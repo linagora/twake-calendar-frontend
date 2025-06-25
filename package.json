@@ -1,0 +1,56 @@
+{
+  "name": "front",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
+    "@types/node": "^16.18.126",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "i18next": "^23.7.9",
+    "openid-client": "^6.5.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-i18next": "^13.5.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.23.1",
+    "redux-first-history": "^5.2.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "PORT=5000 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "i18next-resources-for-ts": "1.4.0",
+    "jest": "^27.5.1",
+    "jest-preview": "^0.3.1",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.9.5"
+  }
+}
