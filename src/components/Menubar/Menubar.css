@@ -16,7 +16,7 @@
   padding: 0.2rem;
 }
 
-.calendar {
+.calendar-text {
   font-family: "Cal Sans";
   padding: 0.2rem;
   font-weight: 400;
@@ -39,12 +39,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1a1a1a62;
   padding: 0.5rem;
-  color: white;
-  position: absolute;
   width: 100%;
-  top: 0;
   z-index: 1000;
 }
 

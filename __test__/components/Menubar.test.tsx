@@ -5,7 +5,7 @@ import { Menubar } from "../../src/components/Menubar/Menubar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("Calendar App Component Display Tests", () => {
-  test("renders the Navbar component", () => {
+  test("renders the Menubar component", () => {
     renderWithProviders(<Menubar />);
     const navbarElement = screen.getByText("Twake");
     expect(navbarElement).toBeInTheDocument();
