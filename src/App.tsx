@@ -4,19 +4,22 @@ import { HistoryRouter as Router } from "redux-first-history/rr6";
 import { Menubar } from "./components/Menubar/Menubar";
 import { CallbackResume } from "./features/User/LoginCallback";
 import { history } from "./app/store";
-import './App.css'
+import "./App.css";
+import { Loading } from "./components/Loading/Loading";
+import HandleLogin from "./features/User/HandleLogin";
+import CalendarApp from "./components/Calendar/Calendar";
 function App() {
   return (
-    <Suspense fallback="loading">
+    <Suspense fallback={<Loading />}>
       <Router history={history}>
         <Routes>
+          <Route path="/" element={<HandleLogin />} />
           <Route
-            path="/"
+            path="/calendar"
             element={
               <div className="App">
-                <header className="App-header">
-                  <Menubar />
-                </header>
+                <Menubar />
+                <CalendarApp />
               </div>
             }
           />

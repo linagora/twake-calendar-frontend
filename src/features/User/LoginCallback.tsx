@@ -4,6 +4,7 @@ import { Callback } from "./oidcAuth";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { push } from "redux-first-history";
 import { setUserData } from "./userSlice";
+import { Loading } from "../../components/Loading/Loading";
 
 export function CallbackResume() {
   const dispatch = useAppDispatch();
@@ -43,23 +44,5 @@ export function CallbackResume() {
     }
   }, [dispatch, saved]);
 
-  return (
-    <div>
-      <p>Processing OIDC callback...</p>
-      {/* Optionally show loading or debug info */}
-      {tokens && (
-        <ul>
-          <li>
-            ID_Token: <pre>{JSON.stringify(tokens?.id_token)}</pre>
-          </li>
-          <li>
-            Access_Token: <pre>{JSON.stringify(tokens?.access_token)}</pre>
-          </li>
-          <li>
-            User info: <pre>{JSON.stringify(userInfo, null, 2)}</pre>
-          </li>
-        </ul>
-      )}
-    </div>
-  );
+  return <Loading />;
 }

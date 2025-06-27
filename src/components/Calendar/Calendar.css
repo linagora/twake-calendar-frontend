@@ -1,0 +1,184 @@
+main {
+  display: flex;
+  flex-direction: row;
+}
+
+.calendar {
+  width: 100%;
+  height: 100%;
+}
+
+.sidebar{
+  border-right: 2px gray;
+}
+
+.fc .fc-daygrid-day {
+  min-height: 10px !important; /* Default is ~40px */
+  height: 10px !important;
+  font-size: 0.75rem;
+}
+.fc .fc-timegrid-slot {
+  height: 60px !important; /* Default is ~40px */
+}
+
+#calendar {
+  flex: 1;
+  overflow: hidden; /* Important: let FullCalendar handle internal scroll */
+}
+
+.fc-scroller-liquid-absolute {
+  overflow-y: auto !important; /* This targets the scrollable part */
+  max-height: calc(100vh - 100px); /* Adjust based on your header size */
+}
+.scrollgrid-section-header {
+  border: white;
+}
+
+/* Base container */
+.fc-daygrid-day-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-family: "Inter", sans-serif;
+  color: #1e293b; /* dark navy */
+}
+
+/* Day number */
+.fc-daygrid-day-top .fc-daygrid-day-number {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 2;
+}
+
+/* Day name (e.g., MON) */
+.fc-daygrid-day-top small {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: #94a3b8; /* slate gray */
+  text-transform: uppercase;
+}
+
+/* Today’s date highlight */
+.current-date {
+  background-color: orange;
+  color: white;
+  border-radius: 50%;
+  padding: 50px;
+}
+
+.fc .fc-col-header-cell,
+.fc .fc-scrollgrid table,
+.fc-theme-standard .fc-scrollgrid {
+  background: none;
+  border: none;
+}
+
+/* Container de la sidebar */
+.sidebar-calendar {
+  width: 280px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Style du mini calendrier */
+.react-calendar {
+  border: none;
+  font-size: 14px;
+  width: 100%;
+  user-select: none;
+}
+
+/* Jours sélectionnés et hover */
+.react-calendar__tile {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 50%;
+  border: none;
+  background-color: white;
+  width: 12px;
+  height: 37.52px;
+}
+
+.react-calendar__tile:hover {
+  background-color: rgb(224, 224, 224);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.react-calendar__tile--active {
+  background-color: orange;
+  color: white;
+}
+
+/* Titre ou header de la sidebar */
+.sidebar-calendar h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+/* Liste des calendriers */
+.calendar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.calendar-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #444;
+  padding: 10px 15px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Couleurs distinctes pour chaque type de calendrier */
+.calendar-list li.work {
+  background-color: #d0e8ff;
+  color: #1a73e8;
+}
+
+.calendar-list li.work:hover {
+  background-color: #b0d4ff;
+}
+
+.calendar-list li.personal {
+  background-color: #ffe0e0;
+  color: #d93025;
+}
+
+.calendar-list li.personal:hover {
+  background-color: #ffb3b3;
+}
+
+/* Petit indicateur couleur à gauche */
+.calendar-list li::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.calendar-list li.work::before {
+  background-color: #1a73e8;
+}
+
+.calendar-list li.personal::before {
+  background-color: #d93025;
+}
