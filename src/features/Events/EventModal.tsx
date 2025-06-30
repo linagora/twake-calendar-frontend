@@ -1,10 +1,17 @@
-// components/EventModal.tsx
 import React, { useEffect, useState } from "react";
 import { addEvent } from "./EventsSlice";
 import { CalendarEvent } from "./EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
-import { useAppDispatch } from "../../app/hooks";
-import { Popover, TextField, Button, Box, Typography } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  Popover,
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 function EventPopover({
   anchorEl,
@@ -19,12 +26,14 @@ function EventPopover({
 }) {
   const dispatch = useAppDispatch();
 
-  const [title, setTitle] = useState("");
+  const organizer = useAppSelector((state) => state.user.organiserData);
+  const calendars = useAppSelector((state) => state.calendars);
+  const [summary, setSummary] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [calendar, setCalendar] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  const [calendarid, setCalendarid] = useState("");
 
   useEffect(() => {
     if (selectedRange) {
@@ -35,21 +44,31 @@ function EventPopover({
 
   const handleSave = () => {
     const newEvent: CalendarEvent = {
-      title,
-      start,
-      end,
-      calendar,
-      extendedProps: {
-        description,
-        location,
-      },
+      summary,
+      start: new Date(start),
+      end: new Date(end),
+      uid: Date.now().toString(36),
+      description,
+      location,
+      organizer,
+      attendee: [
+        {
+          cn: organizer.cn,
+          cal_address: organizer.cal_address,
+          partstat: "ACCEPTED",
+          rsvp: "FALSE",
+          role: "CHAIR",
+          cutype: "INDIVIDUAL",
+        },
+      ],
+      transp: "OPAQUE",
     };
     dispatch(addEvent(newEvent));
-    console.log(newEvent)
+    console.log(newEvent);
     onClose({}, "backdropClick");
 
     // Reset
-    setTitle("");
+    setSummary("");
     setDescription("");
     setLocation("");
   };
@@ -72,11 +91,16 @@ function EventPopover({
         <Typography variant="h6" gutterBottom>
           Create Event
         </Typography>
+        <Select onClick={(e) => console.log(e.target)}>
+          {Object.keys(calendars).map((calendar) => (
+            <MenuItem value={calendar}>{calendars[calendar].name}</MenuItem>
+          ))}
+        </Select>
         <TextField
           fullWidth
-          label="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          label="summary"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
           size="small"
           margin="dense"
         />

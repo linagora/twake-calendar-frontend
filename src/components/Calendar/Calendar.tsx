@@ -8,14 +8,16 @@ import ReactCalendar from "react-calendar";
 import "./Calendar.css";
 import { useRef, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
+import EventPopover from "../../features/Events/EventModal";
+import CalendarPopover from "../../features/Calendars/CalendarModal";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedCalendars, setSelectedCalendars] = useState([
-    "Work",
-    "Personnal",
-  ]);
+  const calendars = useAppSelector((state) => state.calendars);
+  const [selectedCalendars, setSelectedCalendars] = useState(
+    Object.keys(calendars).map((id) => calendars[id].name)
+  );
   const events = useAppSelector((state) => state.events);
 
   const handleCalendarToggle = (name: string) => {
@@ -23,9 +25,6 @@ export default function CalendarApp() {
       prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
   };
-  const filteredEvent = events.filter((e) =>
-    selectedCalendars.includes(e.calendar)
-  );
 
   const [date, setDate] = useState(new Date());
 
@@ -43,6 +42,22 @@ export default function CalendarApp() {
     "November",
     "December",
   ];
+
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
+  const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
+    null
+  );
+
+  const handleDateSelect = (selectInfo: DateSelectArg) => {
+    setSelectedRange(selectInfo);
+    setAnchorEl(document.body); // fallback: we could use selectInfo.jsEvent.target if from a click
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+    setSelectedRange(null);
+  };
 
   return (
     <main>
@@ -83,18 +98,20 @@ export default function CalendarApp() {
           nextLabel={null}
           showNavigation={false}
         />
-        {["Work", "Personnal", "Holidays"].map((name) => (
-          <div key={name}>
+        {Object.keys(calendars).map((id) => (
+          <div key={id}>
             <label>
               <input
                 type="checkbox"
-                checked={selectedCalendars.includes(name)}
-                onChange={() => handleCalendarToggle(name)}
+                style={{backgroundColor:calendars[id].color}}
+                checked={selectedCalendars.includes(calendars[id].name)}
+                onChange={() => handleCalendarToggle(calendars[id].name)}
               />
-              {name}
+              {calendars[id].name}
             </label>
           </div>
         ))}
+        <button onClick={() => setAnchorElCal(document.body)}>+</button>
       </div>
       <div className="calendar">
         <FullCalendar
@@ -108,13 +125,14 @@ export default function CalendarApp() {
           weekends={false}
           editable={true}
           selectable={true}
+          select={handleDateSelect}
           nowIndicator
           selectMirror={true}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={filteredEvent}
+          events={events}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
@@ -158,6 +176,17 @@ export default function CalendarApp() {
             center: "prev,today,next",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
+        />
+        <EventPopover
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleClosePopover}
+          selectedRange={selectedRange}
+        />
+        <CalendarPopover
+          anchorEl={anchorElCal}
+          open={Boolean(anchorElCal)}
+          onClose={() => setAnchorElCal(null)}
         />
       </div>
     </main>
