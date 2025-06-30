@@ -22,7 +22,6 @@ export async function getClientConfig() {
 }
 
 export async function Auth() {
-  console.log("bap");
   let code_verifier = client.randomPKCECodeVerifier();
   let code_challenge = await client.calculatePKCECodeChallenge(code_verifier);
   const openIdClientConfig = await getClientConfig();

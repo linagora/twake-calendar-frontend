@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch } from "../../app/hooks";
 import { push } from "redux-first-history";
 import { setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
@@ -12,9 +11,6 @@ export function CallbackResume() {
   const saved = sessionStorage.getItem("redirectState")
     ? JSON.parse(sessionStorage.getItem("redirectState")!)
     : null;
-  const [tokens, setTokens] = useState<any>();
-  const [userInfo, setUserInfo] = useState<any>();
-  const location = useAppSelector((state) => state.router.location);
   useEffect(() => {
     if (hasRun.current) {
       return;
@@ -24,8 +20,6 @@ export function CallbackResume() {
       try {
         const data = await Callback(saved?.code_verifier, saved?.state);
         console.log("data:", data);
-        setTokens(data?.tokenSet);
-        setUserInfo(data?.userinfo);
         dispatch(setUserData(data?.userinfo));
         sessionStorage.removeItem("redirectState");
         // Redirect to main page after successful callback
