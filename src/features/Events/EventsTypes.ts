@@ -7,11 +7,12 @@ export interface CalendarEvent {
   end?: Date;
   class?: string;
   x_openpass_videoconference?: unknown;
-  summary?: string;
+  title?: string;
   description?: string;
   location?: string;
   organizer: userOrganiser;
   attendee: userAttendee[];
   stamp?: Date;
   sequence?: Number;
+  color?: string;
 }

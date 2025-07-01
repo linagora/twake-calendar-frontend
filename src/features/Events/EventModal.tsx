@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { addEvent } from "./EventsSlice";
+import { addEvent } from "../Calendars/CalendarSlice";
 import { CalendarEvent } from "./EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -11,6 +11,7 @@ import {
   Typography,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 
 function EventPopover({
@@ -22,13 +23,13 @@ function EventPopover({
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
-  selectedRange: any;
+  selectedRange: DateSelectArg | null;
 }) {
   const dispatch = useAppDispatch();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const calendars = useAppSelector((state) => state.calendars);
-  const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [start, setStart] = useState("");
@@ -44,9 +45,9 @@ function EventPopover({
 
   const handleSave = () => {
     const newEvent: CalendarEvent = {
-      summary,
-      start: new Date(start),
-      end: new Date(end),
+      title,
+      start: new Date(start || ""),
+      end: new Date(end || ""),
       uid: Date.now().toString(36),
       description,
       location,
@@ -62,13 +63,13 @@ function EventPopover({
         },
       ],
       transp: "OPAQUE",
+      color: calendars[calendarid].color,
     };
-    dispatch(addEvent(newEvent));
-    console.log(newEvent);
+    dispatch(addEvent({ calendarUid: calendarid, event: newEvent }));
     onClose({}, "backdropClick");
 
     // Reset
-    setSummary("");
+    setTitle("");
     setDescription("");
     setLocation("");
   };
@@ -91,16 +92,18 @@ function EventPopover({
         <Typography variant="h6" gutterBottom>
           Create Event
         </Typography>
-        <Select onClick={(e) => console.log(e.target)}>
+        <Select
+          onChange={(e: SelectChangeEvent) => setCalendarid(e.target.value)}
+        >
           {Object.keys(calendars).map((calendar) => (
             <MenuItem value={calendar}>{calendars[calendar].name}</MenuItem>
           ))}
         </Select>
         <TextField
           fullWidth
-          label="summary"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
+          label="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           size="small"
           margin="dense"
         />
