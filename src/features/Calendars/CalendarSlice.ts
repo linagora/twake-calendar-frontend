@@ -18,6 +18,10 @@ const CalendarSlice = createSlice({
       state,
       action: PayloadAction<{ calendarUid: string; event: CalendarEvent }>
     ) => {
+      console.log(action.payload)
+      if (!state[action.payload.calendarUid].events) {
+        state[action.payload.calendarUid].events = [];
+      }
       state[action.payload.calendarUid].events.push(action.payload.event);
     },
     removeEvent: (

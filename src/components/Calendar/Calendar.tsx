@@ -10,15 +10,20 @@ import { useRef, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
+import { CalendarEvent } from "../../features/Events/EventsTypes";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const calendars = useAppSelector((state) => state.calendars);
   const [selectedCalendars, setSelectedCalendars] = useState(
-    Object.keys(calendars).map((id) => calendars[id].name)
+    Object.keys(calendars).map((id) => id)
   );
-  const events = useAppSelector((state) => state.events);
+  
+  let filteredEvents: CalendarEvent[] = [];
+  selectedCalendars.forEach((id) => {
+    filteredEvents = filteredEvents.concat(calendars[id].events);
+  });
 
   const handleCalendarToggle = (name: string) => {
     setSelectedCalendars((prev) =>
@@ -103,9 +108,9 @@ export default function CalendarApp() {
             <label>
               <input
                 type="checkbox"
-                style={{backgroundColor:calendars[id].color}}
-                checked={selectedCalendars.includes(calendars[id].name)}
-                onChange={() => handleCalendarToggle(calendars[id].name)}
+                style={{ backgroundColor: calendars[id].color }}
+                checked={selectedCalendars.includes(id)}
+                onChange={() => handleCalendarToggle(id)}
               />
               {calendars[id].name}
             </label>
@@ -132,7 +137,7 @@ export default function CalendarApp() {
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={events}
+          events={filteredEvents}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
