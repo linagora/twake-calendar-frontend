@@ -64,7 +64,6 @@ export function parseCalendarEvent(
   }
 
   if (!event.uid || !event.start) {
-    console.log(event);
     throw new Error(`Missing required event fields`);
   }
 
