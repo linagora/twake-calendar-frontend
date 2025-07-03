@@ -20,7 +20,6 @@ export function CallbackResume() {
     const runCallback = async () => {
       try {
         const data = await Callback(saved?.code_verifier, saved?.state);
-        console.log("data:", data);
         dispatch(setUserData(data?.userinfo));
         dispatch(setTokens(data?.tokenSet));
         dispatch(getCalendarsAsync(data?.tokenSet.access_token || ""));

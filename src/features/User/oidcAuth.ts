@@ -1,19 +1,18 @@
 import * as client from "openid-client";
 
 export const clientConfig = {
-  url: process.env.REACT_APP_SSO_BASE_URL || "",
-  client_id: process.env.REACT_APP_SSO_CLIENT_ID || "",
-  client_secret: process.env.REACT_APP_SSO_CLIENT_SECRET || "",
-  scope: process.env.REACT_APP_SSO_SCOPE || "",
-  redirect_uri: process.env.REACT_APP_SSO_REDIRECT_URI || "",
-  response_type: process.env.REACT_APP_SSO_RESPONSE_TYPE || "",
-  code_challenge_method: process.env.REACT_APP_SSO_CODE_CHALLENGE_METHOD || "",
+  url: process.env.PUBLIC_SSO_BASE_URL || "",
+  client_id: process.env.PUBLIC_SSO_CLIENT_ID || "",
+  client_secret: process.env.PUBLIC_SSO_CLIENT_SECRET || "",
+  scope: process.env.PUBLIC_SSO_SCOPE || "",
+  redirect_uri: process.env.PUBLIC_SSO_REDIRECT_URI || "",
+  response_type: process.env.PUBLIC_SSO_RESPONSE_TYPE || "",
+  code_challenge_method: process.env.PUBLIC_SSO_CODE_CHALLENGE_METHOD || "",
   post_logout_redirect_uri:
-    process.env.REACT_APP_SSO_POST_LOGOUT_REDIRECT || "",
+    process.env.PUBLIC_SSO_POST_LOGOUT_REDIRECT || "",
 };
 
 export async function getClientConfig() {
-  console.log(process.env.REACT_APP_SSO_BASE_URL)
   return await client.discovery(
     new URL(clientConfig.url),
     clientConfig.client_id,
@@ -37,7 +36,6 @@ export async function Auth() {
     parameters.state = state;
   }
   let redirectTo = client.buildAuthorizationUrl(openIdClientConfig, parameters);
-  console.log(redirectTo);
 
   return { redirectTo, code_verifier, state };
 }
@@ -58,7 +56,6 @@ export async function Callback(code_verifier: string, state: any) {
 
     console.log("Callback URL:", currentUrl.toString());
     console.log("Code verifier:", code_verifier);
-    console.log("State:", state);
 
     const tokenSet = await client.authorizationCodeGrant(
       openIdClientConfig,

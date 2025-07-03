@@ -18,7 +18,6 @@ export const userSlice = createSlice({
       state.organiserData.cal_address = `mailto:${action.payload.email}`;
     },
     setTokens: (state, action) => {
-      console.log(state.tokens);
       state.tokens = action.payload;
     },
   },

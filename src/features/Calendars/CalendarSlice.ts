@@ -58,7 +58,6 @@ const CalendarSlice = createSlice({
       state,
       action: PayloadAction<{ calendarUid: string; event: CalendarEvent }>
     ) => {
-      console.log(action.payload);
       if (!state[action.payload.calendarUid].events) {
         state[action.payload.calendarUid].events = [];
       }
@@ -81,10 +80,7 @@ const CalendarSlice = createSlice({
     builder.addCase(
       getCalendarsAsync.fulfilled,
       (state, action: PayloadAction<Record<string, Calendars>>) => {
-        console.log("ony est!!!!: ", action.payload);
-        console.log(Object.keys(action.payload));
         Object.keys(action.payload).forEach((id) => {
-          console.log(id);
           state[id] = action.payload[id];
         });
       }
