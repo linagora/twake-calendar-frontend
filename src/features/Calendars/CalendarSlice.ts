@@ -21,11 +21,9 @@ export const getCalendarsAsync = createAsyncThunk<
       ? cal["calendarserver:source"]._links.self.href
           .replace("/calendars/", "")
           .replace(".json", "")
-          .split("/")[0]
       : cal._links.self.href
           .replace("/calendars/", "")
           .replace(".json", "")
-          .split("/")[0];
 
     const color = cal["apple:color"];
     const calendarDetails = await getCalendar(id, access_token);
