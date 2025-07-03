@@ -7,19 +7,29 @@ import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
 import { useRef, useState } from "react";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
+import {
+  getCalendar,
+  getCalendars,
+} from "../../features/Calendars/CalendarApi";
+import { access } from "node:fs";
+import getOpenPaasUserId from "../../features/User/userAPI";
+import { getCalendarsAsync } from "../../features/Calendars/CalendarSlice";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { parseCalendarEvent } from "../../features/Events/eventUtils";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const tokens = useAppSelector((state) => state.user.tokens);
   const calendars = useAppSelector((state) => state.calendars);
   const [selectedCalendars, setSelectedCalendars] = useState(
     Object.keys(calendars).map((id) => id)
   );
-  
+  const dispatch = useAppDispatch();
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
     filteredEvents = filteredEvents.concat(calendars[id].events);

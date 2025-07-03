@@ -3,9 +3,9 @@ import { CalendarEvent } from "../Events/EventsTypes";
 export interface Calendars {
   id: string;
   name: string;
-  prodid: string;
+  prodid?: string;
   color: string;
-  description: string;
+  description?: string;
   calscale?: string;
   version?: string;
   events: CalendarEvent[];
