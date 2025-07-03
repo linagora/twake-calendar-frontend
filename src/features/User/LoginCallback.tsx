@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
 import { useAppDispatch } from "../../app/hooks";
 import { push } from "redux-first-history";
-import { setUserData } from "./userSlice";
+import { setTokens, setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
+import { getCalendarsAsync } from "../Calendars/CalendarSlice";
 
 export function CallbackResume() {
   const dispatch = useAppDispatch();
@@ -19,8 +20,9 @@ export function CallbackResume() {
     const runCallback = async () => {
       try {
         const data = await Callback(saved?.code_verifier, saved?.state);
-        console.log("data:", data);
         dispatch(setUserData(data?.userinfo));
+        dispatch(setTokens(data?.tokenSet));
+        dispatch(getCalendarsAsync(data?.tokenSet.access_token || ""));
         sessionStorage.removeItem("redirectState");
         // Redirect to main page after successful callback
         dispatch(push("/"));
