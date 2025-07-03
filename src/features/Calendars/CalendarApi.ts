@@ -16,7 +16,7 @@ export async function getCalendars(userId: string, opaque_token: string) {
 
 export async function getCalendar(id: string, opaque_token: string) {
   const response = await fetch(
-    `${process.env.PUBLIC_CALENDAR_BASE_URL}/dav/calendars/${id}/${id}.json`,
+    `${process.env.PUBLIC_CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
     {
       method: "REPORT",
       headers: {

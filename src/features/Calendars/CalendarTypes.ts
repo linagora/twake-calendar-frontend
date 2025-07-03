@@ -4,7 +4,7 @@ export interface Calendars {
   id: string;
   name: string;
   prodid?: string;
-  color: string;
+  color?: string;
   description?: string;
   calscale?: string;
   version?: string;
