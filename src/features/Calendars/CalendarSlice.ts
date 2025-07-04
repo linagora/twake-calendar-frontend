@@ -24,14 +24,6 @@ export const getCalendarsListAsync = createAsyncThunk<
       : cal._links.self.href.replace("/calendars/", "").replace(".json", "");
 
     const color = cal["apple:color"];
-    // const calendarDetails = await getCalendar(id, access_token);
-    // const events = calendarDetails._embedded["dav:item"].map(
-    //   (eventdata: any) => {
-    //     const datas = eventdata.data[2][0][1];
-    //     return parseCalendarEvent(datas, color);
-    //   }
-    // );
-
     importedCalendars[id] = { id, name, description, color, events: [] };
   }
 
