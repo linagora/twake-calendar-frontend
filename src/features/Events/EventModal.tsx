@@ -28,7 +28,7 @@ function EventPopover({
   const dispatch = useAppDispatch();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
-  const calendars = useAppSelector((state) => state.calendars);
+  const calendars = useAppSelector((state) => state.calendars.list);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -46,8 +46,8 @@ function EventPopover({
   const handleSave = () => {
     const newEvent: CalendarEvent = {
       title,
-      start: new Date(start || ""),
-      end: new Date(end || ""),
+      start: new Date(start ?? ""),
+      end: new Date(end ?? ""),
       uid: Date.now().toString(36),
       description,
       location,

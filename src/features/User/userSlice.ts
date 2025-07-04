@@ -1,5 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
+import getOpenPaasUserId from "./userAPI";
+
+export const getOpenPaasUserIdAsync = createAsyncThunk<
+  string, // Return type
+  string // Arg type
+>("user/getOpenPaasUserId", async (access_token) => {
+  const user = await getOpenPaasUserId(access_token);
+
+  return user.id;
+});
 
 export const userSlice = createSlice({
   name: "user",
@@ -20,6 +30,11 @@ export const userSlice = createSlice({
     setTokens: (state, action) => {
       state.tokens = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getOpenPaasUserIdAsync.fulfilled, (state, action) => {
+      state.userData.openpaasId = action.payload;
+    });
   },
 });
 
