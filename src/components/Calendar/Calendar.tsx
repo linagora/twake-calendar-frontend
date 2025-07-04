@@ -6,40 +6,51 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
-import {
-  getCalendar,
-  getCalendars,
-} from "../../features/Calendars/CalendarApi";
-import { access } from "node:fs";
-import getOpenPaasUserId from "../../features/User/userAPI";
-import { getCalendarsAsync } from "../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
-import { parseCalendarEvent } from "../../features/Events/eventUtils";
+import CalendarSelection from "./CalendarSelection";
+import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
-  const calendars = useAppSelector((state) => state.calendars);
-  const [selectedCalendars, setSelectedCalendars] = useState(
-    Object.keys(calendars).map((id) => id)
-  );
   const dispatch = useAppDispatch();
+  const calendars = useAppSelector((state) => state.calendars.list);
+  const pending = useAppSelector((state) => state.calendars.pending);
+  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
+    Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
+  );
+
+  const fetchedIdsRef = useRef<Set<string>>(new Set());
+
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
     filteredEvents = filteredEvents.concat(calendars[id].events);
   });
 
-  const handleCalendarToggle = (name: string) => {
-    setSelectedCalendars((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    );
-  };
+  useEffect(() => {
+    selectedCalendars.forEach((id) => {
+      const events = calendars[id]?.events ?? [];
+
+      const isEmpty = events.length === 0;
+      const notFetched = !fetchedIdsRef.current.has(id);
+
+      if (isEmpty && notFetched && !pending) {
+        dispatch(
+          getCalendarDetailAsync({
+            access_token: tokens.access_token,
+            calId: id,
+          })
+        );
+        fetchedIdsRef.current.add(id);
+      }
+    });
+  }, [selectedCalendars, calendars, pending, tokens.access_token, dispatch]);
 
   const [date, setDate] = useState(new Date());
 
@@ -113,19 +124,10 @@ export default function CalendarApp() {
           nextLabel={null}
           showNavigation={false}
         />
-        {Object.keys(calendars).map((id) => (
-          <div key={id}>
-            <label>
-              <input
-                type="checkbox"
-                style={{ backgroundColor: calendars[id].color }}
-                checked={selectedCalendars.includes(id)}
-                onChange={() => handleCalendarToggle(id)}
-              />
-              {calendars[id].name}
-            </label>
-          </div>
-        ))}
+        <CalendarSelection
+          selectedCalendars={selectedCalendars}
+          setSelectedCalendars={setSelectedCalendars}
+        />
         <button onClick={() => setAnchorElCal(document.body)}>+</button>
       </div>
       <div className="calendar">

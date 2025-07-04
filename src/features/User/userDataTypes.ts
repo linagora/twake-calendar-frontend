@@ -2,6 +2,7 @@ export interface userData {
   email: string;
   sid: string;
   sub: string;
+  openpaasId?: string;
 }
 
 export interface userOrganiser {
