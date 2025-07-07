@@ -7,6 +7,7 @@ import { push } from "redux-first-history";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user.userData);
+  const calendars = useAppSelector((state) => state.calendars);
   const dispatch = useAppDispatch();
   useEffect(() => {
     const initiateLogin = async () => {
@@ -31,7 +32,9 @@ export function HandleLogin() {
   if (!userData) {
     return <Error />;
   }
-  dispatch(push("/calendar"));
+  if (!calendars.pending) {
+    dispatch(push("/calendar"));
+  }
   return <Loading />;
 }
 

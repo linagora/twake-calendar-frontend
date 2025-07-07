@@ -26,7 +26,7 @@ function CalendarPopover({
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("");
   const [timeZone, setTimeZone] = useState("");
-  const timezones = Intl.supportedValuesOf?.("timeZone") || [];
+  const timezones = Intl.supportedValuesOf?.("timeZone") ?? [];
   const handleSave = () => {
 
     dispatch(createCalendar({ name, description, color }));
