@@ -6,7 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";

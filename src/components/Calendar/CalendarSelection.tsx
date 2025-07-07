@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 
 export default function CalendarSelection({
   selectedCalendars,
