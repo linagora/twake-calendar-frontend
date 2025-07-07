@@ -5,7 +5,8 @@ type RawEntry = [string, Record<string, string>, string, any];
 
 export function parseCalendarEvent(
   data: RawEntry[],
-  color: string
+  color: string,
+  calendarid: string
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
 
@@ -64,7 +65,11 @@ export function parseCalendarEvent(
   }
 
   if (!event.uid || !event.start) {
-    throw new Error(`Missing required event fields`);
+    console.error(
+      `missing crucial event param in calendar ${calendarid} `,
+      data
+    );
+    event.error = `missing crucial event param in calendar ${calendarid} `;
   }
 
   return event as CalendarEvent;
