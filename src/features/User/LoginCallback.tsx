@@ -4,10 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { push } from "redux-first-history";
 import { getOpenPaasUserIdAsync, setTokens, setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
-import {
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
-} from "../Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 
 export function CallbackResume() {
   const dispatch = useAppDispatch();
