@@ -15,5 +15,6 @@ export interface CalendarEvent {
   stamp?: Date;
   sequence?: Number;
   color?: string;
-  allday?:Boolean
+  allday?: Boolean;
+  error?: string;
 }

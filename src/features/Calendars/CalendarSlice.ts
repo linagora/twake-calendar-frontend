@@ -39,7 +39,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
   const events: CalendarEvent[] = calendar._embedded["dav:item"].map(
     (eventdata: any) => {
       const datas = eventdata.data[2][0][1];
-      return parseCalendarEvent(datas, color);
+      return parseCalendarEvent(datas, color, calId);
     }
   );
 
