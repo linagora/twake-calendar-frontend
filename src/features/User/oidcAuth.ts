@@ -1,13 +1,13 @@
 import * as client from "openid-client";
 
 export const clientConfig = {
-  url: process.env.PUBLIC_SSO_BASE_URL || "",
-  client_id: process.env.PUBLIC_SSO_CLIENT_ID || "",
-  scope: process.env.PUBLIC_SSO_SCOPE || "",
-  redirect_uri: process.env.PUBLIC_SSO_REDIRECT_URI || "",
-  response_type: process.env.PUBLIC_SSO_RESPONSE_TYPE || "",
-  code_challenge_method: process.env.PUBLIC_SSO_CODE_CHALLENGE_METHOD || "",
-  post_logout_redirect_uri: process.env.PUBLIC_SSO_POST_LOGOUT_REDIRECT || "",
+  url: process.env.PUBLIC_SSO_BASE_URL ?? "",
+  client_id: process.env.PUBLIC_SSO_CLIENT_ID ?? "",
+  scope: process.env.PUBLIC_SSO_SCOPE ?? "",
+  redirect_uri: process.env.PUBLIC_SSO_REDIRECT_URI ?? "",
+  response_type: process.env.PUBLIC_SSO_RESPONSE_TYPE ?? "",
+  code_challenge_method: process.env.PUBLIC_SSO_CODE_CHALLENGE_METHOD ?? "",
+  post_logout_redirect_uri: process.env.PUBLIC_SSO_POST_LOGOUT_REDIRECT ?? "",
 };
 
 export async function getClientConfig() {

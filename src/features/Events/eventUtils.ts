@@ -40,22 +40,22 @@ export function parseCalendarEvent(
         break;
       case "organizer":
         event.organizer = {
-          cn: params?.cn || "",
+          cn: params?.cn ?? "",
           cal_address: value.replace(/^mailto:/, ""),
         };
         break;
       case "attendee":
         (event.attendee as userAttendee[]).push({
-          cn: params?.cn || "",
+          cn: params?.cn ?? "",
           cal_address: value.replace(/^mailto:/, ""),
-          partstat: params?.partstat || "",
-          rsvp: params?.rsvp || "",
-          role: params?.role || "",
-          cutype: params?.cutype || "",
+          partstat: params?.partstat ?? "",
+          rsvp: params?.rsvp ?? "",
+          role: params?.role ?? "",
+          cutype: params?.cutype ?? "",
         });
         break;
       case "dtstamp":
-        event.stamp = new Date(value);
+        event.stamp = value;
         break;
       case "sequence":
         event.sequence = Number(value);
