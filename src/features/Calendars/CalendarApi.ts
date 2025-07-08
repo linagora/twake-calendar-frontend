@@ -2,7 +2,7 @@ import { cp } from "node:fs";
 
 export async function getCalendars(userId: string, opaque_token: string) {
   const response = await fetch(
-    `${process.env.PUBLIC_CALENDAR_BASE_URL}/dav/calendars/${userId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
+    `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${userId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
     {
       headers: {
         Accept: "application/calendar+json",
@@ -16,7 +16,7 @@ export async function getCalendars(userId: string, opaque_token: string) {
 
 export async function getCalendar(id: string, opaque_token: string) {
   const response = await fetch(
-    `${process.env.PUBLIC_CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
+    `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
     {
       method: "REPORT",
       headers: {

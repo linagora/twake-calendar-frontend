@@ -13,10 +13,10 @@
 
 # secrets
 .DS_Store
-.env
-.env.development
-.env.test
-.env.production
+.env.js
+.env.development.js
+.env.test.js
+.env.production.js
 
 npm-debug.log*
 yarn-debug.log*
