@@ -54,7 +54,22 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 ### Run it with docker
 
-More details to be supplied when available.
+After compiling the project with npm (see previous section) simply run:
+
+```
+docker built -t linagora/twake-calendar-front .
+```
+
+Then edit `.env.js` in order to match your configuration then run it with:
+
+```
+docker run -d \
+  -v $PWD/.env.example.js:/usr/share/nginx/html/.env.js \
+  -p 5000:80 \
+  tcal-front
+```
+
+And then visit [https://localhost:5000](https://localhost:5000).
 
 ## Configuring it
 
