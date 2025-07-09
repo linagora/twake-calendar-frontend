@@ -14,6 +14,10 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
+import {
+  formatDateToYYYYMMDDTHHMMSS,
+  getCalendarRange,
+} from "../../utils/dateUtils";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -40,35 +44,23 @@ export default function CalendarApp() {
 
       const isEmpty = events.length === 0;
       const notFetched = !fetchedIdsRef.current.has(id);
+      const calendarRange = getCalendarRange(selectedDate);
 
       if (isEmpty && notFetched && !pending) {
         dispatch(
           getCalendarDetailAsync({
             access_token: tokens.access_token,
             calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
           })
         );
         fetchedIdsRef.current.add(id);
       }
     });
   }, [selectedCalendars, calendars, pending, tokens.access_token, dispatch]);
-
-  const [date, setDate] = useState(new Date());
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
@@ -92,25 +84,39 @@ export default function CalendarApp() {
         <div className="calendar-label">
           <div className="calendar-label">
             <span>
-              {months[date.getMonth()]} {date.getFullYear()}
+              {selectedDate.toLocaleDateString("us-us", {
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
           <button
             onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() - 1))
+              setSelectedDate(
+                new Date(
+                  selectedDate.getFullYear(),
+                  selectedDate.getMonth() - 1
+                )
+              )
             }
           >
             &lt;
           </button>
           <button
             onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() + 1))
+              setSelectedDate(
+                new Date(
+                  selectedDate.getFullYear(),
+                  selectedDate.getMonth() + 1
+                )
+              )
             }
           >
             &gt;
           </button>
         </div>
         <ReactCalendar
+          key={selectedDate.toDateString()}
           showNeighboringMonth={false}
           calendarType="hebrew"
           formatShortWeekday={(locale, date) =>
@@ -162,6 +168,12 @@ export default function CalendarApp() {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
+          }}
+          datesSet={(arg) => {
+            const today = new Date();
+            setSelectedDate(
+              today > arg.start && today < arg.end ? today : arg.start
+            );
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();

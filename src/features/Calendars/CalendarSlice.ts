@@ -32,9 +32,9 @@ export const getCalendarsListAsync = createAsyncThunk<
 
 export const getCalendarDetailAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
-  { access_token: string; calId: string } // Arg type
->("calendars/getCalendarDetails", async ({ access_token, calId }) => {
-  const calendar = await getCalendar(calId, access_token);
+  { access_token: string; calId: string; match: { start: string; end: string } } // Arg type
+>("calendars/getCalendarDetails", async ({ access_token, calId, match }) => {
+  const calendar = await getCalendar(calId, access_token, match);
   const color = calendar["apple:color"];
   const events: CalendarEvent[] = calendar._embedded["dav:item"].map(
     (eventdata: any) => {
@@ -104,7 +104,9 @@ const CalendarSlice = createSlice({
               events: [] as CalendarEvent[],
             } as Calendars;
           }
-          state.list[action.payload.calId].events = action.payload.events;
+          action.payload.events.forEach((event) => {
+            state.list[action.payload.calId].events.push(event);
+          });
           state.list[action.payload.calId].events.forEach((event) => {
             event.color = state.list[action.payload.calId].color;
           });
