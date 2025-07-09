@@ -14,7 +14,6 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
-import { Alert, Button, Collapse } from "@mui/material";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
