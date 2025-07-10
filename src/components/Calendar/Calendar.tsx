@@ -18,6 +18,7 @@ import {
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
 } from "../../utils/dateUtils";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -28,6 +29,22 @@ export default function CalendarApp() {
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
 
+  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
+    Object.keys(state.calendars.list).map((id) => {
+      if (id.split("/")[0] === userId) {
+        return state.calendars.list[id];
+      }
+      return {} as Calendars;
+    })
+  );
+  let personnalEvents: CalendarEvent[] = [];
+  Object.keys(userPersonnalCalendars).forEach((value, id) => {
+    if (userPersonnalCalendars[id].events) {
+      personnalEvents = personnalEvents.concat(
+        userPersonnalCalendars[id].events
+      );
+    }
+  });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
     Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
   );
@@ -130,6 +147,18 @@ export default function CalendarApp() {
           prevLabel={null}
           nextLabel={null}
           showNavigation={false}
+          tileContent={({ date }) => {
+            const hasEvents = personnalEvents.some((event) => {
+              const eventDate = new Date(event.start);
+              return (
+                eventDate.getFullYear() === date.getFullYear() &&
+                eventDate.getMonth() === date.getMonth() &&
+                eventDate.getDate() === date.getDate()
+              );
+            });
+            console.log(date, hasEvents);
+            return hasEvents ? <div className="event-dot" /> : null;
+          }}
         />
         <CalendarSelection
           selectedCalendars={selectedCalendars}
