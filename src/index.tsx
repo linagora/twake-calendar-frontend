@@ -22,7 +22,7 @@ const polyglot = initTranslation(locale, lang => {})
 root.render(
   <React.StrictMode>
     <I18n lang={locale} polyglot={polyglot}>
-      <CozyTheme ignoreCozySettings={undefined}>
+      <CozyTheme ignoreCozySettings={true}>
         <BreakpointsProvider>
           <Provider store={store}>
             <App />

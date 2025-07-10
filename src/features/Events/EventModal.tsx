@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { addEvent } from "../Calendars/CalendarSlice";
 import { CalendarEvent } from "./EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-  Popover,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-} from "@mui/material";
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "cozy-ui/transpiled/react/Dialog";
+import ToggleButtonGroup from "cozy-ui/transpiled/react/ToggleButtonGroup";
+import ToggleButton from "cozy-ui/transpiled/react/ToggleButton";
+import TextField from "cozy-ui/transpiled/react/TextField";
+import { Button } from "cozy-ui/transpiled/react";
+import MenuItem from "cozy-ui/transpiled/react/MenuItem";
+import { Calendars } from "../Calendars/CalendarTypes";
 
 function EventPopover({
   anchorEl,
@@ -29,6 +30,19 @@ function EventPopover({
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const calendars = useAppSelector((state) => state.calendars.list);
+  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userPersonnalCalendars: Record<string, Calendars> = useAppSelector(
+    (state) => {
+      const calendars: Record<string, Calendars> = {};
+      Object.keys(state.calendars.list).map((id) => {
+        if (id.split("/")[0] === userId) {
+          calendars[id] = state.calendars.list[id];
+        }
+      });
+      return calendars;
+    }
+  );
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -75,7 +89,7 @@ function EventPopover({
   };
 
   return (
-    <Popover
+    <Dialog
       open={open}
       anchorEl={anchorEl}
       onClose={onClose}
@@ -88,17 +102,20 @@ function EventPopover({
         horizontal: "left",
       }}
     >
-      <Box p={2} width={300}>
-        <Typography variant="h6" gutterBottom>
-          Create Event
-        </Typography>
-        <Select
-          onChange={(e: SelectChangeEvent) => setCalendarid(e.target.value)}
+      <DialogTitle> Create Event</DialogTitle>
+      <DialogContent>
+        <TextField
+          select
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            setCalendarid(e.target.value)
+          }
         >
-          {Object.keys(calendars).map((calendar) => (
-            <MenuItem value={calendar}>{calendars[calendar].name}</MenuItem>
+          {Object.keys(userPersonnalCalendars).map((calendar) => (
+            <MenuItem value={calendar}>
+              {userPersonnalCalendars[calendar].name}
+            </MenuItem>
           ))}
-        </Select>
+        </TextField>
         <TextField
           fullWidth
           label="title"
@@ -145,19 +162,16 @@ function EventPopover({
           size="small"
           margin="dense"
         />
-        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-          <Button
-            variant="outlined"
-            onClick={() => onClose({}, "backdropClick")}
-          >
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSave}>
-            Save
-          </Button>
-        </Box>
-      </Box>
-    </Popover>
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={() => onClose({}, "backdropClick")}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSave}>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

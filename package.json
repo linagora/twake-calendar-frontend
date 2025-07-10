@@ -20,6 +20,7 @@
     "cozy-client": "^59.3.0",
     "cozy-device-helper": "^3.8.0",
     "cozy-flags": "^4.7.0",
+    "cozy-intent": "^2.30.0",
     "cozy-logger": "^1.17.0",
     "cozy-ui": "^127.2.0",
     "history": "^5.3.0",

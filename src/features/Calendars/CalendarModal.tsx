@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { createCalendar } from "./CalendarSlice";
 import { useAppDispatch } from "../../app/hooks";
-import {
-  Popover,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Select,
-  ButtonGroup,
-} from "@mui/material";
+import { Button } from "cozy-ui/transpiled/react";
+import Dialog, {
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "cozy-ui/transpiled/react/Dialog";
+import ToggleButtonGroup from "cozy-ui/transpiled/react/ToggleButtonGroup";
+import ToggleButton from "cozy-ui/transpiled/react/ToggleButton";
+import TextField from "cozy-ui/transpiled/react/TextField";
 
 function CalendarPopover({
   anchorEl,
@@ -28,7 +28,6 @@ function CalendarPopover({
   const [timeZone, setTimeZone] = useState("");
   const timezones = Intl.supportedValuesOf?.("timeZone") ?? [];
   const handleSave = () => {
-
     dispatch(createCalendar({ name, description, color }));
     onClose({}, "backdropClick");
 
@@ -50,7 +49,8 @@ function CalendarPopover({
     "#616161",
   ];
   return (
-    <Popover
+    <Dialog
+      className={"h3"}
       open={open}
       anchorEl={anchorEl}
       onClose={onClose}
@@ -63,15 +63,17 @@ function CalendarPopover({
         horizontal: "center",
       }}
     >
-      <Box p={2}>
-        <Typography variant="h6" gutterBottom style={{backgroundColor:color}}>
-          Create a Calendar
-        </Typography>
+      <DialogTitle style={{ backgroundColor: color }} color={color}>
+        Create a Calendar
+      </DialogTitle>
+      <DialogContent>
         <TextField
           fullWidth
           label="Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            setName(e.target.value)
+          }
           size="small"
           margin="dense"
         />
@@ -79,43 +81,46 @@ function CalendarPopover({
           fullWidth
           label="Description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            setDescription(e.target.value)
+          }
           size="small"
           margin="dense"
           multiline
           rows={2}
         />
-        <ButtonGroup>
+        <ToggleButtonGroup>
           {palette.map((color) => (
-            <Button
+            <ToggleButton
               style={{ backgroundColor: color }}
               onClick={() => setColor(color)}
             />
           ))}
-        </ButtonGroup>
-        <Select
+        </ToggleButtonGroup>
+        <TextField
           fullWidth
+          select
           label="timeZone"
           value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            setTimeZone(e.target.value)
+          }
         >
           {timezones.map((zone: string) => (
             <div>{zone}</div>
           ))}
-        </Select>
-        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-          <Button
-            variant="outlined"
-            onClick={() => onClose({}, "backdropClick")}
-          >
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSave}>
-            Save
-          </Button>
-        </Box>
-      </Box>
-    </Popover>
+        </TextField>
+      </DialogContent>
+      <DialogActions>
+        {" "}
+        <Button variant="outlined" onClick={() => onClose({}, "backdropClick")}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSave}>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
