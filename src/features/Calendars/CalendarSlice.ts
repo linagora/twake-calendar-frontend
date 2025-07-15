@@ -6,12 +6,11 @@ import getOpenPaasUserId from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
-  Record<string, Calendars>, // Return type
-  string // Arg type (access_token)
->("calendars/getCalendars", async (access_token: string) => {
+  Record<string, Calendars> // Return type
+>("calendars/getCalendars", async () => {
   const importedCalendars: Record<string, Calendars> = {};
-  const user = await getOpenPaasUserId(access_token);
-  const calendars = await getCalendars(user.id, access_token);
+  const user = (await getOpenPaasUserId()) as Record<string, string>;
+  const calendars = (await getCalendars(user.id)) as Record<string, any>;
   const rawCalendars = calendars._embedded["dav:calendar"];
 
   for (const cal of rawCalendars) {
@@ -32,9 +31,9 @@ export const getCalendarsListAsync = createAsyncThunk<
 
 export const getCalendarDetailAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
-  { access_token: string; calId: string; match: { start: string; end: string } } // Arg type
->("calendars/getCalendarDetails", async ({ access_token, calId, match }) => {
-  const calendar = await getCalendar(calId, access_token, match);
+  { calId: string; match: { start: string; end: string } } // Arg type
+>("calendars/getCalendarDetails", async ({ calId, match }) => {
+  const calendar = (await getCalendar(calId, match)) as Record<string, any>;
   const color = calendar["apple:color"];
   const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
     (eventdata: any) => {
