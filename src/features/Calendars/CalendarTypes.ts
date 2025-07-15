@@ -8,5 +8,5 @@ export interface Calendars {
   description?: string;
   calscale?: string;
   version?: string;
-  events: CalendarEvent[];
+  events: Record<string, CalendarEvent>;
 }

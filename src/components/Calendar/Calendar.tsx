@@ -41,7 +41,9 @@ export default function CalendarApp() {
   Object.keys(userPersonnalCalendars).forEach((value, id) => {
     if (userPersonnalCalendars[id].events) {
       personnalEvents = personnalEvents.concat(
-        userPersonnalCalendars[id].events
+        Object.keys(userPersonnalCalendars[id].events).map(
+          (eventid) => userPersonnalCalendars[id].events[eventid]
+        )
       );
     }
   });
@@ -50,20 +52,27 @@ export default function CalendarApp() {
   );
   const fetchedIdsRef = useRef<Set<string>>(new Set());
 
+  const calendarRange = getCalendarRange(selectedDate);
+
+  // Create a stable string key for the range
+  const rangeKey = `${formatDateToYYYYMMDDTHHMMSS(
+    calendarRange.start
+  )}_${formatDateToYYYYMMDDTHHMMSS(calendarRange.end)}`;
+
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
-    filteredEvents = filteredEvents.concat(calendars[id].events);
+    filteredEvents = filteredEvents
+      .concat(
+        Object.keys(calendars[id].events).map(
+          (eventid) => calendars[id].events[eventid]
+        )
+      )
+      .filter((event) => !(event.status === "CANCELLED"));
   });
 
   useEffect(() => {
     selectedCalendars.forEach((id) => {
-      const events = calendars[id]?.events ?? [];
-
-      const isEmpty = events.length === 0;
-      const notFetched = !fetchedIdsRef.current.has(id);
-      const calendarRange = getCalendarRange(selectedDate);
-
-      if (isEmpty && notFetched && !pending) {
+      if (!pending && rangeKey) {
         dispatch(
           getCalendarDetailAsync({
             access_token: tokens.access_token,
@@ -74,10 +83,9 @@ export default function CalendarApp() {
             },
           })
         );
-        fetchedIdsRef.current.add(id);
       }
     });
-  }, [selectedCalendars, calendars, pending, tokens.access_token, dispatch]);
+  }, [rangeKey, selectedCalendars]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
@@ -156,7 +164,6 @@ export default function CalendarApp() {
                 eventDate.getDate() === date.getDate()
               );
             });
-            console.log(date, hasEvents);
             return hasEvents ? <div className="event-dot" /> : null;
           }}
         />
@@ -191,7 +198,7 @@ export default function CalendarApp() {
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
           slotLabelInterval={"00:30:00"}
-          scrollTime={"07:00:00"}
+          scrollTime={"09:00:00"}
           allDayText=""
           slotLabelFormat={{
             hour: "2-digit",

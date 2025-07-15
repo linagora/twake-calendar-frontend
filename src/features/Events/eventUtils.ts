@@ -9,6 +9,7 @@ export function parseCalendarEvent(
   calendarid: string
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
+  let recurrenceId;
 
   for (const [key, params, type, value] of data) {
     switch (key.toLowerCase()) {
@@ -61,7 +62,15 @@ export function parseCalendarEvent(
       case "sequence":
         event.sequence = Number(value);
         break;
+      case "recurrence-id":
+        recurrenceId = value;
+        break;
+      case "status":
+        event.status = String(value);
     }
+  }
+  if (recurrenceId && event.uid) {
+    event.uid = `${event.uid}/${recurrenceId}`;
   }
 
   if (!event.uid || !event.start) {
