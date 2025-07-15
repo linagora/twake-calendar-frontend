@@ -19,12 +19,18 @@ import {
   getCalendarRange,
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { push } from "redux-first-history";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
   const dispatch = useAppDispatch();
+
+  if (!tokens) {
+    dispatch(push("/"));
+  }
+
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
@@ -75,7 +81,6 @@ export default function CalendarApp() {
       if (!pending && rangeKey) {
         dispatch(
           getCalendarDetailAsync({
-            access_token: tokens.access_token,
             calId: id,
             match: {
               start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),

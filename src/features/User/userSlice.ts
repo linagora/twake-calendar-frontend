@@ -2,14 +2,14 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
 import getOpenPaasUserId from "./userAPI";
 
-export const getOpenPaasUserIdAsync = createAsyncThunk<
-  string, // Return type
-  string // Arg type
->("user/getOpenPaasUserId", async (access_token) => {
-  const user = await getOpenPaasUserId(access_token);
+export const getOpenPaasUserIdAsync = createAsyncThunk<string>(
+  "user/getOpenPaasUserId",
+  async () => {
+    const user = (await getOpenPaasUserId()) as Record<string, string>;
 
-  return user.id;
-});
+    return user.id;
+  }
+);
 
 export const userSlice = createSlice({
   name: "user",
