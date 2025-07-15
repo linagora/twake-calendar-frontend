@@ -19,7 +19,6 @@ export async function getCalendar(
   opaque_token: string,
   match: { start: string; end: string }
 ) {
-  console.log(match)
   const response = await fetch(
     `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
     {
