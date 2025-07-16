@@ -1,37 +1,32 @@
-import { cp } from "node:fs";
+import { api } from "../../utils/apiUtils";
 
-export async function getCalendars(userId: string, opaque_token: string) {
-  const response = await fetch(
-    `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${userId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
-    {
-      headers: {
-        Accept: "application/calendar+json",
-        Authorization: `Bearer ${opaque_token}`,
-      },
-    }
-  );
-  const calendars = await response.json();
+export async function getCalendars(userId: string) {
+  const calendars = await api
+    .get(
+      `dav/calendars/${userId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
+      {
+        headers: {
+          Accept: "application/calendar+json",
+        },
+      }
+    )
+    .json();
   return calendars;
 }
 
 export async function getCalendar(
   id: string,
-  opaque_token: string,
   match: { start: string; end: string }
 ) {
-  const response = await fetch(
-    `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
-    {
-      method: "REPORT",
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Authorization: `Bearer ${opaque_token}`,
-      },
-      body: JSON.stringify({
-        match,
-      }),
-    }
-  );
+  const response = await api(`dav/calendars/${id}.json`, {
+    method: "REPORT",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+    body: JSON.stringify({
+      match,
+    }),
+  });
   const calendar = await response.json();
   return calendar;
 }

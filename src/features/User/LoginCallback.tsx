@@ -9,8 +9,6 @@ import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 export function CallbackResume() {
   const dispatch = useAppDispatch();
   const hasRun = useRef(false);
-  const calendars = useAppSelector((state) => state.calendars);
-  const userId = useAppSelector((state) => state.user.userData?.openpaasId);
   const saved = sessionStorage.getItem("redirectState")
     ? JSON.parse(sessionStorage.getItem("redirectState")!)
     : null;
@@ -24,10 +22,11 @@ export function CallbackResume() {
         const data = await Callback(saved?.code_verifier, saved?.state);
         dispatch(setUserData(data?.userinfo));
         dispatch(setTokens(data?.tokenSet));
-        dispatch(getOpenPaasUserIdAsync(data?.tokenSet.access_token ?? ""));
-        dispatch(getCalendarsListAsync(data?.tokenSet.access_token ?? ""));
+        dispatch(getOpenPaasUserIdAsync());
+        dispatch(getCalendarsListAsync());
 
         sessionStorage.removeItem("redirectState");
+        sessionStorage.setItem("tokenSet", JSON.stringify(data?.tokenSet));
         // Redirect to main page after successful callback
         dispatch(push("/"));
       } catch (e) {
