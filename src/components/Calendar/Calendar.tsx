@@ -13,6 +13,7 @@ import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import ImportAlert from "../../features/Events/ImportAlert";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -22,10 +23,10 @@ export default function CalendarApp() {
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
+
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
     Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
   );
-
   const fetchedIdsRef = useRef<Set<string>>(new Set());
 
   let filteredEvents: CalendarEvent[] = [];
@@ -131,6 +132,7 @@ export default function CalendarApp() {
         <button onClick={() => setAnchorElCal(document.body)}>+</button>
       </div>
       <div className="calendar">
+        <ImportAlert />
         <FullCalendar
           ref={(ref) => {
             if (ref) {
