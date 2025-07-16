@@ -8,7 +8,7 @@ main {
   height: 100%;
 }
 
-.sidebar{
+.sidebar {
   border-right: 2px gray;
 }
 
@@ -181,4 +181,14 @@ main {
 
 .calendar-list li.personal::before {
   background-color: #d93025;
+}
+
+.event-dot {
+  margin-top: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #d93025; /* adjust to your theme */
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
 }

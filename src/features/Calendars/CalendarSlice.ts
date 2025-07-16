@@ -24,7 +24,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       : cal._links.self.href.replace("/calendars/", "").replace(".json", "");
 
     const color = cal["apple:color"];
-    importedCalendars[id] = { id, name, description, color, events: [] };
+    importedCalendars[id] = { id, name, description, color, events: {} };
   }
 
   return importedCalendars;
@@ -32,14 +32,16 @@ export const getCalendarsListAsync = createAsyncThunk<
 
 export const getCalendarDetailAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
-  { access_token: string; calId: string } // Arg type
->("calendars/getCalendarDetails", async ({ access_token, calId }) => {
-  const calendar = await getCalendar(calId, access_token);
+  { access_token: string; calId: string; match: { start: string; end: string } } // Arg type
+>("calendars/getCalendarDetails", async ({ access_token, calId, match }) => {
+  const calendar = await getCalendar(calId, access_token, match);
   const color = calendar["apple:color"];
-  const events: CalendarEvent[] = calendar._embedded["dav:item"].map(
+  const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
     (eventdata: any) => {
-      const datas = eventdata.data[2][0][1];
-      return parseCalendarEvent(datas, color, calId);
+      const vevents = eventdata.data[2] as any[][]; // array of ['vevent', RawEntry[], []]
+      return vevents.map((vevent: any[]) => {
+        return parseCalendarEvent(vevent[1], color, calId);
+      });
     }
   );
 
@@ -56,28 +58,25 @@ const CalendarSlice = createSlice({
       state.list[id].name = action.payload.name;
       state.list[id].color = action.payload.color;
       state.list[id].description = action.payload.description;
-      state.list[id].events = [];
+      state.list[id].events = {};
     },
     addEvent: (
       state,
       action: PayloadAction<{ calendarUid: string; event: CalendarEvent }>
     ) => {
       if (!state.list[action.payload.calendarUid].events) {
-        state.list[action.payload.calendarUid].events = [];
+        state.list[action.payload.calendarUid].events = {};
       }
-      state.list[action.payload.calendarUid].events.push(action.payload.event);
+      state.list[action.payload.calendarUid].events[action.payload.event.uid] =
+        action.payload.event;
     },
     removeEvent: (
       state,
       action: PayloadAction<{ calendarUid: string; eventUid: string }>
     ) => {
-      state.list[action.payload.calendarUid as string].events = state.list[
-        action.payload.calendarUid
-      ].events.filter((event) => {
-        if (event.uid !== action.payload.calendarUid) {
-          return event;
-        }
-      });
+      delete state.list[action.payload.calendarUid].events[
+        action.payload.eventUid
+      ];
     },
   },
   extraReducers: (builder) => {
@@ -101,12 +100,15 @@ const CalendarSlice = createSlice({
           if (!state.list[action.payload.calId]) {
             state.list[action.payload.calId] = {
               id: action.payload.calId,
-              events: [] as CalendarEvent[],
+              events: {},
             } as Calendars;
           }
-          state.list[action.payload.calId].events = action.payload.events;
-          state.list[action.payload.calId].events.forEach((event) => {
-            event.color = state.list[action.payload.calId].color;
+          action.payload.events.forEach((event) => {
+            state.list[action.payload.calId].events[event.uid] = event;
+          });
+          Object.keys(state.list[action.payload.calId].events).forEach((id) => {
+            state.list[action.payload.calId].events[id].color =
+              state.list[action.payload.calId].color;
           });
         }
       )
