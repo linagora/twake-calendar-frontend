@@ -13,7 +13,6 @@ export default function CalendarSelection({
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const handleCalendarToggle = (name: string) => {
-
     setSelectedCalendars((prev: string[]) =>
       prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
