@@ -18,18 +18,24 @@ export default function ImportAlert() {
   return (
     <>
       {Object.keys(calendars).map((calendarId) =>
-        calendars[calendarId].events
-          .filter((event) => event.error)
-          .map((event) => {
-            const isVisible = visibleAlerts[event.uid] ?? true; // default to visible
+        Object.keys(calendars[calendarId].events)
+          .filter((id) => calendars[calendarId].events[id].error)
+          .map((id) => {
+            const isVisible =
+              visibleAlerts[calendars[calendarId].events[id].uid] ?? true; // default to visible
 
             return (
-              <Collapse in={isVisible} key={event.uid}>
+              <Collapse
+                in={isVisible}
+                key={calendars[calendarId].events[id].uid}
+              >
                 <Alert
                   severity="error"
-                  onClose={() => toggleEventAlert(event.uid)}
+                  onClose={() =>
+                    toggleEventAlert(calendars[calendarId].events[id].uid)
+                  }
                 >
-                  {event.error}
+                  {calendars[calendarId].events[id].error}
                 </Alert>
               </Collapse>
             );

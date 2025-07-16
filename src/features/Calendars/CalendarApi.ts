@@ -14,7 +14,11 @@ export async function getCalendars(userId: string, opaque_token: string) {
   return calendars;
 }
 
-export async function getCalendar(id: string, opaque_token: string) {
+export async function getCalendar(
+  id: string,
+  opaque_token: string,
+  match: { start: string; end: string }
+) {
   const response = await fetch(
     `${(window as any).CALENDAR_BASE_URL}/dav/calendars/${id}.json`,
     {
@@ -24,7 +28,7 @@ export async function getCalendar(id: string, opaque_token: string) {
         Authorization: `Bearer ${opaque_token}`,
       },
       body: JSON.stringify({
-        match: { start: "20250525T000000", end: "20250708T000000" },
+        match,
       }),
     }
   );

@@ -17,4 +17,5 @@ export interface CalendarEvent {
   color?: string;
   allday?: Boolean;
   error?: string;
+  status?: string;
 }

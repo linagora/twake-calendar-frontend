@@ -14,6 +14,11 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
+import {
+  formatDateToYYYYMMDDTHHMMSS,
+  getCalendarRange,
+} from "../../utils/dateUtils";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -24,51 +29,63 @@ export default function CalendarApp() {
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
 
+  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
+    Object.keys(state.calendars.list).map((id) => {
+      if (id.split("/")[0] === userId) {
+        return state.calendars.list[id];
+      }
+      return {} as Calendars;
+    })
+  );
+  let personnalEvents: CalendarEvent[] = [];
+  Object.keys(userPersonnalCalendars).forEach((value, id) => {
+    if (userPersonnalCalendars[id].events) {
+      personnalEvents = personnalEvents.concat(
+        Object.keys(userPersonnalCalendars[id].events).map(
+          (eventid) => userPersonnalCalendars[id].events[eventid]
+        )
+      );
+    }
+  });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
     Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
   );
   const fetchedIdsRef = useRef<Set<string>>(new Set());
 
+  const calendarRange = getCalendarRange(selectedDate);
+
+  // Create a stable string key for the range
+  const rangeKey = `${formatDateToYYYYMMDDTHHMMSS(
+    calendarRange.start
+  )}_${formatDateToYYYYMMDDTHHMMSS(calendarRange.end)}`;
+
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
-    filteredEvents = filteredEvents.concat(calendars[id].events);
+    filteredEvents = filteredEvents
+      .concat(
+        Object.keys(calendars[id].events).map(
+          (eventid) => calendars[id].events[eventid]
+        )
+      )
+      .filter((event) => !(event.status === "CANCELLED"));
   });
 
   useEffect(() => {
     selectedCalendars.forEach((id) => {
-      const events = calendars[id]?.events ?? [];
-
-      const isEmpty = events.length === 0;
-      const notFetched = !fetchedIdsRef.current.has(id);
-
-      if (isEmpty && notFetched && !pending) {
+      if (!pending && rangeKey) {
         dispatch(
           getCalendarDetailAsync({
             access_token: tokens.access_token,
             calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
           })
         );
-        fetchedIdsRef.current.add(id);
       }
     });
-  }, [selectedCalendars, calendars, pending, tokens.access_token, dispatch]);
-
-  const [date, setDate] = useState(new Date());
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  }, [rangeKey, selectedCalendars]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
@@ -92,25 +109,39 @@ export default function CalendarApp() {
         <div className="calendar-label">
           <div className="calendar-label">
             <span>
-              {months[date.getMonth()]} {date.getFullYear()}
+              {selectedDate.toLocaleDateString("us-us", {
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
           <button
             onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() - 1))
+              setSelectedDate(
+                new Date(
+                  selectedDate.getFullYear(),
+                  selectedDate.getMonth() - 1
+                )
+              )
             }
           >
             &lt;
           </button>
           <button
             onClick={() =>
-              setDate(new Date(date.getFullYear(), date.getMonth() + 1))
+              setSelectedDate(
+                new Date(
+                  selectedDate.getFullYear(),
+                  selectedDate.getMonth() + 1
+                )
+              )
             }
           >
             &gt;
           </button>
         </div>
         <ReactCalendar
+          key={selectedDate.toDateString()}
           showNeighboringMonth={false}
           calendarType="hebrew"
           formatShortWeekday={(locale, date) =>
@@ -124,6 +155,17 @@ export default function CalendarApp() {
           prevLabel={null}
           nextLabel={null}
           showNavigation={false}
+          tileContent={({ date }) => {
+            const hasEvents = personnalEvents.some((event) => {
+              const eventDate = new Date(event.start);
+              return (
+                eventDate.getFullYear() === date.getFullYear() &&
+                eventDate.getMonth() === date.getMonth() &&
+                eventDate.getDate() === date.getDate()
+              );
+            });
+            return hasEvents ? <div className="event-dot" /> : null;
+          }}
         />
         <CalendarSelection
           selectedCalendars={selectedCalendars}
@@ -156,12 +198,18 @@ export default function CalendarApp() {
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
           slotLabelInterval={"00:30:00"}
-          scrollTime={"07:00:00"}
+          scrollTime={"09:00:00"}
           allDayText=""
           slotLabelFormat={{
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
+          }}
+          datesSet={(arg) => {
+            const today = new Date();
+            setSelectedDate(
+              today > arg.start && today < arg.end ? today : arg.start
+            );
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
