@@ -29,9 +29,17 @@ export const api = ky.extend({
               state: loginurl.state,
             })
           );
-          window.location.assign(loginurl.redirectTo);
+          redirectTo(loginurl.redirectTo);
         }
       },
     ],
   },
 });
+
+export function redirectTo(url: URL) {
+  window.location.assign(url);
+}
+
+export function getLocation() {
+  return window.location.href;
+}

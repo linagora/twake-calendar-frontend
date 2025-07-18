@@ -1,5 +1,17 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
+
+import { TextEncoder, TextDecoder } from "util";
+import { clientConfig } from "./features/User/oidcAuth";
+
+global.TextEncoder = TextEncoder;
+
+jest.mock("openid-client", () => ({
+  discovery: jest.fn(),
+  randomPKCECodeVerifier: jest.fn(),
+  calculatePKCECodeChallenge: jest.fn(),
+  randomState: jest.fn(),
+  buildAuthorizationUrl: jest.fn(),
+  buildEndSessionUrl: jest.fn(),
+  authorizationCodeGrant: jest.fn(),
+  fetchUserInfo: jest.fn(),
+}));
