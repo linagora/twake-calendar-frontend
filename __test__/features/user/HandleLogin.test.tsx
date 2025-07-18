@@ -45,8 +45,8 @@ describe("HandleLogin", () => {
     const preloadedState = {
       user: {
         userData: {
-          sub: "cmoussu",
-          email: "cmoussu@linagora.com",
+          sub: "test",
+          email: "test@test.com",
           sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
           openpaasId: "667037022b752d0026472254",
         },
