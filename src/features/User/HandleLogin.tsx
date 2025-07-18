@@ -4,6 +4,7 @@ import { Auth } from "./oidcAuth";
 import { Loading } from "../../components/Loading/Loading";
 import { Error } from "../../components/Error/Error";
 import { push } from "redux-first-history";
+import { redirectTo } from "../../utils/apiUtils";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user.userData);
@@ -22,7 +23,7 @@ export function HandleLogin() {
           })
         );
 
-        window.location.assign(loginurl.redirectTo);
+        redirectTo(loginurl.redirectTo);
       }
     };
 

@@ -1,0 +1,80 @@
+import { screen, waitFor } from "@testing-library/react";
+import thunk from "redux-thunk";
+import HandleLogin from "../../../src/features/User/HandleLogin";
+import * as oidcAuth from "../../../src/features/User/oidcAuth";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
+import { clientConfig } from "../../../src/features/User/oidcAuth";
+import * as apiUtils from "../../../src/utils/apiUtils";
+clientConfig.url = "https://example.com";
+
+
+describe("HandleLogin", () => {
+  beforeEach(() => {
+    jest.spyOn(apiUtils, "redirectTo").mockImplementation(() => {});
+
+    jest.clearAllMocks();
+    sessionStorage.clear();
+  });
+
+  test("redirects and sets sessionStorage when no userData", async () => {
+    const loginUrlMock = {
+      code_verifier: "verifier123",
+      state: "state123",
+      redirectTo: new URL("http://login.url"),
+    };
+
+    jest.spyOn(oidcAuth, "Auth").mockResolvedValue(loginUrlMock);
+
+    renderWithProviders(<HandleLogin />);
+
+    await waitFor(() => {
+      expect(oidcAuth.Auth).toHaveBeenCalled();
+      expect(sessionStorage.getItem("redirectState")).toEqual(
+        JSON.stringify({
+          code_verifier: "verifier123",
+          state: "state123",
+        })
+      );
+      expect(apiUtils.redirectTo).toHaveBeenCalledWith(loginUrlMock.redirectTo);
+    });
+
+    expect(screen.getByText(/error/i)).toBeInTheDocument();
+  });
+
+  test("shows Loading when userData exists and calendars pending is true", () => {
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "cmoussu",
+          email: "cmoussu@linagora.com",
+          sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+      calendars: { list: {}, pending: true },
+    };
+
+    renderWithProviders(<HandleLogin />, preloadedState);
+    expect(screen.getByAltText(/loading/i)).toBeInTheDocument();
+  });
+  test("shows Loading when userData exists and calendars pending is false", () => {
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "cmoussu",
+          email: "cmoussu@linagora.com",
+          sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<HandleLogin />, preloadedState);
+
+    expect(screen.getByAltText("loading")).toBeInTheDocument();
+  });
+  test("shows Error when userData doesnt exists and calendars pending is false", () => {
+    renderWithProviders(<HandleLogin />);
+
+    expect(screen.getByText("Error")).toBeInTheDocument();
+  });
+});

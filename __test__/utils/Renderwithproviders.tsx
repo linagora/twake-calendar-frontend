@@ -1,21 +1,12 @@
 import type { RenderOptions } from "@testing-library/react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { render } from "@testing-library/react";
 import React, { PropsWithChildren } from "react";
-import { useTranslation } from "react-i18next";
 import { Provider } from "react-redux";
-import "../i18n";
 
 import { MemoryRouter } from "react-router-dom";
 import type { AppStore, RootState } from "../../src/app/store";
 import { setupStore } from "../../src/app/store";
-import { t } from "i18next";
-import { userData } from "../../src/features/User/userDataTypes";
+import { userData, userOrganiser } from "../../src/features/User/userDataTypes";
 
 interface ExtendedRenderOptions extends Omit<RenderOptions, "queries"> {
   preloadedState?: Partial<RootState>;
@@ -24,30 +15,15 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, "queries"> {
 
 export function renderWithProviders(
   ui: React.ReactElement,
+  preloadedState = {},
   extendedRenderOptions: ExtendedRenderOptions = {}
 ) {
-  const {
-    preloadedState = {
-      user: { userData: null as unknown as userData },
-      router: {
-        location: {
-          pathname: "",
-          search: "",
-          hash: "",
-          state: null,
-          key: "o01z0jry",
-        },
-      },
-    },
-
-    store = setupStore(preloadedState),
-    ...renderOptions
-  } = extendedRenderOptions;
+  const { store = setupStore(preloadedState), ...renderOptions } =
+    extendedRenderOptions;
 
   const Wrapper = ({ children }: PropsWithChildren) => {
-    useTranslation();
     return (
-      <MemoryRouter initialEntries={["/manager.html"]}>
+      <MemoryRouter initialEntries={["/"]}>
         <Provider store={store}>{children}</Provider>
       </MemoryRouter>
     );
