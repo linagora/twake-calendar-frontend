@@ -15,6 +15,8 @@ It is meant as a drop in replacement of [esn-frontend-calendar](https://github.c
 
 ## Running it
 
+Requirement: node 24+
+
 ### Compile it and run it
 
 In the project directory, you can run:
