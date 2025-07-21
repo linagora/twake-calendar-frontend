@@ -1,4 +1,5 @@
 import * as client from "openid-client";
+import { getLocation } from "../../utils/apiUtils";
 
 export const clientConfig = {
   url: (window as any).SSO_BASE_URL ?? "",
@@ -49,14 +50,14 @@ export async function Logout() {
 export async function Callback(code_verifier: string, state: any) {
   try {
     const openIdClientConfig = await getClientConfig();
-    const currentUrl = new URL(window.location.href);
+    const currentLocation = getLocation();
 
-    console.log("Callback URL:", currentUrl.toString());
+    console.log("Callback URL:", currentLocation);
     console.log("Code verifier:", code_verifier);
 
     const tokenSet = await client.authorizationCodeGrant(
       openIdClientConfig,
-      currentUrl,
+      new URL(currentLocation),
       {
         pkceCodeVerifier: code_verifier,
         expectedState: state,
