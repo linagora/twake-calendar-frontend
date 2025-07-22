@@ -148,7 +148,7 @@ export default function CalendarApp() {
         <ReactCalendar
           key={selectedDate.toDateString()}
           showNeighboringMonth={false}
-          calendarType="hebrew"
+          calendarType="gregory"
           formatShortWeekday={(locale, date) =>
             date.toLocaleDateString(locale, { weekday: "narrow" })
           }
@@ -160,7 +160,38 @@ export default function CalendarApp() {
           prevLabel={null}
           nextLabel={null}
           showNavigation={false}
+          tileClassName={({ date }) => {
+            const classNames: string[] = [];
+
+            const today = new Date().setHours(0, 0, 0, 0);
+            if (date.getTime() === today) {
+              classNames.push("today");
+            }
+            const selected = new Date(selectedDate);
+            selected.setHours(0, 0, 0, 0);
+            if (calendarRef.current?.view.type === "timeGridWeek") {
+              const startOfWeek = new Date(selected);
+              startOfWeek.setDate(selected.getDate() - selected.getDay()); // Sunday
+              startOfWeek.setHours(0, 0, 0, 0);
+
+              const endOfWeek = new Date(startOfWeek);
+              endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+              endOfWeek.setHours(23, 59, 59, 999);
+
+              if (date <= endOfWeek && date >= startOfWeek) {
+                classNames.push("selectedWeek");
+              }
+            }
+            if (
+              calendarRef.current?.view.type === "timeGridDay" &&
+              date.getTime() === selected.getTime()
+            ) {
+              classNames.push("selectedWeek");
+            }
+            return classNames;
+          }}
           tileContent={({ date }) => {
+            const classNames: string[] = [];
             const hasEvents = personnalEvents.some((event) => {
               const eventDate = new Date(event.start);
               return (
@@ -169,7 +200,11 @@ export default function CalendarApp() {
                 eventDate.getDate() === date.getDate()
               );
             });
-            return hasEvents ? <div className="event-dot" /> : null;
+            if (hasEvents) {
+              classNames.push("event-dot");
+            }
+
+            return <div className={classNames.join(" ")}></div>;
           }}
         />
         <CalendarSelection
