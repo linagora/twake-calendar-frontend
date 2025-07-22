@@ -24,6 +24,7 @@ import { push } from "redux-first-history";
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
   const dispatch = useAppDispatch();
 
@@ -56,7 +57,6 @@ export default function CalendarApp() {
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
     Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
   );
-  const fetchedIdsRef = useRef<Set<string>>(new Set());
 
   const calendarRange = getCalendarRange(selectedDate);
 
@@ -108,56 +108,45 @@ export default function CalendarApp() {
     setSelectedRange(null);
   };
 
+  const handleMonthUp = () => {
+    setSelectedMiniDate(
+      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() - 1)
+    );
+  };
+  const handleMonthDown = () => {
+    setSelectedMiniDate(
+      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() + 1)
+    );
+  };
   return (
     <main>
       <div className="sidebar">
         <div className="calendar-label">
           <div className="calendar-label">
-            <span>
-              {selectedDate.toLocaleDateString("us-us", {
+            <span title="mini calendar month">
+              {selectedMiniDate.toLocaleDateString("en-us", {
                 month: "long",
                 year: "numeric",
               })}
             </span>
           </div>
-          <button
-            onClick={() =>
-              setSelectedDate(
-                new Date(
-                  selectedDate.getFullYear(),
-                  selectedDate.getMonth() - 1
-                )
-              )
-            }
-          >
-            &lt;
-          </button>
-          <button
-            onClick={() =>
-              setSelectedDate(
-                new Date(
-                  selectedDate.getFullYear(),
-                  selectedDate.getMonth() + 1
-                )
-              )
-            }
-          >
-            &gt;
-          </button>
+          <button onClick={handleMonthUp}>&lt;</button>
+          <button onClick={handleMonthDown}>&gt;</button>
         </div>
         <ReactCalendar
-          key={selectedDate.toDateString()}
-          showNeighboringMonth={false}
+          key={selectedMiniDate.toDateString()}
           calendarType="gregory"
           formatShortWeekday={(locale, date) =>
             date.toLocaleDateString(locale, { weekday: "narrow" })
           }
-          value={selectedDate}
+          value={selectedMiniDate}
           onClickDay={(date) => {
             setSelectedDate(date);
+            setSelectedMiniDate(date);
             calendarRef.current?.gotoDate(date);
           }}
           prevLabel={null}
+          showNeighboringMonth={true}
           nextLabel={null}
           showNavigation={false}
           tileClassName={({ date }) => {
@@ -169,7 +158,10 @@ export default function CalendarApp() {
             }
             const selected = new Date(selectedDate);
             selected.setHours(0, 0, 0, 0);
-            if (calendarRef.current?.view.type === "timeGridWeek") {
+            if (
+              calendarRef.current?.view.type === "timeGridWeek" ||
+              calendarRef.current?.view.type === undefined
+            ) {
               const startOfWeek = new Date(selected);
               startOfWeek.setDate(selected.getDate() - selected.getDay()); // Sunday
               startOfWeek.setHours(0, 0, 0, 0);
@@ -246,10 +238,24 @@ export default function CalendarApp() {
             hour12: false,
           }}
           datesSet={(arg) => {
-            const today = new Date();
-            setSelectedDate(
-              today > arg.start && today < arg.end ? today : arg.start
-            );
+            if (arg.view.type === "timeGridDay") {
+              setSelectedDate(new Date(arg.start));
+              setSelectedMiniDate(new Date(arg.start));
+            } else if (arg.view.type === "timeGridWeek") {
+              // In week view, retain selectedDate if it's in current range, otherwise set to start
+              if (selectedDate < arg.start || selectedDate > arg.end) {
+                setSelectedDate(new Date(arg.start));
+                setSelectedMiniDate(new Date(arg.start));
+              }
+            } else if (arg.view.type === "dayGridMonth") {
+              setSelectedDate(new Date(arg.start));
+              const midTimestamp =
+                (arg.start.getTime() + arg.end.getTime()) / 2;
+              setSelectedMiniDate(new Date(midTimestamp));
+            } else {
+              setSelectedDate(new Date(arg.start));
+              setSelectedMiniDate(new Date(arg.start));
+            }
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
