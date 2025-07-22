@@ -18,4 +18,5 @@ export interface CalendarEvent {
   allday?: Boolean;
   error?: string;
   status?: string;
+  timezone: string;
 }

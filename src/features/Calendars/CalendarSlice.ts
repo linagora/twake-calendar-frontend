@@ -4,6 +4,8 @@ import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
 import getOpenPaasUserId from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
+import { getEvent, putEvent } from "../Events/EventApi";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -45,6 +47,22 @@ export const getCalendarDetailAsync = createAsyncThunk<
   );
 
   return { calId, events };
+});
+
+export const putEventAsync = createAsyncThunk<
+  { calId: string; event: CalendarEvent }, // Return type
+  { cal: Calendars; newEvent: CalendarEvent } // Arg type
+>("calendars/putEvent", async ({ cal, newEvent }) => {
+  const response = await putEvent(cal, newEvent);
+  const now = new Date();
+  const event = (await getCalendar(cal.id, {
+    start: formatDateToYYYYMMDDTHHMMSS(now),
+    end: formatDateToYYYYMMDDTHHMMSS(new Date(now.getDate() + 1)),
+  })) as Record<string, any>;
+  return {
+    calId: cal.id,
+    event: parseCalendarEvent([event[1]], "", cal.id),
+  };
 });
 
 const CalendarSlice = createSlice({
@@ -111,10 +129,33 @@ const CalendarSlice = createSlice({
           });
         }
       )
+      .addCase(
+        putEventAsync.fulfilled,
+        (
+          state,
+          action: PayloadAction<{ calId: string; event: CalendarEvent }>
+        ) => {
+          state.pending = false;
+          if (!state.list[action.payload.calId]) {
+            state.list[action.payload.calId] = {
+              id: action.payload.calId,
+              events: {},
+            } as Calendars;
+          }
+          state.list[action.payload.calId].events[action.payload.event.uid] =
+            action.payload.event;
+          state.list[action.payload.calId].events[
+            action.payload.event.uid
+          ].color = state.list[action.payload.calId].color;
+        }
+      )
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
       .addCase(getCalendarsListAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(putEventAsync.pending, (state) => {
         state.pending = true;
       });
   },
