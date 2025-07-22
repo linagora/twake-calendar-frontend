@@ -4,6 +4,7 @@ import { jest } from "@jest/globals";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as appHooks from "../../src/app/hooks";
 import { ThunkDispatch } from "@reduxjs/toolkit";
+import preview from "jest-preview";
 
 describe("MiniCalendar", () => {
   const day = new Date();
@@ -54,6 +55,8 @@ describe("MiniCalendar", () => {
 
   it("renders mini calendar with the week in gray (except for today) when full calendar in week view", async () => {
     renderCalendar();
+    preview.debug();
+
     const today = new Date();
     const sunday = new Date(today);
     sunday.setDate(today.getDate() - today.getDay());
@@ -61,9 +64,9 @@ describe("MiniCalendar", () => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(sunday);
       date.setDate(sunday.getDate() + i);
-      const tile = screen
-        .getAllByText(date.getDate())
-        .find((el) => el.tagName.toLowerCase() === "abbr");
+      const tile = (await screen.findAllByText(date.getDate())).find(
+        (el) => el.tagName.toLowerCase() === "abbr"
+      );
       if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
         expect(tile?.parentElement).toHaveClass("selectedWeek");
       }
@@ -104,10 +107,95 @@ describe("MiniCalendar", () => {
     renderCalendar();
 
     const dot = document.querySelector(".event-dot");
-    console.log(dot?.parentElement?.children[0].innerHTML);
     expect(dot?.parentElement?.children[0].innerHTML).toBe(
       day.getDate().toString()
     );
     expect(dot).toBeInTheDocument();
+  });
+});
+
+describe("Found Bugs", () => {
+  const day = new Date();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
+  });
+
+  const renderCalendar = () => {
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            name: "Calendar 1",
+            color: "#FF0000",
+            events: {
+              event1: {
+                id: "event1",
+                title: "Test Event",
+                start: day.toISOString(),
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    };
+    renderWithProviders(<CalendarApp />, preloadedState);
+  };
+
+  it("gray day stays when day mode, click today, then change the month bar to august and come back to july", async () => {
+    renderCalendar();
+    const dayViewButton = await screen.findByTitle(/day view/i);
+    fireEvent.click(dayViewButton);
+    const nextMonthButton = screen.getByText(">");
+    const previousMonthButton = screen.getByText("<");
+    fireEvent.click(nextMonthButton);
+    fireEvent.click(previousMonthButton);
+    preview.debug();
+    const shownDay = screen.getByText((content, element) => {
+      return (
+        element?.className.toLowerCase().includes("fc-daygrid-day-number") ??
+        false
+      );
+    });
+    const selectedTile = screen.getByText((content, element) => {
+      return element?.className.includes("selectedWeek") ?? false;
+    });
+    const supposedSelectedTile = screen
+      .getAllByText((content, element) => {
+        return element?.tagName.toLowerCase() === "abbr";
+      })
+      .find((el) => el.innerHTML === shownDay.innerHTML);
+
+    expect(selectedTile.children[0].innerHTML).toBe(
+      supposedSelectedTile?.innerHTML
+    );
+    expect(supposedSelectedTile?.parentElement).toHaveClass("selectedWeek");
+  });
+
+  it("in month view going to next month, side panel is not updated on second click to following month both components are updated with the side panel view jumping 2 months", async () => {
+    renderCalendar();
+
+    const monthViewButton = await screen.findByTitle(/month view/i);
+    fireEvent.click(monthViewButton);
+    const nextMonthButton = await screen.findByTitle(/Next month/i);
+    const previousMonthButton = await screen.findByTitle(/Previous month/i);
+    fireEvent.click(nextMonthButton);
+    const miniCalMonth = await screen.findByTitle(/mini calendar month/i);
+    const fullCalMonth = screen.getByText((content, element) => {
+      return element?.className.includes("fc-toolbar-title") ?? false;
+    });
+    expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
+    fireEvent.click(nextMonthButton);
+    expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
   });
 });

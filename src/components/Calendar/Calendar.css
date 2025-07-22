@@ -114,6 +114,9 @@ main {
 .selectedWeek {
   background-color: lightgrey;
 }
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: gray;
+}
 
 /* sidebar header */
 .sidebar-calendar h2 {
