@@ -100,6 +100,7 @@ export default function CalendarApp() {
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
+    console.log(selectInfo);
     setAnchorEl(document.body); // fallback: we could use selectInfo.jsEvent.target if from a click
   };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { addEvent } from "../Calendars/CalendarSlice";
+import { addEvent, putEventAsync } from "../Calendars/CalendarSlice";
 import { CalendarEvent } from "./EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -12,7 +12,12 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
+import { Calendars } from "../Calendars/CalendarTypes";
+import { putEvent } from "./EventApi";
+import { TIMEZONES } from "../../utils/timezone-data";
 
 function EventPopover({
   anchorEl,
@@ -28,30 +33,46 @@ function EventPopover({
   const dispatch = useAppDispatch();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
-  const calendars = useAppSelector((state) => state.calendars.list);
+  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
+    Object.keys(state.calendars.list).map((id) => {
+      if (id.split("/")[0] === userId) {
+        return state.calendars.list[id];
+      }
+      return {} as Calendars;
+    })
+  ).filter((calendar) => calendar.id);
+  const timezones = TIMEZONES.aliases;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
-  const [calendarid, setCalendarid] = useState("");
+  const [calendarid, setCalendarid] = useState(0);
+  const [timezone, setTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   useEffect(() => {
     if (selectedRange) {
-      setStart(selectedRange.startStr);
-      setEnd(selectedRange.endStr ?? "");
+      setStart(selectedRange ? formatLocalDateTime(selectedRange.start) : "");
+      setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
     }
   }, [selectedRange]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!calendarid) return; // Prevent crash if no calendar is selected
+
     const newEvent: CalendarEvent = {
       title,
-      start: new Date(start ?? ""),
-      end: new Date(end ?? ""),
-      uid: Date.now().toString(36),
+      start: new Date(start),
+      end: new Date(end),
+      uid: crypto.randomUUID(),
       description,
       location,
       organizer,
+      timezone,
       attendee: [
         {
           cn: organizer.cn,
@@ -63,15 +84,27 @@ function EventPopover({
         },
       ],
       transp: "OPAQUE",
-      color: calendars[calendarid].color,
+      color: userPersonnalCalendars[calendarid]?.color,
     };
-    dispatch(addEvent({ calendarUid: calendarid, event: newEvent }));
+    // dispatch(
+    //   addEvent({
+    //     calendarUid: userPersonnalCalendars[calendarid]?.id,
+    //     event: newEvent,
+    //   })
+    // );
+    dispatch(
+      putEventAsync({
+        cal: userPersonnalCalendars[calendarid],
+        newEvent,
+      })
+    );
     onClose({}, "backdropClick");
 
     // Reset
     setTitle("");
     setDescription("");
     setLocation("");
+    setCalendarid(0);
   };
 
   return (
@@ -79,29 +112,35 @@ function EventPopover({
       open={open}
       anchorEl={anchorEl}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "left",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "left",
-      }}
+      anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      transformOrigin={{ vertical: "top", horizontal: "left" }}
     >
-      <Box p={2} width={300}>
+      <Box p={2} width={500}>
         <Typography variant="h6" gutterBottom>
           Create Event
         </Typography>
-        <Select
-          onChange={(e: SelectChangeEvent) => setCalendarid(e.target.value)}
-        >
-          {Object.keys(calendars).map((calendar) => (
-            <MenuItem value={calendar}>{calendars[calendar].name}</MenuItem>
-          ))}
-        </Select>
+
+        <FormControl fullWidth margin="dense" size="small">
+          <InputLabel id="calendar-select-label">Calendar</InputLabel>
+          <Select
+            labelId="calendar-select-label"
+            value={calendarid.toString()}
+            label="Calendar"
+            onChange={(e: SelectChangeEvent) =>
+              setCalendarid(Number(e.target.value))
+            }
+          >
+            {Object.keys(userPersonnalCalendars).map((value, calendar) => (
+              <MenuItem key={calendar} value={calendar}>
+                {userPersonnalCalendars[calendar].name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <TextField
           fullWidth
-          label="title"
+          label="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           size="small"
@@ -145,6 +184,23 @@ function EventPopover({
           size="small"
           margin="dense"
         />
+
+        <FormControl fullWidth margin="dense" size="small">
+          <InputLabel id="timezone-select-label">Time Zone</InputLabel>
+          <Select
+            labelId="timezone-select-label"
+            value={timezone}
+            label="Time Zone"
+            onChange={(e: SelectChangeEvent) => setTimezone(e.target.value)}
+          >
+            {Object.keys(timezones).map((key) => (
+              <MenuItem key={key} value={timezones[key].aliasTo}>
+                {key}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
             variant="outlined"
@@ -152,7 +208,11 @@ function EventPopover({
           >
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={!(calendarid ?? false) || !title}
+          >
             Save
           </Button>
         </Box>
@@ -162,3 +222,10 @@ function EventPopover({
 }
 
 export default EventPopover;
+
+function formatLocalDateTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
