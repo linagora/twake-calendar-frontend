@@ -62,8 +62,6 @@ function EventPopover({
   }, [selectedRange]);
 
   const handleSave = async () => {
-    if (!calendarid) return; // Prevent crash if no calendar is selected
-
     const newEvent: CalendarEvent = {
       title,
       start: new Date(start),
@@ -86,12 +84,7 @@ function EventPopover({
       transp: "OPAQUE",
       color: userPersonnalCalendars[calendarid]?.color,
     };
-    // dispatch(
-    //   addEvent({
-    //     calendarUid: userPersonnalCalendars[calendarid]?.id,
-    //     event: newEvent,
-    //   })
-    // );
+
     dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
@@ -208,11 +201,7 @@ function EventPopover({
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={!(calendarid ?? false) || !title}
-          >
+          <Button variant="contained" onClick={handleSave} disabled={!title}>
             Save
           </Button>
         </Box>

@@ -1,4 +1,17 @@
-export const TIMEZONES = {
+export interface TimeZones {
+  version: string;
+  aliases: Record<string, { aliasTo: string }>;
+  zones: Record<
+    string,
+    {
+      ics: string;
+      latitude: string;
+      longitude: string;
+    }
+  >;
+}
+
+export const TIMEZONES: TimeZones = {
   version: "2.2016c",
   aliases: {
     "AUS Central Standard Time": {
