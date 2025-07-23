@@ -19,4 +19,5 @@ export interface CalendarEvent {
   error?: string;
   status?: string;
   timezone: string;
+  repetition?: string;
 }
