@@ -41,7 +41,6 @@ main {
   align-items: center;
   padding: 0.5rem 0;
   font-family: "Inter", sans-serif;
-  color: #1e293b; /* dark navy */
 }
 
 /* Day number */
@@ -74,7 +73,7 @@ main {
   border: none;
 }
 
-/* Container de la sidebar */
+/* sidebar*/
 .sidebar-calendar {
   width: 280px;
   background-color: #fff;
@@ -87,7 +86,7 @@ main {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Style du mini calendrier */
+/* mini calendar style */
 .react-calendar {
   border: none;
   font-size: 14px;
@@ -95,29 +94,31 @@ main {
   user-select: none;
 }
 
-/* Jours sélectionnés et hover */
+/* selected day hover */
 .react-calendar__tile {
   transition: background-color 0.3s ease, color 0.3s ease;
-  border-radius: 50%;
   border: none;
   background-color: white;
   width: 12px;
   height: 37.52px;
 }
 
-.react-calendar__tile:hover {
-  background-color: rgb(224, 224, 224);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
+.react-calendar__tile--active {
+  background-color: rgb(255, 255, 255);
 }
 
-.react-calendar__tile--active {
-  background-color: orange;
+.today {
+  background: orange !important;
   color: white;
 }
+.selectedWeek {
+  background-color: lightgrey;
+}
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: gray;
+}
 
-/* Titre ou header de la sidebar */
+/* sidebar header */
 .sidebar-calendar h2 {
   font-size: 1.3rem;
   font-weight: 700;
@@ -125,7 +126,7 @@ main {
   margin: 0 0 10px 0;
 }
 
-/* Liste des calendriers */
+/* Calendar list */
 .calendar-list {
   list-style: none;
   padding: 0;
@@ -147,47 +148,11 @@ main {
   cursor: pointer;
 }
 
-/* Couleurs distinctes pour chaque type de calendrier */
-.calendar-list li.work {
-  background-color: #d0e8ff;
-  color: #1a73e8;
-}
-
-.calendar-list li.work:hover {
-  background-color: #b0d4ff;
-}
-
-.calendar-list li.personal {
-  background-color: #ffe0e0;
-  color: #d93025;
-}
-
-.calendar-list li.personal:hover {
-  background-color: #ffb3b3;
-}
-
-/* Petit indicateur couleur à gauche */
-.calendar-list li::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.calendar-list li.work::before {
-  background-color: #1a73e8;
-}
-
-.calendar-list li.personal::before {
-  background-color: #d93025;
-}
-
 .event-dot {
   margin-top: 2px;
   width: 6px;
   height: 6px;
-  background-color: #d93025; /* adjust to your theme */
+  background-color: #d93025;
   border-radius: 50%;
   margin-left: auto;
   margin-right: auto;
