@@ -136,9 +136,9 @@ function EventPopover({
               setCalendarid(Number(e.target.value))
             }
           >
-            {Object.keys(userPersonnalCalendars).map((value, calendar) => (
-              <MenuItem key={calendar} value={calendar}>
-                {userPersonnalCalendars[calendar].name}
+            {Object.keys(userPersonnalCalendars).map((calendar, index) => (
+              <MenuItem key={index} value={index}>
+                {userPersonnalCalendars[index].name}
               </MenuItem>
             ))}
           </Select>
