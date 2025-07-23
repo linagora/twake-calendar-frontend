@@ -18,6 +18,7 @@ import {
 import { Calendars } from "../Calendars/CalendarTypes";
 import { putEvent } from "./EventApi";
 import { TIMEZONES } from "../../utils/timezone-data";
+import { CheckBox, Repeat } from "@mui/icons-material";
 
 function EventPopover({
   anchorEl,
@@ -50,6 +51,8 @@ function EventPopover({
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [calendarid, setCalendarid] = useState(0);
+  const [allday, setAllDay] = useState(false);
+  const [repetition, setRepetition] = useState("");
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
@@ -66,9 +69,11 @@ function EventPopover({
       title,
       start: new Date(start),
       end: new Date(end),
+      allday,
       uid: crypto.randomUUID(),
       description,
       location,
+      repetition,
       organizer,
       timezone,
       attendee: [
@@ -113,6 +118,14 @@ function EventPopover({
           Create Event
         </Typography>
 
+        <TextField
+          fullWidth
+          label="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          size="small"
+          margin="dense"
+        />
         <FormControl fullWidth margin="dense" size="small">
           <InputLabel id="calendar-select-label">Calendar</InputLabel>
           <Select
@@ -133,16 +146,8 @@ function EventPopover({
 
         <TextField
           fullWidth
-          label="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          size="small"
-          margin="dense"
-        />
-        <TextField
-          fullWidth
           label="Start"
-          type="datetime-local"
+          type={allday ? "date" : "datetime-local"}
           value={start}
           onChange={(e) => setStart(e.target.value)}
           size="small"
@@ -152,13 +157,21 @@ function EventPopover({
         <TextField
           fullWidth
           label="End"
-          type="datetime-local"
+          type={allday ? "date" : "datetime-local"}
           value={end}
           onChange={(e) => setEnd(e.target.value)}
           size="small"
           margin="dense"
           InputLabelProps={{ shrink: true }}
         />
+        <label>
+          <input
+            type="checkbox"
+            checked={allday}
+            onChange={() => setAllDay(!allday)}
+          />
+          All day
+        </label>
         <TextField
           fullWidth
           label="Description"
@@ -177,6 +190,22 @@ function EventPopover({
           size="small"
           margin="dense"
         />
+
+        <FormControl fullWidth margin="dense" size="small">
+          <InputLabel id="repeat">Repetition</InputLabel>
+          <Select
+            labelId="repeat"
+            value={repetition}
+            label="Time Zone"
+            onChange={(e: SelectChangeEvent) => setRepetition(e.target.value)}
+          >
+            <MenuItem value={""}>No Repetition</MenuItem>
+            <MenuItem value={"daily"}>Repeat daily</MenuItem>
+            <MenuItem value={"weekly"}>Repeat weekly</MenuItem>
+            <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
+            <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
+          </Select>
+        </FormControl>
 
         <FormControl fullWidth margin="dense" size="small">
           <InputLabel id="timezone-select-label">Time Zone</InputLabel>

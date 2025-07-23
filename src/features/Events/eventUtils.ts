@@ -94,7 +94,12 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
     [
       ["uid", {}, "text", event.uid],
       ["transp", {}, "text", event.transp ?? "OPAQUE"],
-      ["dtstart", { tzid }, "date-time", formatDateToICal(event.start)],
+      [
+        "dtstart",
+        { tzid },
+        event.allday ? "date" : "date-time",
+        formatDateToICal(event.start, event.allday ?? false),
+      ],
       ["class", {}, "text", event.class ?? "PUBLIC"],
       [
         "x-openpaas-videoconference",
@@ -111,8 +116,8 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
     vevent[1].push([
       "dtend",
       { tzid },
-      "date-time",
-      formatDateToICal(event.end),
+      event.allday ? "date" : "date-time",
+      formatDateToICal(event.end, event.allday ?? false),
     ]);
   }
   if (event.organizer) {
@@ -128,6 +133,9 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   }
   if (event.description) {
     vevent[1].push(["description", {}, "text", event.description]);
+  }
+  if (event.repetition) {
+    vevent[1].push(["rrule", {}, "recur", { freq: event.repetition }]);
   }
 
   event.attendee.forEach((att) => {
@@ -151,7 +159,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   });
   return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
 }
-function formatDateToICal(date: Date) {
+function formatDateToICal(date: Date, allday: Boolean) {
   // Format date like: 20250214T110000 (local time)
 
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -161,5 +169,8 @@ function formatDateToICal(date: Date) {
   const hours = pad(date.getHours());
   const minutes = pad(date.getMinutes());
   const seconds = pad(date.getSeconds());
+  if (allday) {
+    return `${year}-${month}-${day}`;
+  }
   return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }

@@ -16,3 +16,13 @@ export async function putEvent(cal: Calendars, event: CalendarEvent) {
   ).json();
   return response;
 }
+
+export async function deleteEvent(calId: string, eventId: string) {
+  const response = await api(
+    `dav/calendars/${calId}/${eventId.split(".")[0]}.isc`,
+    {
+      method: "DELETE",
+    }
+  ).json();
+  return response;
+}
