@@ -1,26 +1,46 @@
 import { screen, fireEvent } from "@testing-library/react";
-import {
-  addEvent,
-  createCalendar,
-} from "../../../src/features/Calendars/CalendarSlice";
+import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import EventPopover from "../../../src/features/Events/EventModal";
 import { DateSelectArg } from "@fullcalendar/core";
-import { randomUUID } from "crypto";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../src/utils/dateUtils";
 import preview from "jest-preview";
-import * as appHooks from "../../../src/app/hooks"; // Import the module
 
 describe("EventPopover", () => {
   const mockOnClose = jest.fn();
   jest.mock("crypto");
-  const dispatch = jest.fn();
-  jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
+  const preloadedState = {
+    user: {
+      userData: {
+        sub: "test",
+        email: "test@test.com",
+        sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
+        openpaasId: "667037022b752d0026472254",
+      },
+      organiserData: {
+        cn: "test",
+        cal_address: "mailto:test@test.com",
+      },
+    },
+    calendars: {
+      list: {
+        "667037022b752d0026472254/cal1": {
+          id: "667037022b752d0026472254/cal1",
+          name: "Calendar 1",
+          color: "#FF0000",
+        },
+        "667037022b752d0026472254/cal2": {
+          id: "667037022b752d0026472254/cal2",
+          name: "Calendar 2",
+          color: "#00FF00",
+        },
+      },
+      pending: false,
+    },
+  };
   const renderPopover = (
     selectedRange = {
       startStr: "2025-07-18T09:00",
@@ -31,33 +51,6 @@ describe("EventPopover", () => {
       resource: undefined,
     } as unknown as DateSelectArg
   ) => {
-    const preloadedState = {
-      user: {
-        userData: {
-          sub: "test",
-          email: "test@test.com",
-          sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
-          openpaasId: "667037022b752d0026472254",
-        },
-        organiserData: {
-          cn: "test",
-          cal_address: "mailto:test@test.com",
-        },
-      },
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            name: "Calendar 1",
-            color: "#FF0000",
-          },
-          "667037022b752d0026472254/cal2": {
-            name: "Calendar 2",
-            color: "#00FF00",
-          },
-        },
-        pending: false,
-      },
-    };
     renderWithProviders(
       <EventPopover
         anchorEl={document.body}
@@ -72,21 +65,23 @@ describe("EventPopover", () => {
   it("renders correctly with inputs and calendar options", () => {
     renderPopover();
 
-    expect(screen.getByText(/Create Event/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Start/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/End/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Location/i)).toBeInTheDocument();
-    preview.debug();
+    expect(screen.getByText("Create Event")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar")).toBeInTheDocument();
+    expect(screen.getByLabelText("Title")).toBeInTheDocument();
+    expect(screen.getByLabelText("Start")).toBeInTheDocument();
+    expect(screen.getByLabelText("End")).toBeInTheDocument();
+    expect(screen.getByLabelText("All day")).toBeInTheDocument();
+    expect(screen.getByLabelText("Description")).toBeInTheDocument();
+    expect(screen.getByLabelText("Location")).toBeInTheDocument();
+    expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
+    expect(screen.getByLabelText("Time Zone")).toBeInTheDocument();
     // Calendar options
-    const select = screen.getByRole("combobox");
+    const select = screen.getByLabelText("Calendar");
     fireEvent.mouseDown(select);
-    expect(screen.getByText("Calendar 1")).toBeInTheDocument();
-    expect(screen.getByText("Calendar 2")).toBeInTheDocument();
+    expect(screen.getAllByRole("option")).toHaveLength(2);
   });
 
-  it("fills start and end from selectedRange", () => {
+  it("fills start from selectedRange", () => {
     const selectedRange = {
       startStr: "2026-07-20T10:00",
       endStr: "2026-07-20T12:00",
@@ -97,93 +92,106 @@ describe("EventPopover", () => {
     };
 
     renderPopover(selectedRange as unknown as DateSelectArg);
-
-    expect(screen.getByLabelText(/Start/i)).toHaveValue("2026-07-20T10:00");
-    expect(screen.getByLabelText(/End/i)).toHaveValue("2026-07-20T12:00");
+    expect(screen.getByLabelText("Start")).toHaveValue("2026-07-20T10:00");
   });
 
   it("updates inputs on change", () => {
-    renderWithProviders(
-      <EventPopover
-        anchorEl={document.body}
-        open={true}
-        onClose={mockOnClose}
-        selectedRange={null}
-      />
-    );
+    renderPopover();
 
-    fireEvent.change(screen.getByLabelText(/title/i), {
+    fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: "My Event" },
     });
-    expect(screen.getByLabelText(/title/i)).toHaveValue("My Event");
+    expect(screen.getByLabelText("Title")).toHaveValue("My Event");
 
-    fireEvent.change(screen.getByLabelText(/Description/i), {
+    fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Event Description" },
     });
-    expect(screen.getByLabelText(/Description/i)).toHaveValue(
+    expect(screen.getByLabelText("Description")).toHaveValue(
       "Event Description"
     );
 
-    fireEvent.change(screen.getByLabelText(/Location/i), {
+    fireEvent.change(screen.getByLabelText("Location"), {
       target: { value: "Conference Room" },
     });
-    expect(screen.getByLabelText(/Location/i)).toHaveValue("Conference Room");
+    expect(screen.getByLabelText("Location")).toHaveValue("Conference Room");
   });
 
   it("changes selected calendar", async () => {
     renderPopover();
 
-    const select = screen.getByRole("combobox");
+    const select = screen.getByLabelText("Calendar");
     fireEvent.mouseDown(select); // Open menu
 
     const option = await screen.findByText("Calendar 2");
     fireEvent.click(option);
 
-    // The Select control value isn't easy to check directly because MUI Select wraps input,
-    // but we can test by triggering save later
+    expect(screen.getAllByRole("combobox")[0]).toHaveTextContent("Calendar 2");
   });
 
-  it("dispatches addEvent and calls onClose when Save is clicked", () => {
+  it("dispatches putEventAsync and calls onClose when Save is clicked", async () => {
     renderPopover();
-
-    // Select calendar id
-    const select = screen.getByRole("combobox");
-    fireEvent.mouseDown(select);
-    fireEvent.click(screen.getByText("Calendar 1"));
+    const newEvent = {
+      title: "Meeting",
+      start: "2025-07-18T00:00:00.000Z",
+      end: "2025-07-19T00:00:00.000Z",
+      allday: false,
+      uid: "6045c603-11ab-43c5-bc30-0641420bb3a8",
+      description: "Discuss project",
+      location: "Zoom",
+      repetition: "",
+      organizer: { cn: "test", cal_address: "mailto:test@test.com" },
+      timezone: "Europe/Paris",
+      transp: "OPAQUE",
+    };
 
     // Fill inputs
-    fireEvent.change(screen.getByLabelText(/title/i), {
-      target: { value: "Meeting" },
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: newEvent.title },
     });
-    fireEvent.change(screen.getByLabelText(/Start/i), {
-      target: { value: "2025-07-18T09:00" },
+    fireEvent.click(screen.getByLabelText("All day"));
+    fireEvent.change(screen.getByLabelText("Start"), {
+      target: { value: newEvent.start.split("T")[0] },
     });
-    fireEvent.change(screen.getByLabelText(/End/i), {
-      target: { value: "2025-07-18T10:00" },
-    });
-    fireEvent.change(screen.getByLabelText(/Description/i), {
-      target: { value: "Discuss project" },
-    });
-    fireEvent.change(screen.getByLabelText(/Location/i), {
-      target: { value: "Zoom" },
+    fireEvent.change(screen.getByLabelText("End"), {
+      target: { value: newEvent.end.split("T")[0] },
     });
 
-    fireEvent.click(screen.getByText(/Save/i));
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: newEvent.description },
+    });
+    fireEvent.change(screen.getByLabelText("Location"), {
+      target: { value: newEvent.location },
+    });
 
-    expect(dispatch).toHaveBeenCalled();
+    let receivedPayload: any = null;
+
+    jest.spyOn(eventThunks, "putEventAsync").mockImplementation((payload) => {
+      receivedPayload = payload;
+      return () => Promise.resolve() as any;
+    });
+
+    fireEvent.click(screen.getByText("Save"));
+    expect(eventThunks.putEventAsync).toHaveBeenCalled();
 
     // Extract dispatched action argument
-    const dispatchedArg = dispatch.mock.calls[0][0].payload;
-    console.log(dispatchedArg);
-    expect(dispatchedArg.calendarUid).toBe("667037022b752d0026472254/cal1");
-    expect(dispatchedArg.event.title).toBe("Meeting");
-    expect(dispatchedArg.event.description).toBe("Discuss project");
-    expect(dispatchedArg.event.location).toBe("Zoom");
-    expect(dispatchedArg.event.color).toBe("#FF0000");
-    expect(dispatchedArg.event.organizer).toEqual({
-      cn: "test",
-      cal_address: "mailto:test@test.com",
-    });
+    console.log(receivedPayload);
+    expect(receivedPayload.cal).toBe(
+      preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+    );
+    expect(receivedPayload.newEvent.title).toBe(newEvent.title);
+    expect(receivedPayload.newEvent.description).toBe(newEvent.description);
+    expect(receivedPayload.newEvent.start.toString()).toBe(
+      new Date(newEvent.start).toString()
+    );
+    expect(receivedPayload.newEvent.end.toString()).toBe(
+      new Date(newEvent.end).toString()
+    );
+    expect(receivedPayload.newEvent.location).toBe(newEvent.location);
+    expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer);
+    expect(receivedPayload.newEvent.repetition).toEqual(newEvent.repetition);
+    expect(receivedPayload.newEvent.color).toEqual(
+      preloadedState.calendars.list["667037022b752d0026472254/cal1"].color
+    );
 
     // onClose should be called
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
@@ -192,7 +200,7 @@ describe("EventPopover", () => {
   it("calls onClose when Cancel clicked", () => {
     renderPopover();
 
-    fireEvent.click(screen.getByText(/Cancel/i));
+    fireEvent.click(screen.getByText("Cancel"));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
