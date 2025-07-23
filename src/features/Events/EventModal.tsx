@@ -60,7 +60,6 @@ function EventPopover({
   useEffect(() => {
     if (selectedRange) {
       setStart(selectedRange ? formatLocalDateTime(selectedRange.start) : "");
-      setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
     }
   }, [selectedRange]);
 
@@ -68,7 +67,6 @@ function EventPopover({
     const newEvent: CalendarEvent = {
       title,
       start: new Date(start),
-      end: new Date(end),
       allday,
       uid: crypto.randomUUID(),
       description,
@@ -89,7 +87,9 @@ function EventPopover({
       transp: "OPAQUE",
       color: userPersonnalCalendars[calendarid]?.color,
     };
-
+    if (end) {
+      newEvent.end = new Date(end);
+    }
     dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
