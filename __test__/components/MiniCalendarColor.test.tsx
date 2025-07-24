@@ -55,7 +55,6 @@ describe("MiniCalendar", () => {
 
   it("renders mini calendar with the week in gray (except for today) when full calendar in week view", async () => {
     renderCalendar();
-    preview.debug();
 
     const today = new Date();
     const sunday = new Date(today);
@@ -160,7 +159,6 @@ describe("Found Bugs", () => {
     const previousMonthButton = screen.getByText("<");
     fireEvent.click(nextMonthButton);
     fireEvent.click(previousMonthButton);
-    preview.debug();
     const shownDay = screen.getByText((content, element) => {
       return (
         element?.className.toLowerCase().includes("fc-daygrid-day-number") ??
@@ -197,5 +195,28 @@ describe("Found Bugs", () => {
     expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
     fireEvent.click(nextMonthButton);
     expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
+  });
+
+  it("gray day stays when day mode, change day, then change to week view", async () => {
+    renderCalendar();
+    const dayViewButton = await screen.findByTitle(/day view/i);
+    const weekViewButton = await screen.findByTitle(/week view/i);
+    fireEvent.click(dayViewButton);
+    const nextDayButton = screen.getByTitle("Next day");
+    fireEvent.click(nextDayButton);
+
+    const dayViewSelectedTiles = screen.getAllByText((content, element) => {
+      return element?.className.includes("selectedWeek") ?? false;
+    });
+
+    expect(dayViewSelectedTiles).toHaveLength(1);
+
+    fireEvent.click(weekViewButton);
+
+    const weekViewSelectedTiles = screen.getAllByText((content, element) => {
+      return element?.className.includes("selectedWeek") ?? false;
+    });
+
+    expect(weekViewSelectedTiles).toHaveLength(7);
   });
 });
