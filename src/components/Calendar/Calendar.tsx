@@ -215,7 +215,6 @@ export default function CalendarApp() {
           }}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          weekends={false}
           editable={true}
           selectable={true}
           select={handleDateSelect}
