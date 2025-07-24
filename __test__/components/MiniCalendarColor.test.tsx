@@ -219,4 +219,17 @@ describe("Found Bugs", () => {
 
     expect(weekViewSelectedTiles).toHaveLength(7);
   });
+  it("gray day stays when day mode, change day, then change to week view", async () => {
+    jest.useFakeTimers().setSystemTime(new Date("2025-01-30"));
+    renderCalendar();
+    const nextWeekButton = screen.getByTitle("Next week");
+
+    fireEvent.click(nextWeekButton);
+
+    const miniCalMonth = await screen.findByTitle(/mini calendar month/i);
+    const fullCalMonth = screen.getByText((content, element) => {
+      return element?.className.includes("fc-toolbar-title") ?? false;
+    });
+    expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
+  });
 });
