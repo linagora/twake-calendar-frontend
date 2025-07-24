@@ -238,15 +238,7 @@ export default function CalendarApp() {
             hour12: false,
           }}
           datesSet={(arg) => {
-            if (arg.view.type === "timeGridDay") {
-              setSelectedDate(new Date(arg.start));
-              setSelectedMiniDate(new Date(arg.start));
-            } else if (arg.view.type === "timeGridWeek") {
-              if (selectedDate <= arg.start && selectedDate >= arg.end) {
-                setSelectedMiniDate(new Date(arg.start));
-              }
-              setSelectedDate(new Date(arg.start));
-            } else if (arg.view.type === "dayGridMonth") {
+            if (arg.view.type === "dayGridMonth") {
               setSelectedDate(new Date(arg.start));
               const midTimestamp =
                 (arg.start.getTime() + arg.end.getTime()) / 2;
