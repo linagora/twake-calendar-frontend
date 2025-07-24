@@ -104,6 +104,7 @@ export default function CalendarApp() {
   };
 
   const handleClosePopover = () => {
+    calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
   };
@@ -230,6 +231,7 @@ export default function CalendarApp() {
           slotDuration={"00:30:00"}
           slotLabelInterval={"00:30:00"}
           scrollTime={"09:00:00"}
+          unselectAuto={false}
           allDayText=""
           slotLabelFormat={{
             hour: "2-digit",
@@ -285,6 +287,8 @@ export default function CalendarApp() {
           open={Boolean(anchorEl)}
           onClose={handleClosePopover}
           selectedRange={selectedRange}
+          setSelectedRange={setSelectedRange}
+          calendarRef={calendarRef}
         />
         <CalendarPopover
           anchorEl={anchorElCal}

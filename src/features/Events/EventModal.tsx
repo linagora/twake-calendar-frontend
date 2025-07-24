@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { addEvent, putEventAsync } from "../Calendars/CalendarSlice";
 import { CalendarEvent } from "./EventsTypes";
-import { DateSelectArg } from "@fullcalendar/core";
+import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
@@ -25,11 +25,15 @@ function EventPopover({
   open,
   onClose,
   selectedRange,
+  setSelectedRange,
+  calendarRef,
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
   selectedRange: DateSelectArg | null;
+  setSelectedRange: Function;
+  calendarRef: React.RefObject<CalendarApi | null>;
 }) {
   const dispatch = useAppDispatch();
 
@@ -60,6 +64,7 @@ function EventPopover({
   useEffect(() => {
     if (selectedRange) {
       setStart(selectedRange ? formatLocalDateTime(selectedRange.start) : "");
+      setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
     }
   }, [selectedRange]);
 
@@ -148,8 +153,19 @@ function EventPopover({
           fullWidth
           label="Start"
           type={allday ? "date" : "datetime-local"}
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
+          value={allday ? start.split("T")[0] : start}
+          onChange={(e) => {
+            const newStart = e.target.value;
+            setStart(newStart);
+            const newRange = {
+              ...selectedRange,
+              start: new Date(newStart),
+              startStr: newStart,
+              allDay: allday,
+            };
+            setSelectedRange(newRange);
+            calendarRef.current?.select(newRange);
+          }}
           size="small"
           margin="dense"
           InputLabelProps={{ shrink: true }}
@@ -158,8 +174,19 @@ function EventPopover({
           fullWidth
           label="End"
           type={allday ? "date" : "datetime-local"}
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
+          value={allday ? end.split("T")[0] : end}
+          onChange={(e) => {
+            const newEnd = e.target.value;
+            setEnd(newEnd);
+            const newRange = {
+              ...selectedRange,
+              end: new Date(newEnd),
+              endStr: newEnd,
+              allDay: allday,
+            };
+            setSelectedRange(newRange);
+            calendarRef.current?.select(newRange);
+          }}
           size="small"
           margin="dense"
           InputLabelProps={{ shrink: true }}
@@ -168,7 +195,19 @@ function EventPopover({
           <input
             type="checkbox"
             checked={allday}
-            onChange={() => setAllDay(!allday)}
+            onChange={() => {
+              setAllDay(!allday);
+              const newRange = {
+                startStr: allday ? start.split("T")[0] : start,
+                endStr: allday ? end.split("T")[0] : end,
+                start: new Date(allday ? start.split("T")[0] : start),
+                end: new Date(allday ? end.split("T")[0] : end),
+                allday,
+                ...selectedRange,
+              };
+              setSelectedRange(newRange);
+              calendarRef.current?.select(newRange);
+            }}
           />
           All day
         </label>
