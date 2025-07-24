@@ -242,11 +242,10 @@ export default function CalendarApp() {
               setSelectedDate(new Date(arg.start));
               setSelectedMiniDate(new Date(arg.start));
             } else if (arg.view.type === "timeGridWeek") {
-              // In week view, retain selectedDate if it's in current range, otherwise set to start
-              if (selectedDate < arg.start || selectedDate > arg.end) {
-                setSelectedDate(new Date(arg.start));
+              if (selectedDate <= arg.start && selectedDate >= arg.end) {
                 setSelectedMiniDate(new Date(arg.start));
               }
+              setSelectedDate(new Date(arg.start));
             } else if (arg.view.type === "dayGridMonth") {
               setSelectedDate(new Date(arg.start));
               const midTimestamp =
