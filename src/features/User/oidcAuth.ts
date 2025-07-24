@@ -22,17 +22,14 @@ export async function Auth() {
   let code_verifier = client.randomPKCECodeVerifier();
   let code_challenge = await client.calculatePKCECodeChallenge(code_verifier);
   const openIdClientConfig = await getClientConfig();
+  let state = client.randomState();
   let parameters: Record<string, string> = {
     redirect_uri: clientConfig.redirect_uri,
     scope: clientConfig.scope!,
     code_challenge,
     code_challenge_method: clientConfig.code_challenge_method,
+    state,
   };
-  let state!: string;
-  if (!openIdClientConfig.serverMetadata().supportsPKCE()) {
-    state = client.randomState();
-    parameters.state = state;
-  }
   let redirectTo = client.buildAuthorizationUrl(openIdClientConfig, parameters);
 
   return { redirectTo, code_verifier, state };

@@ -59,7 +59,7 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 After compiling the project with npm (see previous section) simply run:
 
 ```
-docker built -t linagora/twake-calendar-front .
+docker build -t linagora/twake-calendar-front .
 ```
 
 Then edit `.env.js` in order to match your configuration then run it with:

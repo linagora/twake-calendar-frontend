@@ -1,6 +1,6 @@
 var SSO_BASE_URL = "https://example.com";
 var SSO_CLIENT_ID = "example";
-var SSO_SCOPE = "openid name email";
+var SSO_SCOPE = "openid profile email";
 var SSO_REDIRECT_URI = "https://example.com/callback";
 var SSO_RESPONSE_TYPE = "code";
 var SSO_CODE_CHALLENGE_METHOD = "S256";
