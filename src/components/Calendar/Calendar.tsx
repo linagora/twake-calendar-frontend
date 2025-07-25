@@ -218,9 +218,9 @@ export default function CalendarApp() {
           initialView="timeGridWeek"
           editable={true}
           selectable={true}
+          height={"100%"}
           select={handleDateSelect}
           nowIndicator
-          selectMirror={true}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
@@ -228,9 +228,8 @@ export default function CalendarApp() {
           events={filteredEvents}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
-          slotDuration={"00:30:00"}
-          slotLabelInterval={"00:30:00"}
-          scrollTime={"09:00:00"}
+          slotDuration={"01:00:00"}
+          scrollTime={"08:00:00"}
           unselectAuto={false}
           allDayText=""
           slotLabelFormat={{
