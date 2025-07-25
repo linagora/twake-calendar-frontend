@@ -4,8 +4,9 @@ import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
 import getOpenPaasUserId from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
-import { putEvent } from "../Events/EventApi";
+import { deleteEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
+import { responsiveFontSizes } from "@mui/material";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -73,6 +74,14 @@ export const putEventAsync = createAsyncThunk<
     calId: cal.id,
     events,
   };
+});
+
+export const deleteEventAsync = createAsyncThunk<
+  { calId: string; eventId: string }, // Return type
+  { calId: string; eventId: string } // Arg type
+>("calendars/delEvent", async ({ calId, eventId }) => {
+  const response = await deleteEvent(calId, eventId);
+  return { calId, eventId };
 });
 
 const CalendarSlice = createSlice({
@@ -160,9 +169,15 @@ const CalendarSlice = createSlice({
           Object.keys(state.list[action.payload.calId].events).forEach((id) => {
             state.list[action.payload.calId].events[id].color =
               state.list[action.payload.calId].color;
+            state.list[action.payload.calId].events[id].calId =
+              action.payload.calId;
           });
         }
       )
+      .addCase(deleteEventAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        delete state.list[action.payload.calId].events[action.payload.eventId];
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -170,6 +185,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(putEventAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(deleteEventAsync.pending, (state) => {
         state.pending = true;
       });
   },
