@@ -308,13 +308,15 @@ export default function CalendarApp() {
           open={Boolean(anchorElCal)}
           onClose={() => setAnchorElCal(null)}
         />
-        <EventDisplayModal
-          open={openEventDisplay}
-          onClose={handleCloseEventDisplay}
-          anchorEl={anchorElEventDisplay}
-          eventId={eventDisplayedId}
-          calId={eventDisplayedCalId}
-        />
+        {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
+          <EventDisplayModal
+            eventId={eventDisplayedId}
+            calId={eventDisplayedCalId}
+            anchorEl={anchorElEventDisplay}
+            open={openEventDisplay}
+            onClose={handleCloseEventDisplay}
+          />
+        )}
       </div>
     </main>
   );

@@ -1,30 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { addEvent } from "../Calendars/CalendarSlice";
-import { CalendarEvent } from "./EventsTypes";
-import { DateSelectArg } from "@fullcalendar/core";
+import { useEffect, useState } from "react";
+import { deleteEventAsync } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
-  TextField,
   Button,
   Box,
   Typography,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  Avatar,
   ButtonGroup,
   Card,
   CardContent,
   Divider,
   IconButton,
 } from "@mui/material";
-import EventModal from "./EventModal";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import VideocamIcon from "@mui/icons-material/Videocam";
@@ -45,6 +35,7 @@ function EventDisplayModal({
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   if (calId && eventId) {
+    const dispatch = useAppDispatch();
     const calendar = useAppSelector((state) => state.calendars.list[calId]);
     const event = useAppSelector(
       (state) => state.calendars.list[calId].events[eventId]
@@ -52,6 +43,14 @@ function EventDisplayModal({
     const user = useAppSelector((state) => state.user);
     const [showAllAttendees, setShowAllAttendees] = useState(false);
     const attendeeDisplayLimit = 3;
+
+    useEffect(() => {
+      if (!event || !calendar) {
+        onClose({}, "backdropClick");
+      }
+    }, [event, calendar, onClose]);
+
+    if (!event || !calendar) return null;
 
     const visibleAttendees = showAllAttendees
       ? event.attendee
@@ -73,7 +72,13 @@ function EventDisplayModal({
             <IconButton size="small">
               <EditIcon fontSize="small" />
             </IconButton>
-            <IconButton size="small">
+            <IconButton
+              size="small"
+              onClick={() => {
+                onClose({}, "backdropClick");
+                dispatch(deleteEventAsync({ calId, eventId }));
+              }}
+            >
               <DeleteIcon fontSize="small" />
             </IconButton>
             <IconButton
@@ -187,7 +192,7 @@ function EventDisplayModal({
 
             {/* Attendance options */}
             {event.attendee.find(
-              (person) => person.cal_address === `mailto:${user.userData.email}`
+              (person) => person.cal_address === user.userData.email
             ) && (
               <Box>
                 <Typography variant="body2" sx={{ mb: 1 }}>
