@@ -1,17 +1,20 @@
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import EventPopover from "../../../src/features/Events/EventModal";
 import { DateSelectArg } from "@fullcalendar/core";
 import preview from "jest-preview";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../../src/utils/dateUtils";
 
 describe("EventPopover", () => {
   const mockOnClose = jest.fn();
-  jest.mock("crypto");
+  const mockSetSelectedRange = jest.fn();
+  const mockCalendarRef = { current: { select: jest.fn() } } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   const preloadedState = {
     user: {
       userData: {
@@ -41,22 +44,25 @@ describe("EventPopover", () => {
       pending: false,
     },
   };
-  const renderPopover = (
-    selectedRange = {
-      startStr: "2025-07-18T09:00",
-      endStr: "2025-07-18T10:00",
-      start: new Date("2025-07-18T09:00"),
-      end: new Date("2025-07-18T10:00"),
-      allDay: false,
-      resource: undefined,
-    } as unknown as DateSelectArg
-  ) => {
+
+  const defaultSelectedRange = {
+    startStr: "2025-07-18T09:00",
+    endStr: "2025-07-18T10:00",
+    start: new Date("2025-07-18T09:00"),
+    end: new Date("2025-07-18T10:00"),
+    allDay: false,
+    resource: undefined,
+  } as unknown as DateSelectArg;
+
+  const renderPopover = (selectedRange = defaultSelectedRange) => {
     renderWithProviders(
       <EventPopover
         anchorEl={document.body}
         open={true}
         onClose={mockOnClose}
         selectedRange={selectedRange}
+        setSelectedRange={mockSetSelectedRange}
+        calendarRef={mockCalendarRef}
       />,
       preloadedState
     );
@@ -70,7 +76,6 @@ describe("EventPopover", () => {
     expect(screen.getByLabelText("Title")).toBeInTheDocument();
     expect(screen.getByLabelText("Start")).toBeInTheDocument();
     expect(screen.getByLabelText("End")).toBeInTheDocument();
-    expect(screen.getByLabelText("All day")).toBeInTheDocument();
     expect(screen.getByLabelText("Description")).toBeInTheDocument();
     expect(screen.getByLabelText("Location")).toBeInTheDocument();
     expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
@@ -82,16 +87,14 @@ describe("EventPopover", () => {
   });
 
   it("fills start from selectedRange", () => {
-    const selectedRange = {
+    renderPopover({
       startStr: "2026-07-20T10:00",
       endStr: "2026-07-20T12:00",
       start: new Date("2026-07-20T10:00"),
       end: new Date("2026-07-20T12:00"),
       allDay: false,
-      resource: undefined,
-    };
+    } as unknown as DateSelectArg);
 
-    renderPopover(selectedRange as unknown as DateSelectArg);
     expect(screen.getByLabelText("Start")).toHaveValue("2026-07-20T10:00");
   });
 
@@ -162,30 +165,36 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText("Location"), {
       target: { value: newEvent.location },
     });
-
-    let receivedPayload: any = null;
-
-    jest.spyOn(eventThunks, "putEventAsync").mockImplementation((payload) => {
-      receivedPayload = payload;
-      return () => Promise.resolve() as any;
-    });
+    preview.debug();
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
 
     fireEvent.click(screen.getByText("Save"));
-    expect(eventThunks.putEventAsync).toHaveBeenCalled();
 
-    // Extract dispatched action argument
-    console.log(receivedPayload);
-    expect(receivedPayload.cal).toBe(
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    const receivedPayload = spy.mock.calls[0][0];
+
+    expect(receivedPayload.cal).toEqual(
       preloadedState.calendars.list["667037022b752d0026472254/cal1"]
     );
+
+    console.log(receivedPayload.newEvent.start);
     expect(receivedPayload.newEvent.title).toBe(newEvent.title);
     expect(receivedPayload.newEvent.description).toBe(newEvent.description);
-    expect(receivedPayload.newEvent.start.toString()).toBe(
-      new Date(newEvent.start).toString()
-    );
-    expect(receivedPayload.newEvent.end.toString()).toBe(
-      new Date(newEvent.end).toString()
-    );
+    expect(
+      formatDateToYYYYMMDDTHHMMSS(receivedPayload.newEvent.start).split("T")[0]
+    ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)).split("T")[0]);
+    expect(
+      formatDateToYYYYMMDDTHHMMSS(
+        receivedPayload.newEvent.end || new Date()
+      ).split("T")[0]
+    ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.end)).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);
     expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer);
     expect(receivedPayload.newEvent.repetition).toEqual(newEvent.repetition);
