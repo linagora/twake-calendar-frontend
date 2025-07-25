@@ -20,6 +20,7 @@ import {
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
+import EventDisplayModal from "../../features/Events/EventDisplay";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -93,6 +94,11 @@ export default function CalendarApp() {
   }, [rangeKey, selectedCalendars]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [anchorElEventDisplay, setAnchorElEventDisplay] =
+    useState<HTMLElement | null>(null);
+  const [openEventDisplay, setOpenEventDisplay] = useState(false);
+  const [eventDisplayedId, setEventDisplayedId] = useState("");
+  const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
@@ -107,6 +113,10 @@ export default function CalendarApp() {
     calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
+  };
+  const handleCloseEventDisplay = () => {
+    setAnchorElEventDisplay(null);
+    setOpenEventDisplay(false);
   };
 
   const handleMonthUp = () => {
@@ -273,6 +283,10 @@ export default function CalendarApp() {
               window.open(info.event.url);
             } else {
               console.log(info.event);
+              setOpenEventDisplay(true);
+              setAnchorElEventDisplay(info.el);
+              setEventDisplayedId(info.event.extendedProps.uid);
+              setEventDisplayedCalId(info.event.extendedProps.calId);
             }
           }}
           headerToolbar={{
@@ -293,6 +307,13 @@ export default function CalendarApp() {
           anchorEl={anchorElCal}
           open={Boolean(anchorElCal)}
           onClose={() => setAnchorElCal(null)}
+        />
+        <EventDisplayModal
+          open={openEventDisplay}
+          onClose={handleCloseEventDisplay}
+          anchorEl={anchorElEventDisplay}
+          eventId={eventDisplayedId}
+          calId={eventDisplayedCalId}
         />
       </div>
     </main>

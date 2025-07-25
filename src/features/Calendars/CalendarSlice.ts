@@ -136,6 +136,8 @@ const CalendarSlice = createSlice({
           Object.keys(state.list[action.payload.calId].events).forEach((id) => {
             state.list[action.payload.calId].events[id].color =
               state.list[action.payload.calId].color;
+            state.list[action.payload.calId].events[id].calId =
+              action.payload.calId;
           });
         }
       )
