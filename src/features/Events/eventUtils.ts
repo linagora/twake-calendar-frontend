@@ -1,6 +1,8 @@
+import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { CalendarEvent } from "./EventsTypes";
-
+import ICAL from "ical.js";
+import { TIMEZONES } from "../../utils/timezone-data";
 type RawEntry = [string, Record<string, string>, string, any];
 
 export function parseCalendarEvent(
@@ -82,4 +84,93 @@ export function parseCalendarEvent(
   }
 
   return event as CalendarEvent;
+}
+
+export function calendarEventToJCal(event: CalendarEvent): any[] {
+  const tzid = event.timezone; // Fallback to UTC if no timezone provided
+
+  const vevent: any[] = [
+    "vevent",
+    [
+      ["uid", {}, "text", event.uid],
+      ["transp", {}, "text", event.transp ?? "OPAQUE"],
+      [
+        "dtstart",
+        { tzid },
+        event.allday ? "date" : "date-time",
+        formatDateToICal(event.start, event.allday ?? false),
+      ],
+      ["class", {}, "text", event.class ?? "PUBLIC"],
+      [
+        "x-openpaas-videoconference",
+        {},
+        "unknown",
+        event.x_openpass_videoconference ?? null,
+      ],
+      ["summary", {}, "text", event.title ?? ""],
+    ],
+    [],
+  ];
+
+  if (event.end) {
+    vevent[1].push([
+      "dtend",
+      { tzid },
+      event.allday ? "date" : "date-time",
+      formatDateToICal(event.end, event.allday ?? false),
+    ]);
+  }
+  if (event.organizer) {
+    vevent[1].push([
+      "organizer",
+      { cn: event.organizer.cn },
+      "cal-address",
+      event.organizer.cal_address,
+    ]);
+  }
+  if (event.location) {
+    vevent[1].push(["location", {}, "text", event.location]);
+  }
+  if (event.description) {
+    vevent[1].push(["description", {}, "text", event.description]);
+  }
+  if (event.repetition) {
+    vevent[1].push(["rrule", {}, "recur", { freq: event.repetition }]);
+  }
+
+  event.attendee.forEach((att) => {
+    vevent[1].push([
+      "attendee",
+      {
+        cn: att.cn,
+        partstat: att.partstat,
+        rsvp: att.rsvp,
+        role: att.role,
+        cutype: att.cutype,
+      },
+      "cal-address",
+      att.cal_address,
+    ]);
+  });
+
+  const vtimezone = new ICAL.Timezone({
+    component: TIMEZONES.zones[event.timezone].ics,
+    tzid: event.timezone,
+  });
+  return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
+}
+function formatDateToICal(date: Date, allday: Boolean) {
+  // Format date like: 20250214T110000 (local time)
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  if (allday) {
+    return `${year}-${month}-${day}`;
+  }
+  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }
