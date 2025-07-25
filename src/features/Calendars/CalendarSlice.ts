@@ -4,6 +4,8 @@ import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
 import getOpenPaasUserId from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
+import { putEvent } from "../Events/EventApi";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -45,6 +47,32 @@ export const getCalendarDetailAsync = createAsyncThunk<
   );
 
   return { calId, events };
+});
+
+export const putEventAsync = createAsyncThunk<
+  { calId: string; events: CalendarEvent[] }, // Return type
+  { cal: Calendars; newEvent: CalendarEvent } // Arg type
+>("calendars/putEvent", async ({ cal, newEvent }) => {
+  const response = await putEvent(cal, newEvent);
+  const calEvents = (await getCalendar(cal.id, {
+    start: formatDateToYYYYMMDDTHHMMSS(newEvent.start),
+    end: formatDateToYYYYMMDDTHHMMSS(
+      new Date(newEvent.start.getTime() + 86400000)
+    ),
+  })) as Record<string, any>;
+  const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
+    (eventdata: any) => {
+      const vevents = eventdata.data[2] as any[][];
+      return vevents.map((vevent: any[]) => {
+        return parseCalendarEvent(vevent[1], cal.color ?? "", cal.id);
+      });
+    }
+  );
+
+  return {
+    calId: cal.id,
+    events,
+  };
 });
 
 const CalendarSlice = createSlice({
@@ -111,10 +139,35 @@ const CalendarSlice = createSlice({
           });
         }
       )
+      .addCase(
+        putEventAsync.fulfilled,
+        (
+          state,
+          action: PayloadAction<{ calId: string; events: CalendarEvent[] }>
+        ) => {
+          state.pending = false;
+          if (!state.list[action.payload.calId]) {
+            state.list[action.payload.calId] = {
+              id: action.payload.calId,
+              events: {},
+            } as Calendars;
+          }
+          action.payload.events.forEach((event) => {
+            state.list[action.payload.calId].events[event.uid] = event;
+          });
+          Object.keys(state.list[action.payload.calId].events).forEach((id) => {
+            state.list[action.payload.calId].events[id].color =
+              state.list[action.payload.calId].color;
+          });
+        }
+      )
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
       .addCase(getCalendarsListAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(putEventAsync.pending, (state) => {
         state.pending = true;
       });
   },
