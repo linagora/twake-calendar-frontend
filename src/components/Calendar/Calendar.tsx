@@ -207,7 +207,12 @@ export default function CalendarApp() {
               classNames.push("event-dot");
             }
 
-            return <div className={classNames.join(" ")}></div>;
+            return (
+              <div
+                className={classNames.join(" ")}
+                data-testid={`date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`}
+              ></div>
+            );
           }}
         />
         <CalendarSelection
