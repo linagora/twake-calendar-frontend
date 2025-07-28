@@ -12,6 +12,7 @@ describe("MiniCalendar", () => {
     jest.clearAllMocks();
     const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
+    jest.useFakeTimers().clearAllTimers();
   });
 
   const renderCalendar = () => {
@@ -63,10 +64,14 @@ describe("MiniCalendar", () => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(sunday);
       date.setDate(sunday.getDate() + i);
-      const tile = (await screen.findAllByText(date.getDate())).find(
-        (el) => el.tagName.toLowerCase() === "abbr"
-      );
+      const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      preview.debug();
+
+      const tile = screen.getByTestId(dateTestId);
+
       if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
+        preview.debug();
+
         expect(tile?.parentElement).toHaveClass("selectedWeek");
       }
     }
