@@ -47,10 +47,10 @@ describe("MiniCalendar", () => {
 
   it("renders mini calendar with today in orange", async () => {
     renderCalendar();
-    const today = new Date().getDate().toString();
-    const todayTile = screen
-      .getAllByText(today)
-      .find((el) => el.tagName.toLowerCase() === "abbr");
+    const today = new Date();
+    const dateTestId = `date-${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+    const todayTile = screen.getByTestId(dateTestId);
     expect(todayTile?.parentElement).toHaveClass("today");
   });
 
@@ -65,13 +65,10 @@ describe("MiniCalendar", () => {
       const date = new Date(sunday);
       date.setDate(sunday.getDate() + i);
       const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-      preview.debug();
 
       const tile = screen.getByTestId(dateTestId);
 
       if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
-        preview.debug();
-
         expect(tile?.parentElement).toHaveClass("selectedWeek");
       }
     }
@@ -84,10 +81,10 @@ describe("MiniCalendar", () => {
     const dayViewButton = await screen.findByTitle(/day view/i);
     fireEvent.click(dayViewButton);
 
-    const today = new Date().getDate().toString();
-    const todayTile = screen
-      .getAllByText(today)
-      .find((el) => el.tagName.toLowerCase() === "abbr");
+    const today = new Date();
+    const dateTestId = `date-${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+    const todayTile = screen.getByTestId(dateTestId);
     expect(todayTile?.parentElement).toHaveClass("selectedWeek");
   });
 
@@ -164,23 +161,19 @@ describe("Found Bugs", () => {
     const previousMonthButton = screen.getByText("<");
     fireEvent.click(nextMonthButton);
     fireEvent.click(previousMonthButton);
-    const shownDay = screen.getByText((content, element) => {
-      return (
-        element?.className.toLowerCase().includes("fc-daygrid-day-number") ??
-        false
-      );
-    });
     const selectedTile = screen.getByText((content, element) => {
       return element?.className.includes("selectedWeek") ?? false;
     });
-    const supposedSelectedTile = screen
-      .getAllByText((content, element) => {
-        return element?.tagName.toLowerCase() === "abbr";
-      })
-      .find((el) => el.innerHTML === shownDay.innerHTML);
+    const ariaLabel = screen.getByRole("columnheader");
+    const shownDayDate = new Date(
+      ariaLabel.getAttribute("data-date") as string
+    );
+    const dateTestId = `date-${shownDayDate.getFullYear()}-${shownDayDate.getMonth()}-${shownDayDate.getDate()}`;
+
+    const supposedSelectedTile = screen.getByTestId(dateTestId);
 
     expect(selectedTile.children[0].innerHTML).toBe(
-      supposedSelectedTile?.innerHTML
+      supposedSelectedTile.parentElement?.children[0]?.innerHTML
     );
     expect(supposedSelectedTile?.parentElement).toHaveClass("selectedWeek");
   });

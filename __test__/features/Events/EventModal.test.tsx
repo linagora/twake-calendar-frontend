@@ -165,7 +165,6 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText("Location"), {
       target: { value: newEvent.location },
     });
-    preview.debug();
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
