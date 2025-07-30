@@ -26,6 +26,7 @@ import {
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
 import EventDisplayModal from "../../features/Events/EventDisplay";
+import { createSelector } from "@reduxjs/toolkit";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -41,14 +42,18 @@ export default function CalendarApp() {
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
-
-  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
-    Object.keys(state.calendars.list).map((id) => {
-      if (id.split("/")[0] === userId) {
-        return state.calendars.list[id];
-      }
-      return {} as Calendars;
-    })
+  const selectPersonnalCalendars = createSelector(
+    (state) => state.calendars,
+    (calendars) =>
+      Object.keys(calendars.list).map((id) => {
+        if (id.split("/")[0] === userId) {
+          return calendars.list[id];
+        }
+        return {} as Calendars;
+      })
+  );
+  const userPersonnalCalendars: Calendars[] = useAppSelector(
+    selectPersonnalCalendars
   );
   let personnalEvents: CalendarEvent[] = [];
   Object.keys(userPersonnalCalendars).forEach((value, id) => {
