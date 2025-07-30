@@ -70,6 +70,7 @@ function EventPopover({
 
   const handleSave = async () => {
     const newEvent: CalendarEvent = {
+      calId: userPersonnalCalendars[calendarid].id,
       title,
       start: new Date(start),
       allday,

@@ -5,7 +5,7 @@ import { calendarEventToJCal } from "./eventUtils";
 
 export async function putEvent(cal: Calendars, event: CalendarEvent) {
   const response = await api(
-    `dav/calendars/${cal.id}/${event.uid.split(".")[0]}.isc`,
+    `dav/calendars/${cal.id}/${event.uid.split("/")[0]}.isc`,
     {
       method: "PUT",
       body: JSON.stringify(calendarEventToJCal(event)),
@@ -19,7 +19,7 @@ export async function putEvent(cal: Calendars, event: CalendarEvent) {
 
 export async function deleteEvent(calId: string, eventId: string) {
   const response = await api(
-    `dav/calendars/${calId}/${eventId.split(".")[0]}.isc`,
+    `dav/calendars/${calId}/${eventId.split("/")[0]}.isc`,
     {
       method: "DELETE",
     }
