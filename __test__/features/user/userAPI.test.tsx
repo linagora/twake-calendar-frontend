@@ -1,5 +1,5 @@
 import { clientConfig } from "../../../src/features/User/oidcAuth";
-import getOpenPaasUserId from "../../../src/features/User/userAPI";
+import getOpenPaasUser from "../../../src/features/User/userAPI";
 import { api } from "../../../src/utils/apiUtils";
 
 jest.mock("../../../src/utils/apiUtils");
@@ -14,7 +14,7 @@ describe("getOpenPaasUserId", () => {
       json: jest.fn().mockResolvedValue(mockUser),
     });
 
-    const result = await getOpenPaasUserId();
+    const result = await getOpenPaasUser();
 
     expect(api.get).toHaveBeenCalledWith("api/user");
     expect(result).toEqual(mockUser);
