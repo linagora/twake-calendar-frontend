@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { deleteEventAsync } from "../Calendars/CalendarSlice";
+import { deleteEventAsync, putEventAsync } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
@@ -25,6 +25,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { userAttendee } from "../User/userDataTypes";
+import { putEvent } from "./EventApi";
 
 function EventDisplayModal({
   eventId,
@@ -73,6 +74,18 @@ function EventDisplayModal({
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
+
+  function handleRSVP(rsvp: string) {
+    const newEvent = {
+      ...event,
+      attendee: event.attendee?.map((a) =>
+        a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
+      ),
+    };
+
+    dispatch(putEventAsync({ cal: calendar, newEvent }));
+    onClose({}, "backdropClick");
+  }
 
   return (
     <Popover open={open} anchorEl={anchorEl} onClose={onClose}>
@@ -195,9 +208,36 @@ function EventDisplayModal({
                 Will you attend?
               </Typography>
               <ButtonGroup size="small" fullWidth>
-                <Button>Accept</Button>
-                <Button>Maybe</Button>
-                <Button>Decline</Button>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "ACCEPTED"
+                      ? "success"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("ACCEPTED")}
+                >
+                  Accept
+                </Button>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "TENTATIVE"
+                      ? "warning"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("TENTATIVE")}
+                >
+                  Maybe
+                </Button>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "DECLINED"
+                      ? "error"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("DECLINED")}
+                >
+                  Decline
+                </Button>
               </ButtonGroup>
             </Box>
           )}
