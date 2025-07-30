@@ -98,7 +98,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
         "dtstart",
         { tzid },
         event.allday ? "date" : "date-time",
-        formatDateToICal(event.start, event.allday ?? false),
+        formatDateToICal(new Date(event.start), event.allday ?? false),
       ],
       ["class", {}, "text", event.class ?? "PUBLIC"],
       [
@@ -117,7 +117,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(event.end, event.allday ?? false),
+      formatDateToICal(new Date(event.end), event.allday ?? false),
     ]);
   }
   if (event.organizer) {

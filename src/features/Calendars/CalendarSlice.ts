@@ -56,9 +56,9 @@ export const putEventAsync = createAsyncThunk<
 >("calendars/putEvent", async ({ cal, newEvent }) => {
   const response = await putEvent(cal, newEvent);
   const calEvents = (await getCalendar(cal.id, {
-    start: formatDateToYYYYMMDDTHHMMSS(newEvent.start),
+    start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
     end: formatDateToYYYYMMDDTHHMMSS(
-      new Date(newEvent.start.getTime() + 86400000)
+      new Date(new Date(newEvent.start).getTime() + 86400000)
     ),
   })) as Record<string, any>;
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
