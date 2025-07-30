@@ -1,19 +1,19 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventPopover from "../../../src/features/Events/EventModal";
 import { DateSelectArg } from "@fullcalendar/core";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import preview from "jest-preview";
+import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
+import EventPopover from "../../../src/features/Events/EventModal";
+import { api } from "../../../src/utils/apiUtils";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../src/utils/dateUtils";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
+
+jest.mock("../../../src/utils/apiUtils");
 
 describe("EventPopover", () => {
   const mockOnClose = jest.fn();
   const mockSetSelectedRange = jest.fn();
   const mockCalendarRef = { current: { select: jest.fn() } } as any;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   const preloadedState = {
     user: {
@@ -25,7 +25,7 @@ describe("EventPopover", () => {
       },
       organiserData: {
         cn: "test",
-        cal_address: "mailto:test@test.com",
+        cal_address: "test@test.com",
       },
     },
     calendars: {
@@ -44,6 +44,44 @@ describe("EventPopover", () => {
       pending: false,
     },
   };
+
+  const mockUsers = [
+    {
+      id: "john@example.com",
+      objectType: "user",
+      emailAddresses: [
+        {
+          value: "john@example.com",
+          type: "default",
+        },
+      ],
+      names: [
+        {
+          displayName: "John Doe",
+          type: "default",
+        },
+      ],
+    },
+    {
+      id: "jane@example.com",
+      objectType: "user",
+      emailAddresses: [
+        {
+          value: "jane@example.com",
+          type: "default",
+        },
+      ],
+      names: [
+        {
+          displayName: "Jane Smith",
+          type: "default",
+        },
+      ],
+    },
+  ];
+  (api.post as jest.Mock).mockReturnValue({
+    json: jest.fn().mockResolvedValue(mockUsers),
+  });
 
   const defaultSelectedRange = {
     startStr: "2025-07-18T09:00",
@@ -130,6 +168,69 @@ describe("EventPopover", () => {
 
     expect(screen.getAllByRole("combobox")[0]).toHaveTextContent("Calendar 2");
   });
+  it("adds a attendee", async () => {
+    jest.useFakeTimers();
+    renderPopover();
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "newEvent" },
+    });
+    const select = screen.getByLabelText("Search user");
+
+    act(() => {
+      select.focus();
+      fireEvent.mouseDown(select);
+      userEvent.type(select, "john");
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+    });
+    await act(async () => {
+      userEvent.click(screen.getByText("John Doe"));
+    });
+
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    const receivedPayload = spy.mock.calls[0][0];
+
+    expect(receivedPayload.cal).toEqual(
+      preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+    );
+
+    expect(receivedPayload.newEvent.attendee).toHaveLength(2);
+    expect(receivedPayload.newEvent.attendee).toStrictEqual([
+      {
+        cn: "test",
+        cal_address: "test@test.com",
+        partstat: "ACCEPTED",
+        rsvp: "FALSE",
+        role: "CHAIR",
+        cutype: "INDIVIDUAL",
+      },
+      {
+        cn: "John Doe",
+        cal_address: "john@example.com",
+        partstat: "NEED_ACTION",
+        rsvp: "FALSE",
+        role: "CHAIR",
+        cutype: "INDIVIDUAL",
+      },
+    ]);
+  });
 
   it("dispatches putEventAsync and calls onClose when Save is clicked", async () => {
     renderPopover();
@@ -142,7 +243,7 @@ describe("EventPopover", () => {
       description: "Discuss project",
       location: "Zoom",
       repetition: "",
-      organizer: { cn: "test", cal_address: "mailto:test@test.com" },
+      organizer: { cn: "test", cal_address: "test@test.com" },
       timezone: "Europe/Paris",
       transp: "OPAQUE",
     };

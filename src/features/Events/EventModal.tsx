@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { addEvent, putEventAsync } from "../Calendars/CalendarSlice";
-import { CalendarEvent } from "./EventsTypes";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  Popover,
-  TextField,
-  Button,
   Box,
-  Typography,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
+  Button,
   FormControl,
   InputLabel,
+  MenuItem,
+  Popover,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Calendars } from "../Calendars/CalendarTypes";
-import { putEvent } from "./EventApi";
+import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import { TIMEZONES } from "../../utils/timezone-data";
-import { CheckBox, Repeat } from "@mui/icons-material";
+import { putEventAsync } from "../Calendars/CalendarSlice";
+import { Calendars } from "../Calendars/CalendarTypes";
+import { userAttendee } from "../User/userDataTypes";
+import { CalendarEvent } from "./EventsTypes";
+import { createSelector } from "@reduxjs/toolkit";
 
 function EventPopover({
   anchorEl,
@@ -39,14 +40,21 @@ function EventPopover({
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
-  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
-    Object.keys(state.calendars.list).map((id) => {
-      if (id.split("/")[0] === userId) {
-        return state.calendars.list[id];
-      }
-      return {} as Calendars;
-    })
-  ).filter((calendar) => calendar.id);
+  const selectPersonnalCalendars = createSelector(
+    (state) => state.calendars,
+    (calendars) =>
+      Object.keys(calendars.list)
+        .map((id) => {
+          if (id.split("/")[0] === userId) {
+            return calendars.list[id];
+          }
+          return {} as Calendars;
+        })
+        .filter((calendar) => calendar.id)
+  );
+  const userPersonnalCalendars: Calendars[] = useAppSelector(
+    selectPersonnalCalendars
+  );
   const timezones = TIMEZONES.aliases;
 
   const [title, setTitle] = useState("");
@@ -57,6 +65,7 @@ function EventPopover({
   const [calendarid, setCalendarid] = useState(0);
   const [allday, setAllDay] = useState(false);
   const [repetition, setRepetition] = useState("");
+  const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
@@ -96,6 +105,11 @@ function EventPopover({
     if (end) {
       newEvent.end = new Date(end);
     }
+
+    if (attendees.length > 0) {
+      newEvent.attendee = newEvent.attendee.concat(attendees);
+    }
+
     dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
@@ -246,7 +260,7 @@ function EventPopover({
             <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
           </Select>
         </FormControl>
-
+        <AttendeeSelector setAttendees={setAttendees} />
         <FormControl fullWidth margin="dense" size="small">
           <InputLabel id="timezone-select-label">Time Zone</InputLabel>
           <Select
