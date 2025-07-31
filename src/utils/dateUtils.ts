@@ -27,3 +27,21 @@ export function getCalendarRange(date = new Date()) {
     end: endDate,
   };
 }
+
+export function getDeltaInMilliseconds(delta: {
+  years: number;
+  months: number;
+  days: number;
+  milliseconds: number;
+}) {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const AVG_MS_PER_MONTH = 30.44 * MS_PER_DAY; // approx
+  const AVG_MS_PER_YEAR = 365.25 * MS_PER_DAY; // approx
+
+  return (
+    (delta.years || 0) * AVG_MS_PER_YEAR +
+    (delta.months || 0) * AVG_MS_PER_MONTH +
+    (delta.days || 0) * MS_PER_DAY +
+    (delta.milliseconds || 0)
+  );
+}

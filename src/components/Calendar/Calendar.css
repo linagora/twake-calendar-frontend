@@ -27,16 +27,11 @@ main {
   position: relative;
 }
 
-.fc-timegrid-slot::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  border-top: 1px dotted #ccc;
-  pointer-events: none;
-  z-index: 1;
+.fc .fc-timegrid-slot {
+  height: 30px !important;
+  min-height: 30px !important;
 }
+
 .fc .fc-timegrid-slot-label {
   display: flex;
   align-items: flex-start;

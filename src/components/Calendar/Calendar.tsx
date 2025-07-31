@@ -12,11 +12,15 @@ import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import {
+  getCalendarDetailAsync,
+  putEventAsync,
+} from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
+  getDeltaInMilliseconds,
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
@@ -129,6 +133,11 @@ export default function CalendarApp() {
       new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() + 1)
     );
   };
+
+  if (process.env.NODE_ENV === "test") {
+    (window as any).__calendarRef = calendarRef;
+  }
+
   return (
     <main>
       <div className="sidebar">
@@ -233,6 +242,7 @@ export default function CalendarApp() {
           initialView="timeGridWeek"
           editable={true}
           selectable={true}
+          timeZone="local"
           height={"100%"}
           select={handleDateSelect}
           nowIndicator
@@ -240,10 +250,16 @@ export default function CalendarApp() {
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={filteredEvents}
+          events={filteredEvents.map((e) => {
+            if (e.calId.split("/")[0] === userId) {
+              return { ...e, editable: true };
+            }
+            return { ...e, editable: false };
+          })}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
-          slotDuration={"01:00:00"}
+          slotDuration={"00:30:00"}
+          slotLabelInterval={"01:00:00"}
           scrollTime={"08:00:00"}
           unselectAuto={false}
           allDayText=""
@@ -293,6 +309,57 @@ export default function CalendarApp() {
               setEventDisplayedId(info.event.extendedProps.uid);
               setEventDisplayedCalId(info.event.extendedProps.calId);
             }
+          }}
+          eventDrop={(arg) => {
+            const event =
+              calendars[arg.event._def.extendedProps.calId].events[
+                arg.event._def.extendedProps.uid
+              ];
+            const totalDeltaMs = getDeltaInMilliseconds(arg.delta);
+
+            const originalStart = new Date(event.start);
+            const computedNewStart = new Date(
+              originalStart.getTime() + totalDeltaMs
+            );
+            const originalEnd = new Date(event.end ?? "");
+            const computedNewEnd = new Date(
+              originalEnd.getTime() + totalDeltaMs
+            );
+            const newEvent = {
+              ...event,
+              start: computedNewStart,
+              end: computedNewEnd,
+            } as CalendarEvent;
+            console.log(newEvent);
+            console.log(arg);
+            dispatch(
+              putEventAsync({ cal: calendars[newEvent.calId], newEvent })
+            );
+          }}
+          eventResize={(arg) => {
+            const event =
+              calendars[arg.event._def.extendedProps.calId].events[
+                arg.event._def.extendedProps.uid
+              ];
+
+            const originalStart = new Date(event.start);
+            const computedNewStart = new Date(
+              originalStart.getTime() + getDeltaInMilliseconds(arg.startDelta)
+            );
+            const originalEnd = new Date(event.end ?? "");
+            const computedNewEnd = new Date(
+              originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
+            );
+            const newEvent = {
+              ...event,
+              start: computedNewStart,
+              end: computedNewEnd,
+            } as CalendarEvent;
+            console.log(newEvent);
+            console.log(arg);
+            dispatch(
+              putEventAsync({ cal: calendars[newEvent.calId], newEvent })
+            );
           }}
           headerToolbar={{
             left: "title",
