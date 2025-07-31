@@ -147,6 +147,8 @@ const CalendarSlice = createSlice({
               state.list[action.payload.calId].color;
             state.list[action.payload.calId].events[id].calId =
               action.payload.calId;
+            state.list[action.payload.calId].events[id].timezone =
+              Intl.DateTimeFormat().resolvedOptions().timeZone;
           });
         }
       )
@@ -171,6 +173,8 @@ const CalendarSlice = createSlice({
               state.list[action.payload.calId].color;
             state.list[action.payload.calId].events[id].calId =
               action.payload.calId;
+            state.list[action.payload.calId].events[id].timezone =
+              Intl.DateTimeFormat().resolvedOptions().timeZone;
           });
         }
       )
