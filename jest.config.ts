@@ -30,7 +30,7 @@ const config: Config = {
           "<rootDir>/fileTransformer.ts",
       },
       transformIgnorePatterns: [
-        "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky)/)",
+        "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui)/)",
       ],
 
       moduleNameMapper: { "^preact(/(.*)|$)": "preact$1" },

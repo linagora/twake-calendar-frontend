@@ -15,15 +15,16 @@
     "@mui/material": "^7.1.2",
     "@reduxjs/toolkit": "^2.8.2",
     "@types/node": "^16.18.126",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "cozy-ui": "^127.17.0",
     "i18next": "^23.7.9",
     "ical.js": "^2.2.0",
     "ky": "^1.8.1",
     "openid-client": "^6.5.3",
-    "react": "^19.1.0",
+    "react": "^18.3.1",
     "react-calendar": "^6.0.0",
-    "react-dom": "^19.1.0",
+    "react-dom": "^18.3.1",
     "react-i18next": "^13.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.23.1",
@@ -64,6 +65,7 @@
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
     "@rsbuild/core": "^1.4.3",
+    "@rsbuild/plugin-node-polyfill": "1.4.0",
     "@rsbuild/plugin-react": "^1.3.3",
     "@rsbuild/plugin-svgr": "^1.2.0",
     "@testing-library/dom": "^10.4.0",
@@ -80,5 +82,9 @@
     "jest-preview": "^0.3.1",
     "ts-jest": "^29.4.0",
     "typescript": "^4.9.5"
+  },
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
