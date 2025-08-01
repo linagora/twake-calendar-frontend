@@ -125,7 +125,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
       "organizer",
       { cn: event.organizer.cn },
       "cal-address",
-      event.organizer.cal_address,
+      `mailto:${event.organizer.cal_address}`,
     ]);
   }
   if (event.location) {
@@ -149,7 +149,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
         cutype: att.cutype,
       },
       "cal-address",
-      att.cal_address,
+      `mailto:${att.cal_address}`,
     ]);
   });
 
@@ -160,7 +160,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
 }
 function formatDateToICal(date: Date, allday: Boolean) {
-  // Format date like: 20250214T110000 (local time)
+  // Format date like: 2025-02-14T11:00:00 (local time)
 
   const pad = (n: number) => n.toString().padStart(2, "0");
   const year = date.getFullYear();
@@ -172,5 +172,5 @@ function formatDateToICal(date: Date, allday: Boolean) {
   if (allday) {
     return `${year}-${month}-${day}`;
   }
-  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }

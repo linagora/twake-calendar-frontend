@@ -24,7 +24,7 @@ export const userSlice = createSlice({
       if (!state.organiserData) {
         state.organiserData = {} as userOrganiser;
       }
-      state.organiserData.cn = action.payload.sub;
+      state.organiserData.cn = action.payload.name;
       state.organiserData.cal_address = `mailto:${action.payload.email}`;
     },
     setTokens: (state, action) => {
