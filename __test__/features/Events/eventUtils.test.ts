@@ -16,12 +16,12 @@ describe("parseCalendarEvent", () => {
       ["SUMMARY", {}, "text", "Team Meeting"],
       ["DESCRIPTION", {}, "text", "Discuss roadmap"],
       ["LOCATION", {}, "text", "Zoom"],
-      ["ORGANIZER", { cn: "Alice" }, "cal-address", "mailto:alice@example.com"],
+      ["ORGANIZER", { cn: "Alice" }, "cal-address", "alice@example.com"],
       [
         "ATTENDEE",
         { cn: "Bob", partstat: "ACCEPTED" },
         "cal-address",
-        "mailto:bob@example.com",
+        "bob@example.com",
       ],
       ["X-OPENPAAS-VIDEOCONFERENCE", {}, "text", "https://meet.link"],
       ["STATUS", {}, "text", "CONFIRMED"],
@@ -98,8 +98,8 @@ describe("parseCalendarEvent", () => {
     const rawData = [
       ["UID", {}, "text", "event-4"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
-      ["ATTENDEE", {}, "cal-address", "mailto:john@example.com"],
-      ["ORGANIZER", {}, "cal-address", "mailto:jane@example.com"],
+      ["ATTENDEE", {}, "cal-address", "john@example.com"],
+      ["ORGANIZER", {}, "cal-address", "jane@example.com"],
     ] as unknown as [string, Record<string, string>, string, any];
 
     const result = parseCalendarEvent(rawData, baseColor, calendarId);

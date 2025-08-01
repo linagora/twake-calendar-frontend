@@ -139,15 +139,18 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   }
 
   event.attendee.forEach((att) => {
+    const attendee: Record<string, string> = {
+      partstat: att.partstat,
+      rsvp: att.rsvp,
+      role: att.role,
+      cutype: att.cutype,
+    };
+    if (att.cn) {
+      attendee.cn = att.cn;
+    }
     vevent[1].push([
       "attendee",
-      {
-        cn: att.cn,
-        partstat: att.partstat,
-        rsvp: att.rsvp,
-        role: att.role,
-        cutype: att.cutype,
-      },
+      attendee,
       "cal-address",
       `mailto:${att.cal_address}`,
     ]);
