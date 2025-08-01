@@ -5,6 +5,7 @@ export interface Calendars {
   name: string;
   prodid?: string;
   color?: string;
+  ownerEmails?: string[];
   description?: string;
   calscale?: string;
   version?: string;

@@ -27,6 +27,18 @@ main {
   position: relative;
 }
 
+.declined-event {
+  opacity: 0.7;
+}
+
+.tentative-event {
+}
+
+.needs-action-event {
+  opacity: 0.7;
+  border: dashed 1px #ffffff;
+}
+
 .fc .fc-timegrid-slot {
   height: 30px !important;
   min-height: 30px !important;

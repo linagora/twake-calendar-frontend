@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
-import getOpenPaasUser from "../User/userAPI";
+import getOpenPaasUser, { getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
@@ -24,9 +24,16 @@ export const getCalendarsListAsync = createAsyncThunk<
           .replace("/calendars/", "")
           .replace(".json", "")
       : cal._links.self.href.replace("/calendars/", "").replace(".json", "");
-
+    const ownerData: any = await getUserDetails(id.split("/")[0]);
     const color = cal["apple:color"];
-    importedCalendars[id] = { id, name, description, color, events: {} };
+    importedCalendars[id] = {
+      id,
+      name,
+      ownerEmails: ownerData.emails,
+      description,
+      color,
+      events: {},
+    };
   }
 
   return importedCalendars;
