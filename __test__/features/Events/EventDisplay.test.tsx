@@ -33,7 +33,7 @@ describe("Event Display", () => {
       list: {
         "667037022b752d0026472254/cal1": {
           id: "667037022b752d0026472254/cal1",
-          name: "Calendar 1",
+          name: "Calendar",
           color: "#FF0000",
           events: {
             event1: {
@@ -94,7 +94,7 @@ describe("Event Display", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText(/\d{2}:\d{2} – \d{2}:\d{2}/)).toBeInTheDocument();
-    expect(screen.getByText("Calendar 1")).toBeInTheDocument();
+    expect(screen.getByText("Calendar")).toBeInTheDocument();
   });
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(
