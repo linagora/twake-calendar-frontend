@@ -147,7 +147,7 @@ describe("calendarEventToJCal", () => {
       repetition: "WEEKLY",
       organizer: {
         cn: "Alice",
-        cal_address: "mailto:alice@example.com",
+        cal_address: "alice@example.com",
       },
       attendee: [
         {
@@ -156,7 +156,7 @@ describe("calendarEventToJCal", () => {
           rsvp: "TRUE",
           role: "REQ-PARTICIPANT",
           cutype: "INDIVIDUAL",
-          cal_address: "mailto:bob@example.com",
+          cal_address: "bob@example.com",
         },
       ],
     };
@@ -173,8 +173,13 @@ describe("calendarEventToJCal", () => {
         ["uid", {}, "text", "event-123"],
         ["summary", {}, "text", "Team Meeting"],
         ["transp", {}, "text", "OPAQUE"],
-        ["dtstart", { tzid: "Europe/Paris" }, "date-time", "20250723T100000"],
-        ["dtend", { tzid: "Europe/Paris" }, "date-time", "20250723T110000"],
+        [
+          "dtstart",
+          { tzid: "Europe/Paris" },
+          "date-time",
+          "2025-07-23T10:00:00",
+        ],
+        ["dtend", { tzid: "Europe/Paris" }, "date-time", "2025-07-23T11:00:00"],
         ["class", {}, "text", "PUBLIC"],
         ["location", {}, "text", "Room 101"],
         ["description", {}, "text", "Discuss project roadmap."],
@@ -253,7 +258,7 @@ describe("calendarEventToJCal", () => {
       repetition: "WEEKLY",
       organizer: {
         cn: "Alice",
-        cal_address: "mailto:alice@example.com",
+        cal_address: "alice@example.com",
       },
       attendee: [
         {
@@ -262,7 +267,7 @@ describe("calendarEventToJCal", () => {
           rsvp: "TRUE",
           role: "REQ-PARTICIPANT",
           cutype: "INDIVIDUAL",
-          cal_address: "mailto:bob@example.com",
+          cal_address: "bob@example.com",
         },
       ],
     };
