@@ -25,3 +25,8 @@ export async function searchUsers(query: string) {
       avatarUrl: user.photos?.[0]?.url || "",
     }));
 }
+
+export async function getUserDetails(id: string) {
+  const user = await api.get(`api/users/${id}`).json();
+  return user;
+}

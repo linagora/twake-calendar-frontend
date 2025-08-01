@@ -27,12 +27,17 @@ import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
 import EventDisplayModal from "../../features/Events/EventDisplay";
 import { createSelector } from "@reduxjs/toolkit";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import ClearIcon from "@mui/icons-material/Clear";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { userAttendee } from "../../features/User/userDataTypes";
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
+  const user = useAppSelector((state) => state.user.userData);
   const dispatch = useAppDispatch();
 
   if (!tokens) {
@@ -371,6 +376,82 @@ export default function CalendarApp() {
             left: "title",
             center: "prev,today,next",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          eventContent={(arg) => {
+            const event = arg.event;
+            if (!calendars[arg.event._def.extendedProps.calId]) return;
+
+            const attendees = event._def.extendedProps.attendee || [];
+            let Icon = null;
+            let titleStyle: React.CSSProperties = {};
+            const ownerEmails = new Set(
+              calendars[arg.event._def.extendedProps.calId].ownerEmails?.map(
+                (email) => email.toLowerCase()
+              )
+            );
+            const showSpecialDisplay = attendees.filter((att: userAttendee) =>
+              ownerEmails.has(att.cal_address.toLowerCase())
+            );
+            if (!showSpecialDisplay[0]) return;
+            switch (showSpecialDisplay[0].partstat) {
+              case "DECLINED":
+                Icon = null;
+                titleStyle.textDecoration = "line-through";
+                break;
+              case "TENTATIVE":
+                Icon = HelpOutlineIcon;
+                break;
+              case "NEEDS-ACTION":
+                Icon = AccessTimeIcon;
+                break;
+              case "ACCEPTED":
+                Icon = null;
+                break;
+              default:
+                break;
+            }
+
+            return (
+              <div>
+                {Icon && <Icon fontSize="small" />}
+                <span style={titleStyle}>{event.title}</span>
+              </div>
+            );
+          }}
+          eventDidMount={(arg) => {
+            const attendees = arg.event._def.extendedProps.attendee || [];
+            if (!calendars[arg.event._def.extendedProps.calId]) return;
+            const ownerEmails = new Set(
+              calendars[arg.event._def.extendedProps.calId].ownerEmails?.map(
+                (email) => email.toLowerCase()
+              )
+            );
+            const showSpecialDisplay = attendees.filter((att: userAttendee) =>
+              ownerEmails.has(att.cal_address.toLowerCase())
+            );
+
+            if (!showSpecialDisplay[0]) return;
+
+            // Clear previously applied classes
+            arg.el.classList.remove(
+              "declined-event",
+              "tentative-event",
+              "needs-action-event"
+            );
+
+            switch (showSpecialDisplay[0].partstat) {
+              case "DECLINED":
+                arg.el.classList.add("declined-event");
+                break;
+              case "TENTATIVE":
+                arg.el.classList.add("tentative-event");
+                break;
+              case "NEEDS-ACTION":
+                arg.el.classList.add("needs-action-event");
+                break;
+              default:
+                break;
+            }
           }}
         />
         <EventPopover
