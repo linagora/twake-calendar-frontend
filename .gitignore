@@ -17,6 +17,7 @@
 .env.development.js
 .env.test.js
 .env.production.js
+appList.js
 
 npm-debug.log*
 yarn-debug.log*
