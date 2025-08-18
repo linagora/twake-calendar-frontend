@@ -73,10 +73,22 @@
   left: 887px;
 }
 
-.menu-tools {
-  width: 383.20001220703125;
-  height: 49;
-  top: 16px;
-  left: 1511px;
-  gap: 24px;
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px;
+  justify-items: center;
+  align-items: center;
+}
+
+.app-grid img {
+  width: 48px;
+  height: 48px;
+}
+
+.app-grid p {
+  margin-top: 6px;
+  font-size: 14px;
+  text-align: center;
 }
