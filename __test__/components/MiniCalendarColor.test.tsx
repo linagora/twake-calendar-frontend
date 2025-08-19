@@ -32,6 +32,7 @@ describe("MiniCalendar", () => {
             color: "#FF0000",
             events: {
               event1: {
+                calId: "667037022b752d0026472254/cal1",
                 id: "event1",
                 title: "Test Event",
                 start: day.toISOString(),
@@ -140,6 +141,7 @@ describe("Found Bugs", () => {
             color: "#FF0000",
             events: {
               event1: {
+                calId: "667037022b752d0026472254/cal1",
                 id: "event1",
                 title: "Test Event",
                 start: day.toISOString(),
