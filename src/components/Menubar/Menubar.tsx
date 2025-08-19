@@ -15,7 +15,7 @@ export type AppIconProps = {
 
 export function Menubar() {
   const user = useAppSelector((state) => state.user.userData);
-  const applist: AppIconProps[] = (window as any).appList;
+  const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const dispatch = useAppDispatch();
 
@@ -93,6 +93,7 @@ function AppIcon({ prop }: { prop: AppIconProps }) {
     <a
       key={prop.name}
       href={prop.link}
+      target="_blank"
       style={{ textDecoration: "none", color: "inherit" }}
     >
       <div>

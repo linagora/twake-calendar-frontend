@@ -75,7 +75,23 @@ And then visit [https://localhost:5000](https://localhost:5000).
 
 ## Configuring it
 
-More details to be supplied when available.
+### App grid
+
+An applist is configurable in the public folder to setup the grid of app accessible within Twake Calendar. 
+
+Each app has three fields:
+
+- name: the app’s name
+- icon: the link to the app’s icon
+- link: the app’s link or URL
+
+Example:
+
+```js
+var appList = [
+  { name: "My App", icon: "https://myapp.com/myapp.png", link: "https://myapp.com" },
+];
+```
 
 ## Roadmap
 
