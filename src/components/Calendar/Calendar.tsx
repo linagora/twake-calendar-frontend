@@ -15,6 +15,7 @@ import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
   putEventAsync,
+  updateEventLocal,
 } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
@@ -330,8 +331,9 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-            console.log(newEvent);
-            console.log(arg);
+            dispatch(
+              updateEventLocal({ calId: newEvent.calId, event: newEvent })
+            );
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
