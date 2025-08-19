@@ -114,6 +114,13 @@ const CalendarSlice = createSlice({
         action.payload.eventUid
       ];
     },
+    updateEventLocal: (
+      state,
+      action: PayloadAction<{ calId: string; event: CalendarEvent }>
+    ) => {
+      const { calId, event } = action.payload;
+      state.list[calId].events[event.uid] = event;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -147,6 +154,8 @@ const CalendarSlice = createSlice({
               state.list[action.payload.calId].color;
             state.list[action.payload.calId].events[id].calId =
               action.payload.calId;
+            state.list[action.payload.calId].events[id].timezone =
+              Intl.DateTimeFormat().resolvedOptions().timeZone;
           });
         }
       )
@@ -171,6 +180,8 @@ const CalendarSlice = createSlice({
               state.list[action.payload.calId].color;
             state.list[action.payload.calId].events[id].calId =
               action.payload.calId;
+            state.list[action.payload.calId].events[id].timezone =
+              Intl.DateTimeFormat().resolvedOptions().timeZone;
           });
         }
       )
@@ -193,5 +204,6 @@ const CalendarSlice = createSlice({
   },
 });
 
-export const { addEvent, removeEvent, createCalendar } = CalendarSlice.actions;
+export const { addEvent, removeEvent, createCalendar, updateEventLocal } =
+  CalendarSlice.actions;
 export default CalendarSlice.reducer;
