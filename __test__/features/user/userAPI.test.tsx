@@ -1,5 +1,5 @@
 import { clientConfig } from "../../../src/features/User/oidcAuth";
-import getOpenPaasUser from "../../../src/features/User/userAPI";
+import { getOpenPaasUser } from "../../../src/features/User/userAPI";
 import { api } from "../../../src/utils/apiUtils";
 
 jest.mock("../../../src/utils/apiUtils");
