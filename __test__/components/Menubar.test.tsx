@@ -38,6 +38,23 @@ describe("Calendar App Component Display Tests", () => {
     expect(screen.getByText("JD")).toBeInTheDocument();
   });
 
+  it("shows avatar with email initials when no user name", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          family_name: "Doe",
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    expect(screen.getByText("t")).toBeInTheDocument();
+  });
+
   it("shows AppsIcon when applist is not empty", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     renderWithProviders(<Menubar />, preloadedState);

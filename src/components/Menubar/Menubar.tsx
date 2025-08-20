@@ -46,11 +46,16 @@ export function Menubar() {
             </IconButton>
           )}
           <Avatar
-            sx={{ bgcolor: stringToColor(user.family_name) }}
+            sx={{
+              bgcolor: stringToColor(
+                user.family_name ? user.family_name : user.email
+              ),
+            }}
             sizes="large"
           >
-            {user.name[0]}
-            {user.family_name[0]}
+            {user.name && user.family_name
+              ? `${user.name[0]}${user.family_name[0]}`
+              : user.email[0]}
           </Avatar>
         </div>
       </header>
