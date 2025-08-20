@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { push } from "redux-first-history";
-import { getOpenPaasUserIdAsync, setTokens, setUserData } from "./userSlice";
+import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
 import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 
@@ -22,7 +22,7 @@ export function CallbackResume() {
         const data = await Callback(saved?.code_verifier, saved?.state);
         dispatch(setUserData(data?.userinfo));
         dispatch(setTokens(data?.tokenSet));
-        dispatch(getOpenPaasUserIdAsync());
+        dispatch(getOpenPaasUserDataAsync());
         dispatch(getCalendarsListAsync());
 
         sessionStorage.removeItem("redirectState");

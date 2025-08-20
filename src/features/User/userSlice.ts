@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
-import getOpenPaasUserId from "./userAPI";
+import getOpenPaasUser from "./userAPI";
 
-export const getOpenPaasUserIdAsync = createAsyncThunk<string>(
-  "user/getOpenPaasUserId",
+export const getOpenPaasUserDataAsync = createAsyncThunk<any>(
+  "user/getOpenPaasUserData",
   async () => {
-    const user = (await getOpenPaasUserId()) as Record<string, string>;
+    const user = (await getOpenPaasUser()) as Record<string, string>;
 
-    return user.id;
+    return user;
   }
 );
 
@@ -32,8 +32,18 @@ export const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getOpenPaasUserIdAsync.fulfilled, (state, action) => {
-      state.userData.openpaasId = action.payload;
+    builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
+      state.userData.name = action.payload.firstname;
+      state.userData.family_name = action.payload.lastname;
+      state.userData.openpaasId = action.payload.id;
+      if (!state.organiserData) {
+        state.organiserData = {} as userOrganiser;
+      }
+      state.organiserData.cn = `${action.payload.firstname} ${action.payload.lastname}`;
+      if (action.payload.preferredEmail) {
+        state.organiserData.cal_address = `mailto:${action.payload.preferredEmail}`;
+        state.userData.email = action.payload.preferredEmail;
+      }
     });
   },
 });

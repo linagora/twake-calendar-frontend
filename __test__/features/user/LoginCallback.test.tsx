@@ -8,7 +8,7 @@ import { push } from "redux-first-history";
 import {
   setTokens,
   setUserData,
-  getOpenPaasUserIdAsync,
+  getOpenPaasUserDataAsync,
 } from "../../../src/features/User/userSlice";
 import { getCalendarsListAsync } from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
@@ -26,7 +26,7 @@ jest.mock("../../../src/features/User/oidcAuth", () => ({
 jest.mock("../../../src/features/User/userSlice", () => ({
   setUserData: jest.fn((data) => ({ type: "SET_USER", payload: data })),
   setTokens: jest.fn((tokens) => ({ type: "SET_TOKENS", payload: tokens })),
-  getOpenPaasUserIdAsync: jest.fn(() => ({ type: "GET_USER_ID" })),
+  getOpenPaasUserDataAsync: jest.fn(() => ({ type: "GET_USER_ID" })),
 }));
 
 jest.mock("../../../src/features/Calendars/CalendarSlice", () => ({
@@ -63,7 +63,7 @@ describe("CallbackResume", () => {
       expect(oidcAuth.Callback).toHaveBeenCalledWith("verifier123", "state456");
       expect(dispatch).toHaveBeenCalledWith(setUserData(mockUserInfo));
       expect(dispatch).toHaveBeenCalledWith(setTokens(mockTokenSet));
-      expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserIdAsync());
+      expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserDataAsync());
       expect(dispatch).toHaveBeenCalledWith(getCalendarsListAsync());
       expect(dispatch).toHaveBeenCalledWith(push("/"));
       expect(sessionStorage.getItem("redirectState")).toBe(null);
