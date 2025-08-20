@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
-import getOpenPaasUser, { getUserDetails } from "../User/userAPI";
+import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
