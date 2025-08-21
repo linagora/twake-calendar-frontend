@@ -25,7 +25,7 @@ export const userSlice = createSlice({
         state.organiserData = {} as userOrganiser;
       }
       state.organiserData.cn = action.payload.name;
-      state.organiserData.cal_address = `mailto:${action.payload.email}`;
+      state.organiserData.cal_address = action.payload.email;
     },
     setTokens: (state, action) => {
       state.tokens = action.payload;
@@ -39,9 +39,11 @@ export const userSlice = createSlice({
       if (!state.organiserData) {
         state.organiserData = {} as userOrganiser;
       }
-      state.organiserData.cn = `${action.payload.firstname} ${action.payload.lastname}`;
+      if (action.payload.firstname && action.payload.lastname) {
+        state.organiserData.cn = `${action.payload.firstname} ${action.payload.lastname}`;
+      }
       if (action.payload.preferredEmail) {
-        state.organiserData.cal_address = `mailto:${action.payload.preferredEmail}`;
+        state.organiserData.cal_address = action.payload.preferredEmail;
         state.userData.email = action.payload.preferredEmail;
       }
     });

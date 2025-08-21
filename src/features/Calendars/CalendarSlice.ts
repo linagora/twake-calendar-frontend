@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
-import { getOpenPaasUserId } from "../User/userAPI";
+import getOpenPaasUser from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
@@ -12,7 +12,7 @@ export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
 >("calendars/getCalendars", async () => {
   const importedCalendars: Record<string, Calendars> = {};
-  const user = (await getOpenPaasUserId()) as Record<string, string>;
+  const user = (await getOpenPaasUser()) as Record<string, string>;
   const calendars = (await getCalendars(user.id)) as Record<string, any>;
   const rawCalendars = calendars._embedded["dav:calendar"];
 
