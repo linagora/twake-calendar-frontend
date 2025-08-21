@@ -7,7 +7,7 @@ export default async function getOpenPaasUser() {
 
 export async function searchUsers(query: string) {
   const response: any[] = await api
-    .post(`api/people/search/`, {
+    .post(`api/people/search`, {
       body: JSON.stringify({
         limit: 10,
         objectTypes: ["user", "group", "contact", "ldap"],
