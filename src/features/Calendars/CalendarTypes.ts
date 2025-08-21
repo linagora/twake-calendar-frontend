@@ -3,6 +3,7 @@ import { CalendarEvent } from "../Events/EventsTypes";
 export interface Calendars {
   id: string;
   name: string;
+  delegated?: boolean;
   prodid?: string;
   color?: string;
   ownerEmails?: string[];

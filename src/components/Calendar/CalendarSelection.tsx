@@ -7,11 +7,18 @@ export default function CalendarSelection({
   selectedCalendars: string[];
   setSelectedCalendars: Function;
 }) {
-  const tokens = useAppSelector((state) => state.user.tokens);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars.list);
-
+  const personnalCalendars = Object.keys(calendars).filter(
+    (id) => id.split("/")[0] === userId
+  );
+  const delegatedCalendars = Object.keys(calendars).filter(
+    (id) => id.split("/")[0] !== userId && calendars[id].delegated
+  );
+  const sharedCalendars = Object.keys(calendars).filter(
+    (id) => id.split("/")[0] !== userId && !calendars[id].delegated
+  );
   const handleCalendarToggle = (name: string) => {
     setSelectedCalendars((prev: string[]) =>
       prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
@@ -21,27 +28,8 @@ export default function CalendarSelection({
   return (
     <div>
       <h3>personnalCalendars</h3>
-      {Object.keys(calendars)
-        .filter((id) => id.split("/")[0] === userId)
-        .map((id) => {
-          return (
-            <div key={id}>
-              <label>
-                <input
-                  type="checkbox"
-                  style={{ backgroundColor: calendars[id].color }}
-                  checked={selectedCalendars.includes(id)}
-                  onChange={() => handleCalendarToggle(id)}
-                />
-                {calendars[id].name}
-              </label>
-            </div>
-          );
-        })}
-      <h3>sharedCalendars</h3>
-      {Object.keys(calendars)
-        .filter((id) => id.split("/")[0] !== userId)
-        .map((id) => (
+      {personnalCalendars.map((id) => {
+        return (
           <div key={id}>
             <label>
               <input
@@ -53,7 +41,44 @@ export default function CalendarSelection({
               {calendars[id].name}
             </label>
           </div>
-        ))}
+        );
+      })}
+      {delegatedCalendars.length > 0 && (
+        <>
+          <h3>delegatedCalendars</h3>
+          {delegatedCalendars.map((id) => (
+            <div key={id}>
+              <label>
+                <input
+                  type="checkbox"
+                  style={{ backgroundColor: calendars[id].color }}
+                  checked={selectedCalendars.includes(id)}
+                  onChange={() => handleCalendarToggle(id)}
+                />
+                {calendars[id].name}
+              </label>
+            </div>
+          ))}
+        </>
+      )}
+      {sharedCalendars.length > 0 && (
+        <>
+          <h3>sharedCalendars</h3>
+          {sharedCalendars.map((id) => (
+            <div key={id}>
+              <label>
+                <input
+                  type="checkbox"
+                  style={{ backgroundColor: calendars[id].color }}
+                  checked={selectedCalendars.includes(id)}
+                  onChange={() => handleCalendarToggle(id)}
+                />
+                {calendars[id].name}
+              </label>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

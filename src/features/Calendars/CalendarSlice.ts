@@ -6,7 +6,6 @@ import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
-import { responsiveFontSizes } from "@mui/material";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -19,11 +18,17 @@ export const getCalendarsListAsync = createAsyncThunk<
   for (const cal of rawCalendars) {
     const name = cal["dav:name"];
     const description = cal["dav:description"];
-    const id = cal["calendarserver:source"]
+    let delegated = false;
+    let source = cal["calendarserver:source"]
       ? cal["calendarserver:source"]._links.self.href
-          .replace("/calendars/", "")
-          .replace(".json", "")
-      : cal._links.self.href.replace("/calendars/", "").replace(".json", "");
+      : cal._links.self.href;
+    if (cal["calendarserver:delegatedsource"]) {
+      source = cal["calendarserver:delegatedsource"];
+      delegated = true;
+    }
+    console.log(source);
+    const id = source.replace("/calendars/", "").replace(".json", "");
+
     const ownerData: any = await getUserDetails(id.split("/")[0]);
     const color = cal["apple:color"];
     importedCalendars[id] = {
@@ -31,6 +36,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       name,
       ownerEmails: ownerData.emails,
       description,
+      delegated,
       color,
       events: {},
     };
