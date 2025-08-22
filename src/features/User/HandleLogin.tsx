@@ -7,12 +7,12 @@ import { push } from "redux-first-history";
 import { redirectTo } from "../../utils/apiUtils";
 
 export function HandleLogin() {
-  const userData = useAppSelector((state) => state.user.userData);
+  const userData = useAppSelector((state) => state.user);
   const calendars = useAppSelector((state) => state.calendars);
   const dispatch = useAppDispatch();
   useEffect(() => {
     const initiateLogin = async () => {
-      if (!userData) {
+      if (!userData.userData) {
         const loginurl = await Auth();
 
         sessionStorage.setItem(
@@ -30,10 +30,10 @@ export function HandleLogin() {
     initiateLogin();
   }, [userData]);
 
-  if (!userData) {
-    return <Error />;
+  if (!calendars.pending && !userData.loading) {
+    dispatch(push("/error"));
   }
-  if (!calendars.pending) {
+  if (!calendars.pending && !userData.loading) {
     dispatch(push("/calendar"));
   }
   return <Loading />;

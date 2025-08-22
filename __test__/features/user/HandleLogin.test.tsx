@@ -1,18 +1,21 @@
 import { screen, waitFor } from "@testing-library/react";
-import thunk from "redux-thunk";
+import thunk, { ThunkDispatch } from "redux-thunk";
 import HandleLogin from "../../../src/features/User/HandleLogin";
 import * as oidcAuth from "../../../src/features/User/oidcAuth";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import { clientConfig } from "../../../src/features/User/oidcAuth";
 import * as apiUtils from "../../../src/utils/apiUtils";
-clientConfig.url = "https://example.com";
+import * as appHooks from "../../../src/app/hooks";
+import { push } from "redux-first-history";
 
+clientConfig.url = "https://example.com";
 
 describe("HandleLogin", () => {
   beforeEach(() => {
-    jest.spyOn(apiUtils, "redirectTo").mockImplementation(() => {});
-
     jest.clearAllMocks();
+    jest.spyOn(apiUtils, "redirectTo").mockImplementation(() => {});
+    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     sessionStorage.clear();
   });
 
@@ -37,8 +40,6 @@ describe("HandleLogin", () => {
       );
       expect(apiUtils.redirectTo).toHaveBeenCalledWith(loginUrlMock.redirectTo);
     });
-
-    expect(screen.getByText(/error/i)).toBeInTheDocument();
   });
 
   test("shows Loading when userData exists and calendars pending is true", () => {
@@ -72,9 +73,9 @@ describe("HandleLogin", () => {
 
     expect(screen.getByAltText("loading")).toBeInTheDocument();
   });
-  test("shows Error when userData doesnt exists and calendars pending is false", () => {
-    renderWithProviders(<HandleLogin />);
-
-    expect(screen.getByText("Error")).toBeInTheDocument();
+  test("goes to error page when userData doesnt exists after loading and calendars pending is false", () => {
+    const dispatch = appHooks.useAppDispatch();
+    renderWithProviders(<HandleLogin />, { user: { loading: false } });
+    expect(dispatch).toHaveBeenCalledWith(push("/error"));
   });
 });
