@@ -8,6 +8,7 @@ import "./App.css";
 import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarApp from "./components/Calendar/Calendar";
+import { Error } from "./components/Error/Error";
 function App() {
   return (
     <Suspense fallback={<Loading />}>
@@ -24,6 +25,7 @@ function App() {
             }
           />
           <Route path="/callback" element={<CallbackResume />} />
+          <Route path="/error" element={<Error />} />
         </Routes>
       </Router>
     </Suspense>

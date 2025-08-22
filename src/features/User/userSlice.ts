@@ -17,6 +17,7 @@ export const userSlice = createSlice({
     userData: null as unknown as userData,
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
+    loading: true,
   },
   reducers: {
     setUserData: (state, action) => {
@@ -24,29 +25,38 @@ export const userSlice = createSlice({
       if (!state.organiserData) {
         state.organiserData = {} as userOrganiser;
       }
-      state.organiserData.cn = action.payload.name;
-      state.organiserData.cal_address = action.payload.email;
+      state.organiserData.cn = action.payload.sub;
+      state.organiserData.cal_address = `mailto:${action.payload.email}`;
+      state.loading = false;
     },
     setTokens: (state, action) => {
       state.tokens = action.payload;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
-      state.userData.name = action.payload.firstname;
-      state.userData.family_name = action.payload.lastname;
-      state.userData.openpaasId = action.payload.id;
-      if (!state.organiserData) {
-        state.organiserData = {} as userOrganiser;
-      }
-      if (action.payload.firstname && action.payload.lastname) {
-        state.organiserData.cn = `${action.payload.firstname} ${action.payload.lastname}`;
-      }
-      if (action.payload.preferredEmail) {
-        state.organiserData.cal_address = action.payload.preferredEmail;
-        state.userData.email = action.payload.preferredEmail;
-      }
-    });
+    builder
+      .addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData.name = action.payload.firstname;
+        state.userData.family_name = action.payload.lastname;
+        state.userData.openpaasId = action.payload.id;
+        if (!state.organiserData) {
+          state.organiserData = {} as userOrganiser;
+        }
+        if (action.payload.firstname && action.payload.lastname) {
+          state.organiserData.cn = `${action.payload.firstname} ${action.payload.lastname}`;
+        }
+        if (action.payload.preferredEmail) {
+          state.organiserData.cal_address = action.payload.preferredEmail;
+          state.userData.email = action.payload.preferredEmail;
+        }
+      })
+      .addCase(getOpenPaasUserDataAsync.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getOpenPaasUserDataAsync.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 
