@@ -127,9 +127,9 @@ describe("CalendarSelection", () => {
       },
     };
     renderWithProviders(<CalendarApp />, preloadedState);
-    expect(screen.getByText("personnalCalendars")).toBeInTheDocument();
-    expect(screen.getByText("delegatedCalendars")).toBeInTheDocument();
-    expect(screen.getByText("sharedCalendars")).toBeInTheDocument();
+    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Shared Calendars")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
@@ -184,9 +184,9 @@ describe("CalendarSelection", () => {
       },
     };
     renderWithProviders(<CalendarApp />, preloadedState);
-    expect(screen.getByText("personnalCalendars")).toBeInTheDocument();
-    expect(screen.queryByText("delegatedCalendars")).not.toBeInTheDocument();
-    expect(screen.queryByText("sharedCalendars")).not.toBeInTheDocument();
+    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.queryByText("Delegated Calendars")).not.toBeInTheDocument();
+    expect(screen.queryByText("Shared Calendars")).not.toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
   });
