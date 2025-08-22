@@ -8,7 +8,6 @@ export default function CalendarSelection({
   setSelectedCalendars: Function;
 }) {
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
-  const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars.list);
   const personnalCalendars = Object.keys(calendars).filter(
     (id) => id.split("/")[0] === userId
@@ -27,7 +26,9 @@ export default function CalendarSelection({
 
   return (
     <div>
-      <h3>personnalCalendars</h3>
+      <p className="calendarListHeader">
+        <h3>Personnal Calendars</h3>
+      </p>
       {personnalCalendars.map((id) => {
         return (
           <div key={id}>
@@ -45,7 +46,9 @@ export default function CalendarSelection({
       })}
       {delegatedCalendars.length > 0 && (
         <>
-          <h3>delegatedCalendars</h3>
+          <p className="calendarListHeader">
+            <h3>Delegated Calendars</h3>
+          </p>
           {delegatedCalendars.map((id) => (
             <div key={id}>
               <label>
@@ -63,7 +66,9 @@ export default function CalendarSelection({
       )}
       {sharedCalendars.length > 0 && (
         <>
-          <h3>sharedCalendars</h3>
+          <p className="calendarListHeader">
+            <h3>Shared Calendars</h3>
+          </p>
           {sharedCalendars.map((id) => (
             <div key={id}>
               <label>

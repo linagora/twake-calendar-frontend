@@ -9,6 +9,9 @@ main {
   height: 90vh;
 }
 
+.calendarListHeader {
+  padding-top: 10px;
+}
 .sidebar {
   border-right: 2px gray;
   width: 20vw;
