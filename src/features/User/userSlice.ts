@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
-import getOpenPaasUser from "./userAPI";
+import { getOpenPaasUser } from "./userAPI";
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<any>(
   "user/getOpenPaasUserData",

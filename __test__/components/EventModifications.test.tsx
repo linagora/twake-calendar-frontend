@@ -18,7 +18,6 @@ describe("CalendarApp integration", () => {
     jest.clearAllMocks();
     const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
-    jest.useFakeTimers(); // optional
   });
 
   const renderCalendar = () => {
@@ -36,7 +35,9 @@ describe("CalendarApp integration", () => {
         list: {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
+            id: "667037022b752d0026472254/cal1",
             color: "#FF0000",
+            ownerEmails: ["alice@example.com"],
             events: {
               event1: {
                 id: "event1",
@@ -45,6 +46,21 @@ describe("CalendarApp integration", () => {
                 title: "Test Event",
                 start: start.toISOString(),
                 end: end.toISOString(),
+                partstat: "ACCEPTED",
+                organizer: {
+                  cn: "Alice",
+                  cal_address: "alice@example.com",
+                },
+                attendee: [
+                  {
+                    cn: "Alice",
+                    partstat: "ACCEPTED",
+                    rsvp: "TRUE",
+                    role: "REQ-PARTICIPANT",
+                    cutype: "INDIVIDUAL",
+                    cal_address: "alice@example.com",
+                  },
+                ],
               },
             },
           },

@@ -169,4 +169,286 @@ describe("Event Display", () => {
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
+  it("renders RSVP buttons when user is an attendee", () => {
+    const rsvpStateIsOrga = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: [
+                  {
+                    cal_address: "test@test.com",
+                    cn: "Test User",
+                    partstat: "NEEDS-ACTION",
+                  },
+                  {
+                    cal_address: "organizer@test.com",
+                    cn: "Test Organizer",
+                    partstat: "NEEDS-ACTION",
+                  },
+                ],
+                organizer: {
+                  cal_address: "organizer@test.com",
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      rsvpStateIsOrga
+    );
+
+    expect(screen.getByText("Will you attend?")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Maybe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
+  });
+  it("doesnt renders RSVP buttons when user isnt an attendee", () => {
+    const rsvpStateIsOrga = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: [
+                  {
+                    cal_address: "organizer@test.com",
+                    cn: "Test Organizer",
+                    partstat: "NEEDS-ACTION",
+                  },
+                ],
+                organizer: {
+                  cal_address: "organizer@test.com",
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      rsvpStateIsOrga
+    );
+
+    expect(screen.queryByText("Will you attend?")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Accept" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Maybe" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Decline" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("handles RSVP Accept click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    const rsvpState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: [
+                  {
+                    cal_address: "test@test.com",
+                    cn: "Test User",
+                    partstat: "NEEDS-ACTION",
+                  },
+                ],
+                organizer: {
+                  cal_address: "organizer@test.com",
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      rsvpState
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Accept" }));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    });
+
+    const updatedEvent = spy.mock.calls[0][0].newEvent;
+    expect(updatedEvent.attendee[0].partstat).toBe("ACCEPTED");
+  });
+
+  it("handles RSVP Maybe click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    const rsvpState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: [
+                  {
+                    cal_address: "test@test.com",
+                    cn: "Test User",
+                    partstat: "NEEDS-ACTION",
+                  },
+                ],
+                organizer: {
+                  cal_address: "organizer@test.com",
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      rsvpState
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Maybe" }));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    });
+
+    const updatedEvent = spy.mock.calls[0][0].newEvent;
+    expect(updatedEvent.attendee[0].partstat).toBe("TENTATIVE");
+  });
+
+  it("handles RSVP Decline click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    const rsvpState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: [
+                  {
+                    cal_address: "test@test.com",
+                    cn: "Test User",
+                    partstat: "NEEDS-ACTION",
+                  },
+                ],
+                organizer: {
+                  cal_address: "organizer@test.com",
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      rsvpState
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Decline" }));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    });
+
+    const updatedEvent = spy.mock.calls[0][0].newEvent;
+    expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
+  });
 });

@@ -14,7 +14,7 @@ export interface userOrganiser {
 }
 
 export interface userAttendee {
-  cn: string;
+  cn?: string;
   cal_address: string;
   partstat: string;
   rsvp: string;
