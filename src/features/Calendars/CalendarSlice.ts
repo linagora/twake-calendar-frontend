@@ -26,7 +26,6 @@ export const getCalendarsListAsync = createAsyncThunk<
       source = cal["calendarserver:delegatedsource"];
       delegated = true;
     }
-    console.log(source);
     const id = source.replace("/calendars/", "").replace(".json", "");
 
     const ownerData: any = await getUserDetails(id.split("/")[0]);
@@ -34,6 +33,9 @@ export const getCalendarsListAsync = createAsyncThunk<
     importedCalendars[id] = {
       id,
       name,
+      owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+        ownerData.lastname
+      }`,
       ownerEmails: ownerData.emails,
       description,
       delegated,
