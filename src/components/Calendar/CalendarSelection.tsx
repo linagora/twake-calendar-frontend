@@ -26,9 +26,9 @@ export default function CalendarSelection({
 
   return (
     <div>
-      <p className="calendarListHeader">
+      <span className="calendarListHeader">
         <h3>Personnal Calendars</h3>
-      </p>
+      </span>
       {personnalCalendars.map((id) => {
         return (
           <div key={id}>
@@ -46,9 +46,9 @@ export default function CalendarSelection({
       })}
       {delegatedCalendars.length > 0 && (
         <>
-          <p className="calendarListHeader">
+          <span className="calendarListHeader">
             <h3>Delegated Calendars</h3>
-          </p>
+          </span>
           {delegatedCalendars.map((id) => (
             <div key={id}>
               <label>
@@ -66,9 +66,9 @@ export default function CalendarSelection({
       )}
       {sharedCalendars.length > 0 && (
         <>
-          <p className="calendarListHeader">
+          <span className="calendarListHeader">
             <h3>Shared Calendars</h3>
-          </p>
+          </span>
           {sharedCalendars.map((id) => (
             <div key={id}>
               <label>

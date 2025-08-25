@@ -1,6 +1,7 @@
 import { userAttendee, userOrganiser } from "../User/userDataTypes";
 
 export interface CalendarEvent {
+  URL: string;
   calId: string;
   uid: string;
   transp?: string;
