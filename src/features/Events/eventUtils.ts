@@ -8,7 +8,8 @@ type RawEntry = [string, Record<string, string>, string, any];
 export function parseCalendarEvent(
   data: RawEntry[],
   color: string,
-  calendarid: string
+  calendarid: string,
+  eventURL: string
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
@@ -75,6 +76,7 @@ export function parseCalendarEvent(
     event.uid = `${event.uid}/${recurrenceId}`;
   }
 
+  event.URL = eventURL;
   if (!event.uid || !event.start) {
     console.error(
       `missing crucial event param in calendar ${calendarid} `,
@@ -98,7 +100,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
         "dtstart",
         { tzid },
         event.allday ? "date" : "date-time",
-        formatDateToICal(event.start, event.allday ?? false),
+        formatDateToICal(new Date(event.start), event.allday ?? false),
       ],
       ["class", {}, "text", event.class ?? "PUBLIC"],
       [
@@ -117,7 +119,7 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(event.end, event.allday ?? false),
+      formatDateToICal(new Date(event.end), event.allday ?? false),
     ]);
   }
   if (event.organizer) {
@@ -139,15 +141,18 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   }
 
   event.attendee.forEach((att) => {
+    const attendee: Record<string, string> = {
+      partstat: att.partstat,
+      rsvp: att.rsvp,
+      role: att.role,
+      cutype: att.cutype,
+    };
+    if (att.cn) {
+      attendee.cn = att.cn;
+    }
     vevent[1].push([
       "attendee",
-      {
-        cn: att.cn,
-        partstat: att.partstat,
-        rsvp: att.rsvp,
-        role: att.role,
-        cutype: att.cutype,
-      },
+      attendee,
       "cal-address",
       `mailto:${att.cal_address}`,
     ]);

@@ -1,6 +1,6 @@
 import { api } from "../../utils/apiUtils";
 
-export default async function getOpenPaasUser() {
+export async function getOpenPaasUser() {
   const user = await api.get(`api/user`).json();
   return user;
 }
@@ -24,4 +24,9 @@ export async function searchUsers(query: string) {
         user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value,
       avatarUrl: user.photos?.[0]?.url || "",
     }));
+}
+
+export async function getUserDetails(id: string) {
+  const user = await api.get(`api/users/${id}`).json();
+  return user;
 }

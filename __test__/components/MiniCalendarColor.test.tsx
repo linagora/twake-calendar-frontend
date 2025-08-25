@@ -30,6 +30,7 @@ describe("MiniCalendar", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             color: "#FF0000",
+            ownerEmails: ["test@test.com"],
             events: {
               event1: {
                 calId: "667037022b752d0026472254/cal1",
@@ -139,6 +140,7 @@ describe("Found Bugs", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             color: "#FF0000",
+            ownerEmails: ["test.test@test.com"],
             events: {
               event1: {
                 calId: "667037022b752d0026472254/cal1",
