@@ -8,7 +8,8 @@ type RawEntry = [string, Record<string, string>, string, any];
 export function parseCalendarEvent(
   data: RawEntry[],
   color: string,
-  calendarid: string
+  calendarid: string,
+  eventURL: string
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
@@ -75,6 +76,7 @@ export function parseCalendarEvent(
     event.uid = `${event.uid}/${recurrenceId}`;
   }
 
+  event.URL = eventURL;
   if (!event.uid || !event.start) {
     console.error(
       `missing crucial event param in calendar ${calendarid} `,

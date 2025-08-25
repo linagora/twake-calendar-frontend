@@ -54,8 +54,9 @@ export const getCalendarDetailAsync = createAsyncThunk<
   const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][]; // array of ['vevent', RawEntry[], []]
+      const eventURL = eventdata._links.self.href;
       return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(vevent[1], color, calId);
+        return parseCalendarEvent(vevent[1], color, calId, eventURL);
       });
     }
   );
@@ -67,7 +68,7 @@ export const putEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
   { cal: Calendars; newEvent: CalendarEvent } // Arg type
 >("calendars/putEvent", async ({ cal, newEvent }) => {
-  const response = await putEvent(cal, newEvent);
+  const response = await putEvent(newEvent);
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
     end: formatDateToYYYYMMDDTHHMMSS(
@@ -77,8 +78,9 @@ export const putEventAsync = createAsyncThunk<
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][];
+      const eventURL = eventdata._links.self.href;
       return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(vevent[1], cal.color ?? "", cal.id);
+        return parseCalendarEvent(vevent[1], cal.color ?? "", cal.id, eventURL);
       });
     }
   );
@@ -91,9 +93,9 @@ export const putEventAsync = createAsyncThunk<
 
 export const deleteEventAsync = createAsyncThunk<
   { calId: string; eventId: string }, // Return type
-  { calId: string; eventId: string } // Arg type
->("calendars/delEvent", async ({ calId, eventId }) => {
-  const response = await deleteEvent(calId, eventId);
+  { calId: string; eventId: string; eventURL: string } // Arg type
+>("calendars/delEvent", async ({ calId, eventId, eventURL }) => {
+  const response = await deleteEvent(eventURL);
   return { calId, eventId };
 });
 
@@ -118,6 +120,11 @@ const CalendarSlice = createSlice({
       }
       state.list[action.payload.calendarUid].events[action.payload.event.uid] =
         action.payload.event;
+      state.list[action.payload.calendarUid].events[
+        action.payload.event.uid
+      ].URL = `dav/calendars/${action.payload.calendarUid}/${
+        action.payload.event.uid.split("/")[0]
+      }.isc`;
     },
     removeEvent: (
       state,
