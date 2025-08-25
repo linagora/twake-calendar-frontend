@@ -5,7 +5,7 @@ import EventPopover from "../../../src/features/Events/EventModal";
 import { DateSelectArg } from "@fullcalendar/core";
 import preview from "jest-preview";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../src/utils/dateUtils";
-import EventDisplayModal from "../../../src/features/Events/EventDisplay";
+import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 
 describe("Event Display", () => {
   const mockOnClose = jest.fn();
@@ -39,8 +39,28 @@ describe("Event Display", () => {
             event1: {
               id: "event1",
               title: "Test Event",
+              calId: "667037022b752d0026472254/cal1",
               start: day.toISOString(),
               end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
+              attendee: [
+                {
+                  cn: "test",
+                  cal_address: "test@test.com",
+                  partstat: "NEEDS-ACTION",
+                  rsvp: "TRUE",
+                  role: "REQ-PARTICIPANT",
+                  cutype: "INDIVIDUAL",
+                },
+                {
+                  cn: "John",
+                  cal_address: "john@test.com",
+                  partstat: "NEEDS-ACTION",
+                  rsvp: "TRUE",
+                  role: "REQ-PARTICIPANT",
+                  cutype: "INDIVIDUAL",
+                },
+              ],
             },
           },
         },
@@ -51,9 +71,11 @@ describe("Event Display", () => {
           events: {
             event1: {
               id: "event1",
+              calId: "otherCal/cal",
               title: "Test Event Other cal",
               start: day.toISOString(),
               end: day.toISOString(),
+              organizer: { cn: "john", cal_address: "john@test.com" },
             },
           },
         },
@@ -73,8 +95,8 @@ describe("Event Display", () => {
         return RealDateToLocaleString.call(this, "en-UK", options);
       });
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -98,8 +120,8 @@ describe("Event Display", () => {
   });
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -114,8 +136,8 @@ describe("Event Display", () => {
   it("Shows delete button only when calendar is own", () => {
     // Renders the other cal event
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"otherCal/cal"}
@@ -126,8 +148,8 @@ describe("Event Display", () => {
     expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
     // Renders the personnal cal event
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -139,8 +161,8 @@ describe("Event Display", () => {
   });
   it("calls delete when Delete clicked", async () => {
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -206,8 +228,8 @@ describe("Event Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -253,8 +275,8 @@ describe("Event Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -313,8 +335,8 @@ describe("Event Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -372,8 +394,8 @@ describe("Event Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -431,8 +453,8 @@ describe("Event Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
-        anchorEl={document.body}
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
