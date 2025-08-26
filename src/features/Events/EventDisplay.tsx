@@ -40,6 +40,7 @@ import { Calendars } from "../Calendars/CalendarTypes";
 import { CalendarEvent } from "./EventsTypes";
 import { isValidUrl } from "../../utils/apiUtils";
 import { formatLocalDateTime } from "./EventModal";
+import RepeatEvent from "./EventRepeat";
 
 export default function EventDisplayModal({
   eventId,
@@ -405,23 +406,10 @@ export default function EventDisplayModal({
           {/* Extended options */}
           {showMore && (
             <>
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="repeat">Repetition</InputLabel>
-                <Select
-                  labelId="repeat"
-                  value={repetition}
-                  disabled={!isOwn}
-                  onChange={(e: SelectChangeEvent) =>
-                    setRepetition(e.target.value)
-                  }
-                >
-                  <MenuItem value={""}>No Repetition</MenuItem>
-                  <MenuItem value={"daily"}>Repeat daily</MenuItem>
-                  <MenuItem value={"weekly"}>Repeat weekly</MenuItem>
-                  <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
-                  <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
-                </Select>
-              </FormControl>
+              <RepeatEvent
+                eventClass={eventClass}
+                setEventClass={setEventClass}
+              />
 
               <FormControl fullWidth margin="dense" size="small">
                 <InputLabel id="alarm">Alarm</InputLabel>
@@ -451,6 +439,7 @@ export default function EventDisplayModal({
                 <InputLabel id="class">Class</InputLabel>
                 <Select
                   labelId="class"
+                  label="class"
                   value={eventClass}
                   disabled={!isOwn}
                   onChange={(e: SelectChangeEvent) =>
@@ -463,7 +452,7 @@ export default function EventDisplayModal({
                 </Select>
               </FormControl>
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="repeat">is Busy</InputLabel>
+                <InputLabel id="busy">is Busy</InputLabel>
                 <Select
                   labelId="busy"
                   value={eventClass}
