@@ -27,7 +27,11 @@ import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { userAttendee } from "../User/userDataTypes";
-import EventDisplayModal from "./EventDisplay";
+import EventDisplayModal, {
+  InfoRow,
+  renderAttendeeBadge,
+  stringAvatar,
+} from "./EventDisplay";
 
 export default function EventPreviewModal({
   eventId,
@@ -179,6 +183,7 @@ export default function EventPreviewModal({
               <InfoRow
                 icon={<VideocamIcon sx={{ fontSize: 18 }} />}
                 text="Video conference available"
+                data={event.x_openpass_videoconference}
               />
             )}
 
@@ -291,96 +296,6 @@ export default function EventPreviewModal({
   );
 }
 
-function InfoRow({
-  icon,
-  text,
-  error = false,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  error?: boolean;
-}) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-      {icon}
-      <Typography variant="body2" color={error ? "error" : "textPrimary"}>
-        {text}
-      </Typography>
-    </Box>
-  );
-}
-
-function renderAttendeeBadge(
-  a: userAttendee,
-  key: string,
-  isOrganizer?: boolean
-) {
-  const statusIcon =
-    a.partstat === "ACCEPTED" ? (
-      <CheckCircleIcon fontSize="inherit" color="success" />
-    ) : a.partstat === "DECLINED" ? (
-      <CancelIcon fontSize="inherit" color="error" />
-    ) : null;
-
-  return (
-    <Box
-      key={key}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1.5,
-        mb: 0.5,
-        p: 0.5,
-        borderRadius: 1,
-      }}
-    >
-      <Badge
-        overlap="circular"
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        badgeContent={
-          statusIcon && (
-            <Box
-              sx={{
-                fontSize: 14,
-                lineHeight: 0,
-                backgroundColor: "white",
-                borderRadius: "50%",
-                padding: "1px",
-              }}
-            >
-              {statusIcon}
-            </Box>
-          )
-        }
-      >
-        <Avatar {...stringAvatar(a.cn || a.cal_address)} />
-      </Badge>
-      <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <Typography
-          variant="body2"
-          noWrap
-          sx={{
-            maxWidth: "180px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {a.cn || a.cal_address}
-        </Typography>
-        {isOrganizer && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ fontStyle: "italic" }}
-          >
-            Organizer
-          </Typography>
-        )}
-      </Box>
-    </Box>
-  );
-}
-
 function formatDate(date: Date) {
   return new Date(date).toLocaleString(undefined, {
     weekday: "long",
@@ -389,26 +304,4 @@ function formatDate(date: Date) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-export function stringToColor(string: string) {
-  let hash = 0;
-  for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  let color = "#";
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-
-  return color;
-}
-
-function stringAvatar(name: string) {
-  return {
-    sx: { width: 24, height: 24, fontSize: 18, bgcolor: stringToColor(name) },
-    children: name[0],
-  };
 }

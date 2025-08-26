@@ -13,7 +13,6 @@ import {
   IconButton,
   Avatar,
   Badge,
-  PopoverPosition,
   Modal,
   TextField,
   CardHeader,
@@ -25,26 +24,23 @@ import {
   Checkbox,
   FormControlLabel,
   CardActions,
+  Link,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { userAttendee } from "../User/userDataTypes";
-import timezone from "ical.js/dist/types/timezone";
-import { title } from "process";
-import { start } from "repl";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { Calendars } from "../Calendars/CalendarTypes";
-import { putEvent } from "./EventApi";
+import { CalendarEvent } from "./EventsTypes";
+import { isValidUrl } from "../../utils/apiUtils";
+import { formatLocalDateTime } from "./EventModal";
 
-function EventDisplayModal({
+export default function EventDisplayModal({
   eventId,
   calId,
   open,
@@ -61,40 +57,58 @@ function EventDisplayModal({
     (state) => state.calendars.list[calId]?.events[eventId]
   );
   const user = useAppSelector((state) => state.user);
+
   const [showAllAttendees, setShowAllAttendees] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+
   const calendars = useAppSelector((state) =>
-    Object.keys(state.calendars.list).map((id) => state.calendars.list[id])
+    Object.values(state.calendars.list)
   );
-  const userPersonnalCalendars: Calendars[] = useAppSelector((state) =>
-    Object.keys(state.calendars.list).map((id) => {
-      if (id.split("/")[0] === user.userData.openpaasId) {
-        return state.calendars.list[id];
-      }
-      return {} as Calendars;
-    })
-  ).filter((calendar) => calendar.id);
-  const timezones = TIMEZONES.aliases;
-  const [title, setTitle] = useState(event.title);
-  const [description, setDescription] = useState(event.description);
-  const [location, setLocation] = useState(event.location);
-  const [start, setStart] = useState(new Date(event.start));
-  const [end, setEnd] = useState(new Date(event.end ?? ""));
+
+  const userPersonnalCalendars: Calendars[] = calendars.filter(
+    (c) => c.id?.split("/")[0] === user.userData.openpaasId
+  );
+
+  // Form state
+  const [title, setTitle] = useState(event?.title ?? "");
+  const [description, setDescription] = useState(event?.description ?? "");
+  const [location, setLocation] = useState(event?.location ?? "");
+  const [start, setStart] = useState(
+    formatLocalDateTime(new Date(event?.start ?? Date.now()))
+  );
+  const [end, setEnd] = useState(
+    formatLocalDateTime(new Date(event?.end ?? Date.now()))
+  );
+  const [allday, setAllDay] = useState(event?.allday);
+  const [repetition, setRepetition] = useState(event?.repetition ?? "");
+  const [alarm, setAlarm] = useState("");
+  const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
+  const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
+
   const [calendarid, setCalendarid] = useState(
-    event.calId.split("/")[0] === user.userData.openpaasId
+    event?.calId.split("/")[0] === user.userData.openpaasId
       ? userPersonnalCalendars.findIndex((cal) => cal.id === calId)
       : calendars.findIndex((cal) => cal.id === calId)
   );
-  const [allday, setAllDay] = useState(event.allday);
-  const [repetition, setRepetition] = useState(event.repetition ?? "");
-  const [alarm, setAlarm] = useState("");
-  const [eventClass, setEventClass] = useState(event.class);
-  const [selectedRange, setSelectedRange] = useState({
-    start: new Date(event.start),
-    end: new Date(event.end ?? ""),
-    allday: event.allday,
-  });
-  const [timezone, setTimezone] = useState(event.timezone);
-  const [showMore, setShowMore] = useState(false);
+
+  const [attendees, setAttendees] = useState(
+    (event?.attendee || []).filter(
+      (a) => a.cal_address !== event?.organizer?.cal_address
+    )
+  );
+
+  const currentUserAttendee = event?.attendee?.find(
+    (person) => person.cal_address === user.userData.email
+  );
+
+  const organizer = event?.attendee?.find(
+    (a) => a.cal_address === event?.organizer?.cal_address
+  );
+
+  const isOwn = organizer?.cal_address === user.userData.email;
+  const isOwnCal = userPersonnalCalendars.find((cal) => cal.id === calId);
+  const attendeeDisplayLimit = 3;
+
   useEffect(() => {
     if (!event || !calendar) {
       onClose({}, "backdropClick");
@@ -102,25 +116,6 @@ function EventDisplayModal({
   }, [event, calendar, onClose]);
 
   if (!event || !calendar) return null;
-
-  const attendeeDisplayLimit = 3;
-
-  const attendees =
-    event.attendee?.filter(
-      (a) => a.cal_address !== event.organizer?.cal_address
-    ) || [];
-
-  const visibleAttendees = showAllAttendees
-    ? attendees
-    : attendees.slice(0, attendeeDisplayLimit);
-
-  const currentUserAttendee = event.attendee?.find(
-    (person) => person.cal_address === user.userData.email
-  );
-
-  const organizer = event.attendee?.find(
-    (a) => a.cal_address === event.organizer?.cal_address
-  );
 
   function handleRSVP(rsvp: string) {
     const newEvent = {
@@ -134,7 +129,45 @@ function EventDisplayModal({
     onClose({}, "backdropClick");
   }
 
-  const isOwn = organizer?.cal_address === user.userData.email;
+  const handleSave = () => {
+    const newEventUID = crypto.randomUUID();
+
+    const newEvent: CalendarEvent = {
+      calId,
+      title,
+      URL: event.URL ?? `/calendars/${calId}/${newEventUID}.ics`,
+      start: new Date(start),
+      end: new Date(end),
+      allday,
+      uid: event.uid ?? newEventUID,
+      description,
+      location,
+      repetition,
+      organizer: event.organizer,
+      timezone,
+      attendee: [
+        {
+          cn: event.organizer?.cn,
+          cal_address: event.organizer?.cal_address ?? "",
+          partstat: "ACCEPTED",
+          rsvp: "FALSE",
+          role: "CHAIR",
+          cutype: "INDIVIDUAL",
+        },
+        ...attendees,
+      ],
+      transp: "OPAQUE",
+      color: userPersonnalCalendars[calendarid]?.color,
+    };
+
+    dispatch(
+      putEventAsync({
+        cal: userPersonnalCalendars[calendarid],
+        newEvent,
+      })
+    );
+    onClose({}, "backdropClick");
+  };
 
   const calList =
     event.calId.split("/")[0] === user.userData.openpaasId
@@ -169,31 +202,18 @@ function EventDisplayModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Card
-        sx={{
-          minWidth: 300,
-          width: "50vw",
-          p: 2,
-          position: "absolute",
-        }}
-      >
-        {/* Top-right buttons */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            display: "flex",
-            gap: 1,
-            overflowY: "auto",
-          }}
-        >
+      <Card sx={{ minWidth: 300, width: "50vw", p: 2, position: "absolute" }}>
+        {/* Close button */}
+        <Box sx={{ position: "absolute", top: 8, right: 8 }}>
           <IconButton size="small" onClick={() => onClose({}, "backdropClick")}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
+
         <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
-        <CardContent sx={{ maxHeight: "85vh", overflow: "auto", pt: 1.5 }}>
+
+        <CardContent sx={{ maxHeight: "85vh", overflow: "auto" }}>
+          {/* Title */}
           <TextField
             fullWidth
             disabled={!isOwn}
@@ -203,51 +223,52 @@ function EventDisplayModal({
             size="small"
             margin="dense"
           />
+
           {/* RSVP */}
-          {currentUserAttendee && (
-            <Card>
-              <Box>
-                <ButtonGroup size="small" fullWidth>
-                  <Button
-                    color={
-                      currentUserAttendee.partstat === "ACCEPTED"
-                        ? "success"
-                        : "primary"
-                    }
-                    onClick={() => handleRSVP("ACCEPTED")}
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    color={
-                      currentUserAttendee.partstat === "TENTATIVE"
-                        ? "warning"
-                        : "primary"
-                    }
-                    onClick={() => handleRSVP("TENTATIVE")}
-                  >
-                    Maybe
-                  </Button>
-                  <Button
-                    color={
-                      currentUserAttendee.partstat === "DECLINED"
-                        ? "error"
-                        : "primary"
-                    }
-                    onClick={() => handleRSVP("DECLINED")}
-                  >
-                    Decline
-                  </Button>
-                  <Button
-                    color="primary"
-                    onClick={() => console.log("proposenewtime")}
-                  >
-                    Propose new time
-                  </Button>
-                </ButtonGroup>
-              </Box>
+          {currentUserAttendee && isOwnCal && (
+            <Card sx={{ my: 1 }}>
+              <ButtonGroup size="small" fullWidth>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "ACCEPTED"
+                      ? "success"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("ACCEPTED")}
+                >
+                  Accept
+                </Button>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "TENTATIVE"
+                      ? "warning"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("TENTATIVE")}
+                >
+                  Maybe
+                </Button>
+                <Button
+                  color={
+                    currentUserAttendee.partstat === "DECLINED"
+                      ? "error"
+                      : "primary"
+                  }
+                  onClick={() => handleRSVP("DECLINED")}
+                >
+                  Decline
+                </Button>
+                <Button
+                  color="primary"
+                  onClick={() => console.log("proposenewtime")}
+                >
+                  Propose new time
+                </Button>
+              </ButtonGroup>
             </Card>
           )}
+
+          {/* Calendar selector */}
           <FormControl fullWidth margin="dense" size="small">
             <InputLabel id="calendar-select-label">Calendar</InputLabel>
             <Select
@@ -262,80 +283,48 @@ function EventDisplayModal({
               {calList}
             </Select>
           </FormControl>
+
+          {/* Dates */}
           <TextField
             fullWidth
             label="Start"
             disabled={!isOwn}
             type={allday ? "date" : "datetime-local"}
-            value={
-              allday
-                ? start.toISOString().split("T")[0]
-                : start.toISOString().replace("Z", "")
+            value={allday ? start.split("T")[0] : start.slice(0, 16)}
+            onChange={(e) =>
+              setStart(formatLocalDateTime(new Date(e.target.value)))
             }
-            onChange={(e) => {
-              const newStart = e.target.value;
-              // setStart(newStart);
-              // const newRange = {
-              //   ...selectedRange,
-              //   start: new Date(newStart),
-              //   startStr: newStart,
-              //   allDay: allday,
-              // };
-              // setSelectedRange(newRange);
-              // calendarRef.current?.select(newRange);
-            }}
             size="small"
             margin="dense"
             InputLabelProps={{ shrink: true }}
           />
+
           <TextField
             fullWidth
             disabled={!isOwn}
             label="End"
             type={allday ? "date" : "datetime-local"}
-            value={
-              allday
-                ? end?.toISOString().split("T")[0]
-                : end?.toISOString().replace("Z", "")
+            value={allday ? end.split("T")[0] : end.slice(0, 16)}
+            onChange={(e) =>
+              setEnd(formatLocalDateTime(new Date(e.target.value)))
             }
-            onChange={(e) => {
-              const newEnd = e.target.value;
-              // setEnd(newEnd);
-              // const newRange = {
-              //   ...selectedRange,
-              //   end: new Date(newEnd),
-              //   endStr: newEnd,
-              //   allDay: allday,
-              // };
-              // setSelectedRange(newRange);
-              // calendarRef.current?.select(newRange);
-            }}
             size="small"
             margin="dense"
             InputLabelProps={{ shrink: true }}
-          />{" "}
+          />
+
           <FormControlLabel
             control={
               <Checkbox
                 disabled={!isOwn}
-                checked={Boolean(allday)}
-                onChange={() => {
-                  setAllDay(!allday);
-                  // const newRange = {
-                  //   startStr: allday ? start.split("T")[0] : start,
-                  //   endStr: allday ? end.split("T")[0] : end,
-                  //   start: new Date(allday ? start.split("T")[0] : start),
-                  //   end: new Date(allday ? end.split("T")[0] : end),
-                  //   allday,
-                  //   ...selectedRange,
-                  // };
-                  // setSelectedRange(newRange);
-                  // calendarRef.current?.select(newRange);
-                }}
+                checked={allday}
+                onChange={() => setAllDay(!allday)}
               />
             }
             label="All day"
           />
+
+          {/* Description & Location */}
           <TextField
             fullWidth
             disabled={!isOwn}
@@ -347,6 +336,7 @@ function EventDisplayModal({
             multiline
             rows={2}
           />
+
           <TextField
             fullWidth
             label="Location"
@@ -356,30 +346,44 @@ function EventDisplayModal({
             size="small"
             margin="dense"
           />
+
           {/* Video */}
           {event.x_openpass_videoconference && (
             <InfoRow
               icon={<VideocamIcon sx={{ fontSize: 18 }} />}
               text="Video conference available"
+              data={event.x_openpass_videoconference}
             />
           )}
+
           {/* Attendees */}
           {event.attendee?.length > 0 && (
             <Box sx={{ mb: 1 }}>
               <Typography variant="subtitle2">Attendees:</Typography>
               {organizer && renderAttendeeBadge(organizer, "org", true)}
-              {visibleAttendees.map((a, idx) =>
-                renderAttendeeBadge(a, idx.toString())
-              )}
+              {(showAllAttendees
+                ? attendees
+                : attendees.slice(0, attendeeDisplayLimit)
+              ).map((a, idx) => (
+                <Box>
+                  {renderAttendeeBadge(a, idx.toString())}
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      const newAttendeesList = [...attendees];
+                      setAttendees(newAttendeesList.splice(idx, 1));
+                      console.log(attendees, newAttendeesList);
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ))}
               {attendees.length > attendeeDisplayLimit && (
                 <Typography
                   variant="body2"
                   color="primary"
-                  sx={{
-                    cursor: "pointer",
-                    mt: 0.5,
-                    overflowY: "auto",
-                  }}
+                  sx={{ cursor: "pointer", mt: 0.5 }}
                   onClick={() => setShowAllAttendees(!showAllAttendees)}
                 >
                   {showAllAttendees
@@ -391,22 +395,18 @@ function EventDisplayModal({
               )}
             </Box>
           )}
-          <Divider sx={{ mb: 1 }} />
-          {/* Description */}
-          {event.description && (
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              {event.description}
-            </Typography>
-          )}
+
+          <Divider sx={{ my: 1 }} />
+
+          {/* Extended options */}
           {showMore && (
             <>
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="busy">Repetition</InputLabel>
+                <InputLabel id="repeat">Repetition</InputLabel>
                 <Select
-                  labelId="busy"
+                  labelId="repeat"
                   value={repetition}
                   disabled={!isOwn}
-                  label="Repetition"
                   onChange={(e: SelectChangeEvent) =>
                     setRepetition(e.target.value)
                   }
@@ -418,13 +418,13 @@ function EventDisplayModal({
                   <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
                 </Select>
               </FormControl>
+
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="repeat">Alarm</InputLabel>
+                <InputLabel id="alarm">Alarm</InputLabel>
                 <Select
-                  labelId="repeat"
+                  labelId="alarm"
                   value={alarm}
                   disabled={!isOwn}
-                  label="Alarm"
                   onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
                 >
                   <MenuItem value={""}>No Alarm</MenuItem>
@@ -442,39 +442,19 @@ function EventDisplayModal({
                   <MenuItem value={"-PT1W"}>1 week</MenuItem>
                 </Select>
               </FormControl>
+
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="repeat">Repetition</InputLabel>
-                <Select
-                  labelId="repeat"
-                  value={eventClass}
-                  disabled={!isOwn}
-                  label="Repetition"
-                  onChange={(e: SelectChangeEvent) =>
-                    setEventClass(e.target.value)
-                  }
-                >
-                  <MenuItem value={"PUBLIC"}>Public</MenuItem>
-                  <MenuItem value={"CONFIDENTIAL"}>
-                    Show time and date only
-                  </MenuItem>
-                  <MenuItem value={"PRIVATE"}>Private</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="class">class</InputLabel>
+                <InputLabel id="class">Class</InputLabel>
                 <Select
                   labelId="class"
                   value={eventClass}
                   disabled={!isOwn}
-                  label="class"
                   onChange={(e: SelectChangeEvent) =>
                     setEventClass(e.target.value)
                   }
                 >
                   <MenuItem value={"PUBLIC"}>Public</MenuItem>
-                  <MenuItem value={"CONFIDENTIAL"}>
-                    Show time and date only
-                  </MenuItem>
+                  <MenuItem value={"CONFIDENTIAL"}>Show time only</MenuItem>
                   <MenuItem value={"PRIVATE"}>Private</MenuItem>
                 </Select>
               </FormControl>
@@ -484,7 +464,7 @@ function EventDisplayModal({
                   labelId="busy"
                   value={eventClass}
                   disabled={!isOwn}
-                  label="busy"
+                  label="is busy"
                   onChange={(e: SelectChangeEvent) =>
                     setEventClass(e.target.value)
                   }
@@ -506,6 +486,7 @@ function EventDisplayModal({
             </>
           )}
         </CardContent>
+
         <CardActions>
           <ButtonGroup>
             <IconButton
@@ -519,10 +500,16 @@ function EventDisplayModal({
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
+
             <Button size="small" onClick={() => setShowMore(!showMore)}>
-              {!showMore && "Show More"}
-              {showMore && "Show Less"}
+              {showMore ? "Show Less" : "Show More"}
             </Button>
+
+            {isOwn && (
+              <Button size="small" onClick={handleSave}>
+                Save
+              </Button>
+            )}
           </ButtonGroup>
         </CardActions>
       </Card>
@@ -530,26 +517,28 @@ function EventDisplayModal({
   );
 }
 
-function InfoRow({
+export function InfoRow({
   icon,
   text,
   error = false,
+  data,
 }: {
   icon: React.ReactNode;
   text: string;
   error?: boolean;
+  data?: string;
 }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
       {icon}
       <Typography variant="body2" color={error ? "error" : "textPrimary"}>
-        {text}
+        {isValidUrl(data) && <Link href={data}>{text}</Link>}
       </Typography>
     </Box>
   );
 }
 
-function renderAttendeeBadge(
+export function renderAttendeeBadge(
   a: userAttendee,
   key: string,
   isOrganizer?: boolean
@@ -620,16 +609,6 @@ function renderAttendeeBadge(
   );
 }
 
-function formatDate(date: Date) {
-  return new Date(date).toLocaleString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export function stringToColor(string: string) {
   let hash = 0;
   for (let i = 0; i < string.length; i++) {
@@ -645,11 +624,9 @@ export function stringToColor(string: string) {
   return color;
 }
 
-function stringAvatar(name: string) {
+export function stringAvatar(name: string) {
   return {
     sx: { width: 24, height: 24, fontSize: 18, bgcolor: stringToColor(name) },
     children: name[0],
   };
 }
-
-export default EventDisplayModal;

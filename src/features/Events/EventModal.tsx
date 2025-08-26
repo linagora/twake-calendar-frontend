@@ -78,12 +78,15 @@ function EventPopover({
   }, [selectedRange]);
 
   const handleSave = async () => {
+    const newEventUID = crypto.randomUUID();
+
     const newEvent: CalendarEvent = {
       calId: userPersonnalCalendars[calendarid].id,
       title,
+      URL: `/calendars/${userPersonnalCalendars[calendarid].id}/${newEventUID}.ics`,
       start: new Date(start),
       allday,
-      uid: crypto.randomUUID(),
+      uid: newEventUID,
       description,
       location,
       repetition,
@@ -295,7 +298,7 @@ function EventPopover({
 
 export default EventPopover;
 
-function formatLocalDateTime(date: Date): string {
+export function formatLocalDateTime(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
