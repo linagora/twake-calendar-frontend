@@ -13,7 +13,7 @@ export async function putEvent(event: CalendarEvent) {
   if (response.status === 201) {
     console.log("PUT (201) :", response.url);
   }
-  return await response.json();
+  return response;
 }
 
 export async function deleteEvent(eventURL: string) {
