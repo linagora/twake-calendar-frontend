@@ -77,6 +77,7 @@ export const putEventAsync = createAsyncThunk<
       new Date(new Date(newEvent.start).getTime() + 86400000)
     ),
   })) as Record<string, any>;
+  console.log(calEvents)
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][];
