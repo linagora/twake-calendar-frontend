@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { deleteEventAsync, putEventAsync } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
   Popover,
   Button,
@@ -143,6 +144,7 @@ export default function EventDisplayModal({
       description,
       location,
       repetition,
+      class: eventClass,
       organizer: event.organizer,
       timezone,
       attendee: [
@@ -336,6 +338,8 @@ export default function EventDisplayModal({
             multiline
             rows={2}
           />
+
+          <AttendeeSelector setAttendees={setAttendees} />
 
           <TextField
             fullWidth
