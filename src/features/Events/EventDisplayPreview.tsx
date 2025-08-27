@@ -162,12 +162,10 @@ export default function EventPreviewModal({
 
             {/* Time info*/}
             <Typography variant="body2" color="textSecondary" gutterBottom>
-              {formatDate(event.start)}
+              {formatDate(event.start, event.allday)}
               {event.end &&
-                ` – ${new Date(event.end).toLocaleTimeString(undefined, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}`}
+                formatEnd(event.start, event.end, event.allday) &&
+                ` – ${formatEnd(event.start, event.end, event.allday)}`}
             </Typography>
 
             {/* Location */}
@@ -296,12 +294,63 @@ export default function EventPreviewModal({
   );
 }
 
-function formatDate(date: Date) {
-  return new Date(date).toLocaleString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function formatDate(date: Date, allday?: boolean) {
+  if (allday) {
+    return new Date(date).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      weekday: "long",
+      day: "numeric",
+    });
+  } else {
+    return new Date(date).toLocaleString(undefined, {
+      year: "numeric",
+      month: "long",
+      weekday: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+}
+
+function formatEnd(start: Date, end: Date, allday?: boolean) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  const sameDay =
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate();
+
+  if (allday) {
+    console.log(
+      endDate.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    );
+    return sameDay
+      ? null
+      : endDate.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  } else {
+    if (sameDay) {
+      return endDate.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return endDate.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 }

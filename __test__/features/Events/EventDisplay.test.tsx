@@ -109,6 +109,7 @@ describe("Event Display", () => {
     const dayOfMonth = day.getDate().toString();
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
+    preview.debug();
     expect(screen.getByText(new RegExp(weekday, "i"))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(month, "i"))).toBeInTheDocument();
     expect(

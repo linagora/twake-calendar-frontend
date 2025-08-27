@@ -372,7 +372,7 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-
+            console.log(event , newEvent);
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );

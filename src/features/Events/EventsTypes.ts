@@ -8,7 +8,7 @@ export interface CalendarEvent {
   start: Date; // ISO date
   end?: Date;
   class?: string;
-  x_openpass_videoconference?: unknown;
+  x_openpass_videoconference?: string;
   title?: string;
   description?: string;
   location?: string;

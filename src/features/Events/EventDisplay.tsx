@@ -321,7 +321,20 @@ export default function EventDisplayModal({
               <Checkbox
                 disabled={!isOwn}
                 checked={allday}
-                onChange={() => setAllDay(!allday)}
+                onChange={() => {
+                  const endDate = new Date(end);
+                  const startDate = new Date(start);
+                  setAllDay(!allday);
+                  console.log(
+                    endDate.getDate() === startDate.getDate(),
+                    endDate.getDate(),
+                    startDate.getDate()
+                  );
+                  if (endDate.getDate() === startDate.getDate()) {
+                    endDate.setDate(startDate.getDate() + 1);
+                    setEnd(formatLocalDateTime(endDate));
+                  }
+                }}
               />
             }
             label="All day"
@@ -407,8 +420,9 @@ export default function EventDisplayModal({
           {showMore && (
             <>
               <RepeatEvent
-                eventClass={eventClass}
-                setEventClass={setEventClass}
+                repetition={repetition}
+                setRepetition={setRepetition}
+                isOwn={isOwn}
               />
 
               <FormControl fullWidth margin="dense" size="small">
@@ -436,10 +450,10 @@ export default function EventDisplayModal({
               </FormControl>
 
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="class">Class</InputLabel>
+                <InputLabel id="Visibility">Visibility</InputLabel>
                 <Select
-                  labelId="class"
-                  label="class"
+                  labelId="Visibility"
+                  label="Visibility"
                   value={eventClass}
                   disabled={!isOwn}
                   onChange={(e: SelectChangeEvent) =>
@@ -459,7 +473,7 @@ export default function EventDisplayModal({
                   disabled={!isOwn}
                   label="is busy"
                   onChange={(e: SelectChangeEvent) =>
-                    setEventClass(e.target.value)
+                    console.log(e.target.value)
                   }
                 >
                   <MenuItem value={"free"}>Free</MenuItem>
@@ -525,7 +539,7 @@ export function InfoRow({
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
       {icon}
       <Typography variant="body2" color={error ? "error" : "textPrimary"}>
-        {isValidUrl(data) && <Link href={data}>{text}</Link>}
+        {isValidUrl(data) ? <Link href={data}>{text}</Link> : text}
       </Typography>
     </Box>
   );
