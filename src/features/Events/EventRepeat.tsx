@@ -7,23 +7,29 @@ import {
 } from "@mui/material";
 
 export default function RepeatEvent({
-  eventClass,
-  setEventClass,
+  repetition,
+  setRepetition,
+  isOwn = true,
 }: {
-  eventClass: string;
-  setEventClass: React.Dispatch<React.SetStateAction<string>>;
+  repetition: string;
+  setRepetition: Function;
+  isOwn?: boolean;
 }) {
   return (
     <FormControl fullWidth margin="dense" size="small">
-      <InputLabel id="repeat">is Busy</InputLabel>
+      <InputLabel id="repeat">Repetition</InputLabel>
       <Select
-        labelId="busy"
-        value={eventClass}
-        label="is busy"
-        onChange={(e: SelectChangeEvent) => setEventClass(e.target.value)}
+        labelId="repeat"
+        value={repetition}
+        disabled={!isOwn}
+        label="Repetition"
+        onChange={(e: SelectChangeEvent) => setRepetition(e.target.value)}
       >
-        <MenuItem value={"free"}>Free</MenuItem>
-        <MenuItem value={"busy"}>Busy </MenuItem>
+        <MenuItem value={""}>No Repetition</MenuItem>
+        <MenuItem value={"daily"}>Repeat daily</MenuItem>
+        <MenuItem value={"weekly"}>Repeat weekly</MenuItem>
+        <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
+        <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
       </Select>
     </FormControl>
   );

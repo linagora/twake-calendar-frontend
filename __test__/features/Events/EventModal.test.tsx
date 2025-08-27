@@ -116,7 +116,12 @@ describe("EventPopover", () => {
     expect(screen.getByLabelText("End")).toBeInTheDocument();
     expect(screen.getByLabelText("Description")).toBeInTheDocument();
     expect(screen.getByLabelText("Location")).toBeInTheDocument();
+    expect(screen.getByText("Show More")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Show More"));
     expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
+    expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
+    expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
+    expect(screen.getByLabelText("is Busy")).toBeInTheDocument();
     expect(screen.getByLabelText("Time Zone")).toBeInTheDocument();
     // Calendar options
     const select = screen.getByLabelText("Calendar");

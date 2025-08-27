@@ -230,17 +230,36 @@ function EventPopover({
               type="checkbox"
               checked={allday}
               onChange={() => {
+                const endDate = new Date(end);
+                const startDate = new Date(start);
                 setAllDay(!allday);
+                console.log(
+                  endDate.getDate() === startDate.getDate(),
+                  endDate.getDate(),
+                  startDate.getDate()
+                );
+                if (endDate.getDate() === startDate.getDate()) {
+                  endDate.setDate(startDate.getDate() + 1);
+                  console.log("formatedd", formatLocalDateTime(endDate));
+                  setEnd(formatLocalDateTime(endDate));
+                }
+
                 const newRange = {
-                  startStr: allday ? start.split("T")[0] : start,
-                  endStr: allday ? end.split("T")[0] : end,
-                  start: new Date(allday ? start.split("T")[0] : start),
-                  end: new Date(allday ? end.split("T")[0] : end),
-                  allday,
                   ...selectedRange,
+                  startStr: allday ? start.split("T")[0] : start,
+                  endStr: allday
+                    ? endDate.toISOString().split("T")[0]
+                    : endDate.toISOString(),
+                  start: new Date(allday ? start.split("T")[0] : start),
+                  end: new Date(
+                    allday
+                      ? endDate.toISOString().split("T")[0]
+                      : endDate.toISOString()
+                  ),
+                  allDay: allday,
                 };
+                console.log(newRange, selectedRange);
                 setSelectedRange(newRange);
-                calendarRef.current?.select(newRange);
               }}
             />
             All day
@@ -263,27 +282,14 @@ function EventPopover({
             size="small"
             margin="dense"
           />
+          <AttendeeSelector setAttendees={setAttendees} />
           {/* Extended options */}
           {showMore && (
             <>
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="repeat">Repetition</InputLabel>
-                <Select
-                  labelId="repeat"
-                  value={repetition}
-                  label="Time Zone"
-                  onChange={(e: SelectChangeEvent) =>
-                    setRepetition(e.target.value)
-                  }
-                >
-                  <MenuItem value={""}>No Repetition</MenuItem>
-                  <MenuItem value={"daily"}>Repeat daily</MenuItem>
-                  <MenuItem value={"weekly"}>Repeat weekly</MenuItem>
-                  <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
-                  <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
-                </Select>
-              </FormControl>
-              <AttendeeSelector setAttendees={setAttendees} />
+              <RepeatEvent
+                repetition={repetition}
+                setRepetition={setRepetition}
+              />
               <FormControl fullWidth margin="dense" size="small">
                 <InputLabel id="timezone-select-label">Time Zone</InputLabel>
                 <Select
@@ -325,10 +331,10 @@ function EventPopover({
               </FormControl>
 
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="class">Class</InputLabel>
+                <InputLabel id="Visibility">Visibility</InputLabel>
                 <Select
-                  labelId="class"
-                  label="class"
+                  labelId="Visibility"
+                  label="Visibility"
                   value={eventClass}
                   onChange={(e: SelectChangeEvent) =>
                     setEventClass(e.target.value)
@@ -339,10 +345,21 @@ function EventPopover({
                   <MenuItem value={"PRIVATE"}>Private</MenuItem>
                 </Select>
               </FormControl>
-              <RepeatEvent
-                eventClass={eventClass}
-                setEventClass={setEventClass}
-              />
+
+              <FormControl fullWidth margin="dense" size="small">
+                <InputLabel id="busy">is Busy</InputLabel>
+                <Select
+                  labelId="busy"
+                  value={eventClass}
+                  label="is busy"
+                  onChange={(e: SelectChangeEvent) =>
+                    console.log(e.target.value)
+                  }
+                >
+                  <MenuItem value={"free"}>Free</MenuItem>
+                  <MenuItem value={"busy"}>Busy </MenuItem>
+                </Select>
+              </FormControl>
             </>
           )}
         </CardContent>

@@ -17,7 +17,7 @@ export async function putEvent(event: CalendarEvent) {
 }
 
 export async function deleteEvent(eventURL: string) {
-  const response = await api(eventURL, {
+  const response = await api(`dav${eventURL}`, {
     method: "DELETE",
   }).json();
   return response;

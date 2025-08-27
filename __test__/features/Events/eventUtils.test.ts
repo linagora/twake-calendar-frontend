@@ -31,7 +31,12 @@ describe("parseCalendarEvent", () => {
       ["DTSTAMP", {}, "date-time", "2025-07-18T08:00:00Z"],
     ] as unknown as [string, Record<string, string>, string, any];
 
-    const result = parseCalendarEvent(rawData, baseColor, calendarId);
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
 
     expect(result.uid).toBe("event-1");
     expect(result.title).toBe("Team Meeting");
@@ -71,7 +76,12 @@ describe("parseCalendarEvent", () => {
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
     ];
 
-    const result = parseCalendarEvent(rawData, baseColor, calendarId);
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
 
     expect(result.uid).toBe("event-2/2025-07-18T09:00:00Z");
   });
@@ -81,7 +91,12 @@ describe("parseCalendarEvent", () => {
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
     ];
 
-    const result = parseCalendarEvent(rawDataMissingUid, baseColor, calendarId);
+    const result = parseCalendarEvent(
+      rawDataMissingUid,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
     expect(result.error).toMatch(/missing crucial event param/);
 
     const rawDataMissingStart: any = [["UID", {}, "text", "event-3"]];
@@ -89,7 +104,8 @@ describe("parseCalendarEvent", () => {
     const result2 = parseCalendarEvent(
       rawDataMissingStart,
       baseColor,
-      calendarId
+      calendarId,
+      "/calendars/test.ics"
     );
     expect(result2.error).toMatch(/missing crucial event param/);
   });
@@ -102,7 +118,12 @@ describe("parseCalendarEvent", () => {
       ["ORGANIZER", {}, "cal-address", "jane@example.com"],
     ] as unknown as [string, Record<string, string>, string, any];
 
-    const result = parseCalendarEvent(rawData, baseColor, calendarId);
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
 
     expect(result.attendee).toEqual([
       {
@@ -135,6 +156,8 @@ describe("calendarEventToJCal", () => {
   it("should convert a CalendarEvent to JCal format", () => {
     const mockEvent = {
       uid: "event-123",
+      URL: "/calendars/test.ics",
+      calId: "test/test",
       title: "Team Meeting",
       start: new Date("2025-07-23T10:00:00"),
       end: new Date("2025-07-23T11:00:00"),
@@ -246,6 +269,8 @@ describe("calendarEventToJCal", () => {
   it("should convert a CalendarEvent to JCal format, with all day activated", () => {
     const mockEvent = {
       uid: "event-123",
+      URL: "/calendars/test.ics",
+      calId: "test/test",
       title: "Team Meeting",
       start: new Date("2025-07-23"),
       end: new Date("2025-07-23"),
@@ -285,7 +310,7 @@ describe("calendarEventToJCal", () => {
         ["summary", {}, "text", "Team Meeting"],
         ["transp", {}, "text", "OPAQUE"],
         ["dtstart", { tzid: "Europe/Paris" }, "date", "2025-07-23"],
-        ["dtend", { tzid: "Europe/Paris" }, "date", "2025-07-23"],
+        ["dtend", { tzid: "Europe/Paris" }, "date", "2025-07-24"],
         ["class", {}, "text", "PUBLIC"],
         ["location", {}, "text", "Room 101"],
         ["description", {}, "text", "Discuss project roadmap."],

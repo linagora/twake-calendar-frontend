@@ -13,6 +13,7 @@ export function parseCalendarEvent(
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
+  const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
   for (const [key, params, type, value] of data) {
     switch (key.toLowerCase()) {
@@ -24,9 +25,19 @@ export function parseCalendarEvent(
         break;
       case "dtstart":
         event.start = value;
+        if (dateRegex.test(value)) {
+          event.allday = true;
+        } else {
+          event.allday = false;
+        }
         break;
       case "dtend":
         event.end = value;
+        if (dateRegex.test(value)) {
+          event.allday = true;
+        } else {
+          event.allday = false;
+        }
         break;
       case "class":
         event.class = value;
@@ -115,6 +126,14 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   ];
 
   if (event.end) {
+    console.log(
+      event.end,
+      event.start,
+      event.end.getTime() === event.start.getTime()
+    );
+    if (event.allday && event.end.getTime() === event.start.getTime()) {
+      event.end.setDate(event.start.getDate() + 1);
+    }
     vevent[1].push([
       "dtend",
       { tzid },
