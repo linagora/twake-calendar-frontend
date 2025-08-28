@@ -16,9 +16,19 @@ export async function putEvent(event: CalendarEvent) {
   return response;
 }
 
+export async function moveEvent(event: CalendarEvent) {
+  const response = await api(`dav${event.URL}`, {
+    method: "MOVE",
+    headers: {
+      destination: event.URL,
+    },
+  });
+  return response;
+}
+
 export async function deleteEvent(eventURL: string) {
   const response = await api(`dav${eventURL}`, {
     method: "DELETE",
-  }).json();
+  });
   return response;
 }

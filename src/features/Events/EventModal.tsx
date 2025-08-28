@@ -233,14 +233,8 @@ function EventPopover({
                 const endDate = new Date(end);
                 const startDate = new Date(start);
                 setAllDay(!allday);
-                console.log(
-                  endDate.getDate() === startDate.getDate(),
-                  endDate.getDate(),
-                  startDate.getDate()
-                );
                 if (endDate.getDate() === startDate.getDate()) {
                   endDate.setDate(startDate.getDate() + 1);
-                  console.log("formatedd", formatLocalDateTime(endDate));
                   setEnd(formatLocalDateTime(endDate));
                 }
 
@@ -258,7 +252,6 @@ function EventPopover({
                   ),
                   allDay: allday,
                 };
-                console.log(newRange, selectedRange);
                 setSelectedRange(newRange);
               }}
             />

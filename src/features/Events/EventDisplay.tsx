@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { deleteEventAsync, putEventAsync } from "../Calendars/CalendarSlice";
+import {
+  deleteEventAsync,
+  moveEventAsync,
+  putEventAsync,
+} from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
@@ -86,7 +90,7 @@ export default function EventDisplayModal({
   const [alarm, setAlarm] = useState("");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
-
+  const [newCalId, setNewCalId] = useState(event.calId);
   const [calendarid, setCalendarid] = useState(
     event?.calId.split("/")[0] === user.userData.openpaasId
       ? userPersonnalCalendars.findIndex((cal) => cal.id === calId)
@@ -169,6 +173,12 @@ export default function EventDisplayModal({
         newEvent,
       })
     );
+
+    if (newCalId !== calId) {
+      dispatch(
+        moveEventAsync({ cal: userPersonnalCalendars[calendarid], newEvent })
+      );
+    }
     onClose({}, "backdropClick");
   };
 
@@ -279,9 +289,11 @@ export default function EventDisplayModal({
               labelId="calendar-select-label"
               value={calendarid.toString()}
               label="Calendar"
-              onChange={(e: SelectChangeEvent) =>
-                setCalendarid(Number(e.target.value))
-              }
+              onChange={(e: SelectChangeEvent) => {
+                const newId = Number(e.target.value);
+                setCalendarid(newId);
+                setNewCalId(userPersonnalCalendars[newId].id);
+              }}
             >
               {calList}
             </Select>
@@ -325,11 +337,6 @@ export default function EventDisplayModal({
                   const endDate = new Date(end);
                   const startDate = new Date(start);
                   setAllDay(!allday);
-                  console.log(
-                    endDate.getDate() === startDate.getDate(),
-                    endDate.getDate(),
-                    startDate.getDate()
-                  );
                   if (endDate.getDate() === startDate.getDate()) {
                     endDate.setDate(startDate.getDate() + 1);
                     setEnd(formatLocalDateTime(endDate));
@@ -390,7 +397,6 @@ export default function EventDisplayModal({
                     onClick={() => {
                       const newAttendeesList = [...attendees];
                       setAttendees(newAttendeesList.splice(idx, 1));
-                      console.log(attendees, newAttendeesList);
                     }}
                   >
                     <CloseIcon fontSize="small" />
@@ -496,18 +502,19 @@ export default function EventDisplayModal({
 
         <CardActions>
           <ButtonGroup>
-            <IconButton
-              size="small"
-              onClick={() => {
-                onClose({}, "backdropClick");
-                dispatch(
-                  deleteEventAsync({ calId, eventId, eventURL: event.URL })
-                );
-              }}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-
+            {isOwn && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  onClose({}, "backdropClick");
+                  dispatch(
+                    deleteEventAsync({ calId, eventId, eventURL: event.URL })
+                  );
+                }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
             <Button size="small" onClick={() => setShowMore(!showMore)}>
               {showMore ? "Show Less" : "Show More"}
             </Button>
