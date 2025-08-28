@@ -324,13 +324,6 @@ function formatEnd(start: Date, end: Date, allday?: boolean) {
     startDate.getDate() === endDate.getDate();
 
   if (allday) {
-    console.log(
-      endDate.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    );
     return sameDay
       ? null
       : endDate.toLocaleDateString(undefined, {

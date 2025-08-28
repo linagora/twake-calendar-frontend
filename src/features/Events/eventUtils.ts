@@ -126,11 +126,6 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
   ];
 
   if (event.end) {
-    console.log(
-      event.end,
-      event.start,
-      event.end.getTime() === event.start.getTime()
-    );
     if (event.allday && event.end.getTime() === event.start.getTime()) {
       event.end.setDate(event.start.getDate() + 1);
     }
