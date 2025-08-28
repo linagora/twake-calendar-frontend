@@ -7,7 +7,6 @@ import EventDisplayModal, {
   stringToColor,
 } from "../../../src/features/Events/EventDisplay";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
   const day = new Date();
@@ -479,7 +478,6 @@ describe("Event Preview Display", () => {
 describe("Event Full Display", () => {
   const mockOnClose = jest.fn();
   const day = new Date();
-  const RealDateToLocaleString = Date.prototype.toLocaleString;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -554,15 +552,6 @@ describe("Event Full Display", () => {
   };
 
   it("renders correctly event data", () => {
-    jest
-      .spyOn(Date.prototype, "toLocaleString")
-      .mockImplementation(function (
-        this: Date,
-        locales?: Intl.LocalesArgument,
-        options?: Intl.DateTimeFormatOptions | undefined
-      ): string {
-        return RealDateToLocaleString.call(this, "en-UK", options);
-      });
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -572,8 +561,8 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    day.setHours(day.getHours() + 2);
-    const date = day.toISOString().slice(0, 16);
+    const tzOffset = day.getTimezoneOffset() * 60000; // offset in ms
+    const date = new Date(day.getTime() - tzOffset).toISOString().slice(0, 16);
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
     expect(
