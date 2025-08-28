@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { searchUsers } from "../../features/User/userAPI";
+import { userAttendee } from "../../features/User/userDataTypes";
 
 interface User {
   email: string;
@@ -17,9 +18,13 @@ interface User {
 }
 
 export default function UserSearch({
+  attendees,
   setAttendees,
+  disabled,
 }: {
+  attendees: userAttendee[];
   setAttendees: Function;
+  disabled?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<User[]>([]);
@@ -40,6 +45,7 @@ export default function UserSearch({
     <Autocomplete
       multiple
       options={options}
+      disabled={disabled}
       loading={loading}
       filterOptions={(x) => x}
       fullWidth
@@ -75,14 +81,20 @@ export default function UserSearch({
           }}
         />
       )}
-      renderOption={(props, option) => (
-        <ListItem {...props} key={option.email} disableGutters>
-          <ListItemAvatar>
-            <Avatar src={option.avatarUrl} alt={option.displayName} />
-          </ListItemAvatar>
-          <ListItemText primary={option.displayName} secondary={option.email} />
-        </ListItem>
-      )}
+      renderOption={(props, option) => {
+        if (attendees.find((a) => a.cal_address === option.email)) return;
+        return (
+          <ListItem {...props} key={option.email} disableGutters>
+            <ListItemAvatar>
+              <Avatar src={option.avatarUrl} alt={option.displayName} />
+            </ListItemAvatar>
+            <ListItemText
+              primary={option.displayName}
+              secondary={option.email}
+            />
+          </ListItem>
+        );
+      }}
     />
   );
 }

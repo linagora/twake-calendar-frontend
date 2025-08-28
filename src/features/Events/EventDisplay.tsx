@@ -360,7 +360,15 @@ export default function EventDisplayModal({
             rows={2}
           />
 
-          <AttendeeSelector setAttendees={setAttendees} />
+          {isOwn && (
+            <AttendeeSelector
+              attendees={attendees}
+              setAttendees={(value: userAttendee[]) => {
+                const newAttendeeList = attendees.concat(value);
+                setAttendees(newAttendeeList);
+              }}
+            />
+          )}
 
           <TextField
             fullWidth
