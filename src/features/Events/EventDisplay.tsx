@@ -400,15 +400,18 @@ export default function EventDisplayModal({
               ).map((a, idx) => (
                 <Box>
                   {renderAttendeeBadge(a, idx.toString())}
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      const newAttendeesList = [...attendees];
-                      setAttendees(newAttendeesList.splice(idx, 1));
-                    }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
+                  {isOwn && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        const newAttendeesList = [...attendees];
+                        newAttendeesList.splice(idx, 1);
+                        setAttendees(newAttendeesList);
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
               ))}
               {attendees.length > attendeeDisplayLimit && (
