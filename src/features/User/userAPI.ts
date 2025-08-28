@@ -16,14 +16,12 @@ export async function searchUsers(query: string) {
     })
     .json();
 
-  return response
-    .filter((user) => user.objectType === "user")
-    .map((user) => ({
-      email: user.emailAddresses?.[0]?.value || "",
-      displayName:
-        user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value,
-      avatarUrl: user.photos?.[0]?.url || "",
-    }));
+  return response.map((user) => ({
+    email: user.emailAddresses?.[0]?.value || "",
+    displayName:
+      user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value,
+    avatarUrl: user.photos?.[0]?.url || "",
+  }));
 }
 
 export async function getUserDetails(id: string) {

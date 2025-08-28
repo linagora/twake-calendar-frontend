@@ -275,7 +275,7 @@ function EventPopover({
             size="small"
             margin="dense"
           />
-          <AttendeeSelector setAttendees={setAttendees} />
+          <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
           {/* Extended options */}
           {showMore && (
             <>
