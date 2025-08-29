@@ -79,15 +79,14 @@ describe("eventApi", () => {
     (api as unknown as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue(mockResponse),
     });
-    const result = await moveEvent(mockEvent);
+    const result = await moveEvent(mockEvent, "newurl.ics");
 
     expect(api).toHaveBeenCalledWith(
       "dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics",
       expect.objectContaining({
         method: "MOVE",
         headers: {
-          destination:
-            "/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics",
+          destination: "newurl.ics",
         },
       })
     );

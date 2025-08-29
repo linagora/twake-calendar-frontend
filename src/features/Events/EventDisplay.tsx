@@ -132,7 +132,6 @@ export default function EventDisplayModal({
     };
 
     dispatch(putEventAsync({ cal: calendar, newEvent }));
-    onClose({}, "backdropClick");
   }
 
   const handleSave = () => {
@@ -176,7 +175,11 @@ export default function EventDisplayModal({
 
     if (newCalId !== calId) {
       dispatch(
-        moveEventAsync({ cal: userPersonnalCalendars[calendarid], newEvent })
+        moveEventAsync({
+          cal: userPersonnalCalendars[calendarid],
+          newEvent,
+          newURL: `/calendars/${newCalId}/${event.uid}.ics`,
+        })
       );
     }
     onClose({}, "backdropClick");
