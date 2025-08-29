@@ -94,9 +94,9 @@ export const putEventAsync = createAsyncThunk<
 });
 export const moveEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
-  { cal: Calendars; newEvent: CalendarEvent } // Arg type
->("calendars/moveEvent", async ({ cal, newEvent }) => {
-  const response = await moveEvent(newEvent);
+  { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
+>("calendars/moveEvent", async ({ cal, newEvent, newURL }) => {
+  const response = await moveEvent(newEvent, newURL);
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
     end: formatDateToYYYYMMDDTHHMMSS(
