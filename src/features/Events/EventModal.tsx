@@ -1,7 +1,6 @@
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import {
   Box,
-  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -11,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Button from "cozy-ui/transpiled/react/Buttons"
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
@@ -279,14 +279,15 @@ function EventPopover({
 
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
-            variant="outlined"
+            label="Cancel"
+            variant="secondary"
             onClick={() => onClose({}, "backdropClick")}
-          >
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSave} disabled={!title}>
-            Save
-          </Button>
+          />
+          <Button
+            label="Save"
+            variant="primary"
+            onClick={handleSave}
+            disabled={!title} />
         </Box>
       </Box>
     </Popover>
