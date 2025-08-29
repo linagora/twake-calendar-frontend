@@ -11,6 +11,8 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "cozy-ui/transpiled/react/Buttons"
+import { useI18n } from 'cozy-ui/transpiled/react/providers/I18n'
+
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
@@ -37,6 +39,7 @@ function EventPopover({
   calendarRef: React.RefObject<CalendarApi | null>;
 }) {
   const dispatch = useAppDispatch();
+  const { t } = useI18n()
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
@@ -279,12 +282,12 @@ function EventPopover({
 
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
-            label="Cancel"
+            label={t("buttons.cancel")}
             variant="secondary"
             onClick={() => onClose({}, "backdropClick")}
           />
           <Button
-            label="Save"
+            label={t("buttons.save")}
             variant="primary"
             onClick={handleSave}
             disabled={!title} />
