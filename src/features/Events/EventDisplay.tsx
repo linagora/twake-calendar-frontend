@@ -3,6 +3,7 @@ import {
   deleteEventAsync,
   moveEventAsync,
   putEventAsync,
+  removeEvent,
 } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
@@ -134,7 +135,7 @@ export default function EventDisplayModal({
     dispatch(putEventAsync({ cal: calendar, newEvent }));
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
 
     const newEvent: CalendarEvent = {
@@ -166,7 +167,7 @@ export default function EventDisplayModal({
       color: userPersonnalCalendars[calendarid]?.color,
     };
 
-    dispatch(
+    await dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
@@ -181,6 +182,7 @@ export default function EventDisplayModal({
           newURL: `/calendars/${newCalId}/${event.uid}.ics`,
         })
       );
+      dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
     }
     onClose({}, "backdropClick");
   };
