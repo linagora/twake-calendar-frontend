@@ -41,9 +41,11 @@ pipeline {
             }
 
             echo "Docker tag: ${env.DOCKER_TAG}"
-                sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
-                sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
-                sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+            sh 'ls'
+            sh 'ls dist'
+            sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
+            sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
+            sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
           }
         }
       }
