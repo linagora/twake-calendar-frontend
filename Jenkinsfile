@@ -27,6 +27,12 @@ pipeline {
         }
       }
       stage('Deploy docker images') {
+        when {
+          anyOf {
+            branch 'master'
+            buildingTag()
+          }
+        }
         steps {
           script {
             env.DOCKER_TAG = 'branch-master'
