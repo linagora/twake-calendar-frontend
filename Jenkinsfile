@@ -16,16 +16,17 @@ pipeline {
     }
     
     stages {
-        stage('Compile') {
-            steps {
-                sh 'npm install'
-            }
+      stage('Compile') {
+          steps {
+              sh 'npm install'
+          }
+      }
+      stage('Test') {
+        steps {
+          sh 'npm run test'
         }
-        stage('Test') {
-            steps {
-                sh 'npm run test'
-            }
-        }
+      }
+      stage('Deploy docker images') {
         steps {
           script {
             env.DOCKER_TAG = 'branch-master'
