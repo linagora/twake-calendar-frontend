@@ -29,7 +29,7 @@ pipeline {
       stage('Deploy docker images') {
         when {
           anyOf {
-            branch 'master'
+            branch 'main'
             buildingTag()
           }
         }
