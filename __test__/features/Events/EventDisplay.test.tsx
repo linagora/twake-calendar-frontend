@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import EventDisplayModal, {
@@ -7,6 +7,7 @@ import EventDisplayModal, {
   stringToColor,
 } from "../../../src/features/Events/EventDisplay";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
   const day = new Date();
@@ -915,7 +916,19 @@ describe("Event Full Display", () => {
     const updatedEvent = spy.mock.calls[0][0].newEvent;
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
   });
-  test("toggle Show More reveals extra fields", () => {
+  it("toggle Show More reveals extra fields", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getEventAsync")
+      .mockImplementation((payload) => {
+        return () =>
+          Promise.resolve({
+            calId: payload.calId,
+            event:
+              preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+                .events["event1"],
+          }) as any;
+      });
+
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -925,14 +938,23 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    fireEvent.click(screen.getByText("Show More"));
-    expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
-    expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
-    expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByText("Show More"));
+    });
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+    console.log(spy);
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Alarm/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Repetition/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Visibility/i)).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByText("Show Less"));
   });
 
-  test("can edit title when user is organizer", () => {
+  it("can edit title when user is organizer", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -946,7 +968,7 @@ describe("Event Full Display", () => {
     fireEvent.change(titleField, { target: { value: "New Title" } });
     expect(screen.getByDisplayValue("New Title")).toBeInTheDocument();
   });
-  test("calendar select is disabled when not organizer", () => {
+  it("calendar select is disabled when not organizer", () => {
     const rsvpState = {
       ...preloadedState,
       calendars: {
@@ -988,7 +1010,7 @@ describe("Event Full Display", () => {
     );
     expect(screen.getByLabelText("Calendar")).toHaveClass("Mui-disabled");
   });
-  test("toggle all-day updates end date correctly", () => {
+  it("toggle all-day updates end date correctly", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -1010,18 +1032,18 @@ describe("Event Full Display", () => {
 });
 
 describe("Helper functions", () => {
-  test("stringToColor generates consistent color", () => {
+  it("stringToColor generates consistent color", () => {
     expect(stringToColor("Alice")).toMatch(/^#[0-9a-f]{6}$/);
     expect(stringToColor("Alice")).toBe(stringToColor("Alice"));
   });
 
-  test("stringAvatar returns correct props", () => {
+  it("stringAvatar returns correct props", () => {
     const result = stringAvatar("Alice");
     expect(result.children).toBe("A");
     expect(result.sx.bgcolor).toMatch(/^#/);
   });
 
-  test("InfoRow renders text and link if url is valid", () => {
+  it("InfoRow renders text and link if url is valid", () => {
     renderWithProviders(
       <InfoRow
         icon={<span>ico</span>}

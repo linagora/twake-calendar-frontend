@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   deleteEventAsync,
+  getEventAsync,
   moveEventAsync,
   putEventAsync,
   removeEvent,
@@ -42,10 +43,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { userAttendee } from "../User/userDataTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { Calendars } from "../Calendars/CalendarTypes";
-import { CalendarEvent } from "./EventsTypes";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { isValidUrl } from "../../utils/apiUtils";
 import { formatLocalDateTime } from "./EventModal";
-import RepeatEvent from "./EventRepeat";
+import RepeatEvent from "../../components/Event/EventRepeat";
 
 export default function EventDisplayModal({
   eventId,
@@ -68,8 +69,8 @@ export default function EventDisplayModal({
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  const calendars = useAppSelector((state) =>
-    Object.values(state.calendars.list)
+  const calendars = Object.values(
+    useAppSelector((state) => state.calendars.list)
   );
 
   const userPersonnalCalendars: Calendars[] = calendars.filter(
@@ -87,13 +88,15 @@ export default function EventDisplayModal({
     formatLocalDateTime(new Date(event?.end ?? Date.now()))
   );
   const [allday, setAllDay] = useState(event?.allday);
-  const [repetition, setRepetition] = useState(event?.repetition ?? "");
+  const [repetition, setRepetition] = useState<RepetitionObject>(
+    event.repetition ?? ({} as RepetitionObject)
+  );
   const [alarm, setAlarm] = useState("");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
   const [newCalId, setNewCalId] = useState(event.calId);
   const [calendarid, setCalendarid] = useState(
-    event?.calId.split("/")[0] === user.userData.openpaasId
+    calId.split("/")[0] === user.userData.openpaasId
       ? userPersonnalCalendars.findIndex((cal) => cal.id === calId)
       : calendars.findIndex((cal) => cal.id === calId)
   );
@@ -103,7 +106,6 @@ export default function EventDisplayModal({
       (a) => a.cal_address !== event?.organizer?.cal_address
     )
   );
-
   const currentUserAttendee = event?.attendee?.find(
     (person) => person.cal_address === user.userData.email
   );
@@ -120,7 +122,7 @@ export default function EventDisplayModal({
     if (!event || !calendar) {
       onClose({}, "backdropClick");
     }
-  }, [event, calendar, onClose]);
+  }, [open, eventId, dispatch, onClose]);
 
   if (!event || !calendar) return null;
 
@@ -187,8 +189,18 @@ export default function EventDisplayModal({
     onClose({}, "backdropClick");
   };
 
+  const [detailsLoaded, setDetailsLoaded] = useState(false);
+
+  const handleToggleShowMore = async () => {
+    if (!detailsLoaded) {
+      await dispatch(getEventAsync(event));
+      setDetailsLoaded(true);
+    }
+    setShowMore(!showMore);
+  };
+
   const calList =
-    event.calId.split("/")[0] === user.userData.openpaasId
+    calId.split("/")[0] === user.userData.openpaasId
       ? Object.keys(userPersonnalCalendars).map((calendar, index) => (
           <MenuItem key={index} value={index}>
             <Typography variant="body2">
@@ -230,7 +242,7 @@ export default function EventDisplayModal({
 
         <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
 
-        <CardContent sx={{ maxHeight: "85vh", overflow: "auto" }}>
+        <CardContent sx={{ overflow: "auto" }}>
           {/* Title */}
           <TextField
             fullWidth
@@ -403,7 +415,7 @@ export default function EventDisplayModal({
                 ? attendees
                 : attendees.slice(0, attendeeDisplayLimit)
               ).map((a, idx) => (
-                <Box>
+                <Box key={a.cal_address}>
                   {renderAttendeeBadge(a, idx.toString())}
                   {isOwn && (
                     <IconButton
@@ -491,7 +503,7 @@ export default function EventDisplayModal({
                 <InputLabel id="busy">is Busy</InputLabel>
                 <Select
                   labelId="busy"
-                  value={eventClass}
+                  value={""}
                   disabled={!isOwn}
                   label="is busy"
                   onChange={(e: SelectChangeEvent) =>
@@ -531,7 +543,7 @@ export default function EventDisplayModal({
                 <DeleteIcon fontSize="small" />
               </IconButton>
             )}
-            <Button size="small" onClick={() => setShowMore(!showMore)}>
+            <Button size="small" onClick={handleToggleShowMore}>
               {showMore ? "Show Less" : "Show More"}
             </Button>
 

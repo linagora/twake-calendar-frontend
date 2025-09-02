@@ -167,7 +167,7 @@ describe("calendarEventToJCal", () => {
       allday: false,
       location: "Room 101",
       description: "Discuss project roadmap.",
-      repetition: "WEEKLY",
+      repetition: { freq: "WEEKLY" },
       organizer: {
         cn: "Alice",
         cal_address: "alice@example.com",
@@ -280,7 +280,7 @@ describe("calendarEventToJCal", () => {
       allday: true,
       location: "Room 101",
       description: "Discuss project roadmap.",
-      repetition: "WEEKLY",
+      repetition: { freq: "WEEKLY" },
       organizer: {
         cn: "Alice",
         cal_address: "alice@example.com",

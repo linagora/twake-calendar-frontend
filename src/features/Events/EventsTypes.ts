@@ -21,5 +21,13 @@ export interface CalendarEvent {
   error?: string;
   status?: string;
   timezone: string;
-  repetition?: string;
+  repetition?: RepetitionObject;
+}
+
+export interface RepetitionObject {
+  freq: string;
+  interval?: number;
+  selectedDays?: string[];
+  occurrences?: number;
+  endDate?: string;
 }

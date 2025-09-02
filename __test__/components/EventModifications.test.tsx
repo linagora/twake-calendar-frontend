@@ -2,7 +2,7 @@ import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import * as appHooks from "../../src/app/hooks";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
@@ -88,16 +88,17 @@ describe("CalendarApp integration", () => {
       { timeout: 3000 }
     );
     expect(eventEl).toBeInTheDocument();
+    act(() => {
+      if (calendarApi) {
+        const fcEvent = calendarApi.getEventById("event1");
+        expect(fcEvent?.title).toBe("Test Event");
+        const oldEnd = new Date(today.getTime() + 3600000); // +1 hour
+        const newEnd = new Date(oldEnd.getTime() + 1800000); // +30 min
 
-    if (calendarApi) {
-      const fcEvent = calendarApi.getEventById("event1");
-      expect(fcEvent?.title).toBe("Test Event");
-      const oldEnd = new Date(today.getTime() + 3600000); // +1 hour
-      const newEnd = new Date(oldEnd.getTime() + 1800000); // +30 min
+        fcEvent?.setEnd(newEnd);
 
-      fcEvent?.setEnd(newEnd);
-
-      expect(dispatch).toHaveBeenCalled();
-    }
+        expect(dispatch).toHaveBeenCalled();
+      }
+    });
   });
 });
