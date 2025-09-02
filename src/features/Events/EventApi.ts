@@ -1,6 +1,20 @@
 import { api } from "../../utils/apiUtils";
 import { CalendarEvent } from "./EventsTypes";
-import { calendarEventToJCal } from "./eventUtils";
+import { calendarEventToJCal, parseCalendarEvent } from "./eventUtils";
+import ICAL from "ical.js";
+
+export async function getEvent(event: CalendarEvent) {
+  const response = await api.get(`dav${event.URL}`);
+  const eventData = await response.text();
+  const eventical = ICAL.parse(eventData);
+  const eventjson = parseCalendarEvent(
+    eventical[2][1][1],
+    event.color ?? "",
+    event.calId,
+    event.URL
+  );
+  return { ...eventjson, ...event };
+}
 
 export async function putEvent(event: CalendarEvent) {
   const response = await api(`dav${event.URL}`, {

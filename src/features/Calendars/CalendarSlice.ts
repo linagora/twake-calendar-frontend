@@ -4,7 +4,7 @@ import { CalendarEvent } from "../Events/EventsTypes";
 import { getCalendar, getCalendars } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
-import { deleteEvent, moveEvent, putEvent } from "../Events/EventApi";
+import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
@@ -92,6 +92,18 @@ export const putEventAsync = createAsyncThunk<
     events,
   };
 });
+
+export const getEventAsync = createAsyncThunk<
+  { calId: string; event: CalendarEvent }, // Return type
+  CalendarEvent // Arg type
+>("calendars/getEvent", async (event) => {
+  const response: CalendarEvent = await getEvent(event);
+  return {
+    calId: event.calId,
+    event: response,
+  };
+});
+
 export const moveEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
   { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
@@ -234,6 +246,24 @@ const CalendarSlice = createSlice({
         }
       )
       .addCase(
+        getEventAsync.fulfilled,
+        (
+          state,
+          action: PayloadAction<{ calId: string; event: CalendarEvent }>
+        ) => {
+          state.pending = false;
+          if (!state.list[action.payload.calId]) {
+            state.list[action.payload.calId] = {
+              id: action.payload.calId,
+              events: {},
+            } as Calendars;
+          }
+
+          state.list[action.payload.calId].events[action.payload.event.uid] =
+            action.payload.event;
+        }
+      )
+      .addCase(
         moveEventAsync.fulfilled,
         (
           state,
@@ -264,6 +294,9 @@ const CalendarSlice = createSlice({
         delete state.list[action.payload.calId].events[action.payload.eventId];
       })
       .addCase(getCalendarDetailAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(getEventAsync.pending, (state) => {
         state.pending = true;
       })
       .addCase(getCalendarsListAsync.pending, (state) => {

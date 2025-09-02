@@ -22,9 +22,9 @@ import { TIMEZONES } from "../../utils/timezone-data";
 import { putEventAsync } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
-import { CalendarEvent } from "./EventsTypes";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
-import RepeatEvent from "./EventRepeat";
+import RepeatEvent from "../../components/Event/EventRepeat";
 
 function EventPopover({
   anchorEl,
@@ -70,7 +70,9 @@ function EventPopover({
   const [end, setEnd] = useState("");
   const [calendarid, setCalendarid] = useState(0);
   const [allday, setAllDay] = useState(false);
-  const [repetition, setRepetition] = useState("");
+  const [repetition, setRepetition] = useState<RepetitionObject>(
+    {} as RepetitionObject
+  );
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [alarm, setAlarm] = useState("");
   const [eventClass, setEventClass] = useState("PUBLIC");
@@ -343,7 +345,7 @@ function EventPopover({
                 <InputLabel id="busy">is Busy</InputLabel>
                 <Select
                   labelId="busy"
-                  value={eventClass}
+                  value={""}
                   label="is busy"
                   onChange={(e: SelectChangeEvent) =>
                     console.log(e.target.value)

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { deleteEventAsync, putEventAsync } from "../Calendars/CalendarSlice";
+import {
+  deleteEventAsync,
+  getEventAsync,
+  putEventAsync,
+} from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
@@ -32,6 +36,8 @@ import EventDisplayModal, {
   renderAttendeeBadge,
   stringAvatar,
 } from "./EventDisplay";
+import { getEvent } from "./EventApi";
+import { CalendarEvent } from "./EventsTypes";
 
 export default function EventPreviewModal({
   eventId,
@@ -47,13 +53,15 @@ export default function EventPreviewModal({
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   const dispatch = useAppDispatch();
-  const calendar = useAppSelector((state) => state.calendars.list[calId]);
+  const calendars = useAppSelector((state) => state.calendars);
+  const calendar = calendars.list[calId];
   const event = useAppSelector(
     (state) => state.calendars.list[calId]?.events[eventId]
   );
   const user = useAppSelector((state) => state.user);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
+
   useEffect(() => {
     if (!event || !calendar) {
       onClose({}, "backdropClick");
@@ -126,7 +134,7 @@ export default function EventPreviewModal({
               <>
                 <IconButton
                   size="small"
-                  onClick={() => {
+                  onClick={async () => {
                     setOpenFullDisplay(!openFullDisplay);
                   }}
                 >
