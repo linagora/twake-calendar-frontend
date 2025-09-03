@@ -8,7 +8,7 @@ export interface CalendarEvent {
   start: Date; // ISO date
   end?: Date;
   class?: string;
-  x_openpass_videoconference?: unknown;
+  x_openpass_videoconference?: string;
   title?: string;
   description?: string;
   location?: string;
@@ -17,9 +17,17 @@ export interface CalendarEvent {
   stamp?: Date;
   sequence?: Number;
   color?: string;
-  allday?: Boolean;
+  allday?: boolean;
   error?: string;
   status?: string;
   timezone: string;
-  repetition?: string;
+  repetition?: RepetitionObject;
+}
+
+export interface RepetitionObject {
+  freq: string;
+  interval?: number;
+  selectedDays?: string[];
+  occurrences?: number;
+  endDate?: string;
 }
