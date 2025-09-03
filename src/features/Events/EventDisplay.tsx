@@ -92,6 +92,7 @@ export default function EventDisplayModal({
     event.repetition ?? ({} as RepetitionObject)
   );
   const [alarm, setAlarm] = useState("");
+  const [busy, setBusy] = useState("");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
   const [newCalId, setNewCalId] = useState(event.calId);
@@ -503,12 +504,10 @@ export default function EventDisplayModal({
                 <InputLabel id="busy">is Busy</InputLabel>
                 <Select
                   labelId="busy"
-                  value={""}
+                  value={busy}
                   disabled={!isOwn}
                   label="is busy"
-                  onChange={(e: SelectChangeEvent) =>
-                    console.log(e.target.value)
-                  }
+                  onChange={(e) => setBusy(e.target.value)}
                 >
                   <MenuItem value={"free"}>Free</MenuItem>
                   <MenuItem value={"busy"}>Busy </MenuItem>

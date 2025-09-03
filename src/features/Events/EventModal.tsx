@@ -76,6 +76,7 @@ function EventPopover({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [alarm, setAlarm] = useState("");
   const [eventClass, setEventClass] = useState("PUBLIC");
+  const [busy, setBusy] = useState("");
 
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -286,23 +287,6 @@ function EventPopover({
                 setRepetition={setRepetition}
               />
               <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="timezone-select-label">Time Zone</InputLabel>
-                <Select
-                  labelId="timezone-select-label"
-                  value={timezone}
-                  label="Time Zone"
-                  onChange={(e: SelectChangeEvent) =>
-                    setTimezone(e.target.value)
-                  }
-                >
-                  {Object.keys(timezones).map((key) => (
-                    <MenuItem key={key} value={timezones[key].aliasTo}>
-                      {key}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth margin="dense" size="small">
                 <InputLabel id="alarm">Alarm</InputLabel>
                 <Select
                   labelId="alarm"
@@ -345,11 +329,9 @@ function EventPopover({
                 <InputLabel id="busy">is Busy</InputLabel>
                 <Select
                   labelId="busy"
-                  value={""}
+                  value={busy}
                   label="is busy"
-                  onChange={(e: SelectChangeEvent) =>
-                    console.log(e.target.value)
-                  }
+                  onChange={(e) => setBusy(e.target.value)}
                 >
                   <MenuItem value={"free"}>Free</MenuItem>
                   <MenuItem value={"busy"}>Busy </MenuItem>
