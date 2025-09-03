@@ -121,7 +121,6 @@ describe("EventPopover", () => {
     expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
     expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
     expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
-    expect(screen.getByLabelText("is Busy")).toBeInTheDocument();
     // Calendar options
     const select = screen.getByLabelText("Calendar");
     fireEvent.mouseDown(select);

@@ -492,19 +492,6 @@ export default function EventDisplayModal({
                   <MenuItem value={"PRIVATE"}>Private</MenuItem>
                 </Select>
               </FormControl>
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="busy">is Busy</InputLabel>
-                <Select
-                  labelId="busy"
-                  value={busy}
-                  disabled={!isOwn}
-                  label="is busy"
-                  onChange={(e) => setBusy(e.target.value)}
-                >
-                  <MenuItem value={"free"}>Free</MenuItem>
-                  <MenuItem value={"busy"}>Busy </MenuItem>
-                </Select>
-              </FormControl>
               {/* Error */}
               {event.error && (
                 <InfoRow
