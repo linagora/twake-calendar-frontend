@@ -991,6 +991,7 @@ describe("Event Full Display", () => {
                 ],
                 organizer: {
                   cal_address: "organizer@test.com",
+                  cn: "Edgar Organiser",
                 },
               },
             },

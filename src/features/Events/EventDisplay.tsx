@@ -111,9 +111,10 @@ export default function EventDisplayModal({
     (person) => person.cal_address === user.userData.email
   );
 
-  const organizer = event?.attendee?.find(
-    (a) => a.cal_address === event?.organizer?.cal_address
-  );
+  const organizer =
+    event.attendee?.find(
+      (a) => a.cal_address === event?.organizer?.cal_address
+    ) ?? ({} as userAttendee);
 
   const isOwn = organizer?.cal_address === user.userData.email;
   const isOwnCal = userPersonnalCalendars.find((cal) => cal.id === calId);
@@ -155,17 +156,7 @@ export default function EventDisplayModal({
       class: eventClass,
       organizer: event.organizer,
       timezone,
-      attendee: [
-        {
-          cn: event.organizer?.cn,
-          cal_address: event.organizer?.cal_address ?? "",
-          partstat: "ACCEPTED",
-          rsvp: "FALSE",
-          role: "CHAIR",
-          cutype: "INDIVIDUAL",
-        },
-        ...attendees,
-      ],
+      attendee: [organizer, ...attendees],
       transp: "OPAQUE",
       color: userPersonnalCalendars[calendarid]?.color,
     };
@@ -411,7 +402,8 @@ export default function EventDisplayModal({
           {event.attendee?.length > 0 && (
             <Box sx={{ mb: 1 }}>
               <Typography variant="subtitle2">Attendees:</Typography>
-              {organizer && renderAttendeeBadge(organizer, "org", true)}
+              {organizer.cal_address &&
+                renderAttendeeBadge(organizer, "org", true)}
               {(showAllAttendees
                 ? attendees
                 : attendees.slice(0, attendeeDisplayLimit)
