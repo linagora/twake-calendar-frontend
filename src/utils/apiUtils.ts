@@ -43,3 +43,14 @@ export function redirectTo(url: URL) {
 export function getLocation() {
   return window.location.href;
 }
+
+export function isValidUrl(string?: string) {
+  let url;
+
+  try {
+    url = new URL(string ?? "");
+  } catch (_) {
+    return false;
+  }
+  return url;
+}

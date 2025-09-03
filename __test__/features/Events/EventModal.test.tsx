@@ -116,8 +116,11 @@ describe("EventPopover", () => {
     expect(screen.getByLabelText("End")).toBeInTheDocument();
     expect(screen.getByLabelText("Description")).toBeInTheDocument();
     expect(screen.getByLabelText("Location")).toBeInTheDocument();
+    expect(screen.getByText("Show More")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Show More"));
     expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
-    expect(screen.getByLabelText("Time Zone")).toBeInTheDocument();
+    expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
+    expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
     // Calendar options
     const select = screen.getByLabelText("Calendar");
     fireEvent.mouseDown(select);
@@ -242,7 +245,6 @@ describe("EventPopover", () => {
       uid: "6045c603-11ab-43c5-bc30-0641420bb3a8",
       description: "Discuss project",
       location: "Zoom",
-      repetition: "",
       organizer: { cn: "test", cal_address: "test@test.com" },
       timezone: "Europe/Paris",
       transp: "OPAQUE",
@@ -297,7 +299,6 @@ describe("EventPopover", () => {
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.end)).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);
     expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer);
-    expect(receivedPayload.newEvent.repetition).toEqual(newEvent.repetition);
     expect(receivedPayload.newEvent.color).toEqual(
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].color
     );

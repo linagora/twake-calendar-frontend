@@ -74,7 +74,7 @@ export function Menubar() {
       >
         <div className="app-grid">
           {applist.map((prop: AppIconProps) => (
-            <AppIcon prop={prop} />
+            <AppIcon key={prop.name} prop={prop} />
           ))}
         </div>
       </Popover>
@@ -96,7 +96,6 @@ export function MainTitle() {
 function AppIcon({ prop }: { prop: AppIconProps }) {
   return (
     <a
-      key={prop.name}
       href={prop.link}
       target="_blank"
       style={{ textDecoration: "none", color: "inherit" }}

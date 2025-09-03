@@ -25,7 +25,7 @@ import {
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
-import EventDisplayModal from "../../features/Events/EventDisplay";
+import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import { createSelector } from "@reduxjs/toolkit";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -109,8 +109,10 @@ export default function CalendarApp() {
   }, [rangeKey, selectedCalendars]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [anchorElEventDisplay, setAnchorElEventDisplay] =
-    useState<HTMLElement | null>(null);
+  const [anchorPosition, setAnchorPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
@@ -130,7 +132,7 @@ export default function CalendarApp() {
     setSelectedRange(null);
   };
   const handleCloseEventDisplay = () => {
-    setAnchorElEventDisplay(null);
+    setAnchorPosition(null);
     setOpenEventDisplay(false);
   };
 
@@ -316,7 +318,10 @@ export default function CalendarApp() {
             } else {
               console.log(info.event);
               setOpenEventDisplay(true);
-              setAnchorElEventDisplay(info.el);
+              setAnchorPosition({
+                top: info.jsEvent.clientY,
+                left: info.jsEvent.clientX,
+              });
               setEventDisplayedId(info.event.extendedProps.uid);
               setEventDisplayedCalId(info.event.extendedProps.calId);
             }
@@ -367,7 +372,7 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-
+            console.log(event , newEvent);
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
@@ -468,10 +473,10 @@ export default function CalendarApp() {
           onClose={() => setAnchorElCal(null)}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
-          <EventDisplayModal
+          <EventPreviewModal
             eventId={eventDisplayedId}
             calId={eventDisplayedCalId}
-            anchorEl={anchorElEventDisplay}
+            anchorPosition={anchorPosition}
             open={openEventDisplay}
             onClose={handleCloseEventDisplay}
           />
