@@ -139,16 +139,14 @@ export default function RepeatEvent({
                   setRepetition({
                     freq: repetition.freq,
                     interval: repetition.interval,
-                    occurence: Number(e.target.value),
+                    occurences: 0,
                   });
                 }
                 if (value === "on") {
                   setRepetition({
                     freq: repetition.freq,
                     interval: repetition.interval,
-                    endDate: new Date(e.target.value)
-                      .toISOString()
-                      .slice(0, 16),
+                    endDate: new Date().toISOString().slice(0, 16),
                   });
                 }
               }}
@@ -173,7 +171,7 @@ export default function RepeatEvent({
                         setRepetition({
                           freq: repetition.freq,
                           interval: repetition.interval,
-                          occurence: Number(e.target.value),
+                          occurences: Number(e.target.value),
                         })
                       }
                       sx={{ width: 100 }}
