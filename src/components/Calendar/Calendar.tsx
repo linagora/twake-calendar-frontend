@@ -166,7 +166,7 @@ export default function CalendarApp() {
         </div>
         <ReactCalendar
           key={selectedMiniDate.toDateString()}
-          calendarType="gregory"
+          calendarType="iso8601"
           formatShortWeekday={(locale, date) =>
             date.toLocaleDateString(locale, { weekday: "narrow" })
           }
@@ -251,6 +251,7 @@ export default function CalendarApp() {
           }}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
+          firstDay={1}
           editable={true}
           selectable={true}
           timeZone="local"
