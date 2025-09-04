@@ -193,12 +193,15 @@ export default function CalendarApp() {
               calendarRef.current?.view.type === "timeGridWeek" ||
               calendarRef.current?.view.type === undefined
             ) {
+              const day = selected.getDay();
+              const diff = day === 0 ? -6 : 1 - day;
+
               const startOfWeek = new Date(selected);
-              startOfWeek.setDate(selected.getDate() - selected.getDay()); // Sunday
+              startOfWeek.setDate(selected.getDate() + diff);
               startOfWeek.setHours(0, 0, 0, 0);
 
               const endOfWeek = new Date(startOfWeek);
-              endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+              endOfWeek.setDate(startOfWeek.getDate() + 6);
               endOfWeek.setHours(23, 59, 59, 999);
 
               if (date <= endOfWeek && date >= startOfWeek) {
