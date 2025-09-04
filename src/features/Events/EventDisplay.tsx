@@ -124,7 +124,8 @@ export default function EventDisplayModal({
     if (!event || !calendar) {
       onClose({}, "backdropClick");
     }
-  }, [open, eventId, dispatch, onClose]);
+    setRepetition(event.repetition ?? ({} as RepetitionObject));
+  }, [open, eventId, dispatch, onClose, event]);
 
   if (!event || !calendar) return null;
 
@@ -224,315 +225,331 @@ export default function EventDisplayModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Card sx={{ minWidth: 300, width: "50vw", p: 2, position: "absolute" }}>
-        {/* Close button */}
-        <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-          <IconButton size="small" onClick={() => onClose({}, "backdropClick")}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
-
-        <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
-
-        <CardContent sx={{ overflow: "auto" }}>
-          {/* Title */}
-          <TextField
-            fullWidth
-            disabled={!isOwn}
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            size="small"
-            margin="dense"
-          />
-
-          {/* RSVP */}
-          {currentUserAttendee && isOwnCal && (
-            <Card sx={{ my: 1 }}>
-              <ButtonGroup size="small" fullWidth>
-                <Button
-                  color={
-                    currentUserAttendee.partstat === "ACCEPTED"
-                      ? "success"
-                      : "primary"
-                  }
-                  onClick={() => handleRSVP("ACCEPTED")}
-                >
-                  Accept
-                </Button>
-                <Button
-                  color={
-                    currentUserAttendee.partstat === "TENTATIVE"
-                      ? "warning"
-                      : "primary"
-                  }
-                  onClick={() => handleRSVP("TENTATIVE")}
-                >
-                  Maybe
-                </Button>
-                <Button
-                  color={
-                    currentUserAttendee.partstat === "DECLINED"
-                      ? "error"
-                      : "primary"
-                  }
-                  onClick={() => handleRSVP("DECLINED")}
-                >
-                  Decline
-                </Button>
-                <Button
-                  color="primary"
-                  onClick={() => console.log("proposenewtime")}
-                >
-                  Propose new time
-                </Button>
-              </ButtonGroup>
-            </Card>
-          )}
-
-          {/* Calendar selector */}
-          <FormControl fullWidth margin="dense" size="small">
-            <InputLabel id="calendar-select-label">Calendar</InputLabel>
-            <Select
-              disabled={!isOwn}
-              labelId="calendar-select-label"
-              value={calendarid.toString()}
-              label="Calendar"
-              onChange={(e: SelectChangeEvent) => {
-                const newId = Number(e.target.value);
-                setCalendarid(newId);
-                setNewCalId(userPersonnalCalendars[newId].id);
-              }}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "5vh",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "50vw",
+          maxHeight: "80vh",
+        }}
+      >
+        <Card sx={{ p: 2, position: "absolute" }}>
+          {/* Close button */}
+          <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+            <IconButton
+              size="small"
+              onClick={() => onClose({}, "backdropClick")}
             >
-              {calList}
-            </Select>
-          </FormControl>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
-          {/* Dates */}
-          <TextField
-            fullWidth
-            label="Start"
-            disabled={!isOwn}
-            type={allday ? "date" : "datetime-local"}
-            value={allday ? start.split("T")[0] : start.slice(0, 16)}
-            onChange={(e) =>
-              setStart(formatLocalDateTime(new Date(e.target.value)))
-            }
-            size="small"
-            margin="dense"
-            InputLabelProps={{ shrink: true }}
-          />
+          <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
 
-          <TextField
-            fullWidth
-            disabled={!isOwn}
-            label="End"
-            type={allday ? "date" : "datetime-local"}
-            value={allday ? end.split("T")[0] : end.slice(0, 16)}
-            onChange={(e) =>
-              setEnd(formatLocalDateTime(new Date(e.target.value)))
-            }
-            size="small"
-            margin="dense"
-            InputLabelProps={{ shrink: true }}
-          />
+          <CardContent sx={{ maxHeight: "75vh", overflow: "auto" }}>
+            {/* Title */}
+            <TextField
+              fullWidth
+              disabled={!isOwn}
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              size="small"
+              margin="dense"
+            />
 
-          <FormControlLabel
-            control={
-              <Checkbox
+            {/* RSVP */}
+            {currentUserAttendee && isOwnCal && (
+              <Card sx={{ my: 1 }}>
+                <ButtonGroup size="small" fullWidth>
+                  <Button
+                    color={
+                      currentUserAttendee.partstat === "ACCEPTED"
+                        ? "success"
+                        : "primary"
+                    }
+                    onClick={() => handleRSVP("ACCEPTED")}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    color={
+                      currentUserAttendee.partstat === "TENTATIVE"
+                        ? "warning"
+                        : "primary"
+                    }
+                    onClick={() => handleRSVP("TENTATIVE")}
+                  >
+                    Maybe
+                  </Button>
+                  <Button
+                    color={
+                      currentUserAttendee.partstat === "DECLINED"
+                        ? "error"
+                        : "primary"
+                    }
+                    onClick={() => handleRSVP("DECLINED")}
+                  >
+                    Decline
+                  </Button>
+                  <Button
+                    color="primary"
+                    onClick={() => console.log("proposenewtime")}
+                  >
+                    Propose new time
+                  </Button>
+                </ButtonGroup>
+              </Card>
+            )}
+
+            {/* Calendar selector */}
+            <FormControl fullWidth margin="dense" size="small">
+              <InputLabel id="calendar-select-label">Calendar</InputLabel>
+              <Select
                 disabled={!isOwn}
-                checked={allday}
-                onChange={() => {
-                  const endDate = new Date(end);
-                  const startDate = new Date(start);
-                  setAllDay(!allday);
-                  if (endDate.getDate() === startDate.getDate()) {
-                    endDate.setDate(startDate.getDate() + 1);
-                    setEnd(formatLocalDateTime(endDate));
-                  }
-                }}
-              />
-            }
-            label="All day"
-          />
-
-          {/* Description & Location */}
-          <TextField
-            fullWidth
-            disabled={!isOwn}
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            size="small"
-            margin="dense"
-            multiline
-            rows={2}
-          />
-
-          {isOwn && (
-            <AttendeeSelector
-              attendees={attendees}
-              setAttendees={(value: userAttendee[]) => {
-                const newAttendeeList = attendees.concat(value);
-                setAttendees(newAttendeeList);
-              }}
-            />
-          )}
-
-          <TextField
-            fullWidth
-            label="Location"
-            disabled={!isOwn}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            size="small"
-            margin="dense"
-          />
-
-          {/* Video */}
-          {event.x_openpass_videoconference && (
-            <InfoRow
-              icon={<VideocamIcon sx={{ fontSize: 18 }} />}
-              text="Video conference available"
-              data={event.x_openpass_videoconference}
-            />
-          )}
-
-          {/* Attendees */}
-          {event.attendee?.length > 0 && (
-            <Box sx={{ mb: 1 }}>
-              <Typography variant="subtitle2">Attendees:</Typography>
-              {organizer.cal_address &&
-                renderAttendeeBadge(organizer, "org", true)}
-              {(showAllAttendees
-                ? attendees
-                : attendees.slice(0, attendeeDisplayLimit)
-              ).map((a, idx) => (
-                <Box key={a.cal_address}>
-                  {renderAttendeeBadge(a, idx.toString())}
-                  {isOwn && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const newAttendeesList = [...attendees];
-                        newAttendeesList.splice(idx, 1);
-                        setAttendees(newAttendeesList);
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
-              ))}
-              {attendees.length > attendeeDisplayLimit && (
-                <Typography
-                  variant="body2"
-                  color="primary"
-                  sx={{ cursor: "pointer", mt: 0.5 }}
-                  onClick={() => setShowAllAttendees(!showAllAttendees)}
-                >
-                  {showAllAttendees
-                    ? "Show less"
-                    : `Show more (${
-                        attendees.length - attendeeDisplayLimit
-                      } more)`}
-                </Typography>
-              )}
-            </Box>
-          )}
-
-          <Divider sx={{ my: 1 }} />
-
-          {/* Extended options */}
-          {showMore && (
-            <>
-              <RepeatEvent
-                repetition={repetition}
-                setRepetition={setRepetition}
-                isOwn={isOwn}
-              />
-
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="alarm">Alarm</InputLabel>
-                <Select
-                  labelId="alarm"
-                  value={alarm}
-                  disabled={!isOwn}
-                  onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
-                >
-                  <MenuItem value={""}>No Alarm</MenuItem>
-                  <MenuItem value={"-PT1M"}>1 minute</MenuItem>
-                  <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
-                  <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
-                  <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
-                  <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
-                  <MenuItem value={"-PT1H"}>1 hours</MenuItem>
-                  <MenuItem value={"-PT2H"}>2 hours</MenuItem>
-                  <MenuItem value={"-PT5H"}>5 hours</MenuItem>
-                  <MenuItem value={"-PT12H"}>12 hours</MenuItem>
-                  <MenuItem value={"-PT1D"}>1 day</MenuItem>
-                  <MenuItem value={"-PT2D"}>2 days</MenuItem>
-                  <MenuItem value={"-PT1W"}>1 week</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel id="Visibility">Visibility</InputLabel>
-                <Select
-                  labelId="Visibility"
-                  label="Visibility"
-                  value={eventClass}
-                  disabled={!isOwn}
-                  onChange={(e: SelectChangeEvent) =>
-                    setEventClass(e.target.value)
-                  }
-                >
-                  <MenuItem value={"PUBLIC"}>Public</MenuItem>
-                  <MenuItem value={"CONFIDENTIAL"}>Show time only</MenuItem>
-                  <MenuItem value={"PRIVATE"}>Private</MenuItem>
-                </Select>
-              </FormControl>
-              {/* Error */}
-              {event.error && (
-                <InfoRow
-                  icon={
-                    <ErrorOutlineIcon color="error" sx={{ fontSize: 18 }} />
-                  }
-                  text={event.error}
-                  error
-                />
-              )}
-            </>
-          )}
-        </CardContent>
-
-        <CardActions>
-          <ButtonGroup>
-            {isOwn && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  onClose({}, "backdropClick");
-                  dispatch(
-                    deleteEventAsync({ calId, eventId, eventURL: event.URL })
-                  );
+                labelId="calendar-select-label"
+                value={calendarid.toString()}
+                label="Calendar"
+                onChange={(e: SelectChangeEvent) => {
+                  const newId = Number(e.target.value);
+                  setCalendarid(newId);
+                  setNewCalId(userPersonnalCalendars[newId].id);
                 }}
               >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-            <Button size="small" onClick={handleToggleShowMore}>
-              {showMore ? "Show Less" : "Show More"}
-            </Button>
+                {calList}
+              </Select>
+            </FormControl>
+
+            {/* Dates */}
+            <TextField
+              fullWidth
+              label="Start"
+              disabled={!isOwn}
+              type={allday ? "date" : "datetime-local"}
+              value={allday ? start.split("T")[0] : start.slice(0, 16)}
+              onChange={(e) =>
+                setStart(formatLocalDateTime(new Date(e.target.value)))
+              }
+              size="small"
+              margin="dense"
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              fullWidth
+              disabled={!isOwn}
+              label="End"
+              type={allday ? "date" : "datetime-local"}
+              value={allday ? end.split("T")[0] : end.slice(0, 16)}
+              onChange={(e) =>
+                setEnd(formatLocalDateTime(new Date(e.target.value)))
+              }
+              size="small"
+              margin="dense"
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  disabled={!isOwn}
+                  checked={allday}
+                  onChange={() => {
+                    const endDate = new Date(end);
+                    const startDate = new Date(start);
+                    setAllDay(!allday);
+                    if (endDate.getDate() === startDate.getDate()) {
+                      endDate.setDate(startDate.getDate() + 1);
+                      setEnd(formatLocalDateTime(endDate));
+                    }
+                  }}
+                />
+              }
+              label="All day"
+            />
+
+            {/* Description & Location */}
+            <TextField
+              fullWidth
+              disabled={!isOwn}
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              size="small"
+              margin="dense"
+              multiline
+              rows={2}
+            />
 
             {isOwn && (
-              <Button size="small" onClick={handleSave}>
-                Save
-              </Button>
+              <AttendeeSelector
+                attendees={attendees}
+                setAttendees={(value: userAttendee[]) => {
+                  const newAttendeeList = attendees.concat(value);
+                  setAttendees(newAttendeeList);
+                }}
+              />
             )}
-          </ButtonGroup>
-        </CardActions>
-      </Card>
+
+            <TextField
+              fullWidth
+              label="Location"
+              disabled={!isOwn}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              size="small"
+              margin="dense"
+            />
+
+            {/* Video */}
+            {event.x_openpass_videoconference && (
+              <InfoRow
+                icon={<VideocamIcon sx={{ fontSize: 18 }} />}
+                text="Video conference available"
+                data={event.x_openpass_videoconference}
+              />
+            )}
+
+            {/* Attendees */}
+            {event.attendee?.length > 0 && (
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="subtitle2">Attendees:</Typography>
+                {organizer.cal_address &&
+                  renderAttendeeBadge(organizer, "org", true)}
+                {(showAllAttendees
+                  ? attendees
+                  : attendees.slice(0, attendeeDisplayLimit)
+                ).map((a, idx) => (
+                  <Box key={a.cal_address}>
+                    {renderAttendeeBadge(a, idx.toString())}
+                    {isOwn && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newAttendeesList = [...attendees];
+                          newAttendeesList.splice(idx, 1);
+                          setAttendees(newAttendeesList);
+                        }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                ))}
+                {attendees.length > attendeeDisplayLimit && (
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ cursor: "pointer", mt: 0.5 }}
+                    onClick={() => setShowAllAttendees(!showAllAttendees)}
+                  >
+                    {showAllAttendees
+                      ? "Show less"
+                      : `Show more (${
+                          attendees.length - attendeeDisplayLimit
+                        } more)`}
+                  </Typography>
+                )}
+              </Box>
+            )}
+
+            <Divider sx={{ my: 1 }} />
+
+            {/* Extended options */}
+            {showMore && (
+              <>
+                <RepeatEvent
+                  repetition={repetition}
+                  setRepetition={setRepetition}
+                  isOwn={isOwn}
+                />
+
+                <FormControl fullWidth margin="dense" size="small">
+                  <InputLabel id="alarm">Alarm</InputLabel>
+                  <Select
+                    labelId="alarm"
+                    value={alarm}
+                    disabled={!isOwn}
+                    onChange={(e: SelectChangeEvent) =>
+                      setAlarm(e.target.value)
+                    }
+                  >
+                    <MenuItem value={""}>No Alarm</MenuItem>
+                    <MenuItem value={"-PT1M"}>1 minute</MenuItem>
+                    <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
+                    <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
+                    <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
+                    <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
+                    <MenuItem value={"-PT1H"}>1 hours</MenuItem>
+                    <MenuItem value={"-PT2H"}>2 hours</MenuItem>
+                    <MenuItem value={"-PT5H"}>5 hours</MenuItem>
+                    <MenuItem value={"-PT12H"}>12 hours</MenuItem>
+                    <MenuItem value={"-PT1D"}>1 day</MenuItem>
+                    <MenuItem value={"-PT2D"}>2 days</MenuItem>
+                    <MenuItem value={"-PT1W"}>1 week</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth margin="dense" size="small">
+                  <InputLabel id="Visibility">Visibility</InputLabel>
+                  <Select
+                    labelId="Visibility"
+                    label="Visibility"
+                    value={eventClass}
+                    disabled={!isOwn}
+                    onChange={(e: SelectChangeEvent) =>
+                      setEventClass(e.target.value)
+                    }
+                  >
+                    <MenuItem value={"PUBLIC"}>Public</MenuItem>
+                    <MenuItem value={"CONFIDENTIAL"}>Show time only</MenuItem>
+                    <MenuItem value={"PRIVATE"}>Private</MenuItem>
+                  </Select>
+                </FormControl>
+                {/* Error */}
+                {event.error && (
+                  <InfoRow
+                    icon={
+                      <ErrorOutlineIcon color="error" sx={{ fontSize: 18 }} />
+                    }
+                    text={event.error}
+                    error
+                  />
+                )}
+              </>
+            )}
+          </CardContent>
+
+          <CardActions>
+            <ButtonGroup>
+              {isOwn && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    onClose({}, "backdropClick");
+                    dispatch(
+                      deleteEventAsync({ calId, eventId, eventURL: event.URL })
+                    );
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
+              <Button size="small" onClick={handleToggleShowMore}>
+                {showMore ? "Show Less" : "Show More"}
+              </Button>
+
+              {isOwn && (
+                <Button size="small" onClick={handleSave}>
+                  Save
+                </Button>
+              )}
+            </ButtonGroup>
+          </CardActions>
+        </Card>
+      </Box>
     </Modal>
   );
 }
