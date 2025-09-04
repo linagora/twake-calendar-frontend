@@ -31,7 +31,7 @@ export default function RepeatEvent({
 
   // derive endOption based on repetition
   const getEndOption = () => {
-    if (repetition.occurrences && repetition.occurrences > 0) return "after";
+    if (repetition.occurrences && repetition.occurrences >= 0) return "after";
     if (repetition.endDate) return "on";
     return "never";
   };
@@ -40,7 +40,9 @@ export default function RepeatEvent({
 
   // keep endOption in sync if repetition changes from parent
   useEffect(() => {
-    setEndOption(getEndOption());
+    if (!endOption) {
+      setEndOption(getEndOption());
+    }
   }, [repetition.occurrences, repetition.endDate]);
 
   const handleDayChange = (day: string) => {
@@ -77,7 +79,7 @@ export default function RepeatEvent({
             <Typography>Interval:</Typography>
             <TextField
               type="number"
-              value={repetition.interval ?? 0}
+              value={repetition.interval ?? 1}
               onChange={(e) =>
                 setRepetition({
                   ...repetition,
@@ -137,15 +139,15 @@ export default function RepeatEvent({
                 }
                 if (value === "after") {
                   setRepetition({
-                    freq: repetition.freq,
-                    interval: repetition.interval,
-                    occurences: 0,
+                    ...repetition,
+                    occurrences: 0,
+                    endDate: "",
                   });
                 }
                 if (value === "on") {
                   setRepetition({
-                    freq: repetition.freq,
-                    interval: repetition.interval,
+                    ...repetition,
+                    occurrences: 0,
                     endDate: new Date().toISOString().slice(0, 16),
                   });
                 }
@@ -171,7 +173,7 @@ export default function RepeatEvent({
                         setRepetition({
                           freq: repetition.freq,
                           interval: repetition.interval,
-                          occurences: Number(e.target.value),
+                          occurrences: Number(e.target.value),
                         })
                       }
                       sx={{ width: 100 }}
