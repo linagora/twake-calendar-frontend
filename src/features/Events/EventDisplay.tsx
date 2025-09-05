@@ -182,13 +182,7 @@ export default function EventDisplayModal({
     onClose({}, "backdropClick");
   };
 
-  const [detailsLoaded, setDetailsLoaded] = useState(false);
-
   const handleToggleShowMore = async () => {
-    if (!detailsLoaded) {
-      await dispatch(getEventAsync(event));
-      setDetailsLoaded(true);
-    }
     setShowMore(!showMore);
   };
 

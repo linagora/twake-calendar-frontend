@@ -136,6 +136,7 @@ export default function EventPreviewModal({
                   size="small"
                   onClick={async () => {
                     setOpenFullDisplay(!openFullDisplay);
+                    await dispatch(getEventAsync(event));
                   }}
                 >
                   <EditIcon fontSize="small" />

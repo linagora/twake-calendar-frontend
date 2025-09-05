@@ -474,6 +474,37 @@ describe("Event Preview Display", () => {
     const updatedEvent = spy.mock.calls[0][0].newEvent;
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
   });
+  it("handles Edit click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getEventAsync")
+      .mockImplementation((payload) => {
+        return () =>
+          Promise.resolve({
+            calId: payload.calId,
+            event:
+              preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+                .events["event1"],
+          }) as any;
+      });
+
+    renderWithProviders(
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedState
+    );
+
+    fireEvent.click(screen.getByTestId("EditIcon"));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+    expect(screen.getByText("Edit Event")).toBeInTheDocument();
+  });
 });
 
 describe("Event Full Display", () => {
@@ -917,18 +948,6 @@ describe("Event Full Display", () => {
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
   });
   it("toggle Show More reveals extra fields", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "getEventAsync")
-      .mockImplementation((payload) => {
-        return () =>
-          Promise.resolve({
-            calId: payload.calId,
-            event:
-              preloadedState.calendars.list["667037022b752d0026472254/cal1"]
-                .events["event1"],
-          }) as any;
-      });
-
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -942,10 +961,6 @@ describe("Event Full Display", () => {
       fireEvent.click(screen.getByText("Show More"));
     });
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-    console.log(spy);
     await waitFor(() => {
       expect(screen.getByLabelText(/Alarm/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Repetition/i)).toBeInTheDocument();
