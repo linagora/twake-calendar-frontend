@@ -32,10 +32,12 @@ export default function UserSearch({
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      setLoading(true);
-      const res = await searchUsers(query);
-      setOptions(res);
-      setLoading(false);
+      if (query) {
+        setLoading(true);
+        const res = await searchUsers(query);
+        setOptions(res);
+        setLoading(false);
+      }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
