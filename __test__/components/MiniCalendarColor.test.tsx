@@ -59,25 +59,8 @@ describe("MiniCalendar", () => {
   it("renders mini calendar with the week in gray (except for today) when full calendar in week view", async () => {
     renderCalendar();
 
-    // const today = new Date();
-    // const sunday = new Date(today);
-    // sunday.setDate(today.getDate() - today.getDay());
-
-    // for (let i = 0; i < 7; i++) {
-    //   const date = new Date(sunday);
-    //   date.setDate(sunday.getDate() + i);
-    //   const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-
-    //   const tile = screen.getByTestId(dateTestId);
-
-    //   if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
-    //     expect(tile?.parentElement).toHaveClass("selectedWeek");
-    //   }
-    // }
     const today = new Date();
     const monday = new Date(today);
-
-    // Shift back to Monday (ISO week start)
     monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
     for (let i = 0; i < 7; i++) {
