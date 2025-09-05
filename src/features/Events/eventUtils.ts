@@ -84,9 +84,7 @@ export function parseCalendarEvent(
         break;
       case "rrule":
         event.repetition = { freq: value.freq.toLowerCase() };
-        console.log(value);
         if (value.byday) {
-          console.log(value.byday);
           event.repetition.selectedDays = value.byday;
         }
         if (value.until) {
@@ -98,7 +96,6 @@ export function parseCalendarEvent(
         if (value.interval) {
           event.repetition.interval = value.interval;
         }
-        console.log(event.repetition);
         break;
     }
   }

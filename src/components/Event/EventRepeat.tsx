@@ -171,8 +171,8 @@ export default function RepeatEvent({
                       value={repetition.occurrences ?? 0}
                       onChange={(e) =>
                         setRepetition({
-                          freq: repetition.freq,
-                          interval: repetition.interval,
+                          ...repetition,
+                          endDate: "",
                           occurrences: Number(e.target.value),
                         })
                       }
@@ -197,8 +197,8 @@ export default function RepeatEvent({
                       value={repetition.endDate ?? ""}
                       onChange={(e) =>
                         setRepetition({
-                          freq: repetition.freq,
-                          interval: repetition.interval,
+                          ...repetition,
+                          occurrences: 0,
                           endDate: e.target.value,
                         })
                       }
