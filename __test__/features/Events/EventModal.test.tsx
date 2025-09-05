@@ -286,7 +286,6 @@ describe("EventPopover", () => {
       preloadedState.calendars.list["667037022b752d0026472254/cal1"]
     );
 
-    console.log(receivedPayload.newEvent.start);
     expect(receivedPayload.newEvent.title).toBe(newEvent.title);
     expect(receivedPayload.newEvent.description).toBe(newEvent.description);
     expect(
