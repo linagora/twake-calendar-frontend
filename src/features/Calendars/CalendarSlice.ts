@@ -298,7 +298,20 @@ const CalendarSlice = createSlice({
       )
       .addCase(deleteEventAsync.fulfilled, (state, action) => {
         state.pending = false;
-        delete state.list[action.payload.calId].events[action.payload.eventId];
+        const [baseId, recurrenceId] = action.payload.eventId.split("/");
+        if (recurrenceId) {
+          Object.keys(state.list[action.payload.calId].events).forEach(
+            (element) => {
+              if (element.split("/")[0] === baseId) {
+                delete state.list[action.payload.calId].events[element];
+              }
+            }
+          );
+        } else {
+          delete state.list[action.payload.calId].events[
+            action.payload.eventId
+          ];
+        }
       })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;

@@ -193,6 +193,7 @@ export default function RepeatEvent({
                     On
                     <TextField
                       type="date"
+                      inputProps={{ "data-testid": "end-date" }}
                       size="small"
                       value={repetition.endDate ?? ""}
                       onChange={(e) =>
