@@ -162,6 +162,16 @@ export default function EventDisplayModal({
       color: userPersonnalCalendars[calendarid]?.color,
     };
 
+    const [baseId, recurrenceId] = event.uid.split("/");
+    if (recurrenceId) {
+      Object.keys(userPersonnalCalendars[calendarid].events).forEach(
+        (element) => {
+          if (element.split("/")[0] === baseId) {
+            dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
+          }
+        }
+      );
+    }
     await dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
