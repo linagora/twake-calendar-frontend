@@ -19,15 +19,18 @@ import { RepetitionObject } from "../../features/Events/EventsTypes";
 
 export default function RepeatEvent({
   repetition,
+  eventStart,
   setRepetition,
   isOwn = true,
 }: {
   repetition: RepetitionObject;
+  eventStart: Date;
   setRepetition: Function;
   isOwn?: boolean;
 }) {
   const repetitionValues = ["day", "week", "month", "year"];
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+  const day = new Date(eventStart);
 
   // derive endOption based on repetition
   const getEndOption = () => {
@@ -61,9 +64,17 @@ export default function RepeatEvent({
         value={repetition.freq ?? ""}
         disabled={!isOwn}
         label="Repetition"
-        onChange={(e: SelectChangeEvent) =>
-          setRepetition({ ...repetition, freq: e.target.value })
-        }
+        onChange={(e: SelectChangeEvent) => {
+          if (e.target.value === "weekly") {
+            setRepetition({
+              ...repetition,
+              freq: e.target.value,
+              selectedDays: [days[day.getDay() - 1]],
+            });
+          } else {
+            setRepetition({ ...repetition, freq: e.target.value });
+          }
+        }}
       >
         <MenuItem value={""}>No Repetition</MenuItem>
         <MenuItem value={"daily"}>Repeat daily</MenuItem>

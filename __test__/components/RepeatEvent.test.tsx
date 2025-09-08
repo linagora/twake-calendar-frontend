@@ -65,6 +65,7 @@ function setupRepeatEvent(props?: Partial<RepetitionObject>, state?: any) {
   renderWithProviders(
     <RepeatEvent
       repetition={{ ...baseRepetition, ...props }}
+      eventStart={defaultSelectedRange.start}
       setRepetition={setRepetition}
       isOwn={true}
     />,
@@ -133,7 +134,18 @@ async function expectRRule(expected: any) {
     spyAPi.mock.calls[0][1]?.body?.toString() ?? "";
   const [, , [vevent]] = JSON.parse(receivedPayload);
   const rrule = vevent[1].find(([name]: any) => name === "rrule");
-  expect(rrule[3]).toEqual(expected);
+
+  if (rrule[3].byday) {
+    expect({
+      ...rrule[3],
+      byday: rrule[3].byday.sort(),
+    }).toEqual({
+      ...expected,
+      byday: expected.byday.sort(),
+    });
+  } else {
+    expect(rrule[3]).toEqual(expected);
+  }
 }
 
 describe("RepeatEvent", () => {
@@ -221,7 +233,17 @@ describe("Repeat Event API calls", () => {
     expect(received.newEvent.organizer).toEqual(
       preloadedState.user.organiserData
     );
-    expect(received.newEvent.repetition).toEqual({ freq: "weekly" });
+    const day = new Date(received.newEvent.start)
+      .toLocaleString("en-UK", {
+        weekday: "short",
+      })
+      .slice(0, 2)
+      .toUpperCase();
+
+    expect(received.newEvent.repetition).toEqual({
+      freq: "weekly",
+      selectedDays: [day],
+    });
     expect(received.newEvent.color).toEqual(
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].color
     );
@@ -280,23 +302,21 @@ describe("Repeat Event API calls", () => {
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
 
-  it("sends correct API payload for repeat weekly on Thursday and Friday", async () => {
+  it("sends correct API payload for repeat weekly on Thursday and event day (Friday)", async () => {
     await setupEventPopover();
 
     userEvent.click(await screen.findByText(/repeat weekly/i));
     userEvent.click(screen.getByLabelText("TH"));
-    userEvent.click(screen.getByLabelText("FR"));
 
     await expectRRule({ freq: "weekly", byday: ["TH", "FR"] });
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
-  it("sends correct API payload for repeat weekly on Thursday and Friday and an interval of 3 weeks", async () => {
+  it("sends correct API payload for repeat weekly on Thursday and event day (Friday) and an interval of 3 weeks", async () => {
     await setupEventPopover();
 
     userEvent.click(await screen.findByText(/repeat weekly/i));
 
     userEvent.click(screen.getByLabelText("TH"));
-    userEvent.click(screen.getByLabelText("FR"));
 
     const intervalInput = screen.getByDisplayValue("1");
     fireEvent.change(intervalInput, { target: { value: "3" } });

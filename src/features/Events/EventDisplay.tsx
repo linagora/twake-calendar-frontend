@@ -466,6 +466,7 @@ export default function EventDisplayModal({
               <>
                 <RepeatEvent
                   repetition={repetition}
+                  eventStart={event.start}
                   setRepetition={setRepetition}
                   isOwn={isOwn}
                 />
