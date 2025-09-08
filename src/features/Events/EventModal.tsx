@@ -117,6 +117,7 @@ function EventPopover({
       ],
       transp: "OPAQUE",
       color: userPersonnalCalendars[calendarid]?.color,
+      alarm: { trigger: alarm, action: "EMAIL" },
     };
     if (end) {
       newEvent.end = new Date(end);
