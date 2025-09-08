@@ -16,10 +16,10 @@ export async function getEvent(event: CalendarEvent) {
   return { ...eventjson, ...event };
 }
 
-export async function putEvent(event: CalendarEvent) {
+export async function putEvent(event: CalendarEvent, calOwnerEmail?: string) {
   const response = await api(`dav${event.URL}`, {
     method: "PUT",
-    body: JSON.stringify(calendarEventToJCal(event)),
+    body: JSON.stringify(calendarEventToJCal(event, calOwnerEmail)),
     headers: {
       "content-type": "text/calendar; charset=utf-8",
     },

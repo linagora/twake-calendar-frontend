@@ -56,9 +56,10 @@ export const getCalendarDetailAsync = createAsyncThunk<
   const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][]; // array of ['vevent', RawEntry[], []]
+      const valarm = eventdata.data[2][0][2][0];
       const eventURL = eventdata._links.self.href;
       return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(vevent[1], color, calId, eventURL);
+        return parseCalendarEvent(vevent[1], color, calId, eventURL, valarm);
       });
     }
   );
@@ -88,8 +89,15 @@ export const putEventAsync = createAsyncThunk<
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][];
       const eventURL = eventdata._links.self.href;
+      const valarm = eventdata.data[3][0][1];
       return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(vevent[1], cal.color ?? "", cal.id, eventURL);
+        return parseCalendarEvent(
+          vevent[1],
+          cal.color ?? "",
+          cal.id,
+          eventURL,
+          valarm
+        );
       });
     }
   );
