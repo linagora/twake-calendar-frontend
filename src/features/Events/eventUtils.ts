@@ -105,7 +105,6 @@ export function parseCalendarEvent(
   }
 
   if (valarm) {
-    console.log(valarm);
     event.alarm = {} as AlarmObject;
     for (const [key, params, type, value] of valarm[1]) {
       switch (key.toLowerCase()) {
