@@ -1,3 +1,4 @@
+import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import {
   calendarEventToJCal,
   parseCalendarEvent,
@@ -69,6 +70,23 @@ describe("parseCalendarEvent", () => {
     ]);
   });
 
+  it("marks allday true for DATE format", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-2"],
+      ["DTSTART", {}, "date", "2025-07-20"],
+      ["DTEND", {}, "date", "2025-07-21"],
+    ] as any;
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+
+    expect(result.allday).toBe(true);
+  });
+
   it("appends recurrence-id to UID if present", () => {
     const rawData: any = [
       ["UID", {}, "text", "event-2"],
@@ -108,6 +126,32 @@ describe("parseCalendarEvent", () => {
       "/calendars/test.ics"
     );
     expect(result2.error).toMatch(/missing crucial event param/);
+  });
+
+  it("parses alarm block correctly", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-5"],
+      ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
+    ] as any;
+
+    const valarm: any = [
+      "VALARM",
+      [
+        ["ACTION", {}, "text", "DISPLAY"],
+        ["TRIGGER", {}, "duration", "-PT15M"],
+      ],
+    ];
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics",
+      valarm
+    );
+
+    expect(result.alarm?.action).toBe("DISPLAY");
+    expect(result.alarm?.trigger).toBe("-PT15M");
   });
 
   it("handles optional organizer and attendee fields gracefully", () => {
@@ -184,7 +228,7 @@ describe("calendarEventToJCal", () => {
       ],
     };
 
-    const result = calendarEventToJCal(mockEvent);
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -266,6 +310,53 @@ describe("calendarEventToJCal", () => {
       ])
     );
   });
+
+  it("converts with alarm included", () => {
+    const mockEvent: any = {
+      uid: "event-10",
+      title: "Alarm Event",
+      start: new Date("2025-07-20T09:00:00"),
+      end: new Date("2025-07-20T10:00:00"),
+      timezone: "Europe/Paris",
+      allday: false,
+      alarm: { trigger: "-PT10M", action: "DISPLAY" },
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent, "owner@example.com");
+    const vevent = result[2][0];
+
+    expect(vevent[2][0][0]).toBe("valarm");
+    expect(vevent[2][0][1]).toEqual(
+      expect.arrayContaining([
+        ["trigger", {}, "duration", "-PT10M"],
+        ["action", {}, "text", "DISPLAY"],
+      ])
+    );
+  });
+
+  it("converts all-day events adjusting dtend", () => {
+    const mockEvent: any = {
+      uid: "event-11",
+      title: "All Day",
+      start: new Date("2025-07-21"),
+      end: new Date("2025-07-21"),
+      timezone: "Europe/Paris",
+      allday: true,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent);
+    const veventProps = result[2][0][1];
+
+    expect(veventProps).toEqual(
+      expect.arrayContaining([
+        ["dtstart", { tzid: "Europe/Paris" }, "date", "2025-07-21"],
+        ["dtend", { tzid: "Europe/Paris" }, "date", "2025-07-22"],
+      ])
+    );
+  });
+
   it("should convert a CalendarEvent to JCal format, with all day activated", () => {
     const mockEvent = {
       uid: "event-123",
@@ -297,7 +388,7 @@ describe("calendarEventToJCal", () => {
       ],
     };
 
-    const result = calendarEventToJCal(mockEvent);
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
