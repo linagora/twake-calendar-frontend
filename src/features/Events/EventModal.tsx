@@ -76,7 +76,7 @@ function EventPopover({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [alarm, setAlarm] = useState("");
   const [eventClass, setEventClass] = useState("PUBLIC");
-  const [busy, setBusy] = useState("");
+  const [busy, setBusy] = useState("OPAQUE");
 
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -115,7 +115,7 @@ function EventPopover({
           cutype: "INDIVIDUAL",
         },
       ],
-      transp: "OPAQUE",
+      transp: busy,
       color: userPersonnalCalendars[calendarid]?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
     };
@@ -324,6 +324,18 @@ function EventPopover({
                   <MenuItem value={"PUBLIC"}>Public</MenuItem>
                   <MenuItem value={"CONFIDENTIAL"}>Show time only</MenuItem>
                   <MenuItem value={"PRIVATE"}>Private</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth margin="dense" size="small">
+                <InputLabel id="busy">is Busy</InputLabel>
+                <Select
+                  labelId="busy"
+                  value={busy}
+                  label="is busy"
+                  onChange={(e: SelectChangeEvent) => setBusy(e.target.value)}
+                >
+                  <MenuItem value={"TRANSPARENT"}>Free</MenuItem>
+                  <MenuItem value={"OPAQUE"}>Busy </MenuItem>
                 </Select>
               </FormControl>
             </>

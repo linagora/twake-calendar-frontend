@@ -247,7 +247,7 @@ describe("EventPopover", () => {
       location: "Zoom",
       organizer: { cn: "test", cal_address: "test@test.com" },
       timezone: "Europe/Paris",
-      transp: "OPAQUE",
+      transp: "TRANSPARENT",
     };
 
     // Fill inputs

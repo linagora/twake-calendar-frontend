@@ -157,7 +157,7 @@ export function calendarEventToJCal(
       ["summary", {}, "text", event.title ?? ""],
     ],
   ];
-  if (event.alarm) {
+  if (event.alarm?.trigger) {
     const valarm = [
       ["trigger", {}, "duration", event.alarm.trigger],
       ["action", {}, "text", event.alarm.action],
