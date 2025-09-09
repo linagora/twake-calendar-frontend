@@ -33,6 +33,13 @@ import ClearIcon from "@mui/icons-material/Clear";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { userAttendee } from "../../features/User/userDataTypes";
 
+const computeStartOfTheWeek = (date: Date): Date => {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
+  startOfWeek.setHours(0, 0, 0, 0); 
+  return startOfWeek;
+};
+
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -169,7 +176,7 @@ export default function CalendarApp() {
         </div>
         <ReactCalendar
           key={selectedMiniDate.toDateString()}
-          calendarType="gregory"
+          calendarType="iso8601"
           formatShortWeekday={(locale, date) =>
             date.toLocaleDateString(locale, { weekday: "narrow" })
           }
@@ -196,12 +203,11 @@ export default function CalendarApp() {
               calendarRef.current?.view.type === "timeGridWeek" ||
               calendarRef.current?.view.type === undefined
             ) {
-              const startOfWeek = new Date(selected);
-              startOfWeek.setDate(selected.getDate() - selected.getDay()); // Sunday
-              startOfWeek.setHours(0, 0, 0, 0);
+
+              const startOfWeek = computeStartOfTheWeek(selected);
 
               const endOfWeek = new Date(startOfWeek);
-              endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+              endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
               endOfWeek.setHours(23, 59, 59, 999);
 
               if (date <= endOfWeek && date >= startOfWeek) {
@@ -254,6 +260,7 @@ export default function CalendarApp() {
           }}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
+          firstDay={1}
           editable={true}
           selectable={true}
           timeZone="local"
