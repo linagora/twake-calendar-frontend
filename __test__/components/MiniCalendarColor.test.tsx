@@ -56,24 +56,33 @@ describe("MiniCalendar", () => {
     expect(todayTile?.parentElement).toHaveClass("today");
   });
 
-  it("renders mini calendar with the week in gray (except for today) when full calendar in week view", async () => {
+  it.each([
+  { today: new Date(2025, 8, 1), label: "Monday 1 Sept 2025" },
+  { today: new Date(2025, 8, 3), label: "Wednesday 3 Sept 2025" },
+  { today: new Date(2025, 8, 7), label: "Sunday 7 Sept 2025" },
+  ])(
+  "renders mini calendar with the week in gray (except for today) when today is $label",
+  ({ today }) => {
+    jest.useFakeTimers();
+    jest.setSystemTime(today);
+
     renderCalendar();
 
-    const today = new Date();
-    const sunday = new Date(today);
-    sunday.setDate(today.getDate() - today.getDay());
+    const monday = new Date(2025, 8, 1); // Monday Sept 1
 
     for (let i = 0; i < 7; i++) {
-      const date = new Date(sunday);
-      date.setDate(sunday.getDate() + i);
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
       const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-
+      
       const tile = screen.getByTestId(dateTestId);
 
       if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
         expect(tile?.parentElement).toHaveClass("selectedWeek");
       }
     }
+
+    jest.useRealTimers();
   });
 
   it("renders mini calendar with the day in gray (except for today) when full calendar in day view", async () => {
