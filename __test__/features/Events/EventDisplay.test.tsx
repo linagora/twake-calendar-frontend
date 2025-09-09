@@ -13,6 +13,18 @@ describe('EventDisplay', () => {
   const day = new Date();
 
   const preloadedState = {
+    user: {
+      userData: {
+        sub: "test",
+        email: "test@test.com",
+        sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
+        openpaasId: "667037022b752d0026472254",
+      },
+      organiserData: {
+        cn: "test",
+        cal_address: "mailto:test@test.com",
+      },
+    },
     calendars: {
       list: {
         "cal1": {
@@ -78,7 +90,7 @@ describe('EventDisplay', () => {
     );
     expect(screen.getByTestId("lock-icon")).toBeInTheDocument();
   });
-  
+
   it('does not render lock icon for public events', () => {
     renderWithProviders(
       <EventDisplayModal
