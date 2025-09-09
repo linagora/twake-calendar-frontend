@@ -89,7 +89,7 @@ export const putEventAsync = createAsyncThunk<
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][];
       const eventURL = eventdata._links.self.href;
-      const valarm = eventdata.data[3][0][1];
+      const valarm = eventdata.data[2][0][2][0];
       return vevents.map((vevent: any[]) => {
         return parseCalendarEvent(
           vevent[1],
