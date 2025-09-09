@@ -8,6 +8,91 @@ import EventDisplayModal, {
 } from "../../../src/features/Events/EventDisplay";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 
+describe('EventDisplay', () => {
+  const mockOnClose = jest.fn();
+  const day = new Date();
+
+  const preloadedState = {
+    calendars: {
+      list: {
+        "cal1": {
+          id: "cal1",
+          name: "Calendar",
+          events: {
+            event1: {
+              id: "event1",
+              title: "Private Event",
+              class: 'PRIVATE',
+              calId: "cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
+            },
+            event2: {
+              id: "event2",
+              title: "Confidential Event",
+              class: 'CONFIDENTIAL',
+              calId: "cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
+            },
+            event3: {
+              id: "event3",
+              title: "Public Event",
+              class: 'PUBLIC',
+              calId: "cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
+            },
+          },
+        },
+      },
+      pending: false,
+    },
+  };
+
+  it('renders lock icon for private events', () => {
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId="cal1"
+        eventId="event1"
+      />,
+      preloadedState
+    );
+    expect(screen.getByTestId("lock-icon")).toBeInTheDocument();
+  });
+
+  it('renders lock icon for confidential events', () => {
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId="cal1"
+        eventId="event2"
+      />,
+      preloadedState
+    );
+    expect(screen.getByTestId("lock-icon")).toBeInTheDocument();
+  });
+  
+  it('does not render lock icon for public events', () => {
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId="cal1"
+        eventId="event3"
+      />,
+      preloadedState
+    );
+    expect(screen.queryByTestId("lock-icon")).not.toBeInTheDocument();
+  });
+});
+
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
   const day = new Date();

@@ -388,7 +388,7 @@ export default function CalendarApp() {
             if (!calendars[arg.event._def.extendedProps.calId]) return;
 
             const attendees = event._def.extendedProps.attendee || [];
-            const isPrivate = event._def.extendedProps.class === "PRIVATE";
+            const isPrivate = event._def.extendedProps.class === "PRIVATE" || event._def.extendedProps.class === "CONFIDENTIAL"; 
             let Icon = null;
             let titleStyle: React.CSSProperties = {};
             const ownerEmails = new Set(
@@ -420,7 +420,7 @@ export default function CalendarApp() {
 
             return (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                {isPrivate && <LockIcon fontSize="small" style={{ marginRight: '4px' }} />}
+                {isPrivate && <LockIcon data-testid="lock-icon" fontSize="small" style={{ marginRight: '4px' }} />}
                 {Icon && <Icon fontSize="small" style={{ marginRight: '4px' }}/>}
                 <span style={titleStyle}>{event.title}</span>
               </div>
