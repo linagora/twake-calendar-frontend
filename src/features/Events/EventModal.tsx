@@ -284,6 +284,7 @@ function EventPopover({
             <>
               <RepeatEvent
                 repetition={repetition}
+                eventStart={selectedRange?.start ?? new Date()}
                 setRepetition={setRepetition}
               />
               <FormControl fullWidth margin="dense" size="small">

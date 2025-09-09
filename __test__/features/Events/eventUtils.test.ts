@@ -280,7 +280,7 @@ describe("calendarEventToJCal", () => {
       allday: true,
       location: "Room 101",
       description: "Discuss project roadmap.",
-      repetition: { freq: "WEEKLY" },
+      repetition: { freq: "WEEKLY", interval: 2 },
       organizer: {
         cn: "Alice",
         cal_address: "alice@example.com",
@@ -315,7 +315,7 @@ describe("calendarEventToJCal", () => {
         ["location", {}, "text", "Room 101"],
         ["description", {}, "text", "Discuss project roadmap."],
         ["x-openpaas-videoconference", {}, "unknown", null],
-        ["rrule", {}, "recur", { freq: "WEEKLY" }],
+        ["rrule", {}, "recur", { freq: "WEEKLY", interval: 2 }],
         [
           "organizer",
           { cn: "Alice" },

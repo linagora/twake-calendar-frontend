@@ -88,10 +88,10 @@ export function parseCalendarEvent(
           event.repetition.selectedDays = value.byday;
         }
         if (value.until) {
-          event.repetition.selectedDays = value.endDate;
+          event.repetition.endDate = value.until;
         }
         if (value.count) {
-          event.repetition.selectedDays = value.occurrences;
+          event.repetition.occurrences = value.count;
         }
         if (value.interval) {
           event.repetition.interval = value.interval;

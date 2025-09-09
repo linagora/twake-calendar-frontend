@@ -6,46 +6,56 @@ import {
   MenuItem,
   Box,
   Stack,
-  Paper,
   Typography,
   TextField,
   Checkbox,
-  List,
-  ListItem,
   FormControlLabel,
   FormGroup,
   Radio,
   RadioGroup,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
 
 export default function RepeatEvent({
   repetition,
+  eventStart,
   setRepetition,
   isOwn = true,
 }: {
   repetition: RepetitionObject;
+  eventStart: Date;
   setRepetition: Function;
   isOwn?: boolean;
 }) {
-  console.log(JSON.stringify(repetition));
-
   const repetitionValues = ["day", "week", "month", "year"];
-  const [interval, setInterval] = useState(repetition.interval ?? 0);
-  const [selectedDays, setSelectedDays] = useState<string[]>(
-    repetition.selectedDays ?? []
-  );
-  const [endOption, setEndOption] = useState("");
-  const [occurrences, setOccurrences] = useState(repetition.occurrences) ?? 0;
-  const [endDate, setEndDate] = useState(repetition.endDate ?? "");
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+  const day = new Date(eventStart);
+
+  // derive endOption based on repetition
+  const getEndOption = () => {
+    if (repetition.occurrences && repetition.occurrences >= 0) return "after";
+    if (repetition.endDate) return "on";
+    return "never";
+  };
+
+  const [endOption, setEndOption] = useState(getEndOption());
+
+  // keep endOption in sync if repetition changes from parent
+  useEffect(() => {
+    if (!endOption) {
+      setEndOption(getEndOption());
+    }
+  }, [repetition.occurrences, repetition.endDate]);
 
   const handleDayChange = (day: string) => {
-    setSelectedDays((prev: string[]) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
+    const updatedDays = repetition.selectedDays?.includes(day)
+      ? repetition.selectedDays.filter((d) => d !== day)
+      : [...(repetition.selectedDays ?? []), day];
+
+    setRepetition({ ...repetition, selectedDays: updatedDays });
   };
+
   return (
     <FormControl fullWidth margin="dense" size="small">
       <InputLabel id="repeat">Repetition</InputLabel>
@@ -54,9 +64,17 @@ export default function RepeatEvent({
         value={repetition.freq ?? ""}
         disabled={!isOwn}
         label="Repetition"
-        onChange={(e: SelectChangeEvent) =>
-          setRepetition({ ...repetition, freq: e.target.value })
-        }
+        onChange={(e: SelectChangeEvent) => {
+          if (e.target.value === "weekly") {
+            setRepetition({
+              ...repetition,
+              freq: e.target.value,
+              selectedDays: [days[day.getDay() - 1]],
+            });
+          } else {
+            setRepetition({ ...repetition, freq: e.target.value });
+          }
+        }}
       >
         <MenuItem value={""}>No Repetition</MenuItem>
         <MenuItem value={"daily"}>Repeat daily</MenuItem>
@@ -64,18 +82,24 @@ export default function RepeatEvent({
         <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
         <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
       </Select>
+
       {repetition.freq && (
         <Stack>
+          {/* Interval */}
           <Box display="flex" alignItems="center" gap={2} mb={2}>
             <Typography>Interval:</Typography>
             <TextField
               type="number"
-              value={interval}
-              onChange={(e) => setInterval(Number(e.target.value))}
+              value={repetition.interval ?? 1}
+              onChange={(e) =>
+                setRepetition({
+                  ...repetition,
+                  interval: Number(e.target.value),
+                })
+              }
               size="small"
               sx={{ width: 80 }}
             />
-
             <Typography>
               {
                 repetitionValues[
@@ -84,6 +108,8 @@ export default function RepeatEvent({
               }
             </Typography>
           </Box>
+
+          {/* Weekly selection */}
           {repetition.freq === "weekly" && (
             <Box>
               <Typography variant="body2" gutterBottom>
@@ -95,7 +121,9 @@ export default function RepeatEvent({
                     key={day}
                     control={
                       <Checkbox
-                        checked={selectedDays.includes(day)}
+                        checked={
+                          repetition.selectedDays?.includes(day) ?? false
+                        }
                         onChange={() => handleDayChange(day)}
                       />
                     }
@@ -105,13 +133,36 @@ export default function RepeatEvent({
               </FormGroup>
             </Box>
           )}
+
+          {/* End options */}
           <Box>
             <Typography variant="body2" gutterBottom sx={{ mt: 2 }}>
               End:
             </Typography>
             <RadioGroup
               value={endOption}
-              onChange={(e) => setEndOption(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setEndOption(value);
+
+                if (value === "never") {
+                  setRepetition({ ...repetition, occurrences: 0, endDate: "" });
+                }
+                if (value === "after") {
+                  setRepetition({
+                    ...repetition,
+                    occurrences: 0,
+                    endDate: "",
+                  });
+                }
+                if (value === "on") {
+                  setRepetition({
+                    ...repetition,
+                    occurrences: 0,
+                    endDate: new Date().toISOString().slice(0, 16),
+                  });
+                }
+              }}
             >
               <FormControlLabel
                 value="never"
@@ -128,8 +179,14 @@ export default function RepeatEvent({
                     <TextField
                       type="number"
                       size="small"
-                      value={occurrences}
-                      onChange={(e) => setOccurrences(Number(e.target.value))}
+                      value={repetition.occurrences ?? 0}
+                      onChange={(e) =>
+                        setRepetition({
+                          ...repetition,
+                          endDate: "",
+                          occurrences: Number(e.target.value),
+                        })
+                      }
                       sx={{ width: 100 }}
                       inputProps={{ min: 1 }}
                       disabled={endOption !== "after"}
@@ -147,9 +204,16 @@ export default function RepeatEvent({
                     On
                     <TextField
                       type="date"
+                      inputProps={{ "data-testid": "end-date" }}
                       size="small"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      value={repetition.endDate ?? ""}
+                      onChange={(e) =>
+                        setRepetition({
+                          ...repetition,
+                          occurrences: 0,
+                          endDate: e.target.value,
+                        })
+                      }
                       disabled={endOption !== "on"}
                     />
                   </Box>

@@ -14,6 +14,7 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
+  getEventAsync,
   putEventAsync,
   updateEventLocal,
 } from "../../features/Calendars/CalendarSlice";
@@ -326,11 +327,21 @@ export default function CalendarApp() {
               setEventDisplayedCalId(info.event.extendedProps.calId);
             }
           }}
+          eventAllow={(dropInfo, draggedEvent) => {
+            if (
+              draggedEvent?.extendedProps.uid &&
+              draggedEvent.extendedProps.uid.split("/")[1]
+            ) {
+              return false;
+            }
+            return true;
+          }}
           eventDrop={(arg) => {
             const event =
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
               ];
+
             const totalDeltaMs = getDeltaInMilliseconds(arg.delta);
 
             const originalStart = new Date(event.start);
@@ -358,7 +369,9 @@ export default function CalendarApp() {
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
               ];
-
+            if (event.uid.split("/")[1]) {
+              dispatch(getEventAsync(event));
+            }
             const originalStart = new Date(event.start);
             const computedNewStart = new Date(
               originalStart.getTime() + getDeltaInMilliseconds(arg.startDelta)
@@ -372,7 +385,7 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-            console.log(event , newEvent);
+            console.log(event, newEvent);
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
