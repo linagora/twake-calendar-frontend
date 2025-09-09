@@ -56,13 +56,6 @@ describe("MiniCalendar", () => {
     expect(todayTile?.parentElement).toHaveClass("today");
   });
 
-  // it("renders mini calendar with the week in gray (except for today) when full calendar in week view", async () => {
-  //   renderCalendar();
-
-  //   const today = new Date();
-  //   const monday = new Date(today);
-  //   monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-
   it.each([
   { today: new Date(2025, 8, 1), label: "Monday 1 Sept 2025" },
   { today: new Date(2025, 8, 3), label: "Wednesday 3 Sept 2025" },

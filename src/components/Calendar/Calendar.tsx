@@ -201,7 +201,7 @@ export default function CalendarApp() {
               calendarRef.current?.view.type === undefined
             ) {
 
-              const startOfWeek = computeStartOfTheWeek(new Date());
+              const startOfWeek = computeStartOfTheWeek(selected);
 
               const endOfWeek = new Date(startOfWeek);
               endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
