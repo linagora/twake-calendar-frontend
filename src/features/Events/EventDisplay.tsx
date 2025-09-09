@@ -91,7 +91,7 @@ export default function EventDisplayModal({
   const [repetition, setRepetition] = useState<RepetitionObject>(
     event.repetition ?? ({} as RepetitionObject)
   );
-  const [alarm, setAlarm] = useState(event.alarm.trigger);
+  const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [busy, setBusy] = useState("");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
