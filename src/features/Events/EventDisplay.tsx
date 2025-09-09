@@ -91,7 +91,7 @@ export default function EventDisplayModal({
   const [repetition, setRepetition] = useState<RepetitionObject>(
     event.repetition ?? ({} as RepetitionObject)
   );
-  const [alarm, setAlarm] = useState("");
+  const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [busy, setBusy] = useState("");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
@@ -160,6 +160,7 @@ export default function EventDisplayModal({
       attendee: [organizer, ...attendees],
       transp: "OPAQUE",
       color: userPersonnalCalendars[calendarid]?.color,
+      alarm: { trigger: alarm, action: "EMAIL" },
     };
 
     const [baseId, recurrenceId] = event.uid.split("/");
@@ -471,31 +472,30 @@ export default function EventDisplayModal({
                   isOwn={isOwn}
                 />
 
-                <FormControl fullWidth margin="dense" size="small">
-                  <InputLabel id="alarm">Alarm</InputLabel>
-                  <Select
-                    labelId="alarm"
-                    value={alarm}
-                    disabled={!isOwn}
-                    onChange={(e: SelectChangeEvent) =>
-                      setAlarm(e.target.value)
-                    }
-                  >
-                    <MenuItem value={""}>No Alarm</MenuItem>
-                    <MenuItem value={"-PT1M"}>1 minute</MenuItem>
-                    <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
-                    <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
-                    <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
-                    <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
-                    <MenuItem value={"-PT1H"}>1 hours</MenuItem>
-                    <MenuItem value={"-PT2H"}>2 hours</MenuItem>
-                    <MenuItem value={"-PT5H"}>5 hours</MenuItem>
-                    <MenuItem value={"-PT12H"}>12 hours</MenuItem>
-                    <MenuItem value={"-PT1D"}>1 day</MenuItem>
-                    <MenuItem value={"-PT2D"}>2 days</MenuItem>
-                    <MenuItem value={"-PT1W"}>1 week</MenuItem>
-                  </Select>
-                </FormControl>
+              <FormControl fullWidth margin="dense" size="small">
+                <InputLabel id="alarm">Alarm</InputLabel>
+                <Select
+                  labelId="alarm"
+                  label="Alarm"
+                  value={alarm}
+                  disabled={!isOwn}
+                  onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
+                >
+                  <MenuItem value={""}>No Alarm</MenuItem>
+                  <MenuItem value={"-PT1M"}>1 minute</MenuItem>
+                  <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
+                  <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
+                  <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
+                  <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
+                  <MenuItem value={"-PT1H"}>1 hours</MenuItem>
+                  <MenuItem value={"-PT2H"}>2 hours</MenuItem>
+                  <MenuItem value={"-PT5H"}>5 hours</MenuItem>
+                  <MenuItem value={"-PT12H"}>12 hours</MenuItem>
+                  <MenuItem value={"-PT1D"}>1 day</MenuItem>
+                  <MenuItem value={"-PT2D"}>2 days</MenuItem>
+                  <MenuItem value={"-PT1W"}>1 week</MenuItem>
+                </Select>
+              </FormControl>
 
                 <FormControl fullWidth margin="dense" size="small">
                   <InputLabel id="Visibility">Visibility</InputLabel>

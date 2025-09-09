@@ -1,6 +1,6 @@
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
-import { CalendarEvent } from "./EventsTypes";
+import { AlarmObject, CalendarEvent } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
 type RawEntry = [string, Record<string, string>, string, any];
@@ -9,7 +9,8 @@ export function parseCalendarEvent(
   data: RawEntry[],
   color: string,
   calendarid: string,
-  eventURL: string
+  eventURL: string,
+  valarm?: RawEntry[]
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
@@ -103,6 +104,20 @@ export function parseCalendarEvent(
     event.uid = `${event.uid}/${recurrenceId}`;
   }
 
+  if (valarm) {
+    event.alarm = {} as AlarmObject;
+    for (const [key, params, type, value] of valarm[1]) {
+      switch (key.toLowerCase()) {
+        case "action":
+          event.alarm.action = value;
+          break;
+        case "trigger":
+          event.alarm.trigger = value;
+          break;
+      }
+    }
+  }
+
   event.URL = eventURL;
   if (!event.uid || !event.start) {
     console.error(
@@ -115,7 +130,10 @@ export function parseCalendarEvent(
   return event as CalendarEvent;
 }
 
-export function calendarEventToJCal(event: CalendarEvent): any[] {
+export function calendarEventToJCal(
+  event: CalendarEvent,
+  calOwnerEmail?: string
+): any[] {
   const tzid = event.timezone; // Fallback to UTC if no timezone provided
 
   const vevent: any[] = [
@@ -138,8 +156,23 @@ export function calendarEventToJCal(event: CalendarEvent): any[] {
       ],
       ["summary", {}, "text", event.title ?? ""],
     ],
-    [],
   ];
+  if (event.alarm) {
+    const valarm = [
+      ["trigger", {}, "duration", event.alarm.trigger],
+      ["action", {}, "text", event.alarm.action],
+      ["attendee", {}, "cal-address", `mailto:${calOwnerEmail}`],
+      ["summary", {}, "text", event.title],
+      [
+        "description",
+        {},
+        "text",
+        "This is an automatic alarm sent by OpenPaas",
+      ],
+    ];
+    vevent.push([["valarm", valarm]]);
+  }
+  vevent.push([]);
 
   if (event.end) {
     if (event.allday && event.end.getTime() === event.start.getTime()) {

@@ -22,6 +22,7 @@ export interface CalendarEvent {
   status?: string;
   timezone: string;
   repetition?: RepetitionObject;
+  alarm: AlarmObject;
 }
 
 export interface RepetitionObject {
@@ -30,4 +31,9 @@ export interface RepetitionObject {
   selectedDays?: string[];
   occurrences?: number;
   endDate?: string;
+}
+
+export interface AlarmObject {
+  trigger: string;
+  action: string;
 }
