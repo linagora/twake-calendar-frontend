@@ -32,6 +32,13 @@ import ClearIcon from "@mui/icons-material/Clear";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { userAttendee } from "../../features/User/userDataTypes";
 
+const computeStartOfTheWeek = (date: Date): Date => {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
+  startOfWeek.setHours(0, 0, 0, 0); 
+  return startOfWeek;
+};
+
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -193,9 +200,8 @@ export default function CalendarApp() {
               calendarRef.current?.view.type === "timeGridWeek" ||
               calendarRef.current?.view.type === undefined
             ) {
-              const startOfWeek = new Date(selected);
-              startOfWeek.setDate(selected.getDate() - ((selected.getDay() + 6) % 7)); // Monday
-              startOfWeek.setHours(0, 0, 0, 0);
+
+              const startOfWeek = computeStartOfTheWeek(new Date());
 
               const endOfWeek = new Date(startOfWeek);
               endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
