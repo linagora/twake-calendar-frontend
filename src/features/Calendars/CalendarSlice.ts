@@ -71,7 +71,10 @@ export const putEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
   { cal: Calendars; newEvent: CalendarEvent } // Arg type
 >("calendars/putEvent", async ({ cal, newEvent }) => {
-  const response = await putEvent(newEvent);
+  const response = await putEvent(
+    newEvent,
+    cal.ownerEmails ? cal.ownerEmails[0] : undefined
+  );
   const eventDate = new Date(newEvent.start);
 
   const weekStart = new Date(eventDate);
