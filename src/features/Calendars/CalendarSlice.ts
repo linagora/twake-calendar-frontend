@@ -71,11 +71,18 @@ export const putEventAsync = createAsyncThunk<
   { cal: Calendars; newEvent: CalendarEvent } // Arg type
 >("calendars/putEvent", async ({ cal, newEvent }) => {
   const response = await putEvent(newEvent);
+  const eventDate = new Date(newEvent.start);
+
+  const weekStart = new Date(eventDate);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(eventDate.getDate() - eventDate.getDay());
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 7);
+
   const calEvents = (await getCalendar(cal.id, {
-    start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
-    end: formatDateToYYYYMMDDTHHMMSS(
-      new Date(new Date(newEvent.start).getTime() + 86400000)
-    ),
+    start: formatDateToYYYYMMDDTHHMMSS(weekStart),
+    end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
   })) as Record<string, any>;
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
@@ -291,7 +298,20 @@ const CalendarSlice = createSlice({
       )
       .addCase(deleteEventAsync.fulfilled, (state, action) => {
         state.pending = false;
-        delete state.list[action.payload.calId].events[action.payload.eventId];
+        const [baseId, recurrenceId] = action.payload.eventId.split("/");
+        if (recurrenceId) {
+          Object.keys(state.list[action.payload.calId].events).forEach(
+            (element) => {
+              if (element.split("/")[0] === baseId) {
+                delete state.list[action.payload.calId].events[element];
+              }
+            }
+          );
+        } else {
+          delete state.list[action.payload.calId].events[
+            action.payload.eventId
+          ];
+        }
       })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
