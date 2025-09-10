@@ -1045,6 +1045,296 @@ describe("Event Full Display", () => {
       screen.getAllByDisplayValue(new RegExp(date, "i"))[0]
     ).toBeInTheDocument();
   });
+  it("saves event and moves it when calendar is changed", async () => {
+    const spyPut = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    const spyMove = jest
+      .spyOn(eventThunks, "moveEventAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+
+    const day = new Date();
+    const preloadedTwoCals = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            id: "667037022b752d0026472254/cal1",
+            name: "Calendar One",
+            color: "#FF0000",
+            events: {
+              event1: {
+                uid: "uid-base",
+                id: "event1",
+                title: "Test Event",
+                calId: "667037022b752d0026472254/cal1",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cn: "test", cal_address: "test@test.com" },
+                attendee: [{ cn: "test", cal_address: "test@test.com" }],
+              },
+            },
+          },
+          "667037022b752d0026472254/cal2": {
+            id: "667037022b752d0026472254/cal2",
+            name: "Calendar Two",
+            color: "#00FF00",
+            events: {},
+          },
+        },
+        pending: false,
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedTwoCals
+    );
+
+    fireEvent.mouseDown(screen.getByLabelText("Calendar"));
+
+    const option = await screen.findByText("Calendar Two");
+    fireEvent.click(option);
+
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => {
+      expect(spyPut).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(spyMove).toHaveBeenCalled();
+    });
+
+    expect(spyRemove).toHaveBeenCalled();
+  });
+
+  it("removes recurrence instances when saving an edited recurring series", async () => {
+    const spyPut = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+
+    const day = new Date();
+    const preloadedRecurrence = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            id: "667037022b752d0026472254/cal1",
+            name: "First Calendar",
+            color: "#FF0000",
+            events: {
+              "base/20250101": {
+                uid: "base/20250101",
+                calId: "667037022b752d0026472254/cal1",
+                title: "eventA",
+              },
+              "base/20250201": {
+                uid: "base/20250201",
+                calId: "667037022b752d0026472254/cal1",
+                title: "eventB",
+              },
+              "base/20250301": {
+                uid: "base/20250301",
+                title: "Recurring event",
+                calId: "667037022b752d0026472254/cal1",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cal_address: "test@test.com" },
+                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"base/20250301"}
+      />,
+      preloadedRecurrence
+    );
+
+    act(() => fireEvent.click(screen.getByText("Save")));
+
+    await waitFor(() => {
+      expect(spyPut).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(spyRemove).toHaveBeenCalled();
+    });
+  });
+
+  it("InfoRow renders error style when error prop is true", () => {
+    renderWithProviders(<InfoRow icon={<span>i</span>} text="Bad" error />);
+    expect(screen.getByText("Bad")).toBeInTheDocument();
+  });
+
+  it("calls onClose from useEffect if event or calendar missing", () => {
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"nonexistent/cal"}
+        eventId={"ghost"}
+      />,
+      preloadedState
+    );
+    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+  });
+
+  it("renders error row when event has error", () => {
+    const errorState = {
+      ...preloadedState,
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                error: "Something went wrong",
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      errorState
+    );
+
+    act(() => {
+      fireEvent.click(screen.getByText("Show More"));
+    });
+
+    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+  });
+
+  it("can remove an attendee with the close button", () => {
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedState
+    );
+
+    const removeBtn = screen.getAllByTestId("CloseIcon").pop()!;
+    fireEvent.click(removeBtn);
+
+    expect(screen.queryByText(/John/)).not.toBeInTheDocument();
+  });
+
+  it("shows more attendees when overflow, then toggles back", () => {
+    const overflowState = {
+      ...preloadedState,
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                attendee: new Array(6).fill(null).map((_, i) => ({
+                  cn: `Person${i}`,
+                  cal_address: `p${i}@test.com`,
+                })),
+                organizer: { cn: "test", cal_address: "test@test.com" },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      overflowState
+    );
+
+    const toggle = screen.getByText(/Show more/);
+    fireEvent.click(toggle);
+
+    expect(screen.getByText(/Show less/)).toBeInTheDocument();
+  });
+
+  it("renders video conference info when x_openpass_videoconference exists", () => {
+    const videoState = {
+      ...preloadedState,
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              event1: {
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
+                x_openpass_videoconference: "https://meet.test/video",
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      videoState
+    );
+
+    expect(screen.getByText("Video conference available")).toBeInTheDocument();
+  });
 });
 
 describe("Helper functions", () => {
