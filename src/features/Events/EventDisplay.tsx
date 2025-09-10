@@ -40,7 +40,6 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LockIcon from '@mui/icons-material/Lock';
 import { userAttendee } from "../User/userDataTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { Calendars } from "../Calendars/CalendarTypes";
@@ -233,16 +232,7 @@ export default function EventDisplayModal({
           </IconButton>
         </Box>
 
-        <CardHeader 
-          title={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {(event?.class === 'PRIVATE' || event?.class === 'CONFIDENTIAL') && (
-                <LockIcon data-testid="lock-icon" fontSize="small" />
-              )}
-              {isOwn ? "Edit Event" : "Event Details"}
-            </Box>
-          } 
-        />
+        <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
 
         <CardContent sx={{ overflow: "auto" }}>
           {/* Title */}
