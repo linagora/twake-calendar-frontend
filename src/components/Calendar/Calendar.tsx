@@ -268,6 +268,28 @@ export default function CalendarApp() {
           height={"100%"}
           select={handleDateSelect}
           nowIndicator
+          customButtons={{
+            refresh: {
+              text: "↻",
+              click: () => {
+                selectedCalendars.forEach((id) => {
+                  if (!pending && rangeKey) {
+                    dispatch(
+                      getCalendarDetailAsync({
+                        calId: id,
+                        match: {
+                          start: formatDateToYYYYMMDDTHHMMSS(
+                            calendarRange.start
+                          ),
+                          end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+                        },
+                      })
+                    );
+                  }
+                });
+              },
+            },
+          }}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
@@ -401,7 +423,7 @@ export default function CalendarApp() {
           headerToolbar={{
             left: "title",
             center: "prev,today,next",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
+            right: "refresh,dayGridMonth,timeGridWeek,timeGridDay",
           }}
           eventContent={(arg) => {
             const event = arg.event;
