@@ -176,7 +176,7 @@ describe("Found Bugs", () => {
     fireEvent.click(nextMonthButton);
     fireEvent.click(previousMonthButton);
     const selectedTile = screen.getByText((content, element) => {
-      return element?.className.includes("selectedWeek") ?? false;
+      return element?.classList.contains("selectedWeek") ?? false;
     });
     const ariaLabel = screen.getByRole("columnheader");
     const shownDayDate = new Date(
@@ -202,7 +202,7 @@ describe("Found Bugs", () => {
     fireEvent.click(nextMonthButton);
     const miniCalMonth = await screen.findByTitle(/mini calendar month/i);
     const fullCalMonth = screen.getByText((content, element) => {
-      return element?.className.includes("fc-toolbar-title") ?? false;
+      return element?.classList.contains("fc-toolbar-title") ?? false;
     });
     expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
     fireEvent.click(nextMonthButton);
@@ -218,7 +218,7 @@ describe("Found Bugs", () => {
     fireEvent.click(nextDayButton);
 
     const dayViewSelectedTiles = screen.getAllByText((content, element) => {
-      return element?.className.includes("selectedWeek") ?? false;
+      return element?.classList.contains("selectedWeek") ?? false;
     });
 
     expect(dayViewSelectedTiles).toHaveLength(1);
@@ -226,7 +226,7 @@ describe("Found Bugs", () => {
     fireEvent.click(weekViewButton);
 
     const weekViewSelectedTiles = screen.getAllByText((content, element) => {
-      return element?.className.includes("selectedWeek") ?? false;
+      return element?.classList.contains("selectedWeek") ?? false;
     });
 
     expect(weekViewSelectedTiles).toHaveLength(7);
@@ -240,7 +240,7 @@ describe("Found Bugs", () => {
 
     const miniCalMonth = await screen.findByTitle(/mini calendar month/i);
     const fullCalMonth = screen.getByText((content, element) => {
-      return element?.className.includes("fc-toolbar-title") ?? false;
+      return element?.classList.contains("fc-toolbar-title") ?? false;
     });
     expect(miniCalMonth.innerHTML).toBe(fullCalMonth.innerHTML);
   });
