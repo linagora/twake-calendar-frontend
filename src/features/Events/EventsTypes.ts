@@ -22,7 +22,7 @@ export interface CalendarEvent {
   status?: string;
   timezone: string;
   repetition?: RepetitionObject;
-  alarm: AlarmObject;
+  alarm?: AlarmObject;
 }
 
 export interface RepetitionObject {
