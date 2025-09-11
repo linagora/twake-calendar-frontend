@@ -244,7 +244,6 @@ export default function EventDisplayModal({
         <Card sx={{ p: 2, position: "absolute" }}>
           {/* Close button */}
           <Box sx={{ position: "absolute", top: 8, right: 8 }}>
-            <EventDuplication event={event} onClose={onClose} />
             <IconButton
               size="small"
               onClick={() => onClose({}, "backdropClick")}
