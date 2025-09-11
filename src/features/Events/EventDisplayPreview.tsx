@@ -20,6 +20,7 @@ import {
   PopoverPosition,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import EmailIcon from "@mui/icons-material/Email";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
@@ -61,6 +62,7 @@ export default function EventPreviewModal({
   const user = useAppSelector((state) => state.user);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
+  const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
 
   useEffect(() => {
     if (!event || !calendar) {
@@ -120,6 +122,20 @@ export default function EventPreviewModal({
               gap: 1,
             }}
           >
+            {mailSpaUrl && attendees.length > 1 && (
+              <IconButton
+                size="small"
+                onClick={() =>
+                  window.open(
+                    `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
+                      .map((a) => a.cal_address)
+                      .join(",")}?subject=${event.title}`
+                  )
+                }
+              >
+                <EmailIcon fontSize="small" />
+              </IconButton>
+            )}
             {user.userData.email !== event.organizer?.cal_address && (
               <IconButton
                 size="small"
