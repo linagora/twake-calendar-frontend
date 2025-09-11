@@ -3,6 +3,7 @@ import EventDuplication from "../../src/components/Event/EventDuplicate";
 import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
 
 const day = new Date();
 const preloadedState = {
@@ -153,11 +154,12 @@ describe("EventPopover", () => {
 describe("EventDisplayModal", () => {
   it("shows duplication button and opens duplication form", () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventPreviewModal
         eventId="event1"
         calId="667037022b752d0026472254/cal1"
         open={true}
         onClose={jest.fn()}
+        anchorPosition={{ top: 0, left: 0 }}
       />,
       preloadedState
     );
@@ -165,10 +167,10 @@ describe("EventDisplayModal", () => {
     fireEvent.click(screen.getByTestId("AddToPhotosIcon"));
     expect(screen.getByText(/Duplicate Event/i)).toBeInTheDocument();
     expect(
-      screen.getAllByDisplayValue(
+      screen.getByDisplayValue(
         preloadedState.calendars.list["667037022b752d0026472254/cal1"].events
           .event1.title
       )
-    ).toHaveLength(2);
+    ).toBeInTheDocument();
   });
 });
