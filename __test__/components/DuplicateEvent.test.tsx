@@ -3,7 +3,6 @@ import EventDuplication from "../../src/components/Event/EventDuplicate";
 import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import preview from "jest-preview";
 
 const day = new Date();
 const preloadedState = {
@@ -164,7 +163,6 @@ describe("EventDisplayModal", () => {
     );
 
     fireEvent.click(screen.getByTestId("AddToPhotosIcon"));
-    preview.debug();
     expect(screen.getByText(/Duplicate Event/i)).toBeInTheDocument();
     expect(
       screen.getAllByDisplayValue(
