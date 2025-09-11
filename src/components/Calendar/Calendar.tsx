@@ -31,6 +31,7 @@ import { createSelector } from "@reduxjs/toolkit";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ClearIcon from "@mui/icons-material/Clear";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import LockIcon from '@mui/icons-material/Lock';
 import { userAttendee } from "../../features/User/userDataTypes";
 
 const computeStartOfTheWeek = (date: Date): Date => {
@@ -407,6 +408,7 @@ export default function CalendarApp() {
             if (!calendars[arg.event._def.extendedProps.calId]) return;
 
             const attendees = event._def.extendedProps.attendee || [];
+            const isPrivate = event._def.extendedProps.class === "PRIVATE" || event._def.extendedProps.class === "CONFIDENTIAL"; 
             let Icon = null;
             let titleStyle: React.CSSProperties = {};
             const ownerEmails = new Set(
@@ -437,8 +439,9 @@ export default function CalendarApp() {
             }
 
             return (
-              <div>
-                {Icon && <Icon fontSize="small" />}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {isPrivate && <LockIcon data-testid="lock-icon" fontSize="small" style={{ marginRight: '4px' }} />}
+                {Icon && <Icon fontSize="small" style={{ marginRight: '4px' }}/>}
                 <span style={titleStyle}>{event.title}</span>
               </div>
             );
