@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { createCalendar } from "./CalendarSlice";
-import { useAppDispatch } from "../../app/hooks";
+import { createCalendar, createCalendarAsync } from "./CalendarSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
   TextField,
@@ -21,14 +21,18 @@ function CalendarPopover({
   onClose: (Calendar: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   const dispatch = useAppDispatch();
-
+  const userId =
+    useAppSelector((state) => state.user.userData.openpaasId) ?? "";
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("");
   const [timeZone, setTimeZone] = useState("");
   const timezones = Intl.supportedValuesOf?.("timeZone") ?? [];
   const handleSave = () => {
-    dispatch(createCalendar({ name, description, color }));
+    const calId = crypto.randomUUID();
+    dispatch(
+      createCalendarAsync({ name, desc: description, color, userId, calId })
+    );
     onClose({}, "backdropClick");
 
     // Reset
@@ -68,7 +72,7 @@ function CalendarPopover({
           gutterBottom
           style={{ backgroundColor: color }}
         >
-          Create a Calendar
+          Calendar configuration
         </Typography>
         <TextField
           fullWidth

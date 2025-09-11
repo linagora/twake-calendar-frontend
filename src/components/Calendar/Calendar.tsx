@@ -14,6 +14,7 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
+  getCalendarsListAsync,
   getEventAsync,
   putEventAsync,
   updateEventLocal,
@@ -92,13 +93,15 @@ export default function CalendarApp() {
 
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
-    filteredEvents = filteredEvents
-      .concat(
-        Object.keys(calendars[id].events).map(
-          (eventid) => calendars[id].events[eventid]
+    if (calendars[id].events) {
+      filteredEvents = filteredEvents
+        .concat(
+          Object.keys(calendars[id].events).map(
+            (eventid) => calendars[id].events[eventid]
+          )
         )
-      )
-      .filter((event) => !(event.status === "CANCELLED"));
+        .filter((event) => !(event.status === "CANCELLED"));
+    }
   });
 
   useEffect(() => {
@@ -125,7 +128,6 @@ export default function CalendarApp() {
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
-  const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
   );
@@ -248,7 +250,6 @@ export default function CalendarApp() {
           selectedCalendars={selectedCalendars}
           setSelectedCalendars={setSelectedCalendars}
         />
-        <button onClick={() => setAnchorElCal(document.body)}>+</button>
       </div>
       <div className="calendar">
         <ImportAlert />
@@ -270,7 +271,8 @@ export default function CalendarApp() {
           customButtons={{
             refresh: {
               text: "↻",
-              click: () => {
+              click: async () => {
+                await dispatch(getCalendarsListAsync());
                 selectedCalendars.forEach((id) => {
                   if (!pending && rangeKey) {
                     dispatch(
@@ -520,11 +522,6 @@ export default function CalendarApp() {
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
           calendarRef={calendarRef}
-        />
-        <CalendarPopover
-          anchorEl={anchorElCal}
-          open={Boolean(anchorElCal)}
-          onClose={() => setAnchorElCal(null)}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
           <EventPreviewModal
