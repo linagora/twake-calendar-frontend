@@ -33,6 +33,7 @@ function EventPopover({
   selectedRange,
   setSelectedRange,
   calendarRef,
+  event,
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
@@ -40,6 +41,7 @@ function EventPopover({
   selectedRange: DateSelectArg | null;
   setSelectedRange: Function;
   calendarRef: React.RefObject<CalendarApi | null>;
+  event?: CalendarEvent;
 }) {
   const dispatch = useAppDispatch();
 
@@ -63,20 +65,32 @@ function EventPopover({
   const timezones = TIMEZONES.aliases;
   const [showMore, setShowMore] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [calendarid, setCalendarid] = useState(0);
-  const [allday, setAllDay] = useState(false);
-  const [repetition, setRepetition] = useState<RepetitionObject>(
-    {} as RepetitionObject
+  const [title, setTitle] = useState(event?.title ?? "");
+  const [description, setDescription] = useState(event?.description ?? "");
+  const [location, setLocation] = useState(event?.location ?? "");
+  const [start, setStart] = useState(
+    event?.start ? new Date(event.start).toISOString() : ""
   );
-  const [attendees, setAttendees] = useState<userAttendee[]>([]);
-  const [alarm, setAlarm] = useState("");
-  const [eventClass, setEventClass] = useState("PUBLIC");
-  const [busy, setBusy] = useState("OPAQUE");
+  const [end, setEnd] = useState(
+    event?.end ? new Date(event.end)?.toISOString() : ""
+  );
+  const [calendarid, setCalendarid] = useState(
+    event?.calId
+      ? userPersonnalCalendars.findIndex((e) => e.id === event?.calId)
+      : 0
+  );
+  const [allday, setAllDay] = useState(event?.allday ?? false);
+  const [repetition, setRepetition] = useState<RepetitionObject>(
+    event?.repetition ?? ({} as RepetitionObject)
+  );
+  const [attendees, setAttendees] = useState<userAttendee[]>(
+    event?.attendee
+      ? event.attendee.filter((a) => a.cal_address !== organizer.cal_address)
+      : []
+  );
+  const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
+  const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
+  const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
 
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -157,7 +171,7 @@ function EventPopover({
       }}
     >
       <Card>
-        <CardHeader title="Create Event" />
+        <CardHeader title={event ? "Duplicate Event" : "Create Event"} />
         <CardContent
           sx={{ maxHeight: "85vh", maxWidth: "40vw", overflow: "auto" }}
         >

@@ -39,6 +39,7 @@ import EventDisplayModal, {
 } from "./EventDisplay";
 import { getEvent } from "./EventApi";
 import { CalendarEvent } from "./EventsTypes";
+import EventDuplication from "../../components/Event/EventDuplicate";
 
 export default function EventPreviewModal({
   eventId,
@@ -122,6 +123,7 @@ export default function EventPreviewModal({
               gap: 1,
             }}
           >
+            <EventDuplication event={event} onClose={onClose} />
             {mailSpaUrl && attendees.length > 0 && (
               <IconButton
                 size="small"
