@@ -1137,13 +1137,7 @@ describe("Event Full Display", () => {
 
     const day = new Date();
     const preloadedTwoCals = {
-      user: {
-        userData: {
-          sub: "test",
-          email: "test@test.com",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
+      ...preloadedState,
       calendars: {
         list: {
           "667037022b752d0026472254/cal1": {
@@ -1210,13 +1204,7 @@ describe("Event Full Display", () => {
 
     const day = new Date();
     const preloadedRecurrence = {
-      user: {
-        userData: {
-          sub: "test",
-          email: "test@test.com",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
+      ...preloadedState,
       calendars: {
         list: {
           "667037022b752d0026472254/cal1": {
