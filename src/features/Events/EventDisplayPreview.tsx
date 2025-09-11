@@ -122,7 +122,7 @@ export default function EventPreviewModal({
               gap: 1,
             }}
           >
-            {mailSpaUrl && attendees.length > 1 && (
+            {mailSpaUrl && attendees.length > 0 && (
               <IconButton
                 size="small"
                 onClick={() =>
