@@ -47,6 +47,7 @@ import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { isValidUrl } from "../../utils/apiUtils";
 import { formatLocalDateTime } from "./EventModal";
 import RepeatEvent from "../../components/Event/EventRepeat";
+import EventDuplication from "../../components/Event/EventDuplicate";
 
 export default function EventDisplayModal({
   eventId,
@@ -243,6 +244,7 @@ export default function EventDisplayModal({
         <Card sx={{ p: 2, position: "absolute" }}>
           {/* Close button */}
           <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+            <EventDuplication event={event} onClose={onClose} />
             <IconButton
               size="small"
               onClick={() => onClose({}, "backdropClick")}
