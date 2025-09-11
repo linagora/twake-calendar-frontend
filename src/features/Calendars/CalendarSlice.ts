@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
-import { getCalendar, getCalendars } from "./CalendarApi";
+import { getCalendar, getCalendars, postCalendar } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
@@ -157,6 +157,14 @@ export const deleteEventAsync = createAsyncThunk<
   return { calId, eventId };
 });
 
+export const createCalendarAsync = createAsyncThunk<
+  { userId: string; calId: string; color: string; name: string; desc: string }, // Return type
+  { userId: string; calId: string; color: string; name: string; desc: string } // Arg type
+>("calendars/createCalendar", async ({ userId, calId, color, name, desc }) => {
+  const response = await postCalendar(userId, calId, color, name, desc);
+  return { userId, calId, color, name, desc };
+});
+
 const CalendarSlice = createSlice({
   name: "calendars",
   initialState: { list: {} as Record<string, Calendars>, pending: false },
@@ -206,9 +214,7 @@ const CalendarSlice = createSlice({
         getCalendarsListAsync.fulfilled,
         (state, action: PayloadAction<Record<string, Calendars>>) => {
           state.pending = false;
-          Object.keys(action.payload).forEach((id) => {
-            state.list[id] = action.payload[id];
-          });
+          state.list = action.payload;
         }
       )
       .addCase(
@@ -324,6 +330,15 @@ const CalendarSlice = createSlice({
           ];
         }
       })
+      .addCase(createCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[`${action.payload.userId}/${action.payload.calId}`] = {
+          color: action.payload.color,
+          id: `${action.payload.userId}/${action.payload.calId}`,
+          description: action.payload.desc,
+          name: action.payload.name,
+        } as unknown as Calendars;
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -340,6 +355,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(deleteEventAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(createCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },

@@ -30,3 +30,24 @@ export async function getCalendar(
   const calendar = await response.json();
   return calendar;
 }
+
+export async function postCalendar(
+  userId: string,
+  calId: string,
+  color: string,
+  name: string,
+  desc: string
+) {
+  const response = await api.post(`dav/calendars/${userId}.json`, {
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+    body: JSON.stringify({
+      id: calId,
+      "dav:name": name,
+      "apple:color": color,
+      "caldav:description": desc,
+    }),
+  });
+  return response;
+}
