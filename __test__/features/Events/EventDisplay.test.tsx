@@ -15,6 +15,7 @@ describe("Event Preview Display", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (window as any).MAIL_SPA_URL = null;
   });
 
   const preloadedState = {
@@ -62,6 +63,14 @@ describe("Event Preview Display", () => {
                   cutype: "INDIVIDUAL",
                 },
               ],
+            },
+            event2: {
+              id: "event2",
+              title: "Test Event",
+              calId: "667037022b752d0026472254/cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
             },
           },
         },
@@ -504,6 +513,78 @@ describe("Event Preview Display", () => {
       expect(spy).toHaveBeenCalled();
     });
     expect(screen.getByText("Edit Event")).toBeInTheDocument();
+  });
+  it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
+    (window as any).MAIL_SPA_URL = "test";
+    renderWithProviders(
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedState
+    );
+    expect(screen.getByTestId("EmailIcon")).toBeInTheDocument();
+  });
+  it("doesnt render message button when MAIL_SPA_URL is not null and event has no attendees", () => {
+    (window as any).MAIL_SPA_URL = "test";
+    renderWithProviders(
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event2"}
+      />,
+      preloadedState
+    );
+    expect(screen.queryByTestId("EmailIcon")).not.toBeInTheDocument();
+  });
+  it("doesnt render message button when MAIL_SPA_URL is null and event has attendees", () => {
+    renderWithProviders(
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedState
+    );
+    expect(screen.queryByTestId("EmailIcon")).not.toBeInTheDocument();
+  });
+  it("message button opens url with attendees as uri and title as subject", () => {
+    (window as any).MAIL_SPA_URL = "test";
+    const mockOpen = jest.fn();
+    window.open = mockOpen;
+
+    renderWithProviders(
+      <EventPreviewModal
+        anchorPosition={{ top: 0, left: 0 }}
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event1"}
+      />,
+      preloadedState
+    );
+
+    const emailButton = screen.getByTestId("EmailIcon");
+    expect(emailButton).toBeInTheDocument();
+
+    fireEvent.click(emailButton.closest("button")!);
+
+    const event =
+      preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
+        "event1"
+      ];
+    const expectedUrl = `test/mailto/?uri=mailto:${event.attendee
+      .map((a) => a.cal_address)
+      .join(",")}?subject=${event.title}`;
+
+    expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
 });
 
