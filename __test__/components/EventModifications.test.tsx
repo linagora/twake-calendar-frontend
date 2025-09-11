@@ -2,7 +2,7 @@ import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { act, screen } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import * as appHooks from "../../src/app/hooks";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
@@ -100,5 +100,95 @@ describe("CalendarApp integration", () => {
         expect(dispatch).toHaveBeenCalled();
       }
     });
+  });
+
+  const createPreloadedState = (eventProps = {}) => ({
+    user: {
+      userData: {
+        sub: "test",
+        email: "test@test.com",
+        sid: "mockSid",
+        openpaasId: "667037022b752d0026472254",
+      },
+      tokens: {
+        accessToken: "token"
+      },
+    },
+    calendars: {
+      list: {
+        "667037022b752d0026472254/cal1": {
+          name: "Calendar 1",
+          id: "667037022b752d0026472254/cal1",
+          color: "#FF0000",
+          ownerEmails: ["alice@example.com"],
+          events: {
+            event1: {
+              id: "event1",
+              calId: "667037022b752d0026472254/cal1",
+              uid: "event1",
+              start: new Date().toISOString(),
+              end: new Date(Date.now() + 3600000).toISOString(),
+              partstat: "ACCEPTED",
+              organizer: {
+                cn: "Alice",
+                cal_address: "alice@example.com",
+              },
+              attendee: [{
+                cn: "Alice",
+                partstat: "ACCEPTED",
+                rsvp: "TRUE",
+                role: "REQ-PARTICIPANT",
+                cutype: "INDIVIDUAL",
+                cal_address: "alice@example.com",
+              }, ],
+              ...eventProps,
+            },
+          },
+        },
+      },
+      pending: false,
+    },
+  });
+
+  it("renders lock icon for private events on the calendar", async () => {
+    const preloadedState = createPreloadedState({
+      class: "PRIVATE",
+      title: "Private Event",
+    });
+    renderWithProviders(<CalendarApp />, preloadedState);
+
+    const eventEls = screen.getAllByText("Private Event");
+    const found = eventEls.some((eventEl) =>
+      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
+    );
+    expect(found).toBe(true);
+  });
+
+  it("renders lock icon for confidential events on the calendar", async () => {
+    const preloadedState = createPreloadedState({
+      class: "CONFIDENTIAL",
+      title: "Confidential Event",
+    });
+    renderWithProviders(<CalendarApp />, preloadedState);
+
+    const eventEls = screen.getAllByText("Confidential Event");
+    const found = eventEls.some((eventEl) =>
+      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
+    );
+    expect(found).toBe(true);
+  });
+
+  it("does NOT render a lock icon for public events on the calendar", async () => {
+    const preloadedState = createPreloadedState({
+      class: "PUBLIC",
+      title: "Public Event",
+    });
+    renderWithProviders(<CalendarApp />, preloadedState);
+
+    const eventEls = screen.getAllByText("Public Event");
+    const found = eventEls.some((eventEl) =>
+      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
+    );
+    expect(found).toBe(false);
   });
 });
