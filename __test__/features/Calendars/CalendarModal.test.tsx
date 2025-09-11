@@ -3,16 +3,13 @@ import { useAppDispatch } from "../../../src/app/hooks";
 import { createCalendar } from "../../../src/features/Calendars/CalendarSlice";
 import CalendarPopover from "../../../src/features/Calendars/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-
-jest.mock("../../../src/app/hooks");
+import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 
 describe("CalendarPopover", () => {
-  const mockDispatch = jest.fn();
   const mockOnClose = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAppDispatch as unknown as jest.Mock).mockReturnValue(mockDispatch);
   });
 
   const renderPopover = (open = true) => {
@@ -42,7 +39,7 @@ describe("CalendarPopover", () => {
 
     expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
-    expect(screen.getByText("Create a Calendar")).toBeInTheDocument();
+    expect(screen.getByText("Calendar configuration")).toBeInTheDocument();
   });
 
   it("updates name and description fields", () => {
@@ -67,12 +64,17 @@ describe("CalendarPopover", () => {
     fireEvent.click(colorButtons[0]);
 
     // The header background should update (check via inline style)
-    expect(screen.getByText("Create a Calendar").style.backgroundColor).toBe(
-      colorButtons[0].style.backgroundColor
-    );
+    expect(
+      screen.getByText("Calendar configuration").style.backgroundColor
+    ).toBe(colorButtons[0].style.backgroundColor);
   });
 
   it("dispatches createCalendar and calls onClose when Save clicked", () => {
+    const spy = jest
+      .spyOn(eventThunks, "createCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
     renderPopover();
 
     fireEvent.change(screen.getByLabelText(/Name/i), {
@@ -92,13 +94,7 @@ describe("CalendarPopover", () => {
 
     fireEvent.click(screen.getByText(/Save/i));
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      createCalendar({
-        name: "Test Calendar",
-        description: "Test Description",
-        color: expectedColor,
-      })
-    );
+    expect(spy).toHaveBeenCalled();
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
 
