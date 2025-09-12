@@ -580,6 +580,7 @@ describe("Event Preview Display", () => {
       ];
     const expectedUrl = `test/mailto/?uri=mailto:${event.attendee
       .map((a) => a.cal_address)
+      .filter((mail) => mail !== preloadedState.user.userData.email)
       .join(",")}?subject=${event.title}`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
