@@ -95,15 +95,13 @@ describe("Event Preview Display", () => {
   };
 
   it("renders correctly event data", () => {
-    jest
-      .spyOn(Date.prototype, "toLocaleString")
-      .mockImplementation(function (
-        this: Date,
-        locales?: Intl.LocalesArgument,
-        options?: Intl.DateTimeFormatOptions | undefined
-      ): string {
-        return RealDateToLocaleString.call(this, "en-UK", options);
-      });
+    jest.spyOn(Date.prototype, "toLocaleString").mockImplementation(function (
+      this: Date,
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions | undefined
+    ): string {
+      return RealDateToLocaleString.call(this, "en-UK", options);
+    });
     renderWithProviders(
       <EventPreviewModal
         anchorPosition={{ top: 0, left: 0 }}

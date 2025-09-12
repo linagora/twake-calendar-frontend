@@ -26,6 +26,11 @@ pipeline {
           sh 'npm run test'
         }
       }
+      stage('Check Formatting') {
+        steps {
+          sh 'npx prettier --check .'
+        }
+      }
       stage('Deploy docker images') {
         when {
           anyOf {
