@@ -8,10 +8,19 @@ This project aims at service a Single Page Application allowing a user to intera
 
 This frontend-only application will interact with:
 
- - [esn-sabre](https://github.com/linagora/esn-sabre/) CalDAV + CardDAV server, tailor made for LINAGORA needs.
- - [Twake Calendar side service](https://github.com/linagora/twake-calendar-side-service) that delivers additional backend features for Sabre.
+- [esn-sabre](https://github.com/linagora/esn-sabre/) CalDAV + CardDAV server, tailor made for LINAGORA needs.
+- [Twake Calendar side service](https://github.com/linagora/twake-calendar-side-service) that delivers additional backend features for Sabre.
 
 It is meant as a drop in replacement of [esn-frontend-calendar](https://github.com/linagora/esn-frontend-calendar).
+
+## Contributing
+
+### Formating
+
+We use [Prettier](https://prettier.io/) to keep code style consistent.  
+A `.prettierrc` file is already included in the repo, so formatting rules are predefined.
+
+Before committing, make sure you format your files either using your IDE Prettier extension or Prettier CLI.
 
 ## Running it
 
@@ -77,7 +86,7 @@ And then visit [https://localhost:5000](https://localhost:5000).
 
 ### App grid
 
-An applist is configurable in the public folder to setup the grid of app accessible within Twake Calendar. 
+An applist is configurable in the public folder to setup the grid of app accessible within Twake Calendar.
 
 Each app has three fields:
 
@@ -89,7 +98,11 @@ Example:
 
 ```js
 var appList = [
-  { name: "My App", icon: "https://myapp.com/myapp.png", link: "https://myapp.com" },
+  {
+    name: "My App",
+    icon: "https://myapp.com/myapp.png",
+    link: "https://myapp.com",
+  },
 ];
 ```
 

@@ -28,7 +28,6 @@ function CalendarPopover({
   const [timeZone, setTimeZone] = useState("");
   const timezones = Intl.supportedValuesOf?.("timeZone") ?? [];
   const handleSave = () => {
-
     dispatch(createCalendar({ name, description, color }));
     onClose({}, "backdropClick");
 
@@ -64,7 +63,11 @@ function CalendarPopover({
       }}
     >
       <Box p={2}>
-        <Typography variant="h6" gutterBottom style={{backgroundColor:color}}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          style={{ backgroundColor: color }}
+        >
           Create a Calendar
         </Typography>
         <TextField

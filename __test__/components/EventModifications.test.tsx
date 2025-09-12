@@ -111,7 +111,7 @@ describe("CalendarApp integration", () => {
         openpaasId: "667037022b752d0026472254",
       },
       tokens: {
-        accessToken: "token"
+        accessToken: "token",
       },
     },
     calendars: {
@@ -133,14 +133,16 @@ describe("CalendarApp integration", () => {
                 cn: "Alice",
                 cal_address: "alice@example.com",
               },
-              attendee: [{
-                cn: "Alice",
-                partstat: "ACCEPTED",
-                rsvp: "TRUE",
-                role: "REQ-PARTICIPANT",
-                cutype: "INDIVIDUAL",
-                cal_address: "alice@example.com",
-              }, ],
+              attendee: [
+                {
+                  cn: "Alice",
+                  partstat: "ACCEPTED",
+                  rsvp: "TRUE",
+                  role: "REQ-PARTICIPANT",
+                  cutype: "INDIVIDUAL",
+                  cal_address: "alice@example.com",
+                },
+              ],
               ...eventProps,
             },
           },
