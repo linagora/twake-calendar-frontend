@@ -26,18 +26,18 @@ function CalendarPopover({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("");
-  const [timeZone, setTimeZone] = useState("");
-  const timezones = Intl.supportedValuesOf?.("timeZone") ?? [];
   const handleSave = () => {
     const calId = crypto.randomUUID();
-    dispatch(
-      createCalendarAsync({ name, desc: description, color, userId, calId })
-    );
-    onClose({}, "backdropClick");
+    if (name) {
+      dispatch(
+        createCalendarAsync({ name, desc: description, color, userId, calId })
+      );
+      onClose({}, "backdropClick");
 
-    // Reset
-    setName("");
-    setDescription("");
+      // Reset
+      setName("");
+      setDescription("");
+    }
   };
   const palette = [
     "#D50000",
@@ -100,16 +100,6 @@ function CalendarPopover({
             />
           ))}
         </ButtonGroup>
-        <Select
-          fullWidth
-          label="timeZone"
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
-        >
-          {timezones.map((zone: string) => (
-            <div>{zone}</div>
-          ))}
-        </Select>
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
             variant="outlined"
@@ -117,7 +107,11 @@ function CalendarPopover({
           >
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleSave}>
+          <Button
+            disabled={name && name !== "" ? false : true}
+            variant="contained"
+            onClick={handleSave}
+          >
             Save
           </Button>
         </Box>

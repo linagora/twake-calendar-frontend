@@ -28,7 +28,6 @@ export default function CalendarSelection({
     );
   };
 
-  useEffect(() => {}, [calendars]);
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
 
   return (
