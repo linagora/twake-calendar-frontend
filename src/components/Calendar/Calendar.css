@@ -11,6 +11,9 @@ main {
 
 .calendarListHeader {
   padding-top: 10px;
+  display: flex;
+  align-items: center;
+  margin-left: 25%;
 }
 .sidebar {
   border-right: 2px gray;
