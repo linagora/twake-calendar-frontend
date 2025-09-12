@@ -31,13 +31,13 @@ import { createSelector } from "@reduxjs/toolkit";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ClearIcon from "@mui/icons-material/Clear";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LockIcon from '@mui/icons-material/Lock';
+import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
 
 const computeStartOfTheWeek = (date: Date): Date => {
   const startOfWeek = new Date(date);
   startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
-  startOfWeek.setHours(0, 0, 0, 0); 
+  startOfWeek.setHours(0, 0, 0, 0);
   return startOfWeek;
 };
 
@@ -204,7 +204,6 @@ export default function CalendarApp() {
               calendarRef.current?.view.type === "timeGridWeek" ||
               calendarRef.current?.view.type === undefined
             ) {
-
               const startOfWeek = computeStartOfTheWeek(selected);
 
               const endOfWeek = new Date(startOfWeek);
@@ -430,7 +429,9 @@ export default function CalendarApp() {
             if (!calendars[arg.event._def.extendedProps.calId]) return;
 
             const attendees = event._def.extendedProps.attendee || [];
-            const isPrivate = event._def.extendedProps.class === "PRIVATE" || event._def.extendedProps.class === "CONFIDENTIAL"; 
+            const isPrivate =
+              event._def.extendedProps.class === "PRIVATE" ||
+              event._def.extendedProps.class === "CONFIDENTIAL";
             let Icon = null;
             let titleStyle: React.CSSProperties = {};
             const ownerEmails = new Set(
@@ -461,9 +462,17 @@ export default function CalendarApp() {
             }
 
             return (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {isPrivate && <LockIcon data-testid="lock-icon" fontSize="small" style={{ marginRight: '4px' }} />}
-                {Icon && <Icon fontSize="small" style={{ marginRight: '4px' }}/>}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {isPrivate && (
+                  <LockIcon
+                    data-testid="lock-icon"
+                    fontSize="small"
+                    style={{ marginRight: "4px" }}
+                  />
+                )}
+                {Icon && (
+                  <Icon fontSize="small" style={{ marginRight: "4px" }} />
+                )}
                 <span style={titleStyle}>{event.title}</span>
               </div>
             );

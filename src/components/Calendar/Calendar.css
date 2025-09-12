@@ -133,7 +133,9 @@ main {
 
 /* selected day hover */
 .react-calendar__tile {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   border: none;
   background-color: white;
   width: 12px;
