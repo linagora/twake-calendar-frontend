@@ -131,6 +131,7 @@ export default function EventPreviewModal({
                   window.open(
                     `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                       .map((a) => a.cal_address)
+                      .filter((mail) => mail !== user.userData.email)
                       .join(",")}?subject=${event.title}`
                   )
                 }
