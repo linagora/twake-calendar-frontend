@@ -27,6 +27,7 @@ export function CallbackResume() {
 
         sessionStorage.removeItem("redirectState");
         sessionStorage.setItem("tokenSet", JSON.stringify(data?.tokenSet));
+        sessionStorage.setItem("userData", JSON.stringify(data?.userinfo));
         // Redirect to main page after successful callback
         dispatch(push("/"));
       } catch (e) {

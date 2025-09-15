@@ -23,7 +23,7 @@ export const api = ky.extend({
           const loginurl = await Auth();
 
           sessionStorage.setItem(
-            "tokenSet",
+            "redirectState",
             JSON.stringify({
               code_verifier: loginurl.code_verifier,
               state: loginurl.state,

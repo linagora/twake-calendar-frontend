@@ -5,6 +5,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { Error } from "../../components/Error/Error";
 import { push } from "redux-first-history";
 import { redirectTo } from "../../utils/apiUtils";
+import { setTokens, setUserData } from "./userSlice";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user);
@@ -13,6 +14,20 @@ export function HandleLogin() {
   useEffect(() => {
     const initiateLogin = async () => {
       if (!userData.userData) {
+        const savedToken = sessionStorage.getItem("tokenSet")
+          ? JSON.parse(sessionStorage.getItem("tokenSet")!)
+          : null;
+        const savedUser = sessionStorage.getItem("userData")
+          ? JSON.parse(sessionStorage.getItem("userData")!)
+          : null;
+
+        if (savedToken && savedUser) {
+          dispatch(setTokens(savedToken));
+          dispatch(setUserData(savedUser));
+          dispatch(push("/"));
+          return;
+        }
+
         const loginurl = await Auth();
 
         sessionStorage.setItem(
@@ -28,7 +43,7 @@ export function HandleLogin() {
     };
 
     initiateLogin();
-  }, [userData]);
+  }, [userData, dispatch]);
 
   if (!calendars.pending && !userData.loading) {
     dispatch(push("/error"));
