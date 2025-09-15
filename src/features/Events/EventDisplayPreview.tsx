@@ -182,7 +182,14 @@ export default function EventPreviewModal({
 
           <CardContent sx={{ pt: 1.5 }}>
             {event.title && (
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                sx={{
+                  wordBreak: "break-word",
+                }}
+                gutterBottom
+              >
                 {event.title}
               </Typography>
             )}

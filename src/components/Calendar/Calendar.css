@@ -54,6 +54,14 @@ main {
   height: 100%;
 }
 
+.fc-event-main span,
+.fc-daygrid-event div {
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
 [data-theme="dark"] .fc-timegrid-slot::after {
   border-top: 1px dotted rgba(255, 255, 255, 0.2);
 }
