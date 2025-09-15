@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { createCalendar, createCalendarAsync } from "./CalendarSlice";
+import {
+  createCalendarAsync /*, updateCalendarAsync */,
+  patchCalendarAsync,
+} from "./CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   Popover,
@@ -7,7 +10,6 @@ import {
   Button,
   Box,
   Typography,
-  Select,
   ButtonGroup,
 } from "@mui/material";
 import { Calendars } from "./CalendarTypes";
@@ -20,7 +22,10 @@ function CalendarPopover({
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
-  onClose: (Calendar: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onClose: (
+    event: object | null,
+    reason: "backdropClick" | "escapeKeyDown"
+  ) => void;
   calendar?: Calendars;
 }) {
   const dispatch = useAppDispatch();
@@ -35,22 +40,37 @@ function CalendarPopover({
       setName(calendar.name);
       setDescription(calendar.description ?? "");
       setColor(calendar.color ?? "");
-    }
-  });
-
-  const handleSave = () => {
-    const calId = crypto.randomUUID();
-    if (name) {
-      dispatch(
-        createCalendarAsync({ name, desc: description, color, userId, calId })
-      );
-      onClose({}, "backdropClick");
-
-      // Reset
+    } else {
       setName("");
       setDescription("");
+      setColor("");
+    }
+  }, [calendar, open]);
+
+  const handleSave = () => {
+    const calId = calendar ? calendar.id : crypto.randomUUID();
+    if (name) {
+      if (calendar?.id) {
+        dispatch(
+          patchCalendarAsync({
+            calId: calendar.id,
+            calLink: calendar.link,
+            patch: { name, desc: description, color },
+          })
+        );
+      } else {
+        dispatch(
+          createCalendarAsync({ name, desc: description, color, userId, calId })
+        );
+      }
+      onClose({}, "backdropClick");
+
+      setName("");
+      setDescription("");
+      setColor("");
     }
   };
+
   const palette = [
     "#D50000",
     "#E67C73",
@@ -64,19 +84,14 @@ function CalendarPopover({
     "#8E24AA",
     "#616161",
   ];
+
   return (
     <Popover
       open={open}
       anchorEl={anchorEl}
-      onClose={onClose}
-      anchorOrigin={{
-        vertical: "center",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "center",
-        horizontal: "center",
-      }}
+      onClose={(e, reason) => onClose(e, reason)}
+      anchorOrigin={{ vertical: "center", horizontal: "center" }}
+      transformOrigin={{ vertical: "center", horizontal: "center" }}
     >
       <Box p={2}>
         <Typography
@@ -105,25 +120,22 @@ function CalendarPopover({
           rows={2}
         />
         <ButtonGroup>
-          {palette.map((color) => (
+          {palette.map((c) => (
             <Button
-              style={{ backgroundColor: color }}
-              onClick={() => setColor(color)}
+              key={c}
+              style={{ backgroundColor: c }}
+              onClick={() => setColor(c)}
             />
           ))}
         </ButtonGroup>
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
             variant="outlined"
-            onClick={() => onClose({}, "backdropClick")}
+            onClick={(e) => onClose({}, "backdropClick")}
           >
             Cancel
           </Button>
-          <Button
-            disabled={name && name !== "" ? false : true}
-            variant="contained"
-            onClick={handleSave}
-          >
+          <Button disabled={!name} variant="contained" onClick={handleSave}>
             Save
           </Button>
         </Box>

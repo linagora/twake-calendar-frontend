@@ -51,3 +51,27 @@ export async function postCalendar(
   });
   return response;
 }
+
+export async function proppatchCalendar(
+  calLink: string,
+  patch: { name: string; desc: string; color: string }
+) {
+  const body: Record<string, string> = {};
+  if (patch.name) {
+    body["dav:name"] = patch.name;
+  }
+  if (patch.desc) {
+    body["caldav:description"] = patch.desc;
+  }
+  if (patch.color) {
+    body["apple:color"] = patch.color;
+  }
+  const response = await api(`dav/${calLink}.json`, {
+    method: "PROPPATCH",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+    body: JSON.stringify(body),
+  });
+  return response;
+}

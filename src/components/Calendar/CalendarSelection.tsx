@@ -1,11 +1,12 @@
-import { Checkbox, IconButton } from "@mui/material";
-import { Button } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
+import Checkbox from "@mui/material/Checkbox";
+import Button from "@mui/material/Button";
 
 export default function CalendarSelection({
   selectedCalendars,
