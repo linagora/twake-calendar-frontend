@@ -28,7 +28,7 @@ describe("Event Preview Display", () => {
       },
       organiserData: {
         cn: "test",
-        cal_address: "mailto:test@test.com",
+        cal_address: "test@test.com",
       },
     },
     calendars: {
@@ -578,9 +578,7 @@ describe("Event Preview Display", () => {
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
         "event1"
       ];
-    const expectedUrl = `test/mailto/?uri=mailto:${event.attendee
-      .map((a) => a.cal_address)
-      .join(",")}?subject=${event.title}`;
+    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Test Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
