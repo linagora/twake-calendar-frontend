@@ -66,7 +66,7 @@ export async function proppatchCalendar(
   if (patch.color) {
     body["apple:color"] = patch.color;
   }
-  const response = await api(`dav/${calLink}.json`, {
+  const response = await api(`dav${calLink}`, {
     method: "PROPPATCH",
     headers: {
       Accept: "application/json, text/plain, */*",

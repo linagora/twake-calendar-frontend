@@ -2,6 +2,7 @@ import { CalendarEvent } from "../Events/EventsTypes";
 
 export interface Calendars {
   id: string;
+  link: string;
   name: string;
   delegated?: boolean;
   prodid?: string;
