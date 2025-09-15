@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createCalendar, createCalendarAsync } from "./CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -10,22 +10,34 @@ import {
   Select,
   ButtonGroup,
 } from "@mui/material";
+import { Calendars } from "./CalendarTypes";
 
 function CalendarPopover({
   anchorEl,
   open,
   onClose,
+  calendar,
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: (Calendar: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  calendar?: Calendars;
 }) {
   const dispatch = useAppDispatch();
   const userId =
     useAppSelector((state) => state.user.userData.openpaasId) ?? "";
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [color, setColor] = useState("");
+  const [name, setName] = useState(calendar?.name ?? "");
+  const [description, setDescription] = useState(calendar?.description ?? "");
+  const [color, setColor] = useState(calendar?.color ?? "");
+
+  useEffect(() => {
+    if (calendar) {
+      setName(calendar.name);
+      setDescription(calendar.description ?? "");
+      setColor(calendar.color ?? "");
+    }
+  });
+
   const handleSave = () => {
     const calId = crypto.randomUUID();
     if (name) {

@@ -17,7 +17,7 @@ export const getCalendarsListAsync = createAsyncThunk<
 
   for (const cal of rawCalendars) {
     const name = cal["dav:name"];
-    const description = cal["dav:description"];
+    const description = cal["caldav:description"];
     let delegated = false;
     let source = cal["calendarserver:source"]
       ? cal["calendarserver:source"]._links.self.href
