@@ -372,6 +372,11 @@ const CalendarSlice = createSlice({
             ...state.list[action.payload.calId],
             color: action.payload.patch.color,
           };
+          Object.keys(state.list[action.payload.calId].events).forEach(
+            (evId) =>
+              (state.list[action.payload.calId].events[evId].color =
+                action.payload.patch.color)
+          );
         }
         if (action.payload.patch.desc) {
           state.list[action.payload.calId] = {
