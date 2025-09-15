@@ -7,7 +7,6 @@ import EventDisplayModal, {
   stringToColor,
 } from "../../../src/features/Events/EventDisplay";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-import { s } from "@fullcalendar/core/internal-common";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
