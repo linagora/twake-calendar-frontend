@@ -48,19 +48,29 @@ function CalendarPopover({
   }, [calendar, open]);
 
   const handleSave = () => {
-    const calId = calendar ? calendar.id : crypto.randomUUID();
-    if (name) {
+    const trimmedName = name.trim();
+    const trimmedDesc = description.trim();
+
+    if (trimmedName) {
+      const calId = calendar ? calendar.id : crypto.randomUUID();
+
       if (calendar?.id) {
         dispatch(
           patchCalendarAsync({
             calId: calendar.id,
             calLink: calendar.link,
-            patch: { name, desc: description, color },
+            patch: { name: trimmedName, desc: trimmedDesc, color },
           })
         );
       } else {
         dispatch(
-          createCalendarAsync({ name, desc: description, color, userId, calId })
+          createCalendarAsync({
+            name: trimmedName,
+            desc: trimmedDesc,
+            color,
+            userId,
+            calId,
+          })
         );
       }
       onClose({}, "backdropClick");
@@ -135,7 +145,11 @@ function CalendarPopover({
           >
             Cancel
           </Button>
-          <Button disabled={!name} variant="contained" onClick={handleSave}>
+          <Button
+            disabled={!name.trim()}
+            variant="contained"
+            onClick={handleSave}
+          >
             Save
           </Button>
         </Box>

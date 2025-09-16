@@ -155,6 +155,29 @@ describe("CalendarPopover (editing mode)", () => {
     });
   });
 
+  test("Save button is disabled when name is empty or whitespace only", () => {
+    renderWithProviders(
+      <CalendarPopover
+        anchorEl={document.createElement("div")}
+        open={true}
+        onClose={jest.fn()}
+      />,
+      { user: baseUser }
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    expect(saveButton).toBeDisabled();
+    // only spaces
+    const nameInput = screen.getByLabelText(/name/i);
+    fireEvent.change(nameInput, { target: { value: "    " } });
+
+    expect(saveButton).toBeDisabled();
+
+    // valid name
+    fireEvent.change(nameInput, { target: { value: "Work Calendar" } });
+    expect(saveButton).toBeEnabled();
+  });
+
   it("allows modifying and saving existing calendar", async () => {
     const spy = jest
       .spyOn(eventThunks, "patchCalendarAsync")
