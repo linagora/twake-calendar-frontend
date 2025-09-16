@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import {
+  addSharedCalendar,
   getCalendar,
   getCalendars,
   postCalendar,
@@ -189,6 +190,19 @@ export const createCalendarAsync = createAsyncThunk<
 >("calendars/createCalendar", async ({ userId, calId, color, name, desc }) => {
   const response = await postCalendar(userId, calId, color, name, desc);
   return { userId, calId, color, name, desc };
+});
+export const addSharedCalendarAsync = createAsyncThunk<
+  { userId: string; calId: string; color: string; name: string; desc: string }, // Return type
+  { userId: string; calId: string; cal: Record<string, any> } // Arg type
+>("calendars/addSharedCalendar", async ({ userId, calId, cal }) => {
+  const response = await addSharedCalendar(userId, calId, cal);
+  return {
+    userId: cal.cal._embedded["dav:calendar"][0]._links.self.href.split("/")[2],
+    calId,
+    color: cal.cal._embedded["dav:calendar"][0]["apple:color"],
+    desc: cal.cal._embedded["dav:calendar"][0]["caldav:description"],
+    name: cal.cal._embedded["dav:calendar"][0]["dav:name"],
+  };
 });
 
 const CalendarSlice = createSlice({
@@ -391,6 +405,15 @@ const CalendarSlice = createSlice({
           };
         }
       })
+      .addCase(addSharedCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[`${action.payload.userId}/${action.payload.calId}`] = {
+          color: action.payload.color,
+          id: `${action.payload.userId}/${action.payload.calId}`,
+          description: action.payload.desc,
+          name: action.payload.name,
+        } as unknown as Calendars;
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -413,6 +436,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(createCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(addSharedCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },

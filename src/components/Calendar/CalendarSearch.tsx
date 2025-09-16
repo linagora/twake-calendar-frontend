@@ -29,7 +29,10 @@ import {
   getCalendar,
   getCalendars,
 } from "../../features/Calendars/CalendarApi";
-import { createCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import {
+  addSharedCalendarAsync,
+  createCalendarAsync,
+} from "../../features/Calendars/CalendarSlice";
 
 interface User {
   email: string;
@@ -64,8 +67,8 @@ export default function CalendarSearch({
   const handleSave = () => {
     const calId = crypto.randomUUID();
     if (selectedCal) {
-      selectedCal.forEach(
-        async (cal) => await addSharedCalendar(openpaasId, calId, cal)
+      selectedCal.forEach(async (cal) =>
+        dispatch(addSharedCalendarAsync({ userId: openpaasId, calId, cal }))
       );
       onClose({}, "backdropClick");
     }
@@ -82,7 +85,6 @@ export default function CalendarSearch({
 
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
-  console.log(selectedCal);
   return (
     <Popover
       open={open}
