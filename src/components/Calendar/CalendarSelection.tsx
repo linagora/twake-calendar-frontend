@@ -73,6 +73,8 @@ function CalendarAccordion({
     </Accordion>
   );
 }
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CalendarSearch from "./CalendarSearch";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -102,6 +104,9 @@ export default function CalendarSelection({
   const [selectedCalId, setSelectedCalId] = useState("");
 
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
+  const [anchorElCalOthers, setAnchorElCalOthers] =
+    useState<HTMLElement | null>(null);
+
   return (
     <>
       <div>
@@ -154,7 +159,6 @@ export default function CalendarSelection({
           setSelectedCalId("");
           setAnchorElCal(null);
         }}
-        calendar={calendars[selectedCalId] ?? undefined}
       />
     </>
   );

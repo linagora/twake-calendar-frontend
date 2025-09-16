@@ -52,6 +52,23 @@ export async function postCalendar(
   return response;
 }
 
+export async function addSharedCalendar(
+  userId: string,
+  calId: string,
+  cal: Record<string, any>
+) {
+  const response = await api.post(`dav/calendars/${userId}.json`, {
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+    body: JSON.stringify({
+      id: calId,
+      ...cal.cal._embedded["dav:calendar"][0],
+    }),
+  });
+  return response;
+}
+
 export async function proppatchCalendar(
   calLink: string,
   patch: { name: string; desc: string; color: string }
