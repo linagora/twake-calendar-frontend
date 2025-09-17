@@ -13,17 +13,6 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-type CalendarAccordionProps = {
-  title: string;
-  calendars: string[];
-  selectedCalendars: string[];
-  handleToggle: (id: string) => void;
-  showAddButton?: boolean;
-  onAddClick?: () => void;
-  defaultExpanded?: boolean;
-  setOpen: Function;
-};
-
 function CalendarAccordion({
   title,
   calendars,
@@ -33,22 +22,37 @@ function CalendarAccordion({
   onAddClick,
   defaultExpanded = false,
   setOpen,
-}: CalendarAccordionProps) {
+}: {
+  title: string;
+  calendars: string[];
+  selectedCalendars: string[];
+  handleToggle: (id: string) => void;
+  showAddButton?: boolean;
+  onAddClick?: Function;
+  defaultExpanded?: boolean;
+  setOpen: Function;
+}) {
   const allCalendars = useAppSelector((state) => state.calendars.list);
 
   if (calendars.length === 0) return null;
-
+  const [expended, setExpended] = useState(defaultExpanded);
   return (
-    <Accordion defaultExpanded={defaultExpanded}>
+    <Accordion defaultExpanded={defaultExpanded} expanded={expended}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`${title}-content`}
         id={`${title}-header`}
         className="calendarListHeader"
+        onClick={() => setExpended(!expended)}
       >
         <Typography component="h3">{title}</Typography>
         {showAddButton && (
-          <Button onClick={onAddClick}>
+          <Button
+            onClick={(e) => {
+              expended && e.stopPropagation();
+              onAddClick && onAddClick();
+            }}
+          >
             <AddIcon />
           </Button>
         )}
@@ -130,7 +134,9 @@ export default function CalendarSelection({
           calendars={sharedCalendars}
           selectedCalendars={selectedCalendars}
           showAddButton
-          onAddClick={() => setAnchorElCal(document.body)}
+          onAddClick={() => {
+            setAnchorElCal(document.body);
+          }}
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
             setAnchorElCal(document.body);
