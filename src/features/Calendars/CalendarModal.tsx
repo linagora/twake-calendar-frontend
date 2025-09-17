@@ -36,14 +36,16 @@ function CalendarPopover({
   const [color, setColor] = useState(calendar?.color ?? "");
 
   useEffect(() => {
-    if (calendar) {
-      setName(calendar.name);
-      setDescription(calendar.description ?? "");
-      setColor(calendar.color ?? "");
-    } else {
-      setName("");
-      setDescription("");
-      setColor("");
+    if (open) {
+      if (calendar) {
+        setName(calendar.name);
+        setDescription(calendar.description ?? "");
+        setColor(calendar.color ?? "");
+      } else {
+        setName("");
+        setDescription("");
+        setColor("");
+      }
     }
   }, [calendar, open]);
 
@@ -73,11 +75,8 @@ function CalendarPopover({
           })
         );
       }
-      onClose({}, "backdropClick");
 
-      setName("");
-      setDescription("");
-      setColor("");
+      onClose({}, "backdropClick");
     }
   };
 
