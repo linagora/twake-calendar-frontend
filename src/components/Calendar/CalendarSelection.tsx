@@ -1,10 +1,8 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Typography,
-} from "@mui/material";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Typography from "@mui/material/Typography";
+import { useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
@@ -14,6 +12,61 @@ import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+type CalendarAccordionProps = {
+  title: string;
+  calendars: string[];
+  selectedCalendars: string[];
+  handleToggle: (id: string) => void;
+  showAddButton?: boolean;
+  onAddClick?: () => void;
+  defaultExpanded?: boolean;
+  setOpen: Function;
+};
+
+function CalendarAccordion({
+  title,
+  calendars,
+  selectedCalendars,
+  handleToggle,
+  showAddButton = false,
+  onAddClick,
+  defaultExpanded = false,
+  setOpen,
+}: CalendarAccordionProps) {
+  const allCalendars = useAppSelector((state) => state.calendars.list);
+
+  if (calendars.length === 0) return null;
+
+  return (
+    <Accordion defaultExpanded={defaultExpanded}>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls={`${title}-content`}
+        id={`${title}-header`}
+        className="calendarListHeader"
+      >
+        <Typography component="h3">{title}</Typography>
+        {showAddButton && (
+          <Button onClick={onAddClick}>
+            <AddIcon />
+          </Button>
+        )}
+      </AccordionSummary>
+      <AccordionDetails>
+        {calendars.map((id) =>
+          CalendarSelector(
+            allCalendars,
+            id,
+            selectedCalendars,
+            handleToggle,
+            () => setOpen(id)
+          )
+        )}
+      </AccordionDetails>
+    </Accordion>
+  );
+}
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -46,89 +99,44 @@ export default function CalendarSelection({
   return (
     <>
       <div>
-        <Accordion defaultExpanded>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="persoCal-content"
-            id="persoCal-header"
-            className="calendarListHeader"
-          >
-            <Typography component="h3">Personnal Calendars</Typography>
-            <Button onClick={() => setAnchorElCal(document.body)}>
-              <AddIcon />
-            </Button>
-          </AccordionSummary>
-          <AccordionDetails>
-            {personnalCalendars.map((id) =>
-              CalendarSelector(
-                calendars,
-                id,
-                selectedCalendars,
-                handleCalendarToggle,
-                () => {
-                  setAnchorElCal(document.body);
-                  setSelectedCalId(id);
-                }
-              )
-            )}
-          </AccordionDetails>
-        </Accordion>
+        <CalendarAccordion
+          title="Personnal Calendars"
+          calendars={personnalCalendars}
+          selectedCalendars={selectedCalendars}
+          handleToggle={handleCalendarToggle}
+          showAddButton
+          onAddClick={() => setAnchorElCal(document.body)}
+          setOpen={(id: string) => {
+            setAnchorElCal(document.body);
+            setSelectedCalId(id);
+          }}
+          defaultExpanded
+        />
 
-        {delegatedCalendars.length > 0 && (
-          <Accordion defaultExpanded>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="persoCal-content"
-              id="persoCal-header"
-              className="calendarListHeader"
-            >
-              <Typography component="h3">Delegated Calendars</Typography>
-              <Button onClick={() => setAnchorElCal(document.body)}>
-                <AddIcon />
-              </Button>
-            </AccordionSummary>
-            <AccordionDetails>
-              {delegatedCalendars.map((id) =>
-                CalendarSelector(
-                  calendars,
-                  id,
-                  selectedCalendars,
-                  handleCalendarToggle,
-                  () => {
-                    setAnchorElCal(document.body);
-                    setSelectedCalId(id);
-                  }
-                )
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )}
-        {sharedCalendars.length > 0 && (
-          <Accordion>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="persoCal-content"
-              id="persoCal-header"
-              className="calendarListHeader"
-            >
-              <Typography component="h3">Other Calendars</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              {sharedCalendars.map((id) =>
-                CalendarSelector(
-                  calendars,
-                  id,
-                  selectedCalendars,
-                  handleCalendarToggle,
-                  () => {
-                    setAnchorElCal(document.body);
-                    setSelectedCalId(id);
-                  }
-                )
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )}
+        <CalendarAccordion
+          title="Delegated Calendars"
+          calendars={delegatedCalendars}
+          selectedCalendars={selectedCalendars}
+          handleToggle={handleCalendarToggle}
+          defaultExpanded
+          setOpen={(id: string) => {
+            setAnchorElCal(document.body);
+            setSelectedCalId(id);
+          }}
+        />
+
+        <CalendarAccordion
+          title="Other Calendars"
+          calendars={sharedCalendars}
+          selectedCalendars={selectedCalendars}
+          showAddButton
+          onAddClick={() => setAnchorElCal(document.body)}
+          handleToggle={handleCalendarToggle}
+          setOpen={(id: string) => {
+            setAnchorElCal(document.body);
+            setSelectedCalId(id);
+          }}
+        />
       </div>
 
       <CalendarPopover

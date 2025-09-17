@@ -123,7 +123,7 @@ describe("CalendarSelection", () => {
     renderWithProviders(<CalendarApp />, preloadedState);
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Shared Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
