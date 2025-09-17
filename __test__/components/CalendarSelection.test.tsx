@@ -113,7 +113,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButton = screen.getByRole("button");
+    const addButton = screen.getByTestId("AddIcon");
     fireEvent.click(addButton);
 
     expect(screen.getByRole("presentation")).toBeInTheDocument();

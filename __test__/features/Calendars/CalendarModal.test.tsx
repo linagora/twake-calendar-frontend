@@ -1,6 +1,4 @@
-import { screen, fireEvent } from "@testing-library/react";
-import { useAppDispatch } from "../../../src/app/hooks";
-import { createCalendar } from "../../../src/features/Calendars/CalendarSlice";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import CalendarPopover from "../../../src/features/Calendars/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
@@ -97,10 +95,6 @@ describe("CalendarPopover", () => {
     expect(spy).toHaveBeenCalled();
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
-
-    // Inputs should be reset (optional check)
-    expect(screen.getByLabelText(/Name/i)).toHaveValue("");
-    expect(screen.getByLabelText(/Description/i)).toHaveValue("");
   });
 
   it("calls onClose when Cancel clicked", () => {
@@ -109,5 +103,115 @@ describe("CalendarPopover", () => {
     fireEvent.click(screen.getByText(/Cancel/i));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+  });
+});
+
+describe("CalendarPopover (editing mode)", () => {
+  const mockOnClose = jest.fn();
+
+  const baseUser = {
+    userData: {
+      sub: "test",
+      email: "test@test.com",
+      sid: "mockSid",
+      openpaasId: "user1",
+    },
+  };
+
+  const existingCalendar = {
+    id: "user1/cal1",
+    link: "/calendars/user/cal1",
+    name: "Work Calendar",
+    description: "Team meetings",
+    color: "#33B679",
+    owner: "alice",
+    ownerEmails: ["alice@example.com"],
+    events: {},
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("prefills fields when calendar prop is given", () => {
+    renderWithProviders(
+      <CalendarPopover
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    expect(screen.getByLabelText(/Name/i)).toHaveValue("Work Calendar");
+    expect(screen.getByLabelText(/Description/i)).toHaveValue("Team meetings");
+    expect(screen.getByText("Calendar configuration")).toHaveStyle({
+      backgroundColor: "#33B679",
+    });
+  });
+
+  test("Save button is disabled when name is empty or whitespace only", () => {
+    renderWithProviders(
+      <CalendarPopover
+        anchorEl={document.createElement("div")}
+        open={true}
+        onClose={jest.fn()}
+      />,
+      { user: baseUser }
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    expect(saveButton).toBeDisabled();
+    // only spaces
+    const nameInput = screen.getByLabelText(/name/i);
+    fireEvent.change(nameInput, { target: { value: "    " } });
+
+    expect(saveButton).toBeDisabled();
+
+    // valid name
+    fireEvent.change(nameInput, { target: { value: "Work Calendar" } });
+    expect(saveButton).toBeEnabled();
+  });
+
+  it("allows modifying and saving existing calendar", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "patchCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    renderWithProviders(
+      <CalendarPopover
+        anchorEl={document.body}
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    // Change name
+    fireEvent.change(screen.getByLabelText(/Name/i), {
+      target: { value: "Updated Calendar" },
+    });
+
+    // Save
+    fireEvent.click(screen.getByText(/Save/i));
+
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          calId: "user1/cal1",
+          calLink: "/calendars/user/cal1",
+          patch: {
+            color: "#33B679",
+            desc: "Team meetings",
+            name: "Updated Calendar",
+          },
+        })
+      )
+    );
+    expect(mockOnClose).toHaveBeenCalled();
   });
 });

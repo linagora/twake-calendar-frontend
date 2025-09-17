@@ -4,6 +4,7 @@ import {
   getCalendar,
   getCalendars,
   postCalendar,
+  proppatchCalendar,
 } from "../../../src/features/Calendars/CalendarApi";
 import { clientConfig } from "../../../src/features/User/oidcAuth";
 import { api } from "../../../src/utils/apiUtils";
@@ -74,6 +75,27 @@ describe("Calendar API", () => {
         "dav:name": "new cal",
         "apple:color": "calId",
         "caldav:description": "desc",
+      }),
+    });
+  });
+  it("patch Calendar", async () => {
+    const calId = "calId";
+    const calLink = "/calendars/calId.json";
+    const color = "calId";
+    const name = "new cal";
+    const desc = "desc";
+
+    const result = await proppatchCalendar(calLink, { color, name, desc });
+
+    expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
+      method: "PROPPATCH",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
+      body: JSON.stringify({
+        "dav:name": "new cal",
+        "caldav:description": "desc",
+        "apple:color": "calId",
       }),
     });
   });
