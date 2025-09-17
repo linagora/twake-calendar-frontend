@@ -1,15 +1,15 @@
 import { api } from "../../utils/apiUtils";
 
-export async function getCalendars(userId: string) {
+export async function getCalendars(
+  userId: string,
+  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true"
+) {
   const calendars = await api
-    .get(
-      `dav/calendars/${userId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
-      {
-        headers: {
-          Accept: "application/calendar+json",
-        },
-      }
-    )
+    .get(`dav/calendars/${userId}.json?${scope}`, {
+      headers: {
+        Accept: "application/calendar+json",
+      },
+    })
     .json();
   return calendars;
 }
@@ -63,16 +63,16 @@ export async function addSharedCalendar(
     },
     body: JSON.stringify({
       id: calId,
-      ...cal.cal._embedded["dav:calendar"][0],
+      ...cal.cal,
       "calendarserver:source": {
-        acl: cal.cal._embedded["dav:calendar"][0].acl,
-        calendarHomeId: cal.cal._embedded["dav:calendar"][0].id,
-        color: cal.cal._embedded["dav:calendar"][0]["apple:color"],
-        description: cal.cal._embedded["dav:calendar"][0]["caldav:description"],
-        href: cal.cal._embedded["dav:calendar"][0]._links.self.href,
-        id: cal.cal._embedded["dav:calendar"][0].id,
-        invite: cal.cal._embedded["dav:calendar"][0].invite,
-        name: cal.cal._embedded["dav:calendar"][0]["dav:name"],
+        acl: cal.cal.acl,
+        calendarHomeId: cal.cal.id,
+        color: cal.cal["apple:color"],
+        description: cal.cal["caldav:description"],
+        href: cal.cal._links.self.href,
+        id: cal.cal.id,
+        invite: cal.cal.invite,
+        name: cal.cal["dav:name"],
       },
     }),
   });

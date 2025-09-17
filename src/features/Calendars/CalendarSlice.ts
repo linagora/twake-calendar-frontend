@@ -197,12 +197,12 @@ export const addSharedCalendarAsync = createAsyncThunk<
 >("calendars/addSharedCalendar", async ({ userId, calId, cal }) => {
   const response = await addSharedCalendar(userId, calId, cal);
   return {
-    calId: cal.cal._embedded["dav:calendar"][0]._links.self.href
+    calId: cal.cal._links.self.href
       .replace("/calendars/", "")
       .replace(".json", ""),
-    color: cal.cal._embedded["dav:calendar"][0]["apple:color"],
-    desc: cal.cal._embedded["dav:calendar"][0]["caldav:description"],
-    name: cal.cal._embedded["dav:calendar"][0]["dav:name"],
+    color: cal.cal["apple:color"],
+    desc: cal.cal["caldav:description"],
+    name: cal.cal["dav:name"],
   };
 });
 

@@ -7,7 +7,7 @@ export async function getOpenPaasUser() {
 
 export async function searchUsers(
   query: string,
-  objectTypes: string[] = ["user", "group", "contact", "ldap"]
+  objectTypes: string[] = ["user", "contact"]
 ): Promise<
   {
     email: string;

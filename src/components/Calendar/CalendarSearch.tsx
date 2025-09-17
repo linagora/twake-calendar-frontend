@@ -62,7 +62,7 @@ export default function CalendarSearch({
             calId,
             cal: {
               ...cal,
-              color: cal.cal._embedded["dav:calendar"][0]["apple:color"],
+              color: cal.cal["apple:color"],
             },
           })
         );
@@ -132,18 +132,17 @@ export default function CalendarSearch({
 
                 const cals = await Promise.all(
                   value.map(async (user) => {
-                    const cal = (await getCalendars(user.openpaasId)) as Record<
-                      string,
-                      any
-                    >;
-                    return {
-                      cal,
-                      owner: user,
-                    };
+                    const cals = (await getCalendars(
+                      user.openpaasId,
+                      "sharedPublic=true&withRights=true"
+                    )) as Record<string, any>;
+                    return cals._embedded["dav:calendar"].map(
+                      (cal: Record<string, any>) => ({ cal, owner: user })
+                    );
                   })
                 );
-
-                setSelectedCalendars(cals);
+                console.log(cals.flat());
+                setSelectedCalendars(cals.flat());
               }}
               renderInput={(params) => (
                 <TextField
@@ -163,12 +162,6 @@ export default function CalendarSearch({
                 />
               )}
               renderOption={(props, option) => {
-                if (
-                  Object.keys(calendars)
-                    .map((id) => calendars[id])
-                    .find((c) => c.ownerEmails?.find((e) => e === option.email))
-                )
-                  return null;
                 return (
                   <ListItem
                     {...props}
@@ -194,7 +187,7 @@ export default function CalendarSearch({
                 </Typography>
                 {selectedCal.map((cal) => (
                   <Box
-                    key={cal.owner.email}
+                    key={cal.owner.email + cal.cal["dav:name"]}
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
@@ -211,21 +204,17 @@ export default function CalendarSearch({
                         alt={cal.owner.email}
                         sx={{
                           border: `2px solid ${
-                            cal.cal._embedded["dav:calendar"][0][
-                              "apple:color"
-                            ] ?? "transparent"
+                            cal.cal["apple:color"] ?? "transparent"
                           }`,
-                          boxShadow: cal.cal._embedded["dav:calendar"][0][
-                            "apple:color"
-                          ]
-                            ? `0 0 0 2px ${cal.cal._embedded["dav:calendar"][0]["apple:color"]}`
+                          boxShadow: cal.cal["apple:color"]
+                            ? `0 0 0 2px ${cal.cal["apple:color"]}`
                             : "none",
                         }}
                       />
 
                       <Box>
                         <Typography variant="body1">
-                          {cal.cal._embedded["dav:calendar"][0]["dav:name"]}
+                          {cal.cal["dav:name"]}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
                           {cal.owner.email}
@@ -240,24 +229,14 @@ export default function CalendarSearch({
                           onClick={() =>
                             setSelectedCalendars((prev) =>
                               prev.map((prevcal) =>
-                                prevcal.owner.email === cal.owner.email
+                                prevcal.owner.email === cal.owner.email &&
+                                prevcal.cal._links.self.href ===
+                                  cal.cal._links.self.href
                                   ? {
                                       ...prevcal,
                                       cal: {
                                         ...prevcal.cal,
-                                        _embedded: {
-                                          ...prevcal.cal._embedded,
-                                          "dav:calendar": prevcal.cal._embedded[
-                                            "dav:calendar"
-                                          ].map((calendar: any, idx: number) =>
-                                            idx === 0
-                                              ? {
-                                                  ...calendar,
-                                                  "apple:color": c,
-                                                }
-                                              : calendar
-                                          ),
-                                        },
+                                        "apple:color": c,
                                       },
                                     }
                                   : prevcal
@@ -271,9 +250,7 @@ export default function CalendarSearch({
                             bgcolor: c,
                             cursor: "pointer",
                             border:
-                              cal.cal._embedded["dav:calendar"][0][
-                                "apple:color"
-                              ] === c
+                              cal.cal["apple:color"] === c
                                 ? "2px solid black"
                                 : "2px solid transparent",
                             transition: "all 0.2s",
@@ -287,12 +264,22 @@ export default function CalendarSearch({
                           setSelectedCalendars((prev) =>
                             prev.filter(
                               (prevcal) =>
-                                prevcal.owner.email !== cal.owner.email
+                                prevcal.cal._links.self.href !==
+                                cal.cal._links.self.href
                             )
                           );
-                          setSelectedUsers((prev) =>
-                            prev.filter((u) => u.email !== cal.owner.email)
-                          );
+                          if (
+                            !selectedCal.find(
+                              (c) =>
+                                cal.owner.email === c.owner.email &&
+                                c.cal._links.self.href !==
+                                  cal.cal._links.self.href
+                            )
+                          ) {
+                            setSelectedUsers((prev) =>
+                              prev.filter((u) => u.email !== cal.owner.email)
+                            );
+                          }
                         }}
                       >
                         <CloseIcon fontSize="small" />
