@@ -192,13 +192,14 @@ export const createCalendarAsync = createAsyncThunk<
   return { userId, calId, color, name, desc };
 });
 export const addSharedCalendarAsync = createAsyncThunk<
-  { userId: string; calId: string; color: string; name: string; desc: string }, // Return type
+  { calId: string; color: string; name: string; desc: string }, // Return type
   { userId: string; calId: string; cal: Record<string, any> } // Arg type
 >("calendars/addSharedCalendar", async ({ userId, calId, cal }) => {
   const response = await addSharedCalendar(userId, calId, cal);
   return {
-    userId: cal.cal._embedded["dav:calendar"][0]._links.self.href.split("/")[2],
-    calId,
+    calId: cal.cal._embedded["dav:calendar"][0]._links.self.href
+      .replace("/calendars/", "")
+      .replace(".json", ""),
     color: cal.cal._embedded["dav:calendar"][0]["apple:color"],
     desc: cal.cal._embedded["dav:calendar"][0]["caldav:description"],
     name: cal.cal._embedded["dav:calendar"][0]["dav:name"],
@@ -377,7 +378,8 @@ const CalendarSlice = createSlice({
           id: `${action.payload.userId}/${action.payload.calId}`,
           description: action.payload.desc,
           name: action.payload.name,
-        } as unknown as Calendars;
+          events: {},
+        } as Calendars;
       })
       .addCase(patchCalendarAsync.fulfilled, (state, action) => {
         state.pending = false;
@@ -407,12 +409,13 @@ const CalendarSlice = createSlice({
       })
       .addCase(addSharedCalendarAsync.fulfilled, (state, action) => {
         state.pending = false;
-        state.list[`${action.payload.userId}/${action.payload.calId}`] = {
+        state.list[action.payload.calId] = {
           color: action.payload.color,
-          id: `${action.payload.userId}/${action.payload.calId}`,
+          id: action.payload.calId,
           description: action.payload.desc,
           name: action.payload.name,
-        } as unknown as Calendars;
+          events: {},
+        } as Calendars;
       })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;

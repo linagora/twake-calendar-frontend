@@ -90,6 +90,7 @@ export default function CalendarSearch({
         sx={{
           position: "absolute",
           left: "50%",
+          top: "20%",
           transform: "translate( -50%)",
           width: "50vw",
           maxHeight: "80vh",
@@ -169,7 +170,11 @@ export default function CalendarSearch({
                 )
                   return null;
                 return (
-                  <ListItem {...props} key={option.email} disableGutters>
+                  <ListItem
+                    {...props}
+                    key={option.email + option.displayName}
+                    disableGutters
+                  >
                     <ListItemAvatar>
                       <Avatar src={option.avatarUrl} alt={option.displayName} />
                     </ListItemAvatar>

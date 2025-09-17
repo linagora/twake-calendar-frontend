@@ -101,7 +101,7 @@ describe("CalendarSelection", () => {
     expect(updater(["user1/cal1"])).toEqual([]);
   });
 
-  it("opens CalendarPopover when personal Add button is clicked", () => {
+  it("opens CalendarPopover modal when personal Add button is clicked", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -114,12 +114,12 @@ describe("CalendarSelection", () => {
     );
 
     const addButtons = screen.getAllByRole("button");
-    fireEvent.click(addButtons[0]); // first Add button (personal)
+    fireEvent.click(addButtons[0]);
 
     expect(screen.getByRole("presentation")).toBeInTheDocument();
   });
 
-  it("opens CalendarPopover when delegated Add button is clicked", () => {
+  it("opens CalendarSearch modal when Other Add button is clicked", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -132,25 +132,7 @@ describe("CalendarSelection", () => {
     );
 
     const addButtons = screen.getAllByRole("button");
-    fireEvent.click(addButtons[1]); // second Add button (delegated)
-
-    expect(screen.getByRole("presentation")).toBeInTheDocument();
-  });
-
-  it("opens CalendarSearch when Other Add button is clicked", () => {
-    renderWithProviders(
-      <CalendarSelection
-        selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
-      />,
-      {
-        user: baseUser,
-        calendars: { list: calendarsMock, pending: false },
-      }
-    );
-
-    const addButtons = screen.getAllByRole("button");
-    fireEvent.click(addButtons[2]); // third Add button (other)
+    fireEvent.click(addButtons[1]); // seccond Add button (other)
 
     expect(screen.getByRole("presentation")).toBeInTheDocument();
   });
@@ -219,11 +201,14 @@ describe("CalendarSelection", () => {
         calendars: { list: calendarsMock, pending: false },
       }
     );
+    const delegatedAccordionSummary = screen
+      .getByText("Delegated Calendars")
+      .closest(".MuiAccordionSummary-root");
 
-    const delegatedAccordion = screen.getByText("Delegated Calendars");
-    fireEvent.click(delegatedAccordion);
+    fireEvent.click(delegatedAccordionSummary!);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
 
-    // Clicking should toggle expansion (content hidden)
-    expect(screen.queryByLabelText("Calendar delegated")).not.toBeVisible();
+    fireEvent.click(delegatedAccordionSummary!);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
 });

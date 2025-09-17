@@ -131,7 +131,7 @@ export default function CalendarSelection({
           handleToggle={handleCalendarToggle}
           defaultExpanded
           setOpen={(id: string) => {
-            setAnchorElCal(document.body);
+            setAnchorElCalOthers(document.body);
             setSelectedCalId(id);
           }}
         />
