@@ -5,7 +5,10 @@ export async function getOpenPaasUser() {
   return user;
 }
 
-export async function searchUsers(query: string): Promise<
+export async function searchUsers(
+  query: string,
+  objectTypes: string[] = ["user", "group", "contact", "ldap"]
+): Promise<
   {
     email: string;
     displayName: string;
@@ -17,7 +20,7 @@ export async function searchUsers(query: string): Promise<
     .post(`api/people/search`, {
       body: JSON.stringify({
         limit: 10,
-        objectTypes: ["user", "group", "contact", "ldap"],
+        objectTypes,
         q: query,
       }),
     })
