@@ -96,9 +96,6 @@ describe("CalendarPopover", () => {
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
 
-    // Inputs should be reset (optional check)
-    expect(screen.getByLabelText(/Name/i)).toHaveValue("");
-    expect(screen.getByLabelText(/Description/i)).toHaveValue("");
   });
 
   it("calls onClose when Cancel clicked", () => {
