@@ -242,7 +242,7 @@ export function calendarEventToJCal(
     });
     return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
   }
-  
+
   const vtimezone = new ICAL.Timezone({
     component: timezoneData.ics,
     tzid: event.timezone,

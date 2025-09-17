@@ -48,16 +48,18 @@ export function Menubar() {
           <Avatar
             sx={{
               bgcolor: stringToColor(
-                (user && user.family_name) ? user.family_name : 
-                (user && user.email) ? user.email : 
-                ''
+                user && user.family_name
+                  ? user.family_name
+                  : user && user.email
+                    ? user.email
+                    : ""
               ),
             }}
             sizes="large"
           >
             {user?.name && user?.family_name
               ? `${user.name[0]}${user.family_name[0]}`
-              : user?.email?.[0] ?? ''}
+              : (user?.email?.[0] ?? "")}
           </Avatar>
         </div>
       </header>
