@@ -1,12 +1,21 @@
-main {
+.App {
+  background-color: #f3f6f9;
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.main-layout {
+  background-color: #fff;
   flex-direction: row;
+  height: calc(100vh - 90px);
+  display: flex;
 }
 
 .calendar {
   flex-grow: 1;
-  overflow: "hidden";
-  height: 90vh;
+  height: 100%;
+  overflow: hidden;
+  padding: 0 25px 0 10px;
 }
 
 .calendarListHeader {
@@ -16,28 +25,12 @@ main {
   margin-left: 25%;
 }
 .sidebar {
-  border-right: 2px gray;
+  border-right: 2px solid #F3F4F6;
   width: 20vw;
+  padding: 16px 25px;
 }
-
-.fc .fc-daygrid-day {
-  min-height: 10px !important; /* Default is ~40px */
-  height: 10px !important;
-  font-size: 0.75rem;
-}
-.fc .fc-timegrid-slot {
-  height: 60px !important; /* Default is ~40px */
-}
-
-.fc-timegrid-slot {
-  position: relative;
-}
-
 .declined-event {
   opacity: 0.7;
-}
-
-.tentative-event {
 }
 
 .needs-action-event {
@@ -46,8 +39,8 @@ main {
 }
 
 .fc .fc-timegrid-slot {
-  height: 30px !important;
-  min-height: 30px !important;
+  height: auto;
+  min-height: 54px !important;
 }
 
 .fc .fc-timegrid-slot-label {
@@ -74,13 +67,6 @@ main {
   overflow: hidden; /* Important: let FullCalendar handle internal scroll */
 }
 
-.fc-scroller-liquid-absolute {
-  overflow-y: auto !important; /* This targets the scrollable part */
-  max-height: calc(100vh - 100px); /* Adjust based on your header size */
-}
-.scrollgrid-section-header {
-  border: white;
-}
 
 /* Base container */
 .fc-daygrid-day-top {
@@ -91,35 +77,6 @@ main {
   font-family: "Inter", sans-serif;
 }
 
-/* Day number */
-.fc-daygrid-day-top .fc-daygrid-day-number {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 2;
-}
-
-/* Day name (e.g., MON) */
-.fc-daygrid-day-top small {
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  color: #94a3b8; /* slate gray */
-  text-transform: uppercase;
-}
-
-/* Today’s date highlight */
-.current-date {
-  background-color: orange;
-  color: white;
-  border-radius: 50%;
-  padding: 50px;
-}
-
-.fc .fc-col-header-cell,
-.fc .fc-scrollgrid table,
-.fc-theme-standard .fc-scrollgrid {
-  background: none;
-  border: none;
-}
 
 /* sidebar*/
 .sidebar-calendar {
@@ -206,4 +163,112 @@ main {
   border-radius: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Custom main calendar view */
+.fc-header-toolbar.fc-toolbar.fc-toolbar-ltr {
+  /* display: none; */
+}
+.fc-theme-standard td, .fc-theme-standard th {
+  border: 1px solid #B8C1CC;
+  border-left: 0;
+}
+a.fc-timegrid-axis-cushion {
+  color: #243B55;
+  text-align: center;
+  font-family: Roboto;
+  font-size: 12.507px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18.76px;
+  letter-spacing: 0.391px;
+}
+.fc-daygrid-day-top small {
+  color: #8C9CAF;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+.fc-daygrid-day-top .fc-daygrid-day-number,
+span.fc-daygrid-day-number {
+  color: #243b55;
+  margin: 0 8px 0 0;
+  font-family: Roboto;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 36px;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  line-height: 39px;
+}
+.fc-daygrid-day-top .fc-daygrid-day-number:after,
+span.fc-daygrid-day-number:after {
+  content: "";
+  z-index: -1;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  left: 0;
+  top: -1px;
+}
+span.fc-daygrid-day-number.current-date {
+  color: #fff;
+}
+span.fc-daygrid-day-number.current-date:after {
+  background-color: #F67E35;
+}
+td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink,
+td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {
+  border: 0;
+}
+th.fc-timegrid-axis.fc-scrollgrid-shrink {
+  border: 0;
+  border-right: 1px solid #B8C1CC;
+}
+.fc .fc-timegrid-axis-cushion {
+  min-width: 70px;
+  max-width: 70px;
+  padding: 0;
+  text-align: left;
+}
+.fc .fc-timegrid-divider {
+  display: none;
+  height: 0;
+}
+.fc-timegrid-slot-label-cushion {
+  color: #AEA9B1;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+th.fc-col-header-cell.fc-day {
+  border-right: 0;
+}
+.fc .fc-scrollgrid {
+  border: 0;
+}
+.fc .fc-timegrid-slot-label {
+  justify-content: flex-end;
+}
+.fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame {
+  position: relative;
+  transform: translate(-15px, -12px);
+}
+.fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame::after {
+  content: "";
+  z-index: -1;
+  background-color: #B8C1CC;
+  width: 10px;
+  height: 1px;
+  position: absolute;
+  top: 9.5px;
+  right: -15px;
 }
