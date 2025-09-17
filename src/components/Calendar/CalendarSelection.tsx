@@ -36,6 +36,7 @@ function CalendarAccordion({
 
   if (calendars.length === 0) return null;
   const [expended, setExpended] = useState(defaultExpanded);
+
   return (
     <Accordion defaultExpanded={defaultExpanded} expanded={expended}>
       <AccordionSummary
@@ -47,14 +48,15 @@ function CalendarAccordion({
       >
         <Typography component="h3">{title}</Typography>
         {showAddButton && (
-          <Button
+          <IconButton
+            component="span"
             onClick={(e) => {
               expended && e.stopPropagation();
               onAddClick && onAddClick();
             }}
           >
             <AddIcon />
-          </Button>
+          </IconButton>
         )}
       </AccordionSummary>
       <AccordionDetails>
@@ -149,6 +151,7 @@ export default function CalendarSelection({
         anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
         onClose={() => {
+          setSelectedCalId("");
           setAnchorElCal(null);
         }}
         calendar={calendars[selectedCalId] ?? undefined}
