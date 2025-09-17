@@ -171,7 +171,7 @@ export default function CalendarApp() {
   }
 
   return (
-    <main>
+    <main className="main-layout">
       <div className="sidebar">
         <div className="calendar-label">
           <div className="calendar-label">
@@ -312,7 +312,7 @@ export default function CalendarApp() {
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
-          slotLabelInterval={"01:00:00"}
+          slotLabelInterval={"00:30:00"}
           scrollTime={"08:00:00"}
           unselectAuto={false}
           allDayText=""
