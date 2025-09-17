@@ -1,7 +1,12 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
-import { getCalendar, getCalendars, postCalendar } from "./CalendarApi";
+import {
+  getCalendar,
+  getCalendars,
+  postCalendar,
+  proppatchCalendar,
+} from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
@@ -17,11 +22,12 @@ export const getCalendarsListAsync = createAsyncThunk<
 
   for (const cal of rawCalendars) {
     const name = cal["dav:name"];
-    const description = cal["dav:description"];
+    const description = cal["caldav:description"];
     let delegated = false;
     let source = cal["calendarserver:source"]
       ? cal["calendarserver:source"]._links.self.href
       : cal._links.self.href;
+    const link = cal._links.self.href;
     if (cal["calendarserver:delegatedsource"]) {
       source = cal["calendarserver:delegatedsource"];
       delegated = true;
@@ -33,6 +39,7 @@ export const getCalendarsListAsync = createAsyncThunk<
     importedCalendars[id] = {
       id,
       name,
+      link,
       owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
         ownerData.lastname
       }`,
@@ -119,6 +126,25 @@ export const getEventAsync = createAsyncThunk<
   return {
     calId: event.calId,
     event: response,
+  };
+});
+export const patchCalendarAsync = createAsyncThunk<
+  {
+    calId: string;
+    calLink: string;
+    patch: { name: string; desc: string; color: string };
+  }, // Return type
+  {
+    calId: string;
+    calLink: string;
+    patch: { name: string; desc: string; color: string };
+  } // Arg type
+>("calendars/patchCalendar", async ({ calId, calLink, patch }) => {
+  const response = await proppatchCalendar(calLink, patch);
+  return {
+    calId,
+    calLink,
+    patch,
   };
 });
 
@@ -339,6 +365,32 @@ const CalendarSlice = createSlice({
           name: action.payload.name,
         } as unknown as Calendars;
       })
+      .addCase(patchCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        if (action.payload.patch.color) {
+          state.list[action.payload.calId] = {
+            ...state.list[action.payload.calId],
+            color: action.payload.patch.color,
+          };
+          Object.keys(state.list[action.payload.calId].events).forEach(
+            (evId) =>
+              (state.list[action.payload.calId].events[evId].color =
+                action.payload.patch.color)
+          );
+        }
+        if (action.payload.patch.desc) {
+          state.list[action.payload.calId] = {
+            ...state.list[action.payload.calId],
+            description: action.payload.patch.desc,
+          };
+        }
+        if (action.payload.patch.name) {
+          state.list[action.payload.calId] = {
+            ...state.list[action.payload.calId],
+            name: action.payload.patch.name,
+          };
+        }
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -355,6 +407,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(deleteEventAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(patchCalendarAsync.pending, (state) => {
         state.pending = true;
       })
       .addCase(createCalendarAsync.pending, (state) => {
