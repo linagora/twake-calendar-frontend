@@ -95,7 +95,6 @@ describe("CalendarPopover", () => {
     expect(spy).toHaveBeenCalled();
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
-
   });
 
   it("calls onClose when Cancel clicked", () => {
