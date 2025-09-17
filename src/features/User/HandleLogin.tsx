@@ -5,7 +5,8 @@ import { Loading } from "../../components/Loading/Loading";
 import { Error } from "../../components/Error/Error";
 import { push } from "redux-first-history";
 import { redirectTo } from "../../utils/apiUtils";
-import { setTokens, setUserData } from "./userSlice";
+import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
+import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user);
@@ -24,6 +25,8 @@ export function HandleLogin() {
         if (savedToken && savedUser) {
           dispatch(setTokens(savedToken));
           dispatch(setUserData(savedUser));
+          dispatch(getOpenPaasUserDataAsync());
+          dispatch(getCalendarsListAsync());
           dispatch(push("/"));
           return;
         }
