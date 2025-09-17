@@ -84,7 +84,11 @@ export default function CalendarApp() {
 
   // Auto-select personal calendars when first loaded
   useEffect(() => {
-    if (Object.keys(calendars).length > 0 && userId && selectedCalendars.length === 0) {
+    if (
+      Object.keys(calendars).length > 0 &&
+      userId &&
+      selectedCalendars.length === 0
+    ) {
       const personalCalendarIds = Object.keys(calendars).filter(
         (id) => id.split("/")[0] === userId
       );

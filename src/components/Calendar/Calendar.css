@@ -25,7 +25,7 @@
   margin-left: 25%;
 }
 .sidebar {
-  border-right: 2px solid #F3F4F6;
+  border-right: 2px solid #f3f4f6;
   width: 20vw;
   padding: 16px 25px;
 }
@@ -67,7 +67,6 @@
   overflow: hidden; /* Important: let FullCalendar handle internal scroll */
 }
 
-
 /* Base container */
 .fc-daygrid-day-top {
   display: flex;
@@ -76,7 +75,6 @@
   padding: 0.5rem 0;
   font-family: "Inter", sans-serif;
 }
-
 
 /* sidebar*/
 .sidebar-calendar {
@@ -169,12 +167,13 @@
 .fc-header-toolbar.fc-toolbar.fc-toolbar-ltr {
   /* display: none; */
 }
-.fc-theme-standard td, .fc-theme-standard th {
-  border: 1px solid #B8C1CC;
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border: 1px solid #b8c1cc;
   border-left: 0;
 }
 a.fc-timegrid-axis-cushion {
-  color: #243B55;
+  color: #243b55;
   text-align: center;
   font-family: Roboto;
   font-size: 12.507px;
@@ -184,7 +183,7 @@ a.fc-timegrid-axis-cushion {
   letter-spacing: 0.391px;
 }
 .fc-daygrid-day-top small {
-  color: #8C9CAF;
+  color: #8c9caf;
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
@@ -220,7 +219,7 @@ span.fc-daygrid-day-number.current-date {
   color: #fff;
 }
 span.fc-daygrid-day-number.current-date:after {
-  background-color: #F67E35;
+  background-color: #f67e35;
 }
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink,
 td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {
@@ -228,7 +227,7 @@ td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {
 }
 th.fc-timegrid-axis.fc-scrollgrid-shrink {
   border: 0;
-  border-right: 1px solid #B8C1CC;
+  border-right: 1px solid #b8c1cc;
 }
 .fc .fc-timegrid-axis-cushion {
   min-width: 70px;
@@ -241,7 +240,7 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink {
   height: 0;
 }
 .fc-timegrid-slot-label-cushion {
-  color: #AEA9B1;
+  color: #aea9b1;
   font-family: Roboto;
   font-size: 14px;
   font-style: normal;
@@ -265,7 +264,7 @@ th.fc-col-header-cell.fc-day {
 .fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame::after {
   content: "";
   z-index: -1;
-  background-color: #B8C1CC;
+  background-color: #b8c1cc;
   width: 10px;
   height: 1px;
   position: absolute;
