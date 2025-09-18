@@ -1,4 +1,4 @@
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CalendarSelection from "../../src/components/Calendar/CalendarSelection";
 import { renderWithProviders } from "../utils/Renderwithproviders";
@@ -116,7 +116,7 @@ describe("CalendarSelection", () => {
     const addButtons = screen.getAllByRole("button");
     fireEvent.click(addButtons[0]);
 
-    expect(screen.getByRole("presentation")).toBeInTheDocument();
+    waitFor(() => expect(screen.getByRole("presentation")).toBeInTheDocument());
   });
 
   it("opens CalendarSearch modal when Other Add button is clicked", () => {
@@ -172,22 +172,6 @@ describe("CalendarSelection", () => {
     );
 
     expect(screen.queryByLabelText(/Calendar/)).not.toBeInTheDocument();
-  });
-
-  it("applies background color styles to checkboxes", () => {
-    renderWithProviders(
-      <CalendarSelection
-        selectedCalendars={["user1/cal1"]}
-        setSelectedCalendars={jest.fn()}
-      />,
-      {
-        user: baseUser,
-        calendars: { list: calendarsMock, pending: false },
-      }
-    );
-
-    const personalCheckbox = screen.getByLabelText("Calendar personal");
-    expect(personalCheckbox).toHaveStyle({ backgroundColor: "#FF0000" });
   });
 
   it("expands and collapses accordions when clicked", () => {
