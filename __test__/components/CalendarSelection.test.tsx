@@ -50,7 +50,7 @@ describe("CalendarSelection", () => {
 
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Shared Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
     expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
@@ -113,7 +113,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButton = screen.getByTestId("AddIcon");
+    const addButton = screen.getAllByTestId("AddIcon")[0];
     fireEvent.click(addButton);
 
     expect(screen.getByRole("presentation")).toBeInTheDocument();
