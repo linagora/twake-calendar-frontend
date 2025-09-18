@@ -80,9 +80,17 @@ export default function CalendarApp() {
       );
     }
   });
-  const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
-    Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
-  );
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+
+  // Auto-select personal calendars when first loaded
+  useEffect(() => {
+    if (Object.keys(calendars).length > 0 && userId && selectedCalendars.length === 0) {
+      const personalCalendarIds = Object.keys(calendars).filter(
+        (id) => id.split("/")[0] === userId
+      );
+      setSelectedCalendars(personalCalendarIds);
+    }
+  }, [calendars, userId, selectedCalendars.length]);
 
   const calendarRange = getCalendarRange(selectedDate);
 
