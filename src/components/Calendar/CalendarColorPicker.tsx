@@ -16,6 +16,8 @@ export function ColorPicker({
       {colors.map((c) => (
         <Box
           key={c}
+          role="button"
+          aria-label={`select color ${c}`}
           onClick={() => onChange(c)}
           sx={{
             width: 20,
