@@ -20,6 +20,16 @@ export default function UserSearch({
       openpaasId: "",
     }))
   );
+  useEffect(() => {
+    setSelectedUsers(
+      attendees.map((a) => ({
+        email: a.cal_address,
+        displayName: a.cn ?? "",
+        avatarUrl: "",
+        openpaasId: "",
+      }))
+    );
+  }, [attendees]);
   return (
     <>
       <PeopleSearch
