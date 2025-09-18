@@ -18,15 +18,159 @@ import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { searchUsers } from "../../features/User/userAPI";
-
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import { ColorPicker } from "./CalendarColorPicker";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 
 interface User {
   email: string;
   displayName: string;
   avatarUrl: string;
   openpaasId: string;
+}
+
+interface CalendarWithOwner {
+  cal: Record<string, any>;
+  owner: User;
+}
+
+function CalendarItem({
+  cal,
+  onRemove,
+  onColorChange,
+}: {
+  cal: CalendarWithOwner;
+  onRemove: () => void;
+  onColorChange: (color: string) => void;
+}) {
+  return (
+    <Box
+      key={cal.owner.email + cal.cal["dav:name"]}
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      sx={{
+        borderRadius: 2,
+        border: "1px solid #e5e7eb",
+        p: 1,
+        mb: 1,
+      }}
+    >
+      <Box display="flex" alignItems="center" gap={2}>
+        <Avatar
+          src={cal.owner.avatarUrl}
+          alt={cal.owner.email}
+          sx={{
+            border: `2px solid ${cal.cal["apple:color"] ?? "transparent"}`,
+            boxShadow: cal.cal["apple:color"]
+              ? `0 0 0 2px ${cal.cal["apple:color"]}`
+              : "none",
+          }}
+        />
+        <Box>
+          <Typography variant="body1">{cal.cal["dav:name"]}</Typography>
+          <Typography variant="body2" color="textSecondary">
+            {cal.owner.email}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box display="flex" alignItems="center" gap={1}>
+        <ColorPicker
+          selectedColor={cal.cal["apple:color"]}
+          onChange={onColorChange}
+        />
+        <IconButton size="small" onClick={onRemove}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+}
+
+function SelectedCalendarsList({
+  calendars,
+  selectedCal,
+  onRemove,
+  onColorChange,
+}: {
+  calendars: Record<string, Calendars>;
+  selectedCal: CalendarWithOwner[];
+  onRemove: (cal: CalendarWithOwner) => void;
+  onColorChange: (cal: CalendarWithOwner, color: string) => void;
+}) {
+  if (selectedCal.length === 0) return null;
+
+  const groupedByOwner = selectedCal.reduce<
+    Record<
+      string,
+      {
+        owner: User;
+        visibleCals: CalendarWithOwner[];
+        alreadyExisting: boolean;
+      }
+    >
+  >((acc, cal) => {
+    const exists = Object.values(calendars).some(
+      (existing: any) =>
+        existing.id ===
+        cal.cal?._links?.self?.href
+          .replace("/calendars/", "")
+          .replace(".json", "")
+    );
+
+    if (!acc[cal.owner.email]) {
+      acc[cal.owner.email] = {
+        owner: cal.owner,
+        visibleCals: [],
+        alreadyExisting: false,
+      };
+    }
+
+    if (exists) {
+      acc[cal.owner.email].alreadyExisting = true;
+    } else {
+      acc[cal.owner.email].visibleCals.push(cal);
+    }
+
+    return acc;
+  }, {});
+
+  return (
+    <Box mt={2}>
+      <Typography variant="subtitle1" gutterBottom>
+        Name
+      </Typography>
+
+      {Object.values(groupedByOwner).map(
+        ({ owner, visibleCals, alreadyExisting }) => (
+          <Box key={owner.email} mb={2}>
+            {visibleCals.length > 0 ? (
+              visibleCals.map((cal) =>
+                cal.cal ? (
+                  <CalendarItem
+                    key={cal.owner.email + cal.cal["dav:name"]}
+                    cal={cal}
+                    onRemove={() => onRemove(cal)}
+                    onColorChange={(color) => onColorChange(cal, color)}
+                  />
+                ) : (
+                  <Typography color="textSecondary">
+                    No publicly available calendars for {owner.displayName}
+                  </Typography>
+                )
+              )
+            ) : alreadyExisting ? (
+              <Typography color="textSecondary">
+                No more Calendar for {owner.displayName}
+              </Typography>
+            ) : null}
+          </Box>
+        )
+      )}
+    </Box>
+  );
 }
 
 export default function CalendarSearch({
@@ -36,38 +180,43 @@ export default function CalendarSearch({
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
-  onClose: (Calendar: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onClose: Function;
 }) {
   const dispatch = useAppDispatch();
   const [query, setQuery] = useState("");
   const openpaasId =
     useAppSelector((state) => state.user.userData.openpaasId) ?? "";
+  const calendars = useAppSelector((state) => state.calendars.list);
+
   const [options, setOptions] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const calendars = useAppSelector((state) => state.calendars.list);
-  const [selectedCal, setSelectedCalendars] = useState<Record<string, any>[]>(
-    []
-  );
-  const colors = ["#34d399", "#fbbf24", "#f87171", "#60a5fa", "#f472b6"];
-
+  const [selectedCal, setSelectedCalendars] = useState<CalendarWithOwner[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
   const handleSave = () => {
     if (selectedCal) {
       selectedCal.forEach(async (cal) => {
         const calId = crypto.randomUUID();
-        await dispatch(
-          addSharedCalendarAsync({
-            userId: openpaasId,
-            calId,
-            cal: {
-              ...cal,
-              color: cal.cal["apple:color"],
-            },
-          })
+        const exists = Object.values(calendars).some(
+          (existing: any) =>
+            existing.id ===
+            cal.cal?._links?.self?.href
+              .replace("/calendars/", "")
+              .replace(".json", "")
         );
+        if (!exists && cal.cal) {
+          await dispatch(
+            addSharedCalendarAsync({
+              userId: openpaasId,
+              calId,
+              cal: { ...cal, color: cal.cal["apple:color"] },
+            })
+          );
+        }
       });
       onClose({}, "backdropClick");
+      setSelectedCalendars([]);
+      setSelectedUsers([]);
     }
   };
 
@@ -85,7 +234,14 @@ export default function CalendarSearch({
   }, [query]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={() => {
+        onClose({}, "backdropClick");
+        setSelectedCalendars([]);
+        setSelectedUsers([]);
+      }}
+    >
       <Box
         sx={{
           position: "absolute",
@@ -131,17 +287,19 @@ export default function CalendarSearch({
                 setSelectedUsers(value);
 
                 const cals = await Promise.all(
-                  value.map(async (user) => {
+                  value.map(async (user: User) => {
                     const cals = (await getCalendars(
                       user.openpaasId,
                       "sharedPublic=true&withRights=true"
                     )) as Record<string, any>;
-                    return cals._embedded["dav:calendar"].map(
-                      (cal: Record<string, any>) => ({ cal, owner: user })
-                    );
+                    return cals._embedded?.["dav:calendar"]
+                      ? cals._embedded["dav:calendar"].map(
+                          (cal: Record<string, any>) => ({ cal, owner: user })
+                        )
+                      : { cal: undefined, owner: user };
                   })
                 );
-                console.log(cals.flat());
+
                 setSelectedCalendars(cals.flat());
               }}
               renderInput={(params) => (
@@ -161,134 +319,58 @@ export default function CalendarSearch({
                   }}
                 />
               )}
-              renderOption={(props, option) => {
-                return (
-                  <ListItem
-                    {...props}
-                    key={option.email + option.displayName}
-                    disableGutters
-                  >
-                    <ListItemAvatar>
-                      <Avatar src={option.avatarUrl} alt={option.displayName} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={option.displayName}
-                      secondary={option.email}
-                    />
-                  </ListItem>
-                );
-              }}
+              renderOption={(props, option) => (
+                <ListItem
+                  {...props}
+                  key={option.email + option.displayName}
+                  disableGutters
+                >
+                  <ListItemAvatar>
+                    <Avatar src={option.avatarUrl} alt={option.displayName} />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={option.displayName}
+                    secondary={option.email}
+                  />
+                </ListItem>
+              )}
             />
 
-            {selectedCal.length > 0 && (
-              <Box mt={2}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Name
-                </Typography>
-                {selectedCal.map((cal) => (
-                  <Box
-                    key={cal.owner.email + cal.cal["dav:name"]}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{
-                      borderRadius: 2,
-                      border: "1px solid #e5e7eb",
-                      p: 1,
-                      mb: 1,
-                    }}
-                  >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar
-                        src={cal.owner.avatarUrl}
-                        alt={cal.owner.email}
-                        sx={{
-                          border: `2px solid ${
-                            cal.cal["apple:color"] ?? "transparent"
-                          }`,
-                          boxShadow: cal.cal["apple:color"]
-                            ? `0 0 0 2px ${cal.cal["apple:color"]}`
-                            : "none",
-                        }}
-                      />
-
-                      <Box>
-                        <Typography variant="body1">
-                          {cal.cal["dav:name"]}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {cal.owner.email}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {colors.map((c) => (
-                        <Box
-                          key={c}
-                          onClick={() =>
-                            setSelectedCalendars((prev) =>
-                              prev.map((prevcal) =>
-                                prevcal.owner.email === cal.owner.email &&
-                                prevcal.cal._links.self.href ===
-                                  cal.cal._links.self.href
-                                  ? {
-                                      ...prevcal,
-                                      cal: {
-                                        ...prevcal.cal,
-                                        "apple:color": c,
-                                      },
-                                    }
-                                  : prevcal
-                              )
-                            )
-                          }
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: "50%",
-                            bgcolor: c,
-                            cursor: "pointer",
-                            border:
-                              cal.cal["apple:color"] === c
-                                ? "2px solid black"
-                                : "2px solid transparent",
-                            transition: "all 0.2s",
-                          }}
-                        />
-                      ))}
-
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setSelectedCalendars((prev) =>
-                            prev.filter(
-                              (prevcal) =>
-                                prevcal.cal._links.self.href !==
-                                cal.cal._links.self.href
-                            )
-                          );
-                          if (
-                            !selectedCal.find(
-                              (c) =>
-                                cal.owner.email === c.owner.email &&
-                                c.cal._links.self.href !==
-                                  cal.cal._links.self.href
-                            )
-                          ) {
-                            setSelectedUsers((prev) =>
-                              prev.filter((u) => u.email !== cal.owner.email)
-                            );
-                          }
-                        }}
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            )}
+            <SelectedCalendarsList
+              calendars={calendars}
+              selectedCal={selectedCal}
+              onRemove={(cal) => {
+                setSelectedCalendars((prev) =>
+                  prev.filter(
+                    (c) => c.cal._links.self.href !== cal.cal._links.self.href
+                  )
+                );
+                if (
+                  !selectedCal.find(
+                    (c) =>
+                      cal.owner.email === c.owner.email &&
+                      c.cal._links.self.href !== cal.cal._links.self.href
+                  )
+                ) {
+                  setSelectedUsers((prev) =>
+                    prev.filter((u) => u.email !== cal.owner.email)
+                  );
+                }
+              }}
+              onColorChange={(cal, color) =>
+                setSelectedCalendars((prev) =>
+                  prev.map((prevcal) =>
+                    prevcal.owner.email === cal.owner.email &&
+                    prevcal.cal._links.self.href === cal.cal._links.self.href
+                      ? {
+                          ...prevcal,
+                          cal: { ...prevcal.cal, "apple:color": color },
+                        }
+                      : prevcal
+                  )
+                )
+              }
+            />
           </CardContent>
 
           <CardActions sx={{ justifyContent: "flex-end", gap: 1 }}>
