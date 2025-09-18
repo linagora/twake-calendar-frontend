@@ -15,20 +15,14 @@ import ListItemText from "@mui/material/ListItemText";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { searchUsers } from "../../features/User/userAPI";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { ColorPicker } from "./CalendarColorPicker";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-
-interface User {
-  email: string;
-  displayName: string;
-  avatarUrl: string;
-  openpaasId: string;
-}
+import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 
 interface CalendarWithOwner {
   cal: Record<string, any>;
@@ -183,13 +177,10 @@ export default function CalendarSearch({
   onClose: Function;
 }) {
   const dispatch = useAppDispatch();
-  const [query, setQuery] = useState("");
   const openpaasId =
     useAppSelector((state) => state.user.userData.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
-  const [options, setOptions] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedCal, setSelectedCalendars] = useState<CalendarWithOwner[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
@@ -219,19 +210,6 @@ export default function CalendarSearch({
       setSelectedUsers([]);
     }
   };
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (query) {
-        setLoading(true);
-        const res = await searchUsers(query, ["user"]);
-        setOptions(res);
-        setLoading(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query]);
 
   return (
     <Modal
@@ -273,17 +251,9 @@ export default function CalendarSearch({
 
           <CardHeader title="Browse other calendars" sx={{ pb: 0 }} />
           <CardContent sx={{ flex: 1, overflow: "auto" }}>
-            <Autocomplete
-              multiple
-              options={options}
-              loading={loading}
-              filterOptions={(x) => x}
-              fullWidth
-              getOptionLabel={(option) => option.displayName || option.email}
-              filterSelectedOptions
-              value={selectedUsers}
-              onInputChange={(event, value) => setQuery(value)}
-              onChange={async (event, value) => {
+            <PeopleSearch
+              selectedUsers={selectedUsers}
+              onChange={async (event: any, value: User[]) => {
                 setSelectedUsers(value);
 
                 const cals = await Promise.all(
@@ -302,38 +272,6 @@ export default function CalendarSearch({
 
                 setSelectedCalendars(cals.flat());
               }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search user"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loading ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              renderOption={(props, option) => (
-                <ListItem
-                  {...props}
-                  key={option.email + option.displayName}
-                  disableGutters
-                >
-                  <ListItemAvatar>
-                    <Avatar src={option.avatarUrl} alt={option.displayName} />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={option.displayName}
-                    secondary={option.email}
-                  />
-                </ListItem>
-              )}
             />
 
             <SelectedCalendarsList
