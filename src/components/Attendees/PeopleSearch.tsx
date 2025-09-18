@@ -17,6 +17,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import { searchUsers } from "../../features/User/userAPI";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 
 export interface User {
   email: string;
@@ -71,6 +72,11 @@ export function PeopleSearch({
           slotProps={{
             input: {
               ...params.InputProps,
+              startAdornment: (
+                <PeopleOutlineOutlinedIcon
+                  sx={{ mr: 1, color: "action.active" }}
+                />
+              ),
               endAdornment: (
                 <>
                   {loading ? (

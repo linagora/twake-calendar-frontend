@@ -35,6 +35,8 @@ import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
+import { PeopleSearch, User } from "../Attendees/PeopleSearch";
+import { getCalendar } from "../../features/Calendars/CalendarApi";
 import Button from "@mui/material/Button";
 
 const computeStartOfTheWeek = (date: Date): Date => {
@@ -146,6 +148,9 @@ export default function CalendarApp() {
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
   );
+
+  const [tempUsers, setTempUsers] = useState<User[]>([]);
+  const [tempCals, setTempCals] = useState<any[]>([]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
@@ -265,6 +270,12 @@ export default function CalendarApp() {
                 data-testid={`date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`}
               ></div>
             );
+          }}
+        />
+        <PeopleSearch
+          selectedUsers={tempUsers}
+          onChange={(event: any, value: User[]) => {
+            setTempUsers(value);
           }}
         />
         <CalendarSelection
