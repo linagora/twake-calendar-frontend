@@ -484,16 +484,20 @@ describe("calendarEventToJCal", () => {
     const [vevent, vtimezone] = result[2];
     expect(vevent[0]).toBe("vevent");
     expect(vtimezone[0]).toBe("vtimezone");
-    
+
     // Should use UTC timezone as fallback - check for UTC standard timezone
     expect(vtimezone[2]).toEqual(
       expect.arrayContaining([
-        ["standard", [
-          ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
-          ["tzoffsetto", {}, "utc-offset", "+00:00"],
-          ["tzname", {}, "text", "UTC"],
-          ["dtstart", {}, "date-time", "1970-01-01T00:00:00"]
-        ], []]
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
       ])
     );
   });
@@ -515,16 +519,20 @@ describe("calendarEventToJCal", () => {
     const [vevent, vtimezone] = result[2];
     expect(vevent[0]).toBe("vevent");
     expect(vtimezone[0]).toBe("vtimezone");
-    
+
     // Should use UTC timezone as fallback
     expect(vtimezone[2]).toEqual(
       expect.arrayContaining([
-        ["standard", [
-          ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
-          ["tzoffsetto", {}, "utc-offset", "+00:00"],
-          ["tzname", {}, "text", "UTC"],
-          ["dtstart", {}, "date-time", "1970-01-01T00:00:00"]
-        ], []]
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
       ])
     );
   });
@@ -546,16 +554,20 @@ describe("calendarEventToJCal", () => {
     const [vevent, vtimezone] = result[2];
     expect(vevent[0]).toBe("vevent");
     expect(vtimezone[0]).toBe("vtimezone");
-    
+
     // Should use UTC timezone as fallback
     expect(vtimezone[2]).toEqual(
       expect.arrayContaining([
-        ["standard", [
-          ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
-          ["tzoffsetto", {}, "utc-offset", "+00:00"],
-          ["tzname", {}, "text", "UTC"],
-          ["dtstart", {}, "date-time", "1970-01-01T00:00:00"]
-        ], []]
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
       ])
     );
   });
@@ -577,16 +589,20 @@ describe("calendarEventToJCal", () => {
     const [vevent, vtimezone] = result[2];
     expect(vevent[0]).toBe("vevent");
     expect(vtimezone[0]).toBe("vtimezone");
-    
+
     // Should use UTC timezone as fallback
     expect(vtimezone[2]).toEqual(
       expect.arrayContaining([
-        ["standard", [
-          ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
-          ["tzoffsetto", {}, "utc-offset", "+00:00"],
-          ["tzname", {}, "text", "UTC"],
-          ["dtstart", {}, "date-time", "1970-01-01T00:00:00"]
-        ], []]
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
       ])
     );
   });
@@ -608,24 +624,42 @@ describe("calendarEventToJCal", () => {
     const [vevent, vtimezone] = result[2];
     expect(vevent[0]).toBe("vevent");
     expect(vtimezone[0]).toBe("vtimezone");
-    
+
     // Should use the specified timezone - check for Europe/Paris timezone components
     expect(vtimezone[2]).toEqual(
       expect.arrayContaining([
-        ["daylight", [
-          ["tzoffsetfrom", {}, "utc-offset", "+01:00"],
-          ["tzoffsetto", {}, "utc-offset", "+02:00"],
-          ["tzname", {}, "text", "CEST"],
-          ["dtstart", {}, "date-time", "1970-03-29T02:00:00"],
-          ["rrule", {}, "recur", { byday: "-1SU", bymonth: 3, freq: "YEARLY" }]
-        ], []],
-        ["standard", [
-          ["tzoffsetfrom", {}, "utc-offset", "+02:00"],
-          ["tzoffsetto", {}, "utc-offset", "+01:00"],
-          ["tzname", {}, "text", "CET"],
-          ["dtstart", {}, "date-time", "1970-10-25T03:00:00"],
-          ["rrule", {}, "recur", { byday: "-1SU", bymonth: 10, freq: "YEARLY" }]
-        ], []]
+        [
+          "daylight",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+01:00"],
+            ["tzoffsetto", {}, "utc-offset", "+02:00"],
+            ["tzname", {}, "text", "CEST"],
+            ["dtstart", {}, "date-time", "1970-03-29T02:00:00"],
+            [
+              "rrule",
+              {},
+              "recur",
+              { byday: "-1SU", bymonth: 3, freq: "YEARLY" },
+            ],
+          ],
+          [],
+        ],
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+02:00"],
+            ["tzoffsetto", {}, "utc-offset", "+01:00"],
+            ["tzname", {}, "text", "CET"],
+            ["dtstart", {}, "date-time", "1970-10-25T03:00:00"],
+            [
+              "rrule",
+              {},
+              "recur",
+              { byday: "-1SU", bymonth: 10, freq: "YEARLY" },
+            ],
+          ],
+          [],
+        ],
       ])
     );
   });
