@@ -131,7 +131,7 @@ export default function CalendarSelection({
           handleToggle={handleCalendarToggle}
           defaultExpanded
           setOpen={(id: string) => {
-            setAnchorElCalOthers(document.body);
+            setAnchorElCal(document.body);
             setSelectedCalId(id);
           }}
         />
@@ -142,7 +142,7 @@ export default function CalendarSelection({
           selectedCalendars={selectedCalendars}
           showAddButton
           onAddClick={() => {
-            setAnchorElCal(document.body);
+            setAnchorElCalOthers(document.body);
           }}
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
@@ -151,7 +151,6 @@ export default function CalendarSelection({
           }}
         />
       </div>
-
       <CalendarPopover
         anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
@@ -159,6 +158,11 @@ export default function CalendarSelection({
           setSelectedCalId("");
           setAnchorElCal(null);
         }}
+      />
+      <CalendarSearch
+        anchorEl={anchorElCalOthers}
+        open={Boolean(anchorElCalOthers)}
+        onClose={() => setAnchorElCalOthers(null)}
       />
     </>
   );
