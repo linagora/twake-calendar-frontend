@@ -123,7 +123,7 @@ describe("CalendarSelection", () => {
     renderWithProviders(<CalendarApp />, preloadedState);
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Shared Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
@@ -146,5 +146,26 @@ describe("CalendarSelection", () => {
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
     });
+  });
+  it("open accordeon when clicking on button only", () => {
+    renderWithProviders(<CalendarApp />, preloadedState);
+    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
+
+    expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
+
+    const delegatedAccordionSummary = screen
+      .getByText("Delegated Calendars")
+      .closest(".MuiAccordionSummary-root");
+
+    const addButton = screen.getAllByTestId("AddIcon")[1];
+    fireEvent.click(addButton);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(addButton);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
 });
