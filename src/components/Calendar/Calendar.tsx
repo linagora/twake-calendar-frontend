@@ -56,7 +56,7 @@ export default function CalendarApp() {
 
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
-  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>

@@ -46,7 +46,7 @@ function EventPopover({
   const dispatch = useAppDispatch();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
-  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>

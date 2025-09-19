@@ -30,7 +30,7 @@ function CalendarPopover({
 }) {
   const dispatch = useAppDispatch();
   const userId =
-    useAppSelector((state) => state.user.userData.openpaasId) ?? "";
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const [name, setName] = useState(calendar?.name ?? "");
   const [description, setDescription] = useState(calendar?.description ?? "");
   const [color, setColor] = useState(calendar?.color ?? "");

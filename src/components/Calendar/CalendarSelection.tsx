@@ -10,7 +10,6 @@ import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 function CalendarAccordion({
@@ -81,7 +80,7 @@ export default function CalendarSelection({
   selectedCalendars: string[];
   setSelectedCalendars: Function;
 }) {
-  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const personnalCalendars = Object.keys(calendars).filter(
