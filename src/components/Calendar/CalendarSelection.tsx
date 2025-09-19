@@ -154,6 +154,7 @@ export default function CalendarSelection({
       <CalendarPopover
         anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
+        calendar={calendars[selectedCalId] ?? undefined}
         onClose={() => {
           setSelectedCalId("");
           setAnchorElCal(null);
