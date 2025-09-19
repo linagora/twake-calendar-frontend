@@ -56,7 +56,8 @@ export default function CalendarApp() {
 
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
-  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>
@@ -317,7 +318,9 @@ export default function CalendarApp() {
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
           slotLabelInterval={"00:30:00"}
-          scrollTime={"08:00:00"}
+          scrollTime={new Date(Date.now() - 2 * 60 * 60 * 1000)
+            .toTimeString()
+            .slice(0, 5)}
           unselectAuto={false}
           allDayText=""
           slotLabelFormat={{

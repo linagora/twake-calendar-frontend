@@ -80,7 +80,8 @@ export default function CalendarSelection({
   selectedCalendars: string[];
   setSelectedCalendars: Function;
 }) {
-  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const personnalCalendars = Object.keys(calendars).filter(
