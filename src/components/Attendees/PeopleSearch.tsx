@@ -73,9 +73,12 @@ export function PeopleSearch({
             input: {
               ...params.InputProps,
               startAdornment: (
-                <PeopleOutlineOutlinedIcon
-                  sx={{ mr: 1, color: "action.active" }}
-                />
+                <>
+                  <PeopleOutlineOutlinedIcon
+                    sx={{ mr: 1, color: "action.active" }}
+                  />
+                  {params.InputProps.startAdornment}
+                </>
               ),
               endAdornment: (
                 <>

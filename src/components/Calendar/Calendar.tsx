@@ -16,6 +16,7 @@ import {
   getCalendarDetailAsync,
   getCalendarsListAsync,
   getEventAsync,
+  getTempCalendarsListAsync,
   putEventAsync,
   updateEventLocal,
 } from "../../features/Calendars/CalendarSlice";
@@ -36,7 +37,10 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { getCalendar } from "../../features/Calendars/CalendarApi";
+import {
+  getCalendar,
+  getCalendars,
+} from "../../features/Calendars/CalendarApi";
 import Button from "@mui/material/Button";
 
 const computeStartOfTheWeek = (date: Date): Date => {
@@ -59,6 +63,8 @@ export default function CalendarApp() {
   }
 
   const calendars = useAppSelector((state) => state.calendars.list);
+  const tempcalendars =
+    useAppSelector((state) => state.calendars.templist) ?? {};
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
@@ -121,6 +127,19 @@ export default function CalendarApp() {
     }
   });
 
+  let filteredTempEvents: CalendarEvent[] = [];
+  Object.keys(tempcalendars).forEach((id) => {
+    if (tempcalendars[id].events) {
+      filteredTempEvents = filteredTempEvents
+        .concat(
+          Object.keys(tempcalendars[id].events).map(
+            (eventid) => tempcalendars[id].events[eventid]
+          )
+        )
+        .filter((event) => !(event.status === "CANCELLED"));
+    }
+  });
+
   useEffect(() => {
     selectedCalendars.forEach((id) => {
       if (!pending && rangeKey) {
@@ -137,6 +156,21 @@ export default function CalendarApp() {
     });
   }, [rangeKey, selectedCalendars]);
 
+  useEffect(() => {
+    Object.keys(tempcalendars).forEach((calId) => {
+      dispatch(
+        getCalendarDetailAsync({
+          calId,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType: "temp",
+        })
+      );
+    });
+  }, [rangeKey, Object.keys(tempcalendars).join(",")]);
+
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<{
     top: number;
@@ -144,6 +178,7 @@ export default function CalendarApp() {
   } | null>(null);
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
+  const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
@@ -274,8 +309,12 @@ export default function CalendarApp() {
         />
         <PeopleSearch
           selectedUsers={tempUsers}
-          onChange={(event: any, value: User[]) => {
+          onChange={async (event: any, value: User[]) => {
             setTempUsers(value);
+            await dispatch(getTempCalendarsListAsync(value));
+
+            if (value.length === 0) {
+            }
           }}
         />
         <CalendarSelection
@@ -327,12 +366,14 @@ export default function CalendarApp() {
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={filteredEvents.map((e) => {
-            if (e.calId.split("/")[0] === userId) {
-              return { ...e, editable: true };
-            }
-            return { ...e, editable: false };
-          })}
+          events={filteredEvents
+            .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
+            .map((e) => {
+              if (e.calId.split("/")[0] === userId) {
+                return { ...e, editable: true };
+              }
+              return { ...e, editable: false };
+            })}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
@@ -390,6 +431,7 @@ export default function CalendarApp() {
               });
               setEventDisplayedId(info.event.extendedProps.uid);
               setEventDisplayedCalId(info.event.extendedProps.calId);
+              setEventDisplayedTemp(info.event._def.extendedProps.temp);
             }
           }}
           eventAllow={(dropInfo, draggedEvent) => {
@@ -450,7 +492,7 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-            console.log(event, newEvent);
+
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
@@ -462,7 +504,13 @@ export default function CalendarApp() {
           }}
           eventContent={(arg) => {
             const event = arg.event;
-            if (!calendars[arg.event._def.extendedProps.calId]) return;
+            if (
+              (!event._def.extendedProps.temp &&
+                !calendars[arg.event._def.extendedProps.calId]) ||
+              (event._def.extendedProps.temp &&
+                !tempcalendars[arg.event._def.extendedProps.calId])
+            )
+              return;
 
             const attendees = event._def.extendedProps.attendee || [];
             const isPrivate =
@@ -471,9 +519,9 @@ export default function CalendarApp() {
             let Icon = null;
             let titleStyle: React.CSSProperties = {};
             const ownerEmails = new Set(
-              calendars[arg.event._def.extendedProps.calId].ownerEmails?.map(
-                (email) => email.toLowerCase()
-              )
+              (event._def.extendedProps.temp ? tempcalendars : calendars)[
+                arg.event._def.extendedProps.calId
+              ].ownerEmails?.map((email) => email.toLowerCase())
             );
             const showSpecialDisplay = attendees.filter((att: userAttendee) =>
               ownerEmails.has(att.cal_address.toLowerCase())
@@ -561,6 +609,7 @@ export default function CalendarApp() {
           <EventPreviewModal
             eventId={eventDisplayedId}
             calId={eventDisplayedCalId}
+            tempEvent={eventDisplayedTemp}
             anchorPosition={anchorPosition}
             open={openEventDisplay}
             onClose={handleCloseEventDisplay}
