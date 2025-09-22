@@ -432,6 +432,56 @@ export default function CalendarApp() {
             }
           }}
           viewDidMount={(arg) => {
+            // Update now indicator arrow with current time
+            const updateNowIndicator = () => {
+              const nowIndicatorArrow = document.querySelector(
+                ".fc-timegrid-now-indicator-arrow"
+              ) as HTMLElement;
+              if (nowIndicatorArrow) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                });
+                nowIndicatorArrow.setAttribute("data-time", timeString);
+              }
+            };
+
+            // Update immediately and then every minute
+            updateNowIndicator();
+            const timeInterval = setInterval(updateNowIndicator, 60000);
+
+            // Watch for now indicator arrow creation and update immediately
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+                    if (
+                      element.classList?.contains(
+                        "fc-timegrid-now-indicator-arrow"
+                      ) ||
+                      element.querySelector?.(
+                        ".fc-timegrid-now-indicator-arrow"
+                      )
+                    ) {
+                      setTimeout(updateNowIndicator, 10);
+                    }
+                  }
+                });
+              });
+            });
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
+
+            // Store interval and observer for cleanup
+            (arg.el as any).__timeInterval = timeInterval;
+            (arg.el as any).__timeObserver = observer;
+
             // Add global hover effect for week and day views
             if (
               arg.view.type === "timeGridWeek" ||
@@ -536,6 +586,18 @@ export default function CalendarApp() {
             }
           }}
           viewWillUnmount={(arg) => {
+            // Clean up time interval
+            if ((arg.el as any).__timeInterval) {
+              clearInterval((arg.el as any).__timeInterval);
+              delete (arg.el as any).__timeInterval;
+            }
+
+            // Clean up observer
+            if ((arg.el as any).__timeObserver) {
+              (arg.el as any).__timeObserver.disconnect();
+              delete (arg.el as any).__timeObserver;
+            }
+
             // Clean up event listeners to prevent memory leaks
             const calendarEl = document.querySelector(".fc") as HTMLElement;
             if (calendarEl) {
