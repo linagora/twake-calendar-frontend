@@ -391,10 +391,7 @@ export default function EventDisplayModal({
             {isOwn && (
               <AttendeeSelector
                 attendees={attendees}
-                setAttendees={(value: userAttendee[]) => {
-                  const newAttendeeList = attendees.concat(value);
-                  setAttendees(newAttendeeList);
-                }}
+                setAttendees={setAttendees}
               />
             )}
 

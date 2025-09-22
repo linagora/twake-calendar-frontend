@@ -5,12 +5,22 @@ export async function getOpenPaasUser() {
   return user;
 }
 
-export async function searchUsers(query: string) {
+export async function searchUsers(
+  query: string,
+  objectTypes: string[] = ["user", "contact"]
+): Promise<
+  {
+    email: string;
+    displayName: string;
+    avatarUrl: string;
+    openpaasId: string;
+  }[]
+> {
   const response: any[] = await api
     .post(`api/people/search`, {
       body: JSON.stringify({
         limit: 10,
-        objectTypes: ["user", "group", "contact", "ldap"],
+        objectTypes,
         q: query,
       }),
     })
@@ -21,6 +31,7 @@ export async function searchUsers(query: string) {
     displayName:
       user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value,
     avatarUrl: user.photos?.[0]?.url || "",
+    openpaasId: user.id || "",
   }));
 }
 

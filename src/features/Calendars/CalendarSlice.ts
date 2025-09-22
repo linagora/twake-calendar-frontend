@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Calendars } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import {
+  addSharedCalendar,
   getCalendar,
   getCalendars,
   postCalendar,
@@ -184,11 +185,64 @@ export const deleteEventAsync = createAsyncThunk<
 });
 
 export const createCalendarAsync = createAsyncThunk<
-  { userId: string; calId: string; color: string; name: string; desc: string }, // Return type
+  {
+    userId: string;
+    calId: string;
+    color: string;
+    name: string;
+    desc: string;
+    owner: string;
+    ownerEmails: string[];
+  }, // Return type
   { userId: string; calId: string; color: string; name: string; desc: string } // Arg type
 >("calendars/createCalendar", async ({ userId, calId, color, name, desc }) => {
   const response = await postCalendar(userId, calId, color, name, desc);
-  return { userId, calId, color, name, desc };
+  const ownerData: any = await getUserDetails(userId.split("/")[0]);
+
+  return {
+    userId,
+    calId,
+    color,
+    name,
+    desc,
+    owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+      ownerData.lastname
+    }`,
+    ownerEmails: ownerData.emails,
+  };
+});
+
+export const addSharedCalendarAsync = createAsyncThunk<
+  {
+    calId: string;
+    color: string;
+    name: string;
+    desc: string;
+    owner: string;
+    ownerEmails: string[];
+  }, // Return type
+  { userId: string; calId: string; cal: Record<string, any> } // Arg type
+>("calendars/addSharedCalendar", async ({ userId, calId, cal }) => {
+  const response = await addSharedCalendar(userId, calId, cal);
+  const ownerData: any = await getUserDetails(
+    cal.cal._links.self.href
+      .replace("/calendars/", "")
+      .replace(".json", "")
+      .split("/")[0]
+  );
+
+  return {
+    calId: cal.cal._links.self.href
+      .replace("/calendars/", "")
+      .replace(".json", ""),
+    color: cal.cal["apple:color"],
+    desc: cal.cal["caldav:description"],
+    name: cal.cal["dav:name"],
+    owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+      ownerData.lastname
+    }`,
+    ownerEmails: ownerData.emails,
+  };
 });
 
 const CalendarSlice = createSlice({
@@ -363,7 +417,10 @@ const CalendarSlice = createSlice({
           id: `${action.payload.userId}/${action.payload.calId}`,
           description: action.payload.desc,
           name: action.payload.name,
-        } as unknown as Calendars;
+          owner: action.payload.owner,
+          ownerEmails: action.payload.ownerEmails,
+          events: {},
+        } as Calendars;
       })
       .addCase(patchCalendarAsync.fulfilled, (state, action) => {
         state.pending = false;
@@ -391,6 +448,18 @@ const CalendarSlice = createSlice({
           };
         }
       })
+      .addCase(addSharedCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[action.payload.calId] = {
+          color: action.payload.color,
+          id: action.payload.calId,
+          description: action.payload.desc,
+          name: action.payload.name,
+          events: {},
+          owner: action.payload.owner,
+          ownerEmails: action.payload.ownerEmails,
+        } as Calendars;
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -413,6 +482,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(createCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(addSharedCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },

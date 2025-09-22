@@ -1,4 +1,4 @@
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CalendarSelection from "../../src/components/Calendar/CalendarSelection";
 import { renderWithProviders } from "../utils/Renderwithproviders";
@@ -16,7 +16,7 @@ describe("CalendarSelection", () => {
 
   const calendarsMock = {
     "user1/cal1": {
-      name: "Calendar personnal",
+      name: "Calendar personal",
       id: "user1/cal1",
       color: "#FF0000",
       ownerEmails: ["alice@example.com"],
@@ -36,7 +36,7 @@ describe("CalendarSelection", () => {
     },
   };
 
-  it("renders personal, delegated and shared calendars", () => {
+  it("renders personal, delegated and other calendars", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={["user1/cal1"]}
@@ -52,7 +52,7 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
+    expect(screen.getByLabelText("Calendar personal")).toBeChecked();
     expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
     expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
   });
@@ -71,7 +71,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const checkbox = screen.getByLabelText("Calendar personnal");
+    const checkbox = screen.getByLabelText("Calendar personal");
     fireEvent.click(checkbox);
 
     expect(setSelectedCalendars).toHaveBeenCalledWith(expect.any(Function));
@@ -94,14 +94,14 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const checkbox = screen.getByLabelText("Calendar personnal");
+    const checkbox = screen.getByLabelText("Calendar personal");
     fireEvent.click(checkbox);
 
     const updater = setSelectedCalendars.mock.calls[0][0];
     expect(updater(["user1/cal1"])).toEqual([]);
   });
 
-  it("opens CalendarPopover when Add button is clicked", () => {
+  it("opens CalendarPopover modal when personal Add button is clicked", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -113,13 +113,31 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButton = screen.getAllByTestId("AddIcon")[0];
-    fireEvent.click(addButton);
+    const addButtons = screen.getAllByRole("button");
+    fireEvent.click(addButtons[0]);
+
+    waitFor(() => expect(screen.getByRole("presentation")).toBeInTheDocument());
+  });
+
+  it("opens CalendarSearch modal when Other Add button is clicked", () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false },
+      }
+    );
+
+    const addButtons = screen.getAllByRole("button");
+    fireEvent.click(addButtons[1]); // seccond Add button (other)
 
     expect(screen.getByRole("presentation")).toBeInTheDocument();
   });
 
-  it("renders only personal calendars if no delegated/shared exist", () => {
+  it("renders only personal calendars if no delegated/other exist", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -138,7 +156,7 @@ describe("CalendarSelection", () => {
 
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.queryByText("Delegated Calendars")).not.toBeInTheDocument();
-    expect(screen.queryByText("Shared Calendars")).not.toBeInTheDocument();
+    expect(screen.queryByText("Other Calendars")).not.toBeInTheDocument();
   });
 
   it("renders nothing when no calendars are present", () => {
@@ -154,5 +172,27 @@ describe("CalendarSelection", () => {
     );
 
     expect(screen.queryByLabelText(/Calendar/)).not.toBeInTheDocument();
+  });
+
+  it("expands and collapses accordions when clicked", () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false },
+      }
+    );
+    const delegatedAccordionSummary = screen
+      .getByText("Delegated Calendars")
+      .closest(".MuiAccordionSummary-root");
+
+    fireEvent.click(delegatedAccordionSummary!);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(delegatedAccordionSummary!);
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
 });
