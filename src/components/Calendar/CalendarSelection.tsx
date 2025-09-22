@@ -72,6 +72,8 @@ function CalendarAccordion({
     </Accordion>
   );
 }
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import CalendarSearch from "./CalendarSearch";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -102,6 +104,9 @@ export default function CalendarSelection({
   const [selectedCalId, setSelectedCalId] = useState("");
 
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
+  const [anchorElCalOthers, setAnchorElCalOthers] =
+    useState<HTMLElement | null>(null);
+
   return (
     <>
       <div>
@@ -137,7 +142,7 @@ export default function CalendarSelection({
           selectedCalendars={selectedCalendars}
           showAddButton
           onAddClick={() => {
-            setAnchorElCal(document.body);
+            setAnchorElCalOthers(document.body);
           }}
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
@@ -146,15 +151,24 @@ export default function CalendarSelection({
           }}
         />
       </div>
-
       <CalendarPopover
         anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
+        calendar={calendars[selectedCalId] ?? undefined}
         onClose={() => {
           setSelectedCalId("");
           setAnchorElCal(null);
         }}
-        calendar={calendars[selectedCalId] ?? undefined}
+      />
+      <CalendarSearch
+        anchorEl={anchorElCalOthers}
+        open={Boolean(anchorElCalOthers)}
+        onClose={(newCalIds?: string[]) => {
+          setAnchorElCalOthers(null);
+          if (newCalIds?.length) {
+            newCalIds.forEach((id) => handleCalendarToggle(id));
+          }
+        }}
       />
     </>
   );

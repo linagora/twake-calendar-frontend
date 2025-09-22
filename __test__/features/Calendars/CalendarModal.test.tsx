@@ -56,15 +56,15 @@ describe("CalendarPopover", () => {
     renderPopover();
 
     // There are multiple color buttons; pick the first
-    const colorButtons = screen
-      .getAllByRole("button")
-      .filter((btn) => btn.style.backgroundColor !== "");
+    const colorButtons = screen.getAllByRole("button", {
+      name: /select color/i,
+    });
     fireEvent.click(colorButtons[0]);
 
     // The header background should update (check via inline style)
     expect(
       screen.getByText("Calendar configuration").style.backgroundColor
-    ).toBe(colorButtons[0].style.backgroundColor);
+    ).toBe("rgb(52, 211, 153)");
   });
 
   it("dispatches createCalendar and calls onClose when Save clicked", () => {
@@ -82,12 +82,9 @@ describe("CalendarPopover", () => {
       target: { value: "Test Description" },
     });
 
-    const expectedColor = "#D50000";
-
-    const colorButtons = screen
-      .getAllByRole("button")
-      .filter((btn) => btn.style.backgroundColor !== "");
-
+    const colorButtons = screen.getAllByRole("button", {
+      name: /select color/i,
+    });
     fireEvent.click(colorButtons[0]);
 
     fireEvent.click(screen.getByText(/Save/i));

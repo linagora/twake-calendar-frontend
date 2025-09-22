@@ -12,6 +12,7 @@ import {
   Typography,
   ButtonGroup,
 } from "@mui/material";
+import { ColorPicker } from "../../components/Calendar/CalendarColorPicker";
 import { Calendars } from "./CalendarTypes";
 
 function CalendarPopover({
@@ -128,15 +129,11 @@ function CalendarPopover({
           multiline
           rows={2}
         />
-        <ButtonGroup>
-          {palette.map((c) => (
-            <Button
-              key={c}
-              style={{ backgroundColor: c }}
-              onClick={() => setColor(c)}
-            />
-          ))}
-        </ButtonGroup>
+        <ColorPicker
+          onChange={(color) => setColor(color)}
+          selectedColor={color}
+        />
+
         <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
           <Button
             variant="outlined"
