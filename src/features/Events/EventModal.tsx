@@ -109,10 +109,10 @@ function EventPopover({
     setTitle(event?.title ?? "");
     setAttendees(
       event?.attendee
-        ? event.attendee.filter((a) => a.cal_address !== organizer.cal_address)
+        ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
         : []
     );
-  }, [event, organizer.cal_address]);
+  }, [event, organizer?.cal_address]);
 
   const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
