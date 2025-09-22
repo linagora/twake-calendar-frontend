@@ -74,7 +74,7 @@ export default function EventDisplayModal({
   );
 
   const userPersonnalCalendars: Calendars[] = calendars.filter(
-    (c) => c.id?.split("/")[0] === user.userData.openpaasId
+    (c) => c.id?.split("/")[0] === user.userData?.openpaasId
   );
 
   // Form state
@@ -97,7 +97,7 @@ export default function EventDisplayModal({
   const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
   const [newCalId, setNewCalId] = useState(event?.calId);
   const [calendarid, setCalendarid] = useState(
-    calId.split("/")[0] === user.userData.openpaasId
+    calId.split("/")[0] === user.userData?.openpaasId
       ? userPersonnalCalendars.findIndex((cal) => cal.id === calId)
       : calendars.findIndex((cal) => cal.id === calId)
   );
@@ -198,7 +198,7 @@ export default function EventDisplayModal({
   };
 
   const calList =
-    calId.split("/")[0] === user.userData.openpaasId
+    calId.split("/")[0] === user.userData?.openpaasId
       ? Object.keys(userPersonnalCalendars).map((calendar, index) => (
           <MenuItem key={index} value={index}>
             <Typography variant="body2">

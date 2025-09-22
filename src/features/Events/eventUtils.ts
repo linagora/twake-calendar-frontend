@@ -234,8 +234,17 @@ export function calendarEventToJCal(
     ]);
   });
 
+  const timezoneData = TIMEZONES.zones[event.timezone];
+  if (!timezoneData) {
+    const vtimezone = new ICAL.Timezone({
+      component: TIMEZONES.zones["Etc/UTC"].ics,
+      tzid: "Etc/UTC",
+    });
+    return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
+  }
+
   const vtimezone = new ICAL.Timezone({
-    component: TIMEZONES.zones[event.timezone].ics,
+    component: timezoneData.ics,
     tzid: event.timezone,
   });
   return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
