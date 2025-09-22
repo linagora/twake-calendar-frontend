@@ -310,11 +310,36 @@ export default function CalendarApp() {
         <PeopleSearch
           selectedUsers={tempUsers}
           onChange={async (event: any, value: User[]) => {
-            setTempUsers(value);
-            await dispatch(getTempCalendarsListAsync(value));
+            const calToImport = value.filter(
+              (u) =>
+                !selectedCalendars.find((id) =>
+                  calendars[id].ownerEmails?.find((mail) => mail === u.email)
+                )
+            );
+            const calToToggle: string[] = value.flatMap((u) => {
+              const found = Object.entries(calendars).find(([id, cal]) =>
+                cal.ownerEmails?.includes(u.email)
+              );
+              return found ? [found[0]] : [];
+            });
 
-            if (value.length === 0) {
+            setTempUsers(value);
+
+            if (calToImport.length > 0) {
+              await dispatch(getTempCalendarsListAsync(calToImport));
             }
+
+            if (calToToggle.length > 0) {
+              setSelectedCalendars([...selectedCalendars, ...calToToggle]);
+            }
+          }}
+          onToggleEventPreview={() => {
+            setOpenEventDisplay(true);
+            console.log(openEventDisplay);
+            setAnchorPosition({
+              top: 50,
+              left: 50,
+            });
           }}
         />
         <CalendarSelection

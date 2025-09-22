@@ -30,10 +30,12 @@ export function PeopleSearch({
   selectedUsers,
   onChange,
   disabled,
+  onToggleEventPreview,
 }: {
   selectedUsers: User[];
   onChange: Function;
   disabled?: boolean;
+  onToggleEventPreview?: Function;
 }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,14 @@ export function PeopleSearch({
       renderInput={(params) => (
         <TextField
           {...params}
+          placeholder="Search user"
           label="Search user"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && onToggleEventPreview) {
+              e.preventDefault();
+              onToggleEventPreview();
+            }
+          }}
           slotProps={{
             input: {
               ...params.InputProps,

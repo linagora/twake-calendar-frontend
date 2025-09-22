@@ -1,3 +1,4 @@
+import { User } from "../../components/Attendees/PeopleSearch";
 import { api } from "../../utils/apiUtils";
 
 export async function getOpenPaasUser() {
@@ -8,14 +9,7 @@ export async function getOpenPaasUser() {
 export async function searchUsers(
   query: string,
   objectTypes: string[] = ["user", "contact"]
-): Promise<
-  {
-    email: string;
-    displayName: string;
-    avatarUrl: string;
-    openpaasId: string;
-  }[]
-> {
+): Promise<User[]> {
   const response: any[] = await api
     .post(`api/people/search`, {
       body: JSON.stringify({

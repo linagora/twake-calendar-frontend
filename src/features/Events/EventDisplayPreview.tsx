@@ -52,7 +52,7 @@ export default function EventPreviewModal({
 }: {
   eventId: string;
   calId: string;
-  tempEvent: boolean;
+  tempEvent?: boolean;
   anchorPosition: PopoverPosition | null;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
