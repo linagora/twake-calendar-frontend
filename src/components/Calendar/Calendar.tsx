@@ -22,6 +22,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
+  computeStartOfTheWeek,
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
   getDeltaInMilliseconds,
@@ -37,18 +38,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import {
-  getCalendar,
-  getCalendars,
-} from "../../features/Calendars/CalendarApi";
 import Button from "@mui/material/Button";
-
-const computeStartOfTheWeek = (date: Date): Date => {
-  const startOfWeek = new Date(date);
-  startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
-  startOfWeek.setHours(0, 0, 0, 0);
-  return startOfWeek;
-};
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -114,62 +104,31 @@ export default function CalendarApp() {
     calendarRange.start
   )}_${formatDateToYYYYMMDDTHHMMSS(calendarRange.end)}`;
 
-  let filteredEvents: CalendarEvent[] = [];
-  selectedCalendars.forEach((id) => {
-    if (calendars[id].events) {
-      filteredEvents = filteredEvents
-        .concat(
-          Object.keys(calendars[id].events).map(
-            (eventid) => calendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"));
-    }
-  });
+  let filteredEvents: CalendarEvent[] = extractEvents(
+    selectedCalendars,
+    calendars
+  );
 
-  let filteredTempEvents: CalendarEvent[] = [];
-  Object.keys(tempcalendars).forEach((id) => {
-    if (tempcalendars[id].events) {
-      filteredTempEvents = filteredTempEvents
-        .concat(
-          Object.keys(tempcalendars[id].events).map(
-            (eventid) => tempcalendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"));
-    }
-  });
+  let filteredTempEvents: CalendarEvent[] = extractEvents(
+    Object.keys(tempcalendars),
+    tempcalendars
+  );
 
-  useEffect(() => {
-    selectedCalendars.forEach((id) => {
-      if (!pending && rangeKey) {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
-        );
-      }
-    });
-  }, [rangeKey, selectedCalendars]);
-
-  useEffect(() => {
-    Object.keys(tempcalendars).forEach((calId) => {
-      dispatch(
-        getCalendarDetailAsync({
-          calId,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType: "temp",
-        })
-      );
-    });
-  }, [rangeKey, Object.keys(tempcalendars).join(",")]);
+  updateCalsDetails(
+    selectedCalendars,
+    pending,
+    rangeKey,
+    dispatch,
+    calendarRange
+  );
+  updateCalsDetails(
+    Object.keys(tempcalendars),
+    pending,
+    rangeKey,
+    dispatch,
+    calendarRange,
+    "temp"
+  );
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<{
@@ -185,6 +144,9 @@ export default function CalendarApp() {
   );
 
   const [tempUsers, setTempUsers] = useState<User[]>([]);
+  const [tempEvent, setTempEvent] = useState<CalendarEvent>(
+    {} as CalendarEvent
+  );
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
@@ -325,12 +287,10 @@ export default function CalendarApp() {
             setTempUsers(value);
 
             if (calToImport.length > 0) {
-              console.log("caltoimport", calToImport);
               await dispatch(getTempCalendarsListAsync(calToImport));
             }
 
             if (calToToggle.length > 0) {
-              console.log("caltotoggle", calToToggle);
               setSelectedCalendars((prev) => [
                 ...new Set([...prev, ...calToToggle]),
               ]);
@@ -341,12 +301,17 @@ export default function CalendarApp() {
             }
           }}
           onToggleEventPreview={() => {
-            setOpenEventDisplay(true);
-            console.log(openEventDisplay);
-            setAnchorPosition({
-              top: 50,
-              left: 50,
-            });
+            setTempEvent({
+              title: "New Event",
+              attendee: tempUsers.map((u) => ({
+                cal_address: u.email,
+                partstat: "NEED-ACTION",
+                role: "RAQ-PARTICIPATION",
+                rsvp: "TRUE",
+                cutype: "INDIVIDUAL",
+              })),
+            } as unknown as CalendarEvent);
+            setAnchorEl(document.body);
           }}
         />
         <CalendarSelection
@@ -398,14 +363,11 @@ export default function CalendarApp() {
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={filteredEvents
-            .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
-            .map((e) => {
-              if (e.calId.split("/")[0] === userId) {
-                return { ...e, editable: true };
-              }
-              return { ...e, editable: false };
-            })}
+          events={eventToFullCalendarFormat(
+            filteredEvents,
+            filteredTempEvents,
+            userId
+          )}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
@@ -636,6 +598,7 @@ export default function CalendarApp() {
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
           calendarRef={calendarRef}
+          event={tempEvent}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
           <EventPreviewModal
@@ -650,4 +613,64 @@ export default function CalendarApp() {
       </div>
     </main>
   );
+}
+
+function eventToFullCalendarFormat(
+  filteredEvents: CalendarEvent[],
+  filteredTempEvents: CalendarEvent[],
+  userId: string | undefined
+) {
+  return filteredEvents
+    .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
+    .map((e) => {
+      if (e.calId.split("/")[0] === userId) {
+        return { ...e, editable: true };
+      }
+      return { ...e, editable: false };
+    });
+}
+
+function extractEvents(
+  selectedCalendars: string[],
+  calendars: Record<string, Calendars>
+) {
+  let filteredEvents: CalendarEvent[] = [];
+  selectedCalendars.forEach((id) => {
+    if (calendars[id].events) {
+      filteredEvents = filteredEvents
+        .concat(
+          Object.keys(calendars[id].events).map(
+            (eventid) => calendars[id].events[eventid]
+          )
+        )
+        .filter((event) => !(event.status === "CANCELLED"));
+    }
+  });
+  return filteredEvents;
+}
+
+function updateCalsDetails(
+  selectedCalendars: string[],
+  pending: boolean,
+  rangeKey: string,
+  dispatch: Function,
+  calendarRange: { start: Date; end: Date },
+  calType?: "temp"
+) {
+  useEffect(() => {
+    selectedCalendars.forEach((id) => {
+      if (!pending && rangeKey) {
+        dispatch(
+          getCalendarDetailAsync({
+            calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+            calType,
+          })
+        );
+      }
+    });
+  }, [rangeKey, selectedCalendars.join(",")]);
 }

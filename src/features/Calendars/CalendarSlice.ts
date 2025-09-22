@@ -72,16 +72,13 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     for (const cal of rawCalendars) {
       const name = cal["dav:name"];
       const description = cal["caldav:description"];
-      let delegated = false;
-      let source = cal["calendarserver:source"]
+      const delegated = cal["calendarserver:delegatedsource"] ? true : false;
+      const source = cal["calendarserver:source"]
         ? cal["calendarserver:source"]._links.self.href
-        : cal._links.self.href;
+        : cal["calendarserver:delegatedsource"]
+          ? cal["calendarserver:delegatedsource"]._links.self.href
+          : cal._links.self.href;
       const link = cal._links.self.href;
-
-      if (cal["calendarserver:delegatedsource"]) {
-        source = cal["calendarserver:delegatedsource"];
-        delegated = true;
-      }
 
       const id = source.replace("/calendars/", "").replace(".json", "");
       const ownerData: any = await getUserDetails(id.split("/")[0]);
