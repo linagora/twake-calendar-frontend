@@ -185,7 +185,6 @@ export default function CalendarApp() {
   );
 
   const [tempUsers, setTempUsers] = useState<User[]>([]);
-  const [tempCals, setTempCals] = useState<any[]>([]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
@@ -326,11 +325,19 @@ export default function CalendarApp() {
             setTempUsers(value);
 
             if (calToImport.length > 0) {
+              console.log("caltoimport", calToImport);
               await dispatch(getTempCalendarsListAsync(calToImport));
             }
 
             if (calToToggle.length > 0) {
-              setSelectedCalendars([...selectedCalendars, ...calToToggle]);
+              console.log("caltotoggle", calToToggle);
+              setSelectedCalendars((prev) => [
+                ...new Set([...prev, ...calToToggle]),
+              ]);
+            }
+
+            if (value.length === 0) {
+              await dispatch(getTempCalendarsListAsync([]));
             }
           }}
           onToggleEventPreview={() => {
