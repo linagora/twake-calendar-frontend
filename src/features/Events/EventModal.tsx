@@ -67,6 +67,7 @@ function EventPopover({
   const [showMore, setShowMore] = useState(false);
 
   const [title, setTitle] = useState(event?.title ?? "");
+  console.log("tito", event?.title, title);
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(
@@ -103,6 +104,15 @@ function EventPopover({
       setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
     }
   }, [selectedRange]);
+
+  useEffect(() => {
+    setTitle(event?.title ?? "");
+    setAttendees(
+      event?.attendee
+        ? event.attendee.filter((a) => a.cal_address !== organizer.cal_address)
+        : []
+    );
+  }, [event, organizer.cal_address]);
 
   const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
@@ -172,7 +182,7 @@ function EventPopover({
       }}
     >
       <Card>
-        <CardHeader title={event ? "Duplicate Event" : "Create Event"} />
+        <CardHeader title={event?.uid ? "Duplicate Event" : "Create Event"} />
         <CardContent
           sx={{ maxHeight: "85vh", maxWidth: "40vw", overflow: "auto" }}
         >
