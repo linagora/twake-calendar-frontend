@@ -465,4 +465,202 @@ describe("calendarEventToJCal", () => {
       ])
     );
   });
+
+  // Edge cases for timezone fallback
+  it("handles invalid timezone with UTC fallback", () => {
+    const mockEvent = {
+      uid: "event-invalid-tz",
+      title: "Invalid Timezone Event",
+      start: new Date("2025-07-23T10:00:00"),
+      end: new Date("2025-07-23T11:00:00"),
+      timezone: "Invalid/Timezone",
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+
+    expect(result[0]).toBe("vcalendar");
+    const [vevent, vtimezone] = result[2];
+    expect(vevent[0]).toBe("vevent");
+    expect(vtimezone[0]).toBe("vtimezone");
+
+    // Should use UTC timezone as fallback - check for UTC standard timezone
+    expect(vtimezone[2]).toEqual(
+      expect.arrayContaining([
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
+      ])
+    );
+  });
+
+  it("handles null timezone with UTC fallback", () => {
+    const mockEvent = {
+      uid: "event-null-tz",
+      title: "Null Timezone Event",
+      start: new Date("2025-07-23T10:00:00"),
+      end: new Date("2025-07-23T11:00:00"),
+      timezone: null,
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+
+    expect(result[0]).toBe("vcalendar");
+    const [vevent, vtimezone] = result[2];
+    expect(vevent[0]).toBe("vevent");
+    expect(vtimezone[0]).toBe("vtimezone");
+
+    // Should use UTC timezone as fallback
+    expect(vtimezone[2]).toEqual(
+      expect.arrayContaining([
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
+      ])
+    );
+  });
+
+  it("handles undefined timezone with UTC fallback", () => {
+    const mockEvent = {
+      uid: "event-undefined-tz",
+      title: "Undefined Timezone Event",
+      start: new Date("2025-07-23T10:00:00"),
+      end: new Date("2025-07-23T11:00:00"),
+      timezone: undefined,
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+
+    expect(result[0]).toBe("vcalendar");
+    const [vevent, vtimezone] = result[2];
+    expect(vevent[0]).toBe("vevent");
+    expect(vtimezone[0]).toBe("vtimezone");
+
+    // Should use UTC timezone as fallback
+    expect(vtimezone[2]).toEqual(
+      expect.arrayContaining([
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
+      ])
+    );
+  });
+
+  it("handles empty string timezone with UTC fallback", () => {
+    const mockEvent = {
+      uid: "event-empty-tz",
+      title: "Empty Timezone Event",
+      start: new Date("2025-07-23T10:00:00"),
+      end: new Date("2025-07-23T11:00:00"),
+      timezone: "",
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+
+    expect(result[0]).toBe("vcalendar");
+    const [vevent, vtimezone] = result[2];
+    expect(vevent[0]).toBe("vevent");
+    expect(vtimezone[0]).toBe("vtimezone");
+
+    // Should use UTC timezone as fallback
+    expect(vtimezone[2]).toEqual(
+      expect.arrayContaining([
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+00:00"],
+            ["tzoffsetto", {}, "utc-offset", "+00:00"],
+            ["tzname", {}, "text", "UTC"],
+            ["dtstart", {}, "date-time", "1970-01-01T00:00:00"],
+          ],
+          [],
+        ],
+      ])
+    );
+  });
+
+  it("handles valid timezone correctly", () => {
+    const mockEvent = {
+      uid: "event-valid-tz",
+      title: "Valid Timezone Event",
+      start: new Date("2025-07-23T10:00:00"),
+      end: new Date("2025-07-23T11:00:00"),
+      timezone: "Europe/Paris",
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+
+    expect(result[0]).toBe("vcalendar");
+    const [vevent, vtimezone] = result[2];
+    expect(vevent[0]).toBe("vevent");
+    expect(vtimezone[0]).toBe("vtimezone");
+
+    // Should use the specified timezone - check for Europe/Paris timezone components
+    expect(vtimezone[2]).toEqual(
+      expect.arrayContaining([
+        [
+          "daylight",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+01:00"],
+            ["tzoffsetto", {}, "utc-offset", "+02:00"],
+            ["tzname", {}, "text", "CEST"],
+            ["dtstart", {}, "date-time", "1970-03-29T02:00:00"],
+            [
+              "rrule",
+              {},
+              "recur",
+              { byday: "-1SU", bymonth: 3, freq: "YEARLY" },
+            ],
+          ],
+          [],
+        ],
+        [
+          "standard",
+          [
+            ["tzoffsetfrom", {}, "utc-offset", "+02:00"],
+            ["tzoffsetto", {}, "utc-offset", "+01:00"],
+            ["tzname", {}, "text", "CET"],
+            ["dtstart", {}, "date-time", "1970-10-25T03:00:00"],
+            [
+              "rrule",
+              {},
+              "recur",
+              { byday: "-1SU", bymonth: 10, freq: "YEARLY" },
+            ],
+          ],
+          [],
+        ],
+      ])
+    );
+  });
 });

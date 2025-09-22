@@ -56,7 +56,8 @@ export default function CalendarApp() {
 
   const calendars = useAppSelector((state) => state.calendars.list);
   const pending = useAppSelector((state) => state.calendars.pending);
-  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>
@@ -80,9 +81,21 @@ export default function CalendarApp() {
       );
     }
   });
-  const [selectedCalendars, setSelectedCalendars] = useState<string[]>(
-    Object.keys(calendars).filter((id) => id.split("/")[0] === userId)
-  );
+  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+
+  // Auto-select personal calendars when first loaded
+  useEffect(() => {
+    if (
+      Object.keys(calendars).length > 0 &&
+      userId &&
+      selectedCalendars.length === 0
+    ) {
+      const personalCalendarIds = Object.keys(calendars).filter(
+        (id) => id.split("/")[0] === userId
+      );
+      setSelectedCalendars(personalCalendarIds);
+    }
+  }, [calendars, userId, selectedCalendars.length]);
 
   const calendarRange = getCalendarRange(selectedDate);
 
@@ -163,7 +176,7 @@ export default function CalendarApp() {
   }
 
   return (
-    <main>
+    <main className="main-layout">
       <div className="sidebar">
         <div className="calendar-label">
           <div className="calendar-label">
@@ -304,8 +317,10 @@ export default function CalendarApp() {
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
-          slotLabelInterval={"01:00:00"}
-          scrollTime={"08:00:00"}
+          slotLabelInterval={"00:30:00"}
+          scrollTime={new Date(Date.now() - 2 * 60 * 60 * 1000)
+            .toTimeString()
+            .slice(0, 5)}
           unselectAuto={false}
           allDayText=""
           slotLabelFormat={{

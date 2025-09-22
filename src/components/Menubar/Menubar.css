@@ -42,7 +42,8 @@
   padding: 0.5rem;
   width: 100%;
   z-index: 1000;
-  height: 7vh;
+  height: 80px;
+  background-color: #fff;
 }
 
 .menubar-item {

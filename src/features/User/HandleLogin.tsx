@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Auth } from "./oidcAuth";
 import { Loading } from "../../components/Loading/Loading";
-import { Error } from "../../components/Error/Error";
 import { push } from "redux-first-history";
 import { redirectTo } from "../../utils/apiUtils";
 import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
@@ -27,7 +26,7 @@ export function HandleLogin() {
           dispatch(setUserData(savedUser));
           dispatch(getOpenPaasUserDataAsync());
           dispatch(getCalendarsListAsync());
-          dispatch(push("/"));
+          dispatch(push("/calendar"));
           return;
         }
 

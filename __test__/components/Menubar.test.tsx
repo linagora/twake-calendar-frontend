@@ -55,6 +55,139 @@ describe("Calendar App Component Display Tests", () => {
     expect(screen.getByText("t")).toBeInTheDocument();
   });
 
+  // Edge cases for avatar display logic
+  it("handles user with only family_name", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          family_name: "Smith",
+          name: null,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    expect(screen.getByText("t")).toBeInTheDocument();
+  });
+
+  it("handles user with only name", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          family_name: null,
+          name: "John",
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    expect(screen.getByText("t")).toBeInTheDocument();
+  });
+
+  it("handles user with both name and family_name", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          family_name: "Doe",
+          name: "John",
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    expect(screen.getByText("JD")).toBeInTheDocument();
+  });
+
+  it("handles user with no name and family_name", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          family_name: null,
+          name: null,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    expect(screen.getByText("t")).toBeInTheDocument();
+  });
+
+  it("handles user with empty email", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "",
+          family_name: null,
+          name: null,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    // Should not crash and show empty string
+    const avatar = screen.getByRole("img", { hidden: true });
+    expect(avatar).toBeInTheDocument();
+  });
+
+  it("handles user with null email", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: null,
+          family_name: null,
+          name: null,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    // Should not crash and show empty string
+    const avatar = screen.getByRole("img", { hidden: true });
+    expect(avatar).toBeInTheDocument();
+  });
+
+  it("handles user with undefined email", () => {
+    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: undefined,
+          family_name: null,
+          name: null,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+      },
+    };
+    renderWithProviders(<Menubar />, preloadedState);
+    // Should not crash and show empty string
+    const avatar = screen.getByRole("img", { hidden: true });
+    expect(avatar).toBeInTheDocument();
+  });
+
   it("shows AppsIcon when applist is not empty", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     renderWithProviders(<Menubar />, preloadedState);
