@@ -163,7 +163,12 @@ export default function CalendarSelection({
       <CalendarSearch
         anchorEl={anchorElCalOthers}
         open={Boolean(anchorElCalOthers)}
-        onClose={() => setAnchorElCalOthers(null)}
+        onClose={(newCalIds?: string[]) => {
+          setAnchorElCalOthers(null);
+          if (newCalIds?.length) {
+            newCalIds.forEach((id) => handleCalendarToggle(id));
+          }
+        }}
       />
     </>
   );

@@ -184,28 +184,35 @@ export default function CalendarSearch({
   const [selectedCal, setSelectedCalendars] = useState<CalendarWithOwner[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
 
-  const handleSave = () => {
-    if (selectedCal) {
-      selectedCal.forEach(async (cal) => {
-        const calId = crypto.randomUUID();
-        const exists = Object.values(calendars).some(
-          (existing: any) =>
-            existing.id ===
-            cal.cal?._links?.self?.href
-              .replace("/calendars/", "")
-              .replace(".json", "")
-        );
-        if (!exists && cal.cal) {
-          await dispatch(
-            addSharedCalendarAsync({
-              userId: openpaasId,
-              calId,
-              cal: { ...cal, color: cal.cal["apple:color"] },
-            })
+  const handleSave = async () => {
+    if (selectedCal.length > 0) {
+      const idList = await Promise.all(
+        selectedCal.map(async (cal) => {
+          const calId = crypto.randomUUID();
+          const exists = Object.values(calendars).some(
+            (existing: any) =>
+              existing.id ===
+              cal.cal?._links?.self?.href
+                .replace("/calendars/", "")
+                .replace(".json", "")
           );
-        }
-      });
-      onClose({}, "backdropClick");
+          if (!exists && cal.cal) {
+            await dispatch(
+              addSharedCalendarAsync({
+                userId: openpaasId,
+                calId,
+                cal: { ...cal, color: cal.cal["apple:color"] },
+              })
+            );
+            return cal.cal._links.self.href
+              .replace("/calendars/", "")
+              .replace(".json", "");
+          }
+          return null;
+        })
+      );
+
+      onClose(idList.filter(Boolean));
       setSelectedCalendars([]);
       setSelectedUsers([]);
     }
