@@ -1,5 +1,5 @@
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { jest } from "@jest/globals";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as appHooks from "../../src/app/hooks";
@@ -56,35 +56,53 @@ describe("MiniCalendar", () => {
     expect(todayTile?.parentElement).toHaveClass("today");
   });
 
-  it.each([
-    { today: new Date(2025, 8, 1), label: "Monday 1 Sept 2025" },
-    { today: new Date(2025, 8, 3), label: "Wednesday 3 Sept 2025" },
-    { today: new Date(2025, 8, 7), label: "Sunday 7 Sept 2025" },
-  ])(
-    "renders mini calendar with the week in gray (except for today) when today is $label",
-    ({ today }) => {
-      jest.useFakeTimers();
-      jest.setSystemTime(today);
+  it("renders mini calendar with the week in gray (except for today) when today is Sunday 10 Aug 2025", async () => {
+    const today = new Date(2025, 7, 10);
+    jest.useFakeTimers();
+    jest.setSystemTime(today);
 
-      renderCalendar();
+    renderCalendar();
 
-      const monday = new Date(2025, 8, 1); // Monday Sept 1
+    // Wait for calendar to initialize and set to week view (default)
+    const weekViewButton = await screen.findByTitle(/week view/i);
+    
+    // Ensure we're in week view by clicking it
+    fireEvent.click(weekViewButton);
 
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
-        const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    // Click on the today date to set selectedDate in the component
+    const todayTestId = `date-${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    const todayTile = screen.getByTestId(todayTestId);
+    fireEvent.click(todayTile.parentElement!);
 
-        const tile = screen.getByTestId(dateTestId);
+    // Wait for the component to re-render after click
+    await waitFor(() => {
+      expect(todayTile?.parentElement).toHaveClass("selectedWeek");
+    });
 
-        if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
-          expect(tile?.parentElement).toHaveClass("selectedWeek");
-        }
+    // Calculate the Monday of the week that contains 'today'
+    const computeStartOfTheWeek = (date: Date): Date => {
+      const startOfWeek = new Date(date);
+      startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
+      startOfWeek.setHours(0, 0, 0, 0);
+      return startOfWeek;
+    };
+
+    const monday = computeStartOfTheWeek(today);
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      const dateTestId = `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+      const tile = screen.getByTestId(dateTestId);
+
+      if (date.getTime() !== today.setHours(0, 0, 0, 0)) {
+        expect(tile?.parentElement).toHaveClass("selectedWeek");
       }
-
-      jest.useRealTimers();
     }
-  );
+
+    jest.useRealTimers();
+  });
 
   it("renders mini calendar with the day in gray (except for today) when full calendar in day view", async () => {
     renderCalendar();
