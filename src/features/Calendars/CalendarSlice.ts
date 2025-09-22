@@ -75,9 +75,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       const delegated = cal["calendarserver:delegatedsource"] ? true : false;
       const source = cal["calendarserver:source"]
         ? cal["calendarserver:source"]._links.self.href
-        : cal["calendarserver:delegatedsource"]
-          ? cal["calendarserver:delegatedsource"]._links.self.href
-          : cal._links.self.href;
+        : cal._links.self.href;
       const link = cal._links.self.href;
 
       const id = source.replace("/calendars/", "").replace(".json", "");

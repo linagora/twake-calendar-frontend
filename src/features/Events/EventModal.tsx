@@ -67,7 +67,7 @@ function EventPopover({
   const [showMore, setShowMore] = useState(false);
 
   const [title, setTitle] = useState(event?.title ?? "");
-  console.log("tito", event?.title, title);
+
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(
