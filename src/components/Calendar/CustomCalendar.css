@@ -1,7 +1,4 @@
 /* Custom main calendar view */
-.fc-header-toolbar.fc-toolbar.fc-toolbar-ltr {
-  /* display: none; */
-}
 .fc-theme-standard td,
 .fc-theme-standard th {
   border: 1px solid #b8c1cc;
@@ -148,7 +145,24 @@ th.fc-col-header-cell.fc-day {
   left: -5px;
 }
 .fc .fc-timegrid-now-indicator-arrow {
-  display: none;
+  display: block !important;
+  width: auto;
+  height: auto;
+  position: relative;
+  border: 0;
+}
+
+.fc .fc-timegrid-now-indicator-arrow::before {
+  content: attr(data-time);
+  color: #f67e35;
+  white-space: nowrap;
+  font-family: Roboto, sans-serif;
+  font-weight: 600;
+  position: absolute;
+  top: -2px;
+  left: 25px;
+  font-size: 14px;
+  letter-spacing: 0.25px;
 }
 .fc-day-today .fc-timegrid-now-indicator-container {
   overflow: unset;
