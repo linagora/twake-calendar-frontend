@@ -65,7 +65,7 @@ describe("MiniCalendar", () => {
 
     // Wait for calendar to initialize and set to week view (default)
     const weekViewButton = await screen.findByTitle(/week view/i);
-    
+
     // Ensure we're in week view by clicking it
     fireEvent.click(weekViewButton);
 
