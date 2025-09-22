@@ -320,7 +320,7 @@ export default function CalendarApp() {
           }}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          firstDay={1}
+          firstDay={0}
           editable={true}
           selectable={true}
           timeZone="local"
@@ -361,8 +361,8 @@ export default function CalendarApp() {
           )}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
-          slotDuration={"00:30:00"}
-          slotLabelInterval={"00:30:00"}
+          slotDuration={"01:00:00"}
+          slotLabelInterval={"01:00:00"}
           scrollTime={new Date(Date.now() - 2 * 60 * 60 * 1000)
             .toTimeString()
             .slice(0, 5)}
@@ -401,6 +401,159 @@ export default function CalendarApp() {
                 </span>
               </div>
             );
+          }}
+          dayHeaderDidMount={(arg) => {
+            // Add click handler to day headers in week view
+            if (arg.view.type === "timeGridWeek") {
+              const headerEl = arg.el;
+
+              const handleDayHeaderClick = () => {
+                // Switch to day view and navigate to the clicked date
+                calendarRef.current?.changeView("timeGridDay", arg.date);
+                setSelectedDate(new Date(arg.date));
+                setSelectedMiniDate(new Date(arg.date));
+              };
+
+              headerEl.addEventListener("click", handleDayHeaderClick);
+
+              // Store the handler for cleanup
+              (headerEl as any).__dayHeaderClickHandler = handleDayHeaderClick;
+            }
+          }}
+          dayHeaderWillUnmount={(arg) => {
+            // Clean up event listeners to prevent memory leaks
+            const headerEl = arg.el;
+            if ((headerEl as any).__dayHeaderClickHandler) {
+              headerEl.removeEventListener(
+                "click",
+                (headerEl as any).__dayHeaderClickHandler
+              );
+              delete (headerEl as any).__dayHeaderClickHandler;
+            }
+          }}
+          viewDidMount={(arg) => {
+            // Add global hover effect for week and day views
+            if (
+              arg.view.type === "timeGridWeek" ||
+              arg.view.type === "timeGridDay"
+            ) {
+              const calendarEl = document.querySelector(".fc") as HTMLElement;
+              if (calendarEl) {
+                const handleMouseMove = (e: MouseEvent) => {
+                  // Find the timegrid container
+                  const timegridEl =
+                    calendarEl.querySelector(".fc-timegrid-body");
+                  if (!timegridEl) return;
+
+                  // Check if mouse is over all-day events area (fc-scrollgrid-sync-table)
+                  const allDayTable = calendarEl.querySelector(
+                    ".fc-scrollgrid-sync-table"
+                  );
+                  if (allDayTable) {
+                    const allDayRect = allDayTable.getBoundingClientRect();
+                    if (
+                      e.clientY >= allDayRect.top &&
+                      e.clientY <= allDayRect.bottom
+                    ) {
+                      // Mouse is over all-day events area, don't show highlight
+                      timegridEl
+                        .querySelectorAll(".hour-highlight")
+                        .forEach((el: Element) => el.remove());
+                      return;
+                    }
+                  }
+
+                  // Check if mouse is over time slot labels (left side with hours)
+                  const target = e.target as HTMLElement;
+                  if (target && target.closest(".fc-timegrid-slot-label")) {
+                    // Mouse is over time slot labels, don't show highlight
+                    timegridEl
+                      .querySelectorAll(".hour-highlight")
+                      .forEach((el: Element) => el.remove());
+                    return;
+                  }
+
+                  // Get all day columns
+                  const dayColumns =
+                    timegridEl.querySelectorAll(".fc-timegrid-col");
+                  if (dayColumns.length === 0) return;
+
+                  // Remove previous highlights
+                  timegridEl
+                    .querySelectorAll(".hour-highlight")
+                    .forEach((el: Element) => el.remove());
+
+                  // Find which day column the mouse is over
+                  let targetColumn: Element | null = null;
+                  for (const column of dayColumns) {
+                    const rect = column.getBoundingClientRect();
+                    if (e.clientX >= rect.left && e.clientX <= rect.right) {
+                      targetColumn = column;
+                      break;
+                    }
+                  }
+
+                  if (targetColumn) {
+                    const rect = targetColumn.getBoundingClientRect();
+                    const relativeY = e.clientY - rect.top;
+                    const hourHeight = rect.height / 24; // Assuming 24 hours
+                    const hourIndex = Math.floor(relativeY / hourHeight);
+
+                    // Only show highlight if mouse is actually over the timegrid area (not all-day events)
+                    if (relativeY >= 0 && relativeY <= rect.height) {
+                      // Create highlight for the specific hour in the specific day
+                      const highlight = document.createElement("div");
+                      highlight.className = "hour-highlight";
+                      highlight.style.top = `${hourIndex * hourHeight}px`;
+                      highlight.style.height = `${hourHeight}px`;
+
+                      (targetColumn as HTMLElement).style.position = "relative";
+                      targetColumn.appendChild(highlight);
+                    }
+                  }
+                };
+
+                const handleMouseLeave = () => {
+                  // Remove all hour highlights when mouse leaves calendar
+                  const timegridEl =
+                    calendarEl.querySelector(".fc-timegrid-body");
+                  if (timegridEl) {
+                    timegridEl
+                      .querySelectorAll(".hour-highlight")
+                      .forEach((el: Element) => el.remove());
+                  }
+                };
+
+                calendarEl.addEventListener("mousemove", handleMouseMove);
+                calendarEl.addEventListener("mouseleave", handleMouseLeave);
+
+                // Store handlers for cleanup
+                (calendarEl as any).__calendarMouseMoveHandler =
+                  handleMouseMove;
+                (calendarEl as any).__calendarMouseLeaveHandler =
+                  handleMouseLeave;
+              }
+            }
+          }}
+          viewWillUnmount={(arg) => {
+            // Clean up event listeners to prevent memory leaks
+            const calendarEl = document.querySelector(".fc") as HTMLElement;
+            if (calendarEl) {
+              if ((calendarEl as any).__calendarMouseMoveHandler) {
+                calendarEl.removeEventListener(
+                  "mousemove",
+                  (calendarEl as any).__calendarMouseMoveHandler
+                );
+                delete (calendarEl as any).__calendarMouseMoveHandler;
+              }
+              if ((calendarEl as any).__calendarMouseLeaveHandler) {
+                calendarEl.removeEventListener(
+                  "mouseleave",
+                  (calendarEl as any).__calendarMouseLeaveHandler
+                );
+                delete (calendarEl as any).__calendarMouseLeaveHandler;
+              }
+            }
           }}
           eventClick={(info) => {
             info.jsEvent.preventDefault(); // don't let the browser navigate

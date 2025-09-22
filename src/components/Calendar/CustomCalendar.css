@@ -5,8 +5,11 @@
 .fc-theme-standard td,
 .fc-theme-standard th {
   border: 1px solid #b8c1cc;
+}
+th.fc-col-header-cell.fc-day {
   border-left: 0;
 }
+
 a.fc-timegrid-axis-cushion {
   color: #243b55;
   text-align: center;
@@ -24,11 +27,12 @@ a.fc-timegrid-axis-cushion {
   font-weight: 500;
   line-height: 20px;
   letter-spacing: 0.25px;
+  font-family: "Inter", sans-serif;
 }
 .fc-daygrid-day-top .fc-daygrid-day-number,
 span.fc-daygrid-day-number {
   color: #243b55;
-  margin: 0 8px 0 0;
+  margin: 0 6px 0 0;
   font-family: Roboto;
   font-size: 28px;
   font-style: normal;
@@ -44,11 +48,12 @@ span.fc-daygrid-day-number:after {
   content: "";
   z-index: -1;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   position: absolute;
-  left: 0;
-  top: -1px;
+  top: 1px;
+  left: 1px;
+  transition: background-color 0.3s ease;
 }
 span.fc-daygrid-day-number.current-date {
   color: #fff;
@@ -65,10 +70,16 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink {
   border-right: 1px solid #b8c1cc;
 }
 .fc .fc-timegrid-axis-cushion {
-  min-width: 70px;
-  max-width: 70px;
+  min-width: 80px;
+  max-width: 80px;
   padding: 0;
   text-align: left;
+  font-family: Roboto;
+  font-size: 12.507px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18.76px;
+  padding: 0 0 0 10px;
 }
 .fc .fc-timegrid-divider {
   display: none;
@@ -85,6 +96,7 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink {
 }
 th.fc-col-header-cell.fc-day {
   border-right: 0;
+  border-bottom: 0;
 }
 .fc .fc-scrollgrid {
   border: 0;
@@ -105,4 +117,89 @@ th.fc-col-header-cell.fc-day {
   position: absolute;
   top: 9.5px;
   right: -15px;
+}
+.fc .fc-timegrid-col.fc-day-today,
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: #fff;
+}
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 36px;
+}
+.fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+  margin-bottom: 0;
+}
+.fc .fc-timegrid-now-indicator-line {
+  z-index: 5;
+  border: 0 solid #f67e35;
+  border-top-width: 2px;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.fc .fc-timegrid-now-indicator-line::after {
+  content: "";
+  z-index: 5;
+  background-color: #f67e35;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  top: -6px;
+  left: -5px;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  display: none;
+}
+.fc-day-today .fc-timegrid-now-indicator-container {
+  overflow: unset;
+}
+.fc .fc-timegrid-slot {
+  height: auto;
+  min-height: 40px !important;
+}
+.fc .fc-timegrid-slot-label {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  height: 100%;
+}
+tr:has(> td.fc-timegrid-divider.fc-cell-shaded) {
+  display: none;
+}
+.fc .fc-scrollgrid-section td {
+  border-bottom: 0;
+}
+.fc .fc-scrollgrid-section td .fc-daygrid-day-frame {
+  border-bottom: 1px solid #b8c1cc;
+}
+th.fc-col-header-cell.fc-day {
+  cursor: pointer;
+}
+th.fc-col-header-cell.fc-day:hover
+  .fc-daygrid-day-number:not(.current-date)::after {
+  background-color: #b8c1cc56;
+}
+
+/* Hover effects for month view using CSS */
+.fc-daygrid-day:hover {
+  background-color: #b8c1cc1a !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover effects for week and day views using JavaScript */
+.hoverable-day-cell {
+  transition: background-color 0.3s ease;
+}
+
+.hour-highlight {
+  transition: background-color 0.3s ease;
+  background-color: #b8c1cc1a !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.fc-timegrid-slot-label {
+  background-color: #fff !important;
 }

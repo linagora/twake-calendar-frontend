@@ -15,7 +15,6 @@
   flex-grow: 1;
   height: 100%;
   overflow: hidden;
-  padding: 0 25px 0 10px;
 }
 
 .calendarListHeader {
@@ -40,18 +39,6 @@
 .needs-action-event {
   opacity: 0.7;
   border: dashed 1px #ffffff;
-}
-
-.fc .fc-timegrid-slot {
-  height: auto;
-  min-height: 54px !important;
-}
-
-.fc .fc-timegrid-slot-label {
-  display: flex;
-  align-items: flex-start;
-  padding-top: 2px;
-  height: 100%;
 }
 
 .fc-event-main span,
