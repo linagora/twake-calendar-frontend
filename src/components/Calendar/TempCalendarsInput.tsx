@@ -66,7 +66,6 @@ export function TempCalendarsInput({
     }
 
     for (const user of removedUsers) {
-
       const controller = requestControllers.get(user.email);
       if (controller) {
         controller.abort();
