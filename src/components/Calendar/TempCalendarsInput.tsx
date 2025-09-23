@@ -8,6 +8,8 @@ import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 
+const requestControllers = new Map<string, AbortController>();
+
 export function TempCalendarsInput({
   setAnchorEl,
   setTempEvent,
@@ -48,9 +50,13 @@ export function TempCalendarsInput({
     );
 
     if (calendarsToImport.length > 0) {
-      calendarsToImport.forEach(
-        async (c) => await dispatch(getTempCalendarsListAsync(c))
-      );
+      for (const user of calendarsToImport) {
+        const controller = new AbortController();
+        requestControllers.set(user.email, controller);
+        dispatch(
+          getTempCalendarsListAsync(user, { signal: controller.signal })
+        );
+      }
     }
 
     if (calendarsToToggle.length > 0) {
@@ -60,6 +66,13 @@ export function TempCalendarsInput({
     }
 
     for (const user of removedUsers) {
+
+      const controller = requestControllers.get(user.email);
+      if (controller) {
+        controller.abort();
+        requestControllers.delete(user.email);
+      }
+
       const calIds = buildEmailToCalendarMap(tempcalendars).get(user.email);
       calIds?.forEach((id) => dispatch(removeTempCal(id)));
     }
