@@ -158,7 +158,6 @@ function EventPopover({
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
-        calType: !event?.uid && event?.title ? "temp" : undefined,
       })
     );
     onClose({}, "backdropClick");

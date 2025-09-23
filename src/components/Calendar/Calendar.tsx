@@ -505,11 +505,15 @@ export default function CalendarApp() {
                 arg.event._def.extendedProps.calId
               ].ownerEmails?.map((email) => email.toLowerCase())
             );
+
+            const delegated = (
+              event._def.extendedProps.temp ? tempcalendars : calendars
+            )[arg.event._def.extendedProps.calId].delegated;
             const showSpecialDisplay = attendees.filter((att: userAttendee) =>
               ownerEmails.has(att.cal_address.toLowerCase())
             );
-            if (!showSpecialDisplay[0]) return;
-            switch (showSpecialDisplay[0].partstat) {
+            if (!delegated && showSpecialDisplay.length === 0) return null;
+            switch (showSpecialDisplay?.[0]?.partstat) {
               case "DECLINED":
                 Icon = null;
                 titleStyle.textDecoration = "line-through";
