@@ -6,7 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
@@ -16,7 +16,6 @@ import {
   getCalendarDetailAsync,
   getCalendarsListAsync,
   getEventAsync,
-  getTempCalendarsListAsync,
   putEventAsync,
   updateEventLocal,
 } from "../../features/Calendars/CalendarSlice";
@@ -37,7 +36,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
-import { PeopleSearch, User } from "../Attendees/PeopleSearch";
+import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
 
 export default function CalendarApp() {
@@ -114,21 +113,28 @@ export default function CalendarApp() {
     tempcalendars
   );
 
-  updateCalsDetails(
-    selectedCalendars,
-    pending,
-    rangeKey,
-    dispatch,
-    calendarRange
-  );
-  updateCalsDetails(
-    Object.keys(tempcalendars),
-    pending,
-    rangeKey,
-    dispatch,
-    calendarRange,
-    "temp"
-  );
+  useEffect(() => {
+    updateCalsDetails(
+      selectedCalendars,
+      pending,
+      calendars,
+      rangeKey,
+      dispatch,
+      calendarRange
+    );
+  }, [rangeKey, selectedCalendars]);
+
+  useEffect(() => {
+    updateCalsDetails(
+      Object.keys(tempcalendars),
+      pending,
+      tempcalendars,
+      rangeKey,
+      dispatch,
+      calendarRange,
+      "temp"
+    );
+  }, [rangeKey, Object.keys(tempcalendars).join(",")]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<{
@@ -143,7 +149,6 @@ export default function CalendarApp() {
     null
   );
 
-  const [tempUsers, setTempUsers] = useState<User[]>([]);
   const [tempEvent, setTempEvent] = useState<CalendarEvent>(
     {} as CalendarEvent
   );
@@ -157,6 +162,29 @@ export default function CalendarApp() {
     calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
+    selectedCalendars.forEach((calId) =>
+      dispatch(
+        getCalendarDetailAsync({
+          calId,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+        })
+      )
+    );
+    Object.keys(tempcalendars).forEach((calId) =>
+      dispatch(
+        getCalendarDetailAsync({
+          calId,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType: "temp",
+        })
+      )
+    );
   };
   const handleCloseEventDisplay = () => {
     setAnchorPosition(null);
@@ -268,51 +296,11 @@ export default function CalendarApp() {
             );
           }}
         />
-        <PeopleSearch
-          selectedUsers={tempUsers}
-          onChange={async (event: any, value: User[]) => {
-            const calToImport = value.filter(
-              (u) =>
-                !selectedCalendars.find((id) =>
-                  calendars[id].ownerEmails?.find((mail) => mail === u.email)
-                )
-            );
-            const calToToggle: string[] = value.flatMap((u) => {
-              const found = Object.entries(calendars).find(([id, cal]) =>
-                cal.ownerEmails?.includes(u.email)
-              );
-              return found ? [found[0]] : [];
-            });
-
-            setTempUsers(value);
-
-            if (calToImport.length > 0) {
-              await dispatch(getTempCalendarsListAsync(calToImport));
-            }
-
-            if (calToToggle.length > 0) {
-              setSelectedCalendars((prev) => [
-                ...new Set([...prev, ...calToToggle]),
-              ]);
-            }
-
-            if (value.length === 0) {
-              await dispatch(getTempCalendarsListAsync([]));
-            }
-          }}
-          onToggleEventPreview={() => {
-            setTempEvent({
-              title: "New Event",
-              attendee: tempUsers.map((u) => ({
-                cal_address: u.email,
-                partstat: "NEED-ACTION",
-                role: "RAQ-PARTICIPATION",
-                rsvp: "TRUE",
-                cutype: "INDIVIDUAL",
-              })),
-            } as unknown as CalendarEvent);
-            setAnchorEl(document.body);
-          }}
+        <TempCalendarsInput
+          setAnchorEl={setAnchorEl}
+          selectedCalendars={selectedCalendars}
+          setSelectedCalendars={setSelectedCalendars}
+          setTempEvent={setTempEvent}
         />
         <CalendarSelection
           selectedCalendars={selectedCalendars}
@@ -652,25 +640,28 @@ function extractEvents(
 function updateCalsDetails(
   selectedCalendars: string[],
   pending: boolean,
+  calendars: Record<string, Calendars>,
   rangeKey: string,
   dispatch: Function,
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
-  useEffect(() => {
-    selectedCalendars.forEach((id) => {
-      if (!pending && rangeKey) {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-            calType,
-          })
-        );
-      }
-    });
-  }, [rangeKey, selectedCalendars.join(",")]);
+  console.log(selectedCalendars);
+  selectedCalendars.forEach((id) => {
+    if (Object.keys(calendars[id].events).length > 0) {
+      return;
+    }
+    if (!pending && rangeKey) {
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType,
+        })
+      );
+    }
+  });
 }

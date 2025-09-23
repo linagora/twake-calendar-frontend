@@ -164,16 +164,16 @@ describe("CalendarSelection", () => {
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
 
-    const delegatedAccordionSummary = screen
-      .getByText("Delegated Calendars")
+    const sharedAccordionSummary = screen
+      .getByText("Other Calendars")
       .closest(".MuiAccordionSummary-root");
 
     const addButton = screen.getAllByTestId("AddIcon")[1];
     fireEvent.click(addButton);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(addButton);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -213,6 +213,7 @@ describe("calendar Availability search", () => {
       {
         email: "newuser@example.com",
         displayName: "New User",
+        avatarUrl: "image.png",
         openpaasId: "1234567890",
       },
     ]);
@@ -230,7 +231,12 @@ describe("calendar Availability search", () => {
 
   it("does not import temp calendars if user already has a calendar but toggles the shared one", async () => {
     mockedSearchUsers.mockResolvedValueOnce([
-      { email: "alice@example.com", displayName: "Alice" },
+      {
+        email: "alice@example.com",
+        displayName: "Alice",
+        avatarUrl: "image.png",
+        openpaasId: "1234567890",
+      },
     ]);
     const spy = jest
       .spyOn(eventThunks, "getTempCalendarsListAsync")

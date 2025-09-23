@@ -71,10 +71,12 @@ function EventPopover({
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(
-    event?.start ? new Date(event.start).toISOString() : ""
+    event?.start
+      ? new Date(event.start).toISOString()
+      : new Date().toISOString()
   );
   const [end, setEnd] = useState(
-    event?.end ? new Date(event.end)?.toISOString() : ""
+    event?.end ? new Date(event.end)?.toISOString() : new Date().toISOString()
   );
   const [calendarid, setCalendarid] = useState(
     event?.calId
@@ -152,10 +154,11 @@ function EventPopover({
       newEvent.attendee = newEvent.attendee.concat(attendees);
     }
 
-    dispatch(
+    await dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
+        calType: event?.uid ? "temp" : undefined,
       })
     );
     onClose({}, "backdropClick");
