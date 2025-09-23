@@ -158,7 +158,7 @@ function EventPopover({
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
-        calType: event?.uid ? "temp" : undefined,
+        calType: !event?.uid && event?.title ? "temp" : undefined,
       })
     );
     onClose({}, "backdropClick");
@@ -166,6 +166,7 @@ function EventPopover({
     // Reset
     setTitle("");
     setDescription("");
+    setAttendees([]);
     setLocation("");
     setCalendarid(0);
   };
