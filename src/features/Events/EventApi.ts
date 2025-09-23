@@ -16,6 +16,13 @@ export async function getEvent(event: CalendarEvent) {
   return { ...eventjson, ...event };
 }
 
+export async function dlEvent(event: CalendarEvent) {
+  const response = await api.get(`dav${event.URL}?export=`);
+  const eventData = await response.text();
+
+  return eventData;
+}
+
 export async function putEvent(event: CalendarEvent, calOwnerEmail?: string) {
   const response = await api(`dav${event.URL}`, {
     method: "PUT",
