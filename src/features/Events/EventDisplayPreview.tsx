@@ -30,16 +30,17 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { userAttendee } from "../User/userDataTypes";
 import EventDisplayModal, {
   InfoRow,
   renderAttendeeBadge,
   stringAvatar,
 } from "./EventDisplay";
-import { getEvent } from "./EventApi";
+import { dlEvent, getEvent } from "./EventApi";
 import { CalendarEvent } from "./EventsTypes";
 import EventDuplication from "../../components/Event/EventDuplicate";
+import { getCalendar } from "../Calendars/CalendarApi";
 
 export default function EventPreviewModal({
   eventId,
@@ -123,6 +124,27 @@ export default function EventPreviewModal({
               gap: 1,
             }}
           >
+            {(window as any).DEBUG && (
+              <IconButton
+                onClick={async () => {
+                  const icsContent = await dlEvent(event);
+                  const blob = new Blob([icsContent], {
+                    type: "text/calendar",
+                  });
+                  const url = URL.createObjectURL(blob);
+
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `${eventId}.ics`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <FileDownloadOutlinedIcon />
+              </IconButton>
+            )}
             <EventDuplication event={event} onClose={onClose} />
             {mailSpaUrl && attendees.length > 0 && (
               <IconButton
