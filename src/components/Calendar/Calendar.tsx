@@ -320,7 +320,7 @@ export default function CalendarApp() {
           }}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
-          firstDay={0}
+          firstDay={1}
           editable={true}
           selectable={true}
           timeZone="local"
@@ -363,9 +363,7 @@ export default function CalendarApp() {
           weekNumberFormat={{ week: "long" }}
           slotDuration={"01:00:00"}
           slotLabelInterval={"01:00:00"}
-          scrollTime={new Date(Date.now() - 2 * 60 * 60 * 1000)
-            .toTimeString()
-            .slice(0, 5)}
+          scrollTime="12:00:00"
           unselectAuto={false}
           allDayText=""
           slotLabelFormat={{
