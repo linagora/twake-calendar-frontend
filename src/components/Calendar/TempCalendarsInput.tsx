@@ -90,6 +90,7 @@ export function TempCalendarsInput({
     const newEvent: CalendarEvent = {
       title: "New Event",
       attendee: tempUsers.map((u) => ({
+        cn: u.displayName,
         cal_address: u.email,
         partstat: "NEED-ACTION",
         role: "REQ-PARTICIPANT",

@@ -116,6 +116,15 @@ function EventPopover({
     );
   }, [event, organizer?.cal_address]);
 
+  const handleClose = () => {
+    onClose({}, "backdropClick"); // Reset
+    setTitle("");
+    setDescription("");
+    setAttendees([]);
+    setLocation("");
+    setCalendarid(0);
+  };
+
   const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
 
@@ -174,7 +183,7 @@ function EventPopover({
     <Popover
       open={open}
       anchorEl={anchorEl}
-      onClose={onClose}
+      onClose={handleClose}
       anchorOrigin={{
         vertical: "center",
         horizontal: "center",
@@ -372,10 +381,7 @@ function EventPopover({
 
         <CardActions>
           <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-            <Button
-              variant="outlined"
-              onClick={() => onClose({}, "backdropClick")}
-            >
+            <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
             <Button size="small" onClick={() => setShowMore(!showMore)}>
