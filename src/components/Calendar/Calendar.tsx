@@ -34,6 +34,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
+import Button from "@mui/material/Button";
 
 const computeStartOfTheWeek = (date: Date): Date => {
   const startOfWeek = new Date(date);
@@ -178,6 +179,12 @@ export default function CalendarApp() {
   return (
     <main className="main-layout">
       <div className="sidebar">
+        <Button
+          variant="contained"
+          onClick={() => handleDateSelect(null as unknown as DateSelectArg)}
+        >
+          + Create Event
+        </Button>
         <div className="calendar-label">
           <div className="calendar-label">
             <span title="mini calendar month">
