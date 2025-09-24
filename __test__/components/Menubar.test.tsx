@@ -23,14 +23,14 @@ describe("Calendar App Component Display Tests", () => {
     ];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     const navbarElement = screen.getByText("Twake");
@@ -40,14 +40,14 @@ describe("Calendar App Component Display Tests", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText(/Twake/i)).toBeInTheDocument();
@@ -58,14 +58,14 @@ describe("Calendar App Component Display Tests", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("JD")).toBeInTheDocument();
@@ -86,14 +86,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("t")).toBeInTheDocument();
@@ -116,14 +116,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("t")).toBeInTheDocument();
@@ -145,14 +145,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("t")).toBeInTheDocument();
@@ -174,14 +174,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("JD")).toBeInTheDocument();
@@ -203,14 +203,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByText("t")).toBeInTheDocument();
@@ -232,14 +232,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     // Should not crash and show empty string
@@ -263,14 +263,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     // Should not crash and show empty string
@@ -294,14 +294,14 @@ describe("Calendar App Component Display Tests", () => {
     };
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     // Should not crash and show empty string
@@ -313,14 +313,14 @@ describe("Calendar App Component Display Tests", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     expect(screen.getByTestId("AppsIcon")).toBeInTheDocument();
@@ -330,14 +330,14 @@ describe("Calendar App Component Display Tests", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     const appsButton = screen.getByTestId("AppsIcon");
@@ -350,14 +350,14 @@ describe("Calendar App Component Display Tests", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date('2024-04-15');
-    
+    const mockCurrentDate = new Date("2024-04-15");
+
     renderWithProviders(
-      <Menubar 
+      <Menubar
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
-      />, 
+      />,
       preloadedState
     );
     const appsButton = screen.getByTestId("AppsIcon");

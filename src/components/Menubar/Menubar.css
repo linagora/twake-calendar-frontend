@@ -49,7 +49,7 @@
 .menubar-item {
   display: flex;
   align-items: center;
-  width: calc(330px - .5rem);
+  width: calc(330px - 0.5rem);
 }
 
 .logo {
