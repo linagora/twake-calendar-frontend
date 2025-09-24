@@ -32,12 +32,14 @@ export interface User {
 export function PeopleSearch({
   selectedUsers,
   onChange,
+  objectTypes,
   disabled,
   freeSolo,
   onToggleEventPreview,
 }: {
   selectedUsers: User[];
   onChange: Function;
+  objectTypes: string[];
   disabled?: boolean;
   freeSolo?: boolean;
   onToggleEventPreview?: Function;
@@ -55,7 +57,7 @@ export function PeopleSearch({
     const delayDebounceFn = setTimeout(async () => {
       if (query) {
         setLoading(true);
-        const res = await searchUsers(query, ["user"]);
+        const res = await searchUsers(query, objectTypes);
         setOptions(res);
         setLoading(false);
       }
