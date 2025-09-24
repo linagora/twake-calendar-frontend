@@ -18,12 +18,15 @@ import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import Chip from "@mui/material/Chip";
+import { useTheme } from "@mui/material/styles";
 
 export interface User {
   email: string;
   displayName: string;
   avatarUrl: string;
   openpaasId: string;
+  color?: string;
 }
 
 export function PeopleSearch({
@@ -40,6 +43,7 @@ export function PeopleSearch({
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
+  const theme = useTheme();
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -119,6 +123,18 @@ export function PeopleSearch({
           </ListItem>
         );
       }}
+      renderValue={(value, getTagProps) =>
+        value.map((option, index) => (
+          <Chip
+            {...getTagProps({ index })}
+            sx={{
+              backgroundColor: option.color,
+              color: theme.palette.getContrastText(option.color ?? "#ffffffff"),
+            }}
+            label={option.displayName}
+          />
+        ))
+      }
     />
   );
 }

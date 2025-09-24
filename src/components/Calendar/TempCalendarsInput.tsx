@@ -28,6 +28,7 @@ export function TempCalendarsInput({
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const prevUsersRef = useRef<User[]>([]);
+  const userColors = new Map<string, string>();
 
   const handleUserChange = async (_: any, users: User[]) => {
     setTempUsers(users);
@@ -53,6 +54,14 @@ export function TempCalendarsInput({
       for (const user of calendarsToImport) {
         const controller = new AbortController();
         requestControllers.set(user.email, controller);
+
+        if (!userColors.has(user.email)) {
+          const existingColors = new Set(userColors.values());
+          userColors.set(user.email, generateUserColor(existingColors));
+        }
+
+        user.color = userColors.get(user.email)!;
+
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );
@@ -138,4 +147,13 @@ function buildEmailToCalendarMap(calRecord: Record<string, Calendars>) {
     });
   }
   return map;
+}
+
+function generateUserColor(existingColors: Set<string>): string {
+  let color: string;
+  do {
+    const hue = Math.floor(Math.random() * 360);
+    color = `hsl(${hue}, 70%, 50%)`;
+  } while (existingColors.has(color));
+  return color;
 }

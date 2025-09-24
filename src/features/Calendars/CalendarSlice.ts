@@ -62,10 +62,10 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 >("calendars/getTempCalendars", async (tempUser) => {
   const importedCalendars: Record<string, Calendars> = {};
 
-  const calendars = (await getCalendars(tempUser.openpaasId ?? "")) as Record<
-    string,
-    any
-  >;
+  const calendars = (await getCalendars(
+    tempUser.openpaasId ?? "",
+    "sharedPublic=true&WithRights=true"
+  )) as Record<string, any>;
   const rawCalendars = calendars._embedded["dav:calendar"];
 
   for (const cal of rawCalendars) {
@@ -79,7 +79,6 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 
     const id = source.replace("/calendars/", "").replace(".json", "");
     const ownerData: any = await getUserDetails(id.split("/")[0]);
-    const color = cal["apple:color"] ?? "gray";
 
     importedCalendars[id] = {
       id,
@@ -89,7 +88,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       ownerEmails: ownerData.emails,
       description,
       delegated,
-      color,
+      color: tempUser.color ?? "#a8a8a8ff",
       events: {},
     };
   }
