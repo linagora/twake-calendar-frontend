@@ -34,7 +34,7 @@ export default function UserSearch({
     <>
       <PeopleSearch
         selectedUsers={selectedUsers}
-        objectTypes={["user", "contacts"]}
+        objectTypes={["user", "contact"]}
         disabled={disabled}
         onChange={(event: any, value: User[]) => {
           setAttendees(
