@@ -6,7 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
@@ -21,6 +21,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
+  computeStartOfTheWeek,
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
   getDeltaInMilliseconds,
@@ -35,14 +36,8 @@ import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
+import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
-
-const computeStartOfTheWeek = (date: Date): Date => {
-  const startOfWeek = new Date(date);
-  startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
-  startOfWeek.setHours(0, 0, 0, 0);
-  return startOfWeek;
-};
 
 export default function CalendarApp() {
   const calendarRef = useRef<CalendarApi | null>(null);
@@ -57,6 +52,8 @@ export default function CalendarApp() {
   }
 
   const calendars = useAppSelector((state) => state.calendars.list);
+  const tempcalendars =
+    useAppSelector((state) => state.calendars.templist) ?? {};
   const pending = useAppSelector((state) => state.calendars.pending);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
@@ -106,34 +103,38 @@ export default function CalendarApp() {
     calendarRange.start
   )}_${formatDateToYYYYMMDDTHHMMSS(calendarRange.end)}`;
 
-  let filteredEvents: CalendarEvent[] = [];
-  selectedCalendars.forEach((id) => {
-    if (calendars[id].events) {
-      filteredEvents = filteredEvents
-        .concat(
-          Object.keys(calendars[id].events).map(
-            (eventid) => calendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"));
-    }
-  });
+  let filteredEvents: CalendarEvent[] = extractEvents(
+    selectedCalendars,
+    calendars
+  );
+
+  let filteredTempEvents: CalendarEvent[] = extractEvents(
+    Object.keys(tempcalendars),
+    tempcalendars
+  );
 
   useEffect(() => {
-    selectedCalendars.forEach((id) => {
-      if (!pending && rangeKey) {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
-        );
-      }
-    });
+    updateCalsDetails(
+      selectedCalendars,
+      pending,
+      calendars,
+      rangeKey,
+      dispatch,
+      calendarRange
+    );
   }, [rangeKey, selectedCalendars]);
+
+  useEffect(() => {
+    updateCalsDetails(
+      Object.keys(tempcalendars),
+      pending,
+      tempcalendars,
+      rangeKey,
+      dispatch,
+      calendarRange,
+      "temp"
+    );
+  }, [rangeKey, Object.keys(tempcalendars).join(",")]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<{
@@ -142,9 +143,14 @@ export default function CalendarApp() {
   } | null>(null);
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
+  const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
+  );
+
+  const [tempEvent, setTempEvent] = useState<CalendarEvent>(
+    {} as CalendarEvent
   );
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
@@ -156,6 +162,29 @@ export default function CalendarApp() {
     calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
+    selectedCalendars.forEach((calId) =>
+      dispatch(
+        getCalendarDetailAsync({
+          calId,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+        })
+      )
+    );
+    Object.keys(tempcalendars).forEach((calId) =>
+      dispatch(
+        getCalendarDetailAsync({
+          calId,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType: "temp",
+        })
+      )
+    );
   };
   const handleCloseEventDisplay = () => {
     setAnchorPosition(null);
@@ -267,6 +296,12 @@ export default function CalendarApp() {
             );
           }}
         />
+        <TempCalendarsInput
+          setAnchorEl={setAnchorEl}
+          selectedCalendars={selectedCalendars}
+          setSelectedCalendars={setSelectedCalendars}
+          setTempEvent={setTempEvent}
+        />
         <CalendarSelection
           selectedCalendars={selectedCalendars}
           setSelectedCalendars={setSelectedCalendars}
@@ -316,12 +351,11 @@ export default function CalendarApp() {
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
           dayMaxEvents={true}
-          events={filteredEvents.map((e) => {
-            if (e.calId.split("/")[0] === userId) {
-              return { ...e, editable: true };
-            }
-            return { ...e, editable: false };
-          })}
+          events={eventToFullCalendarFormat(
+            filteredEvents,
+            filteredTempEvents,
+            userId
+          )}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
@@ -379,6 +413,7 @@ export default function CalendarApp() {
               });
               setEventDisplayedId(info.event.extendedProps.uid);
               setEventDisplayedCalId(info.event.extendedProps.calId);
+              setEventDisplayedTemp(info.event._def.extendedProps.temp);
             }
           }}
           eventAllow={(dropInfo, draggedEvent) => {
@@ -439,7 +474,7 @@ export default function CalendarApp() {
               start: computedNewStart,
               end: computedNewEnd,
             } as CalendarEvent;
-            console.log(event, newEvent);
+
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
@@ -451,7 +486,13 @@ export default function CalendarApp() {
           }}
           eventContent={(arg) => {
             const event = arg.event;
-            if (!calendars[arg.event._def.extendedProps.calId]) return;
+            if (
+              (!event._def.extendedProps.temp &&
+                !calendars[arg.event._def.extendedProps.calId]) ||
+              (event._def.extendedProps.temp &&
+                !tempcalendars[arg.event._def.extendedProps.calId])
+            )
+              return;
 
             const attendees = event._def.extendedProps.attendee || [];
             const isPrivate =
@@ -460,15 +501,19 @@ export default function CalendarApp() {
             let Icon = null;
             let titleStyle: React.CSSProperties = {};
             const ownerEmails = new Set(
-              calendars[arg.event._def.extendedProps.calId].ownerEmails?.map(
-                (email) => email.toLowerCase()
-              )
+              (event._def.extendedProps.temp ? tempcalendars : calendars)[
+                arg.event._def.extendedProps.calId
+              ].ownerEmails?.map((email) => email.toLowerCase())
             );
+
+            const delegated = (
+              event._def.extendedProps.temp ? tempcalendars : calendars
+            )[arg.event._def.extendedProps.calId].delegated;
             const showSpecialDisplay = attendees.filter((att: userAttendee) =>
               ownerEmails.has(att.cal_address.toLowerCase())
             );
-            if (!showSpecialDisplay[0]) return;
-            switch (showSpecialDisplay[0].partstat) {
+            if (!delegated && showSpecialDisplay.length === 0) return null;
+            switch (showSpecialDisplay?.[0]?.partstat) {
               case "DECLINED":
                 Icon = null;
                 titleStyle.textDecoration = "line-through";
@@ -545,11 +590,13 @@ export default function CalendarApp() {
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
           calendarRef={calendarRef}
+          event={tempEvent}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
           <EventPreviewModal
             eventId={eventDisplayedId}
             calId={eventDisplayedCalId}
+            tempEvent={eventDisplayedTemp}
             anchorPosition={anchorPosition}
             open={openEventDisplay}
             onClose={handleCloseEventDisplay}
@@ -558,4 +605,66 @@ export default function CalendarApp() {
       </div>
     </main>
   );
+}
+
+function eventToFullCalendarFormat(
+  filteredEvents: CalendarEvent[],
+  filteredTempEvents: CalendarEvent[],
+  userId: string | undefined
+) {
+  return filteredEvents
+    .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
+    .map((e) => {
+      if (e.calId.split("/")[0] === userId) {
+        return { ...e, editable: true };
+      }
+      return { ...e, editable: false };
+    });
+}
+
+function extractEvents(
+  selectedCalendars: string[],
+  calendars: Record<string, Calendars>
+) {
+  let filteredEvents: CalendarEvent[] = [];
+  selectedCalendars.forEach((id) => {
+    if (calendars[id].events) {
+      filteredEvents = filteredEvents
+        .concat(
+          Object.keys(calendars[id].events).map(
+            (eventid) => calendars[id].events[eventid]
+          )
+        )
+        .filter((event) => !(event.status === "CANCELLED"));
+    }
+  });
+  return filteredEvents;
+}
+
+function updateCalsDetails(
+  selectedCalendars: string[],
+  pending: boolean,
+  calendars: Record<string, Calendars>,
+  rangeKey: string,
+  dispatch: Function,
+  calendarRange: { start: Date; end: Date },
+  calType?: "temp"
+) {
+  selectedCalendars.forEach((id) => {
+    if (Object.keys(calendars[id].events).length > 0) {
+      return;
+    }
+    if (!pending && rangeKey) {
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType,
+        })
+      );
+    }
+  });
 }

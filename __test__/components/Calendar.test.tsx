@@ -2,6 +2,13 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+import { searchUsers } from "../../src/features/User/userAPI";
+
+import userEvent from "@testing-library/user-event";
+jest.mock("../../src/features/User/userAPI");
+const mockedSearchUsers = searchUsers as jest.MockedFunction<
+  typeof searchUsers
+>;
 
 describe("CalendarSelection", () => {
   const today = new Date();
@@ -157,15 +164,93 @@ describe("CalendarSelection", () => {
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
 
-    const delegatedAccordionSummary = screen
-      .getByText("Delegated Calendars")
+    const sharedAccordionSummary = screen
+      .getByText("Other Calendars")
       .closest(".MuiAccordionSummary-root");
 
-    const addButton = screen.getAllByTestId("AddIcon")[1];
+    const addButton = screen.getAllByTestId("AddIcon")[2];
     fireEvent.click(addButton);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(addButton);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+  });
+});
+
+describe("calendar Availability search", () => {
+  const preloadedState = {
+    user: {
+      userData: {
+        sub: "test",
+        email: "test@test.com",
+        sid: "mockSid",
+        openpaasId: "user1",
+      },
+      tokens: { accessToken: "token" },
+    },
+    calendars: {
+      list: {
+        "user1/cal1": {
+          name: "Calendar personnal",
+          id: "user1/cal1",
+          color: "#FF0000",
+          ownerEmails: ["alice@example.com"],
+          events: {},
+        },
+      },
+      pending: false,
+      templist: {},
+    },
+  };
+
+  it("imports temporary calendars when selecting new users", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    mockedSearchUsers.mockResolvedValueOnce([
+      {
+        email: "newuser@example.com",
+        displayName: "New User",
+        avatarUrl: "image.png",
+        openpaasId: "1234567890",
+      },
+    ]);
+
+    renderWithProviders(<CalendarApp />, preloadedState);
+
+    const input = screen.getByPlaceholderText(/search user/i);
+    userEvent.type(input, "New");
+
+    const option = await screen.findByText("New User");
+    fireEvent.click(option);
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("does not import temp calendars if user already has a calendar but toggles the shared one", async () => {
+    mockedSearchUsers.mockResolvedValueOnce([
+      {
+        email: "alice@example.com",
+        displayName: "Alice",
+        avatarUrl: "image.png",
+        openpaasId: "1234567890",
+      },
+    ]);
+    const spy = jest
+      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    renderWithProviders(<CalendarApp />, preloadedState);
+
+    const input = screen.getByPlaceholderText(/search user/i);
+    userEvent.type(input, "Alice");
+
+    const option = await screen.findByText("Alice");
+    fireEvent.click(option);
+
+    expect(spy).not.toHaveBeenCalledWith();
   });
 });

@@ -2,7 +2,7 @@ import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import * as appHooks from "../../src/app/hooks";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
@@ -97,7 +97,7 @@ describe("CalendarApp integration", () => {
 
         fcEvent?.setEnd(newEnd);
 
-        expect(dispatch).toHaveBeenCalled();
+        waitFor(() => expect(dispatch).toHaveBeenCalled());
       }
     });
   });

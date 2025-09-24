@@ -34,7 +34,7 @@ function CalendarAccordion({
   const allCalendars = useAppSelector((state) => state.calendars.list);
 
   const [expended, setExpended] = useState(defaultExpanded);
-  if (calendars.length === 0) return null;
+  if (calendars.length === 0 && !defaultExpanded) return null;
 
   return (
     <Accordion defaultExpanded={defaultExpanded} expanded={expended}>
@@ -129,7 +129,6 @@ export default function CalendarSelection({
           calendars={delegatedCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
-          defaultExpanded
           setOpen={(id: string) => {
             setAnchorElCal(document.body);
             setSelectedCalId(id);

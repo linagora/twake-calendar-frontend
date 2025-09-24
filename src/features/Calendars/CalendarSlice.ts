@@ -12,6 +12,7 @@ import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
+import { User } from "../../components/Attendees/PeopleSearch";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -55,10 +56,50 @@ export const getCalendarsListAsync = createAsyncThunk<
   return importedCalendars;
 });
 
+export const getTempCalendarsListAsync = createAsyncThunk<
+  Record<string, Calendars>,
+  User
+>("calendars/getTempCalendars", async (tempUser) => {
+  const importedCalendars: Record<string, Calendars> = {};
+
+  const calendars = (await getCalendars(
+    tempUser.openpaasId ?? "",
+    "sharedPublic=true&WithRights=true"
+  )) as Record<string, any>;
+  const rawCalendars = calendars._embedded["dav:calendar"];
+
+  for (const cal of rawCalendars) {
+    const name = cal["dav:name"];
+    const description = cal["caldav:description"];
+    const delegated = cal["calendarserver:delegatedsource"] ? true : false;
+    const source = cal["calendarserver:source"]
+      ? cal["calendarserver:source"]._links.self.href
+      : cal._links.self.href;
+    const link = cal._links.self.href;
+
+    const id = source.replace("/calendars/", "").replace(".json", "");
+    const ownerData: any = await getUserDetails(id.split("/")[0]);
+
+    importedCalendars[id] = {
+      id,
+      name,
+      link,
+      owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${ownerData.lastname}`,
+      ownerEmails: ownerData.emails,
+      description,
+      delegated,
+      color: tempUser.color ?? "#a8a8a8ff",
+      events: {},
+    };
+  }
+
+  return importedCalendars;
+});
+
 export const getCalendarDetailAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[] }, // Return type
-  { calId: string; match: { start: string; end: string } } // Arg type
->("calendars/getCalendarDetails", async ({ calId, match }) => {
+  { calId: string; events: CalendarEvent[]; calType?: string }, // Return type
+  { calId: string; match: { start: string; end: string }; calType?: string } // Arg type
+>("calendars/getCalendarDetails", async ({ calId, match, calType }) => {
   const calendar = (await getCalendar(calId, match)) as Record<string, any>;
   const color = calendar["apple:color"];
   const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
@@ -72,13 +113,13 @@ export const getCalendarDetailAsync = createAsyncThunk<
     }
   );
 
-  return { calId, events };
+  return { calId, events, calType };
 });
 
 export const putEventAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[] }, // Return type
-  { cal: Calendars; newEvent: CalendarEvent } // Arg type
->("calendars/putEvent", async ({ cal, newEvent }) => {
+  { calId: string; events: CalendarEvent[]; calType?: "temp" }, // Return type
+  { cal: Calendars; newEvent: CalendarEvent; calType?: "temp" } // Arg type
+>("calendars/putEvent", async ({ cal, newEvent, calType }) => {
   const response = await putEvent(
     newEvent,
     cal.ownerEmails ? cal.ownerEmails[0] : undefined
@@ -116,6 +157,7 @@ export const putEventAsync = createAsyncThunk<
   return {
     calId: cal.id,
     events,
+    calType,
   };
 });
 
@@ -247,7 +289,11 @@ export const addSharedCalendarAsync = createAsyncThunk<
 
 const CalendarSlice = createSlice({
   name: "calendars",
-  initialState: { list: {} as Record<string, Calendars>, pending: false },
+  initialState: {
+    list: {} as Record<string, Calendars>,
+    templist: {} as Record<string, Calendars>,
+    pending: false,
+  },
   reducers: {
     createCalendar: (state, action: PayloadAction<Record<string, string>>) => {
       const id = Date.now().toString(36);
@@ -280,6 +326,9 @@ const CalendarSlice = createSlice({
         action.payload.eventUid
       ];
     },
+    removeTempCal: (state, action: PayloadAction<string>) => {
+      delete state.templist[action.payload];
+    },
     updateEventLocal: (
       state,
       action: PayloadAction<{ calId: string; event: CalendarEvent }>
@@ -298,55 +347,80 @@ const CalendarSlice = createSlice({
         }
       )
       .addCase(
+        getTempCalendarsListAsync.fulfilled,
+        (state, action: PayloadAction<Record<string, Calendars>>) => {
+          state.pending = false;
+          Object.keys(action.payload).forEach(
+            (id) => (state.templist[id] = action.payload[id])
+          );
+        }
+      )
+      .addCase(
         getCalendarDetailAsync.fulfilled,
         (
           state,
-          action: PayloadAction<{ calId: string; events: CalendarEvent[] }>
+          action: PayloadAction<{
+            calId: string;
+            events: CalendarEvent[];
+            calType?: string;
+          }>
         ) => {
           state.pending = false;
-          if (!state.list[action.payload.calId]) {
-            state.list[action.payload.calId] = {
+          const type = action.payload.calType === "temp" ? "templist" : "list";
+
+          if (!state[type][action.payload.calId]) {
+            state[type][action.payload.calId] = {
               id: action.payload.calId,
               events: {},
             } as Calendars;
           }
           action.payload.events.forEach((event) => {
-            state.list[action.payload.calId].events[event.uid] = event;
+            state[type][action.payload.calId].events[event.uid] = event;
           });
-          Object.keys(state.list[action.payload.calId].events).forEach((id) => {
-            state.list[action.payload.calId].events[id].color =
-              state.list[action.payload.calId].color;
-            state.list[action.payload.calId].events[id].calId =
-              action.payload.calId;
-            state.list[action.payload.calId].events[id].timezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone;
-          });
+          Object.keys(state[type][action.payload.calId].events).forEach(
+            (id) => {
+              state[type][action.payload.calId].events[id].color =
+                state[type][action.payload.calId].color;
+              state[type][action.payload.calId].events[id].calId =
+                action.payload.calId;
+              state[type][action.payload.calId].events[id].timezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+          );
         }
       )
       .addCase(
         putEventAsync.fulfilled,
         (
           state,
-          action: PayloadAction<{ calId: string; events: CalendarEvent[] }>
+          action: PayloadAction<{
+            calId: string;
+            events: CalendarEvent[];
+            calType?: "temp";
+          }>
         ) => {
           state.pending = false;
-          if (!state.list[action.payload.calId]) {
-            state.list[action.payload.calId] = {
+          const type = action.payload.calType === "temp" ? "templist" : "list";
+
+          if (!state[type][action.payload.calId]) {
+            state[type][action.payload.calId] = {
               id: action.payload.calId,
               events: {},
             } as Calendars;
           }
           action.payload.events.forEach((event) => {
-            state.list[action.payload.calId].events[event.uid] = event;
+            state[type][action.payload.calId].events[event.uid] = event;
           });
-          Object.keys(state.list[action.payload.calId].events).forEach((id) => {
-            state.list[action.payload.calId].events[id].color =
-              state.list[action.payload.calId].color;
-            state.list[action.payload.calId].events[id].calId =
-              action.payload.calId;
-            state.list[action.payload.calId].events[id].timezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone;
-          });
+          Object.keys(state[type][action.payload.calId].events).forEach(
+            (id) => {
+              state[type][action.payload.calId].events[id].color =
+                state[type][action.payload.calId].color;
+              state[type][action.payload.calId].events[id].calId =
+                action.payload.calId;
+              state[type][action.payload.calId].events[id].timezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+          );
         }
       )
       .addCase(
@@ -484,12 +558,20 @@ const CalendarSlice = createSlice({
       .addCase(createCalendarAsync.pending, (state) => {
         state.pending = true;
       })
+      .addCase(getTempCalendarsListAsync.pending, (state) => {
+        state.pending = true;
+      })
       .addCase(addSharedCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },
 });
 
-export const { addEvent, removeEvent, createCalendar, updateEventLocal } =
-  CalendarSlice.actions;
+export const {
+  addEvent,
+  removeEvent,
+  createCalendar,
+  updateEventLocal,
+  removeTempCal,
+} = CalendarSlice.actions;
 export default CalendarSlice.reducer;

@@ -45,22 +45,24 @@ import { getCalendar } from "../Calendars/CalendarApi";
 export default function EventPreviewModal({
   eventId,
   calId,
+  tempEvent,
   anchorPosition,
   open,
   onClose,
 }: {
   eventId: string;
   calId: string;
+  tempEvent?: boolean;
   anchorPosition: PopoverPosition | null;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
-  const calendar = calendars.list[calId];
-  const event = useAppSelector(
-    (state) => state.calendars.list[calId]?.events[eventId]
-  );
+  const calendar = tempEvent
+    ? calendars.templist[calId]
+    : calendars.list[calId];
+  const event = calendar.events[eventId];
   const user = useAppSelector((state) => state.user);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);

@@ -67,13 +67,16 @@ function EventPopover({
   const [showMore, setShowMore] = useState(false);
 
   const [title, setTitle] = useState(event?.title ?? "");
+
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(
-    event?.start ? new Date(event.start).toISOString() : ""
+    event?.start
+      ? new Date(event.start).toISOString()
+      : new Date().toISOString()
   );
   const [end, setEnd] = useState(
-    event?.end ? new Date(event.end)?.toISOString() : ""
+    event?.end ? new Date(event.end)?.toISOString() : new Date().toISOString()
   );
   const [calendarid, setCalendarid] = useState(
     event?.calId
@@ -103,6 +106,24 @@ function EventPopover({
       setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
     }
   }, [selectedRange]);
+
+  useEffect(() => {
+    setTitle(event?.title ?? "");
+    setAttendees(
+      event?.attendee
+        ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+        : []
+    );
+  }, [event, organizer?.cal_address]);
+
+  const handleClose = () => {
+    onClose({}, "backdropClick"); // Reset
+    setTitle("");
+    setDescription("");
+    setAttendees([]);
+    setLocation("");
+    setCalendarid(0);
+  };
 
   const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
@@ -142,7 +163,7 @@ function EventPopover({
       newEvent.attendee = newEvent.attendee.concat(attendees);
     }
 
-    dispatch(
+    await dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
@@ -153,6 +174,7 @@ function EventPopover({
     // Reset
     setTitle("");
     setDescription("");
+    setAttendees([]);
     setLocation("");
     setCalendarid(0);
   };
@@ -161,7 +183,7 @@ function EventPopover({
     <Popover
       open={open}
       anchorEl={anchorEl}
-      onClose={onClose}
+      onClose={handleClose}
       anchorOrigin={{
         vertical: "center",
         horizontal: "center",
@@ -172,7 +194,7 @@ function EventPopover({
       }}
     >
       <Card>
-        <CardHeader title={event ? "Duplicate Event" : "Create Event"} />
+        <CardHeader title={event?.uid ? "Duplicate Event" : "Create Event"} />
         <CardContent
           sx={{ maxHeight: "85vh", maxWidth: "40vw", overflow: "auto" }}
         >
@@ -359,10 +381,7 @@ function EventPopover({
 
         <CardActions>
           <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-            <Button
-              variant="outlined"
-              onClick={() => onClose({}, "backdropClick")}
-            >
+            <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
             <Button size="small" onClick={() => setShowMore(!showMore)}>
