@@ -31,6 +31,7 @@ import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import { createSelector } from "@reduxjs/toolkit";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ClearIcon from "@mui/icons-material/Clear";
+import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
@@ -183,7 +184,7 @@ export default function CalendarApp() {
           variant="contained"
           onClick={() => handleDateSelect(null as unknown as DateSelectArg)}
         >
-          + Create Event
+          <AddIcon /> <p>Create Event</p>
         </Button>
         <div className="calendar-label">
           <div className="calendar-label">
