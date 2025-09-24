@@ -45,3 +45,10 @@ export function getDeltaInMilliseconds(delta: {
     (delta.milliseconds || 0)
   );
 }
+
+export const computeStartOfTheWeek = (date: Date): Date => {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Monday
+  startOfWeek.setHours(0, 0, 0, 0);
+  return startOfWeek;
+};

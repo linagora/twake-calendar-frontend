@@ -17,26 +17,33 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import { searchUsers } from "../../features/User/userAPI";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import Chip from "@mui/material/Chip";
+import { useTheme } from "@mui/material/styles";
 
 export interface User {
   email: string;
   displayName: string;
   avatarUrl: string;
   openpaasId: string;
+  color?: string;
 }
 
 export function PeopleSearch({
   selectedUsers,
   onChange,
   disabled,
+  onToggleEventPreview,
 }: {
   selectedUsers: User[];
   onChange: Function;
   disabled?: boolean;
+  onToggleEventPreview?: Function;
 }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
+  const theme = useTheme();
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -67,10 +74,25 @@ export function PeopleSearch({
       renderInput={(params) => (
         <TextField
           {...params}
+          placeholder="Search user"
           label="Search user"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && onToggleEventPreview) {
+              e.preventDefault();
+              onToggleEventPreview();
+            }
+          }}
           slotProps={{
             input: {
               ...params.InputProps,
+              startAdornment: (
+                <>
+                  <PeopleOutlineOutlinedIcon
+                    sx={{ mr: 1, color: "action.active" }}
+                  />
+                  {params.InputProps.startAdornment}
+                </>
+              ),
               endAdornment: (
                 <>
                   {loading ? (
@@ -101,6 +123,18 @@ export function PeopleSearch({
           </ListItem>
         );
       }}
+      renderValue={(value, getTagProps) =>
+        value.map((option, index) => (
+          <Chip
+            {...getTagProps({ index })}
+            sx={{
+              backgroundColor: option.color,
+              color: theme.palette.getContrastText(option.color ?? "#ffffffff"),
+            }}
+            label={option.displayName}
+          />
+        ))
+      }
     />
   );
 }

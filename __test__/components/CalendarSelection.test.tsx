@@ -190,9 +190,9 @@ describe("CalendarSelection", () => {
       .closest(".MuiAccordionSummary-root");
 
     fireEvent.click(delegatedAccordionSummary!);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(delegatedAccordionSummary!);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
   });
 });

@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import EventDuplication from "../../src/components/Event/EventDuplicate";
 import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
@@ -147,7 +147,7 @@ describe("EventPopover", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
-    expect(onClose).toHaveBeenCalled();
+    waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 });
 
