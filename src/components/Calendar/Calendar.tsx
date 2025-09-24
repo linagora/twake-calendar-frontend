@@ -7,15 +7,13 @@ import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
 import "./CustomCalendar.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
-import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
-  getCalendarsListAsync,
   getEventAsync,
   putEventAsync,
   updateEventLocal,
@@ -40,12 +38,15 @@ import { userAttendee } from "../../features/User/userDataTypes";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
 
-export default function CalendarApp() {
-  const calendarRef = useRef<CalendarApi | null>(null);
+interface CalendarAppProps {
+  calendarRef: React.RefObject<CalendarApi | null>;
+  onDateChange?: (date: Date) => void;
+}
+
+export default function CalendarApp({ calendarRef, onDateChange }: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
-  const user = useAppSelector((state) => state.user.userData);
   const dispatch = useAppDispatch();
 
   if (!tokens) {
@@ -115,15 +116,20 @@ export default function CalendarApp() {
   );
 
   useEffect(() => {
-    updateCalsDetails(
-      selectedCalendars,
-      pending,
-      calendars,
-      rangeKey,
-      dispatch,
-      calendarRange
-    );
-  }, [rangeKey, selectedCalendars]);
+    selectedCalendars.forEach((id) => {
+      if (!pending && rangeKey) {
+        dispatch(
+          getCalendarDetailAsync({
+            calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+          })
+        );
+      }
+    });
+  }, [rangeKey, selectedCalendars, pending, dispatch, calendarRange.start, calendarRange.end]);
 
   useEffect(() => {
     updateCalsDetails(
@@ -327,29 +333,7 @@ export default function CalendarApp() {
           height={"100%"}
           select={handleDateSelect}
           nowIndicator
-          customButtons={{
-            refresh: {
-              text: "↻",
-              click: async () => {
-                await dispatch(getCalendarsListAsync());
-                selectedCalendars.forEach((id) => {
-                  if (!pending && rangeKey) {
-                    dispatch(
-                      getCalendarDetailAsync({
-                        calId: id,
-                        match: {
-                          start: formatDateToYYYYMMDDTHHMMSS(
-                            calendarRange.start
-                          ),
-                          end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-                        },
-                      })
-                    );
-                  }
-                });
-              },
-            },
-          }}
+          headerToolbar={false}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
@@ -372,14 +356,20 @@ export default function CalendarApp() {
             hour12: false,
           }}
           datesSet={(arg) => {
+            // Get the current date from calendar API to ensure consistency
+            const calendarCurrentDate = calendarRef.current?.getDate() || new Date(arg.start);
+            
             if (arg.view.type === "dayGridMonth") {
               setSelectedDate(new Date(arg.start));
-              const midTimestamp =
-                (arg.start.getTime() + arg.end.getTime()) / 2;
-              setSelectedMiniDate(new Date(midTimestamp));
+              setSelectedMiniDate(calendarCurrentDate);
             } else {
               setSelectedDate(new Date(arg.start));
               setSelectedMiniDate(new Date(arg.start));
+            }
+            
+            // Always use the calendar's current date for consistency
+            if (onDateChange) {
+              onDateChange(calendarCurrentDate);
             }
           }}
           dayHeaderContent={(arg) => {
@@ -694,11 +684,6 @@ export default function CalendarApp() {
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
-          }}
-          headerToolbar={{
-            left: "title",
-            center: "prev,today,next",
-            right: "refresh,dayGridMonth,timeGridWeek,timeGridDay",
           }}
           eventContent={(arg) => {
             const event = arg.event;
