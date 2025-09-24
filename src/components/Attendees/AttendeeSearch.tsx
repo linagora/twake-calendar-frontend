@@ -48,6 +48,7 @@ export default function UserSearch({
           );
           setSelectedUsers(value);
         }}
+        freeSolo
       />
     </>
   );
