@@ -224,3 +224,6 @@ th.fc-col-header-cell.fc-day:hover
 .fc-timegrid-slot-label {
   background-color: #fff !important;
 }
+thead .fc-scroller, tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller {
+  overflow: hidden !important;
+}
