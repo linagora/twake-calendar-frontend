@@ -650,7 +650,6 @@ function updateCalsDetails(
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
-  console.log(selectedCalendars);
   selectedCalendars.forEach((id) => {
     if (Object.keys(calendars[id].events).length > 0) {
       return;
