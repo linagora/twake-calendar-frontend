@@ -168,7 +168,7 @@ describe("CalendarSelection", () => {
       .getByText("Other Calendars")
       .closest(".MuiAccordionSummary-root");
 
-    const addButton = screen.getAllByTestId("AddIcon")[1];
+    const addButton = screen.getAllByTestId("AddIcon")[2];
     fireEvent.click(addButton);
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
