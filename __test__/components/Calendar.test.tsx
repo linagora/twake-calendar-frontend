@@ -128,7 +128,10 @@ describe("CalendarSelection", () => {
   };
   it("renders calendars", async () => {
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -139,7 +142,10 @@ describe("CalendarSelection", () => {
   });
   it("open accordeon when clicking on button only", () => {
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();

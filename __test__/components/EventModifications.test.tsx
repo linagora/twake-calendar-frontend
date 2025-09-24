@@ -70,7 +70,10 @@ describe("CalendarApp integration", () => {
     };
 
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
   };
 
   it("renders the event on the calendar and calendarRef works", async () => {
@@ -159,7 +162,10 @@ describe("CalendarApp integration", () => {
       title: "Private Event",
     });
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
 
     const eventEls = screen.getAllByText("Private Event");
     const found = eventEls.some((eventEl) =>
@@ -174,7 +180,10 @@ describe("CalendarApp integration", () => {
       title: "Confidential Event",
     });
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
 
     const eventEls = screen.getAllByText("Confidential Event");
     const found = eventEls.some((eventEl) =>
@@ -189,7 +198,10 @@ describe("CalendarApp integration", () => {
       title: "Public Event",
     });
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
 
     const eventEls = screen.getAllByText("Public Event");
     const found = eventEls.some((eventEl) =>

@@ -7,7 +7,7 @@ import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
 import "./CustomCalendar.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
@@ -86,6 +86,7 @@ export default function CalendarApp({
     }
   });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded
   useEffect(() => {
@@ -119,23 +120,23 @@ export default function CalendarApp({
   );
 
   useEffect(() => {
+    if (!rangeKey) return;
     selectedCalendars.forEach((id) => {
-      if (!pending && rangeKey) {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
-        );
-      }
+      if (fetchedRangesRef.current[id] === rangeKey) return;
+      fetchedRangesRef.current[id] = rangeKey;
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+        })
+      );
     });
   }, [
     rangeKey,
     selectedCalendars,
-    pending,
     dispatch,
     calendarRange.start,
     calendarRange.end,

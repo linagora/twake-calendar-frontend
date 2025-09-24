@@ -45,7 +45,10 @@ describe("MiniCalendar", () => {
       },
     };
     const mockCalendarRef = { current: null };
-    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
   };
 
   it("renders mini calendar with today in orange", async () => {
@@ -56,9 +59,4 @@ describe("MiniCalendar", () => {
     const todayTile = screen.getByTestId(dateTestId);
     expect(todayTile?.parentElement).toHaveClass("today");
   });
-
-
-
-
 });
-
