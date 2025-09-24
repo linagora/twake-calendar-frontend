@@ -43,7 +43,10 @@ interface CalendarAppProps {
   onDateChange?: (date: Date) => void;
 }
 
-export default function CalendarApp({ calendarRef, onDateChange }: CalendarAppProps) {
+export default function CalendarApp({
+  calendarRef,
+  onDateChange,
+}: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
@@ -129,7 +132,14 @@ export default function CalendarApp({ calendarRef, onDateChange }: CalendarAppPr
         );
       }
     });
-  }, [rangeKey, selectedCalendars, pending, dispatch, calendarRange.start, calendarRange.end]);
+  }, [
+    rangeKey,
+    selectedCalendars,
+    pending,
+    dispatch,
+    calendarRange.start,
+    calendarRange.end,
+  ]);
 
   useEffect(() => {
     updateCalsDetails(
@@ -357,8 +367,9 @@ export default function CalendarApp({ calendarRef, onDateChange }: CalendarAppPr
           }}
           datesSet={(arg) => {
             // Get the current date from calendar API to ensure consistency
-            const calendarCurrentDate = calendarRef.current?.getDate() || new Date(arg.start);
-            
+            const calendarCurrentDate =
+              calendarRef.current?.getDate() || new Date(arg.start);
+
             if (arg.view.type === "dayGridMonth") {
               setSelectedDate(new Date(arg.start));
               setSelectedMiniDate(calendarCurrentDate);
@@ -366,7 +377,7 @@ export default function CalendarApp({ calendarRef, onDateChange }: CalendarAppPr
               setSelectedDate(new Date(arg.start));
               setSelectedMiniDate(new Date(arg.start));
             }
-            
+
             // Always use the calendar's current date for consistency
             if (onDateChange) {
               onDateChange(calendarCurrentDate);

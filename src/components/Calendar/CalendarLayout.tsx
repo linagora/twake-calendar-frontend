@@ -16,17 +16,18 @@ export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const selectedCalendars = useAppSelector((state) => state.calendars.list);
-  const userId = useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const handleRefresh = async () => {
     await dispatch(getCalendarsListAsync());
-    
+
     // Get current calendar range
     if (calendarRef.current) {
       const view = calendarRef.current.getApi().view;
       const calendarRange = getCalendarRange(view.activeStart);
-      
+
       // Refresh events for selected calendars
       Object.keys(selectedCalendars).forEach((id) => {
         if (id.split("/")[0] === userId) {

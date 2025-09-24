@@ -7,16 +7,16 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./Menubar.css";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { stringToColor } from "../../features/Events/EventDisplay";
-import { 
-  Avatar, 
-  IconButton, 
-  Popover, 
-  ButtonGroup, 
-  Button, 
-  Select, 
-  MenuItem, 
+import {
+  Avatar,
+  IconButton,
+  Popover,
+  ButtonGroup,
+  Button,
+  Select,
+  MenuItem,
   FormControl,
-  Typography
+  Typography,
 } from "@mui/material";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
@@ -34,7 +34,12 @@ export type MenubarProps = {
   onDateChange?: (date: Date) => void;
 };
 
-export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: MenubarProps) {
+export function Menubar({
+  calendarRef,
+  onRefresh,
+  currentDate,
+  onDateChange,
+}: MenubarProps) {
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -52,21 +57,21 @@ export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: M
     setAnchorEl(null);
   };
 
-  const handleNavigation = (action: 'prev' | 'next' | 'today') => {
+  const handleNavigation = (action: "prev" | "next" | "today") => {
     if (!calendarRef.current) return;
-    
+
     switch (action) {
-      case 'prev':
+      case "prev":
         calendarRef.current.prev();
         break;
-      case 'next':
+      case "next":
         calendarRef.current.next();
         break;
-      case 'today':
+      case "today":
         calendarRef.current.today();
         break;
     }
-    
+
     // Notify parent about date change after navigation
     if (onDateChange) {
       const newDate = calendarRef.current.getDate();
@@ -78,7 +83,7 @@ export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: M
     if (!calendarRef.current) return;
     setCurrentView(view);
     calendarRef.current.changeView(view);
-    
+
     // Notify parent about date change after view change
     if (onDateChange) {
       const newDate = calendarRef.current.getDate();
@@ -90,23 +95,20 @@ export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: M
     onRefresh();
   };
 
-
   const open = Boolean(anchorEl);
   return (
     <>
       <header className="menubar">
         <div className="left-menu">
           <MainTitle />
-          
+
           <div className="navigation-controls">
             <ButtonGroup variant="outlined" size="small">
-              <Button onClick={() => handleNavigation('prev')}>
+              <Button onClick={() => handleNavigation("prev")}>
                 <ChevronLeftIcon />
               </Button>
-              <Button onClick={() => handleNavigation('today')}>
-                Today
-              </Button>
-              <Button onClick={() => handleNavigation('next')}>
+              <Button onClick={() => handleNavigation("today")}>Today</Button>
+              <Button onClick={() => handleNavigation("next")}>
                 <ChevronRightIcon />
               </Button>
             </ButtonGroup>
@@ -114,9 +116,9 @@ export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: M
 
           <div className="current-date-time">
             <Typography variant="h6" component="div">
-              {currentDate.toLocaleDateString('en-US', {
-                month: 'long',
-                year: 'numeric'
+              {currentDate.toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
               })}
             </Typography>
           </div>
@@ -134,13 +136,13 @@ export function Menubar({ calendarRef, onRefresh, currentDate, onDateChange }: M
                 <MenuItem value="timeGridDay">Day</MenuItem>
               </Select>
             </FormControl>
-            
+
             {applist.length > 0 && (
               <IconButton onClick={handleOpen} sx={{ mr: 1 }}>
                 <AppsIcon />
               </IconButton>
             )}
-            
+
             <Avatar
               sx={{
                 bgcolor: stringToColor(
