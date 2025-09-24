@@ -100,31 +100,35 @@ export function Menubar({
     <>
       <header className="menubar">
         <div className="left-menu">
-          <MainTitle />
-
-          <div className="navigation-controls">
-            <ButtonGroup variant="outlined" size="small">
-              <Button onClick={() => handleNavigation("prev")}>
-                <ChevronLeftIcon />
-              </Button>
-              <Button onClick={() => handleNavigation("today")}>Today</Button>
-              <Button onClick={() => handleNavigation("next")}>
-                <ChevronRightIcon />
-              </Button>
-            </ButtonGroup>
+          <div className="menu-items">
+            <MainTitle />
           </div>
-
-          <div className="current-date-time">
-            <Typography variant="h6" component="div">
-              {currentDate.toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
-            </Typography>
+          <div className="menu-items">
+            <div className="navigation-controls">
+              <ButtonGroup variant="outlined" size="small">
+                <Button onClick={() => handleNavigation("prev")}>
+                  <ChevronLeftIcon />
+                </Button>
+                <Button onClick={() => handleNavigation("today")}>Today</Button>
+                <Button onClick={() => handleNavigation("next")}>
+                  <ChevronRightIcon />
+                </Button>
+              </ButtonGroup>
+            </div>
+          </div>
+          <div className="menu-items">
+            <div className="current-date-time">
+              <Typography variant="h6" component="div">
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Typography>
+            </div>
           </div>
         </div>
         <div className="right-menu">
-          <div className="menubar-item">
+          <div className="menu-items">
             <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
               <Select
                 value={currentView}
@@ -136,13 +140,15 @@ export function Menubar({
                 <MenuItem value="timeGridDay">Day</MenuItem>
               </Select>
             </FormControl>
-
+          </div>
+          <div className="menu-items">
             {applist.length > 0 && (
               <IconButton onClick={handleOpen} sx={{ mr: 1 }}>
                 <AppsIcon />
               </IconButton>
             )}
-
+          </div>
+          <div className="menu-items">
             <Avatar
               sx={{
                 bgcolor: stringToColor(

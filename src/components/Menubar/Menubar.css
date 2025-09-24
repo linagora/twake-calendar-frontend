@@ -49,6 +49,7 @@
 .menubar-item {
   display: flex;
   align-items: center;
+  width: calc(330px - .5rem);
 }
 
 .logo {
@@ -96,5 +97,11 @@
 
 .left-menu {
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.right-menu {
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
 }
