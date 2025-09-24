@@ -127,7 +127,8 @@ describe("CalendarSelection", () => {
     },
   };
   it("renders calendars", async () => {
-    renderWithProviders(<CalendarApp />, preloadedState);
+    const mockCalendarRef = { current: null };
+    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -136,26 +137,9 @@ describe("CalendarSelection", () => {
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
   });
-  it("refresh calendars", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "getCalendarDetailAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-    renderWithProviders(<CalendarApp />, preloadedState);
-
-    const refreshButton = screen.getByRole("button", {
-      name: "↻",
-    });
-
-    fireEvent.click(refreshButton);
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-  });
   it("open accordeon when clicking on button only", () => {
-    renderWithProviders(<CalendarApp />, preloadedState);
+    const mockCalendarRef = { current: null };
+    renderWithProviders(<CalendarApp calendarRef={mockCalendarRef} />, preloadedState);
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();

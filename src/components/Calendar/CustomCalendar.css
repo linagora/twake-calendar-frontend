@@ -105,7 +105,11 @@ th.fc-col-header-cell.fc-day {
   position: relative;
   transform: translate(-15px, -12px);
 }
-.fc tbody tr:first-of-type .fc-timegrid-slot-label .fc-timegrid-slot-label-frame {
+.fc
+  tbody
+  tr:first-of-type
+  .fc-timegrid-slot-label
+  .fc-timegrid-slot-label-frame {
   display: none;
 }
 .fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame::after {
