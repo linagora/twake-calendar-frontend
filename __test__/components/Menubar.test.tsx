@@ -30,11 +30,12 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
-    const navbarElement = screen.getByText("Twake");
-    expect(navbarElement).toBeInTheDocument();
+    const logoElement = screen.getByAltText("Calendar");
+    expect(logoElement).toBeInTheDocument();
   });
   it("renders the main title", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
@@ -47,11 +48,11 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
-    expect(screen.getByText(/Twake/i)).toBeInTheDocument();
-    expect(screen.getByText(/Calendar/i)).toBeInTheDocument();
+    expect(screen.getByAltText("Calendar")).toBeInTheDocument();
   });
 
   it("shows avatar with user initials", () => {
@@ -65,6 +66,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -93,6 +95,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -123,6 +126,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -152,6 +156,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -181,6 +186,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -210,6 +216,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -239,6 +246,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -270,6 +278,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -301,6 +310,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -320,6 +330,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -327,7 +338,10 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("opens popover when clicking AppsIcon", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    (window as any).appList = [
+      { name: "Twake", icon: "twake.svg", link: "/twake" },
+      { name: "Calendar", icon: "calendar.svg", link: "/calendar" }
+    ];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
@@ -337,6 +351,7 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
@@ -357,13 +372,14 @@ describe("Calendar App Component Display Tests", () => {
         calendarRef={mockCalendarRef}
         onRefresh={mockOnRefresh}
         currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
       />,
       preloadedState
     );
     const appsButton = screen.getByTestId("AppsIcon");
     fireEvent.click(appsButton);
 
-    const twakeLink = screen.getByRole("link", { name: /test/i });
-    expect(twakeLink).toHaveAttribute("href", "test");
+    const testLink = screen.getByRole("link", { name: /test/i });
+    expect(testLink).toHaveAttribute("href", "test");
   });
 });

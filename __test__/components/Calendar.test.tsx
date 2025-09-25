@@ -3,12 +3,19 @@ import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
+import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
 jest.mock("../../src/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers
 >;
+
+// Test wrapper component to provide calendarRef
+function CalendarTestWrapper() {
+  const calendarRef = useRef(null);
+  return <CalendarApp calendarRef={calendarRef} />;
+}
 
 describe("CalendarSelection", () => {
   const today = new Date();
@@ -208,7 +215,7 @@ describe("calendar Availability search", () => {
       },
     ]);
 
-    renderWithProviders(<CalendarApp />, preloadedState);
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
     const input = screen.getByPlaceholderText(/search user/i);
     userEvent.type(input, "New");
@@ -233,7 +240,7 @@ describe("calendar Availability search", () => {
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
-    renderWithProviders(<CalendarApp />, preloadedState);
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
     const input = screen.getByPlaceholderText(/search user/i);
     userEvent.type(input, "Alice");
