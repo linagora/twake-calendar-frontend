@@ -24,8 +24,8 @@ export function HandleLogin() {
         if (savedToken && savedUser) {
           dispatch(setTokens(savedToken));
           dispatch(setUserData(savedUser));
-          dispatch(getOpenPaasUserDataAsync());
-          dispatch(getCalendarsListAsync());
+          await dispatch(getOpenPaasUserDataAsync());
+          await dispatch(getCalendarsListAsync());
           dispatch(push("/calendar"));
           return;
         }
@@ -46,13 +46,14 @@ export function HandleLogin() {
 
     initiateLogin();
   }, [userData, dispatch]);
-
-  if (!calendars.pending && !userData.loading) {
-    dispatch(push("/error"));
-  }
-  if (!calendars.pending && !userData.loading) {
-    dispatch(push("/calendar"));
-  }
+  useEffect(() => {
+    if (!calendars.pending && !userData.loading) {
+      dispatch(push("/error"));
+    }
+    if (!calendars.pending && !userData.loading) {
+      dispatch(push("/calendar"));
+    }
+  }, [calendars.pending, userData.loading]);
   return <Loading />;
 }
 
