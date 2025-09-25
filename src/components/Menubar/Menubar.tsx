@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../../static/images/calendar.svg";
+import logo from "../../static/header-logo.svg";
 import AppsIcon from "@mui/icons-material/Apps";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -201,10 +201,6 @@ export function MainTitle() {
   return (
     <div className="menubar-item tc-home">
       <img className="logo" src={logo} alt="Calendar" />
-      <p>
-        <span className="twake">Twake</span>
-        <span className="calendar-text">Calendar</span>
-      </p>
     </div>
   );
 }
