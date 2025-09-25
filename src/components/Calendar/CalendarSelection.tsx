@@ -2,7 +2,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import CalendarPopover from "../../features/Calendars/CalendarModal";
@@ -59,21 +59,35 @@ function CalendarAccordion({
         )}
       </AccordionSummary>
       <AccordionDetails>
-        {calendars.map((id) =>
-          CalendarSelector(
-            allCalendars,
-            id,
-            selectedCalendars,
-            handleToggle,
-            () => setOpen(id)
-          )
-        )}
+        {calendars.map((id) => (
+          <CalendarSelector
+            key={id}
+            calendars={allCalendars}
+            id={id}
+            selectedCalendars={selectedCalendars}
+            handleCalendarToggle={handleToggle}
+            setOpen={() => setOpen(id)}
+          />
+        ))}
       </AccordionDetails>
     </Accordion>
   );
 }
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CalendarSearch from "./CalendarSearch";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Menu,
+  MenuItem,
+  Popover,
+} from "@mui/material";
+import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -173,30 +187,81 @@ export default function CalendarSelection({
   );
 }
 
-function CalendarSelector(
-  calendars: Record<string, Calendars>,
-  id: string,
-  selectedCalendars: string[],
-  handleCalendarToggle: (name: string) => void,
-  setOpen: Function
-) {
+function CalendarSelector({
+  calendars,
+  id,
+  selectedCalendars,
+  handleCalendarToggle,
+  setOpen,
+}: {
+  calendars: Record<string, Calendars>;
+  id: string;
+  selectedCalendars: string[];
+  handleCalendarToggle: (name: string) => void;
+  setOpen: Function;
+}) {
+  const dispatch = useAppDispatch();
+  const calLink =
+    useAppSelector((state) => state.calendars.list[id].link) ?? "";
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+  const handleDeleteConfirm = () => {
+    dispatch(removeCalendarAsync({ calId: id, calLink }));
+    setDeletePopupOpen(false);
+    handleClose();
+  };
   return (
-    <div key={id}>
-      <label>
-        <Checkbox
-          sx={{
-            color: calendars[id].color,
-            "&.Mui-checked": { color: calendars[id].color },
-          }}
-          size="small"
-          checked={selectedCalendars.includes(id)}
-          onChange={() => handleCalendarToggle(id)}
-        />
-        {calendars[id].name}
-      </label>
-      <IconButton onClick={() => setOpen()}>
-        <MoreVertIcon />
-      </IconButton>
-    </div>
+    <>
+      <div>
+        <label>
+          <Checkbox
+            sx={{
+              color: calendars[id].color,
+              "&.Mui-checked": { color: calendars[id].color },
+            }}
+            size="small"
+            checked={selectedCalendars.includes(id)}
+            onChange={() => handleCalendarToggle(id)}
+          />
+          {calendars[id].name}
+        </label>
+        <IconButton onClick={handleClick}>
+          <MoreVertIcon />
+        </IconButton>
+      </div>
+      <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem onClick={() => setOpen()}>Modify</MenuItem>
+        <Divider />
+        <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
+          Delete
+        </MenuItem>
+      </Menu>
+
+      <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
+        <DialogTitle>Delete the calendar?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to remove {calendars[id].name}? This action
+            cannot be undone. You will not have access to this calendar and its
+            events.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeletePopupOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

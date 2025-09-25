@@ -102,3 +102,13 @@ export async function proppatchCalendar(
   });
   return response;
 }
+
+export async function removeCalendar(calLink: string) {
+  const response = await api(`dav${calLink}`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+  });
+  return response;
+}

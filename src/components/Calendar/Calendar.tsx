@@ -130,6 +130,11 @@ export default function CalendarApp({
     tempcalendars
   );
 
+  const [prevSelectedCalendars, setPrevSelectedCalendars] = useState<string[]>(
+    []
+  );
+  const [prevRangeKey, setPrevRangeKey] = useState<string>("");
+
   useEffect(() => {
     if (!rangeKey) return;
     selectedCalendars.forEach((id) => {
@@ -153,17 +158,23 @@ export default function CalendarApp({
     calendarRange.end,
   ]);
 
+  const [prevTempCalendars, setPrevTempCalendars] = useState<string[]>([]);
+
   useEffect(() => {
     updateCalsDetails(
       Object.keys(tempcalendars),
+      prevTempCalendars,
       pending,
-      tempcalendars,
       rangeKey,
+      prevRangeKey,
       dispatch,
       calendarRange,
       "temp"
     );
-  }, [rangeKey, Object.keys(tempcalendars).join(",")]);
+
+    setPrevTempCalendars(Object.keys(tempcalendars));
+    setPrevRangeKey(rangeKey);
+  }, [rangeKey, Object.keys(tempcalendars).join(","), pending]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [anchorPosition, setAnchorPosition] = useState<{

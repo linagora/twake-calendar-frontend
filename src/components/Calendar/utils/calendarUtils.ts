@@ -66,18 +66,35 @@ export const extractEvents = (
 
 export const updateCalsDetails = (
   selectedCalendars: string[],
+  previousSelectedCalendars: string[],
   pending: boolean,
-  calendars: Record<string, Calendars>,
   rangeKey: string,
+  previousRangeKey: string,
   dispatch: Function,
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) => {
-  selectedCalendars.forEach((id) => {
-    if (Object.keys(calendars[id].events).length > 0) {
-      return;
-    }
-    if (!pending && rangeKey) {
+  if (pending || !rangeKey) return;
+
+  const newCalendars = selectedCalendars.filter(
+    (id) => !previousSelectedCalendars.includes(id)
+  );
+
+  newCalendars.forEach((id) => {
+    dispatch(
+      getCalendarDetailAsync({
+        calId: id,
+        match: {
+          start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+          end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+        },
+        calType,
+      })
+    );
+  });
+
+  if (rangeKey !== previousRangeKey) {
+    selectedCalendars.forEach((id) => {
       dispatch(
         getCalendarDetailAsync({
           calId: id,
@@ -88,6 +105,6 @@ export const updateCalsDetails = (
           calType,
         })
       );
-    }
-  });
+    });
+  }
 };

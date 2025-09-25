@@ -7,6 +7,7 @@ import {
   getCalendars,
   postCalendar,
   proppatchCalendar,
+  removeCalendar,
 } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
@@ -188,6 +189,22 @@ export const patchCalendarAsync = createAsyncThunk<
     calId,
     calLink,
     patch,
+  };
+});
+
+export const removeCalendarAsync = createAsyncThunk<
+  {
+    calId: string;
+  },
+  {
+    calId: string;
+    calLink: string;
+  }
+>("calendars/removeCalendar", async ({ calId, calLink }) => {
+  const response = await removeCalendar(calLink);
+  return {
+    calId,
+    calLink,
   };
 });
 
@@ -534,6 +551,10 @@ const CalendarSlice = createSlice({
           ownerEmails: action.payload.ownerEmails,
         } as Calendars;
       })
+      .addCase(removeCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        delete state.list[action.payload.calId];
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -562,6 +583,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(addSharedCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(removeCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },
