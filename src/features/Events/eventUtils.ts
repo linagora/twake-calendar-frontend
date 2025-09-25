@@ -58,13 +58,13 @@ export function parseCalendarEvent(
       case "organizer":
         event.organizer = {
           cn: params?.cn ?? "",
-          cal_address: value?.replace(/^mailto:/, ""),
+          cal_address: value?.replace(/^mailto:/i, ""),
         };
         break;
       case "attendee":
         (event.attendee as userAttendee[]).push({
           cn: params?.cn ?? "",
-          cal_address: value.replace(/^mailto:/, ""),
+          cal_address: value.replace(/^mailto:/i, ""),
           partstat: params?.partstat ?? "",
           rsvp: params?.rsvp ?? "",
           role: params?.role ?? "",
