@@ -259,6 +259,7 @@ export default function CalendarSearch({
           <CardHeader title="Browse other calendars" sx={{ pb: 0 }} />
           <CardContent sx={{ flex: 1, overflow: "auto" }}>
             <PeopleSearch
+              objectTypes={["user"]}
               selectedUsers={selectedUsers}
               onChange={async (event: any, value: User[]) => {
                 setSelectedUsers(value);
