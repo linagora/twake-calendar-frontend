@@ -42,28 +42,29 @@ import Button from "@mui/material/Button";
 const updateSlotLabelVisibility = (currentTime: Date) => {
   const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  
+
   slotLabels.forEach((label) => {
     const labelElement = label as HTMLElement;
     const timeText = labelElement.textContent?.trim();
-    
+
     if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
-      const [hours, minutes] = timeText.split(':').map(Number);
+      const [hours, minutes] = timeText.split(":").map(Number);
       const labelMinutes = hours * 60 + minutes;
-      
+
       // Calculate time difference in minutes
       let timeDiff = Math.abs(currentMinutes - labelMinutes);
-      
+
       // Handle edge case around midnight (00:00)
-      if (timeDiff > 12 * 60) { // More than 12 hours difference
+      if (timeDiff > 12 * 60) {
+        // More than 12 hours difference
         timeDiff = 24 * 60 - timeDiff; // Wrap around
       }
-      
+
       // Dim if within 15 minutes (before or after)
       if (timeDiff <= 15) {
-        labelElement.style.opacity = '0.2';
+        labelElement.style.opacity = "0.2";
       } else {
-        labelElement.style.opacity = '1';
+        labelElement.style.opacity = "1";
       }
     }
   });
@@ -455,7 +456,7 @@ export default function CalendarApp({
                 calendarRef.current?.changeView("timeGridDay", arg.date);
                 setSelectedDate(new Date(arg.date));
                 setSelectedMiniDate(new Date(arg.date));
-                
+
                 // Notify parent about view change
                 if (onViewChange) {
                   onViewChange("timeGridDay");
@@ -493,7 +494,7 @@ export default function CalendarApp({
                   hour12: false,
                 });
                 nowIndicatorArrow.setAttribute("data-time", timeString);
-                
+
                 // Hide slot labels that are too close to current time
                 updateSlotLabelVisibility(now);
               }
@@ -700,7 +701,11 @@ export default function CalendarApp({
             return true;
           }}
           eventDrop={(arg) => {
-            if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
+            if (
+              !arg.event ||
+              !arg.event._def ||
+              !arg.event._def.extendedProps
+            ) {
               return;
             }
 
@@ -732,7 +737,11 @@ export default function CalendarApp({
             );
           }}
           eventResize={(arg) => {
-            if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
+            if (
+              !arg.event ||
+              !arg.event._def ||
+              !arg.event._def.extendedProps
+            ) {
               return;
             }
 
