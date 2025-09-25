@@ -32,24 +32,32 @@ export interface User {
 export function PeopleSearch({
   selectedUsers,
   onChange,
+  objectTypes,
   disabled,
+  freeSolo,
   onToggleEventPreview,
 }: {
   selectedUsers: User[];
   onChange: Function;
+  objectTypes: string[];
   disabled?: boolean;
+  freeSolo?: boolean;
   onToggleEventPreview?: Function;
 }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
+
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (query) {
         setLoading(true);
-        const res = await searchUsers(query, ["user"]);
+        const res = await searchUsers(query, objectTypes);
         setOptions(res);
         setLoading(false);
       }
@@ -60,20 +68,40 @@ export function PeopleSearch({
 
   return (
     <Autocomplete
+      freeSolo={freeSolo}
       multiple
       options={options}
       disabled={disabled}
       loading={loading}
       filterOptions={(x) => x}
       fullWidth
-      getOptionLabel={(option) => option.displayName || option.email}
+      getOptionLabel={(option) => {
+        if (typeof option === "object") {
+          return option.displayName || option.email;
+        } else {
+          return option;
+        }
+      }}
       filterSelectedOptions
       value={selectedUsers}
       onInputChange={(event, value) => setQuery(value)}
-      onChange={(event, value) => onChange(event, value)}
+      onChange={(event, value) => {
+        const last = value[value.length - 1];
+        if (typeof last === "string" && !isValidEmail(last)) {
+          setError(`"${last}" is not a valid email address`);
+          return;
+        }
+        setError(null);
+        const mapped = value.map((v: any) =>
+          typeof v === "string" ? { email: v } : v
+        );
+        onChange(event, mapped);
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
+          error={!!error}
+          helperText={error}
           placeholder="Search user"
           label="Search user"
           onKeyDown={(e) => {
@@ -124,16 +152,26 @@ export function PeopleSearch({
         );
       }}
       renderValue={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
-            {...getTagProps({ index })}
-            sx={{
-              backgroundColor: option.color,
-              color: theme.palette.getContrastText(option.color ?? "#ffffffff"),
-            }}
-            label={option.displayName}
-          />
-        ))
+        value.map((option, index) => {
+          const isString = typeof option === "string";
+          const label = isString ? option : option.displayName || option.email;
+          const chipColor = isString
+            ? theme.palette.grey[300]
+            : (option.color ?? theme.palette.grey[300]);
+          const textColor = theme.palette.getContrastText(chipColor);
+
+          return (
+            <Chip
+              {...getTagProps({ index })}
+              key={label}
+              sx={{
+                backgroundColor: chipColor,
+                color: textColor,
+              }}
+              label={label}
+            />
+          );
+        })
       }
     />
   );

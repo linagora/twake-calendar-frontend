@@ -27,6 +27,7 @@ describe("PeopleSearch", () => {
     const onChange = jest.fn();
     renderWithProviders(
       <PeopleSearch
+        objectTypes={["user"]}
         selectedUsers={selectedUsers}
         onChange={onChange}
         {...props}
