@@ -41,11 +41,13 @@ import Button from "@mui/material/Button";
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
   onDateChange?: (date: Date) => void;
+  onViewChange?: (view: string) => void;
 }
 
 export default function CalendarApp({
   calendarRef,
   onDateChange,
+  onViewChange,
 }: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
@@ -383,6 +385,11 @@ export default function CalendarApp({
             if (onDateChange) {
               onDateChange(calendarCurrentDate);
             }
+
+            // Notify parent about view change
+            if (onViewChange) {
+              onViewChange(arg.view.type);
+            }
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
@@ -412,6 +419,11 @@ export default function CalendarApp({
                 calendarRef.current?.changeView("timeGridDay", arg.date);
                 setSelectedDate(new Date(arg.date));
                 setSelectedMiniDate(new Date(arg.date));
+                
+                // Notify parent about view change
+                if (onViewChange) {
+                  onViewChange("timeGridDay");
+                }
               };
 
               headerEl.addEventListener("click", handleDayHeaderClick);

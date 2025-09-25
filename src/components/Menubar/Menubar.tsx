@@ -32,6 +32,8 @@ export type MenubarProps = {
   onRefresh: () => void;
   currentDate: Date;
   onDateChange?: (date: Date) => void;
+  currentView: string;
+  onViewChange?: (view: string) => void;
 };
 
 export function Menubar({
@@ -39,11 +41,12 @@ export function Menubar({
   onRefresh,
   currentDate,
   onDateChange,
+  currentView,
+  onViewChange,
 }: MenubarProps) {
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [currentView, setCurrentView] = useState<string>("timeGridWeek");
   const dispatch = useAppDispatch();
 
   if (!user) {
@@ -81,8 +84,12 @@ export function Menubar({
 
   const handleViewChange = (view: string) => {
     if (!calendarRef.current) return;
-    setCurrentView(view);
     calendarRef.current.changeView(view);
+
+    // Notify parent about view change
+    if (onViewChange) {
+      onViewChange(view);
+    }
 
     // Notify parent about date change after view change
     if (onDateChange) {

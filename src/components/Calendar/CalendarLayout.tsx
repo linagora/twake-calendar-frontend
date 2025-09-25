@@ -19,6 +19,7 @@ export default function CalendarLayout() {
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentView, setCurrentView] = useState<string>("timeGridWeek");
 
   const handleRefresh = async () => {
     await dispatch(getCalendarsListAsync());
@@ -49,17 +50,27 @@ export default function CalendarLayout() {
     setCurrentDate(date);
   };
 
+  const handleViewChange = (view: string) => {
+    setCurrentView(view);
+  };
+
   const menubarProps: MenubarProps = {
     calendarRef,
     onRefresh: handleRefresh,
     currentDate,
     onDateChange: handleDateChange,
+    currentView,
+    onViewChange: handleViewChange,
   };
 
   return (
     <div className="App">
       <Menubar {...menubarProps} />
-      <CalendarApp calendarRef={calendarRef} onDateChange={handleDateChange} />
+      <CalendarApp 
+        calendarRef={calendarRef} 
+        onDateChange={handleDateChange} 
+        onViewChange={handleViewChange}
+      />
     </div>
   );
 }
