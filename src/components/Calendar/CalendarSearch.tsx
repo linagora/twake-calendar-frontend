@@ -178,7 +178,7 @@ export default function CalendarSearch({
 }) {
   const dispatch = useAppDispatch();
   const openpaasId =
-    useAppSelector((state) => state.user.userData.openpaasId) ?? "";
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const [selectedCal, setSelectedCalendars] = useState<CalendarWithOwner[]>([]);
