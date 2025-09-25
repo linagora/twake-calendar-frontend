@@ -302,10 +302,12 @@ export default function CalendarApp() {
           setSelectedCalendars={setSelectedCalendars}
           setTempEvent={setTempEvent}
         />
-        <CalendarSelection
-          selectedCalendars={selectedCalendars}
-          setSelectedCalendars={setSelectedCalendars}
-        />
+        <div className="calendarList">
+          <CalendarSelection
+            selectedCalendars={selectedCalendars}
+            setSelectedCalendars={setSelectedCalendars}
+          />
+        </div>
       </div>
       <div className="calendar">
         <ImportAlert />
