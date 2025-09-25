@@ -340,7 +340,7 @@ describe("Calendar App Component Display Tests", () => {
   it("opens popover when clicking AppsIcon", () => {
     (window as any).appList = [
       { name: "Twake", icon: "twake.svg", link: "/twake" },
-      { name: "Calendar", icon: "calendar.svg", link: "/calendar" }
+      { name: "Calendar", icon: "calendar.svg", link: "/calendar" },
     ];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
