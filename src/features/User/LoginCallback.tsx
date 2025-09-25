@@ -22,8 +22,8 @@ export function CallbackResume() {
         const data = await Callback(saved?.code_verifier, saved?.state);
         dispatch(setUserData(data?.userinfo));
         dispatch(setTokens(data?.tokenSet));
-        dispatch(getOpenPaasUserDataAsync());
-        dispatch(getCalendarsListAsync());
+        await dispatch(getOpenPaasUserDataAsync());
+        await dispatch(getCalendarsListAsync());
 
         sessionStorage.removeItem("redirectState");
         sessionStorage.setItem("tokenSet", JSON.stringify(data?.tokenSet));

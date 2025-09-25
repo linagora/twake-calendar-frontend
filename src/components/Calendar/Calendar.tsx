@@ -47,9 +47,11 @@ export default function CalendarApp() {
   const user = useAppSelector((state) => state.user.userData);
   const dispatch = useAppDispatch();
 
-  if (!tokens) {
-    dispatch(push("/"));
-  }
+  useEffect(() => {
+    if (!tokens || !user) {
+      dispatch(push("/"));
+    }
+  }, [tokens, user]);
 
   const calendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars =
