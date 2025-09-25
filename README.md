@@ -1,6 +1,6 @@
 # Twake Calendar Frontend
 
-![LOGO](assets/calendar.svg)
+![LOGO](public/calendar.svg)
 
 ## Goals
 
