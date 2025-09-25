@@ -5,8 +5,8 @@ export interface CalendarEvent {
   calId: string;
   uid: string;
   transp?: string;
-  start: Date; // ISO date
-  end?: Date;
+  start: string; // ISO date string
+  end?: string;
   class?: string;
   x_openpass_videoconference?: string;
   title?: string;
@@ -14,7 +14,7 @@ export interface CalendarEvent {
   location?: string;
   organizer?: userOrganiser;
   attendee: userAttendee[];
-  stamp?: Date;
+  stamp?: string;
   sequence?: Number;
   color?: string;
   allday?: boolean;
