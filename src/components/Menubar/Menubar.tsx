@@ -136,6 +136,11 @@ export function Menubar({
         </div>
         <div className="right-menu">
           <div className="menu-items">
+            <IconButton onClick={onRefresh}>
+              <RefreshIcon />
+            </IconButton>
+          </div>
+          <div className="menu-items">
             <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
               <Select
                 value={currentView}
