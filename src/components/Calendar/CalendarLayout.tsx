@@ -26,22 +26,20 @@ export default function CalendarLayout() {
 
     // Get current calendar range
     if (calendarRef.current) {
-      const view = calendarRef.current.getApi().view;
+      const view = calendarRef.current.view;
       const calendarRange = getCalendarRange(view.activeStart);
 
       // Refresh events for selected calendars
       Object.keys(selectedCalendars).forEach((id) => {
-        if (id.split("/")[0] === userId) {
-          dispatch(
-            getCalendarDetailAsync({
-              calId: id,
-              match: {
-                start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-                end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-              },
-            })
-          );
-        }
+        dispatch(
+          getCalendarDetailAsync({
+            calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+          })
+        );
       });
     }
   };
