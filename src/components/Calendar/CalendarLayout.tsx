@@ -66,9 +66,9 @@ export default function CalendarLayout() {
   return (
     <div className="App">
       <Menubar {...menubarProps} />
-      <CalendarApp 
-        calendarRef={calendarRef} 
-        onDateChange={handleDateChange} 
+      <CalendarApp
+        calendarRef={calendarRef}
+        onDateChange={handleDateChange}
         onViewChange={handleViewChange}
       />
     </div>

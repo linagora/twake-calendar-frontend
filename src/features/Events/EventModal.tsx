@@ -70,12 +70,8 @@ function EventPopover({
 
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
-  const [start, setStart] = useState(
-    event?.start ? event.start : ""
-  );
-  const [end, setEnd] = useState(
-    event?.end ? event.end : ""
-  );
+  const [start, setStart] = useState(event?.start ? event.start : "");
+  const [end, setEnd] = useState(event?.end ? event.end : "");
   const [calendarid, setCalendarid] = useState(
     event?.calId
       ? userPersonnalCalendars.findIndex((e) => e.id === event?.calId)
