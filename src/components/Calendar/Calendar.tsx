@@ -358,7 +358,7 @@ export default function CalendarApp({
           )}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
-          slotDuration={"01:00:00"}
+          slotDuration={"00:30:00"}
           slotLabelInterval={"01:00:00"}
           scrollTime="12:00:00"
           unselectAuto={false}

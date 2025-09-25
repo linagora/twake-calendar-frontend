@@ -176,7 +176,7 @@ th.fc-col-header-cell.fc-day {
 }
 .fc .fc-timegrid-slot {
   height: auto;
-  min-height: 40px !important;
+  min-height: 20px !important;
 }
 .fc .fc-timegrid-slot-label {
   display: flex;
