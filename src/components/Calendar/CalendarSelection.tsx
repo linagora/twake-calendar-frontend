@@ -11,6 +11,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CalendarSearch from "./CalendarSearch";
+import { Divider, Menu, MenuItem } from "@mui/material";
+import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
 function CalendarAccordion({
   title,
@@ -64,6 +68,7 @@ function CalendarAccordion({
             key={id}
             calendars={allCalendars}
             id={id}
+            isPersonnal={defaultExpanded}
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
@@ -73,22 +78,6 @@ function CalendarAccordion({
     </Accordion>
   );
 }
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import CalendarSearch from "./CalendarSearch";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Divider,
-  Menu,
-  MenuItem,
-  Popover,
-} from "@mui/material";
-import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
-import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -190,12 +179,14 @@ export default function CalendarSelection({
 function CalendarSelector({
   calendars,
   id,
+  isPersonnal,
   selectedCalendars,
   handleCalendarToggle,
   setOpen,
 }: {
   calendars: Record<string, Calendars>;
   id: string;
+  isPersonnal: boolean;
   selectedCalendars: string[];
   handleCalendarToggle: (name: string) => void;
   setOpen: Function;
@@ -212,6 +203,8 @@ function CalendarSelector({
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const [userId, calId] = id.split("/");
+  const isDefault = isPersonnal && userId === calId;
 
   const [deletePopupOpen, setDeletePopupOpen] = useState(false);
   const handleDeleteConfirm = () => {
@@ -240,10 +233,12 @@ function CalendarSelector({
       </div>
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={() => setOpen()}>Modify</MenuItem>
-        <Divider />
-        <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
-          Delete
-        </MenuItem>
+        {!isDefault && <Divider />}
+        {!isDefault && (
+          <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
+            {isPersonnal ? "Delete" : "Remove"}
+          </MenuItem>
+        )}
       </Menu>
 
       <DeleteCalendarDialog
@@ -251,6 +246,7 @@ function CalendarSelector({
         setDeletePopupOpen={setDeletePopupOpen}
         calendars={calendars}
         id={id}
+        isPersonnal={isPersonnal}
         handleDeleteConfirm={handleDeleteConfirm}
       />
     </>

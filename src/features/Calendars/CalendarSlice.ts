@@ -275,6 +275,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
   {
     calId: string;
     color: string;
+    link: string;
     name: string;
     desc: string;
     owner: string;
@@ -295,6 +296,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
       .replace("/calendars/", "")
       .replace(".json", ""),
     color: cal.cal["apple:color"],
+    link: `/calendars/${userId}/${calId}.json`,
     desc: cal.cal["caldav:description"],
     name: cal.cal["dav:name"],
     owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
@@ -544,6 +546,7 @@ const CalendarSlice = createSlice({
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
+          link: action.payload.link,
           description: action.payload.desc,
           name: action.payload.name,
           events: {},

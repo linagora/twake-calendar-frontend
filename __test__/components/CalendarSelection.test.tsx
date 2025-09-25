@@ -1,7 +1,9 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import CalendarSelection from "../../src/components/Calendar/CalendarSelection";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
+import userEvent from "@testing-library/user-event";
 
 describe("CalendarSelection", () => {
   const baseUser = {
@@ -35,7 +37,10 @@ describe("CalendarSelection", () => {
       ownerEmails: ["charlie@example.com"],
     },
   };
-
+  beforeAll(() => {
+    jest.clearAllMocks();
+    cleanup();
+  });
   it("renders personal, delegated and other calendars", () => {
     renderWithProviders(
       <CalendarSelection
@@ -101,7 +106,7 @@ describe("CalendarSelection", () => {
     expect(updater(["user1/cal1"])).toEqual([]);
   });
 
-  it("opens CalendarPopover modal when personal Add button is clicked", () => {
+  it("opens CalendarPopover modal when personal Add button is clicked", async () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -114,9 +119,71 @@ describe("CalendarSelection", () => {
     );
 
     const addButtons = screen.getAllByRole("button");
+    fireEvent.click(addButtons[1]);
+
+    await waitFor(() =>
+      expect(screen.getByText("Calendar configuration")).toBeInTheDocument()
+    );
+  });
+
+  it("Navigates to deletion dialog and deletes personnal cal", async () => {
+    const spy = jest
+      .spyOn(calendarThunks, "removeCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false },
+      }
+    );
+
+    const addButtons = screen.getAllByTestId("MoreVertIcon");
     fireEvent.click(addButtons[0]);
 
-    waitFor(() => expect(screen.getByRole("presentation")).toBeInTheDocument());
+    userEvent.click(screen.getByText(/delete/i));
+
+    await waitFor(() =>
+      expect(screen.getByText("Remove the calendar?")).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    await waitFor(() => expect(spy).toHaveBeenCalled());
+  });
+
+  it("Navigates to deletion dialog and deletes other cal", async () => {
+    const spy = jest
+      .spyOn(calendarThunks, "removeCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false },
+      }
+    );
+
+    const addButtons = screen.getAllByTestId("MoreVertIcon");
+    fireEvent.click(addButtons[1]);
+
+    userEvent.click(screen.getByText(/remove/i));
+
+    await waitFor(() =>
+      expect(screen.getByText("Remove the calendar?")).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+    await waitFor(() => expect(spy).toHaveBeenCalled());
   });
 
   it("opens CalendarSearch modal when Other Add button is clicked", () => {
