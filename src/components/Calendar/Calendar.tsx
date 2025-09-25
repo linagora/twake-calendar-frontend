@@ -6,15 +6,14 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import ReactCalendar from "react-calendar";
 import "./Calendar.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import "./CustomCalendar.css";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
-import CalendarPopover from "../../features/Calendars/CalendarModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
-  getCalendarsListAsync,
   getEventAsync,
   putEventAsync,
   updateEventLocal,
@@ -39,12 +38,52 @@ import { userAttendee } from "../../features/User/userDataTypes";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
 
-export default function CalendarApp() {
-  const calendarRef = useRef<CalendarApi | null>(null);
+// Function to hide/show slot labels based on current time
+const updateSlotLabelVisibility = (currentTime: Date) => {
+  const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+  slotLabels.forEach((label) => {
+    const labelElement = label as HTMLElement;
+    const timeText = labelElement.textContent?.trim();
+
+    if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
+      const [hours, minutes] = timeText.split(":").map(Number);
+      const labelMinutes = hours * 60 + minutes;
+
+      // Calculate time difference in minutes
+      let timeDiff = Math.abs(currentMinutes - labelMinutes);
+
+      // Handle edge case around midnight (00:00)
+      if (timeDiff > 12 * 60) {
+        // More than 12 hours difference
+        timeDiff = 24 * 60 - timeDiff; // Wrap around
+      }
+
+      // Dim if within 15 minutes (before or after)
+      if (timeDiff <= 15) {
+        labelElement.style.opacity = "0.2";
+      } else {
+        labelElement.style.opacity = "1";
+      }
+    }
+  });
+};
+
+interface CalendarAppProps {
+  calendarRef: React.RefObject<CalendarApi | null>;
+  onDateChange?: (date: Date) => void;
+  onViewChange?: (view: string) => void;
+}
+
+export default function CalendarApp({
+  calendarRef,
+  onDateChange,
+  onViewChange,
+}: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
-  const user = useAppSelector((state) => state.user.userData);
   const dispatch = useAppDispatch();
 
   if (!tokens) {
@@ -81,6 +120,7 @@ export default function CalendarApp() {
     }
   });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded
   useEffect(() => {
@@ -114,15 +154,27 @@ export default function CalendarApp() {
   );
 
   useEffect(() => {
-    updateCalsDetails(
-      selectedCalendars,
-      pending,
-      calendars,
-      rangeKey,
-      dispatch,
-      calendarRange
-    );
-  }, [rangeKey, selectedCalendars]);
+    if (!rangeKey) return;
+    selectedCalendars.forEach((id) => {
+      if (fetchedRangesRef.current[id] === rangeKey) return;
+      fetchedRangesRef.current[id] = rangeKey;
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+        })
+      );
+    });
+  }, [
+    rangeKey,
+    selectedCalendars,
+    dispatch,
+    calendarRange.start,
+    calendarRange.end,
+  ]);
 
   useEffect(() => {
     updateCalsDetails(
@@ -326,29 +378,7 @@ export default function CalendarApp() {
           height={"100%"}
           select={handleDateSelect}
           nowIndicator
-          customButtons={{
-            refresh: {
-              text: "↻",
-              click: async () => {
-                await dispatch(getCalendarsListAsync());
-                selectedCalendars.forEach((id) => {
-                  if (!pending && rangeKey) {
-                    dispatch(
-                      getCalendarDetailAsync({
-                        calId: id,
-                        match: {
-                          start: formatDateToYYYYMMDDTHHMMSS(
-                            calendarRange.start
-                          ),
-                          end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-                        },
-                      })
-                    );
-                  }
-                });
-              },
-            },
-          }}
+          headerToolbar={false}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
           }}
@@ -361,10 +391,8 @@ export default function CalendarApp() {
           weekNumbers
           weekNumberFormat={{ week: "long" }}
           slotDuration={"00:30:00"}
-          slotLabelInterval={"00:30:00"}
-          scrollTime={new Date(Date.now() - 2 * 60 * 60 * 1000)
-            .toTimeString()
-            .slice(0, 5)}
+          slotLabelInterval={"01:00:00"}
+          scrollTime="12:00:00"
           unselectAuto={false}
           allDayText=""
           slotLabelFormat={{
@@ -373,15 +401,32 @@ export default function CalendarApp() {
             hour12: false,
           }}
           datesSet={(arg) => {
+            // Get the current date from calendar API to ensure consistency
+            const calendarCurrentDate =
+              calendarRef.current?.getDate() || new Date(arg.start);
+
             if (arg.view.type === "dayGridMonth") {
               setSelectedDate(new Date(arg.start));
-              const midTimestamp =
-                (arg.start.getTime() + arg.end.getTime()) / 2;
-              setSelectedMiniDate(new Date(midTimestamp));
+              setSelectedMiniDate(calendarCurrentDate);
             } else {
               setSelectedDate(new Date(arg.start));
               setSelectedMiniDate(new Date(arg.start));
             }
+
+            // Always use the calendar's current date for consistency
+            if (onDateChange) {
+              onDateChange(calendarCurrentDate);
+            }
+
+            // Notify parent about view change
+            if (onViewChange) {
+              onViewChange(arg.view.type);
+            }
+
+            // Update slot label visibility when view changes
+            setTimeout(() => {
+              updateSlotLabelVisibility(new Date());
+            }, 100);
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
@@ -400,6 +445,234 @@ export default function CalendarApp() {
                 </span>
               </div>
             );
+          }}
+          dayHeaderDidMount={(arg) => {
+            // Add click handler to day headers in week view
+            if (arg.view.type === "timeGridWeek") {
+              const headerEl = arg.el;
+
+              const handleDayHeaderClick = () => {
+                // Switch to day view and navigate to the clicked date
+                calendarRef.current?.changeView("timeGridDay", arg.date);
+                setSelectedDate(new Date(arg.date));
+                setSelectedMiniDate(new Date(arg.date));
+
+                // Notify parent about view change
+                if (onViewChange) {
+                  onViewChange("timeGridDay");
+                }
+              };
+
+              headerEl.addEventListener("click", handleDayHeaderClick);
+
+              // Store the handler for cleanup
+              (headerEl as any).__dayHeaderClickHandler = handleDayHeaderClick;
+            }
+          }}
+          dayHeaderWillUnmount={(arg) => {
+            // Clean up event listeners to prevent memory leaks
+            const headerEl = arg.el;
+            if ((headerEl as any).__dayHeaderClickHandler) {
+              headerEl.removeEventListener(
+                "click",
+                (headerEl as any).__dayHeaderClickHandler
+              );
+              delete (headerEl as any).__dayHeaderClickHandler;
+            }
+          }}
+          viewDidMount={(arg) => {
+            // Update now indicator arrow with current time and hide nearby slot labels
+            const updateNowIndicator = () => {
+              const nowIndicatorArrow = document.querySelector(
+                ".fc-timegrid-now-indicator-arrow"
+              ) as HTMLElement;
+              if (nowIndicatorArrow) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                });
+                nowIndicatorArrow.setAttribute("data-time", timeString);
+
+                // Hide slot labels that are too close to current time
+                updateSlotLabelVisibility(now);
+              }
+            };
+
+            // Update immediately and then every minute
+            updateNowIndicator();
+            const timeInterval = setInterval(updateNowIndicator, 60000);
+
+            // Watch for now indicator arrow creation and slot label changes
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+                    if (
+                      element.classList?.contains(
+                        "fc-timegrid-now-indicator-arrow"
+                      ) ||
+                      element.querySelector?.(
+                        ".fc-timegrid-now-indicator-arrow"
+                      ) ||
+                      element.classList?.contains("fc-timegrid-slot-label") ||
+                      element.querySelector?.(".fc-timegrid-slot-label")
+                    ) {
+                      setTimeout(() => {
+                        updateNowIndicator();
+                        updateSlotLabelVisibility(new Date());
+                      }, 10);
+                    }
+                  }
+                });
+              });
+            });
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
+
+            // Store interval and observer for cleanup
+            (arg.el as any).__timeInterval = timeInterval;
+            (arg.el as any).__timeObserver = observer;
+
+            // Add global hover effect for week and day views
+            if (
+              arg.view.type === "timeGridWeek" ||
+              arg.view.type === "timeGridDay"
+            ) {
+              const calendarEl = document.querySelector(".fc") as HTMLElement;
+              if (calendarEl) {
+                const handleMouseMove = (e: MouseEvent) => {
+                  // Find the timegrid container
+                  const timegridEl =
+                    calendarEl.querySelector(".fc-timegrid-body");
+                  if (!timegridEl) return;
+
+                  // Check if mouse is over all-day events area (fc-scrollgrid-sync-table)
+                  const allDayTable = calendarEl.querySelector(
+                    ".fc-scrollgrid-sync-table"
+                  );
+                  if (allDayTable) {
+                    const allDayRect = allDayTable.getBoundingClientRect();
+                    if (
+                      e.clientY >= allDayRect.top &&
+                      e.clientY <= allDayRect.bottom
+                    ) {
+                      // Mouse is over all-day events area, don't show highlight
+                      timegridEl
+                        .querySelectorAll(".hour-highlight")
+                        .forEach((el: Element) => el.remove());
+                      return;
+                    }
+                  }
+
+                  // Check if mouse is over time slot labels (left side with hours)
+                  const target = e.target as HTMLElement;
+                  if (target && target.closest(".fc-timegrid-slot-label")) {
+                    // Mouse is over time slot labels, don't show highlight
+                    timegridEl
+                      .querySelectorAll(".hour-highlight")
+                      .forEach((el: Element) => el.remove());
+                    return;
+                  }
+
+                  // Get all day columns
+                  const dayColumns =
+                    timegridEl.querySelectorAll(".fc-timegrid-col");
+                  if (dayColumns.length === 0) return;
+
+                  // Remove previous highlights
+                  timegridEl
+                    .querySelectorAll(".hour-highlight")
+                    .forEach((el: Element) => el.remove());
+
+                  // Find which day column the mouse is over
+                  let targetColumn: Element | null = null;
+                  for (const column of dayColumns) {
+                    const rect = column.getBoundingClientRect();
+                    if (e.clientX >= rect.left && e.clientX <= rect.right) {
+                      targetColumn = column;
+                      break;
+                    }
+                  }
+
+                  if (targetColumn) {
+                    const rect = targetColumn.getBoundingClientRect();
+                    const relativeY = e.clientY - rect.top;
+                    const hourHeight = rect.height / 24; // Assuming 24 hours
+                    const hourIndex = Math.floor(relativeY / hourHeight);
+
+                    // Only show highlight if mouse is actually over the timegrid area (not all-day events)
+                    if (relativeY >= 0 && relativeY <= rect.height) {
+                      // Create highlight for the specific hour in the specific day
+                      const highlight = document.createElement("div");
+                      highlight.className = "hour-highlight";
+                      highlight.style.top = `${hourIndex * hourHeight}px`;
+                      highlight.style.height = `${hourHeight}px`;
+
+                      (targetColumn as HTMLElement).style.position = "relative";
+                      targetColumn.appendChild(highlight);
+                    }
+                  }
+                };
+
+                const handleMouseLeave = () => {
+                  // Remove all hour highlights when mouse leaves calendar
+                  const timegridEl =
+                    calendarEl.querySelector(".fc-timegrid-body");
+                  if (timegridEl) {
+                    timegridEl
+                      .querySelectorAll(".hour-highlight")
+                      .forEach((el: Element) => el.remove());
+                  }
+                };
+
+                calendarEl.addEventListener("mousemove", handleMouseMove);
+                calendarEl.addEventListener("mouseleave", handleMouseLeave);
+
+                // Store handlers for cleanup
+                (calendarEl as any).__calendarMouseMoveHandler =
+                  handleMouseMove;
+                (calendarEl as any).__calendarMouseLeaveHandler =
+                  handleMouseLeave;
+              }
+            }
+          }}
+          viewWillUnmount={(arg) => {
+            // Clean up time interval
+            if ((arg.el as any).__timeInterval) {
+              clearInterval((arg.el as any).__timeInterval);
+              delete (arg.el as any).__timeInterval;
+            }
+
+            // Clean up observer
+            if ((arg.el as any).__timeObserver) {
+              (arg.el as any).__timeObserver.disconnect();
+              delete (arg.el as any).__timeObserver;
+            }
+
+            // Clean up event listeners to prevent memory leaks
+            const calendarEl = document.querySelector(".fc") as HTMLElement;
+            if (calendarEl) {
+              if ((calendarEl as any).__calendarMouseMoveHandler) {
+                calendarEl.removeEventListener(
+                  "mousemove",
+                  (calendarEl as any).__calendarMouseMoveHandler
+                );
+                delete (calendarEl as any).__calendarMouseMoveHandler;
+              }
+              if ((calendarEl as any).__calendarMouseLeaveHandler) {
+                calendarEl.removeEventListener(
+                  "mouseleave",
+                  (calendarEl as any).__calendarMouseLeaveHandler
+                );
+                delete (calendarEl as any).__calendarMouseLeaveHandler;
+              }
+            }
           }}
           eventClick={(info) => {
             info.jsEvent.preventDefault(); // don't let the browser navigate
@@ -428,6 +701,14 @@ export default function CalendarApp() {
             return true;
           }}
           eventDrop={(arg) => {
+            if (
+              !arg.event ||
+              !arg.event._def ||
+              !arg.event._def.extendedProps
+            ) {
+              return;
+            }
+
             const event =
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
@@ -445,8 +726,8 @@ export default function CalendarApp() {
             );
             const newEvent = {
               ...event,
-              start: computedNewStart,
-              end: computedNewEnd,
+              start: computedNewStart.toISOString(),
+              end: computedNewEnd.toISOString(),
             } as CalendarEvent;
             dispatch(
               updateEventLocal({ calId: newEvent.calId, event: newEvent })
@@ -456,6 +737,14 @@ export default function CalendarApp() {
             );
           }}
           eventResize={(arg) => {
+            if (
+              !arg.event ||
+              !arg.event._def ||
+              !arg.event._def.extendedProps
+            ) {
+              return;
+            }
+
             const event =
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
@@ -473,18 +762,13 @@ export default function CalendarApp() {
             );
             const newEvent = {
               ...event,
-              start: computedNewStart,
-              end: computedNewEnd,
+              start: computedNewStart.toISOString(),
+              end: computedNewEnd.toISOString(),
             } as CalendarEvent;
 
             dispatch(
               putEventAsync({ cal: calendars[newEvent.calId], newEvent })
             );
-          }}
-          headerToolbar={{
-            left: "title",
-            center: "prev,today,next",
-            right: "refresh,dayGridMonth,timeGridWeek,timeGridDay",
           }}
           eventContent={(arg) => {
             const event = arg.event;

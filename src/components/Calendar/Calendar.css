@@ -15,7 +15,6 @@
   flex-grow: 1;
   height: 100%;
   overflow: hidden;
-  padding: 0 25px 0 10px;
 }
 
 .calendarListHeader {
@@ -26,7 +25,7 @@
 }
 .sidebar {
   border-right: 2px solid #f3f4f6;
-  width: 20vw;
+  width: 330px;
   padding: 16px 25px;
   height: 90vh;
   flex-direction: column;
@@ -40,18 +39,6 @@
 .needs-action-event {
   opacity: 0.7;
   border: dashed 1px #ffffff;
-}
-
-.fc .fc-timegrid-slot {
-  height: auto;
-  min-height: 54px !important;
-}
-
-.fc .fc-timegrid-slot-label {
-  display: flex;
-  align-items: flex-start;
-  padding-top: 2px;
-  height: 100%;
 }
 
 .fc-event-main span,
@@ -165,113 +152,4 @@
   border-radius: 50%;
   margin-left: auto;
   margin-right: auto;
-}
-
-/* Custom main calendar view */
-.fc-header-toolbar.fc-toolbar.fc-toolbar-ltr {
-  /* display: none; */
-}
-.fc-theme-standard td,
-.fc-theme-standard th {
-  border: 1px solid #b8c1cc;
-  border-left: 0;
-}
-a.fc-timegrid-axis-cushion {
-  color: #243b55;
-  text-align: center;
-  font-family: Roboto;
-  font-size: 12.507px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 18.76px;
-  letter-spacing: 0.391px;
-}
-.fc-daygrid-day-top small {
-  color: #8c9caf;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px;
-  letter-spacing: 0.25px;
-}
-.fc-daygrid-day-top .fc-daygrid-day-number,
-span.fc-daygrid-day-number {
-  color: #243b55;
-  margin: 0 8px 0 0;
-  font-family: Roboto;
-  font-size: 28px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 36px;
-  position: relative;
-  width: 48px;
-  height: 48px;
-  line-height: 39px;
-}
-.fc-daygrid-day-top .fc-daygrid-day-number:after,
-span.fc-daygrid-day-number:after {
-  content: "";
-  z-index: -1;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  position: absolute;
-  left: 0;
-  top: -1px;
-}
-span.fc-daygrid-day-number.current-date {
-  color: #fff;
-}
-span.fc-daygrid-day-number.current-date:after {
-  background-color: #f67e35;
-}
-td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink,
-td.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {
-  border: 0;
-}
-th.fc-timegrid-axis.fc-scrollgrid-shrink {
-  border: 0;
-  border-right: 1px solid #b8c1cc;
-}
-.fc .fc-timegrid-axis-cushion {
-  min-width: 70px;
-  max-width: 70px;
-  padding: 0;
-  text-align: left;
-}
-.fc .fc-timegrid-divider {
-  display: none;
-  height: 0;
-}
-.fc-timegrid-slot-label-cushion {
-  color: #aea9b1;
-  font-family: Roboto;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 20px;
-  letter-spacing: 0.25px;
-}
-th.fc-col-header-cell.fc-day {
-  border-right: 0;
-}
-.fc .fc-scrollgrid {
-  border: 0;
-}
-.fc .fc-timegrid-slot-label {
-  justify-content: flex-end;
-}
-.fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame {
-  position: relative;
-  transform: translate(-15px, -12px);
-}
-.fc .fc-timegrid-slot-label .fc-timegrid-slot-label-frame::after {
-  content: "";
-  z-index: -1;
-  background-color: #b8c1cc;
-  width: 10px;
-  height: 1px;
-  position: absolute;
-  top: 9.5px;
-  right: -15px;
 }

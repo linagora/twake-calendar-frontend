@@ -3,12 +3,19 @@ import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
+import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
 jest.mock("../../src/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers
 >;
+
+// Test wrapper component to provide calendarRef
+function CalendarTestWrapper() {
+  const calendarRef = useRef(null);
+  return <CalendarApp calendarRef={calendarRef} />;
+}
 
 describe("CalendarSelection", () => {
   const today = new Date();
@@ -127,7 +134,11 @@ describe("CalendarSelection", () => {
     },
   };
   it("renders calendars", async () => {
-    renderWithProviders(<CalendarApp />, preloadedState);
+    const mockCalendarRef = { current: null };
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -136,26 +147,12 @@ describe("CalendarSelection", () => {
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
   });
-  it("refresh calendars", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "getCalendarDetailAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-    renderWithProviders(<CalendarApp />, preloadedState);
-
-    const refreshButton = screen.getByRole("button", {
-      name: "↻",
-    });
-
-    fireEvent.click(refreshButton);
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-  });
   it("open accordeon when clicking on button only", () => {
-    renderWithProviders(<CalendarApp />, preloadedState);
+    const mockCalendarRef = { current: null };
+    renderWithProviders(
+      <CalendarApp calendarRef={mockCalendarRef} />,
+      preloadedState
+    );
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -218,7 +215,7 @@ describe("calendar Availability search", () => {
       },
     ]);
 
-    renderWithProviders(<CalendarApp />, preloadedState);
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
     const input = screen.getByPlaceholderText(/search user/i);
     userEvent.type(input, "New");
@@ -243,7 +240,7 @@ describe("calendar Availability search", () => {
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
-    renderWithProviders(<CalendarApp />, preloadedState);
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
     const input = screen.getByPlaceholderText(/search user/i);
     userEvent.type(input, "Alice");
