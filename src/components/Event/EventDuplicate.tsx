@@ -15,9 +15,9 @@ export default function EventDuplication({
   const [openModal, setOpenModal] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>({
     start: new Date(event.start),
-    startStr: new Date(event.start).toISOString(),
+    startStr: event.start,
     end: new Date(event.end ?? ""),
-    endStr: new Date(event.end ?? "").toISOString(),
+    endStr: event.end ?? "",
     allDay: event.allday ?? false,
   } as DateSelectArg);
   const calendarRef = useRef<CalendarApi | null>(null);
