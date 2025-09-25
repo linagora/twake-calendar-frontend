@@ -38,6 +38,37 @@ import { userAttendee } from "../../features/User/userDataTypes";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
 
+// Function to hide/show slot labels based on current time
+const updateSlotLabelVisibility = (currentTime: Date) => {
+  const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  
+  slotLabels.forEach((label) => {
+    const labelElement = label as HTMLElement;
+    const timeText = labelElement.textContent?.trim();
+    
+    if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
+      const [hours, minutes] = timeText.split(':').map(Number);
+      const labelMinutes = hours * 60 + minutes;
+      
+      // Calculate time difference in minutes
+      let timeDiff = Math.abs(currentMinutes - labelMinutes);
+      
+      // Handle edge case around midnight (00:00)
+      if (timeDiff > 12 * 60) { // More than 12 hours difference
+        timeDiff = 24 * 60 - timeDiff; // Wrap around
+      }
+      
+      // Dim if within 15 minutes (before or after)
+      if (timeDiff <= 15) {
+        labelElement.style.opacity = '0.2';
+      } else {
+        labelElement.style.opacity = '1';
+      }
+    }
+  });
+};
+
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
   onDateChange?: (date: Date) => void;
@@ -390,6 +421,11 @@ export default function CalendarApp({
             if (onViewChange) {
               onViewChange(arg.view.type);
             }
+
+            // Update slot label visibility when view changes
+            setTimeout(() => {
+              updateSlotLabelVisibility(new Date());
+            }, 100);
           }}
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
@@ -444,7 +480,7 @@ export default function CalendarApp({
             }
           }}
           viewDidMount={(arg) => {
-            // Update now indicator arrow with current time
+            // Update now indicator arrow with current time and hide nearby slot labels
             const updateNowIndicator = () => {
               const nowIndicatorArrow = document.querySelector(
                 ".fc-timegrid-now-indicator-arrow"
@@ -457,6 +493,9 @@ export default function CalendarApp({
                   hour12: false,
                 });
                 nowIndicatorArrow.setAttribute("data-time", timeString);
+                
+                // Hide slot labels that are too close to current time
+                updateSlotLabelVisibility(now);
               }
             };
 
@@ -464,7 +503,7 @@ export default function CalendarApp({
             updateNowIndicator();
             const timeInterval = setInterval(updateNowIndicator, 60000);
 
-            // Watch for now indicator arrow creation and update immediately
+            // Watch for now indicator arrow creation and slot label changes
             const observer = new MutationObserver((mutations) => {
               mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
@@ -476,9 +515,14 @@ export default function CalendarApp({
                       ) ||
                       element.querySelector?.(
                         ".fc-timegrid-now-indicator-arrow"
-                      )
+                      ) ||
+                      element.classList?.contains("fc-timegrid-slot-label") ||
+                      element.querySelector?.(".fc-timegrid-slot-label")
                     ) {
-                      setTimeout(updateNowIndicator, 10);
+                      setTimeout(() => {
+                        updateNowIndicator();
+                        updateSlotLabelVisibility(new Date());
+                      }, 10);
                     }
                   }
                 });
@@ -656,6 +700,10 @@ export default function CalendarApp({
             return true;
           }}
           eventDrop={(arg) => {
+            if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
+              return;
+            }
+
             const event =
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
@@ -673,8 +721,8 @@ export default function CalendarApp({
             );
             const newEvent = {
               ...event,
-              start: computedNewStart,
-              end: computedNewEnd,
+              start: computedNewStart.toISOString(),
+              end: computedNewEnd.toISOString(),
             } as CalendarEvent;
             dispatch(
               updateEventLocal({ calId: newEvent.calId, event: newEvent })
@@ -684,6 +732,10 @@ export default function CalendarApp({
             );
           }}
           eventResize={(arg) => {
+            if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
+              return;
+            }
+
             const event =
               calendars[arg.event._def.extendedProps.calId].events[
                 arg.event._def.extendedProps.uid
@@ -701,8 +753,8 @@ export default function CalendarApp({
             );
             const newEvent = {
               ...event,
-              start: computedNewStart,
-              end: computedNewEnd,
+              start: computedNewStart.toISOString(),
+              end: computedNewEnd.toISOString(),
             } as CalendarEvent;
 
             dispatch(

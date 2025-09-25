@@ -17,6 +17,11 @@ a.fc-timegrid-axis-cushion {
   line-height: 18.76px;
   letter-spacing: 0.391px;
 }
+
+/* Slot label visibility transitions */
+.fc-timegrid-slot-label {
+  transition: opacity 0.3s ease-in-out;
+}
 .fc-daygrid-day-top small {
   color: #8c9caf;
   font-size: 14px;
