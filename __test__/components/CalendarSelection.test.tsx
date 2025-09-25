@@ -131,10 +131,10 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButtons = screen.getAllByRole("button");
+    const addButtons = screen.getAllByTestId("AddIcon");
     fireEvent.click(addButtons[1]); // seccond Add button (other)
 
-    expect(screen.getByRole("presentation")).toBeInTheDocument();
+    expect(screen.getByText("Browse other calendars")).toBeInTheDocument();
   });
 
   it("renders only personal calendars if no delegated/other exist", () => {

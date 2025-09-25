@@ -130,11 +130,6 @@ export default function CalendarApp({
     tempcalendars
   );
 
-  const [prevSelectedCalendars, setPrevSelectedCalendars] = useState<string[]>(
-    []
-  );
-  const [prevRangeKey, setPrevRangeKey] = useState<string>("");
-
   useEffect(() => {
     if (!rangeKey) return;
     selectedCalendars.forEach((id) => {
@@ -159,6 +154,7 @@ export default function CalendarApp({
   ]);
 
   const [prevTempCalendars, setPrevTempCalendars] = useState<string[]>([]);
+  const [prevRangeKey, setPrevRangeKey] = useState<string>("");
 
   useEffect(() => {
     updateCalsDetails(

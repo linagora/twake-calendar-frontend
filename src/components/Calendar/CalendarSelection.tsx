@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
-import CalendarPopover from "../../features/Calendars/CalendarModal";
+import CalendarPopover from "./CalendarModal";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
@@ -88,6 +88,7 @@ import {
   Popover,
 } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -165,7 +166,6 @@ export default function CalendarSelection({
         />
       </div>
       <CalendarPopover
-        anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
         calendar={calendars[selectedCalId] ?? undefined}
         onClose={() => {
@@ -246,22 +246,13 @@ function CalendarSelector({
         </MenuItem>
       </Menu>
 
-      <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
-        <DialogTitle>Delete the calendar?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to remove {calendars[id].name}? This action
-            cannot be undone. You will not have access to this calendar and its
-            events.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeletePopupOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeleteCalendarDialog
+        deletePopupOpen={deletePopupOpen}
+        setDeletePopupOpen={setDeletePopupOpen}
+        calendars={calendars}
+        id={id}
+        handleDeleteConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }
