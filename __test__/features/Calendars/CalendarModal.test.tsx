@@ -2,6 +2,7 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import CalendarPopover from "../../../src/components/Calendar/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
+import { Calendars } from "../../../src/features/Calendars/CalendarTypes";
 
 describe("CalendarPopover", () => {
   const mockOnClose = jest.fn();
@@ -32,8 +33,7 @@ describe("CalendarPopover", () => {
     renderPopover();
 
     expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
-    expect(screen.getByText("Calendar configuration")).toBeInTheDocument();
+    expect(screen.getByText(/add description/i)).toBeInTheDocument();
   });
 
   it("updates name and description fields", () => {
@@ -43,6 +43,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(nameInput, { target: { value: "My Calendar" } });
     expect(nameInput).toHaveValue("My Calendar");
 
+    fireEvent.click(screen.getByText(/add description/i));
     const descInput = screen.getByLabelText(/Description/i);
     fireEvent.change(descInput, { target: { value: "Test description" } });
     expect(descInput).toHaveValue("Test description");
@@ -56,11 +57,6 @@ describe("CalendarPopover", () => {
       name: /select color/i,
     });
     fireEvent.click(colorButtons[0]);
-
-    // The header background should update (check via inline style)
-    expect(
-      screen.getByText("Calendar configuration").style.backgroundColor
-    ).toBe("rgb(52, 211, 153)");
   });
 
   it("dispatches createCalendar and calls onClose when Save clicked", () => {
@@ -74,6 +70,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(screen.getByLabelText(/Name/i), {
       target: { value: "Test Calendar" },
     });
+    fireEvent.click(screen.getByText(/add description/i));
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: "Test Description" },
     });
@@ -83,7 +80,7 @@ describe("CalendarPopover", () => {
     });
     fireEvent.click(colorButtons[0]);
 
-    fireEvent.click(screen.getByText(/Save/i));
+    fireEvent.click(screen.getByText(/Create/));
 
     expect(spy).toHaveBeenCalled();
 
@@ -119,8 +116,9 @@ describe("CalendarPopover (editing mode)", () => {
     color: "#33B679",
     owner: "alice",
     ownerEmails: ["alice@example.com"],
+    visibility: "public",
     events: {},
-  };
+  } as Calendars;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,9 +136,6 @@ describe("CalendarPopover (editing mode)", () => {
 
     expect(screen.getByLabelText(/Name/i)).toHaveValue("Work Calendar");
     expect(screen.getByLabelText(/Description/i)).toHaveValue("Team meetings");
-    expect(screen.getByText("Calendar configuration")).toHaveStyle({
-      backgroundColor: "#33B679",
-    });
   });
 
   test("Save button is disabled when name is empty or whitespace only", () => {
@@ -148,7 +143,7 @@ describe("CalendarPopover (editing mode)", () => {
       user: baseUser,
     });
 
-    const saveButton = screen.getByRole("button", { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: /create/i });
     expect(saveButton).toBeDisabled();
     // only spaces
     const nameInput = screen.getByLabelText(/name/i);

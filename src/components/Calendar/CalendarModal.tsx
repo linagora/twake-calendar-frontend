@@ -18,6 +18,10 @@ import {
   Box,
   ToggleButtonGroup,
   Typography,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import { ColorPicker } from "../../components/Calendar/CalendarColorPicker";
 import PublicIcon from "@mui/icons-material/Public";
@@ -45,10 +49,9 @@ function CalendarPopover({
   const [name, setName] = useState(calendar?.name ?? "");
   const [description, setDescription] = useState(calendar?.description ?? "");
   const [color, setColor] = useState(calendar?.color ?? "");
-  const [tab, setTab] = useState(0);
-  const [visibility, setVisibility] = useState<
-    "private" | "free-busy" | "public"
-  >("public");
+  const [tab, setTab] = useState<"settings" | "access" | "import">("settings");
+  const [visibility, setVisibility] = useState<"private" | "public">("public");
+  const [importedContent, setImportedContent] = useState(null);
 
   const [toggleDesc, setToggleDesc] = useState(false);
   useEffect(() => {
@@ -105,7 +108,7 @@ function CalendarPopover({
     setName("");
     setDescription("");
     setColor("");
-    setTab(0);
+    setTab("settings");
     setVisibility("public");
     setToggleDesc(false);
   };
@@ -114,82 +117,34 @@ function CalendarPopover({
     <Dialog open={open} onClose={(e, reason) => onClose(e, reason)}>
       <DialogTitle>
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
-          <Tab label="Add new calendar" />
-          <Tab label="Import" />
+          <Tab
+            value={"settings"}
+            label={calendar ? "Settings" : "Add new calendar"}
+          />
+          {calendar && <Tab value={"access"} label="Access" />}
+          {/* <Tab value={"import"} label="Import" /> */}
         </Tabs>
       </DialogTitle>
       <DialogContent>
-        <TextField
-          fullWidth
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          size="small"
-          margin="dense"
-          variant="outlined"
-        />
-
-        {/* Description button style */}
-        {!toggleDesc && (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setToggleDesc(!toggleDesc)}
-            startIcon={<FormatListBulletedIcon />}
-          >
-            Add description
-          </Button>
-        )}
-
-        {toggleDesc && (
-          <TextField
-            fullWidth
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            size="small"
-            margin="dense"
-            multiline
-            rows={2}
+        {tab === "access" && calendar && <AccessTab calendar={calendar} />}
+        {tab === "settings" && (
+          <SetttingTab
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            color={color}
+            setColor={setColor}
+            visibility={visibility}
+            setVisibility={setVisibility}
           />
         )}
-
-        {/* Colors */}
-        <Box mt={2}>
-          <Typography variant="body2" gutterBottom>
-            Color
-          </Typography>
-          <ColorPicker
-            onChange={(color) => setColor(color)}
-            selectedColor={color}
+        {tab === "import" && (
+          <ImportTab
+            setImportedContent={setImportedContent}
+            importedContent={importedContent}
           />
-        </Box>
-
-        {/* Visibility */}
-        <Box mt={2}>
-          <Typography variant="body2" gutterBottom>
-            New events created will be visible to:
-          </Typography>
-          <ToggleButtonGroup
-            value={visibility}
-            exclusive
-            onChange={(e, val) => val && setVisibility(val)}
-            size="small"
-          >
-            <ToggleButton value="public">
-              <PublicIcon fontSize="small" />
-              All
-            </ToggleButton>
-            <ToggleButton value="free-busy">
-              <LockIcon fontSize="small" />
-              Free/Busy
-            </ToggleButton>
-            <ToggleButton value="private">
-              <LockIcon fontSize="small" />
-              You
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -205,7 +160,7 @@ function CalendarPopover({
             variant="contained"
             onClick={handleSave}
           >
-            Create
+            {calendar ? "Save" : "Create"}
           </Button>
         </Box>
       </DialogActions>
@@ -214,3 +169,195 @@ function CalendarPopover({
 }
 
 export default CalendarPopover;
+
+function ImportTab({
+  importedContent,
+  setImportedContent,
+}: {
+  importedContent: any;
+  setImportedContent: Function;
+}) {
+  const [importMode, setImportMode] = useState<"file" | "url">("file");
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importUrl, setImportUrl] = useState("");
+  const [importTarget, setImportTarget] = useState("new");
+
+  useEffect(() => {
+    // setImportedContent({});
+    console.log(importFile);
+    console.log(importUrl);
+  }, [importFile, importUrl]);
+
+  return (
+    <Box mt={2}>
+      {/* File / URL toggle */}
+      <ToggleButtonGroup
+        value={importMode}
+        exclusive
+        onChange={(e, val) => val && setImportMode(val)}
+        fullWidth
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="file">File</ToggleButton>
+        <ToggleButton value="url">URL</ToggleButton>
+      </ToggleButtonGroup>
+
+      {/* File Upload */}
+      {importMode === "file" && (
+        <>
+          <Button variant="outlined" component="label" sx={{ mb: 1 }}>
+            Select file
+            <input
+              type="file"
+              hidden
+              accept=".ics"
+              onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+            />
+          </Button>
+          {importFile && (
+            <Typography variant="body2" color="text.secondary">
+              {importFile.name}
+            </Typography>
+          )}
+          <Typography
+            variant="caption"
+            display="block"
+            color="text.secondary"
+            mb={2}
+          >
+            Import events from an ICS file to one of your calendars.
+          </Typography>
+        </>
+      )}
+
+      {/* URL Input */}
+      {importMode === "url" && (
+        <TextField
+          fullWidth
+          label="ICS feed URL"
+          value={importUrl}
+          onChange={(e) => setImportUrl(e.target.value)}
+          size="small"
+          margin="dense"
+        />
+      )}
+
+      {/* Import To */}
+      <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+        <InputLabel id="import-to-label">Import to</InputLabel>
+        <Select
+          labelId="import-to-label"
+          label="Import to"
+          value={importTarget}
+          disabled
+          onChange={(e) => setImportTarget(e.target.value)}
+        >
+          <MenuItem value="new">New calendar</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
+  );
+}
+
+function AccessTab({ calendar }: { calendar: Calendars }) {
+  return (
+    <Box mt={2}>
+      <TextField disabled value={calendar.link} />
+    </Box>
+  );
+}
+
+function SetttingTab({
+  name,
+  setName,
+  description,
+  setDescription,
+  color,
+  setColor,
+  visibility,
+  setVisibility,
+}: {
+  name: string;
+  setName: Function;
+  description: string;
+  setDescription: Function;
+  color: string;
+  setColor: Function;
+  visibility: "public" | "private";
+  setVisibility: Function;
+}) {
+  const [toggleDesc, setToggleDesc] = useState(Boolean(description));
+
+  return (
+    <Box mt={2}>
+      <TextField
+        fullWidth
+        label="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        size="small"
+        margin="dense"
+        variant="outlined"
+      />
+
+      {/* Description button style */}
+      {!toggleDesc && (
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => setToggleDesc(!toggleDesc)}
+          startIcon={<FormatListBulletedIcon />}
+        >
+          Add description
+        </Button>
+      )}
+
+      {toggleDesc && (
+        <TextField
+          fullWidth
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          size="small"
+          margin="dense"
+          multiline
+          rows={2}
+        />
+      )}
+
+      {/* Colors */}
+      <Box mt={2}>
+        <Typography variant="body2" gutterBottom>
+          Color
+        </Typography>
+        <ColorPicker
+          onChange={(color) => setColor(color)}
+          selectedColor={color}
+        />
+      </Box>
+
+      {/* Visibility */}
+      <Box mt={2}>
+        <Typography variant="body2" gutterBottom>
+          New events created will be visible to:
+        </Typography>
+        <ToggleButtonGroup
+          value={visibility}
+          exclusive
+          onChange={(e, val) => val && setVisibility(val)}
+          size="small"
+        >
+          <ToggleButton value="public">
+            <PublicIcon fontSize="small" />
+            All
+          </ToggleButton>
+          <ToggleButton value="private">
+            <LockIcon fontSize="small" />
+            You
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+    </Box>
+  );
+}

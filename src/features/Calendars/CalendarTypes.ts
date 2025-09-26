@@ -13,5 +13,5 @@ export interface Calendars {
   calscale?: string;
   version?: string;
   events: Record<string, CalendarEvent>;
-  visibility: "private" | "free-busy" | "public";
+  visibility: "private" | "public";
 }

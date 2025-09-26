@@ -143,7 +143,7 @@ interface AclEntry {
 export function getCalendarVisibility(
   acl: AclEntry[],
   ownerId: string
-): "private" | "free-busy" | "public" {
+): "private" | "public" {
   let hasRead = false;
   let hasFreeBusy = false;
 
@@ -155,12 +155,8 @@ export function getCalendarVisibility(
       hasRead = true;
       break; // highest visibility, can stop
     }
-    if (entry.privilege === "{urn:ietf:params:xml:ns:caldav}read-free-busy") {
-      hasFreeBusy = true;
-    }
   }
 
   if (hasRead) return "public";
-  if (hasFreeBusy) return "free-busy";
   return "private";
 }
