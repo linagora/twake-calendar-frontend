@@ -23,13 +23,13 @@ export function DeleteCalendarDialog({
 }) {
   return (
     <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
-      <DialogTitle>Remove the calendar?</DialogTitle>
+      <DialogTitle>Remove {calendars[id].name}?</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Are you sure you want to remove {calendars[id].name}?{" "}
+          Are you sure you want to remove this calendar?{" "}
           {isPersonnal
             ? "You will loose all events in this calendar."
-            : "You will not have access to this calendar and its events. You will still be able to add it back later."}
+            : "You will loose access to its events. You will still be able to add it back later."}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

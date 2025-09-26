@@ -149,7 +149,7 @@ describe("CalendarSelection", () => {
     userEvent.click(screen.getByText(/delete/i));
 
     await waitFor(() =>
-      expect(screen.getByText("Remove the calendar?")).toBeInTheDocument()
+      expect(screen.getByText("Remove Calendar personal?")).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole("button", { name: /delete/i }));
 
@@ -179,7 +179,7 @@ describe("CalendarSelection", () => {
     userEvent.click(screen.getByText(/remove/i));
 
     await waitFor(() =>
-      expect(screen.getByText("Remove the calendar?")).toBeInTheDocument()
+      expect(screen.getByText("Remove Calendar delegated?")).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole("button", { name: /remove/i }));
 
