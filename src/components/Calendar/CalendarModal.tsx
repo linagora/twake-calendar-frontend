@@ -41,19 +41,23 @@ function CalendarPopover({
   const dispatch = useAppDispatch();
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+
   const [name, setName] = useState(calendar?.name ?? "");
   const [description, setDescription] = useState(calendar?.description ?? "");
   const [color, setColor] = useState(calendar?.color ?? "");
   const [tab, setTab] = useState(0);
-  const [visibility, setVisibility] = useState("all");
-  const [timezone, setTimezone] = useState("CET");
+  const [visibility, setVisibility] = useState<
+    "private" | "free-busy" | "public"
+  >("public");
 
+  const [toggleDesc, setToggleDesc] = useState(false);
   useEffect(() => {
     if (open) {
       if (calendar) {
         setName(calendar.name);
         setDescription(calendar.description ?? "");
         setColor(calendar.color ?? "");
+        setVisibility(calendar.visibility ?? "public");
       } else {
         setName("");
         setDescription("");
@@ -89,8 +93,21 @@ function CalendarPopover({
         );
       }
 
-      onClose({}, "backdropClick");
+      handleClose({}, "backdropClick");
     }
+  };
+
+  const handleClose = (
+    e: {},
+    reason: "backdropClick" | "escapeKeyDown"
+  ): void => {
+    onClose(e, reason);
+    setName("");
+    setDescription("");
+    setColor("");
+    setTab(0);
+    setVisibility("public");
+    setToggleDesc(false);
   };
 
   return (
@@ -99,7 +116,7 @@ function CalendarPopover({
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab label="Add new calendar" />
           <Tab label="Import" />
-        </Tabs>{" "}
+        </Tabs>
       </DialogTitle>
       <DialogContent>
         <TextField
@@ -113,16 +130,18 @@ function CalendarPopover({
         />
 
         {/* Description button style */}
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => setDescription(description ? "" : " ")}
-          startIcon={<FormatListBulletedIcon />}
-        >
-          {description ? "Edit description" : "Add description"}
-        </Button>
+        {!toggleDesc && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setToggleDesc(!toggleDesc)}
+            startIcon={<FormatListBulletedIcon />}
+          >
+            Add description
+          </Button>
+        )}
 
-        {description && (
+        {toggleDesc && (
           <TextField
             fullWidth
             label="Description"
@@ -157,11 +176,15 @@ function CalendarPopover({
             onChange={(e, val) => val && setVisibility(val)}
             size="small"
           >
-            <ToggleButton value="all">
+            <ToggleButton value="public">
               <PublicIcon fontSize="small" />
               All
             </ToggleButton>
-            <ToggleButton value="you">
+            <ToggleButton value="free-busy">
+              <LockIcon fontSize="small" />
+              Free/Busy
+            </ToggleButton>
+            <ToggleButton value="private">
               <LockIcon fontSize="small" />
               You
             </ToggleButton>
@@ -173,7 +196,7 @@ function CalendarPopover({
         <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
           <Button
             variant="outlined"
-            onClick={(e) => onClose({}, "backdropClick")}
+            onClick={(e) => handleClose({}, "backdropClick")}
           >
             Cancel
           </Button>

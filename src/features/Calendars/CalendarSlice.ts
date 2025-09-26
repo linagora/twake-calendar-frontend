@@ -17,6 +17,7 @@ import {
   computeWeekRange,
 } from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
+import { getCalendarVisibility } from "../../components/Calendar/utils/calendarUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -39,6 +40,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       delegated = true;
     }
     const id = source.replace("/calendars/", "").replace(".json", "");
+    const visibility = getCalendarVisibility(cal["acl"], id.split("/")[0]);
 
     const ownerData: any = await getUserDetails(id.split("/")[0]);
     const color = cal["apple:color"];
@@ -53,6 +55,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       description,
       delegated,
       color,
+      visibility,
       events: {},
     };
   }
@@ -82,6 +85,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     const link = cal._links.self.href;
 
     const id = source.replace("/calendars/", "").replace(".json", "");
+    const visibility = getCalendarVisibility(cal["acl"], id.split("/")[0]);
     const ownerData: any = await getUserDetails(id.split("/")[0]);
 
     importedCalendars[id] = {
@@ -93,6 +97,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       description,
       delegated,
       color: tempUser.color ?? "#a8a8a8ff",
+      visibility,
       events: {},
     };
   }

@@ -133,3 +133,34 @@ export const updateCalsDetails = (
     });
   }
 };
+
+interface AclEntry {
+  privilege: string;
+  principal: string;
+  protected: boolean;
+}
+
+export function getCalendarVisibility(
+  acl: AclEntry[],
+  ownerId: string
+): "private" | "free-busy" | "public" {
+  let hasRead = false;
+  let hasFreeBusy = false;
+
+  for (const entry of acl) {
+    // Skip owner
+    if (entry.principal.includes(ownerId)) continue;
+
+    if (entry.privilege === "{DAV:}read") {
+      hasRead = true;
+      break; // highest visibility, can stop
+    }
+    if (entry.privilege === "{urn:ietf:params:xml:ns:caldav}read-free-busy") {
+      hasFreeBusy = true;
+    }
+  }
+
+  if (hasRead) return "public";
+  if (hasFreeBusy) return "free-busy";
+  return "private";
+}
