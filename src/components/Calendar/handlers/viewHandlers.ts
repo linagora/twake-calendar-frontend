@@ -135,34 +135,32 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
 
   const handleEventContent = (arg: any) => {
     const event = arg.event;
-    if (
-      (!event._def.extendedProps.temp &&
-        !calendars[arg.event._def.extendedProps.calId]) ||
-      (event._def.extendedProps.temp &&
-        !tempcalendars[arg.event._def.extendedProps.calId])
-    )
-      return;
+    const props = event._def.extendedProps;
+    const { calId, temp, attendees = [], class: classification } = props;
 
-    const attendees = event._def.extendedProps.attendee || [];
-    const isPrivate =
-      event._def.extendedProps.class === "PRIVATE" ||
-      event._def.extendedProps.class === "CONFIDENTIAL";
+    const calendarsSource = temp ? tempcalendars : calendars;
+    const calendar = calendarsSource[calId];
+    if (!calendar) return null;
+
+    const isPrivate = ["PRIVATE", "CONFIDENTIAL"].includes(classification);
+    const ownerEmails = new Set(
+      calendar.ownerEmails?.map((e) => e.toLowerCase())
+    );
+    const delegated = calendar.delegated;
     let Icon = null;
     let titleStyle: React.CSSProperties = {};
-    const ownerEmails = new Set(
-      (event._def.extendedProps.temp ? tempcalendars : calendars)[
-        arg.event._def.extendedProps.calId
-      ].ownerEmails?.map((email) => email.toLowerCase())
-    );
 
-    const delegated = (
-      event._def.extendedProps.temp ? tempcalendars : calendars
-    )[arg.event._def.extendedProps.calId].delegated;
     const showSpecialDisplay = attendees.filter((att: userAttendee) =>
       ownerEmails.has(att.cal_address.toLowerCase())
     );
-    if (!delegated && showSpecialDisplay.length === 0) return null;
-
+    // if no special display
+    if (attendees.length && !delegated && !showSpecialDisplay.length) {
+      return React.createElement(
+        "div",
+        { style: { display: "flex", alignItems: "center" } },
+        React.createElement("span", event.title)
+      );
+    }
     switch (showSpecialDisplay?.[0]?.partstat) {
       case "DECLINED":
         Icon = null;
