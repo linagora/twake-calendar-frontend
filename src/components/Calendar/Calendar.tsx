@@ -1,5 +1,4 @@
 import FullCalendar from "@fullcalendar/react";
-
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -37,38 +36,14 @@ import LockIcon from "@mui/icons-material/Lock";
 import { userAttendee } from "../../features/User/userDataTypes";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
-
-// Function to hide/show slot labels based on current time
-const updateSlotLabelVisibility = (currentTime: Date) => {
-  const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-
-  slotLabels.forEach((label) => {
-    const labelElement = label as HTMLElement;
-    const timeText = labelElement.textContent?.trim();
-
-    if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
-      const [hours, minutes] = timeText.split(":").map(Number);
-      const labelMinutes = hours * 60 + minutes;
-
-      // Calculate time difference in minutes
-      let timeDiff = Math.abs(currentMinutes - labelMinutes);
-
-      // Handle edge case around midnight (00:00)
-      if (timeDiff > 12 * 60) {
-        // More than 12 hours difference
-        timeDiff = 24 * 60 - timeDiff; // Wrap around
-      }
-
-      // Dim if within 15 minutes (before or after)
-      if (timeDiff <= 15) {
-        labelElement.style.opacity = "0.2";
-      } else {
-        labelElement.style.opacity = "1";
-      }
-    }
-  });
-};
+import {
+  updateSlotLabelVisibility,
+  eventToFullCalendarFormat,
+  extractEvents,
+  updateCalsDetails,
+} from "./utils/calendarUtils";
+import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
+import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -84,20 +59,20 @@ export default function CalendarApp({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
   const tokens = useAppSelector((state) => state.user.tokens);
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!tokens || !user) {
+    if (!tokens || !userId) {
       dispatch(push("/"));
     }
-  }, [tokens, user]);
+  }, [tokens, userId]);
 
   const calendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
   const pending = useAppSelector((state) => state.calendars.pending);
-  const userId =
-    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>
@@ -207,53 +182,39 @@ export default function CalendarApp({
     {} as CalendarEvent
   );
 
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
-    setSelectedRange(selectInfo);
-    setAnchorEl(document.body); // fallback: we could use selectInfo.jsEvent.target if from a click
-  };
+  // Event handlers
+  const eventHandlers = useCalendarEventHandlers({
+    setSelectedRange,
+    setAnchorEl,
+    calendarRef,
+    selectedCalendars,
+    tempcalendars,
+    calendarRange,
+    dispatch,
+    setOpenEventDisplay,
+    setAnchorPosition,
+    setEventDisplayedId,
+    setEventDisplayedCalId,
+    setEventDisplayedTemp,
+    calendars,
+  });
 
-  const handleClosePopover = () => {
-    calendarRef.current?.unselect();
-    setAnchorEl(null);
-    setSelectedRange(null);
-    selectedCalendars.forEach((calId) =>
-      dispatch(
-        getCalendarDetailAsync({
-          calId,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-        })
-      )
-    );
-    Object.keys(tempcalendars).forEach((calId) =>
-      dispatch(
-        getCalendarDetailAsync({
-          calId,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType: "temp",
-        })
-      )
-    );
-  };
-  const handleCloseEventDisplay = () => {
-    setAnchorPosition(null);
-    setOpenEventDisplay(false);
-  };
+  // View handlers
+  const viewHandlers = useCalendarViewHandlers({
+    calendarRef,
+    setSelectedDate,
+    setSelectedMiniDate,
+    onViewChange,
+    calendars,
+    tempcalendars,
+  });
 
   const handleMonthUp = () => {
-    setSelectedMiniDate(
-      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() - 1)
-    );
+    eventHandlers.handleMonthUp(selectedMiniDate, setSelectedMiniDate);
   };
+
   const handleMonthDown = () => {
-    setSelectedMiniDate(
-      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() + 1)
-    );
+    eventHandlers.handleMonthDown(selectedMiniDate, setSelectedMiniDate);
   };
 
   if (process.env.NODE_ENV === "test") {
@@ -265,7 +226,9 @@ export default function CalendarApp({
       <div className="sidebar">
         <Button
           variant="contained"
-          onClick={() => handleDateSelect(null as unknown as DateSelectArg)}
+          onClick={() =>
+            eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
+          }
         >
           <AddIcon /> <p>Create Event</p>
         </Button>
@@ -378,7 +341,7 @@ export default function CalendarApp({
           selectable={true}
           timeZone="local"
           height={"100%"}
-          select={handleDateSelect}
+          select={eventHandlers.handleDateSelect}
           nowIndicator
           headerToolbar={false}
           views={{
@@ -448,433 +411,21 @@ export default function CalendarApp({
               </div>
             );
           }}
-          dayHeaderDidMount={(arg) => {
-            // Add click handler to day headers in week view
-            if (arg.view.type === "timeGridWeek") {
-              const headerEl = arg.el;
-
-              const handleDayHeaderClick = () => {
-                // Switch to day view and navigate to the clicked date
-                calendarRef.current?.changeView("timeGridDay", arg.date);
-                setSelectedDate(new Date(arg.date));
-                setSelectedMiniDate(new Date(arg.date));
-
-                // Notify parent about view change
-                if (onViewChange) {
-                  onViewChange("timeGridDay");
-                }
-              };
-
-              headerEl.addEventListener("click", handleDayHeaderClick);
-
-              // Store the handler for cleanup
-              (headerEl as any).__dayHeaderClickHandler = handleDayHeaderClick;
-            }
-          }}
-          dayHeaderWillUnmount={(arg) => {
-            // Clean up event listeners to prevent memory leaks
-            const headerEl = arg.el;
-            if ((headerEl as any).__dayHeaderClickHandler) {
-              headerEl.removeEventListener(
-                "click",
-                (headerEl as any).__dayHeaderClickHandler
-              );
-              delete (headerEl as any).__dayHeaderClickHandler;
-            }
-          }}
-          viewDidMount={(arg) => {
-            // Update now indicator arrow with current time and hide nearby slot labels
-            const updateNowIndicator = () => {
-              const nowIndicatorArrow = document.querySelector(
-                ".fc-timegrid-now-indicator-arrow"
-              ) as HTMLElement;
-              if (nowIndicatorArrow) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString(undefined, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                });
-                nowIndicatorArrow.setAttribute("data-time", timeString);
-
-                // Hide slot labels that are too close to current time
-                updateSlotLabelVisibility(now);
-              }
-            };
-
-            // Update immediately and then every minute
-            updateNowIndicator();
-            const timeInterval = setInterval(updateNowIndicator, 60000);
-
-            // Watch for now indicator arrow creation and slot label changes
-            const observer = new MutationObserver((mutations) => {
-              mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                  if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node as Element;
-                    if (
-                      element.classList?.contains(
-                        "fc-timegrid-now-indicator-arrow"
-                      ) ||
-                      element.querySelector?.(
-                        ".fc-timegrid-now-indicator-arrow"
-                      ) ||
-                      element.classList?.contains("fc-timegrid-slot-label") ||
-                      element.querySelector?.(".fc-timegrid-slot-label")
-                    ) {
-                      setTimeout(() => {
-                        updateNowIndicator();
-                        updateSlotLabelVisibility(new Date());
-                      }, 10);
-                    }
-                  }
-                });
-              });
-            });
-
-            observer.observe(document.body, {
-              childList: true,
-              subtree: true,
-            });
-
-            // Store interval and observer for cleanup
-            (arg.el as any).__timeInterval = timeInterval;
-            (arg.el as any).__timeObserver = observer;
-
-            // Add global hover effect for week and day views
-            if (
-              arg.view.type === "timeGridWeek" ||
-              arg.view.type === "timeGridDay"
-            ) {
-              const calendarEl = document.querySelector(".fc") as HTMLElement;
-              if (calendarEl) {
-                const handleMouseMove = (e: MouseEvent) => {
-                  // Find the timegrid container
-                  const timegridEl =
-                    calendarEl.querySelector(".fc-timegrid-body");
-                  if (!timegridEl) return;
-
-                  // Check if mouse is over all-day events area (fc-scrollgrid-sync-table)
-                  const allDayTable = calendarEl.querySelector(
-                    ".fc-scrollgrid-sync-table"
-                  );
-                  if (allDayTable) {
-                    const allDayRect = allDayTable.getBoundingClientRect();
-                    if (
-                      e.clientY >= allDayRect.top &&
-                      e.clientY <= allDayRect.bottom
-                    ) {
-                      // Mouse is over all-day events area, don't show highlight
-                      timegridEl
-                        .querySelectorAll(".hour-highlight")
-                        .forEach((el: Element) => el.remove());
-                      return;
-                    }
-                  }
-
-                  // Check if mouse is over time slot labels (left side with hours)
-                  const target = e.target as HTMLElement;
-                  if (target && target.closest(".fc-timegrid-slot-label")) {
-                    // Mouse is over time slot labels, don't show highlight
-                    timegridEl
-                      .querySelectorAll(".hour-highlight")
-                      .forEach((el: Element) => el.remove());
-                    return;
-                  }
-
-                  // Get all day columns
-                  const dayColumns =
-                    timegridEl.querySelectorAll(".fc-timegrid-col");
-                  if (dayColumns.length === 0) return;
-
-                  // Remove previous highlights
-                  timegridEl
-                    .querySelectorAll(".hour-highlight")
-                    .forEach((el: Element) => el.remove());
-
-                  // Find which day column the mouse is over
-                  let targetColumn: Element | null = null;
-                  for (const column of dayColumns) {
-                    const rect = column.getBoundingClientRect();
-                    if (e.clientX >= rect.left && e.clientX <= rect.right) {
-                      targetColumn = column;
-                      break;
-                    }
-                  }
-
-                  if (targetColumn) {
-                    const rect = targetColumn.getBoundingClientRect();
-                    const relativeY = e.clientY - rect.top;
-                    const hourHeight = rect.height / 24; // Assuming 24 hours
-                    const hourIndex = Math.floor(relativeY / hourHeight);
-
-                    // Only show highlight if mouse is actually over the timegrid area (not all-day events)
-                    if (relativeY >= 0 && relativeY <= rect.height) {
-                      // Create highlight for the specific hour in the specific day
-                      const highlight = document.createElement("div");
-                      highlight.className = "hour-highlight";
-                      highlight.style.top = `${hourIndex * hourHeight}px`;
-                      highlight.style.height = `${hourHeight}px`;
-
-                      (targetColumn as HTMLElement).style.position = "relative";
-                      targetColumn.appendChild(highlight);
-                    }
-                  }
-                };
-
-                const handleMouseLeave = () => {
-                  // Remove all hour highlights when mouse leaves calendar
-                  const timegridEl =
-                    calendarEl.querySelector(".fc-timegrid-body");
-                  if (timegridEl) {
-                    timegridEl
-                      .querySelectorAll(".hour-highlight")
-                      .forEach((el: Element) => el.remove());
-                  }
-                };
-
-                calendarEl.addEventListener("mousemove", handleMouseMove);
-                calendarEl.addEventListener("mouseleave", handleMouseLeave);
-
-                // Store handlers for cleanup
-                (calendarEl as any).__calendarMouseMoveHandler =
-                  handleMouseMove;
-                (calendarEl as any).__calendarMouseLeaveHandler =
-                  handleMouseLeave;
-              }
-            }
-          }}
-          viewWillUnmount={(arg) => {
-            // Clean up time interval
-            if ((arg.el as any).__timeInterval) {
-              clearInterval((arg.el as any).__timeInterval);
-              delete (arg.el as any).__timeInterval;
-            }
-
-            // Clean up observer
-            if ((arg.el as any).__timeObserver) {
-              (arg.el as any).__timeObserver.disconnect();
-              delete (arg.el as any).__timeObserver;
-            }
-
-            // Clean up event listeners to prevent memory leaks
-            const calendarEl = document.querySelector(".fc") as HTMLElement;
-            if (calendarEl) {
-              if ((calendarEl as any).__calendarMouseMoveHandler) {
-                calendarEl.removeEventListener(
-                  "mousemove",
-                  (calendarEl as any).__calendarMouseMoveHandler
-                );
-                delete (calendarEl as any).__calendarMouseMoveHandler;
-              }
-              if ((calendarEl as any).__calendarMouseLeaveHandler) {
-                calendarEl.removeEventListener(
-                  "mouseleave",
-                  (calendarEl as any).__calendarMouseLeaveHandler
-                );
-                delete (calendarEl as any).__calendarMouseLeaveHandler;
-              }
-            }
-          }}
-          eventClick={(info) => {
-            info.jsEvent.preventDefault(); // don't let the browser navigate
-
-            if (info.event.url) {
-              window.open(info.event.url);
-            } else {
-              console.log(info.event);
-              setOpenEventDisplay(true);
-              setAnchorPosition({
-                top: info.jsEvent.clientY,
-                left: info.jsEvent.clientX,
-              });
-              setEventDisplayedId(info.event.extendedProps.uid);
-              setEventDisplayedCalId(info.event.extendedProps.calId);
-              setEventDisplayedTemp(info.event._def.extendedProps.temp);
-            }
-          }}
-          eventAllow={(dropInfo, draggedEvent) => {
-            if (
-              draggedEvent?.extendedProps.uid &&
-              draggedEvent.extendedProps.uid.split("/")[1]
-            ) {
-              return false;
-            }
-            return true;
-          }}
-          eventDrop={(arg) => {
-            if (
-              !arg.event ||
-              !arg.event._def ||
-              !arg.event._def.extendedProps
-            ) {
-              return;
-            }
-
-            const event =
-              calendars[arg.event._def.extendedProps.calId].events[
-                arg.event._def.extendedProps.uid
-              ];
-
-            const totalDeltaMs = getDeltaInMilliseconds(arg.delta);
-
-            const originalStart = new Date(event.start);
-            const computedNewStart = new Date(
-              originalStart.getTime() + totalDeltaMs
-            );
-            const originalEnd = new Date(event.end ?? "");
-            const computedNewEnd = new Date(
-              originalEnd.getTime() + totalDeltaMs
-            );
-            const newEvent = {
-              ...event,
-              start: computedNewStart.toISOString(),
-              end: computedNewEnd.toISOString(),
-            } as CalendarEvent;
-            dispatch(
-              updateEventLocal({ calId: newEvent.calId, event: newEvent })
-            );
-            dispatch(
-              putEventAsync({ cal: calendars[newEvent.calId], newEvent })
-            );
-          }}
-          eventResize={(arg) => {
-            if (
-              !arg.event ||
-              !arg.event._def ||
-              !arg.event._def.extendedProps
-            ) {
-              return;
-            }
-
-            const event =
-              calendars[arg.event._def.extendedProps.calId].events[
-                arg.event._def.extendedProps.uid
-              ];
-            if (event.uid.split("/")[1]) {
-              dispatch(getEventAsync(event));
-            }
-            const originalStart = new Date(event.start);
-            const computedNewStart = new Date(
-              originalStart.getTime() + getDeltaInMilliseconds(arg.startDelta)
-            );
-            const originalEnd = new Date(event.end ?? "");
-            const computedNewEnd = new Date(
-              originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
-            );
-            const newEvent = {
-              ...event,
-              start: computedNewStart.toISOString(),
-              end: computedNewEnd.toISOString(),
-            } as CalendarEvent;
-
-            dispatch(
-              putEventAsync({ cal: calendars[newEvent.calId], newEvent })
-            );
-          }}
-          eventContent={(arg) => {
-            const event = arg.event;
-            if (
-              (!event._def.extendedProps.temp &&
-                !calendars[arg.event._def.extendedProps.calId]) ||
-              (event._def.extendedProps.temp &&
-                !tempcalendars[arg.event._def.extendedProps.calId])
-            )
-              return;
-
-            const attendees = event._def.extendedProps.attendee || [];
-            const isPrivate =
-              event._def.extendedProps.class === "PRIVATE" ||
-              event._def.extendedProps.class === "CONFIDENTIAL";
-            let Icon = null;
-            let titleStyle: React.CSSProperties = {};
-            const ownerEmails = new Set(
-              (event._def.extendedProps.temp ? tempcalendars : calendars)[
-                arg.event._def.extendedProps.calId
-              ].ownerEmails?.map((email) => email.toLowerCase())
-            );
-
-            const delegated = (
-              event._def.extendedProps.temp ? tempcalendars : calendars
-            )[arg.event._def.extendedProps.calId].delegated;
-            const showSpecialDisplay = attendees.filter((att: userAttendee) =>
-              ownerEmails.has(att.cal_address.toLowerCase())
-            );
-            if (!delegated && showSpecialDisplay.length === 0) return null;
-            switch (showSpecialDisplay?.[0]?.partstat) {
-              case "DECLINED":
-                Icon = null;
-                titleStyle.textDecoration = "line-through";
-                break;
-              case "TENTATIVE":
-                Icon = HelpOutlineIcon;
-                break;
-              case "NEEDS-ACTION":
-                Icon = AccessTimeIcon;
-                break;
-              case "ACCEPTED":
-                Icon = null;
-                break;
-              default:
-                break;
-            }
-
-            return (
-              <div style={{ display: "flex", alignItems: "center" }}>
-                {isPrivate && (
-                  <LockIcon
-                    data-testid="lock-icon"
-                    fontSize="small"
-                    style={{ marginRight: "4px" }}
-                  />
-                )}
-                {Icon && (
-                  <Icon fontSize="small" style={{ marginRight: "4px" }} />
-                )}
-                <span style={titleStyle}>{event.title}</span>
-              </div>
-            );
-          }}
-          eventDidMount={(arg) => {
-            const attendees = arg.event._def.extendedProps.attendee || [];
-            if (!calendars[arg.event._def.extendedProps.calId]) return;
-            const ownerEmails = new Set(
-              calendars[arg.event._def.extendedProps.calId].ownerEmails?.map(
-                (email) => email.toLowerCase()
-              )
-            );
-            const showSpecialDisplay = attendees.filter((att: userAttendee) =>
-              ownerEmails.has(att.cal_address.toLowerCase())
-            );
-
-            if (!showSpecialDisplay[0]) return;
-
-            // Clear previously applied classes
-            arg.el.classList.remove(
-              "declined-event",
-              "tentative-event",
-              "needs-action-event"
-            );
-
-            switch (showSpecialDisplay[0].partstat) {
-              case "DECLINED":
-                arg.el.classList.add("declined-event");
-                break;
-              case "TENTATIVE":
-                arg.el.classList.add("tentative-event");
-                break;
-              case "NEEDS-ACTION":
-                arg.el.classList.add("needs-action-event");
-                break;
-              default:
-                break;
-            }
-          }}
+          dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
+          dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
+          viewDidMount={viewHandlers.handleViewDidMount}
+          viewWillUnmount={viewHandlers.handleViewWillUnmount}
+          eventClick={eventHandlers.handleEventClick}
+          eventAllow={eventHandlers.handleEventAllow}
+          eventDrop={eventHandlers.handleEventDrop}
+          eventResize={eventHandlers.handleEventResize}
+          eventContent={viewHandlers.handleEventContent}
+          eventDidMount={viewHandlers.handleEventDidMount}
         />
         <EventPopover
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
-          onClose={handleClosePopover}
+          onClose={eventHandlers.handleClosePopover}
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
           calendarRef={calendarRef}
@@ -887,72 +438,10 @@ export default function CalendarApp({
             tempEvent={eventDisplayedTemp}
             anchorPosition={anchorPosition}
             open={openEventDisplay}
-            onClose={handleCloseEventDisplay}
+            onClose={eventHandlers.handleCloseEventDisplay}
           />
         )}
       </div>
     </main>
   );
-}
-
-function eventToFullCalendarFormat(
-  filteredEvents: CalendarEvent[],
-  filteredTempEvents: CalendarEvent[],
-  userId: string | undefined
-) {
-  return filteredEvents
-    .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
-    .map((e) => {
-      if (e.calId.split("/")[0] === userId) {
-        return { ...e, editable: true };
-      }
-      return { ...e, editable: false };
-    });
-}
-
-function extractEvents(
-  selectedCalendars: string[],
-  calendars: Record<string, Calendars>
-) {
-  let filteredEvents: CalendarEvent[] = [];
-  selectedCalendars.forEach((id) => {
-    if (calendars[id].events) {
-      filteredEvents = filteredEvents
-        .concat(
-          Object.keys(calendars[id].events).map(
-            (eventid) => calendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"));
-    }
-  });
-  return filteredEvents;
-}
-
-function updateCalsDetails(
-  selectedCalendars: string[],
-  pending: boolean,
-  calendars: Record<string, Calendars>,
-  rangeKey: string,
-  dispatch: Function,
-  calendarRange: { start: Date; end: Date },
-  calType?: "temp"
-) {
-  selectedCalendars.forEach((id) => {
-    if (Object.keys(calendars[id].events).length > 0) {
-      return;
-    }
-    if (!pending && rangeKey) {
-      dispatch(
-        getCalendarDetailAsync({
-          calId: id,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType,
-        })
-      );
-    }
-  });
 }

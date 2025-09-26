@@ -1,0 +1,93 @@
+import { CalendarEvent } from "../../../features/Events/EventsTypes";
+import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlice";
+
+export const updateSlotLabelVisibility = (currentTime: Date) => {
+  const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+  slotLabels.forEach((label) => {
+    const labelElement = label as HTMLElement;
+    const timeText = labelElement.textContent?.trim();
+
+    if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
+      const [hours, minutes] = timeText.split(":").map(Number);
+      const labelMinutes = hours * 60 + minutes;
+
+      let timeDiff = Math.abs(currentMinutes - labelMinutes);
+
+      if (timeDiff > 12 * 60) {
+        timeDiff = 24 * 60 - timeDiff;
+      }
+
+      if (timeDiff <= 15) {
+        labelElement.style.opacity = "0.2";
+      } else {
+        labelElement.style.opacity = "1";
+      }
+    }
+  });
+};
+
+export const eventToFullCalendarFormat = (
+  filteredEvents: CalendarEvent[],
+  filteredTempEvents: CalendarEvent[],
+  userId: string | undefined
+) => {
+  return filteredEvents
+    .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
+    .map((e) => {
+      if (e.calId.split("/")[0] === userId) {
+        return { ...e, editable: true };
+      }
+      return { ...e, editable: false };
+    });
+};
+
+export const extractEvents = (
+  selectedCalendars: string[],
+  calendars: Record<string, Calendars>
+) => {
+  let filteredEvents: CalendarEvent[] = [];
+  selectedCalendars.forEach((id) => {
+    if (calendars[id].events) {
+      filteredEvents = filteredEvents
+        .concat(
+          Object.keys(calendars[id].events).map(
+            (eventid) => calendars[id].events[eventid]
+          )
+        )
+        .filter((event) => !(event.status === "CANCELLED"));
+    }
+  });
+  return filteredEvents;
+};
+
+export const updateCalsDetails = (
+  selectedCalendars: string[],
+  pending: boolean,
+  calendars: Record<string, Calendars>,
+  rangeKey: string,
+  dispatch: Function,
+  calendarRange: { start: Date; end: Date },
+  calType?: "temp"
+) => {
+  selectedCalendars.forEach((id) => {
+    if (Object.keys(calendars[id].events).length > 0) {
+      return;
+    }
+    if (!pending && rangeKey) {
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+          calType,
+        })
+      );
+    }
+  });
+};
