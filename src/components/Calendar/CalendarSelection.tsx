@@ -215,6 +215,7 @@ function CalendarSelector({
     handleClose();
   };
   return (
+<<<<<<< HEAD
     <>
       <div>
         <label>
@@ -252,5 +253,23 @@ function CalendarSelector({
         handleDeleteConfirm={handleDeleteConfirm}
       />
     </>
+=======
+    <div key={id}>
+      <label>
+        <Checkbox
+          style={{
+            color: calendars[id].color,
+          }}
+          size="small"
+          checked={selectedCalendars.includes(id)}
+          onChange={() => handleCalendarToggle(id)}
+        />
+        {calendars[id].name}
+      </label>
+      <IconButton onClick={() => setOpen()}>
+        <MoreVertIcon />
+      </IconButton>
+    </div>
+>>>>>>> a7e29ce (feat: prepare project for cozy-ui migration)
   );
 }
