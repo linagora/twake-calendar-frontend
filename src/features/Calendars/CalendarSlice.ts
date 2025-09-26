@@ -512,6 +512,7 @@ const CalendarSlice = createSlice({
         state.list[`${action.payload.userId}/${action.payload.calId}`] = {
           color: action.payload.color,
           id: `${action.payload.userId}/${action.payload.calId}`,
+          link: `/calendars/${action.payload.userId}/${action.payload.calId}.json`,
           description: action.payload.desc,
           name: action.payload.name,
           owner: action.payload.owner,
