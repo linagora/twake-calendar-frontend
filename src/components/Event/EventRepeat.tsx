@@ -98,7 +98,7 @@ export default function RepeatEvent({
                 })
               }
               size="small"
-              sx={{ width: 80 }}
+              style={{ width: 80 }}
             />
             <Typography>
               {
@@ -136,7 +136,7 @@ export default function RepeatEvent({
 
           {/* End options */}
           <Box>
-            <Typography variant="body2" gutterBottom sx={{ mt: 2 }}>
+            <Typography variant="body2" gutterBottom style={{ marginTop: 16 }}>
               End:
             </Typography>
             <RadioGroup
@@ -187,7 +187,7 @@ export default function RepeatEvent({
                           occurrences: Number(e.target.value),
                         })
                       }
-                      sx={{ width: 100 }}
+                      style={{ width: 100 }}
                       inputProps={{ min: 1 }}
                       disabled={endOption !== "after"}
                     />
