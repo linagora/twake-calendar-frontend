@@ -10,9 +10,10 @@ import {
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  patchCalendarAsync,
-  patchACLCalendarAsync,
   createCalendarAsync,
+  importEventFromFileAsync,
+  patchACLCalendarAsync,
+  patchCalendarAsync
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { AccessTab } from "./AccessTab";
@@ -34,6 +35,7 @@ function CalendarPopover({
   const dispatch = useAppDispatch();
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const calendars = useAppSelector((state) => state.calendars.list);
   const isOwn = calendar ? calendar?.id.split("/")[0] === userId : true;
 
   // existing calendar params
@@ -138,11 +140,13 @@ function CalendarPopover({
         );
       }
     } else {
-      console.log(
-        "dispatch import for existing cal",
-        importTarget,
-        importedContent
-      );
+      importedContent &&
+        dispatch(
+          importEventFromFileAsync({
+            calLink: calendars[importTarget].link,
+            file: importedContent,
+          })
+        );
     }
     handleClose({}, "backdropClick");
   };
@@ -229,7 +233,7 @@ function CalendarPopover({
           Cancel
         </Button>
         <Button
-          disabled={tab === "import" ? !newCalName.trim() : !name.trim()}
+          disabled={tab === "import" ? !importedContent : !name.trim()}
           variant="contained"
           onClick={tab === "import" ? handleImport : handleSave}
         >

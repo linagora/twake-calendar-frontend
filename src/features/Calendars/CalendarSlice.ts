@@ -12,13 +12,20 @@ import {
 } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
-import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
 import {
-  formatDateToYYYYMMDDTHHMMSS,
+  deleteEvent,
+  getEvent,
+  importEventFromFile,
+  moveEvent,
+  putEvent,
+} from "../Events/EventApi";
+import {
   computeWeekRange,
+  formatDateToYYYYMMDDTHHMMSS,
 } from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
 import { getCalendarVisibility } from "../../components/Calendar/utils/calendarUtils";
+import { importFile } from "../../utils/apiUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -328,6 +335,17 @@ export const addSharedCalendarAsync = createAsyncThunk<
     }`,
     ownerEmails: ownerData.emails,
   };
+});
+
+export const importEventFromFileAsync = createAsyncThunk<
+  void,
+  {
+    calLink: string;
+    file: File;
+  }
+>("calendars/getCalendarDetails", async ({ calLink, file }) => {
+  const id = ((await importFile(file)) as Record<string, string>)._id;
+  const response = await importEventFromFile(id, calLink);
 });
 
 const CalendarSlice = createSlice({
