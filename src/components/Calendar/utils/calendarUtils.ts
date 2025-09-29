@@ -140,16 +140,12 @@ interface AclEntry {
   protected: boolean;
 }
 
-export function getCalendarVisibility(
-  acl: AclEntry[],
-  ownerId: string
-): "private" | "public" {
+export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   let hasRead = false;
   let hasFreeBusy = false;
 
   for (const entry of acl) {
-    // Skip owner
-    if (entry.principal.includes(ownerId)) continue;
+    if (entry.principal !== "{DAV:}authenticated") continue;
 
     if (entry.privilege === "{DAV:}read") {
       hasRead = true;

@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-  createCalendarAsync /*, updateCalendarAsync */,
+ createCalendarAsync,
+  patchACLCalendarAsync,
   patchCalendarAsync,
 } from "../../features/Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  Popover,
   TextField,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
+
   Tabs,
   Tab,
-  DialogActions,
   ToggleButton,
   Box,
   ToggleButtonGroup,
@@ -22,6 +19,11 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  IconButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import { ColorPicker } from "../../components/Calendar/CalendarColorPicker";
 import PublicIcon from "@mui/icons-material/Public";
@@ -29,6 +31,9 @@ import LockIcon from "@mui/icons-material/Lock";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import WebAssetTwoToneIcon from "@mui/icons-material/WebAssetTwoTone";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
+import { SnackbarAlert } from "../../components/Loading/SnackBarAlert";
 
 function CalendarPopover({
   open,
@@ -65,6 +70,7 @@ function CalendarPopover({
         setName("");
         setDescription("");
         setColor("");
+        setVisibility("public");
       }
     }
   }, [calendar, open]);
@@ -84,6 +90,15 @@ function CalendarPopover({
             patch: { name: trimmedName, desc: trimmedDesc, color },
           })
         );
+        if (visibility !== calendar.visibility) {
+          dispatch(
+            patchACLCalendarAsync({
+              calId: calendar.id,
+              calLink: calendar.link,
+              request: visibility === "public" ? "{DAV:}read" : "",
+            })
+          );
+        }
       } else {
         dispatch(
           createCalendarAsync({
@@ -92,6 +107,13 @@ function CalendarPopover({
             color,
             userId,
             calId,
+          })
+        );
+        dispatch(
+          patchACLCalendarAsync({
+            calId: `${userId}/${calId}`,
+            calLink: `/calendars/${userId}/${calId}.json`,
+            request: visibility === "public" ? "{DAV:}read" : "",
           })
         );
       }
@@ -114,7 +136,18 @@ function CalendarPopover({
   };
 
   return (
-    <Dialog open={open} onClose={(e, reason) => onClose(e, reason)}>
+    <Dialog
+      open={open}
+      onClose={(e, reason) => handleClose(e, reason)}
+      maxWidth="lg"
+      slotProps={{
+        paper: {
+          sx: {
+            width: "40vw",
+          },
+        },
+      }}
+    >
       <DialogTitle>
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab
@@ -126,6 +159,7 @@ function CalendarPopover({
         </Tabs>
       </DialogTitle>
       <DialogContent>
+
         {tab === "access" && calendar && <AccessTab calendar={calendar} />}
         {tab === "settings" && (
           <SetttingTab
@@ -137,6 +171,7 @@ function CalendarPopover({
             setColor={setColor}
             visibility={visibility}
             setVisibility={setVisibility}
+            calendar={calendar}
           />
         )}
         {tab === "import" && (
@@ -146,23 +181,20 @@ function CalendarPopover({
           />
         )}
       </DialogContent>
-
       <DialogActions>
-        <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
-          <Button
-            variant="outlined"
-            onClick={(e) => handleClose({}, "backdropClick")}
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={!name.trim()}
-            variant="contained"
-            onClick={handleSave}
-          >
-            {calendar ? "Save" : "Create"}
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          onClick={(e) => handleClose({}, "backdropClick")}
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={!name.trim()}
+          variant="contained"
+          onClick={handleSave}
+        >
+          {calendar ? "Save" : "Create"}
+        </Button>
       </DialogActions>
     </Dialog>
   );
@@ -261,10 +293,34 @@ function ImportTab({
 }
 
 function AccessTab({ calendar }: { calendar: Calendars }) {
+  const calDAVLink = `${(window as any).CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
+  const [open, setOpen] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(calDAVLink);
+    setOpen(true);
+  };
+
   return (
-    <Box mt={2}>
-      <TextField disabled value={calendar.link} />
-    </Box>
+    <>
+      <Box mt={2}>
+        <TextField
+          disabled
+          fullWidth
+          label="CalDAV access"
+          value={calDAVLink}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <IconButton onClick={handleCopy} edge="end">
+                  <ContentCopyIcon />
+                </IconButton>
+              ),
+            },
+          }}
+        />
+      </Box>
+      <SnackbarAlert setOpen={setOpen} open={open} message="Link copied!" />
+    </>
   );
 }
 
@@ -277,6 +333,7 @@ function SetttingTab({
   setColor,
   visibility,
   setVisibility,
+  calendar,
 }: {
   name: string;
   setName: Function;
@@ -286,9 +343,12 @@ function SetttingTab({
   setColor: Function;
   visibility: "public" | "private";
   setVisibility: Function;
+  calendar?: Calendars;
 }) {
   const [toggleDesc, setToggleDesc] = useState(Boolean(description));
-
+  const userId =
+    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const isOwn = calendar?.id.split("/")[0] === userId;
   return (
     <Box mt={2}>
       <TextField
@@ -340,22 +400,26 @@ function SetttingTab({
       {/* Visibility */}
       <Box mt={2}>
         <Typography variant="body2" gutterBottom>
-          New events created will be visible to:
+          {isOwn && "New events created will be visible to:"}
+          {!isOwn && `${calendar?.owner} gave the right to:`}
         </Typography>
         <ToggleButtonGroup
           value={visibility}
           exclusive
+          disabled={!isOwn}
           onChange={(e, val) => val && setVisibility(val)}
           size="small"
         >
           <ToggleButton value="public">
             <PublicIcon fontSize="small" />
-            All
+            {isOwn ? "All" : "Read"}
           </ToggleButton>
-          <ToggleButton value="private">
-            <LockIcon fontSize="small" />
-            You
-          </ToggleButton>
+          {isOwn && (
+            <ToggleButton value="private">
+              <LockIcon fontSize="small" />
+              You
+            </ToggleButton>
+          )}
         </ToggleButtonGroup>
       </Box>
     </Box>
