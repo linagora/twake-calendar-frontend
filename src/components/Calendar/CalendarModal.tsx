@@ -93,14 +93,14 @@ function CalendarPopover({
     }
   };
 
-  const createCalendar = (
+  const createCalendar = async (
+    calId: string,
     name: string,
     desc: string,
     color: string,
     visibility: string
   ) => {
-    const calId = crypto.randomUUID();
-    dispatch(
+    await dispatch(
       createCalendarAsync({
         name: name.trim(),
         desc: desc.trim(),
@@ -124,20 +124,29 @@ function CalendarPopover({
     if (calendar) {
       updateCalendar(calendar.id, calendar.link);
     } else {
-      createCalendar(name, description, color, visibility);
+      createCalendar(crypto.randomUUID(), name, description, color, visibility);
     }
     handleClose({}, "backdropClick");
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (importTarget === "new") {
+      const calId = crypto.randomUUID();
       if (newCalName.trim()) {
-        createCalendar(
+        await createCalendar(
+          calId,
           newCalName,
           newCalDescription,
           newCalColor,
           newCalVisibility
         );
+        importedContent &&
+          dispatch(
+            importEventFromFileAsync({
+              calLink: `/calendar/${userId}/${calId}.json`,
+              file: importedContent,
+            })
+          );
       }
     } else {
       importedContent &&
