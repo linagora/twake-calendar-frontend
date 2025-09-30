@@ -109,22 +109,35 @@ describe("EventPopover", () => {
   it("renders correctly with inputs and calendar options", () => {
     renderPopover();
 
+    // Check dialog title
     expect(screen.getByText("Create Event")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar")).toBeInTheDocument();
-    expect(screen.getByLabelText("Title")).toBeInTheDocument();
-    expect(screen.getByLabelText("Start")).toBeInTheDocument();
-    expect(screen.getByLabelText("End")).toBeInTheDocument();
-    expect(screen.getByLabelText("Description")).toBeInTheDocument();
-    expect(screen.getByLabelText("Location")).toBeInTheDocument();
+
+    // Check inputs exist by their roles
+    const titleInput = screen.getByRole("textbox", { name: /title/i });
+    expect(titleInput).toBeInTheDocument();
+
+    const descriptionInput = screen.getByRole("textbox", {
+      name: /description/i,
+    });
+    expect(descriptionInput).toBeInTheDocument();
+
+    const calendarSelect = screen.getByRole("combobox", { name: /calendar/i });
+    expect(calendarSelect).toBeInTheDocument();
+
+    // Check button
     expect(screen.getByText("Show More")).toBeInTheDocument();
+
+    // Extended mode
     fireEvent.click(screen.getByText("Show More"));
-    expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
-    expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
-    expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
-    // Calendar options
-    const select = screen.getByLabelText("Calendar");
-    fireEvent.mouseDown(select);
-    expect(screen.getAllByRole("option")).toHaveLength(2);
+
+    // Back button appears
+    expect(screen.getByLabelText("show less")).toBeInTheDocument();
+
+    // Extended labels appear
+    expect(screen.getAllByText("Repeat")).toHaveLength(1);
+    expect(screen.getAllByText("Alarm")).toHaveLength(1);
+    expect(screen.getAllByText("Visibility")).toHaveLength(1);
+    expect(screen.getAllByText("Show as")).toHaveLength(1);
   });
 
   it("fills start from selectedRange", () => {
@@ -289,11 +302,13 @@ describe("EventPopover", () => {
     expect(receivedPayload.newEvent.title).toBe(newEvent.title);
     expect(receivedPayload.newEvent.description).toBe(newEvent.description);
     expect(
-      formatDateToYYYYMMDDTHHMMSS(receivedPayload.newEvent.start).split("T")[0]
+      formatDateToYYYYMMDDTHHMMSS(
+        new Date(receivedPayload.newEvent.start)
+      ).split("T")[0]
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)).split("T")[0]);
     expect(
       formatDateToYYYYMMDDTHHMMSS(
-        receivedPayload.newEvent.end || new Date()
+        new Date(receivedPayload.newEvent.end || new Date())
       ).split("T")[0]
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.end)).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);

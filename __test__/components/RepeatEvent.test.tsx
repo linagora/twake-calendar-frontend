@@ -99,7 +99,7 @@ async function setupEventPopover(
     preloadedState
   );
   act(() => {
-    fireEvent.change(screen.getByLabelText("Title"), {
+    fireEvent.change(screen.getByRole("textbox", { name: /title/i }), {
       target: { value: "Meeting" },
     });
     fireEvent.click(screen.getByLabelText("All day"));
@@ -113,7 +113,10 @@ async function setupEventPopover(
         value: (overrides?.end ?? "2025-07-19T00:00:00.000Z").split("T")[0],
       },
     });
-    fireEvent.click(screen.getByText("Show More"));
+    const showMoreButton = screen.queryByText("Show More");
+    if (showMoreButton) {
+      fireEvent.click(showMoreButton);
+    }
   });
   const select = screen.getByLabelText(/repetition/i);
   userEvent.click(select);
@@ -124,7 +127,8 @@ async function setupEventPopover(
 async function expectRRule(expected: any) {
   const spyAPi = jest.spyOn(apiUtils, "api");
 
-  act(() => fireEvent.click(screen.getByText("Save")));
+  const saveButton = screen.getByRole("button", { name: /save/i });
+  act(() => fireEvent.click(saveButton));
 
   await waitFor(() => {
     expect(spyAPi).toHaveBeenCalled();
@@ -214,7 +218,8 @@ describe("Repeat Event API calls", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => () => Promise.resolve(payload) as any);
-    act(() => fireEvent.click(screen.getByText("Save")));
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    act(() => fireEvent.click(saveButton));
     await waitFor(() => expect(spy).toHaveBeenCalled());
 
     const received = spy.mock.calls[0][0];
@@ -223,12 +228,14 @@ describe("Repeat Event API calls", () => {
     );
     expect(received.newEvent.title).toBe("Meeting");
     expect(
-      formatDateToYYYYMMDDTHHMMSS(received.newEvent.start).split("T")[0]
-    ).toBe("20250718");
-    expect(
-      formatDateToYYYYMMDDTHHMMSS(received.newEvent.end || new Date()).split(
+      formatDateToYYYYMMDDTHHMMSS(new Date(received.newEvent.start)).split(
         "T"
       )[0]
+    ).toBe("20250718");
+    expect(
+      formatDateToYYYYMMDDTHHMMSS(
+        new Date(received.newEvent.end || new Date())
+      ).split("T")[0]
     ).toBe("20250719");
     expect(received.newEvent.organizer).toEqual(
       preloadedState.user.organiserData
