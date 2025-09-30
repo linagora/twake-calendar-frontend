@@ -13,7 +13,7 @@ import {
   createCalendarAsync,
   importEventFromFileAsync,
   patchACLCalendarAsync,
-  patchCalendarAsync
+  patchCalendarAsync,
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { AccessTab } from "./AccessTab";

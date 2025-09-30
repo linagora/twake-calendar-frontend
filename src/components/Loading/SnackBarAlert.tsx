@@ -17,10 +17,7 @@ export function SnackbarAlert({
       onClose={() => setOpen(false)}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
-      <Alert
-        onClose={() => setOpen(false)}
-        sx={{ width: "100%" }}
-      >
+      <Alert onClose={() => setOpen(false)} sx={{ width: "100%" }}>
         {message}
       </Alert>
     </Snackbar>
