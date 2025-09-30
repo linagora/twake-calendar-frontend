@@ -15,10 +15,10 @@ export function DeleteCalendarDialog({
   handleDeleteConfirm,
 }: {
   deletePopupOpen: boolean;
-  setDeletePopupOpen: Function;
+  setDeletePopupOpen: (e: boolean) => void;
   calendars: Record<string, Calendars>;
   id: string;
-  isPersonnal: Boolean;
+  isPersonnal: boolean;
   handleDeleteConfirm: () => void;
 }) {
   return (
