@@ -1,5 +1,5 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
-import CalendarPopover from "../../../src/features/Calendars/CalendarModal";
+import CalendarPopover from "../../../src/components/Calendar/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 
@@ -23,11 +23,7 @@ describe("CalendarPopover", () => {
       calendars: { list: {}, pending: true },
     };
     renderWithProviders(
-      <CalendarPopover
-        anchorEl={document.body}
-        open={open}
-        onClose={mockOnClose}
-      />,
+      <CalendarPopover open={open} onClose={mockOnClose} />,
       preloadedState
     );
   };
@@ -133,7 +129,6 @@ describe("CalendarPopover (editing mode)", () => {
   it("prefills fields when calendar prop is given", () => {
     renderWithProviders(
       <CalendarPopover
-        anchorEl={document.body}
         open={true}
         onClose={mockOnClose}
         calendar={existingCalendar}
@@ -149,14 +144,9 @@ describe("CalendarPopover (editing mode)", () => {
   });
 
   test("Save button is disabled when name is empty or whitespace only", () => {
-    renderWithProviders(
-      <CalendarPopover
-        anchorEl={document.createElement("div")}
-        open={true}
-        onClose={jest.fn()}
-      />,
-      { user: baseUser }
-    );
+    renderWithProviders(<CalendarPopover open={true} onClose={jest.fn()} />, {
+      user: baseUser,
+    });
 
     const saveButton = screen.getByRole("button", { name: /save/i });
     expect(saveButton).toBeDisabled();
@@ -180,7 +170,6 @@ describe("CalendarPopover (editing mode)", () => {
 
     renderWithProviders(
       <CalendarPopover
-        anchorEl={document.body}
         open={true}
         onClose={mockOnClose}
         calendar={existingCalendar}

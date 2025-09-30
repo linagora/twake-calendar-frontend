@@ -2,26 +2,24 @@ import { useEffect, useState } from "react";
 import {
   createCalendarAsync /*, updateCalendarAsync */,
   patchCalendarAsync,
-} from "./CalendarSlice";
+} from "../../features/Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  Popover,
   TextField,
   Button,
-  Box,
-  Typography,
-  ButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
-import { ColorPicker } from "../../components/Calendar/CalendarColorPicker";
-import { Calendars } from "./CalendarTypes";
+import { ColorPicker } from "./CalendarColorPicker";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 
 function CalendarPopover({
-  anchorEl,
   open,
   onClose,
   calendar,
 }: {
-  anchorEl: HTMLElement | null;
   open: boolean;
   onClose: (
     event: object | null,
@@ -96,21 +94,11 @@ function CalendarPopover({
   ];
 
   return (
-    <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={(e, reason) => onClose(e, reason)}
-      anchorOrigin={{ vertical: "center", horizontal: "center" }}
-      transformOrigin={{ vertical: "center", horizontal: "center" }}
-    >
-      <Box p={2}>
-        <Typography
-          variant="h6"
-          gutterBottom
-          style={{ backgroundColor: color }}
-        >
-          Calendar configuration
-        </Typography>
+    <Dialog open={open} onClose={(e, reason) => onClose(e, reason)}>
+      <DialogTitle style={{ backgroundColor: color }}>
+        Calendar configuration
+      </DialogTitle>
+      <DialogContent>
         <TextField
           fullWidth
           label="Name"
@@ -133,24 +121,24 @@ function CalendarPopover({
           onChange={(color) => setColor(color)}
           selectedColor={color}
         />
+      </DialogContent>
 
-        <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-          <Button
-            variant="outlined"
-            onClick={(e) => onClose({}, "backdropClick")}
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={!name.trim()}
-            variant="contained"
-            onClick={handleSave}
-          >
-            Save
-          </Button>
-        </Box>
-      </Box>
-    </Popover>
+      <DialogActions>
+        <Button
+          variant="outlined"
+          onClick={(e) => onClose({}, "backdropClick")}
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={!name.trim()}
+          variant="contained"
+          onClick={handleSave}
+        >
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

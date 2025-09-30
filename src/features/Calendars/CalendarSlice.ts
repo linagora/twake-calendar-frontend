@@ -7,6 +7,7 @@ import {
   getCalendars,
   postCalendar,
   proppatchCalendar,
+  removeCalendar,
 } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
@@ -191,6 +192,22 @@ export const patchCalendarAsync = createAsyncThunk<
   };
 });
 
+export const removeCalendarAsync = createAsyncThunk<
+  {
+    calId: string;
+  },
+  {
+    calId: string;
+    calLink: string;
+  }
+>("calendars/removeCalendar", async ({ calId, calLink }) => {
+  const response = await removeCalendar(calLink);
+  return {
+    calId,
+    calLink,
+  };
+});
+
 export const moveEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
   { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
@@ -258,6 +275,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
   {
     calId: string;
     color: string;
+    link: string;
     name: string;
     desc: string;
     owner: string;
@@ -278,6 +296,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
       .replace("/calendars/", "")
       .replace(".json", ""),
     color: cal.cal["apple:color"],
+    link: `/calendars/${userId}/${calId}.json`,
     desc: cal.cal["caldav:description"],
     name: cal.cal["dav:name"],
     owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
@@ -527,12 +546,17 @@ const CalendarSlice = createSlice({
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
+          link: action.payload.link,
           description: action.payload.desc,
           name: action.payload.name,
           events: {},
           owner: action.payload.owner,
           ownerEmails: action.payload.ownerEmails,
         } as Calendars;
+      })
+      .addCase(removeCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        delete state.list[action.payload.calId];
       })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
@@ -562,6 +586,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(addSharedCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(removeCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },
