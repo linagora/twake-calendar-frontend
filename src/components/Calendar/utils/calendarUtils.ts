@@ -94,7 +94,7 @@ export const updateCalsDetails = (
   });
 
   if (rangeKey !== previousRangeKey) {
-    selectedCalendars.forEach((id) => {
+    selectedCalendars?.forEach((id) => {
       dispatch(
         getCalendarDetailAsync({
           calId: id,
