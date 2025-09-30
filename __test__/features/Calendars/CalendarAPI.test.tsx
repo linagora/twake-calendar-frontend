@@ -5,6 +5,7 @@ import {
   getCalendars,
   postCalendar,
   proppatchCalendar,
+  removeCalendar,
 } from "../../../src/features/Calendars/CalendarApi";
 import { clientConfig } from "../../../src/features/User/oidcAuth";
 import { api } from "../../../src/utils/apiUtils";
@@ -97,6 +98,18 @@ describe("Calendar API", () => {
         "caldav:description": "desc",
         "apple:color": "calId",
       }),
+    });
+  });
+
+  it("remove Calendar", async () => {
+    const calLink = "/calendars/calId.json";
+    const result = await removeCalendar(calLink);
+
+    expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
     });
   });
 });

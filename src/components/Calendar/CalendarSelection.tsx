@@ -2,15 +2,19 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
-import CalendarPopover from "../../features/Calendars/CalendarModal";
+import CalendarPopover from "./CalendarModal";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CalendarSearch from "./CalendarSearch";
+import { Divider, Menu, MenuItem } from "@mui/material";
+import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
 function CalendarAccordion({
   title,
@@ -59,21 +63,21 @@ function CalendarAccordion({
         )}
       </AccordionSummary>
       <AccordionDetails>
-        {calendars.map((id) =>
-          CalendarSelector(
-            allCalendars,
-            id,
-            selectedCalendars,
-            handleToggle,
-            () => setOpen(id)
-          )
-        )}
+        {calendars.map((id) => (
+          <CalendarSelector
+            key={id}
+            calendars={allCalendars}
+            id={id}
+            isPersonnal={defaultExpanded}
+            selectedCalendars={selectedCalendars}
+            handleCalendarToggle={handleToggle}
+            setOpen={() => setOpen(id)}
+          />
+        ))}
       </AccordionDetails>
     </Accordion>
   );
 }
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import CalendarSearch from "./CalendarSearch";
 
 export default function CalendarSelection({
   selectedCalendars,
@@ -151,7 +155,6 @@ export default function CalendarSelection({
         />
       </div>
       <CalendarPopover
-        anchorEl={anchorElCal}
         open={Boolean(anchorElCal)}
         calendar={calendars[selectedCalId] ?? undefined}
         onClose={() => {
@@ -173,30 +176,79 @@ export default function CalendarSelection({
   );
 }
 
-function CalendarSelector(
-  calendars: Record<string, Calendars>,
-  id: string,
-  selectedCalendars: string[],
-  handleCalendarToggle: (name: string) => void,
-  setOpen: Function
-) {
+function CalendarSelector({
+  calendars,
+  id,
+  isPersonnal,
+  selectedCalendars,
+  handleCalendarToggle,
+  setOpen,
+}: {
+  calendars: Record<string, Calendars>;
+  id: string;
+  isPersonnal: boolean;
+  selectedCalendars: string[];
+  handleCalendarToggle: (name: string) => void;
+  setOpen: Function;
+}) {
+  const dispatch = useAppDispatch();
+  const calLink =
+    useAppSelector((state) => state.calendars.list[id].link) ?? "";
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const [userId, calId] = id.split("/");
+  const isDefault = isPersonnal && userId === calId;
+
+  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+  const handleDeleteConfirm = () => {
+    dispatch(removeCalendarAsync({ calId: id, calLink }));
+    setDeletePopupOpen(false);
+    handleClose();
+  };
   return (
-    <div key={id}>
-      <label>
-        <Checkbox
-          sx={{
-            color: calendars[id].color,
-            "&.Mui-checked": { color: calendars[id].color },
-          }}
-          size="small"
-          checked={selectedCalendars.includes(id)}
-          onChange={() => handleCalendarToggle(id)}
-        />
-        {calendars[id].name}
-      </label>
-      <IconButton onClick={() => setOpen()}>
-        <MoreVertIcon />
-      </IconButton>
-    </div>
+    <>
+      <div>
+        <label>
+          <Checkbox
+            sx={{
+              color: calendars[id].color,
+              "&.Mui-checked": { color: calendars[id].color },
+            }}
+            size="small"
+            checked={selectedCalendars.includes(id)}
+            onChange={() => handleCalendarToggle(id)}
+          />
+          {calendars[id].name}
+        </label>
+        <IconButton onClick={handleClick}>
+          <MoreVertIcon />
+        </IconButton>
+      </div>
+      <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem onClick={() => setOpen()}>Modify</MenuItem>
+        {!isDefault && <Divider />}
+        {!isDefault && (
+          <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
+            {isPersonnal ? "Delete" : "Remove"}
+          </MenuItem>
+        )}
+      </Menu>
+
+      <DeleteCalendarDialog
+        deletePopupOpen={deletePopupOpen}
+        setDeletePopupOpen={setDeletePopupOpen}
+        calendars={calendars}
+        id={id}
+        isPersonnal={isPersonnal}
+        handleDeleteConfirm={handleDeleteConfirm}
+      />
+    </>
   );
 }
