@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import CircleIcon from "@mui/icons-material/Circle";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import VideocamIcon from "@mui/icons-material/Videocam";
 import {
   deleteEventAsync,
   moveEventAsync,
@@ -9,41 +13,32 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
   Button,
-  Box,
-  Typography,
   ButtonGroup,
   Card,
+  CardActions,
   CardContent,
-  Divider,
-  IconButton,
-  Avatar,
-  Badge,
-  Modal,
-  TextField,
   CardHeader,
+  Checkbox,
+  Divider,
   FormControl,
+  FormControlLabel,
+  IconButton,
   InputLabel,
   MenuItem,
+  Modal,
   Select,
   SelectChangeEvent,
-  Checkbox,
-  FormControlLabel,
-  CardActions,
-  Link,
+  TextField,
+  Typography,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import CircleIcon from "@mui/icons-material/Circle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useEffect, useState } from "react";
+import RepeatEvent from "../../components/Event/EventRepeat";
+import { InfoRow } from "../../components/Event/InfoRow";
 import { userAttendee } from "../User/userDataTypes";
 import { Calendars } from "../Calendars/CalendarTypes";
-import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { isValidUrl } from "../../utils/apiUtils";
 import { formatLocalDateTime } from "./EventModal";
-import RepeatEvent from "../../components/Event/EventRepeat";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 
 export default function EventDisplayModal({
   eventId,
@@ -406,8 +401,16 @@ export default function EventDisplayModal({
             {event.x_openpass_videoconference && (
               <InfoRow
                 icon={<VideocamIcon style={{ fontSize: 18 }} />}
-                text="Video conference available"
-                data={event.x_openpass_videoconference}
+                content={
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      window.open(event.x_openpass_videoconference)
+                    }
+                  >
+                    Join the video conference
+                  </Button>
+                }
               />
             )}
 
@@ -416,13 +419,13 @@ export default function EventDisplayModal({
               <Box style={{ marginBottom: 8 }}>
                 <Typography variant="subtitle2">Attendees:</Typography>
                 {organizer.cal_address &&
-                  renderAttendeeBadge(organizer, "org", true)}
+                  renderAttendeeBadge(organizer, "org", true, true)}
                 {(showAllAttendees
                   ? attendees
                   : attendees.slice(0, attendeeDisplayLimit)
                 ).map((a, idx) => (
                   <Box key={a.cal_address}>
-                    {renderAttendeeBadge(a, idx.toString())}
+                    {renderAttendeeBadge(a, idx.toString(), true)}
                     {isOwn && (
                       <IconButton
                         size="small"
@@ -567,120 +570,4 @@ export default function EventDisplayModal({
       </Box>
     </Modal>
   );
-}
-
-export function InfoRow({
-  icon,
-  text,
-  error = false,
-  data,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  error?: boolean;
-  data?: string;
-}) {
-  return (
-    <Box
-      style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}
-    >
-      {icon}
-      <Typography variant="body2" color={error ? "error" : "textPrimary"}>
-        {isValidUrl(data) ? <Link href={data}>{text}</Link> : text}
-      </Typography>
-    </Box>
-  );
-}
-
-export function renderAttendeeBadge(
-  a: userAttendee,
-  key: string,
-  isOrganizer?: boolean
-) {
-  const classIcon =
-    a.partstat === "ACCEPTED" ? (
-      <CheckCircleIcon fontSize="inherit" color="success" />
-    ) : a.partstat === "DECLINED" ? (
-      <CancelIcon fontSize="inherit" color="error" />
-    ) : null;
-
-  return (
-    <Box
-      key={key}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        marginBottom: 4,
-        padding: 4,
-        borderRadius: 4,
-      }}
-    >
-      <Badge
-        overlap="circular"
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        badgeContent={
-          classIcon && (
-            <Box
-              style={{
-                fontSize: 14,
-                lineHeight: 0,
-                backgroundColor: "white",
-                borderRadius: "50%",
-                padding: "1px",
-              }}
-            >
-              {classIcon}
-            </Box>
-          )
-        }
-      >
-        <Avatar {...stringAvatar(a.cn || a.cal_address)} />
-      </Badge>
-      <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <Typography
-          variant="body2"
-          noWrap
-          style={{
-            maxWidth: "180px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {a.cn || a.cal_address}
-        </Typography>
-        {isOrganizer && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            style={{ fontStyle: "italic" }}
-          >
-            Organizer
-          </Typography>
-        )}
-      </Box>
-    </Box>
-  );
-}
-
-export function stringToColor(string: string) {
-  let hash = 0;
-  for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  let color = "#";
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-
-  return color;
-}
-
-export function stringAvatar(name: string) {
-  return {
-    sx: { width: 24, height: 24, fontSize: 18, bgcolor: stringToColor(name) },
-    children: name[0],
-  };
 }
