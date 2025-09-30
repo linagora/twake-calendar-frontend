@@ -2,7 +2,9 @@ import {
   putEvent,
   moveEvent,
   deleteEvent,
+  importEventFromFile,
 } from "../../../src/features/Events/EventApi";
+import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { calendarEventToJCal } from "../../../src/features/Events/eventUtils";
 import { clientConfig } from "../../../src/features/User/oidcAuth";
 import { api } from "../../../src/utils/apiUtils";
@@ -18,8 +20,8 @@ const mockEvent = {
   timezone: "UTC",
   calId: "667037022b752d0026472254/cal1",
   URL: "/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics",
-  start: day,
-  end: day,
+  start: day.toISOString(),
+  end: day.toISOString(),
   status: "PUBLIC",
   organizer: { cn: "test", cal_address: "test@test.com" },
   attendee: [
@@ -40,14 +42,14 @@ const mockEvent = {
       cutype: "INDIVIDUAL",
     },
   ],
-};
+} as CalendarEvent;
 
 describe("eventApi", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test("putEvent sends PUT request with JCal body", async () => {
+  it("putEvent sends PUT request with JCal body", async () => {
     const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
     (api as unknown as jest.Mock).mockReturnValue(mockResponse);
     const result = await putEvent(mockEvent);
@@ -63,7 +65,7 @@ describe("eventApi", () => {
     expect(result).toBe(mockResponse);
   });
 
-  test("putEvent logs when status is 201", async () => {
+  it("putEvent logs when status is 201", async () => {
     const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
     (api as unknown as jest.Mock).mockReturnValue(mockResponse);
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
@@ -74,7 +76,7 @@ describe("eventApi", () => {
     logSpy.mockRestore();
   });
 
-  test("moveEvent sends MOVE request with destination header", async () => {
+  it("moveEvent sends MOVE request with destination header", async () => {
     const mockResponse = { status: 204 };
     (api as unknown as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue(mockResponse),
@@ -92,7 +94,7 @@ describe("eventApi", () => {
     );
   });
 
-  test("deleteEvent sends DELETE request and returns json response", async () => {
+  it("deleteEvent sends DELETE request and returns json response", async () => {
     const mockResponse = { ok: true };
     (api as unknown as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue(mockResponse),
@@ -102,6 +104,22 @@ describe("eventApi", () => {
 
     expect(api).toHaveBeenCalledWith("dav/calendars/test.ics", {
       method: "DELETE",
+    });
+  });
+
+  it("import event file", async () => {
+    const mockResponse = { status: 202 };
+    (api.post as unknown as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockResponse),
+    });
+
+    await importEventFromFile("123456789", "/calendar/calLink.json");
+
+    expect(api.post).toHaveBeenCalledWith("api/import", {
+      body: JSON.stringify({
+        fileId: "123456789",
+        target: "/calendar/calLink.json",
+      }),
     });
   });
 

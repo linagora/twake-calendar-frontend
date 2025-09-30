@@ -58,5 +58,5 @@ export async function importEventFromFile(id: string, calLink: string) {
   const response = await api.post(`api/import`, {
     body: JSON.stringify({ fileId: id, target: calLink }),
   });
-  return await response.json();
+  return response;
 }

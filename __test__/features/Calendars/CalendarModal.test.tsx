@@ -49,16 +49,6 @@ describe("CalendarPopover", () => {
     expect(descInput).toHaveValue("Test description");
   });
 
-  it("selects a color when a color button is clicked", () => {
-    renderPopover();
-
-    // There are multiple color buttons; pick the first
-    const colorButtons = screen.getAllByRole("button", {
-      name: /select color/i,
-    });
-    fireEvent.click(colorButtons[0]);
-  });
-
   it("dispatches createCalendar and calls onClose when Save clicked", () => {
     const spy = jest
       .spyOn(eventThunks, "createCalendarAsync")
@@ -108,7 +98,7 @@ describe("CalendarPopover (editing mode)", () => {
     },
   };
 
-  const existingCalendar = {
+  const existingCalendar: Calendars = {
     id: "user1/cal1",
     link: "/calendars/user/cal1",
     name: "Work Calendar",
@@ -118,7 +108,7 @@ describe("CalendarPopover (editing mode)", () => {
     ownerEmails: ["alice@example.com"],
     visibility: "public",
     events: {},
-  } as Calendars;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -194,5 +184,248 @@ describe("CalendarPopover (editing mode)", () => {
       )
     );
     expect(mockOnClose).toHaveBeenCalled();
+  });
+});
+
+describe("CalendarPopover - Tabs Scenarios", () => {
+  const mockOnClose = jest.fn();
+  const baseUser = {
+    userData: {
+      openpaasId: "user1",
+    },
+  };
+
+  const writeText = jest.fn();
+
+  Object.assign(navigator, {
+    clipboard: {
+      writeText,
+    },
+  });
+
+  const existingCalendar: Calendars = {
+    id: "user1/cal1",
+    link: "/calendars/user1/cal1.json",
+    name: "Work Calendar",
+    description: "Team meetings",
+    color: "#33B679",
+    owner: "alice",
+    ownerEmails: ["alice@example.com"],
+    visibility: "public",
+    events: {},
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("resets state after closing and reopening", () => {
+    const { rerender } = renderWithProviders(
+      <CalendarPopover open={true} onClose={mockOnClose} />,
+      { user: baseUser }
+    );
+
+    // Enter some data
+    fireEvent.change(screen.getByLabelText(/Name/i), {
+      target: { value: "Temp Calendar" },
+    });
+    fireEvent.click(screen.getByText(/Cancel/i));
+
+    expect(mockOnClose).toHaveBeenCalled();
+
+    // Reopen: state should be reset
+    rerender(<CalendarPopover open={true} onClose={mockOnClose} />);
+    expect(screen.getByLabelText(/Name/i)).toHaveValue("");
+  });
+
+  it("shows Access tab only when editing an existing calendar", () => {
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    expect(screen.getByRole("tab", { name: /Access/i })).toBeInTheDocument();
+  });
+
+  it("does not show Access tab when creating new calendar", () => {
+    renderWithProviders(<CalendarPopover open={true} onClose={mockOnClose} />, {
+      user: baseUser,
+    });
+
+    expect(
+      screen.queryByRole("tab", { name: /Access/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("patches ACL when visibility changes", async () => {
+    const patchSpy = jest
+      .spyOn(eventThunks, "patchACLCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    // By default: "All" (public) is selected
+    const publicButton = screen.getByRole("button", { name: /All/i });
+    const privateButton = screen.getByRole("button", { name: /You/i });
+
+    expect(publicButton).toHaveAttribute("aria-pressed", "true");
+    expect(privateButton).toHaveAttribute("aria-pressed", "false");
+
+    // Change to private
+    fireEvent.click(privateButton);
+
+    expect(privateButton).toHaveAttribute("aria-pressed", "true");
+    expect(publicButton).toHaveAttribute("aria-pressed", "false");
+
+    // Save
+    fireEvent.click(screen.getByText(/Save/i));
+
+    await waitFor(() =>
+      expect(patchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          calId: "user1/cal1",
+          request: "",
+        })
+      )
+    );
+  });
+
+  it("copies CalDAV link from Access tab", async () => {
+    (window as any).CALENDAR_BASE_URL = "https://cal.example.org";
+    Object.assign(navigator, {
+      clipboard: { writeText: jest.fn() },
+    });
+
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    // Switch to Access tab
+    fireEvent.click(screen.getByRole("tab", { name: /Access/i }));
+
+    // Expect text field with caldav link
+    const input = screen.getByLabelText(/CalDAV access/i);
+    expect(input).toHaveValue("https://cal.example.org/calendars/user1/cal1");
+
+    // Click copy button
+    const copyButton = screen.getAllByRole("button")[0];
+    fireEvent.click(copyButton);
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      "https://cal.example.org/calendars/user1/cal1"
+    );
+
+    // Snackbar should appear
+    await waitFor(() =>
+      expect(screen.getByText(/Link copied!/i)).toBeInTheDocument()
+    );
+  });
+
+  describe("Import flow", () => {
+    const file = new File(["test"], "events.ics", { type: "text/calendar" });
+
+    it("creates a new calendar and imports events when Import with 'new' target", async () => {
+      const createSpy = jest
+        .spyOn(eventThunks, "createCalendarAsync")
+        .mockImplementation((payload) => {
+          return () => Promise.resolve(payload) as any;
+        });
+      const importSpy = jest
+        .spyOn(eventThunks, "importEventFromFileAsync")
+        .mockImplementation((payload) => {
+          return () => Promise.resolve(payload) as any;
+        });
+
+      renderWithProviders(
+        <CalendarPopover open={true} onClose={mockOnClose} />,
+        {
+          user: baseUser,
+        }
+      );
+
+      // Switch to Import tab
+      fireEvent.click(screen.getByRole("tab", { name: /Import/i }));
+
+      // Provide new calendar params
+      fireEvent.change(screen.getByLabelText(/Name/i), {
+        target: { value: "Imported Calendar" },
+      });
+      const fileInput = screen.getByLabelText(/select file/i);
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      // Click Import
+      fireEvent.click(screen.getByRole("button", { name: "Import" }));
+
+      await waitFor(() => expect(createSpy).toHaveBeenCalled());
+      await waitFor(() => expect(importSpy).toHaveBeenCalled());
+    });
+
+    it("imports into an existing calendar when target is set", async () => {
+      const importSpy = jest
+        .spyOn(eventThunks, "importEventFromFileAsync")
+        .mockImplementation((payload) => {
+          return () => Promise.resolve(payload) as any;
+        });
+
+      const calendars = {
+        "user1/cal1": existingCalendar,
+      };
+
+      renderWithProviders(
+        <CalendarPopover
+          open={true}
+          onClose={mockOnClose}
+          calendar={existingCalendar}
+        />,
+        { user: baseUser, calendars: { list: calendars } }
+      );
+
+      fireEvent.click(screen.getByRole("tab", { name: /Import/i }));
+      const fileInput = screen.getByLabelText(/select file/i);
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      fireEvent.click(screen.getByRole("button", { name: "Import" }));
+
+      await waitFor(() =>
+        expect(importSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            calLink: "/calendars/user1/cal1.json",
+            file,
+          })
+        )
+      );
+    });
+
+    it("disables Import button until a file is uploaded", () => {
+      renderWithProviders(
+        <CalendarPopover open={true} onClose={mockOnClose} />,
+        {
+          user: baseUser,
+        }
+      );
+
+      fireEvent.click(screen.getByRole("tab", { name: /Import/i }));
+
+      const importButton = screen.getByRole("button", { name: /Import/i });
+      expect(importButton).toBeDisabled();
+    });
   });
 });

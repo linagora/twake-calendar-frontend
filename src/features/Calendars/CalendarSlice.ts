@@ -343,7 +343,7 @@ export const importEventFromFileAsync = createAsyncThunk<
     calLink: string;
     file: File;
   }
->("calendars/getCalendarDetails", async ({ calLink, file }) => {
+>("calendars/importEvent", async ({ calLink, file }) => {
   const id = ((await importFile(file)) as Record<string, string>)._id;
   const response = await importEventFromFile(id, calLink);
 });
