@@ -11,8 +11,15 @@ import {
   SelectChangeEvent,
   TextField,
   Typography,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import {
+  Description as DescriptionIcon,
+  Public as PublicIcon,
+  Lock as LockIcon,
+} from "@mui/icons-material";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import { ResponsiveDialog } from "../../components/Dialog";
@@ -22,6 +29,7 @@ import { userAttendee } from "../User/userDataTypes";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
 import RepeatEvent from "../../components/Event/EventRepeat";
+import { TIMEZONES } from "../../utils/timezone-data";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -112,7 +120,50 @@ function EventPopover({
   const userPersonnalCalendars: Calendars[] = useAppSelector(
     selectPersonnalCalendars
   );
+
+  // Helper function to resolve timezone aliases
+  const resolveTimezone = (tzName: string): string => {
+    if (TIMEZONES.zones[tzName]) {
+      return tzName;
+    }
+    if (TIMEZONES.aliases[tzName]) {
+      return TIMEZONES.aliases[tzName].aliasTo;
+    }
+    return tzName;
+  };
+
+  const timezoneList = useMemo(() => {
+    const zones = Object.keys(TIMEZONES.zones).sort();
+    const browserTz = resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    
+    const getTimezoneOffset = (tzName: string): string => {
+      const resolvedTz = resolveTimezone(tzName);
+      const tzData = TIMEZONES.zones[resolvedTz];
+      if (!tzData) return "";
+      
+      const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
+      if (!icsMatch) return "";
+      
+      const offset = icsMatch[1];
+      const hours = parseInt(offset.slice(0, 3));
+      const minutes = parseInt(offset.slice(3));
+      
+      if (minutes === 0) {
+        return `UTC${hours >= 0 ? '+' : ''}${hours}`;
+      }
+      return `UTC${hours >= 0 ? '+' : ''}${hours}:${Math.abs(minutes).toString().padStart(2, '0')}`;
+    };
+    
+    return { zones, browserTz, getTimezoneOffset };
+  }, []);
+
   const [showMore, setShowMore] = useState(false);
+  const [showDescription, setShowDescription] = useState(
+    event?.description ? true : false
+  );
+  const [showRepeat, setShowRepeat] = useState(
+    event?.repetition?.freq ? true : false
+  );
 
   const [title, setTitle] = useState(event?.title ?? "");
 
@@ -137,8 +188,10 @@ function EventPopover({
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
-
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [important, setImportant] = useState(false);
+  const [timezone, setTimezone] = useState(
+    event?.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz
+  );
 
   useEffect(() => {
     if (selectedRange) {
@@ -160,11 +213,15 @@ function EventPopover({
     onClose({}, "backdropClick");
     // Reset state
     setShowMore(false);
+    setShowDescription(false);
+    setShowRepeat(false);
     setTitle("");
     setDescription("");
     setAttendees([]);
     setLocation("");
     setCalendarid(0);
+    setImportant(false);
+    setTimezone(timezoneList.browserTz);
   };
 
   const handleSave = async () => {
@@ -210,11 +267,15 @@ function EventPopover({
 
     // Reset state
     setShowMore(false);
+    setShowDescription(false);
+    setShowRepeat(false);
     setTitle("");
     setDescription("");
     setAttendees([]);
     setLocation("");
     setCalendarid(0);
+    setImportant(false);
+    setTimezone(timezoneList.browserTz);
 
     // Save to API in background
     dispatch(
@@ -254,45 +315,46 @@ function EventPopover({
         <TextField
           fullWidth
           label={!showMore ? "Title" : ""}
+          placeholder="Add title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           size="small"
           margin="dense"
         />
       </FieldWithLabel>
-      <FieldWithLabel label="Description" isExpanded={showMore}>
-        <TextField
-          fullWidth
-          label={!showMore ? "Description" : ""}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          size="small"
-          margin="dense"
-          multiline
-          rows={2}
-        />
-      </FieldWithLabel>
-      <FieldWithLabel label="Calendar" isExpanded={showMore}>
-        <FormControl fullWidth margin="dense" size="small">
-          {!showMore && (
-            <InputLabel id="calendar-select-label">Calendar</InputLabel>
-          )}
-          <Select
-            labelId="calendar-select-label"
-            value={calendarid.toString()}
-            label={!showMore ? "Calendar" : ""}
-            onChange={(e: SelectChangeEvent) =>
-              setCalendarid(Number(e.target.value))
-            }
+
+      <FieldWithLabel label=" " isExpanded={showMore}>
+        <Box display="flex" gap={1} mb={1}>
+          <Button
+            startIcon={<DescriptionIcon />}
+            onClick={() => setShowDescription(true)}
+            size="small"
+            sx={{
+              textTransform: "none",
+              color: "text.secondary",
+              display: showDescription ? "none" : "flex",
+            }}
           >
-            {Object.keys(userPersonnalCalendars).map((calendar, index) => (
-              <MenuItem key={index} value={index}>
-                {userPersonnalCalendars[index].name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            Add description
+          </Button>
+        </Box>
       </FieldWithLabel>
+
+      {showDescription && (
+        <FieldWithLabel label="Description" isExpanded={showMore}>
+          <TextField
+            fullWidth
+            label={!showMore ? "Description" : ""}
+            placeholder="Add description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            size="small"
+            margin="dense"
+            multiline
+            rows={2}
+          />
+        </FieldWithLabel>
+      )}
 
       <FieldWithLabel label="Date & Time" isExpanded={showMore}>
         <Box display="flex" gap={2}>
@@ -355,7 +417,17 @@ function EventPopover({
         </Box>
       </FieldWithLabel>
       <FieldWithLabel label=" " isExpanded={showMore}>
-        <Box>
+        <Box display="flex" gap={2} alignItems="center">
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={important}
+                onChange={() => setImportant(!important)}
+              />
+            }
+            label="Mark as important"
+            sx={{ padding: "0 8px 0 0" }}
+          />
           <FormControlLabel
             control={
               <Checkbox
@@ -390,39 +462,99 @@ function EventPopover({
             label="All day"
             sx={{ padding: "0 8px 0 0" }}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={showRepeat}
+                onChange={() => {
+                  setShowRepeat(!showRepeat);
+                  if (showRepeat) {
+                    setRepetition({} as RepetitionObject);
+                  } else {
+                    setRepetition({
+                      freq: "daily",
+                      interval: 1,
+                    } as RepetitionObject);
+                  }
+                }}
+              />
+            }
+            label="Repeat"
+          />
+          <FormControl size="small" sx={{ width: 160 }}>
+            <Select
+              value={timezone}
+              onChange={(e: SelectChangeEvent) => setTimezone(e.target.value)}
+              displayEmpty
+            >
+              {timezoneList.zones.map((tz) => (
+                <MenuItem key={tz} value={tz}>
+                  ({timezoneList.getTimezoneOffset(tz)}) {tz.replace(/_/g, " ")}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </FieldWithLabel>
-      <FieldWithLabel label="Attendees" isExpanded={showMore}>
+      
+      {showRepeat && (
+        <FieldWithLabel label=" " isExpanded={showMore}>
+          <RepeatEvent
+            repetition={repetition}
+            eventStart={selectedRange?.start ?? new Date()}
+            setRepetition={setRepetition}
+          />
+        </FieldWithLabel>
+      )}
+
+      <FieldWithLabel label="Participants" isExpanded={showMore}>
         <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
       </FieldWithLabel>
       <FieldWithLabel label="Location" isExpanded={showMore}>
         <TextField
           fullWidth
           label={!showMore ? "Location" : ""}
+          placeholder="Add location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           size="small"
           margin="dense"
         />
       </FieldWithLabel>
+      <FieldWithLabel label="Calendar" isExpanded={showMore}>
+        <FormControl fullWidth margin="dense" size="small">
+          {!showMore && (
+            <InputLabel id="calendar-select-label">Calendar</InputLabel>
+          )}
+          <Select
+            labelId="calendar-select-label"
+            value={calendarid.toString()}
+            label={!showMore ? "Calendar" : ""}
+            displayEmpty
+            onChange={(e: SelectChangeEvent) =>
+              setCalendarid(Number(e.target.value))
+            }
+          >
+            {Object.keys(userPersonnalCalendars).map((calendar, index) => (
+              <MenuItem key={index} value={index}>
+                {userPersonnalCalendars[index].name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </FieldWithLabel>
+      
       {/* Extended options */}
       {showMore && (
         <>
-          <FieldWithLabel label="Repeat" isExpanded={showMore}>
-            <RepeatEvent
-              repetition={repetition}
-              eventStart={selectedRange?.start ?? new Date()}
-              setRepetition={setRepetition}
-            />
-          </FieldWithLabel>
-          <FieldWithLabel label="Alarm" isExpanded={showMore}>
+          <FieldWithLabel label="Notification" isExpanded={showMore}>
             <FormControl fullWidth margin="dense" size="small">
               <Select
-                labelId="alarm"
+                labelId="notification"
                 value={alarm}
                 onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
               >
-                <MenuItem value={""}>No Alarm</MenuItem>
+                <MenuItem value={""}>No Notification</MenuItem>
                 <MenuItem value={"-PT1M"}>1 minute</MenuItem>
                 <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
                 <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
@@ -439,22 +571,7 @@ function EventPopover({
             </FormControl>
           </FieldWithLabel>
 
-          <FieldWithLabel label="Visibility" isExpanded={showMore}>
-            <FormControl fullWidth margin="dense" size="small">
-              <Select
-                labelId="Visibility"
-                value={eventClass}
-                onChange={(e: SelectChangeEvent) =>
-                  setEventClass(e.target.value)
-                }
-              >
-                <MenuItem value={"PUBLIC"}>Public</MenuItem>
-                <MenuItem value={"CONFIDENTIAL"}>Show time only</MenuItem>
-                <MenuItem value={"PRIVATE"}>Private</MenuItem>
-              </Select>
-            </FormControl>
-          </FieldWithLabel>
-          <FieldWithLabel label="Show as" isExpanded={showMore}>
+          <FieldWithLabel label="Show me as" isExpanded={showMore}>
             <FormControl fullWidth margin="dense" size="small">
               <Select
                 labelId="busy"
@@ -465,6 +582,28 @@ function EventPopover({
                 <MenuItem value={"OPAQUE"}>Busy </MenuItem>
               </Select>
             </FormControl>
+          </FieldWithLabel>
+
+          <FieldWithLabel label="Visible to" isExpanded={showMore}>
+            <ToggleButtonGroup
+              value={eventClass}
+              exclusive
+              onChange={(e, newValue) => {
+                if (newValue !== null) {
+                  setEventClass(newValue);
+                }
+              }}
+              size="small"
+            >
+              <ToggleButton value="PUBLIC" sx={{ width: '140px' }}>
+                <PublicIcon sx={{ mr: 1, fontSize: '16px' }} />
+                All
+              </ToggleButton>
+              <ToggleButton value="PRIVATE" sx={{ width: '140px' }}>
+                <LockIcon sx={{ mr: 1, fontSize: '16px' }} />
+                Participants
+              </ToggleButton>
+            </ToggleButtonGroup>
           </FieldWithLabel>
         </>
       )}

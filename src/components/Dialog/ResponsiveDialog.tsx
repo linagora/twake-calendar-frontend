@@ -122,6 +122,11 @@ function ResponsiveDialog({
   };
 
   const baseContentSx: SxProps<Theme> = {
+    width: "100%",
+    padding: isExpanded ? "16px" : undefined,
+  };
+
+  const contentWrapperSx: SxProps<Theme> = {
     maxWidth: isExpanded ? expandedContentMaxWidth : "100%",
     margin: isExpanded ? "0 auto" : "0",
     width: "100%",
@@ -160,7 +165,13 @@ function ResponsiveDialog({
         ]}
         {...dialogContentProps}
       >
-        <Stack spacing={currentSpacing}>{children}</Stack>
+        {isExpanded ? (
+          <Stack spacing={currentSpacing} sx={contentWrapperSx}>
+            {children}
+          </Stack>
+        ) : (
+          <Stack spacing={currentSpacing}>{children}</Stack>
+        )}
       </DialogContent>
       {actions && <DialogActions>{actions}</DialogActions>}
     </Dialog>

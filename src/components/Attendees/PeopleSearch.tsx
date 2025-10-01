@@ -102,8 +102,8 @@ export function PeopleSearch({
           {...params}
           error={!!error}
           helperText={error}
-          placeholder="Search user"
-          label="Search user"
+          placeholder="Start typing a name or email"
+          label="Start typing a name or email"
           onKeyDown={(e) => {
             if (e.key === "Enter" && onToggleEventPreview) {
               e.preventDefault();
