@@ -5,6 +5,16 @@ import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlic
 
 export const updateSlotLabelVisibility = (currentTime: Date) => {
   const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
+  const isCurrentWeekOrDay = checkIfCurrentWeekOrDay();
+  
+  if (!isCurrentWeekOrDay) {
+    slotLabels.forEach((label) => {
+      const labelElement = label as HTMLElement;
+      labelElement.style.opacity = "1";
+    });
+    return;
+  }
+
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   slotLabels.forEach((label) => {
@@ -28,6 +38,17 @@ export const updateSlotLabelVisibility = (currentTime: Date) => {
       }
     }
   });
+};
+
+const checkIfCurrentWeekOrDay = (): boolean => {
+  const todayColumn = document.querySelector(".fc-day-today");
+  
+  if (!todayColumn) {
+    return false;
+  }
+
+  const nowIndicator = document.querySelector(".fc-timegrid-now-indicator-arrow");
+  return !!nowIndicator;
 };
 
 export const eventToFullCalendarFormat = (
