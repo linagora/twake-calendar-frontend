@@ -47,14 +47,14 @@ export const createMouseHandlers = (props: MouseHandlersProps) => {
     if (targetColumn) {
       const rect = targetColumn.getBoundingClientRect();
       const relativeY = e.clientY - rect.top;
-      const hourHeight = rect.height / 24;
-      const hourIndex = Math.floor(relativeY / hourHeight);
+      const slotHeight = rect.height / 48;
+      const slotIndex = Math.floor(relativeY / slotHeight);
 
       if (relativeY >= 0 && relativeY <= rect.height) {
         const highlight = document.createElement("div");
         highlight.className = "hour-highlight";
-        highlight.style.top = `${hourIndex * hourHeight}px`;
-        highlight.style.height = `${hourHeight}px`;
+        highlight.style.top = `${slotIndex * slotHeight}px`;
+        highlight.style.height = `${slotHeight}px`;
 
         (targetColumn as HTMLElement).style.position = "relative";
         targetColumn.appendChild(highlight);
