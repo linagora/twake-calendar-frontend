@@ -190,7 +190,7 @@ function EventPopover({
       <Card>
         <CardHeader title={event?.uid ? "Duplicate Event" : "Create Event"} />
         <CardContent
-          sx={{ maxHeight: "85vh", maxWidth: "40vw", overflow: "auto" }}
+          style={{ maxHeight: "85vh", maxWidth: "40vw", overflow: "auto" }}
         >
           <TextField
             fullWidth

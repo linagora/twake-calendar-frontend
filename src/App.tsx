@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { HistoryRouter as Router } from "redux-first-history/rr6";
 import { CallbackResume } from "./features/User/LoginCallback";
 import { history } from "./app/store";
-import "./App.css";
+import "./App.styl";
 import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";

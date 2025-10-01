@@ -44,18 +44,18 @@ function CalendarItem({
       display="flex"
       alignItems="center"
       justifyContent="space-between"
-      sx={{
-        borderRadius: 2,
+      style={{
+        borderRadius: 8,
         border: "1px solid #e5e7eb",
-        p: 1,
-        mb: 1,
+        padding: 8,
+        marginBottom: 8,
       }}
     >
       <Box display="flex" alignItems="center" gap={2}>
         <Avatar
           src={cal.owner.avatarUrl}
           alt={cal.owner.email}
-          sx={{
+          style={{
             border: `2px solid ${cal.cal["apple:color"] ?? "transparent"}`,
             boxShadow: cal.cal["apple:color"]
               ? `0 0 0 2px ${cal.cal["apple:color"]}`
@@ -228,7 +228,7 @@ export default function CalendarSearch({
       }}
     >
       <Box
-        sx={{
+        style={{
           position: "absolute",
           left: "50%",
           top: "20%",
@@ -238,16 +238,16 @@ export default function CalendarSearch({
         }}
       >
         <Card
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: 6,
+          style={{
+            padding: 16,
+            borderRadius: 12,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             display: "flex",
             flexDirection: "column",
             maxHeight: "80vh",
           }}
         >
-          <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+          <Box style={{ position: "absolute", top: 8, right: 8 }}>
             <IconButton
               size="small"
               onClick={() => onClose({}, "backdropClick")}
@@ -256,8 +256,11 @@ export default function CalendarSearch({
             </IconButton>
           </Box>
 
-          <CardHeader title="Browse other calendars" sx={{ pb: 0 }} />
-          <CardContent sx={{ flex: 1, overflow: "auto" }}>
+          <CardHeader
+            title="Browse other calendars"
+            style={{ paddingBottom: 0 }}
+          />
+          <CardContent style={{ flex: 1, overflow: "auto" }}>
             <PeopleSearch
               objectTypes={["user"]}
               selectedUsers={selectedUsers}
@@ -319,7 +322,7 @@ export default function CalendarSearch({
             />
           </CardContent>
 
-          <CardActions sx={{ justifyContent: "flex-end", gap: 1 }}>
+          <CardActions style={{ justifyContent: "flex-end", gap: 8 }}>
             <Button
               variant="outlined"
               onClick={() => onClose({}, "backdropClick")}
