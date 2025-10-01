@@ -115,15 +115,15 @@ export default function EventPreviewModal({
         anchorPosition={anchorPosition ?? undefined}
         onClose={onClose}
       >
-        <Card sx={{ width: 300, p: 2, position: "relative" }}>
+        <Card style={{ width: 300, padding: 16, position: "relative" }}>
           {/* Top-right buttons */}
           <Box
-            sx={{
+            style={{
               position: "absolute",
               top: 8,
               right: 8,
               display: "flex",
-              gap: 1,
+              gap: 8,
             }}
           >
             {(window as any).DEBUG && (
@@ -205,12 +205,12 @@ export default function EventPreviewModal({
             </IconButton>
           </Box>
 
-          <CardContent sx={{ pt: 1.5 }}>
+          <CardContent style={{ paddingTop: 12 }}>
             {event.title && (
               <Typography
                 variant="h6"
                 fontWeight="bold"
-                sx={{
+                style={{
                   wordBreak: "break-word",
                 }}
                 gutterBottom
@@ -230,7 +230,7 @@ export default function EventPreviewModal({
             {/* Location */}
             {event.location && (
               <InfoRow
-                icon={<LocationOnIcon sx={{ fontSize: 18 }} />}
+                icon={<LocationOnIcon style={{ fontSize: 18 }} />}
                 text={event.location}
               />
             )}
@@ -238,7 +238,7 @@ export default function EventPreviewModal({
             {/* Video */}
             {event.x_openpass_videoconference && (
               <InfoRow
-                icon={<VideocamIcon sx={{ fontSize: 18 }} />}
+                icon={<VideocamIcon style={{ fontSize: 18 }} />}
                 text="Video conference available"
                 data={event.x_openpass_videoconference}
               />
@@ -246,7 +246,7 @@ export default function EventPreviewModal({
 
             {/* Attendees */}
             {event.attendee?.length > 0 && (
-              <Box sx={{ mb: 1 }}>
+              <Box style={{ marginBottom: 8 }}>
                 <Typography variant="subtitle2">Attendees:</Typography>
                 {organizer && renderAttendeeBadge(organizer, "org", true)}
                 {visibleAttendees.map((a, idx) =>
@@ -256,7 +256,7 @@ export default function EventPreviewModal({
                   <Typography
                     variant="body2"
                     color="primary"
-                    sx={{ cursor: "pointer", mt: 0.5 }}
+                    style={{ cursor: "pointer", marginTop: 4 }}
                     onClick={() => setShowAllAttendees(!showAllAttendees)}
                   >
                     {showAllAttendees
@@ -272,17 +272,26 @@ export default function EventPreviewModal({
             {/* Error */}
             {event.error && (
               <InfoRow
-                icon={<ErrorOutlineIcon color="error" sx={{ fontSize: 18 }} />}
+                icon={
+                  <ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />
+                }
                 text={event.error}
                 error
               />
             )}
 
             {/* Calendar color dot */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <CalendarTodayIcon sx={{ fontSize: 16 }} />
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 16,
+              }}
+            >
+              <CalendarTodayIcon style={{ fontSize: 16 }} />
               <CircleIcon
-                sx={{
+                style={{
                   color: calendar.color ?? "#3788D8",
                   width: 12,
                   height: 12,
@@ -291,12 +300,12 @@ export default function EventPreviewModal({
               <Typography variant="body2">{calendar.name}</Typography>
             </Box>
 
-            <Divider sx={{ mb: 1 }} />
+            <Divider style={{ marginBottom: 8 }} />
 
             {/* RSVP */}
             {currentUserAttendee && (
               <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>
+                <Typography variant="body2" style={{ marginBottom: 8 }}>
                   Will you attend?
                 </Typography>
                 <ButtonGroup size="small" fullWidth>
@@ -336,7 +345,7 @@ export default function EventPreviewModal({
 
             {/* Description */}
             {event.description && (
-              <Typography variant="body2" sx={{ mt: 1 }}>
+              <Typography variant="body2" style={{ marginTop: 8 }}>
                 {event.description}
               </Typography>
             )}

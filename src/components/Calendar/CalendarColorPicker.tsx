@@ -19,11 +19,11 @@ export function ColorPicker({
           role="button"
           aria-label={`select color ${c}`}
           onClick={() => onChange(c)}
-          sx={{
+          style={{
             width: 20,
             height: 20,
             borderRadius: "50%",
-            bgcolor: c,
+            backgroundColor: c,
             cursor: "pointer",
             border:
               selectedColor === c ? "2px solid black" : "2px solid transparent",

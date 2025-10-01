@@ -116,7 +116,7 @@ export function PeopleSearch({
               startAdornment: (
                 <>
                   <PeopleOutlineOutlinedIcon
-                    sx={{ mr: 1, color: "action.active" }}
+                    style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
                   />
                   {params.InputProps.startAdornment}
                 </>
@@ -164,7 +164,7 @@ export function PeopleSearch({
             <Chip
               {...getTagProps({ index })}
               key={label}
-              sx={{
+              style={{
                 backgroundColor: chipColor,
                 color: textColor,
               }}

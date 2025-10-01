@@ -4,7 +4,7 @@ import AppsIcon from "@mui/icons-material/Apps";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import "./Menubar.css";
+import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { stringToColor } from "../../features/Events/EventDisplay";
 import {
@@ -141,7 +141,10 @@ export function Menubar({
             </IconButton>
           </div>
           <div className="menu-items">
-            <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
+            <FormControl
+              size="small"
+              style={{ minWidth: 120, marginRight: 16 }}
+            >
               <Select
                 value={currentView}
                 onChange={(e) => handleViewChange(e.target.value)}
@@ -155,15 +158,15 @@ export function Menubar({
           </div>
           <div className="menu-items">
             {applist.length > 0 && (
-              <IconButton onClick={handleOpen} sx={{ mr: 1 }}>
+              <IconButton onClick={handleOpen} style={{ marginRight: 8 }}>
                 <AppsIcon />
               </IconButton>
             )}
           </div>
           <div className="menu-items">
             <Avatar
-              sx={{
-                bgcolor: stringToColor(
+              style={{
+                backgroundColor: stringToColor(
                   user && user.family_name
                     ? user.family_name
                     : user && user.email

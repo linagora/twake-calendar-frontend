@@ -1,0 +1,93 @@
+/* Basic reset */
+*
+  margin 0
+  padding 0
+  box-sizing border-box
+
+.twake
+  font-family "Cal Sans"
+  font-weight 400
+  font-size 28.07px
+  line-height 100%
+  letter-spacing 0%
+  text-align center
+  vertical-align middle
+  padding 0.2rem
+
+.calendar-text
+  font-family "Cal Sans"
+  padding 0.2rem
+  font-weight 400
+  font-size 28.07px
+  line-height 100%
+  letter-spacing 0%
+  text-align center
+  vertical-align middle
+  background linear-gradient(180deg, #ffb73d, #f26c32)
+  -webkit-background-clip text
+  -webkit-text-fill-color transparent
+  /* Optional for broader support */
+  background-clip text
+  color transparent
+
+/* Menubar styles */
+.menubar
+  display flex
+  justify-content space-between
+  align-items center
+  padding 0.5rem
+  width 100%
+  z-index 1000
+  height 80px
+  background-color #fff
+
+.menubar-item
+  display flex
+  align-items center
+  width calc(330px - 0.5rem)
+
+.logo
+  padding 0.5rem 1rem
+  font-size 1.5rem
+
+.nav-month
+  padding-right 2px
+  padding-left 2px
+  gap 38px
+
+.day-selector
+  font-weight 100
+  font-size small
+
+.search-bar
+  width 600
+  height 43.88999938964844
+  top 18px
+  left 887px
+
+.app-grid
+  display grid
+  grid-template-columns repeat(3, 1fr)
+  gap 16px
+  padding 16px
+  justify-items center
+  align-items center
+
+.app-grid img
+  width 48px
+  height 48px
+
+.app-grid p
+  margin-top 6px
+  font-size 14px
+  text-align center
+
+.left-menu
+  display flex
+  align-items center
+  justify-content flex-start
+
+.right-menu
+  display flex
+  justify-content flex-end
+  align-items center

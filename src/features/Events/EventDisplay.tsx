@@ -203,7 +203,7 @@ export default function EventDisplayModal({
           <MenuItem key={index} value={index}>
             <Typography variant="body2">
               <CircleIcon
-                sx={{
+                style={{
                   color: userPersonnalCalendars[index].color ?? "#3788D8",
                   width: 12,
                   height: 12,
@@ -217,7 +217,7 @@ export default function EventDisplayModal({
           <MenuItem key={index} value={index}>
             <Typography variant="body2">
               <CircleIcon
-                sx={{
+                style={{
                   color: calendars[index].color ?? "#3788D8",
                   width: 12,
                   height: 12,
@@ -231,7 +231,7 @@ export default function EventDisplayModal({
   return (
     <Modal open={open} onClose={onClose}>
       <Box
-        sx={{
+        style={{
           position: "absolute",
           top: "5vh",
           left: "50%",
@@ -240,9 +240,9 @@ export default function EventDisplayModal({
           maxHeight: "80vh",
         }}
       >
-        <Card sx={{ p: 2, position: "absolute" }}>
+        <Card style={{ padding: 16, position: "absolute" }}>
           {/* Close button */}
-          <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+          <Box style={{ position: "absolute", top: 8, right: 8 }}>
             <IconButton
               size="small"
               onClick={() => onClose({}, "backdropClick")}
@@ -253,7 +253,7 @@ export default function EventDisplayModal({
 
           <CardHeader title={isOwn ? "Edit Event" : "Event Details"} />
 
-          <CardContent sx={{ maxHeight: "75vh", overflow: "auto" }}>
+          <CardContent style={{ maxHeight: "75vh", overflow: "auto" }}>
             {/* Title */}
             <TextField
               fullWidth
@@ -267,7 +267,7 @@ export default function EventDisplayModal({
 
             {/* RSVP */}
             {currentUserAttendee && isOwnCal && (
-              <Card sx={{ my: 1 }}>
+              <Card style={{ margin: "8px 0" }}>
                 <ButtonGroup size="small" fullWidth>
                   <Button
                     color={
@@ -408,7 +408,7 @@ export default function EventDisplayModal({
             {/* Video */}
             {event.x_openpass_videoconference && (
               <InfoRow
-                icon={<VideocamIcon sx={{ fontSize: 18 }} />}
+                icon={<VideocamIcon style={{ fontSize: 18 }} />}
                 text="Video conference available"
                 data={event.x_openpass_videoconference}
               />
@@ -416,7 +416,7 @@ export default function EventDisplayModal({
 
             {/* Attendees */}
             {event.attendee?.length > 0 && (
-              <Box sx={{ mb: 1 }}>
+              <Box style={{ marginBottom: 8 }}>
                 <Typography variant="subtitle2">Attendees:</Typography>
                 {organizer.cal_address &&
                   renderAttendeeBadge(organizer, "org", true)}
@@ -444,7 +444,7 @@ export default function EventDisplayModal({
                   <Typography
                     variant="body2"
                     color="primary"
-                    sx={{ cursor: "pointer", mt: 0.5 }}
+                    style={{ cursor: "pointer", marginTop: 4 }}
                     onClick={() => setShowAllAttendees(!showAllAttendees)}
                   >
                     {showAllAttendees
@@ -457,7 +457,7 @@ export default function EventDisplayModal({
               </Box>
             )}
 
-            <Divider sx={{ my: 1 }} />
+            <Divider style={{ margin: "8px 0" }} />
 
             {/* Extended options */}
             {showMore && (
@@ -527,7 +527,10 @@ export default function EventDisplayModal({
                 {event.error && (
                   <InfoRow
                     icon={
-                      <ErrorOutlineIcon color="error" sx={{ fontSize: 18 }} />
+                      <ErrorOutlineIcon
+                        color="error"
+                        style={{ fontSize: 18 }}
+                      />
                     }
                     text={event.error}
                     error
@@ -581,7 +584,9 @@ export function InfoRow({
   data?: string;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+    <Box
+      style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}
+    >
       {icon}
       <Typography variant="body2" color={error ? "error" : "textPrimary"}>
         {isValidUrl(data) ? <Link href={data}>{text}</Link> : text}
@@ -605,13 +610,13 @@ export function renderAttendeeBadge(
   return (
     <Box
       key={key}
-      sx={{
+      style={{
         display: "flex",
         alignItems: "center",
-        gap: 1.5,
-        mb: 0.5,
-        p: 0.5,
-        borderRadius: 1,
+        gap: 12,
+        marginBottom: 4,
+        padding: 4,
+        borderRadius: 4,
       }}
     >
       <Badge
@@ -620,7 +625,7 @@ export function renderAttendeeBadge(
         badgeContent={
           classIcon && (
             <Box
-              sx={{
+              style={{
                 fontSize: 14,
                 lineHeight: 0,
                 backgroundColor: "white",
@@ -635,11 +640,11 @@ export function renderAttendeeBadge(
       >
         <Avatar {...stringAvatar(a.cn || a.cal_address)} />
       </Badge>
-      <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
         <Typography
           variant="body2"
           noWrap
-          sx={{
+          style={{
             maxWidth: "180px",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -651,7 +656,7 @@ export function renderAttendeeBadge(
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ fontStyle: "italic" }}
+            style={{ fontStyle: "italic" }}
           >
             Organizer
           </Typography>
