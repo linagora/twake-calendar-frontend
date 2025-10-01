@@ -100,18 +100,17 @@ export default function CalendarApp({
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded
+  const initialLoadRef = useRef(true);
+
   useEffect(() => {
-    if (
-      Object.keys(calendars).length > 0 &&
-      userId &&
-      selectedCalendars.length === 0
-    ) {
+    if (initialLoadRef.current && Object.keys(calendars).length > 0 && userId) {
       const personalCalendarIds = Object.keys(calendars).filter(
         (id) => id.split("/")[0] === userId
       );
       setSelectedCalendars(personalCalendarIds);
+      initialLoadRef.current = false;
     }
-  }, [calendars, userId, selectedCalendars.length]);
+  }, [calendars, userId]);
 
   const calendarRange = getCalendarRange(selectedDate);
 

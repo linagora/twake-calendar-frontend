@@ -250,4 +250,21 @@ describe("calendar Availability search", () => {
 
     expect(spy).not.toHaveBeenCalledWith();
   });
+
+  it("BUGFIX: can untoggle all personnal calendars", () => {
+    renderWithProviders(<CalendarTestWrapper />, {
+      user: preloadedState.user,
+      calendars: {
+        list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
+        pending: false,
+      },
+    });
+
+    const checkbox = screen.getByLabelText("Calendar personnal");
+    expect(checkbox).toBeChecked();
+
+    fireEvent.click(checkbox); // toggle off
+
+    expect(checkbox).not.toBeChecked();
+  });
 });
