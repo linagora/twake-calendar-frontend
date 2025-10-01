@@ -1,6 +1,5 @@
 import {
   FormControl,
-  InputLabel,
   Select,
   SelectChangeEvent,
   MenuItem,
@@ -28,7 +27,6 @@ export default function RepeatEvent({
   setRepetition: Function;
   isOwn?: boolean;
 }) {
-  const repetitionValues = ["day", "week", "month", "year"];
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
   const day = new Date(eventStart);
 
@@ -43,9 +41,11 @@ export default function RepeatEvent({
 
   // keep endOption in sync if repetition changes from parent
   useEffect(() => {
-    if (!endOption) {
-      setEndOption(getEndOption());
+    const newEndOption = getEndOption();
+    if (endOption !== newEndOption) {
+      setEndOption(newEndOption);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [repetition.occurrences, repetition.endDate]);
 
   const handleDayChange = (day: string) => {
@@ -57,37 +57,11 @@ export default function RepeatEvent({
   };
 
   return (
-    <FormControl fullWidth margin="dense" size="small">
-      <InputLabel id="repeat">Repetition</InputLabel>
-      <Select
-        labelId="repeat"
-        value={repetition.freq ?? ""}
-        disabled={!isOwn}
-        label="Repetition"
-        onChange={(e: SelectChangeEvent) => {
-          if (e.target.value === "weekly") {
-            setRepetition({
-              ...repetition,
-              freq: e.target.value,
-              selectedDays: [days[day.getDay() - 1]],
-            });
-          } else {
-            setRepetition({ ...repetition, freq: e.target.value });
-          }
-        }}
-      >
-        <MenuItem value={""}>No Repetition</MenuItem>
-        <MenuItem value={"daily"}>Repeat daily</MenuItem>
-        <MenuItem value={"weekly"}>Repeat weekly</MenuItem>
-        <MenuItem value={"monthly"}>Repeat monthly</MenuItem>
-        <MenuItem value={"yearly"}>Repeat yearly</MenuItem>
-      </Select>
-
-      {repetition.freq && (
-        <Stack>
+    <Box>
+      <Stack>
           {/* Interval */}
           <Box display="flex" alignItems="center" gap={2} mb={2}>
-            <Typography>Interval:</Typography>
+            <Typography>Repeat every</Typography>
             <TextField
               type="number"
               value={repetition.interval ?? 1}
@@ -99,21 +73,36 @@ export default function RepeatEvent({
               }
               size="small"
               style={{ width: 80 }}
+              inputProps={{ min: 1 }}
             />
-            <Typography>
-              {
-                repetitionValues[
-                  repetitionValues.findIndex((el) => el === repetition.freq)
-                ]
-              }
-            </Typography>
+            <FormControl size="small" style={{ minWidth: 120 }}>
+              <Select
+                value={repetition.freq ?? "daily"}
+                onChange={(e: SelectChangeEvent) => {
+                  if (e.target.value === "weekly") {
+                    setRepetition({
+                      ...repetition,
+                      freq: e.target.value,
+                      selectedDays: [days[day.getDay() - 1]],
+                    });
+                  } else {
+                    setRepetition({ ...repetition, freq: e.target.value });
+                  }
+                }}
+              >
+                <MenuItem value={"daily"}>Day(s)</MenuItem>
+                <MenuItem value={"weekly"}>Week(s)</MenuItem>
+                <MenuItem value={"monthly"}>Month(s)</MenuItem>
+                <MenuItem value={"yearly"}>Year(s)</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
 
           {/* Weekly selection */}
           {repetition.freq === "weekly" && (
             <Box>
               <Typography variant="body2" gutterBottom>
-                On days:
+                Repeat on:
               </Typography>
               <FormGroup row>
                 {days.map((day) => (
@@ -136,7 +125,7 @@ export default function RepeatEvent({
 
           {/* End options */}
           <Box>
-            <Typography variant="body2" gutterBottom style={{ marginTop: 16 }}>
+            <Typography variant="body2" gutterBottom>
               End:
             </Typography>
             <RadioGroup
@@ -222,7 +211,6 @@ export default function RepeatEvent({
             </RadioGroup>
           </Box>
         </Stack>
-      )}
-    </FormControl>
+    </Box>
   );
 }
