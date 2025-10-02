@@ -1,5 +1,13 @@
 import { generateMeetingId, generateMeetingLink, addVideoConferenceToDescription, extractVideoConferenceFromDescription } from '../videoConferenceUtils';
 
+// Mock window object for Node.js environment
+const mockWindow = {
+  VIDEO_CONFERENCE_BASE_URL: 'https://meet.linagora.com'
+};
+
+// @ts-ignore
+global.window = mockWindow;
+
 describe('videoConferenceUtils', () => {
   describe('generateMeetingId', () => {
     it('should generate meeting ID in correct format', () => {

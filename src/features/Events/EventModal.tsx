@@ -527,13 +527,23 @@ function EventPopover({
               <Checkbox
                 checked={showRepeat}
                 onChange={() => {
-                  setShowRepeat(!showRepeat);
-                  if (showRepeat) {
-                    setRepetition({} as RepetitionObject);
-                  } else {
+                  const newShowRepeat = !showRepeat;
+                  setShowRepeat(newShowRepeat);
+                  if (newShowRepeat) {
                     setRepetition({
                       freq: "daily",
                       interval: 1,
+                      occurrences: 0,
+                      endDate: "",
+                      selectedDays: [],
+                    } as RepetitionObject);
+                  } else {
+                    setRepetition({
+                      freq: "",
+                      interval: 1,
+                      occurrences: 0,
+                      endDate: "",
+                      selectedDays: [],
                     } as RepetitionObject);
                   }
                 }}
@@ -588,7 +598,7 @@ function EventPopover({
           
           {hasVideoConference && meetingLink && (
             <>
-              <Typography variant="body2" sx={{ color: "text.secondary", mr: 1 }}>
+              <Typography sx={{ color: "text.secondary", mr: 1 }}>
                 Meeting link generated
               </Typography>
               <IconButton
@@ -722,3 +732,4 @@ export function formatLocalDateTime(date: Date): string {
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+

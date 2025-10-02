@@ -184,7 +184,9 @@ describe("EventPopover", () => {
     const option = await screen.findByText("Calendar 2");
     fireEvent.click(option);
 
-    expect(screen.getAllByRole("combobox")[0]).toHaveTextContent("Calendar 2");
+    // Find the calendar combobox specifically by its aria-labelledby
+    const calendarSelect = screen.getByRole("combobox", { name: /Calendar/i });
+    expect(calendarSelect).toHaveTextContent("Calendar 2");
   });
   it("adds a attendee", async () => {
     jest.useFakeTimers();
