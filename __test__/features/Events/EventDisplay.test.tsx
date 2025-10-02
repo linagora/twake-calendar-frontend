@@ -1039,9 +1039,9 @@ describe("Event Full Display", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Alarm/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Repetition/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Visibility/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Notification/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Repeat/i)).toBeInTheDocument();
+      expect(screen.getByText(/Visible to/i)).toBeInTheDocument();
     });
     fireEvent.click(screen.getByText("Show Less"));
   });

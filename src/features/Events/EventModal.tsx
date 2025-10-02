@@ -134,26 +134,28 @@ function EventPopover({
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    
+    const browserTz = resolveTimezone(
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
     const getTimezoneOffset = (tzName: string): string => {
       const resolvedTz = resolveTimezone(tzName);
       const tzData = TIMEZONES.zones[resolvedTz];
       if (!tzData) return "";
-      
+
       const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
       if (!icsMatch) return "";
-      
+
       const offset = icsMatch[1];
       const hours = parseInt(offset.slice(0, 3));
       const minutes = parseInt(offset.slice(3));
-      
+
       if (minutes === 0) {
-        return `UTC${hours >= 0 ? '+' : ''}${hours}`;
+        return `UTC${hours >= 0 ? "+" : ""}${hours}`;
       }
-      return `UTC${hours >= 0 ? '+' : ''}${hours}:${Math.abs(minutes).toString().padStart(2, '0')}`;
+      return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
     };
-    
+
     return { zones, browserTz, getTimezoneOffset };
   }, []);
 
@@ -496,7 +498,7 @@ function EventPopover({
           </FormControl>
         </Box>
       </FieldWithLabel>
-      
+
       {showRepeat && (
         <FieldWithLabel label=" " isExpanded={showMore}>
           <RepeatEvent
@@ -543,7 +545,7 @@ function EventPopover({
           </Select>
         </FormControl>
       </FieldWithLabel>
-      
+
       {/* Extended options */}
       {showMore && (
         <>
@@ -595,12 +597,12 @@ function EventPopover({
               }}
               size="small"
             >
-              <ToggleButton value="PUBLIC" sx={{ width: '140px' }}>
-                <PublicIcon sx={{ mr: 1, fontSize: '16px' }} />
+              <ToggleButton value="PUBLIC" sx={{ width: "140px" }}>
+                <PublicIcon sx={{ mr: 1, fontSize: "16px" }} />
                 All
               </ToggleButton>
-              <ToggleButton value="PRIVATE" sx={{ width: '140px' }}>
-                <LockIcon sx={{ mr: 1, fontSize: '16px' }} />
+              <ToggleButton value="PRIVATE" sx={{ width: "140px" }}>
+                <LockIcon sx={{ mr: 1, fontSize: "16px" }} />
                 Participants
               </ToggleButton>
             </ToggleButtonGroup>
