@@ -5,6 +5,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -18,6 +19,9 @@ import {
   Description as DescriptionIcon,
   Public as PublicIcon,
   Lock as LockIcon,
+  CameraAlt as VideocamIcon,
+  ContentCopy as CopyIcon,
+  Close as DeleteIcon,
 } from "@mui/icons-material";
 import React, { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -30,6 +34,7 @@ import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
 import RepeatEvent from "../../components/Event/EventRepeat";
 import { TIMEZONES } from "../../utils/timezone-data";
+import { generateMeetingLink, addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -194,6 +199,12 @@ function EventPopover({
   const [timezone, setTimezone] = useState(
     event?.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz
   );
+  const [hasVideoConference, setHasVideoConference] = useState(
+    event?.x_openpass_videoconference ? true : false
+  );
+  const [meetingLink, setMeetingLink] = useState<string | null>(
+    event?.x_openpass_videoconference || null
+  );
 
   useEffect(() => {
     if (selectedRange) {
@@ -209,7 +220,49 @@ function EventPopover({
         ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
         : []
     );
+    // Update video conference state when editing different events
+    setHasVideoConference(event?.x_openpass_videoconference ? true : false);
+    setMeetingLink(event?.x_openpass_videoconference || null);
+    // Update description to include video conference footer if exists
+    if (event?.x_openpass_videoconference && event?.description) {
+      const hasVideoFooter = event.description.includes('Visio:');
+      if (!hasVideoFooter) {
+        setDescription(addVideoConferenceToDescription(event.description, event.x_openpass_videoconference));
+      } else {
+        setDescription(event.description);
+      }
+    } else {
+      setDescription(event?.description ?? "");
+    }
   }, [event, organizer?.cal_address]);
+
+  const handleAddVideoConference = () => {
+    const newMeetingLink = generateMeetingLink();
+    const updatedDescription = addVideoConferenceToDescription(description, newMeetingLink);
+    setDescription(updatedDescription);
+    setHasVideoConference(true);
+    setMeetingLink(newMeetingLink);
+  };
+
+  const handleCopyMeetingLink = async () => {
+    if (meetingLink) {
+      try {
+        await navigator.clipboard.writeText(meetingLink);
+        // You could add a toast notification here
+        console.log('Meeting link copied to clipboard');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+      }
+    }
+  };
+
+  const handleDeleteVideoConference = () => {
+    // Remove video conference footer from description
+    const updatedDescription = description.replace(/\n\nVisio: https?:\/\/[^\s]+/, '');
+    setDescription(updatedDescription);
+    setHasVideoConference(false);
+    setMeetingLink(null);
+  };
 
   const handleClose = () => {
     onClose({}, "backdropClick");
@@ -224,6 +277,8 @@ function EventPopover({
     setCalendarid(0);
     setImportant(false);
     setTimezone(timezoneList.browserTz);
+    setHasVideoConference(false);
+    setMeetingLink(null);
   };
 
   const handleSave = async () => {
@@ -255,6 +310,7 @@ function EventPopover({
       transp: busy,
       color: userPersonnalCalendars[calendarid]?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
+      x_openpass_videoconference: meetingLink || undefined,
     };
     if (end) {
       newEvent.end = new Date(end).toISOString();
@@ -278,6 +334,8 @@ function EventPopover({
     setCalendarid(0);
     setImportant(false);
     setTimezone(timezoneList.browserTz);
+    setHasVideoConference(false);
+    setMeetingLink(null);
 
     // Save to API in background
     dispatch(
@@ -511,6 +569,49 @@ function EventPopover({
 
       <FieldWithLabel label="Participants" isExpanded={showMore}>
         <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
+      </FieldWithLabel>
+
+      <FieldWithLabel label="Video meeting" isExpanded={showMore}>
+        <Box display="flex" gap={1} mb={1} alignItems="center">
+          <Button
+            startIcon={<VideocamIcon />}
+            onClick={handleAddVideoConference}
+            size="medium"
+            sx={{
+              textTransform: "none",
+              color: "text.secondary",
+              display: hasVideoConference ? "none" : "flex",
+            }}
+          >
+            Add Visio conference
+          </Button>
+          
+          {hasVideoConference && meetingLink && (
+            <>
+              <Typography variant="body2" sx={{ color: "text.secondary", mr: 1 }}>
+                Meeting link generated
+              </Typography>
+              <IconButton
+                onClick={handleCopyMeetingLink}
+                size="small"
+                sx={{ color: "primary.main" }}
+                aria-label="Copy meeting link"
+                title="Copy meeting link"
+              >
+                <CopyIcon />
+              </IconButton>
+              <IconButton
+                onClick={handleDeleteVideoConference}
+                size="small"
+                sx={{ color: "error.main" }}
+                aria-label="Remove video conference"
+                title="Remove video conference"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </>
+          )}
+        </Box>
       </FieldWithLabel>
       <FieldWithLabel label="Location" isExpanded={showMore}>
         <TextField
