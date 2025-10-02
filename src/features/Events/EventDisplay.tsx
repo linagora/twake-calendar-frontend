@@ -469,17 +469,17 @@ export default function EventDisplayModal({
                   isOwn={isOwn}
                 />
                 <FormControl fullWidth margin="dense" size="small">
-                  <InputLabel id="alarm">Alarm</InputLabel>
+                  <InputLabel id="notification">Notification</InputLabel>
                   <Select
-                    labelId="alarm"
-                    label="Alarm"
+                    labelId="notification"
+                    label="Notification"
                     value={alarm}
                     disabled={!isOwn}
                     onChange={(e: SelectChangeEvent) =>
                       setAlarm(e.target.value)
                     }
                   >
-                    <MenuItem value={""}>No Alarm</MenuItem>
+                    <MenuItem value={""}>No Notification</MenuItem>
                     <MenuItem value={"-PT1M"}>1 minute</MenuItem>
                     <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
                     <MenuItem value={"-PT10M"}>10 minutes</MenuItem>

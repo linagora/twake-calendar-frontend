@@ -116,10 +116,9 @@ describe("EventPopover", () => {
     const titleInput = screen.getByRole("textbox", { name: /title/i });
     expect(titleInput).toBeInTheDocument();
 
-    const descriptionInput = screen.getByRole("textbox", {
-      name: /description/i,
-    });
-    expect(descriptionInput).toBeInTheDocument();
+    // Description input is only visible after clicking "Add description" button
+    const addDescriptionButton = screen.getByText("Add description");
+    expect(addDescriptionButton).toBeInTheDocument();
 
     const calendarSelect = screen.getByRole("combobox", { name: /calendar/i });
     expect(calendarSelect).toBeInTheDocument();
@@ -135,9 +134,9 @@ describe("EventPopover", () => {
 
     // Extended labels appear
     expect(screen.getAllByText("Repeat")).toHaveLength(1);
-    expect(screen.getAllByText("Alarm")).toHaveLength(1);
-    expect(screen.getAllByText("Visibility")).toHaveLength(1);
-    expect(screen.getAllByText("Show as")).toHaveLength(1);
+    expect(screen.getAllByText("Notification")).toHaveLength(1);
+    expect(screen.getAllByText("Visible to")).toHaveLength(1);
+    expect(screen.getAllByText("Show me as")).toHaveLength(1);
   });
 
   it("fills start from selectedRange", () => {
@@ -160,6 +159,9 @@ describe("EventPopover", () => {
     });
     expect(screen.getByLabelText("Title")).toHaveValue("My Event");
 
+    // Click "Add description" button first
+    fireEvent.click(screen.getByText("Add description"));
+    
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Event Description" },
     });
@@ -190,7 +192,7 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: "newEvent" },
     });
-    const select = screen.getByLabelText("Search user");
+    const select = screen.getByLabelText("Start typing a name or email");
 
     act(() => {
       select.focus();
@@ -275,6 +277,8 @@ describe("EventPopover", () => {
       target: { value: newEvent.end.split("T")[0] },
     });
 
+    // Click "Add description" button first
+    fireEvent.click(screen.getByText("Add description"));
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: newEvent.description },
     });

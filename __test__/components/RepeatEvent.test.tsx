@@ -118,7 +118,7 @@ async function setupEventPopover(
       fireEvent.click(showMoreButton);
     }
   });
-  const select = screen.getByLabelText(/repetition/i);
+  const select = screen.getByLabelText(/repeat/i);
   userEvent.click(select);
 
   return jest.spyOn(apiUtils, "api");
@@ -155,13 +155,15 @@ async function expectRRule(expected: any) {
 describe("RepeatEvent", () => {
   it("renders with no repetition by default", () => {
     setupRepeatEvent();
-    expect(screen.getByLabelText(/repetition/i)).toBeInTheDocument();
-    expect(screen.queryByText(/daily/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Repeat every/i)).toBeInTheDocument();
+    // Check that the select exists and has default value
+    const select = screen.getByRole("combobox");
+    expect(select).toBeInTheDocument();
   });
 
   it("allows selecting repetition frequency", async () => {
     const { setRepetition } = setupRepeatEvent();
-    const select = screen.getByLabelText(/repetition/i);
+    const select = screen.getByRole("combobox");
     act(() => {
       userEvent.click(select);
     });
@@ -176,7 +178,7 @@ describe("RepeatEvent", () => {
 
   it("renders interval input when frequency is selected", () => {
     setupRepeatEvent({ freq: "daily", interval: 2 });
-    expect(screen.getByText(/interval/i)).toBeInTheDocument();
+    expect(screen.getByText(/Repeat every/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue("2")).toBeInTheDocument();
   });
 

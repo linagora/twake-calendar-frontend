@@ -6,7 +6,7 @@ import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlic
 export const updateSlotLabelVisibility = (currentTime: Date) => {
   const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
   const isCurrentWeekOrDay = checkIfCurrentWeekOrDay();
-  
+
   if (!isCurrentWeekOrDay) {
     slotLabels.forEach((label) => {
       const labelElement = label as HTMLElement;
@@ -42,12 +42,14 @@ export const updateSlotLabelVisibility = (currentTime: Date) => {
 
 const checkIfCurrentWeekOrDay = (): boolean => {
   const todayColumn = document.querySelector(".fc-day-today");
-  
+
   if (!todayColumn) {
     return false;
   }
 
-  const nowIndicator = document.querySelector(".fc-timegrid-now-indicator-arrow");
+  const nowIndicator = document.querySelector(
+    ".fc-timegrid-now-indicator-arrow"
+  );
   return !!nowIndicator;
 };
 
