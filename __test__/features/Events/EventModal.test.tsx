@@ -161,7 +161,7 @@ describe("EventPopover", () => {
 
     // Click "Add description" button first
     fireEvent.click(screen.getByText("Add description"));
-    
+
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Event Description" },
     });

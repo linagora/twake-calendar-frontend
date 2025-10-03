@@ -7,11 +7,14 @@
  * @returns {string} Random meeting ID
  */
 export function generateMeetingId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz';
+  const chars = "abcdefghijklmnopqrstuvwxyz";
   const generateSegment = (length: number): string => {
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    return Array.from(
+      { length },
+      () => chars[Math.floor(Math.random() * chars.length)]
+    ).join("");
   };
-  
+
   return `${generateSegment(3)}-${generateSegment(4)}-${generateSegment(3)}`;
 }
 
@@ -21,7 +24,10 @@ export function generateMeetingId(): string {
  * @returns {string} Complete meeting link
  */
 export function generateMeetingLink(baseUrl?: string): string {
-  const base = baseUrl || (window as any).VIDEO_CONFERENCE_BASE_URL || 'https://meet.linagora.com';
+  const base =
+    baseUrl ||
+    (window as any).VIDEO_CONFERENCE_BASE_URL ||
+    "https://meet.linagora.com";
   const meetingId = generateMeetingId();
   return `${base}/${meetingId}`;
 }
@@ -32,7 +38,10 @@ export function generateMeetingLink(baseUrl?: string): string {
  * @param {string} meetingLink - Generated meeting link
  * @returns {string} Description with video conference footer
  */
-export function addVideoConferenceToDescription(description: string, meetingLink: string): string {
+export function addVideoConferenceToDescription(
+  description: string,
+  meetingLink: string
+): string {
   const footer = `\n\nVisio: ${meetingLink}`;
   return description + footer;
 }
@@ -42,7 +51,9 @@ export function addVideoConferenceToDescription(description: string, meetingLink
  * @param {string} description - Event description
  * @returns {string | null} Video conference link if found, null otherwise
  */
-export function extractVideoConferenceFromDescription(description: string): string | null {
+export function extractVideoConferenceFromDescription(
+  description: string
+): string | null {
   const match = description.match(/Visio:\s*(https?:\/\/[^\s]+)/);
   return match ? match[1] : null;
 }
