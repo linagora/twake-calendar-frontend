@@ -49,7 +49,7 @@ describe("videoConferenceUtils", () => {
       const description = "";
       const meetingLink = "https://meet.linagora.com/abc-defg-hij";
       const result = addVideoConferenceToDescription(description, meetingLink);
-      expect(result).toBe("\n\nVisio: https://meet.linagora.com/abc-defg-hij");
+      expect(result).toBe("\nVisio: https://meet.linagora.com/abc-defg-hij");
     });
 
     it("should add video conference footer to existing description", () => {
@@ -57,7 +57,7 @@ describe("videoConferenceUtils", () => {
       const meetingLink = "https://meet.linagora.com/abc-defg-hij";
       const result = addVideoConferenceToDescription(description, meetingLink);
       expect(result).toBe(
-        "This is a meeting description.\n\nVisio: https://meet.linagora.com/abc-defg-hij"
+        "This is a meeting description.\nVisio: https://meet.linagora.com/abc-defg-hij"
       );
     });
   });
@@ -65,7 +65,7 @@ describe("videoConferenceUtils", () => {
   describe("extractVideoConferenceFromDescription", () => {
     it("should extract video conference link from description", () => {
       const description =
-        "Meeting description.\n\nVisio: https://meet.linagora.com/abc-defg-hij";
+        "Meeting description.\nVisio: https://meet.linagora.com/abc-defg-hij";
       const result = extractVideoConferenceFromDescription(description);
       expect(result).toBe("https://meet.linagora.com/abc-defg-hij");
     });

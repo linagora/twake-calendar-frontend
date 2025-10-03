@@ -74,7 +74,7 @@ export const extractEvents = (
 ) => {
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
-    if (calendars[id].events) {
+    if (calendars[id] && calendars[id].events) {
       filteredEvents = filteredEvents
         .concat(
           Object.keys(calendars[id].events).map(
@@ -118,16 +118,18 @@ export const updateCalsDetails = (
 
   if (rangeKey !== previousRangeKey) {
     selectedCalendars?.forEach((id) => {
-      dispatch(
-        getCalendarDetailAsync({
-          calId: id,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType,
-        })
-      );
+      if (id) {
+        dispatch(
+          getCalendarDetailAsync({
+            calId: id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+            calType,
+          })
+        );
+      }
     });
   }
 };

@@ -270,7 +270,7 @@ function EventPopover({
   const handleDeleteVideoConference = () => {
     // Remove video conference footer from description
     const updatedDescription = description.replace(
-      /\n\nVisio: https?:\/\/[^\s]+/,
+      /\nVisio: https?:\/\/[^\s]+/,
       ""
     );
     setDescription(updatedDescription);
@@ -500,7 +500,6 @@ function EventPopover({
               />
             }
             label="Mark as important"
-            sx={{ padding: "0 8px 0 0" }}
           />
           <FormControlLabel
             control={
@@ -534,7 +533,6 @@ function EventPopover({
               />
             }
             label="All day"
-            sx={{ padding: "0 8px 0 0" }}
           />
           <FormControlLabel
             control={
@@ -596,7 +594,7 @@ function EventPopover({
       </FieldWithLabel>
 
       <FieldWithLabel label="Video meeting" isExpanded={showMore}>
-        <Box display="flex" gap={1} mb={1} alignItems="center">
+        <Box display="flex" gap={1} alignItems="center">
           <Button
             startIcon={<VideocamIcon />}
             onClick={handleAddVideoConference}

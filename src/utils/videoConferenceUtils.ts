@@ -42,7 +42,7 @@ export function addVideoConferenceToDescription(
   description: string,
   meetingLink: string
 ): string {
-  const footer = `\n\nVisio: ${meetingLink}`;
+  const footer = `\nVisio: ${meetingLink}`;
   return description + footer;
 }
 
