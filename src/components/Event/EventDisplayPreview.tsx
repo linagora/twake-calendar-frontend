@@ -32,7 +32,9 @@ import {
 import { dlEvent } from "../../features/Events/EventApi";
 import EventDisplayModal from "../../features/Events/EventDisplay";
 import { ResponsiveDialog } from "../Dialog";
+import { EditModeDialog } from "./EditModeDialog";
 import EventDuplication from "./EventDuplicate";
+import { handleDelete, handleRSVP } from "./eventHandlers/eventHandlers";
 import { InfoRow } from "./InfoRow";
 import { renderAttendeeBadge } from "./utils/eventUtils";
 export default function EventPreviewModal({
@@ -55,8 +57,19 @@ export default function EventPreviewModal({
     : calendars.list[calId];
   const event = calendar.events[eventId];
   const user = useAppSelector((state) => state.user);
+
+  const isRecurring = event?.uid?.includes("/");
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
+  const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
+    null
+  );
+  const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
+    undefined
+  );
+  const [masterEventId, setMasterEventId] = useState<string | null>(null);
+  const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
+
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
     null
   );
@@ -88,18 +101,6 @@ export default function EventPreviewModal({
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
-
-  function handleRSVP(rsvp: string) {
-    const newEvent = {
-      ...event,
-      attendee: event.attendee?.map((a) =>
-        a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
-      ),
-    };
-
-    dispatch(putEventAsync({ cal: calendar, newEvent }));
-    onClose({}, "backdropClick");
-  }
 
   return (
     <>
@@ -137,8 +138,16 @@ export default function EventPreviewModal({
                     <IconButton
                       size="small"
                       onClick={async () => {
-                        setOpenFullDisplay(!openFullDisplay);
-                        await dispatch(getEventAsync(event));
+                        if (isRecurring) {
+                          setAfterChoiceFunc(() => async () => {
+                            await dispatch(getEventAsync(event));
+                            setOpenFullDisplay(!openFullDisplay);
+                          });
+                          setOpenEditModePopup("edit");
+                        } else {
+                          await dispatch(getEventAsync(event));
+                          setOpenFullDisplay(!openFullDisplay);
+                        }
                       }}
                     >
                       <EditIcon />
@@ -173,14 +182,32 @@ export default function EventPreviewModal({
                     {user.userData.email === event.organizer?.cal_address && (
                       <MenuItem
                         onClick={() => {
-                          onClose({}, "backdropClick");
-                          dispatch(
-                            deleteEventAsync({
-                              calId,
-                              eventId,
-                              eventURL: event.URL,
-                            })
-                          );
+                          if (isRecurring) {
+                            setAfterChoiceFunc(
+                              () =>
+                                (typeOfAction?: "solo" | "all" | undefined) =>
+                                  handleDelete(
+                                    isRecurring,
+                                    typeOfAction,
+                                    onClose,
+                                    dispatch,
+                                    calendar,
+                                    event,
+                                    calId,
+                                    eventId
+                                  )
+                            );
+                            setOpenEditModePopup("edit");
+                          } else {
+                            onClose({}, "backdropClick");
+                            dispatch(
+                              deleteEventAsync({
+                                calId,
+                                eventId,
+                                eventURL: event.URL,
+                              })
+                            );
+                          }
                         }}
                       >
                         Delete event
@@ -216,10 +243,7 @@ export default function EventPreviewModal({
         }
         actions={
           <>
-            {currentUserAttendee &&
-              event.uid?.split("/")[1] &&
-              "event is a reccuring event, the interraction between acceptance and recurrence is broken and to avoid loosing reccuring events by accepting or refusing them this feature isn't available for now"}
-            {currentUserAttendee && !event.uid?.split("/")[1] && (
+            {currentUserAttendee && (
               <Box style={{ display: "flex", flexDirection: "row" }}>
                 <Typography variant="body2">Attending?</Typography>
                 <ButtonGroup size="small" fullWidth>
@@ -229,7 +253,33 @@ export default function EventPreviewModal({
                         ? "success"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("ACCEPTED")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "ACCEPTED",
+
+                              onClose,
+                              type
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "ACCEPTED",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Accept
                   </Button>
@@ -239,7 +289,33 @@ export default function EventPreviewModal({
                         ? "warning"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("TENTATIVE")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "TENTATIVE",
+
+                              onClose,
+                              type
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "TENTATIVE",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Maybe
                   </Button>
@@ -249,7 +325,32 @@ export default function EventPreviewModal({
                         ? "error"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("DECLINED")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "DECLINED",
+                              onClose,
+                              type
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "DECLINED",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Decline
                   </Button>
@@ -387,6 +488,15 @@ export default function EventPreviewModal({
           </>
         )}
       </ResponsiveDialog>
+      <EditModeDialog
+        type={openEditModePopup}
+        setOpen={setOpenEditModePopup}
+        event={event}
+        eventAction={(type: "solo" | "all" | undefined) => {
+          setTypeOfAction(type);
+          afterChoiceFunc && afterChoiceFunc(type);
+        }}
+      />
       <EventDisplayModal
         open={openFullDisplay}
         onClose={() => setOpenFullDisplay(false)}

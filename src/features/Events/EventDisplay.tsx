@@ -4,10 +4,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import {
-  deleteEventAsync,
   moveEventAsync,
   putEventAsync,
   removeEvent,
+  updateEventInstanceAsync,
+  updateSeriesAsync
 } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
@@ -40,17 +41,24 @@ import { Calendars } from "../Calendars/CalendarTypes";
 import { formatLocalDateTime } from "./EventModal";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
+import {
+  handleDelete,
+  handleRSVP,
+} from "../../components/Event/eventHandlers/eventHandlers";
+import { getEvent } from "./EventApi";
 
 export default function EventDisplayModal({
   eventId,
   calId,
   open,
   onClose,
+  typeOfAction,
 }: {
   eventId: string;
   calId: string;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  typeOfAction?: "solo" | "all";
 }) {
   const dispatch = useAppDispatch();
   const calendar = useAppSelector((state) => state.calendars.list[calId]);
@@ -71,6 +79,7 @@ export default function EventDisplayModal({
   );
 
   // Form state
+  const [savedEventId, setSavedEventId] = useState(event?.uid ?? "");
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
@@ -119,19 +128,29 @@ export default function EventDisplayModal({
     }
     setRepetition(event?.repetition ?? ({} as RepetitionObject));
   }, [open, eventId, dispatch, onClose, event]);
+  useEffect(() => {
+    const fetchMasterEvent = async () => {
+      const masterEvent = await getEvent(event);
+
+      setTitle(masterEvent.title ?? "");
+      setDescription(masterEvent.description ?? "");
+      setLocation(masterEvent.location ?? "");
+      setStart(formatLocalDateTime(new Date(masterEvent?.start ?? Date.now())));
+      setEnd(formatLocalDateTime(new Date(masterEvent?.end ?? Date.now())));
+      setAllDay(masterEvent.allday ?? false);
+      setRepetition(masterEvent?.repetition ?? ({} as RepetitionObject));
+      setAlarm(masterEvent?.alarm?.trigger ?? "");
+      setBusy(masterEvent?.transp ?? "OPAQUE");
+      setEventClass(masterEvent?.class ?? "PUBLIC");
+      setTimezone(masterEvent.timezone ?? "UTC");
+    };
+    if (typeOfAction === "all") {
+      fetchMasterEvent();
+    }
+  }, [typeOfAction, event]); // 👈 add dependencies
 
   if (!event || !calendar) return null;
-
-  function handleRSVP(rsvp: string) {
-    const newEvent = {
-      ...event,
-      attendee: event.attendee?.map((a) =>
-        a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
-      ),
-    };
-
-    dispatch(putEventAsync({ cal: calendar, newEvent }));
-  }
+  const isRecurring = event.uid?.includes("/");
 
   const handleSave = async () => {
     const newEventUID = crypto.randomUUID();
@@ -157,28 +176,41 @@ export default function EventDisplayModal({
     };
 
     const [baseId, recurrenceId] = event.uid.split("/");
-    if (recurrenceId) {
-      Object.keys(userPersonnalCalendars[calendarid].events).forEach(
-        (element) => {
-          if (element.split("/")[0] === baseId) {
-            dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
-          }
-        }
+    // if (recurrenceId) {
+    //   Object.keys(userPersonnalCalendars[calendarid].events).forEach(
+    //     (element) => {
+    //       if (element.split("/")[0] === baseId) {
+    //         dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
+    //       }
+    //     }
+    //   );
+    // }
+    if (typeOfAction === "solo") {
+      dispatch(
+        updateEventInstanceAsync({
+          cal: userPersonnalCalendars[calendarid],
+          event: { ...newEvent, recurrenceId: recurrenceId },
+        })
+      );
+    } else if (typeOfAction === "all") {
+      dispatch(
+        updateSeriesAsync({
+          cal: userPersonnalCalendars[calendarid],
+          event: { ...newEvent, recurrenceId: recurrenceId },
+        })
+      );
+    } else {
+      dispatch(
+        putEventAsync({ cal: userPersonnalCalendars[calendarid], newEvent })
       );
     }
-    await dispatch(
-      putEventAsync({
-        cal: userPersonnalCalendars[calendarid],
-        newEvent,
-      })
-    );
 
     if (newCalId !== calId) {
       dispatch(
         moveEventAsync({
           cal: userPersonnalCalendars[calendarid],
           newEvent,
-          newURL: `/calendars/${newCalId}/${event.uid}.ics`,
+          newURL: `/calendars/${newCalId}/${baseId}.ics`,
         })
       );
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
@@ -268,7 +300,17 @@ export default function EventDisplayModal({
                         ? "success"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("ACCEPTED")}
+                    onClick={() =>
+                      handleRSVP(
+                        dispatch,
+                        calendar,
+                        user,
+                        event,
+                        "ACCEPTED",
+                        undefined,
+                        isRecurring ? typeOfAction : undefined
+                      )
+                    }
                   >
                     Accept
                   </Button>
@@ -278,7 +320,17 @@ export default function EventDisplayModal({
                         ? "warning"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("TENTATIVE")}
+                    onClick={() =>
+                      handleRSVP(
+                        dispatch,
+                        calendar,
+                        user,
+                        event,
+                        "TENTATIVE",
+                        undefined,
+                        isRecurring ? typeOfAction : undefined
+                      )
+                    }
                   >
                     Maybe
                   </Button>
@@ -288,7 +340,17 @@ export default function EventDisplayModal({
                         ? "error"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("DECLINED")}
+                    onClick={() =>
+                      handleRSVP(
+                        dispatch,
+                        calendar,
+                        user,
+                        event,
+                        "DECLINED",
+                        undefined,
+                        isRecurring ? typeOfAction : undefined
+                      )
+                    }
                   >
                     Decline
                   </Button>
@@ -546,12 +608,18 @@ export default function EventDisplayModal({
               {isOwn && (
                 <IconButton
                   size="small"
-                  onClick={() => {
-                    onClose({}, "backdropClick");
-                    dispatch(
-                      deleteEventAsync({ calId, eventId, eventURL: event.URL })
-                    );
-                  }}
+                  onClick={() =>
+                    handleDelete(
+                      isRecurring,
+                      typeOfAction,
+                      onClose,
+                      dispatch,
+                      calendar,
+                      event,
+                      calId,
+                      eventId
+                    )
+                  }
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
