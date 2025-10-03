@@ -12,7 +12,10 @@ import {
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
-import { formatDateToYYYYMMDDTHHMMSS, computeWeekRange } from "../../utils/dateUtils";
+import {
+  formatDateToYYYYMMDDTHHMMSS,
+  computeWeekRange,
+} from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
 
 export const getCalendarsListAsync = createAsyncThunk<
@@ -206,11 +209,11 @@ export const moveEventAsync = createAsyncThunk<
   { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
 >("calendars/moveEvent", async ({ cal, newEvent, newURL }) => {
   await moveEvent(newEvent, newURL);
-  
+
   // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
   const eventDate = new Date(newEvent.start);
   const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
-  
+
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(weekStart),
     end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
