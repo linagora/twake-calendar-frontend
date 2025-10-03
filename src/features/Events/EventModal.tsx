@@ -34,7 +34,10 @@ import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
 import RepeatEvent from "../../components/Event/EventRepeat";
 import { TIMEZONES } from "../../utils/timezone-data";
-import { generateMeetingLink, addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
+import {
+  generateMeetingLink,
+  addVideoConferenceToDescription,
+} from "../../utils/videoConferenceUtils";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -225,9 +228,14 @@ function EventPopover({
     setMeetingLink(event?.x_openpass_videoconference || null);
     // Update description to include video conference footer if exists
     if (event?.x_openpass_videoconference && event?.description) {
-      const hasVideoFooter = event.description.includes('Visio:');
+      const hasVideoFooter = event.description.includes("Visio:");
       if (!hasVideoFooter) {
-        setDescription(addVideoConferenceToDescription(event.description, event.x_openpass_videoconference));
+        setDescription(
+          addVideoConferenceToDescription(
+            event.description,
+            event.x_openpass_videoconference
+          )
+        );
       } else {
         setDescription(event.description);
       }
@@ -238,7 +246,10 @@ function EventPopover({
 
   const handleAddVideoConference = () => {
     const newMeetingLink = generateMeetingLink();
-    const updatedDescription = addVideoConferenceToDescription(description, newMeetingLink);
+    const updatedDescription = addVideoConferenceToDescription(
+      description,
+      newMeetingLink
+    );
     setDescription(updatedDescription);
     setHasVideoConference(true);
     setMeetingLink(newMeetingLink);
@@ -249,16 +260,19 @@ function EventPopover({
       try {
         await navigator.clipboard.writeText(meetingLink);
         // You could add a toast notification here
-        console.log('Meeting link copied to clipboard');
+        console.log("Meeting link copied to clipboard");
       } catch (err) {
-        console.error('Failed to copy link:', err);
+        console.error("Failed to copy link:", err);
       }
     }
   };
 
   const handleDeleteVideoConference = () => {
     // Remove video conference footer from description
-    const updatedDescription = description.replace(/\n\nVisio: https?:\/\/[^\s]+/, '');
+    const updatedDescription = description.replace(
+      /\n\nVisio: https?:\/\/[^\s]+/,
+      ""
+    );
     setDescription(updatedDescription);
     setHasVideoConference(false);
     setMeetingLink(null);
@@ -595,7 +609,7 @@ function EventPopover({
           >
             Add Visio conference
           </Button>
-          
+
           {hasVideoConference && meetingLink && (
             <>
               <Typography sx={{ color: "text.secondary", mr: 1 }}>
@@ -732,4 +746,3 @@ export function formatLocalDateTime(date: Date): string {
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
-

@@ -110,7 +110,7 @@ async function setupEventPopover(
   // Check Repeat checkbox to show repeat options
   const repeatCheckbox = screen.getByLabelText("Repeat");
   fireEvent.click(repeatCheckbox);
-  
+
   // Wait for RepeatEvent component to be rendered
   await waitFor(() => {
     expect(screen.getByText("Day(s)")).toBeInTheDocument();
@@ -137,11 +137,11 @@ describe("RepeatEvent Component", () => {
 
   it("renders with no repetition by default", () => {
     const { setRepetition } = setupRepeatEvent();
-    
+
     // Check that interval input shows default value
     const intervalInput = screen.getByDisplayValue("1");
     expect(intervalInput).toBeInTheDocument();
-    
+
     // Check that frequency dropdown shows default value
     const frequencySelect = screen.getByRole("combobox");
     expect(frequencySelect).toBeInTheDocument();
@@ -149,15 +149,15 @@ describe("RepeatEvent Component", () => {
 
   it("allows selecting repetition frequency", () => {
     const { setRepetition } = setupRepeatEvent();
-    
+
     // Click on frequency dropdown
     const frequencySelect = screen.getByRole("combobox");
     fireEvent.mouseDown(frequencySelect);
-    
+
     // Select Week(s)
     const weeklyOption = screen.getByText("Week(s)");
     fireEvent.click(weeklyOption);
-    
+
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ freq: "weekly" })
     );
@@ -165,17 +165,17 @@ describe("RepeatEvent Component", () => {
 
   it("renders interval input when frequency is selected", () => {
     setupRepeatEvent({ freq: "daily" });
-    
+
     const intervalInput = screen.getByDisplayValue("1");
     expect(intervalInput).toBeInTheDocument();
   });
 
   it("updates interval value", () => {
     const { setRepetition } = setupRepeatEvent();
-    
+
     const intervalInput = screen.getByDisplayValue("1");
     fireEvent.change(intervalInput, { target: { value: "3" } });
-    
+
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ interval: 3 })
     );
@@ -183,10 +183,10 @@ describe("RepeatEvent Component", () => {
 
   it("toggles day selection for weekly frequency", () => {
     const { setRepetition } = setupRepeatEvent({ freq: "weekly" });
-    
+
     const mondayCheckbox = screen.getByLabelText("MO");
     fireEvent.click(mondayCheckbox);
-    
+
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ selectedDays: ["MO"] })
     );
@@ -230,7 +230,7 @@ describe("Repeat Event Integration Tests", () => {
     // Select "After" end option
     const afterRadio = screen.getByLabelText(/after/i);
     fireEvent.click(afterRadio);
-    
+
     // Set occurrences to 5
     const occurrencesInput = screen.getAllByRole("spinbutton")[1];
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
@@ -245,7 +245,7 @@ describe("Repeat Event Integration Tests", () => {
     // Select "On" end option
     const onRadio = screen.getByLabelText(/on/i);
     fireEvent.click(onRadio);
-    
+
     // Set end date
     const endDateInput = screen.getByTestId("end-date");
     fireEvent.change(endDateInput, { target: { value: "2025-12-31" } });
@@ -267,10 +267,10 @@ describe("Repeat Event Integration Tests", () => {
     const thursdayCheckbox = screen.getByLabelText("TH");
     fireEvent.click(thursdayCheckbox);
 
-    await expectRRule({ 
-      freq: "weekly", 
-      interval: 1, 
-      selectedDays: ["FR", "TH"] 
+    await expectRRule({
+      freq: "weekly",
+      interval: 1,
+      selectedDays: ["FR", "TH"],
     });
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
@@ -317,7 +317,7 @@ describe("Repeat Event Integration Tests", () => {
     // Select "After" end option
     const afterRadio = screen.getByLabelText(/after/i);
     fireEvent.click(afterRadio);
-    
+
     // Set occurrences to 5
     const occurrencesInput = screen.getAllByRole("spinbutton")[1];
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
@@ -358,7 +358,12 @@ describe("Repeat Event Integration Tests", () => {
     const neverRadio = screen.getByLabelText(/never/i);
     fireEvent.click(neverRadio);
 
-    await expectRRule({ freq: "yearly", interval: 1, occurrences: 0, endDate: "" });
+    await expectRRule({
+      freq: "yearly",
+      interval: 1,
+      occurrences: 0,
+      endDate: "",
+    });
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
 });
