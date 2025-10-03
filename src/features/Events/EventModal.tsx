@@ -23,7 +23,13 @@ import {
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
 } from "@mui/icons-material";
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import { ResponsiveDialog } from "../../components/Dialog";
@@ -129,7 +135,6 @@ function EventPopover({
     selectPersonnalCalendars
   );
 
-
   // Helper function to resolve timezone aliases
   const resolveTimezone = (tzName: string): string => {
     if (TIMEZONES.zones[tzName]) {
@@ -213,7 +218,7 @@ function EventPopover({
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
   const userPersonnalCalendarsRef = useRef(userPersonnalCalendars);
-  
+
   // Update ref when userPersonnalCalendars changes
   useEffect(() => {
     userPersonnalCalendarsRef.current = userPersonnalCalendars;
@@ -259,7 +264,9 @@ function EventPopover({
       setEnd(event.end ? event.end : "");
       setCalendarid(
         event.calId
-          ? userPersonnalCalendarsRef.current.findIndex((e) => e.id === event.calId)
+          ? userPersonnalCalendarsRef.current.findIndex(
+              (e) => e.id === event.calId
+            )
           : 0
       );
       setAllDay(event.allday ?? false);
@@ -267,16 +274,22 @@ function EventPopover({
       setShowRepeat(event.repetition?.freq ? true : false);
       setAttendees(
         event.attendee
-          ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+          ? event.attendee.filter(
+              (a) => a.cal_address !== organizer?.cal_address
+            )
           : []
       );
       setAlarm(event.alarm?.trigger ?? "");
       setEventClass(event.class ?? "PUBLIC");
       setBusy(event.transp ?? "OPAQUE");
-      setTimezone(event.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz);
+      setTimezone(
+        event.timezone
+          ? resolveTimezone(event.timezone)
+          : timezoneList.browserTz
+      );
       setHasVideoConference(event.x_openpass_videoconference ? true : false);
       setMeetingLink(event.x_openpass_videoconference || null);
-      
+
       // Update description to include video conference footer if exists
       if (event.x_openpass_videoconference && event.description) {
         const hasVideoFooter = event.description.includes("Visio:");
