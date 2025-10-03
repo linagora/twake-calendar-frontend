@@ -23,7 +23,7 @@ import {
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
 } from "@mui/icons-material";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import { ResponsiveDialog } from "../../components/Dialog";
@@ -129,6 +129,7 @@ function EventPopover({
     selectPersonnalCalendars
   );
 
+
   // Helper function to resolve timezone aliases
   const resolveTimezone = (tzName: string): string => {
     if (TIMEZONES.zones[tzName]) {
@@ -209,6 +210,37 @@ function EventPopover({
     event?.x_openpass_videoconference || null
   );
 
+  // Use ref to track if we've already initialized to avoid infinite loop
+  const isInitializedRef = useRef(false);
+  const userPersonnalCalendarsRef = useRef(userPersonnalCalendars);
+  
+  // Update ref when userPersonnalCalendars changes
+  useEffect(() => {
+    userPersonnalCalendarsRef.current = userPersonnalCalendars;
+  }, [userPersonnalCalendars]);
+
+  const resetAllStateToDefault = useCallback(() => {
+    setShowMore(false);
+    setShowDescription(false);
+    setShowRepeat(false);
+    setTitle("");
+    setDescription("");
+    setAttendees([]);
+    setLocation("");
+    setStart("");
+    setEnd("");
+    setCalendarid(0);
+    setAllDay(false);
+    setRepetition({} as RepetitionObject);
+    setAlarm("");
+    setEventClass("PUBLIC");
+    setBusy("OPAQUE");
+    setImportant(false);
+    setTimezone(timezoneList.browserTz);
+    setHasVideoConference(false);
+    setMeetingLink(null);
+  }, [timezoneList.browserTz]);
+
   useEffect(() => {
     if (selectedRange) {
       setStart(selectedRange ? formatLocalDateTime(selectedRange.start) : "");
@@ -216,33 +248,78 @@ function EventPopover({
     }
   }, [selectedRange]);
 
+  // Initialize state when event prop changes
   useEffect(() => {
-    setTitle(event?.title ?? "");
-    setAttendees(
-      event?.attendee
-        ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
-        : []
-    );
-    // Update video conference state when editing different events
-    setHasVideoConference(event?.x_openpass_videoconference ? true : false);
-    setMeetingLink(event?.x_openpass_videoconference || null);
-    // Update description to include video conference footer if exists
-    if (event?.x_openpass_videoconference && event?.description) {
-      const hasVideoFooter = event.description.includes("Visio:");
-      if (!hasVideoFooter) {
-        setDescription(
-          addVideoConferenceToDescription(
-            event.description,
-            event.x_openpass_videoconference
-          )
-        );
-      } else {
-        setDescription(event.description);
+    if (event) {
+      // Editing existing event - populate fields with event data
+      setTitle(event.title ?? "");
+      setDescription(event.description ?? "");
+      setLocation(event.location ?? "");
+      setStart(event.start ? event.start : "");
+      setEnd(event.end ? event.end : "");
+      setCalendarid(
+        event.calId
+          ? userPersonnalCalendarsRef.current.findIndex((e) => e.id === event.calId)
+          : 0
+      );
+      setAllDay(event.allday ?? false);
+      setRepetition(event.repetition ?? ({} as RepetitionObject));
+      setShowRepeat(event.repetition?.freq ? true : false);
+      setAttendees(
+        event.attendee
+          ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+          : []
+      );
+      setAlarm(event.alarm?.trigger ?? "");
+      setEventClass(event.class ?? "PUBLIC");
+      setBusy(event.transp ?? "OPAQUE");
+      setTimezone(event.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz);
+      setHasVideoConference(event.x_openpass_videoconference ? true : false);
+      setMeetingLink(event.x_openpass_videoconference || null);
+      
+      // Update description to include video conference footer if exists
+      if (event.x_openpass_videoconference && event.description) {
+        const hasVideoFooter = event.description.includes("Visio:");
+        if (!hasVideoFooter) {
+          setDescription(
+            addVideoConferenceToDescription(
+              event.description,
+              event.x_openpass_videoconference
+            )
+          );
+        } else {
+          setDescription(event.description);
+        }
       }
-    } else {
-      setDescription(event?.description ?? "");
     }
-  }, [event, organizer?.cal_address]);
+  }, [event, organizer?.cal_address, timezoneList.browserTz]);
+
+  // Reset state when creating new event (event is undefined)
+  useEffect(() => {
+    if (!event && isInitializedRef.current) {
+      // Creating new event - reset all fields to default
+      setShowMore(false);
+      setShowDescription(false);
+      setShowRepeat(false);
+      setTitle("");
+      setDescription("");
+      setAttendees([]);
+      setLocation("");
+      setStart("");
+      setEnd("");
+      setCalendarid(0);
+      setAllDay(false);
+      setRepetition({} as RepetitionObject);
+      setAlarm("");
+      setEventClass("PUBLIC");
+      setBusy("OPAQUE");
+      setImportant(false);
+      setTimezone(timezoneList.browserTz);
+      setHasVideoConference(false);
+      setMeetingLink(null);
+    }
+    isInitializedRef.current = true;
+  }, [event, timezoneList.browserTz]);
 
   const handleAddVideoConference = () => {
     const newMeetingLink = generateMeetingLink();
@@ -280,19 +357,7 @@ function EventPopover({
 
   const handleClose = () => {
     onClose({}, "backdropClick");
-    // Reset state
-    setShowMore(false);
-    setShowDescription(false);
-    setShowRepeat(false);
-    setTitle("");
-    setDescription("");
-    setAttendees([]);
-    setLocation("");
-    setCalendarid(0);
-    setImportant(false);
-    setTimezone(timezoneList.browserTz);
-    setHasVideoConference(false);
-    setMeetingLink(null);
+    resetAllStateToDefault();
   };
 
   const handleSave = async () => {
@@ -337,19 +402,8 @@ function EventPopover({
     // Close popup immediately
     onClose({}, "backdropClick");
 
-    // Reset state
-    setShowMore(false);
-    setShowDescription(false);
-    setShowRepeat(false);
-    setTitle("");
-    setDescription("");
-    setAttendees([]);
-    setLocation("");
-    setCalendarid(0);
-    setImportant(false);
-    setTimezone(timezoneList.browserTz);
-    setHasVideoConference(false);
-    setMeetingLink(null);
+    // Reset all state to default values
+    resetAllStateToDefault();
 
     // Save to API in background
     dispatch(

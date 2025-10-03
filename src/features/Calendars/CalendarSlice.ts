@@ -12,7 +12,7 @@ import {
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
+import { formatDateToYYYYMMDDTHHMMSS, computeWeekRange } from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
 
 export const getCalendarsListAsync = createAsyncThunk<
@@ -124,12 +124,8 @@ export const putEventAsync = createAsyncThunk<
   await putEvent(newEvent, cal.ownerEmails ? cal.ownerEmails[0] : undefined);
   const eventDate = new Date(newEvent.start);
 
-  const weekStart = new Date(eventDate);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(eventDate.getDate() - eventDate.getDay());
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 7);
+  // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
+  const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
 
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(weekStart),
@@ -210,11 +206,14 @@ export const moveEventAsync = createAsyncThunk<
   { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
 >("calendars/moveEvent", async ({ cal, newEvent, newURL }) => {
   await moveEvent(newEvent, newURL);
+  
+  // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
+  const eventDate = new Date(newEvent.start);
+  const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
+  
   const calEvents = (await getCalendar(cal.id, {
-    start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
-    end: formatDateToYYYYMMDDTHHMMSS(
-      new Date(new Date(newEvent.start).getTime() + 86400000)
-    ),
+    start: formatDateToYYYYMMDDTHHMMSS(weekStart),
+    end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
   })) as Record<string, any>;
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
