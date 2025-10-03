@@ -67,7 +67,6 @@ export default function EventPreviewModal({
   const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
     undefined
   );
-  const [masterEventId, setMasterEventId] = useState<string | null>(null);
   const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
 
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(

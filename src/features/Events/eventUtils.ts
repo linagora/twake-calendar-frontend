@@ -189,7 +189,7 @@ export function makeVevent(
         event.x_openpass_videoconference ?? null,
       ],
       ["summary", {}, "text", event.title ?? ""],
-      ["dstamp", {tzid}, "date-time", formatDateToICal(new Date(), false)],
+      ["dstamp", { tzid }, "date-time", formatDateToICal(new Date(), false)],
     ],
   ];
   if (event.alarm?.trigger) {

@@ -10,8 +10,6 @@ import {
   RadioGroup,
 } from "@mui/material";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
-import { getEventAsync } from "../../features/Calendars/CalendarSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState } from "react";
 
 export function EditModeDialog({
@@ -45,7 +43,9 @@ export function EditModeDialog({
       <DialogContent>
         <RadioGroup
           value={typeOfAction}
-          onChange={(e) => setTypeOfAction(e.target.value)}
+          onChange={(e) =>
+            setTypeOfAction(e.target.value as "solo" | "all" | undefined)
+          }
         >
           <FormControlLabel
             value="solo"

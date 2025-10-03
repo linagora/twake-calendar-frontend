@@ -7,9 +7,14 @@ import {
   getCalendarDetailAsync,
   getEventAsync,
   putEventAsync,
+  removeEvent,
+  updateEventInstanceAsync,
   updateEventLocal,
+  updateSeriesAsync,
 } from "../../../features/Calendars/CalendarSlice";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { getEvent } from "../../../features/Events/EventApi";
+import { userData } from "../../../features/User/userDataTypes";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -24,6 +29,9 @@ export interface EventHandlersProps {
   setEventDisplayedCalId: (id: string) => void;
   setEventDisplayedTemp: (temp: boolean) => void;
   calendars: Record<string, Calendars>;
+  setSelectedEvent: (event: CalendarEvent) => void;
+  setAfterChoiceFunc: (func: Function) => void;
+  setOpenEditModePopup: (open: string) => void;
 }
 
 export const createEventHandlers = (props: EventHandlersProps) => {
@@ -40,6 +48,9 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setEventDisplayedCalId,
     setEventDisplayedTemp,
     calendars,
+    setSelectedEvent,
+    setAfterChoiceFunc,
+    setOpenEditModePopup,
   } = props;
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
@@ -113,12 +124,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
   };
 
   const handleEventAllow = (dropInfo: any, draggedEvent: any) => {
-    if (
-      draggedEvent?.extendedProps.uid &&
-      draggedEvent.extendedProps.uid.split("/")[1]
-    ) {
-      return false;
-    }
     return true;
   };
 
@@ -131,7 +136,9 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       calendars[arg.event._def.extendedProps.calId].events[
         arg.event._def.extendedProps.uid
       ];
+    const calendar = calendars[arg.event._def.extendedProps.calId];
 
+    const isRecurring = event.uid.includes("/");
     const totalDeltaMs = getDeltaInMilliseconds(arg.delta);
 
     const originalStart = new Date(event.start);
@@ -143,8 +150,46 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       start: computedNewStart.toISOString(),
       end: computedNewEnd.toISOString(),
     } as CalendarEvent;
-    dispatch(updateEventLocal({ calId: newEvent.calId, event: newEvent }));
-    dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+
+    if (isRecurring) {
+      setSelectedEvent(event);
+      setOpenEditModePopup("edit");
+      setAfterChoiceFunc(
+        () => async (typeOfAction: "solo" | "all" | undefined) => {
+          if (typeOfAction === "solo") {
+            dispatch(
+              updateEventInstanceAsync({ cal: calendar, event: newEvent })
+            );
+            dispatch(
+              updateEventLocal({ calId: newEvent.calId, event: newEvent })
+            );
+          } else if (typeOfAction === "all") {
+            const master = await getEvent(newEvent, true);
+            const recId = event.uid.split("/")[0];
+            Object.keys(calendar.events).forEach((id) => {
+              if (id.split("/")[0] === recId) {
+                dispatch(
+                  removeEvent({ calendarUid: event.calId, eventUid: id })
+                );
+              }
+            });
+            await dispatch(
+              updateSeriesAsync({
+                cal: calendar,
+                event: {
+                  ...master,
+                  start: computedNewStart.toISOString(),
+                  end: computedNewEnd.toISOString(),
+                },
+              })
+            );
+          }
+        }
+      );
+    } else {
+      dispatch(updateEventLocal({ calId: newEvent.calId, event: newEvent }));
+      dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+    }
   };
 
   const handleEventResize = (arg: any) => {
@@ -156,9 +201,10 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       calendars[arg.event._def.extendedProps.calId].events[
         arg.event._def.extendedProps.uid
       ];
-    if (event.uid.split("/")[1]) {
-      dispatch(getEventAsync(event));
-    }
+    const calendar = calendars[arg.event._def.extendedProps.calId];
+
+    const isRecurring = event.uid.includes("/");
+
     const originalStart = new Date(event.start);
     const computedNewStart = new Date(
       originalStart.getTime() + getDeltaInMilliseconds(arg.startDelta)
@@ -173,7 +219,44 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       end: computedNewEnd.toISOString(),
     } as CalendarEvent;
 
-    dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+    if (isRecurring) {
+      setSelectedEvent(event);
+      setOpenEditModePopup("edit");
+      setAfterChoiceFunc(
+        () => async (typeOfAction: "solo" | "all" | undefined) => {
+          if (typeOfAction === "solo") {
+            dispatch(
+              updateEventInstanceAsync({ cal: calendar, event: newEvent })
+            );
+            dispatch(
+              updateEventLocal({ calId: newEvent.calId, event: newEvent })
+            );
+          } else if (typeOfAction === "all") {
+            const master = await getEvent(newEvent, true);
+            const recId = event.uid.split("/")[0];
+            Object.keys(calendar.events).forEach((id) => {
+              if (id.split("/")[0] === recId) {
+                dispatch(
+                  removeEvent({ calendarUid: event.calId, eventUid: id })
+                );
+              }
+            });
+            await dispatch(
+              updateSeriesAsync({
+                cal: calendar,
+                event: {
+                  ...master,
+                  start: computedNewStart.toISOString(),
+                  end: computedNewEnd.toISOString(),
+                },
+              })
+            );
+          }
+        }
+      );
+    } else {
+      dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+    }
   };
 
   return {
