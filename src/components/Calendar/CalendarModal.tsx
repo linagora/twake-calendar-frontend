@@ -79,20 +79,6 @@ function CalendarPopover({
     }
   };
 
-  const palette = [
-    "#D50000",
-    "#E67C73",
-    "#F4511E",
-    "#F6BF26",
-    "#33B679",
-    "#0B8043",
-    "#039BE5",
-    "#3F51B5",
-    "#7986CB",
-    "#8E24AA",
-    "#616161",
-  ];
-
   return (
     <Dialog open={open} onClose={(e, reason) => onClose(e, reason)}>
       <DialogTitle style={{ backgroundColor: color }}>

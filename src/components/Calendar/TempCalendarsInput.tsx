@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   getTempCalendarsListAsync,

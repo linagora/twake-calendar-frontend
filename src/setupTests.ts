@@ -1,7 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { TextEncoder, TextDecoder } from "util";
-import { clientConfig } from "./features/User/oidcAuth";
+import { TextEncoder } from "util";
 
 global.TextEncoder = TextEncoder;
 

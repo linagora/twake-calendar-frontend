@@ -610,9 +610,18 @@ function EventPopover({
 
           {hasVideoConference && meetingLink && (
             <>
-              <Typography sx={{ color: "text.secondary", mr: 1 }}>
-                Meeting link generated
-              </Typography>
+              <Button
+                startIcon={<VideocamIcon />}
+                onClick={() => window.open(meetingLink, "_blank")}
+                size="medium"
+                variant="contained"
+                sx={{
+                  textTransform: "none",
+                  mr: 1,
+                }}
+              >
+                Join Visio conference
+              </Button>
               <IconButton
                 onClick={handleCopyMeetingLink}
                 size="small"

@@ -16,8 +16,6 @@ export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const selectedCalendars = useAppSelector((state) => state.calendars.list);
-  const userId =
-    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<string>("timeGridWeek");
 
