@@ -1412,7 +1412,7 @@ describe("Helper functions", () => {
   it("stringAvatar returns correct props", () => {
     const result = stringAvatar("Alice");
     expect(result.children).toBe("A");
-    expect(result.style.bgcolor).toMatch(/^#/);
+    expect(result.style.backgroundColor).toMatch(/^#/);
   });
 
   it("InfoRow renders text and link if url is valid", () => {
