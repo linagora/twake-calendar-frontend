@@ -525,12 +525,14 @@ export default function EventDisplayModal({
             {/* Extended options */}
             {showMore && (
               <>
-                <RepeatEvent
-                  repetition={repetition}
-                  eventStart={event.start}
-                  setRepetition={setRepetition}
-                  isOwn={isOwn}
-                />
+                {isOwn && (
+                  <RepeatEvent
+                    repetition={repetition}
+                    eventStart={event.start}
+                    setRepetition={setRepetition}
+                    isOwn={isOwn && typeOfAction !== "solo"}
+                  />
+                )}
                 <FormControl fullWidth margin="dense" size="small">
                   <InputLabel id="notification">Notification</InputLabel>
                   <Select

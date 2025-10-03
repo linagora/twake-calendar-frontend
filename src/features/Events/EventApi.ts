@@ -120,7 +120,10 @@ export const updateSeries = async (
   const tzid = event.timezone;
 
   const updatedMaster = makeVevent(event, tzid, calOwnerEmail, true);
-  updatedMaster[1].push(rrule);
+  const newRrule = updatedMaster[1].find(([k]: string[]) => k === "rrule");
+  if (!newRrule) {
+    updatedMaster[1].push(rrule);
+  }
   vevents[masterIndex] = updatedMaster;
 
   const timezoneData = TIMEZONES.zones[event.timezone];

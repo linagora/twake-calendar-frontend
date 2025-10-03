@@ -305,12 +305,13 @@ export const updateSeriesAsync = createAsyncThunk<
   weekStart.setDate(eventDate.getDate() - eventDate.getDay());
 
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 7);
+  weekEnd.setDate(weekStart.getDate() + 8);
 
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(weekStart),
     end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
   })) as Record<string, any>;
+
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
       const vevents = eventdata.data[2] as any[][];
@@ -327,7 +328,6 @@ export const updateSeriesAsync = createAsyncThunk<
       });
     }
   );
-
   return {
     calId: cal.id,
     events,
@@ -616,6 +616,15 @@ const CalendarSlice = createSlice({
       })
       .addCase(updateSeriesAsync.fulfilled, (state, action) => {
         state.pending = false;
+        if (!state.list[action.payload.calId]) {
+          state.list[action.payload.calId] = {
+            id: action.payload.calId,
+            events: {},
+          } as Calendars;
+        }
+        action.payload.events.forEach((event) => {
+          state.list[action.payload.calId].events[event.uid] = event;
+        });
         Object.keys(state.list[action.payload.calId].events).forEach((id) => {
           state.list[action.payload.calId].events[id].color =
             state.list[action.payload.calId].color;
