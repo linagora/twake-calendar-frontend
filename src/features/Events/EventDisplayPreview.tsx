@@ -15,8 +15,6 @@ import {
   CardContent,
   Divider,
   IconButton,
-  Avatar,
-  Badge,
   PopoverPosition,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,18 +27,13 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CircleIcon from "@mui/icons-material/Circle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { userAttendee } from "../User/userDataTypes";
 import EventDisplayModal, {
   InfoRow,
   renderAttendeeBadge,
-  stringAvatar,
 } from "./EventDisplay";
-import { dlEvent, getEvent } from "./EventApi";
-import { CalendarEvent } from "./EventsTypes";
+import { dlEvent } from "./EventApi";
 import EventDuplication from "../../components/Event/EventDuplicate";
-import { getCalendar } from "../Calendars/CalendarApi";
 
 export default function EventPreviewModal({
   eventId,

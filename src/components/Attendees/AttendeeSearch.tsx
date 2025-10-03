@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { searchUsers } from "../../features/User/userAPI";
 import { userAttendee } from "../../features/User/userDataTypes";
 import { PeopleSearch, User } from "./PeopleSearch";
 
