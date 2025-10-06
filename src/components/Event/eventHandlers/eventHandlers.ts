@@ -8,7 +8,7 @@ import {
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { getEvent } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { userAttendee, userData } from "../../../features/User/userDataTypes";
+import { userData } from "../../../features/User/userDataTypes";
 
 export async function handleRSVP(
   dispatch: Function,
