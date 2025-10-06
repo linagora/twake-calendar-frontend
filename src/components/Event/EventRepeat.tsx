@@ -48,11 +48,16 @@ export default function RepeatEvent({
   }, [repetition.occurrences, repetition.endDate]);
 
   const handleDayChange = (day: string) => {
-    const updatedDays = repetition.selectedDays?.includes(day)
-      ? repetition.selectedDays.filter((d) => d !== day)
-      : [...(repetition.selectedDays ?? []), day];
+    const currentDays = repetition.byday || [];
+    const updatedDays = currentDays.includes(day)
+      ? currentDays.filter((d) => d !== day)
+      : [...currentDays, day];
 
-    setRepetition({ ...repetition, selectedDays: updatedDays });
+    // Only set byday if there are selected days, otherwise set to null
+    setRepetition({
+      ...repetition,
+      byday: updatedDays.length > 0 ? updatedDays : null,
+    });
   };
 
   return (
@@ -81,16 +86,20 @@ export default function RepeatEvent({
               disabled={!isOwn}
               onChange={(e: SelectChangeEvent) => {
                 if (e.target.value === "weekly") {
+                  // Adjust day index for MO-SU (0-6) to match JS getDay() (0-6, SU is 0)
+                  const jsDay = day.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+                  const icsDay = days[(jsDay + 6) % 7]; // MO is 0, TU is 1, ..., SU is 6
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
-                    selectedDays: [days[day.getDay() - 1]],
+                    byday: [icsDay], // Use byday instead of selectedDays
                   });
                 } else {
+                  // For non-weekly frequencies, clear byday
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
-                    selectedDays: undefined,
+                    byday: null,
                   });
                 }
               }}
@@ -116,7 +125,7 @@ export default function RepeatEvent({
                   disabled={!isOwn}
                   control={
                     <Checkbox
-                      checked={repetition.selectedDays?.includes(day) ?? false}
+                      checked={repetition.byday?.includes(day) ?? false}
                       onChange={() => handleDayChange(day)}
                     />
                   }
