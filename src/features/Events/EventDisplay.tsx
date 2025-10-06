@@ -12,6 +12,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
+  Box,
   Button,
   ButtonGroup,
   Card,

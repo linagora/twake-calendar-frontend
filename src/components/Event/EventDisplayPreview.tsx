@@ -1,32 +1,27 @@
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import EmailIcon from "@mui/icons-material/Email";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
-
 import {
-  AvatarGroup,
   Box,
   Button,
   ButtonGroup,
-  Dialog,
   DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
-  MenuItem,
   Menu,
+  MenuItem,
   Typography,
 } from "@mui/material";
+import AvatarGroup from "@mui/material/AvatarGroup";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -36,6 +31,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { dlEvent } from "../../features/Events/EventApi";
 import EventDisplayModal from "../../features/Events/EventDisplay";
+import { ResponsiveDialog } from "../Dialog";
 import EventDuplication from "./EventDuplicate";
 import { InfoRow } from "./InfoRow";
 import { renderAttendeeBadge } from "./utils/eventUtils";
@@ -107,104 +103,98 @@ export default function EventPreviewModal({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} style={{ overflow: "auto" }}>
-        <DialogActions>
-          <Box>
-            {(window as any).DEBUG && (
-              <IconButton
-                onClick={async () => {
-                  const icsContent = await dlEvent(event);
-                  const blob = new Blob([icsContent], {
-                    type: "text/calendar",
-                  });
-                  const url = URL.createObjectURL(blob);
-
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `${eventId}.ics`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                <FileDownloadOutlinedIcon />
-              </IconButton>
-            )}
-            {user.userData.email === event.organizer?.cal_address && (
-              <IconButton
-                size="small"
-                onClick={async () => {
-                  setOpenFullDisplay(!openFullDisplay);
-                  await dispatch(getEventAsync(event));
-                }}
-              >
-                <EditIcon />
-              </IconButton>
-            )}
-            <IconButton
-              size="small"
-              onClick={(e) => setToggleActionMenu(e.currentTarget)}
-            >
-              <MoreVertIcon />
-            </IconButton>
-            <Menu
-              open={Boolean(toggleActionMenu)}
-              onClose={() => setToggleActionMenu(null)}
-              anchorEl={toggleActionMenu}
-            >
-              {mailSpaUrl && attendees.length > 0 && (
-                <MenuItem
-                  onClick={() =>
-                    window.open(
-                      `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
-                        .map((a) => a.cal_address)
-                        .filter((mail) => mail !== user.userData.email)
-                        .join(",")}?subject=${event.title}`
-                    )
-                  }
-                >
-                  Email attendees
-                </MenuItem>
-              )}
-              <EventDuplication event={event} onClose={onClose} />
-              {user.userData.email !== event.organizer?.cal_address && (
-                <MenuItem
-                  onClick={() => {
-                    setOpenFullDisplay(!openFullDisplay);
-                  }}
-                >
-                  View Event Details
-                </MenuItem>
-              )}
-              {user.userData.email === event.organizer?.cal_address && (
-                <MenuItem
-                  onClick={() => {
-                    onClose({}, "backdropClick");
-                    dispatch(
-                      deleteEventAsync({
-                        calId,
-                        eventId,
-                        eventURL: event.URL,
-                      })
-                    );
-                  }}
-                >
-                  Delete event
-                </MenuItem>
-              )}
-            </Menu>
-            <IconButton
-              size="small"
-              onClick={() => onClose({}, "backdropClick")}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogActions>
-        <DialogTitle>
-          {event.title && (
+      <ResponsiveDialog
+        open={open}
+        onClose={() => onClose({}, "backdropClick")}
+        style={{ overflow: "auto" }}
+        title={
+          event.title && (
             <>
+              <DialogActions>
+                <Box>
+                  {(window as any).DEBUG && (
+                    <IconButton
+                      onClick={async () => {
+                        const icsContent = await dlEvent(event);
+                        const blob = new Blob([icsContent], {
+                          type: "text/calendar",
+                        });
+                        const url = URL.createObjectURL(blob);
+
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `${eventId}.ics`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                      }}
+                    >
+                      <FileDownloadOutlinedIcon />
+                    </IconButton>
+                  )}
+                  {user.userData.email === event.organizer?.cal_address && (
+                    <IconButton
+                      size="small"
+                      onClick={async () => {
+                        setOpenFullDisplay(!openFullDisplay);
+                        await dispatch(getEventAsync(event));
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setToggleActionMenu(e.currentTarget)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    open={Boolean(toggleActionMenu)}
+                    onClose={() => setToggleActionMenu(null)}
+                    anchorEl={toggleActionMenu}
+                  >
+                    {mailSpaUrl && attendees.length > 0 && (
+                      <MenuItem
+                        onClick={() =>
+                          window.open(
+                            `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
+                              .map((a) => a.cal_address)
+                              .filter((mail) => mail !== user.userData.email)
+                              .join(",")}?subject=${event.title}`
+                          )
+                        }
+                      >
+                        Email attendees
+                      </MenuItem>
+                    )}
+                    <EventDuplication event={event} onClose={onClose} />
+                    {user.userData.email === event.organizer?.cal_address && (
+                      <MenuItem
+                        onClick={() => {
+                          onClose({}, "backdropClick");
+                          dispatch(
+                            deleteEventAsync({
+                              calId,
+                              eventId,
+                              eventURL: event.URL,
+                            })
+                          );
+                        }}
+                      >
+                        Delete event
+                      </MenuItem>
+                    )}
+                  </Menu>
+                  <IconButton
+                    size="small"
+                    onClick={() => onClose({}, "backdropClick")}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </DialogActions>
               <Typography
                 variant="inherit"
                 fontWeight="bold"
@@ -222,140 +212,20 @@ export default function EventPreviewModal({
                   ` – ${formatEnd(event.start, event.end, event.allday)}`}
               </Typography>
             </>
-          )}
-        </DialogTitle>
-
-        <DialogContent style={{ maxHeight: "65vh", overflow: "auto" }}>
-          {/* Video */}
-          {event.x_openpass_videoconference && (
-            <InfoRow
-              icon={<VideocamIcon style={{ fontSize: 18 }} />}
-              content={
-                <Button
-                  variant="contained"
-                  onClick={() => window.open(event.x_openpass_videoconference)}
-                >
-                  Join the video conference
-                </Button>
-              }
-            />
-          )}
-          {/* Attendees */}
-          {attendees?.length > 0 && (
-            <>
-              <InfoRow
-                icon={<PeopleAltOutlinedIcon />}
-                content={
-                  <Box
-                    style={{
-                      marginBottom: 1,
-                      display: "flex",
-                      flexDirection: "row",
-                    }}
-                  >
-                    <Box>
-                      <Typography>{attendees.length} guests</Typography>
-                      <Typography>
-                        {
-                          attendees.filter((a) => a.partstat === "ACCEPTED")
-                            .length
-                        }{" "}
-                        yes,{" "}
-                        {
-                          attendees.filter((a) => a.partstat === "DECLINED")
-                            .length
-                        }{" "}
-                        no
-                      </Typography>
-                    </Box>
-                    {!showAllAttendees && (
-                      <AvatarGroup max={attendeeDisplayLimit}>
-                        {organizer &&
-                          renderAttendeeBadge(
-                            organizer,
-                            "org",
-                            showAllAttendees,
-                            true
-                          )}
-                        {visibleAttendees.map((a, idx) =>
-                          renderAttendeeBadge(
-                            a,
-                            idx.toString(),
-                            showAllAttendees
-                          )
-                        )}
-                      </AvatarGroup>
-                    )}
-                    <Typography
-                      variant="body2"
-                      color="primary"
-                      style={{ cursor: "pointer", marginTop: 0.5 }}
-                      onClick={() => setShowAllAttendees(!showAllAttendees)}
-                    >
-                      {showAllAttendees ? "Show less" : `Show more `}
-                    </Typography>
-                  </Box>
-                }
-              />
-            </>
-          )}
-          {showAllAttendees &&
-            organizer &&
-            renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
-          {showAllAttendees &&
-            visibleAttendees.map((a, idx) =>
-              renderAttendeeBadge(a, idx.toString(), showAllAttendees)
-            )}
-          {/* Location */}
-          {event.location && (
-            <InfoRow icon={<LocationOnOutlinedIcon />} text={event.location} />
-          )}
-          {/* Description */}
-          {event.description && (
-            <InfoRow icon={<SubjectIcon />} text={event.description} />
-          )}
-
-          {/* Error */}
-          {event.error && (
-            <InfoRow
-              icon={<ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />}
-              text={event.error}
-              error
-            />
-          )}
-
-          {/* Calendar color dot */}
-          <Box
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              marginBottom: 2,
-            }}
-          >
-            <CalendarTodayIcon style={{ fontSize: 16 }} />
-            <CircleIcon
-              style={{
-                color: calendar.color ?? "#3788D8",
-                width: 12,
-                height: 12,
-              }}
-            />
-            <Typography variant="body2">{calendar.name}</Typography>
-          </Box>
-        </DialogContent>
-        {currentUserAttendee && !event.repetition && (
+          )
+        }
+        actions={
           <>
-            <Divider variant="fullWidth" />
-            <DialogActions>
-              {/* RSVP */}
-
+            {currentUserAttendee &&
+              event.uid?.split("/")[1] &&
+              "event is a reccuring event, the interraction between acceptance and recurrence is broken and to avoid loosing reccuring events by accepting or refusing them this feature isn't available for now"}
+            {currentUserAttendee && !event.uid?.split("/")[1] && (
               <Box style={{ display: "flex", flexDirection: "row" }}>
                 <Typography variant="body2">Attending?</Typography>
                 <ButtonGroup size="small" fullWidth>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "ACCEPTED"
+                      currentUserAttendee?.partstat === "ACCEPTED"
                         ? "success"
                         : "primary"
                     }
@@ -365,7 +235,7 @@ export default function EventPreviewModal({
                   </Button>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "TENTATIVE"
+                      currentUserAttendee?.partstat === "TENTATIVE"
                         ? "warning"
                         : "primary"
                     }
@@ -375,7 +245,7 @@ export default function EventPreviewModal({
                   </Button>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "DECLINED"
+                      currentUserAttendee?.partstat === "DECLINED"
                         ? "error"
                         : "primary"
                     }
@@ -385,13 +255,138 @@ export default function EventPreviewModal({
                   </Button>
                 </ButtonGroup>
               </Box>
-            </DialogActions>
+            )}
+          </>
+        }
+      >
+        {/* Video */}
+        {event.x_openpass_videoconference && (
+          <InfoRow
+            icon={<VideocamIcon style={{ fontSize: 18 }} />}
+            content={
+              <Button
+                variant="contained"
+                onClick={() => window.open(event.x_openpass_videoconference)}
+              >
+                Join the video conference
+              </Button>
+            }
+          />
+        )}
+        {/* Attendees */}
+        {attendees?.length > 0 && (
+          <>
+            <InfoRow
+              icon={<PeopleAltOutlinedIcon />}
+              content={
+                <Box
+                  style={{
+                    marginBottom: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Box>
+                    <Typography>{attendees.length} guests</Typography>
+                    <Typography>
+                      {
+                        attendees.filter((a) => a.partstat === "ACCEPTED")
+                          .length
+                      }{" "}
+                      yes,{" "}
+                      {
+                        attendees.filter((a) => a.partstat === "DECLINED")
+                          .length
+                      }{" "}
+                      no
+                    </Typography>
+                  </Box>
+                  {!showAllAttendees && (
+                    <AvatarGroup max={attendeeDisplayLimit}>
+                      {organizer &&
+                        renderAttendeeBadge(
+                          organizer,
+                          "org",
+                          showAllAttendees,
+                          true
+                        )}
+                      {visibleAttendees.map((a, idx) =>
+                        renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+                      )}
+                    </AvatarGroup>
+                  )}
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    style={{ cursor: "pointer", marginTop: 0.5 }}
+                    onClick={() => setShowAllAttendees(!showAllAttendees)}
+                  >
+                    {showAllAttendees ? "Show less" : `Show more `}
+                  </Typography>
+                </Box>
+              }
+            />
           </>
         )}
-        {currentUserAttendee &&
-          event.uid?.split("/")[1] &&
-          "event is a reccuring event, the interraction between acceptance and recurrence is broken and to avoid loosing reccuring events by accepting or refusing them this feature isn't available for now"}
-      </Dialog>
+        {showAllAttendees &&
+          organizer &&
+          renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
+        {showAllAttendees &&
+          visibleAttendees.map((a, idx) =>
+            renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+          )}
+        {/* Location */}
+        {event.location && (
+          <InfoRow icon={<LocationOnOutlinedIcon />} text={event.location} />
+        )}
+        {/* Description */}
+        {event.description && (
+          <InfoRow icon={<SubjectIcon />} text={event.description} />
+        )}
+
+        {/* Description */}
+        {event.alarm && (
+          <InfoRow
+            icon={<NotificationsNoneIcon />}
+            text={`${event.alarm.trigger} before by ${event.alarm.action}`}
+          />
+        )}
+
+        {/* Error */}
+        {event.error && (
+          <InfoRow
+            icon={<ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />}
+            text={event.error}
+            error
+          />
+        )}
+
+        {/* Calendar color dot */}
+        <Box
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            marginBottom: 2,
+          }}
+        >
+          <CalendarTodayIcon style={{ fontSize: 16 }} />
+          <CircleIcon
+            style={{
+              color: calendar.color ?? "#3788D8",
+              width: 12,
+              height: 12,
+            }}
+          />
+          <Typography variant="body2">{calendar.name}</Typography>
+        </Box>
+
+        {currentUserAttendee && !event.repetition && (
+          <>
+            <Divider variant="fullWidth" />
+          </>
+        )}
+      </ResponsiveDialog>
       <EventDisplayModal
         open={openFullDisplay}
         onClose={() => setOpenFullDisplay(false)}
