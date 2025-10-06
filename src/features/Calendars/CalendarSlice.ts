@@ -12,7 +12,10 @@ import {
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../utils/dateUtils";
+import {
+  formatDateToYYYYMMDDTHHMMSS,
+  computeWeekRange,
+} from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
 
 export const getCalendarsListAsync = createAsyncThunk<
@@ -121,18 +124,11 @@ export const putEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[]; calType?: "temp" }, // Return type
   { cal: Calendars; newEvent: CalendarEvent; calType?: "temp" } // Arg type
 >("calendars/putEvent", async ({ cal, newEvent, calType }) => {
-  const response = await putEvent(
-    newEvent,
-    cal.ownerEmails ? cal.ownerEmails[0] : undefined
-  );
+  await putEvent(newEvent, cal.ownerEmails ? cal.ownerEmails[0] : undefined);
   const eventDate = new Date(newEvent.start);
 
-  const weekStart = new Date(eventDate);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(eventDate.getDate() - eventDate.getDay());
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 7);
+  // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
+  const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
 
   const calEvents = (await getCalendar(cal.id, {
     start: formatDateToYYYYMMDDTHHMMSS(weekStart),
@@ -184,7 +180,7 @@ export const patchCalendarAsync = createAsyncThunk<
     patch: { name: string; desc: string; color: string };
   } // Arg type
 >("calendars/patchCalendar", async ({ calId, calLink, patch }) => {
-  const response = await proppatchCalendar(calLink, patch);
+  await proppatchCalendar(calLink, patch);
   return {
     calId,
     calLink,
@@ -201,7 +197,7 @@ export const removeCalendarAsync = createAsyncThunk<
     calLink: string;
   }
 >("calendars/removeCalendar", async ({ calId, calLink }) => {
-  const response = await removeCalendar(calLink);
+  await removeCalendar(calLink);
   return {
     calId,
     calLink,
@@ -212,12 +208,15 @@ export const moveEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] }, // Return type
   { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
 >("calendars/moveEvent", async ({ cal, newEvent, newURL }) => {
-  const response = await moveEvent(newEvent, newURL);
+  await moveEvent(newEvent, newURL);
+
+  // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
+  const eventDate = new Date(newEvent.start);
+  const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
+
   const calEvents = (await getCalendar(cal.id, {
-    start: formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)),
-    end: formatDateToYYYYMMDDTHHMMSS(
-      new Date(new Date(newEvent.start).getTime() + 86400000)
-    ),
+    start: formatDateToYYYYMMDDTHHMMSS(weekStart),
+    end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
   })) as Record<string, any>;
   const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
     (eventdata: any) => {
@@ -239,7 +238,7 @@ export const deleteEventAsync = createAsyncThunk<
   { calId: string; eventId: string }, // Return type
   { calId: string; eventId: string; eventURL: string } // Arg type
 >("calendars/delEvent", async ({ calId, eventId, eventURL }) => {
-  const response = await deleteEvent(eventURL);
+  await deleteEvent(eventURL);
   return { calId, eventId };
 });
 
@@ -255,7 +254,7 @@ export const createCalendarAsync = createAsyncThunk<
   }, // Return type
   { userId: string; calId: string; color: string; name: string; desc: string } // Arg type
 >("calendars/createCalendar", async ({ userId, calId, color, name, desc }) => {
-  const response = await postCalendar(userId, calId, color, name, desc);
+  await postCalendar(userId, calId, color, name, desc);
   const ownerData: any = await getUserDetails(userId.split("/")[0]);
 
   return {
@@ -283,7 +282,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
   }, // Return type
   { userId: string; calId: string; cal: Record<string, any> } // Arg type
 >("calendars/addSharedCalendar", async ({ userId, calId, cal }) => {
-  const response = await addSharedCalendar(userId, calId, cal);
+  await addSharedCalendar(userId, calId, cal);
   const ownerData: any = await getUserDetails(
     cal.cal._links.self.href
       .replace("/calendars/", "")

@@ -98,10 +98,6 @@ export function Menubar({
     }
   };
 
-  const handleRefresh = () => {
-    onRefresh();
-  };
-
   const open = Boolean(anchorEl);
   return (
     <>

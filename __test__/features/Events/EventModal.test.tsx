@@ -109,22 +109,34 @@ describe("EventPopover", () => {
   it("renders correctly with inputs and calendar options", () => {
     renderPopover();
 
+    // Check dialog title
     expect(screen.getByText("Create Event")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar")).toBeInTheDocument();
-    expect(screen.getByLabelText("Title")).toBeInTheDocument();
-    expect(screen.getByLabelText("Start")).toBeInTheDocument();
-    expect(screen.getByLabelText("End")).toBeInTheDocument();
-    expect(screen.getByLabelText("Description")).toBeInTheDocument();
-    expect(screen.getByLabelText("Location")).toBeInTheDocument();
+
+    // Check inputs exist by their roles
+    const titleInput = screen.getByRole("textbox", { name: /title/i });
+    expect(titleInput).toBeInTheDocument();
+
+    // Description input is only visible after clicking "Add description" button
+    const addDescriptionButton = screen.getByText("Add description");
+    expect(addDescriptionButton).toBeInTheDocument();
+
+    const calendarSelect = screen.getByRole("combobox", { name: /calendar/i });
+    expect(calendarSelect).toBeInTheDocument();
+
+    // Check button
     expect(screen.getByText("Show More")).toBeInTheDocument();
+
+    // Extended mode
     fireEvent.click(screen.getByText("Show More"));
-    expect(screen.getByLabelText("Repetition")).toBeInTheDocument();
-    expect(screen.getByLabelText("Alarm")).toBeInTheDocument();
-    expect(screen.getByLabelText("Visibility")).toBeInTheDocument();
-    // Calendar options
-    const select = screen.getByLabelText("Calendar");
-    fireEvent.mouseDown(select);
-    expect(screen.getAllByRole("option")).toHaveLength(2);
+
+    // Back button appears
+    expect(screen.getByLabelText("show less")).toBeInTheDocument();
+
+    // Extended labels appear
+    expect(screen.getAllByText("Repeat")).toHaveLength(1);
+    expect(screen.getAllByText("Notification")).toHaveLength(1);
+    expect(screen.getAllByText("Visible to")).toHaveLength(1);
+    expect(screen.getAllByText("Show me as")).toHaveLength(1);
   });
 
   it("fills start from selectedRange", () => {
@@ -146,6 +158,9 @@ describe("EventPopover", () => {
       target: { value: "My Event" },
     });
     expect(screen.getByLabelText("Title")).toHaveValue("My Event");
+
+    // Click "Add description" button first
+    fireEvent.click(screen.getByText("Add description"));
 
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Event Description" },
@@ -169,7 +184,9 @@ describe("EventPopover", () => {
     const option = await screen.findByText("Calendar 2");
     fireEvent.click(option);
 
-    expect(screen.getAllByRole("combobox")[0]).toHaveTextContent("Calendar 2");
+    // Find the calendar combobox specifically by its aria-labelledby
+    const calendarSelect = screen.getByRole("combobox", { name: /Calendar/i });
+    expect(calendarSelect).toHaveTextContent("Calendar 2");
   });
   it("adds a attendee", async () => {
     jest.useFakeTimers();
@@ -177,7 +194,7 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: "newEvent" },
     });
-    const select = screen.getByLabelText("Search user");
+    const select = screen.getByLabelText("Start typing a name or email");
 
     act(() => {
       select.focus();
@@ -262,6 +279,8 @@ describe("EventPopover", () => {
       target: { value: newEvent.end.split("T")[0] },
     });
 
+    // Click "Add description" button first
+    fireEvent.click(screen.getByText("Add description"));
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: newEvent.description },
     });
@@ -289,11 +308,13 @@ describe("EventPopover", () => {
     expect(receivedPayload.newEvent.title).toBe(newEvent.title);
     expect(receivedPayload.newEvent.description).toBe(newEvent.description);
     expect(
-      formatDateToYYYYMMDDTHHMMSS(receivedPayload.newEvent.start).split("T")[0]
+      formatDateToYYYYMMDDTHHMMSS(
+        new Date(receivedPayload.newEvent.start)
+      ).split("T")[0]
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)).split("T")[0]);
     expect(
       formatDateToYYYYMMDDTHHMMSS(
-        receivedPayload.newEvent.end || new Date()
+        new Date(receivedPayload.newEvent.end || new Date())
       ).split("T")[0]
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.end)).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);

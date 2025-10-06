@@ -11,29 +11,18 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import {
-  getCalendarDetailAsync,
-  getEventAsync,
-  putEventAsync,
-  updateEventLocal,
-} from "../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   computeStartOfTheWeek,
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
-  getDeltaInMilliseconds,
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
 import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import { createSelector } from "@reduxjs/toolkit";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import ClearIcon from "@mui/icons-material/Clear";
 import AddIcon from "@mui/icons-material/Add";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LockIcon from "@mui/icons-material/Lock";
-import { userAttendee } from "../../features/User/userDataTypes";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
 import {

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch } from "../../app/hooks";
 import { push } from "redux-first-history";
 import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";

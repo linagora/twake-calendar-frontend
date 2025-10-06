@@ -104,4 +104,56 @@ describe("eventApi", () => {
       method: "DELETE",
     });
   });
+
+  test("putEvent handles byday field correctly", async () => {
+    const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
+    (api as unknown as jest.Mock).mockReturnValue(mockResponse);
+
+    const eventWithByday = {
+      ...mockEvent,
+      repetition: {
+        freq: "weekly",
+        interval: 1,
+        byday: ["MO", "WE", "FR"],
+      },
+    };
+
+    await putEvent(eventWithByday);
+    const expectedResult = calendarEventToJCal(eventWithByday);
+
+    expect(api).toHaveBeenCalledWith(
+      "dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics",
+      expect.objectContaining({
+        method: "PUT",
+        headers: { "content-type": "text/calendar; charset=utf-8" },
+        body: JSON.stringify(expectedResult),
+      })
+    );
+  });
+
+  test("putEvent handles null byday field correctly", async () => {
+    const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
+    (api as unknown as jest.Mock).mockReturnValue(mockResponse);
+
+    const eventWithNullByday = {
+      ...mockEvent,
+      repetition: {
+        freq: "daily",
+        interval: 1,
+        byday: null,
+      },
+    };
+
+    await putEvent(eventWithNullByday);
+    const expectedResult = calendarEventToJCal(eventWithNullByday);
+
+    expect(api).toHaveBeenCalledWith(
+      "dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics",
+      expect.objectContaining({
+        method: "PUT",
+        headers: { "content-type": "text/calendar; charset=utf-8" },
+        body: JSON.stringify(expectedResult),
+      })
+    );
+  });
 });
