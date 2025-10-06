@@ -52,3 +52,10 @@ export const computeStartOfTheWeek = (date: Date): Date => {
   startOfWeek.setHours(0, 0, 0, 0);
   return startOfWeek;
 };
+
+export const computeWeekRange = (date: Date): { start: Date; end: Date } => {
+  const weekStart = computeStartOfTheWeek(date);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 7);
+  return { start: weekStart, end: weekEnd };
+};

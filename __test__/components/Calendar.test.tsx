@@ -217,7 +217,7 @@ describe("calendar Availability search", () => {
 
     renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
-    const input = screen.getByPlaceholderText(/search user/i);
+    const input = screen.getByPlaceholderText(/start typing a name or email/i);
     userEvent.type(input, "New");
 
     const option = await screen.findByText("New User");
@@ -242,7 +242,7 @@ describe("calendar Availability search", () => {
       });
     renderWithProviders(<CalendarTestWrapper />, preloadedState);
 
-    const input = screen.getByPlaceholderText(/search user/i);
+    const input = screen.getByPlaceholderText(/start typing a name or email/i);
     userEvent.type(input, "Alice");
 
     const option = await screen.findByText("Alice");

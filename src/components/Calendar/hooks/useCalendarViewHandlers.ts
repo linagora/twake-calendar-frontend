@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { CalendarApi } from "@fullcalendar/core";
 import {
   createViewHandlers,
   ViewHandlersProps,

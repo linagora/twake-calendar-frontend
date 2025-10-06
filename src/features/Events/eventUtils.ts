@@ -1,4 +1,3 @@
-import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { AlarmObject, CalendarEvent } from "./EventsTypes";
 import ICAL from "ical.js";
@@ -16,7 +15,7 @@ export function parseCalendarEvent(
   let recurrenceId;
   const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
-  for (const [key, params, type, value] of data) {
+  for (const [key, params, , value] of data) {
     switch (key.toLowerCase()) {
       case "uid":
         event.uid = value;
@@ -86,7 +85,7 @@ export function parseCalendarEvent(
       case "rrule":
         event.repetition = { freq: value.freq.toLowerCase() };
         if (value.byday) {
-          event.repetition.selectedDays = value.byday;
+          event.repetition.byday = value.byday;
         }
         if (value.until) {
           event.repetition.endDate = value.until;
@@ -106,7 +105,7 @@ export function parseCalendarEvent(
 
   if (valarm) {
     event.alarm = {} as AlarmObject;
-    for (const [key, params, type, value] of valarm[1]) {
+    for (const [key, , , value] of valarm[1]) {
       switch (key.toLowerCase()) {
         case "action":
           event.alarm.action = value;
@@ -175,14 +174,20 @@ export function calendarEventToJCal(
   vevent.push([]);
 
   if (event.end) {
-    if (event.allday && event.end.getTime() === event.start.getTime()) {
-      event.end.setDate(event.start.getDate() + 1);
+    const startDate = new Date(event.start);
+    const endDate = new Date(event.end);
+    let finalEndDate = endDate;
+
+    if (event.allday && endDate.getTime() === startDate.getTime()) {
+      finalEndDate = new Date(endDate);
+      finalEndDate.setDate(startDate.getDate() + 1);
     }
+
     vevent[1].push([
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(new Date(event.end), event.allday ?? false),
+      formatDateToICal(finalEndDate, event.allday ?? false),
     ]);
   }
   if (event.organizer) {
@@ -210,8 +215,11 @@ export function calendarEventToJCal(
     if (event.repetition.endDate) {
       repetitionRule["until"] = event.repetition.endDate;
     }
-    if (event.repetition.selectedDays) {
-      repetitionRule["byday"] = event.repetition.selectedDays;
+    if (
+      event.repetition.byday !== null &&
+      event.repetition.byday !== undefined
+    ) {
+      repetitionRule["byday"] = event.repetition.byday;
     }
     vevent[1].push(["rrule", {}, "recur", repetitionRule]);
   }

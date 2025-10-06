@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   deleteEventAsync,
-  getEventAsync,
   moveEventAsync,
   putEventAsync,
   removeEvent,
@@ -9,7 +8,6 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
-  Popover,
   Button,
   Box,
   Typography,
@@ -41,7 +39,6 @@ import CircleIcon from "@mui/icons-material/Circle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { userAttendee } from "../User/userDataTypes";
-import { TIMEZONES } from "../../utils/timezone-data";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { isValidUrl } from "../../utils/apiUtils";
@@ -94,7 +91,7 @@ export default function EventDisplayModal({
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
-  const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
+  const [timezone] = useState(event?.timezone ?? "UTC");
   const [newCalId, setNewCalId] = useState(event?.calId);
   const [calendarid, setCalendarid] = useState(
     calId.split("/")[0] === user.userData?.openpaasId
@@ -469,17 +466,17 @@ export default function EventDisplayModal({
                   isOwn={isOwn}
                 />
                 <FormControl fullWidth margin="dense" size="small">
-                  <InputLabel id="alarm">Alarm</InputLabel>
+                  <InputLabel id="notification">Notification</InputLabel>
                   <Select
-                    labelId="alarm"
-                    label="Alarm"
+                    labelId="notification"
+                    label="Notification"
                     value={alarm}
                     disabled={!isOwn}
                     onChange={(e: SelectChangeEvent) =>
                       setAlarm(e.target.value)
                     }
                   >
-                    <MenuItem value={""}>No Alarm</MenuItem>
+                    <MenuItem value={""}>No Notification</MenuItem>
                     <MenuItem value={"-PT1M"}>1 minute</MenuItem>
                     <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
                     <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
