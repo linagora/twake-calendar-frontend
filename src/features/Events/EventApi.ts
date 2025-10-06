@@ -12,7 +12,9 @@ import ICAL from "ical.js";
 export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const response = await api.get(`dav${event.URL}`);
   const eventData = await response.text();
+
   const eventical = ICAL.parse(eventData);
+
   const eventjson = parseCalendarEvent(
     eventical[2][1][1],
     event.color ?? "",
