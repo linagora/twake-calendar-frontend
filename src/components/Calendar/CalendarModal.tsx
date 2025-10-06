@@ -1,12 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Tab,
-  Tabs,
-} from "@mui/material";
+import { Button, DialogActions, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -16,6 +8,7 @@ import {
   patchCalendarAsync,
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
@@ -180,17 +173,10 @@ function CalendarPopover({
   };
 
   return (
-    <Dialog
+    <ResponsiveDialog
       open={open}
-      onClose={(e, reason) => handleClose(e, reason)}
-      maxWidth="lg"
-      slotProps={{
-        paper: {
-          sx: { width: "40vw" },
-        },
-      }}
-    >
-      <DialogTitle>
+      onClose={() => handleClose({}, "backdropClick")}
+      title={
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab
             value="settings"
@@ -199,57 +185,58 @@ function CalendarPopover({
           {calendar && <Tab value="access" label="Access" />}
           {isOwn && <Tab value="import" label="Import" />}
         </Tabs>
-      </DialogTitle>
-      <DialogContent>
-        {tab === "import" && (
-          <ImportTab
-            importTarget={importTarget}
-            setImportTarget={setImportTarget}
-            setImportedContent={setImportedContent}
-            userId={userId}
-            newCalParams={{
-              name: newCalName,
-              setName: setNewCalName,
-              description: newCalDescription,
-              setDescription: setNewCalDescription,
-              color: newCalColor,
-              setColor: setNewCalColor,
-              visibility: newCalVisibility,
-              setVisibility: setNewCalVisibility,
-            }}
-          />
-        )}
-        {tab === "settings" && (
-          <SettingsTab
-            name={name}
-            setName={setName}
-            description={description}
-            setDescription={setDescription}
-            color={color}
-            setColor={setColor}
-            visibility={visibility}
-            setVisibility={setVisibility}
-            calendar={calendar}
-          />
-        )}
-        {tab === "access" && calendar && <AccessTab calendar={calendar} />}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          variant="outlined"
-          onClick={(e) => handleClose({}, "backdropClick")}
-        >
-          Cancel
-        </Button>
-        <Button
-          disabled={tab === "import" ? !importedContent : !name.trim()}
-          variant="contained"
-          onClick={tab === "import" ? handleImport : handleSave}
-        >
-          {tab === "import" ? "Import" : calendar ? "Save" : "Create"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      }
+      actions={
+        <DialogActions>
+          <Button
+            variant="outlined"
+            onClick={(e) => handleClose({}, "backdropClick")}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={tab === "import" ? !importedContent : !name.trim()}
+            variant="contained"
+            onClick={tab === "import" ? handleImport : handleSave}
+          >
+            {tab === "import" ? "Import" : calendar ? "Save" : "Create"}
+          </Button>
+        </DialogActions>
+      }
+    >
+      {tab === "import" && (
+        <ImportTab
+          importTarget={importTarget}
+          setImportTarget={setImportTarget}
+          setImportedContent={setImportedContent}
+          userId={userId}
+          newCalParams={{
+            name: newCalName,
+            setName: setNewCalName,
+            description: newCalDescription,
+            setDescription: setNewCalDescription,
+            color: newCalColor,
+            setColor: setNewCalColor,
+            visibility: newCalVisibility,
+            setVisibility: setNewCalVisibility,
+          }}
+        />
+      )}
+      {tab === "settings" && (
+        <SettingsTab
+          name={name}
+          setName={setName}
+          description={description}
+          setDescription={setDescription}
+          color={color}
+          setColor={setColor}
+          visibility={visibility}
+          setVisibility={setVisibility}
+          calendar={calendar}
+        />
+      )}
+      {tab === "access" && calendar && <AccessTab calendar={calendar} />}
+    </ResponsiveDialog>
   );
 }
 
