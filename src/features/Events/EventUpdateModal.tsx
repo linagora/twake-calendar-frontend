@@ -1,0 +1,449 @@
+import { Box, Button } from "@mui/material";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { ResponsiveDialog } from "../../components/Dialog";
+import {
+  putEventAsync,
+  removeEvent,
+  moveEventAsync,
+} from "../Calendars/CalendarSlice";
+import { Calendars } from "../Calendars/CalendarTypes";
+import { userAttendee } from "../User/userDataTypes";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { TIMEZONES } from "../../utils/timezone-data";
+import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
+import EventFormFields, {
+  formatLocalDateTime,
+} from "../../components/Event/EventFormFields";
+import { getEvent } from "./EventApi";
+
+function EventUpdateModal({
+  eventId,
+  calId,
+  open,
+  onClose,
+  eventData,
+}: {
+  eventId: string;
+  calId: string;
+  open: boolean;
+  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  eventData?: CalendarEvent | null;
+}) {
+  const dispatch = useAppDispatch();
+
+  // Get event from Redux store (cached data) as fallback
+  const cachedEvent = useAppSelector(
+    (state) => state.calendars.list[calId]?.events[eventId]
+  );
+
+  // State for fresh event data
+  const [freshEvent, setFreshEvent] = useState<CalendarEvent | null>(null);
+
+  // Use fresh data if available, otherwise use eventData from props, otherwise use cached data
+  const event = freshEvent || eventData || cachedEvent;
+
+  // Fetch fresh event data when modal opens
+  useEffect(() => {
+    if (open && cachedEvent && !eventData) {
+      const fetchFreshData = async () => {
+        try {
+          const freshData = await getEvent(cachedEvent);
+          setFreshEvent(freshData);
+        } catch (err) {
+          // Keep using cached data if API fails
+        }
+      };
+
+      fetchFreshData();
+    }
+  }, [open, cachedEvent, eventData]);
+
+  const user = useAppSelector((state) => state.user);
+
+  const calendarsList = useAppSelector((state) => state.calendars.list);
+
+  const userPersonnalCalendars: Calendars[] = useMemo(() => {
+    const allCalendars = Object.values(calendarsList);
+    return allCalendars.filter(
+      (c) => c.id?.split("/")[0] === user.userData?.openpaasId
+    );
+  }, [calendarsList, user.userData?.openpaasId]);
+
+  // Helper function to resolve timezone aliases
+  const resolveTimezone = (tzName: string): string => {
+    if (TIMEZONES.zones[tzName]) {
+      return tzName;
+    }
+    if (TIMEZONES.aliases[tzName]) {
+      return TIMEZONES.aliases[tzName].aliasTo;
+    }
+    return tzName;
+  };
+
+  const timezoneList = useMemo(() => {
+    const zones = Object.keys(TIMEZONES.zones).sort();
+    const browserTz = resolveTimezone(
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
+    const getTimezoneOffset = (tzName: string): string => {
+      const resolvedTz = resolveTimezone(tzName);
+      const tzData = TIMEZONES.zones[resolvedTz];
+      if (!tzData) return "";
+
+      const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
+      if (!icsMatch) return "";
+
+      const offset = icsMatch[1];
+      const hours = parseInt(offset.slice(0, 3));
+      const minutes = parseInt(offset.slice(3));
+
+      if (minutes === 0) {
+        return `UTC${hours >= 0 ? "+" : ""}${hours}`;
+      }
+      return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
+    };
+
+    return { zones, browserTz, getTimezoneOffset };
+  }, []);
+
+  const [showMore, setShowMore] = useState(false);
+  const [showDescription, setShowDescription] = useState(
+    event?.description ? true : false
+  );
+  const [showRepeat, setShowRepeat] = useState(
+    event?.repetition?.freq ? true : false
+  );
+
+  // Form state - initialize with empty values
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [allday, setAllDay] = useState(false);
+  const [repetition, setRepetition] = useState<RepetitionObject>(
+    {} as RepetitionObject
+  );
+  const [alarm, setAlarm] = useState("");
+  const [busy, setBusy] = useState("OPAQUE");
+  const [eventClass, setEventClass] = useState("PUBLIC");
+  const [timezone, setTimezone] = useState(
+    resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
+  );
+  const [newCalId, setNewCalId] = useState(calId);
+  const [calendarid, setCalendarid] = useState(0);
+
+  const [attendees, setAttendees] = useState<userAttendee[]>([]);
+  const [hasVideoConference, setHasVideoConference] = useState(false);
+  const [meetingLink, setMeetingLink] = useState<string | null>(null);
+  const [important, setImportant] = useState(false);
+
+  const resetAllStateToDefault = useCallback(() => {
+    setShowMore(false);
+    setShowDescription(false);
+    setShowRepeat(false);
+    setTitle("");
+    setDescription("");
+    setAttendees([]);
+    setLocation("");
+    setStart("");
+    setEnd("");
+    setCalendarid(0);
+    setAllDay(false);
+    setRepetition({} as RepetitionObject);
+    setAlarm("");
+    setEventClass("PUBLIC");
+    setBusy("OPAQUE");
+    setImportant(false);
+    setTimezone(
+      resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    );
+    setHasVideoConference(false);
+    setMeetingLink(null);
+  }, []);
+
+  // Prevent repeated initialization loops
+  const initializedKeyRef = useRef<string | null>(null);
+
+  // Initialize form state when event data is available
+  useEffect(() => {
+    if (event && open) {
+      // Editing existing event - populate fields with event data
+      setTitle(event.title ?? "");
+      setDescription(event.description ?? "");
+      setLocation(event.location ?? "");
+
+      // Handle all-day events properly
+      const isAllDay = event.allday ?? false;
+      setAllDay(isAllDay);
+
+      // Format dates based on all-day status
+      if (event.start) {
+        const startDate = new Date(event.start);
+        if (isAllDay) {
+          // For all-day events, use date format (YYYY-MM-DD)
+          setStart(startDate.toISOString().split("T")[0]);
+        } else {
+          // For timed events, use datetime format
+          setStart(formatLocalDateTime(startDate));
+        }
+      } else {
+        setStart("");
+      }
+
+      if (event.end) {
+        const endDate = new Date(event.end);
+        if (isAllDay) {
+          // For all-day events, use date format (YYYY-MM-DD)
+          setEnd(endDate.toISOString().split("T")[0]);
+        } else {
+          // For timed events, use datetime format
+          setEnd(formatLocalDateTime(endDate));
+        }
+      } else {
+        setEnd("");
+      }
+
+      // Find correct calendar index
+      const currentCalIndex = userPersonnalCalendars.findIndex(
+        (cal) => cal.id === calId
+      );
+      setCalendarid(currentCalIndex >= 0 ? currentCalIndex : 0);
+
+      // Handle repetition properly - check both current event and base event
+      const baseEventId = event.uid.split("/")[0];
+      const baseEvent = calendarsList[calId]?.events[baseEventId];
+      const repetitionSource = event.repetition || baseEvent?.repetition;
+
+      if (repetitionSource && repetitionSource.freq) {
+        const repetitionData: RepetitionObject = {
+          freq: repetitionSource.freq,
+          interval: repetitionSource.interval || 1,
+          occurrences: repetitionSource.occurrences,
+          endDate: repetitionSource.endDate,
+          byday: repetitionSource.byday || null,
+        };
+        setRepetition(repetitionData);
+        setShowRepeat(true);
+      } else {
+        setRepetition({} as RepetitionObject);
+        setShowRepeat(false);
+      }
+
+      setAttendees(
+        event.attendee
+          ? event.attendee.filter(
+              (a) => a.cal_address !== event.organizer?.cal_address
+            )
+          : []
+      );
+      setAlarm(event.alarm?.trigger ?? "");
+      setEventClass(event.class ?? "PUBLIC");
+      setBusy(event.transp ?? "OPAQUE");
+
+      const resolvedTimezone = event.timezone
+        ? resolveTimezone(event.timezone)
+        : resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+      setTimezone(resolvedTimezone);
+      setHasVideoConference(event.x_openpass_videoconference ? true : false);
+      setMeetingLink(event.x_openpass_videoconference || null);
+      setNewCalId(event.calId || calId);
+
+      // Update description to include video conference footer if exists
+      if (event.x_openpass_videoconference && event.description) {
+        const hasVideoFooter = event.description.includes("Visio:");
+        if (!hasVideoFooter) {
+          setDescription(
+            addVideoConferenceToDescription(
+              event.description,
+              event.x_openpass_videoconference
+            )
+          );
+        } else {
+          setDescription(event.description);
+        }
+      }
+    }
+  }, [open, event, calId, userPersonnalCalendars, calendarsList]);
+
+  const handleClose = () => {
+    onClose({}, "backdropClick");
+    resetAllStateToDefault();
+    initializedKeyRef.current = null;
+  };
+
+  const handleSave = async () => {
+    if (!event) return;
+
+    const organizer = event.organizer;
+
+    const targetCalendar = userPersonnalCalendars[calendarid];
+    if (!targetCalendar) {
+      console.error("Target calendar not found");
+      return;
+    }
+
+    // Handle start and end dates based on all-day status
+    let startDate: string;
+    let endDate: string;
+
+    if (allday) {
+      // For all-day events, use date format (YYYY-MM-DD)
+      startDate = new Date(start).toISOString().split("T")[0];
+      endDate = new Date(end).toISOString().split("T")[0];
+    } else {
+      // For timed events, use full datetime
+      startDate = new Date(start).toISOString();
+      endDate = new Date(end).toISOString();
+    }
+
+    const newEvent: CalendarEvent = {
+      calId: newCalId || calId,
+      title,
+      URL: event.URL ?? `/calendars/${newCalId || calId}/${event.uid}.ics`,
+      start: startDate,
+      end: endDate,
+      allday,
+      uid: event.uid,
+      description,
+      location,
+      repetition,
+      class: eventClass,
+      organizer: organizer,
+      timezone,
+      attendee: organizer
+        ? [organizer as userAttendee, ...attendees]
+        : attendees,
+      transp: busy,
+      color: targetCalendar?.color,
+      alarm: { trigger: alarm, action: "EMAIL" },
+      x_openpass_videoconference: meetingLink || undefined,
+    };
+
+    // Close popup immediately for better UX
+    onClose({}, "backdropClick");
+
+    // If converting from a non-repeating event to a repeating one,
+    // remove the original single instance to avoid duplicates on the grid
+    if (!event.repetition?.freq && repetition?.freq) {
+      dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
+    }
+
+    // Handle recurrence instances
+    const [baseId, recurrenceId] = event.uid.split("/");
+    if (recurrenceId) {
+      Object.keys(targetCalendar.events).forEach((element) => {
+        if (element.split("/")[0] === baseId) {
+          dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
+        }
+      });
+    }
+
+    // Execute API calls in background
+    dispatch(
+      putEventAsync({
+        cal: targetCalendar,
+        newEvent,
+      })
+    );
+
+    // Handle calendar change
+    if (newCalId !== calId) {
+      dispatch(
+        moveEventAsync({
+          cal: targetCalendar,
+          newEvent,
+          newURL: `/calendars/${newCalId}/${event.uid}.ics`,
+        })
+      );
+      dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
+    }
+  };
+
+  const dialogActions = (
+    <Box display="flex" justifyContent="space-between" width="100%" px={2}>
+      {!showMore && (
+        <Button onClick={() => setShowMore(!showMore)}>Show More</Button>
+      )}
+      <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
+        <Button variant="outlined" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSave} disabled={!title}>
+          Save
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  if (!event) return null;
+
+  return (
+    <ResponsiveDialog
+      open={open}
+      onClose={handleClose}
+      title="Update Event"
+      isExpanded={showMore}
+      onExpandToggle={() => setShowMore(!showMore)}
+      actions={dialogActions}
+    >
+      <EventFormFields
+        title={title}
+        setTitle={setTitle}
+        description={description}
+        setDescription={setDescription}
+        location={location}
+        setLocation={setLocation}
+        start={start}
+        setStart={setStart}
+        end={end}
+        setEnd={setEnd}
+        allday={allday}
+        setAllDay={setAllDay}
+        repetition={repetition}
+        setRepetition={setRepetition}
+        attendees={attendees}
+        setAttendees={setAttendees}
+        alarm={alarm}
+        setAlarm={setAlarm}
+        busy={busy}
+        setBusy={setBusy}
+        eventClass={eventClass}
+        setEventClass={setEventClass}
+        timezone={timezone}
+        setTimezone={setTimezone}
+        calendarid={calendarid}
+        setCalendarid={setCalendarid}
+        important={important}
+        setImportant={setImportant}
+        hasVideoConference={hasVideoConference}
+        setHasVideoConference={setHasVideoConference}
+        meetingLink={meetingLink}
+        setMeetingLink={setMeetingLink}
+        showMore={showMore}
+        showDescription={showDescription}
+        setShowDescription={setShowDescription}
+        showRepeat={showRepeat}
+        setShowRepeat={setShowRepeat}
+        userPersonnalCalendars={userPersonnalCalendars}
+        timezoneList={timezoneList}
+        onCalendarChange={(newCalendarId) => {
+          const selectedCalendar = userPersonnalCalendars[newCalendarId];
+          if (selectedCalendar) {
+            setNewCalId(selectedCalendar.id);
+          }
+        }}
+      />
+    </ResponsiveDialog>
+  );
+}
+
+export default EventUpdateModal;

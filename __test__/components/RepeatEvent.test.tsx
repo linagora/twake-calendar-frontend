@@ -14,7 +14,6 @@ const baseRepetition: RepetitionObject = {
   interval: 1,
   occurrences: 0,
   endDate: "",
-  selectedDays: [],
 };
 
 const mockOnClose = jest.fn();
@@ -188,7 +187,7 @@ describe("RepeatEvent Component", () => {
     fireEvent.click(mondayCheckbox);
 
     expect(setRepetition).toHaveBeenCalledWith(
-      expect.objectContaining({ selectedDays: ["MO"] })
+      expect.objectContaining({ byday: ["MO"] })
     );
   });
 });
@@ -270,7 +269,7 @@ describe("Repeat Event Integration Tests", () => {
     await expectRRule({
       freq: "weekly",
       interval: 1,
-      selectedDays: ["FR", "TH"],
+      byday: ["FR", "TH"],
     });
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });

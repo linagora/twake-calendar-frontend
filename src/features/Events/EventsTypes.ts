@@ -30,7 +30,6 @@ export interface CalendarEvent {
 export interface RepetitionObject {
   freq: string;
   interval?: number;
-  selectedDays?: string[];
   byday?: string[] | null;
   occurrences?: number;
   endDate?: string;
