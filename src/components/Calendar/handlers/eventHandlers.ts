@@ -15,6 +15,7 @@ import {
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
 import { userData } from "../../../features/User/userDataTypes";
+import { refreshCalendars } from "../../Event/eventUtils/eventUtils";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -165,14 +166,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
             );
           } else if (typeOfAction === "all") {
             const master = await getEvent(newEvent, true);
-            const recId = event.uid.split("/")[0];
-            Object.keys(calendar.events).forEach((id) => {
-              if (id.split("/")[0] === recId) {
-                dispatch(
-                  removeEvent({ calendarUid: event.calId, eventUid: id })
-                );
-              }
-            });
             await dispatch(
               updateSeriesAsync({
                 cal: calendar,
@@ -182,6 +175,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                   end: computedNewEnd.toISOString(),
                 },
               })
+            );
+            await refreshCalendars(
+              dispatch,
+              Object.values(calendars),
+              calendarRange
             );
           }
         }
@@ -233,14 +231,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
             );
           } else if (typeOfAction === "all") {
             const master = await getEvent(newEvent, true);
-            const recId = event.uid.split("/")[0];
-            Object.keys(calendar.events).forEach((id) => {
-              if (id.split("/")[0] === recId) {
-                dispatch(
-                  removeEvent({ calendarUid: event.calId, eventUid: id })
-                );
-              }
-            });
+
             await dispatch(
               updateSeriesAsync({
                 cal: calendar,
@@ -250,6 +241,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                   end: computedNewEnd.toISOString(),
                 },
               })
+            );
+            await refreshCalendars(
+              dispatch,
+              Object.values(calendars),
+              calendarRange
             );
           }
         }

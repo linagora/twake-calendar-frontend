@@ -3,12 +3,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import { useEffect, useState } from "react";
 import {
   moveEventAsync,
   putEventAsync,
   removeEvent,
   updateEventInstanceAsync,
-  updateSeriesAsync
+  updateSeriesAsync,
 } from "../Calendars/CalendarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
@@ -33,9 +34,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import RepeatEvent from "../../components/Event/EventRepeat";
-import { InfoRow } from "../../components/Event/InfoRow";
 import { userAttendee } from "../User/userDataTypes";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { formatLocalDateTime } from "./EventModal";
@@ -46,6 +44,8 @@ import {
   handleRSVP,
 } from "../../components/Event/eventHandlers/eventHandlers";
 import { getEvent } from "./EventApi";
+import { getCalendarRange } from "../../utils/dateUtils";
+import { refreshCalendars } from "../../components/Event/eventUtils/eventUtils";
 
 export default function EventDisplayModal({
   eventId,
@@ -79,7 +79,6 @@ export default function EventDisplayModal({
   );
 
   // Form state
-  const [savedEventId, setSavedEventId] = useState(event?.uid ?? "");
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
@@ -96,7 +95,7 @@ export default function EventDisplayModal({
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
-  const [timezone] = useState(event?.timezone ?? "UTC");
+  const [timezone, setTimezone] = useState(event?.timezone ?? "UTC");
   const [newCalId, setNewCalId] = useState(event?.calId);
   const [calendarid, setCalendarid] = useState(
     calId.split("/")[0] === user.userData?.openpaasId
@@ -147,7 +146,7 @@ export default function EventDisplayModal({
     if (typeOfAction === "all") {
       fetchMasterEvent();
     }
-  }, [typeOfAction, event]); // 👈 add dependencies
+  }, [typeOfAction, event]);
 
   if (!event || !calendar) return null;
   const isRecurring = event.uid?.includes("/");
@@ -176,15 +175,8 @@ export default function EventDisplayModal({
     };
 
     const [baseId, recurrenceId] = event.uid.split("/");
-    // if (recurrenceId) {
-    //   Object.keys(userPersonnalCalendars[calendarid].events).forEach(
-    //     (element) => {
-    //       if (element.split("/")[0] === baseId) {
-    //         dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
-    //       }
-    //     }
-    //   );
-    // }
+    const calendarRange = getCalendarRange(new Date(start));
+
     if (typeOfAction === "solo") {
       dispatch(
         updateEventInstanceAsync({
@@ -199,6 +191,7 @@ export default function EventDisplayModal({
           event: { ...newEvent, recurrenceId: recurrenceId },
         })
       );
+      await refreshCalendars(dispatch, calendars, calendarRange);
     } else {
       dispatch(
         putEventAsync({ cal: userPersonnalCalendars[calendarid], newEvent })

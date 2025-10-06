@@ -29,7 +29,6 @@ export default function RepeatEvent({
 }) {
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
   const day = new Date(eventStart);
-
   // derive endOption based on repetition
   const getEndOption = () => {
     if (repetition.occurrences && repetition.occurrences >= 0) return "after";
@@ -88,7 +87,11 @@ export default function RepeatEvent({
                     selectedDays: [days[day.getDay() - 1]],
                   });
                 } else {
-                  setRepetition({ ...repetition, freq: e.target.value });
+                  setRepetition({
+                    ...repetition,
+                    freq: e.target.value,
+                    selectedDays: undefined,
+                  });
                 }
               }}
             >

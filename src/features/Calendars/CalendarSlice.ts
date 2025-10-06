@@ -294,44 +294,10 @@ export const updateEventInstanceAsync = createAsyncThunk<
 });
 
 export const updateSeriesAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[] },
+  void,
   { cal: Calendars; event: CalendarEvent }
 >("calendars/updateSeries", async ({ cal, event }) => {
   await updateSeries(event, cal.ownerEmails?.[0]);
-  const eventDate = new Date(event.start);
-
-  const weekStart = new Date(eventDate);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(eventDate.getDate() - eventDate.getDay());
-
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 8);
-
-  const calEvents = (await getCalendar(cal.id, {
-    start: formatDateToYYYYMMDDTHHMMSS(weekStart),
-    end: formatDateToYYYYMMDDTHHMMSS(weekEnd),
-  })) as Record<string, any>;
-
-  const events: CalendarEvent[] = calEvents._embedded["dav:item"].flatMap(
-    (eventdata: any) => {
-      const vevents = eventdata.data[2] as any[][];
-      const eventURL = eventdata._links.self.href;
-      const valarm = eventdata.data[2][0][2][0];
-      return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(
-          vevent[1],
-          cal.color ?? "",
-          cal.id,
-          eventURL,
-          valarm
-        );
-      });
-    }
-  );
-  return {
-    calId: cal.id,
-    events,
-  };
 });
 
 export const createCalendarAsync = createAsyncThunk<
@@ -614,25 +580,8 @@ const CalendarSlice = createSlice({
         state.list[action.payload.calId].events[action.payload.event.uid] =
           action.payload.event;
       })
-      .addCase(updateSeriesAsync.fulfilled, (state, action) => {
+      .addCase(updateSeriesAsync.fulfilled, (state) => {
         state.pending = false;
-        if (!state.list[action.payload.calId]) {
-          state.list[action.payload.calId] = {
-            id: action.payload.calId,
-            events: {},
-          } as Calendars;
-        }
-        action.payload.events.forEach((event) => {
-          state.list[action.payload.calId].events[event.uid] = event;
-        });
-        Object.keys(state.list[action.payload.calId].events).forEach((id) => {
-          state.list[action.payload.calId].events[id].color =
-            state.list[action.payload.calId].color;
-          state.list[action.payload.calId].events[id].calId =
-            action.payload.calId;
-          state.list[action.payload.calId].events[id].timezone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone;
-        });
       })
       .addCase(createCalendarAsync.fulfilled, (state, action) => {
         state.pending = false;
