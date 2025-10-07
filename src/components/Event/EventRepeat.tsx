@@ -29,7 +29,6 @@ export default function RepeatEvent({
 }) {
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
   const day = new Date(eventStart);
-
   // derive endOption based on repetition
   const getEndOption = () => {
     if (repetition.occurrences && repetition.occurrences >= 0) return "after";
@@ -65,6 +64,7 @@ export default function RepeatEvent({
           <TextField
             type="number"
             value={repetition.interval ?? 1}
+            disabled={!isOwn}
             onChange={(e) =>
               setRepetition({
                 ...repetition,
@@ -78,6 +78,7 @@ export default function RepeatEvent({
           <FormControl size="small" style={{ minWidth: 120 }}>
             <Select
               value={repetition.freq ?? "daily"}
+              disabled={!isOwn}
               onChange={(e: SelectChangeEvent) => {
                 if (e.target.value === "weekly") {
                   setRepetition({
@@ -86,7 +87,11 @@ export default function RepeatEvent({
                     selectedDays: [days[day.getDay() - 1]],
                   });
                 } else {
-                  setRepetition({ ...repetition, freq: e.target.value });
+                  setRepetition({
+                    ...repetition,
+                    freq: e.target.value,
+                    selectedDays: undefined,
+                  });
                 }
               }}
             >
@@ -108,6 +113,7 @@ export default function RepeatEvent({
               {days.map((day) => (
                 <FormControlLabel
                   key={day}
+                  disabled={!isOwn}
                   control={
                     <Checkbox
                       checked={repetition.selectedDays?.includes(day) ?? false}
@@ -151,9 +157,15 @@ export default function RepeatEvent({
               }
             }}
           >
-            <FormControlLabel value="never" control={<Radio />} label="Never" />
+            <FormControlLabel
+              disabled={!isOwn}
+              value="never"
+              control={<Radio />}
+              label="Never"
+            />
 
             <FormControlLabel
+              disabled={!isOwn}
               value="after"
               control={<Radio />}
               label={
@@ -172,7 +184,7 @@ export default function RepeatEvent({
                     }
                     style={{ width: 100 }}
                     inputProps={{ min: 1 }}
-                    disabled={endOption !== "after"}
+                    disabled={!isOwn || endOption !== "after"}
                   />
                   occurrences
                 </Box>
@@ -180,6 +192,7 @@ export default function RepeatEvent({
             />
 
             <FormControlLabel
+              disabled={!isOwn}
               value="on"
               control={<Radio />}
               label={

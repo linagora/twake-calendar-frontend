@@ -14,10 +14,13 @@ import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import {
   deleteEvent,
+  deleteEventInstance,
   getEvent,
   importEventFromFile,
   moveEvent,
   putEvent,
+  putEventWithOverrides,
+  updateSeries,
 } from "../Events/EventApi";
 import {
   computeWeekRange,
@@ -272,6 +275,29 @@ export const deleteEventAsync = createAsyncThunk<
 >("calendars/delEvent", async ({ calId, eventId, eventURL }) => {
   await deleteEvent(eventURL);
   return { calId, eventId };
+});
+
+export const deleteEventInstanceAsync = createAsyncThunk<
+  { calId: string; eventId: string },
+  { cal: Calendars; event: CalendarEvent }
+>("calendars/delEventInstance", async ({ cal, event }) => {
+  await deleteEventInstance(event, cal.ownerEmails?.[0]);
+  return { calId: cal.id, eventId: event.uid };
+});
+
+export const updateEventInstanceAsync = createAsyncThunk<
+  { calId: string; event: CalendarEvent },
+  { cal: Calendars; event: CalendarEvent }
+>("calendars/updateEventInstance", async ({ cal, event }) => {
+  await putEventWithOverrides(event, cal.ownerEmails?.[0]);
+  return { calId: cal.id, event };
+});
+
+export const updateSeriesAsync = createAsyncThunk<
+  void,
+  { cal: Calendars; event: CalendarEvent }
+>("calendars/updateSeries", async ({ cal, event }) => {
+  await updateSeries(event, cal.ownerEmails?.[0]);
 });
 
 export const createCalendarAsync = createAsyncThunk<
@@ -544,6 +570,18 @@ const CalendarSlice = createSlice({
             action.payload.eventId
           ];
         }
+      })
+      .addCase(deleteEventInstanceAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        delete state.list[action.payload.calId].events[action.payload.eventId];
+      })
+      .addCase(updateEventInstanceAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[action.payload.calId].events[action.payload.event.uid] =
+          action.payload.event;
+      })
+      .addCase(updateSeriesAsync.fulfilled, (state) => {
+        state.pending = false;
       })
       .addCase(createCalendarAsync.fulfilled, (state, action) => {
         state.pending = false;
