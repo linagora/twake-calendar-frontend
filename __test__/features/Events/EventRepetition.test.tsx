@@ -465,7 +465,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
-        expect(mockOnClose).toHaveBeenCalled();
       });
 
       const updatedEvent = spy.mock.calls[0][0].event;
@@ -509,7 +508,6 @@ describe("Recurrence Event Behavior Tests", () => {
       await waitFor(() => {
         expect(getEventSpy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalled();
-        expect(mockOnClose).toHaveBeenCalled();
       });
 
       const updatedEvent = spy.mock.calls[0][0].event;
@@ -884,7 +882,6 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       expect(mockDispatch).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
   });
 

@@ -53,7 +53,6 @@ export async function handleRSVP(
   } else {
     dispatch(putEventAsync({ cal: calendar, newEvent }));
   }
-  onClose && onClose({}, "backdropClick");
 }
 
 export function handleDelete(

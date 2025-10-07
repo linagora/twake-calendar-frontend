@@ -358,7 +358,6 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
@@ -416,7 +415,6 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
@@ -474,7 +472,6 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
