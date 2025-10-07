@@ -561,3 +561,28 @@ export function formatLocalDateTime(date: Date): string {
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+export function formatDateTimeInTimezone(
+  isoString: string,
+  timezone: string
+): string {
+  // Parse the ISO string as UTC
+  const utcDate = new Date(isoString);
+
+  // Format the date in the target timezone
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(utcDate);
+  const getValue = (type: string) =>
+    parts.find((p) => p.type === type)?.value || "";
+
+  return `${getValue("year")}-${getValue("month")}-${getValue("day")}T${getValue("hour")}:${getValue("minute")}`;
+}

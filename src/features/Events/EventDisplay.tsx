@@ -300,10 +300,7 @@ export default function EventDisplayModal({
                     >
                       Decline
                     </Button>
-                    <Button
-                      color="primary"
-                      onClick={() => {}}
-                    >
+                    <Button color="primary" onClick={() => {}}>
                       Propose new time
                     </Button>
                   </ButtonGroup>

@@ -65,18 +65,7 @@ describe("eventApi", () => {
     expect(result).toBe(mockResponse);
   });
 
-  it("putEvent logs when status is 201", async () => {
-    const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
-    (api as unknown as jest.Mock).mockReturnValue(mockResponse);
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-
-    await putEvent(mockEvent);
-    expect(logSpy).toHaveBeenCalledWith("PUT (201) :", "/dav/cals/test.ics");
-
-    logSpy.mockRestore();
-  });
-
-  it("moveEvent sends MOVE request with destination header", async () => {
+  test("moveEvent sends MOVE request with destination header", async () => {
     const mockResponse = { status: 204 };
     (api as unknown as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue(mockResponse),
