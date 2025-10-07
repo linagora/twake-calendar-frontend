@@ -17,7 +17,10 @@ import { createSelector } from "@reduxjs/toolkit";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 import EventFormFields from "../../components/Event/EventFormFields";
-import { formatLocalDateTime } from "../../components/Event/EventFormFields";
+import {
+  formatLocalDateTime,
+  formatDateTimeInTimezone,
+} from "../../components/Event/EventFormFields";
 
 function EventPopover({
   anchorEl,
@@ -180,8 +183,34 @@ function EventPopover({
       setTitle(event.title ?? "");
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
-      setStart(event.start ? event.start : "");
-      setEnd(event.end ? event.end : "");
+
+      // Get event's original timezone
+      const eventTimezone = event.timezone
+        ? resolveTimezone(event.timezone)
+        : timezoneList.browserTz;
+
+      const isAllDay = event.allday ?? false;
+
+      // Format dates based on all-day status
+      if (isAllDay) {
+        setStart(
+          event.start ? new Date(event.start).toISOString().split("T")[0] : ""
+        );
+        setEnd(
+          event.end ? new Date(event.end).toISOString().split("T")[0] : ""
+        );
+      } else {
+        // For timed events, format in the event's original timezone
+        setStart(
+          event.start
+            ? formatDateTimeInTimezone(event.start, eventTimezone)
+            : ""
+        );
+        setEnd(
+          event.end ? formatDateTimeInTimezone(event.end, eventTimezone) : ""
+        );
+      }
+
       setCalendarid(
         event.calId
           ? userPersonnalCalendarsRef.current.findIndex(
@@ -189,7 +218,7 @@ function EventPopover({
             )
           : 0
       );
-      setAllDay(event.allday ?? false);
+      setAllDay(isAllDay);
       if (event.repetition) {
         const repetitionData: RepetitionObject = {
           freq: event.repetition.freq || "",
