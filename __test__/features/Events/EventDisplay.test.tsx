@@ -1,12 +1,19 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventDisplayModal, {
-  InfoRow,
-  stringAvatar,
+import EventDisplayModal from "../../../src/features/Events/EventDisplay";
+import EventPreviewModal from "../../../src/components/Event/EventDisplayPreview";
+import { InfoRow } from "../../../src/components/Event/InfoRow";
+import {
   stringToColor,
-} from "../../../src/features/Events/EventDisplay";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+  stringAvatar,
+} from "../../../src/components/Event/utils/eventUtils";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
@@ -104,7 +111,6 @@ describe("Event Preview Display", () => {
     });
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -118,9 +124,8 @@ describe("Event Preview Display", () => {
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
     expect(screen.getByText(new RegExp(weekday, "i"))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(month, "i"))).toBeInTheDocument();
     expect(
-      screen.getByText(new RegExp(`\\b${dayOfMonth}\\b`))
+      screen.getByText(new RegExp(`\\b${dayOfMonth}\\b ${month}`))
     ).toBeInTheDocument();
 
     expect(screen.getByText(/\d{2}:\d{2} – \d{2}:\d{2}/)).toBeInTheDocument();
@@ -129,7 +134,6 @@ describe("Event Preview Display", () => {
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -145,7 +149,6 @@ describe("Event Preview Display", () => {
     // Renders the other cal event
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"otherCal/cal"}
@@ -153,11 +156,12 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
+    cleanup();
     // Renders the personnal cal event
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -165,12 +169,12 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.queryByTestId("DeleteIcon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.queryByText("Delete event")).toBeInTheDocument();
   });
   it("calls delete when Delete clicked", async () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -183,8 +187,8 @@ describe("Event Preview Display", () => {
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
-
-    fireEvent.click(screen.getByTestId("DeleteIcon"));
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    fireEvent.click(screen.getByText("Delete event"));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -237,7 +241,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -246,7 +249,7 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.getByText("Will you attend?")).toBeInTheDocument();
+    expect(screen.getByText("Attending?")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Maybe" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
@@ -284,7 +287,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -293,7 +295,7 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.queryByText("Will you attend?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Attending?")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Accept" })
     ).not.toBeInTheDocument();
@@ -344,7 +346,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -403,7 +404,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -462,7 +462,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -496,7 +495,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -516,7 +514,6 @@ describe("Event Preview Display", () => {
     (window as any).MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -524,13 +521,13 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.getByTestId("EmailIcon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.getByText("Email attendees")).toBeInTheDocument();
   });
   it("doesnt render message button when MAIL_SPA_URL is not null and event has no attendees", () => {
     (window as any).MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -543,7 +540,6 @@ describe("Event Preview Display", () => {
   it("doesnt render message button when MAIL_SPA_URL is null and event has attendees", () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -560,7 +556,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -569,10 +564,11 @@ describe("Event Preview Display", () => {
       preloadedState
     );
 
-    const emailButton = screen.getByTestId("EmailIcon");
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    const emailButton = screen.getByText("Email attendees");
     expect(emailButton).toBeInTheDocument();
 
-    fireEvent.click(emailButton.closest("button")!);
+    fireEvent.click(emailButton);
 
     const event =
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
@@ -1403,7 +1399,7 @@ describe("Event Full Display", () => {
       videoState
     );
 
-    expect(screen.getByText("Video conference available")).toBeInTheDocument();
+    expect(screen.getByText("Join the video conference")).toBeInTheDocument();
   });
 });
 
@@ -1416,7 +1412,7 @@ describe("Helper functions", () => {
   it("stringAvatar returns correct props", () => {
     const result = stringAvatar("Alice");
     expect(result.children).toBe("A");
-    expect(result.sx.bgcolor).toMatch(/^#/);
+    expect(result.style.backgroundColor).toMatch(/^#/);
   });
 
   it("InfoRow renders text and link if url is valid", () => {

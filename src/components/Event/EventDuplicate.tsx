@@ -1,4 +1,4 @@
-import { IconButton } from "@mui/material";
+import { IconButton, MenuItem } from "@mui/material";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import AddToPhotosIcon from "@mui/icons-material/AddToPhotos";
 import { useRef, useState } from "react";
@@ -30,14 +30,13 @@ export default function EventDuplication({
   };
   return (
     <>
-      <IconButton
-        size="small"
+      <MenuItem
         onClick={() => {
           setOpenModal(true);
         }}
       >
-        <AddToPhotosIcon fontSize="small" />
-      </IconButton>
+        Duplicate event
+      </MenuItem>
       <EventPopover
         anchorEl={null}
         open={openModal}

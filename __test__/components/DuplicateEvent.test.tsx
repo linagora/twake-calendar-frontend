@@ -3,7 +3,7 @@ import EventDuplication from "../../src/components/Event/EventDuplicate";
 import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
+import EventPreviewModal from "../../src/components/Event/EventDisplayPreview";
 
 const day = new Date();
 const preloadedState = {
@@ -75,10 +75,9 @@ describe("EventDuplication", () => {
       preloadedState
     );
 
-    const button = screen.getByRole("button");
-    fireEvent.click(button);
+    fireEvent.click(screen.getByText("Duplicate event"));
 
-    expect(screen.getByText(/Duplicate Event/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
   });
 
   it("calls onClose when closing the popover", () => {
@@ -94,7 +93,7 @@ describe("EventDuplication", () => {
       preloadedState
     );
 
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByText("Duplicate event"));
 
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
@@ -159,13 +158,13 @@ describe("EventDisplayModal", () => {
         calId="667037022b752d0026472254/cal1"
         open={true}
         onClose={jest.fn()}
-        anchorPosition={{ top: 0, left: 0 }}
       />,
       preloadedState
     );
 
-    fireEvent.click(screen.getByTestId("AddToPhotosIcon"));
-    expect(screen.getByText(/Duplicate Event/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    fireEvent.click(screen.getByText("Duplicate event"));
+    expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
     expect(
       screen.getByDisplayValue(
         preloadedState.calendars.list["667037022b752d0026472254/cal1"].events

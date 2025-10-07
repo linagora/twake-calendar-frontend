@@ -20,7 +20,6 @@ export interface EventHandlersProps {
   calendarRange: { start: Date; end: Date };
   dispatch: any;
   setOpenEventDisplay: (open: boolean) => void;
-  setAnchorPosition: (position: { top: number; left: number } | null) => void;
   setEventDisplayedId: (id: string) => void;
   setEventDisplayedCalId: (id: string) => void;
   setEventDisplayedTemp: (temp: boolean) => void;
@@ -37,7 +36,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     calendarRange,
     dispatch,
     setOpenEventDisplay,
-    setAnchorPosition,
     setEventDisplayedId,
     setEventDisplayedCalId,
     setEventDisplayedTemp,
@@ -79,7 +77,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
   };
 
   const handleCloseEventDisplay = () => {
-    setAnchorPosition(null);
     setOpenEventDisplay(false);
   };
 
@@ -109,10 +106,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     } else {
       console.log(info.event);
       setOpenEventDisplay(true);
-      setAnchorPosition({
-        top: info.jsEvent.clientY,
-        left: info.jsEvent.clientX,
-      });
       setEventDisplayedId(info.event.extendedProps.uid);
       setEventDisplayedCalId(info.event.extendedProps.calId);
       setEventDisplayedTemp(info.event._def.extendedProps.temp);

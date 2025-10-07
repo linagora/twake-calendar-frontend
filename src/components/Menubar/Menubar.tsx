@@ -6,7 +6,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { stringToColor } from "../../features/Events/EventDisplay";
+import { stringToColor } from "../Event/utils/eventUtils";
 import {
   Avatar,
   IconButton,
