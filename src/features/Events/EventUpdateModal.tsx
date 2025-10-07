@@ -144,7 +144,6 @@ function EventUpdateModal({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
-  const [important, setImportant] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -162,7 +161,6 @@ function EventUpdateModal({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setImportant(false);
     setTimezone(
       resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
     );
@@ -422,8 +420,6 @@ function EventUpdateModal({
         setTimezone={setTimezone}
         calendarid={calendarid}
         setCalendarid={setCalendarid}
-        important={important}
-        setImportant={setImportant}
         hasVideoConference={hasVideoConference}
         setHasVideoConference={setHasVideoConference}
         meetingLink={meetingLink}

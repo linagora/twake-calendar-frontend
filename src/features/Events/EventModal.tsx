@@ -126,7 +126,6 @@ function EventPopover({
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
-  const [important, setImportant] = useState(false);
   const [timezone, setTimezone] = useState(
     event?.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz
   );
@@ -162,7 +161,6 @@ function EventPopover({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setImportant(false);
     setTimezone(timezoneList.browserTz);
     setHasVideoConference(false);
     setMeetingLink(null);
@@ -193,11 +191,11 @@ function EventPopover({
       );
       setAllDay(event.allday ?? false);
       if (event.repetition) {
-        const repetitionData = {
-          freq: event.repetition.freq || null,
+        const repetitionData: RepetitionObject = {
+          freq: event.repetition.freq || "",
           interval: event.repetition.interval || 1,
-          occurrences: event.repetition.occurrences || null,
-          endDate: event.repetition.endDate || null,
+          occurrences: event.repetition.occurrences,
+          endDate: event.repetition.endDate,
           byday: event.repetition.byday || null,
         };
         setRepetition(repetitionData);
@@ -260,7 +258,6 @@ function EventPopover({
       setAlarm("");
       setEventClass("PUBLIC");
       setBusy("OPAQUE");
-      setImportant(false);
       setTimezone(timezoneList.browserTz);
       setHasVideoConference(false);
       setMeetingLink(null);
@@ -379,8 +376,6 @@ function EventPopover({
         setTimezone={setTimezone}
         calendarid={calendarid}
         setCalendarid={setCalendarid}
-        important={important}
-        setImportant={setImportant}
         hasVideoConference={hasVideoConference}
         setHasVideoConference={setHasVideoConference}
         meetingLink={meetingLink}
