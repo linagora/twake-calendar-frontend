@@ -19,7 +19,7 @@ import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 import EventFormFields, {
-  formatLocalDateTime,
+  formatDateTimeInTimezone,
 } from "../../components/Event/EventFormFields";
 import { getEvent } from "./EventApi";
 
@@ -183,28 +183,33 @@ function EventUpdateModal({
       const isAllDay = event.allday ?? false;
       setAllDay(isAllDay);
 
+      // Get event's original timezone
+      const eventTimezone = event.timezone
+        ? resolveTimezone(event.timezone)
+        : resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
       // Format dates based on all-day status
       if (event.start) {
-        const startDate = new Date(event.start);
         if (isAllDay) {
           // For all-day events, use date format (YYYY-MM-DD)
+          const startDate = new Date(event.start);
           setStart(startDate.toISOString().split("T")[0]);
         } else {
-          // For timed events, use datetime format
-          setStart(formatLocalDateTime(startDate));
+          // For timed events, format in the event's original timezone
+          setStart(formatDateTimeInTimezone(event.start, eventTimezone));
         }
       } else {
         setStart("");
       }
 
       if (event.end) {
-        const endDate = new Date(event.end);
         if (isAllDay) {
           // For all-day events, use date format (YYYY-MM-DD)
+          const endDate = new Date(event.end);
           setEnd(endDate.toISOString().split("T")[0]);
         } else {
-          // For timed events, use datetime format
-          setEnd(formatLocalDateTime(endDate));
+          // For timed events, format in the event's original timezone
+          setEnd(formatDateTimeInTimezone(event.end, eventTimezone));
         }
       } else {
         setEnd("");
