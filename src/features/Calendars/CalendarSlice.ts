@@ -8,15 +8,24 @@ import {
   postCalendar,
   proppatchCalendar,
   removeCalendar,
+  updateAclCalendar,
 } from "./CalendarApi";
 import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
-import { deleteEvent, getEvent, moveEvent, putEvent } from "../Events/EventApi";
 import {
-  formatDateToYYYYMMDDTHHMMSS,
+  deleteEvent,
+  getEvent,
+  importEventFromFile,
+  moveEvent,
+  putEvent,
+} from "../Events/EventApi";
+import {
   computeWeekRange,
+  formatDateToYYYYMMDDTHHMMSS,
 } from "../../utils/dateUtils";
 import { User } from "../../components/Attendees/PeopleSearch";
+import { getCalendarVisibility } from "../../components/Calendar/utils/calendarUtils";
+import { importFile } from "../../utils/apiUtils";
 
 export const getCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars> // Return type
@@ -39,7 +48,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       delegated = true;
     }
     const id = source.replace("/calendars/", "").replace(".json", "");
-
+    const visibility = getCalendarVisibility(cal["acl"]);
     const ownerData: any = await getUserDetails(id.split("/")[0]);
     const color = cal["apple:color"];
     importedCalendars[id] = {
@@ -53,6 +62,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       description,
       delegated,
       color,
+      visibility,
       events: {},
     };
   }
@@ -82,6 +92,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     const link = cal._links.self.href;
 
     const id = source.replace("/calendars/", "").replace(".json", "");
+    const visibility = getCalendarVisibility(cal["acl"]);
     const ownerData: any = await getUserDetails(id.split("/")[0]);
 
     importedCalendars[id] = {
@@ -93,6 +104,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       description,
       delegated,
       color: tempUser.color ?? "#a8a8a8ff",
+      visibility,
       events: {},
     };
   }
@@ -234,6 +246,26 @@ export const moveEventAsync = createAsyncThunk<
   };
 });
 
+export const patchACLCalendarAsync = createAsyncThunk<
+  {
+    calId: string;
+    calLink: string;
+    request: string;
+  }, // Return type
+  {
+    calId: string;
+    calLink: string;
+    request: string;
+  } // Arg type
+>("calendars/requestACLCalendar", async ({ calId, calLink, request }) => {
+  const response = await updateAclCalendar(calLink, request);
+  return {
+    calId,
+    calLink,
+    request,
+  };
+});
+
 export const deleteEventAsync = createAsyncThunk<
   { calId: string; eventId: string }, // Return type
   { calId: string; eventId: string; eventURL: string } // Arg type
@@ -303,6 +335,17 @@ export const addSharedCalendarAsync = createAsyncThunk<
     }`,
     ownerEmails: ownerData.emails,
   };
+});
+
+export const importEventFromFileAsync = createAsyncThunk<
+  void,
+  {
+    calLink: string;
+    file: File;
+  }
+>("calendars/importEvent", async ({ calLink, file }) => {
+  const id = ((await importFile(file)) as Record<string, string>)._id;
+  const response = await importEventFromFile(id, calLink);
 });
 
 const CalendarSlice = createSlice({
@@ -507,6 +550,7 @@ const CalendarSlice = createSlice({
         state.list[`${action.payload.userId}/${action.payload.calId}`] = {
           color: action.payload.color,
           id: `${action.payload.userId}/${action.payload.calId}`,
+          link: `/calendars/${action.payload.userId}/${action.payload.calId}.json`,
           description: action.payload.desc,
           name: action.payload.name,
           owner: action.payload.owner,
@@ -557,6 +601,11 @@ const CalendarSlice = createSlice({
         state.pending = false;
         delete state.list[action.payload.calId];
       })
+      .addCase(patchACLCalendarAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[action.payload.calId].visibility =
+          action.payload.request !== "" ? "public" : "private";
+      })
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
       })
@@ -588,6 +637,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(removeCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(patchACLCalendarAsync.pending, (state) => {
         state.pending = true;
       });
   },

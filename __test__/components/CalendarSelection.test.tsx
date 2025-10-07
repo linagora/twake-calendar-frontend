@@ -122,7 +122,7 @@ describe("CalendarSelection", () => {
     fireEvent.click(addButtons[1]);
 
     await waitFor(() =>
-      expect(screen.getByText("Calendar configuration")).toBeInTheDocument()
+      expect(screen.getByText(/Add new calendar/i)).toBeInTheDocument()
     );
   });
 
