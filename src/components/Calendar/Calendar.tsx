@@ -20,7 +20,7 @@ import {
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
-import EventPreviewModal from "../../features/Events/EventDisplayPreview";
+import EventPreviewModal from "../Event/EventDisplayPreview";
 import { createSelector } from "@reduxjs/toolkit";
 import AddIcon from "@mui/icons-material/Add";
 import { TempCalendarsInput } from "./TempCalendarsInput";
@@ -161,10 +161,7 @@ export default function CalendarApp({
   }, [rangeKey, Object.keys(tempcalendars).join(","), pending]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [anchorPosition, setAnchorPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
+
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
@@ -187,7 +184,6 @@ export default function CalendarApp({
     calendarRange,
     dispatch,
     setOpenEventDisplay,
-    setAnchorPosition,
     setEventDisplayedId,
     setEventDisplayedCalId,
     setEventDisplayedTemp,
@@ -431,7 +427,6 @@ export default function CalendarApp({
             eventId={eventDisplayedId}
             calId={eventDisplayedCalId}
             tempEvent={eventDisplayedTemp}
-            anchorPosition={anchorPosition}
             open={openEventDisplay}
             onClose={eventHandlers.handleCloseEventDisplay}
           />

@@ -1,0 +1,105 @@
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { userAttendee } from "../../../features/User/userDataTypes";
+
+export function renderAttendeeBadge(
+  a: userAttendee,
+  key: string,
+  isFull?: boolean,
+  isOrganizer?: boolean
+) {
+  const classIcon =
+    a.partstat === "ACCEPTED" ? (
+      <CheckCircleIcon fontSize="inherit" color="success" />
+    ) : a.partstat === "DECLINED" ? (
+      <CancelIcon fontSize="inherit" color="error" />
+    ) : null;
+
+  if (!isFull) {
+    return <Avatar {...stringAvatar(a.cn || a.cal_address)} />;
+  } else {
+    return (
+      <Box
+        key={key}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          marginBottom: 0.5,
+          padding: 0.5,
+          borderRadius: 1,
+        }}
+      >
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          badgeContent={
+            classIcon && (
+              <Box
+                style={{
+                  fontSize: 14,
+                  lineHeight: 0,
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  padding: "1px",
+                }}
+              >
+                {classIcon}
+              </Box>
+            )
+          }
+        >
+          <Avatar {...stringAvatar(a.cn || a.cal_address)} />
+        </Badge>
+        <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            noWrap
+            style={{
+              maxWidth: "180px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {a.cn || a.cal_address}
+          </Typography>
+          {isOrganizer && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              style={{ fontStyle: "italic" }}
+            >
+              Organizer
+            </Typography>
+          )}
+        </Box>
+      </Box>
+    );
+  }
+}
+
+export function stringToColor(string: string) {
+  let hash = 0;
+  for (let i = 0; i < string.length; i++) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += `00${value.toString(16)}`.slice(-2);
+  }
+
+  return color;
+}
+
+export function stringAvatar(name: string) {
+  return {
+    style: { backgroundColor: stringToColor(name) },
+    children: name[0],
+  };
+}

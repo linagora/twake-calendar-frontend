@@ -136,7 +136,12 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
   const handleEventContent = (arg: any) => {
     const event = arg.event;
     const props = event._def.extendedProps;
-    const { calId, temp, attendees = [], class: classification } = props;
+    const {
+      calId,
+      temp,
+      attendee: attendees = [],
+      class: classification,
+    } = props;
 
     const calendarsSource = temp ? tempcalendars : calendars;
     const calendar = calendarsSource[calId];

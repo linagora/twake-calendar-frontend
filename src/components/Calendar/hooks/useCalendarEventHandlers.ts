@@ -23,13 +23,12 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
     ]),
     handleCloseEventDisplay: useCallback(
       eventHandlers.handleCloseEventDisplay,
-      [props.setAnchorPosition, props.setOpenEventDisplay]
+      [props.setOpenEventDisplay]
     ),
     handleMonthUp: useCallback(eventHandlers.handleMonthUp, []),
     handleMonthDown: useCallback(eventHandlers.handleMonthDown, []),
     handleEventClick: useCallback(eventHandlers.handleEventClick, [
       props.setOpenEventDisplay,
-      props.setAnchorPosition,
       props.setEventDisplayedId,
       props.setEventDisplayedCalId,
       props.setEventDisplayedTemp,
