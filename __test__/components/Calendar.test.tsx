@@ -6,6 +6,7 @@ import { searchUsers } from "../../src/features/User/userAPI";
 import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
+import CalendarLayout from "../../src/components/Calendar/CalendarLayout";
 jest.mock("../../src/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers
@@ -266,5 +267,39 @@ describe("calendar Availability search", () => {
     fireEvent.click(checkbox); // toggle off
 
     expect(checkbox).not.toBeChecked();
+  });
+
+  it("BUGFIX: monthview doesn't show days numbers in banner", async () => {
+    renderWithProviders(<CalendarLayout />, {
+      user: preloadedState.user,
+      calendars: {
+        list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
+        pending: false,
+      },
+    });
+
+    const calendarRef = (window as any).__calendarRef;
+
+    await waitFor(() => {
+      expect(calendarRef.current).not.toBeNull();
+    });
+
+    const calendarApi = calendarRef.current;
+
+    calendarApi.changeView("dayGridMonth");
+    await waitFor(() => {
+      expect(screen.queryAllByRole("columnheader").length).toBe(7);
+    });
+
+    const dayNumbers = screen.getAllByRole("columnheader");
+    expect(dayNumbers.length).toBeGreaterThan(0);
+
+    const dayNumbersWithContent = dayNumbers.filter((cell) => {
+      const dayNum = cell.querySelector(
+        ".fc-daygrid-day-number, .fc-daygrid-day-top"
+      );
+      return dayNum && dayNum.textContent && /\d/.test(dayNum.textContent);
+    });
+    expect(dayNumbersWithContent.length).toBe(0);
   });
 });

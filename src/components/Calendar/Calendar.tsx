@@ -392,13 +392,15 @@ export default function CalendarApp({
             return (
               <div className="fc-daygrid-day-top">
                 <small>{weekDay}</small>
-                <span
-                  className={`fc-daygrid-day-number ${
-                    arg.isToday ? "current-date" : ""
-                  }`}
-                >
-                  {date}
-                </span>
+                {arg.view.type !== "dayGridMonth" && (
+                  <span
+                    className={`fc-daygrid-day-number ${
+                      arg.isToday ? "current-date" : ""
+                    }`}
+                  >
+                    {date}
+                  </span>
+                )}
               </div>
             );
           }}
