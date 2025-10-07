@@ -5,16 +5,13 @@ import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
   getCalendarDetailAsync,
-  getEventAsync,
   putEventAsync,
-  removeEvent,
   updateEventInstanceAsync,
   updateEventLocal,
   updateSeriesAsync,
 } from "../../../features/Calendars/CalendarSlice";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
-import { userData } from "../../../features/User/userDataTypes";
 import { refreshCalendars } from "../../Event/eventUtils/eventUtils";
 
 export interface EventHandlersProps {

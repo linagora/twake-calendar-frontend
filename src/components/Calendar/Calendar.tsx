@@ -170,7 +170,7 @@ export default function CalendarApp({
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
   );
-  const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
+  const [, setTypeOfAction] = useState<"solo" | "all" | undefined>(
     undefined
   );
   const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();

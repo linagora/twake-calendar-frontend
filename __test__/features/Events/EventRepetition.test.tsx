@@ -224,18 +224,15 @@ describe("Recurrence Event Behavior Tests", () => {
 
   describe("EventPreviewModal - Recurring Event Interactions", () => {
     it("shows EditModeDialog when editing a recurring event", async () => {
-      const getEventSpy = jest
-        .spyOn(eventThunks, "getEventAsync")
-        .mockImplementation((payload) => {
-          return () =>
-            Promise.resolve({
-              calId: payload.calId,
-              event:
-                basePreloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events["recurring-base/20250315T100000"],
-            }) as any;
-        });
+      jest.spyOn(eventThunks, "getEventAsync").mockImplementation((payload) => {
+        return () =>
+          Promise.resolve({
+            calId: payload.calId,
+            event:
+              basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+                .events["recurring-base/20250315T100000"],
+          }) as any;
+      });
 
       renderWithProviders(
         <EventPreviewModal
@@ -940,7 +937,7 @@ describe("Recurrence Event Behavior Tests", () => {
         handleDelete,
       } = require("../../../src/components/Event/eventHandlers/eventHandlers");
 
-      const spy = jest
+      jest
         .spyOn(eventThunks, "deleteEventInstanceAsync")
         .mockImplementation((payload) => {
           return () => Promise.resolve(payload) as any;

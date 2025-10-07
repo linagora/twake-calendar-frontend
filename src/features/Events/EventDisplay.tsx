@@ -3,16 +3,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { useEffect, useState } from "react";
-import {
-  moveEventAsync,
-  putEventAsync,
-  removeEvent,
-  updateEventInstanceAsync,
-  updateSeriesAsync,
-} from "../Calendars/CalendarSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
   Box,
   Button,
@@ -32,20 +22,30 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
-import { userAttendee } from "../User/userDataTypes";
-import { Calendars } from "../Calendars/CalendarTypes";
-import { formatLocalDateTime } from "./EventModal";
-import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
   handleDelete,
-  handleRSVP,
+  handleRSVP
 } from "../../components/Event/eventHandlers/eventHandlers";
-import { getEvent } from "./EventApi";
-import { getCalendarRange } from "../../utils/dateUtils";
 import { refreshCalendars } from "../../components/Event/eventUtils/eventUtils";
+import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
+import { getCalendarRange } from "../../utils/dateUtils";
+import {
+  moveEventAsync,
+  putEventAsync,
+  removeEvent,
+  updateEventInstanceAsync,
+  updateSeriesAsync
+} from "../Calendars/CalendarSlice";
+import { Calendars } from "../Calendars/CalendarTypes";
+import { userAttendee } from "../User/userDataTypes";
+import { getEvent } from "./EventApi";
+import { formatLocalDateTime } from "./EventModal";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
 export default function EventDisplayModal({
   eventId,
