@@ -42,9 +42,6 @@ export async function putEvent(event: CalendarEvent, calOwnerEmail?: string) {
       "content-type": "text/calendar; charset=utf-8",
     },
   });
-  if (response.status === 201) {
-    console.log("PUT (201) :", response.url);
-  }
   return response;
 }
 

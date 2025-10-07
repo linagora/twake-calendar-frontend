@@ -25,10 +25,8 @@ import {
 } from "@mui/icons-material";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
-import {
-  userAttendee,
-  RepetitionObject,
-} from "../../features/Events/EventsTypes";
+import { RepetitionObject } from "../../features/Events/EventsTypes";
+import { userAttendee } from "../../features/User/userDataTypes";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import {
   generateMeetingLink,
@@ -115,8 +113,6 @@ interface EventFormFieldsProps {
   setTimezone: (timezone: string) => void;
   calendarid: number;
   setCalendarid: (calendarid: number) => void;
-  important: boolean;
-  setImportant: (important: boolean) => void;
   hasVideoConference: boolean;
   setHasVideoConference: (hasVideoConference: boolean) => void;
   meetingLink: string | null;
@@ -171,8 +167,6 @@ export default function EventFormFields({
   setTimezone,
   calendarid,
   setCalendarid,
-  important,
-  setImportant,
   hasVideoConference,
   setHasVideoConference,
   meetingLink,
@@ -204,7 +198,6 @@ export default function EventFormFields({
     if (meetingLink) {
       try {
         await navigator.clipboard.writeText(meetingLink);
-        console.log("Meeting link copied to clipboard");
       } catch (err) {
         console.error("Failed to copy link:", err);
       }
@@ -330,15 +323,6 @@ export default function EventFormFields({
 
       <FieldWithLabel label=" " isExpanded={showMore}>
         <Box display="flex" gap={2} alignItems="center">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={important}
-                onChange={() => setImportant(!important)}
-              />
-            }
-            label="Mark as important"
-          />
           <FormControlLabel
             control={
               <Checkbox

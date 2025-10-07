@@ -113,7 +113,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     if (info.event.url) {
       window.open(info.event.url);
     } else {
-      console.log(info.event);
       setOpenEventDisplay(true);
       setEventDisplayedId(info.event.extendedProps.uid);
       setEventDisplayedCalId(info.event.extendedProps.calId);

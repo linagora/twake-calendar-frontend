@@ -302,7 +302,7 @@ export default function EventDisplayModal({
                     </Button>
                     <Button
                       color="primary"
-                      onClick={() => console.log("proposenewtime")}
+                      onClick={() => {}}
                     >
                       Propose new time
                     </Button>
