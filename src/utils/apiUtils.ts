@@ -54,3 +54,11 @@ export function isValidUrl(string?: string) {
   }
   return url;
 }
+
+export async function importFile(file: File) {
+  const response = await api.post(
+    `api/files?mimetype=${file.type}&name=${file.name}&size=${file.size}`,
+    { body: await file.text() }
+  );
+  return await response.json();
+}

@@ -112,3 +112,14 @@ export async function removeCalendar(calLink: string) {
   });
   return response;
 }
+
+export async function updateAclCalendar(calLink: string, request: string) {
+  const response = await api(`dav${calLink}`, {
+    method: "ACL",
+    headers: {
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ public_right: request }),
+  });
+  return response;
+}

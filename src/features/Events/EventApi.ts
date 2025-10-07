@@ -53,3 +53,10 @@ export async function deleteEvent(eventURL: string) {
   });
   return response;
 }
+
+export async function importEventFromFile(id: string, calLink: string) {
+  const response = await api.post(`api/import`, {
+    body: JSON.stringify({ fileId: id, target: calLink }),
+  });
+  return response;
+}
