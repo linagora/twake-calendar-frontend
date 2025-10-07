@@ -79,6 +79,10 @@ export function parseCalendarEvent(
       case "recurrence-id":
         recurrenceId = value;
         break;
+      case "exdate":
+        if (!event.exdates) event.exdates = [];
+        event.exdates.push(value);
+        break;
       case "status":
         event.status = String(value);
         break;
@@ -101,6 +105,7 @@ export function parseCalendarEvent(
   }
   if (recurrenceId && event.uid) {
     event.uid = `${event.uid}/${recurrenceId}`;
+    event.recurrenceId = recurrenceId;
   }
 
   if (valarm) {
@@ -135,6 +140,36 @@ export function calendarEventToJCal(
 ): any[] {
   const tzid = event.timezone; // Fallback to UTC if no timezone provided
 
+  const vevent: any[] = makeVevent(event, tzid, calOwnerEmail);
+
+  const timezoneData = TIMEZONES.zones[event.timezone];
+  const vtimezone = makeTimezone(timezoneData, event);
+
+  return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
+}
+
+export function makeTimezone(
+  timezoneData: { ics: string; latitude: string; longitude: string },
+  event: CalendarEvent
+) {
+  if (!timezoneData) {
+    return new ICAL.Timezone({
+      component: TIMEZONES.zones["Etc/UTC"].ics,
+      tzid: "Etc/UTC",
+    });
+  }
+  return new ICAL.Timezone({
+    component: timezoneData.ics,
+    tzid: event.timezone,
+  });
+}
+
+export function makeVevent(
+  event: CalendarEvent,
+  tzid: string,
+  calOwnerEmail: string | undefined,
+  isMasterEvent?: boolean
+) {
   const vevent: any[] = [
     "vevent",
     [
@@ -154,6 +189,7 @@ export function calendarEventToJCal(
         event.x_openpass_videoconference ?? null,
       ],
       ["summary", {}, "text", event.title ?? ""],
+      ["dstamp", { tzid }, "date-time", formatDateToICal(new Date(), false)],
     ],
   ];
   if (event.alarm?.trigger) {
@@ -201,6 +237,9 @@ export function calendarEventToJCal(
   if (event.location) {
     vevent[1].push(["location", {}, "text", event.location]);
   }
+  if (event.recurrenceId && !isMasterEvent) {
+    vevent[1].push(["recurrence-id", {}, "date-time", event.recurrenceId]);
+  }
   if (event.description) {
     vevent[1].push(["description", {}, "text", event.description]);
   }
@@ -242,21 +281,20 @@ export function calendarEventToJCal(
     ]);
   });
 
-  const timezoneData = TIMEZONES.zones[event.timezone];
-  if (!timezoneData) {
-    const vtimezone = new ICAL.Timezone({
-      component: TIMEZONES.zones["Etc/UTC"].ics,
-      tzid: "Etc/UTC",
+  if (event.exdates && event.exdates.length > 0) {
+    event.exdates.forEach((ex) => {
+      vevent[1].push([
+        "exdate",
+        { tzid },
+        "date-time",
+        formatDateToICal(new Date(ex), false),
+      ]);
     });
-    return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
   }
 
-  const vtimezone = new ICAL.Timezone({
-    component: timezoneData.ics,
-    tzid: event.timezone,
-  });
-  return ["vcalendar", [], [vevent, vtimezone.component.jCal]];
+  return vevent;
 }
+
 function formatDateToICal(date: Date, allday: Boolean) {
   // Format date like: 2025-02-14T11:00:00 (local time)
 

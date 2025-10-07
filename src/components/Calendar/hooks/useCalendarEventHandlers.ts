@@ -37,6 +37,9 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
     handleEventDrop: useCallback(eventHandlers.handleEventDrop, [
       props.calendars,
       props.dispatch,
+      props.setSelectedEvent,
+      props.setOpenEditModePopup,
+      props.setAfterChoiceFunc,
     ]),
     handleEventResize: useCallback(eventHandlers.handleEventResize, [
       props.calendars,

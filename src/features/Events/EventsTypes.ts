@@ -4,6 +4,7 @@ export interface CalendarEvent {
   URL: string;
   calId: string;
   uid: string;
+  recurrenceId?: string;
   transp?: string;
   start: string; // ISO date string
   end?: string;
@@ -23,6 +24,7 @@ export interface CalendarEvent {
   timezone: string;
   repetition?: RepetitionObject;
   alarm?: AlarmObject;
+  exdates?: string[];
 }
 
 export interface RepetitionObject {

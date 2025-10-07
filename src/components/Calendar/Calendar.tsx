@@ -33,6 +33,7 @@ import {
 } from "./utils/calendarUtils";
 import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
 import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
+import { EditModeDialog } from "../Event/EditModeDialog";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -166,6 +167,14 @@ export default function CalendarApp({
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
+  const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
+    null
+  );
+  const [, setTypeOfAction] = useState<"solo" | "all" | undefined>(undefined);
+  const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent>(
+    {} as CalendarEvent
+  );
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
   );
@@ -188,6 +197,9 @@ export default function CalendarApp({
     setEventDisplayedCalId,
     setEventDisplayedTemp,
     calendars,
+    setSelectedEvent,
+    setAfterChoiceFunc,
+    setOpenEditModePopup,
   });
 
   // View handlers
@@ -421,6 +433,15 @@ export default function CalendarApp({
           setSelectedRange={setSelectedRange}
           calendarRef={calendarRef}
           event={tempEvent}
+        />
+        <EditModeDialog
+          type={openEditModePopup}
+          setOpen={setOpenEditModePopup}
+          event={selectedEvent}
+          eventAction={(type: "solo" | "all" | undefined) => {
+            setTypeOfAction(type);
+            afterChoiceFunc && afterChoiceFunc(type);
+          }}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
           <EventPreviewModal
