@@ -6,7 +6,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import {
-  getCalendarDetailAsync, getCalendarsListAsync
+  getCalendarDetailAsync,
+  getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/userDataTypes";
