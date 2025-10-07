@@ -133,11 +133,7 @@ export function PeopleSearch({
         if (selectedUsers.find((u) => u.email === option.email)) return null;
         const { key, ...otherProps } = props as any;
         return (
-          <ListItem
-            key={key}
-            {...otherProps}
-            disableGutters
-          >
+          <ListItem key={key} {...otherProps} disableGutters>
             <ListItemAvatar>
               <Avatar src={option.avatarUrl} alt={option.displayName} />
             </ListItemAvatar>
