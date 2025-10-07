@@ -54,7 +54,7 @@ export function PeopleSearch({
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query]);
+  }, [query, objectTypes]);
 
   return (
     <Autocomplete
@@ -94,6 +94,7 @@ export function PeopleSearch({
           helperText={error}
           placeholder="Start typing a name or email"
           label="Start typing a name or email"
+          autoComplete="off"
           onKeyDown={(e) => {
             if (e.key === "Enter" && onToggleEventPreview) {
               e.preventDefault();
@@ -103,6 +104,7 @@ export function PeopleSearch({
           slotProps={{
             input: {
               ...params.InputProps,
+              autoComplete: "new-password",
               startAdornment: (
                 <>
                   <PeopleOutlineOutlinedIcon
@@ -121,14 +123,19 @@ export function PeopleSearch({
               ),
             },
           }}
+          inputProps={{
+            ...params.inputProps,
+            autoComplete: "new-password",
+          }}
         />
       )}
       renderOption={(props, option) => {
-        if (selectedUsers.find((u) => u.email === option.email)) return;
+        if (selectedUsers.find((u) => u.email === option.email)) return null;
+        const { key, ...otherProps } = props as any;
         return (
           <ListItem
-            {...props}
-            key={option.email + option.displayName}
+            key={key}
+            {...otherProps}
             disableGutters
           >
             <ListItemAvatar>
