@@ -505,6 +505,7 @@ export default function EventPreviewModal({
         onClose={() => setOpenFullDisplay(false)}
         eventId={eventId}
         calId={calId}
+        typeOfAction={typeOfAction}
       />
     </>
   );
