@@ -103,6 +103,7 @@ export default function CalendarApp({
   }, [calendars, userId]);
 
   const calendarRange = getCalendarRange(selectedDate);
+  console.log("start?:", selectedDate);
 
   // Create a stable string key for the range
   const rangeKey = `${formatDateToYYYYMMDDTHHMMSS(
@@ -301,7 +302,8 @@ export default function CalendarApp({
               return (
                 eventDate.getFullYear() === date.getFullYear() &&
                 eventDate.getMonth() === date.getMonth() &&
-                eventDate.getDate() === date.getDate()
+                eventDate.getDate() === date.getDate() &&
+                event.status !== "CANCELLED"
               );
             });
             if (hasEvents) {
@@ -374,7 +376,11 @@ export default function CalendarApp({
               calendarRef.current?.getDate() || new Date(arg.start);
 
             if (arg.view.type === "dayGridMonth") {
-              setSelectedDate(new Date(arg.start));
+              const start = new Date(arg.start).getTime();
+              const end = new Date(arg.end).getTime();
+              const middle = start + (end - start) / 2;
+              setSelectedDate(new Date(middle));
+              console.log(arg);
               setSelectedMiniDate(calendarCurrentDate);
             } else {
               setSelectedDate(new Date(arg.start));
