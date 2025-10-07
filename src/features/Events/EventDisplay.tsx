@@ -22,16 +22,18 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import {
   handleDelete,
-  handleRSVP
+  handleRSVP,
 } from "../../components/Event/eventHandlers/eventHandlers";
-import { refreshCalendars } from "../../components/Event/eventUtils/eventUtils";
+import RepeatEvent from "../../components/Event/EventRepeat";
+import { InfoRow } from "../../components/Event/InfoRow";
+import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
 import {
@@ -39,7 +41,7 @@ import {
   putEventAsync,
   removeEvent,
   updateEventInstanceAsync,
-  updateSeriesAsync
+  updateSeriesAsync,
 } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";

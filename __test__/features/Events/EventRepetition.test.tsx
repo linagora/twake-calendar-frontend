@@ -2,13 +2,13 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import EventDisplayModal from "../../../src/features/Events/EventDisplay";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 import { EditModeDialog } from "../../../src/components/Event/EditModeDialog";
 import * as EventApi from "../../../src/features/Events/EventApi";
 import {
   createEventHandlers,
   EventHandlersProps,
 } from "../../../src/components/Calendar/handlers/eventHandlers";
+import EventPreviewModal from "../../../src/components/Event/EventDisplayPreview";
 
 describe("Recurrence Event Behavior Tests", () => {
   const mockOnClose = jest.fn();
@@ -236,7 +236,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -257,7 +256,6 @@ describe("Recurrence Event Behavior Tests", () => {
     it("shows EditModeDialog when deleting a recurring event", async () => {
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -266,7 +264,8 @@ describe("Recurrence Event Behavior Tests", () => {
         basePreloadedState
       );
 
-      fireEvent.click(screen.getByTestId("DeleteIcon"));
+      fireEvent.click(screen.getByTestId("MoreVertIcon"));
+      fireEvent.click(screen.getByText("Delete event"));
 
       await waitFor(() => {
         expect(
@@ -278,7 +277,6 @@ describe("Recurrence Event Behavior Tests", () => {
     it("shows EditModeDialog when RSVP to a recurring event", async () => {
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -332,7 +330,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -341,7 +338,8 @@ describe("Recurrence Event Behavior Tests", () => {
         nonRecurringState
       );
 
-      fireEvent.click(screen.getByTestId("DeleteIcon"));
+      fireEvent.click(screen.getByTestId("MoreVertIcon"));
+      fireEvent.click(screen.getByText("Delete event"));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -364,7 +362,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -373,7 +370,8 @@ describe("Recurrence Event Behavior Tests", () => {
         basePreloadedState
       );
 
-      fireEvent.click(screen.getByTestId("DeleteIcon"));
+      fireEvent.click(screen.getByTestId("MoreVertIcon"));
+      fireEvent.click(screen.getByText("Delete event"));
 
       await waitFor(() => {
         expect(
@@ -407,7 +405,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -416,7 +413,8 @@ describe("Recurrence Event Behavior Tests", () => {
         basePreloadedState
       );
 
-      fireEvent.click(screen.getByTestId("DeleteIcon"));
+      fireEvent.click(screen.getByTestId("MoreVertIcon"));
+      fireEvent.click(screen.getByText("Delete event"));
 
       await waitFor(() => {
         expect(
@@ -446,7 +444,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -490,7 +487,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}
@@ -1007,7 +1003,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
       renderWithProviders(
         <EventPreviewModal
-          anchorPosition={{ top: 0, left: 0 }}
           open={true}
           onClose={mockOnClose}
           calId={"667037022b752d0026472254/cal1"}

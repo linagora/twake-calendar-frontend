@@ -1,3 +1,5 @@
+import { ThunkDispatch } from "@reduxjs/toolkit";
+import { useAppSelector } from "../../../app/hooks";
 import {
   updateEventInstanceAsync,
   updateSeriesAsync,
@@ -9,15 +11,18 @@ import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { getEvent } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { userData } from "../../../features/User/userDataTypes";
+import { getCalendarRange } from "../../../utils/dateUtils";
+import { refreshCalendars } from "../utils/eventUtils";
 
 export async function handleRSVP(
-  dispatch: Function,
+  dispatch: ThunkDispatch<any, any, any>,
   calendar: Calendars,
   user: { userData: userData },
   event: CalendarEvent,
   rsvp: string,
   onClose?: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
-  typeOfAction?: string
+  typeOfAction?: string,
+  calendars?: Calendars[]
 ) {
   const newEvent = {
     ...event,
@@ -29,6 +34,7 @@ export async function handleRSVP(
     dispatch(updateEventInstanceAsync({ cal: calendar, event: newEvent }));
   } else if (typeOfAction === "all") {
     const master = await getEvent(newEvent, true);
+    const calendarRange = getCalendarRange(new Date(event.start));
 
     dispatch(
       updateSeriesAsync({
@@ -41,6 +47,9 @@ export async function handleRSVP(
         },
       })
     );
+    if (calendars) {
+      await refreshCalendars(dispatch, calendars, calendarRange);
+    }
   } else {
     dispatch(putEventAsync({ cal: calendar, newEvent }));
   }

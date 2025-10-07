@@ -51,6 +51,9 @@ export default function EventPreviewModal({
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
+  const calendarList = Object.values(
+    useAppSelector((state) => state.calendars.list)
+  );
   const calendar = tempEvent
     ? calendars.templist[calId]
     : calendars.list[calId];
@@ -263,7 +266,8 @@ export default function EventPreviewModal({
                               "ACCEPTED",
 
                               onClose,
-                              type
+                              type,
+                              calendarList
                             )
                         );
                         setOpenEditModePopup("attendance");
@@ -297,9 +301,9 @@ export default function EventPreviewModal({
                               user,
                               event,
                               "TENTATIVE",
-
                               onClose,
-                              type
+                              type,
+                              calendarList
                             )
                         );
                         setOpenEditModePopup("attendance");
@@ -334,7 +338,8 @@ export default function EventPreviewModal({
                               event,
                               "DECLINED",
                               onClose,
-                              type
+                              type,
+                              calendarList
                             )
                         );
                         setOpenEditModePopup("attendance");

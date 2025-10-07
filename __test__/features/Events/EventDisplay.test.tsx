@@ -507,8 +507,8 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
+      expect(screen.getByText("Edit Event")).toBeInTheDocument();
     });
-    expect(screen.getByText("Edit Event")).toBeInTheDocument();
   });
   it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
     (window as any).MAIL_SPA_URL = "test";

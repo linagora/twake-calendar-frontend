@@ -12,7 +12,7 @@ import {
 } from "../../../features/Calendars/CalendarSlice";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
-import { refreshCalendars } from "../../Event/eventUtils/eventUtils";
+import { refreshCalendars } from "../../Event/utils/eventUtils";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;

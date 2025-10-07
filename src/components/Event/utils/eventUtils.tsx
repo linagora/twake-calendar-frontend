@@ -4,7 +4,13 @@ import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { ThunkDispatch } from "@reduxjs/toolkit";
+import {
+  getCalendarDetailAsync, getCalendarsListAsync
+} from "../../../features/Calendars/CalendarSlice";
+import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/userDataTypes";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -102,4 +108,25 @@ export function stringAvatar(name: string) {
     style: { backgroundColor: stringToColor(name) },
     children: name[0],
   };
+}
+
+export async function refreshCalendars(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendars: Calendars[],
+  calendarRange: { start: Date; end: Date }
+) {
+  await dispatch(getCalendarsListAsync());
+
+  calendars.map(
+    async (cal) =>
+      await dispatch(
+        getCalendarDetailAsync({
+          calId: cal.id,
+          match: {
+            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+          },
+        })
+      )
+  );
 }
