@@ -27,7 +27,6 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   deleteEventAsync,
   getEventAsync,
-  putEventAsync,
 } from "../../features/Calendars/CalendarSlice";
 import { dlEvent } from "../../features/Events/EventApi";
 import EventDisplayModal from "../../features/Events/EventDisplay";
