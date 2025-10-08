@@ -123,12 +123,17 @@ export function parseCalendarEvent(
   }
 
   event.URL = eventURL;
-  if (!event.uid || !event.start) {
+  if (!event.uid || !event.start || !event.end) {
     console.error(
       `missing crucial event param in calendar ${calendarid} `,
       data
     );
     event.error = `missing crucial event param in calendar ${calendarid} `;
+    if (!event.end) {
+      const start = event.start ? new Date(event.start) : new Date();
+      const artificialEnd = new Date(start.getTime() + 3600000);
+      event.end = formatDateToICal(artificialEnd, false);
+    }
   }
 
   return event as CalendarEvent;
