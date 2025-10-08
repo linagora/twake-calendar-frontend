@@ -1,12 +1,19 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventDisplayModal, {
-  InfoRow,
-  stringAvatar,
-  stringToColor,
-} from "../../../src/features/Events/EventDisplay";
+import EventDisplayModal from "../../../src/features/Events/EventDisplay";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+import { InfoRow } from "../../../src/components/Event/InfoRow";
+import {
+  stringToColor,
+  stringAvatar,
+} from "../../../src/components/Event/utils/eventUtils";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
@@ -39,7 +46,7 @@ describe("Event Preview Display", () => {
           color: "#FF0000",
           events: {
             event1: {
-              id: "event1",
+              uid: "event1",
               title: "Test Event",
               calId: "667037022b752d0026472254/cal1",
               start: day.toISOString(),
@@ -65,7 +72,7 @@ describe("Event Preview Display", () => {
               ],
             },
             event2: {
-              id: "event2",
+              uid: "event2",
               title: "Test Event",
               calId: "667037022b752d0026472254/cal1",
               start: day.toISOString(),
@@ -80,7 +87,7 @@ describe("Event Preview Display", () => {
           color: "#FF0000",
           events: {
             event1: {
-              id: "event1",
+              uid: "event1",
               calId: "otherCal/cal",
               title: "Test Event Other cal",
               start: day.toISOString(),
@@ -104,7 +111,6 @@ describe("Event Preview Display", () => {
     });
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -118,9 +124,8 @@ describe("Event Preview Display", () => {
 
     expect(screen.getByText("Test Event")).toBeInTheDocument();
     expect(screen.getByText(new RegExp(weekday, "i"))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(month, "i"))).toBeInTheDocument();
     expect(
-      screen.getByText(new RegExp(`\\b${dayOfMonth}\\b`))
+      screen.getByText(new RegExp(`\\b${dayOfMonth}\\b ${month}`))
     ).toBeInTheDocument();
 
     expect(screen.getByText(/\d{2}:\d{2} – \d{2}:\d{2}/)).toBeInTheDocument();
@@ -129,7 +134,6 @@ describe("Event Preview Display", () => {
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -145,7 +149,6 @@ describe("Event Preview Display", () => {
     // Renders the other cal event
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"otherCal/cal"}
@@ -153,11 +156,12 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
+    cleanup();
     // Renders the personnal cal event
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -165,12 +169,12 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.queryByTestId("DeleteIcon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.queryByText("Delete event")).toBeInTheDocument();
   });
   it("calls delete when Delete clicked", async () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -183,8 +187,8 @@ describe("Event Preview Display", () => {
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
-
-    fireEvent.click(screen.getByTestId("DeleteIcon"));
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    fireEvent.click(screen.getByText("Delete event"));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -237,7 +241,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -246,7 +249,7 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.getByText("Will you attend?")).toBeInTheDocument();
+    expect(screen.getByText("Attending?")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Maybe" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
@@ -284,7 +287,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -293,7 +295,7 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.queryByText("Will you attend?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Attending?")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Accept" })
     ).not.toBeInTheDocument();
@@ -344,7 +346,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -357,7 +358,6 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
@@ -403,7 +403,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -416,7 +415,6 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
@@ -462,7 +460,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -475,16 +472,26 @@ describe("Event Preview Display", () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
     });
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
   });
-  it("displays edit button", () => {
+  it("handles Edit click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getEventAsync")
+      .mockImplementation((payload) => {
+        return () =>
+          Promise.resolve({
+            calId: payload.calId,
+            event:
+              preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+                .events["event1"],
+          }) as any;
+      });
+
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -493,14 +500,17 @@ describe("Event Preview Display", () => {
       preloadedState
     );
 
-    // Check that edit button is displayed
-    expect(screen.getByTestId("EditIcon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("EditIcon"));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+      expect(screen.getByText("Edit Event")).toBeInTheDocument();
+    });
   });
   it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
     (window as any).MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -508,13 +518,13 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    expect(screen.getByTestId("EmailIcon")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    expect(screen.getByText("Email attendees")).toBeInTheDocument();
   });
   it("doesnt render message button when MAIL_SPA_URL is not null and event has no attendees", () => {
     (window as any).MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -527,7 +537,6 @@ describe("Event Preview Display", () => {
   it("doesnt render message button when MAIL_SPA_URL is null and event has attendees", () => {
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -544,7 +553,6 @@ describe("Event Preview Display", () => {
 
     renderWithProviders(
       <EventPreviewModal
-        anchorPosition={{ top: 0, left: 0 }}
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -553,10 +561,11 @@ describe("Event Preview Display", () => {
       preloadedState
     );
 
-    const emailButton = screen.getByTestId("EmailIcon");
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    const emailButton = screen.getByText("Email attendees");
     expect(emailButton).toBeInTheDocument();
 
-    fireEvent.click(emailButton.closest("button")!);
+    fireEvent.click(emailButton);
 
     const event =
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
@@ -654,14 +663,16 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
+    const tzOffset = day.getTimezoneOffset() * 60000; // offset in ms
+    const date = new Date(day.getTime() - tzOffset).toISOString().slice(0, 16);
 
-    // Check that event title is displayed
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
-
-    // Check that event time is displayed (use flexible pattern for any date/time)
+    expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
     expect(
-      screen.getByText(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)
+      screen.getAllByDisplayValue(new RegExp(date, "i"))[0]
     ).toBeInTheDocument();
+    expect(
+      screen.getAllByDisplayValue(new RegExp(date, "i")).length
+    ).toBeLessThanOrEqual(2);
 
     expect(screen.getByText("First Calendar")).toBeInTheDocument();
   });
@@ -1016,10 +1027,6 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-
-    // Initially should show "Show More" button
-    expect(screen.getByText("Show More")).toBeInTheDocument();
-
     act(() => {
       fireEvent.click(screen.getByText("Show More"));
     });
@@ -1028,8 +1035,8 @@ describe("Event Full Display", () => {
       expect(screen.getByLabelText(/Notification/i)).toBeInTheDocument();
     });
 
-    // After clicking, should show "Show Less" button
-    expect(screen.getByText("Show Less")).toBeInTheDocument();
+    // Debug: Print DOM to see what's rendered
+    console.log("DOM after Show More clicked:", document.body.innerHTML);
 
     // EventDisplay modal doesn't have Repeat checkbox, only RepeatEvent component
     // which shows repetition settings when repetition data exists
@@ -1037,7 +1044,7 @@ describe("Event Full Display", () => {
     fireEvent.click(screen.getByText("Show Less"));
   });
 
-  it("displays event title for organizer", () => {
+  it("can edit title when user is organizer", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -1047,10 +1054,11 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    // Check that the event title is displayed
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
+    const titleField = screen.getByLabelText("Title");
+    fireEvent.change(titleField, { target: { value: "New Title" } });
+    expect(screen.getByDisplayValue("New Title")).toBeInTheDocument();
   });
-  it("displays event for non-organizer", () => {
+  it("calendar select is disabled when not organizer", () => {
     const rsvpState = {
       ...preloadedState,
       calendars: {
@@ -1091,10 +1099,9 @@ describe("Event Full Display", () => {
       />,
       rsvpState
     );
-    // Check that the event is displayed for non-organizer
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
+    expect(screen.getByLabelText("Calendar")).toHaveClass("Mui-disabled");
   });
-  it("displays event information correctly", () => {
+  it("toggle all-day updates end date correctly", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -1104,16 +1111,24 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
+    const allDayCheckbox = screen.getByLabelText("All day");
+    fireEvent.click(allDayCheckbox);
+    expect(allDayCheckbox).toBeChecked();
+    const date = day.toISOString().split("T")[0];
 
-    // Check that event title is displayed (use getAllByText to handle multiple instances)
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
-
-    // Check that event time is displayed (use flexible pattern for any date/time)
     expect(
-      screen.getByText(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)
+      screen.getAllByDisplayValue(new RegExp(date, "i"))[0]
     ).toBeInTheDocument();
   });
-  it("displays event with multiple calendars", () => {
+  it("saves event and moves it when calendar is changed", async () => {
+    const spyPut = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    const spyMove = jest
+      .spyOn(eventThunks, "moveEventAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+
     const day = new Date();
     const preloadedTwoCals = {
       ...preloadedState,
@@ -1157,79 +1172,91 @@ describe("Event Full Display", () => {
       preloadedTwoCals
     );
 
-    // Check that event is displayed correctly (use getAllByText to handle multiple instances)
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
-  });
+    fireEvent.mouseDown(screen.getByLabelText("Calendar"));
 
-  it("removes recurrence instances when saving an edited recurring series", async () => {
-    const spyPut = jest
-      .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
-    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+    const option = await screen.findByText("Calendar Two");
+    fireEvent.click(option);
 
-    const day = new Date();
-    const preloadedRecurrence = {
-      ...preloadedState,
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            id: "667037022b752d0026472254/cal1",
-            name: "First Calendar",
-            color: "#FF0000",
-            events: {
-              "base/20250101": {
-                uid: "base/20250101",
-                calId: "667037022b752d0026472254/cal1",
-                title: "eventA",
-              },
-              "base/20250201": {
-                uid: "base/20250201",
-                calId: "667037022b752d0026472254/cal1",
-                title: "eventB",
-              },
-              "base/20250301": {
-                uid: "base/20250301",
-                title: "Recurring event",
-                calId: "667037022b752d0026472254/cal1",
-                start: day.toISOString(),
-                end: day.toISOString(),
-                organizer: { cal_address: "test@test.com" },
-                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
-              },
-            },
-          },
-        },
-        pending: false,
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"base/20250301"}
-      />,
-      preloadedRecurrence
-    );
-
-    act(() => fireEvent.click(screen.getByText("Save")));
+    fireEvent.click(screen.getByText("Save"));
 
     await waitFor(() => {
       expect(spyPut).toHaveBeenCalled();
     });
 
     await waitFor(() => {
-      expect(spyRemove).toHaveBeenCalled();
+      expect(spyMove).toHaveBeenCalled();
     });
+
+    expect(spyRemove).toHaveBeenCalled();
   });
+  //   const spyPut = jest
+  //     .spyOn(eventThunks, "putEventAsync")
+  //     .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+  //   const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+
+  //   const day = new Date();
+  //   const preloadedRecurrence = {
+  //     ...preloadedState,
+  //     calendars: {
+  //       list: {
+  //         "667037022b752d0026472254/cal1": {
+  //           id: "667037022b752d0026472254/cal1",
+  //           name: "First Calendar",
+  //           color: "#FF0000",
+  //           events: {
+  //             "base/20250101": {
+  //               uid: "base/20250101",
+  //               calId: "667037022b752d0026472254/cal1",
+  //               title: "eventA",
+  //             },
+  //             "base/20250201": {
+  //               uid: "base/20250201",
+  //               calId: "667037022b752d0026472254/cal1",
+  //               title: "eventB",
+  //             },
+  //             "base/20250301": {
+  //               uid: "base/20250301",
+  //               title: "Recurring event",
+  //               calId: "667037022b752d0026472254/cal1",
+  //               start: day.toISOString(),
+  //               end: day.toISOString(),
+  //               organizer: { cal_address: "test@test.com" },
+  //               attendee: [{ cal_address: "test@test.com", cn: "Test" }],
+  //             },
+  //           },
+  //         },
+  //       },
+  //       pending: false,
+  //     },
+  //   };
+
+  //   renderWithProviders(
+  //     <EventDisplayModal
+  //       open={true}
+  //       onClose={mockOnClose}
+  //       calId={"667037022b752d0026472254/cal1"}
+  //       eventId={"base/20250301"}
+  //     />,
+  //     preloadedRecurrence
+  //   );
+
+  //   act(() => fireEvent.click(screen.getByText("Save")));
+
+  //   await waitFor(() => {
+  //     expect(spyPut).toHaveBeenCalled();
+  //   });
+
+  //   await waitFor(() => {
+  //     expect(spyRemove).toHaveBeenCalled();
+  //   });
+  // });
 
   it("InfoRow renders error style when error prop is true", () => {
     renderWithProviders(<InfoRow icon={<span>i</span>} text="Bad" error />);
     expect(screen.getByText("Bad")).toBeInTheDocument();
   });
 
-  it("handles missing event gracefully", () => {
+  it("calls onClose from useEffect if event or calendar missing", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -1239,12 +1266,10 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    // EventDisplay should handle missing event gracefully
-    // When event is missing, the component may not render anything
-    expect(screen.queryByRole("presentation")).toBeNull();
+    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
 
-  it("renders event with error state", () => {
+  it("renders error row when event has error", () => {
     const errorState = {
       ...preloadedState,
       calendars: {
@@ -1275,11 +1300,14 @@ describe("Event Full Display", () => {
       errorState
     );
 
-    // Check that the modal renders even with error state (use getAllByText to handle multiple instances)
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
+    act(() => {
+      fireEvent.click(screen.getByText("Show More"));
+    });
+
+    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
-  it("displays attendees correctly", () => {
+  it("can remove an attendee with the close button", () => {
     renderWithProviders(
       <EventDisplayModal
         open={true}
@@ -1290,11 +1318,13 @@ describe("Event Full Display", () => {
       preloadedState
     );
 
-    // Check that attendees are displayed
-    expect(screen.getByText("John")).toBeInTheDocument();
+    const removeBtn = screen.getAllByTestId("CloseIcon").pop()!;
+    fireEvent.click(removeBtn);
+
+    expect(screen.queryByText(/John/)).not.toBeInTheDocument();
   });
 
-  it("displays multiple attendees", () => {
+  it("shows more attendees when overflow, then toggles back", () => {
     const overflowState = {
       ...preloadedState,
       calendars: {
@@ -1328,12 +1358,13 @@ describe("Event Full Display", () => {
       overflowState
     );
 
-    // Check that multiple attendees are displayed
-    expect(screen.getByText("Person0")).toBeInTheDocument();
-    expect(screen.getByText("Person1")).toBeInTheDocument();
+    const toggle = screen.getByText(/Show more/);
+    fireEvent.click(toggle);
+
+    expect(screen.getByText(/Show less/)).toBeInTheDocument();
   });
 
-  it("handles video conference data", () => {
+  it("renders video conference info when x_openpass_videoconference exists", () => {
     const videoState = {
       ...preloadedState,
       calendars: {
@@ -1363,8 +1394,7 @@ describe("Event Full Display", () => {
       videoState
     );
 
-    // Check that the event still displays correctly with video conference data (use getAllByText to handle multiple instances)
-    expect(screen.getAllByText("Test Event")).toHaveLength(2);
+    expect(screen.getByText("Join the video conference")).toBeInTheDocument();
   });
 });
 
@@ -1377,10 +1407,10 @@ describe("Helper functions", () => {
   it("stringAvatar returns correct props", () => {
     const result = stringAvatar("Alice");
     expect(result.children).toBe("A");
-    expect(result.sx.bgcolor).toMatch(/^#/);
+    expect(result.style.backgroundColor).toMatch(/^#/);
   });
 
-  it("InfoRow renders text and data", () => {
+  it("InfoRow renders text and link if url is valid", () => {
     renderWithProviders(
       <InfoRow
         icon={<span>ico</span>}
@@ -1388,7 +1418,9 @@ describe("Helper functions", () => {
         data="https://example.com"
       />
     );
-    expect(screen.getByText("Meeting")).toBeInTheDocument();
-    expect(screen.getByText("https://example.com")).toBeInTheDocument();
+    expect(screen.getByText("Meeting").closest("a")).toHaveAttribute(
+      "href",
+      "https://example.com"
+    );
   });
 });

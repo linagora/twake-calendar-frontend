@@ -3,7 +3,7 @@ import EventDuplication from "../../src/components/Event/EventDuplicate";
 import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import EventPreviewModal from "../../src/components/Event/EventDisplayPreview";
+import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
 
 const day = new Date();
 const preloadedState = {
