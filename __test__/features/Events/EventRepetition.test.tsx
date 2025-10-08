@@ -8,7 +8,7 @@ import {
   createEventHandlers,
   EventHandlersProps,
 } from "../../../src/components/Calendar/handlers/eventHandlers";
-import EventPreviewModal from "../../../src/components/Event/EventDisplayPreview";
+import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 
 describe("Recurrence Event Behavior Tests", () => {
   const mockOnClose = jest.fn();
