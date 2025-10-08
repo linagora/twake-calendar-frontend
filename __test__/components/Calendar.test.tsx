@@ -178,15 +178,22 @@ describe("CalendarSelection", () => {
     renderWithProviders(<CalendarLayout />, preloadedState);
 
     const checkbox = screen.getByLabelText("Calendar personnal");
-    fireEvent.click(checkbox);
+    // checkbox checked : events shown
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
 
+    // checkbox unchecked : events hidden
+    fireEvent.click(checkbox);
     const boxesUntoggled = screen.getAllByTestId(
       /\bdate-\d{4}-\d{1,2}-\d{1,2}\b/g
     );
-
     boxesUntoggled.forEach((box) => expect(box).not.toHaveClass("event-dot"));
-    fireEvent.click(checkbox);
 
+    // checkbox rechecked : events shown
+    fireEvent.click(checkbox);
     expect(
       screen.getByTestId(
         `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
