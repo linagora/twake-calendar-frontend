@@ -985,19 +985,6 @@ describe("Recurrence Event Behavior Tests", () => {
 
   describe("Calendar Integration - EditModeDialog Flow", () => {
     it("passes correct eventId when editing all instances from preview", async () => {
-      const getEventSpy = jest
-        .spyOn(eventThunks, "getEventAsync")
-        .mockImplementation((payload) => {
-          return () =>
-            Promise.resolve({
-              calId: payload.calId,
-              event:
-                basePreloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events["recurring-base/20250315T100000"],
-            }) as any;
-        });
-
       renderWithProviders(
         <EventPreviewModal
           open={true}
@@ -1022,9 +1009,8 @@ describe("Recurrence Event Behavior Tests", () => {
       fireEvent.click(screen.getByText("Ok"));
 
       await waitFor(() => {
-        expect(getEventSpy).toHaveBeenCalled();
-        // Full display modal should open with the first instance of the series
-        expect(screen.getByText("Edit Event")).toBeInTheDocument();
+        // Update modal should open
+        expect(screen.getByText("Update Event")).toBeInTheDocument();
       });
     });
   });

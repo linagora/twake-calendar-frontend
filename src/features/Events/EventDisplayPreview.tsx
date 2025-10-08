@@ -24,17 +24,17 @@ import {
 import AvatarGroup from "@mui/material/AvatarGroup";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-  deleteEventAsync,
-  getEventAsync,
-} from "../Calendars/CalendarSlice";
+import { deleteEventAsync, getEventAsync } from "../Calendars/CalendarSlice";
 import { dlEvent } from "./EventApi";
 import EventDisplayModal from "./EventDisplay";
 import EventUpdateModal from "./EventUpdateModal";
 import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "../../components/Event/EditModeDialog";
 import EventDuplication from "../../components/Event/EventDuplicate";
-import { handleDelete, handleRSVP } from "../../components/Event/eventHandlers/eventHandlers";
+import {
+  handleDelete,
+  handleRSVP,
+} from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 export default function EventPreviewModal({
