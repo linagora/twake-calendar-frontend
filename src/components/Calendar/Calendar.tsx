@@ -63,30 +63,16 @@ export default function CalendarApp({
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
   const pending = useAppSelector((state) => state.calendars.pending);
-  const selectPersonnalCalendars = createSelector(
-    (state) => state.calendars,
-    (calendars) =>
-      Object.keys(calendars.list).map((id) => {
-        if (id.split("/")[0] === userId) {
-          return calendars.list[id];
-        }
-        return {} as Calendars;
-      })
-  );
-  const userPersonnalCalendars: Calendars[] = useAppSelector(
-    selectPersonnalCalendars
-  );
-  let personnalEvents: CalendarEvent[] = [];
-  Object.keys(userPersonnalCalendars).forEach((value, id) => {
-    if (userPersonnalCalendars[id].events) {
-      personnalEvents = personnalEvents.concat(
-        Object.keys(userPersonnalCalendars[id].events).map(
-          (eventid) => userPersonnalCalendars[id].events[eventid]
-        )
-      );
-    }
-  });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+
+  const userPersonnalCalendars: Calendars[] = selectedCalendars
+    .filter((id) => id.split("/")[0] === userId)
+    .map((id) => calendars[id])
+    .filter((cal) => cal && cal.events);
+
+  const personnalEvents: CalendarEvent[] = userPersonnalCalendars.flatMap(
+    (calendar) => Object.values(calendar.events)
+  );
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded

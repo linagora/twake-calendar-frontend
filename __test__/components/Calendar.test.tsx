@@ -174,6 +174,25 @@ describe("CalendarSelection", () => {
     fireEvent.click(addButton);
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
+  it("BUGFIX: remove dots in mini calendar when unselecting personnal calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    const checkbox = screen.getByLabelText("Calendar personnal");
+    fireEvent.click(checkbox);
+
+    const boxesUntoggled = screen.getAllByTestId(
+      /\bdate-\d{4}-\d{1,2}-\d{1,2}\b/g
+    );
+
+    boxesUntoggled.forEach((box) => expect(box).not.toHaveClass("event-dot"));
+    fireEvent.click(checkbox);
+
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
 });
 
 describe("calendar Availability search", () => {
