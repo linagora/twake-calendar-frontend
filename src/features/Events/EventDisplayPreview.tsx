@@ -1,408 +1,523 @@
-import { useEffect, useState } from "react";
-import { deleteEventAsync, putEventAsync } from "../Calendars/CalendarSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CircleIcon from "@mui/icons-material/Circle";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import SubjectIcon from "@mui/icons-material/Subject";
+import VideocamIcon from "@mui/icons-material/Videocam";
 import {
-  Popover,
-  Button,
   Box,
-  Typography,
+  Button,
   ButtonGroup,
-  Card,
-  CardContent,
+  DialogActions,
   Divider,
   IconButton,
-  PopoverPosition,
+  Menu,
+  MenuItem,
+  Typography,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import EmailIcon from "@mui/icons-material/Email";
-import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import CloseIcon from "@mui/icons-material/Close";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import CircleIcon from "@mui/icons-material/Circle";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import EventDisplayModal, {
-  InfoRow,
-  renderAttendeeBadge,
-} from "./EventDisplay";
+import AvatarGroup from "@mui/material/AvatarGroup";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  deleteEventAsync,
+  getEventAsync,
+} from "../Calendars/CalendarSlice";
+import { dlEvent } from "./EventApi";
+import EventDisplayModal from "./EventDisplay";
 import EventUpdateModal from "./EventUpdateModal";
-import { dlEvent, getEvent } from "./EventApi";
+import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
+import { EditModeDialog } from "../../components/Event/EditModeDialog";
 import EventDuplication from "../../components/Event/EventDuplicate";
-import { CalendarEvent } from "./EventsTypes";
-
+import { handleDelete, handleRSVP } from "../../components/Event/eventHandlers/eventHandlers";
+import { InfoRow } from "../../components/Event/InfoRow";
+import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 export default function EventPreviewModal({
   eventId,
   calId,
   tempEvent,
-  anchorPosition,
   open,
   onClose,
 }: {
   eventId: string;
   calId: string;
   tempEvent?: boolean;
-  anchorPosition: PopoverPosition | null;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
+  const calendarList = Object.values(
+    useAppSelector((state) => state.calendars.list)
+  );
   const calendar = tempEvent
     ? calendars.templist[calId]
     : calendars.list[calId];
-  const cachedEvent = calendar.events[eventId];
+  const event = calendar.events[eventId];
   const user = useAppSelector((state) => state.user);
 
+  const isRecurring = event?.uid?.includes("/");
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
+    null
+  );
+  const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
+    undefined
+  );
+  const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
+
+  const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
+    null
+  );
   const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
 
-  // State for fresh event data
-  const [currentEvent, setCurrentEvent] = useState<CalendarEvent | null>(null);
-
-  // Initialize with cached data immediately, then fetch fresh data
   useEffect(() => {
-    if (open && cachedEvent) {
-      // Show cached data immediately
-      setCurrentEvent(cachedEvent);
-
-      // Fetch fresh data in background (only for non-temp events)
-      if (!tempEvent) {
-        const fetchFreshData = async () => {
-          try {
-            const freshData = await getEvent(cachedEvent);
-            setCurrentEvent(freshData);
-          } catch (err) {
-            // Keep using cached data if API fails
-          }
-        };
-
-        fetchFreshData();
-      }
-    } else if (!open) {
-      // Reset when popup closes
-      setCurrentEvent(null);
-    }
-  }, [open, cachedEvent, eventId, calId, tempEvent]);
-
-  useEffect(() => {
-    // Only close if calendar is missing
-    if (!calendar) {
+    if (!event || !calendar) {
       onClose({}, "backdropClick");
     }
-  }, [calendar, onClose]);
+  }, [event, calendar, onClose]);
 
-  if (!calendar || !currentEvent) return null;
+  if (!event || !calendar) return null;
 
   const attendeeDisplayLimit = 3;
 
   const attendees =
-    currentEvent.attendee?.filter(
-      (a) => a.cal_address !== currentEvent.organizer?.cal_address
+    event.attendee?.filter(
+      (a) => a.cal_address !== event.organizer?.cal_address
     ) || [];
 
   const visibleAttendees = showAllAttendees
     ? attendees
     : attendees.slice(0, attendeeDisplayLimit);
 
-  const currentUserAttendee = currentEvent.attendee?.find(
+  const currentUserAttendee = event.attendee?.find(
     (person) => person.cal_address === user.userData.email
   );
 
-  const organizer = currentEvent.attendee?.find(
-    (a) => a.cal_address === currentEvent.organizer?.cal_address
+  const organizer = event.attendee?.find(
+    (a) => a.cal_address === event.organizer?.cal_address
   );
-
-  function handleRSVP(rsvp: string) {
-    if (!currentEvent) return;
-
-    const newEvent: CalendarEvent = {
-      ...currentEvent,
-      attendee: currentEvent.attendee?.map((a) =>
-        a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
-      ),
-    };
-
-    dispatch(putEventAsync({ cal: calendar, newEvent }));
-    onClose({}, "backdropClick");
-  }
 
   return (
     <>
-      <Popover
+      <ResponsiveDialog
         open={open}
-        anchorReference="anchorPosition"
-        anchorPosition={anchorPosition ?? undefined}
-        onClose={onClose}
-      >
-        <Card style={{ width: 300, padding: 16, position: "relative" }}>
-          {/* Top-right buttons */}
-          <Box
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              display: "flex",
-              gap: 8,
-            }}
-          >
-            {(window as any).DEBUG && (
-              <IconButton
-                onClick={async () => {
-                  const icsContent = await dlEvent(currentEvent);
-                  const blob = new Blob([icsContent], {
-                    type: "text/calendar",
-                  });
-                  const url = URL.createObjectURL(blob);
+        onClose={() => onClose({}, "backdropClick")}
+        style={{ overflow: "auto" }}
+        title={
+          event.title && (
+            <>
+              <DialogActions>
+                <Box>
+                  {(window as any).DEBUG && (
+                    <IconButton
+                      onClick={async () => {
+                        const icsContent = await dlEvent(event);
+                        const blob = new Blob([icsContent], {
+                          type: "text/calendar",
+                        });
+                        const url = URL.createObjectURL(blob);
 
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `${eventId}.ics`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                <FileDownloadOutlinedIcon />
-              </IconButton>
-            )}
-            <EventDuplication event={currentEvent} onClose={onClose} />
-            {mailSpaUrl && attendees.length > 0 && (
-              <IconButton
-                size="small"
-                onClick={() =>
-                  window.open(
-                    `${mailSpaUrl}/mailto/?uri=mailto:${currentEvent.attendee
-                      .map((a) => a.cal_address)
-                      .filter((mail) => mail !== user.userData.email)
-                      .join(",")}?subject=${currentEvent.title}`
-                  )
-                }
-              >
-                <EmailIcon fontSize="small" />
-              </IconButton>
-            )}
-            {user.userData.email !== currentEvent.organizer?.cal_address && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setOpenFullDisplay(!openFullDisplay);
-                }}
-              >
-                <VisibilityIcon fontSize="small" />
-              </IconButton>
-            )}
-            {user.userData.email === currentEvent.organizer?.cal_address && (
-              <>
-                <IconButton
-                  size="small"
-                  data-testid="edit-button"
-                  onClick={() => {
-                    setOpenUpdateModal(true);
-                  }}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    onClose({}, "backdropClick");
-                    dispatch(
-                      deleteEventAsync({
-                        calId,
-                        eventId,
-                        eventURL: currentEvent.URL,
-                      })
-                    );
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </>
-            )}
-            <IconButton
-              size="small"
-              onClick={() => onClose({}, "backdropClick")}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
-
-          <CardContent style={{ paddingTop: 12 }}>
-            {currentEvent.title && (
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `${eventId}.ics`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                      }}
+                    >
+                      <FileDownloadOutlinedIcon />
+                    </IconButton>
+                  )}
+                  {user.userData.email === event.organizer?.cal_address && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        if (isRecurring) {
+                          setAfterChoiceFunc(() => () => {
+                            setOpenUpdateModal(true);
+                          });
+                          setOpenEditModePopup("edit");
+                        } else {
+                          setOpenUpdateModal(true);
+                        }
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setToggleActionMenu(e.currentTarget)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    open={Boolean(toggleActionMenu)}
+                    onClose={() => setToggleActionMenu(null)}
+                    anchorEl={toggleActionMenu}
+                  >
+                    {mailSpaUrl && attendees.length > 0 && (
+                      <MenuItem
+                        onClick={() =>
+                          window.open(
+                            `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
+                              .map((a) => a.cal_address)
+                              .filter((mail) => mail !== user.userData.email)
+                              .join(",")}?subject=${event.title}`
+                          )
+                        }
+                      >
+                        Email attendees
+                      </MenuItem>
+                    )}
+                    <EventDuplication event={event} onClose={onClose} />
+                    {user.userData.email === event.organizer?.cal_address && (
+                      <MenuItem
+                        onClick={() => {
+                          if (isRecurring) {
+                            setAfterChoiceFunc(
+                              () =>
+                                (typeOfAction?: "solo" | "all" | undefined) =>
+                                  handleDelete(
+                                    isRecurring,
+                                    typeOfAction,
+                                    onClose,
+                                    dispatch,
+                                    calendar,
+                                    event,
+                                    calId,
+                                    eventId
+                                  )
+                            );
+                            setOpenEditModePopup("edit");
+                          } else {
+                            onClose({}, "backdropClick");
+                            dispatch(
+                              deleteEventAsync({
+                                calId,
+                                eventId,
+                                eventURL: event.URL,
+                              })
+                            );
+                          }
+                        }}
+                      >
+                        Delete event
+                      </MenuItem>
+                    )}
+                  </Menu>
+                  <IconButton
+                    size="small"
+                    onClick={() => onClose({}, "backdropClick")}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </DialogActions>
               <Typography
-                variant="h6"
+                variant="inherit"
                 fontWeight="bold"
                 style={{
                   wordBreak: "break-word",
                 }}
                 gutterBottom
               >
-                {currentEvent.title}
+                {event.title}
               </Typography>
-            )}
-
-            {/* Time info*/}
-            <Typography variant="body2" color="textSecondary" gutterBottom>
-              {formatDate(new Date(currentEvent.start), currentEvent.allday)}
-              {currentEvent.end &&
-                formatEnd(
-                  new Date(currentEvent.start),
-                  new Date(currentEvent.end),
-                  currentEvent.allday
-                ) &&
-                ` – ${formatEnd(new Date(currentEvent.start), new Date(currentEvent.end), currentEvent.allday)}`}
-            </Typography>
-
-            {/* Location */}
-            {currentEvent.location && (
-              <InfoRow
-                icon={<LocationOnIcon style={{ fontSize: 18 }} />}
-                text={currentEvent.location}
-              />
-            )}
-
-            {/* Video */}
-            {currentEvent.x_openpass_videoconference && (
-              <InfoRow
-                icon={<VideocamIcon style={{ fontSize: 18 }} />}
-                text="Video conference available"
-                data={currentEvent.x_openpass_videoconference}
-              />
-            )}
-
-            {/* Attendees */}
-            {currentEvent.attendee?.length > 0 && (
-              <Box style={{ marginBottom: 8 }}>
-                <Typography variant="subtitle2">Attendees:</Typography>
-                {organizer && renderAttendeeBadge(organizer, "org", true)}
-                {visibleAttendees.map((a, idx) =>
-                  renderAttendeeBadge(a, idx.toString())
-                )}
-                {attendees.length > attendeeDisplayLimit && (
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    style={{ cursor: "pointer", marginTop: 4 }}
-                    onClick={() => setShowAllAttendees(!showAllAttendees)}
-                  >
-                    {showAllAttendees
-                      ? "Show less"
-                      : `Show more (${
-                          attendees.length - attendeeDisplayLimit
-                        } more)`}
-                  </Typography>
-                )}
-              </Box>
-            )}
-
-            {/* Error */}
-            {currentEvent.error && (
-              <InfoRow
-                icon={
-                  <ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />
-                }
-                text={currentEvent.error}
-                error
-              />
-            )}
-
-            {/* Calendar color dot */}
-            <Box
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 16,
-              }}
-            >
-              <CalendarTodayIcon style={{ fontSize: 16 }} />
-              <CircleIcon
-                style={{
-                  color: calendar.color ?? "#3788D8",
-                  width: 12,
-                  height: 12,
-                }}
-              />
-              <Typography variant="body2">{calendar.name}</Typography>
-            </Box>
-
-            <Divider style={{ marginBottom: 8 }} />
-
-            {/* RSVP */}
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                {formatDate(event.start, event.allday)}
+                {event.end &&
+                  formatEnd(event.start, event.end, event.allday) &&
+                  ` – ${formatEnd(event.start, event.end, event.allday)}`}
+              </Typography>
+            </>
+          )
+        }
+        actions={
+          <>
             {currentUserAttendee && (
-              <Box>
-                <Typography variant="body2" style={{ marginBottom: 8 }}>
-                  Will you attend?
-                </Typography>
+              <Box style={{ display: "flex", flexDirection: "row" }}>
+                <Typography variant="body2">Attending?</Typography>
                 <ButtonGroup size="small" fullWidth>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "ACCEPTED"
+                      currentUserAttendee?.partstat === "ACCEPTED"
                         ? "success"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("ACCEPTED")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "ACCEPTED",
+
+                              onClose,
+                              type,
+                              calendarList
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "ACCEPTED",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Accept
                   </Button>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "TENTATIVE"
+                      currentUserAttendee?.partstat === "TENTATIVE"
                         ? "warning"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("TENTATIVE")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "TENTATIVE",
+                              onClose,
+                              type,
+                              calendarList
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "TENTATIVE",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Maybe
                   </Button>
                   <Button
                     color={
-                      currentUserAttendee.partstat === "DECLINED"
+                      currentUserAttendee?.partstat === "DECLINED"
                         ? "error"
                         : "primary"
                     }
-                    onClick={() => handleRSVP("DECLINED")}
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(
+                          () => (type: string) =>
+                            handleRSVP(
+                              dispatch,
+                              calendar,
+                              user,
+                              event,
+                              "DECLINED",
+                              onClose,
+                              type,
+                              calendarList
+                            )
+                        );
+                        setOpenEditModePopup("attendance");
+                      } else {
+                        handleRSVP(
+                          dispatch,
+                          calendar,
+                          user,
+                          event,
+                          "DECLINED",
+                          onClose
+                        );
+                      }
+                    }}
                   >
                     Decline
                   </Button>
                 </ButtonGroup>
               </Box>
             )}
+          </>
+        }
+      >
+        {/* Video */}
+        {event.x_openpass_videoconference && (
+          <InfoRow
+            icon={<VideocamIcon style={{ fontSize: 18 }} />}
+            content={
+              <Button
+                variant="contained"
+                onClick={() => window.open(event.x_openpass_videoconference)}
+              >
+                Join the video conference
+              </Button>
+            }
+          />
+        )}
+        {/* Attendees */}
+        {attendees?.length > 0 && (
+          <>
+            <InfoRow
+              icon={<PeopleAltOutlinedIcon />}
+              content={
+                <Box
+                  style={{
+                    marginBottom: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Box>
+                    <Typography>{attendees.length} guests</Typography>
+                    <Typography>
+                      {
+                        attendees.filter((a) => a.partstat === "ACCEPTED")
+                          .length
+                      }{" "}
+                      yes,{" "}
+                      {
+                        attendees.filter((a) => a.partstat === "DECLINED")
+                          .length
+                      }{" "}
+                      no
+                    </Typography>
+                  </Box>
+                  {!showAllAttendees && (
+                    <AvatarGroup max={attendeeDisplayLimit}>
+                      {organizer &&
+                        renderAttendeeBadge(
+                          organizer,
+                          "org",
+                          showAllAttendees,
+                          true
+                        )}
+                      {visibleAttendees.map((a, idx) =>
+                        renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+                      )}
+                    </AvatarGroup>
+                  )}
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    style={{ cursor: "pointer", marginTop: 0.5 }}
+                    onClick={() => setShowAllAttendees(!showAllAttendees)}
+                  >
+                    {showAllAttendees ? "Show less" : `Show more `}
+                  </Typography>
+                </Box>
+              }
+            />
+          </>
+        )}
+        {showAllAttendees &&
+          organizer &&
+          renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
+        {showAllAttendees &&
+          visibleAttendees.map((a, idx) =>
+            renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+          )}
+        {/* Location */}
+        {event.location && (
+          <InfoRow icon={<LocationOnOutlinedIcon />} text={event.location} />
+        )}
+        {/* Description */}
+        {event.description && (
+          <InfoRow icon={<SubjectIcon />} text={event.description} />
+        )}
 
-            {/* Description */}
-            {currentEvent.description && (
-              <Typography variant="body2" style={{ marginTop: 8 }}>
-                {currentEvent.description}
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Popover>
+        {/* Description */}
+        {event.alarm && (
+          <InfoRow
+            icon={<NotificationsNoneIcon />}
+            text={`${event.alarm.trigger} before by ${event.alarm.action}`}
+          />
+        )}
+
+        {/* Error */}
+        {event.error && (
+          <InfoRow
+            icon={<ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />}
+            text={event.error}
+            error
+          />
+        )}
+
+        {/* Calendar color dot */}
+        <Box
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            marginBottom: 2,
+          }}
+        >
+          <CalendarTodayIcon style={{ fontSize: 16 }} />
+          <CircleIcon
+            style={{
+              color: calendar.color ?? "#3788D8",
+              width: 12,
+              height: 12,
+            }}
+          />
+          <Typography variant="body2">{calendar.name}</Typography>
+        </Box>
+
+        {currentUserAttendee && !event.repetition && (
+          <>
+            <Divider variant="fullWidth" />
+          </>
+        )}
+      </ResponsiveDialog>
+      <EditModeDialog
+        type={openEditModePopup}
+        setOpen={setOpenEditModePopup}
+        event={event}
+        eventAction={(type: "solo" | "all" | undefined) => {
+          setTypeOfAction(type);
+          afterChoiceFunc && afterChoiceFunc(type);
+        }}
+      />
       <EventDisplayModal
         open={openFullDisplay}
         onClose={() => setOpenFullDisplay(false)}
         eventId={eventId}
         calId={calId}
-        eventData={currentEvent}
+        typeOfAction={typeOfAction}
       />
       <EventUpdateModal
-        eventId={eventId}
-        calId={calId}
         open={openUpdateModal}
         onClose={() => setOpenUpdateModal(false)}
-        eventData={currentEvent}
+        eventId={eventId}
+        calId={calId}
       />
     </>
   );
 }
 
-function formatDate(date: Date, allday?: boolean) {
+function formatDate(date: Date | string, allday?: boolean) {
   if (allday) {
     return new Date(date).toLocaleDateString(undefined, {
       year: "numeric",
@@ -422,7 +537,7 @@ function formatDate(date: Date, allday?: boolean) {
   }
 }
 
-function formatEnd(start: Date, end: Date, allday?: boolean) {
+function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
