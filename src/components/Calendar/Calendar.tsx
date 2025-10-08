@@ -65,13 +65,8 @@ export default function CalendarApp({
   const pending = useAppSelector((state) => state.calendars.pending);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
 
-  const userPersonnalCalendars: Calendars[] = selectedCalendars
-    .filter((id) => id.split("/")[0] === userId)
-    .map((id) => calendars[id])
-    .filter((cal) => cal && cal.events);
-
-  const personnalEvents: CalendarEvent[] = userPersonnalCalendars.flatMap(
-    (calendar) => Object.values(calendar.events)
+  const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) =>
+    Object.values(calendars[calId].events)
   );
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
@@ -282,7 +277,7 @@ export default function CalendarApp({
           }}
           tileContent={({ date }) => {
             const classNames: string[] = [];
-            const hasEvents = personnalEvents.some((event) => {
+            const hasEvents = dottedEvents.some((event) => {
               const eventDate = new Date(event.start);
               return (
                 eventDate.getFullYear() === date.getFullYear() &&

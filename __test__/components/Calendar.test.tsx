@@ -187,12 +187,57 @@ describe("CalendarSelection", () => {
 
     // checkbox unchecked : events hidden
     fireEvent.click(checkbox);
-    const boxesUntoggled = screen.getAllByTestId(
-      /\bdate-\d{4}-\d{1,2}-\d{1,2}\b/g
-    );
-    boxesUntoggled.forEach((box) => expect(box).not.toHaveClass("event-dot"));
+
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
 
     // checkbox rechecked : events shown
+    fireEvent.click(checkbox);
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
+  it("BUGFIX: remove dots in mini calendar when unselecting delegated calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    // hide personnal event first
+    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    const checkbox = screen.getByLabelText("Calendar delegated");
+
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
+
+    // checkbox checked : events shown
+    fireEvent.click(checkbox);
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
+  it("BUGFIX: remove dots in mini calendar when unselecting shared calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    // hide personnal event first
+    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    const checkbox = screen.getByLabelText("Calendar shared");
+
+    // checkbox unchecked : events hidden
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
+
+    // checkbox checked : events shown
     fireEvent.click(checkbox);
     expect(
       screen.getByTestId(
