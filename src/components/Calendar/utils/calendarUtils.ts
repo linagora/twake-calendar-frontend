@@ -143,16 +143,16 @@ interface AclEntry {
 export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   let hasRead = false;
   let hasFreeBusy = false;
+  if (acl) {
+    for (const entry of acl) {
+      if (entry.principal !== "{DAV:}authenticated") continue;
 
-  for (const entry of acl) {
-    if (entry.principal !== "{DAV:}authenticated") continue;
-
-    if (entry.privilege === "{DAV:}read") {
-      hasRead = true;
-      break; // highest visibility, can stop
+      if (entry.privilege === "{DAV:}read") {
+        hasRead = true;
+        break; // highest visibility, can stop
+      }
     }
   }
-
   if (hasRead) return "public";
   return "private";
 }
