@@ -7,6 +7,7 @@ import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LockIcon from "@mui/icons-material/Lock";
+import { EventErrorHandler } from "../../Error/EventErrorHandler";
 
 export interface ViewHandlersProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -15,6 +16,7 @@ export interface ViewHandlersProps {
   onViewChange?: (view: string) => void;
   calendars: Record<string, Calendars>;
   tempcalendars: Record<string, Calendars>;
+  errorHandler: EventErrorHandler;
 }
 
 export const createViewHandlers = (props: ViewHandlersProps) => {
@@ -25,6 +27,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     onViewChange,
     calendars,
     tempcalendars,
+    errorHandler,
   } = props;
 
   const handleDayHeaderDidMount = (arg: any) => {
@@ -142,64 +145,77 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
       attendee: attendees = [],
       class: classification,
     } = props;
+    try {
+      const calendarsSource = temp ? tempcalendars : calendars;
+      const calendar = calendarsSource[calId];
+      if (!calendar) return null;
 
-    const calendarsSource = temp ? tempcalendars : calendars;
-    const calendar = calendarsSource[calId];
-    if (!calendar) return null;
+      const isPrivate = ["PRIVATE", "CONFIDENTIAL"].includes(classification);
+      const ownerEmails = new Set(
+        calendar.ownerEmails?.map((e) => e.toLowerCase())
+      );
+      const delegated = calendar.delegated;
+      let Icon = null;
+      let titleStyle: React.CSSProperties = {};
 
-    const isPrivate = ["PRIVATE", "CONFIDENTIAL"].includes(classification);
-    const ownerEmails = new Set(
-      calendar.ownerEmails?.map((e) => e.toLowerCase())
-    );
-    const delegated = calendar.delegated;
-    let Icon = null;
-    let titleStyle: React.CSSProperties = {};
+      const showSpecialDisplay = attendees.filter((att: userAttendee) =>
+        ownerEmails.has(att.cal_address.toLowerCase())
+      );
+      // if no special display
+      if (attendees.length && !delegated && !showSpecialDisplay.length) {
+        return React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center" } },
+          React.createElement("span", null, event.title)
+        );
+      }
+      switch (showSpecialDisplay?.[0]?.partstat) {
+        case "DECLINED":
+          Icon = null;
+          titleStyle.textDecoration = "line-through";
+          break;
+        case "TENTATIVE":
+          Icon = HelpOutlineIcon;
+          break;
+        case "NEEDS-ACTION":
+          Icon = AccessTimeIcon;
+          break;
+        case "ACCEPTED":
+          Icon = null;
+          break;
+        default:
+          break;
+      }
 
-    const showSpecialDisplay = attendees.filter((att: userAttendee) =>
-      ownerEmails.has(att.cal_address.toLowerCase())
-    );
-    // if no special display
-    if (attendees.length && !delegated && !showSpecialDisplay.length) {
       return React.createElement(
         "div",
         { style: { display: "flex", alignItems: "center" } },
-        React.createElement("span", event.title)
+        isPrivate &&
+          React.createElement(LockIcon, {
+            "data-testid": "lock-icon",
+            fontSize: "small",
+            style: { marginRight: "4px" },
+          }),
+        Icon &&
+          React.createElement(Icon, {
+            fontSize: "small",
+            style: { marginRight: "4px" },
+          }),
+        React.createElement("span", { style: titleStyle }, event.title)
+      );
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : "Unknown error during rendering";
+      errorHandler.reportError(
+        event._def.extendedProps.uid || event.id,
+        message
+      );
+      return React.createElement(
+        "div",
+        { style: { display: "flex", alignItems: "center" } },
+        React.createElement("span", null, event.title)
       );
     }
-    switch (showSpecialDisplay?.[0]?.partstat) {
-      case "DECLINED":
-        Icon = null;
-        titleStyle.textDecoration = "line-through";
-        break;
-      case "TENTATIVE":
-        Icon = HelpOutlineIcon;
-        break;
-      case "NEEDS-ACTION":
-        Icon = AccessTimeIcon;
-        break;
-      case "ACCEPTED":
-        Icon = null;
-        break;
-      default:
-        break;
-    }
-
-    return React.createElement(
-      "div",
-      { style: { display: "flex", alignItems: "center" } },
-      isPrivate &&
-        React.createElement(LockIcon, {
-          "data-testid": "lock-icon",
-          fontSize: "small",
-          style: { marginRight: "4px" },
-        }),
-      Icon &&
-        React.createElement(Icon, {
-          fontSize: "small",
-          style: { marginRight: "4px" },
-        }),
-      React.createElement("span", { style: titleStyle }, event.title)
-    );
   };
 
   const handleEventDidMount = (arg: any) => {

@@ -34,6 +34,8 @@ import {
 import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
 import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
 import { EditModeDialog } from "../Event/EditModeDialog";
+import { EventErrorHandler } from "../Error/EventErrorHandler";
+import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -91,6 +93,19 @@ export default function CalendarApp({
 
   // Auto-select personal calendars when first loaded
   const initialLoadRef = useRef(true);
+  const [eventErrors, setEventErrors] = useState<string[]>([]);
+  const errorHandler = useRef(new EventErrorHandler());
+
+  useEffect(() => {
+    const handler = errorHandler.current;
+    handler.setErrorCallback(setEventErrors);
+    return () => handler.setErrorCallback(() => {});
+  }, []);
+
+  const handleErrorClose = () => {
+    setEventErrors([]);
+    errorHandler.current.clearAll();
+  };
 
   useEffect(() => {
     if (initialLoadRef.current && Object.keys(calendars).length > 0 && userId) {
@@ -210,6 +225,7 @@ export default function CalendarApp({
     onViewChange,
     calendars,
     tempcalendars,
+    errorHandler: errorHandler.current,
   });
 
   const handleMonthUp = () => {
@@ -458,6 +474,7 @@ export default function CalendarApp({
             onClose={eventHandlers.handleCloseEventDisplay}
           />
         )}
+        <EventErrorSnackbar messages={eventErrors} onClose={handleErrorClose} />
       </div>
     </main>
   );
