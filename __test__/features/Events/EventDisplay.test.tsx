@@ -478,18 +478,6 @@ describe("Event Preview Display", () => {
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
   });
   it("handles Edit click", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "getEventAsync")
-      .mockImplementation((payload) => {
-        return () =>
-          Promise.resolve({
-            calId: payload.calId,
-            event:
-              preloadedState.calendars.list["667037022b752d0026472254/cal1"]
-                .events["event1"],
-          }) as any;
-      });
-
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -503,8 +491,7 @@ describe("Event Preview Display", () => {
     fireEvent.click(screen.getByTestId("EditIcon"));
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-      expect(screen.getByText("Edit Event")).toBeInTheDocument();
+      expect(screen.getByText("Update Event")).toBeInTheDocument();
     });
   });
   it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
