@@ -3,6 +3,7 @@ import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
+import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
 import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
@@ -301,5 +302,48 @@ describe("calendar Availability search", () => {
       return dayNum && dayNum.textContent && /\d/.test(dayNum.textContent);
     });
     expect(dayNumbersWithContent.length).toBe(0);
+  });
+
+  it("should fetch calendar details with date range matching the displayed month", async () => {
+    const spy = jest
+      .spyOn(calendarThunks, "getCalendarDetailAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    jest.useFakeTimers().setSystemTime(new Date("2025-01-01"));
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    const calendarRef = (window as any).__calendarRef;
+    const calendarApi = calendarRef.current;
+    const view = calendarApi?.view;
+    calendarApi.changeView("dayGridMonth");
+    fireEvent.click(screen.getByTestId("ChevronRightIcon"));
+
+    expect(spy).toHaveBeenCalledTimes(2);
+    const callArgs = spy.mock.calls[1][0];
+    expect(callArgs.calId).toBe("user1/cal1");
+
+    const startDate = new Date(
+      callArgs.match.start.replace(
+        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+        "$1-$2-$3T$4:$5:$6"
+      )
+    );
+    const endDate = new Date(
+      callArgs.match.end.replace(
+        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+        "$1-$2-$3T$4:$5:$6"
+      )
+    );
+    // Verify the date range matches the displayed view
+    const viewStart = new Date(view.currentStart);
+    const viewEnd = new Date(view.currentEnd);
+
+    expect(startDate.getTime()).toBeLessThanOrEqual(viewStart.getTime());
+    expect(endDate.getTime()).toBeGreaterThanOrEqual(viewEnd.getTime());
   });
 });
