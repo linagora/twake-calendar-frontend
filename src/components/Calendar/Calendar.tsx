@@ -23,7 +23,7 @@ import {
 } from "../../utils/dateUtils";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
-import EventPreviewModal from "../Event/EventDisplayPreview";
+import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import { createSelector } from "@reduxjs/toolkit";
 import AddIcon from "@mui/icons-material/Add";
 import { TempCalendarsInput } from "./TempCalendarsInput";
