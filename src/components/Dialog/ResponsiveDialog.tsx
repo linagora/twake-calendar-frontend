@@ -106,9 +106,7 @@ function ResponsiveDialog({
       width: "100%",
       // height: isExpanded ? `calc(100vh - ${headerHeight})` : "90vh",
       margin: isExpanded ? `${headerHeight} 0 0 0` : "32px",
-      maxHeight: isExpanded
-        ? `calc(100vh - ${headerHeight})`
-        : "790px",
+      maxHeight: isExpanded ? `calc(100vh - ${headerHeight})` : "790px",
       boxShadow: isExpanded ? "none !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
     },
