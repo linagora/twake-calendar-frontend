@@ -644,7 +644,7 @@ describe("Event Full Display", () => {
     // Use fixed timezone UTC for consistent test results across all environments
     // we provide a fixed timezone to enable exact value matching
     const fixedDate = new Date("2025-01-15T10:00:00.000Z"); // 10AM UTC
-    
+
     const stateWithFixedDate = {
       ...preloadedState,
       calendars: {
@@ -653,7 +653,9 @@ describe("Event Full Display", () => {
             ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
             events: {
               event1: {
-                ...preloadedState.calendars.list["667037022b752d0026472254/cal1"].events.event1,
+                ...preloadedState.calendars.list[
+                  "667037022b752d0026472254/cal1"
+                ].events.event1,
                 start: fixedDate.toISOString(),
                 end: new Date(fixedDate.getTime() + 3600000).toISOString(),
                 timezone: "UTC",
@@ -675,7 +677,7 @@ describe("Event Full Display", () => {
     );
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
-    
+
     // Verify datetime inputs with fixed timezone
     // Note: formatLocalDateTime converts to local browser time, so the exact hour may vary
     // We validate the format is correct rather than relaxing to meaningless patterns
@@ -683,7 +685,9 @@ describe("Event Full Display", () => {
     expect(startInput).toBeInTheDocument();
     expect(startInput).toHaveAttribute("type", "datetime-local");
     // Validate proper datetime-local format (YYYY-MM-DDTHH:MM) without being too relaxed
-    expect(startInput.getAttribute("value")).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+    expect(startInput.getAttribute("value")).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
+    );
 
     expect(screen.getByText("First Calendar")).toBeInTheDocument();
   });
@@ -1284,7 +1288,7 @@ describe("Event Full Display", () => {
     // GIVEN user timezone is UTC+2 (Europe/Paris)
     // WHEN the user opens an event at 2PM UTC+7 (Asia/Bangkok)
     // THEN the event is displayed at 9AM UTC+2 (in local time format)
-    
+
     const eventDateUTC7 = new Date("2025-01-15T07:00:00.000Z"); // 7AM UTC = 2PM UTC+7
 
     const stateWithTimezone = {
@@ -1327,7 +1331,7 @@ describe("Event Full Display", () => {
     // Verify title input field has the event title
     const titleInput = screen.getByDisplayValue("Timezone Test Event");
     expect(titleInput).toBeInTheDocument();
-    
+
     // Verify the datetime input field exists
     const startInput = screen.getByLabelText("Start");
     expect(startInput).toBeInTheDocument();
@@ -1338,7 +1342,7 @@ describe("Event Full Display", () => {
     // GIVEN user timezone is UTC+2
     // WHEN the user edits an event at 2PM UTC+7 (Asia/Bangkok)
     // THEN the update modal displays the time as 2PM in Asia/Bangkok timezone
-    
+
     const eventDateUTC7 = new Date("2025-01-15T07:00:00.000Z"); // 7AM UTC = 2PM UTC+7
 
     const stateWithTimezone = {
@@ -1380,7 +1384,7 @@ describe("Event Full Display", () => {
 
     // Verify the timezone select shows Asia/Bangkok
     fireEvent.click(screen.getByText("Show More"));
-    
+
     // The timezone select should have Asia/Bangkok selected
     // Since the component uses formatLocalDateTime, the displayed time will be in local format
     // but the timezone selector should show Asia/Bangkok
