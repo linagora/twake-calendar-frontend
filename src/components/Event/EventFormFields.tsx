@@ -345,13 +345,13 @@ export default function EventFormFields({
             label="All day"
           />
           <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showRepeat}
-                  disabled={typeOfAction === "solo"}
-                  onChange={() => {
-                    const newShowRepeat = !showRepeat;
-                    setShowRepeat(newShowRepeat);
+            control={
+              <Checkbox
+                checked={showRepeat}
+                disabled={typeOfAction === "solo"}
+                onChange={() => {
+                  const newShowRepeat = !showRepeat;
+                  setShowRepeat(newShowRepeat);
                   if (newShowRepeat) {
                     setRepetition({
                       freq: "daily",

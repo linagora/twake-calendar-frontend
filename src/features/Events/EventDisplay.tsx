@@ -46,7 +46,7 @@ import {
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { getEvent } from "./EventApi";
-import { formatLocalDateTime } from "./EventModal";
+import { formatLocalDateTime } from "../../components/Event/EventFormFields";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
 export default function EventDisplayModal({
@@ -128,7 +128,7 @@ export default function EventDisplayModal({
       onClose({}, "backdropClick");
     }
     setRepetition(event?.repetition ?? ({} as RepetitionObject));
-  }, [open, eventId, dispatch, onClose, event]);
+  }, [open, eventId, dispatch, onClose, event, calendar]);
   useEffect(() => {
     const fetchMasterEvent = async () => {
       const masterEvent = await getEvent(event);
@@ -160,8 +160,8 @@ export default function EventDisplayModal({
       calId,
       title,
       URL: event.URL ?? `/calendars/${calId}/${newEventUID}.ics`,
-      start: new Date(start),
-      end: new Date(end),
+      start: start,
+      end: end,
       allday,
       uid: event.uid ?? newEventUID,
       description,
@@ -523,7 +523,7 @@ export default function EventDisplayModal({
                 {isOwn && (
                   <RepeatEvent
                     repetition={repetition}
-                    eventStart={event.start}
+                    eventStart={new Date(event.start)}
                     setRepetition={setRepetition}
                     isOwn={isOwn && typeOfAction !== "solo"}
                   />
