@@ -12,6 +12,8 @@ import {
   putEventAsync,
   removeEvent,
   moveEventAsync,
+  updateEventInstanceAsync,
+  updateSeriesAsync,
 } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
@@ -22,6 +24,8 @@ import EventFormFields, {
   formatDateTimeInTimezone,
 } from "../../components/Event/EventFormFields";
 import { getEvent } from "./EventApi";
+import { refreshCalendars } from "../../components/Event/utils/eventUtils";
+import { getCalendarRange } from "../../utils/dateUtils";
 
 function EventUpdateModal({
   eventId,
@@ -29,12 +33,14 @@ function EventUpdateModal({
   open,
   onClose,
   eventData,
+  typeOfAction,
 }: {
   eventId: string;
   calId: string;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
   eventData?: CalendarEvent | null;
+  typeOfAction?: "solo" | "all";
 }) {
   const dispatch = useAppDispatch();
 
@@ -340,23 +346,40 @@ function EventUpdateModal({
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
     }
 
-    // Handle recurrence instances
-    const [baseId, recurrenceId] = event.uid.split("/");
-    if (recurrenceId) {
-      Object.keys(targetCalendar.events).forEach((element) => {
-        if (element.split("/")[0] === baseId) {
-          dispatch(removeEvent({ calendarUid: calId, eventUid: element }));
-        }
-      });
-    }
+  // Handle recurrence instances
+  const [, recurrenceId] = event.uid.split("/");
 
-    // Execute API calls in background
+  // Execute API calls in background based on typeOfAction
+  if (recurrenceId) {
+    if (typeOfAction === "solo") {
+      // Update just this instance
+      dispatch(
+        updateEventInstanceAsync({
+          cal: targetCalendar,
+          event: { ...newEvent, recurrenceId },
+        })
+      );
+    } else if (typeOfAction === "all") {
+      // Update all instances
+      dispatch(
+        updateSeriesAsync({
+          cal: targetCalendar,
+          event: { ...newEvent, recurrenceId },
+        })
+      );
+      // Refresh calendars to ensure all instances are updated
+      const calendarRange = getCalendarRange(new Date(start));
+      await refreshCalendars(dispatch, Object.values(calendarsList), calendarRange);
+    }
+  } else {
+    // Non-recurring event
     dispatch(
       putEventAsync({
         cal: targetCalendar,
         newEvent,
       })
     );
+  }
 
     // Handle calendar change
     if (newCalId !== calId) {
@@ -413,6 +436,7 @@ function EventUpdateModal({
         setAllDay={setAllDay}
         repetition={repetition}
         setRepetition={setRepetition}
+        typeOfAction={typeOfAction}
         attendees={attendees}
         setAttendees={setAttendees}
         alarm={alarm}
@@ -432,7 +456,7 @@ function EventUpdateModal({
         showMore={showMore}
         showDescription={showDescription}
         setShowDescription={setShowDescription}
-        showRepeat={showRepeat}
+        showRepeat={typeOfAction !== "solo" && showRepeat}
         setShowRepeat={setShowRepeat}
         userPersonnalCalendars={userPersonnalCalendars}
         timezoneList={timezoneList}
