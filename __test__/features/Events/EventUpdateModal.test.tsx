@@ -42,11 +42,11 @@ describe("EventUpdateModal Timezone Handling", () => {
     // GIVEN user timezone is UTC+2
     // WHEN the user edits an event at 2PM UTC+7 (Asia/Bangkok)
     // THEN the update modal prompts him date with 2PM UTC+7
-    
+
     // Create event at 2PM UTC+7 (Asia/Bangkok)
     // 2PM UTC+7 = 14:00 in Bangkok = 07:00 UTC
     const eventDateUTC = new Date("2025-01-15T07:00:00.000Z");
-    
+
     const eventData = {
       uid: "test-event-1",
       title: "Timezone Event",
@@ -95,7 +95,7 @@ describe("EventUpdateModal Timezone Handling", () => {
       const startInput = screen.getByLabelText("Start");
       expect(startInput).toBeInTheDocument();
       expect(startInput).toHaveAttribute("type", "datetime-local");
-      
+
       // The value should be formatted as 2025-01-15T14:00 (2PM in Bangkok time)
       // EventUpdateModal uses formatDateTimeInTimezone which formats in event's original timezone
       expect(startInput).toHaveValue("2025-01-15T14:00");
@@ -104,7 +104,7 @@ describe("EventUpdateModal Timezone Handling", () => {
 
   it("preserves original timezone when editing event fields", async () => {
     const eventDateUTC = new Date("2025-01-15T07:00:00.000Z");
-    
+
     const eventData = {
       uid: "test-event-2",
       title: "Original Event",
@@ -151,4 +151,3 @@ describe("EventUpdateModal Timezone Handling", () => {
     expect(titleInput).toHaveValue("Updated Event");
   });
 });
-
