@@ -1176,67 +1176,85 @@ describe("Event Full Display", () => {
 
     expect(spyRemove).toHaveBeenCalled();
   });
-  //   const spyPut = jest
-  //     .spyOn(eventThunks, "putEventAsync")
-  //     .mockImplementation((payload) => () => Promise.resolve(payload) as any);
-  //   const spyRemove = jest.spyOn(eventThunks, "removeEvent");
 
-  //   const day = new Date();
-  //   const preloadedRecurrence = {
-  //     ...preloadedState,
-  //     calendars: {
-  //       list: {
-  //         "667037022b752d0026472254/cal1": {
-  //           id: "667037022b752d0026472254/cal1",
-  //           name: "First Calendar",
-  //           color: "#FF0000",
-  //           events: {
-  //             "base/20250101": {
-  //               uid: "base/20250101",
-  //               calId: "667037022b752d0026472254/cal1",
-  //               title: "eventA",
-  //             },
-  //             "base/20250201": {
-  //               uid: "base/20250201",
-  //               calId: "667037022b752d0026472254/cal1",
-  //               title: "eventB",
-  //             },
-  //             "base/20250301": {
-  //               uid: "base/20250301",
-  //               title: "Recurring event",
-  //               calId: "667037022b752d0026472254/cal1",
-  //               start: day.toISOString(),
-  //               end: day.toISOString(),
-  //               organizer: { cal_address: "test@test.com" },
-  //               attendee: [{ cal_address: "test@test.com", cn: "Test" }],
-  //             },
-  //           },
-  //         },
-  //       },
-  //       pending: false,
-  //     },
-  //   };
+  it("saves recurring event with updateSeriesAsync when typeOfAction is all", async () => {
+    const spyUpdateSeries = jest
+      .spyOn(eventThunks, "updateSeriesAsync")
+      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
 
-  //   renderWithProviders(
-  //     <EventDisplayModal
-  //       open={true}
-  //       onClose={mockOnClose}
-  //       calId={"667037022b752d0026472254/cal1"}
-  //       eventId={"base/20250301"}
-  //     />,
-  //     preloadedRecurrence
-  //   );
+    // Mock getEvent API call to avoid API errors in test
+    const EventApi = require("../../../src/features/Events/EventApi");
+    jest.spyOn(EventApi, "getEvent").mockResolvedValue({
+      uid: "base",
+      title: "Recurring event",
+      calId: "667037022b752d0026472254/cal1",
+      start: new Date().toISOString(),
+      end: new Date().toISOString(),
+      repetition: { freq: "daily", interval: 1 },
+    });
 
-  //   act(() => fireEvent.click(screen.getByText("Save")));
+    const day = new Date();
+    const preloadedRecurrence = {
+      ...preloadedState,
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            id: "667037022b752d0026472254/cal1",
+            name: "First Calendar",
+            color: "#FF0000",
+            events: {
+              base: {
+                uid: "base",
+                calId: "667037022b752d0026472254/cal1",
+                title: "Recurring event",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cal_address: "test@test.com" },
+                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
+                repetition: { freq: "daily", interval: 1 },
+              },
+              "base/20250101": {
+                uid: "base/20250101",
+                calId: "667037022b752d0026472254/cal1",
+                title: "Recurring event",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cal_address: "test@test.com" },
+                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
+              },
+              "base/20250201": {
+                uid: "base/20250201",
+                calId: "667037022b752d0026472254/cal1",
+                title: "Recurring event",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cal_address: "test@test.com" },
+                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    };
 
-  //   await waitFor(() => {
-  //     expect(spyPut).toHaveBeenCalled();
-  //   });
+    renderWithProviders(
+      <EventDisplayModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"base/20250101"}
+        typeOfAction="all"
+      />,
+      preloadedRecurrence
+    );
 
-  //   await waitFor(() => {
-  //     expect(spyRemove).toHaveBeenCalled();
-  //   });
-  // });
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => {
+      expect(spyUpdateSeries).toHaveBeenCalled();
+    });
+  });
 
   it("InfoRow renders error style when error prop is true", () => {
     renderWithProviders(<InfoRow icon={<span>i</span>} text="Bad" error />);
