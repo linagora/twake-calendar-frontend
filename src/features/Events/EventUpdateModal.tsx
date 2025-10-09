@@ -361,12 +361,38 @@ function EventUpdateModal({
       );
     } else if (typeOfAction === "all") {
       // Update all instances
-      dispatch(
-        updateSeriesAsync({
-          cal: targetCalendar,
-          event: { ...newEvent, recurrenceId },
-        })
-      );
+      
+      // Special case: When converting recurring event to non-recurring
+      if (event.repetition?.freq && !repetition.freq) {
+        // For repeat -> no-repeat, create a new non-repeating event
+        dispatch(
+          putEventAsync({
+            cal: targetCalendar,
+            newEvent: {
+              ...newEvent,
+              uid: crypto.randomUUID(), // Generate new ID for the single event
+              URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
+            },
+          })
+        );
+        
+        // Delete the old repeating series
+        const baseUID = event.uid.split("/")[0];
+        Object.keys(targetCalendar.events).forEach((eventId) => {
+          if (eventId.split("/")[0] === baseUID) {
+            dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
+          }
+        });
+      } else {
+        // Normal update for recurring events
+        dispatch(
+          updateSeriesAsync({
+            cal: targetCalendar,
+            event: { ...newEvent, recurrenceId },
+          })
+        );
+      }
+      
       // Refresh calendars to ensure all instances are updated
       const calendarRange = getCalendarRange(new Date(start));
       await refreshCalendars(dispatch, Object.values(calendarsList), calendarRange);
