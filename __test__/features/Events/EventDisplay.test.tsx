@@ -128,7 +128,10 @@ describe("Event Preview Display", () => {
       screen.getByText(new RegExp(`\\b${dayOfMonth}\\b ${month}`))
     ).toBeInTheDocument();
 
+    // Check time range is displayed (format may vary by locale/implementation)
+    // Use regex to match time pattern since exact format depends on component implementation
     expect(screen.getByText(/\d{2}:\d{2} – \d{2}:\d{2}/)).toBeInTheDocument();
+
     expect(screen.getByText("Calendar")).toBeInTheDocument();
   });
   it("calls onClose when Cancel clicked", () => {
@@ -642,8 +645,20 @@ describe("Event Full Display", () => {
 
   it("renders correctly event data with fixed timezone", () => {
     // Use fixed timezone UTC for consistent test results across all environments
-    // we provide a fixed timezone to enable exact value matching
+    // Calculate expected local time from UTC time for exact value matching
     const fixedDate = new Date("2025-01-15T10:00:00.000Z"); // 10AM UTC
+    const endDate = new Date(fixedDate.getTime() + 3600000); // 11AM UTC
+
+    // Format expected values in local timezone (what formatLocalDateTime produces)
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const formatLocal = (date: Date) => {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate()
+      )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
+    const expectedStart = formatLocal(fixedDate);
+    const expectedEnd = formatLocal(endDate);
 
     const stateWithFixedDate = {
       ...preloadedState,
@@ -657,7 +672,7 @@ describe("Event Full Display", () => {
                   "667037022b752d0026472254/cal1"
                 ].events.event1,
                 start: fixedDate.toISOString(),
-                end: new Date(fixedDate.getTime() + 3600000).toISOString(),
+                end: endDate.toISOString(),
                 timezone: "UTC",
               },
             },
@@ -678,16 +693,15 @@ describe("Event Full Display", () => {
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
 
-    // Verify datetime inputs with fixed timezone
-    // Note: formatLocalDateTime converts to local browser time, so the exact hour may vary
-    // We validate the format is correct rather than relaxing to meaningless patterns
+    // Use exact equality assertions with calculated local time values
     const startInput = screen.getByLabelText("Start");
     expect(startInput).toBeInTheDocument();
     expect(startInput).toHaveAttribute("type", "datetime-local");
-    // Validate proper datetime-local format (YYYY-MM-DDTHH:MM) without being too relaxed
-    expect(startInput.getAttribute("value")).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
-    );
+    // Exact value assertion - formatLocalDateTime converts UTC to local time
+    expect(startInput.getAttribute("value")).toBe(expectedStart);
+
+    const endInput = screen.getByLabelText("End");
+    expect(endInput.getAttribute("value")).toBe(expectedEnd);
 
     expect(screen.getByText("First Calendar")).toBeInTheDocument();
   });
@@ -1129,11 +1143,14 @@ describe("Event Full Display", () => {
     const allDayCheckbox = screen.getByLabelText("All day");
     fireEvent.click(allDayCheckbox);
     expect(allDayCheckbox).toBeChecked();
-    const date = day.toISOString().split("T")[0];
 
-    expect(
-      screen.getAllByDisplayValue(new RegExp(date, "i"))[0]
-    ).toBeInTheDocument();
+    // Calculate expected date value (YYYY-MM-DD format for all-day events)
+    const expectedDate = day.toISOString().split("T")[0];
+
+    // Use exact value assertion instead of regex
+    const dateInputs = screen.getAllByDisplayValue(expectedDate);
+    expect(dateInputs.length).toBeGreaterThanOrEqual(1);
+    expect(dateInputs[0]).toBeInTheDocument();
   });
   it("saves event and moves it when calendar is changed", async () => {
     const spyPut = jest
