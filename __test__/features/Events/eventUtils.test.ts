@@ -189,6 +189,39 @@ describe("parseCalendarEvent", () => {
     expect(result2.error).toMatch(/missing crucial event param/);
   });
 
+  it("returns computed end when there is no end but a duration", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2025-07-18T00:00:00Z"));
+
+    const rawDataMissing: any = [
+      ["UID", {}, "text", "event-1"],
+      ["DTSTART", {}, "date-time", "2025-07-18T09:00:00"],
+      ["duration", {}, "duration", "PT60M"],
+    ];
+
+    const result = parseCalendarEvent(
+      rawDataMissing,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+    expect(result.end).toBe("2025-07-18T10:00:00");
+  });
+
+  it("returns error if end and duration is missing", () => {
+    const rawDataMissing: any = [
+      ["UID", {}, "text", "event-1"],
+      ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
+    ];
+
+    const result = parseCalendarEvent(
+      rawDataMissing,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+    expect(result.error).toMatch(/missing crucial event param/);
+  });
+
   it("parses alarm block correctly", () => {
     const rawData = [
       ["UID", {}, "text", "event-5"],
@@ -289,7 +322,7 @@ describe("calendarEventToJCal", () => {
       ],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -449,7 +482,7 @@ describe("calendarEventToJCal", () => {
       ],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -539,7 +572,7 @@ describe("calendarEventToJCal", () => {
       attendee: [],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -574,7 +607,7 @@ describe("calendarEventToJCal", () => {
       attendee: [],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -609,7 +642,7 @@ describe("calendarEventToJCal", () => {
       attendee: [],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -644,7 +677,7 @@ describe("calendarEventToJCal", () => {
       attendee: [],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
@@ -679,7 +712,7 @@ describe("calendarEventToJCal", () => {
       attendee: [],
     };
 
-    const result = calendarEventToJCal(mockEvent as CalendarEvent);
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
 
     expect(result[0]).toBe("vcalendar");
     const [vevent, vtimezone] = result[2];
