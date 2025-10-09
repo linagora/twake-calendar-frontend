@@ -2,6 +2,7 @@ import { userAttendee } from "../User/userDataTypes";
 import { AlarmObject, CalendarEvent } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
+import moment from "moment";
 type RawEntry = [string, Record<string, string>, string, any];
 
 export function parseCalendarEvent(
@@ -13,6 +14,7 @@ export function parseCalendarEvent(
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
+  let duration;
   const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
   for (const [key, params, , value] of data) {
@@ -86,6 +88,9 @@ export function parseCalendarEvent(
       case "status":
         event.status = String(value);
         break;
+      case "duration":
+        duration = String(value);
+        break;
       case "rrule":
         event.repetition = { freq: value.freq.toLowerCase() };
         if (value.byday) {
@@ -123,17 +128,18 @@ export function parseCalendarEvent(
   }
 
   event.URL = eventURL;
-  if (!event.uid || !event.start || !event.end) {
+  if (!event.uid || !event.start || (!event.end && !duration)) {
     console.error(
       `missing crucial event param in calendar ${calendarid} `,
       data
     );
     event.error = `missing crucial event param in calendar ${calendarid} `;
-    if (!event.end) {
-      const start = event.start ? new Date(event.start) : new Date();
-      const artificialEnd = new Date(start.getTime() + 3600000);
-      event.end = formatDateToICal(artificialEnd, false);
-    }
+  }
+  if (!event.end) {
+    const start = event.start ? new Date(event.start) : new Date();
+    const timeToAdd = moment.duration(duration).asMilliseconds();
+    const artificialEnd = new Date(start.getTime() + timeToAdd);
+    event.end = formatDateToICal(artificialEnd, false);
   }
 
   return event as CalendarEvent;
