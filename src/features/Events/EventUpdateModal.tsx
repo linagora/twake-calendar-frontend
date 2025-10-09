@@ -23,7 +23,7 @@ import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtil
 import EventFormFields, {
   formatDateTimeInTimezone,
 } from "../../components/Event/EventFormFields";
-import { getEvent } from "./EventApi";
+import { getEvent, deleteEvent } from "./EventApi";
 import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
 
@@ -346,66 +346,90 @@ function EventUpdateModal({
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
     }
 
-  // Handle recurrence instances
-  const [, recurrenceId] = event.uid.split("/");
+    // Handle recurrence instances
+    const [, recurrenceId] = event.uid.split("/");
 
-  // Execute API calls in background based on typeOfAction
-  if (recurrenceId) {
-    if (typeOfAction === "solo") {
-      // Update just this instance
-      dispatch(
-        updateEventInstanceAsync({
-          cal: targetCalendar,
-          event: { ...newEvent, recurrenceId },
-        })
-      );
-    } else if (typeOfAction === "all") {
-      // Update all instances
-      
-      // Special case: When converting recurring event to non-recurring
-      if (event.repetition?.freq && !repetition.freq) {
-        // For repeat -> no-repeat, create a new non-repeating event
+    // Execute API calls in background based on typeOfAction
+    if (recurrenceId) {
+      if (typeOfAction === "solo") {
+        // Update just this instance
         dispatch(
-          putEventAsync({
-            cal: targetCalendar,
-            newEvent: {
-              ...newEvent,
-              uid: crypto.randomUUID(), // Generate new ID for the single event
-              URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
-            },
-          })
-        );
-        
-        // Delete the old repeating series
-        const baseUID = event.uid.split("/")[0];
-        Object.keys(targetCalendar.events).forEach((eventId) => {
-          if (eventId.split("/")[0] === baseUID) {
-            dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
-          }
-        });
-      } else {
-        // Normal update for recurring events
-        dispatch(
-          updateSeriesAsync({
+          updateEventInstanceAsync({
             cal: targetCalendar,
             event: { ...newEvent, recurrenceId },
           })
         );
+      } else if (typeOfAction === "all") {
+        // Update all instances
+
+        // Special case: When converting recurring event to non-recurring
+        if (event.repetition?.freq && !repetition.freq) {
+          // For repeat -> no-repeat, create a new non-repeating event
+          dispatch(
+            putEventAsync({
+              cal: targetCalendar,
+              newEvent: {
+                ...newEvent,
+                uid: crypto.randomUUID(), // Generate new ID for the single event
+                URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
+              },
+            })
+          );
+
+          // Delete the old repeating series - we need to be more direct and forceful
+          const baseUID = event.uid.split("/")[0];
+
+          try {
+            // Directly use the deleteEvent API without going through the store
+            const eventBaseURL = `/calendars/${calId}/${baseUID}.ics`;
+            await deleteEvent(eventBaseURL);
+            console.log(
+              "Deleted master event via direct API call:",
+              eventBaseURL
+            );
+
+            // Force a small delay to ensure deletion completes
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            // Make sure to clean up any instances in the store
+            Object.keys(targetCalendar.events).forEach((eventId) => {
+              if (eventId.split("/")[0] === baseUID) {
+                dispatch(
+                  removeEvent({ calendarUid: calId, eventUid: eventId })
+                );
+              }
+            });
+          } catch (err) {
+            console.error("Failed to delete recurring event:", err);
+            // Even if deletion fails, continue with creating the new event
+          }
+        } else {
+          // Normal update for recurring events
+          dispatch(
+            updateSeriesAsync({
+              cal: targetCalendar,
+              event: { ...newEvent, recurrenceId },
+            })
+          );
+        }
+
+        // Refresh calendars to ensure all instances are updated
+        const calendarRange = getCalendarRange(new Date(start));
+        await refreshCalendars(
+          dispatch,
+          Object.values(calendarsList),
+          calendarRange
+        );
       }
-      
-      // Refresh calendars to ensure all instances are updated
-      const calendarRange = getCalendarRange(new Date(start));
-      await refreshCalendars(dispatch, Object.values(calendarsList), calendarRange);
+    } else {
+      // Non-recurring event
+      dispatch(
+        putEventAsync({
+          cal: targetCalendar,
+          newEvent,
+        })
+      );
     }
-  } else {
-    // Non-recurring event
-    dispatch(
-      putEventAsync({
-        cal: targetCalendar,
-        newEvent,
-      })
-    );
-  }
 
     // Handle calendar change
     if (newCalId !== calId) {
