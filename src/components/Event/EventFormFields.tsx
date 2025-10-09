@@ -101,6 +101,7 @@ interface EventFormFieldsProps {
   setAllDay: (allday: boolean) => void;
   repetition: RepetitionObject;
   setRepetition: (repetition: RepetitionObject) => void;
+  typeOfAction?: "solo" | "all";
   attendees: userAttendee[];
   setAttendees: (attendees: userAttendee[]) => void;
   alarm: string;
@@ -155,6 +156,7 @@ export default function EventFormFields({
   setAllDay,
   repetition,
   setRepetition,
+  typeOfAction,
   attendees,
   setAttendees,
   alarm,
@@ -343,12 +345,13 @@ export default function EventFormFields({
             label="All day"
           />
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={showRepeat}
-                onChange={() => {
-                  const newShowRepeat = !showRepeat;
-                  setShowRepeat(newShowRepeat);
+              control={
+                <Checkbox
+                  checked={showRepeat}
+                  disabled={typeOfAction === "solo"}
+                  onChange={() => {
+                    const newShowRepeat = !showRepeat;
+                    setShowRepeat(newShowRepeat);
                   if (newShowRepeat) {
                     setRepetition({
                       freq: "daily",
@@ -393,6 +396,7 @@ export default function EventFormFields({
             repetition={repetition}
             eventStart={new Date(start)}
             setRepetition={setRepetition}
+            isOwn={true} /* Always editable when shown */
           />
         </FieldWithLabel>
       )}
