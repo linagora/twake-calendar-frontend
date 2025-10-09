@@ -24,7 +24,7 @@ import {
 import AvatarGroup from "@mui/material/AvatarGroup";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { deleteEventAsync, getEventAsync } from "../Calendars/CalendarSlice";
+import { deleteEventAsync } from "../Calendars/CalendarSlice";
 import { dlEvent } from "./EventApi";
 import EventDisplayModal from "./EventDisplay";
 import EventUpdateModal from "./EventUpdateModal";
@@ -512,6 +512,7 @@ export default function EventPreviewModal({
         onClose={() => setOpenUpdateModal(false)}
         eventId={eventId}
         calId={calId}
+        typeOfAction={typeOfAction}
       />
     </>
   );
