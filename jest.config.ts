@@ -1,5 +1,8 @@
 import type { Config } from "jest";
 
+// Set timezone to UTC for consistent test results across all environments
+process.env.TZ = "UTC";
+
 const config: Config = {
   collectCoverage: true,
   coverageDirectory: "coverage",
