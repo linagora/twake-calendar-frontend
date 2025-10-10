@@ -423,6 +423,10 @@ const CalendarSlice = createSlice({
       const { calId, event } = action.payload;
       state.list[calId].events[event.uid] = event;
     },
+    clearFetchCache: (state, action: PayloadAction<string>) => {
+      if (!state.list[action.payload]) return;
+      state.list[action.payload].lastCacheCleared = Date.now();
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -689,5 +693,6 @@ export const {
   createCalendar,
   updateEventLocal,
   removeTempCal,
+  clearFetchCache,
 } = CalendarSlice.actions;
 export default CalendarSlice.reducer;

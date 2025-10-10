@@ -138,6 +138,30 @@ export default function CalendarApp({
     calendarRange.end,
   ]);
 
+  useEffect(() => {
+    selectedCalendars.forEach((calId) => {
+      const calendar = calendars[calId];
+      if (calendar?.lastCacheCleared) {
+        delete fetchedRangesRef.current[calId];
+
+        dispatch(
+          getCalendarDetailAsync({
+            calId,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+          })
+        );
+
+        fetchedRangesRef.current[calId] = rangeKey;
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedCalendars.map((id) => calendars[id]?.lastCacheCleared).join(","),
+  ]);
+
   const [prevTempCalendars, setPrevTempCalendars] = useState<string[]>([]);
   const [prevRangeKey, setPrevRangeKey] = useState<string>("");
 
