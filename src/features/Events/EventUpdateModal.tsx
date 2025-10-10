@@ -495,22 +495,20 @@ function EventUpdateModal({
         const oldRepetition = normalizeRepetition(event.repetition);
         const newRepetition = normalizeRepetition(repetition);
 
-        console.log("[DEBUG] Repetition comparison:", {
-          old: oldRepetition,
-          new: newRepetition,
-          oldRaw: event.repetition,
-          newRaw: repetition,
-        });
+        // Normalize timezone for comparison (undefined, null, "" → null, resolve aliases)
+        const normalizeTimezone = (tz: string | undefined | null) => {
+          if (!tz) return null;
+          // Resolve timezone aliases (e.g., Asia/Saigon → Asia/Ho_Chi_Minh)
+          return resolveTimezone(tz);
+        };
+
+        const oldTimezone = normalizeTimezone(event.timezone);
+        const newTimezone = normalizeTimezone(timezone);
+        const timezoneChanged = oldTimezone !== newTimezone;
 
         const repetitionRulesChanged =
-          JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition);
-
-        console.log("[DEBUG] repetitionRulesChanged =", repetitionRulesChanged);
-        console.log(
-          repetitionRulesChanged
-            ? "[RELOAD] Repetition rules changed"
-            : "[OPTIMISTIC] Properties only"
-        );
+          JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition) ||
+          timezoneChanged;
 
         if (repetitionRulesChanged) {
           // Repetition rules changed - need server to recalculate instances
