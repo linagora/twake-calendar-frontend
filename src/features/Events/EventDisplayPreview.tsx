@@ -510,6 +510,10 @@ export default function EventPreviewModal({
       <EventUpdateModal
         open={openUpdateModal}
         onClose={() => setOpenUpdateModal(false)}
+        onCloseAll={() => {
+          setOpenUpdateModal(false);
+          onClose({}, "backdropClick");
+        }}
         eventId={eventId}
         calId={calId}
         typeOfAction={typeOfAction}

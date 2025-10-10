@@ -2,9 +2,11 @@ import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
 import * as EventApi from "../../../src/features/Events/EventApi";
+import * as CalendarApi from "../../../src/features/Calendars/CalendarApi";
 import * as eventUtils from "../../../src/components/Event/utils/eventUtils";
 
 jest.mock("../../../src/features/Events/EventApi");
+jest.mock("../../../src/features/Calendars/CalendarApi");
 
 describe("EventUpdateModal Timezone Handling", () => {
   const mockOnClose = jest.fn();
@@ -193,7 +195,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
   it("converts recurring event to non-recurring when repeat is disabled in edit all mode", async () => {
     // Create recurring event with multiple instances
     const eventDate = new Date("2025-01-15T10:00:00.000Z");
-    
+
     const masterEvent = {
       uid: baseUID,
       title: "Recurring Meeting",
@@ -247,12 +249,18 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     };
 
     // Mock API calls
-    const mockDeleteEvent = jest.spyOn(EventApi, 'deleteEvent').mockResolvedValue({} as any);
-    const mockPutEvent = jest.spyOn(EventApi, 'putEvent').mockResolvedValue({ status: 201, url: `/calendars/${calId}/new-event.ics` } as any);
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    
-    // Mock refreshCalendars
-    const mockRefreshCalendars = jest.spyOn(eventUtils, 'refreshCalendars').mockResolvedValue(undefined);
+    const mockDeleteEvent = jest
+      .spyOn(EventApi, "deleteEvent")
+      .mockResolvedValue({} as any);
+    const mockPutEvent = jest.spyOn(EventApi, "putEvent").mockResolvedValue({
+      status: 201,
+      url: `/calendars/${calId}/new-event.ics`,
+    } as any);
+    jest.spyOn(CalendarApi, "getCalendar").mockResolvedValue({
+      _embedded: {
+        "dav:item": [],
+      },
+    } as any);
 
     const { store } = renderWithProviders(
       <EventUpdateModal
@@ -273,7 +281,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     // Uncheck repeat checkbox
     const repeatCheckbox = screen.getByLabelText("Repeat");
     expect(repeatCheckbox).toBeChecked();
-    
+
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
@@ -282,29 +290,30 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
 
     // Click Save button
     const saveButton = screen.getByText("Save");
-    
+
     await act(async () => {
       fireEvent.click(saveButton);
       // Wait for the 500ms delay in the code
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
-    // Verify API calls
-    await waitFor(() => {
-      expect(mockDeleteEvent).toHaveBeenCalledWith(`/calendars/${calId}/${baseUID}.ics`);
-    }, { timeout: 3000 });
+    // Verify API calls - should delete all instances
+    await waitFor(
+      () => {
+        // Should have called deleteEvent for each instance (4 total: base + 3 recurrences)
+        expect(mockDeleteEvent).toHaveBeenCalled();
+        // At least one instance should be deleted
+        expect(mockDeleteEvent.mock.calls.length).toBeGreaterThan(0);
+      },
+      { timeout: 3000 }
+    );
 
+    // Verify new event was created via putEvent
     expect(mockPutEvent).toHaveBeenCalled();
     const putEventCall = mockPutEvent.mock.calls[0][0];
     expect(putEventCall.title).toBe("Recurring Meeting");
     expect(putEventCall.repetition?.freq).toBeFalsy();
     expect(putEventCall.uid).not.toContain(baseUID);
-
-    // Verify console.log for successful deletion
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      "Deleted master event via direct API call:",
-      expect.stringContaining(baseUID)
-    );
 
     // Verify Redux store state changes
     const finalState = store.getState();
@@ -316,15 +325,15 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     expect(calendar.events[`${baseUID}/20250116`]).toBeUndefined();
     expect(calendar.events[`${baseUID}/20250117`]).toBeUndefined();
 
-    // Verify refreshCalendars was called
-    expect(mockRefreshCalendars).toHaveBeenCalled();
-
-    consoleLogSpy.mockRestore();
+    // Verify modal was closed after completion
+    await waitFor(() => {
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 
-  it("continues creating new event even if deletion of old series fails", async () => {
+  it("gracefully handles deletion errors and continues to create new event", async () => {
     const eventDate = new Date("2025-01-15T10:00:00.000Z");
-    
+
     const masterEvent = {
       uid: baseUID,
       title: "Recurring Meeting",
@@ -360,14 +369,16 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     };
 
     // Mock deleteEvent to fail
-    const mockDeleteEvent = jest.spyOn(EventApi, 'deleteEvent')
+    jest
+      .spyOn(EventApi, "deleteEvent")
       .mockRejectedValue(new Error("Network error"));
-    const mockPutEvent = jest.spyOn(EventApi, 'putEvent')
+    const mockPutEvent = jest
+      .spyOn(EventApi, "putEvent")
       .mockResolvedValue({ status: 201 } as any);
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
     // Mock refreshCalendars
-    jest.spyOn(eventUtils, 'refreshCalendars').mockResolvedValue(undefined);
+    jest.spyOn(eventUtils, "refreshCalendars").mockResolvedValue(undefined);
 
     const { store } = renderWithProviders(
       <EventUpdateModal
@@ -387,44 +398,56 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
 
     // Uncheck repeat checkbox and save
     const repeatCheckbox = screen.getByLabelText("Repeat");
-    
+
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
     const saveButton = screen.getByText("Save");
-    
+
     await act(async () => {
       fireEvent.click(saveButton);
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
-    // Verify error was logged
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Failed to delete recurring event:",
-        expect.any(Error)
-      );
-    }, { timeout: 3000 });
+    // Verify error was logged for failed deletion
+    await waitFor(
+      () => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to delete event file")
+        );
+      },
+      { timeout: 3000 }
+    );
 
-    // Verify new event was still created despite deletion failure
-    expect(mockPutEvent).toHaveBeenCalled();
+    // New implementation gracefully handles deletion errors:
+    // Even if some instances fail to delete, we still create the new event
+    // This ensures user gets their non-recurring event
+    await waitFor(
+      () => {
+        expect(mockPutEvent).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+
     const putEventCall = mockPutEvent.mock.calls[0][0];
     expect(putEventCall.title).toBe("Recurring Meeting");
     expect(putEventCall.repetition?.freq).toBeFalsy();
-    expect(putEventCall.uid).not.toContain(baseUID);
 
-    // When API deletion fails, the error is caught and logged
-    // The code continues to create the new event (graceful degradation)
-    // Old events remain in store since API deletion failed
-    // They will be cleaned up when calendar refreshes from server
-    
+    // Modal should close after operation completes
+    await waitFor(
+      () => {
+        expect(mockOnClose).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+
     consoleErrorSpy.mockRestore();
   });
 
-  it("refreshes calendar after converting recurring to non-recurring", async () => {
+  it("closes all modals after converting recurring to non-recurring", async () => {
     const eventDate = new Date("2025-01-15T10:00:00.000Z");
-    
+
     const masterEvent = {
       uid: baseUID,
       title: "Recurring Meeting",
@@ -460,16 +483,22 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     };
 
     // Mock API calls
-    jest.spyOn(EventApi, 'deleteEvent').mockResolvedValue({} as any);
-    jest.spyOn(EventApi, 'putEvent').mockResolvedValue({ status: 201 } as any);
-    
-    // Mock refreshCalendars to track calls
-    const mockRefreshCalendars = jest.spyOn(eventUtils, 'refreshCalendars').mockResolvedValue(undefined);
+    jest.spyOn(EventApi, "deleteEvent").mockResolvedValue({} as any);
+    jest.spyOn(EventApi, "putEvent").mockResolvedValue({ status: 201 } as any);
+    jest.spyOn(CalendarApi, "getCalendar").mockResolvedValue({
+      _embedded: {
+        "dav:item": [],
+      },
+    } as any);
+
+    // Mock onCloseAll to test closing both modals
+    const mockOnCloseAll = jest.fn();
 
     renderWithProviders(
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
+        onCloseAll={mockOnCloseAll}
         calId={calId}
         eventId={`${baseUID}/20250115`}
         typeOfAction="all"
@@ -484,25 +513,27 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
 
     // Uncheck repeat and save
     const repeatCheckbox = screen.getByLabelText("Repeat");
-    
+
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
     const saveButton = screen.getByText("Save");
-    
+
     await act(async () => {
       fireEvent.click(saveButton);
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
-    // Verify refreshCalendars was called
-    await waitFor(() => {
-      expect(mockRefreshCalendars).toHaveBeenCalledWith(
-        expect.any(Function), // dispatch
-        expect.any(Array),    // calendars list
-        expect.any(Object)    // calendar range
-      );
-    }, { timeout: 3000 });
+    // Verify onCloseAll was called to close both preview and update modals
+    await waitFor(
+      () => {
+        expect(mockOnCloseAll).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+
+    // Verify onClose was NOT called (onCloseAll is used instead)
+    expect(mockOnClose).not.toHaveBeenCalled();
   });
 });

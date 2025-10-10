@@ -32,6 +32,7 @@ function EventUpdateModal({
   calId,
   open,
   onClose,
+  onCloseAll,
   eventData,
   typeOfAction,
 }: {
@@ -39,6 +40,7 @@ function EventUpdateModal({
   calId: string;
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onCloseAll?: () => void;
   eventData?: CalendarEvent | null;
   typeOfAction?: "solo" | "all";
 }) {
@@ -283,8 +285,17 @@ function EventUpdateModal({
     }
   }, [open, event, calId, userPersonnalCalendars, calendarsList]);
 
+  // Helper to close modal(s) - use onCloseAll if available to close preview modal too
+  const closeModal = () => {
+    if (onCloseAll) {
+      onCloseAll();
+    } else {
+      onClose({}, "backdropClick");
+    }
+  };
+
   const handleClose = () => {
-    onClose({}, "backdropClick");
+    closeModal();
     resetAllStateToDefault();
     initializedKeyRef.current = null;
   };
@@ -337,17 +348,100 @@ function EventUpdateModal({
       x_openpass_videoconference: meetingLink || undefined,
     };
 
-    // Close popup immediately for better UX
-    onClose({}, "backdropClick");
+    // Handle recurrence instances
+    const [, recurrenceId] = event.uid.split("/");
+
+    // Special case: When converting recurring event to non-recurring
+    // Keep modal open until all async operations complete
+    if (
+      recurrenceId &&
+      typeOfAction === "all" &&
+      event.repetition?.freq &&
+      !repetition.freq
+    ) {
+      const baseUID = event.uid.split("/")[0];
+
+      try {
+        // STEP 1: Delete ALL instances of recurring event
+        // Note: This system stores instances only, no master event file
+
+        // Collect all instances that need to be deleted
+        const instancesToDelete = Object.keys(targetCalendar.events)
+          .filter((eventId) => eventId.split("/")[0] === baseUID)
+          .map((eventId) => targetCalendar.events[eventId]);
+
+        // Get unique URLs to avoid deleting same file multiple times
+        const uniqueURLs = new Set<string>();
+        const instancesByURL = new Map<string, CalendarEvent[]>();
+
+        instancesToDelete.forEach((instance) => {
+          if (!instancesByURL.has(instance.URL)) {
+            instancesByURL.set(instance.URL, []);
+          }
+          instancesByURL.get(instance.URL)!.push(instance);
+          uniqueURLs.add(instance.URL);
+        });
+
+        // Delete each unique URL once
+        const deletePromises = Array.from(uniqueURLs).map(async (url) => {
+          try {
+            await deleteEvent(url);
+          } catch (deleteError: any) {
+            // Silently ignore 404 - file might already be deleted
+            const is404 =
+              deleteError.response?.status === 404 ||
+              deleteError.message?.includes("404") ||
+              deleteError.message?.includes("Not Found");
+
+            if (!is404) {
+              console.error(
+                `Failed to delete event file: ${deleteError.message}`
+              );
+            }
+          }
+        });
+
+        await Promise.all(deletePromises);
+
+        // STEP 2: Clean up all instances from Redux store
+        Object.keys(targetCalendar.events).forEach((eventId) => {
+          if (eventId.split("/")[0] === baseUID) {
+            dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
+          }
+        });
+
+        // STEP 3: Create new non-recurring event AFTER deletion
+        // Note: putEventAsync automatically fetches calendar events after creation,
+        // so we don't need to call refreshCalendars separately
+        await dispatch(
+          putEventAsync({
+            cal: targetCalendar,
+            newEvent: {
+              ...newEvent,
+              uid: crypto.randomUUID(),
+              URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
+            },
+          })
+        ).unwrap();
+
+        // STEP 4: Close modal after everything completes
+        closeModal();
+      } catch (err) {
+        console.error("Failed to convert recurring to non-recurring:", err);
+        // Keep modal open on error, user can retry or cancel
+      }
+
+      return;
+    }
+
+    // Close popup immediately for better UX (for non-special cases)
+    closeModal();
 
     // If converting from a non-repeating event to a repeating one,
     // remove the original single instance to avoid duplicates on the grid
     if (!event.repetition?.freq && repetition?.freq) {
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
     }
-
-    // Handle recurrence instances
-    const [, recurrenceId] = event.uid.split("/");
 
     // Execute API calls in background based on typeOfAction
     if (recurrenceId) {
@@ -360,58 +454,13 @@ function EventUpdateModal({
           })
         );
       } else if (typeOfAction === "all") {
-        // Update all instances
-
-        // Special case: When converting recurring event to non-recurring
-        if (event.repetition?.freq && !repetition.freq) {
-          // For repeat -> no-repeat, create a new non-repeating event
-          dispatch(
-            putEventAsync({
-              cal: targetCalendar,
-              newEvent: {
-                ...newEvent,
-                uid: crypto.randomUUID(), // Generate new ID for the single event
-                URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
-              },
-            })
-          );
-
-          // Delete the old repeating series - we need to be more direct and forceful
-          const baseUID = event.uid.split("/")[0];
-
-          try {
-            // Directly use the deleteEvent API without going through the store
-            const eventBaseURL = `/calendars/${calId}/${baseUID}.ics`;
-            await deleteEvent(eventBaseURL);
-            console.log(
-              "Deleted master event via direct API call:",
-              eventBaseURL
-            );
-
-            // Force a small delay to ensure deletion completes
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
-            // Make sure to clean up any instances in the store
-            Object.keys(targetCalendar.events).forEach((eventId) => {
-              if (eventId.split("/")[0] === baseUID) {
-                dispatch(
-                  removeEvent({ calendarUid: calId, eventUid: eventId })
-                );
-              }
-            });
-          } catch (err) {
-            console.error("Failed to delete recurring event:", err);
-            // Even if deletion fails, continue with creating the new event
-          }
-        } else {
-          // Normal update for recurring events
-          dispatch(
-            updateSeriesAsync({
-              cal: targetCalendar,
-              event: { ...newEvent, recurrenceId },
-            })
-          );
-        }
+        // Normal update for recurring events
+        dispatch(
+          updateSeriesAsync({
+            cal: targetCalendar,
+            event: { ...newEvent, recurrenceId },
+          })
+        );
 
         // Refresh calendars to ensure all instances are updated
         const calendarRange = getCalendarRange(new Date(start));
