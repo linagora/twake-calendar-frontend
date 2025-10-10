@@ -174,6 +174,77 @@ describe("CalendarSelection", () => {
     fireEvent.click(addButton);
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
+  it("BUGFIX: remove dots in mini calendar when unselecting personnal calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    const checkbox = screen.getByLabelText("Calendar personnal");
+    // checkbox checked : events shown
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+
+    // checkbox unchecked : events hidden
+    fireEvent.click(checkbox);
+
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
+
+    // checkbox rechecked : events shown
+    fireEvent.click(checkbox);
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
+  it("BUGFIX: remove dots in mini calendar when unselecting delegated calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    // hide personnal event first
+    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    const checkbox = screen.getByLabelText("Calendar delegated");
+
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
+
+    // checkbox checked : events shown
+    fireEvent.click(checkbox);
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
+  it("BUGFIX: remove dots in mini calendar when unselecting shared calendar", () => {
+    renderWithProviders(<CalendarLayout />, preloadedState);
+
+    // hide personnal event first
+    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    const checkbox = screen.getByLabelText("Calendar shared");
+
+    // checkbox unchecked : events hidden
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).not.toHaveClass("event-dot");
+
+    // checkbox checked : events shown
+    fireEvent.click(checkbox);
+    expect(
+      screen.getByTestId(
+        `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
+      )
+    ).toHaveClass("event-dot");
+  });
 });
 
 describe("calendar Availability search", () => {

@@ -63,30 +63,11 @@ export default function CalendarApp({
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
   const pending = useAppSelector((state) => state.calendars.pending);
-  const selectPersonnalCalendars = createSelector(
-    (state) => state.calendars,
-    (calendars) =>
-      Object.keys(calendars.list).map((id) => {
-        if (id.split("/")[0] === userId) {
-          return calendars.list[id];
-        }
-        return {} as Calendars;
-      })
-  );
-  const userPersonnalCalendars: Calendars[] = useAppSelector(
-    selectPersonnalCalendars
-  );
-  let personnalEvents: CalendarEvent[] = [];
-  Object.keys(userPersonnalCalendars).forEach((value, id) => {
-    if (userPersonnalCalendars[id].events) {
-      personnalEvents = personnalEvents.concat(
-        Object.keys(userPersonnalCalendars[id].events).map(
-          (eventid) => userPersonnalCalendars[id].events[eventid]
-        )
-      );
-    }
-  });
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+
+  const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) =>
+    Object.values(calendars[calId].events)
+  );
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded
@@ -296,7 +277,7 @@ export default function CalendarApp({
           }}
           tileContent={({ date }) => {
             const classNames: string[] = [];
-            const hasEvents = personnalEvents.some((event) => {
+            const hasEvents = dottedEvents.some((event) => {
               const eventDate = new Date(event.start);
               return (
                 eventDate.getFullYear() === date.getFullYear() &&
