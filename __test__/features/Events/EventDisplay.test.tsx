@@ -17,8 +17,7 @@ import {
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
-  const day = new Date();
-  const RealDateToLocaleString = Date.prototype.toLocaleString;
+  const day = new Date("2025-01-15T10:00:00.000Z"); // Fixed date in UTC: Jan 15, 2025 10:00 AM UTC
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -102,13 +101,6 @@ describe("Event Preview Display", () => {
   };
 
   it("renders correctly event data", () => {
-    jest.spyOn(Date.prototype, "toLocaleString").mockImplementation(function (
-      this: Date,
-      locales?: Intl.LocalesArgument,
-      options?: Intl.DateTimeFormatOptions | undefined
-    ): string {
-      return RealDateToLocaleString.call(this, "en-UK", options);
-    });
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -118,19 +110,20 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    const weekday = day.toLocaleString("en-UK", { weekday: "long" });
-    const month = day.toLocaleString("en-UK", { month: "long" });
-    const dayOfMonth = day.getDate().toString();
 
+    // With UTC timezone, we can assert exact values
+    // Date: January 15, 2025 10:00 AM UTC
     expect(screen.getByText("Test Event")).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(weekday, "i"))).toBeInTheDocument();
-    expect(
-      screen.getByText(new RegExp(`\\b${dayOfMonth}\\b ${month}`))
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Wednesday/i)).toBeInTheDocument();
+    expect(screen.getByText(/January/i)).toBeInTheDocument();
+    expect(screen.getByText(/15/)).toBeInTheDocument();
 
-    // Check time range is displayed (format may vary by locale/implementation)
-    // Use regex to match time pattern since exact format depends on component implementation
-    expect(screen.getByText(/\d{2}:\d{2} – \d{2}:\d{2}/)).toBeInTheDocument();
+    // Check time is displayed with exact values
+    // Format: "Wednesday, January 15, 2025 at 10:00 AM" and " – 10:00 AM" are in separate elements
+    expect(
+      screen.getByText(/Wednesday, January 15, 2025 at 10:00 AM/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/– 10:00 AM/)).toBeInTheDocument();
 
     expect(screen.getByText("Calendar")).toBeInTheDocument();
   });
@@ -569,7 +562,7 @@ describe("Event Preview Display", () => {
 
 describe("Event Full Display", () => {
   const mockOnClose = jest.fn();
-  const day = new Date();
+  const day = new Date("2025-01-15T10:00:00.000Z"); // Fixed date in UTC: Jan 15, 2025 10:00 AM UTC
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -645,20 +638,12 @@ describe("Event Full Display", () => {
 
   it("renders correctly event data with fixed timezone", () => {
     // Use fixed timezone UTC for consistent test results across all environments
-    // Calculate expected local time from UTC time for exact value matching
     const fixedDate = new Date("2025-01-15T10:00:00.000Z"); // 10AM UTC
     const endDate = new Date(fixedDate.getTime() + 3600000); // 11AM UTC
 
-    // Format expected values in local timezone (what formatLocalDateTime produces)
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const formatLocal = (date: Date) => {
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-        date.getDate()
-      )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    };
-
-    const expectedStart = formatLocal(fixedDate);
-    const expectedEnd = formatLocal(endDate);
+    // With UTC timezone set, formatLocalDateTime produces predictable values
+    const expectedStart = "2025-01-15T10:00"; // 10:00 AM UTC
+    const expectedEnd = "2025-01-15T11:00"; // 11:00 AM UTC
 
     const stateWithFixedDate = {
       ...preloadedState,
@@ -693,11 +678,10 @@ describe("Event Full Display", () => {
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
 
-    // Use exact equality assertions with calculated local time values
+    // Exact value assertions with declarative expected values
     const startInput = screen.getByLabelText("Start");
     expect(startInput).toBeInTheDocument();
     expect(startInput).toHaveAttribute("type", "datetime-local");
-    // Exact value assertion - formatLocalDateTime converts UTC to local time
     expect(startInput.getAttribute("value")).toBe(expectedStart);
 
     const endInput = screen.getByLabelText("End");
@@ -1161,7 +1145,7 @@ describe("Event Full Display", () => {
       .mockImplementation((payload) => () => Promise.resolve(payload) as any);
     const spyRemove = jest.spyOn(eventThunks, "removeEvent");
 
-    const day = new Date();
+    const testDate = new Date("2025-01-15T10:00:00.000Z");
     const preloadedTwoCals = {
       ...preloadedState,
       calendars: {
@@ -1176,8 +1160,8 @@ describe("Event Full Display", () => {
                 id: "event1",
                 title: "Test Event",
                 calId: "667037022b752d0026472254/cal1",
-                start: day.toISOString(),
-                end: day.toISOString(),
+                start: testDate.toISOString(),
+                end: testDate.toISOString(),
                 organizer: { cn: "test", cal_address: "test@test.com" },
                 attendee: [{ cn: "test", cal_address: "test@test.com" }],
               },
@@ -1229,16 +1213,15 @@ describe("Event Full Display", () => {
 
     // Mock getEvent API call to avoid API errors in test
     const EventApi = require("../../../src/features/Events/EventApi");
+    const testDate = new Date("2025-01-15T10:00:00.000Z");
     jest.spyOn(EventApi, "getEvent").mockResolvedValue({
       uid: "base",
       title: "Recurring event",
       calId: "667037022b752d0026472254/cal1",
-      start: new Date().toISOString(),
-      end: new Date().toISOString(),
+      start: testDate.toISOString(),
+      end: testDate.toISOString(),
       repetition: { freq: "daily", interval: 1 },
     });
-
-    const day = new Date();
     const preloadedRecurrence = {
       ...preloadedState,
       calendars: {
@@ -1252,8 +1235,8 @@ describe("Event Full Display", () => {
                 uid: "base",
                 calId: "667037022b752d0026472254/cal1",
                 title: "Recurring event",
-                start: day.toISOString(),
-                end: day.toISOString(),
+                start: testDate.toISOString(),
+                end: testDate.toISOString(),
                 organizer: { cal_address: "test@test.com" },
                 attendee: [{ cal_address: "test@test.com", cn: "Test" }],
                 repetition: { freq: "daily", interval: 1 },
@@ -1262,8 +1245,8 @@ describe("Event Full Display", () => {
                 uid: "base/20250101",
                 calId: "667037022b752d0026472254/cal1",
                 title: "Recurring event",
-                start: day.toISOString(),
-                end: day.toISOString(),
+                start: testDate.toISOString(),
+                end: testDate.toISOString(),
                 organizer: { cal_address: "test@test.com" },
                 attendee: [{ cal_address: "test@test.com", cn: "Test" }],
               },
@@ -1271,8 +1254,8 @@ describe("Event Full Display", () => {
                 uid: "base/20250201",
                 calId: "667037022b752d0026472254/cal1",
                 title: "Recurring event",
-                start: day.toISOString(),
-                end: day.toISOString(),
+                start: testDate.toISOString(),
+                end: testDate.toISOString(),
                 organizer: { cal_address: "test@test.com" },
                 attendee: [{ cal_address: "test@test.com", cn: "Test" }],
               },
