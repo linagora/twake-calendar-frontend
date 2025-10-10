@@ -476,14 +476,41 @@ function EventUpdateModal({
         // Update all instances - check if repetition rules changed
         const baseUID = event.uid.split("/")[0];
 
-        // Detect if repetition rules changed (requires instance recalculation)
+        // Normalize repetition objects for accurate comparison
+        const normalizeRepetition = (rep: RepetitionObject | undefined) => {
+          if (!rep || !rep.freq) return null;
+
+          return {
+            freq: rep.freq,
+            interval: rep.interval || 1,
+            byday:
+              !rep.byday || rep.byday.length === 0
+                ? null
+                : [...rep.byday].sort(),
+            occurrences: rep.occurrences || null,
+            endDate: rep.endDate || null,
+          };
+        };
+
+        const oldRepetition = normalizeRepetition(event.repetition);
+        const newRepetition = normalizeRepetition(repetition);
+
+        console.log("[DEBUG] Repetition comparison:", {
+          old: oldRepetition,
+          new: newRepetition,
+          oldRaw: event.repetition,
+          newRaw: repetition,
+        });
+
         const repetitionRulesChanged =
-          event.repetition?.freq !== repetition.freq ||
-          event.repetition?.interval !== repetition.interval ||
-          JSON.stringify(event.repetition?.byday) !==
-            JSON.stringify(repetition.byday) ||
-          event.repetition?.occurrences !== repetition.occurrences ||
-          event.repetition?.endDate !== repetition.endDate;
+          JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition);
+
+        console.log("[DEBUG] repetitionRulesChanged =", repetitionRulesChanged);
+        console.log(
+          repetitionRulesChanged
+            ? "[RELOAD] Repetition rules changed"
+            : "[OPTIMISTIC] Properties only"
+        );
 
         if (repetitionRulesChanged) {
           // Repetition rules changed - need server to recalculate instances
@@ -545,6 +572,10 @@ function EventUpdateModal({
             })
           )
             .unwrap()
+            .then(() => {
+              // Clear cache to ensure navigation shows updated data
+              dispatch(clearFetchCache(calId));
+            })
             .catch((error) => {
               Object.values(oldInstances).forEach((oldEvent) => {
                 dispatch(updateEventLocal({ calId, event: oldEvent }));
