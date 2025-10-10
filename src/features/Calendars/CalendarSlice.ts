@@ -432,6 +432,10 @@ const CalendarSlice = createSlice({
     setTimeZone: (state, action: PayloadAction<string>) => {
       state.timeZone = action.payload;
     },
+    clearFetchCache: (state, action: PayloadAction<string>) => {
+      if (!state.list[action.payload]) return;
+      state.list[action.payload].lastCacheCleared = Date.now();
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -699,5 +703,6 @@ export const {
   updateEventLocal,
   removeTempCal,
   setTimeZone,
+  clearFetchCache,
 } = CalendarSlice.actions;
 export default CalendarSlice.reducer;
