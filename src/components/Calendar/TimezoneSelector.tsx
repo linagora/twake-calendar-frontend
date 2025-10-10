@@ -1,5 +1,11 @@
-import { TextField, Box, Autocomplete, ListItem } from "@mui/material";
-import { useMemo } from "react";
+import {
+  Autocomplete,
+  Button,
+  ListItem,
+  Popover,
+  TextField,
+} from "@mui/material";
+import { MouseEvent, useMemo, useState } from "react";
 import { TIMEZONES } from "../../utils/timezone-data";
 
 interface TimezoneSelectProps {
@@ -8,6 +14,8 @@ interface TimezoneSelectProps {
 }
 
 export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
   const resolveTimezone = (tzName: string): string => {
     if (TIMEZONES.zones[tzName]) {
       return tzName;
@@ -17,6 +25,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
     }
     return tzName;
   };
+
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
     const browserTz = resolveTimezone(
@@ -43,6 +52,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
+
   const options = useMemo(() => {
     return timezoneList.zones.map((tz) => ({
       value: tz,
@@ -54,12 +64,80 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
   const selectedOption =
     options.find((opt) => opt.value === value) || options[0];
 
+  const handleOpen = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
+  return (
+    <>
+      <Button
+        variant="text"
+        size="small"
+        onClick={handleOpen}
+        sx={{
+          textTransform: "none",
+          minWidth: "auto",
+          padding: "2px 4px",
+          margin: 0,
+          lineHeight: 1.2,
+        }}
+      >
+        {selectedOption ? selectedOption.offset : "Select Timezone"}
+      </Button>
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        slotProps={{
+          paper: {
+            sx: { width: 280, maxHeight: 400, overflow: "auto", p: 1 },
+          },
+        }}
+      >
+        <TimeZoneSearch
+          selectedOption={selectedOption}
+          onChange={onChange}
+          handleClose={handleClose}
+          options={options}
+        />
+      </Popover>
+    </>
+  );
+}
+function TimeZoneSearch({
+  selectedOption,
+  onChange,
+  handleClose,
+  options,
+}: {
+  selectedOption: { value: string; label: string; offset: string };
+  onChange: (value: string) => void;
+  handleClose: () => void;
+  options: { value: string; label: string; offset: string }[];
+}) {
   return (
     <Autocomplete
+      autoFocus
       value={selectedOption}
       onChange={(event, newValue) => {
         if (newValue) {
           onChange(newValue.value);
+          handleClose(); // close after selection
         }
       }}
       options={options}
@@ -67,13 +145,14 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
       renderInput={(params) => (
         <TextField
           {...params}
-          variant="standard"
+          variant="outlined"
           size="small"
+          placeholder="Search timezone..."
           InputProps={{
             ...params.InputProps,
             style: {
-              fontSize: "10px",
-              padding: "2px 4px",
+              fontSize: "12px",
+              padding: "4px",
             },
           }}
         />
@@ -85,16 +164,6 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
       )}
       isOptionEqualToValue={(option, value) => option.value === value.value}
       disableClearable
-      onClick={(e) => e.stopPropagation()}
-      slotProps={{
-        paper: {
-          style: {
-            maxHeight: 300,
-            width: 250,
-          },
-        },
-      }}
-      renderValue={(value) => <div>{value.offset}</div>}
     />
   );
 }

@@ -373,7 +373,7 @@ export default function CalendarApp({
             const showSelector =
               currentView === "timeGridWeek" || currentView === "timeGridDay";
             return (
-              <div>
+              <div className="weekSelector">
                 <div>{arg.text}</div>
                 {showSelector && (
                   <TimezoneSelector value={timezone} onChange={setTimezone} />
