@@ -14,4 +14,5 @@ export interface Calendars {
   version?: string;
   events: Record<string, CalendarEvent>;
   visibility: "private" | "public";
+  lastCacheCleared?: number;
 }

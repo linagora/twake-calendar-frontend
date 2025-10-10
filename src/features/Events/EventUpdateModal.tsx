@@ -14,6 +14,8 @@ import {
   moveEventAsync,
   updateEventInstanceAsync,
   updateSeriesAsync,
+  updateEventLocal,
+  clearFetchCache,
 } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
@@ -23,9 +25,13 @@ import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtil
 import EventFormFields, {
   formatDateTimeInTimezone,
 } from "../../components/Event/EventFormFields";
-import { getEvent, deleteEvent } from "./EventApi";
+import { getEvent, deleteEvent, putEvent } from "./EventApi";
 import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
+
+const showErrorNotification = (message: string) => {
+  console.error(`[ERROR] ${message}`);
+};
 
 function EventUpdateModal({
   eventId,
@@ -352,7 +358,6 @@ function EventUpdateModal({
     const [, recurrenceId] = event.uid.split("/");
 
     // Special case: When converting recurring event to non-recurring
-    // Keep modal open until all async operations complete
     if (
       recurrenceId &&
       typeOfAction === "all" &&
@@ -360,6 +365,9 @@ function EventUpdateModal({
       !repetition.freq
     ) {
       const baseUID = event.uid.split("/")[0];
+
+      // Close modal immediately for better UX
+      closeModal();
 
       try {
         // STEP 1: Delete ALL instances of recurring event
@@ -403,29 +411,32 @@ function EventUpdateModal({
 
         await Promise.all(deletePromises);
 
-        // STEP 2: Clean up all instances from Redux store
+        // Small delay to ensure backend processes deletions
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // STEP 2: Create new non-recurring event
+        const newEventUID = crypto.randomUUID();
+        const finalNewEvent = {
+          ...newEvent,
+          uid: newEventUID,
+          URL: `/calendars/${newCalId || calId}/${newEventUID}.ics`,
+        };
+
+        // STEP 3: Persist new event to server
+        await putEvent(finalNewEvent, targetCalendar.ownerEmails?.[0]);
+
+        // STEP 4: Update Redux store - Add new event first to prevent empty grid
+        dispatch(updateEventLocal({ calId, event: finalNewEvent }));
+
+        // STEP 5: Remove old recurring instances (swap is now instant)
         Object.keys(targetCalendar.events).forEach((eventId) => {
           if (eventId.split("/")[0] === baseUID) {
             dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
           }
         });
 
-        // STEP 3: Create new non-recurring event AFTER deletion
-        // Note: putEventAsync automatically fetches calendar events after creation,
-        // so we don't need to call refreshCalendars separately
-        await dispatch(
-          putEventAsync({
-            cal: targetCalendar,
-            newEvent: {
-              ...newEvent,
-              uid: crypto.randomUUID(),
-              URL: `/calendars/${newCalId || calId}/${crypto.randomUUID()}.ics`,
-            },
-          })
-        ).unwrap();
-
-        // STEP 4: Close modal after everything completes
-        closeModal();
+        // Clear cache to ensure navigation to other weeks works
+        dispatch(clearFetchCache(calId));
       } catch (err) {
         console.error("Failed to convert recurring to non-recurring:", err);
         // Keep modal open on error, user can retry or cancel
@@ -437,47 +448,141 @@ function EventUpdateModal({
     // Close popup immediately for better UX (for non-special cases)
     closeModal();
 
-    // If converting from a non-repeating event to a repeating one,
-    // remove the original single instance to avoid duplicates on the grid
-    if (!event.repetition?.freq && repetition?.freq) {
-      dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
-    }
-
     // Execute API calls in background based on typeOfAction
     if (recurrenceId) {
       if (typeOfAction === "solo") {
-        // Update just this instance
+        // Update single instance with optimistic update + rollback
+        const oldEvent = { ...event };
+
+        dispatch(
+          updateEventLocal({
+            calId,
+            event: { ...newEvent, recurrenceId },
+          })
+        );
+
         dispatch(
           updateEventInstanceAsync({
             cal: targetCalendar,
             event: { ...newEvent, recurrenceId },
           })
-        );
+        )
+          .unwrap()
+          .catch((error) => {
+            dispatch(updateEventLocal({ calId, event: oldEvent }));
+            showErrorNotification("Failed to update event. Changes reverted.");
+          });
       } else if (typeOfAction === "all") {
-        // Normal update for recurring events
-        dispatch(
-          updateSeriesAsync({
-            cal: targetCalendar,
-            event: { ...newEvent, recurrenceId },
-          })
-        );
+        // Update all instances - check if repetition rules changed
+        const baseUID = event.uid.split("/")[0];
 
-        // Refresh calendars to ensure all instances are updated
-        const calendarRange = getCalendarRange(new Date(start));
-        await refreshCalendars(
-          dispatch,
-          Object.values(calendarsList),
-          calendarRange
-        );
+        // Detect if repetition rules changed (requires instance recalculation)
+        const repetitionRulesChanged =
+          event.repetition?.freq !== repetition.freq ||
+          event.repetition?.interval !== repetition.interval ||
+          JSON.stringify(event.repetition?.byday) !==
+            JSON.stringify(repetition.byday) ||
+          event.repetition?.occurrences !== repetition.occurrences ||
+          event.repetition?.endDate !== repetition.endDate;
+
+        if (repetitionRulesChanged) {
+          // Repetition rules changed - need server to recalculate instances
+          dispatch(
+            updateSeriesAsync({
+              cal: targetCalendar,
+              event: { ...newEvent, recurrenceId },
+            })
+          );
+
+          // Fetch to get new instances with correct timing
+          const calendarRange = getCalendarRange(new Date(start));
+          await refreshCalendars(
+            dispatch,
+            Object.values(calendarsList),
+            calendarRange
+          );
+
+          // Clear cache after reload
+          dispatch(clearFetchCache(calId));
+        } else {
+          // Only properties changed - use optimistic update
+          const oldInstances: Record<string, CalendarEvent> = {};
+          Object.keys(targetCalendar.events)
+            .filter((eventId) => eventId.split("/")[0] === baseUID)
+            .forEach((eventId) => {
+              oldInstances[eventId] = { ...targetCalendar.events[eventId] };
+            });
+
+          Object.keys(oldInstances).forEach((eventId) => {
+            const instance = oldInstances[eventId];
+
+            dispatch(
+              updateEventLocal({
+                calId,
+                event: {
+                  ...instance,
+                  title: newEvent.title,
+                  description: newEvent.description,
+                  location: newEvent.location,
+                  allday: newEvent.allday,
+                  repetition: newEvent.repetition,
+                  class: newEvent.class,
+                  transp: newEvent.transp,
+                  timezone: newEvent.timezone,
+                  attendee: newEvent.attendee,
+                  alarm: newEvent.alarm,
+                  x_openpass_videoconference:
+                    newEvent.x_openpass_videoconference,
+                },
+              })
+            );
+          });
+
+          dispatch(
+            updateSeriesAsync({
+              cal: targetCalendar,
+              event: { ...newEvent, recurrenceId },
+            })
+          )
+            .unwrap()
+            .catch((error) => {
+              Object.values(oldInstances).forEach((oldEvent) => {
+                dispatch(updateEventLocal({ calId, event: oldEvent }));
+              });
+
+              showErrorNotification(
+                "Failed to update recurring event. Changes reverted."
+              );
+            });
+        }
       }
     } else {
-      // Non-recurring event
-      dispatch(
-        putEventAsync({
-          cal: targetCalendar,
-          newEvent,
-        })
-      );
+      // Non-recurring event (or converting to recurring)
+
+      // Special case: Converting no-repeat to repeat
+      if (!event.repetition?.freq && repetition?.freq) {
+        const oldEventUID = event.uid;
+
+        // API call: putEventAsync will create recurring event and fetch all instances
+        dispatch(putEventAsync({ cal: targetCalendar, newEvent }))
+          .unwrap()
+          .then(() => {
+            // Remove old single event AFTER new recurring instances are added to store
+            // This prevents empty grid during the transition
+            dispatch(
+              removeEvent({ calendarUid: calId, eventUid: oldEventUID })
+            );
+
+            // Clear cache to ensure navigation to other weeks works
+            dispatch(clearFetchCache(calId));
+          })
+          .catch((error) => {
+            showErrorNotification("Failed to create recurring event.");
+          });
+      } else {
+        // Normal non-recurring event update
+        dispatch(putEventAsync({ cal: targetCalendar, newEvent }));
+      }
     }
 
     // Handle calendar change
