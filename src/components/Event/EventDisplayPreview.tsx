@@ -30,6 +30,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { dlEvent } from "../../features/Events/EventApi";
 import EventDisplayModal from "../../features/Events/EventDisplay";
+import { getTimezoneOffset } from "../Calendar/TimezoneSelector";
 import { ResponsiveDialog } from "../Dialog";
 import { EditModeDialog } from "./EditModeDialog";
 import EventDuplication from "./EventDuplicate";
@@ -51,6 +52,9 @@ export default function EventPreviewModal({
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
+  const timezone =
+    useAppSelector((state) => state.calendars.timeZone) ??
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
   const calendarList = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
@@ -234,10 +238,10 @@ export default function EventPreviewModal({
                 {event.title}
               </Typography>
               <Typography variant="body2" color="textSecondary" gutterBottom>
-                {formatDate(event.start, event.allday)}
+                {formatDate(event.start, timezone, event.allday)}
                 {event.end &&
-                  formatEnd(event.start, event.end, event.allday) &&
-                  ` – ${formatEnd(event.start, event.end, event.allday)}`}
+                  formatEnd(event.start, event.end, timezone, event.allday) &&
+                  ` – ${formatEnd(event.start, event.end, timezone, event.allday)} ${getTimezoneOffset(timezone)}`}
               </Typography>
             </>
           )
@@ -511,13 +515,14 @@ export default function EventPreviewModal({
   );
 }
 
-function formatDate(date: Date | string, allday?: boolean) {
+function formatDate(date: Date | string, timeZone?: string, allday?: boolean) {
   if (allday) {
     return new Date(date).toLocaleDateString(undefined, {
       year: "numeric",
       month: "long",
       weekday: "long",
       day: "numeric",
+      timeZone,
     });
   } else {
     return new Date(date).toLocaleString(undefined, {
@@ -527,11 +532,17 @@ function formatDate(date: Date | string, allday?: boolean) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone,
     });
   }
 }
 
-function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
+function formatEnd(
+  start: Date | string,
+  end: Date | string,
+  timeZone?: string,
+  allday?: boolean
+) {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -547,12 +558,14 @@ function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
           year: "numeric",
           month: "short",
           day: "numeric",
+          timeZone,
         });
   } else {
     if (sameDay) {
       return endDate.toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone,
       });
     }
     return endDate.toLocaleString(undefined, {
@@ -561,6 +574,7 @@ function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone,
     });
   }
 }

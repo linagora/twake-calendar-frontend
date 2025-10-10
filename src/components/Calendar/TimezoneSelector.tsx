@@ -16,43 +16,14 @@ interface TimezoneSelectProps {
 export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const resolveTimezone = (tzName: string): string => {
-    if (TIMEZONES.zones[tzName]) {
-      return tzName;
-    }
-    if (TIMEZONES.aliases[tzName]) {
-      return TIMEZONES.aliases[tzName].aliasTo;
-    }
-    return tzName;
-  };
-
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
     const browserTz = resolveTimezone(
       Intl.DateTimeFormat().resolvedOptions().timeZone
     );
 
-    const getTimezoneOffset = (tzName: string): string => {
-      const resolvedTz = resolveTimezone(tzName);
-      const tzData = TIMEZONES.zones[resolvedTz];
-      if (!tzData) return "";
-
-      const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
-      if (!icsMatch) return "";
-
-      const offset = icsMatch[1];
-      const hours = parseInt(offset.slice(0, 3));
-      const minutes = parseInt(offset.slice(3));
-
-      if (minutes === 0) {
-        return `UTC${hours >= 0 ? "+" : ""}${hours}`;
-      }
-      return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
-    };
-
     return { zones, browserTz, getTimezoneOffset };
   }, []);
-
   const options = useMemo(() => {
     return timezoneList.zones.map((tz) => ({
       value: tz,
@@ -147,12 +118,11 @@ function TimeZoneSearch({
           {...params}
           variant="outlined"
           size="small"
-          placeholder="Search timezone..."
           InputProps={{
             ...params.InputProps,
             style: {
-              fontSize: "12px",
-              padding: "4px",
+              fontSize: "10px",
+              padding: "2px 4px",
             },
           }}
         />
@@ -164,6 +134,44 @@ function TimeZoneSearch({
       )}
       isOptionEqualToValue={(option, value) => option.value === value.value}
       disableClearable
+      onClick={(e) => e.stopPropagation()}
+      slotProps={{
+        paper: {
+          style: {
+            maxHeight: 300,
+            width: 250,
+          },
+        },
+      }}
+      renderValue={(value) => <div>{value.offset}</div>}
     />
   );
+}
+
+export function resolveTimezone(tzName: string): string {
+  if (TIMEZONES.zones[tzName]) {
+    return tzName;
+  }
+  if (TIMEZONES.aliases[tzName]) {
+    return TIMEZONES.aliases[tzName].aliasTo;
+  }
+  return tzName;
+}
+
+export function getTimezoneOffset(tzName: string): string {
+  const resolvedTz = resolveTimezone(tzName);
+  const tzData = TIMEZONES.zones[resolvedTz];
+  if (!tzData) return "";
+
+  const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
+  if (!icsMatch) return "";
+
+  const offset = icsMatch[1];
+  const hours = parseInt(offset.slice(0, 3));
+  const minutes = parseInt(offset.slice(3));
+
+  if (minutes === 0) {
+    return `UTC${hours >= 0 ? "+" : ""}${hours}`;
+  }
+  return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
 }

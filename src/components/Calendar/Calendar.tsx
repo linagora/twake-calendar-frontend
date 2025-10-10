@@ -11,7 +11,10 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import {
+  getCalendarDetailAsync,
+  setTimeZone,
+} from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   computeStartOfTheWeek,
@@ -74,9 +77,7 @@ export default function CalendarApp({
   );
 
   const [currentView, setCurrentView] = useState("timeGridWeek");
-  const [timezone, setTimezone] = useState<string>(
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
+  const timezone = useAppSelector((state) => state.calendars.timeZone);
 
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
@@ -376,7 +377,12 @@ export default function CalendarApp({
               <div className="weekSelector">
                 <div>{arg.text}</div>
                 {showSelector && (
-                  <TimezoneSelector value={timezone} onChange={setTimezone} />
+                  <TimezoneSelector
+                    value={timezone}
+                    onChange={(newTimezone: string) =>
+                      dispatch(setTimeZone(newTimezone))
+                    }
+                  />
                 )}
               </div>
             );
