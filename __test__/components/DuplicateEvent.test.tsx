@@ -95,6 +95,9 @@ describe("EventDuplication", () => {
 
     fireEvent.click(screen.getByText("Duplicate event"));
 
+    // Cancel button only appears in expanded mode
+    fireEvent.click(screen.getByText("More options"));
+
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
     expect(handleClose).toHaveBeenCalled();

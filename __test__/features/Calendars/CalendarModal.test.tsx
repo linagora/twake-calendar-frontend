@@ -325,9 +325,12 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     const input = screen.getByLabelText(/CalDAV access/i);
     expect(input).toHaveValue("https://cal.example.org/calendars/user1/cal1");
 
-    // Click copy button
-    const copyButton = screen.getAllByRole("button")[0];
-    fireEvent.click(copyButton);
+    // Click copy button (find button containing ContentCopyIcon)
+    const copyIcon = screen.getByTestId("ContentCopyIcon");
+    const copyButton = copyIcon.closest("button");
+    if (copyButton) {
+      fireEvent.click(copyButton);
+    }
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       "https://cal.example.org/calendars/user1/cal1"

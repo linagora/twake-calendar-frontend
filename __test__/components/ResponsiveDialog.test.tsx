@@ -295,4 +295,80 @@ describe("ResponsiveDialog", () => {
     expect(screen.getByText("Extended Content")).toBeInTheDocument();
     expect(screen.getByLabelText("show less")).toBeInTheDocument();
   });
+
+  it("renders expand and close icons in normal mode when showHeaderActions is true", () => {
+    render(
+      <ResponsiveDialog
+        open={true}
+        onClose={mockOnClose}
+        title="Test"
+        isExpanded={false}
+        onExpandToggle={mockOnExpandToggle}
+        showHeaderActions={true}
+      >
+        <div>Content</div>
+      </ResponsiveDialog>
+    );
+
+    expect(screen.getByLabelText("expand")).toBeInTheDocument();
+    expect(screen.getByLabelText("close")).toBeInTheDocument();
+  });
+
+  it("does not render header icons when showHeaderActions is false", () => {
+    render(
+      <ResponsiveDialog
+        open={true}
+        onClose={mockOnClose}
+        title="Test Title"
+        isExpanded={false}
+        onExpandToggle={mockOnExpandToggle}
+        showHeaderActions={false}
+      >
+        <div>Content</div>
+      </ResponsiveDialog>
+    );
+
+    expect(screen.queryByLabelText("expand")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("close")).not.toBeInTheDocument();
+    expect(screen.getByText("Test Title")).toBeInTheDocument();
+  });
+
+  it("calls onClose when close icon is clicked", () => {
+    render(
+      <ResponsiveDialog
+        open={true}
+        onClose={mockOnClose}
+        title="Test"
+        isExpanded={false}
+        showHeaderActions={true}
+      >
+        <div>Content</div>
+      </ResponsiveDialog>
+    );
+
+    const closeButton = screen.getByLabelText("close");
+    fireEvent.click(closeButton);
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onExpandToggle when expand icon is clicked", () => {
+    render(
+      <ResponsiveDialog
+        open={true}
+        onClose={mockOnClose}
+        title="Test"
+        isExpanded={false}
+        onExpandToggle={mockOnExpandToggle}
+        showHeaderActions={true}
+      >
+        <div>Content</div>
+      </ResponsiveDialog>
+    );
+
+    const expandButton = screen.getByLabelText("expand");
+    fireEvent.click(expandButton);
+
+    expect(mockOnExpandToggle).toHaveBeenCalledTimes(1);
+  });
 });

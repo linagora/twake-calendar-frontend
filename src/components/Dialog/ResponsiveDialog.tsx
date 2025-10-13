@@ -10,8 +10,11 @@ import {
   Stack,
   SxProps,
   Theme,
+  Box,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import React, { ReactNode } from "react";
 
 /**
@@ -73,6 +76,8 @@ interface ResponsiveDialogProps
   dialogTitleProps?: Omit<DialogTitleProps, "sx">;
   /** Whether to display dividers between title/content/actions */
   dividers?: boolean;
+  /** Whether to show header action icons (expand/close) in normal mode (default: true) */
+  showHeaderActions?: boolean;
 }
 
 function ResponsiveDialog({
@@ -93,6 +98,7 @@ function ResponsiveDialog({
   dialogContentProps,
   dialogTitleProps,
   dividers = false,
+  showHeaderActions = true,
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
@@ -150,6 +156,29 @@ function ResponsiveDialog({
           >
             <ArrowBackIcon />
           </IconButton>
+        ) : showHeaderActions ? (
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            width="100%"
+          >
+            <Box>{title}</Box>
+            <Box>
+              {onExpandToggle && (
+                <IconButton
+                  onClick={onExpandToggle}
+                  aria-label="expand"
+                  size="small"
+                >
+                  <OpenInFullIcon />
+                </IconButton>
+              )}
+              <IconButton onClick={onClose} aria-label="close" size="small">
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </Box>
         ) : (
           title
         )}

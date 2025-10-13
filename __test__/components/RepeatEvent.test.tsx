@@ -102,8 +102,8 @@ async function setupEventPopover(
   const titleInput = screen.getByLabelText("Title");
   fireEvent.change(titleInput, { target: { value: "Meeting" } });
 
-  // Click Show More to expand the dialog
-  const showMoreButton = screen.getByText("Show More");
+  // Click More options to expand the dialog
+  const showMoreButton = screen.getByText("More options");
   fireEvent.click(showMoreButton);
 
   // Check Repeat checkbox to show repeat options
