@@ -111,6 +111,7 @@ export default function EventPreviewModal({
       <ResponsiveDialog
         open={open && !hidePreview}
         onClose={() => onClose({}, "backdropClick")}
+        showHeaderActions={false}
         style={{ overflow: "auto" }}
         title={
           event.title && (
