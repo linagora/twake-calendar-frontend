@@ -2,45 +2,43 @@ import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlice";
+import { SlotLabelContentArg } from "@fullcalendar/core";
+import moment from "moment-timezone";
 
-export const updateSlotLabelVisibility = (currentTime: Date) => {
-  const slotLabels = document.querySelectorAll(".fc-timegrid-slot-label");
+export const updateSlotLabelVisibility = (
+  currentTime: Date,
+  slotLabel: SlotLabelContentArg,
+  timezone: string
+) => {
   const isCurrentWeekOrDay = checkIfCurrentWeekOrDay();
 
   if (!isCurrentWeekOrDay) {
-    slotLabels.forEach((label) => {
-      const labelElement = label as HTMLElement;
-      labelElement.style.opacity = "1";
-    });
-    return;
+    return "fc-timegrid-slot-label";
   }
 
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  const current = moment.tz(currentTime, timezone);
+  const currentMinutes = current.hours() * 60 + current.minutes();
+  const timeText = slotLabel?.text?.trim();
 
-  slotLabels.forEach((label) => {
-    const labelElement = label as HTMLElement;
-    const timeText = labelElement.textContent?.trim();
+  if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
+    const [hours, minutes] = timeText.split(":").map(Number);
+    const labelMinutes = hours * 60 + minutes;
 
-    if (timeText && timeText.match(/^\d{1,2}:\d{2}$/)) {
-      const [hours, minutes] = timeText.split(":").map(Number);
-      const labelMinutes = hours * 60 + minutes;
+    let timeDiff = Math.abs(currentMinutes - labelMinutes);
 
-      let timeDiff = Math.abs(currentMinutes - labelMinutes);
-
-      if (timeDiff > 12 * 60) {
-        timeDiff = 24 * 60 - timeDiff;
-      }
-
-      if (timeDiff <= 15) {
-        labelElement.style.opacity = "0.2";
-      } else {
-        labelElement.style.opacity = "1";
-      }
+    if (timeDiff > 12 * 60) {
+      timeDiff = 24 * 60 - timeDiff;
     }
-  });
+
+    if (timeDiff <= 15) {
+      return "timegrid-slot-label-hidden";
+    }
+  }
+
+  return "fc-timegrid-slot-label";
 };
 
-const checkIfCurrentWeekOrDay = (): boolean => {
+export const checkIfCurrentWeekOrDay = (): boolean => {
   const todayColumn = document.querySelector(".fc-day-today");
 
   if (!todayColumn) {

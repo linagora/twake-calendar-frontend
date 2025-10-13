@@ -127,22 +127,7 @@ function TimeZoneSearch({
           }}
         />
       )}
-      renderOption={(props, option) => (
-        <ListItem {...props} key={option.value}>
-          ({option.offset}) {option.label}
-        </ListItem>
-      )}
-      isOptionEqualToValue={(option, value) => option.value === value.value}
       disableClearable
-      onClick={(e) => e.stopPropagation()}
-      slotProps={{
-        paper: {
-          style: {
-            maxHeight: 300,
-            width: 250,
-          },
-        },
-      }}
       renderValue={(value) => <div>{value.offset}</div>}
     />
   );

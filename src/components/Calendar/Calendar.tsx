@@ -358,6 +358,10 @@ export default function CalendarApp({
           height={"100%"}
           select={eventHandlers.handleDateSelect}
           nowIndicator
+          slotLabelClassNames={(arg) => [
+            updateSlotLabelVisibility(new Date(), arg, timezone),
+          ]}
+          nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
           headerToolbar={false}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
