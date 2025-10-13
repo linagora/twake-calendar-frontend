@@ -65,6 +65,7 @@ export default function EventPreviewModal({
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [hidePreview, setHidePreview] = useState(false);
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
   );
@@ -108,7 +109,7 @@ export default function EventPreviewModal({
   return (
     <>
       <ResponsiveDialog
-        open={open}
+        open={open && !hidePreview}
         onClose={() => onClose({}, "backdropClick")}
         style={{ overflow: "auto" }}
         title={
@@ -143,10 +144,12 @@ export default function EventPreviewModal({
                       onClick={() => {
                         if (isRecurring) {
                           setAfterChoiceFunc(() => () => {
+                            setHidePreview(true);
                             setOpenUpdateModal(true);
                           });
                           setOpenEditModePopup("edit");
                         } else {
+                          setHidePreview(true);
                           setOpenUpdateModal(true);
                         }
                       }}
@@ -509,7 +512,10 @@ export default function EventPreviewModal({
       />
       <EventUpdateModal
         open={openUpdateModal}
-        onClose={() => setOpenUpdateModal(false)}
+        onClose={() => {
+          setOpenUpdateModal(false);
+          setHidePreview(false);
+        }}
         onCloseAll={() => {
           setOpenUpdateModal(false);
           onClose({}, "backdropClick");

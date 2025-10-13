@@ -437,11 +437,33 @@ function EventPopover({
           calendarRef.current?.select(newRange);
         }}
         onAllDayChange={(newAllDay) => {
-          const endDate = new Date(end);
           const startDate = new Date(start);
-          if (endDate.getDate() === startDate.getDate()) {
-            endDate.setDate(startDate.getDate() + 1);
-            setEnd(formatLocalDateTime(endDate));
+          const endDate = new Date(end);
+
+          if (newAllDay) {
+            // No allday => allday: set end date = start date + 1
+            if (endDate.getDate() === startDate.getDate()) {
+              endDate.setDate(startDate.getDate() + 1);
+              setEnd(formatLocalDateTime(endDate));
+            }
+          } else {
+            // Allday => no allday: set end date = start date with rounded time
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const roundedMinutes = minutes < 30 ? 0 : 30;
+            now.setMinutes(roundedMinutes);
+            now.setSeconds(0);
+            now.setMilliseconds(0);
+
+            // Set start time
+            startDate.setHours(now.getHours());
+            startDate.setMinutes(now.getMinutes());
+            setStart(formatLocalDateTime(startDate));
+
+            // Set end date = start date, with time 30 minutes after start
+            const newEndDate = new Date(startDate);
+            newEndDate.setMinutes(newEndDate.getMinutes() + 30);
+            setEnd(formatLocalDateTime(newEndDate));
           }
 
           const newRange = {
