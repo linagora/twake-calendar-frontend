@@ -1,4 +1,5 @@
 import { Box, Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import React, {
   useEffect,
   useState,
@@ -749,12 +750,16 @@ function EventUpdateModal({
   const dialogActions = (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (
-        <Button onClick={() => setShowMore(!showMore)}>Show More</Button>
+        <Button startIcon={<AddIcon />} onClick={() => setShowMore(!showMore)}>
+          More options
+        </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
-        <Button variant="outlined" onClick={handleClose}>
-          Cancel
-        </Button>
+        {showMore && (
+          <Button variant="outlined" onClick={handleClose}>
+            Cancel
+          </Button>
+        )}
         <Button variant="contained" onClick={handleSave} disabled={!title}>
           Save
         </Button>
