@@ -124,10 +124,10 @@ describe("EventPopover", () => {
     expect(calendarSelect).toBeInTheDocument();
 
     // Check button
-    expect(screen.getByText("Show More")).toBeInTheDocument();
+    expect(screen.getByText("More options")).toBeInTheDocument();
 
     // Extended mode
-    fireEvent.click(screen.getByText("Show More"));
+    fireEvent.click(screen.getByText("More options"));
 
     // Back button appears
     expect(screen.getByLabelText("show less")).toBeInTheDocument();
@@ -329,6 +329,9 @@ describe("EventPopover", () => {
 
   it("calls onClose when Cancel clicked", () => {
     renderPopover();
+
+    // Cancel button only appears in expanded mode
+    fireEvent.click(screen.getByText("More options"));
 
     fireEvent.click(screen.getByText("Cancel"));
 
