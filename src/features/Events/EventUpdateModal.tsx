@@ -508,7 +508,8 @@ function EventUpdateModal({
 
         const repetitionRulesChanged =
           JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition) ||
-          timezoneChanged;
+          timezoneChanged ||
+          event.allday !== allday;
 
         if (repetitionRulesChanged) {
           // Repetition rules changed - need server to recalculate instances
