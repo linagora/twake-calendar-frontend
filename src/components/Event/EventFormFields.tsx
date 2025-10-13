@@ -237,6 +237,16 @@ export default function EventFormFields({
     onCalendarChange?.(newCalendarId);
   };
 
+  const getRoundedCurrentTime = () => {
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const roundedMinutes = minutes < 30 ? 0 : 30;
+    now.setMinutes(roundedMinutes);
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+    return now;
+  };
+
   return (
     <>
       <FieldWithLabel label="Title" isExpanded={showMore}>
@@ -330,14 +340,32 @@ export default function EventFormFields({
               <Checkbox
                 checked={allday}
                 onChange={() => {
-                  const endDate = new Date(end);
-                  const startDate = new Date(start);
                   const newAllDay = !allday;
-                  setAllDay(newAllDay);
-                  if (endDate.getDate() === startDate.getDate()) {
-                    endDate.setDate(startDate.getDate() + 1);
+
+                  if (newAllDay) {
+                    // No allday => allday: existing logic
+                    const endDate = new Date(end);
+                    const startDate = new Date(start);
+                    if (endDate.getDate() === startDate.getDate()) {
+                      endDate.setDate(startDate.getDate() + 1);
+                      setEnd(formatLocalDateTime(endDate));
+                    }
+                  } else {
+                    // Allday => no allday: set end date = start date with rounded time
+                    const startDate = new Date(start);
+                    const currentTime = getRoundedCurrentTime();
+
+                    // Set start time
+                    startDate.setHours(currentTime.getHours());
+                    startDate.setMinutes(currentTime.getMinutes());
+                    setStart(formatLocalDateTime(startDate));
+
+                    // Set end date = start date, with time 30 minutes after start
+                    const endDate = new Date(startDate);
+                    endDate.setMinutes(endDate.getMinutes() + 30);
                     setEnd(formatLocalDateTime(endDate));
                   }
+
                   handleAllDayChange(newAllDay);
                 }}
               />
@@ -347,7 +375,9 @@ export default function EventFormFields({
           <FormControlLabel
             control={
               <Checkbox
-                checked={showRepeat}
+                checked={
+                  showRepeat || (typeOfAction === "solo" && !!repetition?.freq)
+                }
                 disabled={typeOfAction === "solo"}
                 onChange={() => {
                   const newShowRepeat = !showRepeat;
@@ -390,13 +420,13 @@ export default function EventFormFields({
         </Box>
       </FieldWithLabel>
 
-      {showRepeat && (
+      {(showRepeat || (typeOfAction === "solo" && repetition?.freq)) && (
         <FieldWithLabel label=" " isExpanded={showMore}>
           <RepeatEvent
             repetition={repetition}
             eventStart={new Date(start)}
             setRepetition={setRepetition}
-            isOwn={true} /* Always editable when shown */
+            isOwn={typeOfAction !== "solo"}
           />
         </FieldWithLabel>
       )}
