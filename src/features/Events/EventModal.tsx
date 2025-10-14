@@ -44,6 +44,10 @@ import {
   generateMeetingLink,
   addVideoConferenceToDescription,
 } from "../../utils/videoConferenceUtils";
+import {
+  getTimezoneOffset,
+  resolveTimezone,
+} from "../../components/Calendar/TimezoneSelector";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -135,43 +139,16 @@ function EventPopover({
     selectPersonnalCalendars
   );
 
-  // Helper function to resolve timezone aliases
-  const resolveTimezone = (tzName: string): string => {
-    if (TIMEZONES.zones[tzName]) {
-      return tzName;
-    }
-    if (TIMEZONES.aliases[tzName]) {
-      return TIMEZONES.aliases[tzName].aliasTo;
-    }
-    return tzName;
-  };
-
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
     const browserTz = resolveTimezone(
       Intl.DateTimeFormat().resolvedOptions().timeZone
     );
 
-    const getTimezoneOffset = (tzName: string): string => {
-      const resolvedTz = resolveTimezone(tzName);
-      const tzData = TIMEZONES.zones[resolvedTz];
-      if (!tzData) return "";
-
-      const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
-      if (!icsMatch) return "";
-
-      const offset = icsMatch[1];
-      const hours = parseInt(offset.slice(0, 3));
-      const minutes = parseInt(offset.slice(3));
-
-      if (minutes === 0) {
-        return `UTC${hours >= 0 ? "+" : ""}${hours}`;
-      }
-      return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
-    };
-
-    return { zones, browserTz, getTimezoneOffset };
+    return { zones, browserTz };
   }, []);
+
+  const calendarTimezone = useAppSelector((state) => state.calendars.timeZone);
 
   const [showMore, setShowMore] = useState(false);
   const [showDescription, setShowDescription] = useState(
@@ -206,7 +183,7 @@ function EventPopover({
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [important, setImportant] = useState(false);
   const [timezone, setTimezone] = useState(
-    event?.timezone ? resolveTimezone(event.timezone) : timezoneList.browserTz
+    event?.timezone ? resolveTimezone(event.timezone) : calendarTimezone
   );
   const [hasVideoConference, setHasVideoConference] = useState(
     event?.x_openpass_videoconference ? true : false
@@ -241,15 +218,19 @@ function EventPopover({
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
     setImportant(false);
-    setTimezone(timezoneList.browserTz);
+    setTimezone(calendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
-  }, [timezoneList.browserTz]);
+  }, [calendarTimezone]);
 
   useEffect(() => {
     if (selectedRange) {
-      setStart(selectedRange ? formatLocalDateTime(selectedRange.start) : "");
-      setEnd(selectedRange ? formatLocalDateTime(selectedRange.end) : "");
+      setStart(
+        selectedRange ? formatLocalDateTime(selectedRange.start, timezone) : ""
+      );
+      setEnd(
+        selectedRange ? formatLocalDateTime(selectedRange.end, timezone) : ""
+      );
     }
   }, [selectedRange]);
 
@@ -283,9 +264,7 @@ function EventPopover({
       setEventClass(event.class ?? "PUBLIC");
       setBusy(event.transp ?? "OPAQUE");
       setTimezone(
-        event.timezone
-          ? resolveTimezone(event.timezone)
-          : timezoneList.browserTz
+        event.timezone ? resolveTimezone(event.timezone) : calendarTimezone
       );
       setHasVideoConference(event.x_openpass_videoconference ? true : false);
       setMeetingLink(event.x_openpass_videoconference || null);
@@ -305,7 +284,7 @@ function EventPopover({
         }
       }
     }
-  }, [event, organizer?.cal_address, timezoneList.browserTz]);
+  }, [event, organizer?.cal_address, calendarTimezone]);
 
   // Reset state when creating new event (event is undefined)
   useEffect(() => {
@@ -332,7 +311,7 @@ function EventPopover({
       setMeetingLink(null);
     }
     isInitializedRef.current = true;
-  }, [event, timezoneList.browserTz]);
+  }, [event, calendarTimezone]);
 
   const handleAddVideoConference = () => {
     const newMeetingLink = generateMeetingLink();
@@ -513,10 +492,16 @@ function EventPopover({
               onChange={(e) => {
                 const newStart = e.target.value;
                 setStart(newStart);
+
+                // Update selectedRange for visual feedback
+                const startISO = formatLocalDateTime(
+                  new Date(newStart),
+                  timezone
+                );
                 const newRange = {
                   ...selectedRange,
-                  start: new Date(newStart),
-                  startStr: newStart,
+                  start: new Date(startISO),
+                  startStr: startISO,
                   allDay: allday,
                 };
                 setSelectedRange(newRange);
@@ -541,10 +526,13 @@ function EventPopover({
               onChange={(e) => {
                 const newEnd = e.target.value;
                 setEnd(newEnd);
+
+                // Update selectedRange for visual feedback
+                const endISO = formatLocalDateTime(new Date(newEnd), timezone);
                 const newRange = {
                   ...selectedRange,
-                  end: new Date(newEnd),
-                  endStr: newEnd,
+                  end: new Date(endISO),
+                  endStr: endISO,
                   allDay: allday,
                 };
                 setSelectedRange(newRange);
@@ -578,7 +566,7 @@ function EventPopover({
                   setAllDay(!allday);
                   if (endDate.getDate() === startDate.getDate()) {
                     endDate.setDate(startDate.getDate() + 1);
-                    setEnd(formatLocalDateTime(endDate));
+                    setEnd(formatLocalDateTime(endDate, timezone));
                   }
 
                   const newRange = {
@@ -638,7 +626,7 @@ function EventPopover({
             >
               {timezoneList.zones.map((tz) => (
                 <MenuItem key={tz} value={tz}>
-                  ({timezoneList.getTimezoneOffset(tz)}) {tz.replace(/_/g, " ")}
+                  ({getTimezoneOffset(tz)}) {tz.replace(/_/g, " ")}
                 </MenuItem>
               ))}
             </Select>
@@ -814,9 +802,17 @@ function EventPopover({
 
 export default EventPopover;
 
-export function formatLocalDateTime(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+export function formatLocalDateTime(date: Date, timeZone?: string) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone,
+  });
+
+  const formatted = formatter.format(date);
+  return formatted.replace(", ", "T");
 }

@@ -157,7 +157,8 @@ th.fc-col-header-cell.fc-day
   position relative
   border 0
 
-.fc .fc-timegrid-now-indicator-arrow::before
+.fc .fc-timegrid-now-indicator-arrow::before,
+.now-time-label
   content attr(data-time)
   color #f67e35
   white-space nowrap
@@ -168,6 +169,9 @@ th.fc-col-header-cell.fc-day
   left 25px
   font-size 14px
   letter-spacing 0.25px
+
+.timegrid-slot-label-hidden
+  opacity 0.2
 
 .fc-day-today .fc-timegrid-now-indicator-container
   overflow unset

@@ -27,5 +27,9 @@ export const useCalendarViewHandlers = (props: ViewHandlersProps) => {
     handleEventDidMount: useCallback(viewHandlers.handleEventDidMount, [
       props.calendars,
     ]),
+    handleNowIndicatorContent: useCallback(
+      viewHandlers.handleNowIndicatorContent,
+      []
+    ),
   };
 };

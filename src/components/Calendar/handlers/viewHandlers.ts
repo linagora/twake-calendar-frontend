@@ -1,5 +1,5 @@
 import React from "react";
-import { CalendarApi } from "@fullcalendar/core";
+import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
 import { updateSlotLabelVisibility } from "../utils/calendarUtils";
 import { createMouseHandlers } from "./mouseHandlers";
 import { userAttendee } from "../../../features/User/userDataTypes";
@@ -29,6 +29,25 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     tempcalendars,
     errorHandler,
   } = props;
+
+  const handleNowIndicatorContent = (arg: NowIndicatorContentArg) => {
+    if (arg.isAxis) {
+      return React.createElement(
+        "div",
+        { style: { display: "flex", alignItems: "center" } },
+        React.createElement(
+          "div",
+          { className: "now-time-label" },
+          new Date().toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: arg.view.dateEnv.timeZone,
+          })
+        )
+      );
+    }
+  };
 
   const handleDayHeaderDidMount = (arg: any) => {
     if (arg.view.type === "timeGridWeek") {
@@ -61,54 +80,6 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
   };
 
   const handleViewDidMount = (arg: any) => {
-    const updateNowIndicator = () => {
-      const nowIndicatorArrow = document.querySelector(
-        ".fc-timegrid-now-indicator-arrow"
-      ) as HTMLElement;
-      if (nowIndicatorArrow) {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-        nowIndicatorArrow.setAttribute("data-time", timeString);
-        updateSlotLabelVisibility(now);
-      }
-    };
-
-    updateNowIndicator();
-    const timeInterval = setInterval(updateNowIndicator, 60000);
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as Element;
-            if (
-              element.classList?.contains("fc-timegrid-now-indicator-arrow") ||
-              element.querySelector?.(".fc-timegrid-now-indicator-arrow") ||
-              element.classList?.contains("fc-timegrid-slot-label") ||
-              element.querySelector?.(".fc-timegrid-slot-label")
-            ) {
-              setTimeout(() => {
-                updateNowIndicator();
-                updateSlotLabelVisibility(new Date());
-              }, 10);
-            }
-          }
-        });
-      });
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    (arg.el as any).__timeInterval = timeInterval;
-    (arg.el as any).__timeObserver = observer;
-
     if (arg.view.type === "timeGridWeek" || arg.view.type === "timeGridDay") {
       const calendarEl = document.querySelector(".fc") as HTMLElement;
       if (calendarEl) {
@@ -254,6 +225,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
   };
 
   return {
+    handleNowIndicatorContent,
     handleDayHeaderDidMount,
     handleDayHeaderWillUnmount,
     handleViewDidMount,
