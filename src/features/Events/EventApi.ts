@@ -15,8 +15,27 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
 
   const eventical = ICAL.parse(eventData);
 
+  let targetVevent;
+  if (isMaster) {
+    // Find master VEVENT (the one without recurrence-id)
+    const vevents = eventical[2].filter(
+      ([name]: string[]) => name === "vevent"
+    );
+    targetVevent = vevents.find(
+      ([, props]: [string, any[]]) =>
+        !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+    );
+    if (!targetVevent) {
+      // Fallback to first VEVENT if no master found
+      targetVevent = eventical[2][1];
+    }
+  } else {
+    // For non-master, use first VEVENT as before
+    targetVevent = eventical[2][1];
+  }
+
   const eventjson = parseCalendarEvent(
-    eventical[2][1][1],
+    targetVevent[1],
     event.color ?? "",
     event.calId,
     event.URL
@@ -109,7 +128,8 @@ export const deleteEventInstance = async (
 
 export const updateSeries = async (
   event: CalendarEvent,
-  calOwnerEmail?: string
+  calOwnerEmail?: string,
+  removeOverrides: boolean = true
 ) => {
   const vevents = await getAllRecurrentEvent(event);
   const masterIndex = vevents.findIndex(
@@ -119,7 +139,7 @@ export const updateSeries = async (
   if (masterIndex === -1) {
     throw new Error("No master VEVENT found for this series");
   }
-  const rrule = vevents[0][1].find(([k]: string[]) => k === "rrule");
+  const rrule = vevents[masterIndex][1].find(([k]: string[]) => k === "rrule");
 
   const tzid = event.timezone;
 
@@ -128,12 +148,25 @@ export const updateSeries = async (
   if (!newRrule) {
     updatedMaster[1].push(rrule);
   }
-  vevents[masterIndex] = updatedMaster;
 
   const timezoneData = TIMEZONES.zones[event.timezone];
   const vtimezone = makeTimezone(timezoneData, event);
 
-  const newJCal = ["vcalendar", [], [...vevents, vtimezone.component.jCal]];
+  let finalVevents;
+  if (removeOverrides) {
+    // When date/time/timezone/repeat rules changed, remove all override instances
+    finalVevents = [updatedMaster];
+  } else {
+    // When only properties changed, keep override instances
+    vevents[masterIndex] = updatedMaster;
+    finalVevents = vevents;
+  }
+
+  const newJCal = [
+    "vcalendar",
+    [],
+    [...finalVevents, vtimezone.component.jCal],
+  ];
   return api(`dav${event.URL}`, {
     method: "PUT",
     body: JSON.stringify(newJCal),

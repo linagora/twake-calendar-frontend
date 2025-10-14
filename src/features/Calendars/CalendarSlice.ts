@@ -295,9 +295,9 @@ export const updateEventInstanceAsync = createAsyncThunk<
 
 export const updateSeriesAsync = createAsyncThunk<
   void,
-  { cal: Calendars; event: CalendarEvent }
->("calendars/updateSeries", async ({ cal, event }) => {
-  await updateSeries(event, cal.ownerEmails?.[0]);
+  { cal: Calendars; event: CalendarEvent; removeOverrides?: boolean }
+>("calendars/updateSeries", async ({ cal, event, removeOverrides = true }) => {
+  await updateSeries(event, cal.ownerEmails?.[0], removeOverrides);
 });
 
 export const createCalendarAsync = createAsyncThunk<
