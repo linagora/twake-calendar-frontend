@@ -1,7 +1,14 @@
-import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
+import {
+  CalendarEvent,
+  RepetitionObject,
+} from "../../../src/features/Events/EventsTypes";
 import {
   calendarEventToJCal,
   parseCalendarEvent,
+  combineMasterDateWithFormTime,
+  normalizeRepetition,
+  normalizeTimezone,
+  detectRecurringEventChanges,
 } from "../../../src/features/Events/eventUtils";
 import { TIMEZONES } from "../../../src/utils/timezone-data";
 
@@ -756,5 +763,437 @@ describe("calendarEventToJCal", () => {
         ],
       ])
     );
+  });
+});
+
+describe("combineMasterDateWithFormTime", () => {
+  const mockFormatDateTime = (iso: string, tz: string) => {
+    const date = new Date(iso);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const hour = String(date.getUTCHours()).padStart(2, "0");
+    const minute = String(date.getUTCMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  };
+
+  it("should use master event dates for all-day events", () => {
+    const masterEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: "2025-10-14T08:00:00.000Z",
+    } as CalendarEvent;
+
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15T09:00",
+      "2025-10-15T10:00",
+      "UTC",
+      true,
+      mockFormatDateTime
+    );
+
+    expect(result.startDate).toBe("2025-10-14");
+    expect(result.endDate).toBe("2025-10-14");
+  });
+
+  it("should handle all-day events with missing end date", () => {
+    const masterEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: undefined,
+    } as CalendarEvent;
+
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15T09:00",
+      "2025-10-15T10:00",
+      "UTC",
+      true,
+      mockFormatDateTime
+    );
+
+    expect(result.startDate).toBe("2025-10-14");
+    expect(result.endDate).toBe("2025-10-14");
+  });
+
+  it("should combine master date with form time for timed events", () => {
+    const masterEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: "2025-10-14T08:00:00.000Z",
+    } as CalendarEvent;
+
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15T09:00",
+      "2025-10-15T10:00",
+      "UTC",
+      false,
+      mockFormatDateTime
+    );
+
+    const resultStartDate = new Date(result.startDate);
+    expect(resultStartDate.getUTCDate()).toBe(14); // Monday (master's date)
+    expect(resultStartDate.getUTCHours()).toBe(9); // 9am (form's time)
+  });
+
+  it("should preserve timezone when combining date and time", () => {
+    const masterEvent = {
+      start: "2025-10-14T00:00:00.000Z",
+      end: "2025-10-14T01:00:00.000Z",
+    } as CalendarEvent;
+
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15T14:30",
+      "2025-10-15T15:30",
+      "Asia/Ho_Chi_Minh",
+      false,
+      mockFormatDateTime
+    );
+
+    expect(result.startDate).toBeDefined();
+    expect(result.endDate).toBeDefined();
+  });
+
+  it("should handle timed events with missing end date", () => {
+    const masterEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: undefined,
+    } as CalendarEvent;
+
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15T09:00",
+      "2025-10-15T10:00",
+      "UTC",
+      false,
+      mockFormatDateTime
+    );
+
+    expect(result.startDate).toBeDefined();
+    expect(result.endDate).toBeDefined();
+  });
+
+  it("should handle different date formats from form input", () => {
+    const masterEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: "2025-10-14T08:00:00.000Z",
+    } as CalendarEvent;
+
+    // Test with different time format
+    const result = combineMasterDateWithFormTime(
+      masterEvent,
+      "2025-10-15 09:00:00",
+      "2025-10-15 10:00:00",
+      "UTC",
+      false,
+      mockFormatDateTime
+    );
+
+    expect(result.startDate).toBeDefined();
+    expect(result.endDate).toBeDefined();
+  });
+});
+
+describe("normalizeRepetition", () => {
+  it("should normalize repetition with all fields", () => {
+    const repetition: RepetitionObject = {
+      freq: "weekly",
+      interval: 2,
+      byday: ["MO", "WE", "FR"],
+      occurrences: 10,
+      endDate: "2025-12-31",
+    };
+
+    const result = normalizeRepetition(repetition);
+
+    expect(result).toEqual({
+      freq: "weekly",
+      interval: 2,
+      byday: ["FR", "MO", "WE"], // Sorted
+      occurrences: 10,
+      endDate: "2025-12-31",
+    });
+  });
+
+  it("should return null for empty repetition", () => {
+    expect(normalizeRepetition(undefined)).toBeNull();
+    expect(normalizeRepetition({} as RepetitionObject)).toBeNull();
+    expect(normalizeRepetition({ freq: "" } as RepetitionObject)).toBeNull();
+  });
+
+  it("should handle repetition with default interval", () => {
+    const repetition: RepetitionObject = {
+      freq: "daily",
+      occurrences: 5,
+    } as RepetitionObject;
+
+    const result = normalizeRepetition(repetition);
+
+    expect(result?.interval).toBe(1);
+  });
+
+  it("should normalize empty byday to null", () => {
+    const repetition: RepetitionObject = {
+      freq: "weekly",
+      interval: 1,
+      byday: [],
+    } as RepetitionObject;
+
+    const result = normalizeRepetition(repetition);
+
+    expect(result?.byday).toBeNull();
+  });
+});
+
+describe("normalizeTimezone", () => {
+  const mockResolveTimezone = (tz: string) => {
+    if (tz === "Asia/Saigon") return "Asia/Ho_Chi_Minh";
+    return tz;
+  };
+
+  it("should resolve timezone aliases", () => {
+    const result = normalizeTimezone("Asia/Saigon", mockResolveTimezone);
+    expect(result).toBe("Asia/Ho_Chi_Minh");
+  });
+
+  it("should return null for empty timezone", () => {
+    expect(normalizeTimezone(undefined, mockResolveTimezone)).toBeNull();
+    expect(normalizeTimezone(null, mockResolveTimezone)).toBeNull();
+    expect(normalizeTimezone("", mockResolveTimezone)).toBeNull();
+  });
+
+  it("should return same timezone if no alias", () => {
+    const result = normalizeTimezone("UTC", mockResolveTimezone);
+    expect(result).toBe("UTC");
+  });
+});
+
+describe("detectRecurringEventChanges", () => {
+  const mockResolveTimezone = (tz: string) => tz;
+  const mockFormatDateTime = (iso: string, tz: string) => {
+    const date = new Date(iso);
+    const hour = String(date.getUTCHours()).padStart(2, "0");
+    const minute = String(date.getUTCMinutes()).padStart(2, "0");
+    return `2025-10-14T${hour}:${minute}`;
+  };
+
+  it("should detect when only time changes", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: "2025-10-14T08:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+        timezone: "UTC",
+        allday: false,
+        start: "2025-10-15T09:00",
+        end: "2025-10-15T10:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.timeChanged).toBe(true);
+    expect(result.repetitionRulesChanged).toBe(true);
+  });
+
+  it("should not detect time change when time is same", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      end: "2025-10-14T08:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+        timezone: "UTC",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.timeChanged).toBe(false);
+    expect(result.repetitionRulesChanged).toBe(false);
+  });
+
+  it("should detect timezone changes", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+        timezone: "Asia/Ho_Chi_Minh",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.timezoneChanged).toBe(true);
+    expect(result.repetitionRulesChanged).toBe(true);
+  });
+
+  it("should resolve timezone aliases before comparison", () => {
+    const resolveWithAlias = (tz: string) => {
+      if (tz === "Asia/Saigon") return "Asia/Ho_Chi_Minh";
+      return tz;
+    };
+
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "Asia/Saigon",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+        timezone: "Asia/Ho_Chi_Minh",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      resolveWithAlias,
+      mockFormatDateTime
+    );
+
+    expect(result.timezoneChanged).toBe(false);
+  });
+
+  it("should detect frequency changes", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "weekly", interval: 1 } as RepetitionObject,
+        timezone: "UTC",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.repetitionRulesChanged).toBe(true);
+  });
+
+  it("should detect interval changes", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "daily", interval: 2 } as RepetitionObject,
+        timezone: "UTC",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.repetitionRulesChanged).toBe(true);
+  });
+
+  it("should detect byday changes", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: {
+        freq: "weekly",
+        interval: 1,
+        byday: ["MO", "WE"],
+      } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: {
+          freq: "weekly",
+          interval: 1,
+          byday: ["MO", "FR"],
+        } as RepetitionObject,
+        timezone: "UTC",
+        allday: false,
+        start: "2025-10-15T07:00",
+        end: "2025-10-15T08:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.repetitionRulesChanged).toBe(true);
+  });
+
+  it("should detect when multiple properties change", () => {
+    const oldEvent = {
+      start: "2025-10-14T07:00:00.000Z",
+      timezone: "UTC",
+      allday: false,
+      repetition: { freq: "daily", interval: 1 } as RepetitionObject,
+    } as CalendarEvent;
+
+    const result = detectRecurringEventChanges(
+      oldEvent,
+      {
+        repetition: { freq: "weekly", interval: 2 } as RepetitionObject,
+        timezone: "Asia/Ho_Chi_Minh",
+        allday: true,
+        start: "2025-10-15T09:00",
+        end: "2025-10-15T10:00",
+      },
+      null,
+      mockResolveTimezone,
+      mockFormatDateTime
+    );
+
+    expect(result.timeChanged).toBe(true);
+    expect(result.timezoneChanged).toBe(true);
+    expect(result.repetitionRulesChanged).toBe(true);
   });
 });
