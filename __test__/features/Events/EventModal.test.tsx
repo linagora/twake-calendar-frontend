@@ -139,7 +139,7 @@ describe("EventPopover", () => {
     expect(screen.getAllByText("Show me as")).toHaveLength(1);
   });
 
-  it("fills start from selectedRange", () => {
+  it("fills start date and time from selectedRange", () => {
     renderPopover({
       startStr: "2026-07-20T10:00",
       endStr: "2026-07-20T12:00",
@@ -148,7 +148,8 @@ describe("EventPopover", () => {
       allDay: false,
     } as unknown as DateSelectArg);
 
-    expect(screen.getByLabelText("Start")).toHaveValue("2026-07-20T10:00");
+    expect(screen.getByLabelText("Start Date")).toHaveValue("2026-07-20");
+    expect(screen.getByLabelText("Start Time")).toHaveValue("10:00");
   });
 
   it("updates inputs on change", () => {
@@ -272,10 +273,10 @@ describe("EventPopover", () => {
       target: { value: newEvent.title },
     });
     fireEvent.click(screen.getByLabelText("All day"));
-    fireEvent.change(screen.getByLabelText("Start"), {
+    fireEvent.change(screen.getByLabelText("Start Date"), {
       target: { value: newEvent.start.split("T")[0] },
     });
-    fireEvent.change(screen.getByLabelText("End"), {
+    fireEvent.change(screen.getByLabelText("End Date"), {
       target: { value: newEvent.end.split("T")[0] },
     });
 
@@ -336,5 +337,130 @@ describe("EventPopover", () => {
     fireEvent.click(screen.getByText("Cancel"));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+  });
+
+  describe("4 Separate Date/Time Fields", () => {
+    it("renders 4 separate fields when allday is false", () => {
+      renderPopover();
+
+      expect(screen.getByLabelText("Start Date")).toBeInTheDocument();
+      expect(screen.getByLabelText("Start Time")).toBeInTheDocument();
+      expect(screen.getByLabelText("End Time")).toBeInTheDocument();
+      expect(screen.getByLabelText("End Date")).toBeInTheDocument();
+    });
+
+    it("disables time fields when allday is true", () => {
+      renderPopover();
+
+      fireEvent.click(screen.getByLabelText("All day"));
+
+      expect(screen.getByLabelText("Start Time")).toBeDisabled();
+      expect(screen.getByLabelText("End Time")).toBeDisabled();
+      expect(screen.getByLabelText("Start Date")).not.toBeDisabled();
+      expect(screen.getByLabelText("End Date")).not.toBeDisabled();
+    });
+  });
+
+  describe("All-day Toggle with Time Preservation", () => {
+    it("preserves time when toggling to all-day and restores when toggling back", () => {
+      renderPopover({
+        startStr: "2025-07-18T10:30",
+        endStr: "2025-07-18T11:30",
+        start: new Date("2025-07-18T10:30"),
+        end: new Date("2025-07-18T11:30"),
+        allDay: false,
+      } as unknown as DateSelectArg);
+
+      // Initial times
+      expect(screen.getByLabelText("Start Time")).toHaveValue("10:30");
+      expect(screen.getByLabelText("End Time")).toHaveValue("11:30");
+
+      // Toggle to all-day
+      fireEvent.click(screen.getByLabelText("All day"));
+
+      // Time fields disabled and values cleared
+      expect(screen.getByLabelText("Start Time")).toBeDisabled();
+      expect(screen.getByLabelText("End Time")).toBeDisabled();
+
+      // Toggle back to timed event
+      fireEvent.click(screen.getByLabelText("All day"));
+
+      // Times restored
+      expect(screen.getByLabelText("Start Time")).not.toBeDisabled();
+      expect(screen.getByLabelText("End Time")).not.toBeDisabled();
+      expect(screen.getByLabelText("Start Time")).toHaveValue("10:30");
+      expect(screen.getByLabelText("End Time")).toHaveValue("11:30");
+    });
+  });
+
+  describe("Timezone Autocomplete", () => {
+    it("renders timezone as autocomplete with search", () => {
+      renderPopover();
+
+      const autocomplete = screen.getByPlaceholderText("Select timezone");
+      expect(autocomplete).toBeInTheDocument();
+    });
+  });
+
+  describe("Auto-adjustment Logic", () => {
+    it("maintains duration when start date changes", () => {
+      renderPopover({
+        startStr: "2025-07-18T10:00",
+        endStr: "2025-07-18T12:00",
+        start: new Date("2025-07-18T10:00"),
+        end: new Date("2025-07-18T12:00"),
+        allDay: false,
+      } as unknown as DateSelectArg);
+
+      expect(screen.getByLabelText("Start Date")).toHaveValue("2025-07-18");
+      expect(screen.getByLabelText("End Date")).toHaveValue("2025-07-18");
+      expect(screen.getByLabelText("Start Time")).toHaveValue("10:00");
+      expect(screen.getByLabelText("End Time")).toHaveValue("12:00");
+
+      // Change start date to next day
+      fireEvent.change(screen.getByLabelText("Start Date"), {
+        target: { value: "2025-07-19" },
+      });
+
+      // End date should auto-adjust to maintain 2-hour duration
+      expect(screen.getByLabelText("End Date")).toHaveValue("2025-07-19");
+      expect(screen.getByLabelText("End Time")).toHaveValue("12:00");
+    });
+
+    it("maintains duration when start time changes", () => {
+      renderPopover({
+        startStr: "2025-07-18T10:00",
+        endStr: "2025-07-18T12:00",
+        start: new Date("2025-07-18T10:00"),
+        end: new Date("2025-07-18T12:00"),
+        allDay: false,
+      } as unknown as DateSelectArg);
+
+      expect(screen.getByLabelText("Start Time")).toHaveValue("10:00");
+      expect(screen.getByLabelText("End Time")).toHaveValue("12:00");
+
+      // Change start time
+      fireEvent.change(screen.getByLabelText("Start Time"), {
+        target: { value: "14:00" },
+      });
+
+      // End time should auto-adjust to maintain 2-hour duration
+      expect(screen.getByLabelText("End Time")).toHaveValue("16:00");
+    });
+  });
+
+  describe("Date/Time Validation", () => {
+    it("sets min attribute on end date based on start date", () => {
+      renderPopover({
+        startStr: "2025-07-18T10:00",
+        endStr: "2025-07-18T12:00",
+        start: new Date("2025-07-18T10:00"),
+        end: new Date("2025-07-18T12:00"),
+        allDay: false,
+      } as unknown as DateSelectArg);
+
+      const endDateInput = screen.getByLabelText("End Date");
+      expect(endDateInput).toHaveAttribute("min", "2025-07-18");
+    });
   });
 });

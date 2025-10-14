@@ -139,6 +139,7 @@ function EventPopover({
   const [meetingLink, setMeetingLink] = useState<string | null>(
     event?.x_openpass_videoconference || null
   );
+  const [hasValidationError, setHasValidationError] = useState(false);
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
@@ -367,7 +368,11 @@ function EventPopover({
             Cancel
           </Button>
         )}
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!title || hasValidationError}
+        >
           Save
         </Button>
       </Box>
@@ -442,51 +447,19 @@ function EventPopover({
           calendarRef.current?.select(newRange);
         }}
         onAllDayChange={(newAllDay) => {
-          const startDate = new Date(start);
-          const endDate = new Date(end);
-
-          if (newAllDay) {
-            // No allday => allday: set end date = start date + 1
-            if (endDate.getDate() === startDate.getDate()) {
-              endDate.setDate(startDate.getDate() + 1);
-              setEnd(formatLocalDateTime(endDate));
-            }
-          } else {
-            // Allday => no allday: set end date = start date with rounded time
-            const now = new Date();
-            const minutes = now.getMinutes();
-            const roundedMinutes = minutes < 30 ? 0 : 30;
-            now.setMinutes(roundedMinutes);
-            now.setSeconds(0);
-            now.setMilliseconds(0);
-
-            // Set start time
-            startDate.setHours(now.getHours());
-            startDate.setMinutes(now.getMinutes());
-            setStart(formatLocalDateTime(startDate));
-
-            // Set end date = start date, with time 30 minutes after start
-            const newEndDate = new Date(startDate);
-            newEndDate.setMinutes(newEndDate.getMinutes() + 30);
-            setEnd(formatLocalDateTime(newEndDate));
-          }
-
+          // EventFormFields handles start/end time logic
+          // Just update calendar selection here
           const newRange = {
             ...selectedRange,
-            startStr: newAllDay ? start.split("T")[0] : start,
-            endStr: newAllDay
-              ? endDate.toISOString().split("T")[0]
-              : endDate.toISOString(),
-            start: new Date(newAllDay ? start.split("T")[0] : start),
-            end: new Date(
-              newAllDay
-                ? endDate.toISOString().split("T")[0]
-                : endDate.toISOString()
-            ),
+            startStr: start,
+            endStr: end,
+            start: new Date(start),
+            end: new Date(end),
             allDay: newAllDay,
           };
           setSelectedRange(newRange);
         }}
+        onValidationChange={(hasError) => setHasValidationError(hasError)}
       />
     </ResponsiveDialog>
   );
