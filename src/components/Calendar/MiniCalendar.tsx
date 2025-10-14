@@ -3,7 +3,14 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DateCalendar, PickersDay } from "@mui/x-date-pickers";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import moment from "moment";
-import { computeStartOfTheWeek } from "../../utils/dateUtils"; // your util
+import {
+  computeStartOfTheWeek,
+  formatDateToYYYYMMDDTHHMMSS,
+  getCalendarRange,
+} from "../../utils/dateUtils";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { refreshCalendars } from "../Event/utils/eventUtils";
+import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 
 export function MiniCalendar({
   calendarRef,
@@ -18,6 +25,9 @@ export function MiniCalendar({
   setSelectedMiniDate: (d: Date) => void;
   dottedEvents: any[];
 }) {
+  const dispatch = useAppDispatch();
+  const calendars = useAppSelector((state) => state.calendars);
+
   return (
     <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en-gb">
       <DateCalendar
@@ -29,9 +39,23 @@ export function MiniCalendar({
           setSelectedMiniDate(date);
           calendarRef.current?.gotoDate(date);
         }}
-        renderLoading={() => <DayCalendarSkeleton />}
         showDaysOutsideCurrentMonth
-        views={["day"]}
+        onMonthChange={(month) => {
+          const calendarRange = getCalendarRange(month.toDate());
+          setSelectedMiniDate(month.toDate());
+          Object.values(calendars.list).forEach((cal) =>
+            dispatch(
+              getCalendarDetailAsync({
+                calId: cal.id,
+                match: {
+                  start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+                  end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+                },
+              })
+            )
+          );
+        }}
+        views={["day", "month"]}
         slotProps={{
           day: (ownerState) => {
             const date = ownerState.day.toDate();
@@ -67,19 +91,16 @@ export function MiniCalendar({
               );
             });
 
-            // Combine your Stylus-based classNames dynamically
             const classNames = [
-              "MuiPickersDay-root",
               isToday ? "today" : "",
-              isSelectedDay || isInSelectedWeek ? "selectedWeek" : "",
+              isSelectedDay ? "selectedDay" : "",
+              isInSelectedWeek ? "selectedWeek" : "",
               hasEvents ? "event-dot" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
+            ].join(" ");
 
             return {
               className: classNames,
-              selected: isSelectedDay,
+              selected: classNames.includes("selectedWeek"),
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
               disableMargin: false,
               onClick: () => {
@@ -88,10 +109,23 @@ export function MiniCalendar({
                 calendarRef.current?.gotoDate(date);
               },
               style: {
-                position: "relative",
                 backgroundColor: "transparent",
+                position: "relative",
                 flexDirection: "column",
                 border: 0,
+              },
+              sx: {
+                "&.Mui-selected": {
+                  color: "inherit !important",
+                  fontWeight: "inherit !important",
+                },
+                "&.selectedDay": {
+                  backgroundColor: "lightgray !important",
+                },
+                "&.today": {
+                  background: "orange !important",
+                  color: "white !important",
+                },
               },
               "data-testid": `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
               children: (

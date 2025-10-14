@@ -29,7 +29,6 @@
   height 90vh
   flex-direction column
   overflow auto
-  font-family "Segoe UI", Tahoma, Geneva, Verdana, sans-serif
 
 .declined-event
   opacity 0.7
@@ -73,29 +72,8 @@
   font-family "Segoe UI", Tahoma, Geneva, Verdana, sans-serif
 
 /* mini calendar style */
-.react-calendar
-  border none
-  font-size 14px
-  width 100%
-  user-select none
-
-/* selected day hover */
-.MuiPickersDay-root
-  transition background-color 0.3s ease, color 0.3s ease
-  border none
-  background-color white
-  width 12px
-  height 37.52px
-
-.MuiPickersDay-root--active
-  background-color rgb(255, 255, 255)
-
-.today
-  background orange !important
-  color white !important
-
-.selectedWeek
-  background-color lightgrey
+.MuiDayCalendar-weekContainer:has(.selectedWeek)
+  background-color lightgray !important
 
 /* sidebar header */
 .sidebar-calendar h2

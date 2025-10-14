@@ -360,7 +360,7 @@ describe("calendar Availability search", () => {
 
     calendarApi.changeView("dayGridMonth");
     await waitFor(() => {
-      expect(screen.queryAllByRole("columnheader").length).toBe(7);
+      expect(screen.queryAllByRole("columnheader").length).toBe(14);
     });
 
     const dayNumbers = screen.getAllByRole("columnheader");
@@ -394,8 +394,8 @@ describe("calendar Availability search", () => {
     calendarApi.changeView("dayGridMonth");
     fireEvent.click(screen.getByTestId("ChevronRightIcon"));
 
-    expect(spy).toHaveBeenCalledTimes(2);
-    const callArgs = spy.mock.calls[1][0];
+    expect(spy).toHaveBeenCalledTimes(4);
+    const callArgs = spy.mock.calls[3][0];
     expect(callArgs.calId).toBe("user1/cal1");
 
     const startDate = new Date(
