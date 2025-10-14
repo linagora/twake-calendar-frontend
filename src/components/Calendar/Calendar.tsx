@@ -41,6 +41,13 @@ import { EventErrorHandler } from "../Error/EventErrorHandler";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import moment from "moment";
+import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
+import { PickersDay } from "@mui/x-date-pickers/PickersDay";
+import { MiniCalendar } from "./MiniCalendar";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -241,19 +248,16 @@ export default function CalendarApp({
         >
           <AddIcon /> <p>Create Event</p>
         </Button>
-        <div className="calendar-label">
-          <div className="calendar-label">
-            <span title="mini calendar month">
-              {selectedMiniDate.toLocaleDateString("en-us", {
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-          <button onClick={handleMonthUp}>&lt;</button>
-          <button onClick={handleMonthDown}>&gt;</button>
-        </div>
-        <ReactCalendar
+
+        <MiniCalendar
+          calendarRef={calendarRef}
+          selectedDate={selectedMiniDate}
+          setSelectedDate={setSelectedDate}
+          setSelectedMiniDate={setSelectedMiniDate}
+          dottedEvents={dottedEvents}
+        />
+
+        {/* <ReactCalendar
           key={selectedMiniDate.toDateString()}
           calendarType="iso8601"
           formatShortWeekday={(locale, date) =>
@@ -322,7 +326,7 @@ export default function CalendarApp({
               ></div>
             );
           }}
-        />
+        /> */}
         <TempCalendarsInput
           setAnchorEl={setAnchorEl}
           selectedCalendars={selectedCalendars}

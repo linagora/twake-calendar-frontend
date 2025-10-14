@@ -23,11 +23,13 @@
 
 .sidebar
   border-right 2px solid #f3f4f6
-  width 330px
-  padding 16px 25px
+  width 350px
+  padding-top 16px
+  padding-left 5px
   height 90vh
   flex-direction column
   overflow auto
+  font-family "Segoe UI", Tahoma, Geneva, Verdana, sans-serif
 
 .declined-event
   opacity 0.7
@@ -78,25 +80,22 @@
   user-select none
 
 /* selected day hover */
-.react-calendar__tile
+.MuiPickersDay-root
   transition background-color 0.3s ease, color 0.3s ease
   border none
   background-color white
   width 12px
   height 37.52px
 
-.react-calendar__tile--active
+.MuiPickersDay-root--active
   background-color rgb(255, 255, 255)
 
 .today
   background orange !important
-  color white
+  color white !important
 
 .selectedWeek
   background-color lightgrey
-
-.react-calendar__month-view__days__day--neighboringMonth
-  color gray
 
 /* sidebar header */
 .sidebar-calendar h2

@@ -57,6 +57,6 @@ describe("MiniCalendar", () => {
     const dateTestId = `date-${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
 
     const todayTile = screen.getByTestId(dateTestId);
-    expect(todayTile?.parentElement).toHaveClass("today");
+    expect(todayTile).toHaveClass("today");
   });
 });
