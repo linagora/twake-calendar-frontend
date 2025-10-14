@@ -317,18 +317,86 @@ function EventUpdateModal({
       return;
     }
 
+    // Handle recurrence instances
+    const [baseUID, recurrenceId] = event.uid.split("/");
+
+    // Check if this is a recurring event
+    const isRecurringEvent = !!event.repetition?.freq;
+
+    // When editing "all events" of a recurring series, fetch master event to get original start time
+    let masterEventData: CalendarEvent | null = null;
+    if (isRecurringEvent && typeOfAction === "all") {
+      try {
+        // Fetch master event using base UID (without recurrence-id)
+        const masterEventToFetch = {
+          ...event,
+          uid: baseUID, // Use base UID to get master event
+        };
+        const masterEvent = await getEvent(masterEventToFetch, true);
+        masterEventData = masterEvent;
+      } catch (err: any) {
+        console.error("Failed to fetch master event:", err);
+        showErrorNotification("Failed to fetch event data. Please try again.");
+        return;
+      }
+    }
+
     // Handle start and end dates based on all-day status
     let startDate: string;
     let endDate: string;
 
-    if (allday) {
-      // For all-day events, use date format (YYYY-MM-DD)
-      startDate = new Date(start).toISOString().split("T")[0];
-      endDate = new Date(end).toISOString().split("T")[0];
+    // For "all events" update, use master event's DATE but apply user's TIME from form
+    if (masterEventData && typeOfAction === "all") {
+      if (allday) {
+        // For all-day events, use date from master event
+        startDate = new Date(masterEventData.start).toISOString().split("T")[0];
+        if (masterEventData.end) {
+          endDate = new Date(masterEventData.end).toISOString().split("T")[0];
+        } else {
+          endDate = startDate;
+        }
+      } else {
+        // For timed events: combine master's date with form's time (both in event timezone)
+        // Format master's start in event timezone to get proper date
+        const masterFormattedStart = formatDateTimeInTimezone(
+          masterEventData.start,
+          timezone
+        );
+        const masterFormattedEnd = masterEventData.end
+          ? formatDateTimeInTimezone(masterEventData.end, timezone)
+          : masterFormattedStart;
+
+        // Extract date portion from master (YYYY-MM-DD)
+        const masterDatePart = masterFormattedStart.split("T")[0];
+        const masterEndDatePart = masterFormattedEnd.split("T")[0];
+
+        // Extract time portion from form input (HH:MM or HH:MM:SS)
+        const formTimePart = start.includes("T")
+          ? start.split("T")[1]
+          : start.substring(11);
+        const formEndTimePart = end.includes("T")
+          ? end.split("T")[1]
+          : end.substring(11);
+
+        // Combine master's date + form's time
+        const combinedStartStr = `${masterDatePart}T${formTimePart}`;
+        const combinedEndStr = `${masterEndDatePart}T${formEndTimePart}`;
+
+        // Parse and convert to ISO (assume local timezone matches event timezone for form input)
+        startDate = new Date(combinedStartStr).toISOString();
+        endDate = new Date(combinedEndStr).toISOString();
+      }
     } else {
-      // For timed events, use full datetime
-      startDate = new Date(start).toISOString();
-      endDate = new Date(end).toISOString();
+      // For single events or "solo" edits, use the edited dates from form
+      if (allday) {
+        // For all-day events, use date format (YYYY-MM-DD)
+        startDate = new Date(start).toISOString().split("T")[0];
+        endDate = new Date(end).toISOString().split("T")[0];
+      } else {
+        // For timed events, use full datetime
+        startDate = new Date(start).toISOString();
+        endDate = new Date(end).toISOString();
+      }
     }
 
     const newEvent: CalendarEvent = {
@@ -353,9 +421,6 @@ function EventUpdateModal({
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
     };
-
-    // Handle recurrence instances
-    const [, recurrenceId] = event.uid.split("/");
 
     // Special case: When converting recurring event to non-recurring
     if (
@@ -506,21 +571,71 @@ function EventUpdateModal({
         const newTimezone = normalizeTimezone(timezone);
         const timezoneChanged = oldTimezone !== newTimezone;
 
+        // Check if TIME changed (compare time portion only, not date)
+        // We need to compare against master event's time, not current instance's time
+        const extractTimeFromForm = (localDateTimeStr: string) => {
+          // Form input is local datetime string like "2025-10-15T09:00"
+          // Extract just the time portion
+          if (!localDateTimeStr) return null;
+          const timePart = localDateTimeStr.includes("T")
+            ? localDateTimeStr.split("T")[1]
+            : localDateTimeStr.substring(11);
+          return timePart?.substring(0, 5); // HH:MM
+        };
+
+        const extractTimeFromISO = (
+          isoString: string | undefined,
+          tz: string
+        ) => {
+          // Format ISO datetime in event timezone and extract time
+          if (!isoString) return null;
+          const formatted = formatDateTimeInTimezone(isoString, tz);
+          const timePart = formatted.includes("T")
+            ? formatted.split("T")[1]
+            : formatted.substring(11);
+          return timePart?.substring(0, 5); // HH:MM
+        };
+
+        const masterOldStart = masterEventData?.start || event.start;
+        const masterOldEnd = masterEventData?.end || event.end;
+
+        // Extract time from form input (local time)
+        const formStartTime = extractTimeFromForm(start);
+        const formEndTime = extractTimeFromForm(end);
+
+        // Extract time from master event (in event timezone)
+        const oldStartTime = extractTimeFromISO(masterOldStart, timezone);
+        const oldEndTime = extractTimeFromISO(masterOldEnd, timezone);
+
+        const timeChanged =
+          formStartTime !== oldStartTime || formEndTime !== oldEndTime;
+
         const repetitionRulesChanged =
           JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition) ||
           timezoneChanged ||
-          event.allday !== allday;
+          event.allday !== allday ||
+          timeChanged;
 
         if (repetitionRulesChanged) {
-          // Repetition rules changed - need server to recalculate instances
-          dispatch(
+          // Date/time or repetition rules changed - remove all overrides and refresh
+
+          // STEP 1: Remove ALL old instances from UI (including solo overrides)
+          Object.keys(targetCalendar.events).forEach((eventId) => {
+            if (eventId.split("/")[0] === baseUID) {
+              dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
+            }
+          });
+
+          // STEP 2: Update series on server with removeOverrides=true (await to ensure it completes)
+          await dispatch(
             updateSeriesAsync({
               cal: targetCalendar,
               event: { ...newEvent, recurrenceId },
+              removeOverrides: true,
             })
-          );
+          ).unwrap();
 
-          // Fetch to get new instances with correct timing
+          // STEP 3: Fetch to get new instances with correct timing
           const calendarRange = getCalendarRange(new Date(start));
           await refreshCalendars(
             dispatch,
@@ -531,7 +646,9 @@ function EventUpdateModal({
           // Clear cache after reload
           dispatch(clearFetchCache(calId));
         } else {
-          // Only properties changed - use optimistic update
+          // Only properties changed - use optimistic update and keep overrides
+
+          // Store old instances for rollback
           const oldInstances: Record<string, CalendarEvent> = {};
           Object.keys(targetCalendar.events)
             .filter((eventId) => eventId.split("/")[0] === baseUID)
@@ -539,6 +656,7 @@ function EventUpdateModal({
               oldInstances[eventId] = { ...targetCalendar.events[eventId] };
             });
 
+          // Optimistic update: Apply new properties to all instances immediately
           Object.keys(oldInstances).forEach((eventId) => {
             const instance = oldInstances[eventId];
 
@@ -550,11 +668,8 @@ function EventUpdateModal({
                   title: newEvent.title,
                   description: newEvent.description,
                   location: newEvent.location,
-                  allday: newEvent.allday,
-                  repetition: newEvent.repetition,
                   class: newEvent.class,
                   transp: newEvent.transp,
-                  timezone: newEvent.timezone,
                   attendee: newEvent.attendee,
                   alarm: newEvent.alarm,
                   x_openpass_videoconference:
@@ -564,10 +679,12 @@ function EventUpdateModal({
             );
           });
 
+          // Update server in background with removeOverrides=false
           dispatch(
             updateSeriesAsync({
               cal: targetCalendar,
               event: { ...newEvent, recurrenceId },
+              removeOverrides: false,
             })
           )
             .unwrap()
@@ -575,7 +692,8 @@ function EventUpdateModal({
               // Clear cache to ensure navigation shows updated data
               dispatch(clearFetchCache(calId));
             })
-            .catch((error) => {
+            .catch((error: any) => {
+              // Rollback: Restore old instances on error
               Object.values(oldInstances).forEach((oldEvent) => {
                 dispatch(updateEventLocal({ calId, event: oldEvent }));
               });
@@ -606,7 +724,7 @@ function EventUpdateModal({
             // Clear cache to ensure navigation to other weeks works
             dispatch(clearFetchCache(calId));
           })
-          .catch((error) => {
+          .catch((error: any) => {
             showErrorNotification("Failed to create recurring event.");
           });
       } else {
