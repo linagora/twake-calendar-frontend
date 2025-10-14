@@ -380,6 +380,12 @@ const CalendarSlice = createSlice({
     list: {} as Record<string, Calendars>,
     templist: {} as Record<string, Calendars>,
     pending: false,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  } as {
+    list: Record<string, Calendars>;
+    templist: Record<string, Calendars>;
+    pending: boolean;
+    timeZone: string;
   },
   reducers: {
     createCalendar: (state, action: PayloadAction<Record<string, string>>) => {
@@ -422,6 +428,9 @@ const CalendarSlice = createSlice({
     ) => {
       const { calId, event } = action.payload;
       state.list[calId].events[event.uid] = event;
+    },
+    setTimeZone: (state, action: PayloadAction<string>) => {
+      state.timeZone = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -689,5 +698,6 @@ export const {
   createCalendar,
   updateEventLocal,
   removeTempCal,
+  setTimeZone,
 } = CalendarSlice.actions;
 export default CalendarSlice.reducer;

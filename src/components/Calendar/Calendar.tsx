@@ -11,7 +11,10 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import {
+  getCalendarDetailAsync,
+  setTimeZone,
+} from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   computeStartOfTheWeek,
@@ -36,6 +39,8 @@ import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
 import { EditModeDialog } from "../Event/EditModeDialog";
 import { EventErrorHandler } from "../Error/EventErrorHandler";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
+import momentTimezonePlugin from "@fullcalendar/moment-timezone";
+import { TimezoneSelector } from "./TimezoneSelector";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -70,6 +75,10 @@ export default function CalendarApp({
   const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) =>
     Object.values(calendars[calId].events)
   );
+
+  const [currentView, setCurrentView] = useState("timeGridWeek");
+  const timezone = useAppSelector((state) => state.calendars.timeZone);
+
   const fetchedRangesRef = useRef<Record<string, string>>({});
 
   // Auto-select personal calendars when first loaded
@@ -335,15 +344,24 @@ export default function CalendarApp({
               calendarRef.current = ref.getApi();
             }
           }}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            momentTimezonePlugin,
+          ]}
           initialView="timeGridWeek"
           firstDay={1}
           editable={true}
           selectable={true}
-          timeZone="local"
+          timeZone={timezone}
           height={"100%"}
           select={eventHandlers.handleDateSelect}
           nowIndicator
+          slotLabelClassNames={(arg) => [
+            updateSlotLabelVisibility(new Date(), arg, timezone),
+          ]}
+          nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
           headerToolbar={false}
           views={{
             timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
@@ -356,6 +374,23 @@ export default function CalendarApp({
           )}
           weekNumbers
           weekNumberFormat={{ week: "long" }}
+          weekNumberContent={(arg) => {
+            const showSelector =
+              currentView === "timeGridWeek" || currentView === "timeGridDay";
+            return (
+              <div className="weekSelector">
+                <div>{arg.text}</div>
+                {showSelector && (
+                  <TimezoneSelector
+                    value={timezone}
+                    onChange={(newTimezone: string) =>
+                      dispatch(setTimeZone(newTimezone))
+                    }
+                  />
+                )}
+              </div>
+            );
+          }}
           slotDuration={"00:30:00"}
           slotLabelInterval={"01:00:00"}
           scrollTime="12:00:00"
@@ -367,6 +402,7 @@ export default function CalendarApp({
             hour12: false,
           }}
           datesSet={(arg) => {
+            setCurrentView(arg.view.type);
             // Get the current date from calendar API to ensure consistency
             const calendarCurrentDate =
               calendarRef.current?.getDate() || new Date(arg.start);
