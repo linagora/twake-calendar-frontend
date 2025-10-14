@@ -28,6 +28,10 @@ import EventFormFields, {
 import { getEvent, deleteEvent, putEvent } from "./EventApi";
 import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
+import {
+  combineMasterDateWithFormTime,
+  detectRecurringEventChanges,
+} from "./eventUtils";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -347,45 +351,16 @@ function EventUpdateModal({
 
     // For "all events" update, use master event's DATE but apply user's TIME from form
     if (masterEventData && typeOfAction === "all") {
-      if (allday) {
-        // For all-day events, use date from master event
-        startDate = new Date(masterEventData.start).toISOString().split("T")[0];
-        if (masterEventData.end) {
-          endDate = new Date(masterEventData.end).toISOString().split("T")[0];
-        } else {
-          endDate = startDate;
-        }
-      } else {
-        // For timed events: combine master's date with form's time (both in event timezone)
-        // Format master's start in event timezone to get proper date
-        const masterFormattedStart = formatDateTimeInTimezone(
-          masterEventData.start,
-          timezone
-        );
-        const masterFormattedEnd = masterEventData.end
-          ? formatDateTimeInTimezone(masterEventData.end, timezone)
-          : masterFormattedStart;
-
-        // Extract date portion from master (YYYY-MM-DD)
-        const masterDatePart = masterFormattedStart.split("T")[0];
-        const masterEndDatePart = masterFormattedEnd.split("T")[0];
-
-        // Extract time portion from form input (HH:MM or HH:MM:SS)
-        const formTimePart = start.includes("T")
-          ? start.split("T")[1]
-          : start.substring(11);
-        const formEndTimePart = end.includes("T")
-          ? end.split("T")[1]
-          : end.substring(11);
-
-        // Combine master's date + form's time
-        const combinedStartStr = `${masterDatePart}T${formTimePart}`;
-        const combinedEndStr = `${masterEndDatePart}T${formEndTimePart}`;
-
-        // Parse and convert to ISO (assume local timezone matches event timezone for form input)
-        startDate = new Date(combinedStartStr).toISOString();
-        endDate = new Date(combinedEndStr).toISOString();
-      }
+      const combined = combineMasterDateWithFormTime(
+        masterEventData,
+        start,
+        end,
+        timezone,
+        allday,
+        formatDateTimeInTimezone
+      );
+      startDate = combined.startDate;
+      endDate = combined.endDate;
     } else {
       // For single events or "solo" edits, use the edited dates from form
       if (allday) {
@@ -541,80 +516,14 @@ function EventUpdateModal({
         // Update all instances - check if repetition rules changed
         const baseUID = event.uid.split("/")[0];
 
-        // Normalize repetition objects for accurate comparison
-        const normalizeRepetition = (rep: RepetitionObject | undefined) => {
-          if (!rep || !rep.freq) return null;
-
-          return {
-            freq: rep.freq,
-            interval: rep.interval || 1,
-            byday:
-              !rep.byday || rep.byday.length === 0
-                ? null
-                : [...rep.byday].sort(),
-            occurrences: rep.occurrences || null,
-            endDate: rep.endDate || null,
-          };
-        };
-
-        const oldRepetition = normalizeRepetition(event.repetition);
-        const newRepetition = normalizeRepetition(repetition);
-
-        // Normalize timezone for comparison (undefined, null, "" → null, resolve aliases)
-        const normalizeTimezone = (tz: string | undefined | null) => {
-          if (!tz) return null;
-          // Resolve timezone aliases (e.g., Asia/Saigon → Asia/Ho_Chi_Minh)
-          return resolveTimezone(tz);
-        };
-
-        const oldTimezone = normalizeTimezone(event.timezone);
-        const newTimezone = normalizeTimezone(timezone);
-        const timezoneChanged = oldTimezone !== newTimezone;
-
-        // Check if TIME changed (compare time portion only, not date)
-        // We need to compare against master event's time, not current instance's time
-        const extractTimeFromForm = (localDateTimeStr: string) => {
-          // Form input is local datetime string like "2025-10-15T09:00"
-          // Extract just the time portion
-          if (!localDateTimeStr) return null;
-          const timePart = localDateTimeStr.includes("T")
-            ? localDateTimeStr.split("T")[1]
-            : localDateTimeStr.substring(11);
-          return timePart?.substring(0, 5); // HH:MM
-        };
-
-        const extractTimeFromISO = (
-          isoString: string | undefined,
-          tz: string
-        ) => {
-          // Format ISO datetime in event timezone and extract time
-          if (!isoString) return null;
-          const formatted = formatDateTimeInTimezone(isoString, tz);
-          const timePart = formatted.includes("T")
-            ? formatted.split("T")[1]
-            : formatted.substring(11);
-          return timePart?.substring(0, 5); // HH:MM
-        };
-
-        const masterOldStart = masterEventData?.start || event.start;
-        const masterOldEnd = masterEventData?.end || event.end;
-
-        // Extract time from form input (local time)
-        const formStartTime = extractTimeFromForm(start);
-        const formEndTime = extractTimeFromForm(end);
-
-        // Extract time from master event (in event timezone)
-        const oldStartTime = extractTimeFromISO(masterOldStart, timezone);
-        const oldEndTime = extractTimeFromISO(masterOldEnd, timezone);
-
-        const timeChanged =
-          formStartTime !== oldStartTime || formEndTime !== oldEndTime;
-
-        const repetitionRulesChanged =
-          JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition) ||
-          timezoneChanged ||
-          event.allday !== allday ||
-          timeChanged;
+        const changes = detectRecurringEventChanges(
+          event,
+          { repetition, timezone, allday, start, end },
+          masterEventData,
+          resolveTimezone,
+          formatDateTimeInTimezone
+        );
+        const repetitionRulesChanged = changes.repetitionRulesChanged;
 
         if (repetitionRulesChanged) {
           // Date/time or repetition rules changed - remove all overrides and refresh
