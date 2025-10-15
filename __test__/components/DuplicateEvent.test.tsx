@@ -6,6 +6,7 @@ import { renderWithProviders } from "../utils/Renderwithproviders";
 import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
 
 const day = new Date();
+const dayISO = day.toISOString();
 const preloadedState = {
   user: {
     userData: {
@@ -31,8 +32,8 @@ const preloadedState = {
             URL: "calendars/667037022b752d0026472254/cal1/event1.ics",
             title: "Test Event",
             calId: "667037022b752d0026472254/cal1",
-            start: day,
-            end: day,
+            start: dayISO,
+            end: dayISO,
             timezone: "UTC",
             organizer: { cn: "test", cal_address: "test@test.com" },
             attendee: [

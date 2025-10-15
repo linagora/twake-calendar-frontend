@@ -114,6 +114,7 @@ function EventPopover({
   const [meetingLink, setMeetingLink] = useState<string | null>(
     event?.x_openpass_videoconference || null
   );
+  const [hasValidationError, setHasValidationError] = useState(false);
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
@@ -146,15 +147,19 @@ function EventPopover({
   }, [calendarTimezone, timezoneList.browserTz]);
 
   useEffect(() => {
-    if (selectedRange) {
-      setStart(
-        selectedRange ? formatLocalDateTime(selectedRange.start, timezone) : ""
-      );
-      setEnd(
-        selectedRange ? formatLocalDateTime(selectedRange.end, timezone) : ""
-      );
+    if (!selectedRange) return;
+
+    // If all-day, keep date-only strings; otherwise format datetime in timezone
+    if (allday || selectedRange.allDay) {
+      const startStr = selectedRange.startStr || selectedRange.start?.toISOString();
+      const endStr = selectedRange.endStr || selectedRange.end?.toISOString();
+      setStart(startStr ? startStr.split("T")[0] : "");
+      setEnd(endStr ? endStr.split("T")[0] : "");
+    } else {
+      setStart(formatLocalDateTime(selectedRange.start, timezone));
+      setEnd(formatLocalDateTime(selectedRange.end, timezone));
     }
-  }, [selectedRange]);
+  }, [selectedRange, timezone, allday]);
 
   // Initialize state when event prop changes
   useEffect(() => {
@@ -336,7 +341,7 @@ function EventPopover({
         <Button variant="outlined" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button variant="contained" onClick={handleSave} disabled={!title || hasValidationError}>
           Save
         </Button>
       </Box>
@@ -395,7 +400,10 @@ function EventPopover({
           getTimezoneOffset: getTimezoneOffset
         }}
         onStartChange={(newStart) => {
-          const startISO = formatLocalDateTime(new Date(newStart), timezone);
+          // For all-day events, keep date-only format; otherwise format as datetime
+          const startISO = allday
+            ? newStart
+            : formatLocalDateTime(new Date(newStart), timezone);
           const newRange = {
             ...selectedRange,
             start: new Date(startISO),
@@ -403,10 +411,12 @@ function EventPopover({
             allDay: allday,
           };
           setSelectedRange(newRange);
-          calendarRef.current?.select(newRange);
         }}
         onEndChange={(newEnd) => {
-          const endISO = formatLocalDateTime(new Date(newEnd), timezone);
+          // For all-day events, keep date-only format; otherwise format as datetime
+          const endISO = allday
+            ? newEnd
+            : formatLocalDateTime(new Date(newEnd), timezone);
           const newRange = {
             ...selectedRange,
             end: new Date(endISO),
@@ -414,31 +424,20 @@ function EventPopover({
             allDay: allday,
           };
           setSelectedRange(newRange);
-          calendarRef.current?.select(newRange);
         }}
         onAllDayChange={(newAllDay) => {
-          const endDate = new Date(end);
-          const startDate = new Date(start);
-          if (endDate.getDate() === startDate.getDate()) {
-            endDate.setDate(startDate.getDate() + 1);
-            setEnd(formatLocalDateTime(endDate, timezone));
-          }
+          // EventFormFields already handles date adjustments, just update the range
           const newRange = {
             ...selectedRange,
-            startStr: allday ? start.split("T")[0] : start,
-            endStr: allday
-              ? endDate.toISOString().split("T")[0]
-              : endDate.toISOString(),
-            start: new Date(allday ? start.split("T")[0] : start),
-            end: new Date(
-              allday
-                ? endDate.toISOString().split("T")[0]
-                : endDate.toISOString()
-            ),
-            allDay: allday,
+            startStr: start,
+            endStr: end,
+            start: new Date(start),
+            end: new Date(end),
+            allDay: newAllDay,
           };
           setSelectedRange(newRange);
         }}
+        onValidationChange={(hasError) => setHasValidationError(hasError)}
       />
     </ResponsiveDialog>
   );

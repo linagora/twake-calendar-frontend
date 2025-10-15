@@ -162,6 +162,7 @@ function EventUpdateModal({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
+  const [hasValidationError, setHasValidationError] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -664,7 +665,7 @@ function EventUpdateModal({
         <Button variant="outlined" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button variant="contained" onClick={handleSave} disabled={!title || hasValidationError}>
           Save
         </Button>
       </Box>
@@ -727,6 +728,7 @@ function EventUpdateModal({
             setNewCalId(selectedCalendar.id);
           }
         }}
+        onValidationChange={(hasError) => setHasValidationError(hasError)}
       />
     </ResponsiveDialog>
   );

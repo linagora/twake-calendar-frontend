@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -85,6 +85,29 @@ export const FieldWithLabel = React.memo(
 
 FieldWithLabel.displayName = "FieldWithLabel";
 
+// Helper functions for datetime manipulation
+const splitDatetime = (datetime: string): { date: string; time: string } => {
+  if (!datetime) return { date: "", time: "" };
+  const [date, time] = datetime.split("T");
+  return { date: date || "", time: time?.substring(0, 5) || "" };
+};
+
+const combineDatetime = (date: string, time: string): string => {
+  if (!date) return "";
+  return time ? `${date}T${time}` : `${date}T00:00`;
+};
+
+const calculateDuration = (start: string, end: string): number => {
+  if (!start || !end) return 0;
+  return new Date(end).getTime() - new Date(start).getTime();
+};
+
+const addDuration = (datetime: string, durationMs: number): string => {
+  if (!datetime || durationMs === 0) return datetime;
+  const newDate = new Date(new Date(datetime).getTime() + durationMs);
+  return formatLocalDateTime(newDate);
+};
+
 interface EventFormFieldsProps {
   // Form state
   title: string;
@@ -139,6 +162,7 @@ interface EventFormFieldsProps {
   onEndChange?: (newEnd: string) => void;
   onAllDayChange?: (newAllDay: boolean) => void;
   onCalendarChange?: (newCalendarId: number) => void;
+  onValidationChange?: (hasError: boolean) => void;
 }
 
 export default function EventFormFields({
@@ -184,6 +208,7 @@ export default function EventFormFields({
   onEndChange,
   onAllDayChange,
   onCalendarChange,
+  onValidationChange,
 }: EventFormFieldsProps) {
   const handleAddVideoConference = () => {
     const newMeetingLink = generateMeetingLink();
@@ -247,6 +272,270 @@ export default function EventFormFields({
     return now;
   };
 
+  // Internal state for 4 separate fields
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("");
+
+  // Saved time values when toggling all-day
+  const [savedStartTime, setSavedStartTime] = useState("");
+  const [savedEndTime, setSavedEndTime] = useState("");
+
+  // Validation error state
+  const [dateTimeError, setDateTimeError] = useState("");
+
+  // Ref to prevent re-sync from props during internal updates
+  const isInternalUpdateRef = React.useRef(false);
+  // Refs to remember initial date/time for restoring when unchecking all-day
+  const initialStartTimeRef = React.useRef("");
+  const initialEndTimeRef = React.useRef("");
+  const initialStartDateRef = React.useRef("");
+  const initialEndDateRef = React.useRef("");
+  // Refs to remember last timed values right before enabling all-day
+  const savedStartDateRef = React.useRef("");
+  const savedEndDateRef = React.useRef("");
+
+  // Handle start date change with duration maintenance
+  const handleStartDateChange = useCallback(
+    (newStartDate: string) => {
+      if (!newStartDate) return;
+
+      isInternalUpdateRef.current = true;
+
+      const oldStart = combineDatetime(startDate, startTime);
+      const oldEnd = combineDatetime(endDate, endTime);
+      const duration = calculateDuration(oldStart, oldEnd);
+
+      setStartDate(newStartDate);
+
+      // Auto-adjust end date to maintain duration
+      if (duration > 0) {
+        const newStart = combineDatetime(newStartDate, startTime);
+        const newEnd = addDuration(newStart, duration);
+        const newEndParts = splitDatetime(newEnd);
+        setEndDate(newEndParts.date);
+        setEndTime(newEndParts.time);
+
+        setStart(newStart);
+        setEnd(newEnd);
+        onStartChange?.(newStart);
+        onEndChange?.(newEnd);
+      } else {
+        const newStart = combineDatetime(newStartDate, startTime);
+        setStart(newStart);
+        onStartChange?.(newStart);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [startDate, startTime, endDate, endTime]
+  );
+
+  // Handle start time change with duration maintenance
+  const handleStartTimeChange = useCallback(
+    (newStartTime: string) => {
+      if (!newStartTime) return;
+
+      isInternalUpdateRef.current = true;
+
+      const oldStart = combineDatetime(startDate, startTime);
+      const oldEnd = combineDatetime(endDate, endTime);
+      const duration = calculateDuration(oldStart, oldEnd);
+
+      setStartTime(newStartTime);
+
+      // Auto-adjust end time to maintain duration
+      if (duration > 0) {
+        const newStart = combineDatetime(startDate, newStartTime);
+        const newEnd = addDuration(newStart, duration);
+        const newEndParts = splitDatetime(newEnd);
+        setEndDate(newEndParts.date);
+        setEndTime(newEndParts.time);
+
+        setStart(newStart);
+        setEnd(newEnd);
+        onStartChange?.(newStart);
+        onEndChange?.(newEnd);
+      } else {
+        const newStart = combineDatetime(startDate, newStartTime);
+        setStart(newStart);
+        onStartChange?.(newStart);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [startDate, startTime, endDate, endTime]
+  );
+
+  // Handle end date change (no auto-adjustment)
+  const handleEndDateChange = useCallback(
+    (newEndDate: string) => {
+      if (!newEndDate) return;
+
+      isInternalUpdateRef.current = true;
+
+      setEndDate(newEndDate);
+      const newEnd = combineDatetime(newEndDate, endTime);
+      setEnd(newEnd);
+      onEndChange?.(newEnd);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [endTime]
+  );
+
+  // Handle end time change (no auto-adjustment)
+  const handleEndTimeChange = useCallback(
+    (newEndTime: string) => {
+      if (!newEndTime || !endDate) return;
+
+      isInternalUpdateRef.current = true;
+
+      setEndTime(newEndTime);
+      const newEnd = combineDatetime(endDate, newEndTime);
+      setEnd(newEnd);
+      onEndChange?.(newEnd);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [endDate]
+  );
+
+  // Handle all-day toggle with time preservation
+  const handleAllDayToggle = useCallback(() => {
+    const newAllDay = !allday;
+
+    // Mark as internal update to prevent re-sync from props
+    isInternalUpdateRef.current = true;
+
+    if (newAllDay) {
+      // Enable all-day: save current times and clear
+      if (startTime) setSavedStartTime(startTime);
+      if (endTime) setSavedEndTime(endTime);
+      // Also save current date parts to restore later
+      savedStartDateRef.current = startDate || (start ? start.split("T")[0] : initialStartDateRef.current);
+      savedEndDateRef.current = endDate || (end ? end.split("T")[0] : initialEndDateRef.current);
+
+      // Clear time values in UI first
+      setStartTime("");
+      setEndTime("");
+
+      // For all-day events, ALWAYS set end date = start date + 1 day
+      const currentStartDate = startDate || (start ? start.split("T")[0] : "");
+      const baseStartForCalc = currentStartDate || new Date().toISOString().split("T")[0];
+      const nextDay = new Date(baseStartForCalc + "T00:00:00");
+      nextDay.setDate(nextDay.getDate() + 1);
+      const newEndDate = nextDay.toISOString().split("T")[0];
+
+      // Update internal state
+      setStartDate(baseStartForCalc);
+      setEndDate(newEndDate);
+
+      // Send ONLY date (no time portion) to parent to prevent re-sync with time
+      setStart(baseStartForCalc);
+      setEnd(newEndDate);
+      onStartChange?.(baseStartForCalc);
+      onEndChange?.(newEndDate);
+    } else {
+      // Disable all-day: restore saved times or use defaults
+      // Restore times from saved values (when enabling all-day) or initial values (from selectedRange)
+      const newStartTime = savedStartTime || initialStartTimeRef.current;
+      const newEndTime = savedEndTime || initialEndTimeRef.current;
+      if (!newStartTime || !newEndTime) {
+        console.warn('Missing time values to restore - this should not happen with selectedRange');
+      }
+
+      setStartTime(newStartTime);
+      setEndTime(newEndTime);
+
+      // Set end date = start date (event should be within same day)
+      // Restore the date from when we enabled all-day
+      const baseStartDate = savedStartDateRef.current || initialStartDateRef.current;
+      setEndDate(baseStartDate);
+
+      const newStart = combineDatetime(baseStartDate, newStartTime);
+      const newEnd = combineDatetime(baseStartDate, newEndTime);
+
+      setStart(newStart);
+      setEnd(newEnd);
+      onStartChange?.(newStart);
+      onEndChange?.(newEnd);
+    }
+
+    setAllDay(newAllDay);
+    onAllDayChange?.(newAllDay);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    allday,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    savedStartTime,
+    savedEndTime,
+  ]);
+
+  // Initialize separate fields from props
+  useEffect(() => {
+    // Skip re-sync if this is an internal update
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      return;
+    }
+
+    const startParts = splitDatetime(start);
+    const endParts = splitDatetime(end);
+
+    setStartDate(startParts.date);
+    setStartTime(startParts.time);
+    setEndDate(endParts.date);
+    setEndTime(endParts.time);
+    // Always capture initial values from props (especially for create modal's selectedRange)
+    if (startParts.time) initialStartTimeRef.current = startParts.time;
+    if (endParts.time) initialEndTimeRef.current = endParts.time;
+    if (startParts.date) initialStartDateRef.current = startParts.date;
+    if (endParts.date) initialEndDateRef.current = endParts.date;
+  }, [start, end]);
+
+  // Validate datetime whenever start or end changes
+  useEffect(() => {
+    if (!startDate || !endDate) {
+      setDateTimeError("");
+      return;
+    }
+
+    // For all-day events, only check dates
+    if (allday) {
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(endDate);
+
+      if (endDateObj < startDateObj) {
+        setDateTimeError("End date must be after start date");
+      } else {
+        setDateTimeError("");
+      }
+      return;
+    }
+
+    // For timed events, check full datetime
+    if (!startTime || !endTime) {
+      setDateTimeError("");
+      return;
+    }
+
+    const startDateTime = new Date(combineDatetime(startDate, startTime));
+    const endDateTime = new Date(combineDatetime(endDate, endTime));
+
+    if (endDateTime <= startDateTime) {
+      setDateTimeError("End time must be after start time");
+    } else {
+      setDateTimeError("");
+    }
+  }, [startDate, startTime, endDate, endTime, allday]);
+
+  // Notify parent component about validation state
+  useEffect(() => {
+    onValidationChange?.(!!dateTimeError);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateTimeError]);
+
   return (
     <>
       <FieldWithLabel label="Title" isExpanded={showMore}>
@@ -295,80 +584,109 @@ export default function EventFormFields({
       )}
 
       <FieldWithLabel label="Date & Time" isExpanded={showMore}>
-        <Box display="flex" gap={2}>
-          <Box flexGrow={1}>
+        <Box display="flex" gap={1}>
+          {/* Start Date */}
+          <Box flex="1 1 30%">
             {showMore && (
               <Typography variant="caption" display="block" mb={0.5}>
-                Start
+                Start Date
               </Typography>
             )}
             <TextField
               fullWidth
-              label={!showMore ? "Start" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? start.split("T")[0] : start}
-              onChange={(e) => handleStartChange(e.target.value)}
+              label={!showMore ? "Start Date" : ""}
+              type="date"
+              value={startDate}
+              onChange={(e) => handleStartDateChange(e.target.value)}
               size="small"
               margin="dense"
               InputLabelProps={{ shrink: true }}
             />
           </Box>
-          <Box flexGrow={1}>
+
+          {/* Start Time */}
+          <Box flex="1 1 20%">
             {showMore && (
               <Typography variant="caption" display="block" mb={0.5}>
-                End
+                Start Time
               </Typography>
             )}
             <TextField
               fullWidth
-              label={!showMore ? "End" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? end.split("T")[0] : end}
-              onChange={(e) => handleEndChange(e.target.value)}
+              label={!showMore ? "Start Time" : ""}
+              type="time"
+              value={startTime}
+              onChange={(e) => handleStartTimeChange(e.target.value)}
+              disabled={allday}
               size="small"
               margin="dense"
               InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+
+          {/* End Time */}
+          <Box flex="1 1 20%">
+            {showMore && (
+              <Typography variant="caption" display="block" mb={0.5}>
+                End Time
+              </Typography>
+            )}
+            <TextField
+              fullWidth
+              label={!showMore ? "End Time" : ""}
+              type="time"
+              value={endTime}
+              onChange={(e) => handleEndTimeChange(e.target.value)}
+              disabled={allday}
+              size="small"
+              margin="dense"
+              InputLabelProps={{ shrink: true }}
+              inputProps={{
+                min: endDate === startDate ? startTime : undefined,
+              }}
+              error={!!dateTimeError}
+            />
+          </Box>
+
+          {/* End Date */}
+          <Box flex="1 1 30%">
+            {showMore && (
+              <Typography variant="caption" display="block" mb={0.5}>
+                End Date
+              </Typography>
+            )}
+            <TextField
+              fullWidth
+              label={!showMore ? "End Date" : ""}
+              type="date"
+              value={endDate}
+              onChange={(e) => handleEndDateChange(e.target.value)}
+              size="small"
+              margin="dense"
+              InputLabelProps={{ shrink: true }}
+              inputProps={{
+                min: startDate,
+              }}
+              error={!!dateTimeError}
             />
           </Box>
         </Box>
+        {dateTimeError && (
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ display: "block", mt: 0.5 }}
+          >
+            {dateTimeError}
+          </Typography>
+        )}
       </FieldWithLabel>
 
       <FieldWithLabel label=" " isExpanded={showMore}>
         <Box display="flex" gap={2} alignItems="center">
           <FormControlLabel
             control={
-              <Checkbox
-                checked={allday}
-                onChange={() => {
-                  const newAllDay = !allday;
-
-                  if (newAllDay) {
-                    // No allday => allday: existing logic
-                    const endDate = new Date(end);
-                    const startDate = new Date(start);
-                    if (endDate.getDate() === startDate.getDate()) {
-                      endDate.setDate(startDate.getDate() + 1);
-                      setEnd(formatLocalDateTime(endDate));
-                    }
-                  } else {
-                    // Allday => no allday: set end date = start date with rounded time
-                    const startDate = new Date(start);
-                    const currentTime = getRoundedCurrentTime();
-
-                    // Set start time
-                    startDate.setHours(currentTime.getHours());
-                    startDate.setMinutes(currentTime.getMinutes());
-                    setStart(formatLocalDateTime(startDate));
-
-                    // Set end date = start date, with time 30 minutes after start
-                    const endDate = new Date(startDate);
-                    endDate.setMinutes(endDate.getMinutes() + 30);
-                    setEnd(formatLocalDateTime(endDate));
-                  }
-
-                  handleAllDayChange(newAllDay);
-                }}
-              />
+              <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
             label="All day"
           />

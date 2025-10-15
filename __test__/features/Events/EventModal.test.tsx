@@ -148,7 +148,8 @@ describe("EventPopover", () => {
       allDay: false,
     } as unknown as DateSelectArg);
 
-    expect(screen.getByLabelText("Start")).toHaveValue("2026-07-20T10:00");
+    expect(screen.getByLabelText("Start Date")).toHaveValue("2026-07-20");
+    expect(screen.getByLabelText("Start Time")).toHaveValue("10:00");
   });
 
   it("updates inputs on change", () => {
@@ -272,10 +273,10 @@ describe("EventPopover", () => {
       target: { value: newEvent.title },
     });
     fireEvent.click(screen.getByLabelText("All day"));
-    fireEvent.change(screen.getByLabelText("Start"), {
+    fireEvent.change(screen.getByLabelText("Start Date"), {
       target: { value: newEvent.start.split("T")[0] },
     });
-    fireEvent.change(screen.getByLabelText("End"), {
+    fireEvent.change(screen.getByLabelText("End Date"), {
       target: { value: newEvent.end.split("T")[0] },
     });
 
