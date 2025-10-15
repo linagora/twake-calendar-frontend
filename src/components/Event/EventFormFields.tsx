@@ -589,7 +589,22 @@ export default function EventFormFields({
   );
 }
 
-export function formatLocalDateTime(date: Date): string {
+export function formatLocalDateTime(date: Date, timezone?: string): string {
+  if (timezone) {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: timezone,
+    });
+    const formatted = formatter.format(date);
+    return formatted.replace(", ", "T");
+  }
+  
+  // Original implementation without timezone
   const pad = (n: number) => n.toString().padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
