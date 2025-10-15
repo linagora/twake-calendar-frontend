@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import CalendarApp from "../../../src/components/Calendar/Calendar";
 import { updateSlotLabelVisibility } from "../../../src/components/Calendar/utils/calendarUtils";
-import EventPreviewModal from "../../../src/components/Event/EventDisplayPreview";
+import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 import * as CalendarSlice from "../../../src/features/Calendars/CalendarSlice";
 import * as calendarUtils from "../../../src/components/Calendar/utils/calendarUtils";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
