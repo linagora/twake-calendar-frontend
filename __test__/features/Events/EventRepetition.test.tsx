@@ -90,6 +90,7 @@ describe("Recurrence Event Behavior Tests", () => {
               ],
             },
           },
+          ownerEmails: ["test@test.com"],
         },
       },
       pending: false,

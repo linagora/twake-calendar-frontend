@@ -79,6 +79,7 @@ describe("Event Preview Display", () => {
               organizer: { cn: "test", cal_address: "test@test.com" },
             },
           },
+          ownerEmails: ["test@test.com"],
         },
         "otherCal/cal": {
           id: "otherCal/cal",

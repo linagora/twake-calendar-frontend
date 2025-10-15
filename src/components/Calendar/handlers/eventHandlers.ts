@@ -106,7 +106,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     return true;
   };
 
-  const handleEventDrop = (arg: any) => {
+  const handleEventDrop = async (arg: any) => {
     if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
       return;
     }
@@ -136,7 +136,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       setAfterChoiceFunc(
         () => async (typeOfAction: "solo" | "all" | undefined) => {
           if (typeOfAction === "solo") {
-            dispatch(
+            await dispatch(
               updateEventInstanceAsync({ cal: calendar, event: newEvent })
             );
             dispatch(
@@ -159,16 +159,34 @@ export const createEventHandlers = (props: EventHandlersProps) => {
               Object.values(calendars),
               calendarRange
             );
+            if (tempcalendars) {
+              await refreshCalendars(
+                dispatch,
+                Object.values(tempcalendars),
+                calendarRange,
+                "temp"
+              );
+            }
           }
         }
       );
     } else {
       dispatch(updateEventLocal({ calId: newEvent.calId, event: newEvent }));
-      dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+      await dispatch(
+        putEventAsync({ cal: calendars[newEvent.calId], newEvent })
+      );
+    }
+    if (tempcalendars) {
+      await refreshCalendars(
+        dispatch,
+        Object.values(tempcalendars),
+        calendarRange,
+        "temp"
+      );
     }
   };
 
-  const handleEventResize = (arg: any) => {
+  const handleEventResize = async (arg: any) => {
     if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
       return;
     }
@@ -201,7 +219,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       setAfterChoiceFunc(
         () => async (typeOfAction: "solo" | "all" | undefined) => {
           if (typeOfAction === "solo") {
-            dispatch(
+            await dispatch(
               updateEventInstanceAsync({ cal: calendar, event: newEvent })
             );
             dispatch(
@@ -225,11 +243,29 @@ export const createEventHandlers = (props: EventHandlersProps) => {
               Object.values(calendars),
               calendarRange
             );
+            if (tempcalendars) {
+              await refreshCalendars(
+                dispatch,
+                Object.values(tempcalendars),
+                calendarRange,
+                "temp"
+              );
+            }
           }
         }
       );
     } else {
-      dispatch(putEventAsync({ cal: calendars[newEvent.calId], newEvent }));
+      await dispatch(
+        putEventAsync({ cal: calendars[newEvent.calId], newEvent })
+      );
+    }
+    if (tempcalendars) {
+      await refreshCalendars(
+        dispatch,
+        Object.values(tempcalendars),
+        calendarRange,
+        "temp"
+      );
     }
   };
 

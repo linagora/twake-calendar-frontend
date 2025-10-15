@@ -36,8 +36,12 @@ import {
   handleRSVP,
 } from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
-import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
+import {
+  refreshCalendars,
+  renderAttendeeBadge,
+} from "../../components/Event/utils/eventUtils";
 import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
+import { getCalendarRange } from "../../utils/dateUtils";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -110,6 +114,18 @@ export default function EventPreviewModal({
     (a) => a.cal_address === event.organizer?.cal_address
   );
 
+  const updateTempList = () => {
+    if (calendars.templist) {
+      const calendarRange = getCalendarRange(new Date(event.start));
+      refreshCalendars(
+        dispatch,
+        Object.values(calendars.templist),
+        calendarRange,
+        "temp"
+      );
+    }
+  };
+
   return (
     <>
       <ResponsiveDialog
@@ -143,25 +159,26 @@ export default function EventPreviewModal({
                       <FileDownloadOutlinedIcon />
                     </IconButton>
                   )}
-                  {user.userData.email === event.organizer?.cal_address && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        if (isRecurring) {
-                          setAfterChoiceFunc(() => () => {
+                  {user.userData.email === event.organizer?.cal_address &&
+                    calendar.ownerEmails?.includes(user.userData.email) && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (isRecurring) {
+                            setAfterChoiceFunc(() => () => {
+                              setHidePreview(true);
+                              setOpenUpdateModal(true);
+                            });
+                            setOpenEditModePopup("edit");
+                          } else {
                             setHidePreview(true);
                             setOpenUpdateModal(true);
-                          });
-                          setOpenEditModePopup("edit");
-                        } else {
-                          setHidePreview(true);
-                          setOpenUpdateModal(true);
-                        }
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  )}
+                          }
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    )}
                   <IconButton
                     size="small"
                     onClick={(e) => setToggleActionMenu(e.currentTarget)}
@@ -190,7 +207,7 @@ export default function EventPreviewModal({
                     <EventDuplication event={event} onClose={onClose} />
                     {user.userData.email === event.organizer?.cal_address && (
                       <MenuItem
-                        onClick={() => {
+                        onClick={async () => {
                           if (isRecurring) {
                             setAfterChoiceFunc(
                               () =>
@@ -209,7 +226,7 @@ export default function EventPreviewModal({
                             setOpenEditModePopup("edit");
                           } else {
                             onClose({}, "backdropClick");
-                            dispatch(
+                            await dispatch(
                               deleteEventAsync({
                                 calId,
                                 eventId,
@@ -217,6 +234,7 @@ export default function EventPreviewModal({
                               })
                             );
                           }
+                          updateTempList();
                         }}
                       >
                         Delete event

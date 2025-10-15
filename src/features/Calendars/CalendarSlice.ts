@@ -422,6 +422,11 @@ const CalendarSlice = createSlice({
     removeTempCal: (state, action: PayloadAction<string>) => {
       delete state.templist[action.payload];
     },
+    emptyTempCal: (state) => {
+      Object.keys(state.templist).forEach(
+        (calId) => (state.templist[calId].events = {})
+      );
+    },
     updateEventLocal: (
       state,
       action: PayloadAction<{ calId: string; event: CalendarEvent }>
@@ -702,6 +707,7 @@ export const {
   createCalendar,
   updateEventLocal,
   removeTempCal,
+  emptyTempCal,
   setTimeZone,
   clearFetchCache,
 } = CalendarSlice.actions;

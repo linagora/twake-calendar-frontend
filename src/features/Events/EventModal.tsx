@@ -48,6 +48,8 @@ import {
   getTimezoneOffset,
   resolveTimezone,
 } from "../../components/Calendar/TimezoneSelector";
+import { getCalendarRange } from "../../utils/dateUtils";
+import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -123,6 +125,7 @@ function EventPopover({
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const tempList = useAppSelector((state) => state.calendars.templist);
   const selectPersonnalCalendars = createSelector(
     (state) => state.calendars,
     (calendars) =>
@@ -398,12 +401,21 @@ function EventPopover({
     resetAllStateToDefault();
 
     // Save to API in background
-    dispatch(
+    await dispatch(
       putEventAsync({
         cal: userPersonnalCalendars[calendarid],
         newEvent,
       })
     );
+    if (tempList) {
+      const calendarRange = getCalendarRange(new Date(start));
+      refreshCalendars(
+        dispatch,
+        Object.values(tempList),
+        calendarRange,
+        "temp"
+      );
+    }
   };
 
   const dialogActions = (
