@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { refreshCalendars } from "../Event/utils/eventUtils";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import { useEffect, useState } from "react";
 
 export function MiniCalendar({
   calendarRef,
@@ -27,11 +28,13 @@ export function MiniCalendar({
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
+  const [visibleDate, setVisibleDate] = useState(selectedDate);
 
+  useEffect(() => setVisibleDate(selectedDate), [selectedDate]);
   return (
     <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en-gb">
       <DateCalendar
-        value={moment(selectedDate)}
+        value={moment(visibleDate)}
         onChange={(dateMoment) => {
           if (!dateMoment) return;
           const date = dateMoment.toDate();
@@ -42,7 +45,7 @@ export function MiniCalendar({
         showDaysOutsideCurrentMonth
         onMonthChange={(month) => {
           const calendarRange = getCalendarRange(month.toDate());
-          setSelectedMiniDate(month.toDate());
+          setVisibleDate(month.toDate());
           Object.values(calendars.list).forEach((cal) =>
             dispatch(
               getCalendarDetailAsync({
@@ -55,7 +58,7 @@ export function MiniCalendar({
             )
           );
         }}
-        views={["day", "month"]}
+        views={["month", "day"]}
         slotProps={{
           day: (ownerState) => {
             const date = ownerState.day.toDate();
