@@ -12,6 +12,7 @@ import {
   Typography,
   ToggleButtonGroup,
   ToggleButton,
+  Autocomplete,
 } from "@mui/material";
 import {
   Description as DescriptionIcon,
@@ -20,6 +21,7 @@ import {
   CameraAlt as VideocamIcon,
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
+  PublicOutlined as TimezoneIcon,
 } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -184,7 +186,6 @@ function EventPopover({
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
-  const [important, setImportant] = useState(false);
   const [timezone, setTimezone] = useState(
     event?.timezone ? resolveTimezone(event.timezone) : calendarTimezone
   );
@@ -220,7 +221,6 @@ function EventPopover({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setImportant(false);
     setTimezone(calendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
@@ -308,7 +308,6 @@ function EventPopover({
       setAlarm("");
       setEventClass("PUBLIC");
       setBusy("OPAQUE");
-      setImportant(false);
       setTimezone(timezoneList.browserTz);
       setHasVideoConference(false);
       setMeetingLink(null);
@@ -454,22 +453,23 @@ function EventPopover({
         />
       </FieldWithLabel>
 
-      <FieldWithLabel label=" " isExpanded={showMore}>
-        <Box display="flex" gap={1} mb={1}>
-          <Button
-            startIcon={<DescriptionIcon />}
-            onClick={() => setShowDescription(true)}
-            size="small"
-            sx={{
-              textTransform: "none",
-              color: "text.secondary",
-              display: showDescription ? "none" : "flex",
-            }}
-          >
-            Add description
-          </Button>
-        </Box>
-      </FieldWithLabel>
+      {!showDescription && (
+        <FieldWithLabel label=" " isExpanded={showMore}>
+          <Box display="flex" gap={1} mb={1}>
+            <Button
+              startIcon={<DescriptionIcon />}
+              onClick={() => setShowDescription(true)}
+              size="small"
+              sx={{
+                textTransform: "none",
+                color: "text.secondary",
+              }}
+            >
+              Add description
+            </Button>
+          </Box>
+        </FieldWithLabel>
+      )}
 
       {showDescription && (
         <FieldWithLabel label="Description" isExpanded={showMore}>
@@ -561,15 +561,6 @@ function EventPopover({
           <FormControlLabel
             control={
               <Checkbox
-                checked={important}
-                onChange={() => setImportant(!important)}
-              />
-            }
-            label="Mark as important"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
                 checked={allday}
                 onChange={() => {
                   const endDate = new Date(end);
@@ -629,19 +620,47 @@ function EventPopover({
             }
             label="Repeat"
           />
-          <FormControl size="small" sx={{ width: 160 }}>
-            <Select
-              value={timezone}
-              onChange={(e: SelectChangeEvent) => setTimezone(e.target.value)}
-              displayEmpty
-            >
-              {timezoneList.zones.map((tz) => (
-                <MenuItem key={tz} value={tz}>
-                  ({getTimezoneOffset(tz)}) {tz.replace(/_/g, " ")}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            value={timezone}
+            options={timezoneList.zones}
+            size="small"
+            sx={{ width: 240 }}
+            getOptionLabel={(option) =>
+              `(${getTimezoneOffset(option)}) ${option.replace(/_/g, " ")}`
+            }
+            onChange={(event, newValue) => {
+              if (newValue) {
+                setTimezone(newValue);
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Select timezone"
+                autoComplete="off"
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <TimezoneIcon
+                          style={{
+                            marginRight: 8,
+                            color: "rgba(0, 0, 0, 0.54)",
+                          }}
+                        />
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  },
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  autoComplete: "new-password",
+                }}
+              />
+            )}
+          />
         </Box>
       </FieldWithLabel>
 
