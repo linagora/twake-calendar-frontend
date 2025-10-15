@@ -14,6 +14,7 @@ import {
   Typography,
   ToggleButtonGroup,
   ToggleButton,
+  Autocomplete,
 } from "@mui/material";
 import {
   Description as DescriptionIcon,
@@ -22,6 +23,7 @@ import {
   CameraAlt as VideocamIcon,
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
+  PublicOutlined as TimezoneIcon,
 } from "@mui/icons-material";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
@@ -261,22 +263,23 @@ export default function EventFormFields({
         />
       </FieldWithLabel>
 
-      <FieldWithLabel label=" " isExpanded={showMore}>
-        <Box display="flex" gap={1} mb={1}>
-          <Button
-            startIcon={<DescriptionIcon />}
-            onClick={() => setShowDescription(true)}
-            size="small"
-            sx={{
-              textTransform: "none",
-              color: "text.secondary",
-              display: showDescription ? "none" : "flex",
-            }}
-          >
-            Add description
-          </Button>
-        </Box>
-      </FieldWithLabel>
+      {!showDescription && (
+        <FieldWithLabel label=" " isExpanded={showMore}>
+          <Box display="flex" gap={1} mb={1}>
+            <Button
+              startIcon={<DescriptionIcon />}
+              onClick={() => setShowDescription(true)}
+              size="small"
+              sx={{
+                textTransform: "none",
+                color: "text.secondary",
+              }}
+            >
+              Add description
+            </Button>
+          </Box>
+        </FieldWithLabel>
+      )}
 
       {showDescription && (
         <FieldWithLabel label="Description" isExpanded={showMore}>
@@ -404,19 +407,47 @@ export default function EventFormFields({
             }
             label="Repeat"
           />
-          <FormControl size="small" sx={{ width: 160 }}>
-            <Select
-              value={timezone}
-              onChange={(e: SelectChangeEvent) => setTimezone(e.target.value)}
-              displayEmpty
-            >
-              {timezoneList.zones.map((tz) => (
-                <MenuItem key={tz} value={tz}>
-                  ({timezoneList.getTimezoneOffset(tz)}) {tz.replace(/_/g, " ")}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            value={timezone}
+            options={timezoneList.zones}
+            size="small"
+            sx={{ width: 240 }}
+            getOptionLabel={(option) =>
+              `(${timezoneList.getTimezoneOffset(option)}) ${option.replace(/_/g, " ")}`
+            }
+            onChange={(event, newValue) => {
+              if (newValue) {
+                setTimezone(newValue);
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Select timezone"
+                autoComplete="off"
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <TimezoneIcon
+                          style={{
+                            marginRight: 8,
+                            color: "rgba(0, 0, 0, 0.54)",
+                          }}
+                        />
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  },
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  autoComplete: "new-password",
+                }}
+              />
+            )}
+          />
         </Box>
       </FieldWithLabel>
 
