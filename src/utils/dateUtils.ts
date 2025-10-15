@@ -1,8 +1,7 @@
+import moment from "moment";
+
 export function formatDateToYYYYMMDDTHHMMSS(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}${month}${day}T000000`;
+  return moment(date).format("YYYYMMDDTHHmmss");
 }
 
 export function getCalendarRange(date = new Date()) {

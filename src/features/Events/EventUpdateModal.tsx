@@ -1,12 +1,6 @@
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { ResponsiveDialog } from "../../components/Dialog";
 import {
@@ -56,7 +50,7 @@ function EventUpdateModal({
   typeOfAction?: "solo" | "all";
 }) {
   const dispatch = useAppDispatch();
-
+  const tempList = useAppSelector((state) => state.calendars.templist);
   // Get event from Redux store (cached data) as fallback
   const cachedEvent = useAppSelector(
     (state) => state.calendars.list[calId]?.events[eventId]
@@ -482,7 +476,15 @@ function EventUpdateModal({
         console.error("Failed to convert recurring to non-recurring:", err);
         // Keep modal open on error, user can retry or cancel
       }
-
+      if (tempList) {
+        const calendarRange = getCalendarRange(new Date(start));
+        refreshCalendars(
+          dispatch,
+          Object.values(tempList),
+          calendarRange,
+          "temp"
+        );
+      }
       return;
     }
 
@@ -502,7 +504,7 @@ function EventUpdateModal({
           })
         );
 
-        dispatch(
+        await dispatch(
           updateEventInstanceAsync({
             cal: targetCalendar,
             event: { ...newEvent, recurrenceId },
@@ -590,7 +592,7 @@ function EventUpdateModal({
           });
 
           // Update server in background with removeOverrides=false
-          dispatch(
+          await dispatch(
             updateSeriesAsync({
               cal: targetCalendar,
               event: { ...newEvent, recurrenceId },
@@ -622,7 +624,7 @@ function EventUpdateModal({
         const oldEventUID = event.uid;
 
         // API call: putEventAsync will create recurring event and fetch all instances
-        dispatch(putEventAsync({ cal: targetCalendar, newEvent }))
+        await dispatch(putEventAsync({ cal: targetCalendar, newEvent }))
           .unwrap()
           .then(() => {
             // Remove old single event AFTER new recurring instances are added to store
@@ -639,13 +641,13 @@ function EventUpdateModal({
           });
       } else {
         // Normal non-recurring event update
-        dispatch(putEventAsync({ cal: targetCalendar, newEvent }));
+        await dispatch(putEventAsync({ cal: targetCalendar, newEvent }));
       }
     }
 
     // Handle calendar change
     if (newCalId !== calId) {
-      dispatch(
+      await dispatch(
         moveEventAsync({
           cal: targetCalendar,
           newEvent,
@@ -653,6 +655,15 @@ function EventUpdateModal({
         })
       );
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
+    }
+    if (tempList) {
+      const calendarRange = getCalendarRange(new Date(start));
+      refreshCalendars(
+        dispatch,
+        Object.values(tempList),
+        calendarRange,
+        "temp"
+      );
     }
   };
 
