@@ -37,6 +37,7 @@ import {
 } from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
+import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -52,6 +53,9 @@ export default function EventPreviewModal({
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
+  const timezone =
+    useAppSelector((state) => state.calendars.timeZone) ??
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
   const calendarList = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
@@ -240,7 +244,7 @@ export default function EventPreviewModal({
                 {formatDate(event.start, event.allday)}
                 {event.end &&
                   formatEnd(event.start, event.end, event.allday) &&
-                  ` – ${formatEnd(event.start, event.end, event.allday)}`}
+                  ` – ${formatEnd(event.start, event.end, event.allday)} ${!event.allday && getTimezoneOffset(timezone)}`}
               </Typography>
             </>
           )
