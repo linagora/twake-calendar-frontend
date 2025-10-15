@@ -1,44 +1,39 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import CalendarApp from "./Calendar";
 import { useAppDispatch } from "../../app/hooks";
-import {
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
-} from "../../features/Calendars/CalendarSlice";
-import {
-  formatDateToYYYYMMDDTHHMMSS,
-  getCalendarRange,
-} from "../../utils/dateUtils";
+import { getCalendarRange } from "../../utils/dateUtils";
 import { useAppSelector } from "../../app/hooks";
+import { refreshCalendars } from "../Event/utils/eventUtils";
 
 export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);
   const dispatch = useAppDispatch();
   const selectedCalendars = useAppSelector((state) => state.calendars.list);
+  const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<string>("timeGridWeek");
 
   const handleRefresh = async () => {
-    await dispatch(getCalendarsListAsync());
-
     // Get current calendar range
     if (calendarRef.current) {
       const view = calendarRef.current.view;
       const calendarRange = getCalendarRange(view.activeStart);
 
       // Refresh events for selected calendars
-      Object.keys(selectedCalendars).forEach((id) => {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
+      await refreshCalendars(
+        dispatch,
+        Object.values(selectedCalendars),
+        calendarRange
+      );
+      if (tempcalendars) {
+        await refreshCalendars(
+          dispatch,
+          Object.values(tempcalendars),
+          calendarRange,
+          "temp"
         );
-      });
+      }
     }
   };
 

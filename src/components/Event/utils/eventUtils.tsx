@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import {
+  emptyTempCal,
   getCalendarDetailAsync,
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
@@ -114,9 +115,11 @@ export function stringAvatar(name: string) {
 export async function refreshCalendars(
   dispatch: ThunkDispatch<any, any, any>,
   calendars: Calendars[],
-  calendarRange: { start: Date; end: Date }
+  calendarRange: { start: Date; end: Date },
+  calType?: "temp"
 ) {
-  await dispatch(getCalendarsListAsync());
+  !calType && (await dispatch(getCalendarsListAsync()));
+  calType && dispatch(emptyTempCal());
 
   calendars.map(
     async (cal) =>
@@ -127,6 +130,7 @@ export async function refreshCalendars(
             start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
             end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
           },
+          calType,
         })
       )
   );
