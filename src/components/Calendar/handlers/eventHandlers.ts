@@ -5,6 +5,7 @@ import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
   getCalendarDetailAsync,
+  getEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
   updateEventLocal,
@@ -97,6 +98,21 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       window.open(info.event.url);
     } else {
       setOpenEventDisplay(true);
+      if (
+        calendars[info.event.extendedProps.calId] &&
+        calendars[info.event.extendedProps.calId].events[
+          info.event.extendedProps.uid
+        ]
+      ) {
+        dispatch(
+          getEventAsync(
+            calendars[info.event.extendedProps.calId].events[
+              info.event.extendedProps.uid
+            ]
+          )
+        );
+      }
+
       setEventDisplayedId(info.event.extendedProps.uid);
       setEventDisplayedCalId(info.event.extendedProps.calId);
       setEventDisplayedTemp(info.event._def.extendedProps.temp);

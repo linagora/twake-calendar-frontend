@@ -94,7 +94,11 @@ export function parseCalendarEvent(
       case "rrule":
         event.repetition = { freq: value.freq.toLowerCase() };
         if (value.byday) {
-          event.repetition.byday = value.byday;
+          if (typeof value.byday === "string") {
+            event.repetition.byday = [value.byday];
+          } else {
+            event.repetition.byday = value.byday;
+          }
         }
         if (value.until) {
           event.repetition.endDate = value.until;
