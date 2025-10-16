@@ -158,6 +158,7 @@ function EventUpdateModal({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -666,12 +667,14 @@ function EventUpdateModal({
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
-        {showMore && (
-          <Button variant="outlined" onClick={handleClose}>
-            Cancel
-          </Button>
-        )}
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button variant="outlined" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!isFormValid}
+        >
           Save
         </Button>
       </Box>
@@ -734,6 +737,8 @@ function EventUpdateModal({
             setNewCalId(selectedCalendar.id);
           }
         }}
+        onValidationChange={setIsFormValid}
+        isCreateMode={false}
       />
     </ResponsiveDialog>
   );
