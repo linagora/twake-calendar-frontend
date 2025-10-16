@@ -27,6 +27,7 @@ import {
   combineMasterDateWithFormTime,
   detectRecurringEventChanges,
 } from "./eventUtils";
+import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -478,12 +479,7 @@ function EventUpdateModal({
       }
       if (tempList) {
         const calendarRange = getCalendarRange(new Date(start));
-        refreshCalendars(
-          dispatch,
-          Object.values(tempList),
-          calendarRange,
-          "temp"
-        );
+        await updateTempCalendar(tempList, event, dispatch, calendarRange);
       }
       return;
     }
@@ -658,12 +654,7 @@ function EventUpdateModal({
     }
     if (tempList) {
       const calendarRange = getCalendarRange(new Date(start));
-      refreshCalendars(
-        dispatch,
-        Object.values(tempList),
-        calendarRange,
-        "temp"
-      );
+      await updateTempCalendar(tempList, event, dispatch, calendarRange);
     }
   };
 

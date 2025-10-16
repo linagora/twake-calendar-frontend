@@ -13,6 +13,7 @@ import {
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
 import { refreshCalendars } from "../../Event/utils/eventUtils";
+import { updateTempCalendar } from "../utils/calendarUtils";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -159,14 +160,12 @@ export const createEventHandlers = (props: EventHandlersProps) => {
               Object.values(calendars),
               calendarRange
             );
-            if (tempcalendars) {
-              await refreshCalendars(
-                dispatch,
-                Object.values(tempcalendars),
-                calendarRange,
-                "temp"
-              );
-            }
+            await updateTempCalendar(
+              tempcalendars,
+              event,
+              dispatch,
+              calendarRange
+            );
           }
         }
       );
@@ -176,14 +175,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         putEventAsync({ cal: calendars[newEvent.calId], newEvent })
       );
     }
-    if (tempcalendars) {
-      await refreshCalendars(
-        dispatch,
-        Object.values(tempcalendars),
-        calendarRange,
-        "temp"
-      );
-    }
+    await updateTempCalendar(tempcalendars, event, dispatch, calendarRange);
   };
 
   const handleEventResize = async (arg: any) => {
@@ -243,14 +235,12 @@ export const createEventHandlers = (props: EventHandlersProps) => {
               Object.values(calendars),
               calendarRange
             );
-            if (tempcalendars) {
-              await refreshCalendars(
-                dispatch,
-                Object.values(tempcalendars),
-                calendarRange,
-                "temp"
-              );
-            }
+            await updateTempCalendar(
+              tempcalendars,
+              event,
+              dispatch,
+              calendarRange
+            );
           }
         }
       );
@@ -259,14 +249,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         putEventAsync({ cal: calendars[newEvent.calId], newEvent })
       );
     }
-    if (tempcalendars) {
-      await refreshCalendars(
-        dispatch,
-        Object.values(tempcalendars),
-        calendarRange,
-        "temp"
-      );
-    }
+    await updateTempCalendar(tempcalendars, event, dispatch, calendarRange);
   };
 
   return {

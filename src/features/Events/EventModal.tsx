@@ -49,7 +49,7 @@ import {
   resolveTimezone,
 } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
-import { refreshCalendars } from "../../components/Event/utils/eventUtils";
+import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 
 // Helper component for field with label
 const FieldWithLabel = React.memo(
@@ -409,12 +409,7 @@ function EventPopover({
     );
     if (tempList) {
       const calendarRange = getCalendarRange(new Date(start));
-      refreshCalendars(
-        dispatch,
-        Object.values(tempList),
-        calendarRange,
-        "temp"
-      );
+      await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
     }
   };
 

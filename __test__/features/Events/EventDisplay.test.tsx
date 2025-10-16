@@ -14,6 +14,8 @@ import {
   stringToColor,
   stringAvatar,
 } from "../../../src/components/Event/utils/eventUtils";
+import * as appHooks from "../../../src/app/hooks";
+import { ThunkDispatch } from "@reduxjs/toolkit";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
@@ -560,6 +562,200 @@ describe("Event Preview Display", () => {
     const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Test Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
+  });
+
+  describe("Owner Email Permissions", () => {
+    const today = new Date();
+    const start = new Date(today);
+    start.setHours(10, 0, 0, 0);
+    const end = new Date(today);
+    end.setHours(11, 0, 0, 0);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+      jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
+    });
+
+    const createPreloadedState = (
+      userEmail: string,
+      ownerEmails: string[],
+      organizerEmail: string
+    ) => ({
+      user: {
+        userData: {
+          sub: "test",
+          email: userEmail,
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+        tokens: {
+          accessToken: "token",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            name: "Calendar 1",
+            id: "667037022b752d0026472254/cal1",
+            color: "#FF0000",
+            ownerEmails: ownerEmails,
+            events: {
+              event1: {
+                id: "event1",
+                calId: "667037022b752d0026472254/cal1",
+                uid: "event1",
+                title: "Test Event",
+                start: start.toISOString(),
+                end: end.toISOString(),
+                partstat: "ACCEPTED",
+                organizer: {
+                  cn: "Organizer",
+                  cal_address: organizerEmail,
+                },
+                attendee: [
+                  {
+                    cn: "Organizer",
+                    partstat: "ACCEPTED",
+                    rsvp: "TRUE",
+                    role: "REQ-PARTICIPANT",
+                    cutype: "INDIVIDUAL",
+                    cal_address: organizerEmail,
+                  },
+                ],
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    });
+
+    it("should show edit button when user email matches organizer and is in ownerEmails", async () => {
+      const preloadedState = createPreloadedState(
+        "owner@test.com",
+        ["owner@test.com"],
+        "owner@test.com"
+      );
+
+      const mockOnClose = jest.fn();
+      renderWithProviders(
+        <EventPreviewModal
+          eventId="event1"
+          calId="667037022b752d0026472254/cal1"
+          open={true}
+          onClose={mockOnClose}
+        />,
+        preloadedState
+      );
+
+      await waitFor(() => {
+        const editButton = screen.queryByTestId("EditIcon");
+        expect(editButton).toBeInTheDocument();
+      });
+    });
+
+    it("should NOT show edit button when user is organizer but not in owner of calendar", async () => {
+      const preloadedState = createPreloadedState(
+        "organizer@test.com",
+        ["other@test.com"], // organizer not in list
+        "organizer@test.com"
+      );
+
+      const mockOnClose = jest.fn();
+      renderWithProviders(
+        <EventPreviewModal
+          eventId="event1"
+          calId="667037022b752d0026472254/cal1"
+          open={true}
+          onClose={mockOnClose}
+        />,
+        preloadedState
+      );
+
+      await waitFor(() => {
+        const editButton = screen.queryByTestId("EditIcon");
+        expect(editButton).not.toBeInTheDocument();
+      });
+    });
+
+    it("should NOT show edit button when user is in ownerEmails but not organizer", async () => {
+      const preloadedState = createPreloadedState(
+        "owner@test.com",
+        ["owner@test.com"],
+        "other@test.com" // different organizer
+      );
+
+      const mockOnClose = jest.fn();
+      renderWithProviders(
+        <EventPreviewModal
+          eventId="event1"
+          calId="667037022b752d0026472254/cal1"
+          open={true}
+          onClose={mockOnClose}
+        />,
+        preloadedState
+      );
+
+      await waitFor(() => {
+        const editButton = screen.queryByTestId("EditIcon");
+        expect(editButton).not.toBeInTheDocument();
+      });
+    });
+
+    it("should handle calendars without ownerEmails property gracefully", async () => {
+      const preloadedStateWithoutOwnerEmails = {
+        user: {
+          userData: {
+            sub: "test",
+            email: "test@test.com",
+            sid: "mockSid",
+            openpaasId: "667037022b752d0026472254",
+          },
+          tokens: {
+            accessToken: "token",
+          },
+        },
+        calendars: {
+          list: {
+            "667037022b752d0026472254/cal1": {
+              name: "Calendar 1",
+              id: "667037022b752d0026472254/cal1",
+              color: "#FF0000",
+              // ownerEmails missing
+              events: {
+                event1: {
+                  id: "event1",
+                  calId: "667037022b752d0026472254/cal1",
+                  uid: "event1",
+                  title: "Test Event",
+                  start: start.toISOString(),
+                  end: end.toISOString(),
+                  organizer: {
+                    cn: "Test",
+                    cal_address: "test@test.com",
+                  },
+                },
+              },
+            },
+          },
+          pending: false,
+        },
+      };
+
+      const mockOnClose = jest.fn();
+      expect(() => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event1"
+            calId="667037022b752d0026472254/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          preloadedStateWithoutOwnerEmails
+        );
+      }).not.toThrow();
+    });
   });
 });
 
