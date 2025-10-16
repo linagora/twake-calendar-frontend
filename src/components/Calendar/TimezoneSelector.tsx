@@ -20,7 +20,10 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
     return { zones, browserTz, getTimezoneOffset };
   }, []);
 
-  const selectedOffset = getTimezoneOffset(value);
+  const effectiveTimezone = value
+    ? resolveTimezone(value)
+    : timezoneList.browserTz;
+  const selectedOffset = getTimezoneOffset(effectiveTimezone);
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -68,7 +71,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
         }}
       >
         <TimezoneAutocomplete
-          value={value}
+          value={effectiveTimezone}
           onChange={onChange}
           zones={timezoneList.zones}
           getTimezoneOffset={getTimezoneOffset}
