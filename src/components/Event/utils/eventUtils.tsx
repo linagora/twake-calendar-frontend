@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import {
-  emptyTempCal,
+  emptyEventsCal,
   getCalendarDetailAsync,
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
@@ -119,7 +119,7 @@ export async function refreshCalendars(
   calType?: "temp"
 ) {
   !calType && (await dispatch(getCalendarsListAsync()));
-  calType && dispatch(emptyTempCal());
+  calType && dispatch(emptyEventsCal({ calType }));
 
   calendars.map(
     async (cal) =>
@@ -133,5 +133,25 @@ export async function refreshCalendars(
           calType,
         })
       )
+  );
+}
+
+export async function refreshSingularCalendar(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendar: Calendars,
+  calendarRange: { start: Date; end: Date },
+  calType?: "temp"
+) {
+  dispatch(emptyEventsCal({ calId: calendar.id, calType }));
+
+  await dispatch(
+    getCalendarDetailAsync({
+      calId: calendar.id,
+      match: {
+        start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+        end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+      },
+      calType,
+    })
   );
 }
