@@ -10,15 +10,19 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import RepeatIcon from "@mui/icons-material/Repeat";
+import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import {
   Box,
   Button,
   ButtonGroup,
+  Chip,
   DialogActions,
   Divider,
   IconButton,
   Menu,
   MenuItem,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import AvatarGroup from "@mui/material/AvatarGroup";
@@ -40,6 +44,7 @@ import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
+import { CalendarEvent } from "./EventsTypes";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -68,6 +73,7 @@ export default function EventPreviewModal({
   const user = useAppSelector((state) => state.user);
 
   const isRecurring = event?.uid?.includes("/");
+  const isOwn = calendar.ownerEmails?.includes(user.userData.email);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -177,12 +183,14 @@ export default function EventPreviewModal({
                         <EditIcon />
                       </IconButton>
                     )}
-                  <IconButton
-                    size="small"
-                    onClick={(e) => setToggleActionMenu(e.currentTarget)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
+                  {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => setToggleActionMenu(e.currentTarget)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  )}
                   <Menu
                     open={Boolean(toggleActionMenu)}
                     onClose={() => setToggleActionMenu(null)}
@@ -247,16 +255,44 @@ export default function EventPreviewModal({
                   </IconButton>
                 </Box>
               </DialogActions>
-              <Typography
-                variant="inherit"
-                fontWeight="bold"
-                style={{
-                  wordBreak: "break-word",
-                }}
-                gutterBottom
-              >
-                {event.title}
-              </Typography>
+              <Box display="flex" flexDirection="row">
+                {event.class === "PRIVATE" &&
+                  (isOwn ? (
+                    <Tooltip
+                      title={
+                        "Only you and attendees can see the details of this event."
+                      }
+                      placement="top"
+                    >
+                      <LockOutlineIcon />
+                    </Tooltip>
+                  ) : (
+                    <LockOutlineIcon />
+                  ))}
+                <Typography
+                  variant="inherit"
+                  fontWeight="bold"
+                  style={{
+                    wordBreak: "break-word",
+                  }}
+                  gutterBottom
+                >
+                  {event.title}
+                </Typography>
+                {event.transp === "TRANSPARENT" && (
+                  <Tooltip
+                    title={
+                      "Others see you as available during the time range of this event."
+                    }
+                    placement="top"
+                  >
+                    <Chip
+                      icon={<CircleIcon color="success" fontSize="small" />}
+                      label="Free"
+                    />
+                  </Tooltip>
+                )}
+              </Box>
               <Typography variant="body2" color="textSecondary" gutterBottom>
                 {formatDate(event.start, event.allday)}
                 {event.end &&
@@ -387,99 +423,140 @@ export default function EventPreviewModal({
           </>
         }
       >
-        {/* Video */}
-        {event.x_openpass_videoconference && (
-          <InfoRow
-            icon={<VideocamIcon style={{ fontSize: 18 }} />}
-            content={
-              <Button
-                variant="contained"
-                onClick={() => window.open(event.x_openpass_videoconference)}
-              >
-                Join the video conference
-              </Button>
-            }
-          />
-        )}
-        {/* Attendees */}
-        {attendees?.length > 0 && (
+        {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
           <>
-            <InfoRow
-              icon={<PeopleAltOutlinedIcon />}
-              content={
-                <Box
-                  style={{
-                    marginBottom: 1,
-                    display: "flex",
-                    flexDirection: "row",
-                  }}
-                >
-                  <Box>
-                    <Typography>{attendees.length} guests</Typography>
-                    <Typography>
-                      {
-                        attendees.filter((a) => a.partstat === "ACCEPTED")
-                          .length
-                      }{" "}
-                      yes,{" "}
-                      {
-                        attendees.filter((a) => a.partstat === "DECLINED")
-                          .length
-                      }{" "}
-                      no
-                    </Typography>
-                  </Box>
-                  {!showAllAttendees && (
-                    <AvatarGroup max={attendeeDisplayLimit}>
-                      {organizer &&
-                        renderAttendeeBadge(
-                          organizer,
-                          "org",
-                          showAllAttendees,
-                          true
-                        )}
-                      {visibleAttendees.map((a, idx) =>
-                        renderAttendeeBadge(a, idx.toString(), showAllAttendees)
-                      )}
-                    </AvatarGroup>
-                  )}
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    style={{ cursor: "pointer", marginTop: 0.5 }}
-                    onClick={() => setShowAllAttendees(!showAllAttendees)}
+            {/* Video */}
+            {event.x_openpass_videoconference && (
+              <InfoRow
+                icon={<VideocamIcon style={{ fontSize: 18 }} />}
+                content={
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      window.open(event.x_openpass_videoconference)
+                    }
                   >
-                    {showAllAttendees ? "Show less" : `Show more `}
-                  </Typography>
-                </Box>
-              }
-            />
+                    Join the video conference
+                  </Button>
+                }
+              />
+            )}
+            {/* Attendees */}
+            {attendees?.length > 0 && (
+              <>
+                <InfoRow
+                  icon={<PeopleAltOutlinedIcon />}
+                  content={
+                    <Box
+                      style={{
+                        marginBottom: 1,
+                        display: "flex",
+                        flexDirection: "row",
+                      }}
+                    >
+                      <Box>
+                        <Typography>{attendees.length} guests</Typography>
+                        <Typography>
+                          {
+                            attendees.filter((a) => a.partstat === "ACCEPTED")
+                              .length
+                          }{" "}
+                          yes,{" "}
+                          {
+                            attendees.filter((a) => a.partstat === "DECLINED")
+                              .length
+                          }{" "}
+                          no
+                        </Typography>
+                      </Box>
+                      {!showAllAttendees && (
+                        <AvatarGroup max={attendeeDisplayLimit}>
+                          {organizer &&
+                            renderAttendeeBadge(
+                              organizer,
+                              "org",
+                              showAllAttendees,
+                              true
+                            )}
+                          {visibleAttendees.map((a, idx) =>
+                            renderAttendeeBadge(
+                              a,
+                              idx.toString(),
+                              showAllAttendees
+                            )
+                          )}
+                        </AvatarGroup>
+                      )}
+                      <Typography
+                        variant="body2"
+                        color="primary"
+                        style={{ cursor: "pointer", marginTop: 0.5 }}
+                        onClick={() => setShowAllAttendees(!showAllAttendees)}
+                      >
+                        {showAllAttendees ? "Show less" : `Show more `}
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </>
+            )}
+            {showAllAttendees &&
+              organizer &&
+              renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
+            {showAllAttendees &&
+              visibleAttendees.map((a, idx) =>
+                renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+              )}
+            {/* Location */}
+            {event.location && (
+              <InfoRow
+                icon={<LocationOnOutlinedIcon />}
+                text={event.location}
+              />
+            )}
+            {/* Description */}
+            {event.description && (
+              <InfoRow icon={<SubjectIcon />} text={event.description} />
+            )}
+            {/* ALARM */}
+            {event.alarm && (
+              <InfoRow
+                icon={<NotificationsNoneIcon />}
+                text={`${event.alarm.trigger} before by ${event.alarm.action}`}
+              />
+            )}
+            {/* Repetition */}
+            {event.repetition && (
+              <InfoRow
+                icon={<RepeatIcon />}
+                text={makeRecurrenceString(event)}
+              />
+            )}
           </>
         )}
-        {showAllAttendees &&
-          organizer &&
-          renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
-        {showAllAttendees &&
-          visibleAttendees.map((a, idx) =>
-            renderAttendeeBadge(a, idx.toString(), showAllAttendees)
-          )}
-        {/* Location */}
-        {event.location && (
-          <InfoRow icon={<LocationOnOutlinedIcon />} text={event.location} />
+        {event.class === "PRIVATE" && !isOwn && (
+          <Box
+            sx={{
+              backgroundColor: "#F3F4F6",
+              height: 48,
+              borderRadius: "8px",
+              gap: "16px",
+              paddingTop: "16px",
+              paddingBottom: " 16px",
+            }}
+          >
+            <Typography
+              fontFamily={"Inter"}
+              fontWeight={500}
+              fontSize={"12px"}
+              lineHeight={"16px"}
+              letterSpacing={"0.5px"}
+              textAlign={"center"}
+            >
+              This is a private event. Details are hidden.
+            </Typography>
+          </Box>
         )}
-        {/* Description */}
-        {event.description && (
-          <InfoRow icon={<SubjectIcon />} text={event.description} />
-        )}
-
-        {/* Description */}
-        {event.alarm && (
-          <InfoRow
-            icon={<NotificationsNoneIcon />}
-            text={`${event.alarm.trigger} before by ${event.alarm.action}`}
-          />
-        )}
-
         {/* Error */}
         {event.error && (
           <InfoRow
@@ -488,7 +565,6 @@ export default function EventPreviewModal({
             error
           />
         )}
-
         {/* Calendar color dot */}
         <Box
           style={{
@@ -508,7 +584,6 @@ export default function EventPreviewModal({
           />
           <Typography variant="body2">{calendar.name}</Typography>
         </Box>
-
         {currentUserAttendee && !event.repetition && (
           <>
             <Divider variant="fullWidth" />
@@ -547,6 +622,33 @@ export default function EventPreviewModal({
       />
     </>
   );
+}
+
+function makeRecurrenceString(event: CalendarEvent): string | undefined {
+  if (!event.repetition) {
+    return;
+  }
+  const recur = [`Reccurent Event · ${event.repetition.freq}`];
+  const recurType: Record<string, string> = {
+    daily: "days",
+    monthly: "months",
+    yearly: "years",
+  };
+  if (event.repetition.byday) {
+    recur.push(`on ${event.repetition.byday.join(", ")}`);
+  }
+  if (event.repetition.interval && event.repetition.interval > 1) {
+    recur.push(
+      `every ${event.repetition.interval} ${recurType[event.repetition.freq]}`
+    );
+  }
+  if (event.repetition.occurrences) {
+    recur.push(`for ${event.repetition.occurrences} occurences`);
+  }
+  if (event.repetition.endDate) {
+    recur.push(`until ${event.repetition.endDate}`);
+  }
+  return recur.join(", ");
 }
 
 function formatDate(date: Date | string, allday?: boolean) {
