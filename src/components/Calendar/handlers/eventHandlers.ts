@@ -89,24 +89,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setOpenEventDisplay(false);
   };
 
-  const handleMonthUp = (
-    selectedMiniDate: Date,
-    setSelectedMiniDate: (date: Date) => void
-  ) => {
-    setSelectedMiniDate(
-      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() - 1)
-    );
-  };
-
-  const handleMonthDown = (
-    selectedMiniDate: Date,
-    setSelectedMiniDate: (date: Date) => void
-  ) => {
-    setSelectedMiniDate(
-      new Date(selectedMiniDate.getFullYear(), selectedMiniDate.getMonth() + 1)
-    );
-  };
-
   const handleEventClick = (info: any) => {
     info.jsEvent.preventDefault();
 
@@ -255,8 +237,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     handleDateSelect,
     handleClosePopover,
     handleCloseEventDisplay,
-    handleMonthUp,
-    handleMonthDown,
     handleEventClick,
     handleEventAllow,
     handleEventDrop,
