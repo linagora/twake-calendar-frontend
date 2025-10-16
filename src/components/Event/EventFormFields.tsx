@@ -14,7 +14,6 @@ import {
   Typography,
   ToggleButtonGroup,
   ToggleButton,
-  Autocomplete,
 } from "@mui/material";
 import {
   Description as DescriptionIcon,
@@ -23,7 +22,6 @@ import {
   CameraAlt as VideocamIcon,
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
-  PublicOutlined as TimezoneIcon,
 } from "@mui/icons-material";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
@@ -34,6 +32,7 @@ import {
   generateMeetingLink,
   addVideoConferenceToDescription,
 } from "../../utils/videoConferenceUtils";
+import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 
 // Helper component for field with label
 export const FieldWithLabel = React.memo(
@@ -407,46 +406,15 @@ export default function EventFormFields({
             }
             label="Repeat"
           />
-          <Autocomplete
+          <TimezoneAutocomplete
             value={timezone}
-            options={timezoneList.zones}
+            onChange={setTimezone}
+            zones={timezoneList.zones}
+            getTimezoneOffset={timezoneList.getTimezoneOffset}
+            showIcon={true}
+            width={240}
             size="small"
-            sx={{ width: 240 }}
-            getOptionLabel={(option) =>
-              `(${timezoneList.getTimezoneOffset(option)}) ${option.replace(/_/g, " ")}`
-            }
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setTimezone(newValue);
-              }
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="Select timezone"
-                autoComplete="off"
-                slotProps={{
-                  input: {
-                    ...params.InputProps,
-                    startAdornment: (
-                      <>
-                        <TimezoneIcon
-                          style={{
-                            marginRight: 8,
-                            color: "rgba(0, 0, 0, 0.54)",
-                          }}
-                        />
-                        {params.InputProps.startAdornment}
-                      </>
-                    ),
-                  },
-                }}
-                inputProps={{
-                  ...params.inputProps,
-                  autoComplete: "new-password",
-                }}
-              />
-            )}
+            placeholder="Select timezone"
           />
         </Box>
       </FieldWithLabel>
