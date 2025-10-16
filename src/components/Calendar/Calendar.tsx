@@ -321,22 +321,20 @@ export default function CalendarApp({
             filteredTempEvents,
             userId
           )}
-          weekNumbers
+          weekNumbers={
+            currentView === "timeGridWeek" || currentView === "timeGridDay"
+          }
           weekNumberFormat={{ week: "long" }}
           weekNumberContent={(arg) => {
-            const showSelector =
-              currentView === "timeGridWeek" || currentView === "timeGridDay";
             return (
               <div className="weekSelector">
                 <div>{arg.text}</div>
-                {showSelector && (
-                  <TimezoneSelector
-                    value={timezone}
-                    onChange={(newTimezone: string) =>
-                      dispatch(setTimeZone(newTimezone))
-                    }
-                  />
-                )}
+                <TimezoneSelector
+                  value={timezone}
+                  onChange={(newTimezone: string) =>
+                    dispatch(setTimeZone(newTimezone))
+                  }
+                />
               </div>
             );
           }}

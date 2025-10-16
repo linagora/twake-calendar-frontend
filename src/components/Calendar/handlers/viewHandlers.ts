@@ -158,21 +158,13 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
           break;
       }
 
-      return React.createElement(
-        "div",
-        { style: { display: "flex", alignItems: "center" } },
-        isPrivate &&
-          React.createElement(LockIcon, {
-            "data-testid": "lock-icon",
-            fontSize: "small",
-            style: { marginRight: "4px" },
-          }),
-        Icon &&
-          React.createElement(Icon, {
-            fontSize: "small",
-            style: { marginRight: "4px" },
-          }),
-        React.createElement("span", { style: titleStyle }, event.title)
+      return RenderEventTitle(
+        titleStyle,
+        isPrivate,
+        Icon,
+        arg,
+        event,
+        calendar
       );
     } catch (e) {
       const message =
@@ -234,3 +226,62 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     handleEventDidMount,
   };
 };
+
+function RenderEventTitle(
+  titleStyle: React.CSSProperties,
+  isPrivate: boolean,
+  Icon: any,
+  arg: any,
+  event: any,
+  calendar: Calendars
+): React.ReactNode {
+  const isMonthView = arg.view.type === "dayGridMonth";
+  const startTime = event._instance.range.start.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const icons: React.ReactNode[] = [];
+  if (isPrivate) {
+    icons.push(
+      React.createElement(LockIcon, {
+        "data-testid": "lock-icon",
+        fontSize: "small",
+        style: { marginRight: "4px" },
+      })
+    );
+  }
+  if (Icon) {
+    icons.push(
+      React.createElement(Icon, {
+        fontSize: "small",
+        style: { marginRight: "4px" },
+      })
+    );
+  }
+
+  const containerStyle: React.CSSProperties = isMonthView
+    ? {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: calendar.color,
+        color: "white",
+        borderRadius: "4px",
+        border: "1px",
+        width: "100%",
+      }
+    : {
+        display: "flex",
+        alignItems: "center",
+      };
+
+  const contentText = isMonthView ? `${startTime} ${event.title}` : event.title;
+
+  return React.createElement(
+    "div",
+    { style: containerStyle },
+    ...icons,
+    React.createElement("span", { style: titleStyle }, contentText)
+  );
+}
