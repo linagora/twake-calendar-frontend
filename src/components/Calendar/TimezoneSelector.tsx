@@ -1,12 +1,7 @@
-import {
-  Autocomplete,
-  Button,
-  ListItem,
-  Popover,
-  TextField,
-} from "@mui/material";
+import { Button, Popover } from "@mui/material";
 import { MouseEvent, useMemo, useState } from "react";
 import { TIMEZONES } from "../../utils/timezone-data";
+import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 
 interface TimezoneSelectProps {
   value: string;
@@ -24,16 +19,8 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
-  const options = useMemo(() => {
-    return timezoneList.zones.map((tz) => ({
-      value: tz,
-      label: tz.replace(/_/g, " "),
-      offset: timezoneList.getTimezoneOffset(tz),
-    }));
-  }, [timezoneList]);
 
-  const selectedOption =
-    options.find((opt) => opt.value === value) || options[0];
+  const selectedOffset = getTimezoneOffset(value);
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -59,7 +46,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
           lineHeight: 1.2,
         }}
       >
-        {selectedOption ? selectedOption.offset : "Select Timezone"}
+        {selectedOffset || "Select Timezone"}
       </Button>
 
       <Popover
@@ -80,56 +67,19 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
           },
         }}
       >
-        <TimeZoneSearch
-          selectedOption={selectedOption}
+        <TimezoneAutocomplete
+          value={value}
           onChange={onChange}
-          handleClose={handleClose}
-          options={options}
+          zones={timezoneList.zones}
+          getTimezoneOffset={getTimezoneOffset}
+          autoFocus={true}
+          inputFontSize="10px"
+          inputPadding="2px 4px"
+          onClose={handleClose}
+          disableClearable={true}
         />
       </Popover>
     </>
-  );
-}
-function TimeZoneSearch({
-  selectedOption,
-  onChange,
-  handleClose,
-  options,
-}: {
-  selectedOption: { value: string; label: string; offset: string };
-  onChange: (value: string) => void;
-  handleClose: () => void;
-  options: { value: string; label: string; offset: string }[];
-}) {
-  return (
-    <Autocomplete
-      autoFocus
-      value={selectedOption}
-      onChange={(event, newValue) => {
-        if (newValue) {
-          onChange(newValue.value);
-          handleClose(); // close after selection
-        }
-      }}
-      options={options}
-      getOptionLabel={(option) => `${option.offset} ${option.label}`}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          variant="outlined"
-          size="small"
-          InputProps={{
-            ...params.InputProps,
-            style: {
-              fontSize: "10px",
-              padding: "2px 4px",
-            },
-          }}
-        />
-      )}
-      disableClearable
-      renderValue={(value) => <div>{value.offset}</div>}
-    />
   );
 }
 
