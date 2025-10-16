@@ -70,7 +70,7 @@ describe("CalendarPopover", () => {
     });
     fireEvent.click(colorButtons[0]);
 
-    fireEvent.click(screen.getByText(/Create/));
+    fireEvent.click(screen.getByRole("button", { name: /Create/i }));
 
     expect(spy).toHaveBeenCalled();
 
@@ -80,7 +80,7 @@ describe("CalendarPopover", () => {
   it("calls onClose when Cancel clicked", () => {
     renderPopover();
 
-    fireEvent.click(screen.getByText(/Cancel/i));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
@@ -168,7 +168,7 @@ describe("CalendarPopover (editing mode)", () => {
     });
 
     // Save
-    fireEvent.click(screen.getByText(/Save/i));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() =>
       expect(spy).toHaveBeenCalledWith(
@@ -229,7 +229,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     fireEvent.change(screen.getByLabelText(/Name/i), {
       target: { value: "Temp Calendar" },
     });
-    fireEvent.click(screen.getByText(/Cancel/i));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
     expect(mockOnClose).toHaveBeenCalled();
 
@@ -291,7 +291,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     expect(publicButton).toHaveAttribute("aria-pressed", "false");
 
     // Save
-    fireEvent.click(screen.getByText(/Save/i));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() =>
       expect(patchSpy).toHaveBeenCalledWith(
