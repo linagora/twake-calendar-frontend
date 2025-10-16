@@ -184,7 +184,7 @@ describe("Event Preview Display", () => {
         return () => Promise.resolve(payload) as any;
       });
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    fireEvent.click(screen.getByText("Delete event"));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -545,7 +545,9 @@ describe("Event Preview Display", () => {
     );
 
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    const emailButton = screen.getByText("Email attendees");
+    const emailButton = screen.getByRole("menuitem", {
+      name: /Email attendees/i,
+    });
     expect(emailButton).toBeInTheDocument();
 
     fireEvent.click(emailButton);
@@ -1041,7 +1043,7 @@ describe("Event Full Display", () => {
       preloadedState
     );
     act(() => {
-      fireEvent.click(screen.getByText("Show More"));
+      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
     });
 
     await waitFor(() => {
@@ -1054,7 +1056,7 @@ describe("Event Full Display", () => {
     // EventDisplay modal doesn't have Repeat checkbox, only RepeatEvent component
     // which shows repetition settings when repetition data exists
     // Since test event has no repetition data, RepeatEvent component won't show Repeat checkbox
-    fireEvent.click(screen.getByText("Show Less"));
+    fireEvent.click(screen.getByRole("button", { name: /Show Less/i }));
   });
 
   it("can edit title when user is organizer", () => {
@@ -1193,7 +1195,7 @@ describe("Event Full Display", () => {
     const option = await screen.findByText("Calendar Two");
     fireEvent.click(option);
 
-    fireEvent.click(screen.getByText("Save"));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() => {
       expect(spyPut).toHaveBeenCalled();
@@ -1277,7 +1279,7 @@ describe("Event Full Display", () => {
       preloadedRecurrence
     );
 
-    fireEvent.click(screen.getByText("Save"));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() => {
       expect(spyUpdateSeries).toHaveBeenCalled();
@@ -1383,7 +1385,7 @@ describe("Event Full Display", () => {
     );
 
     // Verify the timezone select shows Asia/Bangkok
-    fireEvent.click(screen.getByText("Show More"));
+    fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
 
     // The timezone select should have Asia/Bangkok selected
     // Since the component uses formatLocalDateTime, the displayed time will be in local format
@@ -1442,7 +1444,7 @@ describe("Event Full Display", () => {
     );
 
     act(() => {
-      fireEvent.click(screen.getByText("Show More"));
+      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
     });
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();

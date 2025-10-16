@@ -75,7 +75,7 @@ describe("EventDuplication", () => {
       preloadedState
     );
 
-    fireEvent.click(screen.getByText("Duplicate event"));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
 
     expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
   });
@@ -93,10 +93,10 @@ describe("EventDuplication", () => {
       preloadedState
     );
 
-    fireEvent.click(screen.getByText("Duplicate event"));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
 
     // Cancel button only appears in expanded mode
-    fireEvent.click(screen.getByText("More options"));
+    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
 
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
@@ -166,7 +166,7 @@ describe("EventDisplayModal", () => {
     );
 
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    fireEvent.click(screen.getByText("Duplicate event"));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
     expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
     expect(
       screen.getByDisplayValue(

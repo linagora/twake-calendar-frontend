@@ -289,7 +289,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     expect(repeatCheckbox).not.toBeChecked();
 
     // Click Save button
-    const saveButton = screen.getByText("Save");
+    const saveButton = screen.getByRole("button", { name: /Save/i });
 
     await act(async () => {
       fireEvent.click(saveButton);
@@ -403,7 +403,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    const saveButton = screen.getByText("Save");
+    const saveButton = screen.getByRole("button", { name: /Save/i });
 
     await act(async () => {
       fireEvent.click(saveButton);
@@ -518,7 +518,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    const saveButton = screen.getByText("Save");
+    const saveButton = screen.getByRole("button", { name: /Save/i });
 
     await act(async () => {
       fireEvent.click(saveButton);
