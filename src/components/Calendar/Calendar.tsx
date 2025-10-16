@@ -41,6 +41,13 @@ import { EventErrorHandler } from "../Error/EventErrorHandler";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import moment from "moment";
+import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
+import { PickersDay } from "@mui/x-date-pickers/PickersDay";
+import { MiniCalendar } from "./MiniCalendar";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -242,14 +249,6 @@ export default function CalendarApp({
     errorHandler: errorHandler.current,
   });
 
-  const handleMonthUp = () => {
-    eventHandlers.handleMonthUp(selectedMiniDate, setSelectedMiniDate);
-  };
-
-  const handleMonthDown = () => {
-    eventHandlers.handleMonthDown(selectedMiniDate, setSelectedMiniDate);
-  };
-
   if (process.env.NODE_ENV === "test") {
     (window as any).__calendarRef = calendarRef;
   }
@@ -265,87 +264,13 @@ export default function CalendarApp({
         >
           <AddIcon /> <p>Create Event</p>
         </Button>
-        <div className="calendar-label">
-          <div className="calendar-label">
-            <span title="mini calendar month">
-              {selectedMiniDate.toLocaleDateString("en-us", {
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-          <button onClick={handleMonthUp}>&lt;</button>
-          <button onClick={handleMonthDown}>&gt;</button>
-        </div>
-        <ReactCalendar
-          key={selectedMiniDate.toDateString()}
-          calendarType="iso8601"
-          formatShortWeekday={(locale, date) =>
-            date.toLocaleDateString(locale, { weekday: "narrow" })
-          }
-          value={selectedMiniDate}
-          onClickDay={(date) => {
-            setSelectedDate(date);
-            setSelectedMiniDate(date);
-            calendarRef.current?.gotoDate(date);
-          }}
-          prevLabel={null}
-          showNeighboringMonth={true}
-          nextLabel={null}
-          showNavigation={false}
-          tileClassName={({ date }) => {
-            const classNames: string[] = [];
 
-            const today = new Date().setHours(0, 0, 0, 0);
-            if (date.getTime() === today) {
-              classNames.push("today");
-            }
-            const selected = new Date(selectedDate);
-            selected.setHours(0, 0, 0, 0);
-            if (
-              calendarRef.current?.view.type === "timeGridWeek" ||
-              calendarRef.current?.view.type === undefined
-            ) {
-              const startOfWeek = computeStartOfTheWeek(selected);
-
-              const endOfWeek = new Date(startOfWeek);
-              endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-              endOfWeek.setHours(23, 59, 59, 999);
-
-              if (date <= endOfWeek && date >= startOfWeek) {
-                classNames.push("selectedWeek");
-              }
-            }
-            if (
-              calendarRef.current?.view.type === "timeGridDay" &&
-              date.getTime() === selected.getTime()
-            ) {
-              classNames.push("selectedWeek");
-            }
-            return classNames;
-          }}
-          tileContent={({ date }) => {
-            const classNames: string[] = [];
-            const hasEvents = dottedEvents.some((event) => {
-              const eventDate = new Date(event.start);
-              return (
-                eventDate.getFullYear() === date.getFullYear() &&
-                eventDate.getMonth() === date.getMonth() &&
-                eventDate.getDate() === date.getDate() &&
-                event.status !== "CANCELLED"
-              );
-            });
-            if (hasEvents) {
-              classNames.push("event-dot");
-            }
-
-            return (
-              <div
-                className={classNames.join(" ")}
-                data-testid={`date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`}
-              ></div>
-            );
-          }}
+        <MiniCalendar
+          calendarRef={calendarRef}
+          selectedDate={selectedMiniDate}
+          setSelectedDate={setSelectedDate}
+          setSelectedMiniDate={setSelectedMiniDate}
+          dottedEvents={dottedEvents}
         />
         <TempCalendarsInput
           setAnchorEl={setAnchorEl}
