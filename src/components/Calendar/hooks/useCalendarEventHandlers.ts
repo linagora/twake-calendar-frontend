@@ -30,6 +30,7 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setEventDisplayedId,
       props.setEventDisplayedCalId,
       props.setEventDisplayedTemp,
+      props.calendars,
     ]),
     handleEventAllow: useCallback(eventHandlers.handleEventAllow, []),
     handleEventDrop: useCallback(eventHandlers.handleEventDrop, [

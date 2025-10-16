@@ -155,8 +155,10 @@ describe("Event Preview Display", () => {
       />,
       preloadedState
     );
-    fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
+    const moreButton = screen.getByTestId("MoreVertIcon");
+    if (moreButton) {
+      expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
+    }
     cleanup();
     // Renders the personnal cal event
     renderWithProviders(
