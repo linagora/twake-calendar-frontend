@@ -36,12 +36,10 @@ import {
   handleRSVP,
 } from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
-import {
-  refreshCalendars,
-  renderAttendeeBadge,
-} from "../../components/Event/utils/eventUtils";
+import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
+import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -114,14 +112,14 @@ export default function EventPreviewModal({
     (a) => a.cal_address === event.organizer?.cal_address
   );
 
-  const updateTempList = () => {
+  const updateTempList = async () => {
     if (calendars.templist) {
       const calendarRange = getCalendarRange(new Date(event.start));
-      refreshCalendars(
+      await updateTempCalendar(
+        calendars.templist,
+        event,
         dispatch,
-        Object.values(calendars.templist),
-        calendarRange,
-        "temp"
+        calendarRange
       );
     }
   };
