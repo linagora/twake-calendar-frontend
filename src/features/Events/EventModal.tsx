@@ -186,7 +186,9 @@ function EventPopover({
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [timezone, setTimezone] = useState(
-    event?.timezone ? resolveTimezone(event.timezone) : calendarTimezone
+    event?.timezone
+      ? resolveTimezone(event.timezone)
+      : resolveTimezone(calendarTimezone)
   );
   const [hasVideoConference, setHasVideoConference] = useState(
     event?.x_openpass_videoconference ? true : false
@@ -204,6 +206,13 @@ function EventPopover({
     userPersonnalCalendarsRef.current = userPersonnalCalendars;
   }, [userPersonnalCalendars]);
 
+  // Sync timezone with Redux when modal opens or timezone changes
+  useEffect(() => {
+    if (open && !event?.timezone && calendarTimezone) {
+      setTimezone(resolveTimezone(calendarTimezone));
+    }
+  }, [open, calendarTimezone, event?.timezone]);
+
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
     setShowDescription(false);
@@ -220,7 +229,7 @@ function EventPopover({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setTimezone(calendarTimezone);
+    setTimezone(resolveTimezone(calendarTimezone));
     setHasVideoConference(false);
     setMeetingLink(null);
   }, [calendarTimezone]);
