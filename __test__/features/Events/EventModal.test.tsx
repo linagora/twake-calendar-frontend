@@ -117,17 +117,21 @@ describe("EventPopover", () => {
     expect(titleInput).toBeInTheDocument();
 
     // Description input is only visible after clicking "Add description" button
-    const addDescriptionButton = screen.getByText("Add description");
+    const addDescriptionButton = screen.getByRole("button", {
+      name: /Add description/i,
+    });
     expect(addDescriptionButton).toBeInTheDocument();
 
     const calendarSelect = screen.getByRole("combobox", { name: /calendar/i });
     expect(calendarSelect).toBeInTheDocument();
 
     // Check button
-    expect(screen.getByText("More options")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /More options/i })
+    ).toBeInTheDocument();
 
     // Extended mode
-    fireEvent.click(screen.getByText("More options"));
+    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
 
     // Back button appears
     expect(screen.getByLabelText("show less")).toBeInTheDocument();
@@ -160,7 +164,7 @@ describe("EventPopover", () => {
     expect(screen.getByLabelText("Title")).toHaveValue("My Event");
 
     // Click "Add description" button first
-    fireEvent.click(screen.getByText("Add description"));
+    fireEvent.click(screen.getByRole("button", { name: /Add description/i }));
 
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: "Event Description" },
@@ -219,7 +223,7 @@ describe("EventPopover", () => {
         return () => Promise.resolve(payload) as any;
       });
 
-    fireEvent.click(screen.getByText("Save"));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -280,7 +284,7 @@ describe("EventPopover", () => {
     });
 
     // Click "Add description" button first
-    fireEvent.click(screen.getByText("Add description"));
+    fireEvent.click(screen.getByRole("button", { name: /Add description/i }));
     fireEvent.change(screen.getByLabelText("Description"), {
       target: { value: newEvent.description },
     });
@@ -293,7 +297,7 @@ describe("EventPopover", () => {
         return () => Promise.resolve(payload) as any;
       });
 
-    fireEvent.click(screen.getByText("Save"));
+    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -331,9 +335,9 @@ describe("EventPopover", () => {
     renderPopover();
 
     // Cancel button only appears in expanded mode
-    fireEvent.click(screen.getByText("More options"));
+    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
 
-    fireEvent.click(screen.getByText("Cancel"));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });

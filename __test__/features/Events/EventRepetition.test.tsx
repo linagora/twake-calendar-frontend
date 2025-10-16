@@ -162,7 +162,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByLabelText("This event"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(mockEventAction).toHaveBeenCalledWith("solo");
@@ -188,7 +188,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByLabelText("All the events"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(mockEventAction).toHaveBeenCalledWith("all");
@@ -265,7 +265,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      fireEvent.click(screen.getByText("Delete event"));
+      fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
 
       await waitFor(() => {
         expect(
@@ -339,7 +339,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      fireEvent.click(screen.getByText("Delete event"));
+      fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -371,7 +371,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      fireEvent.click(screen.getByText("Delete event"));
+      fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
 
       await waitFor(() => {
         expect(
@@ -380,7 +380,7 @@ describe("Recurrence Event Behavior Tests", () => {
       });
 
       fireEvent.click(screen.getByLabelText("This event"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -414,7 +414,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      fireEvent.click(screen.getByText("Delete event"));
+      fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
 
       await waitFor(() => {
         expect(
@@ -423,7 +423,7 @@ describe("Recurrence Event Behavior Tests", () => {
       });
 
       fireEvent.click(screen.getByLabelText("All the events"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -461,7 +461,7 @@ describe("Recurrence Event Behavior Tests", () => {
       });
 
       fireEvent.click(screen.getByLabelText("This event"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -503,7 +503,7 @@ describe("Recurrence Event Behavior Tests", () => {
       });
 
       fireEvent.click(screen.getByLabelText("All the events"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         expect(getEventSpy).toHaveBeenCalled();
@@ -555,7 +555,7 @@ describe("Recurrence Event Behavior Tests", () => {
         target: { value: "Updated Single Instance" },
       });
 
-      fireEvent.click(screen.getByText("Save"));
+      fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -599,7 +599,7 @@ describe("Recurrence Event Behavior Tests", () => {
         target: { value: "Updated All Instances" },
       });
 
-      fireEvent.click(screen.getByText("Save"));
+      fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
       await waitFor(() => {
         expect(spy).toHaveBeenCalled();
@@ -621,7 +621,7 @@ describe("Recurrence Event Behavior Tests", () => {
         basePreloadedState
       );
 
-      fireEvent.click(screen.getByText("Show More"));
+      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
 
       expect(screen.getByText(/repeat every/i)).toBeInTheDocument();
       expect(screen.getByText(/end:/i)).toBeInTheDocument();
@@ -836,7 +836,7 @@ describe("Recurrence Event Behavior Tests", () => {
         }
       );
 
-      fireEvent.click(screen.getByText("Show More"));
+      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
 
       // Repetition section should not be visible for non-owner
       expect(screen.queryByLabelText(/Repetition/i)).not.toBeInTheDocument();
@@ -1006,7 +1006,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       // Select "All the events"
       fireEvent.click(screen.getByLabelText("All the events"));
-      fireEvent.click(screen.getByText("Ok"));
+      fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
         // Update modal should open
@@ -1055,7 +1055,7 @@ describe("Recurrence Event Behavior Tests", () => {
       const option = await screen.findByText("Calendar 2");
       fireEvent.click(option);
 
-      fireEvent.click(screen.getByText("Save"));
+      fireEvent.click(screen.getByRole("button", { name: /Save/i }));
 
       await waitFor(() => {
         expect(moveEventSpy).toHaveBeenCalled();
