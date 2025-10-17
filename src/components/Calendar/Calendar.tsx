@@ -79,9 +79,11 @@ export default function CalendarApp({
   const pending = useAppSelector((state) => state.calendars.pending);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
 
-  const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) =>
-    Object.values(calendars[calId].events)
-  );
+  const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) => {
+    const calendar = calendars[calId];
+    if (!calendar?.events) return [];
+    return Object.values(calendar.events);
+  });
 
   const [currentView, setCurrentView] = useState("timeGridWeek");
   const timezone = useAppSelector((state) => state.calendars.timeZone);
@@ -113,6 +115,13 @@ export default function CalendarApp({
       initialLoadRef.current = false;
     }
   }, [calendars, userId]);
+
+  useEffect(() => {
+    const validCalendarIds = new Set(Object.keys(calendars));
+    setSelectedCalendars((prev) =>
+      prev.filter((calId) => validCalendarIds.has(calId))
+    );
+  }, [calendars]);
 
   const calendarRange = getCalendarRange(selectedDate);
 
