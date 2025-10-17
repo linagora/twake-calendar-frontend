@@ -41,7 +41,7 @@ export const FieldWithLabel = React.memo(
     isExpanded,
     children,
   }: {
-    label: string;
+    label: string | React.ReactNode;
     isExpanded: boolean;
     children: React.ReactNode;
   }) => {
@@ -211,12 +211,17 @@ export default function EventFormFields({
 
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
-    if (isOpen && titleInputRef.current && process.env.NODE_ENV !== "test") {
-      // Use setTimeout to ensure the dialog is fully rendered
-      const timer = setTimeout(() => {
-        titleInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
+    if (isOpen) {
+      // Reset touched state when modal opens
+      setTitleTouched(false);
+
+      if (titleInputRef.current && process.env.NODE_ENV !== "test") {
+        // Use setTimeout to ensure the dialog is fully rendered
+        const timer = setTimeout(() => {
+          titleInputRef.current?.focus();
+        }, 100);
+        return () => clearTimeout(timer);
+      }
     }
   }, [isOpen]);
 
@@ -225,8 +230,8 @@ export default function EventFormFields({
     // Title validation
     const isTitleValid = title.trim().length > 0;
     const shouldShowTitleError = isCreateMode
-      ? titleTouched && !isTitleValid
-      : !isTitleValid;
+      ? titleTouched && !isTitleValid && isOpen
+      : !isTitleValid && isOpen;
 
     // Date/time validation
     let isDateTimeValid = true;
@@ -271,11 +276,11 @@ export default function EventFormFields({
       isValid,
       errors: {
         title: shouldShowTitleError ? "Title is required" : "",
-        start: startError,
-        dateTime: dateTimeError,
+        start: isOpen ? startError : "",
+        dateTime: isOpen ? dateTimeError : "",
       },
     };
-  }, [title, start, end, titleTouched, isCreateMode]);
+  }, [title, start, end, titleTouched, isCreateMode, isOpen]);
 
   // Notify parent about validation changes
   React.useEffect(() => {
@@ -353,7 +358,14 @@ export default function EventFormFields({
 
   return (
     <>
-      <FieldWithLabel label="Title" isExpanded={showMore}>
+      <FieldWithLabel
+        label={
+          <>
+            Title <span style={{ color: "red" }}>*</span>
+          </>
+        }
+        isExpanded={showMore}
+      >
         <TextField
           fullWidth
           label={!showMore ? "Title" : ""}
@@ -361,11 +373,13 @@ export default function EventFormFields({
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
+            // Set touched only when user has typed something
             if (e.target.value && !titleTouched) {
               setTitleTouched(true);
             }
           }}
           onBlur={() => {
+            // Only set touched if title has value
             if (title) {
               setTitleTouched(true);
             }

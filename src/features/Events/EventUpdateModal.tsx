@@ -84,9 +84,9 @@ function EventUpdateModal({
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
   const userPersonnalCalendars: Calendars[] = useMemo(() => {
-    const allCalendars = Object.values(calendarsList);
+    const allCalendars = Object.values(calendarsList) as Calendars[];
     return allCalendars.filter(
-      (c) => c.id?.split("/")[0] === user.userData?.openpaasId
+      (c: Calendars) => c.id?.split("/")[0] === user.userData?.openpaasId
     );
   }, [calendarsList, user.userData?.openpaasId]);
 
@@ -259,7 +259,8 @@ function EventUpdateModal({
       setAttendees(
         event.attendee
           ? event.attendee.filter(
-              (a) => a.cal_address !== event.organizer?.cal_address
+              (a: userAttendee) =>
+                a.cal_address !== event.organizer?.cal_address
             )
           : []
       );
@@ -304,6 +305,7 @@ function EventUpdateModal({
   const handleClose = () => {
     closeModal();
     resetAllStateToDefault();
+    setFreshEvent(null);
     initializedKeyRef.current = null;
   };
 
@@ -508,7 +510,7 @@ function EventUpdateModal({
           })
         )
           .unwrap()
-          .catch((error) => {
+          .catch((error: any) => {
             dispatch(updateEventLocal({ calId, event: oldEvent }));
             showErrorNotification("Failed to update event. Changes reverted.");
           });
