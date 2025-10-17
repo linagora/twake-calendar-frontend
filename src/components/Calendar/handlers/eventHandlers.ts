@@ -15,6 +15,7 @@ import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
 import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
+import { User } from "../../Attendees/PeopleSearch";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -32,6 +33,8 @@ export interface EventHandlersProps {
   setSelectedEvent: (event: CalendarEvent) => void;
   setAfterChoiceFunc: (func: Function) => void;
   setOpenEditModePopup: (open: string) => void;
+  tempUsers: User[];
+  setTempEvent: (event: CalendarEvent) => void;
 }
 
 export const createEventHandlers = (props: EventHandlersProps) => {
@@ -51,10 +54,27 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setSelectedEvent,
     setAfterChoiceFunc,
     setOpenEditModePopup,
+    tempUsers,
+    setTempEvent,
   } = props;
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
+    if (tempUsers) {
+      const newEvent: CalendarEvent = {
+        title: "New Event",
+        attendee: tempUsers.map((u) => ({
+          cn: u.displayName,
+          cal_address: u.email,
+          partstat: "NEED-ACTION",
+          role: "REQ-PARTICIPANT",
+          rsvp: "TRUE",
+          cutype: "INDIVIDUAL",
+        })),
+      } as CalendarEvent;
+
+      setTempEvent(newEvent);
+    }
     setAnchorEl(document.body);
   };
 

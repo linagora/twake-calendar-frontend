@@ -16,14 +16,11 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
-  computeStartOfTheWeek,
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
 } from "../../utils/dateUtils";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { push } from "redux-first-history";
 import EventPreviewModal from "../../features/Events/EventDisplayPreview";
-import { createSelector } from "@reduxjs/toolkit";
 import AddIcon from "@mui/icons-material/Add";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
@@ -41,13 +38,8 @@ import { EventErrorHandler } from "../Error/EventErrorHandler";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import moment from "moment";
-import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
-import { PickersDay } from "@mui/x-date-pickers/PickersDay";
 import { MiniCalendar } from "./MiniCalendar";
+import { User } from "../Attendees/PeopleSearch";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -224,6 +216,7 @@ export default function CalendarApp({
     null
   );
 
+  const [tempUsers, setTempUsers] = useState<User[]>([]);
   const [tempEvent, setTempEvent] = useState<CalendarEvent>(
     {} as CalendarEvent
   );
@@ -245,6 +238,8 @@ export default function CalendarApp({
     setSelectedEvent,
     setAfterChoiceFunc,
     setOpenEditModePopup,
+    tempUsers,
+    setTempEvent,
   });
 
   // View handlers
@@ -300,10 +295,13 @@ export default function CalendarApp({
           dottedEvents={dottedEvents}
         />
         <TempCalendarsInput
-          setAnchorEl={setAnchorEl}
+          tempUsers={tempUsers}
+          setTempUsers={setTempUsers}
+          handleToggleEventPreview={() => {
+            eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
+          }}
           selectedCalendars={selectedCalendars}
           setSelectedCalendars={setSelectedCalendars}
-          setTempEvent={setTempEvent}
         />
         <div className="calendarList">
           <CalendarSelection
