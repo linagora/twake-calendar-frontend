@@ -276,7 +276,7 @@ function RenderEventTitle(
         alignItems: "center",
       };
 
-  const contentText = isMonthView ? `${startTime} ${event.title}` : event.title;
+  const contentText = isMonthView &&!event._def.extendedProps.allday ? `${startTime} ${event.title}` : event.title;
 
   return React.createElement(
     "div",
