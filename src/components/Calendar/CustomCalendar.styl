@@ -245,3 +245,63 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 
 .fc .fc-timegrid-slot-minor 
   border-top-style: none
+
+/* FullCalendar "more" popover restyle */
+.fc-more-popover
+  z-index 700 !important
+  border-radius 4px
+  background #fff
+  overflow hidden
+  font-family Inter
+  width 244px
+
+  .fc-popover-header
+    background #FCFCFC
+    justify-content space-between
+    width 244px
+    height 40px
+    padding 12px
+
+    .fc-popover-title
+      font-family Inter
+      font-weight 500
+      font-size 14px
+      color #243B55
+      line-height 20px
+      letter-spacing 0.1px
+
+    .fc-popover-close
+      color #605D62
+
+  .fc-popover-body
+    max-height 208px
+    overflow auto
+    padding 0 !important
+
+    .fc-more-popover-misc
+      height 0 !important
+      margin 0 !important
+      padding 0 !important
+    .fc-daygrid-event 
+      &:hover
+        background #f7f7f8
+      div
+        display flex
+        align-items center
+        padding 4px 6px 4px 12px
+        border-radius 8px
+        color #1C1B1F!important
+        background-color transparent!important
+        border none
+        color #334155
+        font-size 14px
+        font-weight 400
+        line-height 20px
+        letter-spacing 0.25px
+        vertical-align middle
+        transition background 0.15s ease, color 0.15s ease
+
+        span
+          white-space nowrap
+          overflow hidden
+          text-overflow ellipsis
