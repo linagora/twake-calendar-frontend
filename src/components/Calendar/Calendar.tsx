@@ -338,6 +338,22 @@ export default function CalendarApp({
               </div>
             );
           }}
+          dayCellContent={(arg) => {
+            const month = arg.date.toLocaleDateString("en-US", {
+              month: "short",
+            });
+            if (arg.view.type === "dayGridMonth") {
+              return (
+                <span
+                  className={`fc-daygrid-day-number ${
+                    arg.isToday ? "current-date" : ""
+                  }`}
+                >
+                  {arg.dayNumberText === "1" ? month : ""} {arg.dayNumberText}
+                </span>
+              );
+            }
+          }}
           slotDuration={"00:30:00"}
           slotLabelInterval={"01:00:00"}
           scrollTime="12:00:00"
