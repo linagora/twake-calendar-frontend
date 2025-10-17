@@ -729,6 +729,7 @@ function EventUpdateModal({
         setShowDescription={setShowDescription}
         showRepeat={typeOfAction !== "solo" && showRepeat}
         setShowRepeat={setShowRepeat}
+        isOpen={open}
         userPersonnalCalendars={userPersonnalCalendars}
         timezoneList={timezoneList}
         onCalendarChange={(newCalendarId) => {
