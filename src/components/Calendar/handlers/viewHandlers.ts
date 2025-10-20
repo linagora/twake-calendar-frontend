@@ -127,7 +127,9 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
       );
       const delegated = calendar.delegated;
       let Icon = null;
-      let titleStyle: React.CSSProperties = {};
+      let titleStyle: React.CSSProperties = {
+        color: event._def.extendedProps.colors?.dark,
+      };
 
       const showSpecialDisplay = attendees.filter((att: userAttendee) =>
         ownerEmails.has(att.cal_address.toLowerCase())

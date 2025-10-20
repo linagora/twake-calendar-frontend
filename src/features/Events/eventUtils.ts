@@ -1,5 +1,5 @@
 import { userAttendee } from "../User/userDataTypes";
-import { AlarmObject, CalendarEvent } from "./EventsTypes";
+import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
 import moment from "moment";
@@ -7,7 +7,7 @@ type RawEntry = [string, Record<string, string>, string, any];
 
 export function parseCalendarEvent(
   data: RawEntry[],
-  color: string,
+  color: Record<string, string>,
   calendarid: string,
   eventURL: string,
   valarm?: RawEntry[]

@@ -53,7 +53,10 @@ export const getCalendarsListAsync = createAsyncThunk<
     const id = source.replace("/calendars/", "").replace(".json", "");
     const visibility = getCalendarVisibility(cal["acl"]);
     const ownerData: any = await getUserDetails(id.split("/")[0]);
-    const color = cal["apple:color"];
+    const color = {
+      light: cal["apple:color"] ?? "#006BD8",
+      dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
+    };
     importedCalendars[id] = {
       id,
       name,
@@ -106,7 +109,10 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       ownerEmails: ownerData.emails,
       description,
       delegated,
-      color: tempUser.color ?? "#a8a8a8ff",
+      color: {
+        light: tempUser.color?.light ?? "#a8a8a8ff",
+        dark: tempUser.color?.dark ?? "#a8a8a8ff",
+      },
       visibility,
       events: {},
     };
@@ -157,7 +163,7 @@ export const putEventAsync = createAsyncThunk<
       return vevents.map((vevent: any[]) => {
         return parseCalendarEvent(
           vevent[1],
-          cal.color ?? "",
+          cal.color ?? {},
           cal.id,
           eventURL,
           valarm
@@ -187,12 +193,12 @@ export const patchCalendarAsync = createAsyncThunk<
   {
     calId: string;
     calLink: string;
-    patch: { name: string; desc: string; color: string };
+    patch: { name: string; desc: string; color: Record<string, string> };
   }, // Return type
   {
     calId: string;
     calLink: string;
-    patch: { name: string; desc: string; color: string };
+    patch: { name: string; desc: string; color: Record<string, string> };
   } // Arg type
 >("calendars/patchCalendar", async ({ calId, calLink, patch }) => {
   await proppatchCalendar(calLink, patch);
@@ -238,7 +244,7 @@ export const moveEventAsync = createAsyncThunk<
       const vevents = eventdata.data[2] as any[][];
       const eventURL = eventdata._links.self.href;
       return vevents.map((vevent: any[]) => {
-        return parseCalendarEvent(vevent[1], cal.color ?? "", cal.id, eventURL);
+        return parseCalendarEvent(vevent[1], cal.color ?? {}, cal.id, eventURL);
       });
     }
   );
@@ -304,13 +310,19 @@ export const createCalendarAsync = createAsyncThunk<
   {
     userId: string;
     calId: string;
-    color: string;
+    color: Record<string, string>;
     name: string;
     desc: string;
     owner: string;
     ownerEmails: string[];
   }, // Return type
-  { userId: string; calId: string; color: string; name: string; desc: string } // Arg type
+  {
+    userId: string;
+    calId: string;
+    color: Record<string, string>;
+    name: string;
+    desc: string;
+  } // Arg type
 >("calendars/createCalendar", async ({ userId, calId, color, name, desc }) => {
   await postCalendar(userId, calId, color, name, desc);
   const ownerData: any = await getUserDetails(userId.split("/")[0]);
@@ -331,7 +343,7 @@ export const createCalendarAsync = createAsyncThunk<
 export const addSharedCalendarAsync = createAsyncThunk<
   {
     calId: string;
-    color: string;
+    color: Record<string, string>;
     link: string;
     name: string;
     desc: string;
@@ -352,7 +364,10 @@ export const addSharedCalendarAsync = createAsyncThunk<
     calId: cal.cal._links.self.href
       .replace("/calendars/", "")
       .replace(".json", ""),
-    color: cal.cal["apple:color"],
+    color: {
+      light: cal.cal["apple:color"],
+      dark: cal.cal["X-TWAKE-Dark-theme-color"],
+    },
     link: `/calendars/${userId}/${calId}.json`,
     desc: cal.cal["caldav:description"],
     name: cal.cal["dav:name"],
@@ -388,12 +403,15 @@ const CalendarSlice = createSlice({
     timeZone: string;
   },
   reducers: {
-    createCalendar: (state, action: PayloadAction<Record<string, string>>) => {
+    createCalendar: (
+      state,
+      action: PayloadAction<Record<string, string | Record<string, string>>>
+    ) => {
       const id = Date.now().toString(36);
       state.list[id] = {} as Calendars;
-      state.list[id].name = action.payload.name;
-      state.list[id].color = action.payload.color;
-      state.list[id].description = action.payload.description;
+      state.list[id].name = action.payload.name as string;
+      state.list[id].color = action.payload.color as Record<string, string>;
+      state.list[id].description = action.payload.description as string;
       state.list[id].events = {};
     },
     addEvent: (

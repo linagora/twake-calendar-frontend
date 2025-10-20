@@ -29,7 +29,7 @@ function CalendarItem({
 }: {
   cal: CalendarWithOwner;
   onRemove: () => void;
-  onColorChange: (color: string) => void;
+  onColorChange: (color: Record<string, string>) => void;
 }) {
   return (
     <Box
@@ -65,7 +65,10 @@ function CalendarItem({
 
       <Box display="flex" alignItems="center" gap={1}>
         <ColorPicker
-          selectedColor={cal.cal["apple:color"]}
+          selectedColor={{
+            light: cal.cal["apple:color"],
+            dark: cal.cal["X-TWAKE-Dark-theme-color"],
+          }}
           onChange={onColorChange}
         />
         <IconButton size="small" onClick={onRemove}>
@@ -85,7 +88,10 @@ function SelectedCalendarsList({
   calendars: Record<string, Calendars>;
   selectedCal: CalendarWithOwner[];
   onRemove: (cal: CalendarWithOwner) => void;
-  onColorChange: (cal: CalendarWithOwner, color: string) => void;
+  onColorChange: (
+    cal: CalendarWithOwner,
+    color: Record<string, string>
+  ) => void;
 }) {
   if (selectedCal.length === 0) return null;
 
@@ -194,7 +200,13 @@ export default function CalendarSearch({
               addSharedCalendarAsync({
                 userId: openpaasId,
                 calId,
-                cal: { ...cal, color: cal.cal["apple:color"] },
+                cal: {
+                  ...cal,
+                  color: {
+                    light: cal.cal["apple:color"],
+                    dark: cal.cal["X-TWAKE-Dark-theme-color"],
+                  },
+                },
               })
             );
             return cal.cal._links.self.href
@@ -306,7 +318,11 @@ export default function CalendarSearch({
                     prevcal.cal._links.self.href === cal.cal._links.self.href
                       ? {
                           ...prevcal,
-                          cal: { ...prevcal.cal, "apple:color": color },
+                          cal: {
+                            ...prevcal.cal,
+                            "apple:color": color.light,
+                            "X-TWAKE-Dark-theme-color": color.dark,
+                          },
                         }
                       : prevcal
                   )

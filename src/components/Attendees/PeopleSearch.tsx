@@ -16,7 +16,7 @@ export interface User {
   displayName: string;
   avatarUrl: string;
   openpaasId: string;
-  color?: string;
+  color?: Record<string, string>;
 }
 
 export function PeopleSearch({
@@ -150,7 +150,7 @@ export function PeopleSearch({
           const label = isString ? option : option.displayName || option.email;
           const chipColor = isString
             ? theme.palette.grey[300]
-            : (option.color ?? theme.palette.grey[300]);
+            : (option.color?.light ?? theme.palette.grey[300]);
           const textColor = theme.palette.getContrastText(chipColor);
 
           return (

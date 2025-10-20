@@ -218,8 +218,8 @@ function CalendarSelector({
         <label>
           <Checkbox
             sx={{
-              color: calendars[id].color,
-              "&.Mui-checked": { color: calendars[id].color },
+              color: calendars[id].color?.light,
+              "&.Mui-checked": { color: calendars[id].color?.light },
             }}
             size="small"
             checked={selectedCalendars.includes(id)}
