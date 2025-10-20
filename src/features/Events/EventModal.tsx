@@ -1,26 +1,4 @@
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  TextField,
-  Typography,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
-import {
-  Description as DescriptionIcon,
-  Public as PublicIcon,
-  Lock as LockIcon,
-  CameraAlt as VideocamIcon,
-  ContentCopy as CopyIcon,
-  Close as DeleteIcon,
-} from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import React, {
@@ -29,80 +7,27 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  startTransition,
 } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import AttendeeSelector from "../../components/Attendees/AttendeeSearch";
 import { ResponsiveDialog } from "../../components/Dialog";
 import { putEventAsync } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
-import RepeatEvent from "../../components/Event/EventRepeat";
 import { TIMEZONES } from "../../utils/timezone-data";
-import {
-  generateMeetingLink,
-  addVideoConferenceToDescription,
-} from "../../utils/videoConferenceUtils";
+import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 import {
   getTimezoneOffset,
   resolveTimezone,
 } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
-import { TimezoneAutocomplete } from "../../components/Timezone/TimezoneAutocomplete";
-
-// Helper component for field with label
-const FieldWithLabel = React.memo(
-  ({
-    label,
-    isExpanded,
-    children,
-  }: {
-    label: string;
-    isExpanded: boolean;
-    children: React.ReactNode;
-  }) => {
-    if (!isExpanded) {
-      // Normal mode: label on top
-      return (
-        <Box>
-          <Typography
-            component="label"
-            sx={{
-              display: "block",
-              marginBottom: "4px",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-            }}
-          >
-            {label}
-          </Typography>
-          {children}
-        </Box>
-      );
-    }
-
-    // Extended mode: label on left
-    return (
-      <Box display="flex" alignItems="center">
-        <Typography
-          component="label"
-          sx={{
-            minWidth: "115px",
-            marginRight: "12px",
-            flexShrink: 0,
-          }}
-        >
-          {label}
-        </Typography>
-        <Box flexGrow={1}>{children}</Box>
-      </Box>
-    );
-  }
-);
-
-FieldWithLabel.displayName = "FieldWithLabel";
+import EventFormFields, {
+  formatLocalDateTime,
+  formatDateTimeInTimezone,
+} from "../../components/Event/EventFormFields";
 
 function EventPopover({
   anchorEl,
@@ -128,8 +53,8 @@ function EventPopover({
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const tempList = useAppSelector((state) => state.calendars.templist);
   const selectPersonnalCalendars = createSelector(
-    (state) => state.calendars,
-    (calendars) =>
+    (state: any) => state.calendars,
+    (calendars: any) =>
       Object.keys(calendars.list)
         .map((id) => {
           if (id.split("/")[0] === userId) {
@@ -149,7 +74,7 @@ function EventPopover({
       Intl.DateTimeFormat().resolvedOptions().timeZone
     );
 
-    return { zones, browserTz };
+    return { zones, browserTz, getTimezoneOffset };
   }, []);
 
   const calendarTimezone = useAppSelector((state) => state.calendars.timeZone);
@@ -186,9 +111,7 @@ function EventPopover({
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [timezone, setTimezone] = useState(
-    event?.timezone
-      ? resolveTimezone(event.timezone)
-      : resolveTimezone(calendarTimezone)
+    event?.timezone ? resolveTimezone(event.timezone) : calendarTimezone
   );
   const [hasVideoConference, setHasVideoConference] = useState(
     event?.x_openpass_videoconference ? true : false
@@ -196,6 +119,7 @@ function EventPopover({
   const [meetingLink, setMeetingLink] = useState<string | null>(
     event?.x_openpass_videoconference || null
   );
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
@@ -205,13 +129,6 @@ function EventPopover({
   useEffect(() => {
     userPersonnalCalendarsRef.current = userPersonnalCalendars;
   }, [userPersonnalCalendars]);
-
-  // Sync timezone with Redux when modal opens or timezone changes
-  useEffect(() => {
-    if (open && !event?.timezone && calendarTimezone) {
-      setTimezone(resolveTimezone(calendarTimezone));
-    }
-  }, [open, calendarTimezone, event?.timezone]);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -229,31 +146,127 @@ function EventPopover({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setTimezone(resolveTimezone(calendarTimezone));
+    setTimezone(calendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
   }, [calendarTimezone]);
 
-  useEffect(() => {
-    if (selectedRange) {
-      setStart(
-        selectedRange ? formatLocalDateTime(selectedRange.start, timezone) : ""
-      );
-      setEnd(
-        selectedRange ? formatLocalDateTime(selectedRange.end, timezone) : ""
-      );
-    }
-  }, [selectedRange]);
+  // Track if we should sync from selectedRange (only on initial selection, not on toggle)
+  const shouldSyncFromRangeRef = useRef(true);
 
-  // Initialize state when event prop changes
+  // Reset sync flag when modal opens
   useEffect(() => {
-    if (event) {
+    if (open) {
+      shouldSyncFromRangeRef.current = true;
+    }
+  }, [open]);
+
+  // Set start/end times when modal opens for new event creation
+  useEffect(() => {
+    // Only run when modal opens and not duplicating an event
+    // Check if event has uid to determine if it's a valid event (not empty object)
+    if (!shouldSyncFromRangeRef.current || !open || (event && event.uid)) {
+      return;
+    }
+
+    if (selectedRange && selectedRange.start && selectedRange.end) {
+      // selectedRange gives us the visual time displayed on calendar
+      // Use selectedRange.startStr and endStr if available (from FullCalendar)
+      if (selectedRange.startStr && selectedRange.endStr) {
+        // Check if they are strings (from FullCalendar) or need conversion
+        const startStr =
+          typeof selectedRange.startStr === "string"
+            ? selectedRange.startStr
+            : formatLocalDateTime(selectedRange.start);
+        const endStr =
+          typeof selectedRange.endStr === "string"
+            ? selectedRange.endStr
+            : formatLocalDateTime(selectedRange.end);
+
+        // Use the string values directly to preserve the displayed time
+        setStart(
+          selectedRange.allDay ? startStr.split("T")[0] : startStr.slice(0, 16) // YYYY-MM-DDTHH:mm
+        );
+        setEnd(
+          selectedRange.allDay ? endStr.split("T")[0] : endStr.slice(0, 16)
+        );
+      } else {
+        // Fallback: format Date objects using local time components
+        // Only set if both start and end are valid
+        const formattedStart = formatLocalDateTime(selectedRange.start);
+        const formattedEnd = formatLocalDateTime(selectedRange.end);
+        if (formattedStart) setStart(formattedStart);
+        if (formattedEnd) setEnd(formattedEnd);
+      }
+    } else {
+      // No valid selectedRange - use default times
+      // Start time = current time + 1 hour (rounded up to the hour)
+      // End time = start time + 1 hour
+      const now = new Date();
+      const nextHour = new Date(now);
+      nextHour.setHours(now.getHours() + 1);
+      nextHour.setMinutes(0);
+      nextHour.setSeconds(0);
+      nextHour.setMilliseconds(0);
+
+      const endTime = new Date(nextHour);
+      endTime.setHours(nextHour.getHours() + 1);
+
+      // Format using local time (browser timezone)
+      const formattedStart = formatLocalDateTime(nextHour);
+      const formattedEnd = formatLocalDateTime(endTime);
+
+      if (formattedStart) setStart(formattedStart);
+      if (formattedEnd) setEnd(formattedEnd);
+    }
+
+    shouldSyncFromRangeRef.current = false;
+  }, [selectedRange, open, event]);
+
+  // Initialize state when event prop changes (duplicate event)
+  useEffect(() => {
+    if (event && event.uid) {
       // Editing existing event - populate fields with event data
       setTitle(event.title ?? "");
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
-      setStart(event.start ? event.start : "");
-      setEnd(event.end ? event.end : "");
+
+      // Get event's timezone for formatting
+      const eventTimezone = event.timezone
+        ? resolveTimezone(event.timezone)
+        : calendarTimezone;
+
+      // Handle all-day events properly
+      const isAllDay = event.allday ?? false;
+      setAllDay(isAllDay);
+
+      // Format dates based on all-day status and timezone
+      if (event.start) {
+        if (isAllDay) {
+          // For all-day events, use date format (YYYY-MM-DD)
+          const startDate = new Date(event.start);
+          setStart(startDate.toISOString().split("T")[0]);
+        } else {
+          // For timed events, format in the event's timezone
+          setStart(formatDateTimeInTimezone(event.start, eventTimezone));
+        }
+      } else {
+        setStart("");
+      }
+
+      if (event.end) {
+        if (isAllDay) {
+          // For all-day events, use date format (YYYY-MM-DD)
+          const endDate = new Date(event.end);
+          setEnd(endDate.toISOString().split("T")[0]);
+        } else {
+          // For timed events, format in the event's timezone
+          setEnd(formatDateTimeInTimezone(event.end, eventTimezone));
+        }
+      } else {
+        setEnd("");
+      }
+
       setCalendarid(
         event.calId
           ? userPersonnalCalendarsRef.current.findIndex(
@@ -261,7 +274,6 @@ function EventPopover({
             )
           : 0
       );
-      setAllDay(event.allday ?? false);
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
       setAttendees(
@@ -274,9 +286,7 @@ function EventPopover({
       setAlarm(event.alarm?.trigger ?? "");
       setEventClass(event.class ?? "PUBLIC");
       setBusy(event.transp ?? "OPAQUE");
-      setTimezone(
-        event.timezone ? resolveTimezone(event.timezone) : calendarTimezone
-      );
+      setTimezone(eventTimezone);
       setHasVideoConference(event.x_openpass_videoconference ? true : false);
       setMeetingLink(event.x_openpass_videoconference || null);
 
@@ -297,10 +307,11 @@ function EventPopover({
     }
   }, [event, organizer?.cal_address, calendarTimezone]);
 
-  // Reset state when creating new event (event is undefined)
+  // Reset state when creating new event (event is empty object or undefined)
   useEffect(() => {
-    if (!event && isInitializedRef.current) {
+    if ((!event || !event.uid) && isInitializedRef.current) {
       // Creating new event - reset all fields to default
+      // Note: start and end are handled by the selectedRange useEffect
       setShowMore(false);
       setShowDescription(false);
       setShowRepeat(false);
@@ -308,8 +319,6 @@ function EventPopover({
       setDescription("");
       setAttendees([]);
       setLocation("");
-      setStart("");
-      setEnd("");
       setCalendarid(0);
       setAllDay(false);
       setRepetition({} as RepetitionObject);
@@ -321,45 +330,84 @@ function EventPopover({
       setMeetingLink(null);
     }
     isInitializedRef.current = true;
-  }, [event, calendarTimezone]);
+  }, [event, calendarTimezone, timezoneList.browserTz]);
 
-  const handleAddVideoConference = () => {
-    const newMeetingLink = generateMeetingLink();
-    const updatedDescription = addVideoConferenceToDescription(
-      description,
-      newMeetingLink
-    );
-    setDescription(updatedDescription);
-    setHasVideoConference(true);
-    setMeetingLink(newMeetingLink);
-  };
+  const handleStartChange = useCallback(
+    (newStart: string) => {
+      setStart(newStart);
 
-  const handleCopyMeetingLink = async () => {
-    if (meetingLink) {
-      try {
-        await navigator.clipboard.writeText(meetingLink);
-        // You could add a toast notification here
-        console.log("Meeting link copied to clipboard");
-      } catch (err) {
-        console.error("Failed to copy link:", err);
-      }
-    }
-  };
+      // Defer visual feedback (non-urgent)
+      startTransition(() => {
+        const newRange = {
+          ...selectedRange,
+          start: new Date(newStart),
+          startStr: newStart,
+          allDay: allday,
+        };
+        setSelectedRange(newRange);
+        calendarRef.current?.select(newRange);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [selectedRange, allday]
+  );
 
-  const handleDeleteVideoConference = () => {
-    // Remove video conference footer from description
-    const updatedDescription = description.replace(
-      /\nVisio: https?:\/\/[^\s]+/,
-      ""
-    );
-    setDescription(updatedDescription);
-    setHasVideoConference(false);
-    setMeetingLink(null);
-  };
+  const handleEndChange = useCallback(
+    (newEnd: string) => {
+      setEnd(newEnd);
+
+      // Defer visual feedback (non-urgent)
+      startTransition(() => {
+        const newRange = {
+          ...selectedRange,
+          end: new Date(newEnd),
+          endStr: newEnd,
+          allDay: allday,
+        };
+        setSelectedRange(newRange);
+        calendarRef.current?.select(newRange);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [selectedRange, allday]
+  );
+
+  const handleAllDayChange = useCallback(
+    (newAllDay: boolean, newStart: string, newEnd: string) => {
+      // Update critical state immediately (checkbox response)
+      setAllDay(newAllDay);
+      setStart(newStart);
+      setEnd(newEnd);
+
+      // Defer visual feedback updates (non-urgent)
+      startTransition(() => {
+        const newRange = {
+          ...selectedRange,
+          startStr: newAllDay ? newStart.split("T")[0] : newStart,
+          endStr: newAllDay ? newEnd.split("T")[0] : newEnd,
+          start: new Date(
+            newAllDay ? newStart.split("T")[0] + "T00:00:00" : newStart
+          ),
+          end: new Date(
+            newAllDay ? newEnd.split("T")[0] + "T00:00:00" : newEnd
+          ),
+          allDay: newAllDay,
+        };
+        setSelectedRange(newRange);
+        calendarRef.current?.select(newRange);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [selectedRange]
+  );
 
   const handleClose = () => {
     onClose({}, "backdropClick");
     resetAllStateToDefault();
+    // Reset start/end so they don't show stale values next time modal opens
+    setStart("");
+    setEnd("");
+    shouldSyncFromRangeRef.current = true; // Reset for next time
   };
 
   const handleSave = async () => {
@@ -433,7 +481,11 @@ function EventPopover({
             Cancel
           </Button>
         )}
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!isFormValid}
+        >
           Save
         </Button>
       </Box>
@@ -449,387 +501,53 @@ function EventPopover({
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}
     >
-      <FieldWithLabel label="Title" isExpanded={showMore}>
-        <TextField
-          fullWidth
-          label={!showMore ? "Title" : ""}
-          placeholder="Add title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          size="small"
-          margin="dense"
-        />
-      </FieldWithLabel>
-
-      {!showDescription && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={1} mb={1}>
-            <Button
-              startIcon={<DescriptionIcon />}
-              onClick={() => setShowDescription(true)}
-              size="small"
-              sx={{
-                textTransform: "none",
-                color: "text.secondary",
-              }}
-            >
-              Add description
-            </Button>
-          </Box>
-        </FieldWithLabel>
-      )}
-
-      {showDescription && (
-        <FieldWithLabel label="Description" isExpanded={showMore}>
-          <TextField
-            fullWidth
-            label={!showMore ? "Description" : ""}
-            placeholder="Add description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            size="small"
-            margin="dense"
-            multiline
-            minRows={2}
-            maxRows={10}
-            sx={{
-              "& .MuiInputBase-root": {
-                maxHeight: "33%",
-                overflowY: "auto",
-              },
-              "& textarea": {
-                resize: "vertical",
-              },
-            }}
-          />
-        </FieldWithLabel>
-      )}
-
-      <FieldWithLabel label="Date & Time" isExpanded={showMore}>
-        <Box display="flex" gap={2}>
-          <Box flexGrow={1}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                Start
-              </Typography>
-            )}
-            <TextField
-              fullWidth
-              label={!showMore ? "Start" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? start.split("T")[0] : start}
-              onChange={(e) => {
-                const newStart = e.target.value;
-                setStart(newStart);
-
-                // Update selectedRange for visual feedback
-                const startISO = formatLocalDateTime(
-                  new Date(newStart),
-                  timezone
-                );
-                const newRange = {
-                  ...selectedRange,
-                  start: new Date(startISO),
-                  startStr: startISO,
-                  allDay: allday,
-                };
-                setSelectedRange(newRange);
-                calendarRef.current?.select(newRange);
-              }}
-              size="small"
-              margin="dense"
-              InputLabelProps={{ shrink: true }}
-            />
-          </Box>
-          <Box flexGrow={1}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                End
-              </Typography>
-            )}
-            <TextField
-              fullWidth
-              label={!showMore ? "End" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? end.split("T")[0] : end}
-              onChange={(e) => {
-                const newEnd = e.target.value;
-                setEnd(newEnd);
-
-                // Update selectedRange for visual feedback
-                const endISO = formatLocalDateTime(new Date(newEnd), timezone);
-                const newRange = {
-                  ...selectedRange,
-                  end: new Date(endISO),
-                  endStr: endISO,
-                  allDay: allday,
-                };
-                setSelectedRange(newRange);
-                calendarRef.current?.select(newRange);
-              }}
-              size="small"
-              margin="dense"
-              InputLabelProps={{ shrink: true }}
-            />
-          </Box>
-        </Box>
-      </FieldWithLabel>
-      <FieldWithLabel label=" " isExpanded={showMore}>
-        <Box display="flex" gap={2} alignItems="center">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={allday}
-                onChange={() => {
-                  const endDate = new Date(end);
-                  const startDate = new Date(start);
-                  setAllDay(!allday);
-                  if (endDate.getDate() === startDate.getDate()) {
-                    endDate.setDate(startDate.getDate() + 1);
-                    setEnd(formatLocalDateTime(endDate, timezone));
-                  }
-
-                  const newRange = {
-                    ...selectedRange,
-                    startStr: allday ? start.split("T")[0] : start,
-                    endStr: allday
-                      ? endDate.toISOString().split("T")[0]
-                      : endDate.toISOString(),
-                    start: new Date(allday ? start.split("T")[0] : start),
-                    end: new Date(
-                      allday
-                        ? endDate.toISOString().split("T")[0]
-                        : endDate.toISOString()
-                    ),
-                    allDay: allday,
-                  };
-                  setSelectedRange(newRange);
-                }}
-              />
-            }
-            label="All day"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showRepeat}
-                onChange={() => {
-                  const newShowRepeat = !showRepeat;
-                  setShowRepeat(newShowRepeat);
-                  if (newShowRepeat) {
-                    setRepetition({
-                      freq: "daily",
-                      interval: 1,
-                      occurrences: 0,
-                      endDate: "",
-                      selectedDays: [],
-                    } as RepetitionObject);
-                  } else {
-                    setRepetition({
-                      freq: "",
-                      interval: 1,
-                      occurrences: 0,
-                      endDate: "",
-                      selectedDays: [],
-                    } as RepetitionObject);
-                  }
-                }}
-              />
-            }
-            label="Repeat"
-          />
-          <TimezoneAutocomplete
-            value={timezone}
-            onChange={setTimezone}
-            zones={timezoneList.zones}
-            getTimezoneOffset={getTimezoneOffset}
-            showIcon={true}
-            width={240}
-            size="small"
-            placeholder="Select timezone"
-          />
-        </Box>
-      </FieldWithLabel>
-
-      {showRepeat && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <RepeatEvent
-            repetition={repetition}
-            eventStart={selectedRange?.start ?? new Date()}
-            setRepetition={setRepetition}
-          />
-        </FieldWithLabel>
-      )}
-
-      <FieldWithLabel label="Participants" isExpanded={showMore}>
-        <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
-      </FieldWithLabel>
-
-      <FieldWithLabel label="Video meeting" isExpanded={showMore}>
-        <Box display="flex" gap={1} alignItems="center">
-          <Button
-            startIcon={<VideocamIcon />}
-            onClick={handleAddVideoConference}
-            size="medium"
-            sx={{
-              textTransform: "none",
-              color: "text.secondary",
-              display: hasVideoConference ? "none" : "flex",
-            }}
-          >
-            Add Visio conference
-          </Button>
-
-          {hasVideoConference && meetingLink && (
-            <>
-              <Button
-                startIcon={<VideocamIcon />}
-                onClick={() => window.open(meetingLink, "_blank")}
-                size="medium"
-                variant="contained"
-                sx={{
-                  textTransform: "none",
-                  mr: 1,
-                }}
-              >
-                Join Visio conference
-              </Button>
-              <IconButton
-                onClick={handleCopyMeetingLink}
-                size="small"
-                sx={{ color: "primary.main" }}
-                aria-label="Copy meeting link"
-                title="Copy meeting link"
-              >
-                <CopyIcon />
-              </IconButton>
-              <IconButton
-                onClick={handleDeleteVideoConference}
-                size="small"
-                sx={{ color: "error.main" }}
-                aria-label="Remove video conference"
-                title="Remove video conference"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </>
-          )}
-        </Box>
-      </FieldWithLabel>
-      <FieldWithLabel label="Location" isExpanded={showMore}>
-        <TextField
-          fullWidth
-          label={!showMore ? "Location" : ""}
-          placeholder="Add location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          size="small"
-          margin="dense"
-        />
-      </FieldWithLabel>
-      <FieldWithLabel label="Calendar" isExpanded={showMore}>
-        <FormControl fullWidth margin="dense" size="small">
-          {!showMore && (
-            <InputLabel id="calendar-select-label">Calendar</InputLabel>
-          )}
-          <Select
-            labelId="calendar-select-label"
-            value={calendarid.toString()}
-            label={!showMore ? "Calendar" : ""}
-            displayEmpty
-            onChange={(e: SelectChangeEvent) =>
-              setCalendarid(Number(e.target.value))
-            }
-          >
-            {Object.keys(userPersonnalCalendars).map((calendar, index) => (
-              <MenuItem key={index} value={index}>
-                {userPersonnalCalendars[index].name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </FieldWithLabel>
-
-      {/* Extended options */}
-      {showMore && (
-        <>
-          <FieldWithLabel label="Notification" isExpanded={showMore}>
-            <FormControl fullWidth margin="dense" size="small">
-              <Select
-                labelId="notification"
-                value={alarm}
-                onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
-              >
-                <MenuItem value={""}>No Notification</MenuItem>
-                <MenuItem value={"-PT1M"}>1 minute</MenuItem>
-                <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
-                <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
-                <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
-                <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
-                <MenuItem value={"-PT1H"}>1 hours</MenuItem>
-                <MenuItem value={"-PT2H"}>2 hours</MenuItem>
-                <MenuItem value={"-PT5H"}>5 hours</MenuItem>
-                <MenuItem value={"-PT12H"}>12 hours</MenuItem>
-                <MenuItem value={"-PT1D"}>1 day</MenuItem>
-                <MenuItem value={"-PT2D"}>2 days</MenuItem>
-                <MenuItem value={"-PT1W"}>1 week</MenuItem>
-              </Select>
-            </FormControl>
-          </FieldWithLabel>
-
-          <FieldWithLabel label="Show me as" isExpanded={showMore}>
-            <FormControl fullWidth margin="dense" size="small">
-              <Select
-                labelId="busy"
-                value={busy}
-                onChange={(e: SelectChangeEvent) => setBusy(e.target.value)}
-              >
-                <MenuItem value={"TRANSPARENT"}>Free</MenuItem>
-                <MenuItem value={"OPAQUE"}>Busy </MenuItem>
-              </Select>
-            </FormControl>
-          </FieldWithLabel>
-
-          <FieldWithLabel label="Visible to" isExpanded={showMore}>
-            <ToggleButtonGroup
-              value={eventClass}
-              exclusive
-              onChange={(e, newValue) => {
-                if (newValue !== null) {
-                  setEventClass(newValue);
-                }
-              }}
-              size="small"
-            >
-              <ToggleButton value="PUBLIC" sx={{ width: "140px" }}>
-                <PublicIcon sx={{ mr: 1, fontSize: "16px" }} />
-                All
-              </ToggleButton>
-              <ToggleButton value="PRIVATE" sx={{ width: "140px" }}>
-                <LockIcon sx={{ mr: 1, fontSize: "16px" }} />
-                Participants
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </FieldWithLabel>
-        </>
-      )}
+      <EventFormFields
+        title={title}
+        setTitle={setTitle}
+        description={description}
+        setDescription={setDescription}
+        location={location}
+        setLocation={setLocation}
+        start={start}
+        setStart={setStart}
+        end={end}
+        setEnd={setEnd}
+        allday={allday}
+        setAllDay={setAllDay}
+        repetition={repetition}
+        setRepetition={setRepetition}
+        attendees={attendees}
+        setAttendees={setAttendees}
+        alarm={alarm}
+        setAlarm={setAlarm}
+        busy={busy}
+        setBusy={setBusy}
+        eventClass={eventClass}
+        setEventClass={setEventClass}
+        timezone={timezone}
+        setTimezone={setTimezone}
+        calendarid={calendarid}
+        setCalendarid={setCalendarid}
+        hasVideoConference={hasVideoConference}
+        setHasVideoConference={setHasVideoConference}
+        meetingLink={meetingLink}
+        setMeetingLink={setMeetingLink}
+        showMore={showMore}
+        showDescription={showDescription}
+        setShowDescription={setShowDescription}
+        showRepeat={showRepeat}
+        setShowRepeat={setShowRepeat}
+        isOpen={open}
+        userPersonnalCalendars={userPersonnalCalendars}
+        timezoneList={timezoneList}
+        onStartChange={handleStartChange}
+        onEndChange={handleEndChange}
+        onAllDayChange={handleAllDayChange}
+        onValidationChange={setIsFormValid}
+        isCreateMode={!event?.uid}
+      />
     </ResponsiveDialog>
   );
 }
 
 export default EventPopover;
-
-export function formatLocalDateTime(date: Date, timeZone?: string) {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone,
-  });
-
-  const formatted = formatter.format(date);
-  return formatted.replace(", ", "T");
-}
