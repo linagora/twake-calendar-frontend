@@ -209,6 +209,9 @@ export default function EventFormFields({
   // Track if title field has been touched (for create mode)
   const [titleTouched, setTitleTouched] = React.useState(false);
 
+  // Track previous showMore state to detect changes
+  const prevShowMoreRef = React.useRef<boolean | undefined>(undefined);
+
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
     if (isOpen) {
@@ -224,6 +227,34 @@ export default function EventFormFields({
       }
     }
   }, [isOpen]);
+
+  // Auto-focus title field when toggling between normal and extended mode
+  React.useEffect(() => {
+    // Skip on initial render (when prevShowMoreRef is undefined)
+    if (
+      prevShowMoreRef.current !== undefined &&
+      isOpen &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      const hasChanged = prevShowMoreRef.current !== showMore;
+
+      if (hasChanged) {
+        // Simple setTimeout approach with sufficient delay for layout changes
+        const timer = setTimeout(() => {
+          if (titleInputRef.current) {
+            titleInputRef.current.focus();
+          }
+        }, 150);
+
+        // Update previous value before returning cleanup
+        prevShowMoreRef.current = showMore;
+        return () => clearTimeout(timer);
+      }
+    }
+
+    // Always update previous value
+    prevShowMoreRef.current = showMore;
+  }, [showMore, isOpen]);
 
   // Validation logic
   const validateForm = React.useCallback(() => {
