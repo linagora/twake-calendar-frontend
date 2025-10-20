@@ -70,7 +70,7 @@ export function InfoRow({
         <Typography
           variant="body2"
           color={error ? "error" : "textPrimary"}
-          style={{ wordBreak: "break-word" }}
+          style={{ wordBreak: "break-word", whiteSpace: "pre-line" }}
         >
           {data ? (
             <Link
