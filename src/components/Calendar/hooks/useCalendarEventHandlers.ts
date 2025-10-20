@@ -13,6 +13,7 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setAnchorEl,
       props.setTempEvent,
       props.tempUsers,
+      props.timezone,
     ]),
     handleClosePopover: useCallback(eventHandlers.handleClosePopover, [
       props.calendarRef,

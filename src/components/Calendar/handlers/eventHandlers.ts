@@ -16,6 +16,7 @@ import { getEvent } from "../../../features/Events/EventApi";
 import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
+import { formatLocalDateTime } from "../../../features/Events/EventModal";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -35,6 +36,7 @@ export interface EventHandlersProps {
   setOpenEditModePopup: (open: string) => void;
   tempUsers: User[];
   setTempEvent: (event: CalendarEvent) => void;
+  timezone: string;
 }
 
 export const createEventHandlers = (props: EventHandlersProps) => {
@@ -56,13 +58,19 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setOpenEditModePopup,
     tempUsers,
     setTempEvent,
+    timezone,
   } = props;
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setSelectedRange(selectInfo);
     if (tempUsers) {
       const newEvent: CalendarEvent = {
-        title: "New Event",
+        start: selectInfo?.start
+          ? formatLocalDateTime(selectInfo?.start, timezone)
+          : "",
+        end: selectInfo?.end
+          ? formatLocalDateTime(selectInfo?.end, timezone)
+          : "",
         attendee: tempUsers.map((u) => ({
           cn: u.displayName,
           cal_address: u.email,

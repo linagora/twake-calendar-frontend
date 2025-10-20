@@ -240,6 +240,7 @@ export default function CalendarApp({
     setOpenEditModePopup,
     tempUsers,
     setTempEvent,
+    timezone,
   });
 
   // View handlers
