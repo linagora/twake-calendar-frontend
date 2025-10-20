@@ -82,6 +82,7 @@ export function InfoRow({
             whiteSpace: "pre-line",
             maxHeight: "33vh",
             overflowY: "auto",
+            width: "100%",
           }}
         >
           {data ? (
