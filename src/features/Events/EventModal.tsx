@@ -153,13 +153,35 @@ function EventPopover({
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
   const shouldSyncFromRangeRef = useRef(true);
+  const prevOpenRef = useRef(false);
 
-  // Reset sync flag when modal opens
+  // Sync timezone when modal opens or calendarTimezone changes
   useEffect(() => {
-    if (open) {
+    // Detect modal opening (transition from closed to open)
+    const isOpening = open && !prevOpenRef.current;
+
+    if (isOpening) {
       shouldSyncFromRangeRef.current = true;
+
+      // Set timezone to calendar timezone for new events when opening
+      const isNewEvent = !event || !event.uid;
+      if (isNewEvent) {
+        const resolvedTimezone = resolveTimezone(calendarTimezone);
+        setTimezone(resolvedTimezone);
+      }
     }
-  }, [open]);
+
+    // Update previous open state
+    prevOpenRef.current = open;
+  }, [open, event?.uid, calendarTimezone]);
+
+  // Separately sync timezone when calendarTimezone changes while modal is open for new events
+  useEffect(() => {
+    if (open && (!event || !event.uid)) {
+      const resolvedTimezone = resolveTimezone(calendarTimezone);
+      setTimezone(resolvedTimezone);
+    }
+  }, [calendarTimezone, open, event?.uid]);
 
   // Set start/end times when modal opens for new event creation
   useEffect(() => {
@@ -312,6 +334,7 @@ function EventPopover({
     if ((!event || !event.uid) && isInitializedRef.current) {
       // Creating new event - reset all fields to default
       // Note: start and end are handled by the selectedRange useEffect
+      // Note: timezone is handled by separate useEffect above
       setShowMore(false);
       setShowDescription(false);
       setShowRepeat(false);
@@ -325,12 +348,11 @@ function EventPopover({
       setAlarm("");
       setEventClass("PUBLIC");
       setBusy("OPAQUE");
-      setTimezone(timezoneList.browserTz);
       setHasVideoConference(false);
       setMeetingLink(null);
     }
     isInitializedRef.current = true;
-  }, [event, calendarTimezone, timezoneList.browserTz]);
+  }, [event]);
 
   const handleStartChange = useCallback(
     (newStart: string) => {
@@ -404,7 +426,6 @@ function EventPopover({
   const handleClose = () => {
     onClose({}, "backdropClick");
     resetAllStateToDefault();
-    // Reset start/end so they don't show stale values next time modal opens
     setStart("");
     setEnd("");
     shouldSyncFromRangeRef.current = true; // Reset for next time
