@@ -159,6 +159,7 @@ function EventUpdateModal({
   const [hasVideoConference, setHasVideoConference] = useState(false);
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -189,6 +190,9 @@ function EventUpdateModal({
   // Initialize form state when event data is available
   useEffect(() => {
     if (event && open) {
+      // Reset validation errors when modal opens
+      setShowValidationErrors(false);
+
       // Editing existing event - populate fields with event data
       setTitle(event.title ?? "");
       setDescription(event.description ?? "");
@@ -306,10 +310,19 @@ function EventUpdateModal({
     closeModal();
     resetAllStateToDefault();
     setFreshEvent(null);
+    setShowValidationErrors(false);
     initializedKeyRef.current = null;
   };
 
   const handleSave = async () => {
+    // Show validation errors when Save is clicked
+    setShowValidationErrors(true);
+
+    // Check if form is valid before saving
+    if (!isFormValid) {
+      return;
+    }
+
     if (!event) return;
 
     const organizer = event.organizer;
@@ -672,11 +685,7 @@ function EventUpdateModal({
         <Button variant="outlined" onClick={handleClose}>
           Cancel
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!isFormValid}
-        >
+        <Button variant="contained" onClick={handleSave}>
           Save
         </Button>
       </Box>
@@ -741,7 +750,7 @@ function EventUpdateModal({
           }
         }}
         onValidationChange={setIsFormValid}
-        isCreateMode={false}
+        showValidationErrors={showValidationErrors}
       />
     </ResponsiveDialog>
   );

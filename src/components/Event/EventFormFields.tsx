@@ -148,7 +148,7 @@ interface EventFormFieldsProps {
 
   // Validation
   onValidationChange?: (isValid: boolean) => void;
-  isCreateMode?: boolean;
+  showValidationErrors?: boolean;
 }
 
 export default function EventFormFields({
@@ -196,7 +196,7 @@ export default function EventFormFields({
   onAllDayChange,
   onCalendarChange,
   onValidationChange,
-  isCreateMode = false,
+  showValidationErrors = false,
 }: EventFormFieldsProps) {
   // Store original time before toggling to all-day
   const originalTimeRef = React.useRef<{ start: string; end: string } | null>(
@@ -206,18 +206,12 @@ export default function EventFormFields({
   // Ref for title input field to enable auto-focus
   const titleInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Track if title field has been touched (for create mode)
-  const [titleTouched, setTitleTouched] = React.useState(false);
-
   // Track previous showMore state to detect changes
   const prevShowMoreRef = React.useRef<boolean | undefined>(undefined);
 
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
     if (isOpen) {
-      // Reset touched state when modal opens
-      setTitleTouched(false);
-
       if (titleInputRef.current && process.env.NODE_ENV !== "test") {
         // Use setTimeout to ensure the dialog is fully rendered
         const timer = setTimeout(() => {
@@ -260,9 +254,7 @@ export default function EventFormFields({
   const validateForm = React.useCallback(() => {
     // Title validation
     const isTitleValid = title.trim().length > 0;
-    const shouldShowTitleError = isCreateMode
-      ? titleTouched && !isTitleValid && isOpen
-      : !isTitleValid && isOpen;
+    const shouldShowTitleError = showValidationErrors && !isTitleValid;
 
     // Date/time validation
     let isDateTimeValid = true;
@@ -307,11 +299,11 @@ export default function EventFormFields({
       isValid,
       errors: {
         title: shouldShowTitleError ? "Title is required" : "",
-        start: isOpen ? startError : "",
-        dateTime: isOpen ? dateTimeError : "",
+        start: showValidationErrors ? startError : "",
+        dateTime: showValidationErrors ? dateTimeError : "",
       },
     };
-  }, [title, start, end, titleTouched, isCreateMode, isOpen]);
+  }, [title, start, end, showValidationErrors]);
 
   // Notify parent about validation changes
   React.useEffect(() => {
@@ -404,16 +396,6 @@ export default function EventFormFields({
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            // Set touched only when user has typed something
-            if (e.target.value && !titleTouched) {
-              setTitleTouched(true);
-            }
-          }}
-          onBlur={() => {
-            // Only set touched if title has value
-            if (title) {
-              setTitleTouched(true);
-            }
           }}
           error={!!validation.errors.title}
           helperText={validation.errors.title}

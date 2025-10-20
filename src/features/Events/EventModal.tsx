@@ -120,6 +120,7 @@ function EventPopover({
     event?.x_openpass_videoconference || null
   );
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
@@ -162,6 +163,7 @@ function EventPopover({
 
     if (isOpening) {
       shouldSyncFromRangeRef.current = true;
+      setShowValidationErrors(false);
 
       // Set timezone to calendar timezone for new events when opening
       const isNewEvent = !event || !event.uid;
@@ -428,10 +430,18 @@ function EventPopover({
     resetAllStateToDefault();
     setStart("");
     setEnd("");
+    setShowValidationErrors(false);
     shouldSyncFromRangeRef.current = true; // Reset for next time
   };
 
   const handleSave = async () => {
+    // Show validation errors when Save is clicked
+    setShowValidationErrors(true);
+
+    // Check if form is valid before saving
+    if (!isFormValid) {
+      return;
+    }
     const newEventUID = crypto.randomUUID();
 
     const newEvent: CalendarEvent = {
@@ -502,11 +512,7 @@ function EventPopover({
             Cancel
           </Button>
         )}
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!isFormValid}
-        >
+        <Button variant="contained" onClick={handleSave}>
           Save
         </Button>
       </Box>
@@ -565,7 +571,7 @@ function EventPopover({
         onEndChange={handleEndChange}
         onAllDayChange={handleAllDayChange}
         onValidationChange={setIsFormValid}
-        isCreateMode={!event?.uid}
+        showValidationErrors={showValidationErrors}
       />
     </ResponsiveDialog>
   );
