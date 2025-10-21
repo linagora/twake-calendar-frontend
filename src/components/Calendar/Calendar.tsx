@@ -12,12 +12,12 @@ import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
 import {
   getCalendarDetailAsync,
-  setTimeZone
+  setTimeZone,
 } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   formatDateToYYYYMMDDTHHMMSS,
-  getCalendarRange
+  getCalendarRange,
 } from "../../utils/dateUtils";
 import { push } from "redux-first-history";
 import EventPreviewModal from "../../features/Events/EventDisplayPreview";
@@ -40,9 +40,7 @@ import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
 import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
-import {
-  useTheme
-} from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
 
 interface CalendarAppProps {
