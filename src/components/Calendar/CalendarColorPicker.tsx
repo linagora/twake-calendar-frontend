@@ -38,7 +38,7 @@ export function ColorPicker({
       ))}
       {customColor && (
         <ColorBox
-          color={customColor}
+          color={customColor ?? {}}
           onChange={onChange}
           selectedColor={selectedColor}
         />
@@ -110,9 +110,7 @@ function ColorPickerBox({
   const [oldColor] = useState(
     selectedColor ?? { light: "#ffffff", dark: "#808080" }
   );
-  const [color, setColor] = useState(
-    oldColor ?? { light: "#ffffff", dark: "#808080" }
-  );
+  const [color, setColor] = useState(oldColor);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
@@ -219,7 +217,7 @@ function ColorPickerBox({
             Hex
           </Typography>
           <TextField
-            value={color.light.toUpperCase()}
+            value={color.light?.toUpperCase()}
             onChange={(e) => handleColorChange(e.target.value)}
             variant="standard"
             size="small"
