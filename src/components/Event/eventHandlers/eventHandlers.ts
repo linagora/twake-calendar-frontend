@@ -45,6 +45,7 @@ export async function handleRSVP(
             a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
           ),
         },
+        removeOverrides: false,
       })
     );
     if (calendars) {
