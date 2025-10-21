@@ -21,6 +21,11 @@ export function ColorPicker({
   colors?: Record<string, string>[];
   onChange: (color: Record<string, string>) => void;
 }) {
+  const [customColor, setCustomColor] = useState(
+    !colors.find((c) => c.light === selectedColor?.light)
+      ? selectedColor
+      : undefined
+  );
   return (
     <Box display="flex" alignItems="center" gap={1}>
       {colors.map((c) => (
@@ -31,14 +36,21 @@ export function ColorPicker({
           selectedColor={selectedColor}
         />
       ))}
-      {!colors.find((c) => c.light === selectedColor?.light) && (
+      {customColor && (
         <ColorBox
-          color={selectedColor}
+          color={customColor}
           onChange={onChange}
           selectedColor={selectedColor}
         />
       )}
-      <ColorPickerBox onChange={onChange} />
+
+      <ColorPickerBox
+        onChange={(c) => {
+          onChange(c);
+          setCustomColor(c);
+        }}
+        selectedColor={selectedColor}
+      />
     </Box>
   );
 }
@@ -90,10 +102,18 @@ function ColorBox({
 
 function ColorPickerBox({
   onChange,
+  selectedColor,
 }: {
   onChange: (color: Record<string, string>) => void;
+  selectedColor: Record<string, string>;
 }) {
-  const [color, setColor] = useState({ light: "#ffffff", dark: "#808080" });
+  const [oldColor] = useState(
+    selectedColor ?? { light: "#ffffff", dark: "#808080" }
+  );
+  const [color, setColor] = useState(
+    oldColor ?? { light: "#ffffff", dark: "#808080" }
+  );
+
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
@@ -103,12 +123,13 @@ function ColorPickerBox({
   };
 
   const handleClose = () => {
+    onChange(oldColor);
     setAnchorEl(null);
   };
 
   const handleSave = () => {
     onChange(color);
-    handleClose();
+    setAnchorEl(null);
   };
 
   const handleColorChange = (c: string) => {
