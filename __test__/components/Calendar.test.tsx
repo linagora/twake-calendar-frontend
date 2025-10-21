@@ -256,6 +256,10 @@ describe("calendar Availability search", () => {
         sid: "mockSid",
         openpaasId: "user1",
       },
+      organiserData: {
+        cn: "test",
+        cal_address: "test@test.com",
+      },
       tokens: { accessToken: "token" },
     },
     calendars: {
@@ -322,6 +326,72 @@ describe("calendar Availability search", () => {
     fireEvent.click(option);
 
     expect(spy).not.toHaveBeenCalledWith();
+  });
+
+  it("open window with attendees filled after temp search on create event button click", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    mockedSearchUsers.mockResolvedValue([
+      {
+        email: "newuser@example.com",
+        displayName: "New User",
+        avatarUrl: "image.png",
+        openpaasId: "1234567890",
+      },
+    ]);
+
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+
+    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    userEvent.type(input, "New");
+
+    const option = await screen.findByText("New User");
+    fireEvent.click(option);
+
+    expect(spy).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /create event/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
+      expect(screen.getAllByText(/New User/i)).toHaveLength(2);
+    });
+  });
+
+  it("open window with attendees filled after temp search on enter in temp input", async () => {
+    const spy = jest
+      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
+    mockedSearchUsers.mockResolvedValue([
+      {
+        email: "newuser@example.com",
+        displayName: "New User",
+        avatarUrl: "image.png",
+        openpaasId: "1234567890",
+      },
+    ]);
+
+    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+
+    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    userEvent.type(input, "New");
+
+    const option = await screen.findByText("New User");
+    fireEvent.click(option);
+
+    expect(spy).toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
+      expect(screen.getAllByText(/New User/i)).toHaveLength(2);
+    });
   });
 
   it("BUGFIX: can untoggle all personnal calendars", () => {

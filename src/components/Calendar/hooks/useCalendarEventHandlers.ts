@@ -11,6 +11,9 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
     handleDateSelect: useCallback(eventHandlers.handleDateSelect, [
       props.setSelectedRange,
       props.setAnchorEl,
+      props.setTempEvent,
+      props.tempUsers,
+      props.timezone,
     ]),
     handleClosePopover: useCallback(eventHandlers.handleClosePopover, [
       props.calendarRef,
