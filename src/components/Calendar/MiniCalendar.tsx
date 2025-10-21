@@ -59,6 +59,7 @@ export function MiniCalendar({
           );
         }}
         views={["month", "day"]}
+        sx={{ width: "100%" }}
         slotProps={{
           day: (ownerState) => {
             const date = ownerState.day.toDate();

@@ -27,6 +27,7 @@ import { createSelector } from "@reduxjs/toolkit";
 import AddIcon from "@mui/icons-material/Add";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import Button from "@mui/material/Button";
+import { Box } from "@mui/material";
 import {
   updateSlotLabelVisibility,
   eventToFullCalendarFormat,
@@ -263,15 +264,33 @@ export default function CalendarApp({
 
   return (
     <main className="main-layout">
-      <div className="sidebar">
-        <Button
-          variant="contained"
-          onClick={() =>
-            eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
-          }
+      <Box
+        className="sidebar"
+        sx={{
+          padding: "0 25px 16px",
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            backgroundColor: "#fff",
+            paddingTop: "16px",
+          }}
         >
-          <AddIcon /> <p>Create Event</p>
-        </Button>
+          <Button
+            size="large"
+            variant="contained"
+            fullWidth
+            onClick={() =>
+              eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
+            }
+          >
+            <AddIcon /> <p>Create Event</p>
+          </Button>
+        </Box>
 
         <MiniCalendar
           calendarRef={calendarRef}
@@ -292,7 +311,7 @@ export default function CalendarApp({
             setSelectedCalendars={setSelectedCalendars}
           />
         </div>
-      </div>
+      </Box>
       <div className="calendar">
         <ImportAlert />
         <FullCalendar
