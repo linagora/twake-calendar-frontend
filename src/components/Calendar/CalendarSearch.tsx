@@ -16,6 +16,9 @@ import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { ColorPicker } from "./CalendarColorPicker";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
+import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { useTheme } from "@mui/material/styles";
+import { ResponsiveDialog } from "../Dialog";
 
 interface CalendarWithOwner {
   cal: Record<string, any>;
@@ -31,6 +34,8 @@ function CalendarItem({
   onRemove: () => void;
   onColorChange: (color: Record<string, string>) => void;
 }) {
+  const theme = useTheme();
+
   return (
     <Box
       key={cal.owner.email + cal.cal["dav:name"]}
@@ -67,7 +72,7 @@ function CalendarItem({
         <ColorPicker
           selectedColor={{
             light: cal.cal["apple:color"],
-            dark: cal.cal["X-TWAKE-Dark-theme-color"],
+            dark: getAccessiblePair(cal.cal["apple:color"], theme),
           }}
           onChange={onColorChange}
         />
@@ -224,126 +229,92 @@ export default function CalendarSearch({
   };
 
   return (
-    <Modal
+    <ResponsiveDialog
       open={open}
+      contentSx={{ paddingTop: "8px !important" }}
       onClose={() => {
         onClose({}, "backdropClick");
         setSelectedCalendars([]);
         setSelectedUsers([]);
       }}
+      title="Browse other calendars"
+      actions={
+        <>
+          <Button
+            variant="outlined"
+            onClick={() => onClose({}, "backdropClick")}
+          >
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleSave}>
+            Add
+          </Button>
+        </>
+      }
     >
-      <Box
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "20%",
-          transform: "translate( -50%)",
-          width: "50vw",
-          maxHeight: "80vh",
+      <PeopleSearch
+        objectTypes={["user"]}
+        selectedUsers={selectedUsers}
+        onChange={async (event: any, value: User[]) => {
+          setSelectedUsers(value);
+
+          const cals = await Promise.all(
+            value.map(async (user: User) => {
+              const cals = (await getCalendars(
+                user.openpaasId,
+                "sharedPublic=true&withRights=true"
+              )) as Record<string, any>;
+              return cals._embedded?.["dav:calendar"]
+                ? cals._embedded["dav:calendar"].map(
+                    (cal: Record<string, any>) => ({ cal, owner: user })
+                  )
+                : { cal: undefined, owner: user };
+            })
+          );
+
+          setSelectedCalendars(cals.flat());
         }}
-      >
-        <Card
-          style={{
-            padding: 16,
-            borderRadius: 12,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            display: "flex",
-            flexDirection: "column",
-            maxHeight: "80vh",
-          }}
-        >
-          <Box style={{ position: "absolute", top: 8, right: 8 }}>
-            <IconButton
-              size="small"
-              onClick={() => onClose({}, "backdropClick")}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
+      />
 
-          <CardHeader
-            title="Browse other calendars"
-            style={{ paddingBottom: 0 }}
-          />
-          <CardContent style={{ flex: 1, overflow: "auto" }}>
-            <PeopleSearch
-              objectTypes={["user"]}
-              selectedUsers={selectedUsers}
-              onChange={async (event: any, value: User[]) => {
-                setSelectedUsers(value);
-
-                const cals = await Promise.all(
-                  value.map(async (user: User) => {
-                    const cals = (await getCalendars(
-                      user.openpaasId,
-                      "sharedPublic=true&withRights=true"
-                    )) as Record<string, any>;
-                    return cals._embedded?.["dav:calendar"]
-                      ? cals._embedded["dav:calendar"].map(
-                          (cal: Record<string, any>) => ({ cal, owner: user })
-                        )
-                      : { cal: undefined, owner: user };
-                  })
-                );
-
-                setSelectedCalendars(cals.flat());
-              }}
-            />
-
-            <SelectedCalendarsList
-              calendars={calendars}
-              selectedCal={selectedCal}
-              onRemove={(cal) => {
-                setSelectedCalendars((prev) =>
-                  prev.filter(
-                    (c) => c.cal._links.self.href !== cal.cal._links.self.href
-                  )
-                );
-                if (
-                  !selectedCal.find(
-                    (c) =>
-                      cal.owner.email === c.owner.email &&
-                      c.cal._links.self.href !== cal.cal._links.self.href
-                  )
-                ) {
-                  setSelectedUsers((prev) =>
-                    prev.filter((u) => u.email !== cal.owner.email)
-                  );
-                }
-              }}
-              onColorChange={(cal, color) =>
-                setSelectedCalendars((prev) =>
-                  prev.map((prevcal) =>
-                    prevcal.owner.email === cal.owner.email &&
-                    prevcal.cal._links.self.href === cal.cal._links.self.href
-                      ? {
-                          ...prevcal,
-                          cal: {
-                            ...prevcal.cal,
-                            "apple:color": color.light,
-                            "X-TWAKE-Dark-theme-color": color.dark,
-                          },
-                        }
-                      : prevcal
-                  )
-                )
-              }
-            />
-          </CardContent>
-
-          <CardActions style={{ justifyContent: "flex-end", gap: 8 }}>
-            <Button
-              variant="outlined"
-              onClick={() => onClose({}, "backdropClick")}
-            >
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={handleSave}>
-              Add
-            </Button>
-          </CardActions>
-        </Card>
-      </Box>
-    </Modal>
+      <SelectedCalendarsList
+        calendars={calendars}
+        selectedCal={selectedCal}
+        onRemove={(cal) => {
+          setSelectedCalendars((prev) =>
+            prev.filter(
+              (c) => c.cal._links.self.href !== cal.cal._links.self.href
+            )
+          );
+          if (
+            !selectedCal.find(
+              (c) =>
+                cal.owner.email === c.owner.email &&
+                c.cal._links.self.href !== cal.cal._links.self.href
+            )
+          ) {
+            setSelectedUsers((prev) =>
+              prev.filter((u) => u.email !== cal.owner.email)
+            );
+          }
+        }}
+        onColorChange={(cal, color) =>
+          setSelectedCalendars((prev) =>
+            prev.map((prevcal) =>
+              prevcal.owner.email === cal.owner.email &&
+              prevcal.cal._links.self.href === cal.cal._links.self.href
+                ? {
+                    ...prevcal,
+                    cal: {
+                      ...prevcal.cal,
+                      "apple:color": color.light,
+                      "X-TWAKE-Dark-theme-color": color.dark,
+                    },
+                  }
+                : prevcal
+            )
+          )
+        }
+      />
+    </ResponsiveDialog>
   );
 }

@@ -96,9 +96,6 @@ export async function proppatchCalendar(
   if (patch.color.light) {
     body["apple:color"] = patch.color.light;
   }
-  if (patch.color.dark) {
-    body["X-TWAKE-Dark-theme-color"] = patch.color.dark;
-  }
   const response = await api(`dav${calLink}`, {
     method: "PROPPATCH",
     headers: {

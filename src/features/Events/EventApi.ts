@@ -36,7 +36,7 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
 
   const eventjson = parseCalendarEvent(
     targetVevent[1],
-    event.color ?? "",
+    event.color ?? {},
     event.calId,
     event.URL
   );

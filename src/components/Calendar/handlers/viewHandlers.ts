@@ -267,7 +267,7 @@ function RenderEventTitle(
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: calendar.color,
+        backgroundColor: calendar.color?.light,
         color: "white",
         borderRadius: "4px",
         border: "1px",

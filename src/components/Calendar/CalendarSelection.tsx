@@ -232,7 +232,14 @@ function CalendarSelector({
         </IconButton>
       </div>
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={() => setOpen()}>Modify</MenuItem>
+        <MenuItem
+          onClick={() => {
+            setOpen();
+            handleClose();
+          }}
+        >
+          Modify
+        </MenuItem>
         {!isDefault && <Divider />}
         {!isDefault && (
           <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>

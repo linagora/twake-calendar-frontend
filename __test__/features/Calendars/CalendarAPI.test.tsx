@@ -97,7 +97,6 @@ describe("Calendar API", () => {
         "dav:name": "new cal",
         "caldav:description": "desc",
         "apple:color": "calIdLight",
-        "X-TWAKE-Dark-theme-color": "calIdDark",
       }),
     });
   });

@@ -366,7 +366,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
       .replace(".json", ""),
     color: {
       light: cal.cal["apple:color"],
-      dark: cal.cal["X-TWAKE-Dark-theme-color"],
+      dark: "#000",
     },
     link: `/calendars/${userId}/${calId}.json`,
     desc: cal.cal["caldav:description"],
@@ -467,6 +467,15 @@ const CalendarSlice = createSlice({
     clearFetchCache: (state, action: PayloadAction<string>) => {
       if (!state.list[action.payload]) return;
       state.list[action.payload].lastCacheCleared = Date.now();
+    },
+    updateCalColor: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        color: { light: string; dark: string };
+      }>
+    ) => {
+      state.list[action.payload.id].color = action.payload.color;
     },
   },
   extraReducers: (builder) => {
@@ -737,5 +746,6 @@ export const {
   emptyEventsCal,
   setTimeZone,
   clearFetchCache,
+  updateCalColor,
 } = CalendarSlice.actions;
 export default CalendarSlice.reducer;

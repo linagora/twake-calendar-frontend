@@ -10,6 +10,7 @@ import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
 import { useTheme } from "@mui/material/styles";
+import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 
 export interface User {
   email: string;
@@ -151,7 +152,7 @@ export function PeopleSearch({
           const chipColor = isString
             ? theme.palette.grey[300]
             : (option.color?.light ?? theme.palette.grey[300]);
-          const textColor = theme.palette.getContrastText(chipColor);
+          const textColor = getAccessiblePair(chipColor, theme);
 
           return (
             <Chip

@@ -1,13 +1,16 @@
-import { Box } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
-// const defaultColors = ["#34d399", "#fbbf24", "#f87171", "#60a5fa", "#f472b6"];
-
-const defaultColors = [
-  { light: "#D0ECDA", dark: "#45B26B" },
-  { light: "#FAE3CE", dark: "#EA8E3A" },
-  { light: "#F5CFD0", dark: "#D74244" },
-  { light: "#AFCBEF", dark: "#377DD8" },
-];
+import {
+  Box,
+  Button,
+  Popover,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import { useState } from "react";
+import { HexColorPicker } from "react-colorful";
+import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 export function ColorPicker({
   selectedColor,
@@ -18,11 +21,15 @@ export function ColorPicker({
   colors?: Record<string, string>[];
   onChange: (color: Record<string, string>) => void;
 }) {
-  console.log(selectedColor);
   return (
     <Box display="flex" alignItems="center" gap={1}>
       {colors.map((c) => (
-        <ColorBox color={c} onChange={onChange} selectedColor={selectedColor} />
+        <ColorBox
+          key={c.light}
+          color={c}
+          onChange={onChange}
+          selectedColor={selectedColor}
+        />
       ))}
       {!colors.find((c) => c.light === selectedColor?.light) && (
         <ColorBox
@@ -31,6 +38,7 @@ export function ColorPicker({
           selectedColor={selectedColor}
         />
       )}
+      <ColorPickerBox onChange={onChange} />
     </Box>
   );
 }
@@ -45,7 +53,6 @@ function ColorBox({
 }) {
   return (
     <Box
-      key={color.light}
       role="button"
       aria-label={`select color ${color.light}`}
       onClick={() => onChange(color)}
@@ -74,8 +81,142 @@ function ColorBox({
         style={{
           visibility:
             selectedColor?.light === color.light ? "visible" : "hidden",
+          color: color.dark,
         }}
       />
     </Box>
+  );
+}
+
+function ColorPickerBox({
+  onChange,
+}: {
+  onChange: (color: Record<string, string>) => void;
+}) {
+  const [color, setColor] = useState({ light: "#ffffff", dark: "#808080" });
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const open = Boolean(anchorEl);
+  const theme = useTheme();
+
+  const handleClick = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSave = () => {
+    onChange(color);
+    handleClose();
+  };
+
+  const handleColorChange = (c: string) => {
+    const newLight = c;
+    const newColor = {
+      light: newLight,
+      dark: getAccessiblePair(newLight, theme),
+    };
+    setColor(newColor);
+    onChange(newColor);
+  };
+  return (
+    <>
+      <Box
+        key={"colorPicker"}
+        role="button"
+        aria-label={`select custom color`}
+        onClick={handleClick}
+        style={{
+          width: "46px",
+          height: "32px",
+          padding: 0,
+          borderRadius: "4px",
+          border: "1px solid #CBD2E0",
+          backgroundColor: "#FFF",
+          cursor: "pointer",
+          transition: "all 0.2s",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          style={{
+            height: "7px",
+            width: "100%",
+            borderRadius: "4px 4px 0px 0px",
+            backgroundColor: "#CBD2E0",
+          }}
+        ></Box>
+        <AddIcon
+          style={{
+            color: "#CBD2E0",
+          }}
+        />
+      </Box>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "center",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        slotProps={{
+          paper: {
+            style: {
+              padding: "24px",
+              width: "294px",
+              borderRadius: "8px",
+              boxShadow: "0px 1px 3px #3C404326",
+            },
+          },
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="600">
+          Choose custom colour
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Choose a background colour for this calendar
+        </Typography>
+
+        <Box sx={{ mb: 2 }}>
+          <HexColorPicker
+            color={color.light}
+            onChange={handleColorChange}
+            style={{ width: "100%" }}
+          />
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Typography variant="body2" sx={{ mr: 1 }}>
+            Hex
+          </Typography>
+          <TextField
+            value={color.light.toUpperCase()}
+            onChange={(e) => handleColorChange(e.target.value)}
+            variant="standard"
+            size="small"
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            sx={{ textTransform: "none" }}
+          >
+            Save
+          </Button>
+        </Box>
+      </Popover>
+    </>
   );
 }
