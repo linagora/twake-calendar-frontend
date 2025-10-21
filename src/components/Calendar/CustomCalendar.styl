@@ -40,8 +40,22 @@ span.fc-daygrid-day-number
   line-height 36px
   position relative
   width 48px
-  height 48px
   line-height 39px
+
+.fc-daygrid-day-frame .fc-daygrid-day-top .fc-daygrid-day-number
+  font-family Inter
+  font-size 12px
+  font-weight 500
+  line-height 16px
+  width 100%
+  text-align  center
+  padding 0
+
+.fc-daygrid-day-frame span.fc-daygrid-day-number:after
+  width 25px
+  height 25px
+  top -6px
+  left -6px
 
 .fc-daygrid-day-top .fc-daygrid-day-number:after,
 span.fc-daygrid-day-number:after
@@ -195,6 +209,9 @@ tr:has(> td.fc-timegrid-divider.fc-cell-shaded)
 .fc .fc-scrollgrid-section td .fc-daygrid-day-frame
   border-bottom 1px solid #b8c1cc
 
+.fc-dayGridMonth-view .fc-scrollgrid-section td .fc-daygrid-day-frame
+    border-bottom none
+
 th.fc-col-header-cell.fc-day
   cursor pointer
 
@@ -231,3 +248,78 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 
 .fc .fc-timegrid-slot-minor 
   border-top-style: none
+
+/* FullCalendar "more" popover restyle */
+
+.fc-daygrid-day-events
+  display: flex
+  flex-direction: column
+  height 70%
+
+.fc-daygrid-day-bottom
+  position absolute
+  bottom 0
+  font-weight 500
+  font-size 12px
+  line-height 16px
+  letter-spacing 0.5px
+  color #6D7885
+
+.fc-more-popover
+  z-index 700 !important
+  border-radius 4px
+  background #fff
+  overflow hidden
+  font-family Inter
+  width 244px
+
+  .fc-popover-header
+    background #FCFCFC
+    justify-content space-between
+    width 244px
+    height 40px
+    padding 12px
+
+    .fc-popover-title
+      font-family Inter
+      font-weight 500
+      font-size 14px
+      color #243B55
+      line-height 20px
+      letter-spacing 0.1px
+
+    .fc-popover-close
+      color #605D62
+
+  .fc-popover-body
+    max-height 208px
+    overflow auto
+    padding 0 !important
+
+    .fc-more-popover-misc
+      height 0 !important
+      margin 0 !important
+      padding 0 !important
+    .fc-daygrid-event 
+      &:hover
+        background #f7f7f8
+      div
+        display flex
+        align-items center
+        padding 4px 6px 4px 12px
+        border-radius 8px
+        color #1C1B1F!important
+        background-color transparent!important
+        border none
+        color #334155
+        font-size 14px
+        font-weight 400
+        line-height 20px
+        letter-spacing 0.25px
+        vertical-align middle
+        transition background 0.15s ease, color 0.15s ease
+
+        span
+          white-space nowrap
+          overflow hidden
+          text-overflow ellipsis
