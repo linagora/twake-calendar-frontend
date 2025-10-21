@@ -490,7 +490,17 @@ function EventPopover({
             size="small"
             margin="dense"
             multiline
-            rows={2}
+            minRows={2}
+            maxRows={10}
+            sx={{
+              "& .MuiInputBase-root": {
+                maxHeight: "33%",
+                overflowY: "auto",
+              },
+              "& textarea": {
+                resize: "vertical",
+              },
+            }}
           />
         </FieldWithLabel>
       )}

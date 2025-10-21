@@ -62,7 +62,14 @@ export function InfoRow({
   content,
 }: InfoRowProps) {
   return (
-    <Box style={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+    <Box
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        marginBottom: 1,
+      }}
+    >
       {icon}
       {content ? (
         content
@@ -70,7 +77,13 @@ export function InfoRow({
         <Typography
           variant="body2"
           color={error ? "error" : "textPrimary"}
-          style={{ wordBreak: "break-word" }}
+          style={{
+            wordBreak: "break-word",
+            whiteSpace: "pre-line",
+            maxHeight: "33vh",
+            overflowY: "auto",
+            width: "100%",
+          }}
         >
           {data ? (
             <Link
