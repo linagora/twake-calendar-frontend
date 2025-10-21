@@ -1,27 +1,27 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   getTempCalendarsListAsync,
   removeTempCal,
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 
 const requestControllers = new Map<string, AbortController>();
 
 export function TempCalendarsInput({
-  setAnchorEl,
-  setTempEvent,
+  tempUsers,
+  setTempUsers,
+  handleToggleEventPreview,
   selectedCalendars,
   setSelectedCalendars,
 }: {
-  setAnchorEl: Function;
-  setTempEvent: Function;
+  tempUsers: User[];
+  setTempUsers: (users: User[]) => void;
+  handleToggleEventPreview: () => void;
   selectedCalendars: string[];
   setSelectedCalendars: Function;
 }) {
-  const [tempUsers, setTempUsers] = useState<User[]>([]);
   const dispatch = useAppDispatch();
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
@@ -84,23 +84,6 @@ export function TempCalendarsInput({
       const calIds = buildEmailToCalendarMap(tempcalendars).get(user.email);
       calIds?.forEach((id) => dispatch(removeTempCal(id)));
     }
-  };
-
-  const handleToggleEventPreview = () => {
-    const newEvent: CalendarEvent = {
-      title: "New Event",
-      attendee: tempUsers.map((u) => ({
-        cn: u.displayName,
-        cal_address: u.email,
-        partstat: "NEED-ACTION",
-        role: "REQ-PARTICIPANT",
-        rsvp: "TRUE",
-        cutype: "INDIVIDUAL",
-      })),
-    } as CalendarEvent;
-
-    setTempEvent(newEvent);
-    setAnchorEl(document.body);
   };
 
   return (
