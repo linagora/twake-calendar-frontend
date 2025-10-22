@@ -1,6 +1,7 @@
 // __test__/features/calendars/calendarApi.test.ts
 
 import {
+  addSharedCalendar,
   getCalendar,
   getCalendars,
   postCalendar,
@@ -111,5 +112,44 @@ describe("Calendar API", () => {
         Accept: "application/json, text/plain, */*",
       },
     });
+  });
+
+  it("When adding a sharedCal with #default as a name a new name is sent to the back", async () => {
+    const mockApiPost = jest.spyOn(api, "post");
+
+    const calData = {
+      cal: {
+        id: "cal123",
+        "dav:name": "#default",
+        "apple:color": "#FF5733",
+        "caldav:description": "Default calendar",
+        acl: [],
+        invite: [],
+        _links: {
+          self: {
+            href: "/calendars/owner123/cal123.json",
+          },
+        },
+      },
+      owner: {
+        displayName: "John Doe",
+        email: "john.doe@example.com",
+        openpaasId: "owner123",
+      },
+      color: "#FF5733",
+    };
+
+    await addSharedCalendar("currentUserId", "newCalId123", calData);
+
+    expect(mockApiPost).toHaveBeenCalledWith(
+      "dav/calendars/currentUserId.json",
+      expect.objectContaining({
+        body: expect.stringContaining('"dav:name":"John Doe\'s calendar"'),
+      })
+    );
+
+    const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body));
+    expect(callBody["dav:name"]).toBe("John Doe's calendar");
+    expect(callBody["dav:name"]).not.toBe("#default");
   });
 });
