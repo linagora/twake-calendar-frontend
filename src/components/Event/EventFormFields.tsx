@@ -41,7 +41,7 @@ export const FieldWithLabel = React.memo(
     isExpanded,
     children,
   }: {
-    label: string;
+    label: string | React.ReactNode;
     isExpanded: boolean;
     children: React.ReactNode;
   }) => {
@@ -126,6 +126,7 @@ interface EventFormFieldsProps {
   setShowDescription: (showDescription: boolean) => void;
   showRepeat: boolean;
   setShowRepeat: (showRepeat: boolean) => void;
+  isOpen?: boolean;
 
   // Data
   userPersonnalCalendars: Calendars[];
@@ -138,8 +139,16 @@ interface EventFormFieldsProps {
   // Event handlers
   onStartChange?: (newStart: string) => void;
   onEndChange?: (newEnd: string) => void;
-  onAllDayChange?: (newAllDay: boolean) => void;
+  onAllDayChange?: (
+    newAllDay: boolean,
+    newStart: string,
+    newEnd: string
+  ) => void;
   onCalendarChange?: (newCalendarId: number) => void;
+
+  // Validation
+  onValidationChange?: (isValid: boolean) => void;
+  showValidationErrors?: boolean;
 }
 
 export default function EventFormFields({
@@ -179,13 +188,131 @@ export default function EventFormFields({
   setShowDescription,
   showRepeat,
   setShowRepeat,
+  isOpen = false,
   userPersonnalCalendars,
   timezoneList,
   onStartChange,
   onEndChange,
   onAllDayChange,
   onCalendarChange,
+  onValidationChange,
+  showValidationErrors = false,
 }: EventFormFieldsProps) {
+  // Store original time before toggling to all-day
+  const originalTimeRef = React.useRef<{ start: string; end: string } | null>(
+    null
+  );
+
+  // Ref for title input field to enable auto-focus
+  const titleInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Track previous showMore state to detect changes
+  const prevShowMoreRef = React.useRef<boolean | undefined>(undefined);
+
+  // Auto-focus title field when modal opens (skip in test environment)
+  React.useEffect(() => {
+    if (isOpen) {
+      if (titleInputRef.current && process.env.NODE_ENV !== "test") {
+        // Use setTimeout to ensure the dialog is fully rendered
+        const timer = setTimeout(() => {
+          titleInputRef.current?.focus();
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isOpen]);
+
+  // Auto-focus title field when toggling between normal and extended mode
+  React.useEffect(() => {
+    // Skip on initial render (when prevShowMoreRef is undefined)
+    if (
+      prevShowMoreRef.current !== undefined &&
+      isOpen &&
+      process.env.NODE_ENV !== "test"
+    ) {
+      const hasChanged = prevShowMoreRef.current !== showMore;
+
+      if (hasChanged) {
+        // Simple setTimeout approach with sufficient delay for layout changes
+        const timer = setTimeout(() => {
+          if (titleInputRef.current) {
+            titleInputRef.current.focus();
+          }
+        }, 150);
+
+        // Update previous value before returning cleanup
+        prevShowMoreRef.current = showMore;
+        return () => clearTimeout(timer);
+      }
+    }
+
+    // Always update previous value
+    prevShowMoreRef.current = showMore;
+  }, [showMore, isOpen]);
+
+  // Validation logic
+  const validateForm = React.useCallback(() => {
+    // Title validation
+    const isTitleValid = title.trim().length > 0;
+    const shouldShowTitleError = showValidationErrors && !isTitleValid;
+
+    // Date/time validation
+    let isDateTimeValid = true;
+    let dateTimeError = "";
+    let startError = "";
+
+    // Convert to string if needed
+    const startStr = typeof start === "string" ? start : String(start || "");
+    const endStr = typeof end === "string" ? end : String(end || "");
+
+    // Check if start date is provided and valid
+    if (!start || startStr.trim() === "") {
+      isDateTimeValid = false;
+      dateTimeError = "Start date/time is required";
+      startError = "Start date/time is required";
+    } else if (isNaN(new Date(start).getTime())) {
+      isDateTimeValid = false;
+      dateTimeError = "Invalid start date/time";
+      startError = "Invalid start date/time";
+    }
+    // Check if end date is provided and valid
+    else if (!end || endStr.trim() === "") {
+      isDateTimeValid = false;
+      dateTimeError = "End date/time is required";
+    } else if (isNaN(new Date(end).getTime())) {
+      isDateTimeValid = false;
+      dateTimeError = "Invalid end date/time";
+    }
+    // Check if end is after start
+    else {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      if (endDate <= startDate) {
+        isDateTimeValid = false;
+        dateTimeError = "End time must be after start time";
+      }
+    }
+
+    const isValid = isTitleValid && isDateTimeValid;
+
+    return {
+      isValid,
+      errors: {
+        title: shouldShowTitleError ? "Title is required" : "",
+        start: showValidationErrors ? startError : "",
+        dateTime: showValidationErrors ? dateTimeError : "",
+      },
+    };
+  }, [title, start, end, showValidationErrors]);
+
+  // Notify parent about validation changes
+  React.useEffect(() => {
+    const validation = validateForm();
+    onValidationChange?.(validation.isValid);
+  }, [validateForm, onValidationChange]);
+
+  const validation = validateForm();
+
   const handleAddVideoConference = () => {
     const newMeetingLink = generateMeetingLink();
     const updatedDescription = addVideoConferenceToDescription(
@@ -219,18 +346,28 @@ export default function EventFormFields({
   };
 
   const handleStartChange = (newStart: string) => {
-    setStart(newStart);
-    onStartChange?.(newStart);
+    if (onStartChange) {
+      onStartChange(newStart);
+    } else {
+      setStart(newStart);
+    }
   };
 
   const handleEndChange = (newEnd: string) => {
-    setEnd(newEnd);
-    onEndChange?.(newEnd);
+    if (onEndChange) {
+      onEndChange(newEnd);
+    } else {
+      setEnd(newEnd);
+    }
   };
 
-  const handleAllDayChange = (newAllDay: boolean) => {
+  const handleAllDayChange = (
+    newAllDay: boolean,
+    newStart: string,
+    newEnd: string
+  ) => {
     setAllDay(newAllDay);
-    onAllDayChange?.(newAllDay);
+    onAllDayChange?.(newAllDay, newStart, newEnd);
   };
 
   const handleCalendarChange = (newCalendarId: number) => {
@@ -250,15 +387,27 @@ export default function EventFormFields({
 
   return (
     <>
-      <FieldWithLabel label="Title" isExpanded={showMore}>
+      <FieldWithLabel
+        label={
+          <>
+            Title <span style={{ color: "red" }}>*</span>
+          </>
+        }
+        isExpanded={showMore}
+      >
         <TextField
           fullWidth
           label={!showMore ? "Title" : ""}
           placeholder="Add title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+          error={!!validation.errors.title}
+          helperText={validation.errors.title}
           size="small"
           margin="dense"
+          inputRef={titleInputRef}
         />
       </FieldWithLabel>
 
@@ -307,40 +456,46 @@ export default function EventFormFields({
       )}
 
       <FieldWithLabel label="Date & Time" isExpanded={showMore}>
-        <Box display="flex" gap={2}>
-          <Box flexGrow={1}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                Start
-              </Typography>
-            )}
-            <TextField
-              fullWidth
-              label={!showMore ? "Start" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? start.split("T")[0] : start}
-              onChange={(e) => handleStartChange(e.target.value)}
-              size="small"
-              margin="dense"
-              InputLabelProps={{ shrink: true }}
-            />
-          </Box>
-          <Box flexGrow={1}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                End
-              </Typography>
-            )}
-            <TextField
-              fullWidth
-              label={!showMore ? "End" : ""}
-              type={allday ? "date" : "datetime-local"}
-              value={allday ? end.split("T")[0] : end}
-              onChange={(e) => handleEndChange(e.target.value)}
-              size="small"
-              margin="dense"
-              InputLabelProps={{ shrink: true }}
-            />
+        <Box display="flex" gap={2} flexDirection="column">
+          <Box display="flex" gap={2}>
+            <Box flexGrow={1}>
+              {showMore && (
+                <Typography variant="caption" display="block" mb={0.5}>
+                  Start
+                </Typography>
+              )}
+              <TextField
+                fullWidth
+                label={!showMore ? "Start" : ""}
+                type={allday ? "date" : "datetime-local"}
+                value={allday ? start.split("T")[0] : start}
+                onChange={(e) => handleStartChange(e.target.value)}
+                error={!!validation.errors.start}
+                helperText={validation.errors.start}
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+            <Box flexGrow={1}>
+              {showMore && (
+                <Typography variant="caption" display="block" mb={0.5}>
+                  End
+                </Typography>
+              )}
+              <TextField
+                fullWidth
+                label={!showMore ? "End" : ""}
+                type={allday ? "date" : "datetime-local"}
+                value={allday ? end.split("T")[0] : end}
+                onChange={(e) => handleEndChange(e.target.value)}
+                error={!!validation.errors.dateTime}
+                helperText={validation.errors.dateTime}
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
           </Box>
         </Box>
       </FieldWithLabel>
@@ -353,32 +508,96 @@ export default function EventFormFields({
                 checked={allday}
                 onChange={() => {
                   const newAllDay = !allday;
+                  let newStart = start;
+                  let newEnd = end;
 
                   if (newAllDay) {
-                    // No allday => allday: existing logic
-                    const endDate = new Date(end);
-                    const startDate = new Date(start);
-                    if (endDate.getDate() === startDate.getDate()) {
-                      endDate.setDate(startDate.getDate() + 1);
-                      setEnd(formatLocalDateTime(endDate));
+                    // OFF => ON: Save original time before converting to all-day
+                    if (start.includes("T")) {
+                      originalTimeRef.current = { start, end };
+                    }
+
+                    // Convert to date-only format only if both dates are valid
+                    if (start && end) {
+                      const startDate = start.includes("T")
+                        ? new Date(start)
+                        : new Date(start + "T00:00:00");
+                      const endDate = end.includes("T")
+                        ? new Date(end)
+                        : new Date(end + "T00:00:00");
+
+                      // Check if dates are valid before proceeding
+                      if (
+                        !isNaN(startDate.getTime()) &&
+                        !isNaN(endDate.getTime())
+                      ) {
+                        // If same day, extend end to next day
+                        if (endDate.getDate() === startDate.getDate()) {
+                          endDate.setDate(startDate.getDate() + 1);
+                        }
+
+                        const formattedEnd = formatLocalDateTime(endDate);
+                        if (formattedEnd) {
+                          newEnd = formattedEnd;
+                        }
+                      }
                     }
                   } else {
-                    // Allday => no allday: set end date = start date with rounded time
-                    const startDate = new Date(start);
-                    const currentTime = getRoundedCurrentTime();
+                    // ON => OFF: Restore original time if available
+                    if (originalTimeRef.current) {
+                      // Extract hours/minutes from original time strings
+                      const originalStartMatch =
+                        originalTimeRef.current.start.match(/T(\d{2}):(\d{2})/);
+                      const originalEndMatch =
+                        originalTimeRef.current.end.match(/T(\d{2}):(\d{2})/);
 
-                    // Set start time
-                    startDate.setHours(currentTime.getHours());
-                    startDate.setMinutes(currentTime.getMinutes());
-                    setStart(formatLocalDateTime(startDate));
+                      if (originalStartMatch && originalEndMatch) {
+                        // Parse current date (YYYY-MM-DD)
+                        const currentDate = start.split("T")[0];
 
-                    // Set end date = start date, with time 30 minutes after start
-                    const endDate = new Date(startDate);
-                    endDate.setMinutes(endDate.getMinutes() + 30);
-                    setEnd(formatLocalDateTime(endDate));
+                        // Reconstruct datetime with original time
+                        newStart = `${currentDate}T${originalStartMatch[1]}:${originalStartMatch[2]}`;
+                        newEnd = `${currentDate}T${originalEndMatch[1]}:${originalEndMatch[2]}`;
+                      }
+
+                      // Clear stored time after use
+                      originalTimeRef.current = null;
+                    } else if (start) {
+                      // No original time, use rounded current time
+                      const startDate = start.includes("T")
+                        ? new Date(start)
+                        : new Date(start + "T00:00:00");
+
+                      // Check if start date is valid
+                      if (!isNaN(startDate.getTime())) {
+                        const currentTime = getRoundedCurrentTime();
+
+                        startDate.setHours(currentTime.getHours());
+                        startDate.setMinutes(currentTime.getMinutes());
+                        const formattedStart = formatLocalDateTime(startDate);
+                        if (formattedStart) {
+                          newStart = formattedStart;
+                        }
+
+                        const endDate = new Date(startDate);
+                        endDate.setMinutes(endDate.getMinutes() + 30);
+                        const formattedEnd = formatLocalDateTime(endDate);
+                        if (formattedEnd) {
+                          newEnd = formattedEnd;
+                        }
+                      }
+                    }
                   }
 
-                  handleAllDayChange(newAllDay);
+                  // Only update local state if no callback (for backwards compatibility)
+                  if (!onAllDayChange) {
+                    setStart(newStart);
+                    setEnd(newEnd);
+                    setAllDay(newAllDay);
+                  } else {
+                    // Let callback handle all state updates to avoid duplicate renders
+                    handleAllDayChange(newAllDay, newStart, newEnd);
+                  }
                 }}
               />
             }
@@ -598,7 +817,26 @@ export default function EventFormFields({
   );
 }
 
-export function formatLocalDateTime(date: Date): string {
+export function formatLocalDateTime(date: Date, timeZone?: string): string {
+  // Guard against invalid or undefined dates
+  if (!date || isNaN(date.getTime())) {
+    return "";
+  }
+
+  if (timeZone) {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone,
+    });
+    const formatted = formatter.format(date);
+    return formatted.replace(", ", "T");
+  }
+
   const pad = (n: number) => n.toString().padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
