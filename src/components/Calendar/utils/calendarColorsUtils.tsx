@@ -37,7 +37,12 @@ export function getAccessiblePair(baseColor: string, theme: Theme): string {
 
   // Check if contrast meets 4.5
   const contrast = getContrastRatio(baseColor, adjusted);
+  console.log(isLight, contrast);
   if (contrast >= 4.5) return adjusted;
+
+  if (isLight) {
+    return "#ffffffff";
+  }
 
   return theme.palette.getContrastText(baseColor);
 }
