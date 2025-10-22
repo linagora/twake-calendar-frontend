@@ -346,13 +346,19 @@ export default function EventFormFields({
   };
 
   const handleStartChange = (newStart: string) => {
-    setStart(newStart);
-    onStartChange?.(newStart);
+    if (onStartChange) {
+      onStartChange(newStart);
+    } else {
+      setStart(newStart);
+    }
   };
 
   const handleEndChange = (newEnd: string) => {
-    setEnd(newEnd);
-    onEndChange?.(newEnd);
+    if (onEndChange) {
+      onEndChange(newEnd);
+    } else {
+      setEnd(newEnd);
+    }
   };
 
   const handleAllDayChange = (

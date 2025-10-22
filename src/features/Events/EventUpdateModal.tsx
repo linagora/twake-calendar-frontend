@@ -308,9 +308,9 @@ function EventUpdateModal({
 
   const handleClose = () => {
     closeModal();
+    setShowValidationErrors(false);
     resetAllStateToDefault();
     setFreshEvent(null);
-    setShowValidationErrors(false);
     initializedKeyRef.current = null;
   };
 
@@ -332,6 +332,9 @@ function EventUpdateModal({
       console.error("Target calendar not found");
       return;
     }
+
+    // Reset validation state when validation passes
+    setShowValidationErrors(false);
 
     // Handle recurrence instances
     const [baseUID, recurrenceId] = event.uid.split("/");

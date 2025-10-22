@@ -175,6 +175,7 @@ function EventPopover({
 
     // Update previous open state
     prevOpenRef.current = open;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, event?.uid, calendarTimezone]);
 
   // Separately sync timezone when calendarTimezone changes while modal is open for new events
@@ -183,6 +184,7 @@ function EventPopover({
       const resolvedTimezone = resolveTimezone(calendarTimezone);
       setTimezone(resolvedTimezone);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calendarTimezone, open, event?.uid]);
 
   // Set start/end times when modal opens for new event creation
@@ -247,7 +249,7 @@ function EventPopover({
     shouldSyncFromRangeRef.current = false;
   }, [selectedRange, open, event]);
 
-  // Initialize state when event prop changes (duplicate event)
+  // Initialize state when event prop changes (duplicate event or tempEvent with attendees)
   useEffect(() => {
     if (event && event.uid) {
       // Editing existing event - populate fields with event data
@@ -328,12 +330,20 @@ function EventPopover({
           setDescription(event.description);
         }
       }
+    } else if (event && event.attendee && event.attendee.length > 0) {
+      // Handle tempEvent case (no uid but has attendees from temp calendar search)
+      setAttendees(
+        event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+      );
     }
   }, [event, organizer?.cal_address, calendarTimezone]);
 
   // Reset state when creating new event (event is empty object or undefined)
   useEffect(() => {
-    if ((!event || !event.uid) && isInitializedRef.current) {
+    const isCreatingNew = !event || !event.uid;
+    const wasInitialized = isInitializedRef.current;
+
+    if (isCreatingNew && wasInitialized) {
       // Creating new event - reset all fields to default
       // Note: start and end are handled by the selectedRange useEffect
       // Note: timezone is handled by separate useEffect above
@@ -353,8 +363,12 @@ function EventPopover({
       setHasVideoConference(false);
       setMeetingLink(null);
     }
-    isInitializedRef.current = true;
-  }, [event]);
+
+    if (!isCreatingNew) {
+      isInitializedRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event?.uid]);
 
   const handleStartChange = useCallback(
     (newStart: string) => {
@@ -362,18 +376,21 @@ function EventPopover({
 
       // Defer visual feedback (non-urgent)
       startTransition(() => {
-        const newRange = {
-          ...selectedRange,
-          start: new Date(newStart),
-          startStr: newStart,
-          allDay: allday,
-        };
-        setSelectedRange(newRange);
-        calendarRef.current?.select(newRange);
+        setSelectedRange((prev: DateSelectArg | null) => {
+          const newRange = {
+            ...prev,
+            start: new Date(newStart),
+            startStr: newStart,
+            allDay: allday,
+          } as DateSelectArg;
+          calendarRef.current?.select(newRange);
+          return newRange;
+        });
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [selectedRange, allday]
+    // calendarRef and setSelectedRange are stable refs/setters from parent
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allday]
   );
 
   const handleEndChange = useCallback(
@@ -382,18 +399,21 @@ function EventPopover({
 
       // Defer visual feedback (non-urgent)
       startTransition(() => {
-        const newRange = {
-          ...selectedRange,
-          end: new Date(newEnd),
-          endStr: newEnd,
-          allDay: allday,
-        };
-        setSelectedRange(newRange);
-        calendarRef.current?.select(newRange);
+        setSelectedRange((prev: DateSelectArg | null) => {
+          const newRange = {
+            ...prev,
+            end: new Date(newEnd),
+            endStr: newEnd,
+            allDay: allday,
+          } as DateSelectArg;
+          calendarRef.current?.select(newRange);
+          return newRange;
+        });
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [selectedRange, allday]
+    // calendarRef and setSelectedRange are stable refs/setters from parent
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allday]
   );
 
   const handleAllDayChange = useCallback(
@@ -405,32 +425,35 @@ function EventPopover({
 
       // Defer visual feedback updates (non-urgent)
       startTransition(() => {
-        const newRange = {
-          ...selectedRange,
-          startStr: newAllDay ? newStart.split("T")[0] : newStart,
-          endStr: newAllDay ? newEnd.split("T")[0] : newEnd,
-          start: new Date(
-            newAllDay ? newStart.split("T")[0] + "T00:00:00" : newStart
-          ),
-          end: new Date(
-            newAllDay ? newEnd.split("T")[0] + "T00:00:00" : newEnd
-          ),
-          allDay: newAllDay,
-        };
-        setSelectedRange(newRange);
-        calendarRef.current?.select(newRange);
+        setSelectedRange((prev: DateSelectArg | null) => {
+          const newRange = {
+            ...prev,
+            startStr: newAllDay ? newStart.split("T")[0] : newStart,
+            endStr: newAllDay ? newEnd.split("T")[0] : newEnd,
+            start: new Date(
+              newAllDay ? newStart.split("T")[0] + "T00:00:00" : newStart
+            ),
+            end: new Date(
+              newAllDay ? newEnd.split("T")[0] + "T00:00:00" : newEnd
+            ),
+            allDay: newAllDay,
+          } as DateSelectArg;
+          calendarRef.current?.select(newRange);
+          return newRange;
+        });
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [selectedRange]
+    // calendarRef and setSelectedRange are stable refs/setters from parent
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const handleClose = () => {
     onClose({}, "backdropClick");
+    setShowValidationErrors(false);
     resetAllStateToDefault();
     setStart("");
     setEnd("");
-    setShowValidationErrors(false);
     shouldSyncFromRangeRef.current = true; // Reset for next time
   };
 
@@ -479,6 +502,9 @@ function EventPopover({
     if (attendees.length > 0) {
       newEvent.attendee = newEvent.attendee.concat(attendees);
     }
+
+    // Reset validation state when validation passes
+    setShowValidationErrors(false);
 
     // Close popup immediately
     onClose({}, "backdropClick");
