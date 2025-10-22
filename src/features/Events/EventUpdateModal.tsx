@@ -84,9 +84,9 @@ function EventUpdateModal({
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
   const userPersonnalCalendars: Calendars[] = useMemo(() => {
-    const allCalendars = Object.values(calendarsList);
+    const allCalendars = Object.values(calendarsList) as Calendars[];
     return allCalendars.filter(
-      (c) => c.id?.split("/")[0] === user.userData?.openpaasId
+      (c: Calendars) => c.id?.split("/")[0] === user.userData?.openpaasId
     );
   }, [calendarsList, user.userData?.openpaasId]);
 
@@ -158,6 +158,8 @@ function EventUpdateModal({
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -188,6 +190,9 @@ function EventUpdateModal({
   // Initialize form state when event data is available
   useEffect(() => {
     if (event && open) {
+      // Reset validation errors when modal opens
+      setShowValidationErrors(false);
+
       // Editing existing event - populate fields with event data
       setTitle(event.title ?? "");
       setDescription(event.description ?? "");
@@ -258,7 +263,8 @@ function EventUpdateModal({
       setAttendees(
         event.attendee
           ? event.attendee.filter(
-              (a) => a.cal_address !== event.organizer?.cal_address
+              (a: userAttendee) =>
+                a.cal_address !== event.organizer?.cal_address
             )
           : []
       );
@@ -302,11 +308,21 @@ function EventUpdateModal({
 
   const handleClose = () => {
     closeModal();
+    setShowValidationErrors(false);
     resetAllStateToDefault();
+    setFreshEvent(null);
     initializedKeyRef.current = null;
   };
 
   const handleSave = async () => {
+    // Show validation errors when Save is clicked
+    setShowValidationErrors(true);
+
+    // Check if form is valid before saving
+    if (!isFormValid) {
+      return;
+    }
+
     if (!event) return;
 
     const organizer = event.organizer;
@@ -316,6 +332,9 @@ function EventUpdateModal({
       console.error("Target calendar not found");
       return;
     }
+
+    // Reset validation state when validation passes
+    setShowValidationErrors(false);
 
     // Handle recurrence instances
     const [baseUID, recurrenceId] = event.uid.split("/");
@@ -507,7 +526,7 @@ function EventUpdateModal({
           })
         )
           .unwrap()
-          .catch((error) => {
+          .catch((error: any) => {
             dispatch(updateEventLocal({ calId, event: oldEvent }));
             showErrorNotification("Failed to update event. Changes reverted.");
           });
@@ -666,12 +685,10 @@ function EventUpdateModal({
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
-        {showMore && (
-          <Button variant="outlined" onClick={handleClose}>
-            Cancel
-          </Button>
-        )}
-        <Button variant="contained" onClick={handleSave} disabled={!title}>
+        <Button variant="outlined" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSave}>
           Save
         </Button>
       </Box>
@@ -726,6 +743,7 @@ function EventUpdateModal({
         setShowDescription={setShowDescription}
         showRepeat={typeOfAction !== "solo" && showRepeat}
         setShowRepeat={setShowRepeat}
+        isOpen={open}
         userPersonnalCalendars={userPersonnalCalendars}
         timezoneList={timezoneList}
         onCalendarChange={(newCalendarId) => {
@@ -734,6 +752,8 @@ function EventUpdateModal({
             setNewCalId(selectedCalendar.id);
           }
         }}
+        onValidationChange={setIsFormValid}
+        showValidationErrors={showValidationErrors}
       />
     </ResponsiveDialog>
   );
