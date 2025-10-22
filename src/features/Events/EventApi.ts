@@ -14,24 +14,24 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const eventData = await response.text();
 
   const eventical = ICAL.parse(eventData);
-
+  const vevents = (eventical[2] || []).filter(
+    ([name]: [string]) => name.toLowerCase() === "vevent"
+  );
   let targetVevent;
   if (isMaster) {
     // Find master VEVENT (the one without recurrence-id)
-    const vevents = eventical[2].filter(
-      ([name]: string[]) => name === "vevent"
-    );
+
     targetVevent = vevents.find(
       ([, props]: [string, any[]]) =>
         !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
     );
     if (!targetVevent) {
       // Fallback to first VEVENT if no master found
-      targetVevent = eventical[2][1];
+      targetVevent = vevents[0];
     }
   } else {
     // For non-master, use first VEVENT as before
-    targetVevent = eventical[2][1];
+    targetVevent = vevents[0];
   }
 
   const eventjson = parseCalendarEvent(

@@ -1,15 +1,23 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
 import { getOpenPaasUser } from "./userAPI";
+import { formatReduxError } from "../../utils/errorUtils";
 
-export const getOpenPaasUserDataAsync = createAsyncThunk<any>(
-  "user/getOpenPaasUserData",
-  async () => {
+export const getOpenPaasUserDataAsync = createAsyncThunk<
+  Record<string, string>,
+  void,
+  { rejectValue: { message: string; status?: number } }
+>("user/getOpenPaasUserData", async (_, { rejectWithValue }) => {
+  try {
     const user = (await getOpenPaasUser()) as Record<string, string>;
-
     return user;
+  } catch (err: any) {
+    return rejectWithValue({
+      message: formatReduxError(err),
+      status: err.response?.status,
+    });
   }
-);
+});
 
 export const userSlice = createSlice({
   name: "user",
@@ -18,6 +26,7 @@ export const userSlice = createSlice({
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
     loading: true,
+    error: null as unknown as string | null,
   },
   reducers: {
     setUserData: (state, action) => {
@@ -31,6 +40,9 @@ export const userSlice = createSlice({
     },
     setTokens: (state, action) => {
       state.tokens = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -54,13 +66,15 @@ export const userSlice = createSlice({
       .addCase(getOpenPaasUserDataAsync.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getOpenPaasUserDataAsync.rejected, (state) => {
+      .addCase(getOpenPaasUserDataAsync.rejected, (state, action) => {
         state.loading = false;
+        state.error =
+          action.payload?.message || "Failed to fetch user information";
       });
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens } = userSlice.actions;
+export const { setUserData, setTokens, clearError } = userSlice.actions;
 
 export default userSlice.reducer;

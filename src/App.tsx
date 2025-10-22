@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { HistoryRouter as Router } from "redux-first-history/rr6";
 import { CallbackResume } from "./features/User/LoginCallback";
@@ -8,7 +8,17 @@ import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
 import { Error } from "./components/Error/Error";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import { push } from "redux-first-history";
+import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 function App() {
+  const error = useAppSelector((state) => state.user.error);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (error) {
+      dispatch(push("/error"));
+    }
+  });
   return (
     <Suspense fallback={<Loading />}>
       <Router history={history}>
@@ -19,6 +29,7 @@ function App() {
           <Route path="/error" element={<Error />} />
         </Routes>
       </Router>
+      <ErrorSnackbar error={error} />
     </Suspense>
   );
 }
