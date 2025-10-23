@@ -126,6 +126,50 @@ export const deleteEventInstance = async (
   return putEvent(seriesEvent, calOwnerEmail);
 };
 
+export const updateSeriesPartstat = async (
+  event: CalendarEvent,
+  attendeeEmail: string,
+  partstat: string
+) => {
+  const vevents = await getAllRecurrentEvent(event);
+
+  // Update PARTSTAT in ALL VEVENTs (master + exceptions)
+  const updatedVevents = vevents.map((vevent: any[]) => {
+    const properties = vevent[1];
+    const updatedProperties = properties.map((prop: any[]) => {
+      // Find ATTENDEE properties
+      if (prop[0] === "attendee") {
+        const calAddress = prop[3];
+        // Check if this is the target attendee
+        if (calAddress.toLowerCase().includes(attendeeEmail.toLowerCase())) {
+          // Update PARTSTAT parameter
+          const params = { ...prop[1], partstat: partstat };
+          return [prop[0], params, prop[2], prop[3]];
+        }
+      }
+      return prop;
+    });
+    return [vevent[0], updatedProperties, vevent[2]];
+  });
+
+  const timezoneData = TIMEZONES.zones[event.timezone];
+  const vtimezone = makeTimezone(timezoneData, event);
+
+  const newJCal = [
+    "vcalendar",
+    [],
+    [...updatedVevents, vtimezone.component.jCal],
+  ];
+
+  return api(`dav${event.URL}`, {
+    method: "PUT",
+    body: JSON.stringify(newJCal),
+    headers: {
+      "content-type": "text/calendar; charset=utf-8",
+    },
+  });
+};
+
 export const updateSeries = async (
   event: CalendarEvent,
   calOwnerEmail?: string,

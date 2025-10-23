@@ -472,18 +472,10 @@ describe("Recurrence Event Behavior Tests", () => {
       expect(updatedEvent.attendee[0].partstat).toBe("ACCEPTED");
     });
 
-    it("calls updateSeriesAsync when accepting all instances", async () => {
-      const getEventSpy = jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-        ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
-          .events["recurring-base/20250315T100000"],
-        uid: "recurring-base",
-      } as any);
-
+    it("calls updateSeriesPartstat when accepting all instances", async () => {
       const spy = jest
-        .spyOn(eventThunks, "updateSeriesAsync")
-        .mockImplementation((payload) => {
-          return () => Promise.resolve() as any;
-        });
+        .spyOn(EventApi, "updateSeriesPartstat")
+        .mockResolvedValue({} as any);
 
       renderWithProviders(
         <EventPreviewModal
@@ -507,12 +499,13 @@ describe("Recurrence Event Behavior Tests", () => {
       fireEvent.click(screen.getByRole("button", { name: /Ok/i }));
 
       await waitFor(() => {
-        expect(getEventSpy).toHaveBeenCalled();
         expect(spy).toHaveBeenCalled();
       });
 
-      const updatedEvent = spy.mock.calls[0][0].event;
-      expect(updatedEvent.attendee[0].partstat).toBe("ACCEPTED");
+      const callArgs = spy.mock.calls[0];
+      expect(callArgs[0].uid).toBe("recurring-base/20250315T100000");
+      expect(callArgs[1]).toBe("test@test.com");
+      expect(callArgs[2]).toBe("ACCEPTED");
     });
   });
 
