@@ -77,12 +77,14 @@ export function InfoRow({
         <Typography
           variant="body2"
           color={error ? "error" : "textPrimary"}
-          style={{
+          sx={{
             wordBreak: "break-word",
             whiteSpace: "pre-line",
             maxHeight: "33vh",
             overflowY: "auto",
             width: "100%",
+            fontSize: "16px",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           {data ? (

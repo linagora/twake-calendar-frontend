@@ -78,6 +78,8 @@ interface ResponsiveDialogProps
   dividers?: boolean;
   /** Whether to show header action icons (expand/close) in normal mode (default: true) */
   showHeaderActions?: boolean;
+  /** Whether to add border-top to DialogActions */
+  actionsBorderTop?: boolean;
 }
 
 function ResponsiveDialog({
@@ -99,6 +101,7 @@ function ResponsiveDialog({
   dialogTitleProps,
   dividers = false,
   showHeaderActions = true,
+  actionsBorderTop = false,
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
@@ -199,7 +202,20 @@ function ResponsiveDialog({
           <Stack spacing={currentSpacing}>{children}</Stack>
         )}
       </DialogContent>
-      {actions && <DialogActions>{actions}</DialogActions>}
+      {actions && (
+        <DialogActions
+          sx={{
+            borderTop: actionsBorderTop
+              ? (theme) => `1px solid ${theme.palette.divider}`
+              : undefined,
+            justifyContent: "center",
+            paddingTop: "18px",
+            paddingBottom: "18px",
+          }}
+        >
+          {actions}
+        </DialogActions>
+      )}
     </Dialog>
   );
 }
