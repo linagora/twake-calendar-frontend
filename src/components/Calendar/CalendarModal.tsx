@@ -12,6 +12,7 @@ import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
+import { defaultColors } from "./utils/calendarColorsUtils";
 
 function CalendarPopover({
   open,
@@ -34,7 +35,7 @@ function CalendarPopover({
   // existing calendar params
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("");
+  const [color, setColor] = useState<Record<string, string>>(defaultColors[0]);
   const [visibility, setVisibility] = useState<"private" | "public">("public");
 
   // import tab state
@@ -45,7 +46,7 @@ function CalendarPopover({
   // new calendar params (for import new)
   const [newCalName, setNewCalName] = useState("");
   const [newCalDescription, setNewCalDescription] = useState("");
-  const [newCalColor, setNewCalColor] = useState("");
+  const [newCalColor, setNewCalColor] = useState(defaultColors[0]);
   const [newCalVisibility, setNewCalVisibility] = useState<
     "public" | "private"
   >("public");
@@ -55,13 +56,13 @@ function CalendarPopover({
     if (calendar) {
       setName(calendar.name);
       setDescription(calendar.description ?? "");
-      setColor(calendar.color ?? "");
+      setColor(calendar.color ?? defaultColors[0]);
       setVisibility(calendar.visibility ?? "public");
       setImportTarget(calendar.id ?? "new");
     } else {
       setName("");
       setDescription("");
-      setColor("");
+      setColor(defaultColors[0]);
       setVisibility("public");
       setImportTarget("new");
     }
@@ -90,7 +91,7 @@ function CalendarPopover({
     calId: string,
     name: string,
     desc: string,
-    color: string,
+    color: Record<string, string>,
     visibility: string
   ) => {
     await dispatch(
@@ -160,7 +161,7 @@ function CalendarPopover({
     onClose(e, reason);
     setName("");
     setDescription("");
-    setColor("");
+    setColor(defaultColors[0]);
     setTab("settings");
     setVisibility("public");
     setImportTarget("new");
@@ -168,7 +169,7 @@ function CalendarPopover({
 
     setNewCalName("");
     setNewCalDescription("");
-    setNewCalColor("");
+    setNewCalColor(defaultColors[0]);
     setNewCalVisibility("public");
   };
 

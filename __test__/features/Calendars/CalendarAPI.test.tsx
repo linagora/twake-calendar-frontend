@@ -82,7 +82,7 @@ describe("Calendar API", () => {
   it("patch Calendar", async () => {
     const calId = "calId";
     const calLink = "/calendars/calId.json";
-    const color = "calId";
+    const color = { light: "calIdLight", dark: "calIdDark" };
     const name = "new cal";
     const desc = "desc";
 
@@ -96,7 +96,7 @@ describe("Calendar API", () => {
       body: JSON.stringify({
         "dav:name": "new cal",
         "caldav:description": "desc",
-        "apple:color": "calId",
+        "apple:color": "calIdLight",
       }),
     });
   });

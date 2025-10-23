@@ -1,3 +1,4 @@
+import { useTheme } from "@mui/material/styles";
 import { useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -6,6 +7,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
+import { getAccessiblePair } from "./utils/calendarColorsUtils";
 
 const requestControllers = new Map<string, AbortController>();
 
@@ -26,6 +28,7 @@ export function TempCalendarsInput({
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
   const calendars = useAppSelector((state) => state.calendars.list);
+  const theme = useTheme();
 
   const prevUsersRef = useRef<User[]>([]);
   const userColors = new Map<string, string>();
@@ -59,8 +62,12 @@ export function TempCalendarsInput({
           const existingColors = new Set(userColors.values());
           userColors.set(user.email, generateUserColor(existingColors));
         }
+        const lightColor = userColors.get(user.email)!;
 
-        user.color = userColors.get(user.email)!;
+        user.color = {
+          light: lightColor,
+          dark: getAccessiblePair(lightColor, theme),
+        };
 
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
