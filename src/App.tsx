@@ -32,7 +32,7 @@ function App() {
             <Route path="/error" element={<Error />} />
           </Routes>
         </Router>
-        <ErrorSnackbar error={error} />
+        <ErrorSnackbar error={error} type="user" />
       </Suspense>
     </CustomThemeProvider>
   );

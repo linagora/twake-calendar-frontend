@@ -68,7 +68,7 @@ export function Error() {
               color="error"
               startIcon={<ReplayIcon />}
               onClick={() => {
-                dispatch(push("/"));
+                window.location.reload();
               }}
               sx={{
                 textTransform: "none",

@@ -2,12 +2,19 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { useAppDispatch } from "../../app/hooks";
-import { clearError } from "../../features/Calendars/CalendarSlice";
+import { clearError as calendarClearError } from "../../features/Calendars/CalendarSlice";
+import { clearError as userClearError } from "../../features/User/userSlice";
 
-export function ErrorSnackbar({ error }: { error: string | null }) {
+export function ErrorSnackbar({
+  error,
+  type,
+}: {
+  error: string | null;
+  type: "user" | "calendar";
+}) {
   const dispatch = useAppDispatch();
   const handleCloseSnackbar = () => {
-    dispatch(clearError());
+    dispatch(type === "calendar" ? calendarClearError() : userClearError());
   };
 
   return (

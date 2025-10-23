@@ -64,7 +64,7 @@ export default function CalendarLayout() {
         onDateChange={handleDateChange}
         onViewChange={handleViewChange}
       />
-      <ErrorSnackbar error={error} />
+      <ErrorSnackbar error={error} type="calendar" />
     </div>
   );
 }
