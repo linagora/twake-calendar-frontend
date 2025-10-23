@@ -37,11 +37,6 @@ describe("Calendar - Timezone Integration", () => {
       timeZone: "America/New_York",
       pending: false,
     },
-    events: {
-      selectedEvent: null,
-      isEditMode: false,
-      editModeDialogOpen: false,
-    },
   };
 
   beforeEach(() => {
