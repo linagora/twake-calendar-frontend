@@ -10,13 +10,14 @@ import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
 import { useTheme } from "@mui/material/styles";
+import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 
 export interface User {
   email: string;
   displayName: string;
   avatarUrl: string;
   openpaasId: string;
-  color?: string;
+  color?: Record<string, string>;
 }
 
 export function PeopleSearch({
@@ -150,8 +151,8 @@ export function PeopleSearch({
           const label = isString ? option : option.displayName || option.email;
           const chipColor = isString
             ? theme.palette.grey[300]
-            : (option.color ?? theme.palette.grey[300]);
-          const textColor = theme.palette.getContrastText(chipColor);
+            : (option.color?.light ?? theme.palette.grey[300]);
+          const textColor = getAccessiblePair(chipColor, theme);
 
           return (
             <Chip

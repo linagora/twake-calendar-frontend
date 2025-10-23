@@ -48,6 +48,7 @@ import { userAttendee } from "../User/userDataTypes";
 import { getEvent } from "./EventApi";
 import { formatLocalDateTime } from "../../components/Event/EventFormFields";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { light } from "@mui/material/styles/createPalette";
 
 export default function EventDisplayModal({
   eventId,
@@ -224,7 +225,8 @@ export default function EventDisplayModal({
             <Typography variant="body2">
               <CircleIcon
                 style={{
-                  color: userPersonnalCalendars[index].color ?? "#3788D8",
+                  color:
+                    userPersonnalCalendars[index].color?.light ?? "#3788D8",
                   width: 12,
                   height: 12,
                 }}
@@ -238,7 +240,7 @@ export default function EventDisplayModal({
             <Typography variant="body2">
               <CircleIcon
                 style={{
-                  color: calendars[index].color ?? "#3788D8",
+                  color: calendars[index].color?.light ?? "#3788D8",
                   width: 12,
                   height: 12,
                 }}

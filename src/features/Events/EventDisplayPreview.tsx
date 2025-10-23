@@ -577,7 +577,7 @@ export default function EventPreviewModal({
           <CalendarTodayIcon style={{ fontSize: 16 }} />
           <CircleIcon
             style={{
-              color: calendar.color ?? "#3788D8",
+              color: calendar.color?.light ?? "#3788D8",
               width: 12,
               height: 12,
             }}

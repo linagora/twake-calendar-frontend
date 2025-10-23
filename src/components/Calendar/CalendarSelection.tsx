@@ -218,8 +218,8 @@ function CalendarSelector({
         <label>
           <Checkbox
             sx={{
-              color: calendars[id].color,
-              "&.Mui-checked": { color: calendars[id].color },
+              color: calendars[id].color?.light,
+              "&.Mui-checked": { color: calendars[id].color?.light },
             }}
             size="small"
             checked={selectedCalendars.includes(id)}
@@ -232,7 +232,14 @@ function CalendarSelector({
         </IconButton>
       </div>
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={() => setOpen()}>Modify</MenuItem>
+        <MenuItem
+          onClick={() => {
+            setOpen();
+            handleClose();
+          }}
+        >
+          Modify
+        </MenuItem>
         {!isDefault && <Divider />}
         {!isDefault && (
           <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>

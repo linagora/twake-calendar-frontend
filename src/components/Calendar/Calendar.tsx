@@ -40,6 +40,8 @@ import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
 import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
+import { useTheme } from "@mui/material/styles";
+import { updateDarkColor } from "./utils/calendarColorsUtils";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -58,7 +60,7 @@ export default function CalendarApp({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const dispatch = useAppDispatch();
-
+  const theme = useTheme();
   useEffect(() => {
     if (!tokens || !userId) {
       dispatch(push("/"));
@@ -107,6 +109,15 @@ export default function CalendarApp({
       initialLoadRef.current = false;
     }
   }, [calendars, userId]);
+
+  useEffect(() => {
+    updateDarkColor(calendars, theme, dispatch);
+  }, [
+    theme,
+    Object.values(calendars)
+      .map((c) => c.color?.dark)
+      .join(","),
+  ]);
 
   useEffect(() => {
     const validCalendarIds = new Set(Object.keys(calendars));

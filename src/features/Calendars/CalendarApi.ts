@@ -34,7 +34,7 @@ export async function getCalendar(
 export async function postCalendar(
   userId: string,
   calId: string,
-  color: string,
+  color: Record<string, string>,
   name: string,
   desc: string
 ) {
@@ -67,7 +67,10 @@ export async function addSharedCalendar(
       "calendarserver:source": {
         acl: cal.cal.acl,
         calendarHomeId: cal.cal.id,
-        color: cal.cal["apple:color"],
+        color: {
+          light: cal.cal["apple:color"],
+          dark: cal.cal["X-TWAKE-Dark-theme-color"],
+        },
         description: cal.cal["caldav:description"],
         href: cal.cal._links.self.href,
         id: cal.cal.id,
@@ -81,7 +84,7 @@ export async function addSharedCalendar(
 
 export async function proppatchCalendar(
   calLink: string,
-  patch: { name: string; desc: string; color: string }
+  patch: { name: string; desc: string; color: Record<string, string> }
 ) {
   const body: Record<string, string> = {};
   if (patch.name) {
@@ -90,8 +93,8 @@ export async function proppatchCalendar(
   if (patch.desc) {
     body["caldav:description"] = patch.desc;
   }
-  if (patch.color) {
-    body["apple:color"] = patch.color;
+  if (patch.color.light) {
+    body["apple:color"] = patch.color.light;
   }
   const response = await api(`dav${calLink}`, {
     method: "PROPPATCH",

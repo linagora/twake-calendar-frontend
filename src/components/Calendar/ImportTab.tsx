@@ -30,7 +30,7 @@ export function ImportTab({
     setName: Function;
     description: string;
     setDescription: Function;
-    color: string;
+    color: Record<string, string>;
     setColor: Function;
     visibility: "public" | "private";
     setVisibility: Function;

@@ -6,7 +6,7 @@ export interface Calendars {
   name: string;
   delegated?: boolean;
   prodid?: string;
-  color?: string;
+  color?: Record<string, string>;
   ownerEmails?: string[];
   owner: string;
   description?: string;

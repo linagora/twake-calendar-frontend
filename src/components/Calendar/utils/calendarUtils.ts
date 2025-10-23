@@ -62,9 +62,9 @@ export const eventToFullCalendarFormat = (
     .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
     .map((e) => {
       if (e.calId.split("/")[0] === userId) {
-        return { ...e, editable: true };
+        return { ...e, colors: e.color, color: e.color?.light, editable: true };
       }
-      return { ...e, editable: false };
+      return { ...e, colors: e.color, color: e.color?.light, editable: false };
     });
 };
 
