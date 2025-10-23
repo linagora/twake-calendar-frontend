@@ -31,8 +31,16 @@ import { getCalendarVisibility } from "../../components/Calendar/utils/calendarU
 import { importFile } from "../../utils/apiUtils";
 import { formatReduxError } from "../../utils/errorUtils";
 
+// Define error type for rejected actions
+interface RejectedError {
+  message: string;
+  status?: number;
+}
+
 export const getCalendarsListAsync = createAsyncThunk<
-  Record<string, Calendars> // Return type
+  Record<string, Calendars>, // Return type
+  void, // Arg type
+  { rejectValue: RejectedError } // ThunkAPI config
 >("calendars/getCalendars", async (_, { rejectWithValue }) => {
   try {
     const importedCalendars: Record<string, Calendars> = {};
@@ -93,7 +101,8 @@ export const getCalendarsListAsync = createAsyncThunk<
 
 export const getTempCalendarsListAsync = createAsyncThunk<
   Record<string, Calendars>,
-  User
+  User,
+  { rejectValue: RejectedError }
 >("calendars/getTempCalendars", async (tempUser, { rejectWithValue }) => {
   try {
     const importedCalendars: Record<string, Calendars> = {};
@@ -144,8 +153,9 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 });
 
 export const getCalendarDetailAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[]; calType?: string }, // Return type
-  { calId: string; match: { start: string; end: string }; calType?: string } // Arg type
+  { calId: string; events: CalendarEvent[]; calType?: string },
+  { calId: string; match: { start: string; end: string }; calType?: string },
+  { rejectValue: RejectedError }
 >(
   "calendars/getCalendarDetails",
   async ({ calId, match, calType }, { rejectWithValue }) => {
@@ -154,7 +164,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
       const color = calendar["apple:color"];
       const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
         (eventdata: any) => {
-          const vevents = eventdata.data[2] as any[][]; // array of ['vevent', RawEntry[], []]
+          const vevents = eventdata.data[2] as any[][];
           const valarm = eventdata.data[2][0][2][0];
           const eventURL = eventdata._links.self.href;
           return vevents.map((vevent: any[]) => {
@@ -180,8 +190,9 @@ export const getCalendarDetailAsync = createAsyncThunk<
 );
 
 export const putEventAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[]; calType?: "temp" }, // Return type
-  { cal: Calendars; newEvent: CalendarEvent; calType?: "temp" } // Arg type
+  { calId: string; events: CalendarEvent[]; calType?: "temp" },
+  { cal: Calendars; newEvent: CalendarEvent; calType?: "temp" },
+  { rejectValue: RejectedError }
 >(
   "calendars/putEvent",
   async ({ cal, newEvent, calType }, { rejectWithValue }) => {
@@ -192,7 +203,6 @@ export const putEventAsync = createAsyncThunk<
       );
       const eventDate = new Date(newEvent.start);
 
-      // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
       const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
 
       const calEvents = (await getCalendar(cal.id, {
@@ -231,8 +241,9 @@ export const putEventAsync = createAsyncThunk<
 );
 
 export const getEventAsync = createAsyncThunk<
-  { calId: string; event: CalendarEvent }, // Return type
-  CalendarEvent // Arg type
+  { calId: string; event: CalendarEvent },
+  CalendarEvent,
+  { rejectValue: RejectedError }
 >("calendars/getEvent", async (event, { rejectWithValue }) => {
   try {
     const response: CalendarEvent = await getEvent(event);
@@ -247,17 +258,19 @@ export const getEventAsync = createAsyncThunk<
     });
   }
 });
+
 export const patchCalendarAsync = createAsyncThunk<
   {
     calId: string;
     calLink: string;
     patch: { name: string; desc: string; color: Record<string, string> };
-  }, // Return type
+  },
   {
     calId: string;
     calLink: string;
     patch: { name: string; desc: string; color: Record<string, string> };
-  } // Arg type
+  },
+  { rejectValue: RejectedError }
 >(
   "calendars/patchCalendar",
   async ({ calId, calLink, patch }, { rejectWithValue }) => {
@@ -284,7 +297,8 @@ export const removeCalendarAsync = createAsyncThunk<
   {
     calId: string;
     calLink: string;
-  }
+  },
+  { rejectValue: RejectedError }
 >(
   "calendars/removeCalendar",
   async ({ calId, calLink }, { rejectWithValue }) => {
@@ -304,15 +318,15 @@ export const removeCalendarAsync = createAsyncThunk<
 );
 
 export const moveEventAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[] }, // Return type
-  { cal: Calendars; newEvent: CalendarEvent; newURL: string } // Arg type
+  { calId: string; events: CalendarEvent[] },
+  { cal: Calendars; newEvent: CalendarEvent; newURL: string },
+  { rejectValue: RejectedError }
 >(
   "calendars/moveEvent",
   async ({ cal, newEvent, newURL }, { rejectWithValue }) => {
     try {
       await moveEvent(newEvent, newURL);
 
-      // Calculate week range based on Monday as first day (consistent with FullCalendar firstDay={1})
       const eventDate = new Date(newEvent.start);
       const { start: weekStart, end: weekEnd } = computeWeekRange(eventDate);
 
@@ -353,12 +367,13 @@ export const patchACLCalendarAsync = createAsyncThunk<
     calId: string;
     calLink: string;
     request: string;
-  }, // Return type
+  },
   {
     calId: string;
     calLink: string;
     request: string;
-  } // Arg type
+  },
+  { rejectValue: RejectedError }
 >(
   "calendars/requestACLCalendar",
   async ({ calId, calLink, request }, { rejectWithValue }) => {
@@ -379,8 +394,9 @@ export const patchACLCalendarAsync = createAsyncThunk<
 );
 
 export const deleteEventAsync = createAsyncThunk<
-  { calId: string; eventId: string }, // Return type
-  { calId: string; eventId: string; eventURL: string } // Arg type
+  { calId: string; eventId: string },
+  { calId: string; eventId: string; eventURL: string },
+  { rejectValue: RejectedError }
 >(
   "calendars/delEvent",
   async ({ calId, eventId, eventURL }, { rejectWithValue }) => {
@@ -398,7 +414,8 @@ export const deleteEventAsync = createAsyncThunk<
 
 export const deleteEventInstanceAsync = createAsyncThunk<
   { calId: string; eventId: string },
-  { cal: Calendars; event: CalendarEvent }
+  { cal: Calendars; event: CalendarEvent },
+  { rejectValue: RejectedError }
 >("calendars/delEventInstance", async ({ cal, event }, { rejectWithValue }) => {
   try {
     await deleteEventInstance(event, cal.ownerEmails?.[0]);
@@ -413,7 +430,8 @@ export const deleteEventInstanceAsync = createAsyncThunk<
 
 export const updateEventInstanceAsync = createAsyncThunk<
   { calId: string; event: CalendarEvent },
-  { cal: Calendars; event: CalendarEvent }
+  { cal: Calendars; event: CalendarEvent },
+  { rejectValue: RejectedError }
 >(
   "calendars/updateEventInstance",
   async ({ cal, event }, { rejectWithValue }) => {
@@ -431,7 +449,8 @@ export const updateEventInstanceAsync = createAsyncThunk<
 
 export const updateSeriesAsync = createAsyncThunk<
   void,
-  { cal: Calendars; event: CalendarEvent; removeOverrides?: boolean }
+  { cal: Calendars; event: CalendarEvent; removeOverrides?: boolean },
+  { rejectValue: RejectedError }
 >(
   "calendars/updateSeries",
   async ({ cal, event, removeOverrides = true }, { rejectWithValue }) => {
@@ -455,14 +474,15 @@ export const createCalendarAsync = createAsyncThunk<
     desc: string;
     owner: string;
     ownerEmails: string[];
-  }, // Return type
+  },
   {
     userId: string;
     calId: string;
     color: Record<string, string>;
     name: string;
     desc: string;
-  } // Arg type
+  },
+  { rejectValue: RejectedError }
 >(
   "calendars/createCalendar",
   async ({ userId, calId, color, name, desc }, { rejectWithValue }) => {
@@ -499,8 +519,9 @@ export const addSharedCalendarAsync = createAsyncThunk<
     desc: string;
     owner: string;
     ownerEmails: string[];
-  }, // Return type
-  { userId: string; calId: string; cal: Record<string, any> } // Arg type
+  },
+  { userId: string; calId: string; cal: Record<string, any> },
+  { rejectValue: RejectedError }
 >(
   "calendars/addSharedCalendar",
   async ({ userId, calId, cal }, { rejectWithValue }) => {
@@ -548,7 +569,8 @@ export const importEventFromFileAsync = createAsyncThunk<
   {
     calLink: string;
     file: File;
-  }
+  },
+  { rejectValue: RejectedError }
 >("calendars/importEvent", async ({ calLink, file }, { rejectWithValue }) => {
   try {
     const id = ((await importFile(file)) as Record<string, string>)._id;
@@ -947,75 +969,115 @@ const CalendarSlice = createSlice({
       // Rejected cases
       .addCase(getCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to load calendars";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to load calendars";
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to load temporary calendars";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to load temporary calendars";
       })
       .addCase(getCalendarDetailAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to load calendar details";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to load calendar details";
       })
       .addCase(putEventAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to create event";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to create event";
       })
       .addCase(getEventAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to load event";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to load event";
       })
       .addCase(moveEventAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to move event";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to move event";
       })
       .addCase(deleteEventAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to delete event";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to delete event";
       })
       .addCase(deleteEventInstanceAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to delete event instance";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to delete event instance";
       })
       .addCase(updateEventInstanceAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to update event instance";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to update event instance";
       })
       .addCase(updateSeriesAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to update event series";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to update event series";
       })
       .addCase(patchCalendarAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to update calendar";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to update calendar";
       })
       .addCase(createCalendarAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to create calendar";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to create calendar";
       })
       .addCase(addSharedCalendarAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to add shared calendar";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to add shared calendar";
       })
       .addCase(removeCalendarAsync.rejected, (state, action) => {
         state.pending = false;
-        state.error = action.payload?.message || "Failed to remove calendar";
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to remove calendar";
       })
       .addCase(patchACLCalendarAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to update calendar permissions";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to update calendar permissions";
       })
       .addCase(importEventFromFileAsync.rejected, (state, action) => {
         state.pending = false;
         state.error =
-          action.payload?.message || "Failed to import event from file";
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to import event from file";
       });
   },
 });
