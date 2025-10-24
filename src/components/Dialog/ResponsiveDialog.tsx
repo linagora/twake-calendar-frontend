@@ -80,6 +80,8 @@ interface ResponsiveDialogProps
   showHeaderActions?: boolean;
   /** Whether to add border-top to DialogActions */
   actionsBorderTop?: boolean;
+  /** Justify content alignment for DialogActions */
+  actionsJustifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between';
 }
 
 function ResponsiveDialog({
@@ -102,6 +104,7 @@ function ResponsiveDialog({
   dividers = false,
   showHeaderActions = true,
   actionsBorderTop = false,
+  actionsJustifyContent = 'flex-end',
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
@@ -208,7 +211,7 @@ function ResponsiveDialog({
             borderTop: actionsBorderTop
               ? (theme) => `1px solid ${theme.palette.divider}`
               : undefined,
-            justifyContent: "center",
+            justifyContent: actionsJustifyContent,
             paddingTop: "18px",
             paddingBottom: "18px",
           }}

@@ -135,6 +135,7 @@ export default function EventPreviewModal({
         onClose={() => onClose({}, "backdropClick")}
         showHeaderActions={false}
         actionsBorderTop={true}
+        actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
           event.title && (
