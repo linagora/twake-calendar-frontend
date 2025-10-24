@@ -12,6 +12,8 @@ import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
+import EventPopover from "./EventModal";
+import { DateSelectArg } from "@fullcalendar/core";
 import {
   Box,
   Button,
@@ -75,6 +77,7 @@ export default function EventPreviewModal({
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
   const [hidePreview, setHidePreview] = useState(false);
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
@@ -210,7 +213,15 @@ export default function EventPreviewModal({
                         Email attendees
                       </MenuItem>
                     )}
-                    <EventDuplication event={event} onClose={onClose} />
+                    <EventDuplication
+                      event={event}
+                      onClose={() => setToggleActionMenu(null)}
+                      onOpenDuplicate={() => {
+                        setToggleActionMenu(null); // Đóng option menu
+                        setHidePreview(true); // Ẩn preview modal
+                        setOpenDuplicateModal(true); // Mở duplicate modal
+                      }}
+                    />
                     {user.userData.email === event.organizer?.cal_address && (
                       <MenuItem
                         onClick={async () => {
@@ -676,6 +687,26 @@ export default function EventPreviewModal({
         eventId={eventId}
         calId={calId}
         typeOfAction={typeOfAction}
+      />
+      <EventPopover
+        anchorEl={null}
+        open={openDuplicateModal}
+        selectedRange={
+          {
+            start: new Date(event.start),
+            startStr: event.start,
+            end: new Date(event.end ?? ""),
+            endStr: event.end ?? "",
+            allDay: event.allday ?? false,
+          } as DateSelectArg
+        }
+        setSelectedRange={() => {}}
+        calendarRef={{ current: null }}
+        onClose={() => {
+          setOpenDuplicateModal(false);
+          onClose({}, "backdropClick"); // Đóng cả preview modal
+        }}
+        event={event}
       />
     </>
   );
