@@ -211,10 +211,7 @@ export default function CalendarSearch({
                 calId,
                 cal: {
                   ...cal,
-                  color: {
-                    light: cal.cal["apple:color"],
-                    dark: cal.cal["X-TWAKE-Dark-theme-color"],
-                  },
+                  color: cal.cal["apple:color"],
                 },
               })
             );

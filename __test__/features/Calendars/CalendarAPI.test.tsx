@@ -62,7 +62,7 @@ describe("Calendar API", () => {
   it("postCalendar", async () => {
     const calId = "calId";
     const userId = "userId";
-    const color = "calId";
+    const color = { light: "calId" };
     const name = "new cal";
     const desc = "desc";
 

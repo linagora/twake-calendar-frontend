@@ -48,7 +48,6 @@ import { userAttendee } from "../User/userDataTypes";
 import { getEvent } from "./EventApi";
 import { formatLocalDateTime } from "../../components/Event/EventFormFields";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { light } from "@mui/material/styles/createPalette";
 
 export default function EventDisplayModal({
   eventId,
