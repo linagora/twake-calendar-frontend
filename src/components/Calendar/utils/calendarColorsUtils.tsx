@@ -9,7 +9,7 @@ export function updateDarkColor(
   dispatch: ThunkDispatch<any, any, any>
 ) {
   Object.values(calendars).forEach((cal) => {
-    if (!cal?.color?.light) return;
+    if (!cal?.color?.light || typeof cal.color.light !== "string") return;
     const baseColor = cal.color.light;
 
     const isDefault = Object.values(defaultColors).find(
@@ -29,6 +29,10 @@ export function updateDarkColor(
 }
 
 export function getAccessiblePair(baseColor: string, theme: Theme): string {
+  if (typeof baseColor !== "string") {
+    return theme.palette.getContrastText("#000");
+  }
+
   const contrastToBlack = getContrastRatio(baseColor, "#000");
   const contrastToWhite = getContrastRatio(baseColor, "#fff");
   const isLight = contrastToBlack > contrastToWhite;
