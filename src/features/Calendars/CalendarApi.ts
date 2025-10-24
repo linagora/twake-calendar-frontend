@@ -45,7 +45,7 @@ export async function postCalendar(
     body: JSON.stringify({
       id: calId,
       "dav:name": name,
-      "apple:color": color,
+      "apple:color": color.light,
       "caldav:description": desc,
     }),
   });
@@ -67,10 +67,8 @@ export async function addSharedCalendar(
       "calendarserver:source": {
         acl: cal.cal.acl,
         calendarHomeId: cal.cal.id,
-        color: {
-          light: cal.cal["apple:color"],
-          dark: cal.cal["X-TWAKE-Dark-theme-color"],
-        },
+        color: cal.cal["apple:color"],
+
         description: cal.cal["caldav:description"],
         href: cal.cal._links.self.href,
         id: cal.cal.id,
