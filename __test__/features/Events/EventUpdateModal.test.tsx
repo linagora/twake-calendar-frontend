@@ -92,16 +92,20 @@ describe("EventUpdateModal Timezone Handling", () => {
     const titleInput = screen.getByDisplayValue("Timezone Event");
     expect(titleInput).toBeInTheDocument();
 
-    // Verify the start time input exists
-    // Since showMore is false by default, label should be "Start"
+    // Verify the start date and time inputs exist
+    // Since showMore is false by default, labels should be "Start Date" and "Start Time"
     await waitFor(() => {
-      const startInput = screen.getByLabelText("Start");
-      expect(startInput).toBeInTheDocument();
-      expect(startInput).toHaveAttribute("type", "datetime-local");
+      const startDateInput = screen.getByLabelText("Start Date");
+      const startTimeInput = screen.getByLabelText("Start Time");
 
-      // The value should be formatted as 2025-01-15T14:00 (2PM in Bangkok time)
-      // EventUpdateModal uses formatDateTimeInTimezone which formats in event's original timezone
-      expect(startInput).toHaveValue("2025-01-15T14:00");
+      expect(startDateInput).toBeInTheDocument();
+      expect(startTimeInput).toBeInTheDocument();
+      expect(startDateInput).toHaveAttribute("type", "date");
+      expect(startTimeInput).toHaveAttribute("type", "time");
+
+      // The values should be split from 2025-01-15T14:00
+      expect(startDateInput).toHaveValue("2025-01-15");
+      expect(startTimeInput).toHaveValue("14:00");
     });
   });
 
