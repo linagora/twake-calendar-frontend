@@ -12,7 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarSearch from "./CalendarSearch";
-import { Divider, Menu, MenuItem } from "@mui/material";
+import { Divider, ListItem, Menu, MenuItem } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
@@ -41,13 +41,24 @@ function CalendarAccordion({
   if (calendars.length === 0 && !defaultExpanded) return null;
 
   return (
-    <Accordion defaultExpanded={defaultExpanded} expanded={expended}>
+    <Accordion
+      defaultExpanded={defaultExpanded}
+      expanded={expended}
+      style={{ width: "100%", padding: 0, margin: 0, boxShadow: "none" }}
+    >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`${title}-content`}
         id={`${title}-header`}
         className="calendarListHeader"
         onClick={() => setExpended(!expended)}
+        sx={{
+          "& .MuiAccordionSummary-content": {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          },
+        }}
       >
         <Typography component="h3">{title}</Typography>
         {showAddButton && (
@@ -62,7 +73,7 @@ function CalendarAccordion({
           </IconButton>
         )}
       </AccordionSummary>
-      <AccordionDetails>
+      <AccordionDetails style={{ textAlign: "left", padding: 0 }}>
         {calendars.map((id) => (
           <CalendarSelector
             key={id}
@@ -214,7 +225,24 @@ function CalendarSelector({
   };
   return (
     <>
-      <div>
+      <ListItem
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          transition: "background-color 0.2s ease",
+          padding: "8px 24px 8px 16px",
+          "& .MoreBtn": {
+            opacity: 0,
+          },
+          "&:hover": {
+            backgroundColor: "#F3F3F6",
+            "& .MoreBtn": {
+              opacity: 1,
+            },
+          },
+        }}
+      >
         <label>
           <Checkbox
             sx={{
@@ -227,10 +255,14 @@ function CalendarSelector({
           />
           {calendars[id].name}
         </label>
-        <IconButton onClick={handleClick}>
+        <IconButton
+          className="MoreBtn"
+          onClick={handleClick}
+          style={{ alignSelf: "end" }}
+        >
           <MoreVertIcon />
         </IconButton>
-      </div>
+      </ListItem>
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem
           onClick={() => {

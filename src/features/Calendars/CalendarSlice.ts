@@ -39,7 +39,6 @@ export const getCalendarsListAsync = createAsyncThunk<
   const rawCalendars = calendars._embedded["dav:calendar"];
 
   for (const cal of rawCalendars) {
-    const name = cal["dav:name"];
     const description = cal["caldav:description"];
     let delegated = false;
     let source = cal["calendarserver:source"]
@@ -51,8 +50,16 @@ export const getCalendarsListAsync = createAsyncThunk<
       delegated = true;
     }
     const id = source.replace("/calendars/", "").replace(".json", "");
+    const ownerId = id.split("/")[0];
     const visibility = getCalendarVisibility(cal["acl"]);
-    const ownerData: any = await getUserDetails(id.split("/")[0]);
+    const ownerData: any = await getUserDetails(ownerId);
+    const name =
+      ownerId !== user.id && cal["dav:name"] === "#default"
+        ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+            ownerData.lastname
+          }` + "'s calendar"
+        : cal["dav:name"];
+
     const color = {
       light: cal["apple:color"] ?? "#006BD8",
       dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
@@ -370,7 +377,12 @@ export const addSharedCalendarAsync = createAsyncThunk<
     },
     link: `/calendars/${userId}/${calId}.json`,
     desc: cal.cal["caldav:description"],
-    name: cal.cal["dav:name"],
+    name:
+      ownerData.id !== userId && cal.cal["dav:name"] === "#default"
+        ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+            ownerData.lastname
+          }` + "'s calendar"
+        : cal.cal["dav:name"],
     owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
       ownerData.lastname
     }`,

@@ -61,7 +61,11 @@ function CalendarItem({
           }}
         />
         <Box>
-          <Typography variant="body1">{cal.cal["dav:name"]}</Typography>
+          <Typography variant="body1">
+            {cal.cal["dav:name"] === "#default"
+              ? cal.owner.displayName + "'s calendar"
+              : cal.cal["dav:name"]}
+          </Typography>
           <Typography variant="body2" color="textSecondary">
             {cal.owner.email}
           </Typography>
