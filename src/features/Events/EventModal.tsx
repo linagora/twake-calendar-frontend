@@ -24,10 +24,11 @@ import {
 } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
-import EventFormFields, {
+import EventFormFields from "../../components/Event/EventFormFields";
+import {
   formatLocalDateTime,
   formatDateTimeInTimezone,
-} from "../../components/Event/EventFormFields";
+} from "../../components/Event/utils/dateTimeFormatters";
 
 function EventPopover({
   anchorEl,

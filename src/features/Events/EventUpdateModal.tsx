@@ -17,9 +17,8 @@ import { userAttendee } from "../User/userDataTypes";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
-import EventFormFields, {
-  formatDateTimeInTimezone,
-} from "../../components/Event/EventFormFields";
+import EventFormFields from "../../components/Event/EventFormFields";
+import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
 import { getEvent, deleteEvent, putEvent } from "./EventApi";
 import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
