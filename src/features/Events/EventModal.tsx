@@ -201,6 +201,11 @@ function EventPopover({
     }
 
     if (selectedRange && selectedRange.start && selectedRange.end) {
+      // Auto-check allday if selectedRange is all-day
+      if (selectedRange.allDay) {
+        setAllDay(true);
+      }
+
       // selectedRange gives us the visual time displayed on calendar
       // Use selectedRange.startStr and endStr if available (from FullCalendar)
       if (selectedRange.startStr && selectedRange.endStr) {
@@ -249,6 +254,9 @@ function EventPopover({
 
       if (formattedStart) setStart(formattedStart);
       if (formattedEnd) setEnd(formattedEnd);
+
+      // Default to non-all-day when no selectedRange
+      setAllDay(false);
     }
 
     shouldSyncFromRangeRef.current = false;
