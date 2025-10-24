@@ -64,6 +64,10 @@ export async function addSharedCalendar(
     body: JSON.stringify({
       id: calId,
       ...cal.cal,
+      "dav:name":
+        cal.cal["dav:name"] === "#default"
+          ? cal.owner.displayName + "'s calendar"
+          : cal.cal["dav:name"],
       "calendarserver:source": {
         acl: cal.cal.acl,
         calendarHomeId: cal.cal.id,
