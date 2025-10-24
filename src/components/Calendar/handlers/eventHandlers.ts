@@ -16,7 +16,7 @@ import { getEvent } from "../../../features/Events/EventApi";
 import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
-import { formatLocalDateTime } from "../../Event/EventFormFields";
+import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;

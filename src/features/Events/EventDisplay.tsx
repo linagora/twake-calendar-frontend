@@ -46,7 +46,7 @@ import {
 import { Calendars } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { getEvent } from "./EventApi";
-import { formatLocalDateTime } from "../../components/Event/EventFormFields";
+import { formatLocalDateTime } from "../../components/Event/utils/dateTimeFormatters";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
 export default function EventDisplayModal({

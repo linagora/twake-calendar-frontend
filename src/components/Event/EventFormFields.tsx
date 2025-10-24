@@ -34,75 +34,16 @@ import {
 } from "../../utils/videoConferenceUtils";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
-
-// Helper to split datetime string (YYYY-MM-DDTHH:mm) to date and time
-function splitDateTime(datetime: string): { date: string; time: string } {
-  if (!datetime) return { date: "", time: "" };
-  const parts = datetime.split("T");
-  return {
-    date: parts[0] || "",
-    time: parts[1]?.slice(0, 5) || "", // HH:mm only
-  };
-}
-
-// Helper to combine date and time to datetime string
-function combineDateTime(date: string, time: string): string {
-  if (!date) return "";
-  if (!time) return date; // Date only for all-day
-  return `${date}T${time}`;
-}
-
-// Helper component for field with label
-export const FieldWithLabel = React.memo(
-  ({
-    label,
-    isExpanded,
-    children,
-  }: {
-    label: string | React.ReactNode;
-    isExpanded: boolean;
-    children: React.ReactNode;
-  }) => {
-    if (!isExpanded) {
-      // Normal mode: label on top
-      return (
-        <Box>
-          <Typography
-            component="label"
-            sx={{
-              display: "block",
-              marginBottom: "4px",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-            }}
-          >
-            {label}
-          </Typography>
-          {children}
-        </Box>
-      );
-    }
-
-    // Extended mode: label on left
-    return (
-      <Box display="flex" alignItems="center">
-        <Typography
-          component="label"
-          sx={{
-            minWidth: "115px",
-            marginRight: "12px",
-            flexShrink: 0,
-          }}
-        >
-          {label}
-        </Typography>
-        <Box flexGrow={1}>{children}</Box>
-      </Box>
-    );
-  }
-);
-
-FieldWithLabel.displayName = "FieldWithLabel";
+import { FieldWithLabel } from "./components/FieldWithLabel";
+import { DateTimeFields } from "./components/DateTimeFields";
+import { useAllDayToggle } from "./hooks/useAllDayToggle";
+import { splitDateTime, combineDateTime } from "./utils/dateTimeHelpers";
+import {
+  formatLocalDateTime,
+  formatDateTimeInTimezone,
+  getRoundedCurrentTime,
+} from "./utils/dateTimeFormatters";
+import { validateEventForm } from "./utils/formValidation";
 
 interface EventFormFieldsProps {
   // Form state
@@ -216,19 +157,29 @@ export default function EventFormFields({
   onValidationChange,
   showValidationErrors = false,
 }: EventFormFieldsProps) {
-  // Store original time before toggling to all-day
-  const originalTimeRef = React.useRef<{
-    start: string;
-    end: string;
-    endDate?: string; // Add this field
-    fromAllDaySlot?: boolean; // Track if came from all-day slot click
-  } | null>(null);
-
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState("");
   const [startTime, setStartTime] = React.useState("");
   const [endDate, setEndDate] = React.useState("");
   const [endTime, setEndTime] = React.useState("");
+
+  // Use all-day toggle hook
+  const { originalTimeRef, handleAllDayToggle } = useAllDayToggle({
+    allday,
+    start,
+    end,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    setStartTime,
+    setEndTime,
+    setEndDate,
+    setStart,
+    setEnd,
+    setAllDay,
+    onAllDayChange,
+  });
 
   // Ref for title input field to enable auto-focus
   const titleInputRef = React.useRef<HTMLInputElement>(null);
@@ -367,59 +318,15 @@ export default function EventFormFields({
 
   // Validation logic
   const validateForm = React.useCallback(() => {
-    const isTitleValid = title.trim().length > 0;
-    const shouldShowTitleError = showValidationErrors && !isTitleValid;
-
-    let isDateTimeValid = true;
-    let dateTimeError = "";
-
-    // Validate start date
-    if (!startDate || startDate.trim() === "") {
-      isDateTimeValid = false;
-      dateTimeError = "Start date is required";
-    }
-    // Validate start time (if not all-day)
-    else if (!allday && (!startTime || startTime.trim() === "")) {
-      isDateTimeValid = false;
-      dateTimeError = "Start time is required";
-    }
-    // Validate end date
-    else if (!endDate || endDate.trim() === "") {
-      isDateTimeValid = false;
-      dateTimeError = "End date is required";
-    }
-    // Validate end time (if not all-day)
-    else if (!allday && (!endTime || endTime.trim() === "")) {
-      isDateTimeValid = false;
-      dateTimeError = "End time is required";
-    }
-    // Validate end > start
-    else {
-      const startDateTime = allday
-        ? new Date(startDate + "T00:00:00")
-        : new Date(combineDateTime(startDate, startTime));
-      const endDateTime = allday
-        ? new Date(endDate + "T00:00:00")
-        : new Date(combineDateTime(endDate, endTime));
-
-      if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-        isDateTimeValid = false;
-        dateTimeError = "Invalid date/time";
-      } else if (endDateTime <= startDateTime) {
-        isDateTimeValid = false;
-        dateTimeError = "End time must be after start time";
-      }
-    }
-
-    const isValid = isTitleValid && isDateTimeValid;
-
-    return {
-      isValid,
-      errors: {
-        title: shouldShowTitleError ? "Title is required" : "",
-        dateTime: showValidationErrors ? dateTimeError : "",
-      },
-    };
+    return validateEventForm({
+      title,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      allday,
+      showValidationErrors,
+    });
   }, [
     title,
     startDate,
@@ -470,28 +377,9 @@ export default function EventFormFields({
     setMeetingLink(null);
   };
 
-  const handleAllDayChange = (
-    newAllDay: boolean,
-    newStart: string,
-    newEnd: string
-  ) => {
-    setAllDay(newAllDay);
-    onAllDayChange?.(newAllDay, newStart, newEnd);
-  };
-
   const handleCalendarChange = (newCalendarId: string) => {
     setCalendarid(newCalendarId);
     onCalendarChange?.(newCalendarId);
-  };
-
-  const getRoundedCurrentTime = () => {
-    const now = new Date();
-    const minutes = now.getMinutes();
-    const roundedMinutes = minutes < 30 ? 0 : 30;
-    now.setMinutes(roundedMinutes);
-    now.setSeconds(0);
-    now.setMilliseconds(0);
-    return now;
   };
 
   return (
@@ -565,246 +453,26 @@ export default function EventFormFields({
       )}
 
       <FieldWithLabel label="Date & Time" isExpanded={showMore}>
-        <Box display="flex" gap={1} flexDirection="column">
-          {/* First row: 4 fields */}
-          <Box
-            display="flex"
-            gap={1}
-            flexDirection="row"
-            alignItems="flex-start"
-          >
-            {/* Start Date - 30% */}
-            <Box sx={{ flexGrow: 0.3, flexBasis: "30%" }}>
-              {showMore && (
-                <Typography variant="caption" display="block" mb={0.5}>
-                  Start Date
-                </Typography>
-              )}
-              <TextField
-                fullWidth
-                label={!showMore ? "Start Date" : ""}
-                type="date"
-                value={startDate}
-                onChange={(e) => handleStartDateChange(e.target.value)}
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-
-            {/* Start Time - 20% */}
-            <Box sx={{ flexGrow: 0.2, flexBasis: "20%" }}>
-              {showMore && (
-                <Typography variant="caption" display="block" mb={0.5}>
-                  Start Time
-                </Typography>
-              )}
-              <TextField
-                fullWidth
-                label={!showMore ? "Start Time" : ""}
-                type="time"
-                value={startTime}
-                onChange={(e) => handleStartTimeChange(e.target.value)}
-                disabled={allday}
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-
-            {/* End Time - 20% */}
-            <Box sx={{ flexGrow: 0.2, flexBasis: "20%" }}>
-              {showMore && (
-                <Typography variant="caption" display="block" mb={0.5}>
-                  End Time
-                </Typography>
-              )}
-              <TextField
-                fullWidth
-                label={!showMore ? "End Time" : ""}
-                type="time"
-                value={endTime}
-                onChange={(e) => handleEndTimeChange(e.target.value)}
-                disabled={allday}
-                error={!!validation.errors.dateTime}
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-
-            {/* End Date - 30% */}
-            <Box sx={{ flexGrow: 0.3, flexBasis: "30%" }}>
-              {showMore && (
-                <Typography variant="caption" display="block" mb={0.5}>
-                  End Date
-                </Typography>
-              )}
-              <TextField
-                fullWidth
-                label={!showMore ? "End Date" : ""}
-                type="date"
-                value={endDate}
-                onChange={(e) => handleEndDateChange(e.target.value)}
-                error={!!validation.errors.dateTime}
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-          </Box>
-
-          {/* Second row: Error message - 2 columns 50% each */}
-          {validation.errors.dateTime && (
-            <Box display="flex" gap={1} flexDirection="row">
-              {/* Empty left column - 50% */}
-              <Box sx={{ flexGrow: 0.5, flexBasis: "50%" }} />
-
-              {/* Error message right column - 50% */}
-              <Box sx={{ flexGrow: 0.5, flexBasis: "50%" }}>
-                <Typography variant="caption" color="error">
-                  {validation.errors.dateTime}
-                </Typography>
-              </Box>
-            </Box>
-          )}
-        </Box>
+        <DateTimeFields
+          startDate={startDate}
+          startTime={startTime}
+          endDate={endDate}
+          endTime={endTime}
+          allday={allday}
+          showMore={showMore}
+          validation={validation}
+          onStartDateChange={handleStartDateChange}
+          onStartTimeChange={handleStartTimeChange}
+          onEndDateChange={handleEndDateChange}
+          onEndTimeChange={handleEndTimeChange}
+        />
       </FieldWithLabel>
 
       <FieldWithLabel label=" " isExpanded={showMore}>
         <Box display="flex" gap={2} alignItems="center">
           <FormControlLabel
             control={
-              <Checkbox
-                checked={allday}
-                onChange={() => {
-                  const newAllDay = !allday;
-                  let newStart = start;
-                  let newEnd = end;
-
-                  if (newAllDay) {
-                    // OFF => ON: Save original time AND original end date
-                    if (start.includes("T")) {
-                      originalTimeRef.current = {
-                        start: startTime,
-                        end: endTime,
-                        endDate: endDate, // Save original end date
-                      };
-                    }
-
-                    // Reset time to empty, keep only date part
-                    setStartTime("");
-                    setEndTime("");
-                    newStart = startDate;
-                    newEnd = endDate;
-
-                    // If same day, extend end to next day
-                    if (startDate === endDate) {
-                      const nextDay = new Date(endDate);
-                      nextDay.setDate(nextDay.getDate() + 1);
-                      newEnd = nextDay.toISOString().split("T")[0];
-                      setEndDate(newEnd); // Update internal endDate state
-                    }
-                  } else {
-                    // ON => OFF: Restore original time AND original end date
-                    if (originalTimeRef.current) {
-                      // Check if this came from all-day slot click
-                      if (originalTimeRef.current.fromAllDaySlot) {
-                        // From all-day slot: set endDate = startDate, use default time
-                        const currentTime = getRoundedCurrentTime();
-                        const hours = String(currentTime.getHours()).padStart(
-                          2,
-                          "0"
-                        );
-                        const minutes = String(
-                          currentTime.getMinutes()
-                        ).padStart(2, "0");
-                        const timeStr = `${hours}:${minutes}`;
-
-                        newStart = combineDateTime(startDate, timeStr);
-
-                        // End time = start time + 1 hour
-                        const endTimeDate = new Date(currentTime);
-                        endTimeDate.setHours(endTimeDate.getHours() + 1);
-                        const endHours = String(
-                          endTimeDate.getHours()
-                        ).padStart(2, "0");
-                        const endMinutes = String(
-                          endTimeDate.getMinutes()
-                        ).padStart(2, "0");
-                        const endTimeStr = `${endHours}:${endMinutes}`;
-
-                        newEnd = combineDateTime(startDate, endTimeStr); // Use startDate as endDate
-
-                        // Update internal states
-                        setStartTime(timeStr);
-                        setEndTime(endTimeStr);
-                        setEndDate(startDate); // Set endDate = startDate
-                      } else {
-                        // Normal case: restore original time AND original end date
-                        const restoredEndDate =
-                          originalTimeRef.current.endDate || endDate;
-
-                        newStart = combineDateTime(
-                          startDate,
-                          originalTimeRef.current.start
-                        );
-                        newEnd = combineDateTime(
-                          restoredEndDate,
-                          originalTimeRef.current.end
-                        );
-
-                        // Update internal states
-                        setStartTime(originalTimeRef.current.start);
-                        setEndTime(originalTimeRef.current.end);
-                        setEndDate(restoredEndDate);
-                      }
-
-                      originalTimeRef.current = null;
-                    } else {
-                      // No original time: use rounded current time with 1 hour duration
-                      const currentTime = getRoundedCurrentTime();
-                      const hours = String(currentTime.getHours()).padStart(
-                        2,
-                        "0"
-                      );
-                      const minutes = String(currentTime.getMinutes()).padStart(
-                        2,
-                        "0"
-                      );
-                      const timeStr = `${hours}:${minutes}`;
-
-                      newStart = combineDateTime(startDate, timeStr);
-
-                      // End time = start time + 1 hour (not 30 mins)
-                      const endTimeDate = new Date(currentTime);
-                      endTimeDate.setHours(endTimeDate.getHours() + 1); // Changed from setMinutes +30
-                      const endHours = String(endTimeDate.getHours()).padStart(
-                        2,
-                        "0"
-                      );
-                      const endMinutes = String(
-                        endTimeDate.getMinutes()
-                      ).padStart(2, "0");
-                      const endTimeStr = `${endHours}:${endMinutes}`;
-
-                      newEnd = combineDateTime(endDate, endTimeStr);
-
-                      // Update internal states
-                      setStartTime(timeStr);
-                      setEndTime(endTimeStr);
-                    }
-                  }
-
-                  if (!onAllDayChange) {
-                    setStart(newStart);
-                    setEnd(newEnd);
-                    setAllDay(newAllDay);
-                  } else {
-                    handleAllDayChange(newAllDay, newStart, newEnd);
-                  }
-                }}
-              />
+              <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
             label="All day"
           />
@@ -1016,55 +684,4 @@ export default function EventFormFields({
       )}
     </>
   );
-}
-
-export function formatLocalDateTime(date: Date, timeZone?: string): string {
-  // Guard against invalid or undefined dates
-  if (!date || isNaN(date.getTime())) {
-    return "";
-  }
-
-  if (timeZone) {
-    const formatter = new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone,
-    });
-    const formatted = formatter.format(date);
-    return formatted.replace(", ", "T");
-  }
-
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-export function formatDateTimeInTimezone(
-  isoString: string,
-  timezone: string
-): string {
-  // Parse the ISO string as UTC
-  const utcDate = new Date(isoString);
-
-  // Format the date in the target timezone
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  const parts = formatter.formatToParts(utcDate);
-  const getValue = (type: string) =>
-    parts.find((p) => p.type === type)?.value || "";
-
-  return `${getValue("year")}-${getValue("month")}-${getValue("day")}T${getValue("hour")}:${getValue("minute")}`;
 }
