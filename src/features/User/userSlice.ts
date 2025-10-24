@@ -67,9 +67,11 @@ export const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(getOpenPaasUserDataAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to fetch user information";
+        if (action.payload?.status !== 401) {
+          state.loading = false;
+          state.error =
+            action.payload?.message || "Failed to fetch user information";
+        }
       });
   },
 });

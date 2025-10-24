@@ -38,7 +38,7 @@ interface RejectedError {
 }
 
 export const getCalendarsListAsync = createAsyncThunk<
-  Record<string, Calendars>, // Return type
+  { importedCalendars: Record<string, Calendars>; errors: string }, // Return type
   void, // Arg type
   { rejectValue: RejectedError } // ThunkAPI config
 >("calendars/getCalendars", async (_, { rejectWithValue }) => {
@@ -47,7 +47,7 @@ export const getCalendarsListAsync = createAsyncThunk<
     const user = (await getOpenPaasUser()) as Record<string, string>;
     const calendars = (await getCalendars(user.id)) as Record<string, any>;
     const rawCalendars = calendars._embedded["dav:calendar"];
-
+    const errors = [];
     for (const cal of rawCalendars) {
       const description = cal["caldav:description"];
       let delegated = false;
@@ -62,7 +62,24 @@ export const getCalendarsListAsync = createAsyncThunk<
       const id = source.replace("/calendars/", "").replace(".json", "");
       const ownerId = id.split("/")[0];
       const visibility = getCalendarVisibility(cal["acl"]);
-      const ownerData: any = await getUserDetails(ownerId);
+
+      // Safely fetch owner data with fallback
+      let ownerData: any;
+      try {
+        ownerData = await getUserDetails(ownerId);
+      } catch (error) {
+        console.error(
+          `Failed to fetch user details for ${id.split("/")[0]}:`,
+          error
+        );
+        // Provide fallback data
+        ownerData = {
+          firstname: "",
+          lastname: "Unknown User",
+          emails: [],
+        };
+        errors.push(error);
+      }
       const name =
         ownerId !== user.id && cal["dav:name"] === "#default"
           ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
@@ -90,7 +107,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       };
     }
 
-    return importedCalendars;
+    return { importedCalendars, errors: errors.join("\n") };
   } catch (err: any) {
     return rejectWithValue({
       message: formatReduxError(err),
@@ -682,10 +699,18 @@ const CalendarSlice = createSlice({
       // Fulfilled cases
       .addCase(
         getCalendarsListAsync.fulfilled,
-        (state, action: PayloadAction<Record<string, Calendars>>) => {
+        (
+          state,
+          action: PayloadAction<{
+            importedCalendars: Record<string, Calendars>;
+            errors: string;
+          }>
+        ) => {
           state.pending = false;
-          state.list = action.payload;
-          state.error = null;
+          state.list = action.payload.importedCalendars;
+          state.error = action.payload.errors.length
+            ? action.payload.errors
+            : null;
         }
       )
       .addCase(
@@ -695,7 +720,6 @@ const CalendarSlice = createSlice({
           Object.keys(action.payload).forEach(
             (id) => (state.templist[id] = action.payload[id])
           );
-          state.error = null;
         }
       )
       .addCase(
@@ -730,7 +754,6 @@ const CalendarSlice = createSlice({
                 Intl.DateTimeFormat().resolvedOptions().timeZone;
             }
           );
-          state.error = null;
         }
       )
       .addCase(
@@ -765,7 +788,6 @@ const CalendarSlice = createSlice({
                 Intl.DateTimeFormat().resolvedOptions().timeZone;
             }
           );
-          state.error = null;
         }
       )
       .addCase(
@@ -784,7 +806,6 @@ const CalendarSlice = createSlice({
 
           state.list[action.payload.calId].events[action.payload.event.uid] =
             action.payload.event;
-          state.error = null;
         }
       )
       .addCase(
@@ -811,7 +832,6 @@ const CalendarSlice = createSlice({
             state.list[action.payload.calId].events[id].timezone =
               Intl.DateTimeFormat().resolvedOptions().timeZone;
           });
-          state.error = null;
         }
       )
       .addCase(deleteEventAsync.fulfilled, (state, action) => {
@@ -968,11 +988,13 @@ const CalendarSlice = createSlice({
       })
       // Rejected cases
       .addCase(getCalendarsListAsync.rejected, (state, action) => {
-        state.pending = false;
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          "Failed to load calendars";
+        if (action.payload?.status !== 401) {
+          state.pending = false;
+          state.error =
+            action.payload?.message ||
+            action.error.message ||
+            "Failed to load calendars";
+        }
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
