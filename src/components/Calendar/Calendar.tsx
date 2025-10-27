@@ -274,7 +274,7 @@ export default function CalendarApp({
       <Box
         className="sidebar"
         sx={{
-          padding: "0 25px 16px",
+          padding: "0 15px 16px 25px",
           position: "relative",
         }}
       >
