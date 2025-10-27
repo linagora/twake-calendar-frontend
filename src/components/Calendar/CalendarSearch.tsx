@@ -74,17 +74,12 @@ function CalendarItem({
 
       <Box display="flex" alignItems="center" gap={1}>
         <ColorPicker
-          selectedColor={
-            cal.cal["apple:color"] &&
-            !defaultColors.find(
-              (color) => color.light === cal.cal["apple:color"]
-            )
-              ? {
-                  light: cal.cal["apple:color"],
-                  dark: getAccessiblePair(cal.cal["apple:color"], theme),
-                }
-              : defaultColors[0]
-          }
+          selectedColor={{
+            light: cal.cal["apple:color"] ?? defaultColors[0].light,
+            dark: cal.cal["apple:color"]
+              ? getAccessiblePair(cal.cal["apple:color"], theme)
+              : defaultColors[0].dark,
+          }}
           onChange={onColorChange}
         />
         <IconButton size="small" onClick={onRemove}>
