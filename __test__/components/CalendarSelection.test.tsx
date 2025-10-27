@@ -204,7 +204,7 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("Browse other calendars")).toBeInTheDocument();
   });
 
-  it("renders only personal calendars if no delegated/other exist", () => {
+  it("when only personnal calendars are in the state, only personnal calendars and the title for other to be added are shown", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -223,7 +223,7 @@ describe("CalendarSelection", () => {
 
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.queryByText("Delegated Calendars")).not.toBeInTheDocument();
-    expect(screen.queryByText("Other Calendars")).not.toBeInTheDocument();
+    expect(screen.queryByText("Other Calendars")).toBeInTheDocument();
   });
 
   it("renders nothing when no calendars are present", () => {

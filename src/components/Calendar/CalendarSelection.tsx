@@ -38,7 +38,7 @@ function CalendarAccordion({
   const allCalendars = useAppSelector((state) => state.calendars.list);
 
   const [expended, setExpended] = useState(defaultExpanded);
-  if (calendars.length === 0 && !defaultExpanded) return null;
+  if (calendars.length === 0 && !showAddButton) return null;
 
   return (
     <Accordion
