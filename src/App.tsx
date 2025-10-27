@@ -13,9 +13,6 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 
-import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { push } from "redux-first-history";
-import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 function App() {
   const error = useAppSelector((state) => state.user.error);
   const dispatch = useAppDispatch();
