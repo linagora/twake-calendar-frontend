@@ -4,7 +4,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import CalendarPopover from "./CalendarModal";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -15,6 +15,7 @@ import CalendarSearch from "./CalendarSearch";
 import { Divider, ListItem, Menu, MenuItem } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
+import { trimLongTextWithoutSpace } from "../../utils/textUtils";
 
 function CalendarAccordion({
   title,
@@ -223,6 +224,11 @@ function CalendarSelector({
     setDeletePopupOpen(false);
     handleClose();
   };
+
+  const trimmedName = useMemo(
+    () => trimLongTextWithoutSpace(calendars[id].name),
+    [calendars, id]
+  );
   return (
     <>
       <ListItem
@@ -243,7 +249,14 @@ function CalendarSelector({
           },
         }}
       >
-        <label>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            maxWidth: "calc(100% - 40px)",
+            overflow: "hidden",
+          }}
+        >
           <Checkbox
             sx={{
               color: calendars[id].color?.light,
@@ -253,13 +266,17 @@ function CalendarSelector({
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
           />
-          {calendars[id].name}
+          <span
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              wordBreak: "break-word",
+            }}
+          >
+            {trimmedName}
+          </span>
         </label>
-        <IconButton
-          className="MoreBtn"
-          onClick={handleClick}
-          style={{ alignSelf: "end" }}
-        >
+        <IconButton className="MoreBtn" onClick={handleClick}>
           <MoreVertIcon />
         </IconButton>
       </ListItem>

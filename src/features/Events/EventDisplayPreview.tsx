@@ -655,7 +655,9 @@ export default function EventPreviewModal({
               height: 12,
             }}
           />
-          <Typography>{calendar.name}</Typography>
+          <Typography sx={{ wordBreak: "break-word" }}>
+            {calendar.name}
+          </Typography>
         </Box>
       </ResponsiveDialog>
       <EditModeDialog
