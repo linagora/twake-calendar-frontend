@@ -90,7 +90,7 @@ export default function EventDisplayModal({
   const [end, setEnd] = useState(
     formatLocalDateTime(new Date(event?.end ?? Date.now()))
   );
-  const [allday, setAllDay] = useState(event?.allday);
+  const [allday, setAllDay] = useState(event?.allday ?? false);
   const [repetition, setRepetition] = useState<RepetitionObject>(
     event?.repetition ?? ({} as RepetitionObject)
   );
@@ -280,7 +280,7 @@ export default function EventDisplayModal({
               fullWidth
               disabled={!isOwn}
               label="Title"
-              value={title}
+              value={title ?? ""}
               onChange={(e) => setTitle(e.target.value)}
               size="small"
               margin="dense"
@@ -366,7 +366,7 @@ export default function EventDisplayModal({
               <Select
                 disabled={!isOwn}
                 labelId="calendar-select-label"
-                value={calendarid.toString()}
+                value={calendarid.toString() ?? ""}
                 label="Calendar"
                 onChange={(e: SelectChangeEvent) => {
                   const newId = Number(e.target.value);

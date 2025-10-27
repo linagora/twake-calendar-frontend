@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   User,
@@ -51,7 +51,9 @@ describe("PeopleSearch", () => {
 
     const input = screen.getByRole("combobox");
     await userEvent.type(input, "Test");
-    jest.advanceTimersByTime(300);
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
     await waitFor(() => {
       expect(mockedSearchUsers).toHaveBeenCalledWith("Test", ["user"]);
@@ -64,7 +66,9 @@ describe("PeopleSearch", () => {
 
     const input = screen.getByRole("combobox");
     await userEvent.type(input, "Test");
-    jest.advanceTimersByTime(300);
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
     const option = await screen.findByText("Test User");
     await userEvent.click(option);
@@ -79,7 +83,9 @@ describe("PeopleSearch", () => {
     setup([baseUser]);
     const input = screen.getByRole("combobox");
     await userEvent.type(input, "Test");
-    jest.advanceTimersByTime(300);
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
     await waitFor(() => {
       expect(screen.queryByText("test@example.com")).not.toBeInTheDocument();

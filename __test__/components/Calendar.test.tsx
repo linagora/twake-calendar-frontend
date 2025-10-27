@@ -4,7 +4,7 @@ import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
 import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
-import { useRef } from "react";
+import { act, useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
 import CalendarLayout from "../../src/components/Calendar/CalendarLayout";
@@ -137,10 +137,12 @@ describe("CalendarSelection", () => {
   };
   it("renders calendars", async () => {
     const mockCalendarRef = { current: null };
-    renderWithProviders(
-      <CalendarApp calendarRef={mockCalendarRef} />,
-      preloadedState
-    );
+    await act(async () => {
+      renderWithProviders(
+        <CalendarApp calendarRef={mockCalendarRef} />,
+        preloadedState
+      );
+    });
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -149,12 +151,14 @@ describe("CalendarSelection", () => {
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
   });
-  it("open accordeon when clicking on button only", () => {
+  it("open accordeon when clicking on button only", async () => {
     const mockCalendarRef = { current: null };
-    renderWithProviders(
-      <CalendarApp calendarRef={mockCalendarRef} />,
-      preloadedState
-    );
+    await act(async () => {
+      renderWithProviders(
+        <CalendarApp calendarRef={mockCalendarRef} />,
+        preloadedState
+      );
+    });
     expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
@@ -168,14 +172,20 @@ describe("CalendarSelection", () => {
       .closest(".MuiAccordionSummary-root");
 
     const addButton = screen.getAllByTestId("AddIcon")[2];
-    fireEvent.click(addButton);
+    await act(async () => {
+      fireEvent.click(addButton);
+    });
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
 
-    fireEvent.click(addButton);
+    await act(async () => {
+      fireEvent.click(addButton);
+    });
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
-  it("BUGFIX: remove dots in mini calendar when unselecting personnal calendar", () => {
-    renderWithProviders(<CalendarLayout />, preloadedState);
+  it("BUGFIX: remove dots in mini calendar when unselecting personnal calendar", async () => {
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, preloadedState)
+    );
 
     const checkbox = screen.getByLabelText("Calendar personnal");
     // checkbox checked : events shown
@@ -186,8 +196,9 @@ describe("CalendarSelection", () => {
     ).toHaveClass("event-dot");
 
     // checkbox unchecked : events hidden
-    fireEvent.click(checkbox);
-
+    await act(async () => {
+      fireEvent.click(checkbox);
+    });
     expect(
       screen.getByTestId(
         `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
@@ -195,18 +206,24 @@ describe("CalendarSelection", () => {
     ).not.toHaveClass("event-dot");
 
     // checkbox rechecked : events shown
-    fireEvent.click(checkbox);
+    await act(async () => {
+      fireEvent.click(checkbox);
+    });
     expect(
       screen.getByTestId(
         `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
       )
     ).toHaveClass("event-dot");
   });
-  it("BUGFIX: remove dots in mini calendar when unselecting delegated calendar", () => {
-    renderWithProviders(<CalendarLayout />, preloadedState);
+  it("BUGFIX: remove dots in mini calendar when unselecting delegated calendar", async () => {
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, preloadedState)
+    );
 
     // hide personnal event first
-    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    });
     const checkbox = screen.getByLabelText("Calendar delegated");
 
     expect(
@@ -216,18 +233,24 @@ describe("CalendarSelection", () => {
     ).not.toHaveClass("event-dot");
 
     // checkbox checked : events shown
-    fireEvent.click(checkbox);
+    await act(async () => {
+      fireEvent.click(checkbox);
+    });
     expect(
       screen.getByTestId(
         `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
       )
     ).toHaveClass("event-dot");
   });
-  it("BUGFIX: remove dots in mini calendar when unselecting shared calendar", () => {
-    renderWithProviders(<CalendarLayout />, preloadedState);
+  it("BUGFIX: remove dots in mini calendar when unselecting shared calendar", async () => {
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, preloadedState)
+    );
 
     // hide personnal event first
-    fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+    });
     const checkbox = screen.getByLabelText("Calendar shared");
 
     // checkbox unchecked : events hidden
@@ -238,7 +261,9 @@ describe("CalendarSelection", () => {
     ).not.toHaveClass("event-dot");
 
     // checkbox checked : events shown
-    fireEvent.click(checkbox);
+    await act(async () => {
+      fireEvent.click(checkbox);
+    });
     expect(
       screen.getByTestId(
         `date-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`
@@ -292,13 +317,18 @@ describe("calendar Availability search", () => {
       },
     ]);
 
-    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+    await act(async () =>
+      renderWithProviders(<CalendarTestWrapper />, preloadedState)
+    );
 
     const input = screen.getByPlaceholderText(/start typing a name or email/i);
-    userEvent.type(input, "New");
-
+    act(() => {
+      userEvent.type(input, "New");
+    });
     const option = await screen.findByText("New User");
-    fireEvent.click(option);
+    await act(async () => {
+      fireEvent.click(option);
+    });
 
     expect(spy).toHaveBeenCalled();
   });
@@ -317,14 +347,17 @@ describe("calendar Availability search", () => {
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
-    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+    await act(async () =>
+      renderWithProviders(<CalendarTestWrapper />, preloadedState)
+    );
 
     const input = screen.getByPlaceholderText(/start typing a name or email/i);
-    userEvent.type(input, "Alice");
+    await act(async () => userEvent.type(input, "Alice"));
 
     const option = await screen.findByText("Alice");
-    fireEvent.click(option);
-
+    await act(async () => {
+      fireEvent.click(option);
+    });
     expect(spy).not.toHaveBeenCalledWith();
   });
 
@@ -343,18 +376,22 @@ describe("calendar Availability search", () => {
       },
     ]);
 
-    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+    await act(async () =>
+      renderWithProviders(<CalendarTestWrapper />, preloadedState)
+    );
 
     const input = screen.getByPlaceholderText(/start typing a name or email/i);
-    userEvent.type(input, "New");
+    await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");
-    fireEvent.click(option);
 
+    await act(async () => {
+      fireEvent.click(option);
+    });
     expect(spy).toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: /create event/i }));
-
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /create event/i }));
+    });
     await waitFor(() => {
       expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
       expect(screen.getAllByText(/New User/i)).toHaveLength(2);
@@ -376,17 +413,21 @@ describe("calendar Availability search", () => {
       },
     ]);
 
-    renderWithProviders(<CalendarTestWrapper />, preloadedState);
+    await act(async () =>
+      renderWithProviders(<CalendarTestWrapper />, preloadedState)
+    );
 
     const input = screen.getByPlaceholderText(/start typing a name or email/i);
-    userEvent.type(input, "New");
+    await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");
-    fireEvent.click(option);
-
+    await act(async () => {
+      fireEvent.click(option);
+    });
     expect(spy).toHaveBeenCalled();
-
-    fireEvent.keyDown(input, { key: "Enter" });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
 
     await waitFor(() => {
       expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
@@ -394,14 +435,16 @@ describe("calendar Availability search", () => {
     });
   });
 
-  it("BUGFIX: can untoggle all personnal calendars", () => {
-    renderWithProviders(<CalendarTestWrapper />, {
-      user: preloadedState.user,
-      calendars: {
-        list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
-        pending: false,
-      },
-    });
+  it("BUGFIX: can untoggle all personnal calendars", async () => {
+    await act(async () =>
+      renderWithProviders(<CalendarTestWrapper />, {
+        user: preloadedState.user,
+        calendars: {
+          list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
+          pending: false,
+        },
+      })
+    );
 
     const checkbox = screen.getByLabelText("Calendar personnal");
     expect(checkbox).toBeChecked();
@@ -412,13 +455,15 @@ describe("calendar Availability search", () => {
   });
 
   it("BUGFIX: monthview doesn't show days numbers in banner", async () => {
-    renderWithProviders(<CalendarLayout />, {
-      user: preloadedState.user,
-      calendars: {
-        list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
-        pending: false,
-      },
-    });
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, {
+        user: preloadedState.user,
+        calendars: {
+          list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
+          pending: false,
+        },
+      })
+    );
 
     const calendarRef = (window as any).__calendarRef;
 
@@ -427,8 +472,9 @@ describe("calendar Availability search", () => {
     });
 
     const calendarApi = calendarRef.current;
-
-    calendarApi.changeView("dayGridMonth");
+    await act(async () => {
+      calendarApi.changeView("dayGridMonth");
+    });
     await waitFor(() => {
       expect(screen.queryAllByRole("columnheader").length).toBe(14);
     });
@@ -452,7 +498,9 @@ describe("calendar Availability search", () => {
         return () => Promise.resolve(payload) as any;
       });
     jest.useFakeTimers().setSystemTime(new Date("2025-01-01"));
-    renderWithProviders(<CalendarLayout />, preloadedState);
+    await act(async () =>
+      renderWithProviders(<CalendarLayout />, preloadedState)
+    );
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -461,9 +509,10 @@ describe("calendar Availability search", () => {
     const calendarRef = (window as any).__calendarRef;
     const calendarApi = calendarRef.current;
     const view = calendarApi?.view;
-    calendarApi.changeView("dayGridMonth");
-    fireEvent.click(screen.getByTestId("ChevronRightIcon"));
-
+    await act(async () => {
+      calendarApi.changeView("dayGridMonth");
+      fireEvent.click(screen.getByTestId("ChevronRightIcon"));
+    });
     expect(spy).toHaveBeenCalledTimes(4);
     const callArgs = spy.mock.calls[3][0];
     expect(callArgs.calId).toBe("user1/cal1");

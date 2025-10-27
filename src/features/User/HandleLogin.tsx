@@ -47,10 +47,10 @@ export function HandleLogin() {
     initiateLogin();
   }, [userData, dispatch]);
   useEffect(() => {
-    if (!calendars.pending && !userData.loading) {
+    if (userData.error) {
       dispatch(push("/error"));
     }
-    if (!calendars.pending && !userData.loading) {
+    if (!calendars.pending && !userData.loading && !userData.error) {
       dispatch(push("/calendar"));
     }
   }, [calendars.pending, userData.loading]);

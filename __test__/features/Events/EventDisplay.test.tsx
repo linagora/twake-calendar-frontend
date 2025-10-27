@@ -104,6 +104,26 @@ describe("Event Preview Display", () => {
   };
 
   it("renders correctly event data", () => {
+    const originalToLocaleString = Date.prototype.toLocaleString;
+
+    jest.spyOn(Date.prototype, "toLocaleString").mockImplementation(function (
+      this: Date,
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions
+    ) {
+      return originalToLocaleString.call(this, "en-US", options);
+    });
+    const originalToLocaleTimeString = Date.prototype.toLocaleTimeString;
+
+    jest
+      .spyOn(Date.prototype, "toLocaleTimeString")
+      .mockImplementation(function (
+        this: Date,
+        locales?: Intl.LocalesArgument,
+        options?: Intl.DateTimeFormatOptions
+      ) {
+        return originalToLocaleTimeString.call(this, "en-US", options);
+      });
     renderWithProviders(
       <EventPreviewModal
         open={true}

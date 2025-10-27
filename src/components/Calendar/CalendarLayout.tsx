@@ -5,10 +5,12 @@ import { useAppDispatch } from "../../app/hooks";
 import { getCalendarRange } from "../../utils/dateUtils";
 import { useAppSelector } from "../../app/hooks";
 import { refreshCalendars } from "../Event/utils/eventUtils";
+import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 
 export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);
   const dispatch = useAppDispatch();
+  const error = useAppSelector((state) => state.calendars.error);
   const selectedCalendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -62,6 +64,7 @@ export default function CalendarLayout() {
         onDateChange={handleDateChange}
         onViewChange={handleViewChange}
       />
+      <ErrorSnackbar error={error} type="calendar" />
     </div>
   );
 }
