@@ -16,7 +16,7 @@ import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { ColorPicker } from "./CalendarColorPicker";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
-import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 import { useTheme } from "@mui/material/styles";
 import { ResponsiveDialog } from "../Dialog";
 
@@ -54,10 +54,10 @@ function CalendarItem({
           src={cal.owner.avatarUrl}
           alt={cal.owner.email}
           style={{
-            border: `2px solid ${cal.cal["apple:color"] ?? "transparent"}`,
+            border: `2px solid ${cal.cal["apple:color"] || defaultColors[0]}`,
             boxShadow: cal.cal["apple:color"]
               ? `0 0 0 2px ${cal.cal["apple:color"]}`
-              : "none",
+              : `0 0 0 2px ${defaultColors[0]}`,
           }}
         />
         <Box>
@@ -74,10 +74,17 @@ function CalendarItem({
 
       <Box display="flex" alignItems="center" gap={1}>
         <ColorPicker
-          selectedColor={{
-            light: cal.cal["apple:color"],
-            dark: getAccessiblePair(cal.cal["apple:color"], theme),
-          }}
+          selectedColor={
+            cal.cal["apple:color"] &&
+            !defaultColors.find(
+              (color) => color.light === cal.cal["apple:color"]
+            )
+              ? {
+                  light: cal.cal["apple:color"],
+                  dark: getAccessiblePair(cal.cal["apple:color"], theme),
+                }
+              : defaultColors[0]
+          }
           onChange={onColorChange}
         />
         <IconButton size="small" onClick={onRemove}>
