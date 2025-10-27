@@ -8,6 +8,11 @@ import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
 import { Error } from "./components/Error/Error";
+import { CustomThemeProvider } from "./theme/ThemeProvider";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import { push } from "redux-first-history";
+import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
+
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
@@ -20,17 +25,20 @@ function App() {
     }
   });
   return (
-    <Suspense fallback={<Loading />}>
-      <Router history={history}>
-        <Routes>
-          <Route path="/" element={<HandleLogin />} />
-          <Route path="/calendar" element={<CalendarLayout />} />
-          <Route path="/callback" element={<CallbackResume />} />
-          <Route path="/error" element={<Error />} />
-        </Routes>
-      </Router>
-      <ErrorSnackbar error={error} type="user" />
+    <CustomThemeProvider>
+      <Suspense fallback={<Loading />}>
+        <Router history={history}>
+          <Routes>
+            <Route path="/" element={<HandleLogin />} />
+            <Route path="/calendar" element={<CalendarLayout />} />
+            <Route path="/callback" element={<CallbackResume />} />
+            <Route path="/error" element={<Error />} />
+          </Routes>
+        </Router>
+        <ErrorSnackbar error={error} type="user" />
+        <ErrorSnackbar error={error} type="user" />
     </Suspense>
+    </CustomThemeProvider>
   );
 }
 

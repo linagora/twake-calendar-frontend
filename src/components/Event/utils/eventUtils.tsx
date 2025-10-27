@@ -44,6 +44,7 @@ export function renderAttendeeBadge(
       >
         <Badge
           overlap="circular"
+          sx={{ marginRight: 2 }}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           badgeContent={
             classIcon && (
@@ -65,7 +66,6 @@ export function renderAttendeeBadge(
         </Badge>
         <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
           <Typography
-            variant="body2"
             noWrap
             style={{
               maxWidth: "180px",
@@ -76,11 +76,7 @@ export function renderAttendeeBadge(
             {a.cn || a.cal_address}
           </Typography>
           {isOrganizer && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              style={{ fontStyle: "italic" }}
-            >
+            <Typography variant="caption" color="text.secondary">
               Organizer
             </Typography>
           )}
