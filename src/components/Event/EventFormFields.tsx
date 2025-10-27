@@ -33,6 +33,7 @@ import {
   addVideoConferenceToDescription,
 } from "../../utils/videoConferenceUtils";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
+import { CalendarItemList } from "../Calendar/CalendarItemList";
 
 // Helper component for field with label
 export const FieldWithLabel = React.memo(
@@ -741,11 +742,7 @@ export default function EventFormFields({
               handleCalendarChange(Number(e.target.value))
             }
           >
-            {Object.keys(userPersonnalCalendars).map((calendar, index) => (
-              <MenuItem key={index} value={index}>
-                {userPersonnalCalendars[index].name}
-              </MenuItem>
-            ))}
+            {CalendarItemList(userPersonnalCalendars)}
           </Select>
         </FormControl>
       </FieldWithLabel>
