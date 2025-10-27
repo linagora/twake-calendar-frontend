@@ -104,7 +104,7 @@ function EventPopover({
   );
   const [attendees, setAttendees] = useState<userAttendee[]>(
     event?.attendee
-      ? event.attendee.filter((a) => a.cal_address !== organizer.cal_address)
+      ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
       : []
   );
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
@@ -482,8 +482,8 @@ function EventPopover({
       timezone,
       attendee: [
         {
-          cn: organizer.cn,
-          cal_address: organizer.cal_address,
+          cn: organizer?.cn ?? "",
+          cal_address: organizer?.cal_address ?? "",
           partstat: "ACCEPTED",
           rsvp: "FALSE",
           role: "CHAIR",

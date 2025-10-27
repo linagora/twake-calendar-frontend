@@ -12,13 +12,13 @@ import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
+import EventPopover from "./EventModal";
+import { DateSelectArg } from "@fullcalendar/core";
 import {
   Box,
   Button,
-  ButtonGroup,
   Chip,
   DialogActions,
-  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -77,6 +77,7 @@ export default function EventPreviewModal({
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
   const [hidePreview, setHidePreview] = useState(false);
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
@@ -136,6 +137,8 @@ export default function EventPreviewModal({
         open={open && !hidePreview}
         onClose={() => onClose({}, "backdropClick")}
         showHeaderActions={false}
+        actionsBorderTop={true}
+        actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
           event.title && (
@@ -210,7 +213,15 @@ export default function EventPreviewModal({
                         Email attendees
                       </MenuItem>
                     )}
-                    <EventDuplication event={event} onClose={onClose} />
+                    <EventDuplication
+                      event={event}
+                      onClose={() => setToggleActionMenu(null)}
+                      onOpenDuplicate={() => {
+                        setToggleActionMenu(null);
+                        setHidePreview(true);
+                        setOpenDuplicateModal(true);
+                      }}
+                    />
                     {user.userData.email === event.organizer?.cal_address && (
                       <MenuItem
                         onClick={async () => {
@@ -270,10 +281,12 @@ export default function EventPreviewModal({
                     <LockOutlineIcon />
                   ))}
                 <Typography
-                  variant="inherit"
-                  fontWeight="bold"
-                  style={{
+                  variant="h5"
+                  sx={{
+                    fontSize: "24px",
+                    fontWeight: 600,
                     wordBreak: "break-word",
+                    fontFamily: "Inter, sans-serif",
                   }}
                   gutterBottom
                 >
@@ -293,7 +306,7 @@ export default function EventPreviewModal({
                   </Tooltip>
                 )}
               </Box>
-              <Typography variant="body2" color="textSecondary" gutterBottom>
+              <Typography color="text.secondaryContainer" gutterBottom>
                 {formatDate(event.start, event.allday)}
                 {event.end &&
                   formatEnd(event.start, event.end, event.allday) &&
@@ -305,15 +318,22 @@ export default function EventPreviewModal({
         actions={
           <>
             {currentUserAttendee && (
-              <Box style={{ display: "flex", flexDirection: "row" }}>
-                <Typography variant="body2">Attending?</Typography>
-                <ButtonGroup size="small" fullWidth>
+              <>
+                <Typography sx={{ marginRight: 2 }}>Attending?</Typography>
+                <Box display="flex" gap="15px" alignItems="center">
                   <Button
+                    variant={
+                      currentUserAttendee?.partstat === "ACCEPTED"
+                        ? "contained"
+                        : "outlined"
+                    }
                     color={
                       currentUserAttendee?.partstat === "ACCEPTED"
                         ? "success"
                         : "primary"
                     }
+                    size="large"
+                    sx={{ borderRadius: "50px" }}
                     onClick={() => {
                       if (isRecurring) {
                         setAfterChoiceFunc(
@@ -346,11 +366,18 @@ export default function EventPreviewModal({
                     Accept
                   </Button>
                   <Button
+                    variant={
+                      currentUserAttendee?.partstat === "TENTATIVE"
+                        ? "contained"
+                        : "outlined"
+                    }
                     color={
                       currentUserAttendee?.partstat === "TENTATIVE"
                         ? "warning"
                         : "primary"
                     }
+                    size="large"
+                    sx={{ borderRadius: "50px" }}
                     onClick={() => {
                       if (isRecurring) {
                         setAfterChoiceFunc(
@@ -382,11 +409,18 @@ export default function EventPreviewModal({
                     Maybe
                   </Button>
                   <Button
+                    variant={
+                      currentUserAttendee?.partstat === "DECLINED"
+                        ? "contained"
+                        : "outlined"
+                    }
                     color={
                       currentUserAttendee?.partstat === "DECLINED"
                         ? "error"
                         : "primary"
                     }
+                    size="large"
+                    sx={{ borderRadius: "50px" }}
                     onClick={() => {
                       if (isRecurring) {
                         setAfterChoiceFunc(
@@ -417,8 +451,8 @@ export default function EventPreviewModal({
                   >
                     Decline
                   </Button>
-                </ButtonGroup>
-              </Box>
+                </Box>
+              </>
             )}
           </>
         }
@@ -428,7 +462,11 @@ export default function EventPreviewModal({
             {/* Video */}
             {event.x_openpass_videoconference && (
               <InfoRow
-                icon={<VideocamIcon style={{ fontSize: 18 }} />}
+                icon={
+                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <VideocamIcon />
+                  </Box>
+                }
                 content={
                   <Button
                     variant="contained"
@@ -445,7 +483,11 @@ export default function EventPreviewModal({
             {attendees?.length > 0 && (
               <>
                 <InfoRow
-                  icon={<PeopleAltOutlinedIcon />}
+                  icon={
+                    <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                      <PeopleAltOutlinedIcon />
+                    </Box>
+                  }
                   content={
                     <Box
                       style={{
@@ -454,9 +496,11 @@ export default function EventPreviewModal({
                         flexDirection: "row",
                       }}
                     >
-                      <Box>
+                      <Box sx={{ marginRight: 2 }}>
                         <Typography>{attendees.length} guests</Typography>
-                        <Typography>
+                        <Typography
+                          sx={{ fontSize: "13px", color: "text.secondary" }}
+                        >
                           {
                             attendees.filter((a) => a.partstat === "ACCEPTED")
                               .length
@@ -488,9 +532,13 @@ export default function EventPreviewModal({
                         </AvatarGroup>
                       )}
                       <Typography
-                        variant="body2"
-                        color="primary"
-                        style={{ cursor: "pointer", marginTop: 0.5 }}
+                        sx={{
+                          cursor: "pointer",
+                          marginLeft: 2,
+                          fontSize: "14px",
+                          color: "text.secondary",
+                          alignSelf: "center",
+                        }}
                         onClick={() => setShowAllAttendees(!showAllAttendees)}
                       >
                         {showAllAttendees ? "Show less" : `Show more `}
@@ -510,25 +558,44 @@ export default function EventPreviewModal({
             {/* Location */}
             {event.location && (
               <InfoRow
-                icon={<LocationOnOutlinedIcon />}
+                icon={
+                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <LocationOnOutlinedIcon />
+                  </Box>
+                }
                 text={event.location}
               />
             )}
             {/* Description */}
             {event.description && (
-              <InfoRow icon={<SubjectIcon />} text={event.description} />
+              <InfoRow
+                icon={
+                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <SubjectIcon />
+                  </Box>
+                }
+                text={event.description}
+              />
             )}
             {/* ALARM */}
             {event.alarm && (
               <InfoRow
-                icon={<NotificationsNoneIcon />}
+                icon={
+                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <NotificationsNoneIcon />
+                  </Box>
+                }
                 text={`${event.alarm.trigger} before by ${event.alarm.action}`}
               />
             )}
             {/* Repetition */}
             {event.repetition && (
               <InfoRow
-                icon={<RepeatIcon />}
+                icon={
+                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <RepeatIcon />
+                  </Box>
+                }
                 text={makeRecurrenceString(event)}
               />
             )}
@@ -560,7 +627,11 @@ export default function EventPreviewModal({
         {/* Error */}
         {event.error && (
           <InfoRow
-            icon={<ErrorOutlineIcon color="error" style={{ fontSize: 18 }} />}
+            icon={
+              <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                <ErrorOutlineIcon color="error" />
+              </Box>
+            }
             text={event.error}
             error
           />
@@ -574,7 +645,9 @@ export default function EventPreviewModal({
             marginBottom: 2,
           }}
         >
-          <CalendarTodayIcon style={{ fontSize: 16 }} />
+          <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+            <CalendarTodayIcon />
+          </Box>
           <CircleIcon
             style={{
               color: calendar.color?.light ?? "#3788D8",
@@ -582,13 +655,8 @@ export default function EventPreviewModal({
               height: 12,
             }}
           />
-          <Typography variant="body2">{calendar.name}</Typography>
+          <Typography>{calendar.name}</Typography>
         </Box>
-        {currentUserAttendee && !event.repetition && (
-          <>
-            <Divider variant="fullWidth" />
-          </>
-        )}
       </ResponsiveDialog>
       <EditModeDialog
         type={openEditModePopup}
@@ -619,6 +687,26 @@ export default function EventPreviewModal({
         eventId={eventId}
         calId={calId}
         typeOfAction={typeOfAction}
+      />
+      <EventPopover
+        anchorEl={null}
+        open={openDuplicateModal}
+        selectedRange={
+          {
+            start: new Date(event.start),
+            startStr: event.start,
+            end: new Date(event.end ?? ""),
+            endStr: event.end ?? "",
+            allDay: event.allday ?? false,
+          } as DateSelectArg
+        }
+        setSelectedRange={() => {}}
+        calendarRef={{ current: null }}
+        onClose={() => {
+          setOpenDuplicateModal(false);
+          onClose({}, "backdropClick"); // Đóng cả preview modal
+        }}
+        event={event}
       />
     </>
   );

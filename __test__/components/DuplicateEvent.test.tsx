@@ -62,8 +62,9 @@ const preloadedState = {
 };
 
 describe("EventDuplication", () => {
-  it("opens EventPopover when button clicked", () => {
+  it("calls onOpenDuplicate when button clicked", () => {
     const handleClose = jest.fn();
+    const onOpenDuplicate = jest.fn();
     renderWithProviders(
       <EventDuplication
         event={
@@ -71,36 +72,14 @@ describe("EventDuplication", () => {
             .event1
         }
         onClose={handleClose}
+        onOpenDuplicate={onOpenDuplicate}
       />,
       preloadedState
     );
 
     fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
 
-    expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
-  });
-
-  it("calls onClose when closing the popover", () => {
-    const handleClose = jest.fn();
-    renderWithProviders(
-      <EventDuplication
-        event={
-          preloadedState.calendars.list["667037022b752d0026472254/cal1"].events
-            .event1
-        }
-        onClose={handleClose}
-      />,
-      preloadedState
-    );
-
-    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
-
-    // Cancel button only appears in expanded mode
-    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
-
-    fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
-
-    expect(handleClose).toHaveBeenCalled();
+    expect(onOpenDuplicate).toHaveBeenCalled();
   });
 });
 

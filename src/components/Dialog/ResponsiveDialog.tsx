@@ -78,6 +78,14 @@ interface ResponsiveDialogProps
   dividers?: boolean;
   /** Whether to show header action icons (expand/close) in normal mode (default: true) */
   showHeaderActions?: boolean;
+  /** Whether to add border-top to DialogActions */
+  actionsBorderTop?: boolean;
+  /** Justify content alignment for DialogActions */
+  actionsJustifyContent?:
+    | "flex-start"
+    | "center"
+    | "flex-end"
+    | "space-between";
 }
 
 function ResponsiveDialog({
@@ -99,6 +107,8 @@ function ResponsiveDialog({
   dialogTitleProps,
   dividers = false,
   showHeaderActions = true,
+  actionsBorderTop = false,
+  actionsJustifyContent = "flex-end",
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
@@ -199,7 +209,20 @@ function ResponsiveDialog({
           <Stack spacing={currentSpacing}>{children}</Stack>
         )}
       </DialogContent>
-      {actions && <DialogActions>{actions}</DialogActions>}
+      {actions && (
+        <DialogActions
+          sx={{
+            borderTop: actionsBorderTop
+              ? (theme) => `1px solid ${theme.palette.divider}`
+              : undefined,
+            justifyContent: actionsJustifyContent,
+            paddingTop: "18px",
+            paddingBottom: "18px",
+          }}
+        >
+          {actions}
+        </DialogActions>
+      )}
     </Dialog>
   );
 }

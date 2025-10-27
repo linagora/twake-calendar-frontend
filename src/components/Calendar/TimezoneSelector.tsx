@@ -66,17 +66,19 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
         }}
         slotProps={{
           paper: {
-            sx: { width: 280, maxHeight: 400, overflow: "auto", p: 1 },
+            sx: { width: 280, maxHeight: 400, overflow: "hidden", p: 0 },
           },
         }}
       >
         <TimezoneAutocomplete
+          size="medium"
           value={effectiveTimezone}
           onChange={onChange}
           zones={timezoneList.zones}
           getTimezoneOffset={getTimezoneOffset}
           autoFocus={true}
-          inputFontSize="10px"
+          showIcon={true}
+          inputFontSize="14px"
           inputPadding="2px 4px"
           onClose={handleClose}
           disableClearable={true}
