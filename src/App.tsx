@@ -37,7 +37,7 @@ function App() {
         </Router>
         <ErrorSnackbar error={error} type="user" />
         <ErrorSnackbar error={error} type="user" />
-    </Suspense>
+      </Suspense>
     </CustomThemeProvider>
   );
 }
