@@ -217,9 +217,9 @@ export default function EventPreviewModal({
                       event={event}
                       onClose={() => setToggleActionMenu(null)}
                       onOpenDuplicate={() => {
-                        setToggleActionMenu(null); // Đóng option menu
-                        setHidePreview(true); // Ẩn preview modal
-                        setOpenDuplicateModal(true); // Mở duplicate modal
+                        setToggleActionMenu(null);
+                        setHidePreview(true);
+                        setOpenDuplicateModal(true);
                       }}
                     />
                     {user.userData.email === event.organizer?.cal_address && (

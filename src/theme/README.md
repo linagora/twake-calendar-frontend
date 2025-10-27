@@ -1,186 +1,118 @@
 # Custom MUI Theme
 
-## Tổng quan
+## Overview
 
-Project này sử dụng custom MUI theme để tùy chỉnh Typography, Colors và Components theo thiết kế của Twake Calendar.
+This project uses a custom MUI theme to customize Typography, colors and components according to Twake Calendar design.
 
-## Cấu trúc Files
+## File Structure
 
 ```
 src/theme/
-├── theme.ts          # Định nghĩa custom theme
+├── theme.ts          # Custom theme definition
 ├── ThemeProvider.tsx # ThemeProvider wrapper
-└── README.md         # Documentation này
+└── README.md         # This documentation
 ```
 
 ## Custom Theme Features
 
-### 🎨 **Colors**
+### Colors
 
-- **Primary**: `#1976d2` (Blue)
-- **Secondary**: `#dc004e` (Pink/Red)
 - **Text Primary**: `#000000` (Black)
-- **Text Secondary**: `#8C9CAF` (Custom gray)
-- **Divider**: `#C9CACC` (Custom divider)
+- **Text Secondary**: `#717D96` (Custom gray)
+- **Text Secondary Container**: `#243B55` (Dark gray)
 
-### 📝 **Typography**
+### Typography
 
-- **Font Family**: Inter (với fallbacks)
-- **Custom Variants**: Tất cả variants đều được tùy chỉnh
-- **Event Info Text**: Caption variant với fontSize 14px và color text.secondary
+- **Caption**: fontSize 13px, color `#717D96`
 
-### 🔘 **Components**
+### Components
 
-- **Buttons**: BorderRadius 8px (default), 50px (pill-shaped)
-- **Dialogs**: BorderRadius 12px
-- **DialogActions**: Padding 18px top/bottom
+- **Typography**: Custom styled caption variant
 
-## Cách sử dụng
+## Usage
 
-### 1. Sử dụng Theme Colors
+### Using CustomThemeProvider
+
+Import and use `CustomThemeProvider` to wrap your application:
+
+```tsx
+import { CustomThemeProvider } from "./theme/ThemeProvider";
+
+function App() {
+  return <CustomThemeProvider>{/* Your application */}</CustomThemeProvider>;
+}
+```
+
+### Accessing the Theme
+
+Use `useTheme` to access theme variables:
 
 ```tsx
 import { useTheme } from "@mui/material/styles";
 
 function MyComponent() {
   const theme = useTheme();
-
-  return (
-    <Typography sx={{ color: "text.secondary" }}>
-      Text với màu secondary
-    </Typography>
-  );
+  const textColor = theme.palette.text.secondary;
 }
 ```
 
-### 2. Sử dụng Typography Variants
+### CSS Variables
+
+Use theme variables directly in CSS:
 
 ```tsx
-// Caption với custom styling
-<Typography variant="caption">
-  Text nhỏ với màu secondary
-</Typography>
-
-// Body2 với Inter font
-<Typography variant="body2">
-  Text body với Inter font
+<Typography sx={{ color: "text.secondary" }}>
+  Text with secondary color
 </Typography>
 ```
 
-### 3. Sử dụng Component Overrides
+### Typography
+
+Use predefined typography variants:
 
 ```tsx
-// Button tự động có borderRadius 8px
-<Button variant="contained">
-  Normal Button
-</Button>
-
-// Pill-shaped button cho RSVP
-<Button
-  variant="contained"
-  sx={{ borderRadius: '50px' }}
->
-  RSVP Button
-</Button>
+<Typography variant="caption">Caption text</Typography>
 ```
 
-## Tùy chỉnh Theme
+### Customizing Styles
 
-### Thêm màu mới
-
-```typescript
-// Trong theme.ts
-palette: {
-  custom: {
-    main: '#your-color',
-    light: '#lighter-color',
-    dark: '#darker-color',
-  },
-}
-```
-
-### Thêm Typography variant mới
+Modify styles in `theme.ts` to customize components:
 
 ```typescript
-// Trong theme.ts
-typography: {
-  customVariant: {
-    fontSize: '16px',
-    fontWeight: 500,
-    lineHeight: 1.5,
-  },
-}
-```
-
-### Override Component styles
-
-```typescript
-// Trong theme.ts
 components: {
-  MuiComponentName: {
+  MuiTypography: {
     styleOverrides: {
-      root: {
-        // Custom styles
+      caption: {
+        fontSize: "13px",
+        color: "#717D96",
       },
     },
   },
 }
 ```
 
-## Migration sang Cozy UI
+## Migration to Cozy UI
 
-Khi sẵn sàng migrate sang Cozy UI:
+### Installation
 
-1. **Cài đặt Cozy UI**:
+```bash
+npm install cozy-ui
+```
 
-   ```bash
-   npm install cozy-ui
-   ```
+### Replacing ThemeProvider
 
-2. **Thay đổi ThemeProvider**:
-
-   ```tsx
-   // Thay vì CustomThemeProvider
-   import { MuiCozyTheme } from "cozy-ui/React/MuiCozyTheme";
-
-   <MuiCozyTheme>{children}</MuiCozyTheme>;
-   ```
-
-3. **Cập nhật colors**: Cozy UI sẽ có colors riêng, chỉ cần update palette trong theme.ts
-
-## Best Practices
-
-1. **Sử dụng theme colors**: Thay vì hard-coded colors
-2. **Consistent spacing**: Sử dụng theme.spacing()
-3. **Typography variants**: Sử dụng predefined variants
-4. **Component overrides**: Tùy chỉnh qua theme thay vì inline styles
-5. **TypeScript**: Sử dụng CustomTheme type cho type safety
-
-## Ví dụ thực tế
+In your main file, replace `CustomThemeProvider` with `MuiCozyTheme`:
 
 ```tsx
-// Event Preview Modal với custom theme
-<Typography
-  variant="h5"
-  sx={{
-    fontSize: '24px',
-    fontWeight: 600,
-    fontFamily: 'Inter, sans-serif' // Tự động từ theme
-  }}
->
-  Event Title
-</Typography>
+import { MuiCozyTheme } from "cozy-ui/React/MuiCozyTheme";
 
-<Typography
-  variant="caption" // Tự động có fontSize 14px và color text.secondary
->
-  Show more
-</Typography>
-
-<Button
-  variant="contained"
-  sx={{ borderRadius: '50px' }} // Pill-shaped
->
-  Accept
-</Button>
+<MuiCozyTheme>{children}</MuiCozyTheme>;
 ```
+
+### Updating Palette
+
+Adapt the color palette in `theme.ts` to use Cozy UI colors. Cozy UI provides its own colors that can be integrated into the theme configuration.
+
+### Component Migration
+
+Update components to use Cozy UI components instead of standard MUI components, following Cozy UI documentation for specific components.
