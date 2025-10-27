@@ -17,7 +17,7 @@ export default function UserSearch({
       displayName: a.cn ?? "",
       avatarUrl: "",
       openpaasId: "",
-    }))
+    })) ?? []
   );
   useEffect(() => {
     setSelectedUsers(

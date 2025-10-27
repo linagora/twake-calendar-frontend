@@ -1,10 +1,9 @@
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { jest } from "@jest/globals";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as appHooks from "../../src/app/hooks";
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import preview from "jest-preview";
 
 describe("MiniCalendar", () => {
   const day = new Date();

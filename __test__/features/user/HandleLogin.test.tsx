@@ -73,9 +73,9 @@ describe("HandleLogin", () => {
 
     expect(screen.getByAltText("loading")).toBeInTheDocument();
   });
-  test("goes to error page when userData doesnt exists after loading and calendars pending is false", () => {
+  test("goes to error page when there is error in user data", () => {
     const dispatch = appHooks.useAppDispatch();
-    renderWithProviders(<HandleLogin />, { user: { loading: false } });
+    renderWithProviders(<HandleLogin />, { user: { error: true } });
     expect(dispatch).toHaveBeenCalledWith(push("/error"));
   });
 });
