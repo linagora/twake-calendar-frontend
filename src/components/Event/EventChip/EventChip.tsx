@@ -179,7 +179,9 @@ export function EventChip({
                 <Box
                   sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
                 >
-                  {isMoreThan30 && DisplayedIcons(IconDisplayed, false)}
+                  {isMoreThan30 &&
+                    !isMonthView &&
+                    DisplayedIcons(IconDisplayed, false)}
                   {!isMoreThan30 && (
                     <Typography
                       variant="body2"
@@ -218,6 +220,7 @@ export function EventChip({
           }
           subheader={
             isMoreThan30 &&
+            !isMonthView &&
             !event._def.extendedProps.allday && (
               <Typography
                 style={{
@@ -243,7 +246,7 @@ export function EventChip({
             },
           }}
         />
-        {isMoreThan60 && !showCompact && (
+        {isMoreThan60 && !showCompact && !isMonthView && (
           <CardContent
             sx={{
               py: "4px",
@@ -305,6 +308,7 @@ export function EventChip({
           </CardContent>
         )}
         {(isMoreThan60 || eventLength === 60) &&
+          !isMonthView &&
           event._def.extendedProps.organizer &&
           !showCompact &&
           (window as any).displayOrgAvatar && (
