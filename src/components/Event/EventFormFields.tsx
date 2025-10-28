@@ -38,6 +38,7 @@ import { FieldWithLabel } from "./components/FieldWithLabel";
 import { DateTimeFields } from "./components/DateTimeFields";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
 import { splitDateTime, combineDateTime } from "./utils/dateTimeHelpers";
+import { getEndDateForStartChange } from "./utils/dateRules";
 import {
   formatLocalDateTime,
   formatDateTimeInTimezone,
@@ -163,6 +164,9 @@ export default function EventFormFields({
   const [endDate, setEndDate] = React.useState("");
   const [endTime, setEndTime] = React.useState("");
 
+  // UI state for showing/hiding end date field
+  const [showEndDate, setShowEndDate] = React.useState(false);
+
   // Use all-day toggle hook
   const { originalTimeRef, handleAllDayToggle } = useAllDayToggle({
     allday,
@@ -268,13 +272,25 @@ export default function EventFormFields({
     (newDate: string) => {
       setStartDate(newDate);
       const newStart = combineDateTime(newDate, startTime);
+
+      // Update start
       if (onStartChange) {
         onStartChange(newStart);
       } else {
         setStart(newStart);
       }
+
+      // Rule: update end date when start date changes
+      const nextEndDate = getEndDateForStartChange(newDate, allday);
+      setEndDate(nextEndDate);
+      const newEnd = combineDateTime(nextEndDate, endTime || startTime);
+      if (onEndChange) {
+        onEndChange(newEnd);
+      } else {
+        setEnd(newEnd);
+      }
     },
-    [startTime, onStartChange, setStart]
+    [startTime, endTime, onStartChange, onEndChange, setStart, setEnd, allday]
   );
 
   const handleStartTimeChange = React.useCallback(
@@ -342,6 +358,35 @@ export default function EventFormFields({
     const validation = validateForm();
     onValidationChange?.(validation.isValid);
   }, [validateForm, onValidationChange]);
+
+  // Auto-calculate end date from start date if not already set
+  React.useEffect(() => {
+    if (startDate && !endDate) {
+      setEndDate(startDate);
+      const newEnd = combineDateTime(startDate, endTime || startTime);
+      if (onEndChange) {
+        onEndChange(newEnd);
+      } else {
+        setEnd(newEnd);
+      }
+    }
+  }, [startDate, endDate, startTime, endTime, onEndChange, setEnd]);
+
+  // Auto-calculate end time from start time (+ 1 hour) if not already set
+  React.useEffect(() => {
+    if (startTime && !endTime && !allday) {
+      const [hours, minutes] = startTime.split(":");
+      const endHour = (parseInt(hours) + 1) % 24;
+      const calculatedEndTime = `${endHour.toString().padStart(2, "0")}:${minutes}`;
+      setEndTime(calculatedEndTime);
+      const newEnd = combineDateTime(endDate || startDate, calculatedEndTime);
+      if (onEndChange) {
+        onEndChange(newEnd);
+      } else {
+        setEnd(newEnd);
+      }
+    }
+  }, [startTime, endTime, allday, endDate, startDate, onEndChange, setEnd]);
 
   const validation = validateForm();
 
@@ -465,6 +510,8 @@ export default function EventFormFields({
           onStartTimeChange={handleStartTimeChange}
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
+          showEndDate={showEndDate}
+          onToggleEndDate={() => setShowEndDate(!showEndDate)}
         />
       </FieldWithLabel>
 

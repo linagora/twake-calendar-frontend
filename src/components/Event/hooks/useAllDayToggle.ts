@@ -1,5 +1,6 @@
 import React from "react";
 import { combineDateTime } from "../utils/dateTimeHelpers";
+import { getEndDateForToggle } from "../utils/dateRules";
 import { getRoundedCurrentTime } from "../utils/dateTimeFormatters";
 
 /**
@@ -86,15 +87,15 @@ export function useAllDayToggle(
       setStartTime("");
       setEndTime("");
       newStart = startDate;
-      newEnd = endDate;
-
-      // If same day, extend end to next day
-      if (startDate === endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        newEnd = nextDay.toISOString().split("T")[0];
-        setEndDate(newEnd); // Update internal endDate state
-      }
+      const nextEndDate = getEndDateForToggle({
+        nextAllDay: true,
+        fromAllDaySlot: !!originalTimeRef.current?.fromAllDaySlot,
+        startDate,
+        previousEndDate: endDate,
+        originalEndDate: originalTimeRef.current?.endDate,
+      });
+      newEnd = nextEndDate;
+      setEndDate(nextEndDate);
     } else {
       // ON => OFF: Restore original time AND original end date
       if (originalTimeRef.current) {
@@ -123,7 +124,12 @@ export function useAllDayToggle(
           setEndDate(startDate); // Set endDate = startDate
         } else {
           // Normal case: restore original time AND original end date
-          const restoredEndDate = originalTimeRef.current.endDate || endDate;
+          const restoredEndDate = getEndDateForToggle({
+            nextAllDay: false,
+            startDate,
+            previousEndDate: endDate,
+            originalEndDate: originalTimeRef.current.endDate,
+          });
 
           newStart = combineDateTime(startDate, originalTimeRef.current.start);
           newEnd = combineDateTime(
