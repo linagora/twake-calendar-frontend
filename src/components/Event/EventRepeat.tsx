@@ -192,7 +192,7 @@ export default function RepeatEvent({
                       })
                     }
                     style={{ width: 100 }}
-                    inputProps={{ min: 1 }}
+                    inputProps={{ min: 1, "data-testid": "occurrences-input" }}
                     disabled={!isOwn || endOption !== "after"}
                   />
                   occurrences

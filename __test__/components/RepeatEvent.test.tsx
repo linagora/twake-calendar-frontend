@@ -231,7 +231,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(afterRadio);
 
     // Set occurrences to 5
-    const occurrencesInput = screen.getAllByRole("spinbutton")[1];
+    const occurrencesInput = screen.getByTestId("occurrences-input");
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
 
     await expectRRule({ freq: "daily", interval: 1, occurrences: 5 });
@@ -242,8 +242,10 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select "On" end option
-    const onRadio = screen.getByLabelText(/on/i);
-    fireEvent.click(onRadio);
+    const onRadio = screen
+      .getAllByLabelText(/on/i)
+      .find((el) => el.type === "radio");
+    fireEvent.click(onRadio!);
 
     // Set end date
     const endDateInput = screen.getByTestId("end-date");
@@ -318,7 +320,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(afterRadio);
 
     // Set occurrences to 5
-    const occurrencesInput = screen.getAllByRole("spinbutton")[1];
+    const occurrencesInput = screen.getByTestId("occurrences-input");
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
 
     await expectRRule({ freq: "monthly", interval: 1, occurrences: 5 });
@@ -350,7 +352,7 @@ describe("Repeat Event Integration Tests", () => {
     // First choose "After" with 5 occurrences
     const afterRadio = screen.getByLabelText(/after/i);
     fireEvent.click(afterRadio);
-    const occurrencesInput = screen.getAllByRole("spinbutton")[1];
+    const occurrencesInput = screen.getByTestId("occurrences-input");
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
 
     // Then change mind and choose "Never"
