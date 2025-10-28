@@ -4,7 +4,7 @@ import { createMouseHandlers } from "./mouseHandlers";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
-import { EventChip } from "../../Event/EventChip";
+import { EventChip } from "../../Event/EventChip/EventChip";
 
 export interface ViewHandlersProps {
   calendarRef: React.RefObject<CalendarApi | null>;
