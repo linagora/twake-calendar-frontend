@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import moment, { Moment } from "moment";
 
 /**
@@ -16,6 +17,8 @@ export interface DateTimeFieldsProps {
   endTime: string;
   allday: boolean;
   showMore: boolean;
+  showEndDate: boolean;
+  onToggleEndDate: () => void;
   validation: {
     errors: {
       dateTime: string;
@@ -38,6 +41,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   endTime,
   allday,
   showMore,
+  showEndDate,
+  onToggleEndDate,
   validation,
   onStartDateChange,
   onStartTimeChange,
@@ -46,18 +51,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 }) => {
   return (
     <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en">
-      <Box display="flex" gap={1} flexDirection="column">
+      <Box
+        display="flex"
+        gap={1}
+        flexDirection="column"
+        sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
+      >
         {/* First row: 4 fields */}
-        <Box display="flex" gap={1} flexDirection="row" alignItems="flex-start">
+        <Box display="flex" gap={1} flexDirection="row" alignItems="center">
           {/* Start Date - 30% */}
-          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", minWidth: 0 }}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                Start Date
-              </Typography>
-            )}
+          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", maxWidth: "150px" }}>
             <DatePicker
-              label={!showMore ? "Start Date" : ""}
+              label="Start Date"
               value={startDate ? moment(startDate) : null}
               onChange={(newValue: Moment | null) => {
                 onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
@@ -68,22 +73,17 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   margin: "dense" as const,
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
-                  "data-testid": "start-date-input",
                   sx: { width: "100%" },
+                  inputProps: { "data-testid": "start-date-input" },
                 },
               }}
             />
           </Box>
 
           {/* Start Time - 20% */}
-          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", minWidth: 0 }}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                Start Time
-              </Typography>
-            )}
+          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", maxWidth: "150px" }}>
             <TimePicker
-              label={!showMore ? "Start Time" : ""}
+              label="Start Time"
               value={startTime ? moment(startTime, "HH:mm") : null}
               onChange={(newValue: Moment | null) => {
                 onStartTimeChange(newValue?.format("HH:mm") || "");
@@ -95,22 +95,17 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   margin: "dense" as const,
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
-                  "data-testid": "start-time-input",
                   sx: { width: "100%" },
+                  inputProps: { "data-testid": "start-time-input" },
                 },
               }}
             />
           </Box>
 
           {/* End Time - 20% */}
-          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", minWidth: 0 }}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                End Time
-              </Typography>
-            )}
+          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", maxWidth: "150px" }}>
             <TimePicker
-              label={!showMore ? "End Time" : ""}
+              label="End Time"
               value={endTime ? moment(endTime, "HH:mm") : null}
               onChange={(newValue: Moment | null) => {
                 onEndTimeChange(newValue?.format("HH:mm") || "");
@@ -123,38 +118,53 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
                   error: !!validation.errors.dateTime,
-                  "data-testid": "end-time-input",
                   sx: { width: "100%" },
+                  inputProps: { "data-testid": "end-time-input" },
                 },
               }}
             />
           </Box>
 
-          {/* End Date - 30% */}
-          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", minWidth: 0 }}>
-            {showMore && (
-              <Typography variant="caption" display="block" mb={0.5}>
-                End Date
-              </Typography>
+          {/* End Date - Conditional rendering */}
+          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", maxWidth: "150px" }}>
+            {!showEndDate ? (
+              // Show "..." button to reveal end date
+              <Box
+                display="flex"
+                justifyContent="flex-start"
+                sx={{ mt: showMore ? 0 : 0 }}
+              >
+                <Tooltip title="Show end date">
+                  <IconButton
+                    size="small"
+                    onClick={onToggleEndDate}
+                    aria-label="Show end date"
+                  >
+                    <MoreHorizIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            ) : (
+              // Show End Date picker (no hide button)
+              <DatePicker
+                label="End Date"
+                value={endDate ? moment(endDate) : null}
+                onChange={(newValue: Moment | null) => {
+                  onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
+                }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    margin: "dense" as const,
+                    fullWidth: true,
+                    InputLabelProps: { shrink: true },
+                    error: !!validation.errors.dateTime,
+                    sx: { width: "100%" },
+                    inputProps: { "data-testid": "end-date-input" },
+                  },
+                }}
+              />
             )}
-            <DatePicker
-              label={!showMore ? "End Date" : ""}
-              value={endDate ? moment(endDate) : null}
-              onChange={(newValue: Moment | null) => {
-                onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
-              }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  margin: "dense" as const,
-                  fullWidth: true,
-                  InputLabelProps: { shrink: true },
-                  error: !!validation.errors.dateTime,
-                  "data-testid": "end-date-input",
-                  sx: { width: "100%" },
-                },
-              }}
-            />
           </Box>
         </Box>
 
