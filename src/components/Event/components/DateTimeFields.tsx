@@ -68,6 +68,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   margin: "dense" as const,
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
+                  "data-testid": "start-date-input",
                   sx: { width: "100%" },
                 },
               }}
@@ -94,6 +95,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   margin: "dense" as const,
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
+                  "data-testid": "start-time-input",
                   sx: { width: "100%" },
                 },
               }}
@@ -121,6 +123,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
                   error: !!validation.errors.dateTime,
+                  "data-testid": "end-time-input",
                   sx: { width: "100%" },
                 },
               }}
@@ -147,6 +150,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   fullWidth: true,
                   InputLabelProps: { shrink: true },
                   error: !!validation.errors.dateTime,
+                  "data-testid": "end-date-input",
                   sx: { width: "100%" },
                 },
               }}
