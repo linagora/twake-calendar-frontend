@@ -127,7 +127,7 @@ export function EventChip({
 
     // View and time calculations
     const isMonthView = arg.view.type === "dayGridMonth";
-    const timeZone = arg.view.calendar?.getOption("timeZone") || "local";
+    const timeZone = arg.view.calendar?.getOption("timeZone") || "UTC";
     const { startTime, endTime } = getEventTimes(event, timeZone);
     const eventLength = getEventDuration(event);
 
@@ -152,6 +152,7 @@ export function EventChip({
             : cardStyle
         }
         ref={cardRef}
+        data-testid={`event-card-${event._def.extendedProps.uid}`}
       >
         <CardHeader
           title={
@@ -305,7 +306,8 @@ export function EventChip({
         )}
         {(isMoreThan60 || eventLength === 60) &&
           event._def.extendedProps.organizer &&
-          !showCompact && (
+          !showCompact &&
+          (window as any).displayOrgAvatar && (
             <Avatar
               children={OrganizerAvatar.children}
               style={{

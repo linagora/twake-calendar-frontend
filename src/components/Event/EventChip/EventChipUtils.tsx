@@ -28,7 +28,7 @@ export function getEventDuration(event: any): number {
     "minutes"
   );
 }
-export function getBestColor(colors: any): string {
+export function getBestColor(colors: { light: string; dark: string }): string {
   const contrastToDark = getContrastRatio(colors?.dark, "#fff");
   const contrastToLight = getContrastRatio(colors?.light, "#fff");
   return contrastToDark > contrastToLight ? colors?.dark : colors?.light;
