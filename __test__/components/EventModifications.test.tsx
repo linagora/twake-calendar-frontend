@@ -169,7 +169,9 @@ describe("CalendarApp integration", () => {
 
     const eventEls = screen.getAllByText("Private Event");
     const found = eventEls.some((eventEl) =>
-      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
+      within(eventEl.parentElement as HTMLElement).queryByTestId(
+        "LockOutlineIcon"
+      )
     );
     expect(found).toBe(true);
   });
@@ -187,7 +189,9 @@ describe("CalendarApp integration", () => {
 
     const eventEls = screen.getAllByText("Confidential Event");
     const found = eventEls.some((eventEl) =>
-      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
+      within(eventEl.parentElement as HTMLElement).queryByTestId(
+        "LockOutlineIcon"
+      )
     );
     expect(found).toBe(true);
   });

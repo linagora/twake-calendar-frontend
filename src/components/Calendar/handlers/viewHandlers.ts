@@ -1,12 +1,8 @@
 import React from "react";
 import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
-import { updateSlotLabelVisibility } from "../utils/calendarUtils";
 import { createMouseHandlers } from "./mouseHandlers";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LockIcon from "@mui/icons-material/Lock";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EventChip } from "../../Event/EventChip";
 
