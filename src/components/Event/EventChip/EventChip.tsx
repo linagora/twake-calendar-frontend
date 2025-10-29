@@ -209,7 +209,6 @@ export function EventChip({
                     noWrap
                     style={{
                       ...titleStyle,
-                      marginLeft: isMoreThan30 ? 0.5 : 0,
                       fontSize:
                         !isMoreThan15 || isMonthView
                           ? "11px"

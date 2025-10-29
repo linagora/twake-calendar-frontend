@@ -130,6 +130,7 @@ export function DisplayedIcons(
   IconDisplayed: IconDisplayConfig,
   isCompact?: boolean
 ) {
+  if (!Object.values(IconDisplayed).find((b) => b === true)) return;
   if (isCompact) {
     return (
       <Box
@@ -162,6 +163,7 @@ export function DisplayedIcons(
         flexDirection: "row",
         gap: "1px",
         fontSize: "5%",
+        marginRight: "5px",
       }}
     >
       {IconDisplayed.needAction && (
