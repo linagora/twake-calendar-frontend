@@ -182,22 +182,25 @@ export function EventChip({
                   {isMoreThan30 &&
                     !isMonthView &&
                     DisplayedIcons(IconDisplayed, false)}
-                  {!isMoreThan30 && (
-                    <Typography
-                      variant="body2"
-                      style={{
-                        ...titleStyle,
-                        overflow: "visible",
-                        fontSize:
-                          !isMoreThan15 || isMonthView
-                            ? "11px"
-                            : titleStyle.fontSize,
-                        marginRight: "10px",
-                      }}
-                    >
-                      {startTime}
-                    </Typography>
-                  )}
+                  {(!isMoreThan30 || isMonthView) &&
+                    !event._def.extendedProps.allday && (
+                      <Typography
+                        variant="body2"
+                        className="compactStartTime"
+                        style={{
+                          ...titleStyle,
+                          textDecoration: "none",
+                          overflow: "visible",
+                          fontSize:
+                            !isMoreThan15 || isMonthView
+                              ? "11px"
+                              : titleStyle.fontSize,
+                          marginRight: "10px",
+                        }}
+                      >
+                        {startTime}
+                      </Typography>
+                    )}
                   <Typography
                     variant="body2"
                     noWrap
@@ -214,7 +217,8 @@ export function EventChip({
                   </Typography>
                 </Box>
 
-                {!isMoreThan30 && DisplayedIcons(IconDisplayed, true)}
+                {(!isMoreThan30 || isMonthView) &&
+                  DisplayedIcons(IconDisplayed, true)}
               </Box>
             )
           }

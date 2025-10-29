@@ -251,37 +251,26 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 
 /* FullCalendar "more" popover restyle */
 
-.fc-daygrid-day-events
-  display: flex
-  flex-direction: column
-  height 70%
-
-.fc-daygrid-day-bottom
-  position absolute
-  bottom 0
-  font-weight 500
-  font-size 12px
-  line-height 16px
-  letter-spacing 0.5px
-  color #6D7885
-
 .fc-more-popover
   z-index 700 !important
-  border-radius 4px
+  border-radius 8px
   background #fff
   overflow hidden
-  font-family Inter
+  font-family Inter, sans-serif
   width 244px
+  box-shadow 0 4px 16px rgba(0,0,0,0.1)
 
   .fc-popover-header
     background #FCFCFC
+    display flex
     justify-content space-between
+    align-items center
     width 244px
     height 40px
     padding 12px
+    border-bottom 1px solid #eee
 
     .fc-popover-title
-      font-family Inter
       font-weight 500
       font-size 14px
       color #243B55
@@ -290,40 +279,57 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 
     .fc-popover-close
       color #605D62
+      cursor pointer
 
   .fc-popover-body
     max-height 208px
     overflow auto
     padding 0 !important
+    background #fff
 
+    /* Handle your new Card-based event items */
+    .MuiCard-root
+      box-shadow none !important
+      border none !important
+      border-radius 8px
+      background-color transparent !important
+      margin 2px 6px
+      transition background 0.15s ease
+
+
+      &:hover
+        background #f7f7f8
+
+      .MuiCardHeader-root
+        padding 4px 8px
+        .MuiTypography-root
+          white-space nowrap
+          overflow hidden
+          text-overflow ellipsis
+          font-family: Inter !important
+          font-weight: 400 !important
+          font-style: Regular !important
+          font-size: 14px !important
+          line-height: 20px !important
+          letter-spacing: 0.25px !important
+          vertical-align: middle !important
+          color #1C1B1F !important
+          .compactStartTime
+            display none
+
+      .MuiCardContent-root
+        padding 0 8px 4px 8px
+        font-size 12px
+        color #6D7885
+        line-height 16px
+
+    /* Hide FullCalendar’s extra margin block */
     .fc-more-popover-misc
       height 0 !important
       margin 0 !important
       padding 0 !important
-    .fc-daygrid-event 
-      &:hover
-        background #f7f7f8
-      div
-        display flex
-        align-items center
-        padding 4px 6px 4px 12px
-        border-radius 8px
-        color #1C1B1F!important
-        background-color transparent!important
-        border none
-        color #334155
-        font-size 14px
-        font-weight 400
-        line-height 20px
-        letter-spacing 0.25px
-        vertical-align middle
-        transition background 0.15s ease, color 0.15s ease
 
-        span
-          white-space nowrap
-          overflow hidden
-          text-overflow ellipsis
-
+// Custom event chips
 .fc-event 
   background-color transparent
   border none
