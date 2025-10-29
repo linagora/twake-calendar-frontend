@@ -114,8 +114,8 @@ interface EventFormFieldsProps {
   setEventClass: (eventClass: string) => void;
   timezone: string;
   setTimezone: (timezone: string) => void;
-  calendarid: number;
-  setCalendarid: (calendarid: number) => void;
+  calendarid: string;
+  setCalendarid: (calendarid: string) => void;
   hasVideoConference: boolean;
   setHasVideoConference: (hasVideoConference: boolean) => void;
   meetingLink: string | null;
@@ -145,7 +145,7 @@ interface EventFormFieldsProps {
     newStart: string,
     newEnd: string
   ) => void;
-  onCalendarChange?: (newCalendarId: number) => void;
+  onCalendarChange?: (newCalendarId: string) => void;
 
   // Validation
   onValidationChange?: (isValid: boolean) => void;
@@ -371,7 +371,7 @@ export default function EventFormFields({
     onAllDayChange?.(newAllDay, newStart, newEnd);
   };
 
-  const handleCalendarChange = (newCalendarId: number) => {
+  const handleCalendarChange = (newCalendarId: string) => {
     setCalendarid(newCalendarId);
     onCalendarChange?.(newCalendarId);
   };
@@ -739,7 +739,7 @@ export default function EventFormFields({
             label={!showMore ? "Calendar" : ""}
             displayEmpty
             onChange={(e: SelectChangeEvent) =>
-              handleCalendarChange(Number(e.target.value))
+              handleCalendarChange(e.target.value)
             }
           >
             {CalendarItemList(userPersonnalCalendars)}

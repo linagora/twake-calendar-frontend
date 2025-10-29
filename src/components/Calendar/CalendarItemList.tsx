@@ -6,8 +6,8 @@ import { CalendarName } from "./CalendarName";
 export function CalendarItemList(
   userPersonnalCalendars: Calendars[]
 ): React.ReactNode {
-  return Object.values(userPersonnalCalendars).map((calendar, index) => (
-    <MenuItem key={index} value={index}>
+  return Object.values(userPersonnalCalendars).map((calendar) => (
+    <MenuItem key={calendar.id} value={calendar.id}>
       <CalendarName calendar={calendar} />
     </MenuItem>
   ));
