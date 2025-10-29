@@ -1,13 +1,13 @@
 import CancelIcon from "@mui/icons-material/Cancel";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import RepeatIcon from "@mui/icons-material/Repeat";
 import { Box, getContrastRatio } from "@mui/material";
 import moment from "moment";
 import React from "react";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
+import { EVENT_DURATION } from "./EventChip";
 
 export interface EventChipProps {
   arg: any;
@@ -19,7 +19,6 @@ export interface IconDisplayConfig {
   declined: boolean;
   tentative: boolean;
   needAction: boolean;
-  recurrent: boolean;
   private: boolean;
 }
 export function getEventDuration(event: any): number {
@@ -81,23 +80,52 @@ export function getTitleStyle(
   }
 }
 
-export function getCardStyle(
-  bestColor: string,
-  partstat?: string,
-  calendar?: any
+function getEventVariant(duration: number) {
+  if (duration <= EVENT_DURATION.SHORT) return "short";
+  if (duration <= EVENT_DURATION.MEDIUM) return "medium";
+  if (duration <= EVENT_DURATION.LONG) return "long";
+  return "extraLong";
+}
+
+function getCardVariantStyle(
+  variant: string,
+  baseColor: string
 ): React.CSSProperties {
-  const baseStyle: React.CSSProperties = {
+  const shared: React.CSSProperties = {
     width: "100%",
     height: "100%",
-    borderRadius: "6px",
+    borderRadius: "8px",
     boxShadow: "none",
-    padding: 0,
+    border: `1px solid ${baseColor}`,
+    color: baseColor,
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
-    border: `1px solid ${bestColor}`,
-    color: bestColor,
   };
+
+  switch (variant) {
+    case "short":
+      return { ...shared, padding: "0px 6px", justifyContent: "center" };
+    case "medium":
+      return { ...shared, padding: "4px 6px", justifyContent: "center" };
+    default:
+      return {
+        ...shared,
+        padding: "4px 6px",
+      };
+  }
+}
+
+export function getCardStyle(
+  bestColor: string,
+  eventLength: number,
+  partstat?: string,
+  calendar?: any
+): React.CSSProperties {
+  const baseStyle: React.CSSProperties = getCardVariantStyle(
+    getEventVariant(eventLength),
+    bestColor
+  );
 
   switch (partstat) {
     case "DECLINED":
@@ -126,44 +154,15 @@ export function getCardStyle(
   }
 }
 
-export function DisplayedIcons(
-  IconDisplayed: IconDisplayConfig,
-  isCompact?: boolean
-) {
+export function DisplayedIcons(IconDisplayed: IconDisplayConfig) {
   if (!Object.values(IconDisplayed).find((b) => b === true)) return;
-  if (isCompact) {
-    return (
-      <Box
-        style={{
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
-        {IconDisplayed.recurrent && <RepeatIcon style={{ fontSize: "16px" }} />}
-        {IconDisplayed.private && (
-          <LockOutlineIcon style={{ fontSize: "16px" }} />
-        )}
-        {IconDisplayed.tentative && (
-          <HelpOutlineIcon style={{ fontSize: "16px" }} />
-        )}
-        {IconDisplayed.declined && (
-          <CancelIcon color="error" style={{ fontSize: "16px" }} />
-        )}
-        {IconDisplayed.needAction && (
-          <HelpOutlineIcon style={{ fontSize: "16px" }} />
-        )}
-      </Box>
-    );
-  }
-
   return (
     <Box
       style={{
         display: "flex",
         flexDirection: "row",
         gap: "1px",
-        fontSize: "5%",
-        marginRight: "5px",
+        marginRight: "4px",
       }}
     >
       {IconDisplayed.needAction && (
@@ -178,7 +177,6 @@ export function DisplayedIcons(
       {IconDisplayed.private && (
         <LockOutlineIcon style={{ fontSize: "15px" }} />
       )}
-      {IconDisplayed.recurrent && <RepeatIcon style={{ fontSize: "15px" }} />}
     </Box>
   );
 }
