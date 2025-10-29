@@ -40,7 +40,7 @@ describe("CalendarSelection", () => {
         "user1/cal1": {
           name: "Calendar personnal",
           id: "user1/cal1",
-          color: "#FF0000",
+          color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
           events: {
             event1: {
@@ -72,7 +72,7 @@ describe("CalendarSelection", () => {
           name: "Calendar delegated",
           delegated: true,
           id: "user2/cal1",
-          color: "#FF0000",
+          color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
           events: {
             event1: {
@@ -103,7 +103,7 @@ describe("CalendarSelection", () => {
         "user3/cal1": {
           name: "Calendar shared",
           id: "user3/cal1",
-          color: "#FF0000",
+          color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
           events: {
             event1: {
@@ -292,7 +292,7 @@ describe("calendar Availability search", () => {
         "user1/cal1": {
           name: "Calendar personnal",
           id: "user1/cal1",
-          color: "#FF0000",
+          color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
           events: {},
         },

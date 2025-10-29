@@ -102,7 +102,12 @@ export function EventChip({
     }
 
     // Color and contrast logic
-    const bestColor = getBestColor(event._def.extendedProps.colors);
+    const bestColor = getBestColor(
+      (calendar.color as { light: string; dark: string }) ?? {
+        light: "#fff",
+        dark: "#000",
+      }
+    );
 
     // Style calculation
     const titleStyle = getTitleStyle(

@@ -43,7 +43,6 @@ describe("CalendarApp integration", () => {
                 id: "event1",
                 calId: "667037022b752d0026472254/cal1",
                 uid: "event1",
-                color: { light: "#FFFFFF", dark: "#000000" },
                 title: "Test Event",
                 start: start.toISOString(),
                 end: end.toISOString(),
@@ -131,7 +130,6 @@ describe("CalendarApp integration", () => {
               id: "event1",
               calId: "667037022b752d0026472254/cal1",
               uid: "event1",
-              color: { light: "#FFFFFF", dark: "#000000" },
               start: new Date().toISOString(),
               end: new Date(Date.now() + 3600000).toISOString(),
               partstat: "ACCEPTED",
@@ -236,7 +234,7 @@ describe("CalendarApp integration", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
-            color: "#FF0000",
+            color: { light: "#FF0000", dark: "#000" },
             ownerEmails: ["alice@example.com"],
             events: {
               event1: {
