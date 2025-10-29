@@ -13,13 +13,22 @@ export function getCalendarRange(date = new Date()) {
   const diffToMonday = (dayOfWeekStart + 6) % 7;
   const startDate = new Date(firstOfMonth);
   startDate.setDate(firstOfMonth.getDate() - diffToMonday);
+  startDate.setHours(0, 0, 0, 0);
 
   const lastOfMonth = new Date(year, month + 1, 0);
-  const dayOfWeekEnd = lastOfMonth.getDay();
 
-  const diffToSunday = (7 - dayOfWeekEnd) % 7;
-  const endDate = new Date(lastOfMonth);
-  endDate.setDate(lastOfMonth.getDate() + diffToSunday);
+  // Calculate how many days from startDate to lastOfMonth
+  const daysFromStart = Math.floor(
+    (lastOfMonth.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  // Calculate number of weeks needed to cover all days (round up)
+  const weeksNeeded = Math.ceil((daysFromStart + 1) / 7);
+
+  // endDate is the Sunday of the last week (startDate + weeks * 7 - 1)
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + weeksNeeded * 7 - 1);
+  endDate.setHours(23, 59, 59, 999);
 
   return {
     start: startDate,
