@@ -1,6 +1,5 @@
 import React from "react";
 import { combineDateTime } from "../utils/dateTimeHelpers";
-import { getEndDateForToggle } from "../utils/dateRules";
 import { getRoundedCurrentTime } from "../utils/dateTimeFormatters";
 
 /**
@@ -16,7 +15,6 @@ export interface AllDayToggleParams {
   endTime: string;
   setStartTime: (time: string) => void;
   setEndTime: (time: string) => void;
-  setEndDate: (date: string) => void;
   setStart: (start: string) => void;
   setEnd: (end: string) => void;
   setAllDay: (allday: boolean) => void;
@@ -53,7 +51,6 @@ export function useAllDayToggle(
     endTime,
     setStartTime,
     setEndTime,
-    setEndDate,
     setStart,
     setEnd,
     setAllDay,
@@ -73,97 +70,32 @@ export function useAllDayToggle(
     let newStart = start;
     let newEnd = end;
 
-    if (newAllDay) {
-      // OFF => ON: Save original time AND original end date
-      if (start.includes("T")) {
-        originalTimeRef.current = {
-          start: startTime,
-          end: endTime,
-          endDate: endDate, // Save original end date
-        };
-      }
+    if (!newAllDay) {
+      const hasTimeParts = start.includes("T") && end.includes("T");
+      if (!hasTimeParts && !startTime && !endTime) {
+        const now = new Date();
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+        const nextHour = new Date(now);
+        nextHour.setMinutes(0);
+        nextHour.setHours(now.getHours() + 1);
 
-      // Reset time to empty, keep only date part
-      setStartTime("");
-      setEndTime("");
-      newStart = startDate;
-      const nextEndDate = getEndDateForToggle({
-        nextAllDay: true,
-        fromAllDaySlot: !!originalTimeRef.current?.fromAllDaySlot,
-        startDate,
-        previousEndDate: endDate,
-        originalEndDate: originalTimeRef.current?.endDate,
-      });
-      newEnd = nextEndDate;
-      setEndDate(nextEndDate);
-    } else {
-      // ON => OFF: Restore original time AND original end date
-      if (originalTimeRef.current) {
-        // Check if this came from all-day slot click
-        if (originalTimeRef.current.fromAllDaySlot) {
-          // From all-day slot: set endDate = startDate, use default time
-          const currentTime = getRoundedCurrentTime();
-          const hours = String(currentTime.getHours()).padStart(2, "0");
-          const minutes = String(currentTime.getMinutes()).padStart(2, "0");
-          const timeStr = `${hours}:${minutes}`;
+        const startHours = String(nextHour.getHours()).padStart(2, "0");
+        const startMinutes = String(nextHour.getMinutes()).padStart(2, "0");
+        const startTimeStr = `${startHours}:${startMinutes}`;
 
-          newStart = combineDateTime(startDate, timeStr);
-
-          // End time = start time + 1 hour
-          const endTimeDate = new Date(currentTime);
-          endTimeDate.setHours(endTimeDate.getHours() + 1);
-          const endHours = String(endTimeDate.getHours()).padStart(2, "0");
-          const endMinutes = String(endTimeDate.getMinutes()).padStart(2, "0");
-          const endTimeStr = `${endHours}:${endMinutes}`;
-
-          newEnd = combineDateTime(startDate, endTimeStr); // Use startDate as endDate
-
-          // Update internal states
-          setStartTime(timeStr);
-          setEndTime(endTimeStr);
-          setEndDate(startDate); // Set endDate = startDate
-        } else {
-          // Normal case: restore original time AND original end date
-          const restoredEndDate = getEndDateForToggle({
-            nextAllDay: false,
-            startDate,
-            previousEndDate: endDate,
-            originalEndDate: originalTimeRef.current.endDate,
-          });
-
-          newStart = combineDateTime(startDate, originalTimeRef.current.start);
-          newEnd = combineDateTime(
-            restoredEndDate,
-            originalTimeRef.current.end
-          );
-
-          // Update internal states
-          setStartTime(originalTimeRef.current.start);
-          setEndTime(originalTimeRef.current.end);
-          setEndDate(restoredEndDate);
-        }
-
-        originalTimeRef.current = null;
-      } else {
-        // No original time: use rounded current time with 1 hour duration
-        const currentTime = getRoundedCurrentTime();
-        const hours = String(currentTime.getHours()).padStart(2, "0");
-        const minutes = String(currentTime.getMinutes()).padStart(2, "0");
-        const timeStr = `${hours}:${minutes}`;
-
-        newStart = combineDateTime(startDate, timeStr);
-
-        // End time = start time + 1 hour (not 30 mins)
-        const endTimeDate = new Date(currentTime);
-        endTimeDate.setHours(endTimeDate.getHours() + 1);
-        const endHours = String(endTimeDate.getHours()).padStart(2, "0");
-        const endMinutes = String(endTimeDate.getMinutes()).padStart(2, "0");
+        const endHourDate = new Date(nextHour);
+        endHourDate.setHours(endHourDate.getHours() + 1);
+        const endHours = String(endHourDate.getHours()).padStart(2, "0");
+        const endMinutes = String(endHourDate.getMinutes()).padStart(2, "0");
         const endTimeStr = `${endHours}:${endMinutes}`;
 
-        newEnd = combineDateTime(endDate, endTimeStr);
+        const startDateOnly = start.split("T")[0] || startDate;
+        const endDateOnly = end.split("T")[0] || endDate || startDateOnly;
+        newStart = combineDateTime(startDateOnly, startTimeStr);
+        newEnd = combineDateTime(endDateOnly, endTimeStr);
 
-        // Update internal states
-        setStartTime(timeStr);
+        setStartTime(startTimeStr);
         setEndTime(endTimeStr);
       }
     }
@@ -185,7 +117,6 @@ export function useAllDayToggle(
     endTime,
     setStartTime,
     setEndTime,
-    setEndDate,
     setStart,
     setEnd,
     setAllDay,
