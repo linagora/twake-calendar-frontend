@@ -26,9 +26,13 @@ function App() {
       dispatch(push("/error"));
     }
   });
+
   return (
     <CustomThemeProvider>
-      <I18n dictRequire={(lang) => locale[lang]} lang={lang}>
+      <I18n
+        dictRequire={(lang: keyof typeof locale) => locale[lang]}
+        lang={lang}
+      >
         <Suspense fallback={<Loading />}>
           <Router history={history}>
             <Routes>

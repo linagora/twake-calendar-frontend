@@ -699,7 +699,11 @@ function EventPopover({
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title={event?.uid ? t("eventDuplication.duplicateEvent") : t("event.createEvent")}
+      title={
+        event?.uid
+          ? t("eventDuplication.duplicateEvent")
+          : t("event.createEvent")
+      }
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}
