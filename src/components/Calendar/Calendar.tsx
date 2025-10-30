@@ -42,6 +42,7 @@ import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
 import { useTheme } from "@mui/material/styles";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -286,6 +287,8 @@ export default function CalendarApp({
     (window as any).__calendarRef = calendarRef;
   }
 
+  const { t } = useI18n();
+
   return (
     <main className="main-layout">
       <Box
@@ -312,7 +315,7 @@ export default function CalendarApp({
               eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
             }
           >
-            <AddIcon /> <p>Create Event</p>
+            <AddIcon /> <p>{t("event.createEvent")}</p>
           </Button>
         </Box>
 

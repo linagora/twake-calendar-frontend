@@ -1,4 +1,5 @@
 import { Button, Popover } from "@mui/material";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { MouseEvent, useMemo, useState } from "react";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
@@ -34,7 +35,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
   };
 
   const open = Boolean(anchorEl);
-
+  const { t } = useI18n();
   return (
     <>
       <Button
@@ -49,7 +50,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
           lineHeight: 1.2,
         }}
       >
-        {selectedOffset || "Select Timezone"}
+        {selectedOffset || t("common.select_timezone")}
       </Button>
 
       <Popover

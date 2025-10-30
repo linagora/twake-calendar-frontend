@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { refreshCalendars } from "../Event/utils/eventUtils";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import { useEffect, useState } from "react";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function MiniCalendar({
   calendarRef,
@@ -29,10 +30,14 @@ export function MiniCalendar({
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
   const [visibleDate, setVisibleDate] = useState(selectedDate);
+  const { t } = useI18n();
 
   useEffect(() => setVisibleDate(selectedDate), [selectedDate]);
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en-gb">
+    <LocalizationProvider
+      dateAdapter={AdapterMoment}
+      adapterLocale={t("locale") ?? "en-gb"}
+    >
       <DateCalendar
         value={moment(visibleDate)}
         onChange={(dateMoment) => {

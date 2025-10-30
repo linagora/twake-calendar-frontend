@@ -180,7 +180,7 @@ describe("Event Preview Display", () => {
       expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
     }
     cleanup();
-    // Renders the personnal cal event
+    // Renders the personal cal event
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -936,7 +936,7 @@ describe("Event Full Display", () => {
       preloadedState
     );
     expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
-    // Renders the personnal cal event
+    // Renders the personal cal event
     renderWithProviders(
       <EventDisplayModal
         open={true}

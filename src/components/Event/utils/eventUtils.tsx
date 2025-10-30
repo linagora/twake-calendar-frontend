@@ -13,6 +13,7 @@ import {
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -20,6 +21,7 @@ export function renderAttendeeBadge(
   isFull?: boolean,
   isOrganizer?: boolean
 ) {
+  const { t } = useI18n();
   const classIcon =
     a.partstat === "ACCEPTED" ? (
       <CheckCircleIcon fontSize="inherit" color="success" />
@@ -77,7 +79,7 @@ export function renderAttendeeBadge(
           </Typography>
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
-              Organizer
+              {t("event.organizer")}
             </Typography>
           )}
         </Box>

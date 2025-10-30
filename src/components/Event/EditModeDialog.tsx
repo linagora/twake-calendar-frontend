@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useState } from "react";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function EditModeDialog({
   type,
@@ -23,6 +24,7 @@ export function EditModeDialog({
   event: CalendarEvent;
   eventAction: (type: "solo" | "all" | undefined) => void;
 }) {
+  const { t } = useI18n();
   const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
     "solo"
   );
@@ -37,8 +39,8 @@ export function EditModeDialog({
   return (
     <Dialog open={Boolean(type)} onClose={handleClose}>
       <DialogTitle>
-        {type === "edit" && "Update the reccurent event"}
-        {type === "attendance" && "Update the participation status"}
+        {type === "edit" && t("editModeDialog.updateRecurrentEvent")}
+        {type === "attendance" && t("editModeDialog.updateParticipationStatus")}
       </DialogTitle>
       <DialogContent>
         <RadioGroup
@@ -50,19 +52,19 @@ export function EditModeDialog({
           <FormControlLabel
             value="solo"
             control={<Radio />}
-            label="This event"
+            label={t("editModeDialog.thisEvent")}
           />
           <FormControlLabel
             value="all"
             control={<Radio />}
-            label="All the events"
+            label={t("editModeDialog.allEvents")}
           />
         </RadioGroup>
       </DialogContent>
       <DialogActions>
         <ButtonGroup>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleEvent}>Ok</Button>
+          <Button onClick={handleClose}>{t("common.cancel")}</Button>
+          <Button onClick={handleEvent}>{t("common.ok")}</Button>
         </ButtonGroup>
       </DialogActions>
     </Dialog>

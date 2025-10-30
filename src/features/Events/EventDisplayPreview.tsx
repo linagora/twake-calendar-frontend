@@ -729,7 +729,7 @@ function makeRecurrenceString(event: CalendarEvent): string | undefined {
   if (!event.repetition) {
     return;
   }
-  const recur = [`Reccurent Event · ${event.repetition.freq}`];
+  const recur = [`Recurrent Event · ${event.repetition.freq}`];
   const recurType: Record<string, string> = {
     daily: "days",
     monthly: "months",

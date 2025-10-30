@@ -56,7 +56,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
@@ -129,7 +129,7 @@ describe("CalendarSelection", () => {
     );
   });
 
-  it("Navigates to deletion dialog and deletes personnal cal", async () => {
+  it("Navigates to deletion dialog and deletes personal cal", async () => {
     const spy = jest
       .spyOn(calendarThunks, "removeCalendarAsync")
       .mockImplementation((payload) => {
@@ -207,7 +207,7 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("Browse other calendars")).toBeInTheDocument();
   });
 
-  it("when only personnal calendars are in the state, only personnal calendars and the title for other to be added are shown", () => {
+  it("when only personal calendars are in the state, only personal calendars and the title for other to be added are shown", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -224,7 +224,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
     expect(screen.queryByText("Delegated Calendars")).not.toBeInTheDocument();
     expect(screen.queryByText("Other Calendars")).toBeInTheDocument();
   });

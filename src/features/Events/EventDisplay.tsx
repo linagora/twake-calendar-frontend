@@ -76,7 +76,7 @@ export default function EventDisplayModal({
     useAppSelector((state) => state.calendars.list)
   );
 
-  const userPersonnalCalendars: Calendars[] = calendars.filter(
+  const userPersonalCalendars: Calendars[] = calendars.filter(
     (c) => c.id?.split("/")[0] === user.userData?.openpaasId
   );
 
@@ -101,7 +101,7 @@ export default function EventDisplayModal({
   const [newCalId, setNewCalId] = useState(event?.calId);
   const [calendarid, setCalendarid] = useState(
     calId.split("/")[0] === user.userData?.openpaasId
-      ? userPersonnalCalendars.findIndex((cal) => cal.id === calId)
+      ? userPersonalCalendars.findIndex((cal) => cal.id === calId)
       : calendars.findIndex((cal) => cal.id === calId)
   );
 
@@ -120,7 +120,7 @@ export default function EventDisplayModal({
     ) ?? ({} as userAttendee);
 
   const isOwn = organizer?.cal_address === user.userData.email;
-  const isOwnCal = userPersonnalCalendars.find((cal) => cal.id === calId);
+  const isOwnCal = userPersonalCalendars.find((cal) => cal.id === calId);
   const attendeeDisplayLimit = 3;
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function EventDisplayModal({
       timezone,
       attendee: [organizer, ...attendees],
       transp: busy,
-      color: userPersonnalCalendars[calendarid]?.color,
+      color: userPersonalCalendars[calendarid]?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
     };
 
@@ -182,28 +182,28 @@ export default function EventDisplayModal({
     if (typeOfAction === "solo") {
       dispatch(
         updateEventInstanceAsync({
-          cal: userPersonnalCalendars[calendarid],
+          cal: userPersonalCalendars[calendarid],
           event: { ...newEvent, recurrenceId: recurrenceId },
         })
       );
     } else if (typeOfAction === "all") {
       dispatch(
         updateSeriesAsync({
-          cal: userPersonnalCalendars[calendarid],
+          cal: userPersonalCalendars[calendarid],
           event: { ...newEvent, recurrenceId: recurrenceId },
         })
       );
       await refreshCalendars(dispatch, calendars, calendarRange);
     } else {
       dispatch(
-        putEventAsync({ cal: userPersonnalCalendars[calendarid], newEvent })
+        putEventAsync({ cal: userPersonalCalendars[calendarid], newEvent })
       );
     }
 
     if (newCalId !== calId) {
       dispatch(
         moveEventAsync({
-          cal: userPersonnalCalendars[calendarid],
+          cal: userPersonalCalendars[calendarid],
           newEvent,
           newURL: `/calendars/${newCalId}/${baseId}.ics`,
         })
@@ -219,18 +219,18 @@ export default function EventDisplayModal({
 
   const calList =
     calId.split("/")[0] === user.userData?.openpaasId
-      ? Object.keys(userPersonnalCalendars).map((calendar, index) => (
+      ? Object.keys(userPersonalCalendars).map((calendar, index) => (
           <MenuItem key={index} value={index}>
             <Typography variant="body2">
               <CircleIcon
                 style={{
                   color:
-                    userPersonnalCalendars[index].color?.light ?? "#3788D8",
+                    userPersonalCalendars[index].color?.light ?? "#3788D8",
                   width: 12,
                   height: 12,
                 }}
               />
-              {userPersonnalCalendars[index].name}
+              {userPersonalCalendars[index].name}
             </Typography>
           </MenuItem>
         ))
@@ -371,7 +371,7 @@ export default function EventDisplayModal({
                 onChange={(e: SelectChangeEvent) => {
                   const newId = Number(e.target.value);
                   setCalendarid(newId);
-                  setNewCalId(userPersonnalCalendars[newId].id);
+                  setNewCalId(userPersonalCalendars[newId].id);
                 }}
               >
                 {calList}

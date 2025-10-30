@@ -1,6 +1,5 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { act } from "react";
 import CalendarSearch from "../../src/components/Calendar/CalendarSearch";
 import * as CalendarApi from "../../src/features/Calendars/CalendarApi";
 import * as CalendarSlice from "../../src/features/Calendars/CalendarSlice";

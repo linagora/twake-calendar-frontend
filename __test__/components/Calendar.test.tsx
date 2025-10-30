@@ -1,10 +1,10 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
 import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
-import { act, useRef } from "react";
+import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
 import CalendarLayout from "../../src/components/Calendar/CalendarLayout";
@@ -41,7 +41,7 @@ describe("CalendarSelection", () => {
     calendars: {
       list: {
         "user1/cal1": {
-          name: "Calendar personnal",
+          name: "Calendar personal",
           id: "user1/cal1",
           color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
@@ -146,11 +146,11 @@ describe("CalendarSelection", () => {
         preloadedState
       );
     });
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
   });
@@ -162,11 +162,11 @@ describe("CalendarSelection", () => {
         preloadedState
       );
     });
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
+    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
     expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
     expect(screen.getByText("Other Calendars")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Calendar personnal")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
 
@@ -185,12 +185,12 @@ describe("CalendarSelection", () => {
     });
     expect(sharedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
-  it("BUGFIX: remove dots in mini calendar when unselecting personnal calendar", async () => {
+  it("BUGFIX: remove dots in mini calendar when unselecting personal calendar", async () => {
     await act(async () =>
       renderWithProviders(<CalendarLayout />, preloadedState)
     );
 
-    const checkbox = screen.getByLabelText("Calendar personnal");
+    const checkbox = screen.getByLabelText("Calendar personal");
     // checkbox checked : events shown
     expect(
       screen.getByTestId(
@@ -223,9 +223,9 @@ describe("CalendarSelection", () => {
       renderWithProviders(<CalendarLayout />, preloadedState)
     );
 
-    // hide personnal event first
+    // hide personal event first
     await act(async () => {
-      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+      fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
     const checkbox = screen.getByLabelText("Calendar delegated");
 
@@ -250,9 +250,9 @@ describe("CalendarSelection", () => {
       renderWithProviders(<CalendarLayout />, preloadedState)
     );
 
-    // hide personnal event first
+    // hide personal event first
     await act(async () => {
-      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+      fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
     const checkbox = screen.getByLabelText("Calendar shared");
 
@@ -333,7 +333,7 @@ describe("calendar Availability search", () => {
     calendars: {
       list: {
         "user1/cal1": {
-          name: "Calendar personnal",
+          name: "Calendar personal",
           id: "user1/cal1",
           color: { light: "#FF0000", dark: "#000" },
           ownerEmails: ["alice@example.com"],
@@ -478,7 +478,7 @@ describe("calendar Availability search", () => {
     });
   });
 
-  it("BUGFIX: can untoggle all personnal calendars", async () => {
+  it("BUGFIX: can untoggle all personal calendars", async () => {
     await act(async () =>
       renderWithProviders(<CalendarTestWrapper />, {
         user: preloadedState.user,
@@ -489,7 +489,7 @@ describe("calendar Availability search", () => {
       })
     );
 
-    const checkbox = screen.getByLabelText("Calendar personnal");
+    const checkbox = screen.getByLabelText("Calendar personal");
     expect(checkbox).toBeChecked();
 
     fireEvent.click(checkbox); // toggle off

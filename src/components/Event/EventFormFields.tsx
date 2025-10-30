@@ -33,6 +33,7 @@ import {
 } from "../../utils/videoConferenceUtils";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
 import { DateTimeFields } from "./components/DateTimeFields";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
@@ -84,7 +85,7 @@ interface EventFormFieldsProps {
   isOpen?: boolean;
 
   // Data
-  userPersonnalCalendars: Calendars[];
+  userPersonalCalendars: Calendars[];
   timezoneList: {
     zones: string[];
     browserTz: string;
@@ -145,7 +146,7 @@ export default function EventFormFields({
   showRepeat,
   setShowRepeat,
   isOpen = false,
-  userPersonnalCalendars,
+  userPersonalCalendars,
   timezoneList,
   onStartChange,
   onEndChange,
@@ -155,6 +156,8 @@ export default function EventFormFields({
   showValidationErrors = false,
   onHasEndDateChangedChange,
 }: EventFormFieldsProps) {
+  const { t } = useI18n();
+
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState("");
   const [startTime, setStartTime] = React.useState("");
@@ -406,15 +409,15 @@ export default function EventFormFields({
       <FieldWithLabel
         label={
           <>
-            Title <span style={{ color: "red" }}>*</span>
+            {t("event.form.title")} <span style={{ color: "red" }}>*</span>
           </>
         }
         isExpanded={showMore}
       >
         <TextField
           fullWidth
-          label={!showMore ? "Title" : ""}
-          placeholder="Add title"
+          label={!showMore ? t("event.form.title") : ""}
+          placeholder={t("event.form.titlePlaceholder")}
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -439,18 +442,21 @@ export default function EventFormFields({
                 color: "text.secondary",
               }}
             >
-              Add description
+              {t("event.form.addDescription")}
             </Button>
           </Box>
         </FieldWithLabel>
       )}
 
       {showDescription && (
-        <FieldWithLabel label="Description" isExpanded={showMore}>
+        <FieldWithLabel
+          label={t("event.form.description")}
+          isExpanded={showMore}
+        >
           <TextField
             fullWidth
-            label={!showMore ? "Description" : ""}
-            placeholder="Add description"
+            label={!showMore ? t("event.form.description") : ""}
+            placeholder={t("event.form.descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             size="small"
@@ -496,7 +502,7 @@ export default function EventFormFields({
             control={
               <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
-            label="All day"
+            label={t("event.form.allDay")}
           />
           <FormControlLabel
             control={
@@ -528,7 +534,7 @@ export default function EventFormFields({
                 }}
               />
             }
-            label="Repeat"
+            label={t("event.form.repeat")}
           />
           <TimezoneAutocomplete
             value={timezone}
@@ -538,7 +544,7 @@ export default function EventFormFields({
             showIcon={true}
             width={240}
             size="small"
-            placeholder="Select timezone"
+            placeholder={t("event.form.timezonePlaceholder")}
           />
         </Box>
       </FieldWithLabel>
@@ -554,11 +560,17 @@ export default function EventFormFields({
         </FieldWithLabel>
       )}
 
-      <FieldWithLabel label="Participants" isExpanded={showMore}>
+      <FieldWithLabel
+        label={t("event.form.participants")}
+        isExpanded={showMore}
+      >
         <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
       </FieldWithLabel>
 
-      <FieldWithLabel label="Video meeting" isExpanded={showMore}>
+      <FieldWithLabel
+        label={t("event.form.videoMeeting")}
+        isExpanded={showMore}
+      >
         <Box display="flex" gap={1} alignItems="center">
           <Button
             startIcon={<VideocamIcon />}
@@ -570,7 +582,7 @@ export default function EventFormFields({
               display: hasVideoConference ? "none" : "flex",
             }}
           >
-            Add Visio conference
+            {t("event.form.addVisioConference")}
           </Button>
 
           {hasVideoConference && meetingLink && (
@@ -585,14 +597,14 @@ export default function EventFormFields({
                   mr: 1,
                 }}
               >
-                Join Visio conference
+                {t("event.form.joinVisioConference")}
               </Button>
               <IconButton
                 onClick={handleCopyMeetingLink}
                 size="small"
                 sx={{ color: "primary.main" }}
-                aria-label="Copy meeting link"
-                title="Copy meeting link"
+                aria-label={t("event.form.copyMeetingLink")}
+                title={t("event.form.copyMeetingLink")}
               >
                 <CopyIcon />
               </IconButton>
@@ -600,8 +612,8 @@ export default function EventFormFields({
                 onClick={handleDeleteVideoConference}
                 size="small"
                 sx={{ color: "error.main" }}
-                aria-label="Remove video conference"
-                title="Remove video conference"
+                aria-label={t("event.form.removeVideoConference")}
+                title={t("event.form.removeVideoConference")}
               >
                 <DeleteIcon />
               </IconButton>
@@ -610,11 +622,11 @@ export default function EventFormFields({
         </Box>
       </FieldWithLabel>
 
-      <FieldWithLabel label="Location" isExpanded={showMore}>
+      <FieldWithLabel label={t("event.form.location")} isExpanded={showMore}>
         <TextField
           fullWidth
-          label={!showMore ? "Location" : ""}
-          placeholder="Add location"
+          label={!showMore ? t("event.form.location") : ""}
+          placeholder={t("event.form.locationPlaceholder")}
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           size="small"
@@ -622,65 +634,102 @@ export default function EventFormFields({
         />
       </FieldWithLabel>
 
-      <FieldWithLabel label="Calendar" isExpanded={showMore}>
+      <FieldWithLabel label={t("event.form.calendar")} isExpanded={showMore}>
         <FormControl fullWidth margin="dense" size="small">
           {!showMore && (
-            <InputLabel id="calendar-select-label">Calendar</InputLabel>
+            <InputLabel id="calendar-select-label">
+              {t("event.form.calendar")}
+            </InputLabel>
           )}
           <Select
             labelId="calendar-select-label"
             value={calendarid ?? ""}
-            label={!showMore ? "Calendar" : ""}
+            label={!showMore ? t("event.form.calendar") : ""}
             displayEmpty
             onChange={(e: SelectChangeEvent) =>
               handleCalendarChange(e.target.value)
             }
           >
-            {CalendarItemList(userPersonnalCalendars)}
+            {CalendarItemList(userPersonalCalendars)}
           </Select>
         </FormControl>
       </FieldWithLabel>
 
       {showMore && (
         <>
-          <FieldWithLabel label="Notification" isExpanded={showMore}>
+          <FieldWithLabel
+            label={t("event.form.notification")}
+            isExpanded={showMore}
+          >
             <FormControl fullWidth margin="dense" size="small">
               <Select
                 labelId="notification"
                 value={alarm}
                 onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
               >
-                <MenuItem value={""}>No Notification</MenuItem>
-                <MenuItem value={"-PT1M"}>1 minute</MenuItem>
-                <MenuItem value={"-PT5M"}>2 minutes</MenuItem>
-                <MenuItem value={"-PT10M"}>10 minutes</MenuItem>
-                <MenuItem value={"-PT15M"}>15 minutes</MenuItem>
-                <MenuItem value={"-PT30M"}>30 minutes</MenuItem>
-                <MenuItem value={"-PT1H"}>1 hours</MenuItem>
-                <MenuItem value={"-PT2H"}>2 hours</MenuItem>
-                <MenuItem value={"-PT5H"}>5 hours</MenuItem>
-                <MenuItem value={"-PT12H"}>12 hours</MenuItem>
-                <MenuItem value={"-PT1D"}>1 day</MenuItem>
-                <MenuItem value={"-PT2D"}>2 days</MenuItem>
-                <MenuItem value={"-PT1W"}>1 week</MenuItem>
+                <MenuItem value={""}>{t("event.form.noNotification")}</MenuItem>
+                <MenuItem value={"-PT1M"}>
+                  {t("event.form.notification1minute")}
+                </MenuItem>
+                <MenuItem value={"-PT5M"}>
+                  {t("event.form.notification5minutes")}
+                </MenuItem>
+                <MenuItem value={"-PT10M"}>
+                  {t("event.form.notification10minutes")}
+                </MenuItem>
+                <MenuItem value={"-PT15M"}>
+                  {t("event.form.notification15minutes")}
+                </MenuItem>
+                <MenuItem value={"-PT30M"}>
+                  {t("event.form.notification30minutes")}
+                </MenuItem>
+                <MenuItem value={"-PT1H"}>
+                  {t("event.form.notification1hour")}
+                </MenuItem>
+                <MenuItem value={"-PT2H"}>
+                  {t("event.form.notification2hours")}
+                </MenuItem>
+                <MenuItem value={"-PT5H"}>
+                  {t("event.form.notification5hours")}
+                </MenuItem>
+                <MenuItem value={"-PT12H"}>
+                  {t("event.form.notification12hours")}
+                </MenuItem>
+                <MenuItem value={"-PT1D"}>
+                  {t("event.form.notification1day")}
+                </MenuItem>
+                <MenuItem value={"-PT2D"}>
+                  {t("event.form.notification2days")}
+                </MenuItem>
+                <MenuItem value={"-PT1W"}>
+                  {t("event.form.notification1week")}
+                </MenuItem>
               </Select>
             </FormControl>
           </FieldWithLabel>
 
-          <FieldWithLabel label="Show me as" isExpanded={showMore}>
+          <FieldWithLabel
+            label={t("event.form.showMeAs")}
+            isExpanded={showMore}
+          >
             <FormControl fullWidth margin="dense" size="small">
               <Select
                 labelId="busy"
                 value={busy}
                 onChange={(e: SelectChangeEvent) => setBusy(e.target.value)}
               >
-                <MenuItem value={"TRANSPARENT"}>Free</MenuItem>
-                <MenuItem value={"OPAQUE"}>Busy </MenuItem>
+                <MenuItem value={"TRANSPARENT"}>
+                  {t("event.form.free")}
+                </MenuItem>
+                <MenuItem value={"OPAQUE"}>{t("event.form.busy")}</MenuItem>
               </Select>
             </FormControl>
           </FieldWithLabel>
 
-          <FieldWithLabel label="Visible to" isExpanded={showMore}>
+          <FieldWithLabel
+            label={t("event.form.visibleTo")}
+            isExpanded={showMore}
+          >
             <ToggleButtonGroup
               value={eventClass}
               exclusive
@@ -693,11 +742,11 @@ export default function EventFormFields({
             >
               <ToggleButton value="PUBLIC" sx={{ width: "140px" }}>
                 <PublicIcon sx={{ mr: 1, fontSize: "16px" }} />
-                All
+                {t("event.form.visibleAll")}
               </ToggleButton>
               <ToggleButton value="PRIVATE" sx={{ width: "140px" }}>
                 <LockIcon sx={{ mr: 1, fontSize: "16px" }} />
-                Participants
+                {t("event.form.visibleParticipants")}
               </ToggleButton>
             </ToggleButtonGroup>
           </FieldWithLabel>

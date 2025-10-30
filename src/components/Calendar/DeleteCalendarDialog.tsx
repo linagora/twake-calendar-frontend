@@ -11,14 +11,14 @@ export function DeleteCalendarDialog({
   setDeletePopupOpen,
   calendars,
   id,
-  isPersonnal,
+  isPersonal,
   handleDeleteConfirm,
 }: {
   deletePopupOpen: boolean;
   setDeletePopupOpen: (e: boolean) => void;
   calendars: Record<string, Calendars>;
   id: string;
-  isPersonnal: boolean;
+  isPersonal: boolean;
   handleDeleteConfirm: () => void;
 }) {
   return (
@@ -27,7 +27,7 @@ export function DeleteCalendarDialog({
       <DialogContent>
         <DialogContentText>
           Are you sure you want to remove this calendar?{" "}
-          {isPersonnal
+          {isPersonal
             ? "You will loose all events in this calendar."
             : "You will loose access to its events. You will still be able to add it back later."}
         </DialogContentText>
@@ -35,7 +35,7 @@ export function DeleteCalendarDialog({
       <DialogActions>
         <Button onClick={() => setDeletePopupOpen(false)}>Cancel</Button>
         <Button onClick={handleDeleteConfirm} variant="contained">
-          {isPersonnal ? "Delete" : "Remove"}
+          {isPersonal ? "Delete" : "Remove"}
         </Button>
       </DialogActions>
     </Dialog>

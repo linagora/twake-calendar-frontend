@@ -117,7 +117,7 @@ describe("Recurrence Event Behavior Tests", () => {
       );
 
       expect(
-        screen.getByText("Update the reccurent event")
+        screen.getByText("Update the recurrent event")
       ).toBeInTheDocument();
       expect(screen.getByText("This event")).toBeInTheDocument();
       expect(screen.getByText("All the events")).toBeInTheDocument();
@@ -249,7 +249,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Update the reccurent event")
+          screen.getByText("Update the recurrent event")
         ).toBeInTheDocument();
       });
     });
@@ -270,7 +270,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Update the reccurent event")
+          screen.getByText("Update the recurrent event")
         ).toBeInTheDocument();
       });
     });
@@ -348,7 +348,7 @@ describe("Recurrence Event Behavior Tests", () => {
       });
 
       expect(
-        screen.queryByText("Update the reccurent event")
+        screen.queryByText("Update the recurrent event")
       ).not.toBeInTheDocument();
     });
   });
@@ -376,7 +376,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Update the reccurent event")
+          screen.getByText("Update the recurrent event")
         ).toBeInTheDocument();
       });
 
@@ -419,7 +419,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Update the reccurent event")
+          screen.getByText("Update the recurrent event")
         ).toBeInTheDocument();
       });
 
@@ -994,7 +994,7 @@ describe("Recurrence Event Behavior Tests", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("Update the reccurent event")
+          screen.getByText("Update the recurrent event")
         ).toBeInTheDocument();
       });
 

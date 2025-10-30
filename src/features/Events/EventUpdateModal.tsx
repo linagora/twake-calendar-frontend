@@ -84,7 +84,7 @@ function EventUpdateModal({
 
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
-  const userPersonnalCalendars: Calendars[] = useMemo(() => {
+  const userPersonalCalendars: Calendars[] = useMemo(() => {
     const allCalendars = Object.values(calendarsList) as Calendars[];
     return allCalendars.filter(
       (c: Calendars) => c.id?.split("/")[0] === user.userData?.openpaasId
@@ -296,7 +296,7 @@ function EventUpdateModal({
         }
       }
     }
-  }, [open, event, calId, userPersonnalCalendars, calendarsList]);
+  }, [open, event, calId, userPersonalCalendars, calendarsList]);
 
   // Helper to close modal(s) - use onCloseAll if available to close preview modal too
   const closeModal = () => {
@@ -760,7 +760,7 @@ function EventUpdateModal({
         showRepeat={typeOfAction !== "solo" && showRepeat}
         setShowRepeat={setShowRepeat}
         isOpen={open}
-        userPersonnalCalendars={userPersonnalCalendars}
+        userPersonalCalendars={userPersonalCalendars}
         timezoneList={timezoneList}
         onCalendarChange={(newCalendarId) => {
           const selectedCalendar = calList[newCalendarId];

@@ -13,6 +13,7 @@ import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
 import { defaultColors } from "./utils/calendarColorsUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 function CalendarPopover({
   open,
@@ -26,6 +27,7 @@ function CalendarPopover({
   ) => void;
   calendar?: Calendars;
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
@@ -181,10 +183,18 @@ function CalendarPopover({
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab
             value="settings"
-            label={calendar ? "Settings" : "Add new calendar"}
+            label={
+              calendar
+                ? t("calendarPopover.tabs.settings")
+                : t("calendarPopover.tabs.addNew")
+            }
           />
-          {calendar && <Tab value="access" label="Access" />}
-          {isOwn && <Tab value="import" label="Import" />}
+          {calendar && (
+            <Tab value="access" label={t("calendarPopover.tabs.access")} />
+          )}
+          {isOwn && (
+            <Tab value="import" label={t("calendarPopover.tabs.import")} />
+          )}
         </Tabs>
       }
       actions={
@@ -193,14 +203,18 @@ function CalendarPopover({
             variant="outlined"
             onClick={(e) => handleClose({}, "backdropClick")}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             disabled={tab === "import" ? !importedContent : !name.trim()}
             variant="contained"
             onClick={tab === "import" ? handleImport : handleSave}
           >
-            {tab === "import" ? "Import" : calendar ? "Save" : "Create"}
+            {tab === "import"
+              ? t("actions.import")
+              : calendar
+                ? t("actions.save")
+                : t("actions.create")}
           </Button>
         </DialogActions>
       }

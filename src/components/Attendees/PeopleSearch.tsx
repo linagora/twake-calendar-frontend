@@ -11,6 +11,7 @@ import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined
 import Chip from "@mui/material/Chip";
 import { useTheme } from "@mui/material/styles";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export interface User {
   email: string;
@@ -35,6 +36,7 @@ export function PeopleSearch({
   freeSolo?: boolean;
   onToggleEventPreview?: Function;
 }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
@@ -79,7 +81,7 @@ export function PeopleSearch({
       onChange={(event, value) => {
         const last = value[value.length - 1];
         if (typeof last === "string" && !isValidEmail(last)) {
-          setError(`"${last}" is not a valid email address`);
+          setError(t("peopleSearch.invalidEmail", { email: last }));
           return;
         }
         setError(null);
@@ -93,8 +95,8 @@ export function PeopleSearch({
           {...params}
           error={!!error}
           helperText={error}
-          placeholder="Start typing a name or email"
-          label="Start typing a name or email"
+          placeholder={t("peopleSearch.placeholder")}
+          label={t("peopleSearch.label")}
           autoComplete="off"
           onKeyDown={(e) => {
             if (e.key === "Enter" && onToggleEventPreview) {

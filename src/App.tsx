@@ -12,6 +12,11 @@ import { CustomThemeProvider } from "./theme/ThemeProvider";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
+import I18n from "cozy-ui/transpiled/react/providers/I18n";
+import en from "./locales/en.json";
+
+const locale = { en };
+const lang = (window as any).LANG ?? "en";
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
@@ -23,18 +28,20 @@ function App() {
   });
   return (
     <CustomThemeProvider>
-      <Suspense fallback={<Loading />}>
-        <Router history={history}>
-          <Routes>
-            <Route path="/" element={<HandleLogin />} />
-            <Route path="/calendar" element={<CalendarLayout />} />
-            <Route path="/callback" element={<CallbackResume />} />
-            <Route path="/error" element={<Error />} />
-          </Routes>
-        </Router>
-        <ErrorSnackbar error={error} type="user" />
-        <ErrorSnackbar error={error} type="user" />
-      </Suspense>
+      <I18n dictRequire={(lang) => locale[lang]} lang={lang}>
+        <Suspense fallback={<Loading />}>
+          <Router history={history}>
+            <Routes>
+              <Route path="/" element={<HandleLogin />} />
+              <Route path="/calendar" element={<CalendarLayout />} />
+              <Route path="/callback" element={<CallbackResume />} />
+              <Route path="/error" element={<Error />} />
+            </Routes>
+          </Router>
+          <ErrorSnackbar error={error} type="user" />
+          <ErrorSnackbar error={error} type="user" />
+        </Suspense>
+      </I18n>
     </CustomThemeProvider>
   );
 }

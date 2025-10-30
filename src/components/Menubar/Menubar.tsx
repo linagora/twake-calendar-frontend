@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export type AppIconProps = {
   name: string;
@@ -44,6 +45,7 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
+  const { t, f } = useI18n();
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -112,7 +114,9 @@ export function Menubar({
                 <Button onClick={() => handleNavigation("prev")}>
                   <ChevronLeftIcon />
                 </Button>
-                <Button onClick={() => handleNavigation("today")}>Today</Button>
+                <Button onClick={() => handleNavigation("today")}>
+                  {t("menubar.today")}
+                </Button>
                 <Button onClick={() => handleNavigation("next")}>
                   <ChevronRightIcon />
                 </Button>
@@ -122,17 +126,18 @@ export function Menubar({
           <div className="menu-items">
             <div className="current-date-time">
               <Typography variant="h6" component="div">
-                {currentDate.toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
+                {f(currentDate, "MMMM yyyy")}
               </Typography>
             </div>
           </div>
         </div>
         <div className="right-menu">
           <div className="menu-items">
-            <IconButton onClick={onRefresh}>
+            <IconButton
+              onClick={onRefresh}
+              aria-label={t("menubar.refresh")}
+              title={t("menubar.refresh")}
+            >
               <RefreshIcon />
             </IconButton>
           </div>
@@ -145,16 +150,28 @@ export function Menubar({
                 value={currentView}
                 onChange={(e) => handleViewChange(e.target.value)}
                 variant="outlined"
+                aria-label={t("menubar.viewSelector")}
               >
-                <MenuItem value="dayGridMonth">Month</MenuItem>
-                <MenuItem value="timeGridWeek">Week</MenuItem>
-                <MenuItem value="timeGridDay">Day</MenuItem>
+                <MenuItem value="dayGridMonth">
+                  {t("menubar.views.month")}
+                </MenuItem>
+                <MenuItem value="timeGridWeek">
+                  {t("menubar.views.week")}
+                </MenuItem>
+                <MenuItem value="timeGridDay">
+                  {t("menubar.views.day")}
+                </MenuItem>
               </Select>
             </FormControl>
           </div>
           <div className="menu-items">
             {applist.length > 0 && (
-              <IconButton onClick={handleOpen} style={{ marginRight: 8 }}>
+              <IconButton
+                onClick={handleOpen}
+                style={{ marginRight: 8 }}
+                aria-label={t("menubar.apps")}
+                title={t("menubar.apps")}
+              >
                 <AppsIcon />
               </IconButton>
             )}
@@ -171,6 +188,7 @@ export function Menubar({
                 ),
               }}
               sizes="large"
+              aria-label={t("menubar.userProfile")}
             >
               {user?.name && user?.family_name
                 ? `${user.name[0]}${user.family_name[0]}`
@@ -202,9 +220,10 @@ export function Menubar({
   );
 }
 export function MainTitle() {
+  const { t } = useI18n();
   return (
     <div className="menubar-item tc-home">
-      <img className="logo" src={logo} alt="Calendar" />
+      <img className="logo" src={logo} alt={t("menubar.logoAlt")} />
     </div>
   );
 }

@@ -30,6 +30,7 @@ import {
   formatDateTimeInTimezone,
 } from "../../components/Event/utils/dateTimeFormatters";
 import { addDays } from "../../components/Event/utils/dateRules";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 function EventPopover({
   anchorEl,
@@ -55,7 +56,7 @@ function EventPopover({
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const tempList = useAppSelector((state) => state.calendars.templist);
   const calList = useAppSelector((state) => state.calendars.list);
-  const selectPersonnalCalendars = createSelector(
+  const selectPersonalCalendars = createSelector(
     (state: any) => state.calendars,
     (calendars: any) =>
       Object.keys(calendars.list)
@@ -67,8 +68,8 @@ function EventPopover({
         })
         .filter((calendar) => calendar.id)
   );
-  const userPersonnalCalendars: Calendars[] = useAppSelector(
-    selectPersonnalCalendars
+  const userPersonalCalendars: Calendars[] = useAppSelector(
+    selectPersonalCalendars
   );
 
   const timezoneList = useMemo(() => {
@@ -126,18 +127,18 @@ function EventPopover({
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
-  const userPersonnalCalendarsRef = useRef(userPersonnalCalendars);
+  const userPersonalCalendarsRef = useRef(userPersonalCalendars);
 
-  // Update ref when userPersonnalCalendars changes
+  // Update ref when userPersonalCalendars changes
   useEffect(() => {
-    userPersonnalCalendarsRef.current = userPersonnalCalendars;
-  }, [userPersonnalCalendars]);
+    userPersonalCalendarsRef.current = userPersonalCalendars;
+  }, [userPersonalCalendars]);
 
   useEffect(() => {
-    if (!calendarid && userPersonnalCalendars.length > 0) {
-      setCalendarid(userPersonnalCalendars[0].id);
+    if (!calendarid && userPersonalCalendars.length > 0) {
+      setCalendarid(userPersonalCalendars[0].id);
     }
-  }, [calendarid, userPersonnalCalendars]);
+  }, [calendarid, userPersonalCalendars]);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -396,11 +397,11 @@ function EventPopover({
       }
 
       if (
-        userPersonnalCalendars &&
-        userPersonnalCalendars.length > 0 &&
-        userPersonnalCalendars[0]?.id
+        userPersonalCalendars &&
+        userPersonalCalendars.length > 0 &&
+        userPersonalCalendars[0]?.id
       ) {
-        setCalendarid(userPersonnalCalendars[0].id);
+        setCalendarid(userPersonalCalendars[0].id);
       }
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
@@ -672,22 +673,23 @@ function EventPopover({
       await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
     }
   };
+  const { t } = useI18n();
 
   const dialogActions = (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (
         <Button startIcon={<AddIcon />} onClick={() => setShowMore(!showMore)}>
-          More options
+          {t("common.moreOptions")}
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
         {showMore && (
           <Button variant="outlined" onClick={handleClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
         )}
         <Button variant="contained" onClick={handleSave}>
-          Save
+          {t("action.save")}
         </Button>
       </Box>
     </Box>
@@ -697,7 +699,7 @@ function EventPopover({
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title={event?.uid ? "Duplicate Event" : "Create Event"}
+      title={event?.uid ? t("eventDuplication.duplicateEvent") : t("event.createEvent")}
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}
@@ -739,7 +741,7 @@ function EventPopover({
         showRepeat={showRepeat}
         setShowRepeat={setShowRepeat}
         isOpen={open}
-        userPersonnalCalendars={userPersonnalCalendars}
+        userPersonalCalendars={userPersonalCalendars}
         timezoneList={timezoneList}
         onStartChange={handleStartChange}
         onEndChange={handleEndChange}

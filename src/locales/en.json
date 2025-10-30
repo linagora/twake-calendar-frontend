@@ -1,0 +1,165 @@
+{
+  "locale": "en-gb",
+  "calendar": {
+    "personal": "Personal Calendars",
+    "delegated": "Delegated Calendars",
+    "other": "Other Calendars",
+    "caldav_access": "CalDAV access",
+    "import_file_description": "Import events from an ICS file to one of your calendars.",
+    "ics_feed_url": "ICS feed URL",
+    "import_to": "Import to",
+    "new_calendar": "New calendar",
+    "addDescription": "Add description",
+    "color": "Color",
+    "newEventsVisibility": "New events created will be visible to:"
+  },
+  "actions": {
+    "modify": "Modify",
+    "delete": "Delete",
+    "remove": "Remove",
+    "save": "Save",
+    "create": "Create",
+    "import": "Import"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "ok": "Ok",
+    "link_copied": "Link copied!",
+    "import_file": "File",
+    "select_file": "Select file",
+    "import_url": "URL",
+    "name": "Name",
+    "description": "Description",
+    "all": "All",
+    "you": "You",
+    "select_timezone": "Select Timezone",
+    "moreOptions": "More options"
+  },
+  "calendarPopover": {
+    "tabs": {
+      "settings": "Settings",
+      "addNew": "Add new calendar",
+      "access": "Access",
+      "import": "Import"
+    }
+  },
+  "colorPicker": {
+    "selectCustom": "Select custom color",
+    "title": "Choose custom color",
+    "subtitle": "Choose a background color for this calendar",
+    "hex": "Hex"
+  },
+  "event": {
+    "createEvent": "Create Event",
+    "organizer": "Organizer",
+    "repeat": {
+      "repeatEvery": "Repeat every",
+      "frequency": {
+        "days": "Day(s)",
+        "weeks": "Week(s)",
+        "months": "Month(s)",
+        "years": "Year(s)"
+      },
+      "repeatOn": "Repeat on:",
+      "days": {
+        "monday": "MO",
+        "tuesday": "TU",
+        "wednesday": "WE",
+        "thursday": "TH",
+        "friday": "FR",
+        "saturday": "SA",
+        "sunday": "SU"
+      },
+      "end": {
+        "label": "End:",
+        "never": "Never",
+        "after": "After",
+        "on": "On",
+        "occurrences": "occurrences"
+      }
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Add title",
+      "addDescription": "Add description",
+      "description": "Description",
+      "descriptionPlaceholder": "Add description",
+      "dateTime": "Date & Time",
+      "start": "Start",
+      "end": "End",
+      "allDay": "All day",
+      "repeat": "Repeat",
+      "timezonePlaceholder": "Select timezone",
+      "participants": "Participants",
+      "videoMeeting": "Video meeting",
+      "addVisioConference": "Add Visio conference",
+      "joinVisioConference": "Join Visio conference",
+      "copyMeetingLink": "Copy meeting link",
+      "removeVideoConference": "Remove video conference",
+      "location": "Location",
+      "locationPlaceholder": "Add location",
+      "calendar": "Calendar",
+      "notification": "Notification",
+      "noNotification": "No Notification",
+      "notification1minute": "1 minute",
+      "notification5minutes": "5 minutes",
+      "notification10minutes": "10 minutes",
+      "notification15minutes": "15 minutes",
+      "notification30minutes": "30 minutes",
+      "notification1hour": "1 hour",
+      "notification2hours": "2 hours",
+      "notification5hours": "5 hours",
+      "notification12hours": "12 hours",
+      "notification1day": "1 day",
+      "notification2days": "2 days",
+      "notification1week": "1 week",
+      "showMeAs": "Show me as",
+      "free": "Free",
+      "busy": "Busy",
+      "visibleTo": "Visible to",
+      "visibleAll": "All",
+      "visibleParticipants": "Participants"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "startRequired": "Start date/time is required",
+      "invalidStart": "Invalid start date/time",
+      "endRequired": "End date/time is required",
+      "invalidEnd": "Invalid end date/time",
+      "endAfterStart": "End time must be after start time"
+    }
+  },
+  "peopleSearch": {
+    "label": "Start typing a name or email",
+    "placeholder": "Start typing a name or email",
+    "invalidEmail": "%{email} is not a valid email address"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "unknown": "An unknown error occurred",
+    "retry": "Try Again",
+    "multipleEvents": "%{count} events with errors"
+  },
+  "editModeDialog": {
+    "updateRecurrentEvent": "Update the recurrent event",
+    "updateParticipationStatus": "Update the participation status",
+    "thisEvent": "This event",
+    "allEvents": "All the events"
+  },
+  "eventDuplication": {
+    "duplicateEvent": "Duplicate event"
+  },
+  "menubar": {
+    "today": "Today",
+    "refresh": "Refresh",
+    "viewSelector": "Select view",
+    "views": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "apps": "Apps",
+    "userProfile": "User profile",
+    "logoAlt": "Calendar"
+  }
+}
