@@ -11,7 +11,6 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Typography,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
@@ -38,12 +37,8 @@ import { FieldWithLabel } from "./components/FieldWithLabel";
 import { DateTimeFields } from "./components/DateTimeFields";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
 import { splitDateTime, combineDateTime } from "./utils/dateTimeHelpers";
-import { getEndDateForStartChange } from "./utils/dateRules";
-import {
-  formatLocalDateTime,
-  formatDateTimeInTimezone,
-  getRoundedCurrentTime,
-} from "./utils/dateTimeFormatters";
+import {} from "./utils/dateRules";
+import {} from "./utils/dateTimeFormatters";
 import { validateEventForm } from "./utils/formValidation";
 
 interface EventFormFieldsProps {
@@ -165,10 +160,10 @@ export default function EventFormFields({
   const [endTime, setEndTime] = React.useState("");
 
   // UI state for showing/hiding end date field
-  const [showEndDate, setShowEndDate] = React.useState(false);
+  // keep local flag if needed for future UI toggles (not used now)
 
   // Use all-day toggle hook
-  const { originalTimeRef, handleAllDayToggle } = useAllDayToggle({
+  const { handleAllDayToggle } = useAllDayToggle({
     allday,
     start,
     end,
@@ -178,7 +173,6 @@ export default function EventFormFields({
     endTime,
     setStartTime,
     setEndTime,
-    setEndDate,
     setStart,
     setEnd,
     setAllDay,
@@ -250,47 +244,19 @@ export default function EventFormFields({
     }
   }, [end]);
 
-  // Sync allday prop changes to detect all-day slot clicks
-  React.useEffect(() => {
-    if (allday && (!startTime || !endTime)) {
-      // This is likely from all-day slot click - set time fields empty
-      setStartTime("");
-      setEndTime("");
-
-      // Mark this as coming from all-day slot for later uncheck logic
-      originalTimeRef.current = {
-        start: "",
-        end: "",
-        endDate: endDate,
-        fromAllDaySlot: true,
-      };
-    }
-  }, [allday, startTime, endTime, endDate]);
-
   // Change handlers for 4 separate fields
   const handleStartDateChange = React.useCallback(
     (newDate: string) => {
       setStartDate(newDate);
       const newStart = combineDateTime(newDate, startTime);
 
-      // Update start
       if (onStartChange) {
         onStartChange(newStart);
       } else {
         setStart(newStart);
       }
-
-      // Rule: update end date when start date changes
-      const nextEndDate = getEndDateForStartChange(newDate, allday);
-      setEndDate(nextEndDate);
-      const newEnd = combineDateTime(nextEndDate, endTime || startTime);
-      if (onEndChange) {
-        onEndChange(newEnd);
-      } else {
-        setEnd(newEnd);
-      }
     },
-    [startTime, endTime, onStartChange, onEndChange, setStart, setEnd, allday]
+    [startTime, onStartChange, setStart]
   );
 
   const handleStartTimeChange = React.useCallback(
@@ -359,19 +325,6 @@ export default function EventFormFields({
     onValidationChange?.(validation.isValid);
   }, [validateForm, onValidationChange]);
 
-  // Auto-calculate end date from start date if not already set
-  React.useEffect(() => {
-    if (startDate && !endDate) {
-      setEndDate(startDate);
-      const newEnd = combineDateTime(startDate, endTime || startTime);
-      if (onEndChange) {
-        onEndChange(newEnd);
-      } else {
-        setEnd(newEnd);
-      }
-    }
-  }, [startDate, endDate, startTime, endTime, onEndChange, setEnd]);
-
   // Auto-calculate end time from start time (+ 1 hour) if not already set
   React.useEffect(() => {
     if (startTime && !endTime && !allday) {
@@ -412,7 +365,6 @@ export default function EventFormFields({
   };
 
   const handleDeleteVideoConference = () => {
-    // Remove video conference footer from description
     const updatedDescription = description.replace(
       /\nVisio: https?:\/\/[^\s]+/,
       ""
@@ -510,8 +462,8 @@ export default function EventFormFields({
           onStartTimeChange={handleStartTimeChange}
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
-          showEndDate={showEndDate}
-          onToggleEndDate={() => setShowEndDate(!showEndDate)}
+          showEndDate={showMore || allday}
+          onToggleEndDate={() => {}}
         />
       </FieldWithLabel>
 
@@ -666,7 +618,6 @@ export default function EventFormFields({
         </FormControl>
       </FieldWithLabel>
 
-      {/* Extended options */}
       {showMore && (
         <>
           <FieldWithLabel label="Notification" isExpanded={showMore}>
