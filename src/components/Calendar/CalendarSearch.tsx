@@ -2,23 +2,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
 import IconButton from "@mui/material/IconButton";
-import Modal from "@mui/material/Modal";
+import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
-import { ColorPicker } from "./CalendarColorPicker";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-import { User, PeopleSearch } from "../Attendees/PeopleSearch";
-import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
-import { useTheme } from "@mui/material/styles";
+import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
+import { ColorPicker } from "./CalendarColorPicker";
+import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 interface CalendarWithOwner {
   cal: Record<string, any>;
@@ -104,6 +100,7 @@ function SelectedCalendarsList({
     color: Record<string, string>
   ) => void;
 }) {
+  const { t } = useI18n();
   if (selectedCal.length === 0) return null;
 
   const groupedByOwner = selectedCal.reduce<
@@ -144,7 +141,7 @@ function SelectedCalendarsList({
   return (
     <Box mt={2}>
       <Typography variant="subtitle1" gutterBottom>
-        Name
+        {t("common.name")}
       </Typography>
 
       {Object.values(groupedByOwner).map(
@@ -161,13 +158,15 @@ function SelectedCalendarsList({
                   />
                 ) : (
                   <Typography color="textSecondary">
-                    No publicly available calendars for {owner.displayName}
+                    {t("calendar.noPublicCalendarsFor", {
+                      name: owner.displayName,
+                    })}
                   </Typography>
                 )
               )
             ) : alreadyExisting ? (
               <Typography color="textSecondary">
-                No more Calendar for {owner.displayName}
+                {t("calendar.noMoreCalendarsFor", { name: owner.displayName })}
               </Typography>
             ) : null}
           </Box>
@@ -230,6 +229,7 @@ export default function CalendarSearch({
       setSelectedUsers([]);
     }
   };
+  const { t } = useI18n();
 
   return (
     <ResponsiveDialog
@@ -247,10 +247,10 @@ export default function CalendarSearch({
             variant="outlined"
             onClick={() => onClose({}, "backdropClick")}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="contained" onClick={handleSave}>
-            Add
+            {t("actions.add")}
           </Button>
         </>
       }

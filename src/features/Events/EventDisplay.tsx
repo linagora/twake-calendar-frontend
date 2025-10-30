@@ -48,6 +48,7 @@ import { userAttendee } from "../User/userDataTypes";
 import { getEvent } from "./EventApi";
 import { formatLocalDateTime } from "../../components/Event/utils/dateTimeFormatters";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export default function EventDisplayModal({
   eventId,
@@ -62,6 +63,8 @@ export default function EventDisplayModal({
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
   typeOfAction?: "solo" | "all";
 }) {
+  const { t } = useI18n();
+
   const dispatch = useAppDispatch();
   const calendar = useAppSelector((state) => state.calendars.list[calId]);
   const event = useAppSelector(
@@ -224,8 +227,7 @@ export default function EventDisplayModal({
             <Typography variant="body2">
               <CircleIcon
                 style={{
-                  color:
-                    userPersonalCalendars[index].color?.light ?? "#3788D8",
+                  color: userPersonalCalendars[index].color?.light ?? "#3788D8",
                   width: 12,
                   height: 12,
                 }}
@@ -478,13 +480,13 @@ export default function EventDisplayModal({
               <Box style={{ marginBottom: 8 }}>
                 <Typography variant="subtitle2">Attendees:</Typography>
                 {organizer.cal_address &&
-                  renderAttendeeBadge(organizer, "org", true, true)}
+                  renderAttendeeBadge(organizer, "org", t, true, true)}
                 {(showAllAttendees
                   ? attendees
                   : attendees.slice(0, attendeeDisplayLimit)
                 ).map((a, idx) => (
                   <Box key={a.cal_address}>
-                    {renderAttendeeBadge(a, idx.toString(), true)}
+                    {renderAttendeeBadge(a, idx.toString(), t, true)}
                     {isOwn && (
                       <IconButton
                         size="small"

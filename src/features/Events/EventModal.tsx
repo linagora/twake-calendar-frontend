@@ -689,7 +689,7 @@ function EventPopover({
           </Button>
         )}
         <Button variant="contained" onClick={handleSave}>
-          {t("action.save")}
+          {t("actions.save")}
         </Button>
       </Box>
     </Box>

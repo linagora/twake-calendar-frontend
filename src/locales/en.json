@@ -11,7 +11,10 @@
     "new_calendar": "New calendar",
     "addDescription": "Add description",
     "color": "Color",
-    "newEventsVisibility": "New events created will be visible to:"
+    "newEventsVisibility": "New events created will be visible to:",
+    "browseOtherCalendars": "Browse other calendars",
+    "noPublicCalendarsFor": "No publicly available calendars for %{name}",
+    "noMoreCalendarsFor": "No more calendars for %{name}"
   },
   "actions": {
     "modify": "Modify",
@@ -19,7 +22,8 @@
     "remove": "Remove",
     "save": "Save",
     "create": "Create",
-    "import": "Import"
+    "import": "Import",
+    "add": "Add"
   },
   "common": {
     "cancel": "Cancel",

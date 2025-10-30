@@ -45,6 +45,7 @@ import { dlEvent } from "./EventApi";
 import EventDisplayModal from "./EventDisplay";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -58,6 +59,7 @@ export default function EventPreviewModal({
   open: boolean;
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
   const timezone =
@@ -519,6 +521,7 @@ export default function EventPreviewModal({
                             renderAttendeeBadge(
                               organizer,
                               "org",
+                              t,
                               showAllAttendees,
                               true
                             )}
@@ -526,6 +529,7 @@ export default function EventPreviewModal({
                             renderAttendeeBadge(
                               a,
                               idx.toString(),
+                              t,
                               showAllAttendees
                             )
                           )}
@@ -550,10 +554,10 @@ export default function EventPreviewModal({
             )}
             {showAllAttendees &&
               organizer &&
-              renderAttendeeBadge(organizer, "org", showAllAttendees, true)}
+              renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
             {showAllAttendees &&
               visibleAttendees.map((a, idx) =>
-                renderAttendeeBadge(a, idx.toString(), showAllAttendees)
+                renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
               )}
             {/* Location */}
             {event.location && (

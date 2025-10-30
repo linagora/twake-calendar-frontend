@@ -187,7 +187,7 @@ describe("CalendarSearch", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No more Calendar for Test User")
+        screen.getByText("No more calendars for Test User")
       ).toBeInTheDocument();
     });
 
