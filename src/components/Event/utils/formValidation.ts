@@ -54,7 +54,7 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
   // Validate start time (if not all-day)
   else if (!allday && (!startTime || startTime.trim() === "")) {
     isDateTimeValid = false;
-    dateTimeError = "Start time is required";
+    dateTimeError = "Start time and End time is required";
   }
   // Validate end date
   else if (!endDate || endDate.trim() === "") {
@@ -66,21 +66,36 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     isDateTimeValid = false;
     dateTimeError = "End time is required";
   }
-  // Validate end > start
+  // Validate end vs start
   else {
-    const startDateTime = allday
-      ? new Date(startDate + "T00:00:00")
-      : new Date(combineDateTime(startDate, startTime));
-    const endDateTime = allday
-      ? new Date(endDate + "T00:00:00")
-      : new Date(combineDateTime(endDate, endTime));
+    if (allday) {
+      const toLocalDate = (ymd: string) => {
+        const [y, m, d] = ymd.split("-").map((v) => parseInt(v, 10));
+        if (!y || !m || !d) return new Date(NaN);
+        return new Date(y, m - 1, d);
+      };
 
-    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-      isDateTimeValid = false;
-      dateTimeError = "Invalid date/time";
-    } else if (endDateTime <= startDateTime) {
-      isDateTimeValid = false;
-      dateTimeError = "End time must be after start time";
+      const startOnly = toLocalDate(startDate);
+      const endOnly = toLocalDate(endDate);
+
+      if (isNaN(startOnly.getTime()) || isNaN(endOnly.getTime())) {
+        isDateTimeValid = false;
+        dateTimeError = "Invalid date";
+      } else if (endOnly < startOnly) {
+        isDateTimeValid = false;
+        dateTimeError = "End date must be on or after start date";
+      }
+    } else {
+      const startDateTime = new Date(combineDateTime(startDate, startTime));
+      const endDateTime = new Date(combineDateTime(endDate, endTime));
+
+      if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        isDateTimeValid = false;
+        dateTimeError = "Invalid date/time";
+      } else if (endDateTime <= startDateTime) {
+        isDateTimeValid = false;
+        dateTimeError = "End time must be after start time";
+      }
     }
   }
 

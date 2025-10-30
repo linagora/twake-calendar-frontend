@@ -221,12 +221,21 @@ function EventPopover({
             : formatLocalDateTime(selectedRange.end);
 
         // Use the string values directly to preserve the displayed time
-        setStart(
-          selectedRange.allDay ? startStr.split("T")[0] : startStr.slice(0, 16) // YYYY-MM-DDTHH:mm
-        );
-        setEnd(
-          selectedRange.allDay ? endStr.split("T")[0] : endStr.slice(0, 16)
-        );
+        const startValue = selectedRange.allDay
+          ? startStr.split("T")[0]
+          : startStr.slice(0, 16); // YYYY-MM-DDTHH:mm
+        const endValue = selectedRange.allDay
+          ? endStr.split("T")[0]
+          : endStr.slice(0, 16);
+        setStart(startValue);
+        setEnd(endValue);
+
+        // If start date != end date, open extended mode
+        const startDateOnly = startValue.slice(0, 10);
+        const endDateOnly = endValue.slice(0, 10);
+        if (startDateOnly !== endDateOnly) {
+          setShowMore(true);
+        }
       } else {
         // Fallback: format Date objects using local time components
         // Only set if both start and end are valid
@@ -234,6 +243,13 @@ function EventPopover({
         const formattedEnd = formatLocalDateTime(selectedRange.end);
         if (formattedStart) setStart(formattedStart);
         if (formattedEnd) setEnd(formattedEnd);
+        if (formattedStart && formattedEnd) {
+          const startDateOnly = formattedStart.slice(0, 10);
+          const endDateOnly = formattedEnd.slice(0, 10);
+          if (startDateOnly !== endDateOnly) {
+            setShowMore(true);
+          }
+        }
       }
     } else {
       // No valid selectedRange - use default times
@@ -479,7 +495,7 @@ function EventPopover({
       calId: calList[calendarid].id,
       title,
       URL: `/calendars/${calList[calendarid].id}/${newEventUID}.ics`,
-      start: new Date(start).toISOString(),
+      start: "",
       allday,
       uid: newEventUID,
       description,
@@ -503,8 +519,19 @@ function EventPopover({
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
     };
-    if (end) {
-      newEvent.end = new Date(end).toISOString();
+
+    if (allday) {
+      const startDateOnly = (start || "").split("T")[0];
+      const endDateOnlyBase = (end || start || "").split("T")[0];
+      const startDateObj = new Date(`${startDateOnly}T00:00:00`);
+      const endDateObj = new Date(`${endDateOnlyBase}T00:00:00`);
+      newEvent.start = startDateObj.toISOString();
+      newEvent.end = endDateObj.toISOString();
+    } else {
+      newEvent.start = new Date(start).toISOString();
+      if (end) {
+        newEvent.end = new Date(end).toISOString();
+      }
     }
 
     if (attendees.length > 0) {

@@ -78,3 +78,6 @@ export function getRoundedCurrentTime(): Date {
   now.setMilliseconds(0);
   return now;
 }
+
+/** Long date display format for date pickers */
+export const LONG_DATE_FORMAT = "dddd, MMMM D, YYYY";

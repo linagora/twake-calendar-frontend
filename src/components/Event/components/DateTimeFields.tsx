@@ -1,11 +1,11 @@
 import React from "react";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import moment, { Moment } from "moment";
+import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
 
 /**
  * Props for DateTimeFields component
@@ -49,105 +49,134 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onEndDateChange,
   onEndTimeChange,
 }) => {
+  const isExpanded = showMore;
+  const shouldShowEndDateNormal = allday || !!showEndDate;
   return (
     <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en">
       <Box
         display="flex"
-        gap={1}
         flexDirection="column"
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
-        {/* First row: 4 fields */}
-        <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-          {/* Start Date - 30% */}
-          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", maxWidth: "150px" }}>
-            <DatePicker
-              label="Start Date"
-              value={startDate ? moment(startDate) : null}
-              onChange={(newValue: Moment | null) => {
-                onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
-              }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  margin: "dense" as const,
-                  fullWidth: true,
-                  InputLabelProps: { shrink: true },
-                  sx: { width: "100%" },
-                  inputProps: { "data-testid": "start-date-input" },
-                },
-              }}
-            />
-          </Box>
-
-          {/* Start Time - 20% */}
-          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", maxWidth: "150px" }}>
-            <TimePicker
-              label="Start Time"
-              value={startTime ? moment(startTime, "HH:mm") : null}
-              onChange={(newValue: Moment | null) => {
-                onStartTimeChange(newValue?.format("HH:mm") || "");
-              }}
-              disabled={allday}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  margin: "dense" as const,
-                  fullWidth: true,
-                  InputLabelProps: { shrink: true },
-                  sx: { width: "100%" },
-                  inputProps: { "data-testid": "start-time-input" },
-                },
-              }}
-            />
-          </Box>
-
-          {/* End Time - 20% */}
-          <Box sx={{ flexGrow: 0.2, flexBasis: "25%", maxWidth: "150px" }}>
-            <TimePicker
-              label="End Time"
-              value={endTime ? moment(endTime, "HH:mm") : null}
-              onChange={(newValue: Moment | null) => {
-                onEndTimeChange(newValue?.format("HH:mm") || "");
-              }}
-              disabled={allday}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  margin: "dense" as const,
-                  fullWidth: true,
-                  InputLabelProps: { shrink: true },
-                  error: !!validation.errors.dateTime,
-                  sx: { width: "100%" },
-                  inputProps: { "data-testid": "end-time-input" },
-                },
-              }}
-            />
-          </Box>
-
-          {/* End Date - Conditional rendering */}
-          <Box sx={{ flexGrow: 0.3, flexBasis: "25%", maxWidth: "150px" }}>
-            {!showEndDate ? (
-              // Show "..." button to reveal end date
-              <Box
-                display="flex"
-                justifyContent="flex-start"
-                sx={{ mt: showMore ? 0 : 0 }}
-              >
-                <Tooltip title="Show end date">
-                  <IconButton
-                    size="small"
-                    onClick={onToggleEndDate}
-                    aria-label="Show end date"
-                  >
-                    <MoreHorizIcon />
-                  </IconButton>
-                </Tooltip>
+        {isExpanded ? (
+          <>
+            <Box display="flex" gap={1} flexDirection="row" alignItems="center">
+              <Box sx={{ maxWidth: "280px", width: "45%" }}>
+                <DatePicker
+                  label="Start Date"
+                  format={LONG_DATE_FORMAT}
+                  value={startDate ? moment(startDate) : null}
+                  onChange={(newValue: Moment | null) => {
+                    onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                  }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      margin: "dense" as const,
+                      fullWidth: true,
+                      InputLabelProps: { shrink: true },
+                      sx: { width: "100%" },
+                      inputProps: { "data-testid": "start-date-input" },
+                    },
+                  }}
+                />
               </Box>
-            ) : (
-              // Show End Date picker (no hide button)
+              {!allday && (
+                <Box sx={{ width: "110px" }}>
+                  <TimePicker
+                    label="Start Time"
+                    ampm={false}
+                    value={startTime ? moment(startTime, "HH:mm") : null}
+                    onChange={(newValue: Moment | null) => {
+                      onStartTimeChange(newValue?.format("HH:mm") || "");
+                    }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        margin: "dense" as const,
+                        fullWidth: true,
+                        InputLabelProps: { shrink: true },
+                        sx: { width: "100%" },
+                        inputProps: { "data-testid": "start-time-input" },
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+            <Box display="flex" gap={1} flexDirection="row" alignItems="center">
+              <Box sx={{ maxWidth: "280px", width: "45%" }}>
+                <DatePicker
+                  label="End Date"
+                  format={LONG_DATE_FORMAT}
+                  value={endDate ? moment(endDate) : null}
+                  onChange={(newValue: Moment | null) => {
+                    onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
+                  }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      margin: "dense" as const,
+                      fullWidth: true,
+                      InputLabelProps: { shrink: true },
+                      error: !!validation.errors.dateTime,
+                      sx: { width: "100%" },
+                      inputProps: { "data-testid": "end-date-input" },
+                    },
+                  }}
+                />
+              </Box>
+              {!allday && (
+                <Box sx={{ width: "110px" }}>
+                  <TimePicker
+                    label="End Time"
+                    ampm={false}
+                    value={endTime ? moment(endTime, "HH:mm") : null}
+                    onChange={(newValue: Moment | null) => {
+                      onEndTimeChange(newValue?.format("HH:mm") || "");
+                    }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        margin: "dense" as const,
+                        fullWidth: true,
+                        InputLabelProps: { shrink: true },
+                        error: !!validation.errors.dateTime,
+                        sx: { width: "100%" },
+                        inputProps: { "data-testid": "end-time-input" },
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          </>
+        ) : shouldShowEndDateNormal ? (
+          <Box display="flex" gap={1} flexDirection="row" alignItems="center">
+            <Box sx={{ maxWidth: "280px", width: "45%" }}>
+              <DatePicker
+                label="Start Date"
+                format={LONG_DATE_FORMAT}
+                value={startDate ? moment(startDate) : null}
+                onChange={(newValue: Moment | null) => {
+                  onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    margin: "dense" as const,
+                    fullWidth: true,
+                    InputLabelProps: { shrink: true },
+                    sx: { width: "100%" },
+                    inputProps: { "data-testid": "start-date-input" },
+                  },
+                }}
+              />
+            </Box>
+            <Box sx={{ maxWidth: "280px", width: "45%" }}>
               <DatePicker
                 label="End Date"
+                format={LONG_DATE_FORMAT}
                 value={endDate ? moment(endDate) : null}
                 onChange={(newValue: Moment | null) => {
                   onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
@@ -164,18 +193,81 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   },
                 }}
               />
-            )}
+            </Box>
           </Box>
-        </Box>
+        ) : (
+          <Box display="flex" gap={1} flexDirection="row" alignItems="center">
+            <Box sx={{ maxWidth: "280px", width: "45%" }}>
+              <DatePicker
+                label="Start Date"
+                format={LONG_DATE_FORMAT}
+                value={startDate ? moment(startDate) : null}
+                onChange={(newValue: Moment | null) => {
+                  onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    margin: "dense" as const,
+                    fullWidth: true,
+                    InputLabelProps: { shrink: true },
+                    sx: { width: "100%" },
+                    inputProps: { "data-testid": "start-date-input" },
+                  },
+                }}
+              />
+            </Box>
+            <Box sx={{ maxWidth: "110px" }}>
+              <TimePicker
+                label="Start Time"
+                ampm={false}
+                value={startTime ? moment(startTime, "HH:mm") : null}
+                onChange={(newValue: Moment | null) => {
+                  onStartTimeChange(newValue?.format("HH:mm") || "");
+                }}
+                disabled={allday}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    margin: "dense" as const,
+                    fullWidth: true,
+                    InputLabelProps: { shrink: true },
+                    sx: { width: "100%" },
+                    inputProps: { "data-testid": "start-time-input" },
+                  },
+                }}
+              />
+            </Box>
+            <Box sx={{ maxWidth: "110px" }}>
+              <TimePicker
+                label="End Time"
+                ampm={false}
+                value={endTime ? moment(endTime, "HH:mm") : null}
+                onChange={(newValue: Moment | null) => {
+                  onEndTimeChange(newValue?.format("HH:mm") || "");
+                }}
+                disabled={allday}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    margin: "dense" as const,
+                    fullWidth: true,
+                    InputLabelProps: { shrink: true },
+                    error: !!validation.errors.dateTime,
+                    sx: { width: "100%" },
+                    inputProps: { "data-testid": "end-time-input" },
+                  },
+                }}
+              />
+            </Box>
+          </Box>
+        )}
 
-        {/* Second row: Error message - 2 columns 50% each */}
+        {/* Second row: Error message */}
         {validation.errors.dateTime && (
           <Box display="flex" gap={1} flexDirection="row">
-            {/* Empty left column - 50% */}
-            <Box sx={{ flexGrow: 0.5, flexBasis: "50%" }} />
-
-            {/* Error message right column - 50% */}
-            <Box sx={{ flexGrow: 0.5, flexBasis: "50%" }}>
+            <Box sx={{ width: isExpanded ? "0" : allday ? "45%" : "64%" }} />
+            <Box>
               <Typography variant="caption" sx={{ color: "error.main" }}>
                 {validation.errors.dateTime}
               </Typography>

@@ -263,7 +263,7 @@ describe("EventPopover", () => {
     const newEvent = {
       title: "Meeting",
       start: "2025-07-18T00:00:00.000Z",
-      end: "2025-07-19T00:00:00.000Z",
+      end: "2025-07-18T00:00:00.000Z",
       allday: false,
       uid: "6045c603-11ab-43c5-bc30-0641420bb3a8",
       description: "Discuss project",
