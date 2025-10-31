@@ -5,7 +5,7 @@ export interface SettingsState {
 }
 
 const savedLang = localStorage.getItem("lang");
-const defaultLang = (window as any).LANG ?? savedLang ?? "en";
+const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
 const initialState: SettingsState = {
   language: defaultLang,
