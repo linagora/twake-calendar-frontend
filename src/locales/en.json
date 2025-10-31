@@ -157,6 +157,7 @@
     "today": "Today",
     "refresh": "Refresh",
     "viewSelector": "Select view",
+    "languageSelector": "Select language",
     "views": {
       "month": "Month",
       "week": "Week",

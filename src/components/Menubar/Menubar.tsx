@@ -45,10 +45,11 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
-  const { t, f } = useI18n();
+  const { t, f, lang, setLang } = useI18n();
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
   const dispatch = useAppDispatch();
 
   if (!user) {
@@ -101,6 +102,18 @@ export function Menubar({
   };
 
   const open = Boolean(anchorEl);
+  const langOpen = Boolean(langAnchorEl);
+
+  const handleLangClick = (event: React.MouseEvent<HTMLElement>) => {
+    setLangAnchorEl(event.currentTarget);
+  };
+  const handleLangClose = () => setLangAnchorEl(null);
+
+  const availableLangs = [
+    { code: "en", label: "English" },
+    { code: "fr", label: "Français" },
+  ];
+
   return (
     <>
       <header className="menubar">
@@ -176,24 +189,27 @@ export function Menubar({
               </IconButton>
             )}
           </div>
+
           <div className="menu-items">
-            <Avatar
-              style={{
-                backgroundColor: stringToColor(
-                  user && user.family_name
-                    ? user.family_name
-                    : user && user.email
-                      ? user.email
-                      : ""
-                ),
-              }}
-              sizes="large"
-              aria-label={t("menubar.userProfile")}
-            >
-              {user?.name && user?.family_name
-                ? `${user.name[0]}${user.family_name[0]}`
-                : (user?.email?.[0] ?? "")}
-            </Avatar>
+            <IconButton onClick={handleLangClick}>
+              <Avatar
+                style={{
+                  backgroundColor: stringToColor(
+                    user && user.family_name
+                      ? user.family_name
+                      : user && user.email
+                        ? user.email
+                        : ""
+                  ),
+                }}
+                sizes="large"
+                aria-label={t("menubar.userProfile")}
+              >
+                {user?.name && user?.family_name
+                  ? `${user.name[0]}${user.family_name[0]}`
+                  : (user?.email?.[0] ?? "")}
+              </Avatar>
+            </IconButton>
           </div>
         </div>
       </header>
@@ -216,9 +232,39 @@ export function Menubar({
           ))}
         </div>
       </Popover>
+
+      <Popover
+        open={langOpen}
+        anchorEl={langAnchorEl}
+        onClose={handleLangClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <FormControl size="small" style={{ minWidth: 100, marginRight: 8 }}>
+          <Select
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            variant="outlined"
+            aria-label={t("menubar.languageSelector")}
+          >
+            {availableLangs.map(({ code, label }) => (
+              <MenuItem key={code} value={code}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Popover>
     </>
   );
 }
+
 export function MainTitle() {
   const { t } = useI18n();
   return (

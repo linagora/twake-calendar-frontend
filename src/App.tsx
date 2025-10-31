@@ -14,8 +14,9 @@ import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import I18n from "cozy-ui/transpiled/react/providers/I18n";
 import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
-const locale = { en };
+const locale = { en, fr };
 const lang = (window as any).LANG ?? "en";
 
 function App() {
