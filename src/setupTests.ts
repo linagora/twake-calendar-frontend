@@ -43,6 +43,14 @@ jest.mock("openid-client", () => ({
 }));
 const originalWarn = console.warn;
 
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+(global as any).ResizeObserver = ResizeObserverMock;
+
 beforeAll(() => {
   console.warn = (...args: unknown[]) => {
     if (
