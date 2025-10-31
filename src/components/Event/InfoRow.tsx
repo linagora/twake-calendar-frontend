@@ -7,6 +7,7 @@ type InfoRowProps = {
   error?: boolean;
   data?: string; // optional link target
   content?: React.ReactNode; // if provided, overrides text rendering
+  style?: React.CSSProperties;
 };
 
 function detectUrls(text: string) {
@@ -60,6 +61,7 @@ export function InfoRow({
   error = false,
   data,
   content,
+  style,
 }: InfoRowProps) {
   return (
     <Box
@@ -83,8 +85,7 @@ export function InfoRow({
             maxHeight: "33vh",
             overflowY: "auto",
             width: "100%",
-            fontSize: "16px",
-            fontFamily: "'Inter', sans-serif",
+            ...style,
           }}
         >
           {data ? (

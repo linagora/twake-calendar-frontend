@@ -1,13 +1,10 @@
 import React from "react";
 import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
-import { updateSlotLabelVisibility } from "../utils/calendarUtils";
 import { createMouseHandlers } from "./mouseHandlers";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LockIcon from "@mui/icons-material/Lock";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
+import { EventChip } from "../../Event/EventChip/EventChip";
 
 export interface ViewHandlersProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -108,79 +105,12 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
   };
 
   const handleEventContent = (arg: any) => {
-    const event = arg.event;
-    const props = event._def.extendedProps;
-    const {
-      calId,
-      temp,
-      attendee: attendees = [],
-      class: classification,
-    } = props;
-    try {
-      const calendarsSource = temp ? tempcalendars : calendars;
-      const calendar = calendarsSource[calId];
-      if (!calendar) return null;
-
-      const isPrivate = ["PRIVATE", "CONFIDENTIAL"].includes(classification);
-      const ownerEmails = new Set(
-        calendar.ownerEmails?.map((e) => e.toLowerCase())
-      );
-      const delegated = calendar.delegated;
-      let Icon = null;
-      let titleStyle: React.CSSProperties = {
-        color: event._def.extendedProps.colors?.dark,
-      };
-
-      const showSpecialDisplay = attendees.filter((att: userAttendee) =>
-        ownerEmails.has(att.cal_address.toLowerCase())
-      );
-      // if no special display
-      if (attendees.length && !delegated && !showSpecialDisplay.length) {
-        return React.createElement(
-          "div",
-          { style: { display: "flex", alignItems: "center" } },
-          React.createElement("span", null, event.title)
-        );
-      }
-      switch (showSpecialDisplay?.[0]?.partstat) {
-        case "DECLINED":
-          Icon = null;
-          titleStyle.textDecoration = "line-through";
-          break;
-        case "TENTATIVE":
-          Icon = HelpOutlineIcon;
-          break;
-        case "NEEDS-ACTION":
-          Icon = AccessTimeIcon;
-          break;
-        case "ACCEPTED":
-          Icon = null;
-          break;
-        default:
-          break;
-      }
-
-      return RenderEventTitle(
-        titleStyle,
-        isPrivate,
-        Icon,
-        arg,
-        event,
-        calendar
-      );
-    } catch (e) {
-      const message =
-        e instanceof Error ? e.message : "Unknown error during rendering";
-      errorHandler.reportError(
-        event._def.extendedProps.uid || event.id,
-        message
-      );
-      return React.createElement(
-        "div",
-        { style: { display: "flex", alignItems: "center" } },
-        React.createElement("span", null, event.title)
-      );
-    }
+    return React.createElement(EventChip, {
+      arg,
+      calendars,
+      tempcalendars,
+      errorHandler,
+    });
   };
 
   const handleEventDidMount = (arg: any) => {
@@ -228,65 +158,3 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     handleEventDidMount,
   };
 };
-
-function RenderEventTitle(
-  titleStyle: React.CSSProperties,
-  isPrivate: boolean,
-  Icon: any,
-  arg: any,
-  event: any,
-  calendar: Calendars
-): React.ReactNode {
-  const isMonthView = arg.view.type === "dayGridMonth";
-  const startTime = event._instance.range.start.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const icons: React.ReactNode[] = [];
-  if (isPrivate) {
-    icons.push(
-      React.createElement(LockIcon, {
-        "data-testid": "lock-icon",
-        fontSize: "small",
-        style: { marginRight: "4px" },
-      })
-    );
-  }
-  if (Icon) {
-    icons.push(
-      React.createElement(Icon, {
-        fontSize: "small",
-        style: { marginRight: "4px" },
-      })
-    );
-  }
-
-  const containerStyle: React.CSSProperties = isMonthView
-    ? {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: calendar.color?.light,
-        color: "white",
-        borderRadius: "4px",
-        border: "1px",
-        width: "100%",
-      }
-    : {
-        display: "flex",
-        alignItems: "center",
-      };
-
-  const contentText =
-    isMonthView && !event._def.extendedProps.allday
-      ? `${startTime} ${event.title}`
-      : event.title;
-
-  return React.createElement(
-    "div",
-    { style: containerStyle },
-    ...icons,
-    React.createElement("span", { style: titleStyle }, contentText)
-  );
-}

@@ -564,6 +564,10 @@ export default function EventPreviewModal({
                   </Box>
                 }
                 text={event.location}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
               />
             )}
             {/* Description */}
@@ -575,6 +579,10 @@ export default function EventPreviewModal({
                   </Box>
                 }
                 text={event.description}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
               />
             )}
             {/* ALARM */}
@@ -586,6 +594,10 @@ export default function EventPreviewModal({
                   </Box>
                 }
                 text={`${event.alarm.trigger} before by ${event.alarm.action}`}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
               />
             )}
             {/* Repetition */}
@@ -597,6 +609,10 @@ export default function EventPreviewModal({
                   </Box>
                 }
                 text={makeRecurrenceString(event)}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
               />
             )}
           </>
@@ -633,6 +649,10 @@ export default function EventPreviewModal({
               </Box>
             }
             text={event.error}
+            style={{
+              fontSize: "16px",
+              fontFamily: "'Inter', sans-serif",
+            }}
             error
           />
         )}

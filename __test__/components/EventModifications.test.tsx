@@ -36,7 +36,7 @@ describe("CalendarApp integration", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
-            color: "#FF0000",
+            color: { light: "#FFFFFF", dark: "#000000" },
             ownerEmails: ["alice@example.com"],
             events: {
               event1: {
@@ -123,7 +123,7 @@ describe("CalendarApp integration", () => {
         "667037022b752d0026472254/cal1": {
           name: "Calendar 1",
           id: "667037022b752d0026472254/cal1",
-          color: "#FF0000",
+          color: { light: "#FFFFFF", dark: "#000000" },
           ownerEmails: ["alice@example.com"],
           events: {
             event1: {
@@ -157,6 +157,10 @@ describe("CalendarApp integration", () => {
   });
 
   it("renders lock icon for private events on the calendar", async () => {
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      value: 120,
+    });
     const preloadedState = createPreloadedState({
       class: "PRIVATE",
       title: "Private Event",
@@ -166,15 +170,16 @@ describe("CalendarApp integration", () => {
       <CalendarApp calendarRef={mockCalendarRef} />,
       preloadedState
     );
-
-    const eventEls = screen.getAllByText("Private Event");
-    const found = eventEls.some((eventEl) =>
-      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
-    );
-    expect(found).toBe(true);
+    const card = screen.getByTestId("event-card-event1");
+    const lockIcon = within(card).getByTestId("LockOutlineIcon");
+    expect(lockIcon).toBeInTheDocument();
   });
 
   it("renders lock icon for confidential events on the calendar", async () => {
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      value: 120,
+    });
     const preloadedState = createPreloadedState({
       class: "CONFIDENTIAL",
       title: "Confidential Event",
@@ -185,14 +190,16 @@ describe("CalendarApp integration", () => {
       preloadedState
     );
 
-    const eventEls = screen.getAllByText("Confidential Event");
-    const found = eventEls.some((eventEl) =>
-      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
-    );
-    expect(found).toBe(true);
+    const card = screen.getByTestId("event-card-event1");
+    const lockIcon = within(card).getByTestId("LockOutlineIcon");
+    expect(lockIcon).toBeInTheDocument();
   });
 
   it("does NOT render a lock icon for public events on the calendar", async () => {
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      value: 120,
+    });
     const preloadedState = createPreloadedState({
       class: "PUBLIC",
       title: "Public Event",
@@ -203,11 +210,9 @@ describe("CalendarApp integration", () => {
       preloadedState
     );
 
-    const eventEls = screen.getAllByText("Public Event");
-    const found = eventEls.some((eventEl) =>
-      within(eventEl.parentElement as HTMLElement).queryByTestId("lock-icon")
-    );
-    expect(found).toBe(false);
+    const card = screen.getByTestId("event-card-event1");
+    const lockIcon = within(card).queryByTestId("LockOutlineIcon");
+    expect(lockIcon).not.toBeInTheDocument();
   });
 
   it("does render a title for events without any attendees or user as organizer", async () => {
@@ -229,7 +234,7 @@ describe("CalendarApp integration", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
-            color: "#FF0000",
+            color: { light: "#FF0000", dark: "#000" },
             ownerEmails: ["alice@example.com"],
             events: {
               event1: {
