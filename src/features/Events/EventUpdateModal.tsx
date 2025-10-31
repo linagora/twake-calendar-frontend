@@ -52,6 +52,7 @@ function EventUpdateModal({
 }) {
   const dispatch = useAppDispatch();
   const tempList = useAppSelector((state) => state.calendars.templist);
+  const calList = useAppSelector((state) => state.calendars.list);
   // Get event from Redux store (cached data) as fallback
   const cachedEvent = useAppSelector(
     (state) => state.calendars.list[calId]?.events[eventId]
@@ -153,7 +154,9 @@ function EventUpdateModal({
     resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
   );
   const [newCalId, setNewCalId] = useState(calId);
-  const [calendarid, setCalendarid] = useState(0);
+  const [calendarid, setCalendarid] = useState(
+    calId ?? userPersonnalCalendars[0]?.id
+  );
 
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
@@ -171,7 +174,7 @@ function EventUpdateModal({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(0);
+    setCalendarid(userPersonnalCalendars[0].id);
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
@@ -235,10 +238,7 @@ function EventUpdateModal({
       }
 
       // Find correct calendar index
-      const currentCalIndex = userPersonnalCalendars.findIndex(
-        (cal) => cal.id === calId
-      );
-      setCalendarid(currentCalIndex >= 0 ? currentCalIndex : 0);
+      setCalendarid(calId);
 
       // Handle repetition properly - check both current event and base event
       const baseEventId = event.uid.split("/")[0];
@@ -327,7 +327,7 @@ function EventUpdateModal({
 
     const organizer = event.organizer;
 
-    const targetCalendar = userPersonnalCalendars[calendarid];
+    const targetCalendar = calList[calendarid];
     if (!targetCalendar) {
       console.error("Target calendar not found");
       return;
@@ -747,7 +747,7 @@ function EventUpdateModal({
         userPersonnalCalendars={userPersonnalCalendars}
         timezoneList={timezoneList}
         onCalendarChange={(newCalendarId) => {
-          const selectedCalendar = userPersonnalCalendars[newCalendarId];
+          const selectedCalendar = calList[newCalendarId];
           if (selectedCalendar) {
             setNewCalId(selectedCalendar.id);
           }

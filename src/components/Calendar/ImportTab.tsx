@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
+import { CalendarItemList } from "./CalendarItemList";
 import { SettingsTab } from "./SettingsTab";
 
 export function ImportTab({
@@ -40,8 +41,8 @@ export function ImportTab({
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importUrl, setImportUrl] = useState("");
   const calendars = useAppSelector((state) => state.calendars.list);
-  const personnalCalendars = Object.keys(calendars).filter(
-    (id) => id.split("/")[0] === userId
+  const personnalCalendars = Object.values(calendars).filter(
+    (cal) => cal.id.split("/")[0] === userId
   );
 
   useEffect(() => {
@@ -109,11 +110,7 @@ export function ImportTab({
           onChange={(e) => setImportTarget(e.target.value)}
         >
           <MenuItem value="new">New calendar</MenuItem>
-          {personnalCalendars.map((id) => (
-            <MenuItem key={id} value={id}>
-              {calendars[id].name}
-            </MenuItem>
-          ))}
+          {CalendarItemList(personnalCalendars)}
         </Select>
       </FormControl>
 

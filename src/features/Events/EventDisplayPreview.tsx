@@ -1,3 +1,4 @@
+import { DateSelectArg } from "@fullcalendar/core";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -5,17 +6,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import RepeatIcon from "@mui/icons-material/Repeat";
-import LockOutlineIcon from "@mui/icons-material/LockOutline";
+import { Box, Typography } from "@mui/material";
 import EventPopover from "./EventModal";
-import { DateSelectArg } from "@fullcalendar/core";
 import {
-  Box,
   Button,
   Chip,
   DialogActions,
@@ -23,15 +23,13 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Typography,
 } from "@mui/material";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { deleteEventAsync } from "../Calendars/CalendarSlice";
-import { dlEvent } from "./EventApi";
-import EventDisplayModal from "./EventDisplay";
-import EventUpdateModal from "./EventUpdateModal";
+import { CalendarName } from "../../components/Calendar/CalendarName";
+import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
+import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "../../components/Event/EditModeDialog";
 import EventDuplication from "../../components/Event/EventDuplicate";
@@ -41,10 +39,12 @@ import {
 } from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
-import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
 import { getCalendarRange } from "../../utils/dateUtils";
-import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
+import { deleteEventAsync } from "../Calendars/CalendarSlice";
+import { dlEvent } from "./EventApi";
+import EventDisplayModal from "./EventDisplay";
 import { CalendarEvent } from "./EventsTypes";
+import EventUpdateModal from "./EventUpdateModal";
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -648,16 +648,7 @@ export default function EventPreviewModal({
           <Box sx={{ minWidth: "25px", marginRight: 2 }}>
             <CalendarTodayIcon />
           </Box>
-          <CircleIcon
-            style={{
-              color: calendar.color?.light ?? "#3788D8",
-              width: 12,
-              height: 12,
-            }}
-          />
-          <Typography sx={{ wordBreak: "break-word" }}>
-            {calendar.name}
-          </Typography>
+          <CalendarName calendar={calendar} />
         </Box>
       </ResponsiveDialog>
       <EditModeDialog
