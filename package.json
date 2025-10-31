@@ -23,9 +23,9 @@
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
     "openid-client": "^6.5.3",
-    "react": "^18.3.1",
+    "react": "^18.2.0",
     "react-colorful": "^5.6.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.23.1",
@@ -70,7 +70,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.19.24",
-    "@types/react": "^18.3.1",
+    "@types/react": "^18.3.26",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
@@ -100,24 +100,6 @@
     "@material-ui/pickers": "npm:@mui/x-date-pickers@latest",
     "react-select": "^5.8.0",
     "react-swipeable-views": "^0.14.0",
-    "react-markdown": "^9.0.0",
-    "react-spring": {
-      "react": "^18.3.1",
-      "react-dom": "^18.3.1",
-      "@types/react": "^18.3.26"
-    },
-    "@babel/plugin-proposal-class-properties": "npm:@babel/plugin-transform-class-properties@latest",
-    "@babel/plugin-proposal-private-methods": "npm:@babel/plugin-transform-private-methods@latest",
-    "@babel/plugin-proposal-numeric-separator": "npm:@babel/plugin-transform-numeric-separator@latest",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "npm:@babel/plugin-transform-nullish-coalescing-operator@latest",
-    "@babel/plugin-proposal-optional-chaining": "npm:@babel/plugin-transform-optional-chaining@latest",
-    "@babel/plugin-proposal-private-property-in-object": "npm:@babel/plugin-transform-private-property-in-object@latest",
-    "react-three-fiber": "npm:@react-three/fiber@latest",
-    "react-use-gesture": "npm:@use-gesture/react@latest",
-    "glob": "^11.0.0",
-    "rimraf": "^6.0.0",
-    "intersection-observer": "npm:@juggle/resize-observer@latest",
-    "@humanwhocodes/config-array": "npm:@eslint/config-array@latest",
-    "@humanwhocodes/object-schema": "npm:@eslint/object-schema@latest"
+    "react-markdown": "^9.0.0"
   }
 }
