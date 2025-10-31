@@ -212,7 +212,7 @@ export default function EventPreviewModal({
                           )
                         }
                       >
-                        Email attendees
+                        {t("eventPreview.emailAttendees")}
                       </MenuItem>
                     )}
                     <EventDuplication
@@ -256,7 +256,7 @@ export default function EventPreviewModal({
                           updateTempList();
                         }}
                       >
-                        Delete event
+                        {t("eventPreview.deleteEvent")}
                       </MenuItem>
                     )}
                   </Menu>
@@ -272,9 +272,7 @@ export default function EventPreviewModal({
                 {event.class === "PRIVATE" &&
                   (isOwn ? (
                     <Tooltip
-                      title={
-                        "Only you and attendees can see the details of this event."
-                      }
+                      title={t("eventPreview.privateEvent.tooltipOwn")}
                       placement="top"
                     >
                       <LockOutlineIcon />
@@ -296,23 +294,21 @@ export default function EventPreviewModal({
                 </Typography>
                 {event.transp === "TRANSPARENT" && (
                   <Tooltip
-                    title={
-                      "Others see you as available during the time range of this event."
-                    }
+                    title={t("eventPreview.free.tooltip")}
                     placement="top"
                   >
                     <Chip
                       icon={<CircleIcon color="success" fontSize="small" />}
-                      label="Free"
+                      label={t("eventPreview.free.label")}
                     />
                   </Tooltip>
                 )}
               </Box>
               <Typography color="text.secondaryContainer" gutterBottom>
-                {formatDate(event.start, event.allday)}
+                {formatDate(event.start, t, event.allday)}
                 {event.end &&
-                  formatEnd(event.start, event.end, event.allday) &&
-                  ` – ${formatEnd(event.start, event.end, event.allday)} ${!event.allday && getTimezoneOffset(timezone)}`}
+                  formatEnd(event.start, event.end, t, event.allday) &&
+                  ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday && getTimezoneOffset(timezone)}`}
               </Typography>
             </>
           )
@@ -321,7 +317,9 @@ export default function EventPreviewModal({
           <>
             {currentUserAttendee && (
               <>
-                <Typography sx={{ marginRight: 2 }}>Attending?</Typography>
+                <Typography sx={{ marginRight: 2 }}>
+                  {t("eventPreview.attendingQuestion")}
+                </Typography>
                 <Box display="flex" gap="15px" alignItems="center">
                   <Button
                     variant={
@@ -346,7 +344,6 @@ export default function EventPreviewModal({
                               user,
                               event,
                               "ACCEPTED",
-
                               onClose,
                               type,
                               calendarList
@@ -365,7 +362,7 @@ export default function EventPreviewModal({
                       }
                     }}
                   >
-                    Accept
+                    {t("eventPreview.accept")}
                   </Button>
                   <Button
                     variant={
@@ -408,7 +405,7 @@ export default function EventPreviewModal({
                       }
                     }}
                   >
-                    Maybe
+                    {t("eventPreview.maybe")}
                   </Button>
                   <Button
                     variant={
@@ -451,7 +448,7 @@ export default function EventPreviewModal({
                       }
                     }}
                   >
-                    Decline
+                    {t("eventPreview.decline")}
                   </Button>
                 </Box>
               </>
@@ -476,7 +473,7 @@ export default function EventPreviewModal({
                       window.open(event.x_openpass_videoconference)
                     }
                   >
-                    Join the video conference
+                    {t("eventPreview.joinVideo")}
                   </Button>
                 }
               />
@@ -499,20 +496,25 @@ export default function EventPreviewModal({
                       }}
                     >
                       <Box sx={{ marginRight: 2 }}>
-                        <Typography>{attendees.length} guests</Typography>
+                        <Typography>
+                          {t("eventPreview.guests", {
+                            count: attendees.length,
+                          })}
+                        </Typography>
                         <Typography
                           sx={{ fontSize: "13px", color: "text.secondary" }}
                         >
-                          {
-                            attendees.filter((a) => a.partstat === "ACCEPTED")
-                              .length
-                          }{" "}
-                          yes,{" "}
-                          {
-                            attendees.filter((a) => a.partstat === "DECLINED")
-                              .length
-                          }{" "}
-                          no
+                          {t("eventPreview.yesCount", {
+                            count: attendees.filter(
+                              (a) => a.partstat === "ACCEPTED"
+                            ).length,
+                          })}
+                          ,{" "}
+                          {t("eventPreview.noCount", {
+                            count: attendees.filter(
+                              (a) => a.partstat === "DECLINED"
+                            ).length,
+                          })}
                         </Typography>
                       </Box>
                       {!showAllAttendees && (
@@ -545,7 +547,9 @@ export default function EventPreviewModal({
                         }}
                         onClick={() => setShowAllAttendees(!showAllAttendees)}
                       >
-                        {showAllAttendees ? "Show less" : `Show more `}
+                        {showAllAttendees
+                          ? t("eventPreview.showLess")
+                          : t("eventPreview.showMore")}
                       </Typography>
                     </Box>
                   }
@@ -756,16 +760,16 @@ function makeRecurrenceString(event: CalendarEvent): string | undefined {
   return recur.join(", ");
 }
 
-function formatDate(date: Date | string, allday?: boolean) {
+function formatDate(date: Date | string, t: Function, allday?: boolean) {
   if (allday) {
-    return new Date(date).toLocaleDateString(undefined, {
+    return new Date(date).toLocaleDateString(t("locale"), {
       year: "numeric",
       month: "long",
       weekday: "long",
       day: "numeric",
     });
   } else {
-    return new Date(date).toLocaleString(undefined, {
+    return new Date(date).toLocaleString(t("locale"), {
       year: "numeric",
       month: "long",
       weekday: "long",
@@ -776,7 +780,12 @@ function formatDate(date: Date | string, allday?: boolean) {
   }
 }
 
-function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
+function formatEnd(
+  start: Date | string,
+  end: Date | string,
+  t: Function,
+  allday?: boolean
+) {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -788,19 +797,19 @@ function formatEnd(start: Date | string, end: Date | string, allday?: boolean) {
   if (allday) {
     return sameDay
       ? null
-      : endDate.toLocaleDateString(undefined, {
+      : endDate.toLocaleDateString(t("locale"), {
           year: "numeric",
           month: "short",
           day: "numeric",
         });
   } else {
     if (sameDay) {
-      return endDate.toLocaleTimeString(undefined, {
+      return endDate.toLocaleTimeString(t("locale"), {
         hour: "2-digit",
         minute: "2-digit",
       });
     }
-    return endDate.toLocaleString(undefined, {
+    return endDate.toLocaleString(t("locale"), {
       year: "numeric",
       month: "short",
       day: "numeric",

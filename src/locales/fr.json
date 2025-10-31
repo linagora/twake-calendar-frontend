@@ -166,5 +166,33 @@
     "apps": "Applications",
     "userProfile": "Profil utilisateur",
     "logoAlt": "Calendrier"
+  },
+  "eventPreview": {
+    "emailAttendees": "Envoyer un e-mail aux participants",
+    "deleteEvent": "Supprimer l'événement",
+    "privateEvent": {
+      "tooltipOwn": "Seul vous et les participants pouvez voir les détails de cet événement.",
+      "hiddenDetails": "Ceci est un événement privé. Les détails sont masqués."
+    },
+    "free": {
+      "label": "Libre",
+      "tooltip": "Les autres vous voient disponible pendant la durée de cet événement."
+    },
+    "attendingQuestion": "Participerez-vous ?",
+    "accept": "Accepter",
+    "maybe": "Peut-être",
+    "decline": "Refuser",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "joinVideo": "Rejoindre la visioconférence",
+    "guests": "%{count} invités",
+    "yesCount": "%{count} oui",
+    "noCount": "%{count} non",
+    "recurrentEvent": "Événement récurrent",
+    "until": "jusqu'au",
+    "forOccurrences": "pour %{count} occurrences",
+    "days": "jours",
+    "months": "mois",
+    "years": "ans"
   }
 }

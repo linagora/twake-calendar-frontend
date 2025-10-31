@@ -166,5 +166,33 @@
     "apps": "Apps",
     "userProfile": "User profile",
     "logoAlt": "Calendar"
+  },
+  "eventPreview": {
+    "emailAttendees": "Email attendees",
+    "deleteEvent": "Delete event",
+    "privateEvent": {
+      "tooltipOwn": "Only you and attendees can see the details of this event.",
+      "hiddenDetails": "This is a private event. Details are hidden."
+    },
+    "free": {
+      "label": "Free",
+      "tooltip": "Others see you as available during the time range of this event."
+    },
+    "attendingQuestion": "Attending?",
+    "accept": "Accept",
+    "maybe": "Maybe",
+    "decline": "Decline",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "joinVideo": "Join the video conference",
+    "guests": "%{count} guests",
+    "yesCount": "%{count} yes",
+    "noCount": "%{count} no",
+    "recurrentEvent": "Recurrent Event",
+    "until": "until",
+    "forOccurrences": "for %{count} occurrences",
+    "days": "days",
+    "months": "months",
+    "years": "years"
   }
 }
