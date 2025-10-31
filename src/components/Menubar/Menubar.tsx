@@ -21,6 +21,7 @@ import {
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { setLanguage } from "../../features/Settings/SettingsSlice";
 
 export type AppIconProps = {
   name: string;
@@ -45,7 +46,7 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
-  const { t, f, lang, setLang } = useI18n();
+  const { t, f, lang } = useI18n();
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -249,7 +250,9 @@ export function Menubar({
         <FormControl size="small" style={{ minWidth: 100, marginRight: 8 }}>
           <Select
             value={lang}
-            onChange={(e) => setLang(e.target.value)}
+            onChange={(e) => {
+              dispatch(setLanguage(e.target.value));
+            }}
             variant="outlined"
             aria-label={t("menubar.languageSelector")}
           >

@@ -17,10 +17,11 @@ import en from "./locales/en.json";
 import fr from "./locales/fr.json";
 
 const locale = { en, fr };
-const lang = (window as any).LANG ?? "en";
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
+  const lang = useAppSelector((state) => state.settings.language);
+
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (error) {
