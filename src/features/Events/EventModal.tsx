@@ -151,11 +151,11 @@ function EventPopover({
     setStart("");
     setEnd("");
     if (
-      userPersonnalCalendars &&
-      userPersonnalCalendars.length > 0 &&
-      userPersonnalCalendars[0]?.id
+      userPersonalCalendars &&
+      userPersonalCalendars.length > 0 &&
+      userPersonalCalendars[0]?.id
     ) {
-      setCalendarid(userPersonnalCalendars[0].id);
+      setCalendarid(userPersonalCalendars[0].id);
     }
     setAllDay(false);
     setRepetition({} as RepetitionObject);
@@ -458,11 +458,11 @@ function EventPopover({
       setAttendees([]);
       setLocation("");
       if (
-        userPersonnalCalendars &&
-        userPersonnalCalendars.length > 0 &&
-        userPersonnalCalendars[0]?.id
+        userPersonalCalendars &&
+        userPersonalCalendars.length > 0 &&
+        userPersonalCalendars[0]?.id
       ) {
-        setCalendarid(userPersonnalCalendars[0].id);
+        setCalendarid(userPersonalCalendars[0].id);
       }
       setAllDay(false);
       setRepetition({} as RepetitionObject);

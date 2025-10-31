@@ -155,7 +155,7 @@ function EventUpdateModal({
   );
   const [newCalId, setNewCalId] = useState(calId);
   const [calendarid, setCalendarid] = useState(
-    calId ?? userPersonnalCalendars[0]?.id ?? ""
+    calId ?? userPersonalCalendars[0]?.id ?? ""
   );
 
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
@@ -175,7 +175,7 @@ function EventUpdateModal({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(userPersonnalCalendars[0].id);
+    setCalendarid(userPersonalCalendars[0].id);
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");

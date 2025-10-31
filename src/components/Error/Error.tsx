@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function Error() {
-  const { t } = useI18n(); // 👈 Cozy UI i18n hook
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const userError = useAppSelector((state) => state.user.error);
   const calendarError = useAppSelector((state) => state.calendars.error);
