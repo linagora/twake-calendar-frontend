@@ -52,6 +52,7 @@ function EventPopover({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const tempList = useAppSelector((state) => state.calendars.templist);
+  const calList = useAppSelector((state) => state.calendars.list);
   const selectPersonnalCalendars = createSelector(
     (state: any) => state.calendars,
     (calendars: any) =>
@@ -94,9 +95,7 @@ function EventPopover({
   const [start, setStart] = useState(event?.start ? event.start : "");
   const [end, setEnd] = useState(event?.end ? event.end : "");
   const [calendarid, setCalendarid] = useState(
-    event?.calId
-      ? userPersonnalCalendars.findIndex((e) => e.id === event?.calId)
-      : 0
+    event?.calId ?? userPersonnalCalendars[0]?.id
   );
   const [allday, setAllDay] = useState(event?.allday ?? false);
   const [repetition, setRepetition] = useState<RepetitionObject>(
@@ -141,7 +140,7 @@ function EventPopover({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(0);
+    setCalendarid(userPersonnalCalendars[0].id);
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
@@ -293,13 +292,7 @@ function EventPopover({
         setEnd("");
       }
 
-      setCalendarid(
-        event.calId
-          ? userPersonnalCalendarsRef.current.findIndex(
-              (e) => e.id === event.calId
-            )
-          : 0
-      );
+      setCalendarid(userPersonnalCalendars[0].id);
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
       setAttendees(
@@ -354,7 +347,7 @@ function EventPopover({
       setDescription("");
       setAttendees([]);
       setLocation("");
-      setCalendarid(0);
+      setCalendarid(userPersonnalCalendars[0].id);
       setAllDay(false);
       setRepetition({} as RepetitionObject);
       setAlarm("");
@@ -468,9 +461,9 @@ function EventPopover({
     const newEventUID = crypto.randomUUID();
 
     const newEvent: CalendarEvent = {
-      calId: userPersonnalCalendars[calendarid].id,
+      calId: calList[calendarid].id,
       title,
-      URL: `/calendars/${userPersonnalCalendars[calendarid].id}/${newEventUID}.ics`,
+      URL: `/calendars/${calList[calendarid].id}/${newEventUID}.ics`,
       start: new Date(start).toISOString(),
       allday,
       uid: newEventUID,
@@ -491,7 +484,7 @@ function EventPopover({
         },
       ],
       transp: busy,
-      color: userPersonnalCalendars[calendarid]?.color,
+      color: calList[calendarid]?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
     };
@@ -515,7 +508,7 @@ function EventPopover({
     // Save to API in background
     await dispatch(
       putEventAsync({
-        cal: userPersonnalCalendars[calendarid],
+        cal: calList[calendarid],
         newEvent,
       })
     );
