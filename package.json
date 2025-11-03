@@ -26,11 +26,9 @@
     "react": "^18.2.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.23.1",
     "redux-first-history": "^5.2.0",
-    "ts-node": "^10.9.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -100,6 +98,7 @@
     "@material-ui/pickers": "npm:@mui/x-date-pickers@latest",
     "react-select": "^5.8.0",
     "react-swipeable-views": "^0.14.0",
-    "react-markdown": "^9.0.0"
+    "react-markdown": "^9.0.0",
+    "@babel/runtime": "^7.26.10"
   }
 }
