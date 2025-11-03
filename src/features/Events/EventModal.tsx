@@ -140,7 +140,7 @@ function EventPopover({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(userPersonnalCalendars[0].id);
+    setCalendarid(userPersonnalCalendars[0]?.id);
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
