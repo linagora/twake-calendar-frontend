@@ -667,42 +667,42 @@ export default function EventFormFields({
                 value={alarm}
                 onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
               >
-                <MenuItem value={""}>{t("event.form.noNotification")}</MenuItem>
-                <MenuItem value={"-PT1M"}>
-                  {t("event.form.notification1minute")}
+                <MenuItem value="">{t("event.form.notifications.")}</MenuItem>
+                <MenuItem value="-PT1M">
+                  {t("event.form.notifications.-PT1M")}
                 </MenuItem>
-                <MenuItem value={"-PT5M"}>
-                  {t("event.form.notification5minutes")}
+                <MenuItem value="-PT5M">
+                  {t("event.form.notifications.-PT5M")}
                 </MenuItem>
-                <MenuItem value={"-PT10M"}>
-                  {t("event.form.notification10minutes")}
+                <MenuItem value="-PT10M">
+                  {t("event.form.notifications.-PT10M")}
                 </MenuItem>
-                <MenuItem value={"-PT15M"}>
-                  {t("event.form.notification15minutes")}
+                <MenuItem value="-PT15M">
+                  {t("event.form.notifications.-PT15M")}
                 </MenuItem>
-                <MenuItem value={"-PT30M"}>
-                  {t("event.form.notification30minutes")}
+                <MenuItem value="-PT30M">
+                  {t("event.form.notifications.-PT30M")}
                 </MenuItem>
-                <MenuItem value={"-PT1H"}>
-                  {t("event.form.notification1hour")}
+                <MenuItem value="-PT1H">
+                  {t("event.form.notifications.-PT1H")}
                 </MenuItem>
-                <MenuItem value={"-PT2H"}>
-                  {t("event.form.notification2hours")}
+                <MenuItem value="-PT2H">
+                  {t("event.form.notifications.-PT2H")}
                 </MenuItem>
-                <MenuItem value={"-PT5H"}>
-                  {t("event.form.notification5hours")}
+                <MenuItem value="-PT5H">
+                  {t("event.form.notifications.-PT5H")}
                 </MenuItem>
-                <MenuItem value={"-PT12H"}>
-                  {t("event.form.notification12hours")}
+                <MenuItem value="-PT12H">
+                  {t("event.form.notifications.-PT12H")}
                 </MenuItem>
-                <MenuItem value={"-PT1D"}>
-                  {t("event.form.notification1day")}
+                <MenuItem value="-PT1D">
+                  {t("event.form.notifications.-PT1D")}
                 </MenuItem>
-                <MenuItem value={"-PT2D"}>
-                  {t("event.form.notification2days")}
+                <MenuItem value="-PT2D">
+                  {t("event.form.notifications.-PT2D")}
                 </MenuItem>
-                <MenuItem value={"-PT1W"}>
-                  {t("event.form.notification1week")}
+                <MenuItem value="-PT1W">
+                  {t("event.form.notifications.-PT1W")}
                 </MenuItem>
               </Select>
             </FormControl>

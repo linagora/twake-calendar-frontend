@@ -29,7 +29,7 @@ export function renderAttendeeBadge(
     ) : null;
 
   if (!isFull) {
-    return <Avatar {...stringAvatar(a.cn || a.cal_address)} />;
+    return <Avatar key={key} {...stringAvatar(a.cn || a.cal_address)} />;
   } else {
     return (
       <Box

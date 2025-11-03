@@ -157,7 +157,12 @@ function SelectedCalendarsList({
                     onColorChange={(color) => onColorChange(cal, color)}
                   />
                 ) : (
-                  <Typography color="textSecondary">
+                  <Typography
+                    key={t("calendar.noPublicCalendarsFor", {
+                      name: owner.displayName,
+                    })}
+                    color="textSecondary"
+                  >
                     {t("calendar.noPublicCalendarsFor", {
                       name: owner.displayName,
                     })}
@@ -165,7 +170,12 @@ function SelectedCalendarsList({
                 )
               )
             ) : alreadyExisting ? (
-              <Typography color="textSecondary">
+              <Typography
+                key={t("calendar.noMoreCalendarsFor", {
+                  name: owner.displayName,
+                })}
+                color="textSecondary"
+              >
                 {t("calendar.noMoreCalendarsFor", { name: owner.displayName })}
               </Typography>
             ) : null}

@@ -601,7 +601,10 @@ export default function EventPreviewModal({
                     <NotificationsNoneIcon />
                   </Box>
                 }
-                text={`${event.alarm.trigger} before by ${event.alarm.action}`}
+                text={t("eventPreview.alarmText", {
+                  trigger: t(`event.form.notifications.${event.alarm.trigger}`),
+                  action: t(`event.form.notifications.${event.alarm.action}`),
+                })}
                 style={{
                   fontSize: "16px",
                   fontFamily: "'Inter', sans-serif",
@@ -616,7 +619,7 @@ export default function EventPreviewModal({
                     <RepeatIcon />
                   </Box>
                 }
-                text={makeRecurrenceString(event)}
+                text={makeRecurrenceString(event, t)}
                 style={{
                   fontSize: "16px",
                   fontFamily: "'Inter', sans-serif",
@@ -644,7 +647,7 @@ export default function EventPreviewModal({
               letterSpacing={"0.5px"}
               textAlign={"center"}
             >
-              This is a private event. Details are hidden.
+              {t("eventPreview.privateEvent.hiddenDetails")}
             </Typography>
           </Box>
         )}
@@ -733,29 +736,62 @@ export default function EventPreviewModal({
   );
 }
 
-function makeRecurrenceString(event: CalendarEvent): string | undefined {
-  if (!event.repetition) {
-    return;
-  }
-  const recur = [`Recurrent Event · ${event.repetition.freq}`];
+function makeRecurrenceString(
+  event: CalendarEvent,
+  t: Function
+): string | undefined {
+  if (!event.repetition) return;
+
+  const recur: string[] = [
+    `${t("eventPreview.recurrentEvent")} · ${t(
+      `eventPreview.freq.${event.repetition.freq}`,
+      event.repetition.freq
+    )}`,
+  ];
+
   const recurType: Record<string, string> = {
-    daily: "days",
-    monthly: "months",
-    yearly: "years",
+    daily: t("eventPreview.days"),
+    monthly: t("eventPreview.months"),
+    yearly: t("eventPreview.years"),
   };
+
   if (event.repetition.byday) {
-    recur.push(`on ${event.repetition.byday.join(", ")}`);
+    recur.push(
+      t("eventPreview.recurrenceOnDays", {
+        days: event.repetition.byday
+          .map((s) => t(`eventPreview.onDays.${s}`))
+          .join(", "),
+      })
+    );
   }
   if (event.repetition.interval && event.repetition.interval > 1) {
     recur.push(
-      `every ${event.repetition.interval} ${recurType[event.repetition.freq]}`
+      t("eventPreview.everyInterval", {
+        interval: event.repetition.interval,
+        unit: recurType[event.repetition.freq],
+      })
     );
   }
   if (event.repetition.occurrences) {
-    recur.push(`for ${event.repetition.occurrences} occurences`);
+    recur.push(
+      t("eventPreview.forOccurrences", {
+        count: event.repetition.occurrences,
+      })
+    );
   }
   if (event.repetition.endDate) {
-    recur.push(`until ${event.repetition.endDate}`);
+    recur.push(
+      t("eventPreview.until", {
+        date: new Date(event.repetition.endDate).toLocaleDateString(
+          t("locale"),
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        ),
+      })
+    );
   }
   return recur.join(", ");
 }
