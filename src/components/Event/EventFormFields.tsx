@@ -735,7 +735,7 @@ export default function EventFormFields({
           )}
           <Select
             labelId="calendar-select-label"
-            value={calendarid.toString()}
+            value={calendarid}
             label={!showMore ? "Calendar" : ""}
             displayEmpty
             onChange={(e: SelectChangeEvent) =>
