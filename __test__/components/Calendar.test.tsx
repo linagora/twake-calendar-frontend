@@ -20,6 +20,9 @@ function CalendarTestWrapper() {
 }
 
 describe("CalendarSelection", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
   const today = new Date();
   const start = new Date(today);
   start.setHours(10, 0, 0, 0);
@@ -270,9 +273,49 @@ describe("CalendarSelection", () => {
       )
     ).toHaveClass("event-dot");
   });
+  it("renders calendars with local storage", async () => {
+    const mockCalendarRef = { current: null };
+    localStorage.setItem(
+      "selectedCalendars",
+      JSON.stringify(Object.keys(preloadedState.calendars.list))
+    );
+    await act(async () => {
+      renderWithProviders(
+        <CalendarApp calendarRef={mockCalendarRef} />,
+        preloadedState
+      );
+    });
+
+    expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated")).toBeChecked();
+    expect(screen.getByLabelText("Calendar shared")).toBeChecked();
+  });
+  it("persist selected calendars in local storage", async () => {
+    const mockCalendarRef = { current: null };
+    await act(async () => {
+      renderWithProviders(
+        <CalendarApp calendarRef={mockCalendarRef} />,
+        preloadedState
+      );
+    });
+
+    expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
+
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+      fireEvent.click(screen.getByLabelText("Calendar shared"));
+    });
+
+    expect(localStorage.getItem("selectedCalendars")).toBe('["user3/cal1"]');
+  });
 });
 
 describe("calendar Availability search", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
   const preloadedState = {
     user: {
       userData: {

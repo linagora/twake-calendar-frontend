@@ -102,13 +102,30 @@ export default function CalendarApp({
 
   useEffect(() => {
     if (initialLoadRef.current && Object.keys(calendars).length > 0 && userId) {
-      const personalCalendarIds = Object.keys(calendars).filter(
-        (id) => id.split("/")[0] === userId
-      );
-      setSelectedCalendars(personalCalendarIds);
+      const cached = localStorage.getItem("selectedCalendars");
+      if (cached && cached.length > 0) {
+        const parsed = JSON.parse(cached) as string[];
+        const valid = parsed.filter((id) => calendars[id]);
+        setSelectedCalendars(valid);
+      } else {
+        const personalCalendarIds = Object.keys(calendars).filter(
+          (id) => id.split("/")[0] === userId
+        );
+        setSelectedCalendars(personalCalendarIds);
+      }
       initialLoadRef.current = false;
     }
   }, [calendars, userId]);
+
+  // Save selected cals to cache
+  useEffect(() => {
+    if (Object.keys(calendars).length > 0) {
+      localStorage.setItem(
+        "selectedCalendars",
+        JSON.stringify(selectedCalendars)
+      );
+    }
+  }, [selectedCalendars]);
 
   useEffect(() => {
     updateDarkColor(calendars, theme, dispatch);
