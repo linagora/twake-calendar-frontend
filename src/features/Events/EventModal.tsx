@@ -130,6 +130,12 @@ function EventPopover({
     userPersonnalCalendarsRef.current = userPersonnalCalendars;
   }, [userPersonnalCalendars]);
 
+  useEffect(() => {
+    if (!calendarid && userPersonnalCalendars.length > 0) {
+      setCalendarid(userPersonnalCalendars[0].id);
+    }
+  }, [calendarid, userPersonnalCalendars]);
+
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
     setShowDescription(false);
