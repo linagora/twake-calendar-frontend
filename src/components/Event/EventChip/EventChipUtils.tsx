@@ -3,11 +3,13 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import { Box, getContrastRatio } from "@mui/material";
 import moment from "moment";
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/userDataTypes";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EVENT_DURATION } from "./EventChip";
+
+const COMPACT_WIDTH_THRESHOLD = 100;
 
 export interface EventChipProps {
   arg: any;
@@ -179,4 +181,33 @@ export function DisplayedIcons(IconDisplayed: IconDisplayConfig) {
       )}
     </Box>
   );
+}
+
+export function useCompactMode(
+  cardRef: React.RefObject<HTMLDivElement | null>
+): boolean {
+  const [showCompact, setShowCompact] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!cardRef.current) return;
+
+    const checkWidth = () => {
+      const width = cardRef.current?.offsetWidth ?? 0;
+      const newCompact = width < COMPACT_WIDTH_THRESHOLD;
+
+      setShowCompact((prev) => (prev !== newCompact ? newCompact : prev));
+    };
+
+    checkWidth();
+
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(checkWidth);
+    });
+
+    resizeObserver.observe(cardRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [cardRef]);
+
+  return showCompact;
 }
