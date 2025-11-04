@@ -28,6 +28,7 @@ import {
   detectRecurringEventChanges,
 } from "./eventUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -50,6 +51,7 @@ function EventUpdateModal({
   eventData?: CalendarEvent | null;
   typeOfAction?: "solo" | "all";
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const tempList = useAppSelector((state) => state.calendars.templist);
   const calList = useAppSelector((state) => state.calendars.list);
@@ -697,15 +699,15 @@ function EventUpdateModal({
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (
         <Button startIcon={<AddIcon />} onClick={() => setShowMore(!showMore)}>
-          More options
+          {t("common.moreOptions")}
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
         <Button variant="outlined" onClick={handleClose}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button variant="contained" onClick={handleSave}>
-          Save
+          {t("actions.save")}
         </Button>
       </Box>
     </Box>
@@ -717,7 +719,7 @@ function EventUpdateModal({
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title="Update Event"
+      title={t("event.updateEvent")}
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}

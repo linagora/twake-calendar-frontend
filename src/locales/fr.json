@@ -14,7 +14,12 @@
     "newEventsVisibility": "Les nouveaux événements créés seront visibles par :",
     "browseOtherCalendars": "Parcourir d'autres calendriers",
     "noPublicCalendarsFor": "Aucun calendrier public disponible pour %{name}",
-    "noMoreCalendarsFor": "Plus de calendriers disponibles pour %{name}"
+    "noMoreCalendarsFor": "Plus de calendriers disponibles pour %{name}",
+    "delete": {
+      "title": "Supprimer %{name} ?",
+      "personalWarning": "Vous allez perdre tous les événements de ce calendrier.",
+      "sharedWarning": "Vous allez perdre l’accès à ses événements. Vous pourrez toujours le rajouter plus tard."
+    }
   },
   "actions": {
     "modify": "Modifier",
@@ -55,6 +60,7 @@
   },
   "event": {
     "createEvent": "Créer un événement",
+    "updateEvent": "Mettre à jour un événement",
     "organizer": "Organisateur",
     "repeat": {
       "repeatEvery": "Répéter tous les",
