@@ -19,10 +19,10 @@ import {
   getOwnerAttendee,
   getTitleStyle,
   IconDisplayConfig,
+  useCompactMode,
 } from "./EventChipUtils";
 import { SimpleEventChip } from "./SimpleEventChip";
 
-const COMPACT_WIDTH_THRESHOLD = 100;
 const PRIVATE_CLASSIFICATIONS = ["PRIVATE", "CONFIDENTIAL"];
 
 export const EVENT_DURATION = {
@@ -30,34 +30,6 @@ export const EVENT_DURATION = {
   MEDIUM: 30,
   LONG: 60,
 } as const;
-
-function useCompactMode(
-  cardRef: React.RefObject<HTMLDivElement | null>
-): boolean {
-  const [showCompact, setShowCompact] = useState(false);
-
-  useEffect(() => {
-    const checkWidth = () => {
-      if (cardRef.current) {
-        const width = cardRef.current.offsetWidth;
-        setShowCompact(width < COMPACT_WIDTH_THRESHOLD);
-      }
-    };
-
-    checkWidth();
-
-    const resizeObserver = new ResizeObserver(checkWidth);
-    if (cardRef.current) {
-      resizeObserver.observe(cardRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  return showCompact;
-}
 
 export function EventChip({
   arg,
