@@ -4,7 +4,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import CalendarPopover from "./CalendarModal";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -40,7 +40,7 @@ function CalendarAccordion({
 
   const [expended, setExpended] = useState(defaultExpanded);
   if (calendars.length === 0 && !showAddButton) return null;
-
+  useEffect(() => setExpended(defaultExpanded), [defaultExpanded]);
   return (
     <Accordion
       defaultExpanded={defaultExpanded}
@@ -149,6 +149,9 @@ export default function CalendarSelection({
             setAnchorElCal(document.body);
             setSelectedCalId(id);
           }}
+          defaultExpanded={selectedCalendars.some((id) =>
+            delegatedCalendars.includes(id)
+          )}
         />
 
         <CalendarAccordion
@@ -164,6 +167,9 @@ export default function CalendarSelection({
             setAnchorElCal(document.body);
             setSelectedCalId(id);
           }}
+          defaultExpanded={selectedCalendars.some((id) =>
+            sharedCalendars.includes(id)
+          )}
         />
       </div>
       <CalendarPopover

@@ -6,6 +6,9 @@ import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
 import userEvent from "@testing-library/user-event";
 
 describe("CalendarSelection", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
   const baseUser = {
     userData: {
       sub: "test",
