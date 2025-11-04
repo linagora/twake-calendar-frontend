@@ -341,4 +341,11 @@ describe("EventPopover", () => {
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
+
+  it("BUGFIX: Prefill Calendar field", async () => {
+    renderPopover();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Calendar")).toHaveTextContent("Calendar 1")
+    );
+  });
 });
