@@ -3,9 +3,12 @@ import { Box, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import moment, { Moment } from "moment";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
+
+dayjs.extend(customParseFormat);
 
 /**
  * Props for DateTimeFields component
@@ -17,6 +20,7 @@ export interface DateTimeFieldsProps {
   endTime: string;
   allday: boolean;
   showMore: boolean;
+  hasEndDateChanged: boolean;
   showEndDate: boolean;
   onToggleEndDate: () => void;
   validation: {
@@ -41,6 +45,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   endTime,
   allday,
   showMore,
+  hasEndDateChanged,
   showEndDate,
   onToggleEndDate,
   validation,
@@ -51,23 +56,33 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 }) => {
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || !!showEndDate;
+  const shouldShowFullFieldsInNormal = !allday && hasEndDateChanged;
+  const showSingleDateField =
+    !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
+  const startDateLabel = showSingleDateField ? "Date" : "Start Date";
+
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment} adapterLocale="en">
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
       <Box
         display="flex"
         flexDirection="column"
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
-        {isExpanded ? (
+        {isExpanded || shouldShowFullFieldsInNormal ? (
           <>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-              <Box sx={{ maxWidth: "280px", width: "45%" }}>
+              <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
                   label="Start Date"
                   format={LONG_DATE_FORMAT}
-                  value={startDate ? moment(startDate) : null}
-                  onChange={(newValue: Moment | null) => {
-                    onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                  value={startDate ? dayjs(startDate) : null}
+                  onChange={(newValue) => {
+                    const value = newValue as Dayjs | null;
+                    if (!value || !value.isValid()) {
+                      return;
+                    }
+                    const formatted = value.format("YYYY-MM-DD");
+                    onStartDateChange(formatted);
                   }}
                   slotProps={{
                     textField: {
@@ -86,9 +101,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   <TimePicker
                     label="Start Time"
                     ampm={false}
-                    value={startTime ? moment(startTime, "HH:mm") : null}
-                    onChange={(newValue: Moment | null) => {
-                      onStartTimeChange(newValue?.format("HH:mm") || "");
+                    value={startTime ? dayjs(startTime, "HH:mm") : null}
+                    onChange={(newValue) => {
+                      const value = newValue as Dayjs | null;
+                      if (!value || !value.isValid()) {
+                        return;
+                      }
+                      const formatted = value?.format("HH:mm") || "";
+                      onStartTimeChange(formatted);
                     }}
                     slotProps={{
                       textField: {
@@ -105,13 +125,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               )}
             </Box>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-              <Box sx={{ maxWidth: "280px", width: "45%" }}>
+              <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
                   label="End Date"
                   format={LONG_DATE_FORMAT}
-                  value={endDate ? moment(endDate) : null}
-                  onChange={(newValue: Moment | null) => {
-                    onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
+                  value={endDate ? dayjs(endDate) : null}
+                  onChange={(newValue) => {
+                    const value = newValue as Dayjs | null;
+                    if (!value || !value.isValid()) {
+                      return;
+                    }
+                    const formatted = value.format("YYYY-MM-DD");
+                    onEndDateChange(formatted);
                   }}
                   slotProps={{
                     textField: {
@@ -131,9 +156,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   <TimePicker
                     label="End Time"
                     ampm={false}
-                    value={endTime ? moment(endTime, "HH:mm") : null}
-                    onChange={(newValue: Moment | null) => {
-                      onEndTimeChange(newValue?.format("HH:mm") || "");
+                    value={endTime ? dayjs(endTime, "HH:mm") : null}
+                    onChange={(newValue) => {
+                      const value = newValue as Dayjs | null;
+                      if (!value || !value.isValid()) {
+                        return;
+                      }
+                      const formatted = value?.format("HH:mm") || "";
+                      onEndTimeChange(formatted);
                     }}
                     slotProps={{
                       textField: {
@@ -153,13 +183,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           </>
         ) : shouldShowEndDateNormal ? (
           <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-            <Box sx={{ maxWidth: "280px", width: "45%" }}>
+            <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
                 label="Start Date"
                 format={LONG_DATE_FORMAT}
-                value={startDate ? moment(startDate) : null}
-                onChange={(newValue: Moment | null) => {
-                  onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                value={startDate ? dayjs(startDate) : null}
+                onChange={(newValue) => {
+                  const value = newValue as Dayjs | null;
+                  if (!value || !value.isValid()) {
+                    return;
+                  }
+                  const formatted = value.format("YYYY-MM-DD");
+                  onStartDateChange(formatted);
                 }}
                 slotProps={{
                   textField: {
@@ -173,13 +208,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
-            <Box sx={{ maxWidth: "280px", width: "45%" }}>
+            <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
                 label="End Date"
                 format={LONG_DATE_FORMAT}
-                value={endDate ? moment(endDate) : null}
-                onChange={(newValue: Moment | null) => {
-                  onEndDateChange(newValue?.format("YYYY-MM-DD") || "");
+                value={endDate ? dayjs(endDate) : null}
+                onChange={(newValue) => {
+                  const value = newValue as Dayjs | null;
+                  if (!value || !value.isValid()) {
+                    return;
+                  }
+                  const formatted = value.format("YYYY-MM-DD");
+                  onEndDateChange(formatted);
                 }}
                 slotProps={{
                   textField: {
@@ -197,13 +237,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           </Box>
         ) : (
           <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-            <Box sx={{ maxWidth: "280px", width: "45%" }}>
+            <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label="Start Date"
+                label={startDateLabel}
                 format={LONG_DATE_FORMAT}
-                value={startDate ? moment(startDate) : null}
-                onChange={(newValue: Moment | null) => {
-                  onStartDateChange(newValue?.format("YYYY-MM-DD") || "");
+                value={startDate ? dayjs(startDate) : null}
+                onChange={(newValue) => {
+                  const value = newValue as Dayjs | null;
+                  if (!value || !value.isValid()) {
+                    return;
+                  }
+                  const formatted = value.format("YYYY-MM-DD");
+                  onStartDateChange(formatted);
                 }}
                 slotProps={{
                   textField: {
@@ -221,9 +266,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               <TimePicker
                 label="Start Time"
                 ampm={false}
-                value={startTime ? moment(startTime, "HH:mm") : null}
-                onChange={(newValue: Moment | null) => {
-                  onStartTimeChange(newValue?.format("HH:mm") || "");
+                value={startTime ? dayjs(startTime, "HH:mm") : null}
+                onChange={(newValue) => {
+                  const value = newValue as Dayjs | null;
+                  if (!value || !value.isValid()) {
+                    return;
+                  }
+                  const formatted = value?.format("HH:mm") || "";
+                  onStartTimeChange(formatted);
                 }}
                 disabled={allday}
                 slotProps={{
@@ -242,9 +292,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               <TimePicker
                 label="End Time"
                 ampm={false}
-                value={endTime ? moment(endTime, "HH:mm") : null}
-                onChange={(newValue: Moment | null) => {
-                  onEndTimeChange(newValue?.format("HH:mm") || "");
+                value={endTime ? dayjs(endTime, "HH:mm") : null}
+                onChange={(newValue) => {
+                  const value = newValue as Dayjs | null;
+                  if (!value || !value.isValid()) {
+                    return;
+                  }
+                  const formatted = value?.format("HH:mm") || "";
+                  onEndTimeChange(formatted);
                 }}
                 disabled={allday}
                 slotProps={{
@@ -266,7 +321,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         {/* Second row: Error message */}
         {validation.errors.dateTime && (
           <Box display="flex" gap={1} flexDirection="row">
-            <Box sx={{ width: isExpanded ? "0" : allday ? "45%" : "64%" }} />
+            <Box
+              sx={{
+                width: "1%",
+              }}
+            />
             <Box>
               <Typography variant="caption" sx={{ color: "error.main" }}>
                 {validation.errors.dateTime}
