@@ -19,6 +19,7 @@ import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 import EventFormFields from "../../components/Event/EventFormFields";
 import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
+import { addDays } from "../../components/Event/utils/dateRules";
 import { getEvent, deleteEvent, putEvent } from "./EventApi";
 import { refreshCalendars } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
@@ -154,7 +155,7 @@ function EventUpdateModal({
   );
   const [newCalId, setNewCalId] = useState(calId);
   const [calendarid, setCalendarid] = useState(
-    calId ?? userPersonnalCalendars[0]?.id
+    calId ?? userPersonnalCalendars[0]?.id ?? ""
   );
 
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
@@ -162,6 +163,7 @@ function EventUpdateModal({
   const [meetingLink, setMeetingLink] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [hasEndDateChanged, setHasEndDateChanged] = useState(false);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -379,12 +381,27 @@ function EventUpdateModal({
       // For single events or "solo" edits, use the edited dates from form
       if (allday) {
         // For all-day events, use date format (YYYY-MM-DD)
-        startDate = new Date(start).toISOString().split("T")[0];
-        endDate = new Date(end).toISOString().split("T")[0];
+        // API needs end date = UI end date + 1 day
+        const startDateOnly = new Date(start).toISOString().split("T")[0];
+        const endDateOnlyUI = new Date(end).toISOString().split("T")[0];
+        const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
+        startDate = startDateOnly;
+        endDate = endDateOnlyAPI;
       } else {
-        // For timed events, use full datetime
+        // For timed events
         startDate = new Date(start).toISOString();
-        endDate = new Date(end).toISOString();
+        // In normal mode, only override end date when the end date field is not shown
+        if (!showMore && !hasEndDateChanged) {
+          const startDateOnly = (start || "").split("T")[0];
+          const endTimeOnly = end.includes("T")
+            ? end.split("T")[1]?.slice(0, 5) || "00:00"
+            : "00:00";
+          const endDateTime = `${startDateOnly}T${endTimeOnly}`;
+          endDate = new Date(endDateTime).toISOString();
+        } else {
+          // Extended mode: use actual end datetime
+          endDate = new Date(end).toISOString();
+        }
       }
     }
 
@@ -753,6 +770,7 @@ function EventUpdateModal({
         }}
         onValidationChange={setIsFormValid}
         showValidationErrors={showValidationErrors}
+        onHasEndDateChangedChange={setHasEndDateChanged}
       />
     </ResponsiveDialog>
   );
