@@ -29,6 +29,7 @@ import {
   formatLocalDateTime,
   formatDateTimeInTimezone,
 } from "../../components/Event/utils/dateTimeFormatters";
+import { addDays } from "../../components/Event/utils/dateRules";
 
 function EventPopover({
   anchorEl,
@@ -96,7 +97,7 @@ function EventPopover({
   const [start, setStart] = useState(event?.start ? event.start : "");
   const [end, setEnd] = useState(event?.end ? event.end : "");
   const [calendarid, setCalendarid] = useState(
-    event?.calId ?? userPersonnalCalendars[0]?.id
+    event?.calId ?? userPersonnalCalendars[0]?.id ?? ""
   );
   const [allday, setAllDay] = useState(event?.allday ?? false);
   const [repetition, setRepetition] = useState<RepetitionObject>(
@@ -121,6 +122,7 @@ function EventPopover({
   );
   const [isFormValid, setIsFormValid] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [hasEndDateChanged, setHasEndDateChanged] = useState(false);
 
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
@@ -147,7 +149,13 @@ function EventPopover({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(userPersonnalCalendars[0]?.id);
+    if (
+      userPersonnalCalendars &&
+      userPersonnalCalendars.length > 0 &&
+      userPersonnalCalendars[0]?.id
+    ) {
+      setCalendarid(userPersonnalCalendars[0].id);
+    }
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
@@ -156,7 +164,7 @@ function EventPopover({
     setTimezone(calendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
-  }, [calendarTimezone]);
+  }, [calendarTimezone, userPersonnalCalendars]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
   const shouldSyncFromRangeRef = useRef(true);
@@ -224,9 +232,38 @@ function EventPopover({
         const startValue = selectedRange.allDay
           ? startStr.split("T")[0]
           : startStr.slice(0, 16); // YYYY-MM-DDTHH:mm
-        const endValue = selectedRange.allDay
+        let endValue = selectedRange.allDay
           ? endStr.split("T")[0]
           : endStr.slice(0, 16);
+
+        // For all-day slots: detect single click vs drag multiple days
+        // FullCalendar uses exclusive end, so end date = actual end date + 1
+        // For UI display, we need to adjust:
+        // - Single click (end = start + 1): set end = start for UI
+        // - Drag multiple days (end = actual end + 1): set end = end - 1 for UI
+        if (selectedRange.allDay) {
+          const startDateOnly = startValue.slice(0, 10);
+          const endDateOnlyFromRange = endValue.slice(0, 10);
+
+          // Calculate days difference
+          const startDateObj = new Date(startDateOnly);
+          const endDateObj = new Date(endDateOnlyFromRange);
+          const daysDiff = Math.floor(
+            (endDateObj.getTime() - startDateObj.getTime()) /
+              (1000 * 60 * 60 * 24)
+          );
+
+          if (daysDiff <= 1) {
+            // Single click: FullCalendar gives end = start + 1, set end = start for UI
+            endValue = startValue;
+          } else {
+            // Drag multiple days: FullCalendar gives end = actual end + 1, subtract 1 for UI
+            const adjustedEndDate = new Date(endDateObj);
+            adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
+            endValue = adjustedEndDate.toISOString().split("T")[0];
+          }
+        }
+
         setStart(startValue);
         setEnd(endValue);
 
@@ -240,7 +277,42 @@ function EventPopover({
         // Fallback: format Date objects using local time components
         // Only set if both start and end are valid
         const formattedStart = formatLocalDateTime(selectedRange.start);
-        const formattedEnd = formatLocalDateTime(selectedRange.end);
+        let formattedEnd = formatLocalDateTime(selectedRange.end);
+
+        // For all-day slots: detect single click vs drag multiple days
+        // FullCalendar uses exclusive end, so end date = actual end date + 1
+        // For UI display, we need to adjust:
+        // - Single click (end = start + 1): set end = start for UI
+        // - Drag multiple days (end = actual end + 1): set end = end - 1 for UI
+        if (selectedRange.allDay && formattedStart && formattedEnd) {
+          const startDateOnly = formattedStart.slice(0, 10);
+          const endDateOnly = formattedEnd.slice(0, 10);
+
+          // Calculate days difference
+          const startDateObj = new Date(startDateOnly);
+          const endDateObj = new Date(endDateOnly);
+          const daysDiff = Math.floor(
+            (endDateObj.getTime() - startDateObj.getTime()) /
+              (1000 * 60 * 60 * 24)
+          );
+
+          if (daysDiff <= 1) {
+            // Single click: FullCalendar gives end = start + 1, set end = start for UI
+            formattedEnd = formattedStart;
+          } else {
+            // Drag multiple days: FullCalendar gives end = actual end + 1, subtract 1 for UI
+            const adjustedEndDate = new Date(endDateObj);
+            adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
+            const adjustedEndDateStr = adjustedEndDate
+              .toISOString()
+              .split("T")[0];
+            // Preserve time part if exists, otherwise use date only
+            formattedEnd = formattedEnd.includes("T")
+              ? `${adjustedEndDateStr}T${formattedEnd.split("T")[1]}`
+              : adjustedEndDateStr;
+          }
+        }
+
         if (formattedStart) setStart(formattedStart);
         if (formattedEnd) setEnd(formattedEnd);
         if (formattedStart && formattedEnd) {
@@ -323,7 +395,13 @@ function EventPopover({
         setEnd("");
       }
 
-      setCalendarid(userPersonnalCalendars[0].id);
+      if (
+        userPersonnalCalendars &&
+        userPersonnalCalendars.length > 0 &&
+        userPersonnalCalendars[0]?.id
+      ) {
+        setCalendarid(userPersonnalCalendars[0].id);
+      }
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
       setAttendees(
@@ -378,7 +456,13 @@ function EventPopover({
       setDescription("");
       setAttendees([]);
       setLocation("");
-      setCalendarid(userPersonnalCalendars[0].id);
+      if (
+        userPersonnalCalendars &&
+        userPersonnalCalendars.length > 0 &&
+        userPersonnalCalendars[0]?.id
+      ) {
+        setCalendarid(userPersonnalCalendars[0].id);
+      }
       setAllDay(false);
       setRepetition({} as RepetitionObject);
       setAlarm("");
@@ -407,7 +491,9 @@ function EventPopover({
             startStr: newStart,
             allDay: allday,
           } as DateSelectArg;
-          calendarRef.current?.select(newRange);
+          setTimeout(() => {
+            calendarRef.current?.select(newRange);
+          }, 0);
           return newRange;
         });
       });
@@ -430,7 +516,9 @@ function EventPopover({
             endStr: newEnd,
             allDay: allday,
           } as DateSelectArg;
-          calendarRef.current?.select(newRange);
+          setTimeout(() => {
+            calendarRef.current?.select(newRange);
+          }, 0);
           return newRange;
         });
       });
@@ -462,7 +550,9 @@ function EventPopover({
             ),
             allDay: newAllDay,
           } as DateSelectArg;
-          calendarRef.current?.select(newRange);
+          setTimeout(() => {
+            calendarRef.current?.select(newRange);
+          }, 0);
           return newRange;
         });
       });
@@ -491,10 +581,20 @@ function EventPopover({
     }
     const newEventUID = crypto.randomUUID();
 
+    // Resolve target calendar safely
+    const targetCalendar: Calendars | undefined =
+      calList[calendarid] ||
+      userPersonnalCalendars[0] ||
+      (Object.values(calList)[0] as Calendars | undefined);
+    if (!targetCalendar || !targetCalendar.id) {
+      console.error("No target calendar available to save event");
+      return;
+    }
+
     const newEvent: CalendarEvent = {
-      calId: calList[calendarid].id,
+      calId: targetCalendar.id,
       title,
-      URL: `/calendars/${calList[calendarid].id}/${newEventUID}.ics`,
+      URL: `/calendars/${targetCalendar.id}/${newEventUID}.ics`,
       start: "",
       allday,
       uid: newEventUID,
@@ -515,22 +615,35 @@ function EventPopover({
         },
       ],
       transp: busy,
-      color: calList[calendarid]?.color,
+      color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
     };
 
     if (allday) {
       const startDateOnly = (start || "").split("T")[0];
-      const endDateOnlyBase = (end || start || "").split("T")[0];
+      const endDateOnlyUI = (end || start || "").split("T")[0];
+      // For all-day events, API needs end date = UI end date + 1 day
+      const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
       const startDateObj = new Date(`${startDateOnly}T00:00:00`);
-      const endDateObj = new Date(`${endDateOnlyBase}T00:00:00`);
+      const endDateObj = new Date(`${endDateOnlyAPI}T00:00:00`);
       newEvent.start = startDateObj.toISOString();
       newEvent.end = endDateObj.toISOString();
     } else {
       newEvent.start = new Date(start).toISOString();
       if (end) {
-        newEvent.end = new Date(end).toISOString();
+        // In normal mode, only override end date when the end date field is not shown
+        if (!showMore && !hasEndDateChanged) {
+          const startDateOnly = (start || "").split("T")[0];
+          const endTimeOnly = end.includes("T")
+            ? end.split("T")[1]?.slice(0, 5) || "00:00"
+            : "00:00";
+          const endDateTime = `${startDateOnly}T${endTimeOnly}`;
+          newEvent.end = new Date(endDateTime).toISOString();
+        } else {
+          // Extended mode or end date explicitly shown in normal mode: use actual end datetime
+          newEvent.end = new Date(end).toISOString();
+        }
       }
     }
 
@@ -550,7 +663,7 @@ function EventPopover({
     // Save to API in background
     await dispatch(
       putEventAsync({
-        cal: calList[calendarid],
+        cal: targetCalendar,
         newEvent,
       })
     );
@@ -633,6 +746,7 @@ function EventPopover({
         onAllDayChange={handleAllDayChange}
         onValidationChange={setIsFormValid}
         showValidationErrors={showValidationErrors}
+        onHasEndDateChangedChange={setHasEndDateChanged}
       />
     </ResponsiveDialog>
   );

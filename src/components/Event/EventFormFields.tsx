@@ -104,6 +104,7 @@ interface EventFormFieldsProps {
   // Validation
   onValidationChange?: (isValid: boolean) => void;
   showValidationErrors?: boolean;
+  onHasEndDateChangedChange?: (has: boolean) => void;
 }
 
 export default function EventFormFields({
@@ -152,6 +153,7 @@ export default function EventFormFields({
   onCalendarChange,
   onValidationChange,
   showValidationErrors = false,
+  onHasEndDateChangedChange,
 }: EventFormFieldsProps) {
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState("");
@@ -159,8 +161,20 @@ export default function EventFormFields({
   const [endDate, setEndDate] = React.useState("");
   const [endTime, setEndTime] = React.useState("");
 
-  // UI state for showing/hiding end date field
-  // keep local flag if needed for future UI toggles (not used now)
+  // Track if user has manually changed end date in extended mode
+  const [hasEndDateChanged, setHasEndDateChanged] = React.useState(false);
+
+  // Reset hasEndDateChanged when modal closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setHasEndDateChanged(false);
+    }
+  }, [isOpen]);
+
+  // Notify parent about end date change visibility state
+  React.useEffect(() => {
+    onHasEndDateChangedChange?.(hasEndDateChanged);
+  }, [hasEndDateChanged, onHasEndDateChangedChange]);
 
   // Use all-day toggle hook
   const { handleAllDayToggle } = useAllDayToggle({
@@ -275,6 +289,10 @@ export default function EventFormFields({
   const handleEndDateChange = React.useCallback(
     (newDate: string) => {
       setEndDate(newDate);
+      // Track if user changed end date in extended mode
+      if (showMore) {
+        setHasEndDateChanged(true);
+      }
       const newEnd = combineDateTime(newDate, endTime);
       if (onEndChange) {
         onEndChange(newEnd);
@@ -282,7 +300,7 @@ export default function EventFormFields({
         setEnd(newEnd);
       }
     },
-    [endTime, onEndChange, setEnd]
+    [endTime, onEndChange, setEnd, showMore]
   );
 
   const handleEndTimeChange = React.useCallback(
@@ -308,6 +326,8 @@ export default function EventFormFields({
       endTime,
       allday,
       showValidationErrors,
+      hasEndDateChanged,
+      showMore,
     });
   }, [
     title,
@@ -317,6 +337,8 @@ export default function EventFormFields({
     endTime,
     allday,
     showValidationErrors,
+    hasEndDateChanged,
+    showMore,
   ]);
 
   // Notify parent about validation changes
@@ -457,6 +479,7 @@ export default function EventFormFields({
           endTime={endTime}
           allday={allday}
           showMore={showMore}
+          hasEndDateChanged={hasEndDateChanged}
           validation={validation}
           onStartDateChange={handleStartDateChange}
           onStartTimeChange={handleStartTimeChange}
@@ -606,7 +629,7 @@ export default function EventFormFields({
           )}
           <Select
             labelId="calendar-select-label"
-            value={calendarid}
+            value={calendarid ?? ""}
             label={!showMore ? "Calendar" : ""}
             displayEmpty
             onChange={(e: SelectChangeEvent) =>

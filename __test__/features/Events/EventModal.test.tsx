@@ -312,11 +312,15 @@ describe("EventPopover", () => {
         new Date(receivedPayload.newEvent.start)
       ).split("T")[0]
     ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)).split("T")[0]);
+
+    const expectedAllDayEnd = new Date(newEvent.end);
+    expectedAllDayEnd.setUTCDate(expectedAllDayEnd.getUTCDate() + 1);
+
     expect(
       formatDateToYYYYMMDDTHHMMSS(
         new Date(receivedPayload.newEvent.end || new Date())
       ).split("T")[0]
-    ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.end)).split("T")[0]);
+    ).toBe(formatDateToYYYYMMDDTHHMMSS(expectedAllDayEnd).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);
     expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer);
     expect(receivedPayload.newEvent.color).toEqual(
