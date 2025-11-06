@@ -441,4 +441,46 @@ describe("CalendarPopover - Tabs Scenarios", () => {
       expect(importButton).toBeDisabled();
     });
   });
+
+  it("fetches and resets the secret link", async () => {
+    (window as any).CALENDAR_BASE_URL = "https://cal.example.org";
+
+    (getSecretLink as jest.Mock)
+      .mockResolvedValueOnce({
+        secretLink: "https://example.org/secret/initial",
+      })
+      .mockResolvedValueOnce({
+        secretLink: "https://example.org/secret/new",
+      });
+
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /Access/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByDisplayValue("https://example.org/secret/initial")
+      ).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /reset/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByDisplayValue("https://example.org/secret/new")
+      ).toBeInTheDocument()
+    );
+
+    expect(getSecretLink).toHaveBeenCalledWith(
+      existingCalendar.link.replace(".json", ""),
+      true
+    );
+  });
 });
