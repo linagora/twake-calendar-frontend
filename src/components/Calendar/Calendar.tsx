@@ -5,7 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import "./Calendar.styl";
 import "./CustomCalendar.styl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
@@ -29,7 +29,6 @@ import {
   updateSlotLabelVisibility,
   eventToFullCalendarFormat,
   extractEvents,
-  updateCalsDetails,
 } from "./utils/calendarUtils";
 import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
 import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
@@ -71,7 +70,6 @@ export default function CalendarApp({
   const calendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
-  const pending = useAppSelector((state) => state.calendars.pending);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
 
   const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) => {
@@ -102,7 +100,7 @@ export default function CalendarApp({
   };
 
   useEffect(() => {
-    if (initialLoadRef.current && Object.keys(calendars).length > 0 && userId) {
+    if (initialLoadRef.current && Object.keys(calendars || {}).length > 0 && userId) {
       const cached = localStorage.getItem("selectedCalendars");
       if (cached && cached.length > 0) {
         const parsed = JSON.parse(cached) as string[];
@@ -120,7 +118,7 @@ export default function CalendarApp({
 
   // Save selected cals to cache
   useEffect(() => {
-    if (Object.keys(calendars).length > 0) {
+    if (Object.keys(calendars || {}).length > 0) {
       localStorage.setItem(
         "selectedCalendars",
         JSON.stringify(selectedCalendars)
@@ -129,22 +127,25 @@ export default function CalendarApp({
   }, [selectedCalendars]);
 
   useEffect(() => {
-    updateDarkColor(calendars, theme, dispatch);
+    updateDarkColor(calendars || {}, theme, dispatch);
   }, [
     theme,
-    Object.values(calendars)
+    Object.values(calendars || {})
       .map((c) => c.color?.dark)
       .join(","),
   ]);
 
   useEffect(() => {
-    const validCalendarIds = new Set(Object.keys(calendars));
+    const validCalendarIds = new Set(Object.keys(calendars || {}));
     setSelectedCalendars((prev) =>
       prev.filter((calId) => validCalendarIds.has(calId))
     );
   }, [calendars]);
 
-  const calendarRange = getCalendarRange(selectedDate);
+  const calendarRange = useMemo(
+    () => getCalendarRange(selectedDate),
+    [selectedDate]
+  );
 
   // Create a stable string key for the range
   const rangeKey = `${formatDateToYYYYMMDDTHHMMSS(
@@ -153,35 +154,118 @@ export default function CalendarApp({
 
   let filteredEvents: CalendarEvent[] = extractEvents(
     selectedCalendars,
-    calendars
+    calendars || {}
   );
 
   let filteredTempEvents: CalendarEvent[] = extractEvents(
-    Object.keys(tempcalendars),
-    tempcalendars
+    Object.keys(tempcalendars || {}),
+    tempcalendars || {}
   );
+
+  const sortedSelectedCalendars = useMemo(
+    () => [...selectedCalendars].sort(),
+    [selectedCalendars]
+  );
+
+  const prefetchedCalendarsRef = useRef<Record<string, string>>({});
+  const tempFetchedRangesRef = useRef<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!rangeKey || sortedSelectedCalendars.length === 0) return;
+
+    let cancelled = false;
+    const ACTIVE_BATCH_SIZE = 5;
+
+    const loadCalendars = async () => {
+      const pendingIds = sortedSelectedCalendars.filter(
+        (id) => fetchedRangesRef.current[id] !== rangeKey
+      );
+
+      if (pendingIds.length === 0) {
+        return;
+      }
+
+      const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
+      const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
+
+      for (
+        let i = 0;
+        i < pendingIds.length && !cancelled;
+        i += ACTIVE_BATCH_SIZE
+      ) {
+        const chunk = pendingIds.slice(i, i + ACTIVE_BATCH_SIZE);
+
+        chunk.forEach((id) => {
+          fetchedRangesRef.current[id] = rangeKey;
+          prefetchedCalendarsRef.current[id] = "active";
+        });
+
+        const requests = chunk.map(async (id) => {
+          try {
+            await dispatch(
+              getCalendarDetailAsync({
+                calId: id,
+                match: {
+                  start: rangeStart,
+                  end: rangeEnd,
+                },
+              })
+            ).unwrap();
+          } catch (error) {
+            console.error(`Failed to load calendar ${id}:`, error);
+            fetchedRangesRef.current[id] = "";
+          }
+        });
+
+        await Promise.all(requests);
+      }
+    };
+
+    loadCalendars();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    dispatch,
+    rangeKey,
+    sortedSelectedCalendars,
+    calendarRange,
+  ]);
 
   useEffect(() => {
     if (!rangeKey) return;
-    selectedCalendars.forEach((id) => {
-      if (fetchedRangesRef.current[id] === rangeKey) return;
-      fetchedRangesRef.current[id] = rangeKey;
+
+    const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
+    const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
+
+    const hiddenCalendars = Object.keys(calendars || {})
+      .filter((id) => !selectedCalendars.includes(id))
+      .filter((id) => prefetchedCalendarsRef.current[id] !== rangeKey);
+
+    hiddenCalendars.forEach((id) => {
+      prefetchedCalendarsRef.current[id] = rangeKey;
       dispatch(
         getCalendarDetailAsync({
           calId: id,
           match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            start: rangeStart,
+            end: rangeEnd,
           },
         })
-      );
+      )
+        .unwrap()
+        .catch((error) => {
+          console.error(`Prefetch calendar ${id} failed:`, error);
+          prefetchedCalendarsRef.current[id] = "";
+        });
     });
   }, [
-    rangeKey,
+    calendars,
     selectedCalendars,
+    rangeKey,
+    calendarRange,
     dispatch,
-    calendarRange.start,
-    calendarRange.end,
   ]);
 
   useEffect(() => {
@@ -189,6 +273,7 @@ export default function CalendarApp({
       const calendar = calendars[calId];
       if (calendar?.lastCacheCleared) {
         delete fetchedRangesRef.current[calId];
+        prefetchedCalendarsRef.current[calId] = "";
 
         dispatch(
           getCalendarDetailAsync({
@@ -201,6 +286,7 @@ export default function CalendarApp({
         );
 
         fetchedRangesRef.current[calId] = rangeKey;
+        prefetchedCalendarsRef.current[calId] = rangeKey;
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,40 +294,79 @@ export default function CalendarApp({
     selectedCalendars.map((id) => calendars[id]?.lastCacheCleared).join(","),
   ]);
 
-  const [prevTempCalendars, setPrevTempCalendars] = useState<string[]>([]);
-  const [prevRangeKey, setPrevRangeKey] = useState<string>("");
+  const tempCalendarIds = useMemo(
+    () => Object.keys(tempcalendars || {}).sort(),
+    [tempcalendars]
+  );
 
   const tempCalendarControllersRef = useRef<Map<string, AbortController>>(
     new Map()
   );
 
   useEffect(() => {
-    updateCalsDetails(
-      Object.keys(tempcalendars),
-      prevTempCalendars,
-      pending,
-      rangeKey,
-      prevRangeKey,
-      dispatch,
-      calendarRange,
-      "temp",
-      tempCalendarControllersRef.current
-    );
-
-    prevTempCalendars.forEach((calId) => {
-      if (!Object.keys(tempcalendars).includes(calId)) {
-        const controller = tempCalendarControllersRef.current.get(calId);
-        if (controller) {
-          controller.abort();
-          tempCalendarControllersRef.current.delete(calId);
-        }
-        delete fetchedRangesRef.current[calId];
+    const currentIds = new Set(tempCalendarIds);
+    Object.keys(tempFetchedRangesRef.current).forEach((id) => {
+      if (!currentIds.has(id)) {
+        delete tempFetchedRangesRef.current[id];
       }
     });
+  }, [tempCalendarIds]);
 
-    setPrevTempCalendars(Object.keys(tempcalendars));
-    setPrevRangeKey(rangeKey);
-  }, [rangeKey, Object.keys(tempcalendars).join(","), pending]);
+  useEffect(() => {
+    if (!rangeKey || tempCalendarIds.length === 0) return;
+
+    let cancelled = false;
+    const TEMP_BATCH_SIZE = 5;
+    const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
+    const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
+
+    const loadTempCalendars = async () => {
+      const pendingIds = tempCalendarIds.filter(
+        (id) => tempFetchedRangesRef.current[id] !== rangeKey
+      );
+
+      if (pendingIds.length === 0) {
+        return;
+      }
+
+      for (
+        let i = 0;
+        i < pendingIds.length && !cancelled;
+        i += TEMP_BATCH_SIZE
+      ) {
+        const chunk = pendingIds.slice(i, i + TEMP_BATCH_SIZE);
+        chunk.forEach((id) => {
+          tempFetchedRangesRef.current[id] = rangeKey;
+        });
+
+        const requests = chunk.map(async (id) => {
+          try {
+            await dispatch(
+              getCalendarDetailAsync({
+                calId: id,
+                match: {
+                  start: rangeStart,
+                  end: rangeEnd,
+                },
+                calType: "temp",
+              })
+            ).unwrap();
+          } catch (error) {
+            console.error(`Failed to load temp calendar ${id}:`, error);
+            tempFetchedRangesRef.current[id] = "";
+          }
+        });
+
+        await Promise.all(requests);
+      }
+    };
+
+    loadTempCalendars();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, rangeKey, tempCalendarIds, calendarRange]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
