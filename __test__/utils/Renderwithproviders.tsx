@@ -24,6 +24,9 @@ export function renderWithProviders(
       <I18nContext.Provider
         value={{
           t: (key: string, vars?: Record<string, string>) => {
+            if (key === "locale") {
+              return "en";
+            }
             if (vars) {
               const params = Object.entries(vars)
                 .map(([k, v]) => `${k}=${v}`)
