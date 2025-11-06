@@ -759,7 +759,7 @@ export default function EventFormFields({
       <SnackbarAlert
         setOpen={setOpenToast}
         open={openToast}
-        message={t("event.meetCopied")}
+        message={t("event.form.meetCopied")}
       />
     </>
   );
