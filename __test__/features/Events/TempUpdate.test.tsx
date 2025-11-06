@@ -233,9 +233,7 @@ describe("Update tempcalendars called with correct params", () => {
     const titleInput = screen.getByLabelText(/title/i);
     fireEvent.change(titleInput, { target: { value: "New Event" } });
 
-    const attendeeInput = screen.getByLabelText(
-      /peopleSearch.label/i
-    );
+    const attendeeInput = screen.getByLabelText(/peopleSearch.label/i);
     fireEvent.change(attendeeInput, { target: { value: "attendee@test.com" } });
     fireEvent.keyDown(attendeeInput, { key: "Enter", code: "Enter" });
 

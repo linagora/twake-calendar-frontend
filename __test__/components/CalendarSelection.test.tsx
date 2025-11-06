@@ -125,7 +125,9 @@ describe("CalendarSelection", () => {
     fireEvent.click(addButtons[1]);
 
     await waitFor(() =>
-      expect(screen.getByText("calendarPopover.tabs.addNew")).toBeInTheDocument()
+      expect(
+        screen.getByText("calendarPopover.tabs.addNew")
+      ).toBeInTheDocument()
     );
   });
 

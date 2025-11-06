@@ -21,8 +21,6 @@ export default defineConfig({
     distPath: {
       root: "dist",
     },
-  },
-  performance: {
     minify: false,
   },
 });

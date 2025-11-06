@@ -333,7 +333,9 @@ describe("EventPopover", () => {
   it("BUGFIX: Prefill Calendar field", async () => {
     renderPopover();
     await waitFor(() =>
-      expect(screen.getByLabelText("event.form.calendar")).toHaveTextContent("Calendar 1")
+      expect(screen.getByLabelText("event.form.calendar")).toHaveTextContent(
+        "Calendar 1"
+      )
     );
   });
 });
