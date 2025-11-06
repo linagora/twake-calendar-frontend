@@ -46,9 +46,13 @@ export const getCalendarsListAsync = createAsyncThunk<
     const importedCalendars: Record<string, Calendars> = {};
     const user = (await getOpenPaasUser()) as Record<string, string>;
     const calendars = (await getCalendars(user.id)) as Record<string, any>;
-    const rawCalendars = calendars._embedded["dav:calendar"];
-    const errors = [];
-    for (const cal of rawCalendars) {
+    const rawCalendars = calendars._embedded["dav:calendar"] as Record<
+      string,
+      any
+    >[];
+    const errors: string[] = [];
+
+    const normalizedCalendars = rawCalendars.map((cal) => {
       const description = cal["caldav:description"];
       let delegated = false;
       let source = cal["calendarserver:source"]
@@ -62,50 +66,87 @@ export const getCalendarsListAsync = createAsyncThunk<
       const id = source.replace("/calendars/", "").replace(".json", "");
       const ownerId = id.split("/")[0];
       const visibility = getCalendarVisibility(cal["acl"]);
+      return {
+        cal,
+        description,
+        delegated,
+        source,
+        link,
+        id,
+        ownerId,
+        visibility,
+      };
+    });
 
-      // Safely fetch owner data with fallback
-      let ownerData: any;
+    const uniqueOwnerIds = Array.from(
+      new Set(normalizedCalendars.map(({ ownerId }) => ownerId).filter(Boolean))
+    );
+
+    const ownerDataMap = new Map<string, any>();
+    const OWNER_BATCH_SIZE = 20;
+
+    const fetchOwnerData = async (ownerId: string) => {
       try {
-        ownerData = await getUserDetails(ownerId);
-      } catch (error) {
-        console.error(
-          `Failed to fetch user details for ${id.split("/")[0]}:`,
-          error
-        );
-        // Provide fallback data
-        ownerData = {
+        const data = await getUserDetails(ownerId);
+        ownerDataMap.set(ownerId, data);
+      } catch (error: any) {
+        console.error(`Failed to fetch user details for ${ownerId}:`, error);
+        ownerDataMap.set(ownerId, {
+          firstname: "",
+          lastname: "Unknown User",
+          emails: [],
+        });
+        errors.push(formatReduxError(error));
+      }
+    };
+
+    for (let i = 0; i < uniqueOwnerIds.length; i += OWNER_BATCH_SIZE) {
+      const chunk = uniqueOwnerIds.slice(i, i + OWNER_BATCH_SIZE);
+      await Promise.all(chunk.map((ownerId) => fetchOwnerData(ownerId)));
+    }
+
+    normalizedCalendars.forEach(
+      ({
+        cal,
+        description,
+        delegated,
+        link,
+        id,
+        ownerId,
+        visibility,
+      }) => {
+        const ownerData = ownerDataMap.get(ownerId) || {
           firstname: "",
           lastname: "Unknown User",
           emails: [],
         };
-        errors.push(error);
-      }
-      const name =
-        ownerId !== user.id && cal["dav:name"] === "#default"
-          ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-              ownerData.lastname
-            }` + "'s calendar"
-          : cal["dav:name"];
+        const name =
+          ownerId !== user.id && cal["dav:name"] === "#default"
+            ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+                ownerData.lastname
+              }` + "'s calendar"
+            : cal["dav:name"];
 
-      const color = {
-        light: cal["apple:color"] ?? "#006BD8",
-        dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
-      };
-      importedCalendars[id] = {
-        id,
-        name,
-        link,
-        owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-          ownerData.lastname
-        }`,
-        ownerEmails: ownerData.emails,
-        description,
-        delegated,
-        color,
-        visibility,
-        events: {},
-      };
-    }
+        const color = {
+          light: cal["apple:color"] ?? "#006BD8",
+          dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
+        };
+        importedCalendars[id] = {
+          id,
+          name,
+          link,
+          owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
+            ownerData.lastname
+          }`,
+          ownerEmails: ownerData.emails,
+          description,
+          delegated,
+          color,
+          visibility,
+          events: {},
+        };
+      }
+    );
 
     return { importedCalendars, errors: errors.join("\n") };
   } catch (err: any) {
