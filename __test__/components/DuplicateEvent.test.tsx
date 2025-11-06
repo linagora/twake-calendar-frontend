@@ -1,6 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import EventDuplication from "../../src/components/Event/EventDuplicate";
-import EventDisplayModal from "../../src/features/Events/EventDisplay";
 import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
@@ -31,8 +30,8 @@ const preloadedState = {
             URL: "calendars/667037022b752d0026472254/cal1/event1.ics",
             title: "Test Event",
             calId: "667037022b752d0026472254/cal1",
-            start: day,
-            end: day,
+            start: day.toISOString(),
+            end: day.toISOString(),
             timezone: "UTC",
             organizer: { cn: "test", cal_address: "test@test.com" },
             attendee: [
@@ -77,7 +76,9 @@ describe("EventDuplication", () => {
       preloadedState
     );
 
-    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "eventDuplication.duplicateEvent" })
+    );
 
     expect(onOpenDuplicate).toHaveBeenCalled();
   });
@@ -126,7 +127,7 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText(/Title/i), {
       target: { value: "Duplicated Event" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     waitFor(() => expect(onClose).toHaveBeenCalled());
   });
@@ -145,8 +146,12 @@ describe("EventDisplayModal", () => {
     );
 
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Duplicate event/i }));
-    expect(screen.getAllByText(/Duplicate Event/i)[1]).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "eventDuplication.duplicateEvent" })
+    );
+    expect(
+      screen.getAllByText("eventDuplication.duplicateEvent")[1]
+    ).toBeInTheDocument();
     expect(
       screen.getByDisplayValue(
         preloadedState.calendars.list["667037022b752d0026472254/cal1"].events

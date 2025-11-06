@@ -4,8 +4,10 @@ import { Box, Button, Fade, Paper, Stack, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { push } from "redux-first-history";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function Error() {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const userError = useAppSelector((state) => state.user.error);
   const calendarError = useAppSelector((state) => state.calendars.error);
@@ -16,7 +18,7 @@ export function Error() {
     }
   }, [calendarError, dispatch]);
 
-  const errorMessage = userError || calendarError || "Unknown error";
+  const errorMessage = userError || calendarError || t("error.unknown");
 
   return (
     <Fade in timeout={500}>
@@ -56,7 +58,7 @@ export function Error() {
             </Box>
 
             <Typography variant="h5" fontWeight={600}>
-              Something went wrong
+              {t("error.title")}
             </Typography>
 
             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
@@ -67,9 +69,7 @@ export function Error() {
               variant="contained"
               color="error"
               startIcon={<ReplayIcon />}
-              onClick={() => {
-                window.location.reload();
-              }}
+              onClick={() => window.location.reload()}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
@@ -79,7 +79,7 @@ export function Error() {
                 boxShadow: "none",
               }}
             >
-              Try Again
+              {t("error.retry")}
             </Button>
           </Stack>
         </Paper>

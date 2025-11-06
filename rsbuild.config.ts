@@ -21,5 +21,6 @@ export default defineConfig({
     distPath: {
       root: "dist",
     },
+    minify: false,
   },
 });

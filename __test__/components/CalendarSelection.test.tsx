@@ -44,7 +44,7 @@ describe("CalendarSelection", () => {
     jest.clearAllMocks();
     cleanup();
   });
-  it("renders personal, delegated and other calendars", () => {
+  it("renders personal, delegated and calendar.other", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={["user1/cal1"]}
@@ -56,9 +56,9 @@ describe("CalendarSelection", () => {
       }
     );
 
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
+    expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    expect(screen.getByText("calendar.delegated")).toBeInTheDocument();
+    expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
     expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
@@ -125,11 +125,13 @@ describe("CalendarSelection", () => {
     fireEvent.click(addButtons[1]);
 
     await waitFor(() =>
-      expect(screen.getByText(/Add new calendar/i)).toBeInTheDocument()
+      expect(
+        screen.getByText("calendarPopover.tabs.addNew")
+      ).toBeInTheDocument()
     );
   });
 
-  it("Navigates to deletion dialog and deletes personnal cal", async () => {
+  it("Navigates to deletion dialog and deletes personal cal", async () => {
     const spy = jest
       .spyOn(calendarThunks, "removeCalendarAsync")
       .mockImplementation((payload) => {
@@ -152,7 +154,9 @@ describe("CalendarSelection", () => {
     userEvent.click(screen.getByText(/delete/i));
 
     await waitFor(() =>
-      expect(screen.getByText("Remove Calendar personal?")).toBeInTheDocument()
+      expect(
+        screen.getByText("calendar.delete.title(name=Calendar personal)")
+      ).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole("button", { name: /delete/i }));
 
@@ -182,7 +186,9 @@ describe("CalendarSelection", () => {
     userEvent.click(screen.getByText(/remove/i));
 
     await waitFor(() =>
-      expect(screen.getByText("Remove Calendar delegated?")).toBeInTheDocument()
+      expect(
+        screen.getByText("calendar.delete.title(name=Calendar delegated)")
+      ).toBeInTheDocument()
     );
     fireEvent.click(screen.getByRole("button", { name: /remove/i }));
 
@@ -204,10 +210,12 @@ describe("CalendarSelection", () => {
     const addButtons = screen.getAllByTestId("AddIcon");
     fireEvent.click(addButtons[1]); // seccond Add button (other)
 
-    expect(screen.getByText("Browse other calendars")).toBeInTheDocument();
+    expect(
+      screen.getByText("calendar.browseOtherCalendars")
+    ).toBeInTheDocument();
   });
 
-  it("when only personnal calendars are in the state, only personnal calendars and the title for other to be added are shown", () => {
+  it("when only calendar.personal are in the state, only calendar.personal and the title for other to be added are shown", () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
@@ -224,9 +232,9 @@ describe("CalendarSelection", () => {
       }
     );
 
-    expect(screen.getByText("Personnal Calendars")).toBeInTheDocument();
-    expect(screen.queryByText("Delegated Calendars")).not.toBeInTheDocument();
-    expect(screen.queryByText("Other Calendars")).toBeInTheDocument();
+    expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    expect(screen.queryByText("calendar.delegated")).not.toBeInTheDocument();
+    expect(screen.queryByText("calendar.other")).toBeInTheDocument();
   });
 
   it("renders nothing when no calendars are present", () => {
@@ -256,7 +264,7 @@ describe("CalendarSelection", () => {
       }
     );
     const delegatedAccordionSummary = screen
-      .getByText("Delegated Calendars")
+      .getByText("calendar.delegated")
       .closest(".MuiAccordionSummary-root");
 
     fireEvent.click(delegatedAccordionSummary!);

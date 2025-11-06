@@ -28,6 +28,7 @@ import {
   detectRecurringEventChanges,
 } from "./eventUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -50,6 +51,7 @@ function EventUpdateModal({
   eventData?: CalendarEvent | null;
   typeOfAction?: "solo" | "all";
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const tempList = useAppSelector((state) => state.calendars.templist);
   const calList = useAppSelector((state) => state.calendars.list);
@@ -84,7 +86,7 @@ function EventUpdateModal({
 
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
-  const userPersonnalCalendars: Calendars[] = useMemo(() => {
+  const userPersonalCalendars: Calendars[] = useMemo(() => {
     const allCalendars = Object.values(calendarsList) as Calendars[];
     return allCalendars.filter(
       (c: Calendars) => c.id?.split("/")[0] === user.userData?.openpaasId
@@ -155,7 +157,7 @@ function EventUpdateModal({
   );
   const [newCalId, setNewCalId] = useState(calId);
   const [calendarid, setCalendarid] = useState(
-    calId ?? userPersonnalCalendars[0]?.id ?? ""
+    calId ?? userPersonalCalendars[0]?.id ?? ""
   );
 
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
@@ -175,7 +177,7 @@ function EventUpdateModal({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(userPersonnalCalendars[0].id);
+    setCalendarid(userPersonalCalendars[0].id);
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
@@ -296,7 +298,7 @@ function EventUpdateModal({
         }
       }
     }
-  }, [open, event, calId, userPersonnalCalendars, calendarsList]);
+  }, [open, event, calId, userPersonalCalendars, calendarsList]);
 
   // Helper to close modal(s) - use onCloseAll if available to close preview modal too
   const closeModal = () => {
@@ -682,7 +684,7 @@ function EventUpdateModal({
         moveEventAsync({
           cal: targetCalendar,
           newEvent,
-          newURL: `/calendars/${newCalId}/${event.uid}.ics`,
+          newURL: `/calendars/${newCalId}/${event.uid.split("/")[0]}.ics`,
         })
       );
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
@@ -697,15 +699,15 @@ function EventUpdateModal({
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (
         <Button startIcon={<AddIcon />} onClick={() => setShowMore(!showMore)}>
-          More options
+          {t("common.moreOptions")}
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
         <Button variant="outlined" onClick={handleClose}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button variant="contained" onClick={handleSave}>
-          Save
+          {t("actions.save")}
         </Button>
       </Box>
     </Box>
@@ -717,7 +719,7 @@ function EventUpdateModal({
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title="Update Event"
+      title={t("event.updateEvent")}
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}
@@ -760,7 +762,7 @@ function EventUpdateModal({
         showRepeat={typeOfAction !== "solo" && showRepeat}
         setShowRepeat={setShowRepeat}
         isOpen={open}
-        userPersonnalCalendars={userPersonnalCalendars}
+        userPersonalCalendars={userPersonalCalendars}
         timezoneList={timezoneList}
         onCalendarChange={(newCalendarId) => {
           const selectedCalendar = calList[newCalendarId];

@@ -17,6 +17,7 @@ import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 export function renderAttendeeBadge(
   a: userAttendee,
   key: string,
+  t: Function,
   isFull?: boolean,
   isOrganizer?: boolean
 ) {
@@ -28,7 +29,7 @@ export function renderAttendeeBadge(
     ) : null;
 
   if (!isFull) {
-    return <Avatar {...stringAvatar(a.cn || a.cal_address)} />;
+    return <Avatar key={key} {...stringAvatar(a.cn || a.cal_address)} />;
   } else {
     return (
       <Box
@@ -77,7 +78,7 @@ export function renderAttendeeBadge(
           </Typography>
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
-              Organizer
+              {t("event.organizer")}
             </Typography>
           )}
         </Box>

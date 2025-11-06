@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export default function RepeatEvent({
   repetition,
@@ -27,6 +28,7 @@ export default function RepeatEvent({
   setRepetition: Function;
   isOwn?: boolean;
 }) {
+  const { t } = useI18n();
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
   const day = new Date(eventStart);
   // derive endOption based on repetition
@@ -60,12 +62,25 @@ export default function RepeatEvent({
     });
   };
 
+  const getDayLabel = (day: string) => {
+    const dayMap: { [key: string]: string } = {
+      MO: t("event.repeat.days.monday"),
+      TU: t("event.repeat.days.tuesday"),
+      WE: t("event.repeat.days.wednesday"),
+      TH: t("event.repeat.days.thursday"),
+      FR: t("event.repeat.days.friday"),
+      SA: t("event.repeat.days.saturday"),
+      SU: t("event.repeat.days.sunday"),
+    };
+    return dayMap[day] || day;
+  };
+
   return (
     <Box>
       <Stack>
         {/* Interval */}
         <Box display="flex" alignItems="center" gap={2} mb={2}>
-          <Typography>Repeat every</Typography>
+          <Typography>{t("event.repeat.repeatEvery")}</Typography>
           <TextField
             type="number"
             value={repetition.interval ?? 1}
@@ -104,10 +119,18 @@ export default function RepeatEvent({
                 }
               }}
             >
-              <MenuItem value={"daily"}>Day(s)</MenuItem>
-              <MenuItem value={"weekly"}>Week(s)</MenuItem>
-              <MenuItem value={"monthly"}>Month(s)</MenuItem>
-              <MenuItem value={"yearly"}>Year(s)</MenuItem>
+              <MenuItem value={"daily"}>
+                {t("event.repeat.frequency.days")}
+              </MenuItem>
+              <MenuItem value={"weekly"}>
+                {t("event.repeat.frequency.weeks")}
+              </MenuItem>
+              <MenuItem value={"monthly"}>
+                {t("event.repeat.frequency.months")}
+              </MenuItem>
+              <MenuItem value={"yearly"}>
+                {t("event.repeat.frequency.years")}
+              </MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -116,7 +139,7 @@ export default function RepeatEvent({
         {repetition.freq === "weekly" && (
           <Box>
             <Typography variant="body2" gutterBottom>
-              Repeat on:
+              {t("event.repeat.repeatOn")}
             </Typography>
             <FormGroup row>
               {days.map((day) => (
@@ -129,7 +152,7 @@ export default function RepeatEvent({
                       onChange={() => handleDayChange(day)}
                     />
                   }
-                  label={day}
+                  label={getDayLabel(day)}
                 />
               ))}
             </FormGroup>
@@ -139,7 +162,7 @@ export default function RepeatEvent({
         {/* End options */}
         <Box>
           <Typography variant="body2" gutterBottom>
-            End:
+            {t("event.repeat.end.label")}
           </Typography>
           <RadioGroup
             value={endOption}
@@ -170,7 +193,7 @@ export default function RepeatEvent({
               disabled={!isOwn}
               value="never"
               control={<Radio />}
-              label="Never"
+              label={t("event.repeat.end.never")}
             />
 
             <FormControlLabel
@@ -179,7 +202,7 @@ export default function RepeatEvent({
               control={<Radio />}
               label={
                 <Box display="flex" alignItems="center" gap={1}>
-                  After
+                  {t("event.repeat.end.after")}
                   <TextField
                     type="number"
                     size="small"
@@ -195,7 +218,7 @@ export default function RepeatEvent({
                     inputProps={{ min: 1, "data-testid": "occurrences-input" }}
                     disabled={!isOwn || endOption !== "after"}
                   />
-                  occurrences
+                  {t("event.repeat.end.occurrences")}
                 </Box>
               }
             />
@@ -206,7 +229,7 @@ export default function RepeatEvent({
               control={<Radio />}
               label={
                 <Box display="flex" alignItems="center" gap={1}>
-                  On
+                  {t("event.repeat.end.on")}
                   <TextField
                     type="date"
                     inputProps={{ "data-testid": "end-date" }}

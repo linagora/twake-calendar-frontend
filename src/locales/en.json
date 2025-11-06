@@ -1,0 +1,232 @@
+{
+  "locale": "en-gb",
+  "calendar": {
+    "personal": "Personal Calendars",
+    "delegated": "Delegated Calendars",
+    "other": "Other Calendars",
+    "caldav_access": "CalDAV access",
+    "import_file_description": "Import events from an ICS file to one of your calendars.",
+    "ics_feed_url": "ICS feed URL",
+    "import_to": "Import to",
+    "new_calendar": "New calendar",
+    "addDescription": "Add description",
+    "color": "Color",
+    "newEventsVisibility": "New events created will be visible to:",
+    "browseOtherCalendars": "Browse other calendars",
+    "noPublicCalendarsFor": "No publicly available calendars for %{name}",
+    "noMoreCalendarsFor": "No more calendars for %{name}",
+    "delete": {
+      "title": "Remove %{name}?",
+      "personalWarning": "You will lose all events in this calendar.",
+      "sharedWarning": "You will lose access to its events. You will still be able to add it back later."
+    }
+  },
+  "actions": {
+    "modify": "Modify",
+    "delete": "Delete",
+    "remove": "Remove",
+    "save": "Save",
+    "create": "Create",
+    "import": "Import",
+    "add": "Add"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "ok": "Ok",
+    "link_copied": "Link copied!",
+    "import_file": "File",
+    "select_file": "Select file",
+    "import_url": "URL",
+    "name": "Name",
+    "description": "Description",
+    "all": "All",
+    "you": "You",
+    "select_timezone": "Select Timezone",
+    "moreOptions": "More options"
+  },
+  "calendarPopover": {
+    "tabs": {
+      "settings": "Settings",
+      "addNew": "Add new calendar",
+      "access": "Access",
+      "import": "Import"
+    }
+  },
+  "colorPicker": {
+    "selectCustom": "Select custom color",
+    "title": "Choose custom color",
+    "subtitle": "Choose a background color for this calendar",
+    "hex": "Hex"
+  },
+  "event": {
+    "createEvent": "Create Event",
+    "updateEvent": "Update Event",
+    "organizer": "Organizer",
+    "repeat": {
+      "repeatEvery": "Repeat every",
+      "frequency": {
+        "days": "Day(s)",
+        "weeks": "Week(s)",
+        "months": "Month(s)",
+        "years": "Year(s)"
+      },
+      "repeatOn": "Repeat on:",
+      "days": {
+        "monday": "MO",
+        "tuesday": "TU",
+        "wednesday": "WE",
+        "thursday": "TH",
+        "friday": "FR",
+        "saturday": "SA",
+        "sunday": "SU"
+      },
+      "end": {
+        "label": "End:",
+        "never": "Never",
+        "after": "After",
+        "on": "On",
+        "occurrences": "occurrences"
+      }
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Add title",
+      "addDescription": "Add description",
+      "description": "Description",
+      "descriptionPlaceholder": "Add description",
+      "dateTime": "Date & Time",
+      "start": "Start",
+      "end": "End",
+      "allDay": "All day",
+      "repeat": "Repeat",
+      "timezonePlaceholder": "Select timezone",
+      "participants": "Participants",
+      "videoMeeting": "Video meeting",
+      "addVisioConference": "Add Visio conference",
+      "joinVisioConference": "Join Visio conference",
+      "copyMeetingLink": "Copy meeting link",
+      "removeVideoConference": "Remove video conference",
+      "location": "Location",
+      "locationPlaceholder": "Add location",
+      "calendar": "Calendar",
+      "notification": "Notification",
+      "notifications": {
+        "": "No notification",
+        "-PT1M": "1 minute before",
+        "-PT5M": "5 minutes before",
+        "-PT10M": "10 minutes before",
+        "-PT15M": "15 minutes before",
+        "-PT30M": "30 minutes before",
+        "-PT1H": "1 hour before",
+        "-PT2H": "2 hours before",
+        "-PT5H": "5 hours before",
+        "-PT12H": "12 hours before",
+        "-PT1D": "1 day before",
+        "-PT2D": "2 days before",
+        "-PT1W": "1 week before",
+        "EMAIL": "email"
+      },
+      "showMeAs": "Show me as",
+      "free": "Free",
+      "busy": "Busy",
+      "visibleTo": "Visible to",
+      "visibleAll": "All",
+      "visibleParticipants": "Participants"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "startRequired": "Start date/time is required",
+      "invalidStart": "Invalid start date/time",
+      "endRequired": "End date/time is required",
+      "invalidEnd": "Invalid end date/time",
+      "endAfterStart": "End time must be after start time"
+    }
+  },
+  "peopleSearch": {
+    "label": "Start typing a name or email",
+    "placeholder": "Start typing a name or email",
+    "invalidEmail": "%{email} is not a valid email address"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "unknown": "An unknown error occurred",
+    "retry": "Try Again",
+    "multipleEvents": "%{count} events with errors"
+  },
+  "editModeDialog": {
+    "updateRecurrentEvent": "Update the recurrent event",
+    "updateParticipationStatus": "Update the participation status",
+    "thisEvent": "This event",
+    "allEvents": "All the events"
+  },
+  "eventDuplication": {
+    "duplicateEvent": "Duplicate event"
+  },
+  "menubar": {
+    "today": "Today",
+    "refresh": "Refresh",
+    "viewSelector": "Select view",
+    "languageSelector": "Select language",
+    "views": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "apps": "Apps",
+    "userProfile": "User profile",
+    "logoAlt": "Calendar"
+  },
+  "eventPreview": {
+    "emailAttendees": "Email attendees",
+    "deleteEvent": "Delete event",
+    "privateEvent": {
+      "tooltipOwn": "Only you and attendees can see the details of this event.",
+      "hiddenDetails": "This is a private event. Details are hidden."
+    },
+    "free": {
+      "label": "Free",
+      "tooltip": "Others see you as available during the time range of this event."
+    },
+    "attendingQuestion": "Attending?",
+    "accept": "Accept",
+    "maybe": "Maybe",
+    "decline": "Decline",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "joinVideo": "Join the video conference",
+    "guests": "%{count} guests",
+    "yesCount": "%{count} yes",
+    "noCount": "%{count} no",
+    "recurrentEvent": "Recurrent Event",
+    "freq": {
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly",
+      "yearly": "yearly"
+    },
+    "onDays": {
+      "MO": "monday",
+      "TU": "tuesday",
+      "WE": "wednesday",
+      "TH": "thursday",
+      "FR": "friday",
+      "SA": "saturday",
+      "SU": "sunday"
+    },
+    "recurrenceOnDays": "on %{days}",
+    "everyInterval": "every %{interval} %{unit}",
+    "forOccurrences": "for %{count} occurrences",
+    "until": "until %{date}",
+    "days": "days",
+    "months": "months",
+    "years": "years",
+    "alarmText": "%{trigger} by %{action}"
+  },
+  "dateTimeFields": {
+    "date": "Date",
+    "startDate": "Start Date",
+    "startTime": "Start Time",
+    "endDate": "End Date",
+    "endTime": "End Time"
+  }
+}

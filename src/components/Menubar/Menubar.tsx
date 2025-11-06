@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { setLanguage } from "../../features/Settings/SettingsSlice";
 
 export type AppIconProps = {
   name: string;
@@ -44,9 +46,11 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
+  const { t, f, lang } = useI18n();
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
   const dispatch = useAppDispatch();
 
   if (!user) {
@@ -99,6 +103,18 @@ export function Menubar({
   };
 
   const open = Boolean(anchorEl);
+  const langOpen = Boolean(langAnchorEl);
+
+  const handleLangClick = (event: React.MouseEvent<HTMLElement>) => {
+    setLangAnchorEl(event.currentTarget);
+  };
+  const handleLangClose = () => setLangAnchorEl(null);
+
+  const availableLangs = [
+    { code: "en", label: "English" },
+    { code: "fr", label: "Français" },
+  ];
+
   return (
     <>
       <header className="menubar">
@@ -112,7 +128,9 @@ export function Menubar({
                 <Button onClick={() => handleNavigation("prev")}>
                   <ChevronLeftIcon />
                 </Button>
-                <Button onClick={() => handleNavigation("today")}>Today</Button>
+                <Button onClick={() => handleNavigation("today")}>
+                  {t("menubar.today")}
+                </Button>
                 <Button onClick={() => handleNavigation("next")}>
                   <ChevronRightIcon />
                 </Button>
@@ -122,17 +140,18 @@ export function Menubar({
           <div className="menu-items">
             <div className="current-date-time">
               <Typography variant="h6" component="div">
-                {currentDate.toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
+                {f(currentDate, "MMMM yyyy")}
               </Typography>
             </div>
           </div>
         </div>
         <div className="right-menu">
           <div className="menu-items">
-            <IconButton onClick={onRefresh}>
+            <IconButton
+              onClick={onRefresh}
+              aria-label={t("menubar.refresh")}
+              title={t("menubar.refresh")}
+            >
               <RefreshIcon />
             </IconButton>
           </div>
@@ -145,37 +164,53 @@ export function Menubar({
                 value={currentView}
                 onChange={(e) => handleViewChange(e.target.value)}
                 variant="outlined"
+                aria-label={t("menubar.viewSelector")}
               >
-                <MenuItem value="dayGridMonth">Month</MenuItem>
-                <MenuItem value="timeGridWeek">Week</MenuItem>
-                <MenuItem value="timeGridDay">Day</MenuItem>
+                <MenuItem value="dayGridMonth">
+                  {t("menubar.views.month")}
+                </MenuItem>
+                <MenuItem value="timeGridWeek">
+                  {t("menubar.views.week")}
+                </MenuItem>
+                <MenuItem value="timeGridDay">
+                  {t("menubar.views.day")}
+                </MenuItem>
               </Select>
             </FormControl>
           </div>
           <div className="menu-items">
             {applist.length > 0 && (
-              <IconButton onClick={handleOpen} style={{ marginRight: 8 }}>
+              <IconButton
+                onClick={handleOpen}
+                style={{ marginRight: 8 }}
+                aria-label={t("menubar.apps")}
+                title={t("menubar.apps")}
+              >
                 <AppsIcon />
               </IconButton>
             )}
           </div>
+
           <div className="menu-items">
-            <Avatar
-              style={{
-                backgroundColor: stringToColor(
-                  user && user.family_name
-                    ? user.family_name
-                    : user && user.email
-                      ? user.email
-                      : ""
-                ),
-              }}
-              sizes="large"
-            >
-              {user?.name && user?.family_name
-                ? `${user.name[0]}${user.family_name[0]}`
-                : (user?.email?.[0] ?? "")}
-            </Avatar>
+            <IconButton onClick={handleLangClick}>
+              <Avatar
+                style={{
+                  backgroundColor: stringToColor(
+                    user && user.family_name
+                      ? user.family_name
+                      : user && user.email
+                        ? user.email
+                        : ""
+                  ),
+                }}
+                sizes="large"
+                aria-label={t("menubar.userProfile")}
+              >
+                {user?.name && user?.family_name
+                  ? `${user.name[0]}${user.family_name[0]}`
+                  : (user?.email?.[0] ?? "")}
+              </Avatar>
+            </IconButton>
           </div>
         </div>
       </header>
@@ -198,13 +233,46 @@ export function Menubar({
           ))}
         </div>
       </Popover>
+
+      <Popover
+        open={langOpen}
+        anchorEl={langAnchorEl}
+        onClose={handleLangClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <FormControl size="small" style={{ minWidth: 100, marginRight: 8 }}>
+          <Select
+            value={lang}
+            onChange={(e) => {
+              dispatch(setLanguage(e.target.value));
+            }}
+            variant="outlined"
+            aria-label={t("menubar.languageSelector")}
+          >
+            {availableLangs.map(({ code, label }) => (
+              <MenuItem key={code} value={code}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Popover>
     </>
   );
 }
+
 export function MainTitle() {
+  const { t } = useI18n();
   return (
     <div className="menubar-item tc-home">
-      <img className="logo" src={logo} alt="Calendar" />
+      <img className="logo" src={logo} alt={t("menubar.logoAlt")} />
     </div>
   );
 }

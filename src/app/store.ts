@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import userReducer from "../features/User/userSlice";
+import settingsReducer from "../features/Settings/SettingsSlice";
 import eventsCalendar from "../features/Calendars/CalendarSlice";
 import { createReduxHistoryContext } from "redux-first-history";
 import { createBrowserHistory } from "history";
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   router: routerReducer,
   user: userReducer,
   calendars: eventsCalendar,
+  settings: settingsReducer,
 });
 
 export const setupStore = (preloadedState?: Partial<RootState>) => {
