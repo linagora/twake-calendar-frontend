@@ -137,7 +137,7 @@ export default function EventPreviewModal({
         open={open && !hidePreview}
         onClose={() => onClose({}, "backdropClick")}
         showHeaderActions={false}
-        actionsBorderTop={true}
+        actionsBorderTop={currentUserAttendee && isOwn}
         actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
@@ -316,8 +316,9 @@ export default function EventPreviewModal({
           )
         }
         actions={
-          <>
-            {currentUserAttendee && (
+          currentUserAttendee &&
+          isOwn && (
+            <>
               <>
                 <Typography sx={{ marginRight: 2 }}>Attending?</Typography>
                 <Box display="flex" gap="15px" alignItems="center">
@@ -453,8 +454,8 @@ export default function EventPreviewModal({
                   </Button>
                 </Box>
               </>
-            )}
-          </>
+            </>
+          )
         }
       >
         {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
