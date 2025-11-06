@@ -62,6 +62,7 @@ export function PeopleSearch({
       freeSolo={freeSolo}
       multiple
       options={options}
+      autoComplete={false}
       open={!!query}
       disabled={disabled}
       loading={loading}
@@ -106,7 +107,7 @@ export function PeopleSearch({
           slotProps={{
             input: {
               ...params.InputProps,
-              autoComplete: "new-password",
+              autoComplete: "off",
               startAdornment: (
                 <>
                   <PeopleOutlineOutlinedIcon
@@ -127,7 +128,7 @@ export function PeopleSearch({
           }}
           inputProps={{
             ...params.inputProps,
-            autoComplete: "new-password",
+            autoComplete: "off",
           }}
         />
       )}
