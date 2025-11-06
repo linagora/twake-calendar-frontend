@@ -106,4 +106,25 @@ describe("PeopleSearch", () => {
     setup([], { disabled: true });
     expect(screen.getByRole("combobox")).toBeDisabled();
   });
+
+  it("no options doesn't show dropdown when input is empty", async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
+    setup();
+    const input = screen.getByRole("combobox");
+
+    userEvent.type(input, "Test");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("listbox")).toBeInTheDocument();
+    });
+
+    userEvent.clear(input);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+  });
 });
