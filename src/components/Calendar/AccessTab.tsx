@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { getSecretLink } from "../../features/Calendars/CalendarApi";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-import { FieldWithLabel } from "../Event/EventFormFields";
+import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
