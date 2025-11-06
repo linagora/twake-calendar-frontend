@@ -16,6 +16,7 @@ import { Divider, ListItem, Menu, MenuItem } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { trimLongTextWithoutSpace } from "../../utils/textUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 function CalendarAccordion({
   title,
@@ -80,7 +81,7 @@ function CalendarAccordion({
             key={id}
             calendars={allCalendars}
             id={id}
-            isPersonnal={defaultExpanded}
+            isPersonal={defaultExpanded}
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
@@ -98,11 +99,12 @@ export default function CalendarSelection({
   selectedCalendars: string[];
   setSelectedCalendars: Function;
 }) {
+  const { t } = useI18n();
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
-  const personnalCalendars = Object.keys(calendars).filter(
+  const personalCalendars = Object.keys(calendars).filter(
     (id) => id.split("/")[0] === userId
   );
   const delegatedCalendars = Object.keys(calendars).filter(
@@ -127,8 +129,8 @@ export default function CalendarSelection({
     <>
       <div>
         <CalendarAccordion
-          title="Personnal Calendars"
-          calendars={personnalCalendars}
+          title={t("calendar.personal")}
+          calendars={personalCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
           showAddButton
@@ -141,7 +143,7 @@ export default function CalendarSelection({
         />
 
         <CalendarAccordion
-          title="Delegated Calendars"
+          title={t("calendar.delegated")}
           calendars={delegatedCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
@@ -155,7 +157,7 @@ export default function CalendarSelection({
         />
 
         <CalendarAccordion
-          title="Other Calendars"
+          title={t("calendar.other")}
           calendars={sharedCalendars}
           selectedCalendars={selectedCalendars}
           showAddButton
@@ -197,18 +199,19 @@ export default function CalendarSelection({
 function CalendarSelector({
   calendars,
   id,
-  isPersonnal,
+  isPersonal,
   selectedCalendars,
   handleCalendarToggle,
   setOpen,
 }: {
   calendars: Record<string, Calendars>;
   id: string;
-  isPersonnal: boolean;
+  isPersonal: boolean;
   selectedCalendars: string[];
   handleCalendarToggle: (name: string) => void;
   setOpen: Function;
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const calLink =
     useAppSelector((state) => state.calendars.list[id].link) ?? "";
@@ -222,7 +225,7 @@ function CalendarSelector({
     setAnchorEl(null);
   };
   const [userId, calId] = id.split("/");
-  const isDefault = isPersonnal && userId === calId;
+  const isDefault = isPersonal && userId === calId;
 
   const [deletePopupOpen, setDeletePopupOpen] = useState(false);
   const handleDeleteConfirm = () => {
@@ -244,14 +247,10 @@ function CalendarSelector({
           justifyContent: "space-between",
           transition: "background-color 0.2s ease",
           padding: "8px 24px 8px 16px",
-          "& .MoreBtn": {
-            opacity: 0,
-          },
+          "& .MoreBtn": { opacity: 0 },
           "&:hover": {
             backgroundColor: "#F3F3F6",
-            "& .MoreBtn": {
-              opacity: 1,
-            },
+            "& .MoreBtn": { opacity: 1 },
           },
         }}
       >
@@ -293,12 +292,12 @@ function CalendarSelector({
             handleClose();
           }}
         >
-          Modify
+          {t("actions.modify")}
         </MenuItem>
         {!isDefault && <Divider />}
         {!isDefault && (
           <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
-            {isPersonnal ? "Delete" : "Remove"}
+            {isPersonal ? t("actions.delete") : t("actions.remove")}
           </MenuItem>
         )}
       </Menu>
@@ -308,7 +307,7 @@ function CalendarSelector({
         setDeletePopupOpen={setDeletePopupOpen}
         calendars={calendars}
         id={id}
-        isPersonnal={isPersonnal}
+        isPersonal={isPersonal}
         handleDeleteConfirm={handleDeleteConfirm}
       />
     </>

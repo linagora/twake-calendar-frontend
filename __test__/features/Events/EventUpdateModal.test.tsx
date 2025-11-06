@@ -279,7 +279,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     });
 
     // Uncheck repeat checkbox
-    const repeatCheckbox = screen.getByLabelText("Repeat");
+    const repeatCheckbox = screen.getByLabelText("event.form.repeat");
     expect(repeatCheckbox).toBeChecked();
 
     await act(async () => {
@@ -289,7 +289,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     expect(repeatCheckbox).not.toBeChecked();
 
     // Click Save button
-    const saveButton = screen.getByRole("button", { name: /Save/i });
+    const saveButton = screen.getByRole("button", { name: "actions.save" });
 
     await act(async () => {
       fireEvent.click(saveButton);
@@ -397,13 +397,13 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     });
 
     // Uncheck repeat checkbox and save
-    const repeatCheckbox = screen.getByLabelText("Repeat");
+    const repeatCheckbox = screen.getByLabelText("event.form.repeat");
 
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    const saveButton = screen.getByRole("button", { name: /Save/i });
+    const saveButton = screen.getByRole("button", { name: "actions.save" });
 
     await act(async () => {
       fireEvent.click(saveButton);
@@ -512,13 +512,13 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     });
 
     // Uncheck repeat and save
-    const repeatCheckbox = screen.getByLabelText("Repeat");
+    const repeatCheckbox = screen.getByLabelText("event.form.repeat");
 
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    const saveButton = screen.getByRole("button", { name: /Save/i });
+    const saveButton = screen.getByRole("button", { name: "actions.save" });
 
     await act(async () => {
       fireEvent.click(saveButton);

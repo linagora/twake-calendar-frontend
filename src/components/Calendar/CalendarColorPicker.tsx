@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 export function ColorPicker({
@@ -54,6 +55,7 @@ export function ColorPicker({
     </Box>
   );
 }
+
 function ColorBox({
   color,
   onChange,
@@ -107,11 +109,11 @@ function ColorPickerBox({
   onChange: (color: Record<string, string>) => void;
   selectedColor: Record<string, string>;
 }) {
+  const { t } = useI18n();
   const [oldColor] = useState(
     selectedColor ?? { light: "#ffffff", dark: "#808080" }
   );
   const [color, setColor] = useState(oldColor);
-
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
@@ -139,12 +141,13 @@ function ColorPickerBox({
     setColor(newColor);
     onChange(newColor);
   };
+
   return (
     <>
       <Box
         key={"colorPicker"}
         role="button"
-        aria-label={`select custom color`}
+        aria-label={t("colorPicker.selectCustom")}
         onClick={handleClick}
         style={{
           width: "46px",
@@ -198,10 +201,10 @@ function ColorPickerBox({
         }}
       >
         <Typography variant="subtitle1" fontWeight="600">
-          Choose custom colour
+          {t("colorPicker.title")}
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
-          Choose a background colour for this calendar
+          {t("colorPicker.subtitle")}
         </Typography>
 
         <Box sx={{ mb: 2 }}>
@@ -214,7 +217,7 @@ function ColorPickerBox({
 
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Typography variant="body2" sx={{ mr: 1 }}>
-            Hex
+            {t("colorPicker.hex")}
           </Typography>
           <TextField
             value={color.light?.toUpperCase()}
@@ -226,13 +229,13 @@ function ColorPickerBox({
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose}>{t("common.cancel")}</Button>
           <Button
             variant="contained"
             onClick={handleSave}
             sx={{ textTransform: "none" }}
           >
-            Save
+            {t("actions.save")}
           </Button>
         </Box>
       </Popover>

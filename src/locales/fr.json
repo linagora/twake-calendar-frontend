@@ -1,0 +1,232 @@
+{
+  "locale": "fr-fr",
+  "calendar": {
+    "personal": "Calendriers personnels",
+    "delegated": "Calendriers délégués",
+    "other": "Autres calendriers",
+    "caldav_access": "Accès CalDAV",
+    "import_file_description": "Importer des événements depuis un fichier ICS vers l'un de vos calendriers.",
+    "ics_feed_url": "URL du flux ICS",
+    "import_to": "Importer vers",
+    "new_calendar": "Nouveau calendrier",
+    "addDescription": "Ajouter une description",
+    "color": "Couleur",
+    "newEventsVisibility": "Les nouveaux événements créés seront visibles par :",
+    "browseOtherCalendars": "Parcourir d'autres calendriers",
+    "noPublicCalendarsFor": "Aucun calendrier public disponible pour %{name}",
+    "noMoreCalendarsFor": "Plus de calendriers disponibles pour %{name}",
+    "delete": {
+      "title": "Supprimer %{name} ?",
+      "personalWarning": "Vous allez perdre tous les événements de ce calendrier.",
+      "sharedWarning": "Vous allez perdre l’accès à ses événements. Vous pourrez toujours le rajouter plus tard."
+    }
+  },
+  "actions": {
+    "modify": "Modifier",
+    "delete": "Supprimer",
+    "remove": "Retirer",
+    "save": "Enregistrer",
+    "create": "Créer",
+    "import": "Importer",
+    "add": "Ajouter"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "ok": "OK",
+    "link_copied": "Lien copié !",
+    "import_file": "Fichier",
+    "select_file": "Sélectionner un fichier",
+    "import_url": "URL",
+    "name": "Nom",
+    "description": "Description",
+    "all": "Tous",
+    "you": "Vous",
+    "select_timezone": "Sélectionner le fuseau horaire",
+    "moreOptions": "Plus d'options"
+  },
+  "calendarPopover": {
+    "tabs": {
+      "settings": "Paramètres",
+      "addNew": "Ajouter un nouveau calendrier",
+      "access": "Accès",
+      "import": "Importer"
+    }
+  },
+  "colorPicker": {
+    "selectCustom": "Sélectionner une couleur personnalisée",
+    "title": "Choisir une couleur personnalisée",
+    "subtitle": "Choisissez une couleur d'arrière-plan pour ce calendrier",
+    "hex": "Hex"
+  },
+  "event": {
+    "createEvent": "Créer un événement",
+    "updateEvent": "Mettre à jour un événement",
+    "organizer": "Organisateur",
+    "repeat": {
+      "repeatEvery": "Répéter tous les",
+      "frequency": {
+        "days": "jour(s)",
+        "weeks": "semaine(s)",
+        "months": "mois",
+        "years": "année(s)"
+      },
+      "repeatOn": "Répéter le :",
+      "days": {
+        "monday": "LU",
+        "tuesday": "MA",
+        "wednesday": "ME",
+        "thursday": "JE",
+        "friday": "VE",
+        "saturday": "SA",
+        "sunday": "DI"
+      },
+      "end": {
+        "label": "Fin :",
+        "never": "Jamais",
+        "after": "Après",
+        "on": "Le",
+        "occurrences": "occurrences"
+      }
+    },
+    "form": {
+      "title": "Titre",
+      "titlePlaceholder": "Ajouter un titre",
+      "addDescription": "Ajouter une description",
+      "description": "Description",
+      "descriptionPlaceholder": "Ajouter une description",
+      "dateTime": "Date et heure",
+      "start": "Début",
+      "end": "Fin",
+      "allDay": "Toute la journée",
+      "repeat": "Répéter",
+      "timezonePlaceholder": "Sélectionner un fuseau horaire",
+      "participants": "Participants",
+      "videoMeeting": "Visioconférence",
+      "addVisioConference": "Ajouter une visioconférence",
+      "joinVisioConference": "Rejoindre la visioconférence",
+      "copyMeetingLink": "Copier le lien de la réunion",
+      "removeVideoConference": "Supprimer la visioconférence",
+      "location": "Lieu",
+      "locationPlaceholder": "Ajouter un lieu",
+      "calendar": "Calendrier",
+      "notification": "Notification",
+      "notifications": {
+        "": "Aucune notification",
+        "-PT1M": "1 minute avant",
+        "-PT5M": "5 minutes avant",
+        "-PT10M": "10 minutes avant",
+        "-PT15M": "15 minutes avant",
+        "-PT30M": "30 minutes avant",
+        "-PT1H": "1 heure avant",
+        "-PT2H": "2 heures avant",
+        "-PT5H": "5 heures avant",
+        "-PT12H": "12 heures avant",
+        "-PT1D": "1 jour avant",
+        "-PT2D": "2 jours avant",
+        "-PT1W": "1 semaine avant",
+        "EMAIL": "e-mail"
+      },
+      "showMeAs": "M'afficher comme",
+      "free": "Libre",
+      "busy": "Occupé",
+      "visibleTo": "Visible par",
+      "visibleAll": "Tous",
+      "visibleParticipants": "Participants"
+    },
+    "validation": {
+      "titleRequired": "Le titre est obligatoire",
+      "startRequired": "La date/heure de début est obligatoire",
+      "invalidStart": "Date/heure de début invalide",
+      "endRequired": "La date/heure de fin est obligatoire",
+      "invalidEnd": "Date/heure de fin invalide",
+      "endAfterStart": "L'heure de fin doit être après l'heure de début"
+    }
+  },
+  "peopleSearch": {
+    "label": "Commencez à saisir un nom ou un e-mail",
+    "placeholder": "Commencez à saisir un nom ou un e-mail",
+    "invalidEmail": "%{email} n'est pas une adresse e-mail valide"
+  },
+  "error": {
+    "title": "Une erreur s'est produite",
+    "unknown": "Une erreur inconnue s'est produite",
+    "retry": "Réessayer",
+    "multipleEvents": "%{count} événements comportent des erreurs"
+  },
+  "editModeDialog": {
+    "updateRecurrentEvent": "Mettre à jour l'événement récurrent",
+    "updateParticipationStatus": "Mettre à jour le statut de participation",
+    "thisEvent": "Cet événement",
+    "allEvents": "Tous les événements"
+  },
+  "eventDuplication": {
+    "duplicateEvent": "Dupliquer l'événement"
+  },
+  "menubar": {
+    "today": "Aujourd'hui",
+    "refresh": "Actualiser",
+    "viewSelector": "Sélectionner la vue",
+    "languageSelector": "Sélectionner la langue",
+    "views": {
+      "month": "Mois",
+      "week": "Semaine",
+      "day": "Jour"
+    },
+    "apps": "Applications",
+    "userProfile": "Profil utilisateur",
+    "logoAlt": "Calendrier"
+  },
+  "eventPreview": {
+    "emailAttendees": "Envoyer un e-mail aux participants",
+    "deleteEvent": "Supprimer l'événement",
+    "privateEvent": {
+      "tooltipOwn": "Seuls vous et les participants pouvez voir les détails de cet événement.",
+      "hiddenDetails": "Ceci est un événement privé. Les détails sont masqués."
+    },
+    "free": {
+      "label": "Libre",
+      "tooltip": "Les autres vous voient comme disponible pendant la plage horaire de cet événement."
+    },
+    "attendingQuestion": "Vous participez ?",
+    "accept": "Accepter",
+    "maybe": "Peut-être",
+    "decline": "Décliner",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "joinVideo": "Rejoindre la visioconférence",
+    "guests": "%{count} invités",
+    "yesCount": "%{count} oui",
+    "noCount": "%{count} non",
+    "recurrentEvent": "Événement récurrent",
+    "freq": {
+      "daily": "quotidien",
+      "weekly": "hebdomadaire",
+      "monthly": "mensuel",
+      "yearly": "annuel"
+    },
+    "onDays": {
+      "MO": "lundi",
+      "TU": "mardi",
+      "WE": "mercredi",
+      "TH": "jeudi",
+      "FR": "vendredi",
+      "SA": "samedi",
+      "SU": "dimanche"
+    },
+    "recurrenceOnDays": "le %{days}",
+    "everyInterval": "tous les %{interval} %{unit}",
+    "forOccurrences": "pour %{count} occurrences",
+    "until": "jusqu'au %{date}",
+    "days": "jours",
+    "months": "mois",
+    "years": "ans",
+    "alarmText": "%{trigger} par %{action}"
+  },
+  "dateTimeFields": {
+    "date": "Date",
+    "startDate": "Daye du début",
+    "startTime": "Heure du début",
+    "endDate": "Date de la fin",
+    "endTime": "Heure de la fin"
+  }
+}

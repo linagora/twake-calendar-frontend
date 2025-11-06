@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { CalendarItemList } from "./CalendarItemList";
 import { SettingsTab } from "./SettingsTab";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function ImportTab({
   userId,
@@ -37,11 +38,12 @@ export function ImportTab({
     setVisibility: Function;
   };
 }) {
+  const { t } = useI18n();
   const [importMode, setImportMode] = useState<"file" | "url">("file");
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importUrl, setImportUrl] = useState("");
   const calendars = useAppSelector((state) => state.calendars.list);
-  const personnalCalendars = Object.values(calendars).filter(
+  const personalCalendars = Object.values(calendars).filter(
     (cal) => cal.id.split("/")[0] === userId
   );
 
@@ -59,14 +61,14 @@ export function ImportTab({
         size="small"
         sx={{ mb: 2 }}
       >
-        <ToggleButton value="file">File</ToggleButton>
-        {/* <ToggleButton value="url">URL</ToggleButton> */}
+        <ToggleButton value="file">{t("common.import_file")}</ToggleButton>
+        {/* <ToggleButton value="url">{t("common.import_url")}</ToggleButton> */}
       </ToggleButtonGroup>
 
       {importMode === "file" && (
         <>
           <Button variant="outlined" component="label" sx={{ mb: 1 }}>
-            Select file
+            {t("common.select_file")}
             <input
               type="file"
               hidden
@@ -85,7 +87,7 @@ export function ImportTab({
             display="block"
             mb={2}
           >
-            Import events from an ICS file to one of your calendars.
+            {t("calendar.import_file_description")}
           </Typography>
         </>
       )}
@@ -93,7 +95,7 @@ export function ImportTab({
       {importMode === "url" && (
         <TextField
           fullWidth
-          label="ICS feed URL"
+          label={t("calendar.ics_feed_url")}
           value={importUrl}
           onChange={(e) => setImportUrl(e.target.value)}
           size="small"
@@ -102,15 +104,15 @@ export function ImportTab({
       )}
 
       <FormControl fullWidth size="small" sx={{ mt: 2 }}>
-        <InputLabel id="import-to-label">Import to</InputLabel>
+        <InputLabel id="import-to-label">{t("calendar.import_to")}</InputLabel>
         <Select
           labelId="import-to-label"
-          label="Import to"
+          label={t("calendar.import_to")}
           value={importTarget}
           onChange={(e) => setImportTarget(e.target.value)}
         >
-          <MenuItem value="new">New calendar</MenuItem>
-          {CalendarItemList(personnalCalendars)}
+          <MenuItem value="new">{t("calendar.new_calendar")}</MenuItem>
+          {CalendarItemList(personalCalendars)}
         </Select>
       </FormControl>
 

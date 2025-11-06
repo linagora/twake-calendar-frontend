@@ -1,6 +1,5 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { act } from "react";
 import CalendarSearch from "../../src/components/Calendar/CalendarSearch";
 import * as CalendarApi from "../../src/features/Calendars/CalendarApi";
 import * as CalendarSlice from "../../src/features/Calendars/CalendarSlice";
@@ -188,7 +187,7 @@ describe("CalendarSearch", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No more Calendar for Test User")
+        screen.getByText("calendar.noMoreCalendarsFor(name=Test User)")
       ).toBeInTheDocument();
     });
 
@@ -223,7 +222,7 @@ describe("CalendarSearch", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No publicly available calendars for Test User")
+        screen.getByText("calendar.noPublicCalendarsFor(name=Test User)")
       ).toBeInTheDocument();
     });
   });

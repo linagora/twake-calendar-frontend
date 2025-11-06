@@ -34,7 +34,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    const logoElement = screen.getByAltText("Calendar");
+    const logoElement = screen.getByAltText("menubar.logoAlt");
     expect(logoElement).toBeInTheDocument();
   });
   it("renders the main title", () => {
@@ -52,7 +52,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByAltText("Calendar")).toBeInTheDocument();
+    expect(screen.getByAltText("menubar.logoAlt")).toBeInTheDocument();
   });
 
   it("shows avatar with user initials", () => {

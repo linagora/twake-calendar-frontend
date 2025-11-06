@@ -9,3 +9,4 @@ var CALENDAR_BASE_URL = "https://calendar.example.com";
 var MAIL_SPA_URL = "https://mail.example.com";
 var VIDEO_CONFERENCE_BASE_URL = "https://meet.linagora.com";
 var DEBUG = false;
+var LANG = "en";

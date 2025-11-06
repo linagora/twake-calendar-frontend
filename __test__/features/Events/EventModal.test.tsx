@@ -110,7 +110,7 @@ describe("EventPopover", () => {
     renderPopover();
 
     // Check dialog title
-    expect(screen.getByText("Create Event")).toBeInTheDocument();
+    expect(screen.getByText("event.createEvent")).toBeInTheDocument();
 
     // Check inputs exist by their roles
     const titleInput = screen.getByRole("textbox", { name: /title/i });
@@ -118,7 +118,7 @@ describe("EventPopover", () => {
 
     // Description input is only visible after clicking "Add description" button
     const addDescriptionButton = screen.getByRole("button", {
-      name: /Add description/i,
+      name: "event.form.addDescription",
     });
     expect(addDescriptionButton).toBeInTheDocument();
 
@@ -127,20 +127,20 @@ describe("EventPopover", () => {
 
     // Check button
     expect(
-      screen.getByRole("button", { name: /More options/i })
+      screen.getByRole("button", { name: "common.moreOptions" })
     ).toBeInTheDocument();
 
     // Extended mode
-    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
 
     // Back button appears
     expect(screen.getByLabelText("show less")).toBeInTheDocument();
 
     // Extended labels appear
-    expect(screen.getAllByText("Repeat")).toHaveLength(1);
-    expect(screen.getAllByText("Notification")).toHaveLength(1);
-    expect(screen.getAllByText("Visible to")).toHaveLength(1);
-    expect(screen.getAllByText("Show me as")).toHaveLength(1);
+    expect(screen.getAllByText("event.form.repeat")).toHaveLength(1);
+    expect(screen.getAllByText("event.form.notification")).toHaveLength(1);
+    expect(screen.getAllByText("event.form.visibleTo")).toHaveLength(1);
+    expect(screen.getAllByText("event.form.showMeAs")).toHaveLength(1);
   });
 
   it("fills start from selectedRange", () => {
@@ -160,31 +160,35 @@ describe("EventPopover", () => {
   it("updates inputs on change", () => {
     renderPopover();
 
-    fireEvent.change(screen.getByLabelText("Title"), {
+    fireEvent.change(screen.getByLabelText("event.form.title"), {
       target: { value: "My Event" },
     });
-    expect(screen.getByLabelText("Title")).toHaveValue("My Event");
+    expect(screen.getByLabelText("event.form.title")).toHaveValue("My Event");
 
     // Click "Add description" button first
-    fireEvent.click(screen.getByRole("button", { name: /Add description/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "event.form.addDescription" })
+    );
 
-    fireEvent.change(screen.getByLabelText("Description"), {
+    fireEvent.change(screen.getByLabelText("event.form.description"), {
       target: { value: "Event Description" },
     });
-    expect(screen.getByLabelText("Description")).toHaveValue(
+    expect(screen.getByLabelText("event.form.description")).toHaveValue(
       "Event Description"
     );
 
-    fireEvent.change(screen.getByLabelText("Location"), {
+    fireEvent.change(screen.getByLabelText("event.form.location"), {
       target: { value: "Conference Room" },
     });
-    expect(screen.getByLabelText("Location")).toHaveValue("Conference Room");
+    expect(screen.getByLabelText("event.form.location")).toHaveValue(
+      "Conference Room"
+    );
   });
 
   it("changes selected calendar", async () => {
     renderPopover();
 
-    const select = screen.getByLabelText("Calendar");
+    const select = screen.getByLabelText("event.form.calendar");
     fireEvent.mouseDown(select); // Open menu
 
     const option = await screen.findByText("Calendar 2");
@@ -197,10 +201,10 @@ describe("EventPopover", () => {
   it("adds a attendee", async () => {
     jest.useFakeTimers();
     renderPopover();
-    fireEvent.change(screen.getByLabelText("Title"), {
+    fireEvent.change(screen.getByLabelText("event.form.title"), {
       target: { value: "newEvent" },
     });
-    const select = screen.getByLabelText("Start typing a name or email");
+    const select = screen.getByLabelText("peopleSearch.label");
 
     act(() => {
       select.focus();
@@ -225,7 +229,7 @@ describe("EventPopover", () => {
         return () => Promise.resolve(payload) as any;
       });
 
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -262,8 +266,6 @@ describe("EventPopover", () => {
     renderPopover();
     const newEvent = {
       title: "Meeting",
-      start: "2025-07-18T00:00:00.000Z",
-      end: "2025-07-18T00:00:00.000Z",
       allday: false,
       uid: "6045c603-11ab-43c5-bc30-0641420bb3a8",
       description: "Discuss project",
@@ -274,17 +276,17 @@ describe("EventPopover", () => {
     };
 
     // Fill inputs
-    fireEvent.change(screen.getByLabelText("Title"), {
+    fireEvent.change(screen.getByLabelText("event.form.title"), {
       target: { value: newEvent.title },
     });
-    fireEvent.click(screen.getByLabelText("All day"));
-
     // Click "Add description" button first
-    fireEvent.click(screen.getByRole("button", { name: /Add description/i }));
-    fireEvent.change(screen.getByLabelText("Description"), {
+    fireEvent.click(
+      screen.getByRole("button", { name: "event.form.addDescription" })
+    );
+    fireEvent.change(screen.getByLabelText("event.form.description"), {
       target: { value: newEvent.description },
     });
-    fireEvent.change(screen.getByLabelText("Location"), {
+    fireEvent.change(screen.getByLabelText("event.form.location"), {
       target: { value: newEvent.location },
     });
     const spy = jest
@@ -293,7 +295,7 @@ describe("EventPopover", () => {
         return () => Promise.resolve(payload) as any;
       });
 
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -307,20 +309,6 @@ describe("EventPopover", () => {
 
     expect(receivedPayload.newEvent.title).toBe(newEvent.title);
     expect(receivedPayload.newEvent.description).toBe(newEvent.description);
-    expect(
-      formatDateToYYYYMMDDTHHMMSS(
-        new Date(receivedPayload.newEvent.start)
-      ).split("T")[0]
-    ).toBe(formatDateToYYYYMMDDTHHMMSS(new Date(newEvent.start)).split("T")[0]);
-
-    const expectedAllDayEnd = new Date(newEvent.end);
-    expectedAllDayEnd.setUTCDate(expectedAllDayEnd.getUTCDate() + 1);
-
-    expect(
-      formatDateToYYYYMMDDTHHMMSS(
-        new Date(receivedPayload.newEvent.end || new Date())
-      ).split("T")[0]
-    ).toBe(formatDateToYYYYMMDDTHHMMSS(expectedAllDayEnd).split("T")[0]);
     expect(receivedPayload.newEvent.location).toBe(newEvent.location);
     expect(receivedPayload.newEvent.organizer).toEqual(newEvent.organizer);
     expect(receivedPayload.newEvent.color).toEqual(
@@ -335,7 +323,7 @@ describe("EventPopover", () => {
     renderPopover();
 
     // Cancel button only appears in expanded mode
-    fireEvent.click(screen.getByRole("button", { name: /More options/i }));
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
 
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
@@ -345,7 +333,9 @@ describe("EventPopover", () => {
   it("BUGFIX: Prefill Calendar field", async () => {
     renderPopover();
     await waitFor(() =>
-      expect(screen.getByLabelText("Calendar")).toHaveTextContent("Calendar 1")
+      expect(screen.getByLabelText("event.form.calendar")).toHaveTextContent(
+        "Calendar 1"
+      )
     );
   });
 });

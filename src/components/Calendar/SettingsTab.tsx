@@ -9,7 +9,8 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useState, useEffect } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { ColorPicker } from "./CalendarColorPicker";
@@ -35,16 +36,21 @@ export function SettingsTab({
   setVisibility: Function;
   calendar?: Calendars;
 }) {
+  const { t } = useI18n();
   const [toggleDesc, setToggleDesc] = useState(Boolean(description));
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const isOwn = calendar ? calendar.id.split("/")[0] === userId : true;
 
+  useEffect(() => {
+    if (description) setToggleDesc(true);
+  }, [description]);
+
   return (
     <Box mt={2}>
       <TextField
         fullWidth
-        label="Name"
+        label={t("common.name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
         size="small"
@@ -58,14 +64,14 @@ export function SettingsTab({
           onClick={() => setToggleDesc(!toggleDesc)}
           startIcon={<FormatListBulletedIcon />}
         >
-          Add description
+          {t("calendar.addDescription")}
         </Button>
       )}
 
       {toggleDesc && (
         <TextField
           fullWidth
-          label="Description"
+          label={t("common.description")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           size="small"
@@ -77,7 +83,7 @@ export function SettingsTab({
 
       <Box mt={2}>
         <Typography variant="body2" gutterBottom>
-          Color
+          {t("calendar.color")}
         </Typography>
         <ColorPicker
           onChange={(color) => setColor(color)}
@@ -88,7 +94,7 @@ export function SettingsTab({
       {isOwn && (
         <Box mt={2}>
           <Typography variant="body2" gutterBottom>
-            New events created will be visible to:
+            {t("calendar.newEventsVisibility")}
           </Typography>
           <ToggleButtonGroup
             value={visibility}
@@ -98,12 +104,12 @@ export function SettingsTab({
           >
             <ToggleButton value="public">
               <PublicIcon fontSize="small" />
-              All
+              {t("common.all")}
             </ToggleButton>
 
             <ToggleButton value="private">
               <LockIcon fontSize="small" />
-              You
+              {t("common.you")}
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>

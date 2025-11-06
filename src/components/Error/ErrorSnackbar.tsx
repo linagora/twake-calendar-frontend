@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import { useAppDispatch } from "../../app/hooks";
 import { clearError as calendarClearError } from "../../features/Calendars/CalendarSlice";
 import { clearError as userClearError } from "../../features/User/userSlice";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function ErrorSnackbar({
   error,
@@ -12,7 +13,9 @@ export function ErrorSnackbar({
   error: string | null;
   type: "user" | "calendar";
 }) {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
+
   const handleCloseSnackbar = () => {
     dispatch(type === "calendar" ? calendarClearError() : userClearError());
   };
@@ -29,11 +32,11 @@ export function ErrorSnackbar({
         sx={{ width: "100%" }}
         action={
           <Button color="inherit" size="small" onClick={handleCloseSnackbar}>
-            OK
+            {t("common.ok")}
           </Button>
         }
       >
-        {error}
+        {error || t("error.unknown")}
       </Alert>
     </Snackbar>
   );
@@ -46,11 +49,13 @@ export function EventErrorSnackbar({
   messages: string[];
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const open = messages.length > 0;
+
   const summary =
     messages.length === 1
       ? messages[0]
-      : `${messages.length} events with errors`;
+      : t("error.multipleEvents", { count: messages.length });
 
   return (
     <Snackbar
@@ -65,7 +70,7 @@ export function EventErrorSnackbar({
         sx={{ width: "100%" }}
         action={
           <Button color="inherit" size="small" onClick={onClose}>
-            OK
+            {t("common.ok")}
           </Button>
         }
       >

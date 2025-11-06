@@ -5,37 +5,45 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function DeleteCalendarDialog({
   deletePopupOpen,
   setDeletePopupOpen,
   calendars,
   id,
-  isPersonnal,
+  isPersonal,
   handleDeleteConfirm,
 }: {
   deletePopupOpen: boolean;
   setDeletePopupOpen: (e: boolean) => void;
   calendars: Record<string, Calendars>;
   id: string;
-  isPersonnal: boolean;
+  isPersonal: boolean;
   handleDeleteConfirm: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
-      <DialogTitle>Remove {calendars[id].name}?</DialogTitle>
+      <DialogTitle>
+        {t("calendar.delete.title", { name: calendars[id].name })}
+      </DialogTitle>
+
       <DialogContent>
         <DialogContentText>
-          Are you sure you want to remove this calendar?{" "}
-          {isPersonnal
-            ? "You will loose all events in this calendar."
-            : "You will loose access to its events. You will still be able to add it back later."}
+          {isPersonal
+            ? t("calendar.delete.personalWarning")
+            : t("calendar.delete.sharedWarning")}
         </DialogContentText>
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={() => setDeletePopupOpen(false)}>Cancel</Button>
+        <Button onClick={() => setDeletePopupOpen(false)}>
+          {t("common.cancel")}
+        </Button>
         <Button onClick={handleDeleteConfirm} variant="contained">
-          {isPersonnal ? "Delete" : "Remove"}
+          {isPersonal ? t("actions.delete") : t("actions.remove")}
         </Button>
       </DialogActions>
     </Dialog>

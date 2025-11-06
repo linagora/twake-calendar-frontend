@@ -42,6 +42,7 @@ import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
 import { useTheme } from "@mui/material/styles";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 interface CalendarAppProps {
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -286,6 +287,8 @@ export default function CalendarApp({
     (window as any).__calendarRef = calendarRef;
   }
 
+  const { t, lang } = useI18n();
+
   return (
     <main className="main-layout">
       <Box
@@ -312,7 +315,7 @@ export default function CalendarApp({
               eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
             }
           >
-            <AddIcon /> <p>Create Event</p>
+            <AddIcon /> <p>{t("event.createEvent")}</p>
           </Button>
         </Box>
 
@@ -356,6 +359,7 @@ export default function CalendarApp({
           initialView="timeGridWeek"
           firstDay={1}
           editable={true}
+          locale={lang}
           selectable={true}
           timeZone={timezone}
           height={"100%"}
@@ -382,7 +386,9 @@ export default function CalendarApp({
           weekNumberContent={(arg) => {
             return (
               <div className="weekSelector">
-                <div>{arg.text}</div>
+                <div>
+                  {t("menubar.views.week")} {arg.num}
+                </div>
                 <TimezoneSelector
                   value={timezone}
                   onChange={(newTimezone: string) =>
@@ -393,7 +399,7 @@ export default function CalendarApp({
             );
           }}
           dayCellContent={(arg) => {
-            const month = arg.date.toLocaleDateString("en-US", {
+            const month = arg.date.toLocaleDateString(t("locale"), {
               month: "short",
             });
             if (arg.view.type === "dayGridMonth") {
@@ -453,7 +459,7 @@ export default function CalendarApp({
           dayHeaderContent={(arg) => {
             const date = arg.date.getDate();
             const weekDay = arg.date
-              .toLocaleDateString("en-US", { weekday: "short" })
+              .toLocaleDateString(t("locale"), { weekday: "short" })
               .toUpperCase();
             return (
               <div className="fc-daygrid-day-top">

@@ -3,10 +3,13 @@ import { Box, IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export function AccessTab({ calendar }: { calendar: Calendars }) {
+  const { t } = useI18n();
   const calDAVLink = `${(window as any).CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
   const [open, setOpen] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(calDAVLink);
     setOpen(true);
@@ -18,7 +21,7 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
         <TextField
           disabled
           fullWidth
-          label="CalDAV access"
+          label={t("calendar.caldav_access")}
           value={calDAVLink}
           slotProps={{
             input: {
@@ -31,7 +34,11 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
           }}
         />
       </Box>
-      <SnackbarAlert setOpen={setOpen} open={open} message="Link copied!" />
+      <SnackbarAlert
+        setOpen={setOpen}
+        open={open}
+        message={t("common.link_copied")}
+      />
     </>
   );
 }
