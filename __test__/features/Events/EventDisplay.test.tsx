@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventDisplayModal from "../../../src/features/Events/EventDisplay";
+import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
 import { InfoRow } from "../../../src/components/Event/InfoRow";
 import {
@@ -16,6 +16,8 @@ import {
 } from "../../../src/components/Event/utils/eventUtils";
 import * as appHooks from "../../../src/app/hooks";
 import { ThunkDispatch } from "@reduxjs/toolkit";
+import dayjs from "dayjs";
+import { LONG_DATE_FORMAT } from "../../../src/components/Event/utils/dateTimeFormatters";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
@@ -177,7 +179,9 @@ describe("Event Preview Display", () => {
     );
     const moreButton = screen.getByTestId("MoreVertIcon");
     if (moreButton) {
-      expect(screen.queryByText("Delete event")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("eventPreview.deleteEvent")
+      ).not.toBeInTheDocument();
     }
     cleanup();
     // Renders the personal cal event
@@ -191,7 +195,7 @@ describe("Event Preview Display", () => {
       preloadedState
     );
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    expect(screen.queryByText("Delete event")).toBeInTheDocument();
+    expect(screen.queryByText("eventPreview.deleteEvent")).toBeInTheDocument();
   });
   it("calls delete when Delete clicked", async () => {
     renderWithProviders(
@@ -209,7 +213,9 @@ describe("Event Preview Display", () => {
         return () => Promise.resolve(payload) as any;
       });
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Delete event/i }));
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "eventPreview.deleteEvent" })
+    );
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -270,10 +276,18 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.getByText("Attending?")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Maybe" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
+    expect(
+      screen.getByText("eventPreview.attendingQuestion")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "eventPreview.accept" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "eventPreview.maybe" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "eventPreview.decline" })
+    ).toBeInTheDocument();
   });
   it("doesnt renders RSVP buttons when user isnt an attendee", () => {
     const rsvpStateIsOrga = {
@@ -316,15 +330,17 @@ describe("Event Preview Display", () => {
       rsvpStateIsOrga
     );
 
-    expect(screen.queryByText("Attending?")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Accept" })
+      screen.queryByText("eventPreview.attendingQuestion")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Maybe" })
+      screen.queryByRole("button", { name: "eventPreview.accept" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Decline" })
+      screen.queryByRole("button", { name: "eventPreview.maybe" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "eventPreview.decline" })
     ).not.toBeInTheDocument();
   });
 
@@ -375,7 +391,9 @@ describe("Event Preview Display", () => {
       rsvpState
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Accept" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "eventPreview.accept" })
+    );
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -432,7 +450,7 @@ describe("Event Preview Display", () => {
       rsvpState
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Maybe" }));
+    fireEvent.click(screen.getByRole("button", { name: "eventPreview.maybe" }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -489,7 +507,9 @@ describe("Event Preview Display", () => {
       rsvpState
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Decline" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "eventPreview.decline" })
+    );
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -512,7 +532,7 @@ describe("Event Preview Display", () => {
     fireEvent.click(screen.getByTestId("EditIcon"));
 
     await waitFor(() => {
-      expect(screen.getByText("Update Event")).toBeInTheDocument();
+      expect(screen.getByText("event.updateEvent")).toBeInTheDocument();
     });
   });
   it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
@@ -527,7 +547,7 @@ describe("Event Preview Display", () => {
       preloadedState
     );
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
-    expect(screen.getByText("Email attendees")).toBeInTheDocument();
+    expect(screen.getByText("eventPreview.emailAttendees")).toBeInTheDocument();
   });
   it("doesnt render message button when MAIL_SPA_URL is not null and event has no attendees", () => {
     (window as any).MAIL_SPA_URL = "test";
@@ -571,7 +591,7 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(screen.getByTestId("MoreVertIcon"));
     const emailButton = screen.getByRole("menuitem", {
-      name: /Email attendees/i,
+      name: "eventPreview.emailAttendees",
     });
     expect(emailButton).toBeInTheDocument();
 
@@ -624,9 +644,8 @@ describe("Event Preview Display", () => {
             ownerEmails: ownerEmails,
             events: {
               event1: {
-                id: "event1",
-                calId: "667037022b752d0026472254/cal1",
                 uid: "event1",
+                calId: "667037022b752d0026472254/cal1",
                 title: "Test Event",
                 start: start.toISOString(),
                 end: end.toISOString(),
@@ -747,7 +766,6 @@ describe("Event Preview Display", () => {
               // ownerEmails missing
               events: {
                 event1: {
-                  id: "event1",
                   calId: "667037022b752d0026472254/cal1",
                   uid: "event1",
                   title: "Test Event",
@@ -810,7 +828,7 @@ describe("Event Full Display", () => {
           color: "#FF0000",
           events: {
             event1: {
-              id: "event1",
+              uid: "event1",
               title: "Test Event",
               calId: "667037022b752d0026472254/cal1",
               start: day.toISOString(),
@@ -843,7 +861,7 @@ describe("Event Full Display", () => {
           color: "#FF0000",
           events: {
             event1: {
-              id: "event1",
+              uid: "event1",
               calId: "otherCal/cal",
               title: "Test Event Other cal",
               start: day.toISOString(),
@@ -888,7 +906,7 @@ describe("Event Full Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -899,20 +917,26 @@ describe("Event Full Display", () => {
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
 
-    // Exact value assertions with declarative expected values
-    const startInput = screen.getByLabelText("Start");
-    expect(startInput).toBeInTheDocument();
-    expect(startInput).toHaveAttribute("type", "datetime-local");
-    expect(startInput.getAttribute("value")).toBe(expectedStart);
+    const startDateInput = screen.getByTestId("start-date-input");
+    const startTimeInput = screen.getByTestId("start-time-input");
+    const endTimeInput = screen.getByTestId("end-time-input");
 
-    const endInput = screen.getByLabelText("End");
-    expect(endInput.getAttribute("value")).toBe(expectedEnd);
+    expect(startDateInput).toBeInTheDocument();
+    expect(startTimeInput).toBeInTheDocument();
+    expect(endTimeInput).toBeInTheDocument();
+
+    expect(startDateInput).toHaveValue(
+      dayjs(expectedStart).format(LONG_DATE_FORMAT)
+    );
+    expect(startTimeInput).toHaveValue(dayjs(expectedStart).format("HH:mm"));
+
+    expect(endTimeInput).toHaveValue(dayjs(expectedEnd).format("HH:mm"));
 
     expect(screen.getByText("First Calendar")).toBeInTheDocument();
   });
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -924,336 +948,9 @@ describe("Event Full Display", () => {
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
-  it("Shows delete button only when calendar is own", () => {
-    // Renders the other cal event
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"otherCal/cal"}
-        eventId={"event1"}
-      />,
-      preloadedState
-    );
-    expect(screen.queryByTestId("DeleteIcon")).not.toBeInTheDocument();
-    // Renders the personal cal event
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      preloadedState
-    );
-    expect(screen.queryByTestId("DeleteIcon")).toBeInTheDocument();
-  });
-  it("calls delete when Delete clicked", async () => {
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      preloadedState
-    );
-    const spy = jest
-      .spyOn(eventThunks, "deleteEventAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-
-    fireEvent.click(screen.getByTestId("DeleteIcon"));
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-
-    const receivedPayload = spy.mock.calls[0][0];
-
-    expect(receivedPayload).toEqual({
-      calId: "667037022b752d0026472254/cal1",
-      eventId: "event1",
-    });
-
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
-  });
-  it("renders RSVP buttons when user is an attendee", () => {
-    const rsvpStateIsOrga = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "test@test.com",
-                    cn: "Test User",
-                    partstat: "NEEDS-ACTION",
-                  },
-                  {
-                    cal_address: "organizer@test.com",
-                    cn: "Test Organizer",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpStateIsOrga
-    );
-
-    expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Maybe" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
-  });
-  it("doesnt renders RSVP buttons when user isnt an attendee", () => {
-    const rsvpStateIsOrga = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "organizer@test.com",
-                    cn: "Test Organizer",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpStateIsOrga
-    );
-
-    expect(
-      screen.queryByRole("button", { name: "Accept" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Maybe" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Decline" })
-    ).not.toBeInTheDocument();
-  });
-
-  it("handles RSVP Accept click", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-
-    const rsvpState = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "test@test.com",
-                    cn: "Test User",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpState
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Accept" }));
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-
-    const updatedEvent = spy.mock.calls[0][0].newEvent;
-    expect(updatedEvent.attendee[0].partstat).toBe("ACCEPTED");
-  });
-
-  it("handles RSVP Maybe click", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-
-    const rsvpState = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "test@test.com",
-                    cn: "Test User",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpState
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Maybe" }));
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-
-    const updatedEvent = spy.mock.calls[0][0].newEvent;
-    expect(updatedEvent.attendee[0].partstat).toBe("TENTATIVE");
-  });
-
-  it("handles RSVP Decline click", async () => {
-    const spy = jest
-      .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-
-    const rsvpState = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "test@test.com",
-                    cn: "Test User",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpState
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Decline" }));
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-
-    const updatedEvent = spy.mock.calls[0][0].newEvent;
-    expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
-  });
   it("toggle Show More reveals extra fields", async () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1262,11 +959,13 @@ describe("Event Full Display", () => {
       preloadedState
     );
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Notification/i)).toBeInTheDocument();
+      expect(screen.getByText("event.form.notification")).toBeInTheDocument();
     });
 
     // Debug: Print DOM to see what's rendered
@@ -1280,7 +979,7 @@ describe("Event Full Display", () => {
 
   it("can edit title when user is organizer", () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1288,56 +987,13 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    const titleField = screen.getByLabelText("Title");
+    const titleField = screen.getByLabelText("event.form.title");
     fireEvent.change(titleField, { target: { value: "New Title" } });
     expect(screen.getByDisplayValue("New Title")).toBeInTheDocument();
   });
-  it("calendar select is disabled when not organizer", () => {
-    const rsvpState = {
-      ...preloadedState,
-      calendars: {
-        ...preloadedState.calendars,
-        list: {
-          ...preloadedState.calendars.list,
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: [
-                  {
-                    cal_address: "test@test.com",
-                    cn: "Test User",
-                    partstat: "NEEDS-ACTION",
-                  },
-                ],
-                organizer: {
-                  cal_address: "organizer@test.com",
-                  cn: "Edgar Organiser",
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      rsvpState
-    );
-    expect(screen.getByLabelText("Calendar")).toHaveClass("Mui-disabled");
-  });
   it("toggle all-day updates end date correctly", () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1345,18 +1001,20 @@ describe("Event Full Display", () => {
       />,
       preloadedState
     );
-    const allDayCheckbox = screen.getByLabelText("All day");
+
+    const allDayCheckbox = screen.getByLabelText("event.form.allDay");
     fireEvent.click(allDayCheckbox);
     expect(allDayCheckbox).toBeChecked();
 
-    // Calculate expected date value (YYYY-MM-DD format for all-day events)
-    const expectedDate = day.toISOString().split("T")[0];
+    const expectedDate = dayjs(day).format(LONG_DATE_FORMAT);
 
-    // Use exact value assertion instead of regex
-    const dateInputs = screen.getAllByDisplayValue(expectedDate);
-    expect(dateInputs.length).toBeGreaterThanOrEqual(1);
-    expect(dateInputs[0]).toBeInTheDocument();
+    const startDateInput = screen.getByTestId("start-date-input");
+    const endDateInput = screen.getByTestId("end-date-input");
+
+    expect(startDateInput).toHaveValue(expectedDate);
+    expect(endDateInput).toHaveValue(expectedDate);
   });
+
   it("saves event and moves it when calendar is changed", async () => {
     const spyPut = jest
       .spyOn(eventThunks, "putEventAsync")
@@ -1367,6 +1025,7 @@ describe("Event Full Display", () => {
     const spyRemove = jest.spyOn(eventThunks, "removeEvent");
 
     const testDate = new Date("2025-01-15T10:00:00.000Z");
+    const testEndDate = new Date("2025-01-15T11:00:00.000Z");
     const preloadedTwoCals = {
       ...preloadedState,
       calendars: {
@@ -1377,12 +1036,11 @@ describe("Event Full Display", () => {
             color: "#FF0000",
             events: {
               event1: {
-                uid: "uid-base",
-                id: "event1",
+                uid: "event1",
                 title: "Test Event",
                 calId: "667037022b752d0026472254/cal1",
                 start: testDate.toISOString(),
-                end: testDate.toISOString(),
+                end: testEndDate.toISOString(),
                 organizer: { cn: "test", cal_address: "test@test.com" },
                 attendee: [{ cn: "test", cal_address: "test@test.com" }],
               },
@@ -1399,22 +1057,25 @@ describe("Event Full Display", () => {
       },
     };
 
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      preloadedTwoCals
+    await act(async () =>
+      renderWithProviders(
+        <EventUpdateModal
+          open={true}
+          onClose={mockOnClose}
+          calId={"667037022b752d0026472254/cal1"}
+          eventId={"event1"}
+        />,
+        preloadedTwoCals
+      )
     );
 
-    fireEvent.mouseDown(screen.getByLabelText("Calendar"));
+    const calendarSelect = screen.getByLabelText("event.form.calendar");
+    await act(async () => fireEvent.mouseDown(calendarSelect));
 
     const option = await screen.findByText("Calendar Two");
     fireEvent.click(option);
 
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     await waitFor(() => {
       expect(spyPut).toHaveBeenCalled();
@@ -1425,138 +1086,6 @@ describe("Event Full Display", () => {
     });
 
     expect(spyRemove).toHaveBeenCalled();
-  });
-
-  it("saves recurring event with updateSeriesAsync when typeOfAction is all", async () => {
-    const spyUpdateSeries = jest
-      .spyOn(eventThunks, "updateSeriesAsync")
-      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
-
-    // Mock getEvent API call to avoid API errors in test
-    const EventApi = require("../../../src/features/Events/EventApi");
-    const testDate = new Date("2025-01-15T10:00:00.000Z");
-    jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-      uid: "base",
-      title: "Recurring event",
-      calId: "667037022b752d0026472254/cal1",
-      start: testDate.toISOString(),
-      end: testDate.toISOString(),
-      repetition: { freq: "daily", interval: 1 },
-    });
-    const preloadedRecurrence = {
-      ...preloadedState,
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            id: "667037022b752d0026472254/cal1",
-            name: "First Calendar",
-            color: "#FF0000",
-            events: {
-              base: {
-                uid: "base",
-                calId: "667037022b752d0026472254/cal1",
-                title: "Recurring event",
-                start: testDate.toISOString(),
-                end: testDate.toISOString(),
-                organizer: { cal_address: "test@test.com" },
-                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
-                repetition: { freq: "daily", interval: 1 },
-              },
-              "base/20250101": {
-                uid: "base/20250101",
-                calId: "667037022b752d0026472254/cal1",
-                title: "Recurring event",
-                start: testDate.toISOString(),
-                end: testDate.toISOString(),
-                organizer: { cal_address: "test@test.com" },
-                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
-              },
-              "base/20250201": {
-                uid: "base/20250201",
-                calId: "667037022b752d0026472254/cal1",
-                title: "Recurring event",
-                start: testDate.toISOString(),
-                end: testDate.toISOString(),
-                organizer: { cal_address: "test@test.com" },
-                attendee: [{ cal_address: "test@test.com", cn: "Test" }],
-              },
-            },
-          },
-        },
-        pending: false,
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"base/20250101"}
-        typeOfAction="all"
-      />,
-      preloadedRecurrence
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
-
-    await waitFor(() => {
-      expect(spyUpdateSeries).toHaveBeenCalled();
-    });
-  });
-
-  it("displays event time in user local timezone when user timezone differs from event timezone", () => {
-    // GIVEN user timezone is UTC+2 (Europe/Paris)
-    // WHEN the user opens an event at 2PM UTC+7 (Asia/Bangkok)
-    // THEN the event is displayed at 9AM UTC+2 (in local time format)
-
-    const eventDateUTC7 = new Date("2025-01-15T07:00:00.000Z"); // 7AM UTC = 2PM UTC+7
-
-    const stateWithTimezone = {
-      ...preloadedState,
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            id: "667037022b752d0026472254/cal1",
-            name: "Test Calendar",
-            color: "#FF0000",
-            events: {
-              event1: {
-                uid: "event1",
-                title: "Timezone Test Event",
-                calId: "667037022b752d0026472254/cal1",
-                start: eventDateUTC7.toISOString(),
-                end: new Date(eventDateUTC7.getTime() + 3600000).toISOString(),
-                timezone: "Asia/Bangkok",
-                allday: false,
-                organizer: { cn: "test", cal_address: "test@test.com" },
-                attendee: [{ cn: "test", cal_address: "test@test.com" }],
-              },
-            },
-          },
-        },
-        pending: false,
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      stateWithTimezone
-    );
-
-    // Verify title input field has the event title
-    const titleInput = screen.getByDisplayValue("Timezone Test Event");
-    expect(titleInput).toBeInTheDocument();
-
-    // Verify the datetime input field exists
-    const startInput = screen.getByLabelText("Start");
-    expect(startInput).toBeInTheDocument();
-    expect(startInput).toHaveAttribute("type", "datetime-local");
   });
 
   it("edit modal displays event time in original event timezone", () => {
@@ -1594,7 +1123,7 @@ describe("Event Full Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1603,14 +1132,11 @@ describe("Event Full Display", () => {
       stateWithTimezone
     );
 
-    // Verify the timezone select shows Asia/Bangkok
-    fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
-
     // The timezone select should have Asia/Bangkok selected
     // Since the component uses formatLocalDateTime, the displayed time will be in local format
     // but the timezone selector should show Asia/Bangkok
-    const titleInput = screen.getByDisplayValue("Timezone Edit Test");
-    expect(titleInput).toBeInTheDocument();
+    const timeZone = screen.getByDisplayValue(/Asia\/Bangkok/i);
+    expect(timeZone).toBeInTheDocument();
   });
 
   it("InfoRow renders error style when error prop is true", () => {
@@ -1618,60 +1144,9 @@ describe("Event Full Display", () => {
     expect(screen.getByText("Bad")).toBeInTheDocument();
   });
 
-  it("calls onClose from useEffect if event or calendar missing", () => {
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"nonexistent/cal"}
-        eventId={"ghost"}
-      />,
-      preloadedState
-    );
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
-  });
-
-  it("renders error row when event has error", () => {
-    const errorState = {
-      ...preloadedState,
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                error: "Something went wrong",
-              },
-            },
-          },
-        },
-        pending: false,
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      errorState
-    );
-
-    act(() => {
-      fireEvent.click(screen.getByRole("button", { name: /Show More/i }));
-    });
-
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-  });
-
   it("can remove an attendee with the close button", () => {
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1684,46 +1159,6 @@ describe("Event Full Display", () => {
     fireEvent.click(removeBtn);
 
     expect(screen.queryByText(/John/)).not.toBeInTheDocument();
-  });
-
-  it("shows more attendees when overflow, then toggles back", () => {
-    const overflowState = {
-      ...preloadedState,
-      calendars: {
-        list: {
-          "667037022b752d0026472254/cal1": {
-            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
-            events: {
-              event1: {
-                ...preloadedState.calendars.list[
-                  "667037022b752d0026472254/cal1"
-                ].events.event1,
-                attendee: new Array(6).fill(null).map((_, i) => ({
-                  cn: `Person${i}`,
-                  cal_address: `p${i}@test.com`,
-                })),
-                organizer: { cn: "test", cal_address: "test@test.com" },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    renderWithProviders(
-      <EventDisplayModal
-        open={true}
-        onClose={mockOnClose}
-        calId={"667037022b752d0026472254/cal1"}
-        eventId={"event1"}
-      />,
-      overflowState
-    );
-
-    const toggle = screen.getByText(/Show more/);
-    fireEvent.click(toggle);
-
-    expect(screen.getByText(/Show less/)).toBeInTheDocument();
   });
 
   it("renders video conference info when x_openpass_videoconference exists", () => {
@@ -1747,7 +1182,7 @@ describe("Event Full Display", () => {
     };
 
     renderWithProviders(
-      <EventDisplayModal
+      <EventUpdateModal
         open={true}
         onClose={mockOnClose}
         calId={"667037022b752d0026472254/cal1"}
@@ -1756,7 +1191,9 @@ describe("Event Full Display", () => {
       videoState
     );
 
-    expect(screen.getByText("Join the video conference")).toBeInTheDocument();
+    expect(
+      screen.getByText("event.form.joinVisioConference")
+    ).toBeInTheDocument();
   });
 });
 

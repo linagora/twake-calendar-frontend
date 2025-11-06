@@ -98,7 +98,7 @@ function EventPopover({
   const [start, setStart] = useState(event?.start ? event.start : "");
   const [end, setEnd] = useState(event?.end ? event.end : "");
   const [calendarid, setCalendarid] = useState(
-    event?.calId ?? userPersonnalCalendars[0]?.id ?? ""
+    event?.calId ?? userPersonalCalendars[0]?.id ?? ""
   );
   const [allday, setAllDay] = useState(event?.allday ?? false);
   const [repetition, setRepetition] = useState<RepetitionObject>(
@@ -165,7 +165,7 @@ function EventPopover({
     setTimezone(calendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
-  }, [calendarTimezone, userPersonnalCalendars]);
+  }, [calendarTimezone, userPersonalCalendars]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
   const shouldSyncFromRangeRef = useRef(true);
@@ -585,7 +585,7 @@ function EventPopover({
     // Resolve target calendar safely
     const targetCalendar: Calendars | undefined =
       calList[calendarid] ||
-      userPersonnalCalendars[0] ||
+      userPersonalCalendars[0] ||
       (Object.values(calList)[0] as Calendars | undefined);
     if (!targetCalendar || !targetCalendar.id) {
       console.error("No target calendar available to save event");

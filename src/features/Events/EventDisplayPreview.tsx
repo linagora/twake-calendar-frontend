@@ -42,7 +42,6 @@ import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
 import { deleteEventAsync } from "../Calendars/CalendarSlice";
 import { dlEvent } from "./EventApi";
-import EventDisplayModal from "./EventDisplay";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
@@ -77,7 +76,6 @@ export default function EventPreviewModal({
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.ownerEmails?.includes(user.userData.email);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
-  const [openFullDisplay, setOpenFullDisplay] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
   const [hidePreview, setHidePreview] = useState(false);
@@ -690,13 +688,6 @@ export default function EventPreviewModal({
           setTypeOfAction(type);
           afterChoiceFunc && afterChoiceFunc(type);
         }}
-      />
-      <EventDisplayModal
-        open={openFullDisplay}
-        onClose={() => setOpenFullDisplay(false)}
-        eventId={eventId}
-        calId={calId}
-        typeOfAction={typeOfAction}
       />
       <EventUpdateModal
         open={openUpdateModal}

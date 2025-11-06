@@ -33,7 +33,7 @@ describe("CalendarPopover", () => {
     renderPopover();
 
     expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
-    expect(screen.getByText(/add description/i)).toBeInTheDocument();
+    expect(screen.getByText("calendar.addDescription")).toBeInTheDocument();
   });
 
   it("updates name and description fields", () => {
@@ -43,7 +43,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(nameInput, { target: { value: "My Calendar" } });
     expect(nameInput).toHaveValue("My Calendar");
 
-    fireEvent.click(screen.getByText(/add description/i));
+    fireEvent.click(screen.getByText("calendar.addDescription"));
     const descInput = screen.getByLabelText(/Description/i);
     fireEvent.change(descInput, { target: { value: "Test description" } });
     expect(descInput).toHaveValue("Test description");
@@ -60,7 +60,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(screen.getByLabelText(/Name/i), {
       target: { value: "Test Calendar" },
     });
-    fireEvent.click(screen.getByText(/add description/i));
+    fireEvent.click(screen.getByText("calendar.addDescription"));
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: "Test Description" },
     });
@@ -168,7 +168,7 @@ describe("CalendarPopover (editing mode)", () => {
     });
 
     // Save
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     await waitFor(() =>
       expect(spy).toHaveBeenCalledWith(
@@ -291,7 +291,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     expect(publicButton).toHaveAttribute("aria-pressed", "false");
 
     // Save
-    fireEvent.click(screen.getByRole("button", { name: /Save/i }));
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
     await waitFor(() =>
       expect(patchSpy).toHaveBeenCalledWith(
@@ -322,7 +322,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     fireEvent.click(screen.getByRole("tab", { name: /Access/i }));
 
     // Expect text field with caldav link
-    const input = screen.getByLabelText(/CalDAV access/i);
+    const input = screen.getByLabelText("calendar.caldav_access");
     expect(input).toHaveValue("https://cal.example.org/calendars/user1/cal1");
 
     // Click copy button (find button containing ContentCopyIcon)
@@ -338,7 +338,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
 
     // Snackbar should appear
     await waitFor(() =>
-      expect(screen.getByText(/Link copied!/i)).toBeInTheDocument()
+      expect(screen.getByText("common.link_copied")).toBeInTheDocument()
     );
   });
 
@@ -371,11 +371,11 @@ describe("CalendarPopover - Tabs Scenarios", () => {
       fireEvent.change(screen.getByLabelText(/Name/i), {
         target: { value: "Imported Calendar" },
       });
-      const fileInput = screen.getByLabelText(/select file/i);
+      const fileInput = screen.getByLabelText("common.select_file");
       fireEvent.change(fileInput, { target: { files: [file] } });
 
       // Click Import
-      fireEvent.click(screen.getByRole("button", { name: "Import" }));
+      fireEvent.click(screen.getByRole("button", { name: "actions.import" }));
 
       await waitFor(() => expect(createSpy).toHaveBeenCalled());
       await waitFor(() => expect(importSpy).toHaveBeenCalled());
@@ -402,10 +402,10 @@ describe("CalendarPopover - Tabs Scenarios", () => {
       );
 
       fireEvent.click(screen.getByRole("tab", { name: /Import/i }));
-      const fileInput = screen.getByLabelText(/select file/i);
+      const fileInput = screen.getByLabelText("common.select_file");
       fireEvent.change(fileInput, { target: { files: [file] } });
 
-      fireEvent.click(screen.getByRole("button", { name: "Import" }));
+      fireEvent.click(screen.getByRole("button", { name: "actions.import" }));
 
       await waitFor(() =>
         expect(importSpy).toHaveBeenCalledWith(
@@ -427,7 +427,9 @@ describe("CalendarPopover - Tabs Scenarios", () => {
 
       fireEvent.click(screen.getByRole("tab", { name: /Import/i }));
 
-      const importButton = screen.getByRole("button", { name: /Import/i });
+      const importButton = screen.getByRole("button", {
+        name: "actions.import",
+      });
       expect(importButton).toBeDisabled();
     });
   });

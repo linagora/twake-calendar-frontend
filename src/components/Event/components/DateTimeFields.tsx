@@ -6,6 +6,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
 
 dayjs.extend(customParseFormat);
@@ -54,12 +55,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onEndDateChange,
   onEndTimeChange,
 }) => {
+  const { t } = useI18n();
+
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || !!showEndDate;
   const shouldShowFullFieldsInNormal = !allday && hasEndDateChanged;
   const showSingleDateField =
     !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
-  const startDateLabel = showSingleDateField ? "Date" : "Start Date";
+  const startDateLabel = showSingleDateField
+    ? t("dateTimeFields.date")
+    : t("dateTimeFields.startDate");
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
@@ -73,7 +78,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
-                  label="Start Date"
+                  label={t("dateTimeFields.startDate")}
                   format={LONG_DATE_FORMAT}
                   value={startDate ? dayjs(startDate) : null}
                   onChange={(newValue) => {
@@ -99,7 +104,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               {!allday && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
-                    label="Start Time"
+                    label={t("dateTimeFields.startTime")}
                     ampm={false}
                     value={startTime ? dayjs(startTime, "HH:mm") : null}
                     onChange={(newValue) => {
@@ -127,7 +132,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
-                  label="End Date"
+                  label={t("dateTimeFields.endDate")}
                   format={LONG_DATE_FORMAT}
                   value={endDate ? dayjs(endDate) : null}
                   onChange={(newValue) => {
@@ -154,7 +159,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               {!allday && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
-                    label="End Time"
+                    label={t("dateTimeFields.endTime")}
                     ampm={false}
                     value={endTime ? dayjs(endTime, "HH:mm") : null}
                     onChange={(newValue) => {
@@ -185,7 +190,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           <Box display="flex" gap={1} flexDirection="row" alignItems="center">
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label="Start Date"
+                label={t("dateTimeFields.startDate")}
                 format={LONG_DATE_FORMAT}
                 value={startDate ? dayjs(startDate) : null}
                 onChange={(newValue) => {
@@ -210,7 +215,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             </Box>
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label="End Date"
+                label={t("dateTimeFields.endDate")}
                 format={LONG_DATE_FORMAT}
                 value={endDate ? dayjs(endDate) : null}
                 onChange={(newValue) => {
@@ -264,7 +269,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
               <TimePicker
-                label="Start Time"
+                label={t("dateTimeFields.startTime")}
                 ampm={false}
                 value={startTime ? dayjs(startTime, "HH:mm") : null}
                 onChange={(newValue) => {
@@ -290,7 +295,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
               <TimePicker
-                label="End Time"
+                label={t("dateTimeFields.endTime")}
                 ampm={false}
                 value={endTime ? dayjs(endTime, "HH:mm") : null}
                 onChange={(newValue) => {

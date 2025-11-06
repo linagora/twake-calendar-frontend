@@ -146,9 +146,9 @@ describe("CalendarSelection", () => {
         preloadedState
       );
     });
-    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
+    expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    expect(screen.getByText("calendar.delegated")).toBeInTheDocument();
+    expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
@@ -162,16 +162,16 @@ describe("CalendarSelection", () => {
         preloadedState
       );
     });
-    expect(screen.getByText("Personal Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Delegated Calendars")).toBeInTheDocument();
-    expect(screen.getByText("Other Calendars")).toBeInTheDocument();
+    expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    expect(screen.getByText("calendar.delegated")).toBeInTheDocument();
+    expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
     expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
 
     const sharedAccordionSummary = screen
-      .getByText("Other Calendars")
+      .getByText("calendar.other")
       .closest(".MuiAccordionSummary-root");
 
     const addButton = screen.getAllByTestId("AddIcon")[2];
@@ -286,7 +286,7 @@ describe("CalendarSelection", () => {
       );
     });
 
-    expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
+    expect(screen.getByLabelText("Calendar personal")).toBeChecked();
     expect(screen.getByLabelText("Calendar delegated")).toBeChecked();
     expect(screen.getByLabelText("Calendar shared")).toBeChecked();
   });
@@ -299,12 +299,12 @@ describe("CalendarSelection", () => {
       );
     });
 
-    expect(screen.getByLabelText("Calendar personnal")).toBeChecked();
+    expect(screen.getByLabelText("Calendar personal")).toBeChecked();
     expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
     expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
 
     await act(async () => {
-      fireEvent.click(screen.getByLabelText("Calendar personnal"));
+      fireEvent.click(screen.getByLabelText("Calendar personal"));
       fireEvent.click(screen.getByLabelText("Calendar shared"));
     });
 
@@ -364,7 +364,7 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
     act(() => {
       userEvent.type(input, "New");
     });
@@ -394,7 +394,7 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
     await act(async () => userEvent.type(input, "Alice"));
 
     const option = await screen.findByText("Alice");
@@ -423,7 +423,7 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
     await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");
@@ -433,10 +433,10 @@ describe("calendar Availability search", () => {
     });
     expect(spy).toHaveBeenCalled();
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /create event/i }));
+      fireEvent.click(screen.getByRole("button", { name: "event.createEvent" }));
     });
     await waitFor(() => {
-      expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
+      expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
       expect(screen.getAllByText(/New User/i)).toHaveLength(2);
     });
   });
@@ -460,7 +460,7 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText(/start typing a name or email/i);
+    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
     await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");
@@ -473,12 +473,12 @@ describe("calendar Availability search", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getAllByText(/Create Event/i)).toHaveLength(2);
+      expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
       expect(screen.getAllByText(/New User/i)).toHaveLength(2);
     });
   });
 
-  it("BUGFIX: can untoggle all personal calendars", async () => {
+  it("BUGFIX: can untoggle all calendar.personal", async () => {
     await act(async () =>
       renderWithProviders(<CalendarTestWrapper />, {
         user: preloadedState.user,

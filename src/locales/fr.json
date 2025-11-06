@@ -221,5 +221,12 @@
     "months": "mois",
     "years": "ans",
     "alarmText": "%{trigger} par %{action}"
+  },
+  "dateTimeFields": {
+    "date": "Date",
+    "startDate": "Daye du début",
+    "startTime": "Heure du début",
+    "endDate": "Date de la fin",
+    "endTime": "Heure de la fin"
   }
 }

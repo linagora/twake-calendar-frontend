@@ -187,7 +187,7 @@ describe("CalendarSearch", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No more calendars for Test User")
+        screen.getByText("calendar.noMoreCalendarsFor(name=Test User)")
       ).toBeInTheDocument();
     });
 
@@ -222,7 +222,7 @@ describe("CalendarSearch", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("No publicly available calendars for Test User")
+        screen.getByText("calendar.noPublicCalendarsFor(name=Test User)")
       ).toBeInTheDocument();
     });
   });

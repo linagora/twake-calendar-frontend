@@ -22,4 +22,7 @@ export default defineConfig({
       root: "dist",
     },
   },
+  performance: {
+    minify: false,
+  },
 });

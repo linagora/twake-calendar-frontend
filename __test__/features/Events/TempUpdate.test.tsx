@@ -138,10 +138,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() =>
@@ -191,10 +191,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {
@@ -234,7 +234,7 @@ describe("Update tempcalendars called with correct params", () => {
     fireEvent.change(titleInput, { target: { value: "New Event" } });
 
     const attendeeInput = screen.getByLabelText(
-      /Start typing a name or email/i
+      /peopleSearch.label/i
     );
     fireEvent.change(attendeeInput, { target: { value: "attendee@test.com" } });
     fireEvent.keyDown(attendeeInput, { key: "Enter", code: "Enter" });
@@ -559,10 +559,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {
@@ -597,10 +597,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {
@@ -673,10 +673,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {
@@ -767,10 +767,10 @@ describe("Update tempcalendars called with correct params", () => {
 
     await waitFor(() => {
       fireEvent.click(screen.getByTestId("MoreVertIcon"));
-      expect(screen.getByText("Delete event")).toBeInTheDocument();
+      expect(screen.getByText("eventPreview.deleteEvent")).toBeInTheDocument();
     });
 
-    const deleteMenuItem = screen.getByText("Delete event");
+    const deleteMenuItem = screen.getByText("eventPreview.deleteEvent");
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {

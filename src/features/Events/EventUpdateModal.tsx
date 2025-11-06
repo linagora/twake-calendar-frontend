@@ -684,7 +684,7 @@ function EventUpdateModal({
         moveEventAsync({
           cal: targetCalendar,
           newEvent,
-          newURL: `/calendars/${newCalId}/${event.uid}.ics`,
+          newURL: `/calendars/${newCalId}/${event.uid.split("/")[0]}.ics`,
         })
       );
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));

@@ -99,20 +99,22 @@ async function setupEventPopover(
   );
 
   // Fill in title
-  const titleInput = screen.getByLabelText("Title");
+  const titleInput = screen.getByLabelText("event.form.title");
   fireEvent.change(titleInput, { target: { value: "Meeting" } });
 
   // Click More options to expand the dialog
-  const showMoreButton = screen.getByRole("button", { name: /More options/i });
+  const showMoreButton = screen.getByRole("button", {
+    name: "common.moreOptions",
+  });
   fireEvent.click(showMoreButton);
 
   // Check Repeat checkbox to show repeat options
-  const repeatCheckbox = screen.getByLabelText("Repeat");
+  const repeatCheckbox = screen.getByLabelText("event.form.repeat");
   fireEvent.click(repeatCheckbox);
 
   // Wait for RepeatEvent component to be rendered
   await waitFor(() => {
-    expect(screen.getByText("Day(s)")).toBeInTheDocument();
+    expect(screen.getByText("event.repeat.frequency.days")).toBeInTheDocument();
   });
 }
 
@@ -154,7 +156,7 @@ describe("RepeatEvent Component", () => {
     fireEvent.mouseDown(frequencySelect);
 
     // Select Week(s)
-    const weeklyOption = screen.getByText("Week(s)");
+    const weeklyOption = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.click(weeklyOption);
 
     expect(setRepetition).toHaveBeenCalledWith(
@@ -183,7 +185,7 @@ describe("RepeatEvent Component", () => {
   it("toggles day selection for weekly frequency", () => {
     const { setRepetition } = setupRepeatEvent({ freq: "weekly" });
 
-    const mondayCheckbox = screen.getByLabelText("MO");
+    const mondayCheckbox = screen.getByLabelText("event.repeat.days.monday");
     fireEvent.click(mondayCheckbox);
 
     expect(setRepetition).toHaveBeenCalledWith(
@@ -203,9 +205,11 @@ describe("Repeat Event Integration Tests", () => {
 
     // When Repeat checkbox is checked, repetition is set to empty object
     // We need to set the frequency manually
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const dailyOption = screen.getByRole("option", { name: "Day(s)" });
+    const dailyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.days",
+    });
     fireEvent.click(dailyOption);
 
     await expectRRule({ freq: "daily", interval: 1 });
@@ -259,13 +263,17 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Week(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const weeklyOption = screen.getByRole("option", { name: "Week(s)" });
+    const weeklyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.weeks",
+    });
     fireEvent.click(weeklyOption);
 
     // Select Thursday
-    const thursdayCheckbox = screen.getByLabelText("TH");
+    const thursdayCheckbox = screen.getByLabelText(
+      "event.repeat.days.thursday"
+    );
     fireEvent.click(thursdayCheckbox);
 
     await expectRRule({
@@ -280,9 +288,11 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Week(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const weeklyOption = screen.getByRole("option", { name: "Week(s)" });
+    const weeklyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.weeks",
+    });
     fireEvent.click(weeklyOption);
 
     // Set interval to 3
@@ -297,9 +307,11 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Month(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const monthlyOption = screen.getByRole("option", { name: "Month(s)" });
+    const monthlyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.months",
+    });
     fireEvent.click(monthlyOption);
 
     await expectRRule({ freq: "monthly", interval: 1 });
@@ -310,9 +322,11 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Month(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const monthlyOption = screen.getByRole("option", { name: "Month(s)" });
+    const monthlyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.months",
+    });
     fireEvent.click(monthlyOption);
 
     // Select "After" end option
@@ -331,9 +345,11 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Year(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const yearlyOption = screen.getByRole("option", { name: "Year(s)" });
+    const yearlyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.years",
+    });
     fireEvent.click(yearlyOption);
 
     await expectRRule({ freq: "yearly", interval: 1 });
@@ -344,9 +360,11 @@ describe("Repeat Event Integration Tests", () => {
     await setupEventPopover();
 
     // Select Year(s) frequency
-    const frequencySelect = screen.getByText("Day(s)");
+    const frequencySelect = screen.getByText("event.repeat.frequency.days");
     fireEvent.mouseDown(frequencySelect);
-    const yearlyOption = screen.getByRole("option", { name: "Year(s)" });
+    const yearlyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.years",
+    });
     fireEvent.click(yearlyOption);
 
     // First choose "After" with 5 occurrences

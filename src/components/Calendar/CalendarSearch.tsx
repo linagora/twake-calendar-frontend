@@ -250,7 +250,7 @@ export default function CalendarSearch({
         setSelectedCalendars([]);
         setSelectedUsers([]);
       }}
-      title="Browse other calendars"
+      title={t("calendar.browseOtherCalendars")}
       actions={
         <>
           <Button
