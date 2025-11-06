@@ -306,7 +306,7 @@ export default function EventPreviewModal({
                 {formatDate(event.start, t, event.allday)}
                 {event.end &&
                   formatEnd(event.start, event.end, t, event.allday) &&
-                  ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday && getTimezoneOffset(timezone)}`}
+                  ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday ? getTimezoneOffset(timezone) : ""}`}
               </Typography>
             </>
           )
