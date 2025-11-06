@@ -477,7 +477,7 @@ export default function EventFormFields({
         </FieldWithLabel>
       )}
 
-      <FieldWithLabel label="Date & Time" isExpanded={showMore}>
+      <FieldWithLabel label={t("event.form.dateTime")} isExpanded={showMore}>
         <DateTimeFields
           startDate={startDate}
           startTime={startTime}

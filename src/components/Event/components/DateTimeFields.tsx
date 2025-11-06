@@ -8,7 +8,8 @@ import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
-
+import "dayjs/locale/fr";
+import "dayjs/locale/en";
 dayjs.extend(customParseFormat);
 
 /**
@@ -55,8 +56,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onEndDateChange,
   onEndTimeChange,
 }) => {
-  const { t } = useI18n();
-
+  const { t, lang } = useI18n();
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || !!showEndDate;
   const shouldShowFullFieldsInNormal = !allday && hasEndDateChanged;
@@ -67,7 +67,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     : t("dateTimeFields.startDate");
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en">
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      adapterLocale={lang ?? "en"}
+    >
       <Box
         display="flex"
         flexDirection="column"
