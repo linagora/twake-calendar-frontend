@@ -64,6 +64,7 @@ export function PeopleSearch({
       freeSolo={freeSolo}
       multiple
       options={options}
+      open={!!query}
       disabled={disabled}
       loading={loading}
       filterOptions={(x) => x}
