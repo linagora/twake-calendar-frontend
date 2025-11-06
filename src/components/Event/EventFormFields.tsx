@@ -41,6 +41,7 @@ import { splitDateTime, combineDateTime } from "./utils/dateTimeHelpers";
 import {} from "./utils/dateRules";
 import {} from "./utils/dateTimeFormatters";
 import { validateEventForm } from "./utils/formValidation";
+import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 interface EventFormFieldsProps {
   // Form state
@@ -379,10 +380,13 @@ export default function EventFormFields({
     setMeetingLink(newMeetingLink);
   };
 
+  const [openToast, setOpenToast] = React.useState(false);
+
   const handleCopyMeetingLink = async () => {
     if (meetingLink) {
       try {
         await navigator.clipboard.writeText(meetingLink);
+        setOpenToast(true);
       } catch (err) {
         console.error("Failed to copy link:", err);
       }
@@ -752,6 +756,11 @@ export default function EventFormFields({
           </FieldWithLabel>
         </>
       )}
+      <SnackbarAlert
+        setOpen={setOpenToast}
+        open={openToast}
+        message="Meeting link copied!"
+      />
     </>
   );
 }
