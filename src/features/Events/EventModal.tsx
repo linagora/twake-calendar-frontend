@@ -50,6 +50,7 @@ function EventPopover({
   event?: CalendarEvent;
 }) {
   const dispatch = useAppDispatch();
+  const { t } = useI18n();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId =
@@ -91,7 +92,7 @@ function EventPopover({
     event?.repetition?.freq ? true : false
   );
 
-  const [title, setTitle] = useState(event?.title ?? "");
+  const [title, setTitle] = useState(event?.title || t("event.untitled"));
 
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
@@ -673,8 +674,6 @@ function EventPopover({
       await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
     }
   };
-  const { t } = useI18n();
-
   const dialogActions = (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (

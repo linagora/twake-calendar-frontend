@@ -1,11 +1,9 @@
 import { DateSelectArg } from "@fullcalendar/core";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import preview from "jest-preview";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import EventPopover from "../../../src/features/Events/EventModal";
 import { api } from "../../../src/utils/apiUtils";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../src/utils/dateUtils";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("../../../src/utils/apiUtils");
@@ -328,6 +326,15 @@ describe("EventPopover", () => {
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+  });
+
+  it("Prefill Title field", async () => {
+    renderPopover();
+    await waitFor(() =>
+      expect(screen.getByLabelText("event.form.title")).toHaveDisplayValue(
+        "event.untitled"
+      )
+    );
   });
 
   it("BUGFIX: Prefill Calendar field", async () => {

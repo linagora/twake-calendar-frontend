@@ -65,6 +65,7 @@
     "createEvent": "Create Event",
     "updateEvent": "Update Event",
     "organizer": "Organizer",
+    "untitled": "Untitled",
     "repeat": {
       "repeatEvery": "Repeat every",
       "frequency": {
