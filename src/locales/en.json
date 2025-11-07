@@ -34,7 +34,8 @@
     "import": "Import",
     "add": "Add",
     "reset": "Reset",
-    "export": "Export"
+    "export": "Export",
+    "exporting": "Exporting"
   },
   "common": {
     "cancel": "Cancel",

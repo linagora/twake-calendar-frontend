@@ -7,6 +7,8 @@ import {
   Button,
   Typography,
   InputAdornment,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -49,22 +51,29 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
     setSecretLink(newSecret.secretLink);
   };
 
-  const handleExport = async () => {
-    const exportedData = await exportCalendar(
-      calendar.link.replace(".json", "")
-    );
-    const blob = new Blob([exportedData], {
-      type: "text/calendar",
-    });
-    const url = URL.createObjectURL(blob);
+  const [exportLoading, setExportLoading] = useState(false);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${calendar.id.split("/")[1]}.ics`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleExport = async () => {
+    try {
+      setExportLoading(true);
+      const exportedData = await exportCalendar(
+        calendar.link.replace(".json", "")
+      );
+      const blob = new Blob([exportedData], {
+        type: "text/calendar",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${calendar.id.split("/")[1]}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportLoading(false); // <-- hide popup
+    }
   };
 
   return (
@@ -129,9 +138,17 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
         <Button
           variant="contained"
           onClick={handleExport}
-          startIcon={<FileDownloadOutlinedIcon />}
+          startIcon={!exportLoading && <FileDownloadOutlinedIcon />}
+          disabled={exportLoading}
         >
-          {t("actions.export")}
+          {exportLoading ? (
+            <Box display="flex" alignItems="center" gap={1}>
+              <CircularProgress size={18} />
+              {t("actions.exporting")}
+            </Box>
+          ) : (
+            t("actions.export")
+          )}
         </Button>
       </FieldWithLabel>
 
