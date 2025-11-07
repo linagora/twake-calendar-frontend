@@ -40,8 +40,16 @@ interface RejectedError {
 export const getCalendarsListAsync = createAsyncThunk<
   { importedCalendars: Record<string, Calendars>; errors: string }, // Return type
   void, // Arg type
-  { rejectValue: RejectedError } // ThunkAPI config
->("calendars/getCalendars", async (_, { rejectWithValue }) => {
+  { rejectValue: RejectedError; state: any } // ThunkAPI config
+>("calendars/getCalendars", async (_, { rejectWithValue, getState }) => {
+  const state = getState() as any;
+  if (Object.keys(state.calendars.list).length > 0) {
+    return {
+      importedCalendars: state.calendars.list,
+      errors: "",
+    };
+  }
+
   try {
     const importedCalendars: Record<string, Calendars> = {};
     const user = (await getOpenPaasUser()) as Record<string, string>;
@@ -106,15 +114,7 @@ export const getCalendarsListAsync = createAsyncThunk<
     }
 
     normalizedCalendars.forEach(
-      ({
-        cal,
-        description,
-        delegated,
-        link,
-        id,
-        ownerId,
-        visibility,
-      }) => {
+      ({ cal, description, delegated, link, id, ownerId, visibility }) => {
         const ownerData = ownerDataMap.get(ownerId) || {
           firstname: "",
           lastname: "Unknown User",

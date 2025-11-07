@@ -5,7 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import "./Calendar.styl";
 import "./CustomCalendar.styl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
@@ -44,7 +44,7 @@ import { updateDarkColor } from "./utils/calendarColorsUtils";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 interface CalendarAppProps {
-  calendarRef: React.RefObject<CalendarApi | null>;
+  calendarRef: MutableRefObject<CalendarApi | null>;
   onDateChange?: (date: Date) => void;
   onViewChange?: (view: string) => void;
 }
@@ -65,12 +65,30 @@ export default function CalendarApp({
     if (!tokens || !userId) {
       dispatch(push("/"));
     }
-  }, [tokens, userId]);
+  }, [dispatch, tokens, userId]);
 
   const calendars = useAppSelector((state) => state.calendars.list);
-  const tempcalendars =
-    useAppSelector((state) => state.calendars.templist) ?? {};
+  const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+
+  const calendarLightSignature = useMemo(() => {
+    return Object.values(calendars || {})
+      .map((cal) => `${cal.id}:${cal.color?.light ?? ""}`)
+      .sort()
+      .join("|");
+  }, [calendars]);
+
+  const calendarIdsString = useMemo(
+    () =>
+      Object.keys(calendars || {})
+        .sort()
+        .join(","),
+    [calendars]
+  );
+  const calendarIds = useMemo(
+    () => (calendarIdsString ? calendarIdsString.split(",") : []),
+    [calendarIdsString]
+  );
 
   const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) => {
     const calendar = calendars[calId];
@@ -100,65 +118,99 @@ export default function CalendarApp({
   };
 
   useEffect(() => {
-    if (initialLoadRef.current && Object.keys(calendars || {}).length > 0 && userId) {
+    if (initialLoadRef.current && calendarIds.length > 0 && userId) {
       const cached = localStorage.getItem("selectedCalendars");
       if (cached && cached.length > 0) {
         const parsed = JSON.parse(cached) as string[];
         const valid = parsed.filter((id) => calendars[id]);
         setSelectedCalendars(valid);
       } else {
-        const personalCalendarIds = Object.keys(calendars).filter(
+        const personalCalendarIds = calendarIds.filter(
           (id) => id.split("/")[0] === userId
         );
         setSelectedCalendars(personalCalendarIds);
       }
       initialLoadRef.current = false;
     }
-  }, [calendars, userId]);
+  }, [calendarIds, calendars, userId]);
 
   // Save selected cals to cache
   useEffect(() => {
-    if (Object.keys(calendars || {}).length > 0) {
+    if (calendarIds.length > 0) {
       localStorage.setItem(
         "selectedCalendars",
         JSON.stringify(selectedCalendars)
       );
     }
-  }, [selectedCalendars]);
+  }, [selectedCalendars, calendarIds.length]);
+
+  const prevCalendarLightSignature = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!calendarLightSignature) {
+      prevCalendarLightSignature.current = calendarLightSignature;
+      return;
+    }
+
+    if (prevCalendarLightSignature.current === calendarLightSignature) {
+      return;
+    }
+
+    prevCalendarLightSignature.current = calendarLightSignature;
     updateDarkColor(calendars || {}, theme, dispatch);
-  }, [
-    theme,
-    Object.values(calendars || {})
-      .map((c) => c.color?.dark)
-      .join(","),
-  ]);
+  }, [calendarLightSignature, calendars, theme, dispatch]);
 
   useEffect(() => {
-    const validCalendarIds = new Set(Object.keys(calendars || {}));
-    setSelectedCalendars((prev) =>
-      prev.filter((calId) => validCalendarIds.has(calId))
-    );
-  }, [calendars]);
+    if (calendarIds.length === 0) return;
+    const validCalendarIds = new Set(calendarIds);
+    setSelectedCalendars((prev) => {
+      const filtered = prev.filter((calId) => validCalendarIds.has(calId));
+      if (filtered.length === prev.length) {
+        const unchanged = filtered.every((id, index) => id === prev[index]);
+        if (unchanged) {
+          return prev;
+        }
+      }
+      return filtered;
+    });
+  }, [calendarIds]);
 
   const calendarRange = useMemo(
     () => getCalendarRange(selectedDate),
     [selectedDate]
   );
 
+  const calendarRangeStart = calendarRange.start.getTime();
+  const calendarRangeEnd = calendarRange.end.getTime();
+
+  const rangeStart = useMemo(
+    () => formatDateToYYYYMMDDTHHMMSS(new Date(calendarRangeStart)),
+    [calendarRangeStart]
+  );
+
+  const rangeEnd = useMemo(
+    () => formatDateToYYYYMMDDTHHMMSS(new Date(calendarRangeEnd)),
+    [calendarRangeEnd]
+  );
+
   // Create a stable string key for the range
-  const rangeKey = `${formatDateToYYYYMMDDTHHMMSS(
-    calendarRange.start
-  )}_${formatDateToYYYYMMDDTHHMMSS(calendarRange.end)}`;
+  const rangeKey = useMemo(
+    () => `${rangeStart}_${rangeEnd}`,
+    [rangeStart, rangeEnd]
+  );
 
   let filteredEvents: CalendarEvent[] = extractEvents(
     selectedCalendars,
     calendars || {}
   );
 
+  const tempCalendarIds = useMemo(
+    () => Object.keys(tempcalendars || {}).sort(),
+    [tempcalendars]
+  );
+
   let filteredTempEvents: CalendarEvent[] = extractEvents(
-    Object.keys(tempcalendars || {}),
+    tempCalendarIds,
     tempcalendars || {}
   );
 
@@ -169,55 +221,73 @@ export default function CalendarApp({
 
   const prefetchedCalendarsRef = useRef<Record<string, string>>({});
   const tempFetchedRangesRef = useRef<Record<string, string>>({});
+  const activeLoadCompletedRef = useRef<boolean>(false);
+  const [activeLoadCompleted, setActiveLoadCompleted] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    if (!rangeKey || sortedSelectedCalendars.length === 0) return;
+    activeLoadCompletedRef.current = false;
+    setActiveLoadCompleted(false);
+  }, [rangeKey]);
+
+  useEffect(() => {
+    if (!rangeKey || sortedSelectedCalendars.length === 0) {
+      activeLoadCompletedRef.current = true;
+      setActiveLoadCompleted(true);
+      return;
+    }
 
     let cancelled = false;
     const ACTIVE_BATCH_SIZE = 5;
 
     const loadCalendars = async () => {
-      const pendingIds = sortedSelectedCalendars.filter(
-        (id) => fetchedRangesRef.current[id] !== rangeKey
-      );
+      try {
+        const pendingIds = sortedSelectedCalendars.filter(
+          (id) => fetchedRangesRef.current[id] !== rangeKey
+        );
 
-      if (pendingIds.length === 0) {
-        return;
-      }
+        if (pendingIds.length === 0) {
+          activeLoadCompletedRef.current = true;
+          setActiveLoadCompleted(true);
+          return;
+        }
 
-      const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
-      const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
+        for (
+          let i = 0;
+          i < pendingIds.length && !cancelled;
+          i += ACTIVE_BATCH_SIZE
+        ) {
+          const chunk = pendingIds.slice(i, i + ACTIVE_BATCH_SIZE);
 
-      for (
-        let i = 0;
-        i < pendingIds.length && !cancelled;
-        i += ACTIVE_BATCH_SIZE
-      ) {
-        const chunk = pendingIds.slice(i, i + ACTIVE_BATCH_SIZE);
+          chunk.forEach((id) => {
+            fetchedRangesRef.current[id] = rangeKey;
+            prefetchedCalendarsRef.current[id] = "active";
+          });
 
-        chunk.forEach((id) => {
-          fetchedRangesRef.current[id] = rangeKey;
-          prefetchedCalendarsRef.current[id] = "active";
-        });
+          const requests = chunk.map(async (id) => {
+            try {
+              await dispatch(
+                getCalendarDetailAsync({
+                  calId: id,
+                  match: {
+                    start: rangeStart,
+                    end: rangeEnd,
+                  },
+                })
+              ).unwrap();
+            } catch (error) {
+              console.error(`Failed to load calendar ${id}:`, error);
+              fetchedRangesRef.current[id] = "";
+            }
+          });
 
-        const requests = chunk.map(async (id) => {
-          try {
-            await dispatch(
-              getCalendarDetailAsync({
-                calId: id,
-                match: {
-                  start: rangeStart,
-                  end: rangeEnd,
-                },
-              })
-            ).unwrap();
-          } catch (error) {
-            console.error(`Failed to load calendar ${id}:`, error);
-            fetchedRangesRef.current[id] = "";
-          }
-        });
-
-        await Promise.all(requests);
+          await Promise.all(requests);
+        }
+      } finally {
+        if (!cancelled) {
+          activeLoadCompletedRef.current = true;
+          setActiveLoadCompleted(true);
+        }
       }
     };
 
@@ -226,22 +296,19 @@ export default function CalendarApp({
     return () => {
       cancelled = true;
     };
-  }, [
-    dispatch,
-    rangeKey,
-    sortedSelectedCalendars,
-    calendarRange,
-  ]);
+  }, [dispatch, rangeKey, sortedSelectedCalendars, rangeStart, rangeEnd]);
 
   useEffect(() => {
-    if (!rangeKey) return;
+    if (!rangeKey || !activeLoadCompleted) return;
 
-    const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
-    const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
-
-    const hiddenCalendars = Object.keys(calendars || {})
+    const hiddenCalendars = calendarIds
       .filter((id) => !selectedCalendars.includes(id))
-      .filter((id) => prefetchedCalendarsRef.current[id] !== rangeKey);
+      .filter((id) => {
+        const prefetched = prefetchedCalendarsRef.current[id];
+        return prefetched !== rangeKey && prefetched !== "active";
+      });
+
+    if (hiddenCalendars.length === 0) return;
 
     hiddenCalendars.forEach((id) => {
       prefetchedCalendarsRef.current[id] = rangeKey;
@@ -261,43 +328,56 @@ export default function CalendarApp({
         });
     });
   }, [
-    calendars,
+    calendarIdsString,
     selectedCalendars,
     rangeKey,
-    calendarRange,
     dispatch,
+    rangeStart,
+    rangeEnd,
+    activeLoadCompleted,
   ]);
+
+  const calendarsWithClearedCache = useMemo(() => {
+    return selectedCalendars
+      .map((id) => {
+        const cleared = calendars[id]?.lastCacheCleared;
+        return cleared ? { id, cleared } : null;
+      })
+      .filter(Boolean) as { id: string; cleared: number }[];
+  }, [selectedCalendars, calendars]);
+
+  const processedCacheClearRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    selectedCalendars.forEach((calId) => {
-      const calendar = calendars[calId];
-      if (calendar?.lastCacheCleared) {
-        delete fetchedRangesRef.current[calId];
-        prefetchedCalendarsRef.current[calId] = "";
-
-        dispatch(
-          getCalendarDetailAsync({
-            calId,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
-        );
-
-        fetchedRangesRef.current[calId] = rangeKey;
-        prefetchedCalendarsRef.current[calId] = rangeKey;
+    calendarsWithClearedCache.forEach(({ id, cleared }) => {
+      if (processedCacheClearRef.current[id] === cleared) {
+        return;
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedCalendars.map((id) => calendars[id]?.lastCacheCleared).join(","),
-  ]);
 
-  const tempCalendarIds = useMemo(
-    () => Object.keys(tempcalendars || {}).sort(),
-    [tempcalendars]
-  );
+      processedCacheClearRef.current[id] = cleared;
+      delete fetchedRangesRef.current[id];
+      prefetchedCalendarsRef.current[id] = "";
+
+      dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: rangeStart,
+            end: rangeEnd,
+          },
+        })
+      )
+        .unwrap()
+        .then(() => {
+          fetchedRangesRef.current[id] = rangeKey;
+          prefetchedCalendarsRef.current[id] = rangeKey;
+        })
+        .catch(() => {
+          fetchedRangesRef.current[id] = "";
+          prefetchedCalendarsRef.current[id] = "";
+        });
+    });
+  }, [calendarsWithClearedCache, dispatch, rangeKey, rangeStart, rangeEnd]);
 
   const tempCalendarControllersRef = useRef<Map<string, AbortController>>(
     new Map()
@@ -317,9 +397,6 @@ export default function CalendarApp({
 
     let cancelled = false;
     const TEMP_BATCH_SIZE = 5;
-    const rangeStart = formatDateToYYYYMMDDTHHMMSS(calendarRange.start);
-    const rangeEnd = formatDateToYYYYMMDDTHHMMSS(calendarRange.end);
-
     const loadTempCalendars = async () => {
       const pendingIds = tempCalendarIds.filter(
         (id) => tempFetchedRangesRef.current[id] !== rangeKey
@@ -366,7 +443,7 @@ export default function CalendarApp({
     return () => {
       cancelled = true;
     };
-  }, [dispatch, rangeKey, tempCalendarIds, calendarRange]);
+  }, [dispatch, rangeKey, tempCalendarIds, rangeStart, rangeEnd]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 

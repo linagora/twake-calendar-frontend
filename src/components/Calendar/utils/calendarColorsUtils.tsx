@@ -19,6 +19,10 @@ export function updateDarkColor(
       ? isDefault.dark
       : getAccessiblePair(baseColor, theme);
 
+    if (cal.color?.dark === darkColor) {
+      return;
+    }
+
     dispatch(
       updateCalColor({
         id: cal.id,

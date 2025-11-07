@@ -140,6 +140,203 @@ describe("CalendarSlice", () => {
       expect(state.list).toEqual({});
     });
 
+    it("getCalendarsListAsync loads user details in parallel for multiple owners", async () => {
+      const mockCalendars = [
+        {
+          _links: { self: { href: "/calendars/u1/cal1.json" } },
+          "dav:name": "Calendar 1",
+          "apple:color": "#FF0000",
+          acl: [],
+        },
+        {
+          _links: { self: { href: "/calendars/u2/cal2.json" } },
+          "dav:name": "Calendar 2",
+          "apple:color": "#00FF00",
+          acl: [],
+        },
+        {
+          _links: { self: { href: "/calendars/u3/cal3.json" } },
+          "dav:name": "Calendar 3",
+          "apple:color": "#0000FF",
+          acl: [],
+        },
+      ];
+
+      (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
+      (calAPI.getCalendars as jest.Mock).mockResolvedValue({
+        _embedded: { "dav:calendar": mockCalendars },
+      });
+
+      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
+      getUserDetailsMock
+        .mockResolvedValueOnce({
+          firstname: "Alice",
+          lastname: "Smith",
+          emails: ["alice@example.com"],
+        })
+        .mockResolvedValueOnce({
+          firstname: "Bob",
+          lastname: "Jones",
+          emails: ["bob@example.com"],
+        })
+        .mockResolvedValueOnce({
+          firstname: "Charlie",
+          lastname: "Brown",
+          emails: ["charlie@example.com"],
+        });
+
+      const store = storeFactory();
+      await store.dispatch(getCalendarsListAsync() as any);
+
+      expect(getUserDetailsMock).toHaveBeenCalledTimes(3);
+      expect(getUserDetailsMock).toHaveBeenCalledWith("u1");
+      expect(getUserDetailsMock).toHaveBeenCalledWith("u2");
+      expect(getUserDetailsMock).toHaveBeenCalledWith("u3");
+
+      const state = store.getState().calendars;
+      expect(state.list["u1/cal1"].owner).toContain("Alice");
+      expect(state.list["u2/cal2"].owner).toContain("Bob");
+      expect(state.list["u3/cal3"].owner).toContain("Charlie");
+    });
+
+    it("getCalendarsListAsync deduplicates getUserDetails calls for same ownerId", async () => {
+      const mockCalendars = [
+        {
+          _links: { self: { href: "/calendars/u1/cal1.json" } },
+          "dav:name": "Calendar 1",
+          "apple:color": "#FF0000",
+          acl: [],
+        },
+        {
+          _links: { self: { href: "/calendars/u1/cal2.json" } },
+          "dav:name": "Calendar 2",
+          "apple:color": "#00FF00",
+          acl: [],
+        },
+        {
+          _links: { self: { href: "/calendars/u1/cal3.json" } },
+          "dav:name": "Calendar 3",
+          "apple:color": "#0000FF",
+          acl: [],
+        },
+      ];
+
+      (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
+      (calAPI.getCalendars as jest.Mock).mockResolvedValue({
+        _embedded: { "dav:calendar": mockCalendars },
+      });
+
+      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
+      getUserDetailsMock.mockResolvedValue({
+        firstname: "Alice",
+        lastname: "Smith",
+        emails: ["alice@example.com"],
+      });
+
+      const store = storeFactory();
+      await store.dispatch(getCalendarsListAsync() as any);
+
+      expect(getUserDetailsMock).toHaveBeenCalledTimes(1);
+      expect(getUserDetailsMock).toHaveBeenCalledWith("u1");
+    });
+
+    it("getCalendarsListAsync processes owners in batches of 20", async () => {
+      const mockCalendars = Array.from({ length: 45 }, (_, i) => ({
+        _links: { self: { href: `/calendars/u${i + 1}/cal${i + 1}.json` } },
+        "dav:name": `Calendar ${i + 1}`,
+        "apple:color": "#FF0000",
+        acl: [],
+      }));
+
+      (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
+      (calAPI.getCalendars as jest.Mock).mockResolvedValue({
+        _embedded: { "dav:calendar": mockCalendars },
+      });
+
+      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
+      getUserDetailsMock.mockImplementation((ownerId: string) =>
+        Promise.resolve({
+          firstname: "User",
+          lastname: ownerId,
+          emails: [`${ownerId}@example.com`],
+        })
+      );
+
+      const store = storeFactory();
+      await store.dispatch(getCalendarsListAsync() as any);
+
+      expect(getUserDetailsMock).toHaveBeenCalledTimes(45);
+      const state = store.getState().calendars;
+      expect(Object.keys(state.list)).toHaveLength(45);
+    });
+
+    it("getCalendarsListAsync returns early if calendars already exist in store", async () => {
+      const existingCalendars = {
+        "u1/cal1": {
+          id: "u1/cal1",
+          name: "Existing Calendar",
+          events: {},
+        } as Calendars,
+      };
+
+      const store = storeFactory();
+      store.dispatch({
+        type: "calendars/getCalendars/fulfilled",
+        payload: { importedCalendars: existingCalendars, errors: "" },
+      });
+
+      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
+      const getCalendarsMock = calAPI.getCalendars as jest.Mock;
+
+      await store.dispatch(getCalendarsListAsync() as any);
+
+      expect(getCalendarsMock).not.toHaveBeenCalled();
+      expect(getUserDetailsMock).not.toHaveBeenCalled();
+
+      const state = store.getState().calendars;
+      expect(state.list).toEqual(existingCalendars);
+    });
+
+    it("getCalendarsListAsync handles errors in getUserDetails gracefully", async () => {
+      const mockCalendars = [
+        {
+          _links: { self: { href: "/calendars/u1/cal1.json" } },
+          "dav:name": "Calendar 1",
+          "apple:color": "#FF0000",
+          acl: [],
+        },
+        {
+          _links: { self: { href: "/calendars/u2/cal2.json" } },
+          "dav:name": "Calendar 2",
+          "apple:color": "#00FF00",
+          acl: [],
+        },
+      ];
+
+      (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
+      (calAPI.getCalendars as jest.Mock).mockResolvedValue({
+        _embedded: { "dav:calendar": mockCalendars },
+      });
+
+      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
+      getUserDetailsMock
+        .mockResolvedValueOnce({
+          firstname: "Alice",
+          lastname: "Smith",
+          emails: ["alice@example.com"],
+        })
+        .mockRejectedValueOnce(new Error("Failed to fetch user"));
+
+      const store = storeFactory();
+      const result = await store.dispatch(getCalendarsListAsync() as any);
+
+      expect(getUserDetailsMock).toHaveBeenCalledTimes(2);
+      const state = store.getState().calendars;
+      expect(state.list["u1/cal1"].owner).toContain("Alice");
+      expect(state.list["u2/cal2"].owner).toContain("Unknown User");
+      expect(result.payload.errors).toBeTruthy();
+    });
+
     it("patchCalendarAsync.fulfilled updates calendar fields", () => {
       const calId = "c1";
       const prev = {

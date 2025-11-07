@@ -105,14 +105,14 @@ export default function CalendarSelection({
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
 
-  const personalCalendars = Object.keys(calendars).filter(
+  const personalCalendars = Object.keys(calendars || {}).filter(
     (id) => id.split("/")[0] === userId
   );
-  const delegatedCalendars = Object.keys(calendars).filter(
-    (id) => id.split("/")[0] !== userId && calendars[id].delegated
+  const delegatedCalendars = Object.keys(calendars || {}).filter(
+    (id) => id.split("/")[0] !== userId && calendars[id]?.delegated
   );
-  const sharedCalendars = Object.keys(calendars).filter(
-    (id) => id.split("/")[0] !== userId && !calendars[id].delegated
+  const sharedCalendars = Object.keys(calendars || {}).filter(
+    (id) => id.split("/")[0] !== userId && !calendars?.[id]?.delegated
   );
 
   const handleCalendarToggle = (name: string) => {
@@ -177,7 +177,7 @@ export default function CalendarSelection({
       </div>
       <CalendarPopover
         open={Boolean(anchorElCal)}
-        calendar={calendars[selectedCalId] ?? undefined}
+        calendar={calendars?.[selectedCalId] ?? undefined}
         onClose={() => {
           setSelectedCalId("");
           setAnchorElCal(null);
