@@ -171,13 +171,21 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 
 export const getCalendarDetailAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[]; calType?: string },
-  { calId: string; match: { start: string; end: string }; calType?: string },
+  {
+    calId: string;
+    match: { start: string; end: string };
+    calType?: string;
+    signal?: AbortSignal;
+  },
   { rejectValue: RejectedError }
 >(
   "calendars/getCalendarDetails",
-  async ({ calId, match, calType }, { rejectWithValue }) => {
+  async ({ calId, match, calType, signal }, { rejectWithValue }) => {
     try {
-      const calendar = (await getCalendar(calId, match)) as Record<string, any>;
+      const calendar = (await getCalendar(calId, match, signal)) as Record<
+        string,
+        any
+      >;
       const color = calendar["apple:color"];
       const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
         (eventdata: any) => {
@@ -998,6 +1006,9 @@ const CalendarSlice = createSlice({
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
+        if (action.payload?.message.includes("aborted")) {
+          return;
+        }
         state.error =
           action.payload?.message ||
           action.error.message ||
@@ -1005,6 +1016,9 @@ const CalendarSlice = createSlice({
       })
       .addCase(getCalendarDetailAsync.rejected, (state, action) => {
         state.pending = false;
+        if (action.payload?.message.includes("aborted")) {
+          return;
+        }
         state.error =
           action.payload?.message ||
           action.error.message ||
