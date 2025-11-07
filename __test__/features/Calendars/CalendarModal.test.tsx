@@ -3,6 +3,11 @@ import CalendarPopover from "../../../src/components/Calendar/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
 import { Calendars } from "../../../src/features/Calendars/CalendarTypes";
+import { getSecretLink } from "../../../src/features/Calendars/CalendarApi";
+
+jest.mock("../../../src/features/Calendars/CalendarApi", () => ({
+  getSecretLink: jest.fn(),
+}));
 
 describe("CalendarPopover", () => {
   const mockOnClose = jest.fn();
@@ -308,6 +313,9 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn() },
     });
+    (getSecretLink as jest.Mock).mockResolvedValue({
+      secretLink: "https://example.org/secret/initial",
+    });
 
     renderWithProviders(
       <CalendarPopover
@@ -326,7 +334,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     expect(input).toHaveValue("https://cal.example.org/calendars/user1/cal1");
 
     // Click copy button (find button containing ContentCopyIcon)
-    const copyIcon = screen.getByTestId("ContentCopyIcon");
+    const copyIcon = screen.getAllByTestId("ContentCopyIcon")[0];
     const copyButton = copyIcon.closest("button");
     if (copyButton) {
       fireEvent.click(copyButton);
@@ -432,5 +440,47 @@ describe("CalendarPopover - Tabs Scenarios", () => {
       });
       expect(importButton).toBeDisabled();
     });
+  });
+
+  it("fetches and resets the secret link", async () => {
+    (window as any).CALENDAR_BASE_URL = "https://cal.example.org";
+
+    (getSecretLink as jest.Mock)
+      .mockResolvedValueOnce({
+        secretLink: "https://example.org/secret/initial",
+      })
+      .mockResolvedValueOnce({
+        secretLink: "https://example.org/secret/new",
+      });
+
+    renderWithProviders(
+      <CalendarPopover
+        open={true}
+        onClose={mockOnClose}
+        calendar={existingCalendar}
+      />,
+      { user: baseUser }
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /Access/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByDisplayValue("https://example.org/secret/initial")
+      ).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /reset/i }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByDisplayValue("https://example.org/secret/new")
+      ).toBeInTheDocument()
+    );
+
+    expect(getSecretLink).toHaveBeenCalledWith(
+      existingCalendar.link.replace(".json", ""),
+      true
+    );
   });
 });

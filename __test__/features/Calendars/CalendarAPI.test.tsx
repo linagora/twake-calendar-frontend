@@ -4,6 +4,7 @@ import {
   addSharedCalendar,
   getCalendar,
   getCalendars,
+  getSecretLink,
   postCalendar,
   proppatchCalendar,
   removeCalendar,
@@ -112,6 +113,40 @@ describe("Calendar API", () => {
         Accept: "application/json, text/plain, */*",
       },
     });
+  });
+
+  it("get secret link ", async () => {
+    const calLink = "/calendars/calId.json";
+    (api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue("link"),
+    });
+
+    const noreset = await getSecretLink(calLink, false);
+
+    expect(api.get).toHaveBeenCalledWith(
+      `calendar/api${calLink}/secret-link?shouldResetLink=false`,
+      {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+        },
+      }
+    );
+  });
+  it("get secret link ", async () => {
+    const calLink = "/calendars/calId.json";
+    (api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue("link"),
+    });
+    const reset = await getSecretLink(calLink, true);
+
+    expect(api.get).toHaveBeenCalledWith(
+      `calendar/api${calLink}/secret-link?shouldResetLink=true`,
+      {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+        },
+      }
+    );
   });
 
   it("When adding a sharedCal with #default as a name a new name is sent to the back", async () => {

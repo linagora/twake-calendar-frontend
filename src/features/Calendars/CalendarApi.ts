@@ -128,3 +128,14 @@ export async function updateAclCalendar(calLink: string, request: string) {
   });
   return response;
 }
+
+export async function getSecretLink(calLink: string, reset: boolean) {
+  const response = await api
+    .get(`calendar/api${calLink}/secret-link?shouldResetLink=${reset}`, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
+    })
+    .json();
+  return response as { secretLink: string };
+}
