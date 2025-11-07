@@ -7,6 +7,8 @@
     "caldav_access": "Accès CalDAV",
     "secretUrl": "URL secrète",
     "secretUrlDesc": "L'adresse secrète peut être utilisée pour visualiser tous vos calendiers même sans permissions. Vous pouvez la réinitialiser pour en obtenir une nouvelle.",
+    "exportCalendar": "Exporter le calendrier",
+    "exportDesc": "Exportez votre calendrier au format iCalendar (.ics) que vous pouvez utiliser pour l'importer dans d'autres applications.",
     "import_file_description": "Importer des événements depuis un fichier ICS vers l'un de vos calendriers.",
     "ics_feed_url": "URL du flux ICS",
     "import_to": "Importer vers",
@@ -31,7 +33,8 @@
     "create": "Créer",
     "import": "Importer",
     "add": "Ajouter",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "export": "Exporter"
   },
   "common": {
     "cancel": "Annuler",

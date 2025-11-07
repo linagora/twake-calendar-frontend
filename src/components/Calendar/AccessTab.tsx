@@ -1,4 +1,5 @@
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import {
   Box,
   IconButton,
@@ -8,7 +9,10 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import { getSecretLink } from "../../features/Calendars/CalendarApi";
+import {
+  exportCalendar,
+  getSecretLink,
+} from "../../features/Calendars/CalendarApi";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
@@ -43,6 +47,24 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
       true
     );
     setSecretLink(newSecret.secretLink);
+  };
+
+  const handleExport = async () => {
+    const exportedData = await exportCalendar(
+      calendar.link.replace(".json", "")
+    );
+    const blob = new Blob([exportedData], {
+      type: "text/calendar",
+    });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${calendar.id.split("/")[1]}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -84,18 +106,34 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
               ),
             }}
           />
-          <Button variant="outlined" onClick={handleResetSecretLink}>
+          <Button variant="contained" onClick={handleResetSecretLink}>
             {t("actions.reset")}
           </Button>
         </Box>
+        <Typography
+          variant="body2"
+          sx={{ color: "text.secondary", mt: 1, lineHeight: 1.5 }}
+        >
+          {t("calendar.secretUrlDesc")}
+        </Typography>
       </FieldWithLabel>
 
-      <Typography
-        variant="body2"
-        sx={{ color: "text.secondary", mt: 1, lineHeight: 1.5 }}
-      >
-        {t("calendar.secretUrlDesc")}
-      </Typography>
+      <FieldWithLabel label={t("calendar.exportCalendar")} isExpanded={false}>
+        <Typography
+          variant="body2"
+          sx={{ color: "text.secondary", m: 1, lineHeight: 1.5 }}
+        >
+          {t("calendar.exportDesc")}
+        </Typography>
+
+        <Button
+          variant="contained"
+          onClick={handleExport}
+          startIcon={<FileDownloadOutlinedIcon />}
+        >
+          {t("actions.export")}
+        </Button>
+      </FieldWithLabel>
 
       <SnackbarAlert
         setOpen={setOpen}
