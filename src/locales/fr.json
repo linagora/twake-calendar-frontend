@@ -6,7 +6,7 @@
     "other": "Autres calendriers",
     "caldav_access": "Accès CalDAV",
     "secretUrl": "URL secrète",
-    "secretUrlDesc": "L'adresse secrète peut être utilisée pour visualiser tous vos calendiers même sans permissions. Vous pouvez la réinitialiser pour en obtenir une nouvelle",
+    "secretUrlDesc": "L'adresse secrète peut être utilisée pour visualiser tous vos calendiers même sans permissions. Vous pouvez la réinitialiser pour en obtenir une nouvelle.",
     "import_file_description": "Importer des événements depuis un fichier ICS vers l'un de vos calendriers.",
     "ics_feed_url": "URL du flux ICS",
     "import_to": "Importer vers",
