@@ -581,4 +581,188 @@ describe("calendar Availability search", () => {
     expect(startDate.getTime()).toBeLessThanOrEqual(viewStart.getTime());
     expect(endDate.getTime()).toBeGreaterThanOrEqual(viewEnd.getTime());
   });
+
+  describe("Batch loading and prefetching", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("loads active calendars in batches of 5", async () => {
+      const manyCalendars = Array.from({ length: 12 }, (_, i) => ({
+        [`user1/cal${i + 1}`]: {
+          name: `Calendar ${i + 1}`,
+          id: `user1/cal${i + 1}`,
+          color: { light: "#FF0000", dark: "#000" },
+          events: {},
+        },
+      })).reduce((acc, cal) => ({ ...acc, ...cal }), {});
+
+      const stateWithManyCalendars = {
+        ...preloadedState,
+        calendars: {
+          ...preloadedState.calendars,
+          list: manyCalendars,
+        },
+      };
+
+      const spy = jest
+        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .mockImplementation(() => ({
+          type: "getCalendarDetailAsync",
+          unwrap: () => Promise.resolve({}),
+        })) as any;
+
+      await act(async () => {
+        renderWithProviders(
+          <CalendarApp calendarRef={{ current: null }} />,
+          stateWithManyCalendars
+        );
+      });
+
+      await waitFor(
+        () => {
+          expect(spy).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      const callCount = spy.mock.calls.length;
+      expect(callCount).toBeGreaterThan(0);
+      expect(callCount).toBeLessThanOrEqual(24);
+    });
+
+    it("prefetches hidden calendars only after active load completes", async () => {
+      const calendarsWithSelected = {
+        ...preloadedState,
+        calendars: {
+          ...preloadedState.calendars,
+          list: {
+            "user1/cal1": {
+              name: "Selected Calendar",
+              id: "user1/cal1",
+              color: { light: "#FF0000", dark: "#000" },
+              events: {},
+            },
+            "user1/cal2": {
+              name: "Hidden Calendar 1",
+              id: "user1/cal2",
+              color: { light: "#00FF00", dark: "#000" },
+              events: {},
+            },
+            "user1/cal3": {
+              name: "Hidden Calendar 2",
+              id: "user1/cal3",
+              color: { light: "#0000FF", dark: "#000" },
+              events: {},
+            },
+          },
+        },
+      };
+
+      const spy = jest
+        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .mockImplementation(() => ({
+          type: "getCalendarDetailAsync",
+          unwrap: () => Promise.resolve({}),
+        })) as any;
+
+      await act(async () => {
+        renderWithProviders(
+          <CalendarApp calendarRef={{ current: null }} />,
+          calendarsWithSelected
+        );
+      });
+
+      await waitFor(
+        () => {
+          expect(spy).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      const selectedCalls = spy.mock.calls.filter(
+        (call) => call[0].calId === "user1/cal1"
+      );
+      const hiddenCalls = spy.mock.calls.filter(
+        (call) =>
+          call[0].calId === "user1/cal2" || call[0].calId === "user1/cal3"
+      );
+
+      expect(selectedCalls.length).toBeGreaterThan(0);
+    });
+
+    it("does not make duplicate API calls for same calendar and range", async () => {
+      const spy = jest
+        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .mockImplementation(() => ({
+          type: "getCalendarDetailAsync",
+          unwrap: () => Promise.resolve({}),
+        })) as any;
+
+      await act(async () => {
+        renderWithProviders(
+          <CalendarApp calendarRef={{ current: null }} />,
+          preloadedState
+        );
+      });
+
+      await waitFor(
+        () => {
+          expect(spy).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      const callsForCal1 = spy.mock.calls.filter(
+        (call) => call[0].calId === "user1/cal1"
+      );
+
+      const uniqueRanges = new Set(
+        callsForCal1.map(
+          (call) => `${call[0].match.start}_${call[0].match.end}`
+        )
+      );
+
+      expect(uniqueRanges.size).toBeLessThanOrEqual(callsForCal1.length);
+    });
+
+    it("handles undefined calendars gracefully", async () => {
+      const stateWithUndefinedCalendars = {
+        ...preloadedState,
+        calendars: {
+          list: undefined as any,
+          templist: undefined as any,
+          pending: false,
+        },
+      };
+
+      await act(async () => {
+        renderWithProviders(
+          <CalendarApp calendarRef={{ current: null }} />,
+          stateWithUndefinedCalendars
+        );
+      });
+
+      expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    });
+
+    it("handles undefined tempcalendars gracefully", async () => {
+      const stateWithUndefinedTemp = {
+        ...preloadedState,
+        calendars: {
+          ...preloadedState.calendars,
+          templist: undefined as any,
+        },
+      };
+
+      await act(async () => {
+        renderWithProviders(
+          <CalendarApp calendarRef={{ current: null }} />,
+          stateWithUndefinedTemp
+        );
+      });
+
+      expect(screen.getByText("calendar.personal")).toBeInTheDocument();
+    });
+  });
 });

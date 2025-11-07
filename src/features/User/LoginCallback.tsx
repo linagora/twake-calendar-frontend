@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { push } from "redux-first-history";
 import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
@@ -9,6 +9,7 @@ import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 export function CallbackResume() {
   const dispatch = useAppDispatch();
   const hasRun = useRef(false);
+  const calendarsLoadingRef = useRef(false);
   const saved = sessionStorage.getItem("redirectState")
     ? JSON.parse(sessionStorage.getItem("redirectState")!)
     : null;
@@ -23,7 +24,11 @@ export function CallbackResume() {
         dispatch(setUserData(data?.userinfo));
         dispatch(setTokens(data?.tokenSet));
         await dispatch(getOpenPaasUserDataAsync());
-        await dispatch(getCalendarsListAsync());
+        if (!calendarsLoadingRef.current) {
+          calendarsLoadingRef.current = true;
+          await dispatch(getCalendarsListAsync());
+          calendarsLoadingRef.current = false;
+        }
 
         sessionStorage.removeItem("redirectState");
         sessionStorage.setItem("tokenSet", JSON.stringify(data?.tokenSet));

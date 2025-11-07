@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../../static/header-logo.svg";
 import AppsIcon from "@mui/icons-material/Apps";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -53,8 +53,14 @@ export function Menubar({
   const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    if (!user) {
+      dispatch(push("/"));
+    }
+  }, [dispatch, user]);
+
   if (!user) {
-    dispatch(push("/"));
+    return null;
   }
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
