@@ -50,7 +50,7 @@ function EventPopover({
   event?: CalendarEvent;
 }) {
   const dispatch = useAppDispatch();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId =
@@ -92,7 +92,12 @@ function EventPopover({
     event?.repetition?.freq ? true : false
   );
 
-  const [title, setTitle] = useState(event?.title || t("event.untitled"));
+  const defaultTitle = t("event.untitled");
+  const [title, setTitle] = useState(event?.title || defaultTitle);
+
+  useEffect(() => {
+    setTitle(defaultTitle);
+  }, [lang]);
 
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
@@ -145,7 +150,7 @@ function EventPopover({
     setShowMore(false);
     setShowDescription(false);
     setShowRepeat(false);
-    setTitle("");
+    setTitle(t("event.untitled"));
     setDescription("");
     setAttendees([]);
     setLocation("");
@@ -357,7 +362,7 @@ function EventPopover({
   useEffect(() => {
     if (event && event.uid) {
       // Editing existing event - populate fields with event data
-      setTitle(event.title ?? "");
+      setTitle(event.title ?? t("event.untitled"));
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
 
@@ -454,7 +459,7 @@ function EventPopover({
       setShowMore(false);
       setShowDescription(false);
       setShowRepeat(false);
-      setTitle("");
+      setTitle(t("event.untitled"));
       setDescription("");
       setAttendees([]);
       setLocation("");
@@ -478,7 +483,7 @@ function EventPopover({
       isInitializedRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event?.uid]);
+  }, [event?.uid, lang]);
 
   const handleStartChange = useCallback(
     (newStart: string) => {
