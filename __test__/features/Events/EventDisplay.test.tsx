@@ -797,6 +797,51 @@ describe("Event Preview Display", () => {
       }).not.toThrow();
     });
   });
+
+  describe("BUGFIX", () => {
+    it("doesnt render anything next to date of all day preview", () => {
+      const allDayState = {
+        ...preloadedState,
+        calendars: {
+          ...preloadedState.calendars,
+          list: {
+            ...preloadedState.calendars.list,
+            "667037022b752d0026472254/cal1": {
+              ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+              events: {
+                event1: {
+                  ...preloadedState.calendars.list[
+                    "667037022b752d0026472254/cal1"
+                  ].events.event1,
+                  allday: true, // <-- the fix condition
+                },
+              },
+            },
+          },
+        },
+      };
+
+      renderWithProviders(
+        <EventPreviewModal
+          open={true}
+          onClose={mockOnClose}
+          calId={"667037022b752d0026472254/cal1"}
+          eventId={"event1"}
+        />,
+        allDayState
+      );
+      const dateElement =
+        screen.getByText(/January/i).closest("p") ??
+        screen.getByText(/January/i);
+
+      expect(dateElement).toBeInTheDocument();
+      console.log(dateElement.textContent);
+
+      const text = dateElement.textContent?.trim() ?? "";
+
+      expect(text).toMatch(/\d{4}$/);
+    });
+  });
 });
 
 describe("Event Full Display", () => {
