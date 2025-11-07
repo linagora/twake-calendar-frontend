@@ -51,7 +51,7 @@ export function MiniCalendar({
         onMonthChange={(month) => {
           const calendarRange = getCalendarRange(month.toDate());
           setVisibleDate(month.toDate());
-          Object.values(calendars.list).forEach((cal) =>
+          Object.values(calendars.list || {}).forEach((cal) =>
             dispatch(
               getCalendarDetailAsync({
                 calId: cal.id,

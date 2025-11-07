@@ -59,10 +59,10 @@ function EventPopover({
   const selectPersonalCalendars = createSelector(
     (state: any) => state.calendars,
     (calendars: any) =>
-      Object.keys(calendars.list)
+      Object.keys(calendars.list || {})
         .map((id) => {
           if (id.split("/")[0] === userId) {
-            return calendars.list[id];
+            return calendars.list?.[id];
           }
           return {} as Calendars;
         })

@@ -34,6 +34,7 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setEventDisplayedCalId,
       props.setEventDisplayedTemp,
       props.calendars,
+      props.dispatch,
     ]),
     handleEventAllow: useCallback(eventHandlers.handleEventAllow, []),
     handleEventDrop: useCallback(eventHandlers.handleEventDrop, [
@@ -42,10 +43,14 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setSelectedEvent,
       props.setOpenEditModePopup,
       props.setAfterChoiceFunc,
+      props.tempcalendars,
+      props.calendarRange,
     ]),
     handleEventResize: useCallback(eventHandlers.handleEventResize, [
       props.calendars,
       props.dispatch,
+      props.tempcalendars,
+      props.calendarRange,
     ]),
   };
 };

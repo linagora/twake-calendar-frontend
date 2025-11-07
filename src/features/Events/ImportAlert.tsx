@@ -17,8 +17,8 @@ export default function ImportAlert() {
 
   return (
     <>
-      {Object.keys(calendars).map((calendarId) =>
-        calendars[calendarId]?.events
+      {Object.keys(calendars || {}).map((calendarId) =>
+        calendars?.[calendarId]?.events
           ? Object.keys(calendars[calendarId]?.events)
               .filter((id) => calendars[calendarId]?.events[id].error)
               .map((id) => {
