@@ -30,6 +30,7 @@ import {
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
+import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -157,9 +158,12 @@ function EventUpdateModal({
     resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
   );
   const [newCalId, setNewCalId] = useState(calId);
-  const [calendarid, setCalendarid] = useState(
-    calId ?? userPersonalCalendars[0]?.id ?? ""
+  const defaultCalendarId = useMemo(
+    () => userPersonalCalendars[0]?.id ?? "",
+    [userPersonalCalendars]
   );
+
+  const [calendarid, setCalendarid] = useState(calId ?? defaultCalendarId);
 
   const [attendees, setAttendees] = useState<userAttendee[]>([]);
   const [hasVideoConference, setHasVideoConference] = useState(false);
@@ -178,7 +182,9 @@ function EventUpdateModal({
     setLocation("");
     setStart("");
     setEnd("");
-    setCalendarid(userPersonalCalendars[0].id);
+    if (defaultCalendarId) {
+      setCalendarid(defaultCalendarId);
+    }
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
@@ -189,7 +195,7 @@ function EventUpdateModal({
     );
     setHasVideoConference(false);
     setMeetingLink(null);
-  }, []);
+  }, [defaultCalendarId]);
 
   // Prevent repeated initialization loops
   const initializedKeyRef = useRef<string | null>(null);
@@ -392,7 +398,7 @@ function EventUpdateModal({
         endDate = endDateOnlyAPI;
       } else {
         // For timed events
-        startDate = new Date(start).toISOString();
+        startDate = convertFormDateTimeToISO(start, timezone);
         // In normal mode, only override end date when the end date field is not shown
         if (!showMore && !hasEndDateChanged) {
           const startDateOnly = (start || "").split("T")[0];
@@ -400,10 +406,10 @@ function EventUpdateModal({
             ? end.split("T")[1]?.slice(0, 5) || "00:00"
             : "00:00";
           const endDateTime = `${startDateOnly}T${endTimeOnly}`;
-          endDate = new Date(endDateTime).toISOString();
+          endDate = convertFormDateTimeToISO(endDateTime, timezone);
         } else {
           // Extended mode: use actual end datetime
-          endDate = new Date(end).toISOString();
+          endDate = convertFormDateTimeToISO(end, timezone);
         }
       }
     }
@@ -520,7 +526,7 @@ function EventUpdateModal({
         // Keep modal open on error, user can retry or cancel
       }
       if (tempList) {
-        const calendarRange = getCalendarRange(new Date(start));
+        const calendarRange = getCalendarRange(new Date(startDate));
         await updateTempCalendar(tempList, event, dispatch, calendarRange);
       }
       return;
@@ -586,7 +592,7 @@ function EventUpdateModal({
           ).unwrap();
 
           // STEP 3: Fetch to get new instances with correct timing
-          const calendarRange = getCalendarRange(new Date(start));
+          const calendarRange = getCalendarRange(new Date(startDate));
           await refreshCalendars(
             dispatch,
             Object.values(calendarsList),
@@ -695,7 +701,7 @@ function EventUpdateModal({
       dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
     }
     if (tempList) {
-      const calendarRange = getCalendarRange(new Date(start));
+      const calendarRange = getCalendarRange(new Date(startDate));
       await updateTempCalendar(tempList, event, dispatch, calendarRange);
     }
   };

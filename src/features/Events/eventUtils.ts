@@ -3,7 +3,40 @@ import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
 import moment from "moment";
+import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 type RawEntry = [string, Record<string, string>, string, any];
+
+function resolveTimezoneId(tzid?: string): string | undefined {
+  if (!tzid) return undefined;
+  if (TIMEZONES.zones[tzid]) {
+    return tzid;
+  }
+  const alias = TIMEZONES.aliases[tzid];
+  if (alias) {
+    return alias.aliasTo;
+  }
+  return tzid;
+}
+
+function inferTimezoneFromValue(
+  params: Record<string, string> | undefined,
+  value: string
+): string | undefined {
+  const tzParam =
+    params?.tzid ||
+    params?.TZID ||
+    params?.Tzid ||
+    params?.tZid ||
+    params?.tzId;
+  const resolved = resolveTimezoneId(tzParam);
+  if (resolved) {
+    return resolved;
+  }
+  if (typeof value === "string" && value.endsWith("Z")) {
+    return "Etc/UTC";
+  }
+  return undefined;
+}
 
 export function parseCalendarEvent(
   data: RawEntry[],
@@ -25,22 +58,34 @@ export function parseCalendarEvent(
       case "transp":
         event.transp = value;
         break;
-      case "dtstart":
+      case "dtstart": {
         event.start = value;
+        const detectedTz = inferTimezoneFromValue(params, value);
+        if (detectedTz) {
+          event.timezone = detectedTz;
+        }
         if (dateRegex.test(value)) {
           event.allday = true;
         } else {
           event.allday = false;
         }
         break;
-      case "dtend":
+      }
+      case "dtend": {
         event.end = value;
+        if (!event.timezone) {
+          const detectedTz = inferTimezoneFromValue(params, value);
+          if (detectedTz) {
+            event.timezone = detectedTz;
+          }
+        }
         if (dateRegex.test(value)) {
           event.allday = true;
         } else {
           event.allday = false;
         }
         break;
+      }
       case "class":
         event.class = value;
         break;
@@ -372,8 +417,8 @@ export function combineMasterDateWithFormTime(
   const combinedEndStr = `${masterEndDatePart}T${formEndTimePart}`;
 
   // Parse and convert to ISO
-  const startDate = new Date(combinedStartStr).toISOString();
-  const endDate = new Date(combinedEndStr).toISOString();
+  const startDate = convertFormDateTimeToISO(combinedStartStr, timezone);
+  const endDate = convertFormDateTimeToISO(combinedEndStr, timezone);
 
   return { startDate, endDate };
 }
