@@ -54,6 +54,16 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
   return !!nowIndicator;
 };
 
+function formatEventChipTitle(e: CalendarEvent) {
+  const { t } = useI18n();
+  if (!e.title) {
+    return t("event.untitled");
+  }
+  return e.title === "Busy" && e.class === "PRIVATE"
+    ? t("event.form.busy")
+    : e.title;
+}
+
 export const eventToFullCalendarFormat = (
   filteredEvents: CalendarEvent[],
   filteredTempEvents: CalendarEvent[],
@@ -66,14 +76,14 @@ export const eventToFullCalendarFormat = (
       if (e.calId.split("/")[0] === userId) {
         return {
           ...e,
-          title: e.title ? e.title : t("event.untitled"),
+          title: formatEventChipTitle(e),
           colors: e.color,
           editable: true,
         };
       }
       return {
         ...e,
-        title: e.title ? e.title : t("event.untitled"),
+        title: formatEventChipTitle(e),
         colors: e.color,
         editable: false,
       };

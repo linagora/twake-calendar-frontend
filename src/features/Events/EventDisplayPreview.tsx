@@ -286,7 +286,9 @@ export default function EventPreviewModal({
                 }}
                 gutterBottom
               >
-                {event.title ? event.title : t("event.untitled")}
+                {event.class !== "PRIVATE" && !isOwn && event.title === "Busy"
+                    ? event.title
+                    : t("event.form.busy") ? event.title : t("event.untitled")}
               </Typography>
               {event.transp === "TRANSPARENT" && (
                 <Tooltip title={t("eventPreview.free.tooltip")} placement="top">
