@@ -154,7 +154,8 @@
   "peopleSearch": {
     "label": "Commencez à saisir un nom ou un e-mail",
     "placeholder": "Commencez à saisir un nom ou un e-mail",
-    "invalidEmail": "%{email} n'est pas une adresse e-mail valide"
+    "invalidEmail": "%{email} n'est pas une adresse e-mail valide",
+    "searchError": "Impossible de récupérer les contacts pour le moment. Veuillez réessayer."
   },
   "error": {
     "title": "Une erreur s'est produite",

@@ -154,7 +154,8 @@
   "peopleSearch": {
     "label": "Start typing a name or email",
     "placeholder": "Start typing a name or email",
-    "invalidEmail": "%{email} is not a valid email address"
+    "invalidEmail": "%{email} is not a valid email address",
+    "searchError": "Unable to fetch people right now. Please try again."
   },
   "error": {
     "title": "Something went wrong",
