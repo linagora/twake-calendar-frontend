@@ -1006,7 +1006,10 @@ const CalendarSlice = createSlice({
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
-        if (action.payload?.message.includes("aborted")) {
+        if (
+          action.payload?.message.includes("aborted") ||
+          action.error.name === "AbortError"
+        ) {
           return;
         }
         state.error =
@@ -1016,7 +1019,10 @@ const CalendarSlice = createSlice({
       })
       .addCase(getCalendarDetailAsync.rejected, (state, action) => {
         state.pending = false;
-        if (action.payload?.message.includes("aborted")) {
+        if (
+          action.payload?.message.includes("aborted") ||
+          action.error.name === "AbortError"
+        ) {
           return;
         }
         state.error =

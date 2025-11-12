@@ -137,16 +137,33 @@ export const updateCalsDetails = (
   if (rangeKey !== previousRangeKey) {
     selectedCalendars?.forEach((id) => {
       if (id) {
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-            calType,
-          })
-        );
+        if (controllers) {
+          const controller = new AbortController();
+          controllers.set(id, controller);
+
+          dispatch(
+            getCalendarDetailAsync({
+              calId: id,
+              match: {
+                start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+                end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+              },
+              calType,
+              signal: controller.signal,
+            })
+          );
+        } else {
+          dispatch(
+            getCalendarDetailAsync({
+              calId: id,
+              match: {
+                start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+                end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+              },
+              calType,
+            })
+          );
+        }
       }
     });
   }
