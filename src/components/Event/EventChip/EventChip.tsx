@@ -65,11 +65,6 @@ export function EventChip({
     // Determine owner attendee
     const ownerAttendee = getOwnerAttendee(attendees, ownerEmails);
 
-    // Handle non-owner attendee case
-    if (attendees.length && !delegated && !ownerAttendee) {
-      return <SimpleEventChip title={event.title} />;
-    }
-
     // Color and contrast logic
     const bestColor = getBestColor(
       (calendar.color as { light: string; dark: string }) ?? {
