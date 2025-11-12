@@ -744,10 +744,7 @@ const CalendarSlice = createSlice({
           const type = action.payload.calType === "temp" ? "templist" : "list";
 
           if (!state[type][action.payload.calId]) {
-            state[type][action.payload.calId] = {
-              id: action.payload.calId,
-              events: {},
-            } as Calendars;
+            return;
           }
           action.payload.events.forEach((event) => {
             state[type][action.payload.calId].events[event.uid] = event;
