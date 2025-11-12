@@ -40,8 +40,9 @@ function CalendarAccordion({
   const allCalendars = useAppSelector((state) => state.calendars.list);
 
   const [expended, setExpended] = useState(defaultExpanded);
-  if (calendars.length === 0 && !showAddButton) return null;
   useEffect(() => setExpended(defaultExpanded), [defaultExpanded]);
+
+  if (calendars.length === 0 && !showAddButton) return null;
   return (
     <Accordion
       defaultExpanded={defaultExpanded}
