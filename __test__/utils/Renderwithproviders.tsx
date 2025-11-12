@@ -36,6 +36,7 @@ export function renderWithProviders(
             return key;
           },
           f: (date: Date, formatStr: string) => date.toString(),
+          lang: "en",
         }}
       >
         <MemoryRouter initialEntries={["/"]}>

@@ -148,6 +148,7 @@ export function Menubar({
         <div className="right-menu">
           <div className="menu-items">
             <IconButton
+              className="refresh-button"
               onClick={onRefresh}
               aria-label={t("menubar.refresh")}
               title={t("menubar.refresh")}
@@ -159,6 +160,7 @@ export function Menubar({
             <FormControl
               size="small"
               style={{ minWidth: 120, marginRight: 16 }}
+              className="select-display"
             >
               <Select
                 value={currentView}
