@@ -116,6 +116,7 @@ function ResponsiveDialog({
     "& .MuiBackdrop-root": {
       opacity: isExpanded ? "0 !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
+      pointerEvents: isExpanded ? "none" : undefined,
     },
     "& .MuiDialog-paper": {
       maxWidth: isExpanded ? "100%" : normalMaxWidth,
@@ -124,6 +125,7 @@ function ResponsiveDialog({
       margin: isExpanded ? `${headerHeight} 0 0 0` : "32px",
       boxShadow: isExpanded ? "none !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
+      zIndex: isExpanded ? 1200 : 1300,
     },
     "& .MuiDialogActions-root .MuiBox-root": {
       maxWidth: isExpanded ? expandedContentMaxWidth : undefined,
@@ -145,16 +147,35 @@ function ResponsiveDialog({
     width: "100%",
   };
 
+  React.useEffect(() => {
+    if (isExpanded) {
+      document.body.classList.add("dialog-expanded");
+    } else {
+      document.body.classList.remove("dialog-expanded");
+    }
+  }, [isExpanded]);
+
+  const handleClose = (
+    event: {},
+    reason: "backdropClick" | "escapeKeyDown"
+  ) => {
+    if (isExpanded && reason === "backdropClick") {
+      return;
+    }
+    onClose();
+  };
+
   const currentSpacing = isExpanded ? expandedSpacing : normalSpacing;
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth={false}
       fullWidth
       transitionDuration={isExpanded ? 0 : 300}
       sx={[baseSx, ...(Array.isArray(sx) ? sx : [sx])]}
+      style={isExpanded ? { zIndex: 1200 } : undefined}
       {...otherDialogProps}
     >
       <DialogTitle sx={titleSx} {...dialogTitleProps}>
