@@ -328,15 +328,6 @@ describe("EventPopover", () => {
     expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
   });
 
-  it("Prefill Title field", async () => {
-    renderPopover();
-    await waitFor(() =>
-      expect(screen.getByLabelText("event.form.title")).toHaveDisplayValue(
-        "event.untitled"
-      )
-    );
-  });
-
   it("BUGFIX: Prefill Calendar field", async () => {
     renderPopover();
     await waitFor(() =>

@@ -33,7 +33,6 @@ import { addDays } from "../../components/Event/utils/dateRules";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 function EventPopover({
-  anchorEl,
   open,
   onClose,
   selectedRange,
@@ -92,12 +91,7 @@ function EventPopover({
     event?.repetition?.freq ? true : false
   );
 
-  const defaultTitle = t("event.untitled");
-  const [title, setTitle] = useState(event?.title || defaultTitle);
-
-  useEffect(() => {
-    setTitle(defaultTitle);
-  }, [lang]);
+  const [title, setTitle] = useState(event?.title ?? "");
 
   const [description, setDescription] = useState(event?.description ?? "");
   const [location, setLocation] = useState(event?.location ?? "");
@@ -150,7 +144,7 @@ function EventPopover({
     setShowMore(false);
     setShowDescription(false);
     setShowRepeat(false);
-    setTitle(t("event.untitled"));
+    setTitle("");
     setDescription("");
     setAttendees([]);
     setLocation("");
@@ -362,7 +356,7 @@ function EventPopover({
   useEffect(() => {
     if (event && event.uid) {
       // Editing existing event - populate fields with event data
-      setTitle(event.title ?? t("event.untitled"));
+      setTitle(event.title ?? "");
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
 
@@ -459,7 +453,7 @@ function EventPopover({
       setShowMore(false);
       setShowDescription(false);
       setShowRepeat(false);
-      setTitle(t("event.untitled"));
+      setTitle("");
       setDescription("");
       setAttendees([]);
       setLocation("");
@@ -483,7 +477,7 @@ function EventPopover({
       isInitializedRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event?.uid, lang]);
+  }, [event?.uid]);
 
   const handleStartChange = useCallback(
     (newStart: string) => {
