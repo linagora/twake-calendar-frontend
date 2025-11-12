@@ -2,6 +2,7 @@
 
 import {
   addSharedCalendar,
+  exportCalendar,
   getCalendar,
   getCalendars,
   getSecretLink,
@@ -147,6 +148,20 @@ describe("Calendar API", () => {
         },
       }
     );
+  });
+
+  it("get export data ", async () => {
+    const calLink = "/calendars/calId.json";
+    (api.get as jest.Mock).mockReturnValue({
+      text: jest.fn().mockResolvedValue("data"),
+    });
+    const data = await exportCalendar(calLink);
+
+    expect(api.get).toHaveBeenCalledWith(`dav${calLink}?export`, {
+      headers: {
+        Accept: "application/calendar",
+      },
+    });
   });
 
   it("When adding a sharedCal with #default as a name a new name is sent to the back", async () => {

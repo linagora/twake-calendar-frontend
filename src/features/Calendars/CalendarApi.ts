@@ -139,3 +139,14 @@ export async function getSecretLink(calLink: string, reset: boolean) {
     .json();
   return response as { secretLink: string };
 }
+
+export async function exportCalendar(calLink: string) {
+  const response = await api
+    .get(`dav${calLink}?export`, {
+      headers: {
+        Accept: "application/calendar",
+      },
+    })
+    .text();
+  return response;
+}
