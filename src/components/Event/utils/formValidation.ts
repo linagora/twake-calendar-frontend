@@ -4,7 +4,6 @@ import { combineDateTime } from "./dateTimeHelpers";
  * Validation parameters for event form
  */
 export interface ValidationParams {
-  title: string;
   startDate: string;
   startTime: string;
   endDate: string;
@@ -21,7 +20,6 @@ export interface ValidationParams {
 export interface ValidationResult {
   isValid: boolean;
   errors: {
-    title: string;
     dateTime: string;
   };
 }
@@ -33,7 +31,6 @@ export interface ValidationResult {
  */
 export function validateEventForm(params: ValidationParams): ValidationResult {
   const {
-    title,
     startDate,
     startTime,
     endDate,
@@ -43,9 +40,6 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     hasEndDateChanged = false,
     showMore = false,
   } = params;
-
-  const isTitleValid = title.trim().length > 0;
-  const shouldShowTitleError = showValidationErrors && !isTitleValid;
 
   let isDateTimeValid = true;
   let dateTimeError = "";
@@ -154,12 +148,11 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     }
   }
 
-  const isValid = isTitleValid && isDateTimeValid;
+  const isValid = isDateTimeValid;
 
   return {
     isValid,
     errors: {
-      title: shouldShowTitleError ? "Title is required" : "",
       dateTime: showValidationErrors ? dateTimeError : "",
     },
   };

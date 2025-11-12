@@ -33,7 +33,6 @@ import { addDays } from "../../components/Event/utils/dateRules";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 function EventPopover({
-  anchorEl,
   open,
   onClose,
   selectedRange,
@@ -50,6 +49,7 @@ function EventPopover({
   event?: CalendarEvent;
 }) {
   const dispatch = useAppDispatch();
+  const { t, lang } = useI18n();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId =
@@ -673,8 +673,6 @@ function EventPopover({
       await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
     }
   };
-  const { t } = useI18n();
-
   const dialogActions = (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (

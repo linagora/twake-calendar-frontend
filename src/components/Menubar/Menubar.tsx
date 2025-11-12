@@ -254,6 +254,7 @@ export function Menubar({
             value={lang}
             onChange={(e) => {
               dispatch(setLanguage(e.target.value));
+              handleLangClose();
             }}
             variant="outlined"
             aria-label={t("menubar.languageSelector")}

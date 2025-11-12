@@ -6,6 +6,7 @@ import { SlotLabelContentArg } from "@fullcalendar/core";
 import moment from "moment-timezone";
 import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
 export const updateSlotLabelVisibility = (
   currentTime: Date,
@@ -58,13 +59,24 @@ export const eventToFullCalendarFormat = (
   filteredTempEvents: CalendarEvent[],
   userId: string | undefined
 ) => {
+  const { t } = useI18n();
   return filteredEvents
     .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
     .map((e) => {
       if (e.calId.split("/")[0] === userId) {
-        return { ...e, colors: e.color, editable: true };
+        return {
+          ...e,
+          title: e.title ? e.title : t("event.untitled"),
+          colors: e.color,
+          editable: true,
+        };
       }
-      return { ...e, colors: e.color, editable: false };
+      return {
+        ...e,
+        title: e.title ? e.title : t("event.untitled"),
+        colors: e.color,
+        editable: false,
+      };
     });
 };
 
