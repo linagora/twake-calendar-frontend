@@ -54,8 +54,7 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
   return !!nowIndicator;
 };
 
-function formatEventChipTitle(e: CalendarEvent) {
-  const { t } = useI18n();
+function formatEventChipTitle(e: CalendarEvent, t: Function) {
   if (!e.title) {
     return t("event.untitled");
   }
@@ -76,14 +75,14 @@ export const eventToFullCalendarFormat = (
       if (e.calId.split("/")[0] === userId) {
         return {
           ...e,
-          title: formatEventChipTitle(e),
+          title: formatEventChipTitle(e, t),
           colors: e.color,
           editable: true,
         };
       }
       return {
         ...e,
-        title: formatEventChipTitle(e),
+        title: formatEventChipTitle(e, t),
         colors: e.color,
         editable: false,
       };
