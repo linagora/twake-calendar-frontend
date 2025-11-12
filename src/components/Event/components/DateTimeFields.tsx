@@ -70,6 +70,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
       adapterLocale={lang ?? "en"}
+      localeText={{
+        okButtonLabel: t("common.ok"),
+        cancelButtonLabel: t("common.cancel"),
+        todayButtonLabel: t("menubar.today"),
+      }}
     >
       <Box
         display="flex"
