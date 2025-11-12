@@ -35,7 +35,7 @@
     "add": "Ajouter",
     "reset": "Réinitialiser",
     "export": "Exporter",
-    "exporting": "En cours d'exportation"
+    "exporting": "En cours d'exportation..."
   },
   "common": {
     "cancel": "Annuler",
