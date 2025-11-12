@@ -29,7 +29,10 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarName } from "../../components/Calendar/CalendarName";
 import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
-import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
+import {
+  formatEventChipTitle,
+  updateTempCalendar,
+} from "../../components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "../../components/Event/EditModeDialog";
 import EventDuplication from "../../components/Event/EventDuplicate";
@@ -286,9 +289,7 @@ export default function EventPreviewModal({
                 }}
                 gutterBottom
               >
-                {event.class !== "PRIVATE" && !isOwn && event.title === "Busy"
-                    ? event.title
-                    : t("event.form.busy") ? event.title : t("event.untitled")}
+                {formatEventChipTitle(event, t)}
               </Typography>
               {event.transp === "TRANSPARENT" && (
                 <Tooltip title={t("eventPreview.free.tooltip")} placement="top">

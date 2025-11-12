@@ -54,7 +54,7 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
   return !!nowIndicator;
 };
 
-function formatEventChipTitle(e: CalendarEvent, t: Function) {
+export function formatEventChipTitle(e: CalendarEvent, t: Function) {
   if (!e.title) {
     return t("event.untitled");
   }
