@@ -82,6 +82,13 @@ describe("Event Preview Display", () => {
               end: day.toISOString(),
               organizer: { cn: "test", cal_address: "test@test.com" },
             },
+            event3: {
+              uid: "event3",
+              calId: "667037022b752d0026472254/cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+              organizer: { cn: "test", cal_address: "test@test.com" },
+            },
           },
           ownerEmails: ["test@test.com"],
         },
@@ -797,7 +804,21 @@ describe("Event Preview Display", () => {
       }).not.toThrow();
     });
   });
+  it("renders correctly event data event with empty title", () => {
+    renderWithProviders(
+      <EventPreviewModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event3"}
+      />,
+      preloadedState
+    );
 
+    expect(screen.getByText("event.untitled")).toBeInTheDocument();
+
+    expect(screen.getByText("Calendar")).toBeInTheDocument();
+  });
   describe("BUGFIX", () => {
     it("doesnt render anything next to date of all day preview", () => {
       const allDayState = {
