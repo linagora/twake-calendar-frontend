@@ -19,6 +19,7 @@ import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 
 export function AccessTab({ calendar }: { calendar: Calendars }) {
   const { t } = useI18n();
@@ -52,6 +53,7 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
   };
 
   const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState("");
 
   const handleExport = async () => {
     try {
@@ -71,8 +73,11 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError((e as Error).message);
+      setExportLoading(false);
     } finally {
-      setExportLoading(false); // <-- hide popup
+      setExportLoading(false);
     }
   };
 
@@ -157,6 +162,7 @@ export function AccessTab({ calendar }: { calendar: Calendars }) {
         open={open}
         message={t("common.link_copied")}
       />
+      <ErrorSnackbar error={exportError} type="calendar" />
     </>
   );
 }
