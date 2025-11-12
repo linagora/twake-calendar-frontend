@@ -141,175 +141,169 @@ export default function EventPreviewModal({
         actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
-          event.title && (
-            <>
-              <DialogActions>
-                <Box>
-                  {(window as any).DEBUG && (
-                    <IconButton
-                      onClick={async () => {
-                        const icsContent = await dlEvent(event);
-                        const blob = new Blob([icsContent], {
-                          type: "text/calendar",
-                        });
-                        const url = URL.createObjectURL(blob);
+          <>
+            <DialogActions>
+              <Box>
+                {(window as any).DEBUG && (
+                  <IconButton
+                    onClick={async () => {
+                      const icsContent = await dlEvent(event);
+                      const blob = new Blob([icsContent], {
+                        type: "text/calendar",
+                      });
+                      const url = URL.createObjectURL(blob);
 
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.download = `${eventId}.ics`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        URL.revokeObjectURL(url);
-                      }}
-                    >
-                      <FileDownloadOutlinedIcon />
-                    </IconButton>
-                  )}
-                  {user.userData.email === event.organizer?.cal_address &&
-                    calendar.ownerEmails?.includes(user.userData.email) && (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          if (isRecurring) {
-                            setAfterChoiceFunc(() => () => {
-                              setHidePreview(true);
-                              setOpenUpdateModal(true);
-                            });
-                            setOpenEditModePopup("edit");
-                          } else {
-                            setHidePreview(true);
-                            setOpenUpdateModal(true);
-                          }
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    )}
-                  {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${eventId}.ics`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileDownloadOutlinedIcon />
+                  </IconButton>
+                )}
+                {user.userData.email === event.organizer?.cal_address &&
+                  calendar.ownerEmails?.includes(user.userData.email) && (
                     <IconButton
                       size="small"
-                      onClick={(e) => setToggleActionMenu(e.currentTarget)}
+                      onClick={() => {
+                        if (isRecurring) {
+                          setAfterChoiceFunc(() => () => {
+                            setHidePreview(true);
+                            setOpenUpdateModal(true);
+                          });
+                          setOpenEditModePopup("edit");
+                        } else {
+                          setHidePreview(true);
+                          setOpenUpdateModal(true);
+                        }
+                      }}
                     >
-                      <MoreVertIcon />
+                      <EditIcon />
                     </IconButton>
                   )}
-                  <Menu
-                    open={Boolean(toggleActionMenu)}
-                    onClose={() => setToggleActionMenu(null)}
-                    anchorEl={toggleActionMenu}
-                  >
-                    {mailSpaUrl && attendees.length > 0 && (
-                      <MenuItem
-                        onClick={() =>
-                          window.open(
-                            `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
-                              .map((a) => a.cal_address)
-                              .filter((mail) => mail !== user.userData.email)
-                              .join(",")}?subject=${event.title}`
-                          )
-                        }
-                      >
-                        {t("eventPreview.emailAttendees")}
-                      </MenuItem>
-                    )}
-                    <EventDuplication
-                      event={event}
-                      onClose={() => setToggleActionMenu(null)}
-                      onOpenDuplicate={() => {
-                        setToggleActionMenu(null);
-                        setHidePreview(true);
-                        setOpenDuplicateModal(true);
-                      }}
-                    />
-                    {user.userData.email === event.organizer?.cal_address && (
-                      <MenuItem
-                        onClick={async () => {
-                          if (isRecurring) {
-                            setAfterChoiceFunc(
-                              () =>
-                                (typeOfAction?: "solo" | "all" | undefined) =>
-                                  handleDelete(
-                                    isRecurring,
-                                    typeOfAction,
-                                    onClose,
-                                    dispatch,
-                                    calendar,
-                                    event,
-                                    calId,
-                                    eventId
-                                  )
-                            );
-                            setOpenEditModePopup("edit");
-                          } else {
-                            onClose({}, "backdropClick");
-                            await dispatch(
-                              deleteEventAsync({
-                                calId,
-                                eventId,
-                                eventURL: event.URL,
-                              })
-                            );
-                          }
-                          updateTempList();
-                        }}
-                      >
-                        {t("eventPreview.deleteEvent")}
-                      </MenuItem>
-                    )}
-                  </Menu>
+                {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
                   <IconButton
                     size="small"
-                    onClick={() => onClose({}, "backdropClick")}
+                    onClick={(e) => setToggleActionMenu(e.currentTarget)}
                   >
-                    <CloseIcon />
+                    <MoreVertIcon />
                   </IconButton>
-                </Box>
-              </DialogActions>
-              <Box display="flex" flexDirection="row">
-                {event.class === "PRIVATE" &&
-                  (isOwn ? (
-                    <Tooltip
-                      title={t("eventPreview.privateEvent.tooltipOwn")}
-                      placement="top"
-                    >
-                      <LockOutlineIcon />
-                    </Tooltip>
-                  ) : (
-                    <LockOutlineIcon />
-                  ))}
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontSize: "24px",
-                    fontWeight: 600,
-                    wordBreak: "break-word",
-                    fontFamily: "Inter, sans-serif",
-                  }}
-                  gutterBottom
+                )}
+                <Menu
+                  open={Boolean(toggleActionMenu)}
+                  onClose={() => setToggleActionMenu(null)}
+                  anchorEl={toggleActionMenu}
                 >
-                  {event.title}
-                </Typography>
-                {event.transp === "TRANSPARENT" && (
+                  {mailSpaUrl && attendees.length > 0 && (
+                    <MenuItem
+                      onClick={() =>
+                        window.open(
+                          `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
+                            .map((a) => a.cal_address)
+                            .filter((mail) => mail !== user.userData.email)
+                            .join(",")}?subject=${event.title}`
+                        )
+                      }
+                    >
+                      {t("eventPreview.emailAttendees")}
+                    </MenuItem>
+                  )}
+                  <EventDuplication
+                    event={event}
+                    onClose={() => setToggleActionMenu(null)}
+                    onOpenDuplicate={() => {
+                      setToggleActionMenu(null);
+                      setHidePreview(true);
+                      setOpenDuplicateModal(true);
+                    }}
+                  />
+                  {user.userData.email === event.organizer?.cal_address && (
+                    <MenuItem
+                      onClick={async () => {
+                        if (isRecurring) {
+                          setAfterChoiceFunc(
+                            () => (typeOfAction?: "solo" | "all" | undefined) =>
+                              handleDelete(
+                                isRecurring,
+                                typeOfAction,
+                                onClose,
+                                dispatch,
+                                calendar,
+                                event,
+                                calId,
+                                eventId
+                              )
+                          );
+                          setOpenEditModePopup("edit");
+                        } else {
+                          onClose({}, "backdropClick");
+                          await dispatch(
+                            deleteEventAsync({
+                              calId,
+                              eventId,
+                              eventURL: event.URL,
+                            })
+                          );
+                        }
+                        updateTempList();
+                      }}
+                    >
+                      {t("eventPreview.deleteEvent")}
+                    </MenuItem>
+                  )}
+                </Menu>
+                <IconButton
+                  size="small"
+                  onClick={() => onClose({}, "backdropClick")}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </DialogActions>
+            <Box display="flex" flexDirection="row">
+              {event.class === "PRIVATE" &&
+                (isOwn ? (
                   <Tooltip
-                    title={t("eventPreview.free.tooltip")}
+                    title={t("eventPreview.privateEvent.tooltipOwn")}
                     placement="top"
                   >
-                    <Chip
-                      icon={<CircleIcon color="success" fontSize="small" />}
-                      label={t("eventPreview.free.label")}
-                    />
+                    <LockOutlineIcon />
                   </Tooltip>
-                )}
-              </Box>
-              <Typography color="text.secondaryContainer" gutterBottom>
-                {formatDate(event.start, t, event.allday)}
-                {event.end &&
-                  formatEnd(event.start, event.end, t, event.allday) &&
-                  ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday ? getTimezoneOffset(timezone) : ""}`}
+                ) : (
+                  <LockOutlineIcon />
+                ))}
+              <Typography
+                variant="h5"
+                sx={{
+                  fontSize: "24px",
+                  fontWeight: 600,
+                  wordBreak: "break-word",
+                  fontFamily: "Inter, sans-serif",
+                }}
+                gutterBottom
+              >
+                {event.title ? event.title : t("event.untitled")}
               </Typography>
-            </>
-          )
+              {event.transp === "TRANSPARENT" && (
+                <Tooltip title={t("eventPreview.free.tooltip")} placement="top">
+                  <Chip
+                    icon={<CircleIcon color="success" fontSize="small" />}
+                    label={t("eventPreview.free.label")}
+                  />
+                </Tooltip>
+              )}
+            </Box>
+            <Typography color="text.secondaryContainer" gutterBottom>
+              {formatDate(event.start, t, event.allday)}
+              {event.end &&
+                formatEnd(event.start, event.end, t, event.allday) &&
+                ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday ? getTimezoneOffset(timezone) : ""}`}
+            </Typography>
+          </>
         }
         actions={
           currentUserAttendee &&

@@ -323,7 +323,6 @@ export default function EventFormFields({
   // Validation logic
   const validateForm = React.useCallback(() => {
     return validateEventForm({
-      title,
       startDate,
       startTime,
       endDate,
@@ -410,14 +409,7 @@ export default function EventFormFields({
 
   return (
     <>
-      <FieldWithLabel
-        label={
-          <>
-            {t("event.form.title")} <span style={{ color: "red" }}>*</span>
-          </>
-        }
-        isExpanded={showMore}
-      >
+      <FieldWithLabel label={t("event.form.title")} isExpanded={showMore}>
         <TextField
           fullWidth
           label={!showMore ? t("event.form.title") : ""}
@@ -426,8 +418,6 @@ export default function EventFormFields({
           onChange={(e) => {
             setTitle(e.target.value);
           }}
-          error={!!validation.errors.title}
-          helperText={validation.errors.title}
           size="small"
           margin="dense"
           inputRef={titleInputRef}

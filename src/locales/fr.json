@@ -65,6 +65,7 @@
     "createEvent": "Créer un événement",
     "updateEvent": "Mettre à jour un événement",
     "organizer": "Organisateur",
+    "untitled": "Sans titre",
     "repeat": {
       "repeatEvery": "Répéter tous les",
       "frequency": {
