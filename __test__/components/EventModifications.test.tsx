@@ -338,12 +338,10 @@ describe("CalendarApp integration", () => {
 
     const titleInput = await screen.findByDisplayValue("Original Event");
 
-    // Simulate changing the title
     await act(async () => {
       fireEvent.change(titleInput, "Updated Event");
     });
 
-    // Click "Save" button
     const saveButton = screen.getByRole("button", { name: /save/i });
     await act(async () => {
       saveButton.click();
