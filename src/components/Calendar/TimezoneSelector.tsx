@@ -99,20 +99,15 @@ export function resolveTimezone(tzName: string): string {
   return tzName;
 }
 
-export function getTimezoneOffset(tzName: string): string {
-  const resolvedTz = resolveTimezone(tzName);
-  const tzData = TIMEZONES.zones[resolvedTz];
-  if (!tzData) return "";
-
-  const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
-  if (!icsMatch) return "";
-
-  const offset = icsMatch[1];
-  const hours = parseInt(offset.slice(0, 3));
-  const minutes = parseInt(offset.slice(3));
-
-  if (minutes === 0) {
-    return `UTC${hours >= 0 ? "+" : ""}${hours}`;
-  }
-  return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
+export function getTimezoneOffset(
+  tzName: string,
+  date: Date = new Date()
+): string {
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    timeZone: tzName,
+    timeZoneName: "shortOffset",
+  });
+  const parts = fmt.formatToParts(date);
+  const offsetPart = parts.find((p) => p.type === "timeZoneName");
+  return offsetPart?.value.replace("GMT", "UTC") ?? "";
 }

@@ -16,7 +16,7 @@ describe("TimezoneSelector", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent("UTC-4"); // New York offset
+    expect(button).toHaveTextContent(/UTC−[45]/i); // New York offset
   });
 
   it("opens popover when button is clicked", async () => {

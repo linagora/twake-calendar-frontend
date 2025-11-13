@@ -216,7 +216,7 @@ describe("EventDisplayPreview - Timezone Display", () => {
 
   it("displays correct timezone offset for different timezones", async () => {
     const timezones = [
-      { tz: "America/New_York", expectedOffset: /UTC-[45]/ },
+      { tz: "America/New_York", expectedOffset: /UTC−[45]/ },
       { tz: "Europe/Paris", expectedOffset: /UTC\+[12]/ },
       { tz: "Asia/Tokyo", expectedOffset: /UTC\+9/ },
       { tz: "Australia/Sydney", expectedOffset: /UTC\+1[01]/ },
