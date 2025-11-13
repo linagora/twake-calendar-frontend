@@ -270,7 +270,7 @@ describe("CalendarApp integration", () => {
     expect(screen.getByText("Public Event")).toBeInTheDocument();
   });
 
-  it("BUGFIX : keeps organizer event participation on update", async () => {
+  it("BUGFIX : keeps all attendees event participation on update", async () => {
     const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
 
     const preloadedState = {
@@ -314,6 +314,14 @@ describe("CalendarApp integration", () => {
                     role: "CHAIR",
                     cutype: "INDIVIDUAL",
                     cal_address: "alice@example.com",
+                  },
+                  {
+                    cn: "Bob",
+                    partstat: "ACCEPTED",
+                    rsvp: "TRUE",
+                    role: "CHAIR",
+                    cutype: "INDIVIDUAL",
+                    cal_address: "bob@example.com",
                   },
                 ],
               },
@@ -361,5 +369,14 @@ describe("CalendarApp integration", () => {
     expect(organizerAttendee).toBeTruthy();
     expect(organizerAttendee?.partstat).toBe("ACCEPTED");
     expect(organizerAttendee?.role).toBe("CHAIR");
+
+    // Ensure normal attendee info is preserved too
+    const normalAttendee = updatedEvent?.attendee?.find(
+      (a: any) => a.cal_address === "bob@example.com"
+    );
+
+    expect(normalAttendee).toBeTruthy();
+    expect(normalAttendee?.partstat).toBe("ACCEPTED");
+    expect(normalAttendee?.role).toBe("CHAIR");
   });
 });
