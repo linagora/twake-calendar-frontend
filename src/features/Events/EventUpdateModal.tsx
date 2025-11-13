@@ -282,10 +282,15 @@ function EventUpdateModal({
       setEventClass(event.class ?? "PUBLIC");
       setBusy(event.transp ?? "OPAQUE");
 
-      const resolvedTimezone = event.timezone
-        ? resolveTimezone(event.timezone)
-        : resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-      setTimezone(resolvedTimezone);
+      if (event.timezone) {
+        const resolvedTimezone = resolveTimezone(event.timezone);
+        setTimezone(resolvedTimezone);
+      } else {
+        const browserTz = resolveTimezone(
+          Intl.DateTimeFormat().resolvedOptions().timeZone
+        );
+        setTimezone(browserTz);
+      }
       setHasVideoConference(event.x_openpass_videoconference ? true : false);
       setMeetingLink(event.x_openpass_videoconference || null);
       setNewCalId(event.calId || calId);
@@ -390,12 +395,26 @@ function EventUpdateModal({
       // For single events or "solo" edits, use the edited dates from form
       if (allday) {
         // For all-day events, use date format (YYYY-MM-DD)
+        // Extract date string directly to avoid timezone conversion issues
+        const startDateOnly = (start || "").split("T")[0];
+        const endDateOnlyUI = (end || start || "").split("T")[0];
         // API needs end date = UI end date + 1 day
-        const startDateOnly = new Date(start).toISOString().split("T")[0];
-        const endDateOnlyUI = new Date(end).toISOString().split("T")[0];
         const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
-        startDate = startDateOnly;
-        endDate = endDateOnlyAPI;
+        // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+        const [startYear, startMonth, startDay] = startDateOnly
+          .split("-")
+          .map(Number);
+        const [endYear, endMonth, endDay] = endDateOnlyAPI
+          .split("-")
+          .map(Number);
+        const startDateObj = new Date(
+          Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
+        );
+        const endDateObj = new Date(
+          Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+        );
+        startDate = startDateObj.toISOString();
+        endDate = endDateObj.toISOString();
       } else {
         // For timed events
         startDate = convertFormDateTimeToISO(start, timezone);

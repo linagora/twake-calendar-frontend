@@ -365,14 +365,17 @@ function EventPopover({
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
 
-      // Get event's timezone for formatting
-      const eventTimezone = event.timezone
-        ? resolveTimezone(event.timezone)
-        : resolvedCalendarTimezone;
-
       // Handle all-day events properly
       const isAllDay = event.allday ?? false;
       setAllDay(isAllDay);
+
+      // Get event's timezone for formatting - prioritize event.timezone from server
+      let eventTimezone: string;
+      if (event.timezone) {
+        eventTimezone = resolveTimezone(event.timezone);
+      } else {
+        eventTimezone = resolvedCalendarTimezone;
+      }
 
       // Format dates based on all-day status and timezone
       if (event.start) {
@@ -627,8 +630,17 @@ function EventPopover({
       const endDateOnlyUI = (end || start || "").split("T")[0];
       // For all-day events, API needs end date = UI end date + 1 day
       const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
-      const startDateObj = new Date(`${startDateOnly}T00:00:00`);
-      const endDateObj = new Date(`${endDateOnlyAPI}T00:00:00`);
+      // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+      const [startYear, startMonth, startDay] = startDateOnly
+        .split("-")
+        .map(Number);
+      const [endYear, endMonth, endDay] = endDateOnlyAPI.split("-").map(Number);
+      const startDateObj = new Date(
+        Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
+      );
+      const endDateObj = new Date(
+        Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+      );
       newEvent.start = startDateObj.toISOString();
       newEvent.end = endDateObj.toISOString();
     } else {

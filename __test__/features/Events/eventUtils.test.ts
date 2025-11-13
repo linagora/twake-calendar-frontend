@@ -59,6 +59,7 @@ describe("parseCalendarEvent", () => {
     expect(result.transp).toBe("OPAQUE");
     expect(result.class).toBe("PUBLIC");
     expect(result.x_openpass_videoconference).toBe("https://meet.link");
+    expect(result.timezone).toBe("Etc/UTC");
 
     expect(result.organizer).toEqual({
       cn: "Alice",
@@ -120,6 +121,7 @@ describe("parseCalendarEvent", () => {
     expect(result.transp).toBe("OPAQUE");
     expect(result.class).toBe("PUBLIC");
     expect(result.x_openpass_videoconference).toBe("https://meet.link");
+    expect(result.timezone).toBe("Etc/UTC");
 
     expect(result.organizer).toEqual({
       cn: "Alice",
@@ -211,7 +213,11 @@ describe("parseCalendarEvent", () => {
       calendarId,
       "/calendars/test.ics"
     );
-    expect(result.end).toBe("2025-07-18T10:00:00");
+    expect(result.end).toBeDefined();
+    expect(result.timezone).toBeDefined();
+    const endDate = new Date(result.end);
+    const startDate = new Date(result.start);
+    expect(endDate.getTime() - startDate.getTime()).toBe(60 * 60 * 1000);
   });
 
   it("returns error if end and duration is missing", () => {
@@ -259,6 +265,7 @@ describe("parseCalendarEvent", () => {
     const rawData = [
       ["UID", {}, "text", "event-4"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
+      ["DTEND", {}, "date-time", "2025-07-18T10:00:00Z"],
       ["ATTENDEE", {}, "cal-address", "john@example.com"],
       ["ORGANIZER", {}, "cal-address", "jane@example.com"],
     ] as unknown as [string, Record<string, string>, string, any];
@@ -286,6 +293,66 @@ describe("parseCalendarEvent", () => {
       cal_address: "jane@example.com",
     });
   });
+
+  it("converts datetime without timezone to ISO UTC when timezone is detected", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-tz"],
+      ["DTSTART", { tzid: "Asia/Bangkok" }, "date-time", "2025-07-18T09:00:00"],
+      ["DTEND", { tzid: "Asia/Bangkok" }, "date-time", "2025-07-18T10:00:00"],
+    ] as unknown as [string, Record<string, string>, string, any];
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+
+    expect(result.timezone).toBeDefined();
+    expect(result.start).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+    );
+    expect(result.end).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(result.allday).toBe(false);
+  });
+
+  it("does not convert datetime with Z suffix", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-utc"],
+      ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
+      ["DTEND", {}, "date-time", "2025-07-18T10:00:00Z"],
+    ] as unknown as [string, Record<string, string>, string, any];
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+
+    expect(result.start).toBe("2025-07-18T09:00:00Z");
+    expect(result.end).toBe("2025-07-18T10:00:00Z");
+    expect(result.timezone).toBe("Etc/UTC");
+  });
+
+  it("preserves all-day event dates without conversion", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-allday"],
+      ["DTSTART", {}, "date", "2025-07-18"],
+      ["DTEND", {}, "date", "2025-07-19"],
+    ] as unknown as [string, Record<string, string>, string, any];
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendarId,
+      "/calendars/test.ics"
+    );
+
+    expect(result.allday).toBe(true);
+    expect(result.start).toBe("2025-07-18");
+    expect(result.end).toBe("2025-07-19");
+  });
 });
 
 describe("calendarEventToJCal", () => {
@@ -304,8 +371,8 @@ describe("calendarEventToJCal", () => {
       URL: "/calendars/test.ics",
       calId: "test/test",
       title: "Team Meeting",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
       timezone: "Europe/Paris",
       transp: "OPAQUE",
       class: "PUBLIC",
@@ -336,18 +403,24 @@ describe("calendarEventToJCal", () => {
     expect(vevent[0]).toBe("vevent");
 
     const props = vevent[1];
+    const dtstart = props.find((p: any[]) => p[0] === "dtstart");
+    const dtend = props.find((p: any[]) => p[0] === "dtend");
+
+    expect(dtstart).toBeDefined();
+    expect(dtstart[1]).toEqual({ tzid: "Europe/Paris" });
+    expect(dtstart[2]).toBe("date-time");
+    expect(dtstart[3]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/);
+
+    expect(dtend).toBeDefined();
+    expect(dtend[1]).toEqual({ tzid: "Europe/Paris" });
+    expect(dtend[2]).toBe("date-time");
+    expect(dtend[3]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/);
+
     expect(props).toEqual(
       expect.arrayContaining([
         ["uid", {}, "text", "event-123"],
         ["summary", {}, "text", "Team Meeting"],
         ["transp", {}, "text", "OPAQUE"],
-        [
-          "dtstart",
-          { tzid: "Europe/Paris" },
-          "date-time",
-          "2025-07-23T10:00:00",
-        ],
-        ["dtend", { tzid: "Europe/Paris" }, "date-time", "2025-07-23T11:00:00"],
         ["class", {}, "text", "PUBLIC"],
         ["location", {}, "text", "Room 101"],
         ["description", {}, "text", "Discuss project roadmap."],
@@ -416,8 +489,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent: any = {
       uid: "event-10",
       title: "Alarm Event",
-      start: new Date("2025-07-20T09:00:00"),
-      end: new Date("2025-07-20T10:00:00"),
+      start: "2025-07-20T07:00:00.000Z",
+      end: "2025-07-20T08:00:00.000Z",
       timezone: "Europe/Paris",
       allday: false,
       alarm: { trigger: "-PT10M", action: "DISPLAY" },
@@ -440,8 +513,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent: any = {
       uid: "event-11",
       title: "All Day",
-      start: new Date("2025-07-21"),
-      end: new Date("2025-07-21"),
+      start: "2025-07-21T00:00:00.000Z",
+      end: "2025-07-21T00:00:00.000Z",
       timezone: "Europe/Paris",
       allday: true,
       attendee: [],
@@ -464,8 +537,8 @@ describe("calendarEventToJCal", () => {
       URL: "/calendars/test.ics",
       calId: "test/test",
       title: "Team Meeting",
-      start: new Date("2025-07-23"),
-      end: new Date("2025-07-23"),
+      start: "2025-07-23T00:00:00.000Z",
+      end: "2025-07-23T00:00:00.000Z",
       timezone: "Europe/Paris",
       transp: "OPAQUE",
       class: "PUBLIC",
@@ -572,8 +645,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent = {
       uid: "event-invalid-tz",
       title: "Invalid Timezone Event",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T10:00:00.000Z",
+      end: "2025-07-23T11:00:00.000Z",
       timezone: "Invalid/Timezone",
       allday: false,
       attendee: [],
@@ -607,8 +680,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent = {
       uid: "event-null-tz",
       title: "Null Timezone Event",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T10:00:00.000Z",
+      end: "2025-07-23T11:00:00.000Z",
       timezone: null,
       allday: false,
       attendee: [],
@@ -642,8 +715,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent = {
       uid: "event-undefined-tz",
       title: "Undefined Timezone Event",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T10:00:00.000Z",
+      end: "2025-07-23T11:00:00.000Z",
       timezone: undefined,
       allday: false,
       attendee: [],
@@ -677,8 +750,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent = {
       uid: "event-empty-tz",
       title: "Empty Timezone Event",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T10:00:00.000Z",
+      end: "2025-07-23T11:00:00.000Z",
       timezone: "",
       allday: false,
       attendee: [],
@@ -712,8 +785,8 @@ describe("calendarEventToJCal", () => {
     const mockEvent = {
       uid: "event-valid-tz",
       title: "Valid Timezone Event",
-      start: new Date("2025-07-23T10:00:00"),
-      end: new Date("2025-07-23T11:00:00"),
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
       timezone: "Europe/Paris",
       allday: false,
       attendee: [],
@@ -792,8 +865,9 @@ describe("combineMasterDateWithFormTime", () => {
       mockFormatDateTime
     );
 
-    expect(result.startDate).toBe("2025-10-14");
-    expect(result.endDate).toBe("2025-10-14");
+    // Function now returns ISO UTC strings for all-day events to avoid timezone offset issues
+    expect(result.startDate).toBe("2025-10-14T00:00:00.000Z");
+    expect(result.endDate).toBe("2025-10-14T00:00:00.000Z");
   });
 
   it("should handle all-day events with missing end date", () => {
@@ -811,8 +885,10 @@ describe("combineMasterDateWithFormTime", () => {
       mockFormatDateTime
     );
 
-    expect(result.startDate).toBe("2025-10-14");
-    expect(result.endDate).toBe("2025-10-14");
+    // Function now returns ISO UTC strings for all-day events to avoid timezone offset issues
+    // When end is missing, it uses start date for end date
+    expect(result.startDate).toBe("2025-10-14T00:00:00.000Z");
+    expect(result.endDate).toBe("2025-10-14T00:00:00.000Z");
   });
 
   it("should combine master date with form time for timed events", () => {

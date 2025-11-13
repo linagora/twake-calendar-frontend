@@ -8,6 +8,31 @@ import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
+function convertEventDateTimeToISO(
+  datetime: string,
+  eventTimezone: string,
+  isAllDay: boolean
+): string {
+  if (!datetime || isAllDay) return datetime;
+
+  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
+    return datetime;
+  }
+
+  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (dateOnlyRegex.test(datetime)) {
+    return datetime;
+  }
+
+  const format =
+    datetime.length >= 19 ? "YYYY-MM-DDTHH:mm:ss" : "YYYY-MM-DDTHH:mm";
+  const momentDate = moment.tz(datetime, format, eventTimezone);
+  if (!momentDate.isValid()) {
+    return datetime;
+  }
+  return momentDate.toISOString();
+}
+
 export const updateSlotLabelVisibility = (
   currentTime: Date,
   slotLabel: SlotLabelContentArg,
@@ -72,20 +97,39 @@ export const eventToFullCalendarFormat = (
   return filteredEvents
     .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
     .map((e) => {
-      if (e.calId.split("/")[0] === userId) {
-        return {
-          ...e,
-          title: formatEventChipTitle(e, t),
-          colors: e.color,
-          editable: true,
-        };
-      }
-      return {
+      const eventTimezone = e.timezone || "Etc/UTC";
+      const isAllDay = e.allday ?? false;
+
+      const convertedEvent: any = {
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
-        editable: false,
+        editable: e.calId.split("/")[0] === userId,
       };
+
+      if (!isAllDay && e.start && eventTimezone) {
+        const startISO = convertEventDateTimeToISO(
+          e.start,
+          eventTimezone,
+          isAllDay
+        );
+        if (startISO) {
+          convertedEvent.start = startISO;
+        }
+      }
+
+      if (!isAllDay && e.end && eventTimezone) {
+        const endISO = convertEventDateTimeToISO(
+          e.end,
+          eventTimezone,
+          isAllDay
+        );
+        if (endISO) {
+          convertedEvent.end = endISO;
+        }
+      }
+
+      return convertedEvent;
     });
 };
 
