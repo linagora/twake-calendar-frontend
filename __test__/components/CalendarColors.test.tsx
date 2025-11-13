@@ -328,13 +328,17 @@ describe("CalendarSearch", () => {
 
     expect(addSharedCalendarSpy).not.toHaveBeenCalled();
   });
-
   it("BUGFIX : handles calendar with no apple:color", async () => {
+    const addSharedCalendarSpy = jest
+      .spyOn(CalendarSlice, "addSharedCalendarAsync")
+      .mockImplementation((payload) => {
+        return () => Promise.resolve(payload) as any;
+      });
     const mockCalendarNoColor = {
       "dav:name": "Test Calendar",
       _links: {
         self: {
-          href: "/calendars/user123/cal1.json",
+          href: "/calendars/user123/cal2.json",
         },
       },
     };
@@ -357,6 +361,10 @@ describe("CalendarSearch", () => {
       userEvent.type(input, "Test");
     });
 
+    await waitFor(() => {
+      expect(mockedSearchUsers).toHaveBeenCalledWith("Test", expect.anything());
+    });
+
     const option = await screen.findByText("Test User");
     await act(async () => {
       fireEvent.click(option);
@@ -373,5 +381,33 @@ describe("CalendarSearch", () => {
       expect(screen.getByText("Test Calendar")).toBeInTheDocument();
       expect(screen.getByText("user@example.com")).toBeInTheDocument();
     });
+
+    const addButton = screen.getByRole("button", { name: /add/i });
+    await act(async () => {
+      fireEvent.click(addButton);
+    });
+    await waitFor(() =>
+      expect(addSharedCalendarSpy).toHaveBeenCalledWith({
+        cal: {
+          cal: {
+            _links: { self: { href: "/calendars/user123/cal2.json" } },
+            "dav:name": "Test Calendar",
+          },
+          color: { dark: "#329655", light: "#D0ECDA" },
+          owner: {
+            avatarUrl: "https://example.com/avatar.jpg",
+            displayName: "Test User",
+            email: "user@example.com",
+            openpaasId: "user123",
+          },
+        },
+        calId: expect.any(String),
+        userId: "user1",
+      })
+    );
+
+    expect(mockOnClose).toHaveBeenCalledWith(
+      expect.arrayContaining(["user123/cal2"])
+    );
   });
 });
