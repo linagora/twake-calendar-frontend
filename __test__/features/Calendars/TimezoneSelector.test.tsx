@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import { TimezoneSelector } from "../../../src/components/Calendar/TimezoneSelector";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
@@ -11,7 +11,11 @@ describe("TimezoneSelector", () => {
 
   it("renders with initial timezone value", () => {
     renderWithProviders(
-      <TimezoneSelector value="America/New_York" onChange={mockOnChange} />
+      <TimezoneSelector
+        referenceDate={new Date()}
+        value="America/New_York"
+        onChange={mockOnChange}
+      />
     );
 
     const button = screen.getByRole("button");
@@ -21,7 +25,11 @@ describe("TimezoneSelector", () => {
 
   it("opens popover when button is clicked", async () => {
     renderWithProviders(
-      <TimezoneSelector value="Europe/Paris" onChange={mockOnChange} />
+      <TimezoneSelector
+        referenceDate={new Date()}
+        value="Europe/Paris"
+        onChange={mockOnChange}
+      />
     );
 
     const button = screen.getByRole("button");
@@ -34,7 +42,11 @@ describe("TimezoneSelector", () => {
 
   it("calls onChange when a new timezone is selected", async () => {
     renderWithProviders(
-      <TimezoneSelector value="Europe/Paris" onChange={mockOnChange} />
+      <TimezoneSelector
+        referenceDate={new Date()}
+        value="Europe/Paris"
+        onChange={mockOnChange}
+      />
     );
 
     const button = screen.getByRole("button");
@@ -56,7 +68,11 @@ describe("TimezoneSelector", () => {
 
   it("closes popover after timezone selection", async () => {
     renderWithProviders(
-      <TimezoneSelector value="Europe/Paris" onChange={mockOnChange} />
+      <TimezoneSelector
+        referenceDate={new Date()}
+        value="Europe/Paris"
+        onChange={mockOnChange}
+      />
     );
 
     const button = screen.getByRole("button");
@@ -79,10 +95,40 @@ describe("TimezoneSelector", () => {
 
   it("displays timezones with half-hour offsets correctly", () => {
     renderWithProviders(
-      <TimezoneSelector value="Asia/Kolkata" onChange={mockOnChange} />
+      <TimezoneSelector
+        referenceDate={new Date()}
+        value="Asia/Kolkata"
+        onChange={mockOnChange}
+      />
     );
 
     const button = screen.getByRole("button");
     expect(button).toHaveTextContent("UTC+5:30"); // India offset
+  });
+
+  it("shows correct offset for Europe/Paris depending on daylight saving time", () => {
+    // Summer date (DST on)
+    const summerDate = new Date("2025-07-15T12:00:00Z");
+    renderWithProviders(
+      <TimezoneSelector
+        value="Europe/Paris"
+        onChange={mockOnChange}
+        referenceDate={summerDate}
+      />
+    );
+    let button = screen.getByRole("button");
+    expect(button).toHaveTextContent(/UTC\+2\b/);
+    cleanup();
+    // Rerender with a winter date (DST off)
+    const winterDate = new Date("2025-01-15T12:00:00Z");
+    renderWithProviders(
+      <TimezoneSelector
+        value="Europe/Paris"
+        onChange={mockOnChange}
+        referenceDate={winterDate}
+      />
+    );
+    button = screen.getByRole("button");
+    expect(button).toHaveTextContent(/UTC\+1\b/);
   });
 });

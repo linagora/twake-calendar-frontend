@@ -407,6 +407,7 @@ export default function CalendarApp({
                 </div>
                 <TimezoneSelector
                   value={timezone}
+                  referenceDate={calendarRef.current?.getDate() ?? new Date()}
                   onChange={(newTimezone: string) =>
                     dispatch(setTimeZone(newTimezone))
                   }

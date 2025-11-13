@@ -1,5 +1,6 @@
 import { Button, Popover } from "@mui/material";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
@@ -7,9 +8,14 @@ import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 interface TimezoneSelectProps {
   value: string;
   onChange: (value: string) => void;
+  referenceDate: Date;
 }
 
-export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
+export function TimezoneSelector({
+  value,
+  onChange,
+  referenceDate,
+}: TimezoneSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const timezoneList = useMemo(() => {
@@ -24,7 +30,7 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
   const effectiveTimezone = value
     ? resolveTimezone(value)
     : timezoneList.browserTz;
-  const selectedOffset = getTimezoneOffset(effectiveTimezone);
+  const selectedOffset = getTimezoneOffset(effectiveTimezone, referenceDate);
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -76,7 +82,9 @@ export function TimezoneSelector({ value, onChange }: TimezoneSelectProps) {
           value={effectiveTimezone}
           onChange={onChange}
           zones={timezoneList.zones}
-          getTimezoneOffset={getTimezoneOffset}
+          getTimezoneOffset={(tzName: string) =>
+            getTimezoneOffset(tzName, referenceDate)
+          }
           autoFocus={true}
           showIcon={true}
           inputFontSize="14px"
@@ -107,7 +115,9 @@ export function getTimezoneOffset(
     timeZone: tzName,
     timeZoneName: "shortOffset",
   });
-  const parts = fmt.formatToParts(date);
+
+  const currentDate = moment(date).isValid() ? date : new Date();
+  const parts = fmt.formatToParts(currentDate);
   const offsetPart = parts.find((p) => p.type === "timeZoneName");
   return offsetPart?.value.replace("GMT", "UTC") ?? "";
 }
