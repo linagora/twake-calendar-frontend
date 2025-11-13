@@ -11,9 +11,8 @@ export const api = ky.extend({
           : null;
         const access_token = saved?.access_token;
 
-        const modifiedRequest = new Request(request);
-        modifiedRequest.headers.set("Authorization", `Bearer ${access_token}`);
-        return modifiedRequest;
+        request.headers.set("Authorization", `Bearer ${access_token}`);
+        return request;
       },
     ],
     afterResponse: [

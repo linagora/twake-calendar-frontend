@@ -171,13 +171,21 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 
 export const getCalendarDetailAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[]; calType?: string },
-  { calId: string; match: { start: string; end: string }; calType?: string },
+  {
+    calId: string;
+    match: { start: string; end: string };
+    calType?: string;
+    signal?: AbortSignal;
+  },
   { rejectValue: RejectedError }
 >(
   "calendars/getCalendarDetails",
-  async ({ calId, match, calType }, { rejectWithValue }) => {
+  async ({ calId, match, calType, signal }, { rejectWithValue }) => {
     try {
-      const calendar = (await getCalendar(calId, match)) as Record<string, any>;
+      const calendar = (await getCalendar(calId, match, signal)) as Record<
+        string,
+        any
+      >;
       const color = calendar["apple:color"];
       const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
         (eventdata: any) => {
@@ -736,10 +744,7 @@ const CalendarSlice = createSlice({
           const type = action.payload.calType === "temp" ? "templist" : "list";
 
           if (!state[type][action.payload.calId]) {
-            state[type][action.payload.calId] = {
-              id: action.payload.calId,
-              events: {},
-            } as Calendars;
+            return;
           }
           action.payload.events.forEach((event) => {
             state[type][action.payload.calId].events[event.uid] = event;
@@ -998,6 +1003,12 @@ const CalendarSlice = createSlice({
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
         state.pending = false;
+        if (
+          action.payload?.message.includes("aborted") ||
+          action.error.name === "AbortError"
+        ) {
+          return;
+        }
         state.error =
           action.payload?.message ||
           action.error.message ||
@@ -1005,6 +1016,12 @@ const CalendarSlice = createSlice({
       })
       .addCase(getCalendarDetailAsync.rejected, (state, action) => {
         state.pending = false;
+        if (
+          action.payload?.message.includes("aborted") ||
+          action.error.name === "AbortError"
+        ) {
+          return;
+        }
         state.error =
           action.payload?.message ||
           action.error.message ||

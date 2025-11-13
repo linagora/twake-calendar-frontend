@@ -211,6 +211,10 @@ export default function CalendarApp({
   const [prevTempCalendars, setPrevTempCalendars] = useState<string[]>([]);
   const [prevRangeKey, setPrevRangeKey] = useState<string>("");
 
+  const tempCalendarControllersRef = useRef<Map<string, AbortController>>(
+    new Map()
+  );
+
   useEffect(() => {
     updateCalsDetails(
       Object.keys(tempcalendars),
@@ -220,8 +224,20 @@ export default function CalendarApp({
       prevRangeKey,
       dispatch,
       calendarRange,
-      "temp"
+      "temp",
+      tempCalendarControllersRef.current
     );
+
+    prevTempCalendars.forEach((calId) => {
+      if (!Object.keys(tempcalendars).includes(calId)) {
+        const controller = tempCalendarControllersRef.current.get(calId);
+        if (controller) {
+          controller.abort();
+          tempCalendarControllersRef.current.delete(calId);
+        }
+        delete fetchedRangesRef.current[calId];
+      }
+    });
 
     setPrevTempCalendars(Object.keys(tempcalendars));
     setPrevRangeKey(rangeKey);

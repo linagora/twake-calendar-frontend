@@ -330,7 +330,15 @@ describe("CalendarSlice", () => {
     it("getCalendarDetailAsync.fulfilled adds calendar events", () => {
       const payload = { calId: "c1", events: [{ uid: "e1" }] as any[] };
       const state = reducer(
-        initialState,
+        {
+          ...initialState,
+          list: {
+            ["c1"]: {
+              id: "c1",
+              events: {},
+            } as unknown as Calendars,
+          },
+        },
         getCalendarDetailAsync.fulfilled(payload, "req11", {
           calId: "c1",
           match: { start: "", end: "" },
