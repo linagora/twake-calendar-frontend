@@ -2,13 +2,15 @@ import { api } from "../../utils/apiUtils";
 
 export async function getCalendars(
   userId: string,
-  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true"
+  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true",
+  signal?: AbortSignal
 ) {
   const calendars = await api
     .get(`dav/calendars/${userId}.json?${scope}`, {
       headers: {
         Accept: "application/calendar+json",
       },
+      signal,
     })
     .json();
   return calendars;
@@ -16,7 +18,8 @@ export async function getCalendars(
 
 export async function getCalendar(
   id: string,
-  match: { start: string; end: string }
+  match: { start: string; end: string },
+  signal?: AbortSignal
 ) {
   const response = await api(`dav/calendars/${id}.json`, {
     method: "REPORT",
@@ -26,6 +29,7 @@ export async function getCalendar(
     body: JSON.stringify({
       match,
     }),
+    signal,
   });
   const calendar = await response.json();
   return calendar;
