@@ -329,6 +329,32 @@ function EventUpdateModal({
     if (!event) return;
 
     const organizer = event.organizer;
+    let updatedAttendees: userAttendee[] = [];
+
+    if (organizer) {
+      const organizerAttendee = event.attendee?.find(
+        (a) => a.cal_address === organizer.cal_address
+      );
+
+      const fullOrganizerAttendee =
+        organizerAttendee ||
+        ({
+          ...organizer,
+          role: "CHAIR",
+          partstat: "ACCEPTED",
+          rsvp: "FALSE",
+          cutype: "INDIVIDUAL",
+        } as userAttendee);
+
+      updatedAttendees = [
+        fullOrganizerAttendee,
+        ...attendees.filter(
+          (a) => a.cal_address !== fullOrganizerAttendee.cal_address
+        ),
+      ];
+    } else {
+      updatedAttendees = attendees;
+    }
 
     const targetCalendar = calList[calendarid];
     if (!targetCalendar) {
@@ -421,9 +447,7 @@ function EventUpdateModal({
       class: eventClass,
       organizer: organizer,
       timezone,
-      attendee: organizer
-        ? [organizer as userAttendee, ...attendees]
-        : attendees,
+      attendee: updatedAttendees,
       transp: busy,
       color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },

@@ -2,10 +2,19 @@ import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { act, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import * as appHooks from "../../src/app/hooks";
+import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import CalendarApp from "../../src/components/Calendar/Calendar";
+import EventUpdateModal from "../../src/features/Events/EventUpdateModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+import { putEvent } from "../../src/features/Events/EventApi";
 
 describe("CalendarApp integration", () => {
   const today = new Date();
@@ -259,5 +268,100 @@ describe("CalendarApp integration", () => {
     });
 
     expect(screen.getByText("Public Event")).toBeInTheDocument();
+  });
+
+  it("BUGFIX : keeps organizer event participation on update", async () => {
+    const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          sid: "mockSid",
+          openpaasId: "667037022b752d0026472254",
+        },
+        tokens: {
+          accessToken: "token",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            name: "Calendar 1",
+            id: "667037022b752d0026472254/cal1",
+            color: { light: "#FFFFFF", dark: "#000000" },
+            ownerEmails: ["alice@example.com"],
+            events: {
+              event1: {
+                id: "event1",
+                calId: "667037022b752d0026472254/cal1",
+                uid: "event1",
+                title: "Original Event",
+                start: new Date().toISOString(),
+                end: new Date(Date.now() + 3600000).toISOString(),
+                class: "PUBLIC",
+                partstat: "ACCEPTED",
+                organizer: {
+                  cn: "Alice",
+                  cal_address: "alice@example.com",
+                },
+                attendee: [
+                  {
+                    cn: "Alice",
+                    partstat: "ACCEPTED",
+                    rsvp: "TRUE",
+                    role: "CHAIR",
+                    cutype: "INDIVIDUAL",
+                    cal_address: "alice@example.com",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        pending: false,
+      },
+    };
+
+    const onClose = jest.fn();
+    renderWithProviders(
+      <EventUpdateModal
+        eventId="event1"
+        calId="667037022b752d0026472254/cal1"
+        open={true}
+        onClose={onClose}
+        typeOfAction="solo"
+      />,
+      preloadedState
+    );
+
+    const titleInput = await screen.findByDisplayValue("Original Event");
+
+    // Simulate changing the title
+    await act(async () => {
+      fireEvent.change(titleInput, "Updated Event");
+    });
+
+    // Click "Save" button
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    await act(async () => {
+      saveButton.click();
+    });
+
+    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+
+    const dispatchedCalls = updateSpy.mock.calls;
+    expect(dispatchedCalls.length).toBeGreaterThan(0);
+    const updatedEvent = dispatchedCalls[0][0].newEvent;
+
+    // Ensure organizer attendee info is preserved
+    const organizerAttendee = updatedEvent?.attendee?.find(
+      (a: any) => a.cal_address === "alice@example.com"
+    );
+
+    expect(organizerAttendee).toBeTruthy();
+    expect(organizerAttendee?.partstat).toBe("ACCEPTED");
+    expect(organizerAttendee?.role).toBe("CHAIR");
   });
 });
