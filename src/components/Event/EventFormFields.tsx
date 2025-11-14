@@ -90,7 +90,7 @@ interface EventFormFieldsProps {
   timezoneList: {
     zones: string[];
     browserTz: string;
-    getTimezoneOffset: (tzName: string) => string;
+    getTimezoneOffset: (tzName: string, date: Date) => string;
   };
 
   // Event handlers
@@ -534,7 +534,9 @@ export default function EventFormFields({
             value={timezone}
             onChange={setTimezone}
             zones={timezoneList.zones}
-            getTimezoneOffset={timezoneList.getTimezoneOffset}
+            getTimezoneOffset={(tzName: string) =>
+              timezoneList.getTimezoneOffset(tzName, new Date(start))
+            }
             showIcon={true}
             width={240}
             size="small"
