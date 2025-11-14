@@ -41,6 +41,7 @@ export function PeopleSearch({
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -57,22 +58,25 @@ export function PeopleSearch({
         if (!cancelled) {
           setOptions([]);
           setLoading(false);
+          setHasSearched(false);
         }
         return;
       }
 
       if (!cancelled) {
         setLoading(true);
+        setHasSearched(false);
       }
 
       try {
         const res = await searchUsers(query, objectTypes);
         if (!cancelled) {
           setOptions(res);
+          setHasSearched(true);
         }
       } catch (error: any) {
         if (!cancelled) {
-          setOptions([]);
+          setHasSearched(false);
           setSnackbarMessage(t("peopleSearch.searchError"));
           setSnackbarOpen(true);
         }
@@ -96,11 +100,13 @@ export function PeopleSearch({
         multiple
         options={options}
         autoComplete={false}
-        open={!!query}
+        open={!!query && (loading || hasSearched)}
         disabled={disabled}
         loading={loading}
         filterOptions={(x) => x}
         fullWidth
+        noOptionsText={t("peopleSearch.noResults")}
+        loadingText={t("peopleSearch.loading")}
         getOptionLabel={(option) => {
           if (typeof option === "object") {
             return option.displayName || option.email;
