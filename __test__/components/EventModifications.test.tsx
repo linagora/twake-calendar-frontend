@@ -382,7 +382,7 @@ describe("CalendarApp integration", () => {
       expect(normalAttendee?.role).toBe("CHAIR"); //will need to be changed as not the right role
     });
 
-    it("keeps change normal attendee to need action on time update and no organizer changes", async () => {
+    it("changes normal attendee to need action on time update and no organizer changes", async () => {
       const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
       const onClose = jest.fn();
       renderWithProviders(
