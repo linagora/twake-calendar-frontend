@@ -50,10 +50,10 @@ function CalendarItem({
           src={cal.owner.avatarUrl}
           alt={cal.owner.email}
           style={{
-            border: `2px solid ${cal.cal["apple:color"] || defaultColors[0]}`,
+            border: `2px solid ${cal.cal["apple:color"] || defaultColors[0].light}`,
             boxShadow: cal.cal["apple:color"]
               ? `0 0 0 2px ${cal.cal["apple:color"]}`
-              : `0 0 0 2px ${defaultColors[0]}`,
+              : `0 0 0 2px ${defaultColors[0].light}`,
           }}
         />
         <Box>
@@ -196,6 +196,8 @@ export default function CalendarSearch({
   onClose: Function;
 }) {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+
   const openpaasId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
@@ -222,7 +224,12 @@ export default function CalendarSearch({
                 calId,
                 cal: {
                   ...cal,
-                  color: cal.cal["apple:color"],
+                  color: cal.cal["apple:color"]
+                    ? {
+                        light: cal.cal["apple:color"],
+                        dark: getAccessiblePair(cal.cal["apple:color"], theme),
+                      }
+                    : defaultColors[0],
                 },
               })
             );
@@ -320,7 +327,6 @@ export default function CalendarSearch({
                     cal: {
                       ...prevcal.cal,
                       "apple:color": color.light,
-                      "X-TWAKE-Dark-theme-color": color.dark,
                     },
                   }
                 : prevcal

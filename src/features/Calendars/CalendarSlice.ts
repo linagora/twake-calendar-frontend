@@ -563,10 +563,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
         calId: cal.cal._links.self.href
           .replace("/calendars/", "")
           .replace(".json", ""),
-        color: {
-          light: cal.cal["apple:color"],
-          dark: "#000",
-        },
+        color: cal.color,
         link: `/calendars/${userId}/${calId}.json`,
         desc: cal.cal["caldav:description"],
         name:
