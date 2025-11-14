@@ -1,0 +1,241 @@
+{
+  "locale": "ru-ru",
+  "calendar": {
+    "personal": "Личные календари",
+    "delegated": "Делегированные календари",
+    "other": "Другие календари",
+    "caldav_access": "Доступ CalDAV",
+    "secretUrl": "Секретный URL",
+    "secretUrlDesc": "Секретный адрес можно использовать для просмотра всех событий календаря даже без прав доступа. Вы можете сбросить текущий секретный адрес и получить новый.",
+    "exportCalendar": "Экспортировать календарь",
+    "exportDesc": "Экспортируйте свой календарь в файл формата iCalendar (.ics), который можно импортировать в другие приложения.",
+    "import_file_description": "Импортируйте события из файла ICS в один из ваших календарей.",
+    "ics_feed_url": "URL-адрес ленты ICS",
+    "import_to": "Импортировать в",
+    "new_calendar": "Новый календарь",
+    "addDescription": "Добавить описание",
+    "color": "Цвет",
+    "newEventsVisibility": "Новые события будут видны:",
+    "browseOtherCalendars": "Просмотреть другие календари",
+    "noPublicCalendarsFor": "Нет общедоступных календарей для %{name}",
+    "noMoreCalendarsFor": "Больше нет календарей для %{name}",
+    "delete": {
+      "title": "Удалить %{name}?",
+      "personalWarning": "Вы потеряете все события в этом календаре.",
+      "sharedWarning": "Вы потеряете доступ к событиям этого календаря. Позже вы сможете добавить его снова."
+    }
+  },
+  "actions": {
+    "modify": "Изменить",
+    "delete": "Удалить",
+    "remove": "Удалить",
+    "save": "Сохранить",
+    "create": "Создать",
+    "import": "Импортировать",
+    "add": "Добавить",
+    "reset": "Сбросить",
+    "export": "Экспортировать",
+    "exporting": "Экспорт..."
+  },
+  "common": {
+    "cancel": "Отмена",
+    "ok": "Ок",
+    "link_copied": "Ссылка скопирована!",
+    "import_file": "Файл",
+    "select_file": "Выбрать файл",
+    "import_url": "URL",
+    "name": "Имя",
+    "description": "Описание",
+    "all": "Все",
+    "you": "Вы",
+    "select_timezone": "Выберите часовой пояс",
+    "moreOptions": "Больше параметров"
+  },
+  "calendarPopover": {
+    "tabs": {
+      "settings": "Настройки",
+      "addNew": "Добавить новый календарь",
+      "access": "Доступ",
+      "import": "Импорт"
+    }
+  },
+  "colorPicker": {
+    "selectCustom": "Выбрать пользовательский цвет",
+    "title": "Выберите пользовательский цвет",
+    "subtitle": "Выберите цвет фона для этого календаря",
+    "hex": "Hex"
+  },
+  "event": {
+    "createEvent": "Создать событие",
+    "updateEvent": "Обновить событие",
+    "organizer": "Организатор",
+    "untitled": "Без названия",
+    "repeat": {
+      "repeatEvery": "Повторять каждые",
+      "frequency": {
+        "days": "день(дней)",
+        "weeks": "неделю(ль)",
+        "months": "месяц(ев)",
+        "years": "год(лет)"
+      },
+      "repeatOn": "Повторять по:",
+      "days": {
+        "monday": "ПН",
+        "tuesday": "ВТ",
+        "wednesday": "СР",
+        "thursday": "ЧТ",
+        "friday": "ПТ",
+        "saturday": "СБ",
+        "sunday": "ВС"
+      },
+      "end": {
+        "label": "Окончание:",
+        "never": "Никогда",
+        "after": "После",
+        "on": "В",
+        "occurrences": "повторений"
+      }
+    },
+    "form": {
+      "title": "Название",
+      "titlePlaceholder": "Добавить название",
+      "addDescription": "Добавить описание",
+      "description": "Описание",
+      "descriptionPlaceholder": "Добавить описание",
+      "dateTime": "Дата и время",
+      "start": "Начало",
+      "end": "Окончание",
+      "allDay": "Весь день",
+      "repeat": "Повторять",
+      "timezonePlaceholder": "Выберите часовой пояс",
+      "participants": "Участники",
+      "videoMeeting": "Видеовстреча",
+      "meetCopied": "Ссылка на встречу скопирована!",
+      "addVisioConference": "Добавить видеоконференцию",
+      "joinVisioConference": "Присоединиться к видеоконференции",
+      "copyMeetingLink": "Скопировать ссылку на встречу",
+      "removeVideoConference": "Удалить видеоконференцию",
+      "location": "Место",
+      "locationPlaceholder": "Добавить место",
+      "calendar": "Календарь",
+      "notification": "Уведомление",
+      "notifications": {
+        "": "Без уведомления",
+        "-PT1M": "За 1 минуту до",
+        "-PT5M": "За 5 минут до",
+        "-PT10M": "За 10 минут до",
+        "-PT15M": "За 15 минут до",
+        "-PT30M": "За 30 минут до",
+        "-PT1H": "За 1 час до",
+        "-PT2H": "За 2 часа до",
+        "-PT5H": "За 5 часов до",
+        "-PT12H": "За 12 часов до",
+        "-PT1D": "За 1 день до",
+        "-PT2D": "За 2 дня до",
+        "-PT1W": "За 1 неделю до",
+        "EMAIL": "электронная почта"
+      },
+      "showMeAs": "Показать меня как",
+      "free": "Свободен",
+      "busy": "Занят",
+      "visibleTo": "Видно для",
+      "visibleAll": "Всех",
+      "visibleParticipants": "Участников"
+    },
+    "validation": {
+      "titleRequired": "Название обязательно",
+      "startRequired": "Необходимо указать дату/время начала",
+      "invalidStart": "Недопустимая дата/время начала",
+      "endRequired": "Необходимо указать дату/время окончания",
+      "invalidEnd": "Недопустимая дата/время окончания",
+      "endAfterStart": "Время окончания должно быть позже времени начала"
+    }
+  },
+  "peopleSearch": {
+    "label": "Начните вводить имя или email",
+    "placeholder": "Начните вводить имя или email",
+    "invalidEmail": "%{email} не является допустимым адресом электронной почты"
+  },
+  "error": {
+    "title": "Что-то пошло не так",
+    "unknown": "Произошла неизвестная ошибка",
+    "retry": "Повторить",
+    "multipleEvents": "%{count} событий с ошибками"
+  },
+  "editModeDialog": {
+    "updateRecurrentEvent": "Обновить повторяющееся событие",
+    "updateParticipationStatus": "Обновить статус участия",
+    "thisEvent": "Это событие",
+    "allEvents": "Все события"
+  },
+  "eventDuplication": {
+    "duplicateEvent": "Дублировать событие"
+  },
+  "menubar": {
+    "today": "Сегодня",
+    "refresh": "Обновить",
+    "viewSelector": "Выбрать вид",
+    "languageSelector": "Выбрать язык",
+    "views": {
+      "month": "Месяц",
+      "week": "Неделя",
+      "day": "День"
+    },
+    "apps": "Приложения",
+    "userProfile": "Профиль пользователя",
+    "logoAlt": "Календарь"
+  },
+  "eventPreview": {
+    "emailAttendees": "Отправить письмо участникам",
+    "deleteEvent": "Удалить событие",
+    "privateEvent": {
+      "tooltipOwn": "Только вы и участники можете видеть детали этого события.",
+      "hiddenDetails": "Это частное событие. Подробности скрыты."
+    },
+    "free": {
+      "label": "Свободен",
+      "tooltip": "Другие видят вас как доступного в это время."
+    },
+    "attendingQuestion": "Присоединитесь?",
+    "accept": "Принять",
+    "maybe": "Возможно",
+    "decline": "Отклонить",
+    "showMore": "Показать больше",
+    "showLess": "Показать меньше",
+    "joinVideo": "Присоединиться к видеоконференции",
+    "guests": "%{count} гостей",
+    "yesCount": "%{count} да",
+    "noCount": "%{count} нет",
+    "recurrentEvent": "Повторяющееся событие",
+    "freq": {
+      "daily": "ежедневно",
+      "weekly": "еженедельно",
+      "monthly": "ежемесячно",
+      "yearly": "ежегодно"
+    },
+    "onDays": {
+      "MO": "понедельник",
+      "TU": "вторник",
+      "WE": "среда",
+      "TH": "четверг",
+      "FR": "пятница",
+      "SA": "суббота",
+      "SU": "воскресенье"
+    },
+    "recurrenceOnDays": "по %{days}",
+    "everyInterval": "каждые %{interval} %{unit}",
+    "forOccurrences": "в течение %{count} повторений",
+    "until": "до %{date}",
+    "days": "дни",
+    "months": "месяцы",
+    "years": "годы",
+    "alarmText": "%{trigger} через %{action}"
+  },
+  "dateTimeFields": {
+    "date": "Дата",
+    "startDate": "Дата начала",
+    "startTime": "Время начала",
+    "endDate": "Дата окончания",
+    "endTime": "Время окончания"
+  }
+}

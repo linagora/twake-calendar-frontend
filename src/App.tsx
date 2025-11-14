@@ -13,10 +13,15 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import I18n from "cozy-ui/transpiled/react/providers/I18n";
+
+import { enGB, fr as frLocale, ru as ruLocale } from "date-fns/locale";
+
 import en from "./locales/en.json";
 import fr from "./locales/fr.json";
+import ru from "./locales/ru.json";
 
-const locale = { en, fr };
+const locale = { en, fr, ru };
+const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale };
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
@@ -27,13 +32,14 @@ function App() {
     if (error) {
       dispatch(push("/error"));
     }
-  });
+  }, [error, dispatch]);
 
   return (
     <CustomThemeProvider>
       <I18n
         dictRequire={(lang: keyof typeof locale) => locale[lang]}
         lang={lang}
+        locales={dateLocales}
       >
         <Suspense fallback={<Loading />}>
           <Router history={history}>
@@ -44,7 +50,6 @@ function App() {
               <Route path="/error" element={<Error />} />
             </Routes>
           </Router>
-          <ErrorSnackbar error={error} type="user" />
           <ErrorSnackbar error={error} type="user" />
         </Suspense>
       </I18n>
