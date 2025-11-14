@@ -127,4 +127,93 @@ describe("PeopleSearch", () => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     });
   });
+
+  it("shows 'No results' when search succeeds but returns empty array", async () => {
+    mockedSearchUsers.mockResolvedValueOnce([]);
+    setup();
+
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "Test");
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const noResults = await screen.findByText(
+      "peopleSearch.noResults",
+      {},
+      { timeout: 5000 }
+    );
+    expect(noResults).toBeInTheDocument();
+  });
+
+  it("does not clear options when search fails and shows error snackbar", async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
+    setup();
+
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "Test");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Test User")).toBeInTheDocument();
+    });
+
+    mockedSearchUsers.mockRejectedValueOnce(new Error("Network error"));
+    await userEvent.clear(input);
+    await userEvent.type(input, "Error");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    const errorMessage = await screen.findByText("peopleSearch.searchError");
+    expect(errorMessage).toBeInTheDocument();
+
+    expect(screen.queryByText("Test User")).not.toBeInTheDocument();
+
+    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
+    await userEvent.clear(input);
+    await userEvent.type(input, "Test");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Test User")).toBeInTheDocument();
+    });
+  });
+
+  it("shows loading text when searching", async () => {
+    let resolveSearch: (value: User[]) => void;
+    const searchPromise = new Promise<User[]>((resolve) => {
+      resolveSearch = resolve;
+    });
+    mockedSearchUsers.mockReturnValueOnce(searchPromise);
+    setup();
+
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "Test");
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
+
+    const loadingText = await screen.findByText(
+      "peopleSearch.loading",
+      {},
+      { timeout: 5000 }
+    );
+    expect(loadingText).toBeInTheDocument();
+
+    await act(async () => {
+      resolveSearch!([baseUser]);
+      await searchPromise;
+    });
+  });
 });
