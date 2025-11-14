@@ -169,11 +169,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs);
     const originalEnd = new Date(event.end ?? "");
     const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs);
-    const newEvent = {
+    const newEvent = updateAttendeesAfterTimeChange({
       ...event,
       start: computedNewStart.toISOString(),
       end: computedNewEnd.toISOString(),
-    } as CalendarEvent;
+    } as CalendarEvent);
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -243,11 +243,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewEnd = new Date(
       originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
     );
-    const newEvent = {
+    const newEvent = updateAttendeesAfterTimeChange({
       ...event,
       start: computedNewStart.toISOString(),
       end: computedNewEnd.toISOString(),
-    } as CalendarEvent;
+    } as CalendarEvent);
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -304,5 +304,28 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     handleEventAllow,
     handleEventDrop,
     handleEventResize,
+  };
+};
+
+const updateAttendeesAfterTimeChange = (
+  event: CalendarEvent
+): CalendarEvent => {
+  if (!event.attendee || !event.organizer) return event;
+
+  const organizerAddr = event.organizer.cal_address;
+
+  const updatedAttendees = event.attendee.map((att) => {
+    if (att.cal_address === organizerAddr) return att;
+
+    return {
+      ...att,
+      partstat: "NEEDS-ACTION",
+      rsvp: "TRUE",
+    };
+  });
+
+  return {
+    ...event,
+    attendee: updatedAttendees,
   };
 };

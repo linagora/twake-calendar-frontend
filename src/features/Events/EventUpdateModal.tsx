@@ -329,32 +329,6 @@ function EventUpdateModal({
     if (!event) return;
 
     const organizer = event.organizer;
-    let updatedAttendees: userAttendee[] = [];
-
-    if (organizer) {
-      const organizerAttendee = event.attendee?.find(
-        (a) => a.cal_address === organizer.cal_address
-      );
-
-      const fullOrganizerAttendee =
-        organizerAttendee ||
-        ({
-          ...organizer,
-          role: "CHAIR",
-          partstat: "ACCEPTED",
-          rsvp: "FALSE",
-          cutype: "INDIVIDUAL",
-        } as userAttendee);
-
-      updatedAttendees = [
-        fullOrganizerAttendee,
-        ...attendees.filter(
-          (a) => a.cal_address !== fullOrganizerAttendee.cal_address
-        ),
-      ];
-    } else {
-      updatedAttendees = attendees;
-    }
 
     const targetCalendar = calList[calendarid];
     if (!targetCalendar) {
@@ -432,6 +406,40 @@ function EventUpdateModal({
         }
       }
     }
+
+    const eventStartChanged = event.start !== startDate;
+    const eventEndChanged = event.end !== endDate;
+    const timeChanged = eventStartChanged || eventEndChanged;
+
+    const organizerAttendee = event.attendee?.find(
+      (a) => a.cal_address === organizer?.cal_address
+    );
+
+    const fullOrganizerAttendee =
+      organizerAttendee ||
+      ({
+        ...organizer,
+        role: "CHAIR",
+        partstat: "ACCEPTED",
+        rsvp: "FALSE",
+        cutype: "INDIVIDUAL",
+      } as userAttendee);
+
+    const nonOrganizerAttendees = attendees.filter(
+      (a) => a.cal_address !== organizer?.cal_address
+    );
+
+    const updatedNonOrganizerAttendees = nonOrganizerAttendees.map((a) => {
+      if (timeChanged) {
+        return { ...a, partstat: "NEEDS-ACTION", rsvp: "TRUE" };
+      }
+      return a;
+    });
+
+    const updatedAttendees = [
+      fullOrganizerAttendee,
+      ...updatedNonOrganizerAttendees,
+    ];
 
     const newEvent: CalendarEvent = {
       calId: newCalId || calId,

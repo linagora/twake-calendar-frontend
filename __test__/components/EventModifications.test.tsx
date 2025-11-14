@@ -14,7 +14,10 @@ import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import CalendarApp from "../../src/components/Calendar/Calendar";
 import EventUpdateModal from "../../src/features/Events/EventUpdateModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import { putEvent } from "../../src/features/Events/EventApi";
+import {
+  createEventHandlers,
+  EventHandlersProps,
+} from "../../src/components/Calendar/handlers/eventHandlers";
 
 describe("CalendarApp integration", () => {
   const today = new Date();
@@ -269,10 +272,7 @@ describe("CalendarApp integration", () => {
 
     expect(screen.getByText("Public Event")).toBeInTheDocument();
   });
-
-  it("BUGFIX : keeps all attendees event participation on update", async () => {
-    const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
-
+  describe("BUGFIX", () => {
     const preloadedState = {
       user: {
         userData: {
@@ -298,8 +298,8 @@ describe("CalendarApp integration", () => {
                 calId: "667037022b752d0026472254/cal1",
                 uid: "event1",
                 title: "Original Event",
-                start: new Date().toISOString(),
-                end: new Date(Date.now() + 3600000).toISOString(),
+                start: new Date("2025-11-14T10:31:00.000Z").toISOString(),
+                end: new Date("2025-11-14T11:31:00.000Z").toISOString(),
                 class: "PUBLIC",
                 partstat: "ACCEPTED",
                 organizer: {
@@ -332,51 +332,223 @@ describe("CalendarApp integration", () => {
       },
     };
 
-    const onClose = jest.fn();
-    renderWithProviders(
-      <EventUpdateModal
-        eventId="event1"
-        calId="667037022b752d0026472254/cal1"
-        open={true}
-        onClose={onClose}
-        typeOfAction="solo"
-      />,
-      preloadedState
-    );
+    it("keeps all attendees event participation on title update", async () => {
+      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      const onClose = jest.fn();
+      renderWithProviders(
+        <EventUpdateModal
+          eventId="event1"
+          calId="667037022b752d0026472254/cal1"
+          open={true}
+          onClose={onClose}
+          typeOfAction="solo"
+        />,
+        preloadedState
+      );
 
-    const titleInput = await screen.findByDisplayValue("Original Event");
+      const titleInput = await screen.findByDisplayValue("Original Event");
 
-    await act(async () => {
-      fireEvent.change(titleInput, "Updated Event");
+      await act(async () => {
+        fireEvent.change(titleInput, "Updated Event");
+      });
+
+      const saveButton = screen.getByRole("button", { name: /save/i });
+      await act(async () => {
+        saveButton.click();
+      });
+
+      await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+
+      const dispatchedCalls = updateSpy.mock.calls;
+      expect(dispatchedCalls.length).toBeGreaterThan(0);
+      const updatedEvent = dispatchedCalls[0][0].newEvent;
+
+      // Ensure organizer attendee info is preserved
+      const organizerAttendee = updatedEvent?.attendee?.find(
+        (a: any) => a.cal_address === "alice@example.com"
+      );
+
+      expect(organizerAttendee).toBeTruthy();
+      expect(organizerAttendee?.partstat).toBe("ACCEPTED");
+      expect(organizerAttendee?.role).toBe("CHAIR");
+
+      // Ensure normal attendee info is preserved too
+      const normalAttendee = updatedEvent?.attendee?.find(
+        (a: any) => a.cal_address === "bob@example.com"
+      );
+
+      expect(normalAttendee).toBeTruthy();
+      expect(normalAttendee?.partstat).toBe("ACCEPTED");
+      expect(normalAttendee?.role).toBe("CHAIR"); //will need to be changed as not the right role
     });
 
-    const saveButton = screen.getByRole("button", { name: /save/i });
-    await act(async () => {
-      saveButton.click();
+    it("keeps change normal attendee to need action on time update and no organizer changes", async () => {
+      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      const onClose = jest.fn();
+      renderWithProviders(
+        <EventUpdateModal
+          eventId="event1"
+          calId="667037022b752d0026472254/cal1"
+          open={true}
+          onClose={onClose}
+          typeOfAction="solo"
+        />,
+        preloadedState
+      );
+
+      const startDateInput = await screen.findByTestId("start-time-input");
+
+      await act(async () => {
+        fireEvent.change(startDateInput, {
+          target: { value: "08:00" },
+        });
+      });
+
+      const saveButton = screen.getByRole("button", { name: /save/i });
+      await act(async () => {
+        saveButton.click();
+      });
+
+      await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+
+      const dispatchedCalls = updateSpy.mock.calls;
+      expect(dispatchedCalls.length).toBeGreaterThan(0);
+      const updatedEvent = dispatchedCalls[0][0].newEvent;
+
+      // Ensure organizer attendee info is preserved
+      const organizerAttendee = updatedEvent?.attendee?.find(
+        (a: any) => a.cal_address === "alice@example.com"
+      );
+
+      expect(organizerAttendee).toBeTruthy();
+      expect(organizerAttendee?.partstat).toBe("ACCEPTED");
+      expect(organizerAttendee?.role).toBe("CHAIR");
+
+      // Ensure normal attendee partstat is updated
+      const normalAttendee = updatedEvent?.attendee?.find(
+        (a: any) => a.cal_address === "bob@example.com"
+      );
+
+      expect(normalAttendee).toBeTruthy();
+      expect(normalAttendee?.partstat).toBe("NEEDS-ACTION");
+      expect(normalAttendee?.role).toBe("CHAIR"); //will need to be changed as not the right role
+    });
+    it("update event attendees on drag", async () => {
+      const mockDispatch = jest.fn();
+      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+
+      const eventHandlers = createEventHandlers({
+        setSelectedRange: jest.fn(),
+        setOpenEventModal: jest.fn(),
+        setTempEvent: jest.fn(),
+        setOpenEventDisplay: jest.fn(),
+        dispatch: mockDispatch,
+        calendarRange: { start: new Date(), end: new Date() },
+        setEventDisplayedId: jest.fn(),
+        setEventDisplayedCalId: jest.fn(),
+        setEventDisplayedTemp: jest.fn(),
+        calendars: preloadedState.calendars.list,
+        setSelectedEvent: jest.fn(),
+        setAfterChoiceFunc: jest.fn(),
+        setOpenEditModePopup: jest.fn(),
+      } as unknown as EventHandlersProps);
+
+      const mockArg = {
+        event: {
+          _def: {
+            extendedProps: {
+              uid: "event1",
+              calId: "667037022b752d0026472254/cal1",
+            },
+          },
+        },
+        // drag event → move by 1 day
+        delta: { years: 0, months: 0, days: 1, milliseconds: 0 },
+      };
+
+      renderCalendar();
+      eventHandlers.handleEventDrop(mockArg);
+
+      expect(updateSpy).toHaveBeenCalled();
+
+      // Extract the dispatched update event
+      const dispatched = updateSpy.mock.calls[0];
+
+      expect(dispatched).toBeTruthy();
+
+      const updatePayload = dispatched[0];
+      const updatedEvent = updatePayload.newEvent;
+
+      // Organizer should remain unchanged
+      const organizer = updatedEvent.attendee.find(
+        (a: any) => a.cal_address === "alice@example.com"
+      );
+      expect(organizer?.partstat).toBe("ACCEPTED");
+
+      // Normal attendee must become NEEDS-ACTION
+      const normal = updatedEvent.attendee.find(
+        (a: any) => a.cal_address === "bob@example.com"
+      );
+      expect(normal?.partstat).toBe("NEEDS-ACTION");
     });
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+    it("update event attendees on resize", async () => {
+      const mockDispatch = jest.fn();
+      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
 
-    const dispatchedCalls = updateSpy.mock.calls;
-    expect(dispatchedCalls.length).toBeGreaterThan(0);
-    const updatedEvent = dispatchedCalls[0][0].newEvent;
+      const eventHandlers = createEventHandlers({
+        setSelectedRange: jest.fn(),
+        setOpenEventModal: jest.fn(),
+        setTempEvent: jest.fn(),
+        setOpenEventDisplay: jest.fn(),
+        dispatch: mockDispatch,
+        calendarRange: { start: new Date(), end: new Date() },
+        setEventDisplayedId: jest.fn(),
+        setEventDisplayedCalId: jest.fn(),
+        setEventDisplayedTemp: jest.fn(),
+        calendars: preloadedState.calendars.list,
+        setSelectedEvent: jest.fn(),
+        setAfterChoiceFunc: jest.fn(),
+        setOpenEditModePopup: jest.fn(),
+      } as unknown as EventHandlersProps);
 
-    // Ensure organizer attendee info is preserved
-    const organizerAttendee = updatedEvent?.attendee?.find(
-      (a: any) => a.cal_address === "alice@example.com"
-    );
+      const mockArg = {
+        event: {
+          _def: {
+            extendedProps: {
+              uid: "event1",
+              calId: "667037022b752d0026472254/cal1",
+            },
+          },
+        },
+        startDelta: { years: 0, months: 0, days: 0, milliseconds: 0 },
+        endDelta: { years: 0, months: 0, days: 0, milliseconds: 3600000 }, // 1 hour
+      };
 
-    expect(organizerAttendee).toBeTruthy();
-    expect(organizerAttendee?.partstat).toBe("ACCEPTED");
-    expect(organizerAttendee?.role).toBe("CHAIR");
+      renderCalendar();
+      eventHandlers.handleEventResize(mockArg);
 
-    // Ensure normal attendee info is preserved too
-    const normalAttendee = updatedEvent?.attendee?.find(
-      (a: any) => a.cal_address === "bob@example.com"
-    );
+      expect(updateSpy).toHaveBeenCalled();
 
-    expect(normalAttendee).toBeTruthy();
-    expect(normalAttendee?.partstat).toBe("ACCEPTED");
-    expect(normalAttendee?.role).toBe("CHAIR");
+      // Extract the dispatched update event
+      const dispatched = updateSpy.mock.calls[0];
+
+      expect(dispatched).toBeTruthy();
+
+      const updatePayload = dispatched[0];
+      const updatedEvent = updatePayload.newEvent;
+
+      // Organizer should remain unchanged
+      const organizer = updatedEvent.attendee.find(
+        (a: any) => a.cal_address === "alice@example.com"
+      );
+      expect(organizer?.partstat).toBe("ACCEPTED");
+
+      // Normal attendee must become NEEDS-ACTION
+      const normal = updatedEvent.attendee.find(
+        (a: any) => a.cal_address === "bob@example.com"
+      );
+      expect(normal?.partstat).toBe("NEEDS-ACTION");
+    });
   });
 });
