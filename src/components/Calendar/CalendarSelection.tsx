@@ -38,6 +38,7 @@ function CalendarAccordion({
   setOpen: Function;
 }) {
   const allCalendars = useAppSelector((state) => state.calendars.list);
+  const { t } = useI18n();
 
   const [expended, setExpended] = useState(defaultExpanded);
   useEffect(() => setExpended(defaultExpanded), [defaultExpanded]);
@@ -82,7 +83,7 @@ function CalendarAccordion({
             key={id}
             calendars={allCalendars}
             id={id}
-            isPersonal={defaultExpanded}
+            isPersonal={title === t("calendar.personal")}
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
