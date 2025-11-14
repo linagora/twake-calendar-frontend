@@ -32,7 +32,7 @@ function App() {
     if (error) {
       dispatch(push("/error"));
     }
-  }, [error, dispatch]);
+  });
 
   return (
     <CustomThemeProvider>
