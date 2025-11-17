@@ -457,6 +457,27 @@ export default function CalendarApp({
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
+  // Listen for eventModalError event to reopen modal on API failure
+  useEffect(() => {
+    const handleEventModalError = (event: CustomEvent) => {
+      if (event.detail?.type === "create") {
+        // Reopen create event modal
+        setAnchorEl(document.body);
+      }
+    };
+
+    window.addEventListener(
+      "eventModalError",
+      handleEventModalError as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "eventModalError",
+        handleEventModalError as EventListener
+      );
+    };
+  }, []);
+
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);

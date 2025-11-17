@@ -104,6 +104,33 @@ export default function EventPreviewModal({
     }
   }, [event, calendar, onClose]);
 
+  // Listen for eventModalError event to reopen update modal on API failure
+  useEffect(() => {
+    const handleEventModalError = (event: CustomEvent) => {
+      if (
+        event.detail?.type === "update" &&
+        event.detail?.eventId === eventId &&
+        event.detail?.calId === calId &&
+        event.detail?.typeOfAction === typeOfAction
+      ) {
+        // Reopen update event modal
+        setOpenUpdateModal(true);
+        setHidePreview(true);
+      }
+    };
+
+    window.addEventListener(
+      "eventModalError",
+      handleEventModalError as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "eventModalError",
+        handleEventModalError as EventListener
+      );
+    };
+  }, [eventId, calId, typeOfAction]);
+
   if (!event || !calendar) return null;
 
   const attendeeDisplayLimit = 3;
