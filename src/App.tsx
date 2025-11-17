@@ -14,14 +14,20 @@ import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import I18n from "cozy-ui/transpiled/react/providers/I18n";
 
-import { enGB, fr as frLocale, ru as ruLocale } from "date-fns/locale";
+import {
+  enGB,
+  fr as frLocale,
+  ru as ruLocale,
+  vi as viLocale,
+} from "date-fns/locale";
 
 import en from "./locales/en.json";
 import fr from "./locales/fr.json";
 import ru from "./locales/ru.json";
+import vi from "./locales/vi.json";
 
-const locale = { en, fr, ru };
-const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale };
+const locale = { en, fr, ru, vi };
+const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 function App() {
   const error = useAppSelector((state) => state.user.error);

@@ -23,8 +23,13 @@ import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { setLanguage } from "../../features/Settings/SettingsSlice";
 import { format } from "date-fns";
-import { enGB, fr, ru as ruLocale } from "date-fns/locale";
-const dateLocales = { en: enGB, fr, ru: ruLocale };
+import {
+  enGB,
+  fr as frLocale,
+  ru as ruLocale,
+  vi as viLocale,
+} from "date-fns/locale";
+const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {
   name: string;
@@ -121,6 +126,7 @@ export function Menubar({
     { code: "en", label: "English" },
     { code: "fr", label: "Français" },
     { code: "ru", label: "Русский" },
+    { code: "vi", label: "Tiếng Việt" },
   ];
 
   return (
