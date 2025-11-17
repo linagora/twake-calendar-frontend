@@ -29,6 +29,7 @@ import {
 } from "./eventUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -411,37 +412,8 @@ function EventUpdateModal({
     const eventEndChanged = event.end !== endDate;
     const timeChanged = eventStartChanged || eventEndChanged;
 
-    const organizerAttendee = event.attendee?.find(
-      (a) => a.cal_address === organizer?.cal_address
-    );
-
-    const fullOrganizerAttendee =
-      organizerAttendee ||
-      ({
-        ...organizer,
-        role: "CHAIR",
-        partstat: "ACCEPTED",
-        rsvp: "FALSE",
-        cutype: "INDIVIDUAL",
-      } as userAttendee);
-
-    const nonOrganizerAttendees = attendees.filter(
-      (a) => a.cal_address !== organizer?.cal_address
-    );
-
-    const updatedNonOrganizerAttendees = nonOrganizerAttendees.map((a) => {
-      if (timeChanged) {
-        return { ...a, partstat: "NEEDS-ACTION", rsvp: "TRUE" };
-      }
-      return a;
-    });
-
-    const updatedAttendees = [
-      fullOrganizerAttendee,
-      ...updatedNonOrganizerAttendees,
-    ];
-
     const newEvent: CalendarEvent = {
+      ...updateAttendeesAfterTimeChange(event, timeChanged),
       calId: newCalId || calId,
       title,
       URL: event.URL ?? `/calendars/${newCalId || calId}/${event.uid}.ics`,
@@ -455,7 +427,6 @@ function EventUpdateModal({
       class: eventClass,
       organizer: organizer,
       timezone,
-      attendee: updatedAttendees,
       transp: busy,
       color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },

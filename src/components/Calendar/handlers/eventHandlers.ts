@@ -169,11 +169,14 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs);
     const originalEnd = new Date(event.end ?? "");
     const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs);
-    const newEvent = updateAttendeesAfterTimeChange({
-      ...event,
-      start: computedNewStart.toISOString(),
-      end: computedNewEnd.toISOString(),
-    } as CalendarEvent);
+    const newEvent = updateAttendeesAfterTimeChange(
+      {
+        ...event,
+        start: computedNewStart.toISOString(),
+        end: computedNewEnd.toISOString(),
+      } as CalendarEvent,
+      true
+    );
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -243,11 +246,14 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewEnd = new Date(
       originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
     );
-    const newEvent = updateAttendeesAfterTimeChange({
-      ...event,
-      start: computedNewStart.toISOString(),
-      end: computedNewEnd.toISOString(),
-    } as CalendarEvent);
+    const newEvent = updateAttendeesAfterTimeChange(
+      {
+        ...event,
+        start: computedNewStart.toISOString(),
+        end: computedNewEnd.toISOString(),
+      } as CalendarEvent,
+      true
+    );
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -307,16 +313,16 @@ export const createEventHandlers = (props: EventHandlersProps) => {
   };
 };
 
-const updateAttendeesAfterTimeChange = (
-  event: CalendarEvent
+export const updateAttendeesAfterTimeChange = (
+  event: CalendarEvent,
+  timeChanged?: boolean
 ): CalendarEvent => {
   if (!event.attendee || !event.organizer) return event;
-
   const organizerAddr = event.organizer.cal_address;
 
   const updatedAttendees = event.attendee.map((att) => {
     if (att.cal_address === organizerAddr) return att;
-
+    if (!timeChanged) return att;
     return {
       ...att,
       partstat: "NEEDS-ACTION",
