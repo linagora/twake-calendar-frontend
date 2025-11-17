@@ -408,8 +408,10 @@ function EventUpdateModal({
       }
     }
 
-    const eventStartChanged = event.start !== startDate;
-    const eventEndChanged = event.end !== endDate;
+    const eventStartChanged =
+      new Date(event.start).getTime() !== new Date(startDate).getTime();
+    const eventEndChanged =
+      new Date(event?.end ?? "").getTime() !== new Date(endDate).getTime();
     const timeChanged = eventStartChanged || eventEndChanged;
 
     const newEvent: CalendarEvent = {
