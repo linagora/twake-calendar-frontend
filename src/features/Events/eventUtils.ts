@@ -3,7 +3,10 @@ import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
 import moment from "moment-timezone";
-import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
+import {
+  convertFormDateTimeToISO,
+  detectDateTimeFormat,
+} from "../../components/Event/utils/dateTimeHelpers";
 type RawEntry = [string, Record<string, string>, string, any];
 
 function resolveTimezoneId(tzid?: string): string | undefined {
@@ -235,10 +238,12 @@ function convertDateTimeStringToISO(
     return undefined;
   }
 
-  const format =
-    datetime.length >= 19 ? "YYYY-MM-DDTHH:mm:ss" : "YYYY-MM-DDTHH:mm";
+  const format = detectDateTimeFormat(datetime);
   const momentDate = moment.tz(datetime, format, timezone);
   if (!momentDate.isValid()) {
+    console.warn(
+      `[convertDateTimeStringToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${timezone}"`
+    );
     return undefined;
   }
   return momentDate.toISOString();

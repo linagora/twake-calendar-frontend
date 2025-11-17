@@ -4,6 +4,21 @@ import moment from "moment-timezone";
  * Helper functions for date/time string manipulation
  */
 
+export const DATETIME_WITH_SECONDS_LENGTH = 19;
+export const DATETIME_FORMAT_WITH_SECONDS = "YYYY-MM-DDTHH:mm:ss";
+export const DATETIME_FORMAT_WITHOUT_SECONDS = "YYYY-MM-DDTHH:mm";
+
+/**
+ * Detect datetime format based on string length
+ * @param datetime - Datetime string to analyze
+ * @returns Format string for moment parsing
+ */
+export function detectDateTimeFormat(datetime: string): string {
+  return datetime.length >= DATETIME_WITH_SECONDS_LENGTH
+    ? DATETIME_FORMAT_WITH_SECONDS
+    : DATETIME_FORMAT_WITHOUT_SECONDS;
+}
+
 /**
  * Split datetime string (YYYY-MM-DDTHH:mm) into date and time parts
  * @param datetime - ISO datetime string
@@ -43,10 +58,12 @@ export function convertFormDateTimeToISO(
 ): string {
   if (!datetime) return "";
   const tz = timezone || "Etc/UTC";
-  const format =
-    datetime.length === 19 ? "YYYY-MM-DDTHH:mm:ss" : "YYYY-MM-DDTHH:mm";
+  const format = detectDateTimeFormat(datetime);
   const momentDate = moment.tz(datetime, format, tz);
   if (!momentDate.isValid()) {
+    console.warn(
+      `[convertFormDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${tz}"`
+    );
     return "";
   }
   return momentDate.toDate().toISOString();

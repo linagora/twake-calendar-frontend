@@ -101,7 +101,8 @@ export function populateFormFromEvent(
   // Get event's timezone for formatting
   const eventTimezone = event.timezone
     ? resolveTimezone(event.timezone)
-    : calendarTimezone || resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    : calendarTimezone ||
+      resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   // Format dates based on all-day status and timezone
   if (event.start) {
@@ -189,4 +190,3 @@ export function populateFormFromEvent(
     }
   }
 }
-

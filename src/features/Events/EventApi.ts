@@ -9,6 +9,7 @@ import {
 } from "./eventUtils";
 import ICAL from "ical.js";
 import moment from "moment-timezone";
+import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;
@@ -144,10 +145,12 @@ function convertEventDateTimeToISO(
     return undefined;
   }
 
-  const format =
-    datetime.length >= 19 ? "YYYY-MM-DDTHH:mm:ss" : "YYYY-MM-DDTHH:mm";
+  const format = detectDateTimeFormat(datetime);
   const momentDate = moment.tz(datetime, format, eventTimezone);
   if (!momentDate.isValid()) {
+    console.warn(
+      `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${eventTimezone}"`
+    );
     return undefined;
   }
   return momentDate.toISOString();

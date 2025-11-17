@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { detectDateTimeFormat } from "../../Event/utils/dateTimeHelpers";
 
 function convertEventDateTimeToISO(
   datetime: string,
@@ -24,10 +25,12 @@ function convertEventDateTimeToISO(
     return datetime;
   }
 
-  const format =
-    datetime.length >= 19 ? "YYYY-MM-DDTHH:mm:ss" : "YYYY-MM-DDTHH:mm";
+  const format = detectDateTimeFormat(datetime);
   const momentDate = moment.tz(datetime, format, eventTimezone);
   if (!momentDate.isValid()) {
+    console.warn(
+      `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${eventTimezone}"`
+    );
     return datetime;
   }
   return momentDate.toISOString();
