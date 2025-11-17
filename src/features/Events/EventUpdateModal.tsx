@@ -415,7 +415,7 @@ function EventUpdateModal({
     const timeChanged = eventStartChanged || eventEndChanged;
 
     const newEvent: CalendarEvent = {
-      ...updateAttendeesAfterTimeChange(event, timeChanged),
+      ...updateAttendeesAfterTimeChange(event, timeChanged, attendees),
       calId: newCalId || calId,
       title,
       URL: event.URL ?? `/calendars/${newCalId || calId}/${event.uid}.ics`,

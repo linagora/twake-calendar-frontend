@@ -17,6 +17,7 @@ import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
 import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
+import { userAttendee } from "../../../features/User/userDataTypes";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -315,19 +316,48 @@ export const createEventHandlers = (props: EventHandlersProps) => {
 
 export const updateAttendeesAfterTimeChange = (
   event: CalendarEvent,
-  timeChanged?: boolean
+  timeChanged?: boolean,
+  attendees?: userAttendee[]
 ): CalendarEvent => {
-  if (!event.attendee || !event.organizer) return event;
-  const organizerAddr = event.organizer.cal_address;
+  const { attendee, organizer } = event;
+  if (!attendee || !organizer) return event;
 
-  const updatedAttendees = event.attendee.map((att) => {
-    if (att.cal_address === organizerAddr) return att;
-    if (!timeChanged) return att;
-    return {
-      ...att,
+  const organizerAddr = organizer.cal_address;
+
+  const markNeedsAction = (att: userAttendee): userAttendee => ({
+    ...att,
+    partstat: "NEEDS-ACTION",
+    rsvp: "TRUE",
+  });
+
+  const getExistingOrDefault = (addr: string, fallback: userAttendee) =>
+    attendee.find((a) => a?.cal_address === addr) ?? fallback;
+
+  if (attendees) {
+    const updatedAttendees = attendees.map((att) => {
+      const existing = getExistingOrDefault(
+        att.cal_address,
+        markNeedsAction(att)
+      );
+      return timeChanged ? markNeedsAction(existing) : existing;
+    });
+
+    const organizerEntry = getExistingOrDefault(organizerAddr, {
+      ...organizer,
+      role: "CHAIR",
+      cutype: "INDIVIDUAL",
       partstat: "NEEDS-ACTION",
       rsvp: "TRUE",
+    });
+
+    return {
+      ...event,
+      attendee: [...updatedAttendees, organizerEntry],
     };
+  }
+  const updatedAttendees = attendee.map((att) => {
+    if (att.cal_address === organizerAddr) return att;
+    return timeChanged ? markNeedsAction(att) : att;
   });
 
   return {
