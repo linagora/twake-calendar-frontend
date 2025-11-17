@@ -1,6 +1,6 @@
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { DateCalendar, PickersDay } from "@mui/x-date-pickers";
+import { DateCalendar } from "@mui/x-date-pickers";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import moment from "moment";
 import {
@@ -40,12 +40,15 @@ export function MiniCalendar({
     >
       <DateCalendar
         value={moment(visibleDate)}
-        onChange={(dateMoment) => {
+        onChange={(dateMoment, selectionState) => {
           if (!dateMoment) return;
           const date = dateMoment.toDate();
-          setSelectedDate(date);
-          setSelectedMiniDate(date);
-          calendarRef.current?.gotoDate(date);
+          if (selectionState === "finish") {
+            setSelectedDate(date);
+            setSelectedMiniDate(date);
+            setVisibleDate(date);
+            calendarRef.current?.gotoDate(date);
+          }
         }}
         showDaysOutsideCurrentMonth
         onMonthChange={(month) => {
