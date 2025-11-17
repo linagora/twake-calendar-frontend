@@ -86,33 +86,35 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setAnchorEl(document.body);
   };
 
-  const handleClosePopover = () => {
+  const handleClosePopover = (refresh?: boolean) => {
     calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
-    selectedCalendars.forEach((calId) =>
-      dispatch(
-        getCalendarDetailAsync({
-          calId,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-        })
-      )
-    );
-    Object.keys(tempcalendars).forEach((calId) =>
-      dispatch(
-        getCalendarDetailAsync({
-          calId,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType: "temp",
-        })
-      )
-    );
+    if (refresh) {
+      selectedCalendars.forEach((calId) =>
+        dispatch(
+          getCalendarDetailAsync({
+            calId,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+          })
+        )
+      );
+      Object.keys(tempcalendars).forEach((calId) =>
+        dispatch(
+          getCalendarDetailAsync({
+            calId,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+            calType: "temp",
+          })
+        )
+      );
+    }
   };
 
   const handleCloseEventDisplay = () => {

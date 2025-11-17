@@ -213,7 +213,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(dailyOption);
 
     await expectRRule({ freq: "daily", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat daily with 2 day interval", async () => {
@@ -224,7 +224,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.change(intervalInput, { target: { value: "2" } });
 
     await expectRRule({ freq: "daily", interval: 2 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat daily for 5 repetitions", async () => {
@@ -239,7 +239,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
 
     await expectRRule({ freq: "daily", interval: 1, occurrences: 5 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat daily until specific date", async () => {
@@ -256,7 +256,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.change(endDateInput, { target: { value: "2025-12-31" } });
 
     await expectRRule({ freq: "daily", interval: 1, endDate: "2025-12-31" });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat weekly on specific days", async () => {
@@ -281,7 +281,7 @@ describe("Repeat Event Integration Tests", () => {
       interval: 1,
       byday: ["FR", "TH"],
     });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat weekly with 3 week interval", async () => {
@@ -300,7 +300,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.change(intervalInput, { target: { value: "3" } });
 
     await expectRRule({ freq: "weekly", interval: 3 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat monthly", async () => {
@@ -315,7 +315,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(monthlyOption);
 
     await expectRRule({ freq: "monthly", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat monthly and end after 5 occurrences", async () => {
@@ -338,7 +338,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.change(occurrencesInput, { target: { value: "5" } });
 
     await expectRRule({ freq: "monthly", interval: 1, occurrences: 5 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat yearly", async () => {
@@ -353,7 +353,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(yearlyOption);
 
     await expectRRule({ freq: "yearly", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat yearly with end option changes", async () => {
@@ -383,6 +383,6 @@ describe("Repeat Event Integration Tests", () => {
       occurrences: 0,
       endDate: "",
     });
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 });

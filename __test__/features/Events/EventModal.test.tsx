@@ -314,10 +314,10 @@ describe("EventPopover", () => {
     );
 
     // onClose should be called
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
-  it("calls onClose when Cancel clicked", () => {
+  it("calls onClose with refresh = false when Cancel clicked", () => {
     renderPopover();
 
     // Cancel button only appears in expanded mode
@@ -325,7 +325,7 @@ describe("EventPopover", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 
-    expect(mockOnClose).toHaveBeenCalledWith({}, "backdropClick");
+    expect(mockOnClose).toHaveBeenCalledWith(false);
   });
 
   it("BUGFIX: Prefill Calendar field", async () => {
