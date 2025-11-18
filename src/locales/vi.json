@@ -1,0 +1,241 @@
+{
+  "locale": "vi",
+  "calendar": {
+    "personal": "Lịch cá nhân",
+    "delegated": "Lịch được ủy quyền",
+    "other": "Lịch khác",
+    "caldav_access": "Truy cập CalDAV",
+    "secretUrl": "URL bí mật",
+    "secretUrlDesc": "Địa chỉ bí mật có thể được dùng để xem tất cả sự kiện trong lịch ngay cả khi không có quyền truy cập. Bạn có thể đặt lại địa chỉ bí mật và nhận địa chỉ mới.",
+    "exportCalendar": "Xuất lịch",
+    "exportDesc": "Xuất lịch của bạn thành tệp định dạng iCalendar (.ics) để nhập vào các ứng dụng khác.",
+    "import_file_description": "Nhập sự kiện từ tệp ICS vào một trong các lịch của bạn.",
+    "ics_feed_url": "URL nguồn ICS",
+    "import_to": "Nhập vào",
+    "new_calendar": "Lịch mới",
+    "addDescription": "Thêm mô tả",
+    "color": "Màu",
+    "newEventsVisibility": "Sự kiện mới tạo sẽ hiển thị với:",
+    "browseOtherCalendars": "Xem các lịch khác",
+    "noPublicCalendarsFor": "Không có lịch công khai cho %{name}",
+    "noMoreCalendarsFor": "Không còn lịch nào cho %{name}",
+    "delete": {
+      "title": "Xóa %{name}?",
+      "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",
+      "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
+    }
+  },
+  "actions": {
+    "modify": "Chỉnh sửa",
+    "delete": "Xóa",
+    "remove": "Gỡ bỏ",
+    "save": "Lưu",
+    "create": "Tạo",
+    "import": "Nhập",
+    "add": "Thêm",
+    "reset": "Đặt lại",
+    "export": "Xuất",
+    "exporting": "Đang xuất..."
+  },
+  "common": {
+    "cancel": "Hủy",
+    "ok": "OK",
+    "link_copied": "Đã sao chép liên kết!",
+    "import_file": "Tệp",
+    "select_file": "Chọn tệp",
+    "import_url": "URL",
+    "name": "Tên",
+    "description": "Mô tả",
+    "all": "Tất cả",
+    "you": "Bạn",
+    "select_timezone": "Chọn múi giờ",
+    "moreOptions": "Thêm tùy chọn"
+  },
+  "calendarPopover": {
+    "tabs": {
+      "settings": "Cài đặt",
+      "addNew": "Thêm lịch mới",
+      "access": "Quyền truy cập",
+      "import": "Nhập"
+    }
+  },
+  "colorPicker": {
+    "selectCustom": "Chọn màu tùy chỉnh",
+    "title": "Chọn màu tùy chỉnh",
+    "subtitle": "Chọn màu nền cho lịch này",
+    "hex": "Hex"
+  },
+  "event": {
+    "createEvent": "Tạo sự kiện",
+    "updateEvent": "Cập nhật sự kiện",
+    "organizer": "Người tổ chức",
+    "untitled": "Không có tiêu đề",
+    "repeat": {
+      "repeatEvery": "Lặp lại mỗi",
+      "frequency": {
+        "days": "Ngày",
+        "weeks": "Tuần",
+        "months": "Tháng",
+        "years": "Năm"
+      },
+      "repeatOn": "Lặp vào:",
+      "days": {
+        "monday": "Th 2",
+        "tuesday": "Th 3",
+        "wednesday": "Th 4",
+        "thursday": "Th 5",
+        "friday": "Th 6",
+        "saturday": "Th 7",
+        "sunday": "CN"
+      },
+      "end": {
+        "label": "Kết thúc:",
+        "never": "Không bao giờ",
+        "after": "Sau",
+        "on": "Vào ngày",
+        "occurrences": "lần"
+      }
+    },
+    "form": {
+      "title": "Tiêu đề",
+      "titlePlaceholder": "Thêm tiêu đề",
+      "addDescription": "Thêm mô tả",
+      "description": "Mô tả",
+      "descriptionPlaceholder": "Thêm mô tả",
+      "dateTime": "Ngày & Giờ",
+      "start": "Bắt đầu",
+      "end": "Kết thúc",
+      "allDay": "Cả ngày",
+      "repeat": "Lặp lại",
+      "timezonePlaceholder": "Chọn múi giờ",
+      "participants": "Người tham gia",
+      "videoMeeting": "Cuộc họp video",
+      "meetCopied": "Đã sao chép liên kết họp!",
+      "addVisioConference": "Thêm cuộc họp trực tuyến",
+      "joinVisioConference": "Tham gia cuộc họp",
+      "copyMeetingLink": "Sao chép liên kết họp",
+      "removeVideoConference": "Xóa cuộc họp",
+      "location": "Địa điểm",
+      "locationPlaceholder": "Thêm địa điểm",
+      "calendar": "Lịch",
+      "notification": "Thông báo",
+      "notifications": {
+        "": "Không thông báo",
+        "-PT1M": "1 phút trước",
+        "-PT5M": "5 phút trước",
+        "-PT10M": "10 phút trước",
+        "-PT15M": "15 phút trước",
+        "-PT30M": "30 phút trước",
+        "-PT1H": "1 giờ trước",
+        "-PT2H": "2 giờ trước",
+        "-PT5H": "5 giờ trước",
+        "-PT12H": "12 giờ trước",
+        "-PT1D": "1 ngày trước",
+        "-PT2D": "2 ngày trước",
+        "-PT1W": "1 tuần trước",
+        "EMAIL": "email"
+      },
+      "showMeAs": "Hiển thị tôi là",
+      "free": "Rảnh",
+      "busy": "Bận",
+      "visibleTo": "Hiển thị với",
+      "visibleAll": "Tất cả",
+      "visibleParticipants": "Người tham gia"
+    },
+    "validation": {
+      "titleRequired": "Tiêu đề là bắt buộc",
+      "startRequired": "Ngày/giờ bắt đầu là bắt buộc",
+      "invalidStart": "Ngày/giờ bắt đầu không hợp lệ",
+      "endRequired": "Ngày/giờ kết thúc là bắt buộc",
+      "invalidEnd": "Ngày/giờ kết thúc không hợp lệ",
+      "endAfterStart": "Thời gian kết thúc phải sau thời gian bắt đầu"
+    }
+  },
+  "peopleSearch": {
+    "label": "Nhập tên hoặc email",
+    "placeholder": "Nhập tên hoặc email",
+    "invalidEmail": "%{email} không phải địa chỉ email hợp lệ"
+  },
+  "error": {
+    "title": "Đã xảy ra lỗi",
+    "unknown": "Có lỗi không xác định",
+    "retry": "Thử lại",
+    "multipleEvents": "%{count} sự kiện gặp lỗi"
+  },
+  "editModeDialog": {
+    "updateRecurrentEvent": "Cập nhật sự kiện lặp lại",
+    "updateParticipationStatus": "Cập nhật trạng thái tham gia",
+    "thisEvent": "Sự kiện này",
+    "allEvents": "Tất cả sự kiện"
+  },
+  "eventDuplication": {
+    "duplicateEvent": "Nhân bản sự kiện"
+  },
+  "menubar": {
+    "today": "Hôm nay",
+    "refresh": "Làm mới",
+    "viewSelector": "Chọn chế độ xem",
+    "languageSelector": "Chọn ngôn ngữ",
+    "views": {
+      "month": "Tháng",
+      "week": "Tuần",
+      "day": "Ngày"
+    },
+    "apps": "Ứng dụng",
+    "userProfile": "Hồ sơ người dùng",
+    "logoAlt": "Lịch"
+  },
+  "eventPreview": {
+    "emailAttendees": "Gửi email cho người tham gia",
+    "deleteEvent": "Xóa sự kiện",
+    "privateEvent": {
+      "tooltipOwn": "Chỉ bạn và người tham gia có thể xem chi tiết của sự kiện này.",
+      "hiddenDetails": "Đây là sự kiện riêng tư. Chi tiết bị ẩn."
+    },
+    "free": {
+      "label": "Rảnh",
+      "tooltip": "Người khác sẽ thấy bạn rảnh trong khoảng thời gian này."
+    },
+    "attendingQuestion": "Tham gia?",
+    "accept": "Chấp nhận",
+    "maybe": "Có thể",
+    "decline": "Từ chối",
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn",
+    "joinVideo": "Tham gia cuộc họp video",
+    "guests": "%{count} khách",
+    "yesCount": "%{count} đồng ý",
+    "noCount": "%{count} từ chối",
+    "recurrentEvent": "Sự kiện lặp lại",
+    "freq": {
+      "daily": "hàng ngày",
+      "weekly": "hàng tuần",
+      "monthly": "hàng tháng",
+      "yearly": "hàng năm"
+    },
+    "onDays": {
+      "MO": "thứ hai",
+      "TU": "thứ ba",
+      "WE": "thứ tư",
+      "TH": "thứ năm",
+      "FR": "thứ sáu",
+      "SA": "thứ bảy",
+      "SU": "chủ nhật"
+    },
+    "recurrenceOnDays": "vào %{days}",
+    "everyInterval": "mỗi %{interval} %{unit}",
+    "forOccurrences": "trong %{count} lần",
+    "until": "đến %{date}",
+    "days": "ngày",
+    "months": "tháng",
+    "years": "năm",
+    "alarmText": "%{trigger} bằng %{action}"
+  },
+  "dateTimeFields": {
+    "date": "Ngày",
+    "startDate": "Ngày bắt đầu",
+    "startTime": "Giờ bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "endTime": "Giờ kết thúc"
+  }
+}

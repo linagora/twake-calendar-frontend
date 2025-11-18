@@ -13,10 +13,21 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import I18n from "cozy-ui/transpiled/react/providers/I18n";
+
+import {
+  enGB,
+  fr as frLocale,
+  ru as ruLocale,
+  vi as viLocale,
+} from "date-fns/locale";
+
 import en from "./locales/en.json";
 import fr from "./locales/fr.json";
+import ru from "./locales/ru.json";
+import vi from "./locales/vi.json";
 
-const locale = { en, fr };
+const locale = { en, fr, ru, vi };
+const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
@@ -34,6 +45,7 @@ function App() {
       <I18n
         dictRequire={(lang: keyof typeof locale) => locale[lang]}
         lang={lang}
+        locales={dateLocales}
       >
         <Suspense fallback={<Loading />}>
           <Router history={history}>
@@ -44,7 +56,6 @@ function App() {
               <Route path="/error" element={<Error />} />
             </Routes>
           </Router>
-          <ErrorSnackbar error={error} type="user" />
           <ErrorSnackbar error={error} type="user" />
         </Suspense>
       </I18n>

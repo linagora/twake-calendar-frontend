@@ -22,6 +22,14 @@ import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { setLanguage } from "../../features/Settings/SettingsSlice";
+import { format } from "date-fns";
+import {
+  enGB,
+  fr as frLocale,
+  ru as ruLocale,
+  vi as viLocale,
+} from "date-fns/locale";
+const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {
   name: string;
@@ -46,7 +54,7 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
-  const { t, f, lang } = useI18n();
+  const { t, lang } = useI18n(); // deliberately NOT using f()
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -116,9 +124,15 @@ export function Menubar({
   };
   const handleLangClose = () => setLangAnchorEl(null);
 
+  const dateLabel = format(currentDate, "MMMM yyyy", {
+    locale: dateLocales[lang as keyof typeof dateLocales] || enGB,
+  });
+
   const availableLangs = [
     { code: "en", label: "English" },
     { code: "fr", label: "Français" },
+    { code: "ru", label: "Русский" },
+    { code: "vi", label: "Tiếng Việt" },
   ];
 
   return (
@@ -146,7 +160,7 @@ export function Menubar({
           <div className="menu-items">
             <div className="current-date-time">
               <Typography variant="h6" component="div">
-                {f(currentDate, "MMMM yyyy")}
+                {dateLabel}
               </Typography>
             </div>
           </div>
