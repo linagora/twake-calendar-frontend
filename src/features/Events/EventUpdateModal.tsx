@@ -29,6 +29,7 @@ import {
 } from "./eventUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
 
 const showErrorNotification = (message: string) => {
   console.error(`[ERROR] ${message}`);
@@ -407,7 +408,14 @@ function EventUpdateModal({
       }
     }
 
+    const eventStartChanged =
+      new Date(event.start).getTime() !== new Date(startDate).getTime();
+    const eventEndChanged =
+      new Date(event?.end ?? "").getTime() !== new Date(endDate).getTime();
+    const timeChanged = eventStartChanged || eventEndChanged;
+
     const newEvent: CalendarEvent = {
+      ...updateAttendeesAfterTimeChange(event, timeChanged, attendees),
       calId: newCalId || calId,
       title,
       URL: event.URL ?? `/calendars/${newCalId || calId}/${event.uid}.ics`,
@@ -421,9 +429,6 @@ function EventUpdateModal({
       class: eventClass,
       organizer: organizer,
       timezone,
-      attendee: organizer
-        ? [organizer as userAttendee, ...attendees]
-        : attendees,
       transp: busy,
       color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
