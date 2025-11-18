@@ -17,6 +17,7 @@ import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
 import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
+import { userAttendee } from "../../../features/User/userDataTypes";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -171,11 +172,14 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs);
     const originalEnd = new Date(event.end ?? "");
     const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs);
-    const newEvent = {
-      ...event,
-      start: computedNewStart.toISOString(),
-      end: computedNewEnd.toISOString(),
-    } as CalendarEvent;
+    const newEvent = updateAttendeesAfterTimeChange(
+      {
+        ...event,
+        start: computedNewStart.toISOString(),
+        end: computedNewEnd.toISOString(),
+      } as CalendarEvent,
+      true
+    );
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -245,11 +249,14 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewEnd = new Date(
       originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
     );
-    const newEvent = {
-      ...event,
-      start: computedNewStart.toISOString(),
-      end: computedNewEnd.toISOString(),
-    } as CalendarEvent;
+    const newEvent = updateAttendeesAfterTimeChange(
+      {
+        ...event,
+        start: computedNewStart.toISOString(),
+        end: computedNewEnd.toISOString(),
+      } as CalendarEvent,
+      true
+    );
 
     if (isRecurring) {
       setSelectedEvent(event);
@@ -306,5 +313,57 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     handleEventAllow,
     handleEventDrop,
     handleEventResize,
+  };
+};
+
+export const updateAttendeesAfterTimeChange = (
+  event: CalendarEvent,
+  timeChanged?: boolean,
+  attendees?: userAttendee[]
+): CalendarEvent => {
+  const { attendee, organizer } = event;
+  if (!attendee || !organizer) return event;
+
+  const organizerAddr = organizer.cal_address;
+
+  const markNeedsAction = (att: userAttendee): userAttendee => ({
+    ...att,
+    partstat: "NEEDS-ACTION",
+    rsvp: "TRUE",
+  });
+
+  const getExistingOrDefault = (addr: string, fallback: userAttendee) =>
+    attendee.find((a) => a?.cal_address === addr) ?? fallback;
+
+  if (attendees) {
+    const updatedAttendees = attendees.map((att) => {
+      const existing = getExistingOrDefault(
+        att.cal_address,
+        markNeedsAction(att)
+      );
+      return timeChanged ? markNeedsAction(existing) : existing;
+    });
+
+    const organizerEntry = getExistingOrDefault(organizerAddr, {
+      ...organizer,
+      role: "CHAIR",
+      cutype: "INDIVIDUAL",
+      partstat: "NEEDS-ACTION",
+      rsvp: "TRUE",
+    });
+
+    return {
+      ...event,
+      attendee: [...updatedAttendees, organizerEntry],
+    };
+  }
+  const updatedAttendees = attendee.map((att) => {
+    if (att.cal_address === organizerAddr) return att;
+    return timeChanged ? markNeedsAction(att) : att;
+  });
+
+  return {
+    ...event,
+    attendee: updatedAttendees,
   };
 };
