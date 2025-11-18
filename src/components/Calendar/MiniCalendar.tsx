@@ -1,7 +1,6 @@
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { DateCalendar } from "@mui/x-date-pickers";
-import { DayCalendarSkeleton } from "@mui/x-date-pickers/DayCalendarSkeleton";
 import moment from "moment";
 import {
   computeStartOfTheWeek,
@@ -9,7 +8,6 @@ import {
   getCalendarRange,
 } from "../../utils/dateUtils";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { refreshCalendars } from "../Event/utils/eventUtils";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import { useEffect, useState } from "react";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
@@ -44,9 +42,7 @@ export function MiniCalendar({
           if (!dateMoment) return;
           const date = dateMoment.toDate();
           if (selectionState === "finish") {
-            setSelectedDate(date);
             setSelectedMiniDate(date);
-            setVisibleDate(date);
             calendarRef.current?.gotoDate(date);
           }
         }}
@@ -115,11 +111,6 @@ export function MiniCalendar({
               selected: classNames.includes("selectedWeek"),
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
               disableMargin: false,
-              onClick: () => {
-                setSelectedDate(date);
-                setSelectedMiniDate(date);
-                calendarRef.current?.gotoDate(date);
-              },
               style: {
                 backgroundColor: "transparent",
                 position: "relative",

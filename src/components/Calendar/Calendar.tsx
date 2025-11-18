@@ -443,7 +443,6 @@ export default function CalendarApp({
           }}
           datesSet={(arg) => {
             setCurrentView(arg.view.type);
-            // Get the current date from calendar API to ensure consistency
             const calendarCurrentDate =
               calendarRef.current?.getDate() || new Date(arg.start);
 
@@ -454,8 +453,8 @@ export default function CalendarApp({
               setSelectedDate(new Date(middle));
               setSelectedMiniDate(calendarCurrentDate);
             } else {
-              setSelectedDate(new Date(arg.start));
-              setSelectedMiniDate(new Date(arg.start));
+              setSelectedDate(calendarCurrentDate);
+              setSelectedMiniDate(calendarCurrentDate);
             }
 
             // Always use the calendar's current date for consistency
