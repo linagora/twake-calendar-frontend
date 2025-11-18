@@ -1,0 +1,245 @@
+import {
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+  render,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  DateTimeFieldsProps,
+  DateTimeFields,
+} from "../../src/components/Event/components/DateTimeFields";
+
+jest.mock("cozy-ui/transpiled/react/providers/I18n", () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+    lang: "en",
+  }),
+}));
+
+describe("DateTimeFields", () => {
+  const mockHandlers = {
+    onStartDateChange: jest.fn(),
+    onStartTimeChange: jest.fn(),
+    onEndDateChange: jest.fn(),
+    onEndTimeChange: jest.fn(),
+    onToggleEndDate: jest.fn(),
+  };
+
+  const defaultProps: DateTimeFieldsProps = {
+    startDate: "2025-07-18",
+    startTime: "09:00",
+    endDate: "2025-07-18",
+    endTime: "10:00",
+    allday: false,
+    showMore: true,
+    hasEndDateChanged: false,
+    showEndDate: false,
+    validation: {
+      errors: {
+        dateTime: "",
+      },
+    },
+    ...mockHandlers,
+  };
+
+  const renderField = async (props: Partial<DateTimeFieldsProps> = {}) => {
+    await act(async () =>
+      render(<DateTimeFields {...defaultProps} {...props} />)
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("moves END forward when START moves after END (normal mode)", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "10:00",
+      endDate: "2025-01-01",
+      endTime: "11:00",
+      showMore: true,
+    });
+
+    const startTimeInput = screen.getByTestId("start-time-input");
+
+    fireEvent.change(startTimeInput, { target: { value: "12:00" } });
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("12:00")
+    );
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("13:00")
+    );
+  });
+
+  it("moves END forward by full duration when START date jumps after END date", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "09:00",
+      endDate: "2025-01-01",
+      endTime: "10:00",
+      showMore: true,
+    });
+
+    const startDateInput = screen.getByTestId("start-date-input");
+
+    // Clear and type new date
+    await userEvent.clear(startDateInput);
+    await userEvent.type(startDateInput, "01/03/2025");
+
+    // Trigger blur to commit the change
+    fireEvent.blur(startDateInput);
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-01-03")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-01-03")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:00")
+    );
+  });
+
+  it("moves START backward when END moves before START (normal mode)", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "10:00",
+      endDate: "2025-01-01",
+      endTime: "11:00",
+      showMore: true,
+    });
+
+    const endTimeInput = screen.getByTestId("end-time-input");
+
+    fireEvent.change(endTimeInput, { target: { value: "08:00" } });
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("08:00")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("07:00")
+    );
+  });
+
+  it("moves START backward properly when END date jumps before START date", async () => {
+    await renderField({
+      startDate: "2025-01-05",
+      startTime: "09:00",
+      endDate: "2025-01-05",
+      endTime: "10:00",
+      showMore: true,
+    });
+
+    const endDateInput = screen.getByTestId("end-date-input");
+
+    // Clear and type new date
+    await userEvent.clear(endDateInput);
+    await userEvent.type(endDateInput, "01/03/2025");
+
+    // Trigger blur to commit the change
+    fireEvent.blur(endDateInput);
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-01-03")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-01-03")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:00")
+    );
+  });
+
+  it("pushes END forward in whole days for allday events", async () => {
+    await renderField({
+      allday: true,
+      startDate: "2025-02-01",
+      endDate: "2025-02-03",
+      showEndDate: true,
+    });
+
+    const startDateInput = screen.getByTestId("start-date-input");
+
+    // Clear and type new date
+    await userEvent.clear(startDateInput);
+    await userEvent.type(startDateInput, "02/10/2025");
+
+    // Trigger blur to commit the change
+    fireEvent.blur(startDateInput);
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-02-10")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-02-12")
+    );
+  });
+
+  it("moves START backward in whole days for allday when END moves earlier", async () => {
+    await renderField({
+      allday: true,
+      startDate: "2025-05-10",
+      endDate: "2025-05-15",
+      showEndDate: true,
+    });
+
+    const endDateInput = screen.getByTestId("end-date-input");
+
+    // Clear and type new date
+    await userEvent.clear(endDateInput);
+    await userEvent.type(endDateInput, "05/01/2025");
+
+    // Trigger blur to commit the change
+    fireEvent.blur(endDateInput);
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-05-01")
+    );
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-04-26")
+    );
+  });
+
+  it("does not call handlers if invalid (null) date value", async () => {
+    await renderField({
+      showMore: true,
+    });
+
+    const startDateInput = screen.getByTestId("start-date-input");
+
+    fireEvent.change(startDateInput, { target: { value: "" } });
+
+    expect(mockHandlers.onStartDateChange).not.toHaveBeenCalled();
+    expect(mockHandlers.onEndDateChange).not.toHaveBeenCalled();
+  });
+
+  it("does not shift anything when new start is before old end (normal case)", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "09:00",
+      endDate: "2025-01-01",
+      endTime: "10:00",
+      showMore: true,
+    });
+
+    const startTimeInput = screen.getByTestId("start-time-input");
+
+    fireEvent.change(startTimeInput, { target: { value: "09:30" } });
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:30")
+    );
+    expect(mockHandlers.onEndTimeChange).not.toHaveBeenCalled();
+  });
+});
