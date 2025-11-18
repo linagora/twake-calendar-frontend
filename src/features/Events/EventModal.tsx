@@ -42,7 +42,7 @@ function EventPopover({
 }: {
   anchorEl: HTMLElement | null;
   open: boolean;
-  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onClose: (refresh?: boolean) => void;
   selectedRange: DateSelectArg | null;
   setSelectedRange: Function;
   calendarRef: React.RefObject<CalendarApi | null>;
@@ -564,7 +564,7 @@ function EventPopover({
   );
 
   const handleClose = () => {
-    onClose({}, "backdropClick");
+    onClose(false);
     setShowValidationErrors(false);
     resetAllStateToDefault();
     setStart("");
@@ -656,7 +656,7 @@ function EventPopover({
     setShowValidationErrors(false);
 
     // Close popup immediately
-    onClose({}, "backdropClick");
+    onClose(true);
 
     // Reset all state to default values
     resetAllStateToDefault();
