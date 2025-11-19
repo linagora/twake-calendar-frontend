@@ -456,6 +456,10 @@ export default function CalendarApp({
   }, [dispatch, rangeKey, tempCalendarIds, rangeStart, rangeEnd]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [openEventDisplay, setOpenEventDisplay] = useState(false);
+  const [eventDisplayedId, setEventDisplayedId] = useState("");
+  const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
+  const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
 
   // Listen for eventModalError event to reopen modal on API failure
   useEffect(() => {
@@ -463,6 +467,40 @@ export default function CalendarApp({
       if (event.detail?.type === "create") {
         // Reopen create event modal
         setAnchorEl(document.body);
+      } else if (event.detail?.type === "update") {
+        // Store update modal info to sessionStorage for EventDisplayPreview to pick up
+        try {
+          sessionStorage.setItem(
+            "eventUpdateModalReopen",
+            JSON.stringify({
+              eventId: event.detail.eventId,
+              calId: event.detail.calId,
+              typeOfAction: event.detail.typeOfAction,
+              timestamp: Date.now(),
+            })
+          );
+          
+          // Open EventDisplayPreview if it's not already open with matching event, so it can pick up the sessionStorage
+          if (!openEventDisplay || eventDisplayedId !== event.detail.eventId || eventDisplayedCalId !== event.detail.calId) {
+            setEventDisplayedId(event.detail.eventId);
+            setEventDisplayedCalId(event.detail.calId);
+            setEventDisplayedTemp(false);
+            setOpenEventDisplay(true);
+          } else {
+            // If EventDisplayPreview is already open, trigger reopen by dispatching a custom event
+            window.dispatchEvent(
+              new CustomEvent("eventUpdateModalReopen", {
+                detail: {
+                  eventId: event.detail.eventId,
+                  calId: event.detail.calId,
+                  typeOfAction: event.detail.typeOfAction,
+                },
+              })
+            );
+          }
+        } catch (err) {
+          console.error("[Calendar] Failed to store update modal info:", err);
+        }
       }
     };
 
@@ -476,12 +514,8 @@ export default function CalendarApp({
         handleEventModalError as EventListener
       );
     };
-  }, []);
+  }, [openEventDisplay, eventDisplayedId, eventDisplayedCalId]);
 
-  const [openEventDisplay, setOpenEventDisplay] = useState(false);
-  const [eventDisplayedId, setEventDisplayedId] = useState("");
-  const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
-  const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
   );

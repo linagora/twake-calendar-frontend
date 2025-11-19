@@ -488,8 +488,25 @@ function EventUpdateModal({
         const masterEvent = await getEvent(masterEventToFetch, true);
         masterEventData = masterEvent;
       } catch (err: any) {
-        console.error("Failed to fetch master event:", err);
-        showErrorNotification("Failed to fetch event data. Please try again.");
+        console.error("[EventUpdateModal] Failed to fetch master event:", err);
+        // API failed - restore form data and mark as error
+        const formDataToSave = saveCurrentFormData();
+        const errorFormData = {
+          ...formDataToSave,
+          fromError: true,
+        };
+        saveEventFormDataToTemp("update", errorFormData);
+        
+        showErrorNotification(
+          err?.message || "Failed to fetch event data. Please try again."
+        );
+        
+        // Dispatch eventModalError to reopen modal
+        window.dispatchEvent(
+          new CustomEvent("eventModalError", {
+            detail: { type: "update", eventId, calId, typeOfAction },
+          })
+        );
         return;
       }
     }
@@ -729,8 +746,20 @@ function EventUpdateModal({
             );
 
             // Handle result of updateEventInstanceAsync
-            if (result && typeof result.unwrap === "function") {
-              await result.unwrap();
+            if (result && typeof (result as any).unwrap === "function") {
+              try {
+                await (result as any).unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            } else {
+              // Check if result is rejected
+              if (result.type && (result.type as string).endsWith("/rejected")) {
+                const rejectedResult = result as any;
+                throw new Error(
+                  rejectedResult.error?.message || rejectedResult.payload?.message || "API call failed"
+                );
+              }
             }
 
             // Clear temp data on successful save
@@ -775,17 +804,35 @@ function EventUpdateModal({
             );
 
             // Handle result of updateSeriesAsync
-            if (result && typeof result.unwrap === "function") {
-              await result.unwrap();
+            if (result && typeof (result as any).unwrap === "function") {
+              try {
+                await (result as any).unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            } else {
+              // Check if result is rejected
+              if (result.type && (result.type as string).endsWith("/rejected")) {
+                const rejectedResult = result as any;
+                throw new Error(
+                  rejectedResult.error?.message || rejectedResult.payload?.message || "API call failed"
+                );
+              }
             }
 
             // STEP 3: Fetch to get new instances with correct timing
-            const calendarRange = getCalendarRange(new Date(start));
-            await refreshCalendars(
-              dispatch,
-              Object.values(calendarsList),
-              calendarRange
-            );
+            // Note: refreshCalendars failure is not critical, we can continue
+            try {
+              const calendarRange = getCalendarRange(new Date(start));
+              await refreshCalendars(
+                dispatch,
+                Object.values(calendarsList),
+                calendarRange
+              );
+            } catch (refreshError: any) {
+              console.error("[EventUpdateModal] Failed to refresh calendars:", refreshError);
+              // Don't throw - this is not critical, the update already succeeded
+            }
 
             // Clear cache after reload
             dispatch(clearFetchCache(calId));
@@ -836,8 +883,20 @@ function EventUpdateModal({
             );
 
             // Handle result of updateSeriesAsync
-            if (result && typeof result.unwrap === "function") {
-              await result.unwrap();
+            if (result && typeof (result as any).unwrap === "function") {
+              try {
+                await (result as any).unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            } else {
+              // Check if result is rejected
+              if (result.type && (result.type as string).endsWith("/rejected")) {
+                const rejectedResult = result as any;
+                throw new Error(
+                  rejectedResult.error?.message || rejectedResult.payload?.message || "API call failed"
+                );
+              }
             }
 
             // Clear cache to ensure navigation shows updated data
