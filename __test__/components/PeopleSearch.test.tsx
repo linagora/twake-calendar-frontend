@@ -216,4 +216,35 @@ describe("PeopleSearch", () => {
       await searchPromise;
     });
   });
+
+  it("retains input value when field loses focus (blur)", async () => {
+    let resolveSearch: (value: User[]) => void;
+    const searchPromise = new Promise<User[]>((resolve) => {
+      resolveSearch = resolve;
+    });
+    mockedSearchUsers.mockReturnValueOnce(searchPromise);
+    await act(async () => {
+      setup();
+    });
+
+    const input = screen.getByRole("combobox");
+
+    await act(async () => {
+      userEvent.type(input, "Test");
+    });
+
+    await waitFor(() => {
+      expect(mockedSearchUsers).toHaveBeenCalledWith("Test", ["user"]);
+    });
+
+    expect(input).toHaveValue("Test");
+
+    await act(async () => {
+      input.blur();
+    });
+
+    await waitFor(() => {
+      expect(input).toHaveValue("Test");
+    });
+  });
 });

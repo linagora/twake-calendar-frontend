@@ -42,6 +42,7 @@ export function PeopleSearch({
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<User[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -100,7 +101,11 @@ export function PeopleSearch({
         multiple
         options={options}
         autoComplete={false}
-        open={!!query && (loading || hasSearched)}
+        clearOnBlur={false}
+        blurOnSelect={true}
+        open={isOpen && !!query && (loading || hasSearched)}
+        onOpen={() => setIsOpen(true)}
+        onClose={() => setIsOpen(false)}
         disabled={disabled}
         loading={loading}
         filterOptions={(x) => x}
@@ -116,6 +121,7 @@ export function PeopleSearch({
         }}
         filterSelectedOptions
         value={selectedUsers}
+        inputValue={query}
         onInputChange={(event, value) => setQuery(value)}
         onChange={(event, value) => {
           const last = value[value.length - 1];
