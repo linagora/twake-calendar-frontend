@@ -42,6 +42,7 @@ import {} from "./utils/dateRules";
 import {} from "./utils/dateTimeFormatters";
 import { validateEventForm } from "./utils/formValidation";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { AddDescButton } from "./AddDescButton";
 
 interface EventFormFieldsProps {
   // Form state
@@ -424,52 +425,13 @@ export default function EventFormFields({
         />
       </FieldWithLabel>
 
-      {!showDescription && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={1} mb={1}>
-            <Button
-              startIcon={<DescriptionIcon />}
-              onClick={() => setShowDescription(true)}
-              size="small"
-              sx={{
-                textTransform: "none",
-                color: "text.secondary",
-              }}
-            >
-              {t("event.form.addDescription")}
-            </Button>
-          </Box>
-        </FieldWithLabel>
-      )}
-
-      {showDescription && (
-        <FieldWithLabel
-          label={t("event.form.description")}
-          isExpanded={showMore}
-        >
-          <TextField
-            fullWidth
-            label={!showMore ? t("event.form.description") : ""}
-            placeholder={t("event.form.descriptionPlaceholder")}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            size="small"
-            margin="dense"
-            multiline
-            minRows={2}
-            maxRows={10}
-            sx={{
-              "& .MuiInputBase-root": {
-                maxHeight: "33%",
-                overflowY: "auto",
-              },
-              "& textarea": {
-                resize: "vertical",
-              },
-            }}
-          />
-        </FieldWithLabel>
-      )}
+      <AddDescButton
+        showDescription={showDescription}
+        setShowDescription={setShowDescription}
+        showMore={showMore}
+        description={description}
+        setDescription={setDescription}
+      />
 
       <FieldWithLabel label={t("event.form.dateTime")} isExpanded={showMore}>
         <DateTimeFields

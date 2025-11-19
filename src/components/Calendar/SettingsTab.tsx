@@ -13,6 +13,7 @@ import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { AddDescButton } from "../Event/AddDescButton";
 import { ColorPicker } from "./CalendarColorPicker";
 
 export function SettingsTab({
@@ -29,7 +30,7 @@ export function SettingsTab({
   name: string;
   setName: Function;
   description: string;
-  setDescription: Function;
+  setDescription: (d: string) => void;
   color: Record<string, string>;
   setColor: Function;
   visibility: "public" | "private";
@@ -57,29 +58,13 @@ export function SettingsTab({
         margin="dense"
       />
 
-      {!toggleDesc && (
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => setToggleDesc(!toggleDesc)}
-          startIcon={<FormatListBulletedIcon />}
-        >
-          {t("calendar.addDescription")}
-        </Button>
-      )}
-
-      {toggleDesc && (
-        <TextField
-          fullWidth
-          label={t("common.description")}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          size="small"
-          margin="dense"
-          multiline
-          rows={2}
-        />
-      )}
+      <AddDescButton
+        showDescription={toggleDesc}
+        setShowDescription={setToggleDesc}
+        showMore={false}
+        description={description}
+        setDescription={setDescription}
+      />
 
       <Box mt={2}>
         <Typography variant="body2" gutterBottom>

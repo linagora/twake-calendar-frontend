@@ -38,7 +38,7 @@ describe("CalendarPopover", () => {
     renderPopover();
 
     expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
-    expect(screen.getByText("calendar.addDescription")).toBeInTheDocument();
+    expect(screen.getByText("event.form.addDescription")).toBeInTheDocument();
   });
 
   it("updates name and description fields", () => {
@@ -48,7 +48,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(nameInput, { target: { value: "My Calendar" } });
     expect(nameInput).toHaveValue("My Calendar");
 
-    fireEvent.click(screen.getByText("calendar.addDescription"));
+    fireEvent.click(screen.getByText("event.form.addDescription"));
     const descInput = screen.getByLabelText(/Description/i);
     fireEvent.change(descInput, { target: { value: "Test description" } });
     expect(descInput).toHaveValue("Test description");
@@ -65,7 +65,7 @@ describe("CalendarPopover", () => {
     fireEvent.change(screen.getByLabelText(/Name/i), {
       target: { value: "Test Calendar" },
     });
-    fireEvent.click(screen.getByText("calendar.addDescription"));
+    fireEvent.click(screen.getByText("event.form.addDescription"));
     fireEvent.change(screen.getByLabelText(/Description/i), {
       target: { value: "Test Description" },
     });
