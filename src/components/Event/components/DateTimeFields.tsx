@@ -92,8 +92,9 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   }, [startDate, endDate]);
 
   const isExpanded = showMore;
-  const shouldShowEndDateNormal = allday || showEndDate || spansMultipleDays;
-  const shouldShowFullFieldsInNormal = !allday && hasEndDateChanged;
+  const shouldShowEndDateNormal = allday || showEndDate;
+  const shouldShowFullFieldsInNormal =
+    (!allday && hasEndDateChanged) || spansMultipleDays;
   const showSingleDateField =
     !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
 
@@ -149,7 +150,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     if (newEndTime !== endTime) {
       onEndTimeChange(newEndTime);
     }
-    
+
     if (newEndDate !== endDate) {
       onEndDateChange(newEndDate);
     }
