@@ -200,7 +200,7 @@ describe("DateTimeFields", () => {
     expect(mockHandlers.onEndDateChange).not.toHaveBeenCalled();
   });
 
-  it("does not shift anything when new start is before old end (normal case)", async () => {
+  it("shift to preserve original duration (normal case)", async () => {
     await renderField({
       startDate: "2025-01-01",
       startTime: "09:00",
@@ -216,6 +216,6 @@ describe("DateTimeFields", () => {
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:30")
     );
-    expect(mockHandlers.onEndTimeChange).not.toHaveBeenCalled();
+    expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30");
   });
 });
