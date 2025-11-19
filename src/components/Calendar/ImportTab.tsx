@@ -53,18 +53,6 @@ export function ImportTab({
 
   return (
     <Box mt={2}>
-      <ToggleButtonGroup
-        value={importMode}
-        exclusive
-        onChange={(e, val) => val && setImportMode(val)}
-        fullWidth
-        size="small"
-        sx={{ mb: 2 }}
-      >
-        <ToggleButton value="file">{t("common.import_file")}</ToggleButton>
-        {/* <ToggleButton value="url">{t("common.import_url")}</ToggleButton> */}
-      </ToggleButtonGroup>
-
       {importMode === "file" && (
         <>
           <Button variant="outlined" component="label" sx={{ mb: 1 }}>
