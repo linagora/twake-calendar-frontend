@@ -84,14 +84,10 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const startDateInput = screen.getByTestId("start-date-input");
-
-    // Clear and type new date
-    await userEvent.clear(startDateInput);
-    await userEvent.type(startDateInput, "01/03/2025");
-
-    // Trigger blur to commit the change
-    fireEvent.blur(startDateInput);
+    const calendarButton = screen.getAllByRole("button");
+    await userEvent.click(calendarButton[0]);
+    const dayButton = screen.getByRole("gridcell", { name: "3" });
+    await userEvent.click(dayButton);
 
     await waitFor(() =>
       expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-01-03")
@@ -99,10 +95,6 @@ describe("DateTimeFields", () => {
 
     await waitFor(() =>
       expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-01-03")
-    );
-
-    await waitFor(() =>
-      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:00")
     );
   });
 
@@ -137,14 +129,10 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const endDateInput = screen.getByTestId("end-date-input");
-
-    // Clear and type new date
-    await userEvent.clear(endDateInput);
-    await userEvent.type(endDateInput, "01/03/2025");
-
-    // Trigger blur to commit the change
-    fireEvent.blur(endDateInput);
+    const calendarButton = screen.getAllByRole("button");
+    await userEvent.click(calendarButton[2]);
+    const dayButton = screen.getByRole("gridcell", { name: "3" });
+    await userEvent.click(dayButton);
 
     await waitFor(() =>
       expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-01-03")
@@ -152,10 +140,6 @@ describe("DateTimeFields", () => {
 
     await waitFor(() =>
       expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-01-03")
-    );
-
-    await waitFor(() =>
-      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:00")
     );
   });
 
@@ -167,14 +151,10 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const startDateInput = screen.getByTestId("start-date-input");
-
-    // Clear and type new date
-    await userEvent.clear(startDateInput);
-    await userEvent.type(startDateInput, "02/10/2025");
-
-    // Trigger blur to commit the change
-    fireEvent.blur(startDateInput);
+    const calendarButton = screen.getAllByRole("button");
+    await userEvent.click(calendarButton[0]);
+    const dayButton = screen.getByRole("gridcell", { name: "10" });
+    await userEvent.click(dayButton);
 
     await waitFor(() =>
       expect(mockHandlers.onStartDateChange).toHaveBeenCalledWith("2025-02-10")
@@ -193,14 +173,10 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const endDateInput = screen.getByTestId("end-date-input");
-
-    // Clear and type new date
-    await userEvent.clear(endDateInput);
-    await userEvent.type(endDateInput, "05/01/2025");
-
-    // Trigger blur to commit the change
-    fireEvent.blur(endDateInput);
+    const calendarButton = screen.getAllByRole("button");
+    await userEvent.click(calendarButton[1]);
+    const dayButton = screen.getByRole("gridcell", { name: "1" });
+    await userEvent.click(dayButton);
 
     await waitFor(() =>
       expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith("2025-05-01")

@@ -14,6 +14,7 @@ import "dayjs/locale/ru";
 import "dayjs/locale/vi";
 
 import { PickerValue } from "@mui/x-date-pickers/internals";
+import { dtDate, dtTime, toDateTime } from "../utils/dateTimeHelpers";
 
 dayjs.extend(customParseFormat);
 
@@ -71,75 +72,99 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     ? t("dateTimeFields.date")
     : t("dateTimeFields.startDate");
 
-  const toDateTime = (date: string, time: string) =>
-    dayjs(`${date} ${time || "00:00"}`, "YYYY-MM-DD HH:mm");
+  const getDuration = (s: Dayjs, e: Dayjs, isAllDay: boolean) =>
+    isAllDay
+      ? Math.max(e.startOf("day").diff(s.startOf("day"), "day"), 0)
+      : Math.max(e.diff(s, "minute"), 0);
 
-  const splitDate = (dt: Dayjs) => dt.format("YYYY-MM-DD");
-  const splitTime = (dt: Dayjs) => dt.format("HH:mm");
+  const isEnforcingRef = React.useRef(false);
 
-  const getDuration = (prevStart: Dayjs, prevEnd: Dayjs, isAllDay: boolean) => {
-    if (isAllDay) {
-      const s = prevStart.startOf("day");
-      const e = prevEnd.startOf("day");
-      return Math.max(e.diff(s, "day"), 0);
-    }
-    return Math.max(prevEnd.diff(prevStart, "minute"), 0);
-  };
+  const enforceAfterStartChange = (
+    newStart: Dayjs,
+    prevStart: Dayjs,
+    prevEnd: Dayjs
+  ) => {
+    if (isEnforcingRef.current) return;
 
-  const enforceDurationAfterStartChange = (params: {
-    newStart: Dayjs;
-    prevStart: Dayjs;
-    prevEnd: Dayjs;
-  }) => {
-    const { newStart, prevStart, prevEnd } = params;
-    const duration = getDuration(prevStart, prevEnd, allday);
+    const dur = getDuration(prevStart, prevEnd, allday);
 
     if (allday) {
-      const newStartDay = newStart.startOf("day");
-      const prevEndDay = prevEnd.startOf("day");
-
-      if (newStartDay.isAfter(prevEndDay)) {
-        const fixedEnd = newStartDay.add(duration, "day");
-        onEndDateChange(splitDate(fixedEnd));
+      if (newStart.isAfter(prevEnd)) {
+        isEnforcingRef.current = true;
+        const newEnd = newStart.add(dur, "day");
+        onEndDateChange(dtDate(newEnd));
+        setTimeout(() => {
+          isEnforcingRef.current = false;
+        }, 0);
       }
     } else {
       if (newStart.isAfter(prevEnd)) {
-        const fixedEnd = newStart.add(duration, "minute");
-        onEndDateChange(splitDate(fixedEnd));
-        onEndTimeChange(splitTime(fixedEnd));
+        isEnforcingRef.current = true;
+        const newEnd = newStart.add(dur, "minute");
+
+        const newEndDate = dtDate(newEnd);
+        const newEndTime = dtTime(newEnd);
+
+        if (newEndDate !== endDate) {
+          onEndDateChange(newEndDate);
+        }
+        if (newEndTime !== endTime) {
+          onEndTimeChange(newEndTime);
+        }
+
+        setTimeout(() => {
+          isEnforcingRef.current = false;
+        }, 0);
       }
     }
   };
 
-  const enforceDurationAfterEndChange = (params: {
-    newEnd: Dayjs;
-    prevStart: Dayjs;
-    prevEnd: Dayjs;
-  }) => {
-    const { newEnd, prevStart, prevEnd } = params;
-    const duration = getDuration(prevStart, prevEnd, allday);
+  const enforceAfterEndChange = (
+    newEnd: Dayjs,
+    prevStart: Dayjs,
+    prevEnd: Dayjs
+  ) => {
+    if (isEnforcingRef.current) return;
+
+    const dur = getDuration(prevStart, prevEnd, allday);
 
     if (allday) {
-      const newEndDay = newEnd.startOf("day");
-      const prevStartDay = prevStart.startOf("day");
-
-      if (newEndDay.isBefore(prevStartDay)) {
-        const fixedStart = newEndDay.subtract(duration, "day");
-        onStartDateChange(splitDate(fixedStart));
+      if (newEnd.isBefore(prevStart)) {
+        isEnforcingRef.current = true;
+        const newStart = newEnd.subtract(dur, "day");
+        onStartDateChange(dtDate(newStart));
+        setTimeout(() => {
+          isEnforcingRef.current = false;
+        }, 0);
       }
     } else {
       if (newEnd.isBefore(prevStart)) {
-        const fixedStart = newEnd.subtract(duration, "minute");
-        onStartDateChange(splitDate(fixedStart));
-        onStartTimeChange(splitTime(fixedStart));
+        isEnforcingRef.current = true;
+        const newStart = newEnd.subtract(dur, "minute");
+
+        const newStartDate = dtDate(newStart);
+        const newStartTime = dtTime(newStart);
+
+        if (newStartDate !== startDate) {
+          onStartDateChange(newStartDate);
+        }
+        if (newStartTime !== startTime) {
+          onStartTimeChange(newStartTime);
+        }
+
+        setTimeout(() => {
+          isEnforcingRef.current = false;
+        }, 0);
       }
     }
   };
 
-  const handleStartDateChange = (newDateValue: PickerValue) => {
-    console.log("startdate", newDateValue);
-    if (!newDateValue?.isValid()) return;
-    const newDateStr = newDateValue.format("YYYY-MM-DD");
+  const handleStartDateChange = (value: PickerValue) => {
+    console.log("date changed : ", value);
+
+    if (!value || !value.isValid() || isEnforcingRef.current) return;
+
+    const newDateStr = dtDate(value as Dayjs);
 
     const prevStart = toDateTime(startDate, startTime);
     const prevEnd = toDateTime(endDate, endTime);
@@ -147,12 +172,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     onStartDateChange(newDateStr);
 
     const newStart = toDateTime(newDateStr, startTime);
-    enforceDurationAfterStartChange({ newStart, prevStart, prevEnd });
+    enforceAfterStartChange(newStart, prevStart, prevEnd);
   };
 
-  const handleStartTimeChange = (newTimeValue: PickerValue) => {
-    if (!newTimeValue?.isValid()) return;
-    const newTimeStr = newTimeValue.format("HH:mm");
+  const handleStartTimeChange = (value: PickerValue) => {
+    console.log("date changed : ", value);
+    if (!value || !value.isValid() || isEnforcingRef.current) return;
+
+    const newTimeStr = dtTime(value as Dayjs);
 
     const prevStart = toDateTime(startDate, startTime);
     const prevEnd = toDateTime(endDate, endTime);
@@ -160,13 +187,13 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     onStartTimeChange(newTimeStr);
 
     const newStart = toDateTime(startDate, newTimeStr);
-    enforceDurationAfterStartChange({ newStart, prevStart, prevEnd });
+    enforceAfterStartChange(newStart, prevStart, prevEnd);
   };
 
-  const handleEndDateChange = (newDateValue: PickerValue) => {
-    console.log("endate", newDateValue);
-    if (!newDateValue?.isValid()) return;
-    const newDateStr = newDateValue.format("YYYY-MM-DD");
+  const handleEndDateChange = (value: PickerValue) => {
+    if (!value || !value.isValid() || isEnforcingRef.current) return;
+
+    const newDateStr = dtDate(value as Dayjs);
 
     const prevStart = toDateTime(startDate, startTime);
     const prevEnd = toDateTime(endDate, endTime);
@@ -174,12 +201,13 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     onEndDateChange(newDateStr);
 
     const newEnd = toDateTime(newDateStr, endTime);
-    enforceDurationAfterEndChange({ newEnd, prevStart, prevEnd });
+    enforceAfterEndChange(newEnd, prevStart, prevEnd);
   };
 
-  const handleEndTimeChange = (newTimeValue: PickerValue) => {
-    if (!newTimeValue?.isValid()) return;
-    const newTimeStr = newTimeValue.format("HH:mm");
+  const handleEndTimeChange = (value: PickerValue) => {
+    if (!value || !value.isValid() || isEnforcingRef.current) return;
+
+    const newTimeStr = dtTime(value as Dayjs);
 
     const prevStart = toDateTime(startDate, startTime);
     const prevEnd = toDateTime(endDate, endTime);
@@ -187,7 +215,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     onEndTimeChange(newTimeStr);
 
     const newEnd = toDateTime(endDate, newTimeStr);
-    enforceDurationAfterEndChange({ newEnd, prevStart, prevEnd });
+    enforceAfterEndChange(newEnd, prevStart, prevEnd);
   };
 
   // Memoize parsed date/time values
