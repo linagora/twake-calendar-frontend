@@ -58,7 +58,9 @@ describe("Update tempcalendars called with correct params", () => {
       return thunk;
     }) as ThunkDispatch<any, any, any>;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
-    refreshCalendarsSpy = jest.spyOn(eventUtils, "refreshCalendars");
+    refreshCalendarsSpy = jest
+      .spyOn(eventUtils, "refreshCalendars")
+      .mockResolvedValue();
     updateTempCalendarSpy = jest.spyOn(calendarUtils, "updateTempCalendar");
     refreshSingularCalendarSpy = jest.spyOn(
       eventUtils,

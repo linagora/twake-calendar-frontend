@@ -9,6 +9,17 @@ import {
   EventHandlersProps,
 } from "../../../src/components/Calendar/handlers/eventHandlers";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+
+jest.mock("../../../src/components/Event/utils/eventUtils", () => {
+  const actual = jest.requireActual(
+    "../../../src/components/Event/utils/eventUtils"
+  );
+  return {
+    ...actual,
+    refreshCalendars: jest.fn(() => Promise.resolve()),
+    refreshSingularCalendar: jest.fn(() => Promise.resolve()),
+  };
+});
 import preview from "jest-preview";
 const mockOnClose = jest.fn();
 const day = new Date("2025-03-15T10:00:00Z");

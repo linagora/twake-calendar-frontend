@@ -286,7 +286,6 @@ export default function CalendarApp({
                 })
               ).unwrap();
             } catch (error) {
-              console.error(`Failed to load calendar ${id}:`, error);
               fetchedRangesRef.current[id] = "";
             }
           });
@@ -332,8 +331,7 @@ export default function CalendarApp({
         })
       )
         .unwrap()
-        .catch((error) => {
-          console.error(`Prefetch calendar ${id} failed:`, error);
+        .catch(() => {
           prefetchedCalendarsRef.current[id] = "";
         });
     });
@@ -439,7 +437,6 @@ export default function CalendarApp({
               })
             ).unwrap();
           } catch (error) {
-            console.error(`Failed to load temp calendar ${id}:`, error);
             tempFetchedRangesRef.current[id] = "";
           }
         });
@@ -479,9 +476,13 @@ export default function CalendarApp({
               timestamp: Date.now(),
             })
           );
-          
+
           // Open EventDisplayPreview if it's not already open with matching event, so it can pick up the sessionStorage
-          if (!openEventDisplay || eventDisplayedId !== event.detail.eventId || eventDisplayedCalId !== event.detail.calId) {
+          if (
+            !openEventDisplay ||
+            eventDisplayedId !== event.detail.eventId ||
+            eventDisplayedCalId !== event.detail.calId
+          ) {
             setEventDisplayedId(event.detail.eventId);
             setEventDisplayedCalId(event.detail.calId);
             setEventDisplayedTemp(false);
@@ -499,7 +500,7 @@ export default function CalendarApp({
             );
           }
         } catch (err) {
-          console.error("[Calendar] Failed to store update modal info:", err);
+          // Ignore sessionStorage errors
         }
       }
     };
