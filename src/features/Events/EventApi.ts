@@ -185,8 +185,33 @@ export async function putEventWithOverrides(
 ) {
   const vevents = await getAllRecurrentEvent(updatedEvent);
 
+  // Find existing instance to get current SEQUENCE before creating updated vevent
+  let existingSequence: number | undefined = undefined;
+  if (updatedEvent.recurrenceId) {
+    for (const ve of vevents) {
+      const recurrenceId = ve[1].find(([k]: string[]) => k === "recurrence-id");
+      if (recurrenceId && recurrenceId[3] === updatedEvent.recurrenceId) {
+        // Found existing instance, extract SEQUENCE
+        const sequenceProp = ve[1].find(
+          ([k]: string[]) => k.toLowerCase() === "sequence"
+        );
+        if (sequenceProp && sequenceProp[3] !== undefined) {
+          existingSequence = Number(sequenceProp[3]);
+        }
+        break;
+      }
+    }
+  }
+
+  // Use existing sequence if found, otherwise use sequence from updatedEvent
+  const eventWithCorrectSequence = {
+    ...updatedEvent,
+    sequence:
+      existingSequence !== undefined ? existingSequence : updatedEvent.sequence,
+  };
+
   const updatedVevent = makeVevent(
-    updatedEvent,
+    eventWithCorrectSequence,
     updatedEvent.timezone,
     calOwnerEmail,
     !updatedEvent.recurrenceId
@@ -295,9 +320,31 @@ export const updateSeries = async (
   }
   const rrule = vevents[masterIndex][1].find(([k]: string[]) => k === "rrule");
 
+  // Get current SEQUENCE from master event on server
+  const masterVevent = vevents[masterIndex];
+  const sequenceProp = masterVevent[1].find(
+    ([k]: string[]) => k.toLowerCase() === "sequence"
+  );
+  const existingSequence =
+    sequenceProp && sequenceProp[3] !== undefined
+      ? Number(sequenceProp[3])
+      : undefined;
+
   const tzid = event.timezone;
 
-  const updatedMaster = makeVevent(event, tzid, calOwnerEmail, true);
+  // Use existing sequence if found, otherwise use sequence from event
+  const eventWithCorrectSequence = {
+    ...event,
+    sequence:
+      existingSequence !== undefined ? existingSequence : event.sequence,
+  };
+
+  const updatedMaster = makeVevent(
+    eventWithCorrectSequence,
+    tzid,
+    calOwnerEmail,
+    true
+  );
   const newRrule = updatedMaster[1].find(([k]: string[]) => k === "rrule");
   if (!newRrule) {
     updatedMaster[1].push(rrule);

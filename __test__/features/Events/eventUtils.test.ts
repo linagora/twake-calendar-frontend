@@ -9,6 +9,7 @@ import {
   normalizeRepetition,
   normalizeTimezone,
   detectRecurringEventChanges,
+  makeVevent,
 } from "../../../src/features/Events/eventUtils";
 import { TIMEZONES } from "../../../src/utils/timezone-data";
 
@@ -1271,5 +1272,211 @@ describe("detectRecurringEventChanges", () => {
     expect(result.timeChanged).toBe(true);
     expect(result.timezoneChanged).toBe(true);
     expect(result.repetitionRulesChanged).toBe(true);
+  });
+});
+
+describe("makeVevent - SEQUENCE field handling", () => {
+  const baseEvent: Partial<CalendarEvent> = {
+    uid: "test-event-123",
+    title: "Test Event",
+    start: "2025-07-20T10:00:00Z",
+    end: "2025-07-20T11:00:00Z",
+    timezone: "UTC",
+    allday: false,
+    attendee: [],
+  };
+
+  it("should set SEQUENCE = 1 for new event without sequence property", () => {
+    const event = { ...baseEvent } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should set SEQUENCE = 1 for new event with undefined sequence", () => {
+    const event = { ...baseEvent, sequence: undefined } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should set SEQUENCE = 1 for new event with null sequence", () => {
+    const event = { ...baseEvent, sequence: null } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should increment SEQUENCE when updating existing event", () => {
+    const event = { ...baseEvent, sequence: 1 } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 2]);
+  });
+
+  it("should increment SEQUENCE correctly for multiple updates", () => {
+    const event1 = { ...baseEvent, sequence: 1 } as CalendarEvent;
+    const vevent1 = makeVevent(event1, "UTC", undefined);
+    const seq1 = vevent1[1].find((prop: any[]) => prop[0] === "sequence");
+    expect(seq1).toEqual(["sequence", {}, "integer", 2]);
+
+    const event2 = { ...baseEvent, sequence: 2 } as CalendarEvent;
+    const vevent2 = makeVevent(event2, "UTC", undefined);
+    const seq2 = vevent2[1].find((prop: any[]) => prop[0] === "sequence");
+    expect(seq2).toEqual(["sequence", {}, "integer", 3]);
+
+    const event3 = { ...baseEvent, sequence: 5 } as CalendarEvent;
+    const vevent3 = makeVevent(event3, "UTC", undefined);
+    const seq3 = vevent3[1].find((prop: any[]) => prop[0] === "sequence");
+    expect(seq3).toEqual(["sequence", {}, "integer", 6]);
+  });
+
+  it("should handle SEQUENCE = 0 as existing event and increment to 1", () => {
+    const event = { ...baseEvent, sequence: 0 } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should set SEQUENCE = 1 for recurring event master (new event)", () => {
+    const event = {
+      ...baseEvent,
+      repetition: { freq: "weekly" },
+    } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined, true);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should increment SEQUENCE for recurring event master (update)", () => {
+    const event = {
+      ...baseEvent,
+      sequence: 2,
+      repetition: { freq: "weekly" },
+    } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined, true);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 3]);
+  });
+
+  it("should set SEQUENCE = 1 for new recurring event instance (override)", () => {
+    const event = {
+      ...baseEvent,
+      recurrenceId: "2025-07-20T10:00:00Z",
+    } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined, false);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should increment SEQUENCE for existing recurring event instance (update)", () => {
+    const event = {
+      ...baseEvent,
+      sequence: 1,
+      recurrenceId: "2025-07-20T10:00:00Z",
+    } as CalendarEvent;
+    const vevent = makeVevent(event, "UTC", undefined, false);
+
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 2]);
+  });
+
+  it("should have independent SEQUENCE for master and instance", () => {
+    // Master event with sequence = 3
+    const masterEvent = {
+      ...baseEvent,
+      sequence: 3,
+      repetition: { freq: "weekly" },
+    } as CalendarEvent;
+    const masterVevent = makeVevent(masterEvent, "UTC", undefined, true);
+    const masterSeq = masterVevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+    expect(masterSeq).toEqual(["sequence", {}, "integer", 4]);
+
+    // Instance with sequence = 1 (independent)
+    const instanceEvent = {
+      ...baseEvent,
+      sequence: 1,
+      recurrenceId: "2025-07-20T10:00:00Z",
+    } as CalendarEvent;
+    const instanceVevent = makeVevent(instanceEvent, "UTC", undefined, false);
+    const instanceSeq = instanceVevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+    expect(instanceSeq).toEqual(["sequence", {}, "integer", 2]);
+
+    // Master sequence should not be affected by instance update
+    expect(masterSeq).toEqual(["sequence", {}, "integer", 4]);
+  });
+
+  it("should include SEQUENCE in calendarEventToJCal output for new event", () => {
+    const event = { ...baseEvent } as CalendarEvent;
+    const jcal = calendarEventToJCal(event);
+
+    const vevent = jcal[2].find((comp: any[]) => comp[0] === "vevent");
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("should include incremented SEQUENCE in calendarEventToJCal output for update", () => {
+    const event = { ...baseEvent, sequence: 5 } as CalendarEvent;
+    const jcal = calendarEventToJCal(event);
+
+    const vevent = jcal[2].find((comp: any[]) => comp[0] === "vevent");
+    const sequenceProp = vevent[1].find(
+      (prop: any[]) => prop[0] === "sequence"
+    );
+
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 6]);
   });
 });

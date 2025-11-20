@@ -406,6 +406,26 @@ export function makeVevent(
     });
   }
 
+  // Handle SEQUENCE field
+  // For new events: set SEQUENCE = 1
+  // For updates: increment SEQUENCE
+  // Each VEVENT (master or instance) has its own independent SEQUENCE
+  // If event has sequence property, it's an update - increment it
+  // If event doesn't have sequence, it's a new event - set to 1
+  if (
+    event.sequence !== undefined &&
+    event.sequence !== null &&
+    !isNaN(Number(event.sequence))
+  ) {
+    // Event exists with sequence, increment SEQUENCE for update
+    const currentSequence = Number(event.sequence);
+    const newSequence = currentSequence + 1;
+    vevent[1].push(["sequence", {}, "integer", newSequence]);
+  } else {
+    // New event or event without sequence, set SEQUENCE = 1
+    vevent[1].push(["sequence", {}, "integer", 1]);
+  }
+
   return vevent;
 }
 
