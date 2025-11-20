@@ -319,7 +319,7 @@ describe("CalendarApp integration", () => {
                     cn: "Bob",
                     partstat: "ACCEPTED",
                     rsvp: "TRUE",
-                    role: "CHAIR",
+                    role: "REQ-PARTICIPANT",
                     cutype: "INDIVIDUAL",
                     cal_address: "bob@example.com",
                   },
