@@ -319,7 +319,7 @@ describe("CalendarApp integration", () => {
                     cn: "Bob",
                     partstat: "ACCEPTED",
                     rsvp: "TRUE",
-                    role: "CHAIR",
+                    role: "REQ-PARTICIPANT",
                     cutype: "INDIVIDUAL",
                     cal_address: "bob@example.com",
                   },
@@ -379,7 +379,7 @@ describe("CalendarApp integration", () => {
 
       expect(normalAttendee).toBeTruthy();
       expect(normalAttendee?.partstat).toBe("ACCEPTED");
-      expect(normalAttendee?.role).toBe("CHAIR"); //will need to be changed as not the right role
+      expect(normalAttendee?.role).toBe("REQ-PARTICIPANT");
     });
 
     it("changes normal attendee to need action on time update and no organizer changes", async () => {
@@ -431,7 +431,7 @@ describe("CalendarApp integration", () => {
 
       expect(normalAttendee).toBeTruthy();
       expect(normalAttendee?.partstat).toBe("NEEDS-ACTION");
-      expect(normalAttendee?.role).toBe("CHAIR"); //will need to be changed as not the right role
+      expect(normalAttendee?.role).toBe("REQ-PARTICIPANT");
     });
     it("update event attendees on drag", async () => {
       const mockDispatch = jest.fn();

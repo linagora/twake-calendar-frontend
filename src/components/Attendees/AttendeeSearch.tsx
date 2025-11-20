@@ -42,7 +42,7 @@ export default function UserSearch({
               cal_address: a.email,
               partstat: "NEED_ACTION",
               rsvp: "FALSE",
-              role: "CHAIR",
+              role: "REQ-PARTICIPANT",
               cutype: "INDIVIDUAL",
             }))
           );
