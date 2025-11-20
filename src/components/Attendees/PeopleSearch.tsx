@@ -97,6 +97,7 @@ export function PeopleSearch({
   return (
     <>
       <Autocomplete
+        popupIcon={null}
         freeSolo={freeSolo}
         multiple
         options={options}
