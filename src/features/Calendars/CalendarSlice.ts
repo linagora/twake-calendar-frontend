@@ -793,8 +793,10 @@ const CalendarSlice = createSlice({
                 state[type][action.payload.calId].color;
               state[type][action.payload.calId].events[id].calId =
                 action.payload.calId;
-              state[type][action.payload.calId].events[id].timezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone;
+              if (!state[type][action.payload.calId].events[id].timezone) {
+                state[type][action.payload.calId].events[id].timezone =
+                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+              }
             }
           );
         }
@@ -827,8 +829,10 @@ const CalendarSlice = createSlice({
                 state[type][action.payload.calId].color;
               state[type][action.payload.calId].events[id].calId =
                 action.payload.calId;
-              state[type][action.payload.calId].events[id].timezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone;
+              if (!state[type][action.payload.calId].events[id].timezone) {
+                state[type][action.payload.calId].events[id].timezone =
+                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+              }
             }
           );
         }
@@ -872,8 +876,10 @@ const CalendarSlice = createSlice({
               state.list[action.payload.calId].color;
             state.list[action.payload.calId].events[id].calId =
               action.payload.calId;
-            state.list[action.payload.calId].events[id].timezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (!state.list[action.payload.calId].events[id].timezone) {
+              state.list[action.payload.calId].events[id].timezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
           });
         }
       )

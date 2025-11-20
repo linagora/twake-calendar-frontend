@@ -29,6 +29,7 @@ import {
   formatLocalDateTime,
   formatDateTimeInTimezone,
 } from "../../components/Event/utils/dateTimeFormatters";
+import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import { addDays } from "../../components/Event/utils/dateRules";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 
@@ -82,6 +83,11 @@ function EventPopover({
   }, []);
 
   const calendarTimezone = useAppSelector((state) => state.calendars.timeZone);
+  const resolvedCalendarTimezone = useMemo(() => {
+    const tz =
+      calendarTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return resolveTimezone(tz);
+  }, [calendarTimezone]);
 
   const [showMore, setShowMore] = useState(false);
   const [showDescription, setShowDescription] = useState(
@@ -97,8 +103,13 @@ function EventPopover({
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(event?.start ? event.start : "");
   const [end, setEnd] = useState(event?.end ? event.end : "");
+  const defaultCalendarId = useMemo(
+    () => userPersonalCalendars[0]?.id ?? "",
+    [userPersonalCalendars]
+  );
+
   const [calendarid, setCalendarid] = useState(
-    event?.calId ?? userPersonalCalendars[0]?.id ?? ""
+    event?.calId ?? defaultCalendarId
   );
   const [allday, setAllDay] = useState(event?.allday ?? false);
   const [repetition, setRepetition] = useState<RepetitionObject>(
@@ -113,7 +124,7 @@ function EventPopover({
   const [eventClass, setEventClass] = useState(event?.class ?? "PUBLIC");
   const [busy, setBusy] = useState(event?.transp ?? "OPAQUE");
   const [timezone, setTimezone] = useState(
-    event?.timezone ? resolveTimezone(event.timezone) : calendarTimezone
+    event?.timezone ? resolveTimezone(event.timezone) : resolvedCalendarTimezone
   );
   const [hasVideoConference, setHasVideoConference] = useState(
     event?.x_openpass_videoconference ? true : false
@@ -135,10 +146,10 @@ function EventPopover({
   }, [userPersonalCalendars]);
 
   useEffect(() => {
-    if (!calendarid && userPersonalCalendars.length > 0) {
-      setCalendarid(userPersonalCalendars[0].id);
+    if (!calendarid && defaultCalendarId) {
+      setCalendarid(defaultCalendarId);
     }
-  }, [calendarid, userPersonalCalendars]);
+  }, [calendarid, defaultCalendarId]);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -150,22 +161,18 @@ function EventPopover({
     setLocation("");
     setStart("");
     setEnd("");
-    if (
-      userPersonalCalendars &&
-      userPersonalCalendars.length > 0 &&
-      userPersonalCalendars[0]?.id
-    ) {
-      setCalendarid(userPersonalCalendars[0].id);
+    if (defaultCalendarId) {
+      setCalendarid(defaultCalendarId);
     }
     setAllDay(false);
     setRepetition({} as RepetitionObject);
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setTimezone(calendarTimezone);
+    setTimezone(resolvedCalendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
-  }, [calendarTimezone, userPersonalCalendars]);
+  }, [resolvedCalendarTimezone, defaultCalendarId]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
   const shouldSyncFromRangeRef = useRef(true);
@@ -183,24 +190,22 @@ function EventPopover({
       // Set timezone to calendar timezone for new events when opening
       const isNewEvent = !event || !event.uid;
       if (isNewEvent) {
-        const resolvedTimezone = resolveTimezone(calendarTimezone);
-        setTimezone(resolvedTimezone);
+        setTimezone(resolvedCalendarTimezone);
       }
     }
 
     // Update previous open state
     prevOpenRef.current = open;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, event?.uid, calendarTimezone]);
+  }, [open, event?.uid, resolvedCalendarTimezone]);
 
   // Separately sync timezone when calendarTimezone changes while modal is open for new events
   useEffect(() => {
     if (open && (!event || !event.uid)) {
-      const resolvedTimezone = resolveTimezone(calendarTimezone);
-      setTimezone(resolvedTimezone);
+      setTimezone(resolvedCalendarTimezone);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calendarTimezone, open, event?.uid]);
+  }, [resolvedCalendarTimezone, open, event?.uid]);
 
   // Set start/end times when modal opens for new event creation
   useEffect(() => {
@@ -360,14 +365,17 @@ function EventPopover({
       setDescription(event.description ?? "");
       setLocation(event.location ?? "");
 
-      // Get event's timezone for formatting
-      const eventTimezone = event.timezone
-        ? resolveTimezone(event.timezone)
-        : calendarTimezone;
-
       // Handle all-day events properly
       const isAllDay = event.allday ?? false;
       setAllDay(isAllDay);
+
+      // Get event's timezone for formatting - prioritize event.timezone from server
+      let eventTimezone: string;
+      if (event.timezone) {
+        eventTimezone = resolveTimezone(event.timezone);
+      } else {
+        eventTimezone = resolvedCalendarTimezone;
+      }
 
       // Format dates based on all-day status and timezone
       if (event.start) {
@@ -396,12 +404,8 @@ function EventPopover({
         setEnd("");
       }
 
-      if (
-        userPersonalCalendars &&
-        userPersonalCalendars.length > 0 &&
-        userPersonalCalendars[0]?.id
-      ) {
-        setCalendarid(userPersonalCalendars[0].id);
+      if (defaultCalendarId) {
+        setCalendarid(defaultCalendarId);
       }
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
@@ -439,7 +443,12 @@ function EventPopover({
         event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
       );
     }
-  }, [event, organizer?.cal_address, calendarTimezone]);
+  }, [
+    event,
+    organizer?.cal_address,
+    resolvedCalendarTimezone,
+    defaultCalendarId,
+  ]);
 
   // Reset state when creating new event (event is empty object or undefined)
   useEffect(() => {
@@ -457,12 +466,8 @@ function EventPopover({
       setDescription("");
       setAttendees([]);
       setLocation("");
-      if (
-        userPersonalCalendars &&
-        userPersonalCalendars.length > 0 &&
-        userPersonalCalendars[0]?.id
-      ) {
-        setCalendarid(userPersonalCalendars[0].id);
+      if (defaultCalendarId) {
+        setCalendarid(defaultCalendarId);
       }
       setAllDay(false);
       setRepetition({} as RepetitionObject);
@@ -476,8 +481,7 @@ function EventPopover({
     if (!isCreatingNew) {
       isInitializedRef.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event?.uid]);
+  }, [event, defaultCalendarId]);
 
   const handleStartChange = useCallback(
     (newStart: string) => {
@@ -626,12 +630,21 @@ function EventPopover({
       const endDateOnlyUI = (end || start || "").split("T")[0];
       // For all-day events, API needs end date = UI end date + 1 day
       const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
-      const startDateObj = new Date(`${startDateOnly}T00:00:00`);
-      const endDateObj = new Date(`${endDateOnlyAPI}T00:00:00`);
+      // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+      const [startYear, startMonth, startDay] = startDateOnly
+        .split("-")
+        .map(Number);
+      const [endYear, endMonth, endDay] = endDateOnlyAPI.split("-").map(Number);
+      const startDateObj = new Date(
+        Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
+      );
+      const endDateObj = new Date(
+        Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+      );
       newEvent.start = startDateObj.toISOString();
       newEvent.end = endDateObj.toISOString();
     } else {
-      newEvent.start = new Date(start).toISOString();
+      newEvent.start = convertFormDateTimeToISO(start, timezone);
       if (end) {
         // In normal mode, only override end date when the end date field is not shown
         if (!showMore && !hasEndDateChanged) {
@@ -640,10 +653,10 @@ function EventPopover({
             ? end.split("T")[1]?.slice(0, 5) || "00:00"
             : "00:00";
           const endDateTime = `${startDateOnly}T${endTimeOnly}`;
-          newEvent.end = new Date(endDateTime).toISOString();
+          newEvent.end = convertFormDateTimeToISO(endDateTime, timezone);
         } else {
           // Extended mode or end date explicitly shown in normal mode: use actual end datetime
-          newEvent.end = new Date(end).toISOString();
+          newEvent.end = convertFormDateTimeToISO(end, timezone);
         }
       }
     }
@@ -669,7 +682,7 @@ function EventPopover({
       })
     );
     if (tempList) {
-      const calendarRange = getCalendarRange(new Date(start));
+      const calendarRange = getCalendarRange(new Date(newEvent.start));
       await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
     }
   };

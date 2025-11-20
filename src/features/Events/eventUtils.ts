@@ -2,8 +2,52 @@ import { userAttendee } from "../User/userDataTypes";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
-import moment from "moment";
+import moment from "moment-timezone";
+import {
+  convertFormDateTimeToISO,
+  detectDateTimeFormat,
+} from "../../components/Event/utils/dateTimeHelpers";
 type RawEntry = [string, Record<string, string>, string, any];
+
+function resolveTimezoneId(tzid?: string): string | undefined {
+  if (!tzid) return undefined;
+  if (TIMEZONES.zones[tzid]) {
+    return tzid;
+  }
+  const alias = TIMEZONES.aliases[tzid];
+  if (alias) {
+    return alias.aliasTo;
+  }
+  return tzid;
+}
+
+function inferTimezoneFromValue(
+  params: Record<string, string> | undefined,
+  value: string
+): string | undefined {
+  if (!params) {
+    if (typeof value === "string" && value.endsWith("Z")) {
+      return "Etc/UTC";
+    }
+    return undefined;
+  }
+
+  const tzParam =
+    params.tzid || params.TZID || params.Tzid || params.tZid || params.tzId;
+
+  if (tzParam) {
+    const resolved = resolveTimezoneId(tzParam);
+    if (resolved) {
+      return resolved;
+    }
+  }
+
+  if (typeof value === "string" && value.endsWith("Z")) {
+    return "Etc/UTC";
+  }
+
+  return undefined;
+}
 
 export function parseCalendarEvent(
   data: RawEntry[],
@@ -25,22 +69,34 @@ export function parseCalendarEvent(
       case "transp":
         event.transp = value;
         break;
-      case "dtstart":
+      case "dtstart": {
         event.start = value;
+        const detectedTz = inferTimezoneFromValue(params, value);
+        if (detectedTz) {
+          event.timezone = detectedTz;
+        }
         if (dateRegex.test(value)) {
           event.allday = true;
         } else {
           event.allday = false;
         }
         break;
-      case "dtend":
+      }
+      case "dtend": {
         event.end = value;
+        if (!event.timezone) {
+          const detectedTz = inferTimezoneFromValue(params, value);
+          if (detectedTz) {
+            event.timezone = detectedTz;
+          }
+        }
         if (dateRegex.test(value)) {
           event.allday = true;
         } else {
           event.allday = false;
         }
         break;
+      }
       case "class":
         event.class = value;
         break;
@@ -139,14 +195,58 @@ export function parseCalendarEvent(
     );
     event.error = `missing crucial event param in calendar ${calendarid} `;
   }
+
+  const eventTimezone = event.timezone || "Etc/UTC";
+  event.timezone = eventTimezone;
+
   if (!event.end) {
     const start = event.start ? new Date(event.start) : new Date();
     const timeToAdd = moment.duration(duration).asMilliseconds();
     const artificialEnd = new Date(start.getTime() + timeToAdd);
-    event.end = formatDateToICal(artificialEnd, false);
+    event.end = formatDateToICal(artificialEnd, false, eventTimezone);
+  }
+
+  if (!event.allday && event.start && eventTimezone) {
+    const startISO = convertDateTimeStringToISO(event.start, eventTimezone);
+    if (startISO) {
+      event.start = startISO;
+    }
+  }
+
+  if (!event.allday && event.end && eventTimezone) {
+    const endISO = convertDateTimeStringToISO(event.end, eventTimezone);
+    if (endISO) {
+      event.end = endISO;
+    }
   }
 
   return event as CalendarEvent;
+}
+
+function convertDateTimeStringToISO(
+  datetime: string,
+  timezone: string
+): string | undefined {
+  if (!datetime || !timezone) return undefined;
+
+  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
+    return undefined;
+  }
+
+  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (dateOnlyRegex.test(datetime)) {
+    return undefined;
+  }
+
+  const format = detectDateTimeFormat(datetime);
+  const momentDate = moment.tz(datetime, format, timezone);
+  if (!momentDate.isValid()) {
+    console.warn(
+      `[convertDateTimeStringToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${timezone}"`
+    );
+    return undefined;
+  }
+  return momentDate.toISOString();
 }
 
 export function calendarEventToJCal(
@@ -194,7 +294,7 @@ export function makeVevent(
         "dtstart",
         { tzid },
         event.allday ? "date" : "date-time",
-        formatDateToICal(new Date(event.start), event.allday ?? false),
+        formatDateToICal(new Date(event.start), event.allday ?? false, tzid),
       ],
       ["class", {}, "text", event.class ?? "PUBLIC"],
       [
@@ -237,7 +337,7 @@ export function makeVevent(
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(finalEndDate, event.allday ?? false),
+      formatDateToICal(finalEndDate, event.allday ?? false, tzid),
     ]);
   }
   if (event.organizer) {
@@ -301,7 +401,7 @@ export function makeVevent(
         "exdate",
         { tzid },
         "date-time",
-        formatDateToICal(new Date(ex), false),
+        formatDateToICal(new Date(ex), false, tzid),
       ]);
     });
   }
@@ -309,19 +409,29 @@ export function makeVevent(
   return vevent;
 }
 
-function formatDateToICal(date: Date, allday: Boolean) {
-  // Format date like: 2025-02-14T11:00:00 (local time)
-
+function formatDateToICal(date: Date, allday: Boolean, timezone?: string) {
   const pad = (n: number) => n.toString().padStart(2, "0");
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
+
   if (allday) {
+    const year = date.getUTCFullYear();
+    const month = pad(date.getUTCMonth() + 1);
+    const day = pad(date.getUTCDate());
     return `${year}-${month}-${day}`;
   }
+
+  if (timezone) {
+    const momentDate = moment.utc(date).tz(timezone);
+    if (momentDate.isValid()) {
+      return momentDate.format("YYYY-MM-DDTHH:mm:ss");
+    }
+  }
+
+  const year = date.getUTCFullYear();
+  const month = pad(date.getUTCMonth() + 1);
+  const day = pad(date.getUTCDate());
+  const hours = pad(date.getUTCHours());
+  const minutes = pad(date.getUTCMinutes());
+  const seconds = pad(date.getUTCSeconds());
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
@@ -338,12 +448,30 @@ export function combineMasterDateWithFormTime(
   formatDateTimeInTimezone: (iso: string, tz: string) => string
 ): { startDate: string; endDate: string } {
   if (isAllDay) {
-    const startDate = new Date(masterEvent.start).toISOString().split("T")[0];
-    const endDate = masterEvent.end
+    // Extract date string from master event (which is ISO UTC string)
+    const startDateStr = new Date(masterEvent.start)
+      .toISOString()
+      .split("T")[0];
+    const endDateStr = masterEvent.end
       ? new Date(masterEvent.end).toISOString().split("T")[0]
-      : startDate;
+      : startDateStr;
 
-    return { startDate, endDate };
+    // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+    const [startYear, startMonth, startDay] = startDateStr
+      .split("-")
+      .map(Number);
+    const [endYear, endMonth, endDay] = endDateStr.split("-").map(Number);
+    const startDateObj = new Date(
+      Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
+    );
+    const endDateObj = new Date(
+      Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+    );
+
+    return {
+      startDate: startDateObj.toISOString(),
+      endDate: endDateObj.toISOString(),
+    };
   }
 
   // For timed events: combine master's date with form's time
@@ -372,8 +500,8 @@ export function combineMasterDateWithFormTime(
   const combinedEndStr = `${masterEndDatePart}T${formEndTimePart}`;
 
   // Parse and convert to ISO
-  const startDate = new Date(combinedStartStr).toISOString();
-  const endDate = new Date(combinedEndStr).toISOString();
+  const startDate = convertFormDateTimeToISO(combinedStartStr, timezone);
+  const endDate = convertFormDateTimeToISO(combinedEndStr, timezone);
 
   return { startDate, endDate };
 }

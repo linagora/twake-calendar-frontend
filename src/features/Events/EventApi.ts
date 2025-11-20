@@ -8,6 +8,19 @@ import {
   parseCalendarEvent,
 } from "./eventUtils";
 import ICAL from "ical.js";
+import moment from "moment-timezone";
+import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
+
+function resolveTimezoneId(tzid?: string): string | undefined {
+  if (!tzid) return undefined;
+  if (TIMEZONES.zones[tzid]) {
+    return tzid;
+  }
+  if (TIMEZONES.aliases[tzid]) {
+    return TIMEZONES.aliases[tzid].aliasTo;
+  }
+  return tzid;
+}
 
 export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const response = await api.get(`dav${event.URL}`);
@@ -17,21 +30,66 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const vevents = (eventical[2] || []).filter(
     ([name]: [string]) => name.toLowerCase() === "vevent"
   );
+
+  const vtimezones = (eventical[2] || []).filter(
+    ([name]: [string]) => name.toLowerCase() === "vtimezone"
+  );
+
   let targetVevent;
   if (isMaster) {
-    // Find master VEVENT (the one without recurrence-id)
-
     targetVevent = vevents.find(
       ([, props]: [string, any[]]) =>
         !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
     );
     if (!targetVevent) {
-      // Fallback to first VEVENT if no master found
       targetVevent = vevents[0];
     }
   } else {
-    // For non-master, use first VEVENT as before
     targetVevent = vevents[0];
+  }
+
+  let timezoneFromVTimezone: string | undefined;
+  if (vtimezones.length > 0) {
+    const vtimezone = vtimezones[0];
+    const tzidProp = vtimezone[1]?.find(
+      ([k]: string[]) => k.toLowerCase() === "tzid"
+    );
+    if (tzidProp && tzidProp[3]) {
+      const resolvedTz = resolveTimezoneId(tzidProp[3]);
+      if (resolvedTz) {
+        timezoneFromVTimezone = resolvedTz;
+      }
+    }
+  }
+
+  let timezoneFromDTSTART: string | undefined;
+  const dtstartProp = targetVevent[1]?.find(
+    ([k]: string[]) => k.toLowerCase() === "dtstart"
+  );
+  if (dtstartProp) {
+    const dtstartParams = dtstartProp[1];
+    const dtstartValue = dtstartProp[3];
+    if (dtstartParams) {
+      const tzParam =
+        dtstartParams.tzid ||
+        dtstartParams.TZID ||
+        dtstartParams.Tzid ||
+        dtstartParams.tZid ||
+        dtstartParams.tzId;
+      if (tzParam) {
+        const resolvedTz = resolveTimezoneId(tzParam);
+        if (resolvedTz) {
+          timezoneFromDTSTART = resolvedTz;
+        }
+      }
+    }
+    if (
+      !timezoneFromDTSTART &&
+      typeof dtstartValue === "string" &&
+      dtstartValue.endsWith("Z")
+    ) {
+      timezoneFromDTSTART = "Etc/UTC";
+    }
   }
 
   const eventjson = parseCalendarEvent(
@@ -40,10 +98,62 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
     event.calId,
     event.URL
   );
-  if (isMaster) {
-    return { ...event, ...eventjson };
+
+  const finalTimezone =
+    timezoneFromVTimezone ||
+    timezoneFromDTSTART ||
+    eventjson.timezone ||
+    "Etc/UTC";
+  eventjson.timezone = finalTimezone;
+
+  if (!eventjson.allday && eventjson.start && finalTimezone) {
+    const startISO = convertEventDateTimeToISO(eventjson.start, finalTimezone);
+    if (startISO) {
+      eventjson.start = startISO;
+    }
   }
-  return { ...eventjson, ...event };
+
+  if (!eventjson.allday && eventjson.end && finalTimezone) {
+    const endISO = convertEventDateTimeToISO(eventjson.end, finalTimezone);
+    if (endISO) {
+      eventjson.end = endISO;
+    }
+  }
+
+  if (isMaster) {
+    const merged = { ...event, ...eventjson };
+    merged.timezone = finalTimezone;
+    return merged;
+  }
+  const merged = { ...event, ...eventjson };
+  merged.timezone = finalTimezone;
+  return merged;
+}
+
+function convertEventDateTimeToISO(
+  datetime: string,
+  eventTimezone: string
+): string | undefined {
+  if (!datetime || !eventTimezone) return undefined;
+
+  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
+    return datetime;
+  }
+
+  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (dateOnlyRegex.test(datetime)) {
+    return undefined;
+  }
+
+  const format = detectDateTimeFormat(datetime);
+  const momentDate = moment.tz(datetime, format, eventTimezone);
+  if (!momentDate.isValid()) {
+    console.warn(
+      `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${eventTimezone}"`
+    );
+    return undefined;
+  }
+  return momentDate.toISOString();
 }
 
 export async function dlEvent(event: CalendarEvent) {
