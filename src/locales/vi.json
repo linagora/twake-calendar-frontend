@@ -153,7 +153,10 @@
   "peopleSearch": {
     "label": "Nhập tên hoặc email",
     "placeholder": "Nhập tên hoặc email",
-    "invalidEmail": "%{email} không phải địa chỉ email hợp lệ"
+    "invalidEmail": "%{email} không phải địa chỉ email hợp lệ",
+    "searchError": "Không thể lấy danh bạ. Vui lòng thử lại.",
+    "noResults": "Không có kết quả",
+    "loading": "Đang tải..."
   },
   "error": {
     "title": "Đã xảy ra lỗi",

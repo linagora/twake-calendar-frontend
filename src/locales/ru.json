@@ -153,7 +153,10 @@
   "peopleSearch": {
     "label": "Поиск по имени или email",
     "placeholder": "Введите имя или email",
-    "invalidEmail": "%{email} — некорректный адрес"
+    "invalidEmail": "%{email} — некорректный адрес",
+    "searchError": "Не удалось загрузить контакты. Попробуйте ещё раз.",
+    "noResults": "Нет результатов",
+    "loading": "Загрузка..."
   },
   "error": {
     "title": "Что-то пошло не так",

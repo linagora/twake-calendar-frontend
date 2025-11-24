@@ -10,6 +10,9 @@ import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
 import "dayjs/locale/fr";
 import "dayjs/locale/en";
+import "dayjs/locale/ru";
+import "dayjs/locale/vi";
+
 dayjs.extend(customParseFormat);
 
 /**
