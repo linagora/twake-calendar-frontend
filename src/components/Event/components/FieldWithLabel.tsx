@@ -20,7 +20,7 @@ export const FieldWithLabel = React.memo(
       return (
         <Box>
           <Typography
-            component="label"
+            component="div"
             sx={{
               display: "block",
               marginBottom: "4px",
@@ -39,7 +39,7 @@ export const FieldWithLabel = React.memo(
     return (
       <Box display="flex" alignItems="center">
         <Typography
-          component="label"
+          component="div"
           sx={{
             minWidth: "115px",
             marginRight: "12px",

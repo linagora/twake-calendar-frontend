@@ -144,7 +144,17 @@ export function Menubar({
           </div>
           <div className="menu-items">
             <div className="navigation-controls">
-              <ButtonGroup variant="outlined" size="small">
+              <ButtonGroup
+                variant="outlined"
+                size="small"
+                sx={{
+                  height: "43px",
+                  "& .MuiButton-root": {
+                    color: "#525256",
+                    borderColor: "#AEAEC0",
+                  },
+                }}
+              >
                 <Button onClick={() => handleNavigation("prev")}>
                   <ChevronLeftIcon />
                 </Button>
@@ -187,6 +197,7 @@ export function Menubar({
                 onChange={(e) => handleViewChange(e.target.value)}
                 variant="outlined"
                 aria-label={t("menubar.viewSelector")}
+                sx={{ height: "43px" }}
               >
                 <MenuItem value="dayGridMonth">
                   {t("menubar.views.month")}

@@ -43,7 +43,8 @@ export function AddDescButton({
         >
           <TextField
             fullWidth
-            label={!showMore ? t("event.form.description") : ""}
+            label=""
+            inputProps={{ "aria-label": t("event.form.description") }}
             placeholder={t("event.form.descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
