@@ -91,7 +91,7 @@ describe("CalendarSearch", () => {
     await waitFor(() => {
       expect(mockedGetCalendars).toHaveBeenCalledWith(
         "user123",
-        "sharedPublic=true&withRights=true"
+        "sharedPublic=true&"
       );
     });
 
@@ -373,7 +373,7 @@ describe("CalendarSearch", () => {
     await waitFor(() => {
       expect(mockedGetCalendars).toHaveBeenCalledWith(
         "user123",
-        "sharedPublic=true&withRights=true"
+        "sharedPublic=true&"
       );
     });
 

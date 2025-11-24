@@ -282,7 +282,7 @@ export default function CalendarSearch({
             value.map(async (user: User) => {
               const cals = (await getCalendars(
                 user.openpaasId,
-                "sharedPublic=true&withRights=true"
+                "sharedPublic=true&"
               )) as Record<string, any>;
               return cals._embedded?.["dav:calendar"]
                 ? cals._embedded["dav:calendar"].map(

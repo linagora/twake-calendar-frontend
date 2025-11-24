@@ -167,7 +167,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 
     const calendars = (await getCalendars(
       tempUser.openpaasId ?? "",
-      "sharedPublic=true&WithRights=true"
+      "sharedPublic=true&"
     )) as Record<string, any>;
     const rawCalendars = calendars._embedded["dav:calendar"];
 
