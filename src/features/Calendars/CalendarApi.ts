@@ -2,7 +2,7 @@ import { api } from "../../utils/apiUtils";
 
 export async function getCalendars(
   userId: string,
-  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true",
+  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&",
   signal?: AbortSignal
 ) {
   const calendars = await api
