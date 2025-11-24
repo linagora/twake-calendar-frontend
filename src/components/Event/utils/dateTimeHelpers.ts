@@ -5,7 +5,6 @@ import dayjs, { Dayjs } from "dayjs";
  * Helper functions for date/time string manipulation
  */
 
-
 export const DATETIME_WITH_SECONDS_LENGTH = 19;
 export const DATETIME_FORMAT_WITH_SECONDS = "YYYY-MM-DDTHH:mm:ss";
 export const DATETIME_FORMAT_WITHOUT_SECONDS = "YYYY-MM-DDTHH:mm";
