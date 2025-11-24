@@ -45,7 +45,28 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
       targetVevent = vevents[0];
     }
   } else {
-    targetVevent = vevents[0];
+    // If it's an instance (has recurrenceId), try to find the specific exception VEVENT
+    if (event.recurrenceId) {
+      targetVevent = vevents.find(([name, props]: [string, any[]]) => {
+        const rid = props.find(
+          ([k]: string[]) => k.toLowerCase() === "recurrence-id"
+        );
+        return rid && rid[3] === event.recurrenceId;
+      });
+    }
+
+    // If no specific exception found (or not an instance), fall back to master
+    if (!targetVevent) {
+      targetVevent = vevents.find(
+        ([, props]: [string, any[]]) =>
+          !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+      );
+    }
+
+    // Fallback to first vevent if still nothing
+    if (!targetVevent) {
+      targetVevent = vevents[0];
+    }
   }
 
   let timezoneFromVTimezone: string | undefined;
@@ -125,6 +146,39 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
     merged.timezone = finalTimezone;
     return merged;
   }
+
+  // If we couldn't find a specific exception VEVENT (targetVevent is master),
+  // but we requested an instance (event.recurrenceId exists),
+  // we must preserve the instance's start/end/recurrenceId from the input event.
+  // Otherwise, we overwrite the instance with master's data.
+  const isException =
+    event.recurrenceId &&
+    targetVevent[1].some(
+      ([k, , , v]: any[]) =>
+        k.toLowerCase() === "recurrence-id" && v === event.recurrenceId
+    );
+
+  if (event.recurrenceId && !isException) {
+    // It's an expanded instance without an exception VEVENT yet.
+    // Use master's props (eventjson) but keep instance's time and ID.
+    const merged = {
+      ...eventjson, // Master's data (title, desc, etc.)
+      ...event, // Instance's data (start, end, recurrenceId, uid)
+      title: eventjson.title,
+      description: eventjson.description,
+      location: eventjson.location,
+      attendee: eventjson.attendee,
+      alarm: eventjson.alarm,
+      // Keep instance specific fields
+      start: event.start,
+      end: event.end,
+      recurrenceId: event.recurrenceId,
+      uid: event.uid,
+    };
+    merged.timezone = finalTimezone;
+    return merged;
+  }
+
   const merged = { ...event, ...eventjson };
   merged.timezone = finalTimezone;
   return merged;
@@ -203,11 +257,11 @@ export async function putEventWithOverrides(
     }
   }
 
-  // Use existing sequence if found, otherwise use sequence from updatedEvent
+  // Use existing sequence if found, otherwise use undefined (so makeVevent sets it to 1)
+  // Do NOT use updatedEvent.sequence as it might be the master's sequence
   const eventWithCorrectSequence = {
     ...updatedEvent,
-    sequence:
-      existingSequence !== undefined ? existingSequence : updatedEvent.sequence,
+    sequence: existingSequence !== undefined ? existingSequence : undefined,
   };
 
   const updatedVevent = makeVevent(

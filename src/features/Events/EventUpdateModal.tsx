@@ -285,9 +285,9 @@ function EventUpdateModal({
       setAttendees(
         event.attendee
           ? event.attendee.filter(
-              (a: userAttendee) =>
-                a.cal_address !== event.organizer?.cal_address
-            )
+            (a: userAttendee) =>
+              a.cal_address !== event.organizer?.cal_address
+          )
           : []
       );
       setAlarm(event.alarm?.trigger ?? "");
@@ -592,7 +592,9 @@ function EventUpdateModal({
       ...updateAttendeesAfterTimeChange(event, timeChanged, attendees),
       calId: newCalId || calId,
       title,
-      URL: event.URL ?? `/calendars/${newCalId || calId}/${event.uid}.ics`,
+      URL:
+        event.URL ??
+        `/calendars/${newCalId || calId}/${event.uid.split("/")[0]}.ics`,
       start: startDate,
       end: endDate,
       allday,
@@ -805,8 +807,8 @@ function EventUpdateModal({
                 const rejectedResult = result as any;
                 throw new Error(
                   rejectedResult.error?.message ||
-                    rejectedResult.payload?.message ||
-                    "API call failed"
+                  rejectedResult.payload?.message ||
+                  "API call failed"
                 );
               }
             }
@@ -884,8 +886,8 @@ function EventUpdateModal({
                   const rejectedResult = result as any;
                   throw new Error(
                     rejectedResult.error?.message ||
-                      rejectedResult.payload?.message ||
-                      "API call failed"
+                    rejectedResult.payload?.message ||
+                    "API call failed"
                   );
                 }
               }
@@ -903,7 +905,7 @@ function EventUpdateModal({
                 // If refreshCalendars fails, throw error to reopen modal
                 throw new Error(
                   refreshError?.message ||
-                    "Failed to refresh calendar events. Please try again."
+                  "Failed to refresh calendar events. Please try again."
                 );
               }
 
@@ -970,8 +972,8 @@ function EventUpdateModal({
                 const rejectedResult = result as any;
                 throw new Error(
                   rejectedResult.error?.message ||
-                    rejectedResult.payload?.message ||
-                    "API call failed"
+                  rejectedResult.payload?.message ||
+                  "API call failed"
                 );
               }
             }
@@ -999,8 +1001,8 @@ function EventUpdateModal({
           if (result.type && result.type.endsWith("/rejected")) {
             throw new Error(
               result.error?.message ||
-                result.payload?.message ||
-                "API call failed"
+              result.payload?.message ||
+              "API call failed"
             );
           }
           if (result && typeof result.unwrap === "function") {
@@ -1033,8 +1035,8 @@ function EventUpdateModal({
             if (result.type && result.type.endsWith("/rejected")) {
               throw new Error(
                 result.error?.message ||
-                  result.payload?.message ||
-                  "API call failed"
+                result.payload?.message ||
+                "API call failed"
               );
             }
             if (result && typeof result.unwrap === "function") {
