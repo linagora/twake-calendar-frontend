@@ -1,33 +1,33 @@
 {
   "locale": "ru-ru",
   "calendar": {
-    "personal": "Личные календари",
-    "delegated": "Делегированные календари",
-    "other": "Другие календари",
+    "personal": "Личные",
+    "delegated": "Делегированные",
+    "other": "Другие",
     "caldav_access": "Доступ CalDAV",
     "secretUrl": "Секретный URL",
-    "secretUrlDesc": "Секретный адрес позволяет просматривать все события календаря даже без прав доступа. Вы можете сбросить текущий секретный адрес и получить новый.",
+    "secretUrlDesc": "Используйте этот адрес для просмотра событий без авторизации. Можно сбросить и создать новый.",
     "exportCalendar": "Экспорт календаря",
-    "exportDesc": "Экспортируйте календарь в файл формата iCalendar (.ics), который можно импортировать в другие приложения.",
-    "import_file_description": "Импортируйте события из файла ICS в один из ваших календарей.",
-    "ics_feed_url": "URL-адрес ICS-ленты",
-    "import_to": "Импортировать в",
+    "exportDesc": "Экспорт в iCalendar (.ics) для импорта в другие приложения.",
+    "import_file_description": "Импорт событий из файла ICS в выбранный календарь.",
+    "ics_feed_url": "Адрес ICS-ленты",
+    "import_to": "Импортирт в",
     "new_calendar": "Новый календарь",
     "color": "Цвет",
     "newEventsVisibility": "Новые события будут видны:",
     "browseOtherCalendars": "Просмотреть другие календари",
     "noPublicCalendarsFor": "Нет общедоступных календарей для %{name}",
-    "noMoreCalendarsFor": "Нет других календарей для %{name}",
+    "noMoreCalendarsFor": "Других календарей для %{name} нет",
     "delete": {
       "title": "Удалить %{name}?",
       "personalWarning": "Вы потеряете все события в этом календаре.",
-      "sharedWarning": "Вы потеряете доступ к его событиям. Позже вы сможете добавить его снова."
+      "sharedWarning": "Вы потеряете доступ. Позже можно добавить снова."
     }
   },
   "actions": {
     "modify": "Изменить",
     "delete": "Удалить",
-    "remove": "Убрать",
+    "remove": "Удалить",
     "save": "Сохранить",
     "create": "Создать",
     "import": "Импортировать",
@@ -39,16 +39,16 @@
   "common": {
     "cancel": "Отмена",
     "ok": "Ок",
-    "link_copied": "Ссылка скопирована!",
+    "link_copied": "Ссылка скопирована",
     "import_file": "Файл",
     "select_file": "Выбрать файл",
     "import_url": "URL",
-    "name": "Название",
+    "name": "Имя",
     "description": "Описание",
     "all": "Все",
     "you": "Вы",
     "select_timezone": "Выберите часовой пояс",
-    "moreOptions": "Больше опций"
+    "moreOptions": "Больше параметров"
   },
   "calendarPopover": {
     "tabs": {
@@ -59,9 +59,9 @@
     }
   },
   "colorPicker": {
-    "selectCustom": "Выбрать пользовательский цвет",
+    "selectCustom": "Выбрать цвет",
     "title": "Выберите цвет",
-    "subtitle": "Выберите цвет фона для этого календаря",
+    "subtitle": "Выберите цвет фона",
     "hex": "Hex"
   },
   "event": {
@@ -72,10 +72,10 @@
     "repeat": {
       "repeatEvery": "Повторять каждые",
       "frequency": {
-        "days": "дней",
-        "weeks": "недель",
-        "months": "месяцев",
-        "years": "лет"
+        "days": "день(дней)",
+        "weeks": "неделю(ль)",
+        "months": "месяц(ев)",
+        "years": "год(лет)"
       },
       "repeatOn": "Повторять по:",
       "days": {
@@ -105,11 +105,11 @@
       "start": "Начало",
       "end": "Окончание",
       "allDay": "Весь день",
-      "repeat": "Повтор",
+      "repeat": "Повторять",
       "timezonePlaceholder": "Выберите часовой пояс",
       "participants": "Участники",
       "videoMeeting": "Видеовстреча",
-      "meetCopied": "Ссылка на встречу скопирована!",
+      "meetCopied": "Ссылка на встречу скопирована",
       "addVisioConference": "Добавить видеоконференцию",
       "joinVisioConference": "Присоединиться к видеоконференции",
       "copyMeetingLink": "Скопировать ссылку на встречу",
@@ -144,15 +144,15 @@
     "validation": {
       "titleRequired": "Укажите название",
       "startRequired": "Укажите время начала",
-      "invalidStart": "Некорректная дата или время начала",
+      "invalidStart": "Неверное дата или время начала",
       "endRequired": "Укажите время окончания",
-      "invalidEnd": "Некорректное время окончания",
-      "endAfterStart": "Время окончания должно быть позже времени начала"
+      "invalidEnd": "Неверное время окончания",
+      "endAfterStart": "Окончание должно быть позже начала"
     }
   },
   "peopleSearch": {
-    "label": "Начните вводить имя или email",
-    "placeholder": "Начните вводить имя или email",
+    "label": "Поиск по имени или email",
+    "placeholder": "Введите имя или email",
     "invalidEmail": "%{email} — некорректный адрес",
     "searchError": "Не удалось загрузить контакты. Попробуйте ещё раз.",
     "noResults": "Нет результатов",
@@ -171,32 +171,32 @@
     "allEvents": "Все события"
   },
   "eventDuplication": {
-    "duplicateEvent": "Дублировать событие"
+    "duplicateEvent": "Дублировать"
   },
   "menubar": {
     "today": "Сегодня",
     "refresh": "Обновить",
     "viewSelector": "Выбор вида",
-    "languageSelector": "Выбрать язык",
+    "languageSelector": "Язык",
     "views": {
       "month": "Месяц",
       "week": "Неделя",
       "day": "День"
     },
     "apps": "Приложения",
-    "userProfile": "Профиль пользователя",
+    "userProfile": "Профиль",
     "logoAlt": "Календарь"
   },
   "eventPreview": {
     "emailAttendees": "Написать участникам",
-    "deleteEvent": "Удалить событие",
+    "deleteEvent": "Удалить",
     "privateEvent": {
-      "tooltipOwn": "Только вы и участники можете видеть детали этого события.",
-      "hiddenDetails": "Это приватное событие. Детали скрыты."
+      "tooltipOwn": "Детали видны только вам и участникам",
+      "hiddenDetails": "Это приватное событие. Подробности скрыты."
     },
     "free": {
       "label": "Свободен",
-      "tooltip": "Другие видят вас свободным в это время."
+      "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
     "accept": "Да",
@@ -231,7 +231,7 @@
     "days": "дни",
     "months": "месяцы",
     "years": "годы",
-    "alarmText": "%{trigger} по %{action}"
+    "alarmText": "%{trigger} через %{action}"
   },
   "dateTimeFields": {
     "date": "Дата",

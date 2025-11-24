@@ -42,10 +42,16 @@ import { User } from "../Attendees/PeopleSearch";
 import { useTheme } from "@mui/material/styles";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
-import frLocale from '@fullcalendar/core/locales/fr';
-import enLocale from '@fullcalendar/core/locales/en';
-import ruLocale from '@fullcalendar/core/locales/ru';
-import viLocale from '@fullcalendar/core/locales/vi';
+import frLocale from "@fullcalendar/core/locales/fr";
+import ruLocale from "@fullcalendar/core/locales/ru";
+import viLocale from "@fullcalendar/core/locales/vi";
+
+const localeMap: Record<string, any> = {
+  fr: frLocale,
+  ru: ruLocale,
+  vi: viLocale,
+  en: undefined,
+};
 
 interface CalendarAppProps {
   calendarRef: MutableRefObject<CalendarApi | null>;
@@ -581,8 +587,7 @@ export default function CalendarApp({
           initialView="timeGridWeek"
           firstDay={1}
           editable={true}
-          locales={enLocale, frLocale, viLocale, ruLocale}
-          locale={lang}
+          locale={localeMap[lang]}
           selectable={true}
           timeZone={timezone}
           height={"100%"}
