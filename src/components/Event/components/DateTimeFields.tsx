@@ -38,7 +38,7 @@ export interface DateTimeFieldsProps {
   };
   onStartDateChange: (date: string) => void;
   onStartTimeChange: (time: string) => void;
-  onEndDateChange: (date: string) => void;
+  onEndDateChange: (date: string, time?: string) => void;
   onEndTimeChange: (time: string) => void;
 }
 
@@ -147,12 +147,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     const newEndDate = dtDate(newEnd);
     const newEndTime = dtTime(newEnd);
 
-    if (newEndTime !== endTime) {
-      onEndTimeChange(newEndTime);
-    }
-
-    if (newEndDate !== endDate) {
-      onEndDateChange(newEndDate);
+    if (newEndDate !== endDate && newEndTime !== endTime) {
+      console.log("on fait ca");
+      onEndDateChange(newEndDate, newEndTime);
+    } else {
+      if (newEndDate !== endDate) {
+        onEndDateChange(newEndDate);
+      }
+      if (!allday && newEndTime !== endTime) {
+        onEndTimeChange(newEndTime);
+      }
     }
   };
 
