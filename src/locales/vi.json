@@ -6,9 +6,9 @@
     "other": "Lịch khác",
     "caldav_access": "Truy cập CalDAV",
     "secretUrl": "URL bí mật",
-    "secretUrlDesc": "Địa chỉ bí mật có thể được dùng để xem tất cả sự kiện trong lịch ngay cả khi không có quyền truy cập. Bạn có thể đặt lại địa chỉ bí mật và nhận địa chỉ mới.",
+    "secretUrlDesc": "Địa chỉ bí mật có thể được dùng để xem tất cả sự kiện trong lịch ngay cả khi không có quyền truy cập. Bạn có thể đặt lại địa chỉ bí mật và nhận một địa chỉ mới.",
     "exportCalendar": "Xuất lịch",
-    "exportDesc": "Xuất lịch của bạn thành tệp định dạng iCalendar (.ics) để nhập vào các ứng dụng khác.",
+    "exportDesc": "Xuất lịch của bạn thành tệp iCalendar (.ics) để nhập vào các ứng dụng khác.",
     "import_file_description": "Nhập sự kiện từ tệp ICS vào một trong các lịch của bạn.",
     "ics_feed_url": "URL nguồn ICS",
     "import_to": "Nhập vào",
@@ -21,7 +21,7 @@
     "delete": {
       "title": "Xóa %{name}?",
       "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",
-      "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
+      "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện. Bạn vẫn có thể thêm lại sau."
     }
   },
   "actions": {
@@ -153,7 +153,10 @@
   "peopleSearch": {
     "label": "Nhập tên hoặc email",
     "placeholder": "Nhập tên hoặc email",
-    "invalidEmail": "%{email} không phải địa chỉ email hợp lệ"
+    "invalidEmail": "%{email} không phải địa chỉ email hợp lệ",
+    "searchError": "Không thể lấy danh bạ. Vui lòng thử lại.",
+    "noResults": "Không có kết quả",
+    "loading": "Đang tải..."
   },
   "error": {
     "title": "Đã xảy ra lỗi",
@@ -228,7 +231,7 @@
     "days": "ngày",
     "months": "tháng",
     "years": "năm",
-    "alarmText": "%{trigger} bằng %{action}"
+    "alarmText": "%{trigger} bởi %{action}"
   },
   "dateTimeFields": {
     "date": "Ngày",
