@@ -218,4 +218,31 @@ describe("DateTimeFields", () => {
     );
     expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30");
   });
+
+  it("preserves 1-hour duration across midnight when changing start time from 22:30 to 23:45", async () => {
+    await renderField({
+      startDate: "2025-01-15",
+      startTime: "22:30",
+      endDate: "2025-01-15",
+      endTime: "23:30",
+      showMore: true,
+    });
+
+    const startTimeInput = screen.getByTestId("start-time-input");
+
+    // Change start time from 22:30 to 23:45
+    fireEvent.change(startTimeInput, { target: { value: "23:45" } });
+
+    await waitFor(() =>
+      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("23:45")
+    );
+
+    // End date should move to the next day
+    await waitFor(() =>
+      expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith(
+        "2025-01-16",
+        "00:45"
+      )
+    );
+  });
 });

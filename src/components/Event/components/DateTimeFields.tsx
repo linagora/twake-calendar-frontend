@@ -148,7 +148,6 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     const newEndTime = dtTime(newEnd);
 
     if (newEndDate !== endDate && newEndTime !== endTime) {
-      console.log("on fait ca");
       onEndDateChange(newEndDate, newEndTime);
     } else {
       if (newEndDate !== endDate) {
