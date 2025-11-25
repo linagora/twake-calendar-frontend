@@ -1,5 +1,6 @@
 export class EventErrorHandler {
   private errors = new Map<string, string>();
+  private reportedEvents = new Set<string>();
   private onErrorCallback?: (messages: string[]) => void;
 
   setErrorCallback(callback: (messages: string[]) => void) {
@@ -7,7 +8,8 @@ export class EventErrorHandler {
   }
 
   reportError(eventId: string, message: string) {
-    if (!this.errors.has(eventId)) {
+    if (!this.reportedEvents.has(eventId)) {
+      this.reportedEvents.add(eventId);
       this.errors.set(eventId, message);
       console.warn(`[EventErrorHandler] ${eventId}: ${message}`);
       this.emit();
