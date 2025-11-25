@@ -1,5 +1,5 @@
-import React from "react";
 import { Card, Typography } from "@mui/material";
+import { useRef, useEffect } from "react";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 
 export function ErrorEventChip({
@@ -11,9 +11,21 @@ export function ErrorEventChip({
   errorHandler: EventErrorHandler;
   error: any;
 }) {
-  const message =
-    error instanceof Error ? error.message : "Unknown error during rendering";
-  errorHandler.reportError(event._def.extendedProps.uid || event.id, message);
+  const hasReported = useRef(false);
+
+  useEffect(() => {
+    if (!hasReported.current) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unknown error during rendering";
+      errorHandler.reportError(
+        event._def.extendedProps.uid || event.id,
+        message
+      );
+      hasReported.current = true;
+    }
+  }, [event, errorHandler, error]);
 
   return (
     <Card
