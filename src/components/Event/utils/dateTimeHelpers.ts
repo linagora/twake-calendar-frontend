@@ -1,4 +1,5 @@
 import moment from "moment-timezone";
+import dayjs, { Dayjs } from "dayjs";
 
 /**
  * Helper functions for date/time string manipulation
@@ -68,3 +69,17 @@ export function convertFormDateTimeToISO(
   }
   return momentDate.toDate().toISOString();
 }
+
+/** Convert date + time strings → Dayjs */
+export const toDateTime = (date: string, time: string): Dayjs => {
+  const d = dayjs(date, "YYYY-MM-DD", true);
+  if (!time) return d.startOf("day");
+  const [h, m] = time.split(":").map(Number);
+  return d.hour(h).minute(m).second(0).millisecond(0);
+};
+
+/** Extract date “YYYY-MM-DD” */
+export const dtDate = (d: Dayjs) => d.format("YYYY-MM-DD");
+
+/** Extract time “HH:mm” */
+export const dtTime = (d: Dayjs) => d.format("HH:mm");

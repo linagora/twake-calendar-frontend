@@ -265,9 +265,9 @@ export default function EventFormFields({
 
   // Change handlers for 4 separate fields
   const handleStartDateChange = React.useCallback(
-    (newDate: string) => {
+    (newDate: string, newTime?: string) => {
       setStartDate(newDate);
-      const newStart = combineDateTime(newDate, startTime);
+      const newStart = combineDateTime(newDate, newTime ? newTime : startTime);
 
       if (onStartChange) {
         onStartChange(newStart);
@@ -279,9 +279,9 @@ export default function EventFormFields({
   );
 
   const handleStartTimeChange = React.useCallback(
-    (newTime: string) => {
+    (newTime: string, newDate?: string) => {
       setStartTime(newTime);
-      const newStart = combineDateTime(startDate, newTime);
+      const newStart = combineDateTime(newDate ? newDate : startDate, newTime);
       if (onStartChange) {
         onStartChange(newStart);
       } else {
@@ -292,13 +292,13 @@ export default function EventFormFields({
   );
 
   const handleEndDateChange = React.useCallback(
-    (newDate: string) => {
+    (newDate: string, newTime?: string) => {
       setEndDate(newDate);
       // Track if user changed end date in extended mode
       if (showMore) {
         setHasEndDateChanged(true);
       }
-      const newEnd = combineDateTime(newDate, endTime);
+      const newEnd = combineDateTime(newDate, newTime ? newTime : endTime);
       if (onEndChange) {
         onEndChange(newEnd);
       } else {
@@ -309,9 +309,10 @@ export default function EventFormFields({
   );
 
   const handleEndTimeChange = React.useCallback(
-    (newTime: string) => {
+    (newTime: string, newDate?: string) => {
       setEndTime(newTime);
-      const newEnd = combineDateTime(endDate, newTime);
+
+      const newEnd = combineDateTime(newDate ? newDate : endDate, newTime);
       if (onEndChange) {
         onEndChange(newEnd);
       } else {
