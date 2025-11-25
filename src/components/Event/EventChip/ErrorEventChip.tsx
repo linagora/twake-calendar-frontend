@@ -18,7 +18,7 @@ export function ErrorEventChip({
       const message =
         error instanceof Error
           ? error.message
-          : "Unknown error during rendering";
+          : `${error.class} error during rendering ${event._def.extendedProps.uid || event.id}`;
       errorHandler.reportError(
         event._def.extendedProps.uid || event.id,
         message
