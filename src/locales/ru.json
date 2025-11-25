@@ -207,6 +207,8 @@
     "joinVideo": "Присоединиться к видеоконференции",
     "guests": "%{count} гостей",
     "yesCount": "%{count} да",
+    "maybeCount": "%{count} может быть",
+    "needActionCount": "%{count} в ожидании",
     "noCount": "%{count} нет",
     "recurrentEvent": "Повторяющееся событие",
     "freq": {

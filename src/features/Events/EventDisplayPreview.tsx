@@ -48,6 +48,8 @@ import { dlEvent } from "./EventApi";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { userAttendee } from "../User/userDataTypes";
+
 export default function EventPreviewModal({
   eventId,
   calId,
@@ -89,6 +91,7 @@ export default function EventPreviewModal({
     undefined
   );
   const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
+  const attendeePreview = makeAttendeePreview(event.attendee, t);
 
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
     null
@@ -494,23 +497,13 @@ export default function EventPreviewModal({
                       <Box sx={{ marginRight: 2 }}>
                         <Typography>
                           {t("eventPreview.guests", {
-                            count: attendees.length,
+                            count: event.attendee.length,
                           })}
                         </Typography>
                         <Typography
                           sx={{ fontSize: "13px", color: "text.secondary" }}
                         >
-                          {t("eventPreview.yesCount", {
-                            count: attendees.filter(
-                              (a) => a.partstat === "ACCEPTED"
-                            ).length,
-                          })}
-                          ,{" "}
-                          {t("eventPreview.noCount", {
-                            count: attendees.filter(
-                              (a) => a.partstat === "DECLINED"
-                            ).length,
-                          })}
+                          {attendeePreview}
                         </Typography>
                       </Box>
                       {!showAllAttendees && (
@@ -842,4 +835,31 @@ function formatEnd(
       minute: "2-digit",
     });
   }
+}
+
+export function makeAttendeePreview(attendees: userAttendee[], t: Function) {
+  const attendeePreview = [];
+  const yesCount = attendees?.filter((a) => a.partstat === "ACCEPTED").length;
+  const noCount = attendees?.filter((a) => a.partstat === "DECLINED").length;
+  const maybeCount = attendees?.filter(
+    (a) => a.partstat === "TENTATIVE"
+  ).length;
+  const needActionCount = attendees?.filter(
+    (a) => a.partstat === "NEEDS-ACTION"
+  ).length;
+  if (yesCount) {
+    attendeePreview.push(t("eventPreview.yesCount", { count: yesCount }));
+  }
+  if (maybeCount) {
+    attendeePreview.push(t("eventPreview.maybeCount", { count: maybeCount }));
+  }
+  if (needActionCount) {
+    attendeePreview.push(
+      t("eventPreview.needActionCount", { count: needActionCount })
+    );
+  }
+  if (noCount) {
+    attendeePreview.push(t("eventPreview.noCount", { count: noCount }));
+  }
+  return attendeePreview.join(", ");
 }

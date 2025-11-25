@@ -819,6 +819,616 @@ describe("Event Preview Display", () => {
 
     expect(screen.getByText("Calendar")).toBeInTheDocument();
   });
+
+  describe("Attendee Preview Display", () => {
+    const mockOnClose = jest.fn();
+    const day = new Date("2025-01-15T10:00:00.000Z");
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (window as any).MAIL_SPA_URL = null;
+    });
+
+    const createStateWithAttendees = (attendees: any[]) => ({
+      user: {
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
+          openpaasId: "667037022b752d0026472254",
+        },
+        organiserData: {
+          cn: "test",
+          cal_address: "test@test.com",
+        },
+      },
+      calendars: {
+        list: {
+          "667037022b752d0026472254/cal1": {
+            id: "667037022b752d0026472254/cal1",
+            name: "Calendar",
+            color: "#FF0000",
+            events: {
+              event1: {
+                uid: "event1",
+                title: "Test Event",
+                calId: "667037022b752d0026472254/cal1",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: {
+                  cn: "organizer",
+                  cal_address: "organizer@test.com",
+                },
+                attendee: attendees,
+              },
+            },
+            ownerEmails: ["test@test.com"],
+          },
+        },
+        pending: false,
+      },
+    });
+
+    describe("Guest count display", () => {
+      it("displays correct guest count including organizer", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        // Should display "3 guests" (organizer + 2 guests)
+        expect(screen.getByText(/3/)).toBeInTheDocument();
+      });
+    });
+
+    describe("All attendees with single status", () => {
+      it("displays only yes count when all attendees accepted", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText("eventPreview.yesCount(count=3)")
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.maybeCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.needActionCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.noCount\b/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("displays only maybe count when all attendees tentative", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "TENTATIVE",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "TENTATIVE",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText("eventPreview.maybeCount(count=2)")
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.yesCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.needActionCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.noCount\b/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("displays only no count when all attendees declined", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 3",
+            cal_address: "guest3@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText("eventPreview.noCount(count=4)")
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.yesCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.maybeCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.needActionCount/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("displays only waiting count when all attendees need action", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText("eventPreview.needActionCount(count=2)")
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.yesCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.maybeCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.noCount/i)
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe("No display when count is 0", () => {
+      it("does not display attendee preview when no attendees", () => {
+        const state = createStateWithAttendees([]);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.queryByTestId("PeopleAltOutlinedIcon")
+        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/guests/i)).not.toBeInTheDocument();
+      });
+    });
+
+    describe("Regression tests: mixed statuses with correct counts", () => {
+      it("displays all statuses when attendees have mixed responses", () => {
+        const attendees = [
+          {
+            cn: "organizer",
+            cal_address: "organizer@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "TENTATIVE",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 3",
+            cal_address: "guest3@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 4",
+            cal_address: "guest4@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText(/eventPreview.yesCount\(count\=2\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.maybeCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.needActionCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.noCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+      });
+
+      it("displays correct counts with multiple yes and maybe", () => {
+        const attendees = [
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 3",
+            cal_address: "guest3@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 4",
+            cal_address: "guest4@test.com",
+            partstat: "TENTATIVE",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 5",
+            cal_address: "guest5@test.com",
+            partstat: "TENTATIVE",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText(/eventPreview\.yesCount\(count\=3\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview\.maybeCount\(count\=2\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.noCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.needActionCount/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("displays correct counts with waiting and declined", () => {
+        const attendees = [
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 3",
+            cal_address: "guest3@test.com",
+            partstat: "NEEDS-ACTION",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 4",
+            cal_address: "guest4@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText(/eventPreview.needActionCount\(count\=3\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.noCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.yesCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.maybeCount/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("does not display status categories with zero count", () => {
+        const attendees = [
+          {
+            cn: "Guest 1",
+            cal_address: "guest1@test.com",
+            partstat: "ACCEPTED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+          {
+            cn: "Guest 2",
+            cal_address: "guest2@test.com",
+            partstat: "DECLINED",
+            rsvp: "TRUE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          },
+        ];
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText(/eventPreview.yesCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.noCount\(count\=1\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.maybeCount/i)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/eventPreview.needActionCount/i)
+        ).not.toBeInTheDocument();
+      });
+
+      it("handles large number of attendees correctly", () => {
+        const attendees = Array.from({ length: 15 }, (_, i) => ({
+          cn: `Guest ${i}`,
+          cal_address: `guest${i}@test.com`,
+          partstat:
+            i < 8
+              ? "ACCEPTED"
+              : i < 11
+                ? "TENTATIVE"
+                : i < 13
+                  ? "NEEDS-ACTION"
+                  : "DECLINED",
+          rsvp: "TRUE",
+          role: "REQ-PARTICIPANT",
+          cutype: "INDIVIDUAL",
+        }));
+
+        const state = createStateWithAttendees(attendees);
+        renderWithProviders(
+          <EventPreviewModal
+            open={true}
+            onClose={mockOnClose}
+            calId={"667037022b752d0026472254/cal1"}
+            eventId={"event1"}
+          />,
+          state
+        );
+
+        expect(
+          screen.getByText(/eventPreview.yesCount\(count\=8\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.maybeCount\(count\=3\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.needActionCount\(count\=2\)/i)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/eventPreview.noCount\(count\=2\)/i)
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("BUGFIX", () => {
     it("doesnt render anything next to date of all day preview", () => {
       const allDayState = {

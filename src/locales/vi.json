@@ -207,6 +207,8 @@
     "joinVideo": "Tham gia cuộc họp video",
     "guests": "%{count} khách",
     "yesCount": "%{count} đồng ý",
+    "maybeCount": "%{count} có thể",
+    "needActionCount": "%{count} đang chờ",
     "noCount": "%{count} từ chối",
     "recurrentEvent": "Sự kiện lặp lại",
     "freq": {
