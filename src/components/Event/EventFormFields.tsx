@@ -414,7 +414,8 @@ export default function EventFormFields({
       <FieldWithLabel label={t("event.form.title")} isExpanded={showMore}>
         <TextField
           fullWidth
-          label={!showMore ? t("event.form.title") : ""}
+          label=""
+          inputProps={{ "aria-label": t("event.form.title") }}
           placeholder={t("event.form.titlePlaceholder")}
           value={title}
           onChange={(e) => {
@@ -500,7 +501,7 @@ export default function EventFormFields({
             getTimezoneOffset={(tzName: string) =>
               timezoneList.getTimezoneOffset(tzName, new Date(start))
             }
-            showIcon={true}
+            showIcon={false}
             width={240}
             size="small"
             placeholder={t("event.form.timezonePlaceholder")}
@@ -584,7 +585,8 @@ export default function EventFormFields({
       <FieldWithLabel label={t("event.form.location")} isExpanded={showMore}>
         <TextField
           fullWidth
-          label={!showMore ? t("event.form.location") : ""}
+          label=""
+          inputProps={{ "aria-label": t("event.form.location") }}
           placeholder={t("event.form.locationPlaceholder")}
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -595,15 +597,10 @@ export default function EventFormFields({
 
       <FieldWithLabel label={t("event.form.calendar")} isExpanded={showMore}>
         <FormControl fullWidth margin="dense" size="small">
-          {!showMore && (
-            <InputLabel id="calendar-select-label">
-              {t("event.form.calendar")}
-            </InputLabel>
-          )}
           <Select
-            labelId="calendar-select-label"
             value={calendarid ?? ""}
-            label={!showMore ? t("event.form.calendar") : ""}
+            label=""
+            SelectDisplayProps={{ "aria-label": t("event.form.calendar") }}
             displayEmpty
             onChange={(e: SelectChangeEvent) =>
               handleCalendarChange(e.target.value)
