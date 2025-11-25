@@ -9,6 +9,17 @@ import {
   EventHandlersProps,
 } from "../../../src/components/Calendar/handlers/eventHandlers";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+
+jest.mock("../../../src/components/Event/utils/eventUtils", () => {
+  const actual = jest.requireActual(
+    "../../../src/components/Event/utils/eventUtils"
+  );
+  return {
+    ...actual,
+    refreshCalendars: jest.fn(() => Promise.resolve()),
+    refreshSingularCalendar: jest.fn(() => Promise.resolve()),
+  };
+});
 import preview from "jest-preview";
 const mockOnClose = jest.fn();
 const day = new Date("2025-03-15T10:00:00Z");
@@ -476,7 +487,9 @@ describe("RSVP to Recurring Event", () => {
     const spy = jest
       .spyOn(eventThunks, "updateEventInstanceAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     await act(async () =>
@@ -936,7 +949,9 @@ describe("handleRSVP function", () => {
     } = require("../../../src/components/Event/eventHandlers/eventHandlers");
 
     jest.spyOn(eventThunks, "putEventAsync").mockImplementation((payload) => {
-      return () => Promise.resolve(payload) as any;
+      const promise = Promise.resolve(payload);
+      (promise as any).unwrap = () => promise;
+      return () => promise as any;
     });
 
     const nonRecurringEvent = {
@@ -1116,8 +1131,10 @@ describe("Event URL handling for recurring events", () => {
     const moveEventSpy = jest
       .spyOn(eventThunks, "moveEventAsync")
       .mockImplementation((payload) => {
-        return () =>
-          Promise.resolve({ calId: payload.cal.id, events: [] }) as any;
+        const result = { calId: payload.cal.id, events: [] };
+        const promise = Promise.resolve(result);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     const twoCalState = {

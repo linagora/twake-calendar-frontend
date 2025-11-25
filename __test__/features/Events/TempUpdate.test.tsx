@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent, act } from "@testing-library/react";
 import * as appHooks from "../../../src/app/hooks";
 import * as eventUtils from "../../../src/components/Event/utils/eventUtils";
 import * as userApi from "../../../src/features/User/userAPI";
@@ -51,9 +51,16 @@ describe("Update tempcalendars called with correct params", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    const dispatch = jest.fn((thunk) => {
+      if (typeof thunk === "function") {
+        return thunk(dispatch, () => ({}), undefined);
+      }
+      return thunk;
+    }) as ThunkDispatch<any, any, any>;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
-    refreshCalendarsSpy = jest.spyOn(eventUtils, "refreshCalendars");
+    refreshCalendarsSpy = jest
+      .spyOn(eventUtils, "refreshCalendars")
+      .mockResolvedValue();
     updateTempCalendarSpy = jest.spyOn(calendarUtils, "updateTempCalendar");
     refreshSingularCalendarSpy = jest.spyOn(
       eventUtils,
@@ -214,6 +221,29 @@ describe("Update tempcalendars called with correct params", () => {
       resource: undefined,
     } as unknown as DateSelectArg;
     jest.spyOn(userApi, "searchUsers");
+
+    // Mock putEventAsync to return success with unwrap
+    const putEventAsyncMock = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        const action = {
+          type: "calendars/putEvent/fulfilled",
+          payload: {
+            calId: payload.cal.id,
+            events: [],
+            calType: payload.calType,
+          },
+          unwrap: () =>
+            Promise.resolve({
+              calId: payload.cal.id,
+              events: [],
+              calType: payload.calType,
+            }),
+        };
+        const promise = Promise.resolve(action) as any;
+        return () => promise;
+      });
+
     renderWithProviders(
       <EventPopover
         anchorEl={null}
@@ -238,22 +268,26 @@ describe("Update tempcalendars called with correct params", () => {
     fireEvent.keyDown(attendeeInput, { key: "Enter", code: "Enter" });
 
     const saveButton = screen.getByText(/save/i);
-    fireEvent.click(saveButton);
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
 
-    await waitFor(() =>
-      expect(updateTempCalendarSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          temp1: expect.objectContaining({ id: "temp1" }),
-        }),
-        expect.objectContaining({
-          title: "New Event",
-        }),
-        expect.any(Function),
-        expect.objectContaining({
-          start: expect.any(Date),
-          end: expect.any(Date),
-        })
-      )
+    await waitFor(
+      () =>
+        expect(updateTempCalendarSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            temp1: expect.objectContaining({ id: "temp1" }),
+          }),
+          expect.objectContaining({
+            title: "New Event",
+          }),
+          expect.any(Function),
+          expect.objectContaining({
+            start: expect.any(Date),
+            end: expect.any(Date),
+          })
+        ),
+      { timeout: 3000 }
     );
 
     await waitFor(() =>

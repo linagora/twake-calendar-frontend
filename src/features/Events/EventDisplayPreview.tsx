@@ -25,7 +25,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import AvatarGroup from "@mui/material/AvatarGroup";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarName } from "../../components/Calendar/CalendarName";
 import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
@@ -92,6 +92,7 @@ export default function EventPreviewModal({
   );
   const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
   const attendeePreview = makeAttendeePreview(event.attendee, t);
+  const hasCheckedSessionStorageRef = useRef(false);
 
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
     null
@@ -103,6 +104,157 @@ export default function EventPreviewModal({
       onClose({}, "backdropClick");
     }
   }, [event, calendar, onClose]);
+
+  // Check sessionStorage when component mounts or when open becomes true (only once per open)
+  useEffect(() => {
+    if (!open) {
+      hasCheckedSessionStorageRef.current = false;
+      return;
+    }
+
+    // Only check once when open becomes true
+    if (hasCheckedSessionStorageRef.current) return;
+    hasCheckedSessionStorageRef.current = true;
+
+    const checkAndReopen = () => {
+      try {
+        const stored = sessionStorage.getItem("eventUpdateModalReopen");
+        if (stored) {
+          const data = JSON.parse(stored);
+
+          // Check if stored data matches current preview
+          // For recurring events, typeOfAction from sessionStorage should be used
+          // Allow undefined to match undefined, or use stored typeOfAction if current is undefined
+          const typeOfActionMatch =
+            data.typeOfAction === typeOfAction ||
+            (data.typeOfAction === undefined && typeOfAction === undefined) ||
+            (data.typeOfAction !== undefined && typeOfAction === undefined); // Allow stored typeOfAction to match when current is undefined
+
+          if (
+            data.eventId === eventId &&
+            data.calId === calId &&
+            typeOfActionMatch
+          ) {
+            // Restore typeOfAction from sessionStorage if it exists
+            if (data.typeOfAction !== undefined && typeOfAction === undefined) {
+              setTypeOfAction(data.typeOfAction);
+              // Open modal immediately with the typeOfAction from sessionStorage
+              // Use setTimeout to ensure state is set before opening
+              setTimeout(() => {
+                setOpenUpdateModal(true);
+                setHidePreview(true);
+                sessionStorage.removeItem("eventUpdateModalReopen");
+              }, 50);
+            } else {
+              // Small delay to ensure component is fully mounted
+              setTimeout(() => {
+                setOpenUpdateModal(true);
+                setHidePreview(true);
+                sessionStorage.removeItem("eventUpdateModalReopen");
+              }, 100);
+            }
+          }
+        }
+      } catch (err) {
+        // Ignore sessionStorage errors
+      }
+    };
+
+    checkAndReopen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, eventId, calId]); // Removed typeOfAction from dependencies to prevent re-checking when typeOfAction changes
+
+  // Listen for eventUpdateModalReopen event to reopen update modal on API failure
+  useEffect(() => {
+    const handleUpdateModalReopen = (event: CustomEvent) => {
+      const detail = event.detail;
+
+      // Check if this event matches current preview
+      // For recurring events, typeOfAction from event should be used
+      // Allow undefined to match undefined, or use event typeOfAction if current is undefined
+      const typeOfActionMatch =
+        detail?.typeOfAction === typeOfAction ||
+        (detail?.typeOfAction === undefined && typeOfAction === undefined) ||
+        (detail?.typeOfAction !== undefined && typeOfAction === undefined); // Allow event typeOfAction to match when current is undefined
+      if (
+        detail?.eventId === eventId &&
+        detail?.calId === calId &&
+        typeOfActionMatch
+      ) {
+        // Restore typeOfAction from event if it exists
+        if (detail?.typeOfAction !== undefined && typeOfAction === undefined) {
+          setTypeOfAction(detail.typeOfAction);
+          // Open modal immediately with the typeOfAction from event
+          setTimeout(() => {
+            setOpenUpdateModal(true);
+            setHidePreview(true);
+          }, 50);
+        } else {
+          setOpenUpdateModal(true);
+          setHidePreview(true);
+        }
+        // Clear sessionStorage after reopening
+        try {
+          sessionStorage.removeItem("eventUpdateModalReopen");
+        } catch (err) {
+          // Ignore sessionStorage errors
+        }
+      }
+    };
+
+    // Also check sessionStorage on mount or when eventId/calId changes
+    const checkSessionStorage = () => {
+      try {
+        const stored = sessionStorage.getItem("eventUpdateModalReopen");
+        if (stored) {
+          const data = JSON.parse(stored);
+          // Check if stored data matches current preview
+          // For recurring events, typeOfAction from sessionStorage should be used
+          // Allow undefined to match undefined, or use stored typeOfAction if current is undefined
+          const typeOfActionMatch =
+            data.typeOfAction === typeOfAction ||
+            (data.typeOfAction === undefined && typeOfAction === undefined) ||
+            (data.typeOfAction !== undefined && typeOfAction === undefined); // Allow stored typeOfAction to match when current is undefined
+          if (
+            data.eventId === eventId &&
+            data.calId === calId &&
+            typeOfActionMatch
+          ) {
+            // Restore typeOfAction from sessionStorage if it exists
+            if (data.typeOfAction !== undefined && typeOfAction === undefined) {
+              setTypeOfAction(data.typeOfAction);
+              // Open modal immediately with the typeOfAction from sessionStorage
+              setTimeout(() => {
+                setOpenUpdateModal(true);
+                setHidePreview(true);
+                sessionStorage.removeItem("eventUpdateModalReopen");
+              }, 50);
+            } else {
+              setOpenUpdateModal(true);
+              setHidePreview(true);
+              sessionStorage.removeItem("eventUpdateModalReopen");
+            }
+          }
+        }
+      } catch (err) {
+        // Ignore sessionStorage errors
+      }
+    };
+
+    // Check on mount and when relevant props change
+    checkSessionStorage();
+
+    window.addEventListener(
+      "eventUpdateModalReopen",
+      handleUpdateModalReopen as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "eventUpdateModalReopen",
+        handleUpdateModalReopen as EventListener
+      );
+    };
+  }, [eventId, calId, typeOfAction]);
 
   if (!event || !calendar) return null;
 
@@ -692,7 +844,29 @@ export default function EventPreviewModal({
         }}
         eventId={eventId}
         calId={calId}
-        typeOfAction={typeOfAction}
+        typeOfAction={(() => {
+          // Get typeOfAction from state or sessionStorage
+          if (typeOfAction) {
+            return typeOfAction;
+          }
+          // Fallback: try to get typeOfAction from sessionStorage if state is not set yet
+          try {
+            const stored = sessionStorage.getItem("eventUpdateModalReopen");
+            if (stored) {
+              const data = JSON.parse(stored);
+              if (
+                data.eventId === eventId &&
+                data.calId === calId &&
+                data.typeOfAction
+              ) {
+                return data.typeOfAction;
+              }
+            }
+          } catch (err) {
+            // Ignore
+          }
+          return undefined;
+        })()}
       />
       <EventPopover
         anchorEl={null}

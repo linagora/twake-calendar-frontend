@@ -286,7 +286,6 @@ export default function CalendarApp({
                 })
               ).unwrap();
             } catch (error) {
-              console.error(`Failed to load calendar ${id}:`, error);
               fetchedRangesRef.current[id] = "";
             }
           });
@@ -332,8 +331,7 @@ export default function CalendarApp({
         })
       )
         .unwrap()
-        .catch((error) => {
-          console.error(`Prefetch calendar ${id} failed:`, error);
+        .catch(() => {
           prefetchedCalendarsRef.current[id] = "";
         });
     });
@@ -439,7 +437,6 @@ export default function CalendarApp({
               })
             ).unwrap();
           } catch (error) {
-            console.error(`Failed to load temp calendar ${id}:`, error);
             tempFetchedRangesRef.current[id] = "";
           }
         });
@@ -456,11 +453,70 @@ export default function CalendarApp({
   }, [dispatch, rangeKey, tempCalendarIds, rangeStart, rangeEnd]);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
   const [openEventDisplay, setOpenEventDisplay] = useState(false);
   const [eventDisplayedId, setEventDisplayedId] = useState("");
   const [eventDisplayedTemp, setEventDisplayedTemp] = useState(false);
   const [eventDisplayedCalId, setEventDisplayedCalId] = useState("");
+
+  // Listen for eventModalError event to reopen modal on API failure
+  useEffect(() => {
+    const handleEventModalError = (event: CustomEvent) => {
+      if (event.detail?.type === "create") {
+        // Reopen create event modal
+        setAnchorEl(document.body);
+      } else if (event.detail?.type === "update") {
+        // Store update modal info to sessionStorage for EventDisplayPreview to pick up
+        try {
+          sessionStorage.setItem(
+            "eventUpdateModalReopen",
+            JSON.stringify({
+              eventId: event.detail.eventId,
+              calId: event.detail.calId,
+              typeOfAction: event.detail.typeOfAction,
+              timestamp: Date.now(),
+            })
+          );
+
+          // Open EventDisplayPreview if it's not already open with matching event, so it can pick up the sessionStorage
+          if (
+            !openEventDisplay ||
+            eventDisplayedId !== event.detail.eventId ||
+            eventDisplayedCalId !== event.detail.calId
+          ) {
+            setEventDisplayedId(event.detail.eventId);
+            setEventDisplayedCalId(event.detail.calId);
+            setEventDisplayedTemp(false);
+            setOpenEventDisplay(true);
+          } else {
+            // If EventDisplayPreview is already open, trigger reopen by dispatching a custom event
+            window.dispatchEvent(
+              new CustomEvent("eventUpdateModalReopen", {
+                detail: {
+                  eventId: event.detail.eventId,
+                  calId: event.detail.calId,
+                  typeOfAction: event.detail.typeOfAction,
+                },
+              })
+            );
+          }
+        } catch (err) {
+          // Ignore sessionStorage errors
+        }
+      }
+    };
+
+    window.addEventListener(
+      "eventModalError",
+      handleEventModalError as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "eventModalError",
+        handleEventModalError as EventListener
+      );
+    };
+  }, [openEventDisplay, eventDisplayedId, eventDisplayedCalId]);
+
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
     null
   );
