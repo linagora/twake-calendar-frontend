@@ -342,3 +342,20 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 
 .fc-timegrid-event-harness-inset .fc-timegrid-event
   box-shadow none
+
+/* Hide 00:00 time slot label */
+.fc-timegrid-slot-label[data-time="00:00:00"] .fc-timegrid-slot-label-cushion,
+.fc-timegrid-slot-label[data-time="00:00:00"] .fc-scrollgrid-shrink-cushion,
+.fc-timegrid-slot-label[data-time="00:00:00"] .fc-timegrid-slot-label-frame::after
+  opacity 0
+
+.visually-hidden
+  border 0
+  clip rect(0 0 0 0)
+  height 1px
+  margin -1px
+  overflow hidden
+  padding 0
+  position absolute
+  width 1px
+  whiteSpace nowrap

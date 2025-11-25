@@ -86,7 +86,7 @@ export function TimezoneSelector({
             getTimezoneOffset(tzName, referenceDate)
           }
           autoFocus={true}
-          showIcon={true}
+          showIcon={false}
           inputFontSize="14px"
           inputPadding="2px 4px"
           onClose={handleClose}

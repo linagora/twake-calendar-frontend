@@ -51,7 +51,9 @@ export function SettingsTab({
     <Box mt={2}>
       <TextField
         fullWidth
-        label={t("common.name")}
+        label=""
+        inputProps={{ "aria-label": t("common.name") }}
+        placeholder={t("common.name")}
         value={name}
         onChange={(e) => setName(e.target.value)}
         size="small"
@@ -87,13 +89,13 @@ export function SettingsTab({
             onChange={(e, val) => val && setVisibility(val)}
             size="small"
           >
-            <ToggleButton value="public">
-              <PublicIcon fontSize="small" />
+            <ToggleButton value="public" sx={{ width: "140px" }}>
+              <PublicIcon fontSize="small" sx={{ mr: 1 }} />
               {t("common.all")}
             </ToggleButton>
 
-            <ToggleButton value="private">
-              <LockIcon fontSize="small" />
+            <ToggleButton value="private" sx={{ width: "140px" }}>
+              <LockIcon fontSize="small" sx={{ mr: 1 }} />
               {t("common.you")}
             </ToggleButton>
           </ToggleButtonGroup>
