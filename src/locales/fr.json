@@ -205,8 +205,10 @@
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "joinVideo": "Rejoindre la visioconférence",
-    "guests": "%{count} invités",
+    "guests": "%{count} participants",
     "yesCount": "%{count} oui",
+    "maybeCount": "%{count} peut-être",
+    "needActionCount": "%{count} en attente",
     "noCount": "%{count} non",
     "recurrentEvent": "Événement récurrent",
     "freq": {

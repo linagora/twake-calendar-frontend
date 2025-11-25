@@ -207,6 +207,8 @@
     "joinVideo": "Join the video conference",
     "guests": "%{count} guests",
     "yesCount": "%{count} yes",
+    "maybeCount": "%{count} maybe",
+    "needActionCount": "%{count} waiting",
     "noCount": "%{count} no",
     "recurrentEvent": "Recurrent Event",
     "freq": {
