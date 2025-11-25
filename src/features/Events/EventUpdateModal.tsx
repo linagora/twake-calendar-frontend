@@ -31,10 +31,16 @@ import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtil
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
 import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
-
-const showErrorNotification = (message: string) => {
-  console.error(`[ERROR] ${message}`);
-};
+import {
+  saveEventFormDataToTemp,
+  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
+  clearEventFormTempData,
+  showErrorNotification,
+  buildEventFormTempData,
+  restoreFormDataFromTemp,
+  EventFormState,
+  EventFormContext,
+} from "../../utils/eventFormTempStorage";
 
 function EventUpdateModal({
   eventId,
@@ -199,9 +205,15 @@ function EventUpdateModal({
 
   // Prevent repeated initialization loops
   const initializedKeyRef = useRef<string | null>(null);
+  // Track when restoring from error to prevent other useEffects from overriding restored data
+  const isRestoringFromErrorRef = useRef(false);
 
   // Initialize form state when event data is available
   useEffect(() => {
+    // Skip if restoring from error - data already restored
+    if (isRestoringFromErrorRef.current) {
+      return;
+    }
     if (event && open) {
       // Reset validation errors when modal opens
       setShowValidationErrors(false);
@@ -322,12 +334,117 @@ function EventUpdateModal({
   };
 
   const handleClose = () => {
+    // Clear temp data when user manually closes modal
+    clearEventFormTempData("update");
     closeModal();
     setShowValidationErrors(false);
     resetAllStateToDefault();
     setFreshEvent(null);
     initializedKeyRef.current = null;
   };
+
+  // Function to save current form data to temp storage
+  const saveCurrentFormData = useCallback(() => {
+    const formState: EventFormState = {
+      title,
+      description,
+      location,
+      start,
+      end,
+      allday,
+      repetition,
+      attendees,
+      alarm,
+      busy,
+      eventClass,
+      timezone,
+      calendarid,
+      hasVideoConference,
+      meetingLink,
+      showMore,
+      showDescription,
+      showRepeat,
+      hasEndDateChanged,
+    };
+    const context: EventFormContext = {
+      eventId,
+      calId,
+      typeOfAction,
+    };
+    return buildEventFormTempData(formState, context);
+  }, [
+    title,
+    description,
+    location,
+    start,
+    end,
+    allday,
+    repetition,
+    attendees,
+    alarm,
+    busy,
+    eventClass,
+    timezone,
+    calendarid,
+    hasVideoConference,
+    meetingLink,
+    showMore,
+    showDescription,
+    showRepeat,
+    hasEndDateChanged,
+    eventId,
+    calId,
+    typeOfAction,
+  ]);
+
+  // Check for temp data when modal opens
+  useEffect(() => {
+    if (open && event) {
+      const tempData = restoreEventFormDataFromStorage("update");
+      if (
+        tempData &&
+        tempData.fromError &&
+        tempData.eventId === eventId &&
+        tempData.calId === calId &&
+        tempData.typeOfAction === typeOfAction
+      ) {
+        // Mark that we're restoring from error to prevent other useEffects from overriding
+        isRestoringFromErrorRef.current = true;
+
+        // Restore form data from previous failed save
+        restoreFormDataFromTemp(tempData, {
+          setTitle,
+          setDescription,
+          setLocation,
+          setStart,
+          setEnd,
+          setAllDay,
+          setRepetition,
+          setAttendees,
+          setAlarm,
+          setBusy,
+          setEventClass,
+          setTimezone,
+          setCalendarid,
+          setHasVideoConference,
+          setMeetingLink,
+          setShowMore,
+          setShowDescription,
+          setShowRepeat,
+          setHasEndDateChanged,
+        });
+        // Clear the error flag but keep data until successful save
+        const updatedTempData = { ...tempData, fromError: false };
+        saveEventFormDataToTemp("update", updatedTempData);
+
+        // Reset flag after restore completes (use setTimeout to ensure other useEffects have checked the flag)
+        setTimeout(() => {
+          isRestoringFromErrorRef.current = false;
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, eventId, calId, typeOfAction]);
 
   const handleSave = async () => {
     // Show validation errors when Save is clicked
@@ -338,7 +455,9 @@ function EventUpdateModal({
       return;
     }
 
-    if (!event) return;
+    if (!event) {
+      return;
+    }
 
     const organizer = event.organizer;
 
@@ -357,6 +476,20 @@ function EventUpdateModal({
     // Check if this is a recurring event
     const isRecurringEvent = !!event.repetition?.freq;
 
+    const getSeriesInstances = (): Record<string, CalendarEvent> => {
+      const instances: Record<string, CalendarEvent> = {};
+      const seriesEvents = targetCalendar.events || {};
+
+      Object.keys(seriesEvents).forEach((eventId) => {
+        const instance = seriesEvents[eventId];
+        if (instance && eventId.split("/")[0] === baseUID) {
+          instances[eventId] = { ...instance };
+        }
+      });
+
+      return instances;
+    };
+
     // When editing "all events" of a recurring series, fetch master event to get original start time
     let masterEventData: CalendarEvent | null = null;
     if (isRecurringEvent && typeOfAction === "all") {
@@ -369,8 +502,24 @@ function EventUpdateModal({
         const masterEvent = await getEvent(masterEventToFetch, true);
         masterEventData = masterEvent;
       } catch (err: any) {
-        console.error("Failed to fetch master event:", err);
-        showErrorNotification("Failed to fetch event data. Please try again.");
+        // API failed - restore form data and mark as error
+        const formDataToSave = saveCurrentFormData();
+        const errorFormData = {
+          ...formDataToSave,
+          fromError: true,
+        };
+        saveEventFormDataToTemp("update", errorFormData);
+
+        showErrorNotification(
+          err?.message || "Failed to fetch event data. Please try again."
+        );
+
+        // Dispatch eventModalError to reopen modal
+        window.dispatchEvent(
+          new CustomEvent("eventModalError", {
+            detail: { type: "update", eventId, calId, typeOfAction },
+          })
+        );
         return;
       }
     }
@@ -469,8 +618,36 @@ function EventUpdateModal({
     ) {
       const baseUID = event.uid.split("/")[0];
 
+      // Save current form data to temp storage before closing
+      const formDataToSave = saveCurrentFormData();
+      saveEventFormDataToTemp("update", formDataToSave);
+
       // Close modal immediately for better UX
       closeModal();
+
+      const seriesInstancesSnapshot = getSeriesInstances();
+      let hasRemovedSeriesInstances = false;
+      let createdSingleEventUid: string | null = null;
+
+      const removeSeriesInstancesFromUI = () => {
+        if (!seriesInstancesSnapshot) return;
+        Object.keys(seriesInstancesSnapshot).forEach((eventId) => {
+          dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
+        });
+        hasRemovedSeriesInstances = true;
+      };
+
+      const restoreSeriesInstancesToUI = () => {
+        if (!seriesInstancesSnapshot) return;
+        Object.values(seriesInstancesSnapshot).forEach((instance) => {
+          dispatch(
+            updateEventLocal({
+              calId,
+              event: instance,
+            })
+          );
+        });
+      };
 
       try {
         // STEP 1: Delete ALL instances of recurring event
@@ -530,198 +707,418 @@ function EventUpdateModal({
 
         // STEP 4: Update Redux store - Add new event first to prevent empty grid
         dispatch(updateEventLocal({ calId, event: finalNewEvent }));
-
-        // STEP 5: Remove old recurring instances (swap is now instant)
-        Object.keys(targetCalendar.events).forEach((eventId) => {
-          if (eventId.split("/")[0] === baseUID) {
-            dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
-          }
-        });
+        createdSingleEventUid = finalNewEvent.uid;
 
         // Clear cache to ensure navigation to other weeks works
         dispatch(clearFetchCache(calId));
-      } catch (err) {
-        console.error("Failed to convert recurring to non-recurring:", err);
-        // Keep modal open on error, user can retry or cancel
-      }
-      if (tempList) {
-        const calendarRange = getCalendarRange(new Date(startDate));
-        await updateTempCalendar(tempList, event, dispatch, calendarRange);
+
+        if (tempList) {
+          const calendarRange = getCalendarRange(new Date(start));
+          await updateTempCalendar(tempList, event, dispatch, calendarRange);
+        }
+
+        // STEP 5: Remove old recurring instances only after the rest succeeds
+        removeSeriesInstancesFromUI();
+
+        // Clear temp data on successful save
+        clearEventFormTempData("update");
+
+        // Reset all state to default values only on successful save
+        resetAllStateToDefault();
+        setFreshEvent(null);
+        initializedKeyRef.current = null;
+      } catch (err: any) {
+        // API failed - restore form data and mark as error
+        const errorFormData = {
+          ...formDataToSave,
+          fromError: true,
+        };
+        saveEventFormDataToTemp("update", errorFormData);
+
+        // Show error notification
+        showErrorNotification(
+          err?.message || "Failed to convert recurring event. Please try again."
+        );
+
+        if (createdSingleEventUid) {
+          dispatch(
+            removeEvent({ calendarUid: calId, eventUid: createdSingleEventUid })
+          );
+        }
+
+        if (hasRemovedSeriesInstances) {
+          restoreSeriesInstancesToUI();
+        }
+
+        // Try to reopen modal by dispatching custom event
+        window.dispatchEvent(
+          new CustomEvent("eventModalError", {
+            detail: { type: "update", eventId, calId, typeOfAction },
+          })
+        );
       }
       return;
     }
+
+    // Save current form data to temp storage before closing
+    const formDataToSave = saveCurrentFormData();
+    saveEventFormDataToTemp("update", formDataToSave);
 
     // Close popup immediately for better UX (for non-special cases)
     closeModal();
 
     // Execute API calls in background based on typeOfAction
-    if (recurrenceId) {
-      if (typeOfAction === "solo") {
-        // Update single instance with optimistic update + rollback
-        const oldEvent = { ...event };
+    try {
+      if (recurrenceId) {
+        if (typeOfAction === "solo") {
+          // Update single instance with optimistic update + rollback
+          const oldEvent = { ...event };
 
-        dispatch(
-          updateEventLocal({
-            calId,
-            event: { ...newEvent, recurrenceId },
-          })
-        );
-
-        await dispatch(
-          updateEventInstanceAsync({
-            cal: targetCalendar,
-            event: { ...newEvent, recurrenceId },
-          })
-        )
-          .unwrap()
-          .catch((error: any) => {
-            dispatch(updateEventLocal({ calId, event: oldEvent }));
-            showErrorNotification("Failed to update event. Changes reverted.");
-          });
-      } else if (typeOfAction === "all") {
-        // Update all instances - check if repetition rules changed
-        const baseUID = event.uid.split("/")[0];
-
-        const changes = detectRecurringEventChanges(
-          event,
-          { repetition, timezone, allday, start, end },
-          masterEventData,
-          resolveTimezone,
-          formatDateTimeInTimezone
-        );
-        const repetitionRulesChanged = changes.repetitionRulesChanged;
-
-        if (repetitionRulesChanged) {
-          // Date/time or repetition rules changed - remove all overrides and refresh
-
-          // STEP 1: Remove ALL old instances from UI (including solo overrides)
-          Object.keys(targetCalendar.events).forEach((eventId) => {
-            if (eventId.split("/")[0] === baseUID) {
-              dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }));
-            }
-          });
-
-          // STEP 2: Update series on server with removeOverrides=true (await to ensure it completes)
-          await dispatch(
-            updateSeriesAsync({
-              cal: targetCalendar,
+          dispatch(
+            updateEventLocal({
+              calId,
               event: { ...newEvent, recurrenceId },
-              removeOverrides: true,
             })
-          ).unwrap();
-
-          // STEP 3: Fetch to get new instances with correct timing
-          const calendarRange = getCalendarRange(new Date(startDate));
-          await refreshCalendars(
-            dispatch,
-            Object.values(calendarsList),
-            calendarRange
           );
 
-          // Clear cache after reload
-          dispatch(clearFetchCache(calId));
-        } else {
-          // Only properties changed - use optimistic update and keep overrides
-
-          // Store old instances for rollback
-          const oldInstances: Record<string, CalendarEvent> = {};
-          Object.keys(targetCalendar.events)
-            .filter((eventId) => eventId.split("/")[0] === baseUID)
-            .forEach((eventId) => {
-              oldInstances[eventId] = { ...targetCalendar.events[eventId] };
-            });
-
-          // Optimistic update: Apply new properties to all instances immediately
-          Object.keys(oldInstances).forEach((eventId) => {
-            const instance = oldInstances[eventId];
-
-            dispatch(
-              updateEventLocal({
-                calId,
-                event: {
-                  ...instance,
-                  title: newEvent.title,
-                  description: newEvent.description,
-                  location: newEvent.location,
-                  class: newEvent.class,
-                  transp: newEvent.transp,
-                  attendee: newEvent.attendee,
-                  alarm: newEvent.alarm,
-                  x_openpass_videoconference:
-                    newEvent.x_openpass_videoconference,
-                },
+          try {
+            const result = await dispatch(
+              updateEventInstanceAsync({
+                cal: targetCalendar,
+                event: { ...newEvent, recurrenceId },
               })
             );
-          });
 
-          // Update server in background with removeOverrides=false
-          await dispatch(
-            updateSeriesAsync({
-              cal: targetCalendar,
-              event: { ...newEvent, recurrenceId },
-              removeOverrides: false,
-            })
-          )
-            .unwrap()
-            .then(() => {
-              // Clear cache to ensure navigation shows updated data
-              dispatch(clearFetchCache(calId));
-            })
-            .catch((error: any) => {
-              // Rollback: Restore old instances on error
-              Object.values(oldInstances).forEach((oldEvent) => {
-                dispatch(updateEventLocal({ calId, event: oldEvent }));
+            // Handle result of updateEventInstanceAsync
+            if (result && typeof (result as any).unwrap === "function") {
+              try {
+                await (result as any).unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            } else {
+              // Check if result is rejected
+              if (
+                result.type &&
+                (result.type as string).endsWith("/rejected")
+              ) {
+                const rejectedResult = result as any;
+                throw new Error(
+                  rejectedResult.error?.message ||
+                    rejectedResult.payload?.message ||
+                    "API call failed"
+                );
+              }
+            }
+
+            // Clear temp data on successful save
+            clearEventFormTempData("update");
+          } catch (error: any) {
+            // Rollback optimistic update
+            dispatch(updateEventLocal({ calId, event: oldEvent }));
+            throw error; // Re-throw to be caught by outer catch
+          }
+        } else if (typeOfAction === "all") {
+          // Update all instances - check if repetition rules changed
+          const baseUID = event.uid.split("/")[0];
+
+          const changes = detectRecurringEventChanges(
+            event,
+            { repetition, timezone, allday, start, end },
+            masterEventData,
+            resolveTimezone,
+            formatDateTimeInTimezone
+          );
+          const repetitionRulesChanged = changes.repetitionRulesChanged;
+
+          if (repetitionRulesChanged) {
+            // Date/time or repetition rules changed - remove all overrides and refresh
+
+            const seriesInstancesSnapshot = getSeriesInstances();
+
+            const removeSeriesInstancesFromUI = () => {
+              Object.keys(seriesInstancesSnapshot).forEach((eventId) => {
+                dispatch(
+                  removeEvent({ calendarUid: calId, eventUid: eventId })
+                );
               });
+            };
 
-              showErrorNotification(
-                "Failed to update recurring event. Changes reverted."
+            const restoreSeriesInstancesFromSnapshot = () => {
+              Object.values(seriesInstancesSnapshot).forEach((instance) => {
+                dispatch(
+                  updateEventLocal({
+                    calId,
+                    event: instance,
+                  })
+                );
+              });
+            };
+
+            try {
+              // STEP 1: Remove ALL old instances from UI (including solo overrides)
+              removeSeriesInstancesFromUI();
+
+              // STEP 2: Update series on server with removeOverrides=true (await to ensure it completes)
+              const result = await dispatch(
+                updateSeriesAsync({
+                  cal: targetCalendar,
+                  event: { ...newEvent, recurrenceId },
+                  removeOverrides: true,
+                })
+              );
+
+              // Handle result of updateSeriesAsync
+              if (result && typeof (result as any).unwrap === "function") {
+                try {
+                  await (result as any).unwrap();
+                } catch (unwrapError: any) {
+                  throw unwrapError;
+                }
+              } else {
+                // Check if result is rejected
+                if (
+                  result.type &&
+                  (result.type as string).endsWith("/rejected")
+                ) {
+                  const rejectedResult = result as any;
+                  throw new Error(
+                    rejectedResult.error?.message ||
+                      rejectedResult.payload?.message ||
+                      "API call failed"
+                  );
+                }
+              }
+
+              // STEP 3: Fetch to get new instances with correct timing
+              // If refreshCalendars fails, we need to throw error to reopen modal
+              try {
+                const calendarRange = getCalendarRange(new Date(start));
+                await refreshCalendars(
+                  dispatch,
+                  Object.values(calendarsList),
+                  calendarRange
+                );
+              } catch (refreshError: any) {
+                // If refreshCalendars fails, throw error to reopen modal
+                throw new Error(
+                  refreshError?.message ||
+                    "Failed to refresh calendar events. Please try again."
+                );
+              }
+
+              // Clear cache after reload
+              dispatch(clearFetchCache(calId));
+
+              // Clear temp data on successful save
+              clearEventFormTempData("update");
+            } catch (seriesError) {
+              restoreSeriesInstancesFromSnapshot();
+              throw seriesError;
+            }
+          } else {
+            // Only properties changed - use optimistic update and keep overrides
+
+            // Store old instances for rollback
+            const oldInstances = getSeriesInstances();
+
+            // Optimistic update: Apply new properties to all instances immediately
+            Object.keys(oldInstances).forEach((eventId) => {
+              const instance = oldInstances[eventId];
+
+              dispatch(
+                updateEventLocal({
+                  calId,
+                  event: {
+                    ...instance,
+                    title: newEvent.title,
+                    description: newEvent.description,
+                    location: newEvent.location,
+                    class: newEvent.class,
+                    transp: newEvent.transp,
+                    attendee: newEvent.attendee,
+                    alarm: newEvent.alarm,
+                    x_openpass_videoconference:
+                      newEvent.x_openpass_videoconference,
+                  },
+                })
               );
             });
-        }
-      }
-    } else {
-      // Non-recurring event (or converting to recurring)
 
-      // Special case: Converting no-repeat to repeat
-      if (!event.repetition?.freq && repetition?.freq) {
-        const oldEventUID = event.uid;
-
-        // API call: putEventAsync will create recurring event and fetch all instances
-        await dispatch(putEventAsync({ cal: targetCalendar, newEvent }))
-          .unwrap()
-          .then(() => {
-            // Remove old single event AFTER new recurring instances are added to store
-            // This prevents empty grid during the transition
-            dispatch(
-              removeEvent({ calendarUid: calId, eventUid: oldEventUID })
+            // Update server in background with removeOverrides=false
+            const result = await dispatch(
+              updateSeriesAsync({
+                cal: targetCalendar,
+                event: { ...newEvent, recurrenceId },
+                removeOverrides: false,
+              })
             );
 
-            // Clear cache to ensure navigation to other weeks works
-            dispatch(clearFetchCache(calId));
-          })
-          .catch((error: any) => {
-            showErrorNotification("Failed to create recurring event.");
-          });
-      } else {
-        // Normal non-recurring event update
-        await dispatch(putEventAsync({ cal: targetCalendar, newEvent }));
-      }
-    }
+            // Handle result of updateSeriesAsync
+            if (result && typeof (result as any).unwrap === "function") {
+              try {
+                await (result as any).unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            } else {
+              // Check if result is rejected
+              if (
+                result.type &&
+                (result.type as string).endsWith("/rejected")
+              ) {
+                const rejectedResult = result as any;
+                throw new Error(
+                  rejectedResult.error?.message ||
+                    rejectedResult.payload?.message ||
+                    "API call failed"
+                );
+              }
+            }
 
-    // Handle calendar change
-    if (newCalId !== calId) {
-      await dispatch(
-        moveEventAsync({
-          cal: targetCalendar,
-          newEvent,
-          newURL: `/calendars/${newCalId}/${event.uid.split("/")[0]}.ics`,
+            // Clear cache to ensure navigation shows updated data
+            dispatch(clearFetchCache(calId));
+
+            // Clear temp data on successful save
+            clearEventFormTempData("update");
+          }
+        }
+      } else {
+        // Non-recurring event (or converting to recurring)
+
+        // Special case: Converting no-repeat to repeat
+        if (!event.repetition?.freq && repetition?.freq) {
+          const oldEventUID = event.uid;
+
+          // API call: putEventAsync will create recurring event and fetch all instances
+          const result = await dispatch(
+            putEventAsync({ cal: targetCalendar, newEvent })
+          );
+
+          // Handle result of putEventAsync - check if rejected first
+          if (result.type && result.type.endsWith("/rejected")) {
+            throw new Error(
+              result.error?.message ||
+                result.payload?.message ||
+                "API call failed"
+            );
+          }
+          if (result && typeof result.unwrap === "function") {
+            try {
+              await result.unwrap();
+            } catch (unwrapError: any) {
+              throw unwrapError;
+            }
+          }
+
+          // Remove old single event AFTER new recurring instances are added to store
+          // This prevents empty grid during the transition
+          dispatch(removeEvent({ calendarUid: calId, eventUid: oldEventUID }));
+
+          // Clear cache to ensure navigation to other weeks works
+          dispatch(clearFetchCache(calId));
+
+          // Clear temp data on successful save
+          clearEventFormTempData("update");
+        } else {
+          // Normal non-recurring event update
+          // If calendar is changing, we'll handle it separately with moveEventAsync
+          // So only call putEventAsync if calendar is NOT changing
+          if (newCalId === calId) {
+            const result = await dispatch(
+              putEventAsync({ cal: targetCalendar, newEvent })
+            );
+
+            // Handle result of putEventAsync - check if rejected first
+            if (result.type && result.type.endsWith("/rejected")) {
+              throw new Error(
+                result.error?.message ||
+                  result.payload?.message ||
+                  "API call failed"
+              );
+            }
+            if (result && typeof result.unwrap === "function") {
+              try {
+                await result.unwrap();
+              } catch (unwrapError: any) {
+                throw unwrapError;
+              }
+            }
+
+            // Clear temp data on successful save
+            clearEventFormTempData("update");
+          }
+        }
+      }
+
+      // Handle calendar change
+      if (newCalId !== calId) {
+        // Get the old calendar for updating
+        const oldCalendar = calList[calId];
+        if (!oldCalendar) {
+          console.error("Old calendar not found");
+          return;
+        }
+
+        // First update the event in the old calendar, then move it
+        const putResult = await dispatch(
+          putEventAsync({ cal: oldCalendar, newEvent: { ...newEvent, calId } })
+        );
+
+        // Handle result of putEventAsync
+        if (putResult && typeof putResult.unwrap === "function") {
+          await putResult.unwrap();
+        }
+
+        // Then move it to the new calendar
+        const moveResult = await dispatch(
+          moveEventAsync({
+            cal: targetCalendar,
+            newEvent,
+            newURL: `/calendars/${newCalId}/${event.uid.split("/")[0]}.ics`,
+          })
+        );
+
+        // Handle result of moveEventAsync
+        if (moveResult && typeof moveResult.unwrap === "function") {
+          await moveResult.unwrap();
+        }
+        dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
+
+        // Clear temp data on successful move
+        clearEventFormTempData("update");
+      }
+      if (tempList) {
+        const calendarRange = getCalendarRange(new Date(start));
+        await updateTempCalendar(tempList, event, dispatch, calendarRange);
+      }
+
+      // Reset all state to default values only on successful save (after all branches)
+      clearEventFormTempData("update");
+      resetAllStateToDefault();
+      setFreshEvent(null);
+      initializedKeyRef.current = null;
+    } catch (error: any) {
+      // Handle errors for all branches
+      // Rollback optimistic updates if any
+      // API failed - restore form data and mark as error
+      const errorFormData = {
+        ...formDataToSave,
+        fromError: true,
+      };
+      saveEventFormDataToTemp("update", errorFormData);
+
+      // Show error notification
+      showErrorNotification(
+        error?.message || "Failed to update event. Please try again."
+      );
+
+      // Try to reopen modal
+      window.dispatchEvent(
+        new CustomEvent("eventModalError", {
+          detail: { type: "update", eventId, calId, typeOfAction },
         })
       );
-      dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
-    }
-    if (tempList) {
-      const calendarRange = getCalendarRange(new Date(startDate));
-      await updateTempCalendar(tempList, event, dispatch, calendarRange);
     }
   };
 

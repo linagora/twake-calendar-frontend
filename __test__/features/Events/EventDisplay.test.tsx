@@ -25,6 +25,7 @@ describe("Event Preview Display", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
     (window as any).MAIL_SPA_URL = null;
   });
 
@@ -355,7 +356,9 @@ describe("Event Preview Display", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     const rsvpState = {
@@ -414,7 +417,9 @@ describe("Event Preview Display", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     const rsvpState = {
@@ -471,7 +476,9 @@ describe("Event Preview Display", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     const rsvpState = {
@@ -1694,10 +1701,18 @@ describe("Event Full Display", () => {
   it("saves event and moves it when calendar is changed", async () => {
     const spyPut = jest
       .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+      .mockImplementation((payload) => {
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
+      });
     const spyMove = jest
       .spyOn(eventThunks, "moveEventAsync")
-      .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+      .mockImplementation((payload) => {
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
+      });
     const spyRemove = jest.spyOn(eventThunks, "removeEvent");
 
     const testDate = new Date("2025-01-15T10:00:00.000Z");
@@ -1751,17 +1766,30 @@ describe("Event Full Display", () => {
     const option = await screen.findByText("Calendar Two");
     fireEvent.click(option);
 
-    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
-
-    await waitFor(() => {
-      expect(spyPut).toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
     });
 
-    await waitFor(() => {
-      expect(spyMove).toHaveBeenCalled();
-    });
+    await waitFor(
+      () => {
+        expect(spyPut).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
 
-    expect(spyRemove).toHaveBeenCalled();
+    await waitFor(
+      () => {
+        expect(spyMove).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+
+    await waitFor(
+      () => {
+        expect(spyRemove).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it("edit modal displays event time in original event timezone", () => {

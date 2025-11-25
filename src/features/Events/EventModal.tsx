@@ -32,6 +32,15 @@ import {
 import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import { addDays } from "../../components/Event/utils/dateRules";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import {
+  saveEventFormDataToTemp,
+  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
+  clearEventFormTempData,
+  showErrorNotification,
+  buildEventFormTempData,
+  restoreFormDataFromTemp,
+  EventFormState,
+} from "../../utils/eventFormTempStorage";
 
 function EventPopover({
   open,
@@ -139,6 +148,8 @@ function EventPopover({
   // Use ref to track if we've already initialized to avoid infinite loop
   const isInitializedRef = useRef(false);
   const userPersonalCalendarsRef = useRef(userPersonalCalendars);
+  // Track when restoring from error to prevent other useEffects from overriding restored data
+  const isRestoringFromErrorRef = useRef(false);
 
   // Update ref when userPersonalCalendars changes
   useEffect(() => {
@@ -209,6 +220,10 @@ function EventPopover({
 
   // Set start/end times when modal opens for new event creation
   useEffect(() => {
+    // Skip if restoring from error - data already restored
+    if (isRestoringFromErrorRef.current) {
+      return;
+    }
     // Only run when modal opens and not duplicating an event
     // Check if event has uid to determine if it's a valid event (not empty object)
     if (!shouldSyncFromRangeRef.current || !open || (event && event.uid)) {
@@ -452,6 +467,10 @@ function EventPopover({
 
   // Reset state when creating new event (event is empty object or undefined)
   useEffect(() => {
+    // Skip if restoring from error - data already restored
+    if (isRestoringFromErrorRef.current) {
+      return;
+    }
     const isCreatingNew = !event || !event.uid;
     const wasInitialized = isInitializedRef.current;
 
@@ -568,6 +587,8 @@ function EventPopover({
   );
 
   const handleClose = () => {
+    // Clear temp data when user manually closes modal
+    clearEventFormTempData("create");
     onClose(false);
     setShowValidationErrors(false);
     resetAllStateToDefault();
@@ -575,6 +596,98 @@ function EventPopover({
     setEnd("");
     shouldSyncFromRangeRef.current = true; // Reset for next time
   };
+
+  // Function to save current form data to temp storage
+  const saveCurrentFormData = useCallback(() => {
+    const formState: EventFormState = {
+      title,
+      description,
+      location,
+      start,
+      end,
+      allday,
+      repetition,
+      attendees,
+      alarm,
+      busy,
+      eventClass,
+      timezone,
+      calendarid,
+      hasVideoConference,
+      meetingLink,
+      showMore,
+      showDescription,
+      showRepeat,
+      hasEndDateChanged,
+    };
+    return buildEventFormTempData(formState);
+  }, [
+    title,
+    description,
+    location,
+    start,
+    end,
+    allday,
+    repetition,
+    attendees,
+    alarm,
+    busy,
+    eventClass,
+    timezone,
+    calendarid,
+    hasVideoConference,
+    meetingLink,
+    showMore,
+    showDescription,
+    showRepeat,
+    hasEndDateChanged,
+  ]);
+
+  // Check for temp data when modal opens
+  useEffect(() => {
+    if (open && !event?.uid) {
+      // Only restore for new events (not duplicating)
+      const tempData = restoreEventFormDataFromStorage("create");
+      if (tempData && tempData.fromError) {
+        // Mark that we're restoring from error to prevent other useEffects from overriding
+        isRestoringFromErrorRef.current = true;
+        // Prevent selectedRange useEffect from running
+        shouldSyncFromRangeRef.current = false;
+
+        // Restore form data from previous failed save
+        restoreFormDataFromTemp(tempData, {
+          setTitle,
+          setDescription,
+          setLocation,
+          setStart,
+          setEnd,
+          setAllDay,
+          setRepetition,
+          setAttendees,
+          setAlarm,
+          setBusy,
+          setEventClass,
+          setTimezone,
+          setCalendarid,
+          setHasVideoConference,
+          setMeetingLink,
+          setShowMore,
+          setShowDescription,
+          setShowRepeat,
+          setHasEndDateChanged,
+        });
+        // Clear the error flag but keep data until successful save
+        const updatedTempData = { ...tempData, fromError: false };
+        saveEventFormDataToTemp("create", updatedTempData);
+
+        // Reset flag after restore completes (use setTimeout to ensure other useEffects have checked the flag)
+        setTimeout(() => {
+          isRestoringFromErrorRef.current = false;
+        }, 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, event?.uid]);
 
   const handleSave = async () => {
     // Show validation errors when Save is clicked
@@ -668,22 +781,69 @@ function EventPopover({
     // Reset validation state when validation passes
     setShowValidationErrors(false);
 
+    // Save current form data to temp storage before closing
+    const formDataToSave = saveCurrentFormData();
+    saveEventFormDataToTemp("create", formDataToSave);
+
     // Close popup immediately
     onClose(true);
 
-    // Reset all state to default values
-    resetAllStateToDefault();
-
     // Save to API in background
-    await dispatch(
-      putEventAsync({
-        cal: targetCalendar,
-        newEvent,
-      })
-    );
-    if (tempList) {
-      const calendarRange = getCalendarRange(new Date(newEvent.start));
-      await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
+    try {
+      const result = await dispatch(
+        putEventAsync({
+          cal: targetCalendar,
+          newEvent,
+        })
+      );
+
+      // Handle result of putEventAsync - check if rejected first
+      // Check if result is a rejected action
+      if (result.type && result.type.endsWith("/rejected")) {
+        throw new Error(
+          result.error?.message || result.payload?.message || "API call failed"
+        );
+      }
+
+      // If result has unwrap, call it (it will throw if rejected)
+      if (result && typeof result.unwrap === "function") {
+        try {
+          await result.unwrap();
+        } catch (unwrapError: any) {
+          throw unwrapError;
+        }
+      }
+
+      if (tempList) {
+        const calendarRange = getCalendarRange(new Date(start));
+        await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
+      }
+
+      // Clear temp data on successful save
+      clearEventFormTempData("create");
+
+      // Reset all state to default values only on successful save
+      resetAllStateToDefault();
+    } catch (error: any) {
+      // API failed - restore form data and mark as error
+      const errorFormData = {
+        ...formDataToSave,
+        fromError: true,
+      };
+      saveEventFormDataToTemp("create", errorFormData);
+
+      // Show error notification
+      showErrorNotification(
+        error?.message || "Failed to create event. Please try again."
+      );
+
+      // Try to reopen modal by dispatching custom event
+      // Parent component should listen to this event and reopen modal
+      window.dispatchEvent(
+        new CustomEvent("eventModalError", {
+          detail: { type: "create" },
+        })
+      );
     }
   };
   const dialogActions = (

@@ -13,6 +13,7 @@ describe("EventUpdateModal Timezone Handling", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
   });
 
   const preloadedState = {

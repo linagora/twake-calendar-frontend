@@ -121,7 +121,11 @@ async function setupEventPopover(
 async function expectRRule(expected: Partial<RepetitionObject>) {
   const spy = jest
     .spyOn(eventThunks, "putEventAsync")
-    .mockImplementation((payload) => () => Promise.resolve(payload) as any);
+    .mockImplementation((payload) => {
+      const promise = Promise.resolve(payload);
+      (promise as any).unwrap = () => promise;
+      return () => promise as any;
+    });
   const saveButton = screen.getByRole("button", { name: /save/i });
   act(() => fireEvent.click(saveButton));
   await waitFor(() => expect(spy).toHaveBeenCalled());

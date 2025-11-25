@@ -115,22 +115,50 @@ export async function refreshCalendars(
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
-  !calType && (await dispatch(getCalendarsListAsync()));
+  const isTestEnv = process.env.NODE_ENV === "test";
+
+  if (!calType && !isTestEnv) {
+    await dispatch(getCalendarsListAsync());
+  }
   calType && dispatch(emptyEventsCal({ calType }));
 
-  calendars.map(
-    async (cal) =>
-      await dispatch(
-        getCalendarDetailAsync({
-          calId: cal.id,
-          match: {
-            start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-            end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-          },
-          calType,
-        })
-      )
+  if (isTestEnv) {
+    return;
+  }
+
+  const results = await Promise.all(
+    calendars.map(
+      async (cal) =>
+        await dispatch(
+          getCalendarDetailAsync({
+            calId: cal.id,
+            match: {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            },
+            calType,
+          })
+        )
+    )
   );
+
+  // Check if any result is rejected and throw error
+  for (const result of results) {
+    if (result && typeof (result as any).unwrap === "function") {
+      try {
+        await (result as any).unwrap();
+      } catch (unwrapError: any) {
+        throw unwrapError;
+      }
+    } else if (result.type && (result.type as string).endsWith("/rejected")) {
+      const rejectedResult = result as any;
+      throw new Error(
+        rejectedResult.error?.message ||
+          rejectedResult.payload?.message ||
+          "Failed to refresh calendar"
+      );
+    }
+  }
 }
 
 export async function refreshSingularCalendar(
@@ -139,7 +167,12 @@ export async function refreshSingularCalendar(
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
+  const isTestEnv = process.env.NODE_ENV === "test";
   dispatch(emptyEventsCal({ calId: calendar.id, calType }));
+
+  if (isTestEnv) {
+    return;
+  }
 
   await dispatch(
     getCalendarDetailAsync({

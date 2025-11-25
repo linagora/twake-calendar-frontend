@@ -9,6 +9,10 @@ import { renderWithProviders } from "../../utils/Renderwithproviders";
 jest.mock("../../../src/utils/apiUtils");
 
 describe("EventPopover", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
   const mockOnClose = jest.fn();
   const mockSetSelectedRange = jest.fn();
   const mockCalendarRef = { current: { select: jest.fn() } } as any;
@@ -224,7 +228,9 @@ describe("EventPopover", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
@@ -290,7 +296,9 @@ describe("EventPopover", () => {
     const spy = jest
       .spyOn(eventThunks, "putEventAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
       });
 
     fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
