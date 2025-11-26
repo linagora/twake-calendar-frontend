@@ -285,9 +285,9 @@ function EventUpdateModal({
       setAttendees(
         event.attendee
           ? event.attendee.filter(
-            (a: userAttendee) =>
-              a.cal_address !== event.organizer?.cal_address
-          )
+              (a: userAttendee) =>
+                a.cal_address !== event.organizer?.cal_address
+            )
           : []
       );
       setAlarm(event.alarm?.trigger ?? "");
@@ -807,8 +807,8 @@ function EventUpdateModal({
                 const rejectedResult = result as any;
                 throw new Error(
                   rejectedResult.error?.message ||
-                  rejectedResult.payload?.message ||
-                  "API call failed"
+                    rejectedResult.payload?.message ||
+                    "API call failed"
                 );
               }
             }
@@ -886,8 +886,8 @@ function EventUpdateModal({
                   const rejectedResult = result as any;
                   throw new Error(
                     rejectedResult.error?.message ||
-                    rejectedResult.payload?.message ||
-                    "API call failed"
+                      rejectedResult.payload?.message ||
+                      "API call failed"
                   );
                 }
               }
@@ -905,7 +905,7 @@ function EventUpdateModal({
                 // If refreshCalendars fails, throw error to reopen modal
                 throw new Error(
                   refreshError?.message ||
-                  "Failed to refresh calendar events. Please try again."
+                    "Failed to refresh calendar events. Please try again."
                 );
               }
 
@@ -925,24 +925,45 @@ function EventUpdateModal({
             const oldInstances = getSeriesInstances();
 
             // Optimistic update: Apply new properties to all instances immediately
+            // BUT only for instances that inherit from master (not customized exceptions)
+            const keysToUpdate: (keyof CalendarEvent)[] = [
+              "title",
+              "description",
+              "location",
+              "class",
+              "transp",
+              "attendee",
+              "alarm",
+              "x_openpass_videoconference",
+            ];
+
             Object.keys(oldInstances).forEach((eventId) => {
               const instance = oldInstances[eventId];
+              const isMaster = !instance.recurrenceId;
+              const updatedInstance = { ...instance };
+
+              keysToUpdate.forEach((key) => {
+                const oldValue = instance[key];
+                const masterValue = masterEventData?.[key];
+
+                const isInherited =
+                  !masterEventData ||
+                  (typeof oldValue === "object"
+                    ? JSON.stringify(oldValue) === JSON.stringify(masterValue)
+                    : oldValue === masterValue);
+
+                if (isMaster || isInherited) {
+                  // Only update if it's the master OR the value is inherited from master
+                  // This preserves customized exception values
+                  // @ts-ignore
+                  updatedInstance[key] = newEvent[key];
+                }
+              });
 
               dispatch(
                 updateEventLocal({
                   calId,
-                  event: {
-                    ...instance,
-                    title: newEvent.title,
-                    description: newEvent.description,
-                    location: newEvent.location,
-                    class: newEvent.class,
-                    transp: newEvent.transp,
-                    attendee: newEvent.attendee,
-                    alarm: newEvent.alarm,
-                    x_openpass_videoconference:
-                      newEvent.x_openpass_videoconference,
-                  },
+                  event: updatedInstance,
                 })
               );
             });
@@ -972,8 +993,8 @@ function EventUpdateModal({
                 const rejectedResult = result as any;
                 throw new Error(
                   rejectedResult.error?.message ||
-                  rejectedResult.payload?.message ||
-                  "API call failed"
+                    rejectedResult.payload?.message ||
+                    "API call failed"
                 );
               }
             }
@@ -1001,8 +1022,8 @@ function EventUpdateModal({
           if (result.type && result.type.endsWith("/rejected")) {
             throw new Error(
               result.error?.message ||
-              result.payload?.message ||
-              "API call failed"
+                result.payload?.message ||
+                "API call failed"
             );
           }
           if (result && typeof result.unwrap === "function") {
@@ -1035,8 +1056,8 @@ function EventUpdateModal({
             if (result.type && result.type.endsWith("/rejected")) {
               throw new Error(
                 result.error?.message ||
-                result.payload?.message ||
-                "API call failed"
+                  result.payload?.message ||
+                  "API call failed"
               );
             }
             if (result && typeof result.unwrap === "function") {
