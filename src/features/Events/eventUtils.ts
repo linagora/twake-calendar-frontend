@@ -297,6 +297,7 @@ export function makeVevent(
         formatDateToICal(new Date(event.start), event.allday ?? false, tzid),
       ],
       ["class", {}, "text", event.class ?? "PUBLIC"],
+      ["sequence", {}, "integer", event.sequence ?? 1],
       [
         "x-openpaas-videoconference",
         {},
