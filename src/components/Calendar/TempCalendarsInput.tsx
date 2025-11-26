@@ -143,11 +143,6 @@ function buildEmailToCalendarMap(calRecord: Record<string, Calendars>) {
   return map;
 }
 
-function extractHue(hslColor: string): number {
-  const match = hslColor.match(/hsl\((\d+)/);
-  return match ? parseInt(match[1], 10) : 0;
-}
-
 function extractHSL(hslColor: string): { h: number; s: number; l: number } {
   const match = hslColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
   if (!match) return { h: 0, s: 70, l: 50 };
@@ -167,7 +162,7 @@ function getColorDistance(color1: string, color2: string): number {
   const hsl1 = extractHSL(color1);
   const hsl2 = extractHSL(color2);
 
-  const hueDist = getHueDistance(hsl1.h, hsl2.h) / 180; // Normalize to 0-1
+  const hueDist = getHueDistance(hsl1.h, hsl2.h) / 180;
   const satDist = Math.abs(hsl1.s - hsl2.s) / 100;
   const lightDist = Math.abs(hsl1.l - hsl2.l) / 100;
 
