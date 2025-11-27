@@ -99,10 +99,10 @@ export default function SearchBar() {
     <>
       <Box
         sx={{
-          width: "100%",
-          maxWidth: 600,
           margin: "0 auto",
           position: "relative",
+          width: extended ? { xs: "10vw", sm: "20vw", md: "35vw" } : "auto",
+          transition: "width 0.25s ease-out",
         }}
       >
         {!extended && (
@@ -171,19 +171,35 @@ export default function SearchBar() {
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{ sx: { width: 600 } }}
+        slotProps={{ paper: { sx: { width: 600 } } }}
       >
-        <Card>
+        <Card sx={{ p: 2, pb: 1 }}>
           <CardContent>
-            <Stack spacing={3}>
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <InputLabel id="search-in">{t("search.searchIn")}</InputLabel>
+            <Stack spacing={2}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "140px 1fr",
+                  gap: 2,
+                  alignItems: "center",
+                }}
+              >
+                <InputLabel id="search-in" sx={{ m: 0 }}>
+                  {t("search.searchIn")}
+                </InputLabel>
                 <Select
                   displayEmpty
                   value={filters.searchIn}
                   onChange={(e) =>
                     handleFilterChange("searchIn", e.target.value)
                   }
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300, color:"#8C9CAF"
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="">
                     <Typography>{t("search.filter.allCalendar")}</Typography>
@@ -196,10 +212,19 @@ export default function SearchBar() {
                   </ListSubheader>
                   {CalendarItemList(sharedCalendars)}
                 </Select>
-              </div>
+              </Box>
 
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <InputLabel id="keywords">{t("search.keywords")}</InputLabel>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "140px 1fr",
+                  gap: 2,
+                  alignItems: "center",
+                }}
+              >
+                <InputLabel id="keywords" sx={{ m: 0 }}>
+                  {t("search.keywords")}
+                </InputLabel>
                 <TextField
                   fullWidth
                   placeholder={t("search.keywordsPlaceholder")}
@@ -208,20 +233,36 @@ export default function SearchBar() {
                     handleFilterChange("keywords", e.target.value)
                   }
                 />
-              </div>
+              </Box>
 
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <InputLabel id="from">{t("search.organizers")}</InputLabel>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "140px 1fr",
+                  gap: 2,
+                  alignItems: "center",
+                }}
+              >
+                <InputLabel id="from" sx={{ m: 0 }}>
+                  {t("search.organizers")}
+                </InputLabel>
                 <UserSearch
                   attendees={filters.organizers}
                   setAttendees={(users: userAttendee[]) =>
                     handleFilterChange("organizers", users)
                   }
                 />
-              </div>
+              </Box>
 
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <InputLabel id="participant">
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "140px 1fr",
+                  gap: 2,
+                  alignItems: "center",
+                }}
+              >
+                <InputLabel id="participant" sx={{ m: 0 }}>
                   {t("search.participants")}
                 </InputLabel>
                 <UserSearch
@@ -230,7 +271,7 @@ export default function SearchBar() {
                     handleFilterChange("participants", users)
                   }
                 />
-              </div>
+              </Box>
             </Stack>
           </CardContent>
 
