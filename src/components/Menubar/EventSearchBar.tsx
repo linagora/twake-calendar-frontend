@@ -1,36 +1,32 @@
-import { useState } from "react";
 import {
-  TextField,
-  IconButton,
   Box,
-  Card,
-  Popover,
   Button,
+  Card,
   CardActions,
   CardContent,
-  Stack,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  ListSubheader,
-  Typography,
   Divider,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  ListSubheader,
+  MenuItem,
+  Popover,
+  Select,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-
+import { useState } from "react";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { CalendarItemList } from "../Calendar/CalendarItemList";
-import UserSearch from "../Attendees/AttendeeSearch";
-import { searchEvent } from "../../features/Events/EventApi";
-import { userAttendee } from "../../features/User/userDataTypes";
+import { searchEventsAsync } from "../../features/Search/SearchSlice";
 import { setView } from "../../features/Settings/SettingsSlice";
-import { setHits, setResults } from "../../features/Search/SearchSlice";
+import { userAttendee } from "../../features/User/userDataTypes";
+import UserSearch from "../Attendees/AttendeeSearch";
+import { CalendarItemList } from "../Calendar/CalendarItemList";
 
 export default function SearchBar() {
   const { t } = useI18n();
@@ -78,8 +74,7 @@ export default function SearchBar() {
   };
 
   const handleSearch = async () => {
-    console.log("Search:", search, filters);
-    const cleannedFilters = {
+    const cleanedFilters = {
       ...filters,
       organizers: filters.organizers.map((u) => u.cal_address),
       participants: filters.participants.map((u) => u.cal_address),
@@ -88,10 +83,14 @@ export default function SearchBar() {
           ? calendars.map((c) => c.id)
           : [filters.searchIn],
     };
-    const searchResponse = await searchEvent(search, cleannedFilters);
-    console.log(searchResponse);
-    dispatch(setHits(Number(searchResponse?.hits)));
-    dispatch(setResults(searchResponse?._embedded.events));
+
+    dispatch(
+      searchEventsAsync({
+        search,
+        filters: cleanedFilters,
+      })
+    );
+
     dispatch(setView("search"));
     setAnchorEl(null);
   };
@@ -115,7 +114,7 @@ export default function SearchBar() {
         {extended && (
           <TextField
             fullWidth
-            placeholder={t("search.search")}
+            placeholder={t("common.search")}
             value={search}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
