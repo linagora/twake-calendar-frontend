@@ -28,7 +28,7 @@ export const searchEventsAsync = createAsyncThunk<
     >;
 
     return {
-      hits: Number(response.hits),
+      hits: Number(response._total_hits),
       events: response._embedded?.events ?? [],
     };
   } catch (err: any) {
