@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import SearchBar from "../../../src/components/Menubar/EventSearchBar";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as searchThunk from "../../../src/features/Search/SearchSlice";
+import userEvent from "@testing-library/user-event";
 
 describe("EventSearchBar", () => {
   const today = new Date();
@@ -137,6 +138,30 @@ describe("EventSearchBar", () => {
     expect(searchInput).toBeInTheDocument();
   });
 
+  it("should unexpand search bar when field is unfocused and empty", () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    const searchButton = screen.getByRole("button");
+    fireEvent.click(searchButton);
+
+    const searchInput = screen.getByPlaceholderText("common.search");
+    fireEvent.blur(searchInput);
+    expect(searchInput).not.toBeInTheDocument();
+  });
+
+  it("should not unexpand search bar when field is unfocused but not empty", () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    const searchButton = screen.getByRole("button");
+    fireEvent.click(searchButton);
+
+    const searchInput = screen.getByPlaceholderText("common.search");
+    userEvent.type(searchInput, "test");
+    fireEvent.blur(searchInput);
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveValue("test");
+  });
+
   it("should update search value on input", () => {
     renderWithProviders(<SearchBar />, preloadedState);
 
@@ -200,7 +225,7 @@ describe("EventSearchBar", () => {
         filters: {
           keywords: "test",
           organizers: [],
-          participants: [],
+          attendees: [],
           searchIn: ["user1/cal1", "user2/cal1", "user3/cal1"],
         },
         search: "test",

@@ -49,7 +49,7 @@ export default function SearchBar() {
     searchIn: "",
     keywords: "",
     organizers: [] as userAttendee[],
-    participants: [] as userAttendee[],
+    attendees: [] as userAttendee[],
   });
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -67,7 +67,7 @@ export default function SearchBar() {
       searchIn: "",
       keywords: "",
       organizers: [] as userAttendee[],
-      participants: [] as userAttendee[],
+      attendees: [] as userAttendee[],
     });
     setAnchorEl(null);
     setExtended(false);
@@ -77,7 +77,7 @@ export default function SearchBar() {
     const cleanedFilters = {
       ...filters,
       organizers: filters.organizers.map((u) => u.cal_address),
-      participants: filters.participants.map((u) => u.cal_address),
+      attendees: filters.attendees.map((u) => u.cal_address),
       searchIn:
         filters.searchIn === ""
           ? calendars.map((c) => c.id)
@@ -116,6 +116,11 @@ export default function SearchBar() {
             fullWidth
             placeholder={t("common.search")}
             value={search}
+            onBlur={() => {
+              if (!search.trim()) {
+                setExtended(false);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSearch();
@@ -267,7 +272,7 @@ export default function SearchBar() {
                   {t("search.participants")}
                 </InputLabel>
                 <UserSearch
-                  attendees={filters.participants}
+                  attendees={filters.attendees}
                   setAttendees={(users: userAttendee[]) =>
                     handleFilterChange("participants", users)
                   }

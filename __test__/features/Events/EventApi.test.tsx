@@ -185,7 +185,7 @@ describe("eventApi", () => {
       searchIn: ["user1/calendar1", "user2/calendar2"],
       keywords: "meeting",
       organizers: ["org@example.com"],
-      participants: ["part@example.com"],
+      attendees: ["part@example.com"],
     };
 
     it("should call API with correct parameters", async () => {
@@ -210,7 +210,7 @@ describe("eventApi", () => {
               { calendarId: "calendar2", userId: "user2" },
             ],
             organizers: ["org@example.com"],
-            participants: ["part@example.com"],
+            attendees: ["part@example.com"],
           }),
         }
       );
@@ -262,7 +262,7 @@ describe("eventApi", () => {
 
       await searchEvent("test", {
         ...mockFilters,
-        participants: [],
+        attendees: [],
       });
 
       const callArgs = (api.post as jest.Mock).mock.calls[0][1];

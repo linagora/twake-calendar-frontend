@@ -369,16 +369,16 @@ export async function searchEvent(
     searchIn: string[];
     keywords: string;
     organizers: string[];
-    participants: string[];
+    attendees: string[];
   }
 ) {
-  const { keywords, searchIn, organizers, participants } = filters;
+  const { keywords, searchIn, organizers, attendees } = filters;
 
   const reqParam: {
     query: string;
     calendars: { calendarId: string; userId: string }[];
     organizers?: string[];
-    participants?: string[];
+    attendees?: string[];
   } = {
     query: !!keywords ? keywords : query,
     calendars: searchIn.map((calId) => {
@@ -389,8 +389,8 @@ export async function searchEvent(
   if (organizers.length) {
     reqParam.organizers = organizers;
   }
-  if (participants.length) {
-    reqParam.participants = participants;
+  if (attendees.length) {
+    reqParam.attendees = attendees;
   }
   const response = await api
     .post("calendar/api/events/search?limit=30&offset=0", {

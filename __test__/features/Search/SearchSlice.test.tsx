@@ -53,7 +53,7 @@ describe("SearchSlice", () => {
       searchIn: ["user1/calendar1"],
       keywords: "meeting",
       organizers: ["user@example.com"],
-      participants: ["attendee@example.com"],
+      attendees: ["attendee@example.com"],
     };
 
     it("should handle successful search", async () => {
