@@ -604,6 +604,7 @@ function EventUpdateModal({
       organizer: organizer,
       timezone,
       transp: busy,
+      sequence: (event.sequence ?? 1) + 1,
       color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
@@ -700,6 +701,7 @@ function EventUpdateModal({
           ...newEvent,
           uid: newEventUID,
           URL: `/calendars/${newCalId || calId}/${newEventUID}.ics`,
+          sequence: 1, // New event with new UID starts at sequence 1
         };
 
         // STEP 3: Persist new event to server

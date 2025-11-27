@@ -733,6 +733,7 @@ function EventPopover({
         },
       ],
       transp: busy,
+      sequence: 1,
       color: targetCalendar?.color,
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
