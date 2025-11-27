@@ -574,7 +574,7 @@ export default function CalendarApp({
   const { t, lang } = useI18n();
 
   return (
-    <main className="main-layout">
+    <main className="main-layout calendar-layout">
       <Box
         className="sidebar"
         sx={{
