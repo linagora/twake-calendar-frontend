@@ -302,6 +302,7 @@ describe("CalendarApp integration", () => {
                 end: new Date("2025-11-14T11:31:00.000Z").toISOString(),
                 class: "PUBLIC",
                 partstat: "ACCEPTED",
+                sequence: 2,
                 organizer: {
                   cn: "Alice",
                   cal_address: "alice@example.com",
@@ -380,6 +381,9 @@ describe("CalendarApp integration", () => {
       expect(normalAttendee).toBeTruthy();
       expect(normalAttendee?.partstat).toBe("ACCEPTED");
       expect(normalAttendee?.role).toBe("REQ-PARTICIPANT");
+
+      // Verify SEQUENCE is incremented
+      expect(updatedEvent?.sequence).toBe(3); // 2 + 1
     });
 
     it("changes normal attendee to need action on time update and no organizer changes", async () => {
@@ -432,6 +436,9 @@ describe("CalendarApp integration", () => {
       expect(normalAttendee).toBeTruthy();
       expect(normalAttendee?.partstat).toBe("NEEDS-ACTION");
       expect(normalAttendee?.role).toBe("REQ-PARTICIPANT");
+
+      // Verify SEQUENCE is incremented
+      expect(updatedEvent?.sequence).toBe(3); // 2 + 1
     });
     it("update event attendees on drag", async () => {
       const mockDispatch = jest.fn();
@@ -490,6 +497,9 @@ describe("CalendarApp integration", () => {
         (a: any) => a.cal_address === "bob@example.com"
       );
       expect(normal?.partstat).toBe("NEEDS-ACTION");
+
+      // Verify SEQUENCE is incremented
+      expect(updatedEvent?.sequence).toBe(3); // 2 + 1
     });
 
     it("update event attendees on resize", async () => {
@@ -549,6 +559,9 @@ describe("CalendarApp integration", () => {
         (a: any) => a.cal_address === "bob@example.com"
       );
       expect(normal?.partstat).toBe("NEEDS-ACTION");
+
+      // Verify SEQUENCE is incremented
+      expect(updatedEvent?.sequence).toBe(3); // 2 + 1
     });
   });
 });

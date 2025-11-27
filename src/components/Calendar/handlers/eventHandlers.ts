@@ -177,6 +177,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         ...event,
         start: computedNewStart.toISOString(),
         end: computedNewEnd.toISOString(),
+        sequence: (event.sequence ?? 1) + 1,
       } as CalendarEvent,
       true
     );
@@ -202,6 +203,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                   ...master,
                   start: computedNewStart.toISOString(),
                   end: computedNewEnd.toISOString(),
+                  sequence: (master.sequence ?? 1) + 1,
                 },
               })
             );
@@ -254,6 +256,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         ...event,
         start: computedNewStart.toISOString(),
         end: computedNewEnd.toISOString(),
+        sequence: (event.sequence ?? 1) + 1,
       } as CalendarEvent,
       true
     );
@@ -280,6 +283,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                   ...master,
                   start: computedNewStart.toISOString(),
                   end: computedNewEnd.toISOString(),
+                  sequence: (master.sequence ?? 1) + 1,
                 },
               })
             );

@@ -837,6 +837,99 @@ describe("calendarEventToJCal", () => {
       ])
     );
   });
+
+  it("includes SEQUENCE field when present in event", () => {
+    const mockEvent = {
+      uid: "event-with-sequence",
+      title: "Event with Sequence",
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
+      timezone: "Europe/Paris",
+      allday: false,
+      sequence: 3,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
+
+    const [vevent] = result[2];
+    const props = vevent[1];
+
+    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 3]);
+  });
+
+  it("defaults SEQUENCE to 1 when not present in event", () => {
+    const mockEvent = {
+      uid: "event-without-sequence",
+      title: "Event without Sequence",
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
+      timezone: "Europe/Paris",
+      allday: false,
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
+
+    const [vevent] = result[2];
+    const props = vevent[1];
+
+    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
+  });
+
+  it("includes SEQUENCE in recurring event", () => {
+    const mockEvent = {
+      uid: "recurring-event-sequence",
+      title: "Recurring Event with Sequence",
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
+      timezone: "Europe/Paris",
+      allday: false,
+      sequence: 2,
+      repetition: { freq: "DAILY", interval: 1 },
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
+
+    const [vevent] = result[2];
+    const props = vevent[1];
+
+    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 2]);
+  });
+
+  it("includes SEQUENCE in event exception (with recurrence-id)", () => {
+    const mockEvent = {
+      uid: "event-exception-sequence",
+      title: "Event Exception with Sequence",
+      start: "2025-07-23T08:00:00.000Z",
+      end: "2025-07-23T09:00:00.000Z",
+      timezone: "Europe/Paris",
+      allday: false,
+      sequence: 5,
+      recurrenceId: "2025-07-23T08:00:00Z",
+      attendee: [],
+    };
+
+    const result = calendarEventToJCal(mockEvent as unknown as CalendarEvent);
+
+    const [vevent] = result[2];
+    const props = vevent[1];
+
+    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    expect(sequenceProp).toBeDefined();
+    expect(sequenceProp).toEqual(["sequence", {}, "integer", 5]);
+
+    // Also verify recurrence-id is present
+    const recurrenceIdProp = props.find((p: any[]) => p[0] === "recurrence-id");
+    expect(recurrenceIdProp).toBeDefined();
+  });
 });
 
 describe("combineMasterDateWithFormTime", () => {
