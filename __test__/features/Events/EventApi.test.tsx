@@ -3,6 +3,7 @@ import {
   moveEvent,
   deleteEvent,
   importEventFromFile,
+  searchEvent,
 } from "../../../src/features/Events/EventApi";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { calendarEventToJCal } from "../../../src/features/Events/eventUtils";
@@ -177,5 +178,96 @@ describe("eventApi", () => {
         body: JSON.stringify(expectedResult),
       })
     );
+  });
+
+  describe("searchEvent", () => {
+    const mockFilters = {
+      searchIn: ["user1/calendar1", "user2/calendar2"],
+      keywords: "meeting",
+      organizers: ["org@example.com"],
+      participants: ["part@example.com"],
+    };
+
+    it("should call API with correct parameters", async () => {
+      const mockResponse = {
+        _total_hits: 5,
+        _embedded: { events: [] },
+      };
+
+      (api.post as jest.Mock).mockReturnValue({
+        json: jest.fn().mockResolvedValue(mockResponse),
+      });
+
+      await searchEvent("test", mockFilters);
+
+      expect(api.post).toHaveBeenCalledWith(
+        "calendar/api/events/search?limit=30&offset=0",
+        {
+          body: JSON.stringify({
+            query: "meeting",
+            calendars: [
+              { calendarId: "calendar1", userId: "user1" },
+              { calendarId: "calendar2", userId: "user2" },
+            ],
+            organizers: ["org@example.com"],
+            participants: ["part@example.com"],
+          }),
+        }
+      );
+    });
+
+    it("should use query param when keywords is empty", async () => {
+      const mockResponse = { _total_hits: 0, _embedded: { events: [] } };
+
+      (api.post as jest.Mock).mockReturnValue({
+        json: jest.fn().mockResolvedValue(mockResponse),
+      });
+
+      await searchEvent("fallback query", {
+        ...mockFilters,
+        keywords: "",
+      });
+
+      expect(api.post).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining('"query":"fallback query"'),
+        })
+      );
+    });
+
+    it("should omit organizers when empty", async () => {
+      const mockResponse = { _total_hits: 0, _embedded: { events: [] } };
+
+      (api.post as jest.Mock).mockReturnValue({
+        json: jest.fn().mockResolvedValue(mockResponse),
+      });
+
+      await searchEvent("test", {
+        ...mockFilters,
+        organizers: [],
+      });
+
+      const callArgs = (api.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      expect(body.organizers).toBeUndefined();
+    });
+
+    it("should omit participants when empty", async () => {
+      const mockResponse = { _total_hits: 0, _embedded: { events: [] } };
+
+      (api.post as jest.Mock).mockReturnValue({
+        json: jest.fn().mockResolvedValue(mockResponse),
+      });
+
+      await searchEvent("test", {
+        ...mockFilters,
+        participants: [],
+      });
+
+      const callArgs = (api.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      expect(body.participants).toBeUndefined();
+    });
   });
 });
