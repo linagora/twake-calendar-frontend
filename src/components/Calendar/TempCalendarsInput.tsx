@@ -31,7 +31,7 @@ export function TempCalendarsInput({
   const theme = useTheme();
 
   const prevUsersRef = useRef<User[]>([]);
-  const userColors = new Map<string, string>();
+  const userColorsRef = useRef(new Map<string, string>());
 
   const handleUserChange = async (_: any, users: User[]) => {
     setTempUsers(users);
@@ -58,11 +58,12 @@ export function TempCalendarsInput({
         const controller = new AbortController();
         requestControllers.set(user.email, controller);
 
-        if (!userColors.has(user.email)) {
-          const existingColors = new Set(userColors.values());
-          userColors.set(user.email, generateUserColor(existingColors));
+        if (!userColorsRef.current.has(user.email)) {
+          const existingColors = Array.from(userColorsRef.current.values());
+          const lightColor = generateDistinctColor(existingColors);
+          userColorsRef.current.set(user.email, lightColor);
         }
-        const lightColor = userColors.get(user.email)!;
+        const lightColor = userColorsRef.current.get(user.email)!;
 
         user.color = {
           light: lightColor,
@@ -90,6 +91,7 @@ export function TempCalendarsInput({
 
       const calIds = buildEmailToCalendarMap(tempcalendars).get(user.email);
       calIds?.forEach((id) => dispatch(removeTempCal(id)));
+      userColorsRef.current.delete(user.email);
     }
   };
 
@@ -141,11 +143,95 @@ function buildEmailToCalendarMap(calRecord: Record<string, Calendars>) {
   return map;
 }
 
-function generateUserColor(existingColors: Set<string>): string {
-  let color: string;
-  do {
-    const hue = Math.floor(Math.random() * 360);
-    color = `hsl(${hue}, 70%, 50%)`;
-  } while (existingColors.has(color));
-  return color;
+function extractHSL(hslColor: string): { h: number; s: number; l: number } {
+  const match = hslColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!match) return { h: 0, s: 70, l: 50 };
+  return {
+    h: parseInt(match[1], 10),
+    s: parseInt(match[2], 10),
+    l: parseInt(match[3], 10),
+  };
+}
+
+function getHueDistance(hue1: number, hue2: number): number {
+  const diff = Math.abs(hue1 - hue2);
+  return Math.min(diff, 360 - diff);
+}
+
+function getColorDistance(color1: string, color2: string): number {
+  const hsl1 = extractHSL(color1);
+  const hsl2 = extractHSL(color2);
+
+  const hueDist = getHueDistance(hsl1.h, hsl2.h) / 180;
+  const satDist = Math.abs(hsl1.s - hsl2.s) / 100;
+  const lightDist = Math.abs(hsl1.l - hsl2.l) / 100;
+
+  // Weighted distance: hue is most important, then saturation, then lightness
+  return Math.sqrt(
+    hueDist * hueDist * 4 + satDist * satDist * 1 + lightDist * lightDist * 1
+  );
+}
+
+function generateDistinctColor(
+  existingColors: string[],
+  minDistance: number = 0.35,
+  maxAttempts: number = 150
+): string {
+  // Predefined palette with good variety
+  const palette = [
+    { h: 0, s: 75, l: 50 }, // Red
+    { h: 30, s: 80, l: 50 }, // Orange
+    { h: 50, s: 85, l: 50 }, // Yellow-orange
+    { h: 120, s: 70, l: 45 }, // Green
+    { h: 180, s: 70, l: 45 }, // Cyan
+    { h: 210, s: 75, l: 50 }, // Blue
+    { h: 270, s: 70, l: 50 }, // Purple
+    { h: 320, s: 75, l: 50 }, // Magenta
+    { h: 90, s: 65, l: 55 }, // Lime
+    { h: 200, s: 80, l: 45 }, // Deep blue
+    { h: 290, s: 65, l: 55 }, // Light purple
+    { h: 340, s: 75, l: 50 }, // Pink-red
+  ];
+
+  // Try palette colors first
+  for (const color of palette) {
+    const colorStr = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
+    if (existingColors.length === 0) {
+      return colorStr;
+    }
+
+    const minDist = Math.min(
+      ...existingColors.map((c) => getColorDistance(colorStr, c))
+    );
+
+    if (minDist >= minDistance) {
+      return colorStr;
+    }
+  }
+
+  // If palette exhausted, generate random colors
+  let bestColor = `hsl(0, 70%, 50%)`;
+  let bestMinDistance = 0;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const h = Math.floor(Math.random() * 360);
+    const s = 65 + Math.floor(Math.random() * 20); // 65-85%
+    const l = 45 + Math.floor(Math.random() * 15); // 45-60%
+    const candidateColor = `hsl(${h}, ${s}%, ${l}%)`;
+
+    const minDist = Math.min(
+      ...existingColors.map((c) => getColorDistance(candidateColor, c))
+    );
+
+    if (minDist >= minDistance) {
+      return candidateColor;
+    }
+
+    if (minDist > bestMinDistance) {
+      bestMinDistance = minDist;
+      bestColor = candidateColor;
+    }
+  }
+
+  return bestColor;
 }
