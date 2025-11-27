@@ -35,6 +35,7 @@ import {
   ru as ruLocale,
   vi as viLocale,
 } from "date-fns/locale";
+import SearchBar from "./EventSearchBar";
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {
@@ -190,6 +191,10 @@ export function Menubar({
           </div>
         </div>
         <div className="right-menu">
+          <div className="menu-items search-container">
+            <SearchBar />
+          </div>
+
           <div className="menu-items">
             <IconButton
               className="refresh-button"

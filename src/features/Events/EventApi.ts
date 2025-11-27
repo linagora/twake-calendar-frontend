@@ -10,6 +10,7 @@ import {
 import ICAL from "ical.js";
 import moment from "moment-timezone";
 import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
+import { User } from "../../components/Attendees/PeopleSearch";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;
@@ -359,5 +360,43 @@ export async function importEventFromFile(id: string, calLink: string) {
   const response = await api.post(`api/import`, {
     body: JSON.stringify({ fileId: id, target: calLink }),
   });
+  return response;
+}
+
+export async function searchEvent(
+  query: string,
+  filters: {
+    searchIn: string[];
+    keywords: string;
+    organizers: string[];
+    participants: string[];
+  }
+) {
+  const { keywords, searchIn, organizers, participants } = filters;
+
+  const reqParam: {
+    query: string;
+    calendars: { calendarId: string; userId: string }[];
+    organizers?: string[];
+    participants?: string[];
+  } = {
+    query: query ?? keywords,
+    calendars: searchIn.map((calId) => {
+      const [userId, calendarId] = calId.split("/");
+      return { calendarId, userId };
+    }),
+  };
+  if (organizers.length) {
+    reqParam.organizers = organizers;
+  }
+  if (participants.length) {
+    reqParam.participants = participants;
+  }
+  const response = await api
+    .post("calendar/api/events/search?limit=30&offset=0", {
+      body: JSON.stringify(reqParam),
+    })
+    .json();
+
   return response;
 }
