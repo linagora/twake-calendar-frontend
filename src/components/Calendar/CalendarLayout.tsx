@@ -77,7 +77,7 @@ export default function CalendarLayout() {
   return (
     <div className="App">
       <Menubar {...menubarProps} />
-      {view === "calendar" && (
+      {(view === "calendar" || view === "search") && (
         <CalendarApp
           calendarRef={calendarRef}
           onDateChange={handleDateChange}
@@ -85,7 +85,6 @@ export default function CalendarLayout() {
         />
       )}
       {view === "settings" && <SettingsPage />}
-      {view === "search" && <SearchResultsPage />}
       <ErrorSnackbar error={error} type="calendar" />
     </div>
   );

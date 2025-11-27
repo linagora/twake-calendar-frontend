@@ -45,6 +45,7 @@ import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import frLocale from "@fullcalendar/core/locales/fr";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";
+import SearchResultsPage from "../../features/Search/SearchResultsPage";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
@@ -76,7 +77,7 @@ export default function CalendarApp({
       dispatch(push("/"));
     }
   }, [dispatch, tokens, userId]);
-
+  const view = useAppSelector((state) => state.settings.view);
   const calendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
@@ -628,149 +629,152 @@ export default function CalendarApp({
       </Box>
       <div className="calendar">
         <ImportAlert />
-        <FullCalendar
-          ref={(ref) => {
-            if (ref) {
-              calendarRef.current = ref.getApi();
+        {view === "calendar" && (
+          <FullCalendar
+            ref={(ref) => {
+              if (ref) {
+                calendarRef.current = ref.getApi();
+              }
+            }}
+            plugins={[
+              dayGridPlugin,
+              timeGridPlugin,
+              interactionPlugin,
+              momentTimezonePlugin,
+            ]}
+            initialView="timeGridWeek"
+            firstDay={1}
+            editable={true}
+            locale={localeMap[lang]}
+            selectable={true}
+            timeZone={timezone}
+            height={"100%"}
+            select={eventHandlers.handleDateSelect}
+            nowIndicator
+            slotLabelClassNames={(arg) => [
+              updateSlotLabelVisibility(new Date(), arg, timezone),
+            ]}
+            nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
+            headerToolbar={false}
+            views={{
+              timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
+            }}
+            dayMaxEvents={true}
+            events={eventToFullCalendarFormat(
+              filteredEvents,
+              filteredTempEvents,
+              userId
+            )}
+            weekNumbers={
+              currentView === "timeGridWeek" || currentView === "timeGridDay"
             }
-          }}
-          plugins={[
-            dayGridPlugin,
-            timeGridPlugin,
-            interactionPlugin,
-            momentTimezonePlugin,
-          ]}
-          initialView="timeGridWeek"
-          firstDay={1}
-          editable={true}
-          locale={localeMap[lang]}
-          selectable={true}
-          timeZone={timezone}
-          height={"100%"}
-          select={eventHandlers.handleDateSelect}
-          nowIndicator
-          slotLabelClassNames={(arg) => [
-            updateSlotLabelVisibility(new Date(), arg, timezone),
-          ]}
-          nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
-          headerToolbar={false}
-          views={{
-            timeGridWeek: { titleFormat: { month: "long", year: "numeric" } },
-          }}
-          dayMaxEvents={true}
-          events={eventToFullCalendarFormat(
-            filteredEvents,
-            filteredTempEvents,
-            userId
-          )}
-          weekNumbers={
-            currentView === "timeGridWeek" || currentView === "timeGridDay"
-          }
-          weekNumberFormat={{ week: "long" }}
-          weekNumberContent={(arg) => {
-            return (
-              <div className="weekSelector">
-                <div>
-                  {t("menubar.views.week")} {arg.num}
-                </div>
-                <TimezoneSelector
-                  value={timezone}
-                  referenceDate={calendarRef.current?.getDate() ?? new Date()}
-                  onChange={(newTimezone: string) =>
-                    dispatch(setTimeZone(newTimezone))
-                  }
-                />
-              </div>
-            );
-          }}
-          dayCellContent={(arg) => {
-            const month = arg.date.toLocaleDateString(t("locale"), {
-              month: "short",
-            });
-            if (arg.view.type === "dayGridMonth") {
+            weekNumberFormat={{ week: "long" }}
+            weekNumberContent={(arg) => {
               return (
-                <span
-                  className={`fc-daygrid-day-number ${
-                    arg.isToday ? "current-date" : ""
-                  }`}
-                >
-                  {arg.dayNumberText === "1" ? month : ""} {arg.dayNumberText}
-                </span>
+                <div className="weekSelector">
+                  <div>
+                    {t("menubar.views.week")} {arg.num}
+                  </div>
+                  <TimezoneSelector
+                    value={timezone}
+                    referenceDate={calendarRef.current?.getDate() ?? new Date()}
+                    onChange={(newTimezone: string) =>
+                      dispatch(setTimeZone(newTimezone))
+                    }
+                  />
+                </div>
               );
-            }
-          }}
-          slotDuration={"00:30:00"}
-          slotLabelInterval={"01:00:00"}
-          scrollTime="12:00:00"
-          unselectAuto={false}
-          allDayText=""
-          slotLabelFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }}
-          datesSet={(arg) => {
-            setCurrentView(arg.view.type);
-            const calendarCurrentDate =
-              calendarRef.current?.getDate() || new Date(arg.start);
-
-            if (arg.view.type === "dayGridMonth") {
-              const start = new Date(arg.start).getTime();
-              const end = new Date(arg.end).getTime();
-              const middle = start + (end - start) / 2;
-              setSelectedDate(new Date(middle));
-              setSelectedMiniDate(calendarCurrentDate);
-            } else {
-              setSelectedDate(calendarCurrentDate);
-              setSelectedMiniDate(calendarCurrentDate);
-            }
-
-            // Always use the calendar's current date for consistency
-            if (onDateChange) {
-              onDateChange(calendarCurrentDate);
-            }
-
-            // Notify parent about view change
-            if (onViewChange) {
-              onViewChange(arg.view.type);
-            }
-
-            // Update slot label visibility when view changes
-            setTimeout(() => {
-              updateSlotLabelVisibility(new Date());
-            }, 100);
-          }}
-          dayHeaderContent={(arg) => {
-            const date = arg.date.getDate();
-            const weekDay = arg.date
-              .toLocaleDateString(t("locale"), { weekday: "short" })
-              .toUpperCase();
-            return (
-              <div className="fc-daygrid-day-top">
-                <small>{weekDay}</small>
-                {arg.view.type !== "dayGridMonth" && (
+            }}
+            dayCellContent={(arg) => {
+              const month = arg.date.toLocaleDateString(t("locale"), {
+                month: "short",
+              });
+              if (arg.view.type === "dayGridMonth") {
+                return (
                   <span
                     className={`fc-daygrid-day-number ${
                       arg.isToday ? "current-date" : ""
                     }`}
                   >
-                    {date}
+                    {arg.dayNumberText === "1" ? month : ""} {arg.dayNumberText}
                   </span>
-                )}
-              </div>
-            );
-          }}
-          dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
-          dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
-          viewDidMount={viewHandlers.handleViewDidMount}
-          viewWillUnmount={viewHandlers.handleViewWillUnmount}
-          eventClick={eventHandlers.handleEventClick}
-          eventAllow={eventHandlers.handleEventAllow}
-          eventDrop={eventHandlers.handleEventDrop}
-          eventResize={eventHandlers.handleEventResize}
-          eventContent={viewHandlers.handleEventContent}
-          eventDidMount={viewHandlers.handleEventDidMount}
-        />
+                );
+              }
+            }}
+            slotDuration={"00:30:00"}
+            slotLabelInterval={"01:00:00"}
+            scrollTime="12:00:00"
+            unselectAuto={false}
+            allDayText=""
+            slotLabelFormat={{
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }}
+            datesSet={(arg) => {
+              setCurrentView(arg.view.type);
+              const calendarCurrentDate =
+                calendarRef.current?.getDate() || new Date(arg.start);
+
+              if (arg.view.type === "dayGridMonth") {
+                const start = new Date(arg.start).getTime();
+                const end = new Date(arg.end).getTime();
+                const middle = start + (end - start) / 2;
+                setSelectedDate(new Date(middle));
+                setSelectedMiniDate(calendarCurrentDate);
+              } else {
+                setSelectedDate(calendarCurrentDate);
+                setSelectedMiniDate(calendarCurrentDate);
+              }
+
+              // Always use the calendar's current date for consistency
+              if (onDateChange) {
+                onDateChange(calendarCurrentDate);
+              }
+
+              // Notify parent about view change
+              if (onViewChange) {
+                onViewChange(arg.view.type);
+              }
+
+              // Update slot label visibility when view changes
+              setTimeout(() => {
+                updateSlotLabelVisibility(new Date());
+              }, 100);
+            }}
+            dayHeaderContent={(arg) => {
+              const date = arg.date.getDate();
+              const weekDay = arg.date
+                .toLocaleDateString(t("locale"), { weekday: "short" })
+                .toUpperCase();
+              return (
+                <div className="fc-daygrid-day-top">
+                  <small>{weekDay}</small>
+                  {arg.view.type !== "dayGridMonth" && (
+                    <span
+                      className={`fc-daygrid-day-number ${
+                        arg.isToday ? "current-date" : ""
+                      }`}
+                    >
+                      {date}
+                    </span>
+                  )}
+                </div>
+              );
+            }}
+            dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
+            dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
+            viewDidMount={viewHandlers.handleViewDidMount}
+            viewWillUnmount={viewHandlers.handleViewWillUnmount}
+            eventClick={eventHandlers.handleEventClick}
+            eventAllow={eventHandlers.handleEventAllow}
+            eventDrop={eventHandlers.handleEventDrop}
+            eventResize={eventHandlers.handleEventResize}
+            eventContent={viewHandlers.handleEventContent}
+            eventDidMount={viewHandlers.handleEventDidMount}
+          />
+        )}
+        {view === "search" && <SearchResultsPage />}
         <EventPopover
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}

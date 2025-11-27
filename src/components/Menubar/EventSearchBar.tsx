@@ -24,14 +24,17 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
 import UserSearch from "../Attendees/AttendeeSearch";
 import { searchEvent } from "../../features/Events/EventApi";
 import { userAttendee } from "../../features/User/userDataTypes";
+import { setView } from "../../features/Settings/SettingsSlice";
+import { setHits, setResults } from "../../features/Search/SearchSlice";
 
 export default function SearchBar() {
   const { t } = useI18n();
+  const dispatch = useAppDispatch();
   const calendars = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
@@ -87,6 +90,9 @@ export default function SearchBar() {
     };
     const searchResponse = await searchEvent(search, cleannedFilters);
     console.log(searchResponse);
+    dispatch(setHits(Number(searchResponse?.hits)));
+    dispatch(setResults(searchResponse?._embedded.events));
+    dispatch(setView("search"));
     setAnchorEl(null);
   };
 
