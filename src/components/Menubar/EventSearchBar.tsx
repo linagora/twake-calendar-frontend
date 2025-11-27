@@ -70,6 +70,8 @@ export default function SearchBar() {
       organizers: [] as userAttendee[],
       participants: [] as userAttendee[],
     });
+    setAnchorEl(null);
+    setExtended(false);
   };
 
   const handleSearch = async () => {
@@ -114,7 +116,10 @@ export default function SearchBar() {
                 handleSearch();
               }
             }}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              handleFilterChange("keywords", e.target.value);
+            }}
             variant="outlined"
             sx={{
               borderRadius: "999px",
@@ -141,11 +146,13 @@ export default function SearchBar() {
                       <TuneIcon />
                     </IconButton>
                   </InputAdornment>
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setSearch("")}>
-                      <HighlightOffIcon />
-                    </IconButton>
-                  </InputAdornment>
+                  {search && (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setSearch("")}>
+                        <HighlightOffIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )}
                 </>
               ),
             }}
