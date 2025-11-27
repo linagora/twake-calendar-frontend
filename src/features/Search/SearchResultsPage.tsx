@@ -25,7 +25,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (hits === 0) {
+  if (!hits) {
     return (
       <div className="search-layout">
         <h1>{t("search.noResults")}</h1>

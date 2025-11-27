@@ -196,7 +196,8 @@ export default function SearchBar() {
                   MenuProps={{
                     PaperProps: {
                       style: {
-                        maxHeight: 300, color:"#8C9CAF"
+                        maxHeight: 300,
+                        color: "#8C9CAF",
                       },
                     },
                   }}
