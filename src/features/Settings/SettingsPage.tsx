@@ -1,9 +1,162 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Tabs,
+  Tab,
+  IconButton,
+  FormControl,
+  Select,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SyncIcon from "@mui/icons-material/Sync";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { setView, setLanguage } from "./SettingsSlice";
+import { AVAILABLE_LANGUAGES } from "./constants";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import "./SettingsPage.styl";
+
+type SidebarNavItem = "settings" | "sync";
+type SettingsSubTab = "settings" | "notifications";
 
 export default function SettingsPage() {
+  const dispatch = useAppDispatch();
+  const { t, lang } = useI18n();
+  const [activeNavItem, setActiveNavItem] =
+    useState<SidebarNavItem>("settings");
+  const [activeSettingsSubTab, setActiveSettingsSubTab] =
+    useState<SettingsSubTab>("settings");
+
+  const handleBackClick = () => {
+    dispatch(setView("calendar"));
+  };
+
+  const handleNavItemClick = (item: SidebarNavItem) => {
+    setActiveNavItem(item);
+    if (item === "settings") {
+      setActiveSettingsSubTab("settings");
+    }
+  };
+
+  const handleSettingsSubTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: SettingsSubTab
+  ) => {
+    setActiveSettingsSubTab(newValue);
+  };
+
+  const handleLanguageChange = (event: any) => {
+    dispatch(setLanguage(event.target.value));
+  };
+
   return (
     <main className="main-layout settings-layout">
-      <h1>Settings Page</h1>
+      <Box className="settings-sidebar">
+        <List>
+          <ListItem
+            className={`settings-nav-item ${activeNavItem === "settings" ? "active" : ""}`}
+            onClick={() => handleNavItemClick("settings")}
+            sx={{ cursor: "pointer" }}
+          >
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary={t("settings.title") || "Settings"} />
+          </ListItem>
+          {/* <ListItem
+            className={`settings-nav-item ${activeNavItem === "sync" ? "active" : ""}`}
+            onClick={() => handleNavItemClick("sync")}
+            sx={{ cursor: "pointer" }}
+          >
+            <ListItemIcon>
+              <SyncIcon />
+            </ListItemIcon>
+            <ListItemText primary={t("settings.sync") || "Sync"} />
+          </ListItem> */}
+        </List>
+      </Box>
+      <Box className="settings-content">
+        <Box className="settings-content-header">
+          <IconButton
+            onClick={handleBackClick}
+            aria-label={t("settings.back") || "Back to calendar"}
+            className="back-button"
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          {activeNavItem === "settings" && (
+            <Tabs
+              value={activeSettingsSubTab}
+              onChange={handleSettingsSubTabChange}
+              className="settings-content-tabs"
+            >
+              <Tab value="settings" label={t("settings.title") || "Settings"} />
+              <Tab
+                value="notifications"
+                label={t("settings.notifications") || "Notifications"}
+              />
+            </Tabs>
+          )}
+        </Box>
+        <Box className="settings-content-body">
+          {activeNavItem === "settings" && (
+            <>
+              {activeSettingsSubTab === "settings" && (
+                <Box className="settings-tab-content">
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {t("settings.language") || "Language"}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 3 }}
+                  >
+                    {t("settings.languageDescription") ||
+                      "This will be the language used in your Twake Calendar"}
+                  </Typography>
+                  <FormControl size="small" sx={{ minWidth: 500 }}>
+                    <Select
+                      value={lang}
+                      onChange={handleLanguageChange}
+                      variant="outlined"
+                      aria-label={
+                        t("settings.languageSelector") || "Language selector"
+                      }
+                    >
+                      {AVAILABLE_LANGUAGES.map(({ code, label }) => (
+                        <MenuItem key={code} value={code}>
+                          {label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+              {activeSettingsSubTab === "notifications" && (
+                <Box className="settings-tab-content">
+                  <Typography variant="body1" color="text.secondary">
+                    {t("settings.notifications.empty") ||
+                      "Notifications settings coming soon"}
+                  </Typography>
+                </Box>
+              )}
+            </>
+          )}
+          {activeNavItem === "sync" && (
+            <Box className="settings-tab-content">
+              <Typography variant="body1" color="text.secondary">
+                {t("settings.sync.empty") || "Sync settings coming soon"}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
     </main>
   );
 }
