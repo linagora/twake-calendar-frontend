@@ -110,6 +110,7 @@ export default function SearchBar() {
         className={extended ? "search-bar-extended" : "search-bar-collapsed"}
         sx={{
           margin: "0 auto",
+          height: "44px",
           position: "relative",
           width: extended ? { xs: "10vw", sm: "20vw", md: "35vw" } : "auto",
           transition: "width 0.25s ease-out",
@@ -149,6 +150,7 @@ export default function SearchBar() {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "999px",
               },
+              "& .MuiInputBase-input": { padding: "12px 10px" },
               animation: "scaleIn 0.25s ease-out",
               "@keyframes scaleIn": {
                 from: { transform: "scaleX(0)", opacity: 0 },
