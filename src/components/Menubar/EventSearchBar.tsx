@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -54,6 +54,17 @@ export default function SearchBar() {
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const filterOpen = Boolean(anchorEl);
+
+  const searchWidth = {
+    xs: "10vw",
+    sm: "20vw",
+    md: "35vw",
+    xl: "35vw",
+    "@media (min-width: 2000px)": {
+      width: "55vw",
+    },
+  };
+  const searchBoxRef = useRef<HTMLElement | null>(null);
 
   const handleFilterChange = (
     field: string,
@@ -107,16 +118,14 @@ export default function SearchBar() {
   return (
     <>
       <Box
-        className={extended ? "search-bar-extended" : "search-bar-collapsed"}
+        ref={searchBoxRef}
         sx={{
           margin: "0 auto",
           height: "44px",
           position: "relative",
-          width: extended ? { xs: "10vw", sm: "20vw", md: "35vw" } : "auto",
+          width: extended ? searchWidth : "auto",
+
           transition: "width 0.25s ease-out",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: extended ? "center" : "flex-end",
         }}
       >
         {!extended && (
@@ -167,7 +176,9 @@ export default function SearchBar() {
               endAdornment: (
                 <>
                   <InputAdornment position="end">
-                    <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                    <IconButton
+                      onClick={(e) => setAnchorEl(searchBoxRef.current)}
+                    >
                       <TuneIcon />
                     </IconButton>
                   </InputAdornment>
@@ -191,7 +202,13 @@ export default function SearchBar() {
         onClose={handleClearFilters}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{ paper: { sx: { width: 600 } } }}
+        slotProps={{
+          paper: {
+            sx: { mt: 1.2,  
+              width: extended ? searchWidth : "auto",
+            },
+          },
+        }}
       >
         <Card sx={{ p: 2, pb: 1 }}>
           <CardContent>

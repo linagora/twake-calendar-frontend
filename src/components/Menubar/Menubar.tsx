@@ -192,10 +192,10 @@ export function Menubar({
             </div>
           </div>
         </div>
-        <div className="search-container">
-          <SearchBar />
-        </div>
         <div className="right-menu">
+          <div className="search-container">
+            <SearchBar />
+          </div>
           <div className="menu-items">
             <IconButton
               className="refresh-button"
