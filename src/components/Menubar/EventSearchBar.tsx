@@ -46,7 +46,7 @@ export default function SearchBar() {
   const [extended, setExtended] = useState(false);
 
   const [filters, setFilters] = useState({
-    searchIn: "",
+    searchIn: "my-calendars",
     keywords: "",
     organizers: [] as userAttendee[],
     attendees: [] as userAttendee[],
@@ -64,7 +64,7 @@ export default function SearchBar() {
 
   const handleClearFilters = () => {
     setFilters({
-      searchIn: "",
+      searchIn: "my-calendars",
       keywords: "",
       organizers: [] as userAttendee[],
       attendees: [] as userAttendee[],
@@ -74,14 +74,23 @@ export default function SearchBar() {
   };
 
   const handleSearch = async () => {
+    let searchInCalendars: string[];
+
+    if (filters.searchIn === "" || !filters.searchIn) {
+      searchInCalendars = calendars.map((c) => c.id);
+    } else if (filters.searchIn === "my-calendars") {
+      searchInCalendars = personnalCalendars.map((c) => c.id);
+    } else if (filters.searchIn === "shared-calendars") {
+      searchInCalendars = sharedCalendars.map((c) => c.id);
+    } else {
+      searchInCalendars = [filters.searchIn];
+    }
+
     const cleanedFilters = {
       ...filters,
       organizers: filters.organizers.map((u) => u.cal_address),
       attendees: filters.attendees.map((u) => u.cal_address),
-      searchIn:
-        filters.searchIn === ""
-          ? calendars.map((c) => c.id)
-          : [filters.searchIn],
+      searchIn: searchInCalendars,
     };
 
     dispatch(
@@ -212,14 +221,45 @@ export default function SearchBar() {
                   }}
                 >
                   <MenuItem value="">
-                    <Typography>{t("search.filter.allCalendar")}</Typography>
+                    <Typography
+                      sx={{
+                        color: "#243B55",
+                        font: "Roboto",
+                        fontSize: "16px",
+                        weight: 400,
+                        pointerEvents: "auto",
+                      }}
+                    >
+                      {t("search.filter.allCalendar")}
+                    </Typography>
                   </MenuItem>
                   <Divider />
-                  <ListSubheader>{t("search.filter.myCalendar")}</ListSubheader>
-                  {CalendarItemList(personnalCalendars)} <Divider />
-                  <ListSubheader>
+                  <MenuItem
+                    value="my-calendars"
+                    sx={{
+                      color: "#243B55",
+                      font: "Roboto",
+                      fontSize: "12px",
+                      weight: 400,
+                      pointerEvents: "auto",
+                    }}
+                  >
+                    {t("search.filter.myCalendar")}
+                  </MenuItem>
+                  {CalendarItemList(personnalCalendars)}
+                  <Divider />
+                  <MenuItem
+                    value="shared-calendars"
+                    sx={{
+                      color: "#243B55",
+                      font: "Roboto",
+                      fontSize: "12px",
+                      weight: 400,
+                      pointerEvents: "auto",
+                    }}
+                  >
                     {t("search.filter.sharedCalendars")}
-                  </ListSubheader>
+                  </MenuItem>
                   {CalendarItemList(sharedCalendars)}
                 </Select>
               </Box>
