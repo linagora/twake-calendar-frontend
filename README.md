@@ -2,6 +2,8 @@
 
 ![LOGO](public/calendar.svg)
 
+![Application screenshot](public/screenshot.png)
+
 ## Goals
 
 This project aims at service a Single Page Application allowing a user to interact with its calendar.
