@@ -4,6 +4,8 @@ import AppsIcon from "@mui/icons-material/Apps";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { stringToColor } from "../Event/utils/eventUtils";
@@ -11,17 +13,21 @@ import {
   Avatar,
   IconButton,
   Popover,
+  Menu,
+  MenuItem,
   ButtonGroup,
   Button,
   Select,
-  MenuItem,
   FormControl,
   Typography,
+  Box,
+  Divider,
 } from "@mui/material";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
-import { setLanguage } from "../../features/Settings/SettingsSlice";
+import { setView } from "../../features/Settings/SettingsSlice";
+import { getUserDisplayName } from "../../utils/userUtils";
 import { format } from "date-fns";
 import {
   enGB,
@@ -58,7 +64,9 @@ export function Menubar({
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = (window as any).appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -117,23 +125,29 @@ export function Menubar({
   };
 
   const open = Boolean(anchorEl);
-  const langOpen = Boolean(langAnchorEl);
+  const userMenuOpen = Boolean(userMenuAnchorEl);
 
-  const handleLangClick = (event: React.MouseEvent<HTMLElement>) => {
-    setLangAnchorEl(event.currentTarget);
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchorEl(event.currentTarget);
   };
-  const handleLangClose = () => setLangAnchorEl(null);
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null);
+  };
+
+  const handleSettingsClick = () => {
+    dispatch(setView("settings"));
+    handleUserMenuClose();
+  };
+
+  const handleLogoutClick = () => {
+    // TODO: Implement logout functionality
+    handleUserMenuClose();
+  };
 
   const dateLabel = format(currentDate, "MMMM yyyy", {
     locale: dateLocales[lang as keyof typeof dateLocales] || enGB,
   });
-
-  const availableLangs = [
-    { code: "en", label: "English" },
-    { code: "fr", label: "Français" },
-    { code: "ru", label: "Русский" },
-    { code: "vi", label: "Tiếng Việt" },
-  ];
 
   return (
     <>
@@ -225,7 +239,7 @@ export function Menubar({
           </div>
 
           <div className="menu-items">
-            <IconButton onClick={handleLangClick}>
+            <IconButton onClick={handleUserMenuClick}>
               <Avatar
                 style={{
                   backgroundColor: stringToColor(
@@ -267,10 +281,10 @@ export function Menubar({
         </div>
       </Popover>
 
-      <Popover
-        open={langOpen}
-        anchorEl={langAnchorEl}
-        onClose={handleLangClose}
+      <Menu
+        open={userMenuOpen}
+        anchorEl={userMenuAnchorEl}
+        onClose={handleUserMenuClose}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "right",
@@ -279,25 +293,57 @@ export function Menubar({
           vertical: "top",
           horizontal: "right",
         }}
+        PaperProps={{
+          sx: {
+            minWidth: 280,
+            mt: 1,
+            padding: "0 !important",
+            borderRadius: "16px",
+          },
+        }}
       >
-        <FormControl size="small" style={{ minWidth: 100, marginRight: 8 }}>
-          <Select
-            value={lang}
-            onChange={(e) => {
-              dispatch(setLanguage(e.target.value));
-              handleLangClose();
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "24px",
+          }}
+        >
+          <Avatar
+            style={{
+              backgroundColor: stringToColor(
+                user && user.family_name
+                  ? user.family_name
+                  : user && user.email
+                    ? user.email
+                    : ""
+              ),
+              marginBottom: "8px",
             }}
-            variant="outlined"
-            aria-label={t("menubar.languageSelector")}
+            sizes="large"
           >
-            {availableLangs.map(({ code, label }) => (
-              <MenuItem key={code} value={code}>
-                {label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Popover>
+            {user?.name && user?.family_name
+              ? `${user.name[0]}${user.family_name[0]}`
+              : (user?.email?.[0] ?? "")}
+          </Avatar>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            {getUserDisplayName(user)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user?.email}
+          </Typography>
+        </Box>
+        <MenuItem onClick={handleSettingsClick} sx={{ py: 1.5 }}>
+          <SettingsIcon sx={{ mr: 2 }} />
+          {t("menubar.settings") || "Settings"}
+        </MenuItem>
+        {/* <Divider />
+        <MenuItem onClick={handleLogoutClick} sx={{ py: 1.5 }}>
+          <LogoutIcon sx={{ mr: 2 }} />
+          {t("menubar.logout") || "Logout"}
+        </MenuItem> */}
+      </Menu>
     </>
   );
 }

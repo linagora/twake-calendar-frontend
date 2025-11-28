@@ -185,7 +185,20 @@
     },
     "apps": "Приложения",
     "userProfile": "Профиль",
-    "logoAlt": "Календарь"
+    "logoAlt": "Календарь",
+    "settings": "Настройки",
+    "logout": "Выйти"
+  },
+  "settings": {
+    "title": "Настройки",
+    "notifications": "Уведомления",
+    "sync": "Синхронизация",
+    "language": "Язык",
+    "languageDescription": "Это будет язык, используемый в вашем Twake Calendar",
+    "languageSelector": "Выбор языка",
+    "notifications.empty": "Настройки уведомлений скоро появятся",
+    "sync.empty": "Настройки синхронизации скоро появятся",
+    "back": "Вернуться к календарю"
   },
   "eventPreview": {
     "emailAttendees": "Написать участникам",

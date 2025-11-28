@@ -185,7 +185,20 @@
     },
     "apps": "Apps",
     "userProfile": "User profile",
-    "logoAlt": "Calendar"
+    "logoAlt": "Calendar",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notifications",
+    "sync": "Sync",
+    "language": "Language",
+    "languageDescription": "This will be the language used in your Twake Calendar",
+    "languageSelector": "Language selector",
+    "notifications.empty": "Notifications settings coming soon",
+    "sync.empty": "Sync settings coming soon",
+    "back": "Back to calendar"
   },
   "eventPreview": {
     "emailAttendees": "Email attendees",
