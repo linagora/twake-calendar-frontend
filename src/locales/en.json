@@ -48,7 +48,22 @@
     "all": "All",
     "you": "You",
     "select_timezone": "Select Timezone",
-    "moreOptions": "More options"
+    "moreOptions": "More options",
+    "search": "Search"
+  },
+  "search": {
+    "searchIn": "Search in",
+    "filter": {
+      "allCalendar": "All calendars",
+      "myCalendar": "My calendars",
+      "sharedCalendars": "Shared calendars"
+    },
+    "keywords": "Keywords*",
+    "keywordsPlaceholder": "Enter keywords",
+    "organizers": "Organizers",
+    "participants": "Participants",
+    "noResults": "No results found",
+    "resultsTitle": "Search Results"
   },
   "calendarPopover": {
     "tabs": {
