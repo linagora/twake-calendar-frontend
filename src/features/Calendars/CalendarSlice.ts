@@ -312,6 +312,7 @@ export const getEventAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >("calendars/getEvent", async (event, { rejectWithValue }) => {
   try {
+    console.log(event);
     const response: CalendarEvent = await getEvent(event);
     return {
       calId: event.calId,
@@ -684,7 +685,7 @@ const CalendarSlice = createSlice({
         action.payload.event;
       state.list[action.payload.calendarUid].events[
         action.payload.event.uid
-      ].URL = `dav/calendars/${action.payload.calendarUid}/${
+      ].URL = `/calendars/${action.payload.calendarUid}/${
         action.payload.event.uid.split("/")[0]
       }.isc`;
     },
