@@ -149,9 +149,9 @@ function ResponsiveDialog({
 
   React.useEffect(() => {
     if (isExpanded) {
-      document.body.classList.add("dialog-expanded");
+      document.body.classList.add("fullscreen-view");
     } else {
-      document.body.classList.remove("dialog-expanded");
+      document.body.classList.remove("fullscreen-view");
     }
   }, [isExpanded]);
 

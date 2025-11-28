@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import CalendarApp from "./Calendar";
 import { useAppDispatch } from "../../app/hooks";
@@ -50,6 +50,20 @@ export default function CalendarLayout() {
   const handleViewChange = (view: string) => {
     setCurrentView(view);
   };
+
+  // Hide topbar navigation elements when in settings view (same as fullscreen dialog mode)
+  useEffect(() => {
+    if (view === "settings") {
+      document.body.classList.add("fullscreen-view");
+    } else {
+      document.body.classList.remove("fullscreen-view");
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove("fullscreen-view");
+    };
+  }, [view]);
 
   const menubarProps: MenubarProps = {
     calendarRef,

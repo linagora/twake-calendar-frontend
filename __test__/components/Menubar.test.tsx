@@ -409,7 +409,7 @@ describe("Menubar interaction with expanded Dialog", () => {
   });
 
   afterEach(() => {
-    document.body.classList.remove("dialog-expanded");
+    document.body.classList.remove("fullscreen-view");
   });
 
   it("has navigation controls element with correct class", () => {
@@ -497,7 +497,7 @@ describe("Menubar interaction with expanded Dialog", () => {
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
 
-    document.body.classList.add("dialog-expanded");
+    document.body.classList.add("fullscreen-view");
 
     renderWithProviders(
       <Menubar
@@ -519,7 +519,7 @@ describe("Menubar interaction with expanded Dialog", () => {
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
 
-    document.body.classList.add("dialog-expanded");
+    document.body.classList.add("fullscreen-view");
 
     renderWithProviders(
       <Menubar
