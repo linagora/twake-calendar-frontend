@@ -6,6 +6,7 @@ import {
   removeTempCal,
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { setView } from "../../features/Settings/SettingsSlice";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 import { getAccessiblePair } from "./utils/calendarColorsUtils";
 
@@ -69,7 +70,7 @@ export function TempCalendarsInput({
           light: lightColor,
           dark: getAccessiblePair(lightColor, theme),
         };
-
+        dispatch(setView("calendar"));
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );

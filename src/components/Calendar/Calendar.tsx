@@ -117,13 +117,13 @@ export default function CalendarApp({
   const [eventErrors, setEventErrors] = useState<string[]>([]);
   const errorHandler = useRef(new EventErrorHandler());
 
-  useEffect(() => {
-    if (view === "search") {
-      document.body.classList.add("dialog-expanded");
-    } else {
-      document.body.classList.remove("dialog-expanded");
-    }
-  }, [view]);
+  // useEffect(() => {
+  //   if (view === "search") {
+  //     document.body.classList.add("dialog-expanded");
+  //   } else {
+  //     document.body.classList.remove("dialog-expanded");
+  //   }
+  // }, [view]);
 
   useEffect(() => {
     const handler = errorHandler.current;

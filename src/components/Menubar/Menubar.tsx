@@ -87,9 +87,9 @@ export function Menubar({
     setAnchorEl(null);
   };
 
-  const handleNavigation = (action: "prev" | "next" | "today") => {
+  const handleNavigation = async (action: "prev" | "next" | "today") => {
     if (!calendarRef.current) return;
-
+    await dispatch(setView("calendar"));
     switch (action) {
       case "prev":
         calendarRef.current.prev();
@@ -109,8 +109,10 @@ export function Menubar({
     }
   };
 
-  const handleViewChange = (view: string) => {
+  const handleViewChange = async (view: string) => {
     if (!calendarRef.current) return;
+    await dispatch(setView("calendar"));
+
     calendarRef.current.changeView(view);
 
     // Notify parent about view change
@@ -355,9 +357,15 @@ export function Menubar({
 
 export function MainTitle() {
   const { t } = useI18n();
+  const dispatch = useAppDispatch();
   return (
     <div className="menubar-item tc-home">
-      <img className="logo" src={logo} alt={t("menubar.logoAlt")} />
+      <img
+        className="logo"
+        src={logo}
+        alt={t("menubar.logoAlt")}
+        onClick={() => dispatch(setView("calendar"))}
+      />
     </div>
   );
 }
