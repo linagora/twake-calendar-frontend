@@ -338,11 +338,11 @@ export function Menubar({
           <SettingsIcon sx={{ mr: 2 }} />
           {t("menubar.settings") || "Settings"}
         </MenuItem>
-        <Divider />
+        {/* <Divider />
         <MenuItem onClick={handleLogoutClick} sx={{ py: 1.5 }}>
           <LogoutIcon sx={{ mr: 2 }} />
           {t("menubar.logout") || "Logout"}
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </>
   );

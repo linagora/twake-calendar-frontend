@@ -666,34 +666,6 @@ describe("Menubar interaction with expanded Dialog", () => {
     });
   });
 
-  it("displays logout button in dropdown menu", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
-
-    renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-
-    const avatar = screen.getByText("JD");
-    fireEvent.click(avatar.closest("button")!);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Logout/i)).toBeInTheDocument();
-    });
-
-    const logoutButton = screen.getByText(/Logout/i);
-    expect(logoutButton).toBeInTheDocument();
-    fireEvent.click(logoutButton);
-    // Should not crash
-  });
-
   it("shows all elements in normal mode (not expanded)", () => {
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
