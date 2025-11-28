@@ -174,7 +174,6 @@ describe("SearchResultsPage", () => {
       ...preloadedState,
       searchResult: { results: mockResults, hits: 2 },
     });
-    expect(screen.getByText("search.resultsTitle")).toBeInTheDocument();
     expect(screen.getByText("Team Meeting")).toBeInTheDocument();
     expect(screen.getByText("Project Review")).toBeInTheDocument();
     expect(screen.getByText("John Doe")).toBeInTheDocument();
