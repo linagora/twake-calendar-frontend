@@ -118,11 +118,10 @@ export default function SearchBar() {
         {extended && (
           <TextField
             fullWidth
-            autoFocus
             placeholder={t("common.search")}
             value={search}
             onBlur={() => {
-              if (!search.trim() && !filterOpen) {
+              if (!search.trim()) {
                 setExtended(false);
               }
             }}
