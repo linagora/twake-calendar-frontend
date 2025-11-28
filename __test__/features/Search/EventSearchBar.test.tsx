@@ -226,7 +226,7 @@ describe("EventSearchBar", () => {
           keywords: "test",
           organizers: [],
           attendees: [],
-          searchIn: ["user1/cal1", "user2/cal1", "user3/cal1"],
+          searchIn: ["user1/cal1"],
         },
         search: "test",
       });
