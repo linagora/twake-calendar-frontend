@@ -48,7 +48,22 @@
     "all": "Tous",
     "you": "Vous",
     "select_timezone": "Sélectionner le fuseau horaire",
-    "moreOptions": "Plus d'options"
+    "moreOptions": "Plus d'options",
+    "search": "Rechercher"
+  },
+  "search": {
+    "searchIn": "Rechercher dans",
+    "filter": {
+      "allCalendar": "Tous les calendriers",
+      "myCalendar": "Mes calendriers",
+      "sharedCalendars": "Calendriers partagés"
+    },
+    "keywords": "Mots-clés*",
+    "keywordsPlaceholder": "Saisissez des mots-clés",
+    "organizers": "Organisateurs",
+    "participants": "Participants",
+    "noResults": "Aucun résultat",
+    "resultsTitle": "Résultats de la recherche"
   },
   "calendarPopover": {
     "tabs": {

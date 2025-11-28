@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import { useEffect, useState } from "react";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { setView } from "../../features/Settings/SettingsSlice";
 
 export function MiniCalendar({
   calendarRef,
@@ -38,10 +39,11 @@ export function MiniCalendar({
     >
       <DateCalendar
         value={moment(visibleDate)}
-        onChange={(dateMoment, selectionState) => {
+        onChange={async (dateMoment, selectionState) => {
           if (!dateMoment) return;
           const date = dateMoment.toDate();
           if (selectionState === "finish") {
+            await dispatch(setView("calendar"));
             setSelectedMiniDate(date);
             calendarRef.current?.gotoDate(date);
           }

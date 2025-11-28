@@ -48,7 +48,22 @@
     "all": "Все",
     "you": "Вы",
     "select_timezone": "Выберите часовой пояс",
-    "moreOptions": "Больше параметров"
+    "moreOptions": "Больше параметров",
+    "search": "Поиск"
+  },
+  "search": {
+    "searchIn": "Поиск в",
+    "filter": {
+      "allCalendar": "Все календари",
+      "myCalendar": "Мои календари",
+      "sharedCalendars": "Общие календари"
+    },
+    "keywords": "Ключевые слова*",
+    "keywordsPlaceholder": "Введите ключевые слова",
+    "organizers": "Организаторы",
+    "participants": "Участники",
+    "noResults": "Результаты не найдены",
+    "resultsTitle": "Результаты поиска"
   },
   "calendarPopover": {
     "tabs": {

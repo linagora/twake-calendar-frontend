@@ -48,7 +48,22 @@
     "all": "Tất cả",
     "you": "Bạn",
     "select_timezone": "Chọn múi giờ",
-    "moreOptions": "Thêm tùy chọn"
+    "moreOptions": "Thêm tùy chọn",
+    "search": "Tìm kiếm"
+  },
+  "search": {
+    "searchIn": "Tìm kiếm trong",
+    "filter": {
+      "allCalendar": "Tất cả lịch",
+      "myCalendar": "Lịch của tôi",
+      "sharedCalendars": "Lịch được chia sẻ"
+    },
+    "keywords": "Từ khóa*",
+    "keywordsPlaceholder": "Nhập từ khóa",
+    "organizers": "Người tổ chức",
+    "participants": "Người tham gia",
+    "noResults": "Không tìm thấy kết quả",
+    "resultsTitle": "Kết quả tìm kiếm"
   },
   "calendarPopover": {
     "tabs": {
