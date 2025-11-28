@@ -24,85 +24,58 @@ export default function SearchResultsPage() {
     (state) => state.searchResult
   );
 
+  let layout;
+
   if (loading) {
-    return (
-      <Box className="search-layout loading">
-        <CircularProgress size={24} />
+    layout = (
+      <Box className="loading">
+        <CircularProgress size={32} />
       </Box>
     );
-  }
-
-  if (error) {
-    return (
-      <Box className="search-layout error">
-        <Typography style={{ color: "red", marginTop: 8 }}>{error}</Typography>{" "}
-        <Typography
-          variant="subtitle2"
-          sx={{
-            cursor: "pointer",
-            color: "#8C9CAF",
-            textDecoration: "underline",
-          }}
-          onClick={() => dispatch(setView("calendar"))}
-          aria-label={t("settings.back") || "Back to calendar"}
-        >
-          {t("settings.back")}
-        </Typography>
+  } else if (error) {
+    layout = (
+      <Box className="error">
+        <Typography className="error-text">{error}</Typography>
       </Box>
     );
-  }
-
-  if (!hits) {
-    return (
-      <Box className="search-layout noResults">
+  } else if (!hits) {
+    layout = (
+      <Box className="noResults">
         <img className="logo" src={logo} alt={t("search.noResults")} />
-        <Typography>{t("search.noResults")}</Typography>
-        <Typography>{t("settings.back")}</Typography>
-        <Typography
-          variant="subtitle2"
-          sx={{
-            cursor: "pointer",
-            color: "#8C9CAF",
-            textDecoration: "underline",
-          }}
-          onClick={() => dispatch(setView("calendar"))}
-          aria-label={t("settings.back") || "Back to calendar"}
-        >
-          {t("settings.back")}
+        <Typography className="M3-title-medium">
+          {t("search.noResults")}
         </Typography>
+        <Typography className="M3-Body-medium">
+          {t("search.noResultsSubtitle")}
+        </Typography>
+      </Box>
+    );
+  } else {
+    layout = (
+      <Box className="search-result-content-body">
+        <Stack sx={{ mt: 2 }}>
+          {results?.map((r: any, idx: number) => (
+            <ResultItem key={r.data.uid || idx} eventData={r.data} />
+          ))}
+        </Stack>
       </Box>
     );
   }
 
   return (
-    <Box className="search-layout">
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            p: 2,
-            alignItems: "center",
-            alignContent: "center",
-          }}
-        >
-          <Button
+    <Box className={`search-layout`}>
+      <Box className="search-result-content-header">
+        <Box className="back-button">
+          <IconButton
             onClick={() => dispatch(setView("calendar"))}
-            className="back-button"
-            sx={{
-              color: "#8C9CAF",
-            }}
-            aria-label={t("settings.back") || "Back to calendar"}
-            startIcon={<ArrowBackIcon />}
+            aria-label={t("settings.back")}
           >
-            {t("settings.back")}
-          </Button>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h5">{t("search.resultsTitle")}</Typography>
         </Box>
-
-        {results?.map((r: any, idx: number) => (
-          <ResultItem key={r.data.uid || idx} eventData={r.data} />
-        ))}
-      </Stack>
+      </Box>
+      {layout}
     </Box>
   );
 }
@@ -122,44 +95,26 @@ function ResultItem({ eventData }: { eventData: Record<string, any> }) {
   return (
     <Box
       sx={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: "90px 120px 35px 1fr 150px 1fr 1fr",
         gap: 2,
-        p: 2,
-        borderBottom: "1px solid #e0e0e0",
+        p: 3,
+        borderTop: "1px solid #F3F6F9",
         cursor: "pointer",
         "&:hover": {
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "#e7e7e7ff",
         },
+        alignItems: "center",
+        textAlign: "left",
       }}
     >
-      <Typography
-        sx={{
-          fontFamily: "Roboto",
-          fontWeight: "400",
-          fontStyle: "Regular",
-          fontSize: "22px",
-          lineHeight: "28px",
-          letterSpacing: "0%",
-          color: "#243B55",
-        }}
-      >
+      <Typography className="M3-Body-Large">
         {startDate.toLocaleDateString(t("locale"), {
           day: "2-digit",
           month: "short",
         })}
       </Typography>
-
-      <Typography
-        sx={{
-          fontFamily: "Inter",
-          fontWeight: "400",
-          fontStyle: "Regular",
-          fontSize: "16px",
-          lineHeight: "24px",
-          letterSpacing: "-0.15px",
-          color: "#243B55",
-        }}
-      >
+      <Typography className="M3-Body-medium1">
         {startDate.toLocaleTimeString(t("locale"), {
           hour: "2-digit",
           minute: "2-digit",
@@ -170,7 +125,6 @@ function ResultItem({ eventData }: { eventData: Record<string, any> }) {
           minute: "2-digit",
         })}
       </Typography>
-
       <SquareRoundedIcon
         style={{
           color: calendarColor ?? "#3788D8",
@@ -178,13 +132,27 @@ function ResultItem({ eventData }: { eventData: Record<string, any> }) {
           height: 24,
         }}
       />
-
-      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      <Typography className="M3-Body-Large">
         {eventData.summary || t("event.untitled")}
       </Typography>
 
-      <Typography variant="body2" color="text.secondary">
-        {eventData.organizer?.cn || eventData.organizer?.email || "-"}
+      <Typography className="M3-Body-medium1">
+        {eventData.organizer?.cn || eventData.organizer?.email || ""}
+      </Typography>
+
+      <Typography className="M3-Body-medium">
+        {eventData?.location ?? ""}
+      </Typography>
+
+      <Typography
+        className="M3-Body-medium3"
+        sx={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {eventData?.description?.replace("\n", " ") ?? ""}
       </Typography>
     </Box>
   );
