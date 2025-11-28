@@ -538,12 +538,10 @@ describe("Menubar interaction with expanded Dialog", () => {
     expect(screen.getByText("Twake")).toBeInTheDocument();
   });
 
-  it("keeps avatar clickable when dialog is expanded", async () => {
+  it("opens user dropdown menu when clicking avatar", async () => {
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
-
-    document.body.classList.add("dialog-expanded");
 
     renderWithProviders(
       <Menubar
@@ -561,11 +559,139 @@ describe("Menubar interaction with expanded Dialog", () => {
     fireEvent.click(avatar.closest("button")!);
 
     await waitFor(() => {
-      const languageSelector = screen.getByLabelText(
-        "menubar.languageSelector"
-      );
-      expect(languageSelector).toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("test@test.com")).toBeInTheDocument();
     });
+  });
+
+  it("closes user dropdown menu when clicking outside", async () => {
+    const mockCalendarRef = { current: null };
+    const mockOnRefresh = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    );
+
+    const avatar = screen.getByText("JD");
+    fireEvent.click(avatar.closest("button")!);
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+    });
+
+    // Click outside the menu - MUI Menu closes on backdrop click
+    const backdrop = document.querySelector(".MuiBackdrop-root");
+    if (backdrop) {
+      fireEvent.click(backdrop);
+    } else {
+      // Fallback: click on body
+      fireEvent.mouseDown(document.body);
+    }
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("John Doe")).not.toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it("displays user name and email in dropdown menu", async () => {
+    const mockCalendarRef = { current: null };
+    const mockOnRefresh = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    );
+
+    const avatar = screen.getByText("JD");
+    fireEvent.click(avatar.closest("button")!);
+
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("test@test.com")).toBeInTheDocument();
+    });
+  });
+
+  it("navigates to settings page when clicking Settings in dropdown", async () => {
+    const mockCalendarRef = { current: null };
+    const mockOnRefresh = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const preloadedStateWithSettings = {
+      ...preloadedState,
+      settings: {
+        language: "en",
+        view: "calendar",
+      },
+    };
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedStateWithSettings
+    );
+
+    const avatar = screen.getByText("JD");
+    fireEvent.click(avatar.closest("button")!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Settings/i)).toBeInTheDocument();
+    });
+
+    const settingsButton = screen.getByText(/Settings/i);
+    fireEvent.click(settingsButton);
+
+    await waitFor(() => {
+      const state = store.getState();
+      expect(state.settings.view).toBe("settings");
+    });
+  });
+
+  it("displays logout button in dropdown menu", async () => {
+    const mockCalendarRef = { current: null };
+    const mockOnRefresh = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    );
+
+    const avatar = screen.getByText("JD");
+    fireEvent.click(avatar.closest("button")!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Logout/i)).toBeInTheDocument();
+    });
+
+    const logoutButton = screen.getByText(/Logout/i);
+    expect(logoutButton).toBeInTheDocument();
+    fireEvent.click(logoutButton);
+    // Should not crash
   });
 
   it("shows all elements in normal mode (not expanded)", () => {

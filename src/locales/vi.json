@@ -185,7 +185,20 @@
     },
     "apps": "Ứng dụng",
     "userProfile": "Hồ sơ người dùng",
-    "logoAlt": "Lịch"
+    "logoAlt": "Lịch",
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "notifications": "Thông báo",
+    "sync": "Đồng bộ",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Đây sẽ là ngôn ngữ được sử dụng trong Twake Calendar của bạn",
+    "languageSelector": "Chọn ngôn ngữ",
+    "notifications.empty": "Cài đặt thông báo sắp có",
+    "sync.empty": "Cài đặt đồng bộ sắp có",
+    "back": "Quay lại lịch"
   },
   "eventPreview": {
     "emailAttendees": "Gửi email cho người tham gia",
