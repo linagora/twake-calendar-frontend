@@ -98,11 +98,15 @@ export default function SearchBar() {
   return (
     <>
       <Box
+        className={extended ? "search-bar-extended" : "search-bar-collapsed"}
         sx={{
           margin: "0 auto",
           position: "relative",
           width: extended ? { xs: "10vw", sm: "20vw", md: "35vw" } : "auto",
           transition: "width 0.25s ease-out",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: extended ? "center" : "flex-end",
         }}
       >
         {!extended && (
@@ -114,10 +118,11 @@ export default function SearchBar() {
         {extended && (
           <TextField
             fullWidth
+            autoFocus
             placeholder={t("common.search")}
             value={search}
             onBlur={() => {
-              if (!search.trim()) {
+              if (!search.trim() && !filterOpen) {
                 setExtended(false);
               }
             }}
