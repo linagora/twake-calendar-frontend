@@ -204,9 +204,7 @@ export default function SearchBar() {
         transformOrigin={{ vertical: "top", horizontal: "right" }}
         slotProps={{
           paper: {
-            sx: { mt: 1.2,  
-              width: extended ? searchWidth : "auto",
-            },
+            sx: { mt: 1.2, width: extended ? searchWidth : "auto" },
           },
         }}
       >
