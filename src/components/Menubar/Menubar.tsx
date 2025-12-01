@@ -36,6 +36,7 @@ import {
   vi as viLocale,
 } from "date-fns/locale";
 import SearchBar from "./EventSearchBar";
+import { Logout } from "../../features/User/oidcAuth";
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {
@@ -143,8 +144,10 @@ export function Menubar({
     handleUserMenuClose();
   };
 
-  const handleLogoutClick = () => {
-    // TODO: Implement logout functionality
+  const handleLogoutClick = async () => {
+    const logoutUrl = await Logout();
+    sessionStorage.removeItem("tokenSet");
+    window.location.assign(logoutUrl.href);
     handleUserMenuClose();
   };
 
@@ -344,11 +347,11 @@ export function Menubar({
           <SettingsIcon sx={{ mr: 2 }} />
           {t("menubar.settings") || "Settings"}
         </MenuItem>
-        {/* <Divider />
+        <Divider />
         <MenuItem onClick={handleLogoutClick} sx={{ py: 1.5 }}>
           <LogoutIcon sx={{ mr: 2 }} />
           {t("menubar.logout") || "Logout"}
-        </MenuItem> */}
+        </MenuItem>
       </Menu>
     </>
   );

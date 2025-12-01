@@ -1,7 +1,8 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { Menubar } from "../../src/components/Menubar/Menubar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+import * as oidcAuth from "../../src/features/User/oidcAuth";
 
 describe("Calendar App Component Display Tests", () => {
   const preloadedState = {
@@ -712,5 +713,49 @@ describe("Menubar interaction with expanded Dialog", () => {
     expect(container.querySelector(".current-date-time")).toBeInTheDocument();
     expect(container.querySelector(".refresh-button")).toBeInTheDocument();
     expect(container.querySelector(".select-display")).toBeInTheDocument();
+  });
+});
+
+describe("Menubar logout flow", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  function renderMenubar(user = { name: "John", email: "test@example.com" }) {
+    const preloadedState = {
+      user: { userData: user },
+      settings: { view: "calendar" },
+    };
+
+    return renderWithProviders(
+      <Menubar
+        calendarRef={{ current: null }}
+        onRefresh={() => {}}
+        currentDate={new Date()}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    );
+  }
+
+  it("clears storage before redirecting", async () => {
+    const logoutSpy = jest
+      .spyOn(oidcAuth, "Logout")
+      .mockResolvedValue(new URL("https://logout.url"));
+
+    await act(async () => {
+      renderMenubar();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("menubar.userProfile"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText("menubar.logout"));
+    });
+    expect(logoutSpy).toHaveBeenCalled();
+
+    expect(sessionStorage.length).toBe(0);
   });
 });
