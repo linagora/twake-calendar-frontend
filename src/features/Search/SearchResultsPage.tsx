@@ -103,7 +103,6 @@ function ResultItem({
   const [openPreview, setOpenPreview] = useState(false);
 
   const handleOpenResult = async (eventData: Record<string, any>) => {
-    console.log(calendar, eventData);
     if (calendar) {
       const event = {
         URL: eventData._links.self.href,
@@ -141,7 +140,7 @@ function ResultItem({
           },
           alignItems: "center",
           textAlign: "left",
-          maxWidth:"80vw"
+          maxWidth: "80vw",
         }}
         onClick={() => handleOpenResult(eventData)}
       >
@@ -150,6 +149,16 @@ function ResultItem({
             day: "2-digit",
             month: "short",
           })}
+          {startDate.toDateString() !== endDate.toDateString() && (
+            <>
+              {" "}
+              -{" "}
+              {endDate.toLocaleDateString(t("locale"), {
+                day: "2-digit",
+                month: "short",
+              })}
+            </>
+          )}
         </Typography>
         <Typography className="M3-Body-medium1">
           {!eventData.data.allDay && (
@@ -189,16 +198,18 @@ function ResultItem({
             eventData.data.organizer?.email ||
             ""}
         </Typography>
-        <Typography
-          className="M3-Body-medium"
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {eventData.data?.location ?? ""}
-        </Typography>
+        {eventData.data?.location && (
+          <Typography
+            className="M3-Body-medium"
+            sx={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {eventData.data?.location ?? ""}
+          </Typography>
+        )}
         <Typography
           className="M3-Body-medium3"
           sx={{

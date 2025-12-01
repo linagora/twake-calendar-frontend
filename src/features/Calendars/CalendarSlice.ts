@@ -312,7 +312,6 @@ export const getEventAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >("calendars/getEvent", async (event, { rejectWithValue }) => {
   try {
-    console.log(event);
     const response: CalendarEvent = await getEvent(event);
     return {
       calId: event.calId,
