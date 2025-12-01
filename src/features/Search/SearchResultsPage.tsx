@@ -7,7 +7,7 @@ import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import logo from "../../static/noResult-logo.svg";
-import { addEvent, getEventAsync } from "../Calendars/CalendarSlice";
+import { getEventAsync } from "../Calendars/CalendarSlice";
 import EventPreviewModal from "../Events/EventDisplayPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
 
@@ -130,7 +130,11 @@ function ResultItem({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "90px 120px 35px 220px 150px 250px 1fr",
+          gridTemplateColumns: {
+            xs: "1fr", // Stack on mobile
+            sm: "90px 120px 35px 1fr", // Simplified on tablets
+            md: "90px 120px 35px 220px 150px 250px 1fr", // Full on desktop
+          },
           gap: 2,
           p: 3,
           borderTop: "1px solid #F3F6F9",
@@ -218,7 +222,7 @@ function ResultItem({
             textOverflow: "ellipsis",
           }}
         >
-          {eventData.data?.description?.replace("\n", " ") ?? ""}
+          {eventData.data?.description?.replace(/\n/g, " ") ?? ""}
         </Typography>
       </Box>
       {calendar && calendar.events[eventData.data.uid] && (
