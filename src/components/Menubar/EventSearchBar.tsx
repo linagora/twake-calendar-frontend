@@ -142,10 +142,7 @@ export default function SearchBar() {
             value={search}
             onBlur={(e) => {
               const next = e.relatedTarget as HTMLElement | null;
-
-              // If the next focused element is the filter icon or inside it → don't collapse
               if (next && searchBoxRef.current?.contains(next)) return;
-
               if (!search.trim()) {
                 setExtended(false);
               }
@@ -190,7 +187,12 @@ export default function SearchBar() {
                   </InputAdornment>
                   {search && (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setSearch("")}>
+                      <IconButton
+                        onClick={() => {
+                          setSearch("");
+                          handleFilterChange("keywords", "");
+                        }}
+                      >
                         <HighlightOffIcon />
                       </IconButton>
                     </InputAdornment>
@@ -341,7 +343,7 @@ export default function SearchBar() {
                 <UserSearch
                   attendees={filters.attendees}
                   setAttendees={(users: userAttendee[]) =>
-                    handleFilterChange("participants", users)
+                    handleFilterChange("attendees", users)
                   }
                 />
               </Box>

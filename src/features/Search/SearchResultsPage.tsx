@@ -147,7 +147,6 @@ function ResultItem({
           textAlign: "left",
           maxWidth: "80vw",
         }}
-        role="button"
         onClick={() => handleOpenResult(eventData)}
       >
         <Typography className="M3-Body-Large">
