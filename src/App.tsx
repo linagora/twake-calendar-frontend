@@ -29,6 +29,13 @@ import vi from "./locales/vi.json";
 const locale = { en, fr, ru, vi };
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
+/**
+ * Renders the application's root React component tree including theming, internationalization, routing, and global error handling.
+ *
+ * The component resolves the active language from user settings, persisted localStorage, or a global default, redirects to the error route when a user error is present, and mounts the app routes and UI providers.
+ *
+ * @returns The root React element that provides theme, I18n context, routing for the main pages, and a global error snackbar.
+ */
 function App() {
   const error = useAppSelector((state) => state.user.error);
   const userLanguage = useAppSelector((state) => state.user.language);

@@ -29,6 +29,12 @@ export async function searchUsers(
   }));
 }
 
+/**
+ * Fetches detailed information for a user identified by the given ID from the server.
+ *
+ * @param id - The user identifier to request
+ * @returns The user details object returned by the API
+ */
 export async function getUserDetails(id: string) {
   const user = await api.get(`api/users/${id}`).json();
   return user;
@@ -41,6 +47,12 @@ export interface UserConfigurationUpdates {
   [key: string]: any;
 }
 
+/**
+ * Update user-level configuration entries with the provided values.
+ *
+ * @param updates - Object containing user configuration keys and their new values. Only properties present on `updates` (such as `language`, `notifications`, or `timezone`) will be included in the request payload and applied.
+ * @returns The server's response to the configurations update request.
+ */
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
 ) {

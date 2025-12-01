@@ -29,6 +29,18 @@ import "./SettingsPage.styl";
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";
 
+/**
+ * Render the settings page UI with a sidebar, tabs for sub-settings, and a language selector.
+ *
+ * Renders a two-pane layout containing sidebar navigation (currently "Settings"), tabbed
+ * sub-sections ("Settings" and "Notifications"), and a language selection control.
+ * The component resolves the active language by preferring the user's language, then the
+ * settings language, and finally falling back to `"en"`. Changing the language performs
+ * an optimistic update to both user and settings slices and attempts to persist the
+ * change in the background; if persistence fails, the previous language is restored.
+ *
+ * @returns The JSX element for the settings page UI
+ */
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
