@@ -741,6 +741,7 @@ describe("Menubar logout flow", () => {
   }
 
   it("clears storage before redirecting", async () => {
+    sessionStorage.setItem("tokenSet", "dummy");
     const logoutSpy = jest
       .spyOn(oidcAuth, "Logout")
       .mockResolvedValue(new URL("https://logout.url"));
