@@ -31,7 +31,12 @@ const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
-  const lang = useAppSelector((state) => state.settings.language);
+  const userLanguage = useAppSelector((state) => state.user.language);
+  const settingsLanguage = useAppSelector((state) => state.settings.language);
+  const savedLang = localStorage.getItem("lang");
+  const defaultLang = (window as any).LANG;
+  const lang =
+    userLanguage || settingsLanguage || savedLang || defaultLang || "en";
 
   const dispatch = useAppDispatch();
   useEffect(() => {

@@ -6,6 +6,23 @@ export interface userData {
   sid: string;
   sub: string;
   openpaasId?: string;
+  language?: string;
+}
+
+export interface UserConfigurations {
+  modules?: Array<{
+    name: string;
+    configurations?: Array<{
+      name: string;
+      value: any;
+    }>;
+  }>;
+}
+
+export interface NotificationSettings {
+  email?: boolean;
+  push?: boolean;
+  [key: string]: any;
 }
 
 export interface userOrganiser {
