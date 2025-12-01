@@ -9,6 +9,7 @@ jest.mock("../../../src/utils/apiUtils");
 describe("SettingsPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   const preloadedState = {
