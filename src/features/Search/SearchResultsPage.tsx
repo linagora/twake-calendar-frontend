@@ -131,7 +131,7 @@ function ResultItem({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "90px 120px 35px 1fr 150px 1fr 1fr",
+          gridTemplateColumns: "90px 120px 35px 220px 150px 250px 1fr",
           gap: 2,
           p: 3,
           borderTop: "1px solid #F3F6F9",
@@ -141,6 +141,7 @@ function ResultItem({
           },
           alignItems: "center",
           textAlign: "left",
+          maxWidth:"80vw"
         }}
         onClick={() => handleOpenResult(eventData)}
       >
@@ -151,16 +152,21 @@ function ResultItem({
           })}
         </Typography>
         <Typography className="M3-Body-medium1">
-          {startDate.toLocaleTimeString(t("locale"), {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-          -
-          {endDate.toLocaleTimeString(t("locale"), {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {!eventData.data.allDay && (
+            <>
+              {startDate.toLocaleTimeString(t("locale"), {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              -
+              {endDate.toLocaleTimeString(t("locale"), {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </>
+          )}
         </Typography>
+
         <SquareRoundedIcon
           style={{
             color: calendarColor ?? "#3788D8",
@@ -171,17 +177,28 @@ function ResultItem({
         <Typography className="M3-Body-Large">
           {eventData.data.summary || t("event.untitled")}
         </Typography>
-
-        <Typography className="M3-Body-medium1">
+        <Typography
+          className="M3-Body-medium1"
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           {eventData.data.organizer?.cn ||
             eventData.data.organizer?.email ||
             ""}
         </Typography>
-
-        <Typography className="M3-Body-medium">
+        <Typography
+          className="M3-Body-medium"
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           {eventData.data?.location ?? ""}
         </Typography>
-
         <Typography
           className="M3-Body-medium3"
           sx={{
