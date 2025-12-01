@@ -137,9 +137,15 @@ export default function SearchBar() {
         {extended && (
           <TextField
             fullWidth
+            autoFocus
             placeholder={t("common.search")}
             value={search}
-            onBlur={() => {
+            onBlur={(e) => {
+              const next = e.relatedTarget as HTMLElement | null;
+
+              // If the next focused element is the filter icon or inside it → don't collapse
+              if (next && searchBoxRef.current?.contains(next)) return;
+
               if (!search.trim()) {
                 setExtended(false);
               }
