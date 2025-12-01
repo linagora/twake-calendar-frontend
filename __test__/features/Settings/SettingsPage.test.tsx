@@ -2,7 +2,6 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import SettingsPage from "../../../src/features/Settings/SettingsPage";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import { updateUserConfigurationsAsync } from "../../../src/features/User/userSlice";
 import { api } from "../../../src/utils/apiUtils";
 
 jest.mock("../../../src/utils/apiUtils");
@@ -123,12 +122,17 @@ describe("SettingsPage", () => {
 
     // Verify Select exists
     expect(languageSelect).toBeInTheDocument();
-    // In test environment, MUI Select may not display the text correctly, so we verify the component renders
-    // The actual value is tested in other tests
+
+    // Verify that the underlying native input reflects the user language ("fr")
+    const nativeInput = languageSelect.querySelector(
+      'input[aria-hidden="true"]'
+    ) as HTMLInputElement | null;
+    expect(nativeInput).not.toBeNull();
+    expect(nativeInput?.value).toBe("fr");
   });
 
   it("updates language immediately (optimistic update) and calls API in background", async () => {
-    (api.put as jest.Mock).mockResolvedValue({ status: 204 });
+    (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
 
     const { store } = renderWithProviders(<SettingsPage />, preloadedState);
 
@@ -156,7 +160,7 @@ describe("SettingsPage", () => {
 
     // API should be called in background
     await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith(
+      expect(api.patch).toHaveBeenCalledWith(
         "api/configurations?scope=user",
         expect.objectContaining({
           json: expect.arrayContaining([
@@ -173,9 +177,9 @@ describe("SettingsPage", () => {
   });
 
   it("saves language change to localStorage immediately (optimistic update)", async () => {
-    (api.put as jest.Mock).mockResolvedValue({ status: 204 });
+    (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
 
-    const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+    renderWithProviders(<SettingsPage />, preloadedState);
 
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
@@ -199,7 +203,7 @@ describe("SettingsPage", () => {
   });
 
   it("rolls back language change if API call fails", async () => {
-    (api.put as jest.Mock).mockRejectedValue(new Error("API Error"));
+    (api.patch as jest.Mock).mockRejectedValue(new Error("API Error"));
 
     const { store } = renderWithProviders(<SettingsPage />, preloadedState);
 

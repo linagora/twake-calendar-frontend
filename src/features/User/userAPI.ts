@@ -36,19 +36,13 @@ export async function getUserDetails(id: string) {
 
 export interface UserConfigurationUpdates {
   language?: string;
-  notifications?: Record<string, any>;
+  notifications?: Record<string, unknown>;
   timezone?: string;
-  [key: string]: any;
 }
 
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
-) {
-  const configs: Array<{
-    name: string;
-    configurations: Array<{ name: string; value: any }>;
-  }> = [];
-
+): Promise<Response | { status: number }> {
   const coreConfigs: Array<{ name: string; value: any }> = [];
 
   if (updates.language !== undefined) {
@@ -61,14 +55,16 @@ export async function updateUserConfigurations(
     coreConfigs.push({ name: "timezone", value: updates.timezone });
   }
 
-  if (coreConfigs.length > 0) {
-    configs.push({
-      name: "core",
-      configurations: coreConfigs,
-    });
+  if (coreConfigs.length === 0) {
+    return Promise.resolve({ status: 204 });
   }
 
-  return await api.put(`api/configurations?scope=user`, {
-    json: configs,
+  return await api.patch(`api/configurations?scope=user`, {
+    json: [
+      {
+        name: "core",
+        configurations: coreConfigs,
+      },
+    ],
   });
 }

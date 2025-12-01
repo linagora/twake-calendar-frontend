@@ -22,8 +22,11 @@ export interface UserConfigurations {
 export interface NotificationSettings {
   email?: boolean;
   push?: boolean;
-  [key: string]: any;
 }
+
+export type NotificationSettingsExtended = NotificationSettings & {
+  [key: string]: unknown;
+};
 
 export interface userOrganiser {
   cn: string;

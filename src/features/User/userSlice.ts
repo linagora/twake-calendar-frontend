@@ -124,16 +124,7 @@ export const userSlice = createSlice({
           }
         }
       })
-      .addCase(updateUserConfigurationsAsync.pending, (state, action) => {
-        // Optimistic update - language already updated in SettingsPage
-        // No need to do anything here
-      })
       .addCase(updateUserConfigurationsAsync.rejected, (state, action) => {
-        // Rollback language if API fails
-        if (action.meta.arg.language !== undefined) {
-          // Keep current language, don't rollback to avoid UI flicker
-          // Error will be logged but language stays as user selected
-        }
         if (action.payload?.status !== 401) {
           state.error =
             action.payload?.message || "Failed to update user configurations";

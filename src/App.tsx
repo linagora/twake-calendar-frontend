@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import I18n from "cozy-ui/transpiled/react/providers/I18n";
+import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
 
 import {
   enGB,
@@ -29,21 +30,33 @@ import vi from "./locales/vi.json";
 const locale = { en, fr, ru, vi };
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
+const SUPPORTED_LANGUAGES = AVAILABLE_LANGUAGES.map((lang) => lang.code);
+type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+const isValidLanguage = (
+  lang: string | null | undefined
+): lang is SupportedLanguage => {
+  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
+};
+
 function App() {
   const error = useAppSelector((state) => state.user.error);
   const userLanguage = useAppSelector((state) => state.user.language);
   const settingsLanguage = useAppSelector((state) => state.settings.language);
   const savedLang = localStorage.getItem("lang");
   const defaultLang = (window as any).LANG;
+
   const lang =
-    userLanguage || settingsLanguage || savedLang || defaultLang || "en";
+    [userLanguage, settingsLanguage, savedLang, defaultLang].find(
+      (l): l is string => isValidLanguage(l)
+    ) || "en";
 
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (error) {
       dispatch(push("/error"));
     }
-  });
+  }, [error, dispatch]);
 
   return (
     <CustomThemeProvider>

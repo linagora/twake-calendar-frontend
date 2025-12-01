@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -33,12 +34,13 @@ export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
   const userLanguage = useAppSelector((state) => state.user?.language);
-  const settingsLanguage = useAppSelector((state) => state.settings.language);
+  const settingsLanguage = useAppSelector((state) => state.settings?.language);
   const currentLanguage = userLanguage || settingsLanguage || "en";
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
+  const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -74,7 +76,12 @@ export default function SettingsPage() {
         // Rollback on error
         dispatch(setUserLanguage(previousLanguage));
         dispatch(setSettingsLanguage(previousLanguage));
+        setLanguageErrorOpen(true);
       });
+  };
+
+  const handleLanguageErrorClose = () => {
+    setLanguageErrorOpen(false);
   };
 
   return (
@@ -179,6 +186,14 @@ export default function SettingsPage() {
           )}
         </Box>
       </Box>
+      <Snackbar
+        open={languageErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleLanguageErrorClose}
+        message={
+          t("settings.languageUpdateError") || "Failed to update language"
+        }
+      />
     </main>
   );
 }

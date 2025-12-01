@@ -25,13 +25,17 @@ describe("getOpenPaasUser", () => {
 });
 
 describe("updateUserConfigurations", () => {
-  it("should PUT configurations with language update", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should PATCH configurations with language update", async () => {
     const mockResponse = { status: 204 };
-    (api.put as jest.Mock).mockResolvedValue(mockResponse);
+    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
 
     await updateUserConfigurations({ language: "vi" });
 
-    expect(api.put).toHaveBeenCalledWith("api/configurations?scope=user", {
+    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
       json: [
         {
           name: "core",
@@ -41,16 +45,16 @@ describe("updateUserConfigurations", () => {
     });
   });
 
-  it("should PUT configurations with multiple updates", async () => {
+  it("should PATCH configurations with multiple updates", async () => {
     const mockResponse = { status: 204 };
-    (api.put as jest.Mock).mockResolvedValue(mockResponse);
+    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
 
     await updateUserConfigurations({
       language: "fr",
       timezone: "Europe/Paris",
     });
 
-    expect(api.put).toHaveBeenCalledWith("api/configurations?scope=user", {
+    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
       json: [
         {
           name: "core",
@@ -63,14 +67,10 @@ describe("updateUserConfigurations", () => {
     });
   });
 
-  it("should handle empty updates", async () => {
-    const mockResponse = { status: 204 };
-    (api.put as jest.Mock).mockResolvedValue(mockResponse);
+  it("should handle empty updates without calling API", async () => {
+    const result = await updateUserConfigurations({});
 
-    await updateUserConfigurations({});
-
-    expect(api.put).toHaveBeenCalledWith("api/configurations?scope=user", {
-      json: [],
-    });
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(result).toEqual({ status: 204 });
   });
 });
