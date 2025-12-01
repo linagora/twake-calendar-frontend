@@ -6,6 +6,7 @@ import { ThunkDispatch } from "@reduxjs/toolkit";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { AppDispatch } from "../../app/store";
 import logo from "../../static/noResult-logo.svg";
 import { getEventAsync } from "../Calendars/CalendarSlice";
 import EventPreviewModal from "../Events/EventDisplayPreview";
@@ -86,11 +87,11 @@ function ResultItem({
   dispatch,
 }: {
   eventData: Record<string, any>;
-  dispatch: ThunkDispatch<any, any, any>;
+  dispatch: AppDispatch;
 }) {
   const { t } = useI18n();
   const startDate = new Date(eventData.data.start);
-  const endDate = new Date(eventData.data.end);
+  const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate;
   const timeZone = useAppSelector((state) => state.calendars.timeZone);
   const calendar = useAppSelector(
     (state) =>
