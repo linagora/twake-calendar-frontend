@@ -54,7 +54,7 @@ export default function SearchResultsPage() {
         <Stack sx={{ mt: 2 }}>
           {results?.map((r: any, idx: number) => (
             <ResultItem
-              key={r.data.uid || idx}
+              key={`row-${idx}-event-${r.data.uid}`}
               eventData={r}
               dispatch={dispatch}
             />
@@ -147,6 +147,7 @@ function ResultItem({
           textAlign: "left",
           maxWidth: "80vw",
         }}
+        role="button"
         onClick={() => handleOpenResult(eventData)}
       >
         <Typography className="M3-Body-Large">
