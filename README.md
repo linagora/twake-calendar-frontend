@@ -90,23 +90,37 @@ And then visit [https://localhost:5000](https://localhost:5000).
 
 An applist is configurable in the public folder to setup the grid of app accessible within Twake Calendar.
 
-Each app has three fields:
+1. Copy `public/appList.example.js` to `public/appList.js`
+2. Place your app icons in `public/assets/images/svg/` directory
+3. Configure each app with three fields:
 
-- name: the app’s name
-- icon: the link to the app’s icon
-- link: the app’s link or URL
+- name: the app's name
+- icon: the path to the app's icon (relative to public folder, e.g., `/assets/images/svg/app-chat.svg`)
+- link: the app's link or URL
 
 Example:
 
 ```js
 var appList = [
   {
-    name: "My App",
-    icon: "https://myapp.com/myapp.png",
-    link: "https://myapp.com",
+    name: "Chat",
+    link: "/twake",
+    icon: "/assets/images/svg/app-chat.svg",
+  },
+  {
+    name: "Drive",
+    link: "/drive",
+    icon: "/assets/images/svg/app-drive.svg",
+  },
+  {
+    name: "Mail",
+    link: "/mail",
+    icon: "/assets/images/svg/app-mail.svg",
   },
 ];
 ```
+
+**Note**: `appList.js` is gitignored, so each environment can have its own configuration. The icon files in `public/assets/images/svg/` should be committed to the repository.
 
 ## Roadmap
 

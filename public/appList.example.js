@@ -1,7 +1,17 @@
 var appList = [
   {
-    name: "Twake",
+    name: "Chat",
     link: "/twake",
-    icon: "https://twake-chat.com/tild3037-6365-4134-b838-383030366263__twake-chat-logo.svg",
+    icon: "/assets/images/svg/app-chat.svg",
+  },
+  {
+    name: "Drive",
+    link: "/drive",
+    icon: "/assets/images/svg/app-drive.svg",
+  },
+  {
+    name: "Mail",
+    link: "/mail",
+    icon: "/assets/images/svg/app-mail.svg",
   },
 ];
