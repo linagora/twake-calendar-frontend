@@ -33,3 +33,38 @@ export async function getUserDetails(id: string) {
   const user = await api.get(`api/users/${id}`).json();
   return user;
 }
+
+export interface UserConfigurationUpdates {
+  language?: string;
+  notifications?: Record<string, unknown>;
+  timezone?: string;
+}
+
+export async function updateUserConfigurations(
+  updates: UserConfigurationUpdates
+): Promise<Response | { status: number }> {
+  const coreConfigs: Array<{ name: string; value: any }> = [];
+
+  if (updates.language !== undefined) {
+    coreConfigs.push({ name: "language", value: updates.language });
+  }
+  if (updates.notifications !== undefined) {
+    coreConfigs.push({ name: "notifications", value: updates.notifications });
+  }
+  if (updates.timezone !== undefined) {
+    coreConfigs.push({ name: "timezone", value: updates.timezone });
+  }
+
+  if (coreConfigs.length === 0) {
+    return Promise.resolve({ status: 204 });
+  }
+
+  return await api.patch(`api/configurations?scope=user`, {
+    json: [
+      {
+        name: "core",
+        configurations: coreConfigs,
+      },
+    ],
+  });
+}
