@@ -13,7 +13,19 @@ import {
 import { getCalendarsListAsync } from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
-// Mocks
+// ---------- Helpers: proper async-thunk mocks ----------
+function mockThunk(type: string) {
+  return Object.assign(
+    jest.fn(() => ({ type })),
+    {
+      pending: { type: `${type}/pending` },
+      fulfilled: { type: `${type}/fulfilled` },
+      rejected: { type: `${type}/rejected` },
+    }
+  );
+}
+
+// ---------- Mocks ----------
 jest.mock("../../../src/app/hooks", () => ({
   useAppDispatch: jest.fn(),
   useAppSelector: jest.fn(() => ({})),
@@ -23,15 +35,37 @@ jest.mock("../../../src/features/User/oidcAuth", () => ({
   Callback: jest.fn(),
 }));
 
-jest.mock("../../../src/features/User/userSlice", () => ({
-  setUserData: jest.fn((data) => ({ type: "SET_USER", payload: data })),
-  setTokens: jest.fn((tokens) => ({ type: "SET_TOKENS", payload: tokens })),
-  getOpenPaasUserDataAsync: jest.fn(() => ({ type: "GET_USER_ID" })),
-}));
+jest.mock("../../../src/features/User/userSlice", () => {
+  const mockGetUser = Object.assign(
+    jest.fn(() => ({ type: "GET_USER_ID" })),
+    {
+      pending: { type: "GET_USER_ID/pending" },
+      fulfilled: { type: "GET_USER_ID/fulfilled" },
+      rejected: { type: "GET_USER_ID/rejected" },
+    }
+  );
 
-jest.mock("../../../src/features/Calendars/CalendarSlice", () => ({
-  getCalendarsListAsync: jest.fn(() => ({ type: "GET_CALENDARS" })),
-}));
+  return {
+    setUserData: jest.fn((data) => ({ type: "SET_USER", payload: data })),
+    setTokens: jest.fn((tokens) => ({ type: "SET_TOKENS", payload: tokens })),
+    getOpenPaasUserDataAsync: mockGetUser,
+  };
+});
+
+jest.mock("../../../src/features/Calendars/CalendarSlice", () => {
+  const mockGetCalendars = Object.assign(
+    jest.fn(() => ({ type: "GET_CALENDARS" })),
+    {
+      pending: { type: "GET_CALENDARS/pending" },
+      fulfilled: { type: "GET_CALENDARS/fulfilled" },
+      rejected: { type: "GET_CALENDARS/rejected" },
+    }
+  );
+
+  return {
+    getCalendarsListAsync: mockGetCalendars,
+  };
+});
 
 describe("CallbackResume", () => {
   const dispatch = jest.fn();

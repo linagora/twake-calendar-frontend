@@ -10,7 +10,7 @@ export interface SettingsState {
 const savedLang = localStorage.getItem("lang");
 const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
-const savedTimeZone = localStorage.getItem("TimeZone");
+const savedTimeZone = localStorage.getItem("timeZone");
 const defaultTimeZone =
   savedTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
 
@@ -41,19 +41,17 @@ export const settingsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
-      if (action.payload.configurations?.modules) {
-        const coreModule = action.payload.configurations.modules.find(
-          (module: any) => module.name === "core"
-        );
-        if (coreModule?.configurations) {
-          const datetimeConfig = coreModule.configurations.find(
-            (config: any) => config.name === "datetime"
-          );
-          if (datetimeConfig?.value?.timeZone) {
-            state.timeZone = datetimeConfig.value.timeZone;
-            localStorage.setItem("timeZone", datetimeConfig.value.timeZone);
-          }
-        }
+      const coreModule = action.payload.configurations?.modules?.find(
+        (module: any) => module.name === "core"
+      );
+      const datetimeConfig = coreModule?.configurations?.find(
+        (config: any) => config.name === "datetime"
+      );
+      const timeZone = datetimeConfig?.value?.timeZone;
+
+      if (timeZone) {
+        state.timeZone = timeZone;
+        localStorage.setItem("timeZone", timeZone);
       }
     });
   },
