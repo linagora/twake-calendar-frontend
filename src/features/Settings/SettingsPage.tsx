@@ -12,12 +12,17 @@ import {
   Select,
   MenuItem,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SyncIcon from "@mui/icons-material/Sync";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setView, setLanguage } from "./SettingsSlice";
+import { setView, setLanguage as setSettingsLanguage } from "./SettingsSlice";
+import {
+  updateUserConfigurationsAsync,
+  setLanguage as setUserLanguage,
+} from "../User/userSlice";
 import { AVAILABLE_LANGUAGES } from "./constants";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import "./SettingsPage.styl";
@@ -27,11 +32,15 @@ type SettingsSubTab = "settings" | "notifications";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
+  const userLanguage = useAppSelector((state) => state.user?.language);
+  const settingsLanguage = useAppSelector((state) => state.settings?.language);
+  const currentLanguage = userLanguage || settingsLanguage || "en";
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
+  const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -52,7 +61,27 @@ export default function SettingsPage() {
   };
 
   const handleLanguageChange = (event: any) => {
-    dispatch(setLanguage(event.target.value));
+    const newLanguage = event.target.value;
+    const previousLanguage = currentLanguage;
+
+    // Optimistic update - update UI immediately
+    dispatch(setUserLanguage(newLanguage));
+    dispatch(setSettingsLanguage(newLanguage));
+
+    // Call API in background, don't wait for it
+    dispatch(updateUserConfigurationsAsync({ language: newLanguage }))
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update language:", error);
+        // Rollback on error
+        dispatch(setUserLanguage(previousLanguage));
+        dispatch(setSettingsLanguage(previousLanguage));
+        setLanguageErrorOpen(true);
+      });
+  };
+
+  const handleLanguageErrorClose = () => {
+    setLanguageErrorOpen(false);
   };
 
   return (
@@ -122,7 +151,7 @@ export default function SettingsPage() {
                   </Typography>
                   <FormControl size="small" sx={{ minWidth: 500 }}>
                     <Select
-                      value={lang}
+                      value={currentLanguage}
                       onChange={handleLanguageChange}
                       variant="outlined"
                       aria-label={
@@ -157,6 +186,14 @@ export default function SettingsPage() {
           )}
         </Box>
       </Box>
+      <Snackbar
+        open={languageErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleLanguageErrorClose}
+        message={
+          t("settings.languageUpdateError") || "Failed to update language"
+        }
+      />
     </main>
   );
 }

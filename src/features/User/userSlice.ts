@@ -1,16 +1,36 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userData, userOrganiser } from "./userDataTypes";
-import { getOpenPaasUser } from "./userAPI";
+import {
+  getOpenPaasUser,
+  updateUserConfigurations,
+  UserConfigurationUpdates,
+} from "./userAPI";
 import { formatReduxError } from "../../utils/errorUtils";
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
-  Record<string, string>,
+  Record<string, any>,
   void,
   { rejectValue: { message: string; status?: number } }
 >("user/getOpenPaasUserData", async (_, { rejectWithValue }) => {
   try {
-    const user = (await getOpenPaasUser()) as Record<string, string>;
+    const user = (await getOpenPaasUser()) as Record<string, any>;
     return user;
+  } catch (err: any) {
+    return rejectWithValue({
+      message: formatReduxError(err),
+      status: err.response?.status,
+    });
+  }
+});
+
+export const updateUserConfigurationsAsync = createAsyncThunk<
+  UserConfigurationUpdates,
+  UserConfigurationUpdates,
+  { rejectValue: { message: string; status?: number } }
+>("user/updateConfigurations", async (updates, { rejectWithValue }) => {
+  try {
+    await updateUserConfigurations(updates);
+    return updates;
   } catch (err: any) {
     return rejectWithValue({
       message: formatReduxError(err),
@@ -25,6 +45,7 @@ export const userSlice = createSlice({
     userData: null as unknown as userData,
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
+    language: null as string | null,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -40,6 +61,12 @@ export const userSlice = createSlice({
     },
     setTokens: (state, action) => {
       state.tokens = action.payload;
+    },
+    setLanguage: (state, action) => {
+      state.language = action.payload;
+      if (state.userData) {
+        state.userData.language = action.payload;
+      }
     },
     clearError: (state) => {
       state.error = null;
@@ -62,6 +89,22 @@ export const userSlice = createSlice({
           state.organiserData.cal_address = action.payload.preferredEmail;
           state.userData.email = action.payload.preferredEmail;
         }
+
+        // Extract language from configurations.modules
+        if (action.payload.configurations?.modules) {
+          const coreModule = action.payload.configurations.modules.find(
+            (module: any) => module.name === "core"
+          );
+          if (coreModule?.configurations) {
+            const languageConfig = coreModule.configurations.find(
+              (config: any) => config.name === "language"
+            );
+            if (languageConfig?.value) {
+              state.language = languageConfig.value;
+              state.userData.language = languageConfig.value;
+            }
+          }
+        }
       })
       .addCase(getOpenPaasUserDataAsync.pending, (state) => {
         state.loading = true;
@@ -72,11 +115,26 @@ export const userSlice = createSlice({
           state.error =
             action.payload?.message || "Failed to fetch user information";
         }
+      })
+      .addCase(updateUserConfigurationsAsync.fulfilled, (state, action) => {
+        if (action.payload.language !== undefined) {
+          state.language = action.payload.language;
+          if (state.userData) {
+            state.userData.language = action.payload.language;
+          }
+        }
+      })
+      .addCase(updateUserConfigurationsAsync.rejected, (state, action) => {
+        if (action.payload?.status !== 401) {
+          state.error =
+            action.payload?.message || "Failed to update user configurations";
+        }
       });
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens, clearError } = userSlice.actions;
+export const { setUserData, setTokens, setLanguage, clearError } =
+  userSlice.actions;
 
 export default userSlice.reducer;

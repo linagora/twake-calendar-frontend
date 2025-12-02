@@ -1,12 +1,15 @@
 import { clientConfig } from "../../../src/features/User/oidcAuth";
-import { getOpenPaasUser } from "../../../src/features/User/userAPI";
+import {
+  getOpenPaasUser,
+  updateUserConfigurations,
+} from "../../../src/features/User/userAPI";
 import { api } from "../../../src/utils/apiUtils";
 
 jest.mock("../../../src/utils/apiUtils");
 
 clientConfig.url = "https://example.com";
 
-describe("getOpenPaasUserId", () => {
+describe("getOpenPaasUser", () => {
   it("should fetch and return user data", async () => {
     const mockUser = { id: "123", name: "OpenPaas User" };
 
@@ -18,5 +21,56 @@ describe("getOpenPaasUserId", () => {
 
     expect(api.get).toHaveBeenCalledWith("api/user");
     expect(result).toEqual(mockUser);
+  });
+});
+
+describe("updateUserConfigurations", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should PATCH configurations with language update", async () => {
+    const mockResponse = { status: 204 };
+    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
+
+    await updateUserConfigurations({ language: "vi" });
+
+    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
+      json: [
+        {
+          name: "core",
+          configurations: [{ name: "language", value: "vi" }],
+        },
+      ],
+    });
+  });
+
+  it("should PATCH configurations with multiple updates", async () => {
+    const mockResponse = { status: 204 };
+    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
+
+    await updateUserConfigurations({
+      language: "fr",
+      timezone: "Europe/Paris",
+    });
+
+    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
+      json: [
+        {
+          name: "core",
+          configurations: [
+            { name: "language", value: "fr" },
+            { name: "timezone", value: "Europe/Paris" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("should handle empty updates without calling API", async () => {
+    const result = await updateUserConfigurations({});
+
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(result).toEqual({ status: 204 });
   });
 });
