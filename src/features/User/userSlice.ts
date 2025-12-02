@@ -46,7 +46,7 @@ export const userSlice = createSlice({
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
     language: null as string | null,
-    timezone: null as string | null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
     loading: true,
     error: null as unknown as string | null,
   },

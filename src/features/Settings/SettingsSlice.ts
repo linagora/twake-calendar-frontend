@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { getOpenPaasUserDataAsync } from "../User/userSlice";
 
 export interface SettingsState {
   language: string;
@@ -37,6 +38,24 @@ export const settingsSlice = createSlice({
     ) => {
       state.view = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
+      if (action.payload.configurations?.modules) {
+        const coreModule = action.payload.configurations.modules.find(
+          (module: any) => module.name === "core"
+        );
+        if (coreModule?.configurations) {
+          const datetimeConfig = coreModule.configurations.find(
+            (config: any) => config.name === "datetime"
+          );
+          if (datetimeConfig?.value?.timeZone) {
+            state.timeZone = datetimeConfig.value.timeZone;
+            localStorage.setItem("timeZone", datetimeConfig.value.timeZone);
+          }
+        }
+      }
+    });
   },
 });
 
