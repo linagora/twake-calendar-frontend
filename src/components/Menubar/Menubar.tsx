@@ -282,6 +282,14 @@ export function Menubar({
           vertical: "top",
           horizontal: "right",
         }}
+        PaperProps={{
+          sx: {
+            minWidth: 230,
+            mt: 2,
+            p: "14px 8px",
+            borderRadius: "14px",
+          },
+        }}
       >
         <div className="app-grid">
           {applist.map((prop: AppIconProps) => (
@@ -307,7 +315,7 @@ export function Menubar({
             minWidth: 280,
             mt: 1,
             padding: "0 !important",
-            borderRadius: "16px",
+            borderRadius: "14px",
           },
         }}
       >
@@ -374,16 +382,33 @@ export function MainTitle() {
 
 function AppIcon({ prop }: { prop: AppIconProps }) {
   return (
-    <a
+    <Box
+      component="a"
       href={prop.link}
       target="_blank"
       rel="noreferrer"
-      style={{ textDecoration: "none", color: "inherit" }}
+      sx={{
+        textDecoration: "none",
+        color: "inherit",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        p: "8px 12px 5px",
+        borderRadius: "14px",
+        "&:hover": {
+          backgroundColor: "action.hover",
+        },
+      }}
     >
-      <div>
-        <img src={prop.icon} alt={prop.name} />
-        <p>{prop.name}</p>
-      </div>
-    </a>
+      <Box
+        component="img"
+        src={prop.icon}
+        alt={prop.name}
+        sx={{ maxWidth: 42, height: 42 }}
+      />
+      <Typography sx={{ mt: 0.75, textAlign: "center", fontSize: 12 }}>
+        {prop.name}
+      </Typography>
+    </Box>
   );
 }
