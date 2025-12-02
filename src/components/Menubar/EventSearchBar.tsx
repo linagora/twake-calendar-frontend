@@ -8,7 +8,6 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  ListSubheader,
   MenuItem,
   Popover,
   Select,
@@ -142,7 +141,12 @@ export default function SearchBar() {
             value={search}
             onBlur={(e) => {
               const next = e.relatedTarget as HTMLElement | null;
-              if (next && searchBoxRef.current?.contains(next)) return;
+              if (
+                next instanceof Node &&
+                searchBoxRef.current?.contains(next)
+              ) {
+                return;
+              }
               if (!search.trim()) {
                 setExtended(false);
               }

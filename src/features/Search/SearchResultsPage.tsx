@@ -2,7 +2,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -14,6 +13,57 @@ import { CalendarEvent } from "../Events/EventsTypes";
 
 import { setView } from "../Settings/SettingsSlice";
 import "./searchResult.styl";
+
+const styles = {
+  M3BodyLarge: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "22px",
+    lineHeight: "28px",
+    letterSpacing: "0%",
+    color: "#243B55",
+  },
+  M3BodyMedium1: {
+    fontFamily: "Inter",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "16px",
+    lineHeight: "24px",
+    letterSpacing: "-0.15px",
+    color: "#243B55",
+  },
+  M3BodyMedium: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "14px",
+    lineHeight: "20px",
+    letterSpacing: "0.25px",
+    verticalAlign: "middle",
+    color: "#8C9CAF",
+  },
+  M3BodyMedium3: {
+    fontFamily: "Inter",
+    fontWeight: 400,
+    fontSize: "14px",
+    lineHeight: "20px",
+    letterSpacing: "0.25px",
+    verticalAlign: "middle",
+    color: "#8C9CAF",
+  },
+  M3TitleMedium: {
+    fontFamily: "Roboto",
+    fontWeight: 500,
+    fontStyle: "medium",
+    fontSize: "16px",
+    lineHeight: "24px",
+    letterSpacing: "0.15px",
+    textAlign: "center",
+    verticalAlign: "middle",
+    color: "#243B55",
+  },
+};
 
 export default function SearchResultsPage() {
   const { t } = useI18n();
@@ -40,10 +90,10 @@ export default function SearchResultsPage() {
     layout = (
       <Box className="noResults">
         <img className="logo" src={logo} alt={t("search.noResults")} />
-        <Typography className="M3-title-medium">
+        <Typography sx={styles.M3TitleMedium}>
           {t("search.noResults")}
         </Typography>
-        <Typography className="M3-Body-medium">
+        <Typography sx={styles.M3BodyMedium}>
           {t("search.noResultsSubtitle")}
         </Typography>
       </Box>
@@ -132,50 +182,51 @@ function ResultItem({
         sx={{
           display: "grid",
           gridTemplateColumns: {
-            xs: "1fr", // Stack on mobile
-            sm: "90px 120px 35px 1fr", // Simplified on tablets
-            md: "90px 120px 35px 220px 150px 250px 1fr", // Full on desktop
+            xs: "1fr",
+            sm: "90px 120px 35px 1fr",
+            md: "90px 120px 35px 220px 150px 250px 1fr",
           },
           gap: 2,
           p: 3,
           borderTop: "1px solid #F3F6F9",
           cursor: "pointer",
-          "&:hover": {
-            backgroundColor: "#e7e7e7ff",
-          },
+          "&:hover": { backgroundColor: "#e7e7e7ff" },
           alignItems: "center",
           textAlign: "left",
           maxWidth: "80vw",
         }}
         onClick={() => handleOpenResult(eventData)}
       >
-        <Typography className="M3-Body-Large">
+        <Typography sx={styles.M3BodyLarge}>
           {startDate.toLocaleDateString(t("locale"), {
             day: "2-digit",
             month: "short",
+            timeZone,
           })}
           {startDate.toDateString() !== endDate.toDateString() && (
             <>
-              {" "}
-              -{" "}
+              {" - "}
               {endDate.toLocaleDateString(t("locale"), {
                 day: "2-digit",
                 month: "short",
+                timeZone,
               })}
             </>
           )}
         </Typography>
-        <Typography className="M3-Body-medium1">
+        <Typography sx={styles.M3BodyMedium1}>
           {!eventData.data.allDay && (
             <>
               {startDate.toLocaleTimeString(t("locale"), {
                 hour: "2-digit",
                 minute: "2-digit",
+                timeZone,
               })}
               -
               {endDate.toLocaleTimeString(t("locale"), {
                 hour: "2-digit",
                 minute: "2-digit",
+                timeZone,
               })}
             </>
           )}
@@ -188,12 +239,12 @@ function ResultItem({
             height: 24,
           }}
         />
-        <Typography className="M3-Body-Large">
+        <Typography sx={styles.M3BodyLarge}>
           {eventData.data.summary || t("event.untitled")}
         </Typography>
         <Typography
-          className="M3-Body-medium1"
           sx={{
+            ...styles.M3BodyMedium1,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -205,8 +256,8 @@ function ResultItem({
         </Typography>
         {eventData.data?.location && (
           <Typography
-            className="M3-Body-medium"
             sx={{
+              ...styles.M3BodyMedium,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -216,8 +267,8 @@ function ResultItem({
           </Typography>
         )}
         <Typography
-          className="M3-Body-medium3"
           sx={{
+            ...styles.M3BodyMedium3,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
