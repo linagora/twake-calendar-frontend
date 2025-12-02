@@ -246,4 +246,124 @@ describe("SettingsPage", () => {
       screen.getByText("settings.notifications.empty")
     ).toBeInTheDocument();
   });
+
+  describe("Timezone Settings", () => {
+    it("displays timezone selector in Settings tab", () => {
+      renderWithProviders(<SettingsPage />, preloadedState);
+
+      expect(screen.getAllByRole("combobox")).toHaveLength(2);
+    });
+
+    it("displays timezone from user state", () => {
+      const stateWithUserTimeZone = {
+        user: {
+          userData: {
+            sub: "test",
+            email: "test@test.com",
+            family_name: "Doe",
+            name: "John",
+            sid: "mockSid",
+            openpaasId: "667037022b752d0026472254",
+          },
+          organiserData: null,
+          tokens: null,
+          language: "en",
+          timezone: "America/New_York",
+          loading: false,
+          error: null,
+        },
+        settings: {
+          language: "en",
+          timeZone: "UTC",
+          view: "settings",
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithUserTimeZone);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+      expect(timezoneInput).toHaveValue("(UTC−5) America/New York");
+    });
+
+    it("updates timezone immediately (optimistic update)", async () => {
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      // Clear the input and type new timezone
+      fireEvent.change(timezoneInput, { target: { value: "Europe/Paris" } });
+
+      // Find and click the timezone option from the dropdown
+      const option = await screen.findByText(/Europe\/Paris/i);
+      fireEvent.click(option);
+
+      // Timezone should be updated immediately (optimistic update)
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.timezone).toBe("Europe/Paris");
+        expect(state.settings.timeZone).toBe("Europe/Paris");
+      });
+    });
+
+    it("handles timezone change with different timezone values", async () => {
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      // Test with Asia/Tokyo
+      fireEvent.change(timezoneInput, { target: { value: "Asia/Tokyo" } });
+      const tokyoOption = await screen.findByText(/Asia\/Tokyo/i);
+      fireEvent.click(tokyoOption);
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.timezone).toBe("Asia/Tokyo");
+        expect(state.settings.timeZone).toBe("Asia/Tokyo");
+      });
+
+      // Test with America/Los_Angeles
+      fireEvent.change(timezoneInput, {
+        target: { value: "America/Los_Angeles" },
+      });
+      const laOption = await screen.findByText(/America\/Los Angeles/i);
+      fireEvent.click(laOption);
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.timezone).toBe("America/Los_Angeles");
+        expect(state.settings.timeZone).toBe("America/Los_Angeles");
+      });
+    });
+
+    it("uses UTC as default timezone when no timezone is set", () => {
+      const stateWithoutTimeZone = {
+        user: {
+          userData: {
+            sub: "test",
+            email: "test@test.com",
+            family_name: "Doe",
+            name: "John",
+            sid: "mockSid",
+            openpaasId: "667037022b752d0026472254",
+          },
+          organiserData: null,
+          tokens: null,
+          language: "en",
+          timezone: undefined,
+          loading: false,
+          error: null,
+        },
+        settings: {
+          language: "en",
+          timeZone: undefined,
+          view: "settings",
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithoutTimeZone);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+      expect(timezoneInput).toHaveValue("(UTC) UTC");
+    });
+  });
 });

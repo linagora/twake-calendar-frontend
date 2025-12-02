@@ -211,6 +211,7 @@
     "language": "Langue",
     "languageDescription": "Ce sera la langue utilisée dans votre Twake Calendar",
     "languageSelector": "Sélecteur de langue",
+    "timezone": "Fuseau horaire",
     "notifications.empty": "Paramètres de notifications à venir",
     "sync.empty": "Paramètres de synchronisation à venir",
     "back": "Retour au calendrier"

@@ -18,14 +18,7 @@ export function TimezoneSelector({
 }: TimezoneSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const timezoneList = useMemo(() => {
-    const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
-
-    return { zones, browserTz, getTimezoneOffset };
-  }, []);
+  const timezoneList = getTimeZoneList();
 
   const effectiveTimezone = value
     ? resolveTimezone(value)
@@ -95,6 +88,17 @@ export function TimezoneSelector({
       </Popover>
     </>
   );
+}
+
+export function getTimeZoneList() {
+  return useMemo(() => {
+    const zones = Object.keys(TIMEZONES.zones).sort();
+    const browserTz = resolveTimezone(
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
+    return { zones, browserTz, getTimezoneOffset };
+  }, []);
 }
 
 export function resolveTimezone(tzName: string): string {

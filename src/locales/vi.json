@@ -211,6 +211,7 @@
     "language": "Ngôn ngữ",
     "languageDescription": "Đây sẽ là ngôn ngữ được sử dụng trong Twake Calendar của bạn",
     "languageSelector": "Chọn ngôn ngữ",
+    "timezone": "Múi giờ",
     "notifications.empty": "Cài đặt thông báo sắp có",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "back": "Quay lại lịch"

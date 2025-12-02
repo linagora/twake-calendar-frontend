@@ -653,13 +653,11 @@ const CalendarSlice = createSlice({
     templist: {} as Record<string, Calendars>,
     pending: false,
     error: null as string | null,
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   } as {
     list: Record<string, Calendars>;
     templist: Record<string, Calendars>;
     pending: boolean;
     error: string | null;
-    timeZone: string;
   },
   reducers: {
     createCalendar: (
@@ -719,9 +717,6 @@ const CalendarSlice = createSlice({
     ) => {
       const { calId, event } = action.payload;
       state.list[calId].events[event.uid] = event;
-    },
-    setTimeZone: (state, action: PayloadAction<string>) => {
-      state.timeZone = action.payload;
     },
     clearFetchCache: (state, action: PayloadAction<string>) => {
       if (!state.list[action.payload]) return;
@@ -1172,7 +1167,6 @@ export const {
   updateEventLocal,
   removeTempCal,
   emptyEventsCal,
-  setTimeZone,
   clearFetchCache,
   clearError,
   updateCalColor,

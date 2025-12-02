@@ -10,10 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import {
-  getCalendarDetailAsync,
-  setTimeZone,
-} from "../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   formatDateToYYYYMMDDTHHMMSS,
@@ -46,6 +43,7 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";
 import SearchResultsPage from "../../features/Search/SearchResultsPage";
+import { setTimeZone } from "../../features/Settings/SettingsSlice";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
@@ -108,7 +106,7 @@ export default function CalendarApp({
   });
 
   const [currentView, setCurrentView] = useState("timeGridWeek");
-  const timezone = useAppSelector((state) => state.calendars.timeZone);
+  const timezone = useAppSelector((state) => state.settings.timeZone);
 
   const fetchedRangesRef = useRef<Record<string, string>>({});
 

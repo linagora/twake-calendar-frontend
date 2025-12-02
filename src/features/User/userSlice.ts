@@ -46,6 +46,7 @@ export const userSlice = createSlice({
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
     language: null as string | null,
+    timezone: null as string | null,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -66,6 +67,12 @@ export const userSlice = createSlice({
       state.language = action.payload;
       if (state.userData) {
         state.userData.language = action.payload;
+      }
+    },
+    setTimezone: (state, action) => {
+      state.timezone = action.payload;
+      if (state.userData) {
+        state.userData.timezone = action.payload;
       }
     },
     clearError: (state) => {
@@ -90,7 +97,7 @@ export const userSlice = createSlice({
           state.userData.email = action.payload.preferredEmail;
         }
 
-        // Extract language from configurations.modules
+        // Extract data from configurations.modules
         if (action.payload.configurations?.modules) {
           const coreModule = action.payload.configurations.modules.find(
             (module: any) => module.name === "core"
@@ -102,6 +109,13 @@ export const userSlice = createSlice({
             if (languageConfig?.value) {
               state.language = languageConfig.value;
               state.userData.language = languageConfig.value;
+            }
+            const datetimeConfig = coreModule.configurations.find(
+              (config: any) => config.name === "datetime"
+            );
+            if (datetimeConfig?.value) {
+              state.timezone = datetimeConfig.value.timeZone;
+              state.userData.timezone = datetimeConfig.value.timeZone;
             }
           }
         }
@@ -134,7 +148,7 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens, setLanguage, clearError } =
+export const { setUserData, setTokens, setLanguage, setTimezone, clearError } =
   userSlice.actions;
 
 export default userSlice.reducer;

@@ -2,11 +2,10 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import CalendarApp from "../../../src/components/Calendar/Calendar";
 import { updateSlotLabelVisibility } from "../../../src/components/Calendar/utils/calendarUtils";
 import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-import * as CalendarSlice from "../../../src/features/Calendars/CalendarSlice";
+import * as SettingsSlice from "../../../src/features/Settings/SettingsSlice";
 import * as calendarUtils from "../../../src/components/Calendar/utils/calendarUtils";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import preview from "jest-preview";
 
 describe("Calendar - Timezone Integration", () => {
   const mockCalendarRef = { current: null };
@@ -56,7 +55,7 @@ describe("Calendar - Timezone Integration", () => {
   });
 
   it("dispatches setTimeZone action when timezone is changed", async () => {
-    const setTimeZoneSpy = jest.spyOn(CalendarSlice, "setTimeZone");
+    const setTimeZoneSpy = jest.spyOn(SettingsSlice, "setTimeZone");
 
     renderWithProviders(
       <CalendarApp calendarRef={mockCalendarRef} />,
