@@ -199,7 +199,6 @@ describe("SearchResultsPage", () => {
     });
 
     expect(screen.getByText("Untitled Event")).toBeInTheDocument();
-    expect(screen.getByText("-")).toBeInTheDocument();
   });
 
   it("should format all-day events correctly", () => {

@@ -63,7 +63,8 @@
     "organizers": "Người tổ chức",
     "participants": "Người tham gia",
     "noResults": "Không tìm thấy kết quả",
-    "resultsTitle": "Kết quả tìm kiếm"
+    "resultsTitle": "Kết quả tìm kiếm",
+    "noResultsSubtitle": "Hãy thử điều chỉnh bộ lọc hoặc thuật ngữ tìm kiếm của bạn."
   },
   "calendarPopover": {
     "tabs": {

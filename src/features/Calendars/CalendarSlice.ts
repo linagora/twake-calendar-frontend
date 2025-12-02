@@ -684,7 +684,7 @@ const CalendarSlice = createSlice({
         action.payload.event;
       state.list[action.payload.calendarUid].events[
         action.payload.event.uid
-      ].URL = `dav/calendars/${action.payload.calendarUid}/${
+      ].URL = `/calendars/${action.payload.calendarUid}/${
         action.payload.event.uid.split("/")[0]
       }.isc`;
     },

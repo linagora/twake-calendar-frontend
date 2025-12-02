@@ -1,99 +1,290 @@
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
-import { useAppSelector } from "../../app/hooks";
-import logo from "../../static/noResult-logo.svg";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Box, Card, CardContent, Typography, Chip, Stack } from "@mui/material";
-import { format } from "date-fns";
-import {
-  enGB,
-  fr as frLocale,
-  ru as ruLocale,
-  vi as viLocale,
-} from "date-fns/locale";
+import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { AppDispatch } from "../../app/store";
+import logo from "../../static/noResult-logo.svg";
+import { getEventAsync } from "../Calendars/CalendarSlice";
+import EventPreviewModal from "../Events/EventDisplayPreview";
+import { CalendarEvent } from "../Events/EventsTypes";
 
-const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
+import { setView } from "../Settings/SettingsSlice";
+import "./searchResult.styl";
+
+const styles = {
+  M3BodyLarge: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "22px",
+    lineHeight: "28px",
+    letterSpacing: "0%",
+    color: "#243B55",
+  },
+  M3BodyMedium1: {
+    fontFamily: "Inter",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "16px",
+    lineHeight: "24px",
+    letterSpacing: "-0.15px",
+    color: "#243B55",
+  },
+  M3BodyMedium: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontSize: "14px",
+    lineHeight: "20px",
+    letterSpacing: "0.25px",
+    verticalAlign: "middle",
+    color: "#8C9CAF",
+  },
+  M3BodyMedium3: {
+    fontFamily: "Inter",
+    fontWeight: 400,
+    fontSize: "14px",
+    lineHeight: "20px",
+    letterSpacing: "0.25px",
+    verticalAlign: "middle",
+    color: "#8C9CAF",
+  },
+  M3TitleMedium: {
+    fontFamily: "Roboto",
+    fontWeight: 500,
+    fontStyle: "medium",
+    fontSize: "16px",
+    lineHeight: "24px",
+    letterSpacing: "0.15px",
+    textAlign: "center",
+    verticalAlign: "middle",
+    color: "#243B55",
+  },
+};
 
 export default function SearchResultsPage() {
   const { t } = useI18n();
+  const dispatch = useAppDispatch();
   const { error, loading, hits, results } = useAppSelector(
     (state) => state.searchResult
   );
 
+  let layout;
+
   if (loading) {
-    return (
-      <div className="search-layout">
-        <CircularProgress size={24} />
-      </div>
+    layout = (
+      <Box className="loading">
+        <CircularProgress size={32} />
+      </Box>
     );
-  }
-
-  if (error) {
-    return (
-      <div className="search-layout">
-        <div style={{ color: "red", marginTop: 8 }}>{error}</div>
-      </div>
+  } else if (error) {
+    layout = (
+      <Box className="error">
+        <Typography className="error-text">{error}</Typography>
+      </Box>
     );
-  }
-
-  if (!hits) {
-    return (
-      <div className="search-layout">
-        <h1>{t("search.noResults")}</h1>
+  } else if (!hits) {
+    layout = (
+      <Box className="noResults">
         <img className="logo" src={logo} alt={t("search.noResults")} />
-      </div>
+        <Typography sx={styles.M3TitleMedium}>
+          {t("search.noResults")}
+        </Typography>
+        <Typography sx={styles.M3BodyMedium}>
+          {t("search.noResultsSubtitle")}
+        </Typography>
+      </Box>
+    );
+  } else {
+    layout = (
+      <Box className="search-result-content-body">
+        <Stack sx={{ mt: 2 }}>
+          {results?.map((r: any, idx: number) => (
+            <ResultItem
+              key={`row-${idx}-event-${r.data.uid}`}
+              eventData={r}
+              dispatch={dispatch}
+            />
+          ))}
+        </Stack>
+      </Box>
     );
   }
 
   return (
-    <div className="search-layout">
-      <h1>{t("search.resultsTitle")}</h1>
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        {results?.map((r: any, idx: number) => (
-          <ResultItem key={r.data.uid || idx} eventData={r.data} />
-        ))}
-      </Stack>
-    </div>
+    <Box className={`search-layout`}>
+      <Box className="search-result-content-header">
+        <Box className="back-button">
+          <IconButton
+            onClick={() => dispatch(setView("calendar"))}
+            aria-label={t("settings.back")}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h5">{t("search.resultsTitle")}</Typography>
+        </Box>
+      </Box>
+      {layout}
+    </Box>
   );
 }
 
-function ResultItem({ eventData }: { eventData: Record<string, any> }) {
-  const { lang } = useI18n();
-  const locale = dateLocales[lang as keyof typeof dateLocales] || enGB;
+function ResultItem({
+  eventData,
+  dispatch,
+}: {
+  eventData: Record<string, any>;
+  dispatch: AppDispatch;
+}) {
+  const { t } = useI18n();
+  const startDate = new Date(eventData.data.start);
+  const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate;
+  const timeZone = useAppSelector((state) => state.calendars.timeZone);
+  const calendar = useAppSelector(
+    (state) =>
+      state.calendars.list[
+        `${eventData.data.userId}/${eventData.data.calendarId}`
+      ]
+  );
+  const calendarColor = calendar?.color?.light;
 
-  const startDate = new Date(eventData.start);
+  const [openPreview, setOpenPreview] = useState(false);
 
-  const formatDateTime = (date: Date) => {
-    if (eventData.allDay) {
-      return format(date, "PPP", { locale });
+  const handleOpenResult = async (eventData: Record<string, any>) => {
+    if (calendar) {
+      const event = {
+        URL: eventData._links.self.href,
+        calId: calendar.id,
+        uid: eventData.data.uid,
+        start: eventData.data.start,
+        end: eventData.data.end,
+        allday: eventData.data.allDay,
+        attendee: eventData.data.attendees,
+        class: eventData.data.class,
+        description: eventData.data.description,
+        stamp: eventData.data.dtstamp,
+        location: eventData.data.location,
+        organizer: eventData.data.organizer,
+        title: eventData.data.summary,
+        timezone: timeZone,
+      } as CalendarEvent;
+      await dispatch(getEventAsync(event));
+      setOpenPreview(true);
     }
-    return format(date, "PPP p", { locale });
   };
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "200px 1fr 200px",
-        gap: 2,
-        p: 2,
-        borderBottom: "1px solid #e0e0e0",
-        cursor: "pointer",
-        "&:hover": {
-          backgroundColor: "#f5f5f5",
-        },
-      }}
-    >
-      <Typography variant="body2" color="text.secondary">
-        {formatDateTime(startDate)}
-      </Typography>
+    <>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "90px 120px 35px 1fr",
+            md: "90px 120px 35px 220px 150px 250px 1fr",
+          },
+          gap: 2,
+          p: 3,
+          borderTop: "1px solid #F3F6F9",
+          cursor: "pointer",
+          "&:hover": { backgroundColor: "#e7e7e7ff" },
+          alignItems: "center",
+          textAlign: "left",
+          maxWidth: "80vw",
+        }}
+        onClick={() => handleOpenResult(eventData)}
+      >
+        <Typography sx={styles.M3BodyLarge}>
+          {startDate.toLocaleDateString(t("locale"), {
+            day: "2-digit",
+            month: "short",
+            timeZone,
+          })}
+          {startDate.toDateString() !== endDate.toDateString() && (
+            <>
+              {" - "}
+              {endDate.toLocaleDateString(t("locale"), {
+                day: "2-digit",
+                month: "short",
+                timeZone,
+              })}
+            </>
+          )}
+        </Typography>
+        <Typography sx={styles.M3BodyMedium1}>
+          {!eventData.data.allDay && (
+            <>
+              {startDate.toLocaleTimeString(t("locale"), {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone,
+              })}
+              -
+              {endDate.toLocaleTimeString(t("locale"), {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone,
+              })}
+            </>
+          )}
+        </Typography>
 
-      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-        {eventData.summary || "Untitled Event"}
-      </Typography>
-
-      <Typography variant="body2" color="text.secondary">
-        {eventData.organizer?.cn || eventData.organizer?.email || "-"}
-      </Typography>
-    </Box>
+        <SquareRoundedIcon
+          style={{
+            color: calendarColor ?? "#3788D8",
+            width: 24,
+            height: 24,
+          }}
+        />
+        <Typography sx={styles.M3BodyLarge}>
+          {eventData.data.summary || t("event.untitled")}
+        </Typography>
+        <Typography
+          sx={{
+            ...styles.M3BodyMedium1,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {eventData.data.organizer?.cn ||
+            eventData.data.organizer?.email ||
+            ""}
+        </Typography>
+        {eventData.data?.location && (
+          <Typography
+            sx={{
+              ...styles.M3BodyMedium,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {eventData.data?.location ?? ""}
+          </Typography>
+        )}
+        <Typography
+          sx={{
+            ...styles.M3BodyMedium3,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {eventData.data?.description?.replace(/\n/g, " ") ?? ""}
+        </Typography>
+      </Box>
+      {calendar && calendar.events[eventData.data.uid] && (
+        <EventPreviewModal
+          eventId={eventData.data.uid}
+          calId={calendar.id}
+          open={openPreview}
+          onClose={() => setOpenPreview(false)}
+        />
+      )}
+    </>
   );
 }

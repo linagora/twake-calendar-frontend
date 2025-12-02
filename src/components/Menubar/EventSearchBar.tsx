@@ -8,7 +8,6 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  ListSubheader,
   MenuItem,
   Popover,
   Select,
@@ -137,9 +136,17 @@ export default function SearchBar() {
         {extended && (
           <TextField
             fullWidth
+            autoFocus
             placeholder={t("common.search")}
             value={search}
-            onBlur={() => {
+            onBlur={(e) => {
+              const next = e.relatedTarget as HTMLElement | null;
+              if (
+                next instanceof Node &&
+                searchBoxRef.current?.contains(next)
+              ) {
+                return;
+              }
               if (!search.trim()) {
                 setExtended(false);
               }
@@ -184,7 +191,12 @@ export default function SearchBar() {
                   </InputAdornment>
                   {search && (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setSearch("")}>
+                      <IconButton
+                        onClick={() => {
+                          setSearch("");
+                          handleFilterChange("keywords", "");
+                        }}
+                      >
                         <HighlightOffIcon />
                       </IconButton>
                     </InputAdornment>
@@ -335,7 +347,7 @@ export default function SearchBar() {
                 <UserSearch
                   attendees={filters.attendees}
                   setAttendees={(users: userAttendee[]) =>
-                    handleFilterChange("participants", users)
+                    handleFilterChange("attendees", users)
                   }
                 />
               </Box>
