@@ -91,14 +91,12 @@ export function TimezoneSelector({
 }
 
 export function getTimeZoneList() {
-  return useMemo(() => {
-    const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
+  const zones = Object.keys(TIMEZONES.zones).sort();
+  const browserTz = resolveTimezone(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
-    return { zones, browserTz, getTimezoneOffset };
-  }, []);
+  return { zones, browserTz, getTimezoneOffset };
 }
 
 export function resolveTimezone(tzName: string): string {

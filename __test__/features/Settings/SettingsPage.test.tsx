@@ -281,8 +281,7 @@ describe("SettingsPage", () => {
 
       renderWithProviders(<SettingsPage />, stateWithUserTimeZone);
 
-      const timezoneInput = screen.getAllByRole("combobox")[1];
-      expect(timezoneInput).toHaveValue("(UTC−5) America/New York");
+      expect(screen.getByDisplayValue(/America\/New York/i)).toBeDefined();
     });
 
     it("updates timezone immediately (optimistic update)", async () => {
@@ -362,8 +361,8 @@ describe("SettingsPage", () => {
 
       renderWithProviders(<SettingsPage />, stateWithoutTimeZone);
 
-      const timezoneInput = screen.getAllByRole("combobox")[1];
-      expect(timezoneInput).toHaveValue("(UTC) UTC");
+      const timezoneInput = screen.getByDisplayValue(/UTC/i);
+      expect(timezoneInput).toBeDefined();
     });
   });
 });

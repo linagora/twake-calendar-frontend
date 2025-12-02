@@ -29,7 +29,7 @@ export const settingsSlice = createSlice({
     },
     setTimeZone: (state, action: PayloadAction<string>) => {
       state.timeZone = action.payload;
-      localStorage.setItem("lang", action.payload);
+      localStorage.setItem("timeZone", action.payload);
     },
     setView: (
       state,
