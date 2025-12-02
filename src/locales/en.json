@@ -62,8 +62,9 @@
     "keywordsPlaceholder": "Enter keywords",
     "organizers": "Organizers",
     "participants": "Participants",
-    "noResults": "No results found",
-    "resultsTitle": "Search Results"
+    "noResults": "No events found",
+    "resultsTitle": "Search Results",
+    "noResultsSubtitle": "Try adjusting your filters or search terms."
   },
   "calendarPopover": {
     "tabs": {

@@ -63,7 +63,8 @@
     "organizers": "Организаторы",
     "participants": "Участники",
     "noResults": "Результаты не найдены",
-    "resultsTitle": "Результаты поиска"
+    "resultsTitle": "Результаты поиска",
+    "noResultsSubtitle": "Попробуйте изменить фильтры или условия поиска."
   },
   "calendarPopover": {
     "tabs": {

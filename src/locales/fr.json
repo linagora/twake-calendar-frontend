@@ -63,7 +63,8 @@
     "organizers": "Organisateurs",
     "participants": "Participants",
     "noResults": "Aucun résultat",
-    "resultsTitle": "Résultats de la recherche"
+    "resultsTitle": "Résultats de la recherche",
+    "noResultsSubtitle": "Essayez de changer vos filtres ou termes recherchés."
   },
   "calendarPopover": {
     "tabs": {
