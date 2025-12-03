@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 import { getOpenPaasUserDataAsync } from "../User/userSlice";
 
 export interface SettingsState {
   language: string;
   timeZone: string;
+  isBrowserDefaultTimeZone: boolean;
   view: "calendar" | "settings" | "search";
 }
 
@@ -11,12 +13,12 @@ const savedLang = localStorage.getItem("lang");
 const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
 const savedTimeZone = localStorage.getItem("timeZone");
-const defaultTimeZone =
-  savedTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
+const defaultTimeZone = savedTimeZone ?? browserDefaultTimeZone ?? "UTC";
 
 const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
+  isBrowserDefaultTimeZone: false,
   view: "calendar",
 };
 
@@ -31,6 +33,9 @@ export const settingsSlice = createSlice({
     setTimeZone: (state, action: PayloadAction<string>) => {
       state.timeZone = action.payload;
       localStorage.setItem("timeZone", action.payload);
+    },
+    setIsBrowserDefaultTimeZone: (state, action: PayloadAction<boolean>) => {
+      state.isBrowserDefaultTimeZone = action.payload;
     },
     setView: (
       state,
@@ -52,10 +57,18 @@ export const settingsSlice = createSlice({
       if (timeZone) {
         state.timeZone = timeZone;
         localStorage.setItem("timeZone", timeZone);
+        if (timeZone === browserDefaultTimeZone) {
+          state.isBrowserDefaultTimeZone = true;
+        }
       }
     });
   },
 });
 
-export const { setLanguage, setTimeZone, setView } = settingsSlice.actions;
+export const {
+  setLanguage,
+  setTimeZone,
+  setView,
+  setIsBrowserDefaultTimeZone,
+} = settingsSlice.actions;
 export default settingsSlice.reducer;

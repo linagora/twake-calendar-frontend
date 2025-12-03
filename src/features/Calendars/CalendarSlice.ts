@@ -30,6 +30,7 @@ import { User } from "../../components/Attendees/PeopleSearch";
 import { getCalendarVisibility } from "../../components/Calendar/utils/calendarUtils";
 import { importFile } from "../../utils/apiUtils";
 import { formatReduxError } from "../../utils/errorUtils";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 // Define error type for rejected actions
 interface RejectedError {
@@ -790,7 +791,7 @@ const CalendarSlice = createSlice({
                 action.payload.calId;
               if (!state[type][action.payload.calId].events[id].timezone) {
                 state[type][action.payload.calId].events[id].timezone =
-                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  browserDefaultTimeZone;
               }
             }
           );
@@ -826,7 +827,7 @@ const CalendarSlice = createSlice({
                 action.payload.calId;
               if (!state[type][action.payload.calId].events[id].timezone) {
                 state[type][action.payload.calId].events[id].timezone =
-                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+                 browserDefaultTimeZone;
               }
             }
           );
@@ -873,7 +874,7 @@ const CalendarSlice = createSlice({
               action.payload.calId;
             if (!state.list[action.payload.calId].events[id].timezone) {
               state.list[action.payload.calId].events[id].timezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone;
+               browserDefaultTimeZone;
             }
           });
         }

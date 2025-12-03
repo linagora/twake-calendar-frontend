@@ -22,6 +22,7 @@ interface TimezoneAutocompleteProps {
   inputPadding?: string;
   onClose?: () => void;
   disableClearable?: boolean;
+  disabled?: boolean;
 }
 
 export function TimezoneAutocomplete({
@@ -38,6 +39,7 @@ export function TimezoneAutocomplete({
   inputPadding,
   onClose,
   disableClearable = false,
+  disabled = false,
 }: TimezoneAutocompleteProps) {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map((tz) => ({
@@ -60,6 +62,7 @@ export function TimezoneAutocomplete({
         }
       }}
       options={options}
+      disabled={disabled}
       getOptionLabel={(option) => `(${option.offset}) ${option.label}`}
       size={size}
       sx={width ? { width } : undefined}

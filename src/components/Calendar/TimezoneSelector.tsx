@@ -2,6 +2,7 @@ import { Button, Popover } from "@mui/material";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 
@@ -18,7 +19,7 @@ export function TimezoneSelector({
 }: TimezoneSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const timezoneList = getTimeZoneList();
+  const timezoneList = useTimeZoneList();
 
   const effectiveTimezone = value
     ? resolveTimezone(value)
@@ -90,13 +91,13 @@ export function TimezoneSelector({
   );
 }
 
-export function getTimeZoneList() {
-  const zones = Object.keys(TIMEZONES.zones).sort();
-  const browserTz = resolveTimezone(
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
+export function useTimeZoneList() {
+  return useMemo(() => {
+    const zones = Object.keys(TIMEZONES.zones).sort();
+    const browserTz = resolveTimezone(browserDefaultTimeZone);
 
-  return { zones, browserTz, getTimezoneOffset };
+    return { zones, browserTz, getTimezoneOffset };
+  }, []);
 }
 
 export function resolveTimezone(tzName: string): string {

@@ -6,6 +6,9 @@ import ICAL from "ical.js";
 // TIMEZONES data must be imported or defined separately.
 import { TIMEZONES } from "./timezone-data";
 
+export const browserDefaultTimeZone =
+  Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 // Core timezone registration functionality
 export function registerTimezones() {
   for (const [key, data] of Object.entries(TIMEZONES.zones)) {

@@ -13,6 +13,8 @@ import {
   MenuItem,
   Typography,
   Snackbar,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -22,6 +24,7 @@ import {
   setView,
   setLanguage as setSettingsLanguage,
   setTimeZone as setSettingsTimeZone,
+  setIsBrowserDefaultTimeZone,
 } from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
@@ -32,10 +35,11 @@ import { AVAILABLE_LANGUAGES } from "./constants";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import "./SettingsPage.styl";
 import {
-  getTimeZoneList,
+  useTimeZoneList,
   getTimezoneOffset,
 } from "../../components/Calendar/TimezoneSelector";
 import { TimezoneAutocomplete } from "../../components/Timezone/TimezoneAutocomplete";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";
@@ -50,12 +54,15 @@ export default function SettingsPage() {
   const settingsLanguage = useAppSelector((state) => state.settings?.language);
   const currentLanguage = userLanguage || settingsLanguage || "en";
 
-  const timezoneList = getTimeZoneList();
+  const timezoneList = useTimeZoneList();
   const userTimeZone = useAppSelector(
     (state) => state.user?.coreConfig?.datetime?.timeZone
   );
   const settingTimeZone = useAppSelector((state) => state.settings?.timeZone);
   const currentTimeZone = userTimeZone || settingTimeZone || "UTC";
+  const isBrowserDefault = useAppSelector(
+    (state) => state.settings.isBrowserDefaultTimeZone
+  );
 
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
@@ -112,6 +119,28 @@ export default function SettingsPage() {
     // Optimistic update - update UI immediately
     dispatch(setUserTimeZone(newTimeZone));
     dispatch(setSettingsTimeZone(newTimeZone));
+
+    // // Call API in background, don't wait for it
+    // dispatch(
+    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+    // )
+    //   .unwrap()
+    //   .catch((error) => {
+    //     console.error("Failed to update TimeZone:", error);
+    //     // Rollback on error
+    //     dispatch(setUserTimeZone(previousTimeZone));
+    //     dispatch(setSettingsTimeZone(previousTimeZone));
+    //     setTimeZoneErrorOpen(true);
+    //   });
+  };
+
+  const handleTimeZoneDefaultChange = (isDefault: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setIsBrowserDefaultTimeZone(isDefault));
+    if (isDefault) {
+      dispatch(setUserTimeZone(browserDefaultTimeZone));
+      dispatch(setSettingsTimeZone(browserDefaultTimeZone));
+    }
 
     // // Call API in background, don't wait for it
     // dispatch(
@@ -185,7 +214,7 @@ export default function SettingsPage() {
             <>
               {activeSettingsSubTab === "settings" && (
                 <Box className="settings-tab-content">
-                  <Box>
+                  <Box sx={{ mb: 6 }}>
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {t("settings.language") || "Language"}
                     </Typography>
@@ -218,14 +247,31 @@ export default function SettingsPage() {
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {t("settings.timeZone")}
                     </Typography>
-                    <FormControl size="small" sx={{ minWidth: 500 }}>
-                      <TimezoneAutocomplete
-                        value={currentTimeZone}
-                        zones={timezoneList.zones}
-                        getTimezoneOffset={getTimezoneOffset}
-                        onChange={handleTimeZoneChange}
-                      />
-                    </FormControl>
+                    <Box
+                      sx={{
+                        mb: 6,
+                        gap: 2,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 500 }}>
+                        <FormControlLabel
+                          checked={isBrowserDefault}
+                          onChange={() =>
+                            handleTimeZoneDefaultChange(!isBrowserDefault)
+                          }
+                          control={<Checkbox />}
+                          label="settings.timeZoneBrowserDefault"
+                          labelPlacement="start"
+                        />
+                        <TimezoneAutocomplete
+                          value={currentTimeZone}
+                          zones={timezoneList.zones}
+                          getTimezoneOffset={getTimezoneOffset}
+                          onChange={handleTimeZoneChange}
+                          disabled={isBrowserDefault}
+                        />
+                      </FormControl>
+                    </Box>
                   </Box>
                 </Box>
               )}

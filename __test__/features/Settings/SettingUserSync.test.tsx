@@ -4,6 +4,7 @@ import userReducer, {
 } from "../../../src/features/User/userSlice";
 import settingsReducer from "../../../src/features/Settings/SettingsSlice";
 import { api } from "../../../src/utils/apiUtils";
+import { browserDefaultTimeZone } from "../../../src/utils/timezone";
 
 describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
   let apiGetSpy: jest.SpyInstance;
@@ -92,7 +93,7 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
     });
 
     const browserTimezone =
-      Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
+     browserDefaultTimeZone ?? "UTC";
 
     const store = configureStore({
       reducer: { user: userReducer, settings: settingsReducer },

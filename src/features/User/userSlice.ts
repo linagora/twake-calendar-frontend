@@ -6,6 +6,7 @@ import {
   UserConfigurationUpdates,
 } from "./userAPI";
 import { formatReduxError } from "../../utils/errorUtils";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
   Record<string, any>,
@@ -48,7 +49,7 @@ export const userSlice = createSlice({
     coreConfig: {
       language: null as string | null,
       datetime: {
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
+        timeZone:browserDefaultTimeZone ?? "UTC",
       },
     } as Record<string, any>,
     loading: true,

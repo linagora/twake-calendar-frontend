@@ -225,8 +225,7 @@ describe("EventDisplayPreview - Timezone Display", () => {
     for (const { tz, expectedOffset } of timezones) {
       const state = {
         ...baseState,
-        calendars: {
-          ...baseState.calendars,
+        settings: {
           timeZone: tz,
         },
       };
