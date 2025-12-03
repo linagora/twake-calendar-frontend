@@ -38,6 +38,7 @@ export interface UserConfigurationUpdates {
   language?: string;
   notifications?: Record<string, unknown>;
   timezone?: string;
+  previousConfig?: Record<string, any>;
 }
 
 export async function updateUserConfigurations(
@@ -52,7 +53,13 @@ export async function updateUserConfigurations(
     coreConfigs.push({ name: "notifications", value: updates.notifications });
   }
   if (updates.timezone !== undefined) {
-    coreConfigs.push({ name: "timezone", value: updates.timezone });
+    coreConfigs.push({
+      name: "datetime",
+      value: {
+        ...updates.previousConfig?.datetime,
+        timeZone: updates.timezone,
+      },
+    });
   }
 
   if (coreConfigs.length === 0) {
