@@ -49,7 +49,7 @@ export const userSlice = createSlice({
     coreConfig: {
       language: null as string | null,
       datetime: {
-        timeZone:browserDefaultTimeZone ?? "UTC",
+        timeZone: browserDefaultTimeZone ?? "UTC",
       },
     } as Record<string, any>,
     loading: true,

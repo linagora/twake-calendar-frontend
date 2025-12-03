@@ -15,6 +15,7 @@ import {
   Snackbar,
   Checkbox,
   FormControlLabel,
+  Switch,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -255,21 +256,32 @@ export default function SettingsPage() {
                     >
                       <FormControl size="small" sx={{ minWidth: 500 }}>
                         <FormControlLabel
-                          checked={isBrowserDefault}
-                          onChange={() =>
-                            handleTimeZoneDefaultChange(!isBrowserDefault)
+                          control={
+                            <Switch
+                              checked={isBrowserDefault}
+                              onChange={() =>
+                                handleTimeZoneDefaultChange(!isBrowserDefault)
+                              }
+                              aria-label={t("settings.timeZoneBrowserDefault")}
+                            />
                           }
-                          control={<Checkbox />}
-                          label="settings.timeZoneBrowserDefault"
+                          label={t("settings.timeZoneBrowserDefault")}
                           labelPlacement="start"
+                          sx={{
+                            minWidth: 400,
+                            justifyContent: "space-between",
+                            marginLeft: 0,
+                            mb: 2,
+                          }}
                         />
-                        <TimezoneAutocomplete
-                          value={currentTimeZone}
-                          zones={timezoneList.zones}
-                          getTimezoneOffset={getTimezoneOffset}
-                          onChange={handleTimeZoneChange}
-                          disabled={isBrowserDefault}
-                        />
+                        {!isBrowserDefault && (
+                          <TimezoneAutocomplete
+                            value={currentTimeZone}
+                            zones={timezoneList.zones}
+                            getTimezoneOffset={getTimezoneOffset}
+                            onChange={handleTimeZoneChange}
+                          />
+                        )}
                       </FormControl>
                     </Box>
                   </Box>

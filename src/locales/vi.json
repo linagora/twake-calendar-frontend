@@ -211,9 +211,10 @@
     "language": "Ngôn ngữ",
     "languageDescription": "Đây sẽ là ngôn ngữ được sử dụng trong Twake Calendar của bạn",
     "languageSelector": "Chọn ngôn ngữ",
-    "languageUpdateError": "",
+    "languageUpdateError": "Không cập nhật được ngôn ngữ",
     "timeZone": "Múi giờ",
-    "timeZoneUpdateError": "",
+    "timeZoneBrowserDefault": "Tự động phát hiện múi giờ",
+    "timeZoneUpdateError": "Không cập nhật được múi giờ",
     "notifications.empty": "Cài đặt thông báo sắp có",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "back": "Quay lại lịch"

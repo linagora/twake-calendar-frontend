@@ -69,7 +69,7 @@ export default function EventPreviewModal({
   const calendars = useAppSelector((state) => state.calendars);
   const timezone =
     useAppSelector((state) => state.settings.timeZone) ??
-   browserDefaultTimeZone;
+    browserDefaultTimeZone;
   const calendarList = Object.values(
     useAppSelector((state) => state.calendars.list)
   );

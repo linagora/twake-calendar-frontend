@@ -827,7 +827,7 @@ const CalendarSlice = createSlice({
                 action.payload.calId;
               if (!state[type][action.payload.calId].events[id].timezone) {
                 state[type][action.payload.calId].events[id].timezone =
-                 browserDefaultTimeZone;
+                  browserDefaultTimeZone;
               }
             }
           );
@@ -874,7 +874,7 @@ const CalendarSlice = createSlice({
               action.payload.calId;
             if (!state.list[action.payload.calId].events[id].timezone) {
               state.list[action.payload.calId].events[id].timezone =
-               browserDefaultTimeZone;
+                browserDefaultTimeZone;
             }
           });
         }

@@ -92,8 +92,7 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
       json: async () => mockUserData,
     });
 
-    const browserTimezone =
-     browserDefaultTimeZone ?? "UTC";
+    const browserTimezone = browserDefaultTimeZone ?? "UTC";
 
     const store = configureStore({
       reducer: { user: userReducer, settings: settingsReducer },

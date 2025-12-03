@@ -211,9 +211,10 @@
     "language": "Langue",
     "languageDescription": "Ce sera la langue utilisée dans votre Twake Calendar",
     "languageSelector": "Sélecteur de langue",
-    "languageUpdateError": "",
+    "languageUpdateError": "Échec de la mise à jour de la langue",
     "timeZone": "Fuseau horaire",
-    "timeZoneUpdateError": "",
+    "timeZoneBrowserDefault": "Détection automatique du fuseau horaire",
+    "timeZoneUpdateError": "Échec de la mise à jour du fuseau horaire",
     "notifications.empty": "Paramètres de notifications à venir",
     "sync.empty": "Paramètres de synchronisation à venir",
     "back": "Retour au calendrier"

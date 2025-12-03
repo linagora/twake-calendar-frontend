@@ -85,17 +85,14 @@ function EventPopover({
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(
-     browserDefaultTimeZone
-    );
+    const browserTz = resolveTimezone(browserDefaultTimeZone);
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
 
   const calendarTimezone = useAppSelector((state) => state.settings.timeZone);
   const resolvedCalendarTimezone = useMemo(() => {
-    const tz =
-      calendarTimezone ||browserDefaultTimeZone;
+    const tz = calendarTimezone || browserDefaultTimeZone;
     return resolveTimezone(tz);
   }, [calendarTimezone]);
 

@@ -14,11 +14,12 @@ const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
 const savedTimeZone = localStorage.getItem("timeZone");
 const defaultTimeZone = savedTimeZone ?? browserDefaultTimeZone ?? "UTC";
+const isSavedTimeZoneBrowserDefault = savedTimeZone === browserDefaultTimeZone;
 
 const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
-  isBrowserDefaultTimeZone: false,
+  isBrowserDefaultTimeZone: isSavedTimeZoneBrowserDefault,
   view: "calendar",
 };
 
