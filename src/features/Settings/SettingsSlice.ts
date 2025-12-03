@@ -14,12 +14,13 @@ const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
 const savedTimeZone = localStorage.getItem("timeZone");
 const defaultTimeZone = savedTimeZone ?? browserDefaultTimeZone ?? "UTC";
-const isSavedTimeZoneBrowserDefault = savedTimeZone === browserDefaultTimeZone;
+const isInitialBrowserDefaultTimeZone =
+  defaultTimeZone === browserDefaultTimeZone;
 
 const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
-  isBrowserDefaultTimeZone: isSavedTimeZoneBrowserDefault,
+  isBrowserDefaultTimeZone: isInitialBrowserDefaultTimeZone,
   view: "calendar",
 };
 
@@ -58,9 +59,7 @@ export const settingsSlice = createSlice({
       if (timeZone) {
         state.timeZone = timeZone;
         localStorage.setItem("timeZone", timeZone);
-        if (timeZone === browserDefaultTimeZone) {
-          state.isBrowserDefaultTimeZone = true;
-        }
+        state.isBrowserDefaultTimeZone = timeZone === browserDefaultTimeZone;
       }
     });
   },

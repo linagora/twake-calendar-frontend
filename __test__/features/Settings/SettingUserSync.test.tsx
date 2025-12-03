@@ -24,7 +24,7 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
       id: "667037022b752d0026472254",
       firstname: "John",
       lastname: "Doe",
-      preferredEmail: "[test@test.com](mailto:test@test.com)",
+      preferredEmail: ["test@test.com"],
       configurations: {
         modules: [
           {
