@@ -60,7 +60,7 @@ describe("updateUserConfigurations", () => {
           name: "core",
           configurations: [
             { name: "language", value: "fr" },
-            { name: "timezone", value: "Europe/Paris" },
+            { name: "datetime", value: { timeZone: "Europe/Paris" } },
           ],
         },
       ],

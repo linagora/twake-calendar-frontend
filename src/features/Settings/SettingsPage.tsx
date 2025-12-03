@@ -43,12 +43,17 @@ type SettingsSubTab = "settings" | "notifications";
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  const userLanguage = useAppSelector((state) => state.user?.language);
+  // const previousConfig = useAppSelector((state) => state.user.coreConfig);
+  const userLanguage = useAppSelector(
+    (state) => state.user?.coreConfig.language
+  );
   const settingsLanguage = useAppSelector((state) => state.settings?.language);
   const currentLanguage = userLanguage || settingsLanguage || "en";
 
   const timezoneList = getTimeZoneList();
-  const userTimeZone = useAppSelector((state) => state.user?.timezone);
+  const userTimeZone = useAppSelector(
+    (state) => state.user?.coreConfig?.datetime?.timeZone
+  );
   const settingTimeZone = useAppSelector((state) => state.settings?.timeZone);
   const currentTimeZone = userTimeZone || settingTimeZone || "UTC";
 
@@ -109,7 +114,9 @@ export default function SettingsPage() {
     dispatch(setSettingsTimeZone(newTimeZone));
 
     // // Call API in background, don't wait for it
-    // dispatch(updateUserConfigurationsAsync({ timezone: newTimeZone }))
+    // dispatch(
+    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+    // )
     //   .unwrap()
     //   .catch((error) => {
     //     console.error("Failed to update TimeZone:", error);
@@ -117,7 +124,7 @@ export default function SettingsPage() {
     //     dispatch(setUserTimeZone(previousTimeZone));
     //     dispatch(setSettingsTimeZone(previousTimeZone));
     //     setTimeZoneErrorOpen(true);
-    // });
+    //   });
   };
 
   const handleTimeZoneErrorClose = () => {

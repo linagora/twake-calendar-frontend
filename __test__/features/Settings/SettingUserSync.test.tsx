@@ -56,8 +56,7 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
           },
           organiserData: null,
           tokens: null,
-          language: "en",
-          timezone: "UTC",
+          coreConfig: { language: "en", datetime: { timeZone: "UTC" } },
           loading: false,
           error: null,
         },
@@ -70,9 +69,8 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
     expect(result.type).toBe("user/getOpenPaasUserData/fulfilled");
 
     const state = store.getState();
-    expect(state.user.timezone).toBe("Europe/Paris");
+    expect(state.user.coreConfig.datetime.timeZone).toBe("Europe/Paris");
     expect(state.settings.timeZone).toBe("Europe/Paris");
-    expect(state.user.userData.timezone).toBe("Europe/Paris");
     expect(localStorage.getItem("timeZone")).toBe("Europe/Paris");
   });
 
@@ -110,8 +108,10 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
           },
           organiserData: null,
           tokens: null,
-          language: "en",
-          timezone: browserTimezone,
+          coreConfig: {
+            language: "en",
+            datetime: { timeZone: browserTimezone },
+          },
           loading: false,
           error: null,
         },
@@ -128,7 +128,7 @@ describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
     expect(result.type).toBe("user/getOpenPaasUserData/fulfilled");
 
     const state = store.getState();
-    expect(state.user.timezone).toBe(browserTimezone);
+    expect(state.user.coreConfig.datetime.timeZone).toBe(browserTimezone);
     expect(state.settings.timeZone).toBe(browserTimezone);
   });
 });

@@ -24,7 +24,7 @@ describe("SettingsPage", () => {
       },
       organiserData: null,
       tokens: null,
-      language: "en",
+      coreConfig: { language: "en" },
       loading: false,
       error: null,
     },
@@ -108,7 +108,7 @@ describe("SettingsPage", () => {
         },
         organiserData: null,
         tokens: null,
-        language: "fr",
+        coreConfig: { language: "fr" },
         loading: false,
         error: null,
       },
@@ -155,7 +155,7 @@ describe("SettingsPage", () => {
     // Language should be updated immediately (optimistic update)
     await waitFor(() => {
       const state = store.getState();
-      expect(state.user?.language).toBe("fr");
+      expect(state.user?.coreConfig.language).toBe("fr");
       expect(state.settings.language).toBe("fr");
     });
 
@@ -227,7 +227,7 @@ describe("SettingsPage", () => {
     await waitFor(
       () => {
         const state = store.getState();
-        expect(state.user?.language).toBe("en");
+        expect(state.user?.coreConfig.language).toBe("en");
         expect(state.settings.language).toBe("en");
       },
       { timeout: 3000 }
@@ -267,8 +267,10 @@ describe("SettingsPage", () => {
           },
           organiserData: null,
           tokens: null,
-          language: "en",
-          timezone: "America/New_York",
+          coreConfig: {
+            language: "en",
+            datetime: { timeZone: "America/New_York" },
+          },
           loading: false,
           error: null,
         },
@@ -299,7 +301,7 @@ describe("SettingsPage", () => {
       // Timezone should be updated immediately (optimistic update)
       await waitFor(() => {
         const state = store.getState();
-        expect(state.user?.timezone).toBe("Europe/Paris");
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("Europe/Paris");
         expect(state.settings.timeZone).toBe("Europe/Paris");
       });
     });
@@ -316,7 +318,7 @@ describe("SettingsPage", () => {
 
       await waitFor(() => {
         const state = store.getState();
-        expect(state.user?.timezone).toBe("Asia/Tokyo");
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("Asia/Tokyo");
         expect(state.settings.timeZone).toBe("Asia/Tokyo");
       });
 
@@ -329,7 +331,9 @@ describe("SettingsPage", () => {
 
       await waitFor(() => {
         const state = store.getState();
-        expect(state.user?.timezone).toBe("America/Los_Angeles");
+        expect(state.user?.coreConfig.datetime.timeZone).toBe(
+          "America/Los_Angeles"
+        );
         expect(state.settings.timeZone).toBe("America/Los_Angeles");
       });
     });
@@ -347,8 +351,7 @@ describe("SettingsPage", () => {
           },
           organiserData: null,
           tokens: null,
-          language: "en",
-          timezone: undefined,
+          coreConfig: { language: "en", datetime: { timeZone: undefined } },
           loading: false,
           error: null,
         },

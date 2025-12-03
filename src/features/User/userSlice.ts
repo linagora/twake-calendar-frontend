@@ -45,8 +45,12 @@ export const userSlice = createSlice({
     userData: null as unknown as userData,
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
-    language: null as string | null,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
+    coreConfig: {
+      language: null as string | null,
+      datetime: {
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC",
+      },
+    } as Record<string, any>,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -64,16 +68,16 @@ export const userSlice = createSlice({
       state.tokens = action.payload;
     },
     setLanguage: (state, action) => {
-      state.language = action.payload;
+      state.coreConfig.language = action.payload;
       if (state.userData) {
         state.userData.language = action.payload;
       }
     },
     setTimezone: (state, action) => {
-      state.timezone = action.payload;
-      if (state.userData) {
-        state.userData.timezone = action.payload;
+      if (!state.coreConfig.datetime) {
+        state.coreConfig.datetime = {};
       }
+      state.coreConfig.datetime.timeZone = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -103,18 +107,33 @@ export const userSlice = createSlice({
             (module: any) => module.name === "core"
           );
           if (coreModule?.configurations) {
+            const newCoreConfig = Object.fromEntries(
+              coreModule.configurations.map(
+                (e: { name: string; value: any }) => [e.name, e.value]
+              )
+            );
+
+            state.coreConfig = {
+              ...state.coreConfig,
+              ...newCoreConfig,
+            };
             const languageConfig = coreModule.configurations.find(
               (config: any) => config.name === "language"
             );
             if (languageConfig?.value) {
-              state.language = languageConfig.value;
-              state.userData.language = languageConfig.value;
+              state.coreConfig.language = languageConfig.value;
+              if (state.userData)
+                state.userData.language = languageConfig.value;
             }
+
             const datetimeConfig = coreModule.configurations.find(
               (config: any) => config.name === "datetime"
             );
             if (datetimeConfig?.value) {
-              state.timezone = datetimeConfig.value.timeZone;
+              state.coreConfig.datetime = {
+                ...state.coreConfig.datetime,
+                ...datetimeConfig.value,
+              };
               state.userData.timezone = datetimeConfig.value.timeZone;
             }
           }
@@ -132,7 +151,7 @@ export const userSlice = createSlice({
       })
       .addCase(updateUserConfigurationsAsync.fulfilled, (state, action) => {
         if (action.payload.language !== undefined) {
-          state.language = action.payload.language;
+          state.coreConfig.language = action.payload.language;
           if (state.userData) {
             state.userData.language = action.payload.language;
           }
