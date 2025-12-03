@@ -212,7 +212,9 @@
     "language": "Language",
     "languageDescription": "This will be the language used in your Twake Calendar",
     "languageSelector": "Language selector",
-    "notifications.empty": "Notifications settings coming soon",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Delivery method",
+    "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "sync.empty": "Sync settings coming soon",
     "back": "Back to calendar"
   },

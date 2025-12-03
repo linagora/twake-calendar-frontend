@@ -212,7 +212,9 @@
     "language": "Язык",
     "languageDescription": "Это будет язык, используемый в вашем Twake Calendar",
     "languageSelector": "Выбор языка",
-    "notifications.empty": "Настройки уведомлений скоро появятся",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Способ доставки",
+    "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
     "sync.empty": "Настройки синхронизации скоро появятся",
     "back": "Вернуться к календарю"
   },
