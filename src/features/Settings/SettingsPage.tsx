@@ -13,8 +13,8 @@ import {
   MenuItem,
   Typography,
   Snackbar,
-  FormControlLabel,
   Switch,
+  FormControlLabel,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -30,6 +30,7 @@ import {
   updateUserConfigurationsAsync,
   setLanguage as setUserLanguage,
   setTimezone as setUserTimeZone,
+  setAlarmEmails,
 } from "../User/userSlice";
 import { AVAILABLE_LANGUAGES } from "./constants";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
@@ -64,13 +65,16 @@ export default function SettingsPage() {
   const isBrowserDefault = useAppSelector(
     (state) => state.settings.isBrowserDefaultTimeZone
   );
-
+  const alarmEmailsEnabled = useAppSelector(
+    (state) => state.user?.alarmEmailsEnabled ?? true
+  );
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
+  const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -162,6 +166,30 @@ export default function SettingsPage() {
 
   const handleTimeZoneErrorClose = () => {
     setTimeZoneErrorOpen(false);
+  };
+
+  const handleAlarmEmailsToggle = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newValue = event.target.checked;
+    const previousValue = alarmEmailsEnabled;
+
+    // Optimistic update - update UI immediately
+    dispatch(setAlarmEmails(newValue));
+
+    // Call API in background, don't wait for it
+    dispatch(updateUserConfigurationsAsync({ alarmEmails: newValue }))
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update alarm emails:", error);
+        // Rollback on error
+        dispatch(setAlarmEmails(previousValue));
+        setAlarmEmailsErrorOpen(true);
+      });
+  };
+
+  const handleAlarmEmailsErrorClose = () => {
+    setAlarmEmailsErrorOpen(false);
   };
 
   return (
@@ -291,10 +319,32 @@ export default function SettingsPage() {
               )}
               {activeSettingsSubTab === "notifications" && (
                 <Box className="settings-tab-content">
-                  <Typography variant="body1" color="text.secondary">
-                    {t("settings.notifications.empty") ||
-                      "Notifications settings coming soon"}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 3 }}
+                  >
+                    {t("settings.notifications.deliveryMethod") ||
+                      "Delivery method"}
                   </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={alarmEmailsEnabled}
+                        onChange={handleAlarmEmailsToggle}
+                        aria-label={
+                          t("settings.notifications.email") || "Email"
+                        }
+                      />
+                    }
+                    label={t("settings.notifications.email") || "Email"}
+                    labelPlacement="start"
+                    sx={{
+                      minWidth: 400,
+                      justifyContent: "space-between",
+                      marginLeft: 0,
+                    }}
+                  />
                 </Box>
               )}
             </>
@@ -321,6 +371,15 @@ export default function SettingsPage() {
         autoHideDuration={4000}
         onClose={handleTimeZoneErrorClose}
         message={t("settings.timeZoneUpdateError")}
+      />
+      <Snackbar
+        open={alarmEmailsErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleAlarmEmailsErrorClose}
+        message={
+          t("settings.alarmEmailsUpdateError") ||
+          "Failed to update email notifications setting"
+        }
       />
     </main>
   );

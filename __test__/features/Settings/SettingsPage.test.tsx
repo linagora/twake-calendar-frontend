@@ -28,6 +28,7 @@ describe("SettingsPage", () => {
         language: "en",
         datetime: { timeZone: "UTC" },
       },
+      alarmEmailsEnabled: false,
       loading: false,
       error: null,
     },
@@ -90,7 +91,7 @@ describe("SettingsPage", () => {
     fireEvent.click(notificationsTab);
 
     expect(
-      screen.getByText(/settings.notifications.empty/i)
+      screen.getByText(/settings.notifications.deliveryMethod/i)
     ).toBeInTheDocument();
   });
 
@@ -253,7 +254,7 @@ describe("SettingsPage", () => {
     );
   });
 
-  it("shows empty state in Notifications tab", () => {
+  it("shows Email toggle in Notifications tab", () => {
     renderWithProviders(<SettingsPage />, preloadedState);
 
     const notificationsTab = screen.getByRole("tab", {
@@ -262,7 +263,10 @@ describe("SettingsPage", () => {
     fireEvent.click(notificationsTab);
 
     expect(
-      screen.getByText("settings.notifications.empty")
+      screen.getByText(/settings.notifications.deliveryMethod/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: /settings.notifications.email/i })
     ).toBeInTheDocument();
   });
 
@@ -656,6 +660,182 @@ describe("SettingsPage", () => {
             ]),
           })
         );
+      });
+    });
+
+    describe("Alarm Emails Settings", () => {
+      beforeEach(() => {
+        (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+      });
+
+      it("displays alarmEmails toggle with correct initial state", () => {
+        const stateWithAlarmEmailsEnabled = {
+          ...preloadedState,
+          user: {
+            ...preloadedState.user,
+            alarmEmailsEnabled: true,
+          },
+        };
+        renderWithProviders(<SettingsPage />, stateWithAlarmEmailsEnabled);
+
+        const notificationsTab = screen.getByRole("tab", {
+          name: /settings.notifications/i,
+        });
+        fireEvent.click(notificationsTab);
+
+        const toggle = screen.getByRole("switch", {
+          name: /settings.notifications.email/i,
+        }) as HTMLInputElement;
+        expect(toggle).toBeInTheDocument();
+        expect(toggle.checked).toBe(true);
+      });
+
+      it("displays alarmEmails toggle as true when alarmEmailsEnabled is null", () => {
+        const stateWithNullAlarmEmails = {
+          ...preloadedState,
+          user: {
+            ...preloadedState.user,
+            alarmEmailsEnabled: null,
+          },
+        };
+        renderWithProviders(<SettingsPage />, stateWithNullAlarmEmails);
+
+        const notificationsTab = screen.getByRole("tab", {
+          name: /settings.notifications/i,
+        });
+        fireEvent.click(notificationsTab);
+
+        const toggle = screen.getByRole("switch", {
+          name: /settings.notifications.email/i,
+        }) as HTMLInputElement;
+        expect(toggle).toBeInTheDocument();
+        expect(toggle.checked).toBe(true);
+      });
+
+      it("updates alarmEmails immediately (optimistic update) and calls API in background", async () => {
+        (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+
+        const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+        const notificationsTab = screen.getByRole("tab", {
+          name: /settings.notifications/i,
+        });
+        fireEvent.click(notificationsTab);
+
+        const toggle = screen.getByRole("switch", {
+          name: /settings.notifications.email/i,
+        }) as HTMLInputElement;
+        expect(toggle.checked).toBe(false);
+
+        fireEvent.click(toggle);
+
+        // AlarmEmails should be updated immediately (optimistic update)
+        await waitFor(() => {
+          const state = store.getState();
+          expect(state.user?.alarmEmailsEnabled).toBe(true);
+        });
+
+        // API should be called in background
+        await waitFor(() => {
+          expect(api.patch).toHaveBeenCalledWith(
+            "api/configurations?scope=user",
+            expect.objectContaining({
+              json: expect.arrayContaining([
+                expect.objectContaining({
+                  name: "calendar",
+                  configurations: expect.arrayContaining([
+                    expect.objectContaining({
+                      name: "alarmEmails",
+                      value: true,
+                    }),
+                  ]),
+                }),
+              ]),
+            })
+          );
+        });
+      });
+
+      it("rolls back alarmEmails change if API call fails", async () => {
+        (api.patch as jest.Mock).mockRejectedValue(new Error("API Error"));
+
+        const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+        const notificationsTab = screen.getByRole("tab", {
+          name: /settings.notifications/i,
+        });
+        fireEvent.click(notificationsTab);
+
+        const toggle = screen.getByRole("switch", {
+          name: /settings.notifications.email/i,
+        }) as HTMLInputElement;
+        expect(toggle.checked).toBe(false);
+
+        fireEvent.click(toggle);
+
+        // Wait for rollback - alarmEmails should be rolled back to false after error
+        await waitFor(
+          () => {
+            const state = store.getState();
+            expect(state.user?.alarmEmailsEnabled).toBe(false);
+          },
+          { timeout: 3000 }
+        );
+      });
+
+      it("sends false value when toggle is turned off", async () => {
+        (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+
+        const stateWithAlarmEmailsEnabled = {
+          ...preloadedState,
+          user: {
+            ...preloadedState.user,
+            alarmEmailsEnabled: true,
+          },
+        };
+
+        const { store } = renderWithProviders(
+          <SettingsPage />,
+          stateWithAlarmEmailsEnabled
+        );
+
+        const notificationsTab = screen.getByRole("tab", {
+          name: /settings.notifications/i,
+        });
+        fireEvent.click(notificationsTab);
+
+        const toggle = screen.getByRole("switch", {
+          name: /settings.notifications.email/i,
+        }) as HTMLInputElement;
+        expect(toggle.checked).toBe(true);
+
+        fireEvent.click(toggle);
+
+        // AlarmEmails should be updated immediately (optimistic update)
+        await waitFor(() => {
+          const state = store.getState();
+          expect(state.user?.alarmEmailsEnabled).toBe(false);
+        });
+
+        // API should be called with false value
+        await waitFor(() => {
+          expect(api.patch).toHaveBeenCalledWith(
+            "api/configurations?scope=user",
+            expect.objectContaining({
+              json: expect.arrayContaining([
+                expect.objectContaining({
+                  name: "calendar",
+                  configurations: expect.arrayContaining([
+                    expect.objectContaining({
+                      name: "alarmEmails",
+                      value: false,
+                    }),
+                  ]),
+                }),
+              ]),
+            })
+          );
+        });
       });
     });
   });
