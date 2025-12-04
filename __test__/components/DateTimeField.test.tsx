@@ -84,8 +84,7 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[0]);
+    await userEvent.click(screen.getByTestId("start-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "3" });
     await userEvent.click(dayButton);
 
@@ -129,8 +128,7 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[2]);
+    await userEvent.click(screen.getByTestId("end-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "3" });
     await userEvent.click(dayButton);
 
@@ -151,8 +149,7 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[0]);
+    await userEvent.click(screen.getByTestId("start-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "10" });
     await userEvent.click(dayButton);
 
@@ -173,8 +170,7 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[1]);
+    await userEvent.click(screen.getByTestId("end-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "1" });
     await userEvent.click(dayButton);
 
