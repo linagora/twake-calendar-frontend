@@ -221,6 +221,8 @@
     "notifications.deliveryMethod": "Delivery method",
     "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "sync.empty": "Sync settings coming soon",
+    "calAndEvent": "Calendar and events",
+    "hideDeclinedEvent": "Show declined events",
     "back": "Back to calendar"
   },
   "eventPreview": {

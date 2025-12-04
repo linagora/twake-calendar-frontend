@@ -138,7 +138,9 @@ export const eventToFullCalendarFormat = (
 
 export const extractEvents = (
   selectedCalendars: string[],
-  calendars: Record<string, Calendars>
+  calendars: Record<string, Calendars>,
+  userAdress?: string,
+  hideDeclinedEvents?: boolean | null
 ) => {
   let filteredEvents: CalendarEvent[] = [];
   selectedCalendars.forEach((id) => {
@@ -149,7 +151,15 @@ export const extractEvents = (
             (eventid) => calendars[id].events[eventid]
           )
         )
-        .filter((event) => !(event.status === "CANCELLED"));
+        .filter((event) => !(event.status === "CANCELLED"))
+        .filter(
+          (event) =>
+            !(
+              hideDeclinedEvents &&
+              event.attendee.find((a) => a.cal_address === userAdress)
+                ?.partstat === "DECLINED"
+            )
+        );
     }
   });
   return filteredEvents;
