@@ -267,6 +267,20 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     inputProps: { "data-testid": testId },
   });
 
+  const [isStartTimeOpen, setIsStartTimeOpen] = React.useState(false);
+  const [isEndTimeOpen, setIsEndTimeOpen] = React.useState(false);
+
+  const handleTimeInputClick = (
+    event: React.MouseEvent,
+    setOpen: (open: boolean) => void
+  ) => {
+    // Only open if clicking on the text (span)
+    // In MUI X v6+, the sections are rendered as spans
+    if ((event.target as HTMLElement).tagName === "SPAN") {
+      setOpen(true);
+    }
+  };
+
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
@@ -305,7 +319,22 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     ampm={false}
                     value={startTimeValue}
                     onChange={handleStartTimeChange}
-                    slotProps={getSlotProps("start-time-input")}
+                    open={isStartTimeOpen}
+                    onClose={() => setIsStartTimeOpen(false)}
+                    slotProps={{
+                      ...getSlotProps("start-time-input"),
+                      openPickerButton: { sx: { display: "none" } },
+                      textField: {
+                        ...getSlotProps("start-time-input").textField,
+                        onClick: (e) =>
+                          handleTimeInputClick(e, setIsStartTimeOpen),
+                        sx: {
+                          "& .MuiPickersSectionList-section": {
+                            cursor: "pointer",
+                          },
+                        },
+                      },
+                    }}
                   />
                 </Box>
               )}
@@ -319,7 +348,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   onChange={handleEndDateChange}
                   slots={{ field: ReadOnlyDateField }}
                   slotProps={{
-                    ...getSlotProps("end-date-input", !!validation.errors.dateTime),
+                    ...getSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime
+                    ),
                     field: getFieldSlotProps(
                       "end-date-input",
                       !!validation.errors.dateTime
@@ -334,10 +366,28 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     ampm={false}
                     value={endTimeValue}
                     onChange={handleEndTimeChange}
-                    slotProps={getSlotProps(
-                      "end-time-input",
-                      !!validation.errors.dateTime
-                    )}
+                    open={isEndTimeOpen}
+                    onClose={() => setIsEndTimeOpen(false)}
+                    slotProps={{
+                      ...getSlotProps(
+                        "end-time-input",
+                        !!validation.errors.dateTime
+                      ),
+                      openPickerButton: { sx: { display: "none" } },
+                      textField: {
+                        ...getSlotProps(
+                          "end-time-input",
+                          !!validation.errors.dateTime
+                        ).textField,
+                        onClick: (e) =>
+                          handleTimeInputClick(e, setIsEndTimeOpen),
+                        sx: {
+                          "& .MuiPickersSectionList-section": {
+                            cursor: "pointer",
+                          },
+                        },
+                      },
+                    }}
                   />
                 </Box>
               )}
@@ -366,7 +416,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 onChange={handleEndDateChange}
                 slots={{ field: ReadOnlyDateField }}
                 slotProps={{
-                  ...getSlotProps("end-date-input", !!validation.errors.dateTime),
+                  ...getSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime
+                  ),
                   field: getFieldSlotProps(
                     "end-date-input",
                     !!validation.errors.dateTime
@@ -397,7 +450,21 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 value={startTimeValue}
                 onChange={handleStartTimeChange}
                 disabled={allday}
-                slotProps={getSlotProps("start-time-input")}
+                open={isStartTimeOpen}
+                onClose={() => setIsStartTimeOpen(false)}
+                slotProps={{
+                  ...getSlotProps("start-time-input"),
+                  openPickerButton: { sx: { display: "none" } },
+                  textField: {
+                    ...getSlotProps("start-time-input").textField,
+                    onClick: (e) => handleTimeInputClick(e, setIsStartTimeOpen),
+                    sx: {
+                      "& .MuiPickersSectionList-section": {
+                        cursor: "pointer",
+                      },
+                    },
+                  },
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
@@ -407,6 +474,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 value={endTimeValue}
                 onChange={handleEndTimeChange}
                 disabled={allday}
+                open={isEndTimeOpen}
+                onClose={() => setIsEndTimeOpen(false)}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -414,9 +483,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     fullWidth: true,
                     InputLabelProps: { shrink: true },
                     error: !!validation.errors.dateTime,
-                    sx: { width: "100%" },
                     inputProps: { "data-testid": "end-time-input" },
+                    onClick: (e) => handleTimeInputClick(e, setIsEndTimeOpen),
+                    sx: {
+                      width: "100%",
+                      "& .MuiPickersSectionList-section": {
+                        cursor: "pointer",
+                      },
+                    },
                   },
+                  openPickerButton: { sx: { display: "none" } },
                 }}
               />
             </Box>
