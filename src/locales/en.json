@@ -212,6 +212,10 @@
     "language": "Language",
     "languageDescription": "This will be the language used in your Twake Calendar",
     "languageSelector": "Language selector",
+    "languageUpdateError": "Failed to update language",
+    "timeZone": "Timezone",
+    "timeZoneBrowserDefault": "Detect time zone automatically",
+    "timeZoneUpdateError": "Failed to update time zone",
     "notifications.empty": "Notifications settings coming soon",
     "sync.empty": "Sync settings coming soon",
     "back": "Back to calendar"

@@ -13,19 +13,33 @@ import {
   MenuItem,
   Typography,
   Snackbar,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
-import SyncIcon from "@mui/icons-material/Sync";
+// import SyncIcon from "@mui/icons-material/Sync";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setView, setLanguage as setSettingsLanguage } from "./SettingsSlice";
+import {
+  setView,
+  setLanguage as setSettingsLanguage,
+  setTimeZone as setSettingsTimeZone,
+  setIsBrowserDefaultTimeZone,
+} from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
   setLanguage as setUserLanguage,
+  setTimezone as setUserTimeZone,
 } from "../User/userSlice";
 import { AVAILABLE_LANGUAGES } from "./constants";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import "./SettingsPage.styl";
+import {
+  useTimeZoneList,
+  getTimezoneOffset,
+} from "../../components/Calendar/TimezoneSelector";
+import { TimezoneAutocomplete } from "../../components/Timezone/TimezoneAutocomplete";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";
@@ -33,14 +47,30 @@ type SettingsSubTab = "settings" | "notifications";
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  const userLanguage = useAppSelector((state) => state.user?.language);
+  // const previousConfig = useAppSelector((state) => state.user.coreConfig);
+  const userLanguage = useAppSelector(
+    (state) => state.user?.coreConfig.language
+  );
   const settingsLanguage = useAppSelector((state) => state.settings?.language);
   const currentLanguage = userLanguage || settingsLanguage || "en";
+
+  const timezoneList = useTimeZoneList();
+  const userTimeZone = useAppSelector(
+    (state) => state.user?.coreConfig?.datetime?.timeZone
+  );
+  const settingTimeZone = useAppSelector((state) => state.settings?.timeZone);
+  const currentTimeZone =
+    userTimeZone ?? settingTimeZone ?? browserDefaultTimeZone;
+  const isBrowserDefault = useAppSelector(
+    (state) => state.settings.isBrowserDefaultTimeZone
+  );
+
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
+  const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -82,6 +112,53 @@ export default function SettingsPage() {
 
   const handleLanguageErrorClose = () => {
     setLanguageErrorOpen(false);
+  };
+
+  const handleTimeZoneChange = (newTimeZone: string) => {
+    // const previousTimeZone = currentTimeZone;
+
+    // Optimistic update - update UI immediately
+    dispatch(setUserTimeZone(newTimeZone));
+    dispatch(setSettingsTimeZone(newTimeZone));
+
+    // // Call API in background, don't wait for it
+    // dispatch(
+    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+    // )
+    //   .unwrap()
+    //   .catch((error) => {
+    //     console.error("Failed to update TimeZone:", error);
+    //     // Rollback on error
+    //     dispatch(setUserTimeZone(previousTimeZone));
+    //     dispatch(setSettingsTimeZone(previousTimeZone));
+    //     setTimeZoneErrorOpen(true);
+    //   });
+  };
+
+  const handleTimeZoneDefaultChange = (isDefault: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setIsBrowserDefaultTimeZone(isDefault));
+    if (isDefault) {
+      dispatch(setUserTimeZone(null));
+      dispatch(setSettingsTimeZone(browserDefaultTimeZone));
+    }
+
+    // // Call API in background, don't wait for it
+    // dispatch(
+    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+    // )
+    //   .unwrap()
+    //   .catch((error) => {
+    //     console.error("Failed to update TimeZone:", error);
+    //     // Rollback on error
+    //     dispatch(setUserTimeZone(previousTimeZone));
+    //     dispatch(setSettingsTimeZone(previousTimeZone));
+    //     setTimeZoneErrorOpen(true);
+    //   });
+  };
+
+  const handleTimeZoneErrorClose = () => {
+    setTimeZoneErrorOpen(false);
   };
 
   return (
@@ -138,33 +215,75 @@ export default function SettingsPage() {
             <>
               {activeSettingsSubTab === "settings" && (
                 <Box className="settings-tab-content">
-                  <Typography variant="h6" sx={{ mb: 1 }}>
-                    {t("settings.language") || "Language"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 3 }}
-                  >
-                    {t("settings.languageDescription") ||
-                      "This will be the language used in your Twake Calendar"}
-                  </Typography>
-                  <FormControl size="small" sx={{ minWidth: 500 }}>
-                    <Select
-                      value={currentLanguage}
-                      onChange={handleLanguageChange}
-                      variant="outlined"
-                      aria-label={
-                        t("settings.languageSelector") || "Language selector"
-                      }
+                  <Box sx={{ mb: 6 }}>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {t("settings.language") || "Language"}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 3 }}
                     >
-                      {AVAILABLE_LANGUAGES.map(({ code, label }) => (
-                        <MenuItem key={code} value={code}>
-                          {label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      {t("settings.languageDescription") ||
+                        "This will be the language used in your Twake Calendar"}
+                    </Typography>
+                    <FormControl size="small" sx={{ minWidth: 500 }}>
+                      <Select
+                        value={currentLanguage}
+                        onChange={handleLanguageChange}
+                        variant="outlined"
+                        aria-label={
+                          t("settings.languageSelector") || "Language selector"
+                        }
+                      >
+                        {AVAILABLE_LANGUAGES.map(({ code, label }) => (
+                          <MenuItem key={code} value={code}>
+                            {label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {t("settings.timeZone")}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mb: 6,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 500 }}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={isBrowserDefault}
+                              onChange={() =>
+                                handleTimeZoneDefaultChange(!isBrowserDefault)
+                              }
+                              aria-label={t("settings.timeZoneBrowserDefault")}
+                            />
+                          }
+                          label={t("settings.timeZoneBrowserDefault")}
+                          labelPlacement="start"
+                          sx={{
+                            minWidth: 400,
+                            justifyContent: "space-between",
+                            marginLeft: 0,
+                            mb: 2,
+                          }}
+                        />
+                        {!isBrowserDefault && (
+                          <TimezoneAutocomplete
+                            value={currentTimeZone}
+                            zones={timezoneList.zones}
+                            getTimezoneOffset={getTimezoneOffset}
+                            onChange={handleTimeZoneChange}
+                          />
+                        )}
+                      </FormControl>
+                    </Box>
+                  </Box>
                 </Box>
               )}
               {activeSettingsSubTab === "notifications" && (
@@ -193,6 +312,12 @@ export default function SettingsPage() {
         message={
           t("settings.languageUpdateError") || "Failed to update language"
         }
+      />
+      <Snackbar
+        open={timeZoneErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleTimeZoneErrorClose}
+        message={t("settings.timeZoneUpdateError")}
       />
     </main>
   );

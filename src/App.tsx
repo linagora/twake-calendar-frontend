@@ -41,7 +41,9 @@ const isValidLanguage = (
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
-  const userLanguage = useAppSelector((state) => state.user.language);
+  const userLanguage = useAppSelector(
+    (state) => state.user.coreConfig.language
+  );
   const settingsLanguage = useAppSelector((state) => state.settings.language);
   const savedLang = localStorage.getItem("lang");
   const defaultLang = (window as any).LANG;

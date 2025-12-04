@@ -41,6 +41,7 @@ import {
   EventFormState,
   EventFormContext,
 } from "../../utils/eventFormTempStorage";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 function EventUpdateModal({
   eventId,
@@ -114,9 +115,7 @@ function EventUpdateModal({
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
+    const browserTz = resolveTimezone(browserDefaultTimeZone);
 
     const getTimezoneOffset = (tzName: string): string => {
       const resolvedTz = resolveTimezone(tzName);
@@ -161,7 +160,7 @@ function EventUpdateModal({
   const [busy, setBusy] = useState("OPAQUE");
   const [eventClass, setEventClass] = useState("PUBLIC");
   const [timezone, setTimezone] = useState(
-    resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    resolveTimezone(browserDefaultTimeZone)
   );
   const [newCalId, setNewCalId] = useState(calId);
   const defaultCalendarId = useMemo(
@@ -196,9 +195,7 @@ function EventUpdateModal({
     setAlarm("");
     setEventClass("PUBLIC");
     setBusy("OPAQUE");
-    setTimezone(
-      resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
-    );
+    setTimezone(resolveTimezone(browserDefaultTimeZone));
     setHasVideoConference(false);
     setMeetingLink(null);
   }, [defaultCalendarId]);
@@ -230,7 +227,7 @@ function EventUpdateModal({
       // Get event's original timezone
       const eventTimezone = event.timezone
         ? resolveTimezone(event.timezone)
-        : resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        : resolveTimezone(browserDefaultTimeZone);
 
       // Format dates based on all-day status
       if (event.start) {
@@ -298,9 +295,7 @@ function EventUpdateModal({
         const resolvedTimezone = resolveTimezone(event.timezone);
         setTimezone(resolvedTimezone);
       } else {
-        const browserTz = resolveTimezone(
-          Intl.DateTimeFormat().resolvedOptions().timeZone
-        );
+        const browserTz = resolveTimezone(browserDefaultTimeZone);
         setTimezone(browserTz);
       }
       setHasVideoConference(event.x_openpass_videoconference ? true : false);

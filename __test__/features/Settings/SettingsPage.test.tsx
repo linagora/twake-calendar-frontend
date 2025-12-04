@@ -24,7 +24,7 @@ describe("SettingsPage", () => {
       },
       organiserData: null,
       tokens: null,
-      language: "en",
+      coreConfig: { language: "en" },
       loading: false,
       error: null,
     },
@@ -47,6 +47,7 @@ describe("SettingsPage", () => {
     const { container } = renderWithProviders(<SettingsPage />, preloadedState);
 
     // Check sidebar navigation items
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const sidebar = container.querySelector(".settings-sidebar");
     expect(sidebar).toBeInTheDocument();
     expect(screen.getAllByText(/settings.title/i).length).toBeGreaterThan(0);
@@ -56,6 +57,7 @@ describe("SettingsPage", () => {
   it("highlights active navigation item", () => {
     const { container } = renderWithProviders(<SettingsPage />, preloadedState);
 
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const settingsNavItem = container.querySelector(
       ".settings-nav-item.active"
     );
@@ -108,7 +110,7 @@ describe("SettingsPage", () => {
         },
         organiserData: null,
         tokens: null,
-        language: "fr",
+        coreConfig: { language: "fr" },
         loading: false,
         error: null,
       },
@@ -125,6 +127,7 @@ describe("SettingsPage", () => {
     expect(languageSelect).toBeInTheDocument();
 
     // Verify that the underlying native input reflects the user language ("fr")
+    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement | null;
@@ -140,6 +143,7 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
+    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;
@@ -155,7 +159,10 @@ describe("SettingsPage", () => {
     // Language should be updated immediately (optimistic update)
     await waitFor(() => {
       const state = store.getState();
-      expect(state.user?.language).toBe("fr");
+      expect(state.user?.coreConfig.language).toBe("fr");
+    });
+    await waitFor(() => {
+      const state = store.getState();
       expect(state.settings.language).toBe("fr");
     });
 
@@ -185,6 +192,7 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
+    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;
@@ -211,6 +219,7 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
+    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;
@@ -224,10 +233,13 @@ describe("SettingsPage", () => {
     fireEvent.change(nativeInput, { target: { value: "fr" } });
 
     // Wait for rollback - language should be rolled back to "en" after error
+    await waitFor(() => {
+      const state = store.getState();
+      expect(state.user?.coreConfig.language).toBe("en");
+    });
     await waitFor(
       () => {
         const state = store.getState();
-        expect(state.user?.language).toBe("en");
         expect(state.settings.language).toBe("en");
       },
       { timeout: 3000 }
@@ -245,5 +257,136 @@ describe("SettingsPage", () => {
     expect(
       screen.getByText("settings.notifications.empty")
     ).toBeInTheDocument();
+  });
+
+  describe("Timezone Settings", () => {
+    it("displays timezone selector in Settings tab", () => {
+      renderWithProviders(<SettingsPage />, preloadedState);
+
+      expect(screen.getAllByRole("combobox")).toHaveLength(2);
+    });
+
+    it("displays timezone from user state", () => {
+      const stateWithUserTimeZone = {
+        user: {
+          userData: {
+            sub: "test",
+            email: "test@test.com",
+            family_name: "Doe",
+            name: "John",
+            sid: "mockSid",
+            openpaasId: "667037022b752d0026472254",
+          },
+          organiserData: null,
+          tokens: null,
+          coreConfig: {
+            language: "en",
+            datetime: { timeZone: "America/New_York" },
+          },
+          loading: false,
+          error: null,
+        },
+        settings: {
+          language: "en",
+          timeZone: "UTC",
+          view: "settings",
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithUserTimeZone);
+
+      expect(screen.getByDisplayValue(/America\/New York/i)).toBeDefined();
+    });
+
+    it("updates timezone immediately (optimistic update)", async () => {
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      // Clear the input and type new timezone
+      fireEvent.change(timezoneInput, { target: { value: "Europe/Paris" } });
+
+      // Find and click the timezone option from the dropdown
+      const option = await screen.findByText(/Europe\/Paris/i);
+      fireEvent.click(option);
+
+      // Timezone should be updated immediately (optimistic update)
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("Europe/Paris");
+      });
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.settings.timeZone).toBe("Europe/Paris");
+      });
+    });
+
+    it("handles timezone change with different timezone values", async () => {
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      // Test with Asia/Tokyo
+      fireEvent.change(timezoneInput, { target: { value: "Asia/Tokyo" } });
+      const tokyoOption = await screen.findByText(/Asia\/Tokyo/i);
+      fireEvent.click(tokyoOption);
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("Asia/Tokyo");
+      });
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.settings.timeZone).toBe("Asia/Tokyo");
+      });
+
+      // Test with America/Los_Angeles
+      fireEvent.change(timezoneInput, {
+        target: { value: "America/Los_Angeles" },
+      });
+      const laOption = await screen.findByText(/America\/Los Angeles/i);
+      fireEvent.click(laOption);
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBe(
+          "America/Los_Angeles"
+        );
+      });
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.settings.timeZone).toBe("America/Los_Angeles");
+      });
+    });
+
+    it("uses UTC as default timezone when no timezone is set", () => {
+      const stateWithoutTimeZone = {
+        user: {
+          userData: {
+            sub: "test",
+            email: "test@test.com",
+            family_name: "Doe",
+            name: "John",
+            sid: "mockSid",
+            openpaasId: "667037022b752d0026472254",
+          },
+          organiserData: null,
+          tokens: null,
+          coreConfig: { language: "en", datetime: { timeZone: undefined } },
+          loading: false,
+          error: null,
+        },
+        settings: {
+          language: "en",
+          timeZone: undefined,
+          view: "settings",
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithoutTimeZone);
+
+      const timezoneInput = screen.getByDisplayValue("(UTC) UTC");
+      expect(timezoneInput).toBeDefined();
+    });
   });
 });

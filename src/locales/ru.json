@@ -212,6 +212,10 @@
     "language": "Язык",
     "languageDescription": "Это будет язык, используемый в вашем Twake Calendar",
     "languageSelector": "Выбор языка",
+    "languageUpdateError": "Не удалось обновить язык",
+    "timeZone": "Часовой пояс",
+    "timeZoneBrowserDefault": "Определять часовой пояс автоматически",
+    "timeZoneUpdateError": "Не удалось обновить часовой пояс",
     "notifications.empty": "Настройки уведомлений скоро появятся",
     "sync.empty": "Настройки синхронизации скоро появятся",
     "back": "Вернуться к календарю"

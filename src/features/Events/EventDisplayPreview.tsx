@@ -49,6 +49,7 @@ import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { userAttendee } from "../User/userDataTypes";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 export default function EventPreviewModal({
   eventId,
@@ -67,8 +68,8 @@ export default function EventPreviewModal({
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
   const timezone =
-    useAppSelector((state) => state.calendars.timeZone) ??
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
+    useAppSelector((state) => state.settings.timeZone) ??
+    browserDefaultTimeZone;
   const calendarList = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
@@ -456,10 +457,10 @@ export default function EventPreviewModal({
               )}
             </Box>
             <Typography color="text.secondaryContainer" gutterBottom>
-              {formatDate(event.start, t, event.allday)}
+              {formatDate(event.start, t, timezone, event.allday)}
               {event.end &&
-                formatEnd(event.start, event.end, t, event.allday) &&
-                ` – ${formatEnd(event.start, event.end, t, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
+                formatEnd(event.start, event.end, t, timezone, event.allday) &&
+                ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
             </Typography>
           </>
         }
@@ -952,13 +953,19 @@ function makeRecurrenceString(
   return recur.join(", ");
 }
 
-function formatDate(date: Date | string, t: Function, allday?: boolean) {
+function formatDate(
+  date: Date | string,
+  t: Function,
+  timeZone: string,
+  allday?: boolean
+) {
   if (allday) {
     return new Date(date).toLocaleDateString(t("locale"), {
       year: "numeric",
       month: "long",
       weekday: "long",
       day: "numeric",
+      timeZone,
     });
   } else {
     return new Date(date).toLocaleString(t("locale"), {
@@ -968,6 +975,7 @@ function formatDate(date: Date | string, t: Function, allday?: boolean) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone,
     });
   }
 }
@@ -976,6 +984,7 @@ function formatEnd(
   start: Date | string,
   end: Date | string,
   t: Function,
+  timeZone: string,
   allday?: boolean
 ) {
   const startDate = new Date(start);
@@ -993,12 +1002,14 @@ function formatEnd(
           year: "numeric",
           month: "short",
           day: "numeric",
+          timeZone,
         });
   } else {
     if (sameDay) {
       return endDate.toLocaleTimeString(t("locale"), {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone,
       });
     }
     return endDate.toLocaleString(t("locale"), {
@@ -1007,6 +1018,7 @@ function formatEnd(
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone,
     });
   }
 }

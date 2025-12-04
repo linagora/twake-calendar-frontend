@@ -7,6 +7,7 @@ export interface userData {
   sub: string;
   openpaasId?: string;
   language?: string;
+  timezone?: string | null;
 }
 
 export interface UserConfigurations {

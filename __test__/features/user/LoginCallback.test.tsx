@@ -23,15 +23,37 @@ jest.mock("../../../src/features/User/oidcAuth", () => ({
   Callback: jest.fn(),
 }));
 
-jest.mock("../../../src/features/User/userSlice", () => ({
-  setUserData: jest.fn((data) => ({ type: "SET_USER", payload: data })),
-  setTokens: jest.fn((tokens) => ({ type: "SET_TOKENS", payload: tokens })),
-  getOpenPaasUserDataAsync: jest.fn(() => ({ type: "GET_USER_ID" })),
-}));
+jest.mock("../../../src/features/User/userSlice", () => {
+  const mockGetUser = Object.assign(
+    jest.fn(() => ({ type: "GET_USER_ID" })),
+    {
+      pending: { type: "GET_USER_ID/pending" },
+      fulfilled: { type: "GET_USER_ID/fulfilled" },
+      rejected: { type: "GET_USER_ID/rejected" },
+    }
+  );
 
-jest.mock("../../../src/features/Calendars/CalendarSlice", () => ({
-  getCalendarsListAsync: jest.fn(() => ({ type: "GET_CALENDARS" })),
-}));
+  return {
+    setUserData: jest.fn((data) => ({ type: "SET_USER", payload: data })),
+    setTokens: jest.fn((tokens) => ({ type: "SET_TOKENS", payload: tokens })),
+    getOpenPaasUserDataAsync: mockGetUser,
+  };
+});
+
+jest.mock("../../../src/features/Calendars/CalendarSlice", () => {
+  const mockGetCalendars = Object.assign(
+    jest.fn(() => ({ type: "GET_CALENDARS" })),
+    {
+      pending: { type: "GET_CALENDARS/pending" },
+      fulfilled: { type: "GET_CALENDARS/fulfilled" },
+      rejected: { type: "GET_CALENDARS/rejected" },
+    }
+  );
+
+  return {
+    getCalendarsListAsync: mockGetCalendars,
+  };
+});
 
 describe("CallbackResume", () => {
   const dispatch = jest.fn();
@@ -61,12 +83,26 @@ describe("CallbackResume", () => {
 
     await waitFor(() => {
       expect(oidcAuth.Callback).toHaveBeenCalledWith("verifier123", "state456");
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setUserData(mockUserInfo));
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setTokens(mockTokenSet));
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserDataAsync());
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getCalendarsListAsync());
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(push("/"));
+    });
+    await waitFor(() => {
       expect(sessionStorage.getItem("redirectState")).toBe(null);
+    });
+    await waitFor(() => {
       expect(sessionStorage.getItem("tokenSet")).toEqual(
         JSON.stringify(mockTokenSet)
       );
