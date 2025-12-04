@@ -45,7 +45,12 @@ export const userSlice = createSlice({
     userData: null as unknown as userData,
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
-    language: null as string | null,
+    coreConfig: {
+      language: null as string | null,
+      datetime: {
+        timeZone: null as string | null,
+      },
+    } as Record<string, any>,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -63,9 +68,18 @@ export const userSlice = createSlice({
       state.tokens = action.payload;
     },
     setLanguage: (state, action) => {
-      state.language = action.payload;
+      state.coreConfig.language = action.payload;
       if (state.userData) {
         state.userData.language = action.payload;
+      }
+    },
+    setTimezone: (state, action) => {
+      if (!state.coreConfig.datetime) {
+        state.coreConfig.datetime = {};
+      }
+      state.coreConfig.datetime.timeZone = action.payload;
+      if (state.userData) {
+        state.userData.timezone = action.payload;
       }
     },
     clearError: (state) => {
@@ -90,18 +104,53 @@ export const userSlice = createSlice({
           state.userData.email = action.payload.preferredEmail;
         }
 
-        // Extract language from configurations.modules
+        // Extract data from configurations.modules
         if (action.payload.configurations?.modules) {
           const coreModule = action.payload.configurations.modules.find(
             (module: any) => module.name === "core"
           );
           if (coreModule?.configurations) {
+            const newCoreConfig = Object.fromEntries(
+              coreModule.configurations.map(
+                (e: { name: string; value: any }) => [e.name, e.value]
+              )
+            );
+
+            state.coreConfig = {
+              ...state.coreConfig,
+              ...newCoreConfig,
+            };
             const languageConfig = coreModule.configurations.find(
               (config: any) => config.name === "language"
             );
             if (languageConfig?.value) {
-              state.language = languageConfig.value;
-              state.userData.language = languageConfig.value;
+              state.coreConfig.language = languageConfig.value;
+              if (state.userData)
+                state.userData.language = languageConfig.value;
+            }
+
+            const datetimeConfig = coreModule.configurations.find(
+              (config: any) => config.name === "datetime"
+            );
+            if (datetimeConfig?.value) {
+              const serverTimeZone = datetimeConfig.value.timeZone;
+              state.coreConfig.datetime = {
+                ...state.coreConfig.datetime,
+                ...datetimeConfig.value,
+                timeZone: serverTimeZone !== undefined ? serverTimeZone : null,
+              };
+              if (state.userData) {
+                state.userData.timezone =
+                  serverTimeZone !== undefined ? serverTimeZone : null;
+              }
+            } else {
+              state.coreConfig.datetime = {
+                ...state.coreConfig.datetime,
+                timeZone: null,
+              };
+              if (state.userData) {
+                state.userData.timezone = null;
+              }
             }
           }
         }
@@ -118,9 +167,18 @@ export const userSlice = createSlice({
       })
       .addCase(updateUserConfigurationsAsync.fulfilled, (state, action) => {
         if (action.payload.language !== undefined) {
-          state.language = action.payload.language;
+          state.coreConfig.language = action.payload.language;
           if (state.userData) {
             state.userData.language = action.payload.language;
+          }
+        }
+        if (action.payload.timezone !== undefined) {
+          if (!state.coreConfig.datetime) {
+            state.coreConfig.datetime = {};
+          }
+          state.coreConfig.datetime.timeZone = action.payload.timezone;
+          if (state.userData) {
+            state.userData.timezone = action.payload.timezone;
           }
         }
       })
@@ -134,7 +192,7 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens, setLanguage, clearError } =
+export const { setUserData, setTokens, setLanguage, setTimezone, clearError } =
   userSlice.actions;
 
 export default userSlice.reducer;

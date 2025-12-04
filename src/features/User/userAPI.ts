@@ -2,8 +2,8 @@ import { User } from "../../components/Attendees/PeopleSearch";
 import { api } from "../../utils/apiUtils";
 
 export async function getOpenPaasUser() {
-  const user = await api.get(`api/user`).json();
-  return user;
+  const user = await api.get(`api/user`);
+  return user.json();
 }
 
 export async function searchUsers(
@@ -38,6 +38,7 @@ export interface UserConfigurationUpdates {
   language?: string;
   notifications?: Record<string, unknown>;
   timezone?: string;
+  previousConfig?: Record<string, any>;
 }
 
 export async function updateUserConfigurations(
@@ -52,7 +53,13 @@ export async function updateUserConfigurations(
     coreConfigs.push({ name: "notifications", value: updates.notifications });
   }
   if (updates.timezone !== undefined) {
-    coreConfigs.push({ name: "timezone", value: updates.timezone });
+    coreConfigs.push({
+      name: "datetime",
+      value: {
+        ...updates.previousConfig?.datetime,
+        timeZone: updates.timezone,
+      },
+    });
   }
 
   if (coreConfigs.length === 0) {

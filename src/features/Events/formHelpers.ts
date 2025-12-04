@@ -4,6 +4,7 @@ import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { userAttendee } from "../User/userDataTypes";
 import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 export interface TimezoneListResult {
   zones: string[];
@@ -13,9 +14,7 @@ export interface TimezoneListResult {
 
 export function createTimezoneList(): TimezoneListResult {
   const zones = Object.keys(TIMEZONES.zones).sort();
-  const browserTz = resolveTimezone(
-    Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
+  const browserTz = resolveTimezone(browserDefaultTimeZone);
 
   const getTimezoneOffset = (tzName: string): string => {
     const resolvedTz = resolveTimezone(tzName);
@@ -101,8 +100,7 @@ export function populateFormFromEvent(
   // Get event's timezone for formatting
   const eventTimezone = event.timezone
     ? resolveTimezone(event.timezone)
-    : calendarTimezone ||
-      resolveTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    : calendarTimezone || resolveTimezone(browserDefaultTimeZone);
 
   // Format dates based on all-day status and timezone
   if (event.start) {

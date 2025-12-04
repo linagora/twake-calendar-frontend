@@ -30,6 +30,7 @@ import { User } from "../../components/Attendees/PeopleSearch";
 import { getCalendarVisibility } from "../../components/Calendar/utils/calendarUtils";
 import { importFile } from "../../utils/apiUtils";
 import { formatReduxError } from "../../utils/errorUtils";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 // Define error type for rejected actions
 interface RejectedError {
@@ -653,13 +654,11 @@ const CalendarSlice = createSlice({
     templist: {} as Record<string, Calendars>,
     pending: false,
     error: null as string | null,
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   } as {
     list: Record<string, Calendars>;
     templist: Record<string, Calendars>;
     pending: boolean;
     error: string | null;
-    timeZone: string;
   },
   reducers: {
     createCalendar: (
@@ -719,9 +718,6 @@ const CalendarSlice = createSlice({
     ) => {
       const { calId, event } = action.payload;
       state.list[calId].events[event.uid] = event;
-    },
-    setTimeZone: (state, action: PayloadAction<string>) => {
-      state.timeZone = action.payload;
     },
     clearFetchCache: (state, action: PayloadAction<string>) => {
       if (!state.list[action.payload]) return;
@@ -795,7 +791,7 @@ const CalendarSlice = createSlice({
                 action.payload.calId;
               if (!state[type][action.payload.calId].events[id].timezone) {
                 state[type][action.payload.calId].events[id].timezone =
-                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  browserDefaultTimeZone;
               }
             }
           );
@@ -831,7 +827,7 @@ const CalendarSlice = createSlice({
                 action.payload.calId;
               if (!state[type][action.payload.calId].events[id].timezone) {
                 state[type][action.payload.calId].events[id].timezone =
-                  Intl.DateTimeFormat().resolvedOptions().timeZone;
+                  browserDefaultTimeZone;
               }
             }
           );
@@ -878,7 +874,7 @@ const CalendarSlice = createSlice({
               action.payload.calId;
             if (!state.list[action.payload.calId].events[id].timezone) {
               state.list[action.payload.calId].events[id].timezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone;
+                browserDefaultTimeZone;
             }
           });
         }
@@ -1172,7 +1168,6 @@ export const {
   updateEventLocal,
   removeTempCal,
   emptyEventsCal,
-  setTimeZone,
   clearFetchCache,
   clearError,
   updateCalColor,

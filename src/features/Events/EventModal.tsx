@@ -41,6 +41,7 @@ import {
   restoreFormDataFromTemp,
   EventFormState,
 } from "../../utils/eventFormTempStorage";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 function EventPopover({
   open,
@@ -84,17 +85,14 @@ function EventPopover({
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    );
+    const browserTz = resolveTimezone(browserDefaultTimeZone);
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
 
-  const calendarTimezone = useAppSelector((state) => state.calendars.timeZone);
+  const calendarTimezone = useAppSelector((state) => state.settings.timeZone);
   const resolvedCalendarTimezone = useMemo(() => {
-    const tz =
-      calendarTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tz = calendarTimezone || browserDefaultTimeZone;
     return resolveTimezone(tz);
   }, [calendarTimezone]);
 
