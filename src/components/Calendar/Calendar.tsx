@@ -77,6 +77,10 @@ export default function CalendarApp({
     }
   }, [dispatch, tokens, userId]);
   const view = useAppSelector((state) => state.settings.view);
+  const userData = useAppSelector((state) => state.user.userData);
+  const hideDeclinedEvents = useAppSelector(
+    (state) => state.settings.hideDeclinedEvents
+  );
   const calendars = useAppSelector((state) => state.calendars.list);
   const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
@@ -221,7 +225,9 @@ export default function CalendarApp({
 
   let filteredEvents: CalendarEvent[] = extractEvents(
     selectedCalendars,
-    calendars || {}
+    calendars || {},
+    userData?.email,
+    hideDeclinedEvents
   );
 
   const tempCalendarIds = useMemo(
@@ -231,7 +237,9 @@ export default function CalendarApp({
 
   let filteredTempEvents: CalendarEvent[] = extractEvents(
     tempCalendarIds,
-    tempcalendars || {}
+    tempcalendars || {},
+    userData?.email,
+    hideDeclinedEvents
   );
 
   const sortedSelectedCalendars = useMemo(

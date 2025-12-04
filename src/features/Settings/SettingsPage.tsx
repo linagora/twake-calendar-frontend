@@ -25,6 +25,7 @@ import {
   setLanguage as setSettingsLanguage,
   setTimeZone as setSettingsTimeZone,
   setIsBrowserDefaultTimeZone,
+  setHideDeclinedEvents,
 } from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
@@ -63,6 +64,10 @@ export default function SettingsPage() {
     userTimeZone ?? settingTimeZone ?? browserDefaultTimeZone;
   const isBrowserDefault = useAppSelector(
     (state) => state.settings.isBrowserDefaultTimeZone
+  );
+
+  const hideDeclinedEvents = useAppSelector(
+    (state) => state.settings?.hideDeclinedEvents
   );
 
   const [activeNavItem, setActiveNavItem] =
@@ -155,6 +160,23 @@ export default function SettingsPage() {
     //     dispatch(setSettingsTimeZone(previousTimeZone));
     //     setTimeZoneErrorOpen(true);
     //   });
+  };
+
+  const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
+
+    // Call API in background, don't wait for it
+    dispatch(
+      updateUserConfigurationsAsync({
+        hideDeclinedEvents: doHideDeclinedEvents,
+      })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update hide declined event:", error);
+        dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
+      });
   };
 
   const handleTimeZoneErrorClose = () => {
@@ -281,6 +303,38 @@ export default function SettingsPage() {
                             onChange={handleTimeZoneChange}
                           />
                         )}
+                      </FormControl>
+                    </Box>
+                  </Box>{" "}
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {t("settings.calAndEvent")}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mb: 6,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 500 }}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={Boolean(!hideDeclinedEvents)}
+                              onChange={() =>
+                                handleHideDeclinedEvents(!hideDeclinedEvents)
+                              }
+                              aria-label={t("settings.hideDeclinedEvent")}
+                            />
+                          }
+                          label={t("settings.hideDeclinedEvent")}
+                          labelPlacement="start"
+                          sx={{
+                            minWidth: 400,
+                            justifyContent: "space-between",
+                            marginLeft: 0,
+                            mb: 2,
+                          }}
+                        />
                       </FormControl>
                     </Box>
                   </Box>
