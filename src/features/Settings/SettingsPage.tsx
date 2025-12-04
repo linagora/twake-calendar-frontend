@@ -355,10 +355,10 @@ export default function SettingsPage() {
                               onChange={() =>
                                 handleHideDeclinedEvents(!hideDeclinedEvents)
                               }
-                              aria-label={t("settings.hideDeclinedEvent")}
+                              aria-label={t("settings.showDeclinedEvent")}
                             />
                           }
-                          label={t("settings.hideDeclinedEvent")}
+                          label={t("settings.showDeclinedEvent")}
                           labelPlacement="start"
                           sx={{
                             minWidth: 400,

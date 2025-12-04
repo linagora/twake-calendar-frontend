@@ -222,7 +222,8 @@
     "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "sync.empty": "Sync settings coming soon",
     "calAndEvent": "Calendar and events",
-    "hideDeclinedEvent": "Show declined events",
+    "showDeclinedEvent": "Show declined events",
+    "hideDeclinedEventsUpdateError": "Failed to update hide declined event.",
     "back": "Back to calendar"
   },
   "eventPreview": {

@@ -222,7 +222,8 @@
     "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
     "sync.empty": "Настройки синхронизации скоро появятся",
     "calAndEvent": "Календарь и мероприятия",
-    "hideDeclinedEvent": "Показать отклонённые мероприятия",
+    "showDeclinedEvent": "Показать отклонённые мероприятия",
+    "hideDeclinedEventsUpdateError": "Не удалось обновить скрытие отклоненных событий.",
     "back": "Вернуться к календарю"
   },
   "eventPreview": {

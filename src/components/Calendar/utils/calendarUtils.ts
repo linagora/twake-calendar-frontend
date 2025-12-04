@@ -142,27 +142,26 @@ export const extractEvents = (
   userAdress?: string,
   hideDeclinedEvents?: boolean | null
 ) => {
-  let filteredEvents: CalendarEvent[] = [];
+  const allEvents: CalendarEvent[] = [];
+
   selectedCalendars.forEach((id) => {
-    if (calendars[id] && calendars[id].events) {
-      filteredEvents = filteredEvents
-        .concat(
-          Object.keys(calendars[id].events).map(
-            (eventid) => calendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"))
-        .filter(
-          (event) =>
-            !(
-              hideDeclinedEvents &&
-              event.attendee.find((a) => a.cal_address === userAdress)
-                ?.partstat === "DECLINED"
-            )
-        );
+    const calendar = calendars[id];
+    if (calendar?.events) {
+      allEvents.push(...Object.values(calendar.events));
     }
   });
-  return filteredEvents;
+
+  return allEvents
+    .filter((event) => event.status !== "CANCELLED")
+    .filter(
+      (event) =>
+        !(
+          hideDeclinedEvents &&
+          event.attendee?.some(
+            (a) => a.cal_address === userAdress && a.partstat === "DECLINED"
+          )
+        )
+    );
 };
 
 export const updateCalsDetails = (
