@@ -46,6 +46,7 @@ export const userSlice = createSlice({
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
     language: null as string | null,
+    alarmEmailsEnabled: null as boolean | null,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -67,6 +68,9 @@ export const userSlice = createSlice({
       if (state.userData) {
         state.userData.language = action.payload;
       }
+    },
+    setAlarmEmails: (state, action) => {
+      state.alarmEmailsEnabled = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -104,6 +108,19 @@ export const userSlice = createSlice({
               state.userData.language = languageConfig.value;
             }
           }
+
+          // Extract alarmEmails from configurations.modules
+          const calendarModule = action.payload.configurations.modules.find(
+            (module: any) => module.name === "calendar"
+          );
+          if (calendarModule?.configurations) {
+            const alarmEmailsConfig = calendarModule.configurations.find(
+              (config: any) => config.name === "alarmEmails"
+            );
+            if (alarmEmailsConfig) {
+              state.alarmEmailsEnabled = alarmEmailsConfig.value === true;
+            }
+          }
         }
       })
       .addCase(getOpenPaasUserDataAsync.pending, (state) => {
@@ -123,6 +140,9 @@ export const userSlice = createSlice({
             state.userData.language = action.payload.language;
           }
         }
+        if (action.payload.alarmEmails !== undefined) {
+          state.alarmEmailsEnabled = action.payload.alarmEmails === true;
+        }
       })
       .addCase(updateUserConfigurationsAsync.rejected, (state, action) => {
         if (action.payload?.status !== 401) {
@@ -134,7 +154,12 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens, setLanguage, clearError } =
-  userSlice.actions;
+export const {
+  setUserData,
+  setTokens,
+  setLanguage,
+  setAlarmEmails,
+  clearError,
+} = userSlice.actions;
 
 export default userSlice.reducer;

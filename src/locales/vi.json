@@ -212,7 +212,9 @@
     "language": "Ngôn ngữ",
     "languageDescription": "Đây sẽ là ngôn ngữ được sử dụng trong Twake Calendar của bạn",
     "languageSelector": "Chọn ngôn ngữ",
-    "notifications.empty": "Cài đặt thông báo sắp có",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Phương thức gửi",
+    "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "back": "Quay lại lịch"
   },
