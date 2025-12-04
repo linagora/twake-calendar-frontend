@@ -251,7 +251,6 @@ export default function SettingsPage() {
                     <Box
                       sx={{
                         mb: 6,
-                        gap: 2,
                       }}
                     >
                       <FormControl size="small" sx={{ minWidth: 500 }}>
