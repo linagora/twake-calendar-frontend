@@ -219,7 +219,8 @@
     "notifications.empty": "Cài đặt thông báo sắp có",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "calAndEvent": "Lịch và sự kiện",
-    "hideDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
+    "showDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
+    "hideDeclinedEventsUpdateError": "Không cập nhật được các sự kiện ẩn bị từ chối.",
     "back": "Quay lại lịch"
   },
   "eventPreview": {

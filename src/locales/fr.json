@@ -219,7 +219,8 @@
     "notifications.empty": "Paramètres de notifications à venir",
     "sync.empty": "Paramètres de synchronisation à venir",
     "calAndEvent": "Calendrier et événements",
-    "hideDeclinedEvent": "Afficher les événements déclinés",
+    "showDeclinedEvent": "Afficher les événements déclinés",
+    "hideDeclinedEventsUpdateError": "Échec de la mise à jour du masquage des événements déclines.",
     "back": "Retour au calendrier"
   },
   "eventPreview": {
