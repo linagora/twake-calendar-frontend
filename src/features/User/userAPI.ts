@@ -2,7 +2,7 @@ import { User } from "../../components/Attendees/PeopleSearch";
 import { api } from "../../utils/apiUtils";
 
 export async function getOpenPaasUser() {
-  const user = await api.get(`api/user`);
+  const user = await api.get(`api/user`, { cache: "no-store" });
   return user.json();
 }
 
