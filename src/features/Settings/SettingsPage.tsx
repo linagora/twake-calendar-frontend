@@ -76,7 +76,8 @@ export default function SettingsPage() {
     useState<SettingsSubTab>("settings");
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
-
+  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsOpen] =
+    useState(false);
   const handleBackClick = () => {
     dispatch(setView("calendar"));
   };
@@ -162,6 +163,10 @@ export default function SettingsPage() {
     //   });
   };
 
+  const handleTimeZoneErrorClose = () => {
+    setTimeZoneErrorOpen(false);
+  };
+
   const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
     // Optimistic update - update UI immediately
     dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
@@ -176,13 +181,12 @@ export default function SettingsPage() {
       .catch((error) => {
         console.error("Failed to update hide declined event:", error);
         dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
+        setHideDeclinedEventsOpen(true);
       });
   };
-
-  const handleTimeZoneErrorClose = () => {
+  const handleHideDeclinedEventsErrorClose = () => {
     setTimeZoneErrorOpen(false);
   };
-
   return (
     <main className="main-layout settings-layout">
       <Box className="settings-sidebar">
@@ -305,7 +309,7 @@ export default function SettingsPage() {
                         )}
                       </FormControl>
                     </Box>
-                  </Box>{" "}
+                  </Box>
                   <Box>
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {t("settings.calAndEvent")}
@@ -372,6 +376,12 @@ export default function SettingsPage() {
         autoHideDuration={4000}
         onClose={handleTimeZoneErrorClose}
         message={t("settings.timeZoneUpdateError")}
+      />
+      <Snackbar
+        open={hideDeclinedEventsErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleHideDeclinedEventsErrorClose}
+        message={t("settings.hideDeclinedEventsUpdateError")}
       />
     </main>
   );
