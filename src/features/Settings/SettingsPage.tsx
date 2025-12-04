@@ -81,6 +81,8 @@ export default function SettingsPage() {
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
+  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsOpen] =
+    useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -170,6 +172,10 @@ export default function SettingsPage() {
     }
   };
 
+  const handleTimeZoneErrorClose = () => {
+    setTimeZoneErrorOpen(false);
+  };
+
   const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
     // Optimistic update - update UI immediately
     dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
@@ -184,10 +190,10 @@ export default function SettingsPage() {
       .catch((error) => {
         console.error("Failed to update hide declined event:", error);
         dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
+        setHideDeclinedEventsOpen(true);
       });
   };
-
-  const handleTimeZoneErrorClose = () => {
+  const handleHideDeclinedEventsErrorClose = () => {
     setTimeZoneErrorOpen(false);
   };
 
@@ -337,7 +343,7 @@ export default function SettingsPage() {
                         )}
                       </FormControl>
                     </Box>
-                  </Box>{" "}
+                  </Box>
                   <Box>
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {t("settings.calAndEvent")}
@@ -435,6 +441,13 @@ export default function SettingsPage() {
           t("settings.alarmEmailsUpdateError") ||
           "Failed to update email notifications setting"
         }
+      />
+
+      <Snackbar
+        open={hideDeclinedEventsErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleHideDeclinedEventsErrorClose}
+        message={t("settings.hideDeclinedEventsUpdateError")}
       />
     </main>
   );
