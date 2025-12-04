@@ -15,6 +15,7 @@ import "dayjs/locale/vi";
 
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import { dtDate, dtTime, toDateTime } from "../utils/dateTimeHelpers";
+import { ReadOnlyDateField } from "./ReadOnlyPickerField";
 
 dayjs.extend(customParseFormat);
 
@@ -256,6 +257,30 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     },
   });
 
+  const getFieldSlotProps = (testId: string, hasError = false) => ({
+    size: "small" as const,
+    margin: "dense" as const,
+    fullWidth: true,
+    InputLabelProps: { shrink: true },
+    error: hasError,
+    sx: { width: "100%" },
+    inputProps: { "data-testid": testId },
+  });
+
+  const [isStartTimeOpen, setIsStartTimeOpen] = React.useState(false);
+  const [isEndTimeOpen, setIsEndTimeOpen] = React.useState(false);
+
+  const handleTimeInputClick = (
+    event: React.MouseEvent,
+    setOpen: (open: boolean) => void
+  ) => {
+    // Only open if clicking on the text (span)
+    // In MUI X v6+, the sections are rendered as spans
+    if ((event.target as HTMLElement).tagName === "SPAN") {
+      setOpen(true);
+    }
+  };
+
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
@@ -280,7 +305,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   format={LONG_DATE_FORMAT}
                   value={startDateValue}
                   onChange={handleStartDateChange}
-                  slotProps={getSlotProps("start-date-input")}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps("start-date-input"),
+                    field: getFieldSlotProps("start-date-input") as any,
+                  }}
                 />
               </Box>
               {!allday && (
@@ -290,7 +319,22 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     ampm={false}
                     value={startTimeValue}
                     onChange={handleStartTimeChange}
-                    slotProps={getSlotProps("start-time-input")}
+                    open={isStartTimeOpen}
+                    onClose={() => setIsStartTimeOpen(false)}
+                    slotProps={{
+                      ...getSlotProps("start-time-input"),
+                      openPickerButton: { sx: { display: "none" } },
+                      textField: {
+                        ...getSlotProps("start-time-input").textField,
+                        onClick: (e) =>
+                          handleTimeInputClick(e, setIsStartTimeOpen),
+                        sx: {
+                          "& .MuiPickersSectionList-section": {
+                            cursor: "pointer",
+                          },
+                        },
+                      },
+                    }}
                   />
                 </Box>
               )}
@@ -302,10 +346,17 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   format={LONG_DATE_FORMAT}
                   value={endDateValue}
                   onChange={handleEndDateChange}
-                  slotProps={getSlotProps(
-                    "end-date-input",
-                    !!validation.errors.dateTime
-                  )}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime
+                    ),
+                    field: getFieldSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime
+                    ) as any,
+                  }}
                 />
               </Box>
               {!allday && (
@@ -315,10 +366,28 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     ampm={false}
                     value={endTimeValue}
                     onChange={handleEndTimeChange}
-                    slotProps={getSlotProps(
-                      "end-time-input",
-                      !!validation.errors.dateTime
-                    )}
+                    open={isEndTimeOpen}
+                    onClose={() => setIsEndTimeOpen(false)}
+                    slotProps={{
+                      ...getSlotProps(
+                        "end-time-input",
+                        !!validation.errors.dateTime
+                      ),
+                      openPickerButton: { sx: { display: "none" } },
+                      textField: {
+                        ...getSlotProps(
+                          "end-time-input",
+                          !!validation.errors.dateTime
+                        ).textField,
+                        onClick: (e) =>
+                          handleTimeInputClick(e, setIsEndTimeOpen),
+                        sx: {
+                          "& .MuiPickersSectionList-section": {
+                            cursor: "pointer",
+                          },
+                        },
+                      },
+                    }}
                   />
                 </Box>
               )}
@@ -332,7 +401,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("start-date-input"),
+                  field: getFieldSlotProps("start-date-input") as any,
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
@@ -341,10 +414,17 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={endDateValue}
                 onChange={handleEndDateChange}
-                slotProps={getSlotProps(
-                  "end-date-input",
-                  !!validation.errors.dateTime
-                )}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime
+                  ),
+                  field: getFieldSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime
+                  ) as any,
+                }}
               />
             </Box>
           </Box>
@@ -356,7 +436,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("start-date-input"),
+                  field: getFieldSlotProps("start-date-input") as any,
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
@@ -366,7 +450,21 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 value={startTimeValue}
                 onChange={handleStartTimeChange}
                 disabled={allday}
-                slotProps={getSlotProps("start-time-input")}
+                open={isStartTimeOpen}
+                onClose={() => setIsStartTimeOpen(false)}
+                slotProps={{
+                  ...getSlotProps("start-time-input"),
+                  openPickerButton: { sx: { display: "none" } },
+                  textField: {
+                    ...getSlotProps("start-time-input").textField,
+                    onClick: (e) => handleTimeInputClick(e, setIsStartTimeOpen),
+                    sx: {
+                      "& .MuiPickersSectionList-section": {
+                        cursor: "pointer",
+                      },
+                    },
+                  },
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
@@ -376,6 +474,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 value={endTimeValue}
                 onChange={handleEndTimeChange}
                 disabled={allday}
+                open={isEndTimeOpen}
+                onClose={() => setIsEndTimeOpen(false)}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -383,9 +483,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     fullWidth: true,
                     InputLabelProps: { shrink: true },
                     error: !!validation.errors.dateTime,
-                    sx: { width: "100%" },
                     inputProps: { "data-testid": "end-time-input" },
+                    onClick: (e) => handleTimeInputClick(e, setIsEndTimeOpen),
+                    sx: {
+                      width: "100%",
+                      "& .MuiPickersSectionList-section": {
+                        cursor: "pointer",
+                      },
+                    },
                   },
+                  openPickerButton: { sx: { display: "none" } },
                 }}
               />
             </Box>
