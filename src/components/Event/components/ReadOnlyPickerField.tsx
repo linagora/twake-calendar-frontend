@@ -50,8 +50,8 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
     pickerContext.value == null
       ? ""
       : pickerContext.value.isValid()
-      ? pickerContext.value.format(pickerContext.fieldFormat)
-      : "";
+        ? pickerContext.value.format(pickerContext.fieldFormat)
+        : "";
 
   const mergedInputProps = {
     ...forwardedProps.InputProps,
@@ -84,12 +84,6 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
 
 export function ReadOnlyDateField(props: DatePickerFieldProps) {
   return (
-    <ReadOnlyPickerField
-      {...props}
-      fieldType="date"
-      validator={validateDate}
-    />
+    <ReadOnlyPickerField {...props} fieldType="date" validator={validateDate} />
   );
 }
-
-
