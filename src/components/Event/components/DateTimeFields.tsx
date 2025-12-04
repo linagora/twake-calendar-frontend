@@ -15,6 +15,7 @@ import "dayjs/locale/vi";
 
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import { dtDate, dtTime, toDateTime } from "../utils/dateTimeHelpers";
+import { ReadOnlyDateField } from "./ReadOnlyPickerField";
 
 dayjs.extend(customParseFormat);
 
@@ -256,6 +257,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     },
   });
 
+  const getFieldSlotProps = (testId: string, hasError = false) => ({
+    size: "small" as const,
+    margin: "dense" as const,
+    fullWidth: true,
+    InputLabelProps: { shrink: true },
+    error: hasError,
+    sx: { width: "100%" },
+    inputProps: { "data-testid": testId },
+  });
+
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
@@ -280,7 +291,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   format={LONG_DATE_FORMAT}
                   value={startDateValue}
                   onChange={handleStartDateChange}
-                  slotProps={getSlotProps("start-date-input")}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps("start-date-input"),
+                    field: getFieldSlotProps("start-date-input") as any,
+                  }}
                 />
               </Box>
               {!allday && (
@@ -302,10 +317,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   format={LONG_DATE_FORMAT}
                   value={endDateValue}
                   onChange={handleEndDateChange}
-                  slotProps={getSlotProps(
-                    "end-date-input",
-                    !!validation.errors.dateTime
-                  )}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps("end-date-input", !!validation.errors.dateTime),
+                    field: getFieldSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime
+                    ) as any,
+                  }}
                 />
               </Box>
               {!allday && (
@@ -332,7 +351,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("start-date-input"),
+                  field: getFieldSlotProps("start-date-input") as any,
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
@@ -341,10 +364,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={endDateValue}
                 onChange={handleEndDateChange}
-                slotProps={getSlotProps(
-                  "end-date-input",
-                  !!validation.errors.dateTime
-                )}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("end-date-input", !!validation.errors.dateTime),
+                  field: getFieldSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime
+                  ) as any,
+                }}
               />
             </Box>
           </Box>
@@ -356,7 +383,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("start-date-input"),
+                  field: getFieldSlotProps("start-date-input") as any,
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
