@@ -49,7 +49,7 @@ export const userSlice = createSlice({
     coreConfig: {
       language: null as string | null,
       datetime: {
-        timeZone: browserDefaultTimeZone ?? "UTC",
+        timeZone: null as string | null,
       },
     } as Record<string, any>,
     loading: true,
@@ -79,6 +79,9 @@ export const userSlice = createSlice({
         state.coreConfig.datetime = {};
       }
       state.coreConfig.datetime.timeZone = action.payload;
+      if (state.userData) {
+        state.userData.timezone = action.payload;
+      }
     },
     clearError: (state) => {
       state.error = null;
@@ -131,11 +134,24 @@ export const userSlice = createSlice({
               (config: any) => config.name === "datetime"
             );
             if (datetimeConfig?.value) {
+              const serverTimeZone = datetimeConfig.value.timeZone;
               state.coreConfig.datetime = {
                 ...state.coreConfig.datetime,
                 ...datetimeConfig.value,
+                timeZone: serverTimeZone !== undefined ? serverTimeZone : null,
               };
-              state.userData.timezone = datetimeConfig.value.timeZone;
+              if (state.userData) {
+                state.userData.timezone =
+                  serverTimeZone !== undefined ? serverTimeZone : null;
+              }
+            } else {
+              state.coreConfig.datetime = {
+                ...state.coreConfig.datetime,
+                timeZone: null,
+              };
+              if (state.userData) {
+                state.userData.timezone = null;
+              }
             }
           }
         }
@@ -155,6 +171,15 @@ export const userSlice = createSlice({
           state.coreConfig.language = action.payload.language;
           if (state.userData) {
             state.userData.language = action.payload.language;
+          }
+        }
+        if (action.payload.timezone !== undefined) {
+          if (!state.coreConfig.datetime) {
+            state.coreConfig.datetime = {};
+          }
+          state.coreConfig.datetime.timeZone = action.payload.timezone;
+          if (state.userData) {
+            state.userData.timezone = action.payload.timezone;
           }
         }
       })

@@ -4,7 +4,7 @@ import { getOpenPaasUserDataAsync } from "../User/userSlice";
 
 export interface SettingsState {
   language: string;
-  timeZone: string;
+  timeZone: string | null; // Allow null to represent browser default
   isBrowserDefaultTimeZone: boolean;
   view: "calendar" | "settings" | "search";
 }
@@ -13,14 +13,14 @@ const savedLang = localStorage.getItem("lang");
 const defaultLang = savedLang ?? (window as any).LANG ?? "en";
 
 const savedTimeZone = localStorage.getItem("timeZone");
-const defaultTimeZone = savedTimeZone ?? browserDefaultTimeZone ?? "UTC";
-const isInitialBrowserDefaultTimeZone =
-  defaultTimeZone === browserDefaultTimeZone;
+// If savedTimeZone is the string "null" or doesn't exist, use null
+const defaultTimeZone =
+  savedTimeZone === "null" || !savedTimeZone ? null : savedTimeZone;
 
 const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
-  isBrowserDefaultTimeZone: isInitialBrowserDefaultTimeZone,
+  isBrowserDefaultTimeZone: defaultTimeZone === null,
   view: "calendar",
 };
 
@@ -58,8 +58,12 @@ export const settingsSlice = createSlice({
 
       if (timeZone) {
         state.timeZone = timeZone;
+        state.isBrowserDefaultTimeZone = false;
         localStorage.setItem("timeZone", timeZone);
-        state.isBrowserDefaultTimeZone = timeZone === browserDefaultTimeZone;
+      } else {
+        state.timeZone = browserDefaultTimeZone;
+        state.isBrowserDefaultTimeZone = true;
+        localStorage.setItem("timeZone", browserDefaultTimeZone);
       }
     });
   },

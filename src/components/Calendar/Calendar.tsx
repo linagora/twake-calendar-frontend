@@ -44,6 +44,7 @@ import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";
 import SearchResultsPage from "../../features/Search/SearchResultsPage";
 import { setTimeZone } from "../../features/Settings/SettingsSlice";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
@@ -106,7 +107,9 @@ export default function CalendarApp({
   });
 
   const [currentView, setCurrentView] = useState("timeGridWeek");
-  const timezone = useAppSelector((state) => state.settings.timeZone);
+  const timezone =
+    useAppSelector((state) => state.settings.timeZone) ??
+    browserDefaultTimeZone;
 
   const fetchedRangesRef = useRef<Record<string, string>>({});
 

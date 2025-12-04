@@ -139,7 +139,7 @@ export default function SettingsPage() {
     // Optimistic update - update UI immediately
     dispatch(setIsBrowserDefaultTimeZone(isDefault));
     if (isDefault) {
-      dispatch(setUserTimeZone(browserDefaultTimeZone));
+      dispatch(setUserTimeZone(null));
       dispatch(setSettingsTimeZone(browserDefaultTimeZone));
     }
 
