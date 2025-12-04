@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { fireEvent, screen, waitFor } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import SettingsPage from "../../../src/features/Settings/SettingsPage";
 import settingsReducer, {
   setIsBrowserDefaultTimeZone,
@@ -347,7 +347,13 @@ describe("Timezone Logic - Backend to Frontend Flow", () => {
       await waitFor(() => {
         const state = store.getState();
         expect(state.settings.isBrowserDefaultTimeZone).toBe(true);
+      });
+      await waitFor(() => {
+        const state = store.getState();
         expect(state.settings.timeZone).toBe(browserDefaultTimeZone);
+      });
+      await waitFor(() => {
+        const state = store.getState();
         expect(state.user.coreConfig.datetime.timeZone).toBe(null);
       });
     });
@@ -392,7 +398,13 @@ describe("Timezone Logic - Backend to Frontend Flow", () => {
       await waitFor(() => {
         const state = store.getState();
         expect(state.settings.isBrowserDefaultTimeZone).toBe(false);
+      });
+      await waitFor(() => {
+        const state = store.getState();
         expect(state.settings.timeZone).toBe("Australia/Sydney");
+      });
+      await waitFor(() => {
+        const state = store.getState();
         expect(state.user.coreConfig.datetime.timeZone).toBe(
           "Australia/Sydney"
         );
@@ -406,12 +418,10 @@ describe("Timezone Logic - Backend to Frontend Flow", () => {
       store.dispatch(setTimeZone(browserDefaultTimeZone));
       expect(localStorage.getItem("timeZone")).toBe(browserDefaultTimeZone);
       expect(localStorage.getItem("timeZone")).not.toBe("null");
-      console.log("LocalStorage stores browser timezone value");
 
       // Scenario 2: Specific timezone
       store.dispatch(setTimeZone("Africa/Cairo"));
       expect(localStorage.getItem("timeZone")).toBe("Africa/Cairo");
-      console.log("LocalStorage stores specific timezone value");
     });
   });
 

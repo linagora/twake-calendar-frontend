@@ -13,13 +13,12 @@ import {
   MenuItem,
   Typography,
   Snackbar,
-  Checkbox,
   FormControlLabel,
   Switch,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
-import SyncIcon from "@mui/icons-material/Sync";
+// import SyncIcon from "@mui/icons-material/Sync";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   setView,
@@ -60,7 +59,8 @@ export default function SettingsPage() {
     (state) => state.user?.coreConfig?.datetime?.timeZone
   );
   const settingTimeZone = useAppSelector((state) => state.settings?.timeZone);
-  const currentTimeZone = userTimeZone || settingTimeZone || "UTC";
+  const currentTimeZone =
+    userTimeZone ?? settingTimeZone ?? browserDefaultTimeZone;
   const isBrowserDefault = useAppSelector(
     (state) => state.settings.isBrowserDefaultTimeZone
   );
@@ -115,7 +115,7 @@ export default function SettingsPage() {
   };
 
   const handleTimeZoneChange = (newTimeZone: string) => {
-    const previousTimeZone = currentTimeZone;
+    // const previousTimeZone = currentTimeZone;
 
     // Optimistic update - update UI immediately
     dispatch(setUserTimeZone(newTimeZone));

@@ -13,19 +13,7 @@ import {
 import { getCalendarsListAsync } from "../../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
-// ---------- Helpers: proper async-thunk mocks ----------
-function mockThunk(type: string) {
-  return Object.assign(
-    jest.fn(() => ({ type })),
-    {
-      pending: { type: `${type}/pending` },
-      fulfilled: { type: `${type}/fulfilled` },
-      rejected: { type: `${type}/rejected` },
-    }
-  );
-}
-
-// ---------- Mocks ----------
+// Mocks
 jest.mock("../../../src/app/hooks", () => ({
   useAppDispatch: jest.fn(),
   useAppSelector: jest.fn(() => ({})),
@@ -95,12 +83,26 @@ describe("CallbackResume", () => {
 
     await waitFor(() => {
       expect(oidcAuth.Callback).toHaveBeenCalledWith("verifier123", "state456");
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setUserData(mockUserInfo));
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setTokens(mockTokenSet));
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserDataAsync());
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getCalendarsListAsync());
+    });
+    await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(push("/"));
+    });
+    await waitFor(() => {
       expect(sessionStorage.getItem("redirectState")).toBe(null);
+    });
+    await waitFor(() => {
       expect(sessionStorage.getItem("tokenSet")).toEqual(
         JSON.stringify(mockTokenSet)
       );

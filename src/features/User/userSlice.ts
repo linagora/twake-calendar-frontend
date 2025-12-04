@@ -6,7 +6,6 @@ import {
   UserConfigurationUpdates,
 } from "./userAPI";
 import { formatReduxError } from "../../utils/errorUtils";
-import { browserDefaultTimeZone } from "../../utils/timezone";
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
   Record<string, any>,
