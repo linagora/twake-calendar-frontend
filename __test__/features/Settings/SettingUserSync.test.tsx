@@ -13,6 +13,8 @@ import { api } from "../../../src/utils/apiUtils";
 import { browserDefaultTimeZone } from "../../../src/utils/timezone";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
+jest.mock("../../../src/utils/apiUtils");
+
 describe("Timezone synchronization after getOpenPaasUserDataAsync", () => {
   let apiGetSpy: jest.SpyInstance;
 
@@ -315,6 +317,9 @@ describe("Timezone Logic - Backend to Frontend Flow", () => {
   });
 
   describe("User Actions - Changing Timezone", () => {
+    beforeEach(() => {
+      (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+    });
     test("User enables browser default => Settings gets browser TZ, User gets null", async () => {
       const { store } = renderWithProviders(<SettingsPage />, {
         user: {
