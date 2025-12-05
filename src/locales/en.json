@@ -218,6 +218,7 @@
     "timeZoneUpdateError": "Failed to update time zone",
     "notifications.empty": "Notifications settings coming soon",
     "displayWeekNumbers": "Show week number",
+    "displayWeekNumbersUpdateError": "Failed to update show week number",
     "sync.empty": "Sync settings coming soon",
     "back": "Back to calendar"
   },
