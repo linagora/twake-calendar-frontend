@@ -218,6 +218,9 @@
     "timeZoneUpdateError": "Échec de la mise à jour du fuseau horaire",
     "notifications.empty": "Paramètres de notifications à venir",
     "sync.empty": "Paramètres de synchronisation à venir",
+    "calAndEvent": "Calendrier et événements",
+    "showDeclinedEvent": "Afficher les événements déclinés",
+    "hideDeclinedEventsUpdateError": "Échec de la mise à jour du masquage des événements déclinés.",
     "back": "Retour au calendrier"
   },
   "eventPreview": {

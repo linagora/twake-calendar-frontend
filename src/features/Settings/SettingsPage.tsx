@@ -25,6 +25,7 @@ import {
   setLanguage as setSettingsLanguage,
   setTimeZone as setSettingsTimeZone,
   setIsBrowserDefaultTimeZone,
+  setHideDeclinedEvents,
 } from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
@@ -65,13 +66,18 @@ export default function SettingsPage() {
     (state) => state.settings.isBrowserDefaultTimeZone
   );
 
+  const hideDeclinedEvents = useAppSelector(
+    (state) => state.settings?.hideDeclinedEvents
+  );
+
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
-
+  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsOpen] =
+    useState(false);
   const handleBackClick = () => {
     dispatch(setView("calendar"));
   };
@@ -161,6 +167,26 @@ export default function SettingsPage() {
     setTimeZoneErrorOpen(false);
   };
 
+  const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
+
+    // Call API in background, don't wait for it
+    dispatch(
+      updateUserConfigurationsAsync({
+        hideDeclinedEvents: doHideDeclinedEvents,
+      })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update hide declined event:", error);
+        dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
+        setHideDeclinedEventsOpen(true);
+      });
+  };
+  const handleHideDeclinedEventsErrorClose = () => {
+    setTimeZoneErrorOpen(false);
+  };
   return (
     <main className="main-layout settings-layout">
       <Box className="settings-sidebar">
@@ -284,6 +310,38 @@ export default function SettingsPage() {
                       </FormControl>
                     </Box>
                   </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {t("settings.calAndEvent")}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mb: 6,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 500 }}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={Boolean(!hideDeclinedEvents)}
+                              onChange={() =>
+                                handleHideDeclinedEvents(!hideDeclinedEvents)
+                              }
+                              aria-label={t("settings.showDeclinedEvent")}
+                            />
+                          }
+                          label={t("settings.showDeclinedEvent")}
+                          labelPlacement="start"
+                          sx={{
+                            minWidth: 400,
+                            justifyContent: "space-between",
+                            marginLeft: 0,
+                            mb: 2,
+                          }}
+                        />
+                      </FormControl>
+                    </Box>
+                  </Box>
                 </Box>
               )}
               {activeSettingsSubTab === "notifications" && (
@@ -318,6 +376,12 @@ export default function SettingsPage() {
         autoHideDuration={4000}
         onClose={handleTimeZoneErrorClose}
         message={t("settings.timeZoneUpdateError")}
+      />
+      <Snackbar
+        open={hideDeclinedEventsErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleHideDeclinedEventsErrorClose}
+        message={t("settings.hideDeclinedEventsUpdateError")}
       />
     </main>
   );

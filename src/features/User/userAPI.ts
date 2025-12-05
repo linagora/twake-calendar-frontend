@@ -39,12 +39,14 @@ export interface UserConfigurationUpdates {
   notifications?: Record<string, unknown>;
   timezone?: string;
   previousConfig?: Record<string, any>;
+  hideDeclinedEvents?: boolean;
 }
 
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
 ): Promise<Response | { status: number }> {
   const coreConfigs: Array<{ name: string; value: any }> = [];
+  const esnCalendarConfigs: Array<{ name: string; value: any }> = [];
 
   if (updates.language !== undefined) {
     coreConfigs.push({ name: "language", value: updates.language });
@@ -61,17 +63,37 @@ export async function updateUserConfigurations(
       },
     });
   }
+  if (updates.hideDeclinedEvents !== undefined) {
+    esnCalendarConfigs.push({
+      name: "hideDeclinedEvents",
+      value: updates.hideDeclinedEvents,
+    });
+  }
 
-  if (coreConfigs.length === 0) {
+  const modules: Array<{
+    name: string;
+    configurations: Array<{ name: string; value: any }>;
+  }> = [];
+
+  if (coreConfigs.length > 0) {
+    modules.push({
+      name: "core",
+      configurations: coreConfigs,
+    });
+  }
+
+  if (esnCalendarConfigs.length > 0) {
+    modules.push({
+      name: "linagora.esn.calendar",
+      configurations: esnCalendarConfigs,
+    });
+  }
+
+  if (modules.length === 0) {
     return Promise.resolve({ status: 204 });
   }
 
   return await api.patch(`api/configurations?scope=user`, {
-    json: [
-      {
-        name: "core",
-        configurations: coreConfigs,
-      },
-    ],
+    json: modules,
   });
 }
