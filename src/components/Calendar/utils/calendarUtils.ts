@@ -139,7 +139,7 @@ export const eventToFullCalendarFormat = (
 export const extractEvents = (
   selectedCalendars: string[],
   calendars: Record<string, Calendars>,
-  userAdress?: string,
+  userAddress?: string,
   hideDeclinedEvents?: boolean | null
 ) => {
   const allEvents: CalendarEvent[] = [];
@@ -158,7 +158,7 @@ export const extractEvents = (
         !(
           hideDeclinedEvents &&
           event.attendee?.some(
-            (a) => a.cal_address === userAdress && a.partstat === "DECLINED"
+            (a) => a.cal_address === userAddress && a.partstat === "DECLINED"
           )
         )
     );
