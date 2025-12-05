@@ -221,6 +221,7 @@
     "notifications.deliveryMethod": "Mode de réception",
     "alarmEmailsUpdateError": "Échec de la mise à jour du mode de notification par e-mail",
     "displayWeekNumbers": "Afficher le numéro de la semaine",
+    "displayWeekNumbersUpdateError": "Échec de la mise à jour de l'affichage du numéro de la semaine",
     "sync.empty": "Paramètres de synchronisation à venir",
     "calAndEvent": "Calendrier et événements",
     "showDeclinedEvent": "Afficher les événements déclinés",

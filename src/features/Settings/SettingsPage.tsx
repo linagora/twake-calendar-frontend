@@ -88,7 +88,7 @@ export default function SettingsPage() {
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
   const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
     useState(false);
-  const [displayWeekNumbersErrorOpen, setDisplayWeekNumbersOpen] =
+  const [displayWeekNumbersErrorOpen, setDisplayWeekNumbersErrorOpen] =
     useState(false);
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -239,9 +239,9 @@ export default function SettingsPage() {
     )
       .unwrap()
       .catch((error) => {
-        console.error("Failed to update hide declined event:", error);
+        console.error("Failed to the week number setting:", error);
         dispatch(setDisplayWeekNumbers(!doDisplayWeekNumbers));
-        setDisplayWeekNumbersOpen(true);
+        setDisplayWeekNumbersErrorOpen(true);
       });
   };
   const handleDisplayWeekNumbersErrorClose = () => {
