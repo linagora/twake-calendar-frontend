@@ -77,7 +77,6 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
       sx={pickerContext.rootSx}
       ref={pickerContext.rootRef}
       name={pickerContext.name}
-      label={pickerContext.label}
     />
   );
 }
