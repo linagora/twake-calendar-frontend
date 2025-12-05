@@ -220,6 +220,7 @@
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Способ доставки",
     "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
+    "displayWeekNumbers": "Показать номер недели",
     "sync.empty": "Настройки синхронизации скоро появятся",
     "calAndEvent": "Календарь и мероприятия",
     "showDeclinedEvent": "Показать отклонённые мероприятия",

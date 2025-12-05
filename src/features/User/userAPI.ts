@@ -38,6 +38,7 @@ export interface UserConfigurationUpdates {
   language?: string;
   notifications?: Record<string, unknown>;
   timezone?: string | null;
+  displayWeekNumbers?: boolean;
   previousConfig?: Record<string, any>;
   alarmEmails?: boolean;
   hideDeclinedEvents?: boolean;
@@ -77,6 +78,13 @@ export async function updateUserConfigurations(
       value: updates.hideDeclinedEvents,
     });
   }
+    if (updates.displayWeekNumbers !== undefined) {
+    calendarConfigs.push({
+      name: "displayWeekNumbers",
+      value: updates.displayWeekNumbers,
+    });
+  }
+
 
   const modules: Array<{
     name: string;
