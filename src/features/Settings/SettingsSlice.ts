@@ -6,6 +6,7 @@ export interface SettingsState {
   language: string;
   timeZone: string | null; // Allow null to represent browser default
   isBrowserDefaultTimeZone: boolean;
+  displayWeekNumbers: boolean;
   view: "calendar" | "settings" | "search";
 }
 
@@ -21,6 +22,7 @@ const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
   isBrowserDefaultTimeZone: defaultTimeZone === null,
+  displayWeekNumbers: true,
   view: "calendar",
 };
 
@@ -38,6 +40,9 @@ export const settingsSlice = createSlice({
     },
     setIsBrowserDefaultTimeZone: (state, action: PayloadAction<boolean>) => {
       state.isBrowserDefaultTimeZone = action.payload;
+    },
+    setDisplayWeekNumbers: (state, action: PayloadAction<boolean>) => {
+      state.displayWeekNumbers = action.payload;
     },
     setView: (
       state,
@@ -65,6 +70,18 @@ export const settingsSlice = createSlice({
         state.isBrowserDefaultTimeZone = true;
         localStorage.setItem("timeZone", browserDefaultTimeZone);
       }
+
+      const calendarModule = action.payload.configurations.modules.find(
+        (module: any) => module.name === "calendar"
+      );
+      if (calendarModule?.configurations) {
+        const alarmEmailsConfig = calendarModule.configurations.find(
+          (config: any) => config.name === "displayWeekNumbers"
+        );
+        if (alarmEmailsConfig) {
+          state.displayWeekNumbers = alarmEmailsConfig.value === true;
+        }
+      }
     });
   },
 });
@@ -74,5 +91,6 @@ export const {
   setTimeZone,
   setView,
   setIsBrowserDefaultTimeZone,
+  setDisplayWeekNumbers,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;

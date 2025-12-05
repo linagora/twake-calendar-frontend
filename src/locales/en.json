@@ -217,6 +217,7 @@
     "timeZoneBrowserDefault": "Detect time zone automatically",
     "timeZoneUpdateError": "Failed to update time zone",
     "notifications.empty": "Notifications settings coming soon",
+    "displayWeekNumbers": "Show week number",
     "sync.empty": "Sync settings coming soon",
     "back": "Back to calendar"
   },

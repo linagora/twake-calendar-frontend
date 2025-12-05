@@ -78,6 +78,9 @@ export default function CalendarApp({
   }, [dispatch, tokens, userId]);
   const view = useAppSelector((state) => state.settings.view);
   const calendars = useAppSelector((state) => state.calendars.list);
+  const displayWeekNumbers = useAppSelector(
+    (state) => state.settings.displayWeekNumbers
+  );
   const tempcalendars = useAppSelector((state) => state.calendars.templist);
   const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
 
@@ -681,9 +684,11 @@ export default function CalendarApp({
             weekNumberContent={(arg) => {
               return (
                 <div className="weekSelector">
-                  <div>
-                    {t("menubar.views.week")} {arg.num}
-                  </div>
+                  {displayWeekNumbers && (
+                    <div>
+                      {t("menubar.views.week")} {arg.num}
+                    </div>
+                  )}
                   <TimezoneSelector
                     value={timezone}
                     referenceDate={calendarRef.current?.getDate() ?? new Date()}
