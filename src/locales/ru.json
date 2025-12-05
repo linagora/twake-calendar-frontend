@@ -223,7 +223,7 @@
     "sync.empty": "Настройки синхронизации скоро появятся",
     "calAndEvent": "Календарь и мероприятия",
     "showDeclinedEvent": "Показать отклонённые мероприятия",
-    "hideDeclinedEventsUpdateError": "Не удалось обновить скрытие отклоненных событий.",
+    "hideDeclinedEventsUpdateError": "Не удалось обновить скрытие отклонённых событий.",
     "back": "Вернуться к календарю"
   },
   "eventPreview": {

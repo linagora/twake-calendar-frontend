@@ -223,7 +223,7 @@
     "sync.empty": "Paramètres de synchronisation à venir",
     "calAndEvent": "Calendrier et événements",
     "showDeclinedEvent": "Afficher les événements déclinés",
-    "hideDeclinedEventsUpdateError": "Échec de la mise à jour du masquage des événements déclines.",
+    "hideDeclinedEventsUpdateError": "Échec de la mise à jour du masquage des événements déclinés.",
     "back": "Retour au calendrier"
   },
   "eventPreview": {
