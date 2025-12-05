@@ -241,4 +241,24 @@ describe("DateTimeFields", () => {
       )
     );
   });
+
+  it("should have aria-label for accessibility and testing", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "10:00",
+      endDate: "2025-01-01",
+      endTime: "11:00",
+      showMore: true,
+    });
+
+    const startDateInput = screen.getByTestId("start-date-input");
+    const startTimeInput = screen.getByTestId("start-time-input");
+    const endDateInput = screen.getByTestId("end-date-input");
+    const endTimeInput = screen.getByTestId("end-time-input");
+
+    expect(startDateInput).toHaveAttribute("aria-label", "dateTimeFields.startDate");
+    expect(startTimeInput).toHaveAttribute("aria-label", "dateTimeFields.startTime");
+    expect(endDateInput).toHaveAttribute("aria-label", "dateTimeFields.endDate");
+    expect(endTimeInput).toHaveAttribute("aria-label", "dateTimeFields.endTime");
+  });
 });
