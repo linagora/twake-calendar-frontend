@@ -217,6 +217,8 @@
     "timeZoneBrowserDefault": "Tự động phát hiện múi giờ",
     "timeZoneUpdateError": "Không cập nhật được múi giờ",
     "notifications.empty": "Cài đặt thông báo sắp có",
+    "displayWeekNumbers": "Hiển thị số tuần",
+    "displayWeekNumbersUpdateError": "Không cập nhật được cách hiển thị số tuần",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "back": "Quay lại lịch"
   },
