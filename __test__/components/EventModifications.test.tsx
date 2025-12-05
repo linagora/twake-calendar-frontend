@@ -408,6 +408,11 @@ describe("CalendarApp integration", () => {
         });
       });
 
+      // Wait for the 0.1s delay in handleStartTimeChangeWithClose to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      });
+
       const saveButton = screen.getByRole("button", { name: /save/i });
       await act(async () => {
         saveButton.click();
