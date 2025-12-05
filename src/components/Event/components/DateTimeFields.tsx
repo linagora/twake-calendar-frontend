@@ -321,6 +321,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     onChange={handleStartTimeChange}
                     open={isStartTimeOpen}
                     onClose={() => setIsStartTimeOpen(false)}
+                    thresholdToRenderTimeInASingleColumn={48}
+                    timeSteps={{ minutes: 30 }}
                     slotProps={{
                       ...getSlotProps("start-time-input"),
                       openPickerButton: { sx: { display: "none" } },
@@ -368,6 +370,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     onChange={handleEndTimeChange}
                     open={isEndTimeOpen}
                     onClose={() => setIsEndTimeOpen(false)}
+                    thresholdToRenderTimeInASingleColumn={48}
+                    timeSteps={{ minutes: 30 }}
                     slotProps={{
                       ...getSlotProps(
                         "end-time-input",
@@ -452,6 +456,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 disabled={allday}
                 open={isStartTimeOpen}
                 onClose={() => setIsStartTimeOpen(false)}
+                thresholdToRenderTimeInASingleColumn={48}
+                timeSteps={{ minutes: 30 }}
                 slotProps={{
                   ...getSlotProps("start-time-input"),
                   openPickerButton: { sx: { display: "none" } },
@@ -476,6 +482,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 disabled={allday}
                 open={isEndTimeOpen}
                 onClose={() => setIsEndTimeOpen(false)}
+                thresholdToRenderTimeInASingleColumn={48}
+                timeSteps={{ minutes: 30 }}
                 slotProps={{
                   textField: {
                     size: "small",
