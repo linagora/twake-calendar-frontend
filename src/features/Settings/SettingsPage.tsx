@@ -47,7 +47,7 @@ type SettingsSubTab = "settings" | "notifications";
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  // const previousConfig = useAppSelector((state) => state.user.coreConfig);
+  const previousConfig = useAppSelector((state) => state.user.coreConfig);
   const userLanguage = useAppSelector(
     (state) => state.user?.coreConfig.language
   );
@@ -115,46 +115,49 @@ export default function SettingsPage() {
   };
 
   const handleTimeZoneChange = (newTimeZone: string) => {
-    // const previousTimeZone = currentTimeZone;
+    const previousTimeZone = currentTimeZone;
 
     // Optimistic update - update UI immediately
     dispatch(setUserTimeZone(newTimeZone));
     dispatch(setSettingsTimeZone(newTimeZone));
 
-    // // Call API in background, don't wait for it
-    // dispatch(
-    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
-    // )
-    //   .unwrap()
-    //   .catch((error) => {
-    //     console.error("Failed to update TimeZone:", error);
-    //     // Rollback on error
-    //     dispatch(setUserTimeZone(previousTimeZone));
-    //     dispatch(setSettingsTimeZone(previousTimeZone));
-    //     setTimeZoneErrorOpen(true);
-    //   });
+    // Call API in background, don't wait for it
+    dispatch(
+      updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update TimeZone:", error);
+        // Rollback on error
+        dispatch(setUserTimeZone(previousTimeZone));
+        dispatch(setSettingsTimeZone(previousTimeZone));
+        setTimeZoneErrorOpen(true);
+      });
   };
 
   const handleTimeZoneDefaultChange = (isDefault: boolean) => {
+    const previousTimeZone = currentTimeZone;
+
     // Optimistic update - update UI immediately
     dispatch(setIsBrowserDefaultTimeZone(isDefault));
     if (isDefault) {
       dispatch(setUserTimeZone(null));
       dispatch(setSettingsTimeZone(browserDefaultTimeZone));
-    }
 
-    // // Call API in background, don't wait for it
-    // dispatch(
-    //   updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
-    // )
-    //   .unwrap()
-    //   .catch((error) => {
-    //     console.error("Failed to update TimeZone:", error);
-    //     // Rollback on error
-    //     dispatch(setUserTimeZone(previousTimeZone));
-    //     dispatch(setSettingsTimeZone(previousTimeZone));
-    //     setTimeZoneErrorOpen(true);
-    //   });
+      // Call API in background, don't wait for it
+      dispatch(
+        updateUserConfigurationsAsync({ timezone: null, previousConfig })
+      )
+        .unwrap()
+        .catch((error) => {
+          console.error("Failed to update TimeZone:", error);
+          // Rollback on error
+          dispatch(setUserTimeZone(previousTimeZone));
+          dispatch(setSettingsTimeZone(previousTimeZone));
+          dispatch(setIsBrowserDefaultTimeZone(!isDefault));
+          setTimeZoneErrorOpen(true);
+        });
+    }
   };
 
   const handleTimeZoneErrorClose = () => {

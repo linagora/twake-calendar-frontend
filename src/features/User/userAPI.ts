@@ -37,7 +37,7 @@ export async function getUserDetails(id: string) {
 export interface UserConfigurationUpdates {
   language?: string;
   notifications?: Record<string, unknown>;
-  timezone?: string;
+  timezone?: string | null;
   previousConfig?: Record<string, any>;
 }
 
