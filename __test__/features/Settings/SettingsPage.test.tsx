@@ -24,12 +24,17 @@ describe("SettingsPage", () => {
       },
       organiserData: null,
       tokens: null,
-      coreConfig: { language: "en" },
+      coreConfig: {
+        language: "en",
+        datetime: { timeZone: "UTC" },
+      },
       loading: false,
       error: null,
     },
     settings: {
       language: "en",
+      timeZone: "UTC",
+      isBrowserDefaultTimeZone: false,
       view: "settings",
     },
   };
@@ -110,12 +115,14 @@ describe("SettingsPage", () => {
         },
         organiserData: null,
         tokens: null,
-        coreConfig: { language: "fr" },
+        coreConfig: { language: "fr", datetime: { timeZone: "UTC" } },
         loading: false,
         error: null,
       },
       settings: {
         language: "en",
+        timeZone: "UTC",
+        isBrowserDefaultTimeZone: false,
         view: "settings",
       },
     };
@@ -260,6 +267,9 @@ describe("SettingsPage", () => {
   });
 
   describe("Timezone Settings", () => {
+    beforeEach(() => {
+      (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+    });
     it("displays timezone selector in Settings tab", () => {
       renderWithProviders(<SettingsPage />, preloadedState);
 
@@ -289,6 +299,7 @@ describe("SettingsPage", () => {
         settings: {
           language: "en",
           timeZone: "UTC",
+          isBrowserDefaultTimeZone: false,
           view: "settings",
         },
       };
@@ -298,7 +309,7 @@ describe("SettingsPage", () => {
       expect(screen.getByDisplayValue(/America\/New York/i)).toBeDefined();
     });
 
-    it("updates timezone immediately (optimistic update)", async () => {
+    it("updates timezone immediately (optimistic update) and calls API", async () => {
       const { store } = renderWithProviders(<SettingsPage />, preloadedState);
 
       const timezoneInput = screen.getAllByRole("combobox")[1];
@@ -318,6 +329,27 @@ describe("SettingsPage", () => {
       await waitFor(() => {
         const state = store.getState();
         expect(state.settings.timeZone).toBe("Europe/Paris");
+      });
+
+      await waitFor(() => {
+        expect(api.patch).toHaveBeenCalledWith(
+          "api/configurations?scope=user",
+          expect.objectContaining({
+            json: expect.arrayContaining([
+              expect.objectContaining({
+                name: "core",
+                configurations: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: "datetime",
+                    value: expect.objectContaining({
+                      timeZone: "Europe/Paris",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          })
+        );
       });
     });
 
@@ -340,7 +372,30 @@ describe("SettingsPage", () => {
         expect(state.settings.timeZone).toBe("Asia/Tokyo");
       });
 
-      // Test with America/Los_Angeles
+      await waitFor(() => {
+        expect(api.patch).toHaveBeenCalledWith(
+          "api/configurations?scope=user",
+          expect.objectContaining({
+            json: expect.arrayContaining([
+              expect.objectContaining({
+                name: "core",
+                configurations: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: "datetime",
+                    value: expect.objectContaining({
+                      timeZone: "Asia/Tokyo",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          })
+        );
+      });
+
+      jest.clearAllMocks();
+      (api.patch as jest.Mock).mockResolvedValue({ status: 204 });
+
       fireEvent.change(timezoneInput, {
         target: { value: "America/Los_Angeles" },
       });
@@ -356,6 +411,172 @@ describe("SettingsPage", () => {
       await waitFor(() => {
         const state = store.getState();
         expect(state.settings.timeZone).toBe("America/Los_Angeles");
+      });
+
+      await waitFor(() => {
+        expect(api.patch).toHaveBeenCalledWith(
+          "api/configurations?scope=user",
+          expect.objectContaining({
+            json: expect.arrayContaining([
+              expect.objectContaining({
+                name: "core",
+                configurations: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: "datetime",
+                    value: expect.objectContaining({
+                      timeZone: "America/Los_Angeles",
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          })
+        );
+      });
+    });
+
+    it("enables browser default timezone and calls API with null", async () => {
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const browserDefaultSwitch = screen.getByRole("switch", {
+        name: /settings.timeZoneBrowserDefault/i,
+      });
+
+      expect(browserDefaultSwitch).not.toBeChecked();
+
+      fireEvent.click(browserDefaultSwitch);
+
+      await waitFor(() => {
+        expect(browserDefaultSwitch).toBeChecked();
+      });
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.settings.isBrowserDefaultTimeZone).toBe(true);
+      });
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBeNull();
+      });
+
+      await waitFor(() => {
+        expect(api.patch).toHaveBeenCalledWith(
+          "api/configurations?scope=user",
+          expect.objectContaining({
+            json: expect.arrayContaining([
+              expect.objectContaining({
+                name: "core",
+                configurations: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: "datetime",
+                    value: expect.objectContaining({
+                      timeZone: null,
+                    }),
+                  }),
+                ]),
+              }),
+            ]),
+          })
+        );
+      });
+    });
+
+    it("disables browser default timezone and shows timezone selector", async () => {
+      const stateWithBrowserDefault = {
+        ...preloadedState,
+        user: {
+          ...preloadedState.user,
+          coreConfig: {
+            language: "en",
+            datetime: { timeZone: null },
+          },
+        },
+        settings: {
+          ...preloadedState.settings,
+          isBrowserDefaultTimeZone: true,
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithBrowserDefault);
+
+      const browserDefaultSwitch = screen.getByRole("switch", {
+        name: /settings.timeZoneBrowserDefault/i,
+      });
+
+      expect(browserDefaultSwitch).toBeChecked();
+
+      expect(screen.getAllByRole("combobox")).toHaveLength(1);
+
+      fireEvent.click(browserDefaultSwitch);
+
+      await waitFor(() => {
+        expect(browserDefaultSwitch).not.toBeChecked();
+      });
+
+      await waitFor(() => {
+        expect(screen.getAllByRole("combobox")).toHaveLength(2);
+      });
+    });
+
+    it("rolls back timezone change if API call fails", async () => {
+      (api.patch as jest.Mock).mockRejectedValue(new Error("API Error"));
+
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      fireEvent.change(timezoneInput, { target: { value: "Europe/Paris" } });
+      const option = await screen.findByText(/Europe\/Paris/i);
+      fireEvent.click(option);
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("UTC");
+      });
+      await waitFor(
+        () => {
+          const state = store.getState();
+          expect(state.settings.timeZone).toBe("UTC");
+        },
+        { timeout: 3000 }
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("settings.timeZoneUpdateError")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("rolls back browser default change if API call fails", async () => {
+      (api.patch as jest.Mock).mockRejectedValue(new Error("API Error"));
+
+      const { store } = renderWithProviders(<SettingsPage />, preloadedState);
+
+      const browserDefaultSwitch = screen.getByRole("switch", {
+        name: /settings.timeZoneBrowserDefault/i,
+      });
+
+      fireEvent.click(browserDefaultSwitch);
+
+      await waitFor(
+        () => {
+          const state = store.getState();
+          expect(state.settings.isBrowserDefaultTimeZone).toBe(false);
+        },
+        { timeout: 3000 }
+      );
+
+      await waitFor(() => {
+        const state = store.getState();
+        expect(state.user?.coreConfig.datetime.timeZone).toBe("UTC");
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("settings.timeZoneUpdateError")
+        ).toBeInTheDocument();
       });
     });
 
@@ -379,6 +600,7 @@ describe("SettingsPage", () => {
         settings: {
           language: "en",
           timeZone: undefined,
+          isBrowserDefaultTimeZone: false,
           view: "settings",
         },
       };
@@ -387,6 +609,54 @@ describe("SettingsPage", () => {
 
       const timezoneInput = screen.getByDisplayValue("(UTC) UTC");
       expect(timezoneInput).toBeDefined();
+    });
+
+    it("preserves other datetime properties when updating timezone", async () => {
+      const stateWithDatetimeConfig = {
+        ...preloadedState,
+        user: {
+          ...preloadedState.user,
+          coreConfig: {
+            language: "en",
+            datetime: {
+              timeZone: "UTC",
+              format: "24h",
+              firstDayOfWeek: 1,
+            },
+          },
+        },
+      };
+
+      renderWithProviders(<SettingsPage />, stateWithDatetimeConfig);
+
+      const timezoneInput = screen.getAllByRole("combobox")[1];
+
+      fireEvent.change(timezoneInput, { target: { value: "Europe/Paris" } });
+      const option = await screen.findByText(/Europe\/Paris/i);
+      fireEvent.click(option);
+
+      await waitFor(() => {
+        expect(api.patch).toHaveBeenCalledWith(
+          "api/configurations?scope=user",
+          expect.objectContaining({
+            json: expect.arrayContaining([
+              expect.objectContaining({
+                name: "core",
+                configurations: expect.arrayContaining([
+                  expect.objectContaining({
+                    name: "datetime",
+                    value: {
+                      timeZone: "Europe/Paris",
+                      format: "24h",
+                      firstDayOfWeek: 1,
+                    },
+                  }),
+                ]),
+              }),
+            ]),
+          })
+        );
+      });
     });
   });
 });
