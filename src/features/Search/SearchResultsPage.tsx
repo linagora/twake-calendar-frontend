@@ -1,4 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -7,6 +8,7 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AppDispatch } from "../../app/store";
 import logo from "../../static/noResult-logo.svg";
+import { browserDefaultTimeZone } from "../../utils/timezone";
 import { getEventAsync } from "../Calendars/CalendarSlice";
 import EventPreviewModal from "../Events/EventDisplayPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
@@ -142,7 +144,9 @@ function ResultItem({
   const { t } = useI18n();
   const startDate = new Date(eventData.data.start);
   const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate;
-  const timeZone = useAppSelector((state) => state.calendars.timeZone);
+  const timeZone =
+    useAppSelector((state) => state.settings.timeZone) ??
+    browserDefaultTimeZone;
   const calendar = useAppSelector(
     (state) =>
       state.calendars.list[
@@ -184,7 +188,7 @@ function ResultItem({
           gridTemplateColumns: {
             xs: "1fr",
             sm: "90px 120px 35px 1fr",
-            md: "90px 120px 35px 220px 150px 250px 1fr",
+            md: "90px 120px 35px 1fr 150px 250px 1fr",
           },
           gap: 2,
           p: 3,
@@ -239,9 +243,12 @@ function ResultItem({
             height: 24,
           }}
         />
-        <Typography sx={styles.M3BodyLarge}>
-          {eventData.data.summary || t("event.untitled")}
-        </Typography>
+        <Box display="flex" flexDirection="row" gap={1}>
+          <Typography sx={styles.M3BodyLarge}>
+            {eventData.data.summary || t("event.untitled")}
+          </Typography>
+          {eventData.data.isRecurrentMaster && <RepeatIcon />}
+        </Box>
         <Typography
           sx={{
             ...styles.M3BodyMedium1,
