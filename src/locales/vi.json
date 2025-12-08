@@ -217,6 +217,9 @@
     "timeZoneBrowserDefault": "Tự động phát hiện múi giờ",
     "timeZoneUpdateError": "Không cập nhật được múi giờ",
     "notifications.empty": "Cài đặt thông báo sắp có",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Phương thức gửi",
+    "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "back": "Quay lại lịch"
   },

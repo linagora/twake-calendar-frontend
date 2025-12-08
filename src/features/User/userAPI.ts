@@ -39,12 +39,14 @@ export interface UserConfigurationUpdates {
   notifications?: Record<string, unknown>;
   timezone?: string | null;
   previousConfig?: Record<string, any>;
+  alarmEmails?: boolean;
 }
 
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
 ): Promise<Response | { status: number }> {
   const coreConfigs: Array<{ name: string; value: any }> = [];
+  const calendarConfigs: Array<{ name: string; value: any }> = [];
 
   if (updates.language !== undefined) {
     coreConfigs.push({ name: "language", value: updates.language });
@@ -61,17 +63,37 @@ export async function updateUserConfigurations(
       },
     });
   }
+  if (updates.alarmEmails !== undefined) {
+    calendarConfigs.push({
+      name: "alarmEmails",
+      value: updates.alarmEmails,
+    });
+  }
 
-  if (coreConfigs.length === 0) {
+  const modules: Array<{
+    name: string;
+    configurations: Array<{ name: string; value: any }>;
+  }> = [];
+
+  if (coreConfigs.length > 0) {
+    modules.push({
+      name: "core",
+      configurations: coreConfigs,
+    });
+  }
+
+  if (calendarConfigs.length > 0) {
+    modules.push({
+      name: "calendar",
+      configurations: calendarConfigs,
+    });
+  }
+
+  if (modules.length === 0) {
     return Promise.resolve({ status: 204 });
   }
 
   return await api.patch(`api/configurations?scope=user`, {
-    json: [
-      {
-        name: "core",
-        configurations: coreConfigs,
-      },
-    ],
+    json: modules,
   });
 }
