@@ -241,6 +241,7 @@
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "joinVideo": "Tham gia cuộc họp video",
+    "joinVideoShort": "Tham gia",
     "guests": "%{count} khách",
     "yesCount": "%{count} đồng ý",
     "maybeCount": "%{count} có thể",

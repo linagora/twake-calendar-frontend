@@ -1,7 +1,8 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
 import { useState } from "react";
@@ -184,12 +185,8 @@ function ResultItem({
     <>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "90px 120px 35px 1fr",
-            md: "90px 120px 35px 1fr 150px 250px 1fr",
-          },
+          display: "flex",
+          flexDirection: "row",
           gap: 2,
           p: 3,
           borderTop: "1px solid #F3F6F9",
@@ -201,7 +198,7 @@ function ResultItem({
         }}
         onClick={() => handleOpenResult(eventData)}
       >
-        <Typography sx={styles.M3BodyLarge}>
+        <Typography sx={{ ...styles.M3BodyLarge, minWidth: "90px" }}>
           {startDate.toLocaleDateString(t("locale"), {
             day: "2-digit",
             month: "short",
@@ -218,49 +215,50 @@ function ResultItem({
             </>
           )}
         </Typography>
-        <Typography sx={styles.M3BodyMedium1}>
-          {!eventData.data.allDay && (
-            <>
-              {startDate.toLocaleTimeString(t("locale"), {
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone,
-              })}
-              -
-              {endDate.toLocaleTimeString(t("locale"), {
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone,
-              })}
-            </>
-          )}
-        </Typography>
+        {!eventData.data.allDay && (
+          <Typography sx={{ ...styles.M3BodyMedium1, minWidth: "120px" }}>
+            {startDate.toLocaleTimeString(t("locale"), {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone,
+            })}
+            -
+            {endDate.toLocaleTimeString(t("locale"), {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone,
+            })}
+          </Typography>
+        )}
 
         <SquareRoundedIcon
           style={{
             color: calendarColor ?? "#3788D8",
             width: 24,
             height: 24,
+            flexShrink: 0,
           }}
         />
-        <Box display="flex" flexDirection="row" gap={1}>
+        <Box display="flex" flexDirection="row" gap={1} sx={{ minWidth: 0 }}>
           <Typography sx={styles.M3BodyLarge}>
             {eventData.data.summary || t("event.untitled")}
           </Typography>
           {eventData.data.isRecurrentMaster && <RepeatIcon />}
         </Box>
-        <Typography
-          sx={{
-            ...styles.M3BodyMedium1,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {eventData.data.organizer?.cn ||
-            eventData.data.organizer?.email ||
-            ""}
-        </Typography>
+        {(eventData.data.organizer?.cn || eventData.data.organizer?.email) && (
+          <Typography
+            sx={{
+              ...styles.M3BodyMedium1,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              minWidth: "150px",
+              maxWidth: "150px",
+            }}
+          >
+            {eventData.data.organizer.cn || eventData.data.organizer.email}
+          </Typography>
+        )}
         {eventData.data?.location && (
           <Typography
             sx={{
@@ -268,21 +266,40 @@ function ResultItem({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              minWidth: "150px",
+              maxWidth: "250px",
             }}
           >
-            {eventData.data?.location ?? ""}
+            {eventData.data.location}
           </Typography>
         )}
-        <Typography
-          sx={{
-            ...styles.M3BodyMedium3,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {eventData.data?.description?.replace(/\n/g, " ") ?? ""}
-        </Typography>
+        {eventData.data?.description && (
+          <Typography
+            sx={{
+              ...styles.M3BodyMedium3,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            {eventData.data.description.replace(/\n/g, " ")}
+          </Typography>
+        )}
+        <Box sx={{ flex: 1, minWidth: 0 }} />
+        {eventData.data["x-openpaas-videoconference"] && (
+          <Button
+            startIcon={<VideocamIcon />}
+            sx={{ flexShrink: 0, ml: "auto" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(eventData.data["x-openpaas-videoconference"]);
+            }}
+          >
+            {t("eventPreview.joinVideoShort")}
+          </Button>
+        )}
       </Box>
       {calendar && calendar.events[eventData.data.uid] && (
         <EventPreviewModal
