@@ -239,13 +239,13 @@ export default function SettingsPage() {
     )
       .unwrap()
       .catch((error) => {
-        console.error("Failed to the week number setting:", error);
+        console.error("Failed to update the week number setting:", error);
         dispatch(setDisplayWeekNumbers(!doDisplayWeekNumbers));
         setDisplayWeekNumbersErrorOpen(true);
       });
   };
   const handleDisplayWeekNumbersErrorClose = () => {
-    setTimeZoneErrorOpen(false);
+    setDisplayWeekNumbersErrorOpen(false);
   };
 
   return (
