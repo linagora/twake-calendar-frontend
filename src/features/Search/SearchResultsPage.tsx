@@ -294,7 +294,11 @@ function ResultItem({
             sx={{ flexShrink: 0, ml: "auto" }}
             onClick={(e) => {
               e.stopPropagation();
-              window.open(eventData.data["x-openpaas-videoconference"]);
+              window.open(
+                eventData.data["x-openpaas-videoconference"],
+                "_blank",
+                "noopener,noreferrer"
+              );
             }}
           >
             {t("eventPreview.joinVideoShort")}
