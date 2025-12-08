@@ -182,11 +182,7 @@ describe("EventSearchBar", () => {
     fireEvent.click(searchButton);
 
     // Click tune icon
-    const tuneButtons = screen.getAllByRole("button");
-    const tuneButton = tuneButtons.find((btn) =>
-      // eslint-disable-next-line testing-library/no-node-access
-      btn.querySelector('[data-testid="TuneIcon"]')
-    );
+    const tuneButton = screen.getByTestId("TuneIcon");
     if (tuneButton) fireEvent.click(tuneButton);
 
     await waitFor(() => {
@@ -258,11 +254,7 @@ describe("EventSearchBar", () => {
     fireEvent.click(searchButton);
 
     // Click tune icon
-    const tuneButtons = screen.getAllByRole("button");
-    const tuneButton = tuneButtons.find((btn) =>
-      // eslint-disable-next-line testing-library/no-node-access
-      btn.querySelector('[data-testid="TuneIcon"]')
-    );
+    const tuneButton = screen.getByTestId("TuneIcon");
     if (tuneButton) fireEvent.click(tuneButton);
 
     fireEvent.click(screen.getByText("common.search"));

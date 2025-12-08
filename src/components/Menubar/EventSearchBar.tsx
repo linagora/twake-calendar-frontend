@@ -86,11 +86,15 @@ export default function SearchBar() {
   const handleSearch = async () => {
     const trimmedSearch = search.trim();
     const trimmedKeywords = filters.keywords.trim();
-    if (!filterOpen && !trimmedSearch) {
-      return;
-    }
 
-    if (filterOpen && !trimmedKeywords) {
+    // Block search if all search criteria are empty
+    const hasSearchCriteria =
+      trimmedSearch ||
+      trimmedKeywords ||
+      filters.organizers.length > 0 ||
+      filters.attendees.length > 0;
+
+    if (!hasSearchCriteria) {
       return;
     }
 
