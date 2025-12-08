@@ -81,7 +81,7 @@ export default function SettingsPage() {
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
-  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsOpen] =
+  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
     useState(false);
 
   const handleBackClick = () => {
@@ -190,11 +190,11 @@ export default function SettingsPage() {
       .catch((error) => {
         console.error("Failed to update hide declined event:", error);
         dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
-        setHideDeclinedEventsOpen(true);
+        setHideDeclinedEventsErrorOpen(true);
       });
   };
   const handleHideDeclinedEventsErrorClose = () => {
-    setTimeZoneErrorOpen(false);
+    setHideDeclinedEventsErrorOpen(false);
   };
 
   const handleAlarmEmailsToggle = (
