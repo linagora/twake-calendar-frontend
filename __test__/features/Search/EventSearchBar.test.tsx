@@ -245,7 +245,7 @@ describe("EventSearchBar", () => {
     });
   });
 
-  it("should not trigger search on Enter key when filter keywords is empty", async () => {
+  it("should not trigger search when filter keywords is empty", async () => {
     const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
 
     renderWithProviders(<SearchBar />, preloadedState);
