@@ -97,7 +97,7 @@ describe("DateTimeFields", () => {
     );
   });
 
-  it("moves START backward when END moves before START (normal mode)", async () => {
+  it("does NOT move START backward when END moves before START (normal mode)", async () => {
     await renderField({
       startDate: "2025-01-01",
       startTime: "10:00",
@@ -114,9 +114,9 @@ describe("DateTimeFields", () => {
       expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("08:00")
     );
 
-    await waitFor(() =>
-      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("07:00")
-    );
+    // Start time should NOT be automatically adjusted when end time changes
+    expect(mockHandlers.onStartTimeChange).not.toHaveBeenCalled();
+    expect(mockHandlers.onStartDateChange).not.toHaveBeenCalled();
   });
 
   it("moves START backward properly when END date jumps before START date", async () => {
@@ -256,9 +256,21 @@ describe("DateTimeFields", () => {
     const endDateInput = screen.getByTestId("end-date-input");
     const endTimeInput = screen.getByTestId("end-time-input");
 
-    expect(startDateInput).toHaveAttribute("aria-label", "dateTimeFields.startDate");
-    expect(startTimeInput).toHaveAttribute("aria-label", "dateTimeFields.startTime");
-    expect(endDateInput).toHaveAttribute("aria-label", "dateTimeFields.endDate");
-    expect(endTimeInput).toHaveAttribute("aria-label", "dateTimeFields.endTime");
+    expect(startDateInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.startDate"
+    );
+    expect(startTimeInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.startTime"
+    );
+    expect(endDateInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.endDate"
+    );
+    expect(endTimeInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.endTime"
+    );
   });
 });
