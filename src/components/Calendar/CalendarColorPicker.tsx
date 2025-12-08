@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 export function ColorPicker({

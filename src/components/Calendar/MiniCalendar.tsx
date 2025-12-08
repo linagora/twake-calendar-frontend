@@ -10,7 +10,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
 import { useEffect, useState } from "react";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { setView } from "../../features/Settings/SettingsSlice";
 
 export function MiniCalendar({

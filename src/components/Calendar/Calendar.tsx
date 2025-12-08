@@ -38,7 +38,7 @@ import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
 import { useTheme } from "@mui/material/styles";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import frLocale from "@fullcalendar/core/locales/fr";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";

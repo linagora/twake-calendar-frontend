@@ -11,7 +11,7 @@ import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined
 import Chip from "@mui/material/Chip";
 import { useTheme } from "@mui/material/styles";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 export interface User {

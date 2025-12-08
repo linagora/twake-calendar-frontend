@@ -3,7 +3,7 @@ import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AppDispatch } from "../../app/store";
