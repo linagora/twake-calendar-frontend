@@ -184,6 +184,7 @@ describe("EventSearchBar", () => {
     // Click tune icon
     const tuneButtons = screen.getAllByRole("button");
     const tuneButton = tuneButtons.find((btn) =>
+      // eslint-disable-next-line testing-library/no-node-access
       btn.querySelector('[data-testid="TuneIcon"]')
     );
     if (tuneButton) fireEvent.click(tuneButton);
@@ -230,6 +231,44 @@ describe("EventSearchBar", () => {
         },
         search: "test",
       });
+    });
+  });
+  it("should not trigger search on Enter key when search is empty", async () => {
+    const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
+
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    const searchButton = screen.getByRole("button");
+    fireEvent.click(searchButton);
+
+    const searchInput = screen.getByPlaceholderText("common.search");
+    fireEvent.keyDown(searchInput, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(searchSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should not trigger search on Enter key when filter keywords is empty", async () => {
+    const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
+
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    const searchButton = screen.getByRole("button");
+    fireEvent.click(searchButton);
+
+    // Click tune icon
+    const tuneButtons = screen.getAllByRole("button");
+    const tuneButton = tuneButtons.find((btn) =>
+      // eslint-disable-next-line testing-library/no-node-access
+      btn.querySelector('[data-testid="TuneIcon"]')
+    );
+    if (tuneButton) fireEvent.click(tuneButton);
+
+    fireEvent.click(screen.getByText("common.search"));
+
+    await waitFor(() => {
+      expect(searchSpy).not.toHaveBeenCalled();
     });
   });
 });
