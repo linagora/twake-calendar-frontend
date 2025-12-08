@@ -760,3 +760,219 @@ describe("Menubar logout flow", () => {
     expect(sessionStorage.length).toBe(0);
   });
 });
+
+describe("Logo click navigation to current week", () => {
+  const preloadedState = {
+    user: {
+      userData: {
+        sub: "test",
+        email: "test@test.com",
+        family_name: "Doe",
+        name: "John",
+        sid: "mockSid",
+        openpaasId: "667037022b752d0026472254",
+      },
+    },
+    settings: {
+      view: "calendar",
+      language: "en",
+    },
+  };
+
+  beforeEach(() => {
+    (window as any).appList = [];
+  });
+
+  it("navigates to week view and current week when clicking logo from month view", async () => {
+    const mockChangeView = jest.fn();
+    const mockToday = jest.fn();
+    const mockGetDate = jest.fn(() => new Date());
+    const mockCalendarApi = {
+      changeView: mockChangeView,
+      today: mockToday,
+      getDate: mockGetDate,
+    };
+    const mockCalendarRef = { current: mockCalendarApi as any };
+    const mockOnRefresh = jest.fn();
+    const mockOnViewChange = jest.fn();
+    const mockOnDateChange = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+        onViewChange={mockOnViewChange}
+        onDateChange={mockOnDateChange}
+      />,
+      preloadedState
+    );
+
+    const logoElement = screen.getByAltText("menubar.logoAlt");
+    await act(async () => {
+      fireEvent.click(logoElement);
+    });
+
+    await waitFor(() => {
+      expect(store.getState().settings.view).toBe("calendar");
+    });
+
+    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
+    expect(mockToday).toHaveBeenCalled();
+    expect(mockOnViewChange).toHaveBeenCalledWith("timeGridWeek");
+    expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("navigates to week view and current week when clicking logo from day view", async () => {
+    const mockChangeView = jest.fn();
+    const mockToday = jest.fn();
+    const mockGetDate = jest.fn(() => new Date());
+    const mockCalendarApi = {
+      changeView: mockChangeView,
+      today: mockToday,
+      getDate: mockGetDate,
+    };
+    const mockCalendarRef = { current: mockCalendarApi as any };
+    const mockOnRefresh = jest.fn();
+    const mockOnViewChange = jest.fn();
+    const mockOnDateChange = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="timeGridDay"
+        onViewChange={mockOnViewChange}
+        onDateChange={mockOnDateChange}
+      />,
+      preloadedState
+    );
+
+    const logoElement = screen.getByAltText("menubar.logoAlt");
+    await act(async () => {
+      fireEvent.click(logoElement);
+    });
+
+    await waitFor(() => {
+      expect(store.getState().settings.view).toBe("calendar");
+    });
+
+    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
+    expect(mockToday).toHaveBeenCalled();
+    expect(mockOnViewChange).toHaveBeenCalledWith("timeGridWeek");
+    expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("navigates to current week when clicking logo from week view (not current week)", async () => {
+    const mockChangeView = jest.fn();
+    const mockToday = jest.fn();
+    const mockGetDate = jest.fn(() => new Date());
+    const mockCalendarApi = {
+      changeView: mockChangeView,
+      today: mockToday,
+      getDate: mockGetDate,
+    };
+    const mockCalendarRef = { current: mockCalendarApi as any };
+    const mockOnRefresh = jest.fn();
+    const mockOnViewChange = jest.fn();
+    const mockOnDateChange = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="timeGridWeek"
+        onViewChange={mockOnViewChange}
+        onDateChange={mockOnDateChange}
+      />,
+      preloadedState
+    );
+
+    const logoElement = screen.getByAltText("menubar.logoAlt");
+    await act(async () => {
+      fireEvent.click(logoElement);
+    });
+
+    await waitFor(() => {
+      expect(store.getState().settings.view).toBe("calendar");
+    });
+
+    expect(mockChangeView).not.toHaveBeenCalled();
+    expect(mockToday).toHaveBeenCalled();
+    expect(mockOnDateChange).toHaveBeenCalled();
+  });
+
+  it("does not crash when calendarRef.current is null", async () => {
+    const mockCalendarRef = { current: null };
+    const mockOnRefresh = jest.fn();
+    const mockOnViewChange = jest.fn();
+    const mockOnDateChange = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+        onViewChange={mockOnViewChange}
+        onDateChange={mockOnDateChange}
+      />,
+      preloadedState
+    );
+
+    const logoElement = screen.getByAltText("menubar.logoAlt");
+    await act(async () => {
+      fireEvent.click(logoElement);
+    });
+
+    await waitFor(() => {
+      expect(store.getState().settings.view).toBe("calendar");
+    });
+
+    expect(mockOnViewChange).not.toHaveBeenCalled();
+    expect(mockOnDateChange).not.toHaveBeenCalled();
+  });
+
+  it("handles missing onViewChange and onDateChange callbacks", async () => {
+    const mockChangeView = jest.fn();
+    const mockToday = jest.fn();
+    const mockGetDate = jest.fn(() => new Date());
+    const mockCalendarApi = {
+      changeView: mockChangeView,
+      today: mockToday,
+      getDate: mockGetDate,
+    };
+    const mockCalendarRef = { current: mockCalendarApi as any };
+    const mockOnRefresh = jest.fn();
+    const mockCurrentDate = new Date("2024-04-15");
+
+    const { store } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    );
+
+    const logoElement = screen.getByAltText("menubar.logoAlt");
+    await act(async () => {
+      fireEvent.click(logoElement);
+    });
+
+    await waitFor(() => {
+      expect(store.getState().settings.view).toBe("calendar");
+    });
+
+    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
+    expect(mockToday).toHaveBeenCalled();
+  });
+});
