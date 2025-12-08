@@ -51,6 +51,7 @@ export const userSlice = createSlice({
         timeZone: null as string | null,
       },
     } as Record<string, any>,
+    alarmEmailsEnabled: null as boolean | null,
     loading: true,
     error: null as unknown as string | null,
   },
@@ -81,6 +82,9 @@ export const userSlice = createSlice({
       if (state.userData) {
         state.userData.timezone = action.payload;
       }
+    },
+    setAlarmEmails: (state, action) => {
+      state.alarmEmailsEnabled = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -153,6 +157,19 @@ export const userSlice = createSlice({
               }
             }
           }
+
+          // Extract alarmEmails from configurations.modules
+          const calendarModule = action.payload.configurations.modules.find(
+            (module: any) => module.name === "calendar"
+          );
+          if (calendarModule?.configurations) {
+            const alarmEmailsConfig = calendarModule.configurations.find(
+              (config: any) => config.name === "alarmEmails"
+            );
+            if (alarmEmailsConfig) {
+              state.alarmEmailsEnabled = alarmEmailsConfig.value === true;
+            }
+          }
         }
       })
       .addCase(getOpenPaasUserDataAsync.pending, (state) => {
@@ -181,6 +198,9 @@ export const userSlice = createSlice({
             state.userData.timezone = action.payload.timezone;
           }
         }
+        if (action.payload.alarmEmails !== undefined) {
+          state.alarmEmailsEnabled = action.payload.alarmEmails === true;
+        }
       })
       .addCase(updateUserConfigurationsAsync.rejected, (state, action) => {
         if (action.payload?.status !== 401) {
@@ -192,7 +212,13 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setUserData, setTokens, setLanguage, setTimezone, clearError } =
-  userSlice.actions;
+export const {
+  setUserData,
+  setTokens,
+  setLanguage,
+  setTimezone,
+  setAlarmEmails,
+  clearError,
+} = userSlice.actions;
 
 export default userSlice.reducer;

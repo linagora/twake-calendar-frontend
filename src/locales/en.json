@@ -217,6 +217,9 @@
     "timeZoneBrowserDefault": "Detect time zone automatically",
     "timeZoneUpdateError": "Failed to update time zone",
     "notifications.empty": "Notifications settings coming soon",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Delivery method",
+    "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "sync.empty": "Sync settings coming soon",
     "back": "Back to calendar"
   },

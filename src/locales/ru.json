@@ -217,6 +217,9 @@
     "timeZoneBrowserDefault": "Определять часовой пояс автоматически",
     "timeZoneUpdateError": "Не удалось обновить часовой пояс",
     "notifications.empty": "Настройки уведомлений скоро появятся",
+    "notifications.email": "Email",
+    "notifications.deliveryMethod": "Способ доставки",
+    "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
     "sync.empty": "Настройки синхронизации скоро появятся",
     "back": "Вернуться к календарю"
   },
