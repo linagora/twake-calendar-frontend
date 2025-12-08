@@ -94,8 +94,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || showEndDate;
-  const shouldShowFullFieldsInNormal =
-    (!allday && hasEndDateChanged) || spansMultipleDays;
+  const shouldShowFullFieldsInNormal = isExpanded;
   const showSingleDateField =
     !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
 
@@ -205,22 +204,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     const newEnd = toDateTime(endDate, newTimeStr);
     const currentStart = toDateTime(startDate, startTime);
 
-    // If end is before start, adjust start to maintain duration
-    if (newEnd.isBefore(currentStart)) {
-      const duration = initialDurationRef.current ?? getCurrentDuration();
-      const newStart = newEnd.subtract(duration, "minute");
-
-      const newStartDate = dtDate(newStart);
-      const newStartTime = dtTime(newStart);
-
-      if (newStartDate !== startDate) {
-        onStartDateChange(newStartDate);
-      }
-      if (newStartTime !== startTime) {
-        onStartTimeChange(newStartTime);
-      }
-    } else {
-      // Update duration when user changes end
+    // Update duration when user changes end (if valid)
+    if (!newEnd.isBefore(currentStart)) {
       initialDurationRef.current = newEnd.diff(currentStart, "minute");
     }
 
@@ -245,7 +230,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     [endTime]
   );
 
-  const getSlotProps = (testId: string, hasError = false, testLabel?: string) => ({
+  const getSlotProps = (
+    testId: string,
+    hasError = false,
+    testLabel?: string
+  ) => ({
     textField: {
       size: "small" as const,
       margin: "dense" as const,
@@ -253,21 +242,25 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
       InputLabelProps: { shrink: true },
       error: hasError,
       sx: { width: "100%" },
-      inputProps: { 
+      inputProps: {
         "data-testid": testId,
         ...(testLabel ? { "aria-label": testLabel } : {}),
       },
     },
   });
 
-  const getFieldSlotProps = (testId: string, hasError = false, testLabel?: string) => ({
+  const getFieldSlotProps = (
+    testId: string,
+    hasError = false,
+    testLabel?: string
+  ) => ({
     size: "small" as const,
     margin: "dense" as const,
     fullWidth: true,
     InputLabelProps: { shrink: true },
     error: hasError,
     sx: { width: "100%" },
-    inputProps: { 
+    inputProps: {
       "data-testid": testId,
       ...(testLabel ? { "aria-label": testLabel } : {}),
     },
@@ -316,7 +309,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         flexDirection="column"
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
-        {isExpanded || shouldShowFullFieldsInNormal ? (
+        {shouldShowFullFieldsInNormal ? (
           <>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
@@ -326,8 +319,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   onChange={handleStartDateChange}
                   slots={{ field: ReadOnlyDateField }}
                   slotProps={{
-                    ...getSlotProps("start-date-input", false, t("dateTimeFields.startDate")),
-                    field: getFieldSlotProps("start-date-input", false, t("dateTimeFields.startDate")) as any,
+                    ...getSlotProps(
+                      "start-date-input",
+                      false,
+                      t("dateTimeFields.startDate")
+                    ),
+                    field: getFieldSlotProps(
+                      "start-date-input",
+                      false,
+                      t("dateTimeFields.startDate")
+                    ) as any,
                   }}
                 />
               </Box>
@@ -343,7 +344,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     timeSteps={{ minutes: 30 }}
                     slots={{ actionBar: () => null }}
                     slotProps={{
-                      ...getSlotProps("start-time-input", false, t("dateTimeFields.startTime")),
+                      ...getSlotProps(
+                        "start-time-input",
+                        false,
+                        t("dateTimeFields.startTime")
+                      ),
                       openPickerButton: { sx: { display: "none" } },
                       popper: {
                         sx: {
@@ -355,7 +360,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                         },
                       },
                       textField: {
-                        ...getSlotProps("start-time-input", false, t("dateTimeFields.startTime")).textField,
+                        ...getSlotProps(
+                          "start-time-input",
+                          false,
+                          t("dateTimeFields.startTime")
+                        ).textField,
                         onClick: (e) =>
                           handleTimeInputClick(e, setIsStartTimeOpen),
                         sx: {
@@ -446,8 +455,16 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 onChange={handleStartDateChange}
                 slots={{ field: ReadOnlyDateField }}
                 slotProps={{
-                  ...getSlotProps("start-date-input", false, t("dateTimeFields.startDate")),
-                  field: getFieldSlotProps("start-date-input", false, t("dateTimeFields.startDate")) as any,
+                  ...getSlotProps(
+                    "start-date-input",
+                    false,
+                    t("dateTimeFields.startDate")
+                  ),
+                  field: getFieldSlotProps(
+                    "start-date-input",
+                    false,
+                    t("dateTimeFields.startDate")
+                  ) as any,
                 }}
               />
             </Box>
@@ -482,7 +499,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 slots={{ field: ReadOnlyDateField }}
                 slotProps={{
                   ...getSlotProps("start-date-input", false, startDateLabel),
-                  field: getFieldSlotProps("start-date-input", false, startDateLabel) as any,
+                  field: getFieldSlotProps(
+                    "start-date-input",
+                    false,
+                    startDateLabel
+                  ) as any,
                 }}
               />
             </Box>
@@ -498,7 +519,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 timeSteps={{ minutes: 30 }}
                 slots={{ actionBar: () => null }}
                 slotProps={{
-                  ...getSlotProps("start-time-input", false, t("dateTimeFields.startTime")),
+                  ...getSlotProps(
+                    "start-time-input",
+                    false,
+                    t("dateTimeFields.startTime")
+                  ),
                   openPickerButton: { sx: { display: "none" } },
                   popper: {
                     sx: {
@@ -510,7 +535,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     },
                   },
                   textField: {
-                    ...getSlotProps("start-time-input", false, t("dateTimeFields.startTime")).textField,
+                    ...getSlotProps(
+                      "start-time-input",
+                      false,
+                      t("dateTimeFields.startTime")
+                    ).textField,
                     onClick: (e) => handleTimeInputClick(e, setIsStartTimeOpen),
                     sx: {
                       "& .MuiPickersSectionList-section": {
@@ -521,6 +550,17 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
+            {!allday && (
+              <Typography
+                sx={{
+                  alignSelf: "center",
+                  mx: 0.5,
+                  mt: 0.5,
+                }}
+              >
+                -
+              </Typography>
+            )}
             <Box sx={{ maxWidth: "110px" }}>
               <TimePicker
                 ampm={false}
@@ -539,7 +579,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     fullWidth: true,
                     InputLabelProps: { shrink: true },
                     error: !!validation.errors.dateTime,
-                    inputProps: { 
+                    inputProps: {
                       "data-testid": "end-time-input",
                       "aria-label": t("dateTimeFields.endTime"),
                     },
