@@ -78,13 +78,12 @@ export async function updateUserConfigurations(
       value: updates.hideDeclinedEvents,
     });
   }
-    if (updates.displayWeekNumbers !== undefined) {
+  if (updates.displayWeekNumbers !== undefined) {
     calendarConfigs.push({
       name: "displayWeekNumbers",
       value: updates.displayWeekNumbers,
     });
   }
-
 
   const modules: Array<{
     name: string;
