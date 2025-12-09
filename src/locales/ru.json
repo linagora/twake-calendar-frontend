@@ -221,6 +221,9 @@
     "notifications.deliveryMethod": "Способ доставки",
     "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
     "sync.empty": "Настройки синхронизации скоро появятся",
+    "calAndEvent": "Календарь и мероприятия",
+    "showDeclinedEvent": "Показать отклонённые мероприятия",
+    "hideDeclinedEventsUpdateError": "Не удалось обновить скрытие отклонённых событий.",
     "back": "Вернуться к календарю"
   },
   "eventPreview": {

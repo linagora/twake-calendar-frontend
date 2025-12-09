@@ -40,6 +40,7 @@ export interface UserConfigurationUpdates {
   timezone?: string | null;
   previousConfig?: Record<string, any>;
   alarmEmails?: boolean;
+  hideDeclinedEvents?: boolean;
 }
 
 export async function updateUserConfigurations(
@@ -47,6 +48,7 @@ export async function updateUserConfigurations(
 ): Promise<Response | { status: number }> {
   const coreConfigs: Array<{ name: string; value: any }> = [];
   const calendarConfigs: Array<{ name: string; value: any }> = [];
+  const esnCalendarConfigs: Array<{ name: string; value: any }> = [];
 
   if (updates.language !== undefined) {
     coreConfigs.push({ name: "language", value: updates.language });
@@ -69,6 +71,12 @@ export async function updateUserConfigurations(
       value: updates.alarmEmails,
     });
   }
+  if (updates.hideDeclinedEvents !== undefined) {
+    esnCalendarConfigs.push({
+      name: "hideDeclinedEvents",
+      value: updates.hideDeclinedEvents,
+    });
+  }
 
   const modules: Array<{
     name: string;
@@ -86,6 +94,12 @@ export async function updateUserConfigurations(
     modules.push({
       name: "calendar",
       configurations: calendarConfigs,
+    });
+  }
+  if (esnCalendarConfigs.length > 0) {
+    modules.push({
+      name: "linagora.esn.calendar",
+      configurations: esnCalendarConfigs,
     });
   }
 
