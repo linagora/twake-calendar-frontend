@@ -9,7 +9,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { Calendars } from "../../features/Calendars/CalendarTypes";

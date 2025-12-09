@@ -47,7 +47,7 @@ import { deleteEventAsync } from "../Calendars/CalendarSlice";
 import { dlEvent } from "./EventApi";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { userAttendee } from "../User/userDataTypes";
 import { browserDefaultTimeZone } from "../../utils/timezone";
 

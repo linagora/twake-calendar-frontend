@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { setView } from "../../features/Settings/SettingsSlice";
 import { getUserDisplayName } from "../../utils/userUtils";
 import { format } from "date-fns";

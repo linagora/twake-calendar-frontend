@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { CalendarItemList } from "./CalendarItemList";
 import { SettingsTab } from "./SettingsTab";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 
 export function ImportTab({
   userId,

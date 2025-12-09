@@ -5,7 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 
 export function DeleteCalendarDialog({
   deletePopupOpen,

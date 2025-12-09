@@ -18,7 +18,7 @@ import {
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 
 export function AccessTab({ calendar }: { calendar: Calendars }) {

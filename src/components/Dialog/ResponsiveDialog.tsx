@@ -40,8 +40,10 @@ import React, { ReactNode } from "react";
  * </ResponsiveDialog>
  * ```
  */
-interface ResponsiveDialogProps
-  extends Omit<DialogProps, "maxWidth" | "title"> {
+interface ResponsiveDialogProps extends Omit<
+  DialogProps,
+  "maxWidth" | "title"
+> {
   /** Whether the dialog is open */
   open: boolean;
   /** Callback fired when the dialog should be closed */

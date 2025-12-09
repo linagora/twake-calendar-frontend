@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 
 export default function RepeatEvent({
   repetition,

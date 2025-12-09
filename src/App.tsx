@@ -12,7 +12,6 @@ import { CustomThemeProvider } from "./theme/ThemeProvider";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
-import I18n from "cozy-ui/transpiled/react/providers/I18n";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
 
 import {
@@ -26,6 +25,7 @@ import en from "./locales/en.json";
 import fr from "./locales/fr.json";
 import ru from "./locales/ru.json";
 import vi from "./locales/vi.json";
+import I18n from "twake-i18n";
 
 const locale = { en, fr, ru, vi };
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };

@@ -1,5 +1,5 @@
 import { Button, Popover } from "@mui/material";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";
 import { browserDefaultTimeZone } from "../../utils/timezone";

@@ -13,7 +13,7 @@ import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
 import { defaultColors } from "./utils/calendarColorsUtils";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 
 function CalendarPopover({
   open,

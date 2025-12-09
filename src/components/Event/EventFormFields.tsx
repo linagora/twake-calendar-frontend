@@ -33,7 +33,7 @@ import {
 } from "../../utils/videoConferenceUtils";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
 import { DateTimeFields } from "./components/DateTimeFields";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";

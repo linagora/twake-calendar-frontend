@@ -28,7 +28,7 @@ import {
   detectRecurringEventChanges,
 } from "./eventUtils";
 import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
 import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import {

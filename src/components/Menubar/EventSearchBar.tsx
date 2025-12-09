@@ -19,7 +19,7 @@ import { useRef, useState } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { searchEventsAsync } from "../../features/Search/SearchSlice";
 import { setView } from "../../features/Settings/SettingsSlice";
