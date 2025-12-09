@@ -287,7 +287,6 @@ function ResultItem({
             {eventData.data.description.replace(/\n/g, " ")}
           </Typography>
         )}
-        <Box sx={{ flex: 1, minWidth: 0 }} />
         {eventData.data["x-openpaas-videoconference"] && (
           <Button
             startIcon={<VideocamIcon />}
