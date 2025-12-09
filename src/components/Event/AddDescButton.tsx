@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from "@mui/material";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
 import { Description as DescriptionIcon } from "@mui/icons-material";
 

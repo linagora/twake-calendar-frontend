@@ -6,7 +6,7 @@ import { SlotLabelContentArg } from "@fullcalendar/core";
 import moment from "moment-timezone";
 import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import { detectDateTimeFormat } from "../../Event/utils/dateTimeHelpers";
 
 function convertEventDateTimeToISO(

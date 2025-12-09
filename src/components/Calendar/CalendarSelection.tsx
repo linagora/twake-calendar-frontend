@@ -16,7 +16,7 @@ import { Divider, ListItem, Menu, MenuItem } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { trimLongTextWithoutSpace } from "../../utils/textUtils";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 
 function CalendarAccordion({
   title,

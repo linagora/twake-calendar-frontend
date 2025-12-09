@@ -31,7 +31,7 @@ import {
 } from "../../components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import { addDays } from "../../components/Event/utils/dateRules";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import {
   saveEventFormDataToTemp,
   restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,

@@ -11,7 +11,7 @@ import {
   DateTimeFields,
 } from "../../src/components/Event/components/DateTimeFields";
 
-jest.mock("cozy-ui/transpiled/react/providers/I18n", () => ({
+jest.mock("twake-i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: "en",

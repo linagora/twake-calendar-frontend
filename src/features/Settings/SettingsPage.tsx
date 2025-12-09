@@ -33,7 +33,7 @@ import {
   setAlarmEmails,
 } from "../User/userSlice";
 import { AVAILABLE_LANGUAGES } from "./constants";
-import { useI18n } from "cozy-ui/transpiled/react/providers/I18n";
+import { useI18n } from "twake-i18n";
 import "./SettingsPage.styl";
 import {
   useTimeZoneList,
