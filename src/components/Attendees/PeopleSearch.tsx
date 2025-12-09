@@ -20,6 +20,7 @@ export interface User {
   avatarUrl: string;
   openpaasId: string;
   color?: Record<string, string>;
+  cal_address?: string;
 }
 
 export function PeopleSearch({
@@ -30,14 +31,20 @@ export function PeopleSearch({
   freeSolo,
   onToggleEventPreview,
   placeholder,
+  customRenderInput,
 }: {
   selectedUsers: User[];
-  onChange: Function;
+  onChange: (event: any, users: User[]) => void;
   objectTypes: string[];
   disabled?: boolean;
   freeSolo?: boolean;
   onToggleEventPreview?: () => void;
   placeholder?: string;
+  customRenderInput?: (
+    params: any,
+    query: string,
+    setQuery: (value: string) => void
+  ) => React.ReactNode;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -98,6 +105,53 @@ export function PeopleSearch({
     };
   }, [objectTypes, query, t]);
 
+  const defaultRenderInput = (params: any) => (
+    <>
+      <label htmlFor={params.id} className="visually-hidden">
+        {t("peopleSearch.label")}
+      </label>
+      <TextField
+        {...params}
+        error={!!inputError}
+        helperText={inputError}
+        placeholder={searchPlaceholder}
+        label=""
+        inputProps={{
+          ...params.inputProps,
+          autoComplete: "off",
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && onToggleEventPreview) {
+            e.preventDefault();
+            onToggleEventPreview();
+          }
+        }}
+        slotProps={{
+          input: {
+            ...params.InputProps,
+            autoComplete: "off",
+            startAdornment: (
+              <>
+                <PeopleOutlineOutlinedIcon
+                  style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
+                />
+                {params.InputProps.startAdornment}
+              </>
+            ),
+            endAdornment: (
+              <>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          },
+        }}
+      />
+    </>
+  );
+
   return (
     <>
       <Autocomplete
@@ -108,7 +162,11 @@ export function PeopleSearch({
         autoComplete={false}
         clearOnBlur={false}
         blurOnSelect={true}
-        open={isOpen && !!query && (loading || hasSearched)}
+        open={
+          customRenderInput
+            ? isOpen && !!query && (loading || options.length > 0)
+            : isOpen && !!query && (loading || hasSearched)
+        }
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
         disabled={disabled}
@@ -124,10 +182,15 @@ export function PeopleSearch({
             return option;
           }
         }}
+        sx={{
+          "& .MuiAutocomplete-inputRoot": {
+            py: 0,
+          },
+        }}
         filterSelectedOptions
         value={selectedUsers}
         inputValue={query}
-        onInputChange={(event, value) => setQuery(value)}
+        onInputChange={(_event, value) => setQuery(value)}
         onChange={(event, value) => {
           const last = value[value.length - 1];
           if (typeof last === "string" && !isValidEmail(last)) {
@@ -144,52 +207,11 @@ export function PeopleSearch({
           );
           onChange(event, mapped);
         }}
-        renderInput={(params) => (
-          <>
-            <label htmlFor={params.id} className="visually-hidden">
-              {t("peopleSearch.label")}
-            </label>
-            <TextField
-              {...params}
-              error={!!inputError}
-              helperText={inputError}
-              placeholder={searchPlaceholder}
-              label=""
-              inputProps={{
-                ...params.inputProps,
-                autoComplete: "off",
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && onToggleEventPreview) {
-                  e.preventDefault();
-                  onToggleEventPreview();
-                }
-              }}
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  autoComplete: "off",
-                  startAdornment: (
-                    <>
-                      <PeopleOutlineOutlinedIcon
-                        style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
-                      />
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                  endAdornment: (
-                    <>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                },
-              }}
-            />
-          </>
-        )}
+        renderInput={(params) =>
+          customRenderInput
+            ? customRenderInput(params, query, setQuery)
+            : defaultRenderInput(params)
+        }
         renderOption={(props, option) => {
           if (selectedUsers.find((u) => u.email === option.email)) return null;
           const { key, ...otherProps } = props as any;

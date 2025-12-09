@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -26,14 +26,17 @@ import { setView } from "../../features/Settings/SettingsSlice";
 import { userAttendee } from "../../features/User/userDataTypes";
 import UserSearch from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
+import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 
 export default function SearchBar() {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
+
   const calendars = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
+
   const personnalCalendars = calendars.filter(
     (c) => c.id.split("/")[0] === userId
   );
@@ -63,7 +66,9 @@ export default function SearchBar() {
       width: "55vw",
     },
   };
-  const searchBoxRef = useRef<HTMLElement | null>(null);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleFilterChange = (
     field: string,
@@ -80,11 +85,37 @@ export default function SearchBar() {
       attendees: [] as userAttendee[],
     });
     setAnchorEl(null);
-    setExtended(false);
   };
 
-  const handleSearch = async () => {
-    const trimmedSearch = search.trim();
+  const handleContactSelect = (_event: any, contacts: User[]) => {
+    const newContacts = contacts.filter(
+      (c) =>
+        !filters.organizers.some(
+          (org) => org.cal_address === (c.email || c.cal_address)
+        )
+    );
+
+    if (newContacts.length > 0) {
+      const userAttendees: userAttendee[] = newContacts.map(
+        (contact) =>
+          ({
+            ...contact,
+            cal_address: contact.email || contact.cal_address,
+            cn: contact.displayName,
+          }) as unknown as userAttendee
+      );
+      setFilters((prev) => ({
+        ...prev,
+        keywords: "",
+        organizers: [...prev.organizers, ...userAttendees],
+      }));
+      setAnchorEl(containerRef.current || null);
+    }
+    setSearch("");
+  };
+
+  const handleSearch = async (searchQuery: string) => {
+    const trimmedSearch = searchQuery.trim();
     const trimmedKeywords = filters.keywords.trim();
 
     // Block search if all search criteria are empty
@@ -128,16 +159,40 @@ export default function SearchBar() {
     setAnchorEl(null);
   };
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+
+      if (filterOpen) {
+        return;
+      }
+
+      if (
+        containerRef.current?.contains(target) ||
+        inputRef.current?.contains(target) ||
+        (target as HTMLElement).closest(".MuiAutocomplete-popper")
+      ) {
+        return;
+      }
+
+      if (!search.trim()) {
+        setExtended(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterOpen, search]);
+
   return (
     <>
       <Box
-        ref={searchBoxRef}
+        ref={containerRef}
         sx={{
           margin: "0 auto",
           height: "44px",
           position: "relative",
           width: extended ? searchWidth : "auto",
-
           transition: "width 0.25s ease-out",
         }}
       >
@@ -148,76 +203,86 @@ export default function SearchBar() {
         )}
 
         {extended && (
-          <TextField
-            fullWidth
-            autoFocus
-            placeholder={t("common.search")}
-            value={search}
-            onBlur={(e) => {
-              const next = e.relatedTarget as HTMLElement | null;
-              if (
-                next instanceof Node &&
-                searchBoxRef.current?.contains(next)
-              ) {
-                return;
-              }
-              if (!search.trim()) {
-                setExtended(false);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              handleFilterChange("keywords", e.target.value);
-            }}
-            variant="outlined"
-            sx={{
-              borderRadius: "999px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "999px",
-              },
-              "& .MuiInputBase-input": { padding: "12px 10px" },
-              animation: "scaleIn 0.25s ease-out",
-              "@keyframes scaleIn": {
-                from: { transform: "scaleX(0)", opacity: 0 },
-                to: { transform: "scaleX(1)", opacity: 1 },
-              },
-              transformOrigin: "right",
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "#605D62" }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <>
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={(e) => setAnchorEl(searchBoxRef.current)}
-                    >
-                      <TuneIcon />
-                    </IconButton>
-                  </InputAdornment>
-                  {search && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => {
-                          setSearch("");
-                          handleFilterChange("keywords", "");
-                        }}
-                      >
-                        <HighlightOffIcon />
-                      </IconButton>
+          <PeopleSearch
+            selectedUsers={[]}
+            onChange={handleContactSelect}
+            objectTypes={["user", "contact"]}
+            onToggleEventPreview={() => {}}
+            customRenderInput={(
+              params: any,
+              search: string,
+              setSearch: (value: string) => void
+            ) => (
+              <TextField
+                {...params}
+                fullWidth
+                autoFocus
+                placeholder={t("common.search")}
+                value={search}
+                inputRef={(el) => {
+                  inputRef.current = el;
+                  if (params.InputProps.ref) params.InputProps.ref(el);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(search);
+                  }
+                }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  handleFilterChange("keywords", e.target.value);
+                }}
+                variant="outlined"
+                sx={{
+                  borderRadius: "999px",
+                  "& .MuiInputBase-input": { padding: "12px 10px" },
+                  animation: "scaleIn 0.25s ease-out",
+                  "@keyframes scaleIn": {
+                    from: { transform: "scaleX(0)", opacity: 0 },
+                    to: { transform: "scaleX(1)", opacity: 1 },
+                  },
+                  transformOrigin: "right",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "999px",
+                    height: 40,
+                    padding: "0 10px",
+                  },
+                }}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "#605D62" }} />
                     </InputAdornment>
-                  )}
-                </>
-              ),
-            }}
+                  ),
+                  endAdornment: (
+                    <>
+                      {params.InputProps.endAdornment}
+                      <InputAdornment position="end">
+                        <IconButton
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => setAnchorEl(containerRef.current)}
+                        >
+                          <TuneIcon />
+                        </IconButton>
+                      </InputAdornment>
+                      {search && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => {
+                              setSearch("");
+                              handleFilterChange("keywords", "");
+                            }}
+                          >
+                            <HighlightOffIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )}
+                    </>
+                  ),
+                }}
+              />
+            )}
           />
         )}
       </Box>
@@ -262,6 +327,7 @@ export default function SearchBar() {
                       },
                     },
                   }}
+                  sx={{ height: "40px" }}
                 >
                   <MenuItem value="">
                     <Typography
@@ -325,6 +391,7 @@ export default function SearchBar() {
                   onChange={(e) =>
                     handleFilterChange("keywords", e.target.value)
                   }
+                  size="small"
                 />
               </Box>
 
@@ -369,10 +436,19 @@ export default function SearchBar() {
           </CardContent>
 
           <CardActions sx={{ justifyContent: "flex-end", p: 2, gap: 2 }}>
-            <Button variant="text" onClick={handleClearFilters}>
+            <Button
+              variant="text"
+              onClick={() => {
+                handleClearFilters();
+                setExtended(false);
+              }}
+            >
               {t("common.cancel")}
             </Button>
-            <Button variant="contained" onClick={handleSearch}>
+            <Button
+              variant="contained"
+              onClick={() => handleSearch(filters.keywords)}
+            >
               {t("common.search")}
             </Button>
           </CardActions>
