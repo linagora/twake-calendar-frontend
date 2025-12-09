@@ -6,6 +6,7 @@ export interface SettingsState {
   language: string;
   timeZone: string | null; // Allow null to represent browser default
   isBrowserDefaultTimeZone: boolean;
+  hideDeclinedEvents: boolean | null;
   view: "calendar" | "settings" | "search";
 }
 
@@ -21,6 +22,7 @@ const initialState: SettingsState = {
   language: defaultLang,
   timeZone: defaultTimeZone,
   isBrowserDefaultTimeZone: defaultTimeZone === null,
+  hideDeclinedEvents: null,
   view: "calendar",
 };
 
@@ -38,6 +40,9 @@ export const settingsSlice = createSlice({
     },
     setIsBrowserDefaultTimeZone: (state, action: PayloadAction<boolean>) => {
       state.isBrowserDefaultTimeZone = action.payload;
+    },
+    setHideDeclinedEvents: (state, action: PayloadAction<boolean | null>) => {
+      state.hideDeclinedEvents = action.payload;
     },
     setView: (
       state,
@@ -65,6 +70,16 @@ export const settingsSlice = createSlice({
         state.isBrowserDefaultTimeZone = true;
         localStorage.setItem("timeZone", browserDefaultTimeZone);
       }
+      const esnCalendarModule = action.payload.configurations?.modules?.find(
+        (module: any) => module.name === "linagora.esn.calendar"
+      );
+      const hideDeclinedEventsConfig = esnCalendarModule?.configurations?.find(
+        (config: any) => config.name === "hideDeclinedEvents"
+      );
+      state.hideDeclinedEvents =
+        typeof hideDeclinedEventsConfig?.value === "boolean"
+          ? hideDeclinedEventsConfig.value
+          : null;
     });
   },
 });
@@ -74,5 +89,6 @@ export const {
   setTimeZone,
   setView,
   setIsBrowserDefaultTimeZone,
+  setHideDeclinedEvents,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;

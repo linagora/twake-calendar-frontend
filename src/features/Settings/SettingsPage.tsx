@@ -25,6 +25,7 @@ import {
   setLanguage as setSettingsLanguage,
   setTimeZone as setSettingsTimeZone,
   setIsBrowserDefaultTimeZone,
+  setHideDeclinedEvents,
 } from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
@@ -68,6 +69,11 @@ export default function SettingsPage() {
   const alarmEmailsEnabled = useAppSelector(
     (state) => state.user?.alarmEmailsEnabled ?? true
   );
+
+  const hideDeclinedEvents = useAppSelector(
+    (state) => state.settings?.hideDeclinedEvents
+  );
+
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
@@ -75,6 +81,8 @@ export default function SettingsPage() {
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
+  const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
+    useState(false);
 
   const handleBackClick = () => {
     dispatch(setView("calendar"));
@@ -166,6 +174,27 @@ export default function SettingsPage() {
 
   const handleTimeZoneErrorClose = () => {
     setTimeZoneErrorOpen(false);
+  };
+
+  const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
+
+    // Call API in background, don't wait for it
+    dispatch(
+      updateUserConfigurationsAsync({
+        hideDeclinedEvents: doHideDeclinedEvents,
+      })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update hide declined event:", error);
+        dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
+        setHideDeclinedEventsErrorOpen(true);
+      });
+  };
+  const handleHideDeclinedEventsErrorClose = () => {
+    setHideDeclinedEventsErrorOpen(false);
   };
 
   const handleAlarmEmailsToggle = (
@@ -315,6 +344,38 @@ export default function SettingsPage() {
                       </FormControl>
                     </Box>
                   </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      {t("settings.calAndEvent")}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mb: 6,
+                      }}
+                    >
+                      <FormControl size="small" sx={{ minWidth: 500 }}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={Boolean(!hideDeclinedEvents)}
+                              onChange={() =>
+                                handleHideDeclinedEvents(!hideDeclinedEvents)
+                              }
+                              aria-label={t("settings.showDeclinedEvent")}
+                            />
+                          }
+                          label={t("settings.showDeclinedEvent")}
+                          labelPlacement="start"
+                          sx={{
+                            minWidth: 400,
+                            justifyContent: "space-between",
+                            marginLeft: 0,
+                            mb: 2,
+                          }}
+                        />
+                      </FormControl>
+                    </Box>
+                  </Box>
                 </Box>
               )}
               {activeSettingsSubTab === "notifications" && (
@@ -380,6 +441,13 @@ export default function SettingsPage() {
           t("settings.alarmEmailsUpdateError") ||
           "Failed to update email notifications setting"
         }
+      />
+
+      <Snackbar
+        open={hideDeclinedEventsErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleHideDeclinedEventsErrorClose}
+        message={t("settings.hideDeclinedEventsUpdateError")}
       />
     </main>
   );

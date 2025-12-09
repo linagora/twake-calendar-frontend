@@ -138,21 +138,30 @@ export const eventToFullCalendarFormat = (
 
 export const extractEvents = (
   selectedCalendars: string[],
-  calendars: Record<string, Calendars>
+  calendars: Record<string, Calendars>,
+  userAddress?: string,
+  hideDeclinedEvents?: boolean | null
 ) => {
-  let filteredEvents: CalendarEvent[] = [];
+  const allEvents: CalendarEvent[] = [];
+
   selectedCalendars.forEach((id) => {
-    if (calendars[id] && calendars[id].events) {
-      filteredEvents = filteredEvents
-        .concat(
-          Object.keys(calendars[id].events).map(
-            (eventid) => calendars[id].events[eventid]
-          )
-        )
-        .filter((event) => !(event.status === "CANCELLED"));
+    const calendar = calendars[id];
+    if (calendar?.events) {
+      allEvents.push(...Object.values(calendar.events));
     }
   });
-  return filteredEvents;
+
+  return allEvents
+    .filter((event) => event.status !== "CANCELLED")
+    .filter(
+      (event) =>
+        !(
+          hideDeclinedEvents &&
+          event.attendee?.some(
+            (a) => a.cal_address === userAddress && a.partstat === "DECLINED"
+          )
+        )
+    );
 };
 
 export const updateCalsDetails = (

@@ -221,6 +221,9 @@
     "notifications.deliveryMethod": "Phương thức gửi",
     "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "sync.empty": "Cài đặt đồng bộ sắp có",
+    "calAndEvent": "Lịch và sự kiện",
+    "showDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
+    "hideDeclinedEventsUpdateError": "Không cập nhật được các sự kiện ẩn bị từ chối.",
     "back": "Quay lại lịch"
   },
   "eventPreview": {
