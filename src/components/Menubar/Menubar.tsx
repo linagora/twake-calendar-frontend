@@ -160,7 +160,12 @@ export function Menubar({
       <header className="menubar">
         <div className="left-menu">
           <div className="menu-items">
-            <MainTitle />
+            <MainTitle
+              calendarRef={calendarRef}
+              currentView={currentView}
+              onViewChange={onViewChange}
+              onDateChange={onDateChange}
+            />
           </div>
           <div className="menu-items">
             <div className="navigation-controls">
@@ -365,16 +370,49 @@ export function Menubar({
   );
 }
 
-export function MainTitle() {
+export type MainTitleProps = {
+  calendarRef: React.RefObject<CalendarApi | null>;
+  currentView: string;
+  onViewChange?: (view: string) => void;
+  onDateChange?: (date: Date) => void;
+};
+
+export function MainTitle({
+  calendarRef,
+  currentView,
+  onViewChange,
+  onDateChange,
+}: MainTitleProps) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
+
+  const handleLogoClick = async () => {
+    if (!calendarRef.current) return;
+
+    await dispatch(setView("calendar"));
+
+    if (currentView !== "timeGridWeek") {
+      calendarRef.current.changeView("timeGridWeek");
+      if (onViewChange) {
+        onViewChange("timeGridWeek");
+      }
+    }
+
+    calendarRef.current.today();
+
+    if (onDateChange) {
+      const newDate = calendarRef.current.getDate();
+      onDateChange(newDate);
+    }
+  };
+
   return (
     <div className="menubar-item tc-home">
       <img
         className="logo"
         src={logo}
         alt={t("menubar.logoAlt")}
-        onClick={() => dispatch(setView("calendar"))}
+        onClick={handleLogoClick}
       />
     </div>
   );
