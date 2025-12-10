@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TextField from "@mui/material/TextField";
 import { userAttendee } from "../../features/User/userDataTypes";
 import { PeopleSearch, User } from "./PeopleSearch";
 
@@ -37,7 +38,9 @@ export default function UserSearch({
         selectedUsers={selectedUsers}
         objectTypes={["user", "contact"]}
         disabled={disabled}
-        small={small}
+        inputSlot={
+          small ? (params) => <TextField {...params} size="small" /> : undefined
+        }
         onChange={(event: any, value: User[]) => {
           setAttendees(
             value.map((a: User) => ({
