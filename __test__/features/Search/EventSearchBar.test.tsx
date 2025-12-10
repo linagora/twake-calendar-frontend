@@ -220,7 +220,7 @@ describe("EventSearchBar", () => {
     await waitFor(() => {
       expect(searchSpy).toHaveBeenCalledWith({
         filters: {
-          keywords: "test",
+          keywords: "",
           organizers: [],
           attendees: [],
           searchIn: ["user1/cal1"],
