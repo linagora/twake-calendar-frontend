@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
+import TextField from "@mui/material/TextField";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
 import { ColorPicker } from "./CalendarColorPicker";
@@ -275,7 +276,7 @@ export default function CalendarSearch({
       <PeopleSearch
         objectTypes={["user"]}
         selectedUsers={selectedUsers}
-        small
+        inputSlot={(params) => <TextField {...params} size="small" />}
         onChange={async (event: any, value: User[]) => {
           setSelectedUsers(value);
 
