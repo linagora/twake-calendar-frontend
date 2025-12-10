@@ -66,6 +66,7 @@ describe("DateTimeFields", () => {
     const startTimeInput = screen.getByTestId("start-time-input");
 
     fireEvent.change(startTimeInput, { target: { value: "12:00" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("12:00")
@@ -109,6 +110,7 @@ describe("DateTimeFields", () => {
     const endTimeInput = screen.getByTestId("end-time-input");
 
     fireEvent.change(endTimeInput, { target: { value: "08:00" } });
+    fireEvent.blur(endTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("08:00")
@@ -208,11 +210,14 @@ describe("DateTimeFields", () => {
     const startTimeInput = screen.getByTestId("start-time-input");
 
     fireEvent.change(startTimeInput, { target: { value: "09:30" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:30")
     );
-    expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30");
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30")
+    );
   });
 
   it("preserves 1-hour duration across midnight when changing start time from 22:30 to 23:45", async () => {
@@ -228,6 +233,7 @@ describe("DateTimeFields", () => {
 
     // Change start time from 22:30 to 23:45
     fireEvent.change(startTimeInput, { target: { value: "23:45" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("23:45")

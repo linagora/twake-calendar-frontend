@@ -406,9 +406,10 @@ describe("CalendarApp integration", () => {
         fireEvent.change(startDateInput, {
           target: { value: "08:00" },
         });
+        fireEvent.blur(startDateInput);
       });
 
-      // Wait for the 0.1s delay in handleStartTimeChangeWithClose to complete
+      // Wait for blur handler to complete
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 150));
       });

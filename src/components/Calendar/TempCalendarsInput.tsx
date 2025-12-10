@@ -8,6 +8,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { setView } from "../../features/Settings/SettingsSlice";
+import TextField from "@mui/material/TextField";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 import { getAccessiblePair } from "./utils/calendarColorsUtils";
 
@@ -105,7 +106,7 @@ export function TempCalendarsInput({
       onChange={handleUserChange}
       onToggleEventPreview={handleToggleEventPreview}
       placeholder={t("peopleSearch.availabilityPlaceholder")}
-      small
+      inputSlot={(params) => <TextField {...params} size="small" />}
     />
   );
 }

@@ -181,6 +181,19 @@ export default function EventFormFields({
     onHasEndDateChangedChange?.(hasEndDateChanged);
   }, [hasEndDateChanged, onHasEndDateChangedChange]);
 
+  // Reset hasEndDateChanged when startDate === endDate in normal mode
+  React.useEffect(() => {
+    if (
+      !showMore &&
+      hasEndDateChanged &&
+      startDate &&
+      endDate &&
+      startDate === endDate
+    ) {
+      setHasEndDateChanged(false);
+    }
+  }, [showMore, hasEndDateChanged, startDate, endDate]);
+
   // Use all-day toggle hook
   const { handleAllDayToggle } = useAllDayToggle({
     allday,
@@ -449,7 +462,12 @@ export default function EventFormFields({
           onStartTimeChange={handleStartTimeChange}
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
-          showEndDate={showMore || allday}
+          showEndDate={
+            showMore ||
+            allday ||
+            (hasEndDateChanged && startDate !== endDate) ||
+            (!showMore && !allday && startDate !== endDate)
+          }
           onToggleEndDate={() => {}}
         />
       </FieldWithLabel>

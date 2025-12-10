@@ -758,16 +758,17 @@ function EventPopover({
     } else {
       newEvent.start = convertFormDateTimeToISO(start, timezone);
       if (end) {
-        // In normal mode, only override end date when the end date field is not shown
-        if (!showMore && !hasEndDateChanged) {
-          const startDateOnly = (start || "").split("T")[0];
+        // In normal mode, only override end date when the end date field is not shown and end date is same as start date
+        const startDateOnly = (start || "").split("T")[0];
+        const endDateOnly = (end || "").split("T")[0];
+        if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
           const endTimeOnly = end.includes("T")
             ? end.split("T")[1]?.slice(0, 5) || "00:00"
             : "00:00";
           const endDateTime = `${startDateOnly}T${endTimeOnly}`;
           newEvent.end = convertFormDateTimeToISO(endDateTime, timezone);
         } else {
-          // Extended mode or end date explicitly shown in normal mode: use actual end datetime
+          // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
           newEvent.end = convertFormDateTimeToISO(end, timezone);
         }
       }
