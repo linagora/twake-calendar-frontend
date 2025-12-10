@@ -1,5 +1,8 @@
 import moment from "moment-timezone";
 import dayjs, { Dayjs } from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 /**
  * Helper functions for date/time string manipulation
@@ -8,6 +11,8 @@ import dayjs, { Dayjs } from "dayjs";
 export const DATETIME_WITH_SECONDS_LENGTH = 19;
 export const DATETIME_FORMAT_WITH_SECONDS = "YYYY-MM-DDTHH:mm:ss";
 export const DATETIME_FORMAT_WITHOUT_SECONDS = "YYYY-MM-DDTHH:mm";
+
+export const TIME_PARSE_FORMATS = ["HH:mm", "H:mm", "HHmm", "Hmm", "HH", "H"];
 
 /**
  * Detect datetime format based on string length
@@ -83,3 +88,35 @@ export const dtDate = (d: Dayjs) => d.format("YYYY-MM-DD");
 
 /** Extract time “HH:mm” */
 export const dtTime = (d: Dayjs) => d.format("HH:mm");
+
+/**
+ * Parse flexible time string input into Dayjs object
+ * Handles formats like: "HH:mm", "HHmm", "Hmm", "HH", "H"
+ * Also handles 3-digit input normalization (e.g. "830" -> "08:30")
+ */
+export function parseTimeInput(
+  value: string,
+  currentDate: Dayjs | null
+): Dayjs | null {
+  let trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  // Normalize 3-digit input (e.g. "830" → "0830" → 08:30, "123" → "0123" → 01:23)
+  if (/^\d{3}$/.test(trimmed)) {
+    trimmed = trimmed.padStart(4, "0");
+  }
+
+  const parsed = dayjs(trimmed, TIME_PARSE_FORMATS, true);
+  if (parsed.isValid()) {
+    const baseDate = currentDate || dayjs();
+    return baseDate
+      .hour(parsed.hour())
+      .minute(parsed.minute())
+      .second(0)
+      .millisecond(0);
+  }
+
+  return null;
+}

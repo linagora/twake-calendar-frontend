@@ -45,9 +45,12 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
   let dateTimeError = "";
 
   // Determine which fields are visible based on UI mode
-  const showFullFields = showMore || hasEndDateChanged;
+  const showFullFields =
+    showMore ||
+    allday ||
+    hasEndDateChanged ||
+    (!showMore && !allday && startDate !== endDate);
   const showTimeOnly = !allday && !showFullFields;
-  const showDateOnly = allday;
 
   // Validate start date
   if (!startDate || startDate.trim() === "") {
@@ -121,29 +124,6 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
       } else {
         isDateTimeValid = false;
         dateTimeError = "Invalid time format";
-      }
-    }
-  } else if (showDateOnly) {
-    // 2 fields mode: validate date only
-    if (!endDate || endDate.trim() === "") {
-      isDateTimeValid = false;
-      dateTimeError = "End date is required";
-    } else {
-      const toLocalDate = (ymd: string) => {
-        const [y, m, d] = ymd.split("-").map((v) => parseInt(v, 10));
-        if (!y || !m || !d) return new Date(NaN);
-        return new Date(y, m - 1, d);
-      };
-
-      const startOnly = toLocalDate(startDate);
-      const endOnly = toLocalDate(endDate);
-
-      if (isNaN(startOnly.getTime()) || isNaN(endOnly.getTime())) {
-        isDateTimeValid = false;
-        dateTimeError = "Invalid date";
-      } else if (endOnly < startOnly) {
-        isDateTimeValid = false;
-        dateTimeError = "End date must be on or after start date";
       }
     }
   }
