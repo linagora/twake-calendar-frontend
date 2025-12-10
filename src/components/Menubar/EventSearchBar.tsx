@@ -190,26 +190,28 @@ export default function SearchBar() {
             onToggleEventPreview={() => {}}
             customRenderInput={(
               params: any,
-              search: string,
-              setSearch: (value: string) => void
+              query: string,
+              setQuery: (value: string) => void
             ) => (
               <TextField
                 {...params}
                 fullWidth
                 autoFocus
                 placeholder={t("common.search")}
-                value={search}
+                value={query}
                 inputRef={(el) => {
                   inputRef.current = el;
                   if (params.InputProps.ref) params.InputProps.ref(el);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleSearch(search);
+                    handleSearch(query);
                   }
                 }}
                 onChange={(e) => {
-                  setSearch(e.target.value);
+                  const value = e.target.value;
+                  setQuery(value);
+                  setSearch(value);
                 }}
                 variant="outlined"
                 sx={{
@@ -245,12 +247,12 @@ export default function SearchBar() {
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
                             setAnchorEl(containerRef.current);
-                            handleFilterChange("keywords", search);
+                            handleFilterChange("keywords", query);
                             handleFilterChange(
                               "organizers",
                               selectedContacts.map((a: User) => ({
                                 cn: a.displayName,
-                                cal_address: a.email,
+                                cal_address: a.email || a.cal_address || "",
                                 partstat: "NEEDS-ACTION",
                                 rsvp: "FALSE",
                                 role: "REQ-PARTICIPANT",
@@ -262,10 +264,11 @@ export default function SearchBar() {
                           <TuneIcon />
                         </IconButton>
                       </InputAdornment>
-                      {search && (
+                      {query && (
                         <InputAdornment position="end">
                           <IconButton
                             onClick={() => {
+                              setQuery("");
                               setSearch("");
                               handleFilterChange("keywords", "");
                             }}

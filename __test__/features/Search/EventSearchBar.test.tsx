@@ -357,16 +357,16 @@ describe("EventSearchBar", () => {
     renderWithProviders(<SearchBar />, preloadedState);
 
     fireEvent.click(screen.getByRole("button"));
-    const input = screen.getByPlaceholderText("common.search");
-    userEvent.type(input, "hello");
+    userEvent.type(screen.getByPlaceholderText("common.search"), "hello");
 
     const tuneBtn = screen
       .getAllByRole("button")
       .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
 
     fireEvent.click(tuneBtn!);
-    fireEvent.click(screen.getByText("common.cancel"));
+    fireEvent.click(document.body);
 
-    expect(input).toHaveValue("hello");
+    const inputAfter = screen.getByPlaceholderText("common.search");
+    expect(inputAfter).toHaveValue("hello");
   });
 });
