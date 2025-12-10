@@ -31,12 +31,10 @@ import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 export default function SearchBar() {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
-
   const calendars = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
   const userId = useAppSelector((state) => state.user.userData.openpaasId);
-
   const personnalCalendars = calendars.filter(
     (c) => c.id.split("/")[0] === userId
   );
@@ -45,6 +43,7 @@ export default function SearchBar() {
   );
 
   const [search, setSearch] = useState("");
+  const [selectedContacts, setSelectedContacts] = useState<User[]>([]);
   const [extended, setExtended] = useState(false);
 
   const [filters, setFilters] = useState({
@@ -88,30 +87,11 @@ export default function SearchBar() {
   };
 
   const handleContactSelect = (_event: any, contacts: User[]) => {
-    const newContacts = contacts.filter(
-      (c) =>
-        !filters.organizers.some(
-          (org) => org.cal_address === (c.email || c.cal_address)
-        )
-    );
-
-    if (newContacts.length > 0) {
-      const userAttendees: userAttendee[] = newContacts.map(
-        (contact) =>
-          ({
-            ...contact,
-            cal_address: contact.email || contact.cal_address,
-            cn: contact.displayName,
-          }) as unknown as userAttendee
-      );
-      setFilters((prev) => ({
-        ...prev,
-        keywords: "",
-        organizers: [...prev.organizers, ...userAttendees],
-      }));
-      setAnchorEl(containerRef.current || null);
-    }
+    setSelectedContacts(contacts);
     setSearch("");
+    if (contacts.length > 0) {
+      handleSearch(contacts.map((c) => c.email).join(","));
+    }
   };
 
   const handleSearch = async (searchQuery: string) => {
@@ -204,7 +184,7 @@ export default function SearchBar() {
 
         {extended && (
           <PeopleSearch
-            selectedUsers={[]}
+            selectedUsers={selectedContacts}
             onChange={handleContactSelect}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
@@ -230,7 +210,6 @@ export default function SearchBar() {
                 }}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  handleFilterChange("keywords", e.target.value);
                 }}
                 variant="outlined"
                 sx={{
@@ -251,9 +230,12 @@ export default function SearchBar() {
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: "#605D62" }} />
-                    </InputAdornment>
+                    <>
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "#605D62" }} />
+                      </InputAdornment>
+                      {params.InputProps.startAdornment}
+                    </>
                   ),
                   endAdornment: (
                     <>
@@ -261,7 +243,21 @@ export default function SearchBar() {
                       <InputAdornment position="end">
                         <IconButton
                           onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => setAnchorEl(containerRef.current)}
+                          onClick={() => {
+                            setAnchorEl(containerRef.current);
+                            handleFilterChange("keywords", search);
+                            handleFilterChange(
+                              "organizers",
+                              selectedContacts.map((a: User) => ({
+                                cn: a.displayName,
+                                cal_address: a.email,
+                                partstat: "NEED_ACTION",
+                                rsvp: "FALSE",
+                                role: "REQ-PARTICIPANT",
+                                cutype: "INDIVIDUAL",
+                              }))
+                            );
+                          }}
                         >
                           <TuneIcon />
                         </IconButton>
