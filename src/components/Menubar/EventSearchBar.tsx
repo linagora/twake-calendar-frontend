@@ -162,7 +162,7 @@ export default function SearchBar() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [filterOpen, search]);
+  }, [filterOpen, search, extended]);
 
   return (
     <>
@@ -251,7 +251,7 @@ export default function SearchBar() {
                               selectedContacts.map((a: User) => ({
                                 cn: a.displayName,
                                 cal_address: a.email,
-                                partstat: "NEED_ACTION",
+                                partstat: "NEEDS-ACTION",
                                 rsvp: "FALSE",
                                 role: "REQ-PARTICIPANT",
                                 cutype: "INDIVIDUAL",
