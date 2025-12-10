@@ -181,6 +181,7 @@ function EventPopover({
     setTimezone(resolvedCalendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
+    setHasEndDateChanged(false);
   }, [resolvedCalendarTimezone, defaultCalendarId]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
@@ -517,6 +518,7 @@ function EventPopover({
       setBusy("OPAQUE");
       setHasVideoConference(false);
       setMeetingLink(null);
+      setHasEndDateChanged(false);
     }
 
     if (!isCreatingNew) {
