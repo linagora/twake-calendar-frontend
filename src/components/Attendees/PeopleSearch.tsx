@@ -29,13 +29,15 @@ export function PeopleSearch({
   disabled,
   freeSolo,
   onToggleEventPreview,
+  placeholder,
 }: {
   selectedUsers: User[];
   onChange: Function;
   objectTypes: string[];
   disabled?: boolean;
   freeSolo?: boolean;
-  onToggleEventPreview?: Function;
+  onToggleEventPreview?: () => void;
+  placeholder?: string;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -50,6 +52,8 @@ export function PeopleSearch({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const theme = useTheme();
+
+  const searchPlaceholder = placeholder ?? t("peopleSearch.placeholder");
 
   useEffect(() => {
     let cancelled = false;
@@ -149,7 +153,7 @@ export function PeopleSearch({
               {...params}
               error={!!inputError}
               helperText={inputError}
-              placeholder={t("peopleSearch.placeholder")}
+              placeholder={searchPlaceholder}
               label=""
               inputProps={{
                 ...params.inputProps,

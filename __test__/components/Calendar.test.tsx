@@ -364,7 +364,9 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
+    const input = screen.getByPlaceholderText(
+      "peopleSearch.availabilityPlaceholder"
+    );
     act(() => {
       userEvent.type(input, "New");
     });
@@ -394,14 +396,16 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
+    const input = screen.getByPlaceholderText(
+      "peopleSearch.availabilityPlaceholder"
+    );
     await act(async () => userEvent.type(input, "Alice"));
 
     const option = await screen.findByText("Alice");
     await act(async () => {
       fireEvent.click(option);
     });
-    expect(spy).not.toHaveBeenCalledWith();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("open window with attendees filled after temp search on create event button click", async () => {
@@ -423,7 +427,9 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
+    const input = screen.getByPlaceholderText(
+      "peopleSearch.availabilityPlaceholder"
+    );
     await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");
@@ -462,7 +468,9 @@ describe("calendar Availability search", () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     );
 
-    const input = screen.getByPlaceholderText("peopleSearch.placeholder");
+    const input = screen.getByPlaceholderText(
+      "peopleSearch.availabilityPlaceholder"
+    );
     await act(async () => userEvent.type(input, "New"));
 
     const option = await screen.findByText("New User");

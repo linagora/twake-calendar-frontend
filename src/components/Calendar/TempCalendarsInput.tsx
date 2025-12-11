@@ -1,5 +1,6 @@
 import { useTheme } from "@mui/material/styles";
 import { useRef } from "react";
+import { useI18n } from "twake-i18n";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   getTempCalendarsListAsync,
@@ -30,6 +31,7 @@ export function TempCalendarsInput({
     useAppSelector((state) => state.calendars.templist) ?? {};
   const calendars = useAppSelector((state) => state.calendars.list);
   const theme = useTheme();
+  const { t } = useI18n();
 
   const prevUsersRef = useRef<User[]>([]);
   const userColorsRef = useRef(new Map<string, string>());
@@ -102,6 +104,7 @@ export function TempCalendarsInput({
       selectedUsers={tempUsers}
       onChange={handleUserChange}
       onToggleEventPreview={handleToggleEventPreview}
+      placeholder={t("peopleSearch.availabilityPlaceholder")}
     />
   );
 }
