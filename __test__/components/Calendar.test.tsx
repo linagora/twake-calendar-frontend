@@ -405,7 +405,7 @@ describe("calendar Availability search", () => {
     await act(async () => {
       fireEvent.click(option);
     });
-    expect(spy).not.toHaveBeenCalledWith();
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it("open window with attendees filled after temp search on create event button click", async () => {
