@@ -246,6 +246,7 @@
     "showMore": "Show more",
     "showLess": "Show less",
     "joinVideo": "Join the video conference",
+    "joinVideoShort": "Join",
     "guests": "%{count} guests",
     "yesCount": "%{count} yes",
     "maybeCount": "%{count} maybe",
