@@ -169,6 +169,7 @@
   "peopleSearch": {
     "label": "Commencez à saisir un nom ou un e-mail",
     "placeholder": "Commencez à saisir un nom ou un e-mail",
+    "availabilityPlaceholder": "Vérifier la disponibilité",
     "invalidEmail": "%{email} n'est pas une adresse e-mail valide",
     "searchError": "Impossible de récupérer les contacts pour le moment. Veuillez réessayer.",
     "noResults": "Aucun résultat",
