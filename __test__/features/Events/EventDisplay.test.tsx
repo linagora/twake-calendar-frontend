@@ -90,6 +90,12 @@ describe("Event Preview Display", () => {
               end: day.toISOString(),
               organizer: { cn: "test", cal_address: "test@test.com" },
             },
+            event4: {
+              uid: "event4",
+              calId: "667037022b752d0026472254/cal1",
+              start: day.toISOString(),
+              end: day.toISOString(),
+            },
           },
           ownerEmails: ["test@test.com"],
         },
@@ -105,6 +111,12 @@ describe("Event Preview Display", () => {
               start: day.toISOString(),
               end: day.toISOString(),
               organizer: { cn: "john", cal_address: "john@test.com" },
+            },
+            event2: {
+              uid: "event2",
+              calId: "otherCal/cal",
+              start: day.toISOString(),
+              end: day.toISOString(),
             },
           },
         },
@@ -531,6 +543,39 @@ describe("Event Preview Display", () => {
 
     const updatedEvent = spy.mock.calls[0][0].newEvent;
     expect(updatedEvent.attendee[0].partstat).toBe("DECLINED");
+  });
+  it("handles Edit click when is own but with no organizer", async () => {
+    renderWithProviders(
+      <EventPreviewModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"event4"}
+      />,
+      preloadedState
+    );
+
+    fireEvent.click(screen.getByTestId("EditIcon"));
+
+    await waitFor(() => {
+      expect(screen.getByText("event.updateEvent")).toBeInTheDocument();
+    });
+  });
+
+  it("doesnt show edit button when is not own and with no organizer", async () => {
+    renderWithProviders(
+      <EventPreviewModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"otherCal/cal"}
+        eventId={"event2"}
+      />,
+      preloadedState
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+    });
   });
   it("handles Edit click", async () => {
     renderWithProviders(
