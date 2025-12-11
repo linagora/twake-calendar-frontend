@@ -84,6 +84,20 @@ export default function SearchBar() {
   };
 
   const handleSearch = async () => {
+    const trimmedSearch = search.trim();
+    const trimmedKeywords = filters.keywords.trim();
+
+    // Block search if all search criteria are empty
+    const hasSearchCriteria =
+      trimmedSearch ||
+      trimmedKeywords ||
+      filters.organizers.length > 0 ||
+      filters.attendees.length > 0;
+
+    if (!hasSearchCriteria) {
+      return;
+    }
+
     let searchInCalendars: string[];
 
     if (filters.searchIn === "" || !filters.searchIn) {
@@ -97,7 +111,7 @@ export default function SearchBar() {
     }
 
     const cleanedFilters = {
-      ...filters,
+      keywords: trimmedKeywords,
       organizers: filters.organizers.map((u) => u.cal_address),
       attendees: filters.attendees.map((u) => u.cal_address),
       searchIn: searchInCalendars,
@@ -105,7 +119,7 @@ export default function SearchBar() {
 
     dispatch(
       searchEventsAsync({
-        search,
+        search: trimmedSearch,
         filters: cleanedFilters,
       })
     );
