@@ -18,6 +18,7 @@
     "browseOtherCalendars": "Browse other calendars",
     "noPublicCalendarsFor": "No publicly available calendars for %{name}",
     "noMoreCalendarsFor": "No more calendars for %{name}",
+    "userDoesNotHavePublicCalendars": "%{name} does not have public calendars",
     "delete": {
       "title": "Remove %{name}?",
       "personalWarning": "You will lose all events in this calendar.",

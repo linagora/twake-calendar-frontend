@@ -18,6 +18,7 @@
     "browseOtherCalendars": "Xem các lịch khác",
     "noPublicCalendarsFor": "Không có lịch công khai cho %{name}",
     "noMoreCalendarsFor": "Không còn lịch nào cho %{name}",
+    "userDoesNotHavePublicCalendars": "%{name} không có lịch công khai",
     "delete": {
       "title": "Xóa %{name}?",
       "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",

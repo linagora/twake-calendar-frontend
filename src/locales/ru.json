@@ -18,6 +18,7 @@
     "browseOtherCalendars": "Просмотреть другие календари",
     "noPublicCalendarsFor": "Нет общедоступных календарей для %{name}",
     "noMoreCalendarsFor": "Других календарей для %{name} нет",
+    "userDoesNotHavePublicCalendars": "%{name} не имеет общедоступных календарей",
     "delete": {
       "title": "Удалить %{name}?",
       "personalWarning": "Вы потеряете все события в этом календаре.",
