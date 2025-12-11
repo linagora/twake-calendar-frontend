@@ -220,6 +220,8 @@
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Delivery method",
     "alarmEmailsUpdateError": "Failed to update email notifications setting",
+    "displayWeekNumbers": "Show week number",
+    "displayWeekNumbersUpdateError": "Failed to update show week number",
     "sync.empty": "Sync settings coming soon",
     "calAndEvent": "Calendar and events",
     "showDeclinedEvent": "Show declined events",

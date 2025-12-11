@@ -26,6 +26,7 @@ import {
   setTimeZone as setSettingsTimeZone,
   setIsBrowserDefaultTimeZone,
   setHideDeclinedEvents,
+  setDisplayWeekNumbers,
 } from "./SettingsSlice";
 import {
   updateUserConfigurationsAsync,
@@ -74,6 +75,10 @@ export default function SettingsPage() {
     (state) => state.settings?.hideDeclinedEvents
   );
 
+  const displayWeekNumbers = useAppSelector(
+    (state) => state.settings?.displayWeekNumbers
+  );
+
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
@@ -83,7 +88,8 @@ export default function SettingsPage() {
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
   const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
     useState(false);
-
+  const [displayWeekNumbersErrorOpen, setDisplayWeekNumbersErrorOpen] =
+    useState(false);
   const handleBackClick = () => {
     dispatch(setView("calendar"));
   };
@@ -221,6 +227,27 @@ export default function SettingsPage() {
     setAlarmEmailsErrorOpen(false);
   };
 
+  const handleDisplayWeekNumbers = (doDisplayWeekNumbers: boolean) => {
+    // Optimistic update - update UI immediately
+    dispatch(setDisplayWeekNumbers(doDisplayWeekNumbers));
+
+    // Call API in background, don't wait for it
+    dispatch(
+      updateUserConfigurationsAsync({
+        displayWeekNumbers: doDisplayWeekNumbers,
+      })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error("Failed to update the week number setting:", error);
+        dispatch(setDisplayWeekNumbers(!doDisplayWeekNumbers));
+        setDisplayWeekNumbersErrorOpen(true);
+      });
+  };
+  const handleDisplayWeekNumbersErrorClose = () => {
+    setDisplayWeekNumbersErrorOpen(false);
+  };
+
   return (
     <main className="main-layout settings-layout">
       <Box className="settings-sidebar">
@@ -344,37 +371,48 @@ export default function SettingsPage() {
                       </FormControl>
                     </Box>
                   </Box>
-                  <Box>
+                  <Box sx={{ mb: 6 }}>
                     <Typography variant="h6" sx={{ mb: 1 }}>
                       {t("settings.calAndEvent")}
                     </Typography>
-                    <Box
-                      sx={{
-                        mb: 6,
-                      }}
-                    >
-                      <FormControl size="small" sx={{ minWidth: 500 }}>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={Boolean(!hideDeclinedEvents)}
-                              onChange={() =>
-                                handleHideDeclinedEvents(!hideDeclinedEvents)
-                              }
-                              aria-label={t("settings.showDeclinedEvent")}
-                            />
-                          }
-                          label={t("settings.showDeclinedEvent")}
-                          labelPlacement="start"
-                          sx={{
-                            minWidth: 400,
-                            justifyContent: "space-between",
-                            marginLeft: 0,
-                            mb: 2,
-                          }}
-                        />
-                      </FormControl>
-                    </Box>
+                    <FormControl size="small" sx={{ minWidth: 500 }}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={Boolean(!hideDeclinedEvents)}
+                            onChange={() =>
+                              handleHideDeclinedEvents(!hideDeclinedEvents)
+                            }
+                            aria-label={t("settings.showDeclinedEvent")}
+                          />
+                        }
+                        label={t("settings.showDeclinedEvent")}
+                        labelPlacement="start"
+                        sx={{
+                          minWidth: 400,
+                          justifyContent: "space-between",
+                          marginLeft: 0,
+                        }}
+                      />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={Boolean(displayWeekNumbers)}
+                            onChange={() =>
+                              handleDisplayWeekNumbers(!displayWeekNumbers)
+                            }
+                            aria-label={t("settings.displayWeekNumbers")}
+                          />
+                        }
+                        label={t("settings.displayWeekNumbers")}
+                        labelPlacement="start"
+                        sx={{
+                          minWidth: 400,
+                          justifyContent: "space-between",
+                          marginLeft: 0,
+                        }}
+                      />
+                    </FormControl>
                   </Box>
                 </Box>
               )}
@@ -448,6 +486,12 @@ export default function SettingsPage() {
         autoHideDuration={4000}
         onClose={handleHideDeclinedEventsErrorClose}
         message={t("settings.hideDeclinedEventsUpdateError")}
+      />
+      <Snackbar
+        open={displayWeekNumbersErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleDisplayWeekNumbersErrorClose}
+        message={t("settings.displayWeekNumbersUpdateError")}
       />
     </main>
   );
