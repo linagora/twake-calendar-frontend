@@ -7,6 +7,7 @@ export interface SettingsState {
   timeZone: string | null; // Allow null to represent browser default
   isBrowserDefaultTimeZone: boolean;
   hideDeclinedEvents: boolean | null;
+  displayWeekNumbers: boolean;
   view: "calendar" | "settings" | "search";
 }
 
@@ -23,6 +24,7 @@ const initialState: SettingsState = {
   timeZone: defaultTimeZone,
   isBrowserDefaultTimeZone: defaultTimeZone === null,
   hideDeclinedEvents: null,
+  displayWeekNumbers: true,
   view: "calendar",
 };
 
@@ -43,6 +45,9 @@ export const settingsSlice = createSlice({
     },
     setHideDeclinedEvents: (state, action: PayloadAction<boolean | null>) => {
       state.hideDeclinedEvents = action.payload;
+    },
+    setDisplayWeekNumbers: (state, action: PayloadAction<boolean>) => {
+      state.displayWeekNumbers = action.payload;
     },
     setView: (
       state,
@@ -80,6 +85,18 @@ export const settingsSlice = createSlice({
         typeof hideDeclinedEventsConfig?.value === "boolean"
           ? hideDeclinedEventsConfig.value
           : null;
+
+      const calendarModule = action.payload.configurations.modules.find(
+        (module: any) => module.name === "calendar"
+      );
+      if (calendarModule?.configurations) {
+        const alarmEmailsConfig = calendarModule.configurations.find(
+          (config: any) => config.name === "displayWeekNumbers"
+        );
+        if (alarmEmailsConfig) {
+          state.displayWeekNumbers = alarmEmailsConfig.value === true;
+        }
+      }
     });
   },
 });
@@ -90,5 +107,6 @@ export const {
   setView,
   setIsBrowserDefaultTimeZone,
   setHideDeclinedEvents,
+  setDisplayWeekNumbers,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;

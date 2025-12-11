@@ -220,6 +220,8 @@
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Phương thức gửi",
     "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
+    "displayWeekNumbers": "Hiển thị số tuần",
+    "displayWeekNumbersUpdateError": "Không cập nhật được cách hiển thị số tuần",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "calAndEvent": "Lịch và sự kiện",
     "showDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
