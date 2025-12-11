@@ -682,6 +682,9 @@ export default function CalendarApp({
               filteredTempEvents,
               userId
             )}
+            eventOrder={(a: any, b: any) =>
+              a.extendedProps.priority - b.extendedProps.priority
+            }
             weekNumbers={
               currentView === "timeGridWeek" || currentView === "timeGridDay"
             }
