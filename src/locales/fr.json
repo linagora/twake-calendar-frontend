@@ -246,6 +246,7 @@
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "joinVideo": "Rejoindre la visioconférence",
+    "joinVideoShort": "Rejoindre",
     "guests": "%{count} participants",
     "yesCount": "%{count} oui",
     "maybeCount": "%{count} peut-être",

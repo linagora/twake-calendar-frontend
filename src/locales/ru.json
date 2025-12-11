@@ -246,6 +246,7 @@
     "showMore": "Показать больше",
     "showLess": "Показать меньше",
     "joinVideo": "Присоединиться к видеоконференции",
+    "joinVideoShort": "Присоединиться",
     "guests": "%{count} гостей",
     "yesCount": "%{count} да",
     "maybeCount": "%{count} может быть",
