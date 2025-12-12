@@ -2,6 +2,7 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginStylus } from "@rsbuild/plugin-stylus";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
+import path from "path";
 
 export default defineConfig({
   plugins: [pluginReact(), pluginStylus(), pluginSvgr()],
@@ -22,5 +23,15 @@ export default defineConfig({
       root: "dist",
     },
     minify: false,
+  },
+  tools: {
+    rspack: {
+      resolve: {
+        alias: {
+          react: path.resolve(__dirname, "node_modules/react"),
+          "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+        },
+      },
+    },
   },
 });

@@ -8,11 +8,11 @@ import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
 import { Error } from "./components/Error/Error";
-import { CustomThemeProvider } from "./theme/ThemeProvider";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
+import { useTheme } from "@mui/material/styles";
 
 import {
   enGB,
@@ -40,6 +40,7 @@ const isValidLanguage = (
 };
 
 function App() {
+  const theme = useTheme();
   const error = useAppSelector((state) => state.user.error);
   const userLanguage = useAppSelector(
     (state) => state.user.coreConfig.language
@@ -61,7 +62,6 @@ function App() {
   }, [error, dispatch]);
 
   return (
-    <CustomThemeProvider>
       <I18n
         dictRequire={(lang: keyof typeof locale) => locale[lang]}
         lang={lang}
@@ -79,7 +79,6 @@ function App() {
           <ErrorSnackbar error={error} type="user" />
         </Suspense>
       </I18n>
-    </CustomThemeProvider>
   );
 }
 
