@@ -66,6 +66,7 @@ describe("DateTimeFields", () => {
     const startTimeInput = screen.getByTestId("start-time-input");
 
     fireEvent.change(startTimeInput, { target: { value: "12:00" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("12:00")
@@ -84,8 +85,7 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[0]);
+    await userEvent.click(screen.getByTestId("start-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "3" });
     await userEvent.click(dayButton);
 
@@ -98,7 +98,7 @@ describe("DateTimeFields", () => {
     );
   });
 
-  it("moves START backward when END moves before START (normal mode)", async () => {
+  it("does NOT move START backward when END moves before START (normal mode)", async () => {
     await renderField({
       startDate: "2025-01-01",
       startTime: "10:00",
@@ -110,14 +110,15 @@ describe("DateTimeFields", () => {
     const endTimeInput = screen.getByTestId("end-time-input");
 
     fireEvent.change(endTimeInput, { target: { value: "08:00" } });
+    fireEvent.blur(endTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("08:00")
     );
 
-    await waitFor(() =>
-      expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("07:00")
-    );
+    // Start time should NOT be automatically adjusted when end time changes
+    expect(mockHandlers.onStartTimeChange).not.toHaveBeenCalled();
+    expect(mockHandlers.onStartDateChange).not.toHaveBeenCalled();
   });
 
   it("moves START backward properly when END date jumps before START date", async () => {
@@ -129,8 +130,7 @@ describe("DateTimeFields", () => {
       showMore: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[2]);
+    await userEvent.click(screen.getByTestId("end-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "3" });
     await userEvent.click(dayButton);
 
@@ -151,8 +151,7 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[0]);
+    await userEvent.click(screen.getByTestId("start-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "10" });
     await userEvent.click(dayButton);
 
@@ -173,8 +172,7 @@ describe("DateTimeFields", () => {
       showEndDate: true,
     });
 
-    const calendarButton = screen.getAllByRole("button");
-    await userEvent.click(calendarButton[1]);
+    await userEvent.click(screen.getByTestId("end-date-input"));
     const dayButton = screen.getByRole("gridcell", { name: "1" });
     await userEvent.click(dayButton);
 
@@ -212,11 +210,14 @@ describe("DateTimeFields", () => {
     const startTimeInput = screen.getByTestId("start-time-input");
 
     fireEvent.change(startTimeInput, { target: { value: "09:30" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("09:30")
     );
-    expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30");
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith("10:30")
+    );
   });
 
   it("preserves 1-hour duration across midnight when changing start time from 22:30 to 23:45", async () => {
@@ -232,6 +233,7 @@ describe("DateTimeFields", () => {
 
     // Change start time from 22:30 to 23:45
     fireEvent.change(startTimeInput, { target: { value: "23:45" } });
+    fireEvent.blur(startTimeInput);
 
     await waitFor(() =>
       expect(mockHandlers.onStartTimeChange).toHaveBeenCalledWith("23:45")
@@ -243,6 +245,38 @@ describe("DateTimeFields", () => {
         "2025-01-16",
         "00:45"
       )
+    );
+  });
+
+  it("should have aria-label for accessibility and testing", async () => {
+    await renderField({
+      startDate: "2025-01-01",
+      startTime: "10:00",
+      endDate: "2025-01-01",
+      endTime: "11:00",
+      showMore: true,
+    });
+
+    const startDateInput = screen.getByTestId("start-date-input");
+    const startTimeInput = screen.getByTestId("start-time-input");
+    const endDateInput = screen.getByTestId("end-date-input");
+    const endTimeInput = screen.getByTestId("end-time-input");
+
+    expect(startDateInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.startDate"
+    );
+    expect(startTimeInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.startTime"
+    );
+    expect(endDateInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.endDate"
+    );
+    expect(endTimeInput).toHaveAttribute(
+      "aria-label",
+      "dateTimeFields.endTime"
     );
   });
 });

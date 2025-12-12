@@ -406,6 +406,12 @@ describe("CalendarApp integration", () => {
         fireEvent.change(startDateInput, {
           target: { value: "08:00" },
         });
+        fireEvent.blur(startDateInput);
+      });
+
+      // Wait for blur handler to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 150));
       });
 
       const saveButton = screen.getByRole("button", { name: /save/i });

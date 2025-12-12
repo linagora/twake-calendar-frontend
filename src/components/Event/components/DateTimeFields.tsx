@@ -1,7 +1,10 @@
 import React, { useMemo } from "react";
 import { Box, Typography } from "@mui/material";
+import { TextFieldProps } from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { TimePickerFieldProps } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
@@ -15,6 +18,8 @@ import "dayjs/locale/vi";
 
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import { dtDate, dtTime, toDateTime } from "../utils/dateTimeHelpers";
+import { ReadOnlyDateField } from "./ReadOnlyPickerField";
+import { EditableTimeField } from "./EditableTimeField";
 
 dayjs.extend(customParseFormat);
 
@@ -87,16 +92,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     });
   }, [startDate, endDate, startTime, endTime, getCurrentDuration]);
 
-  const spansMultipleDays = React.useMemo(() => {
-    return startDate !== endDate;
-  }, [startDate, endDate]);
-
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || showEndDate;
-  const shouldShowFullFieldsInNormal =
-    (!allday && hasEndDateChanged) || spansMultipleDays;
-  const showSingleDateField =
-    !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
+  const showSingleDateField = !isExpanded && !shouldShowEndDateNormal;
+  const showFourFieldsNormal = !isExpanded && showEndDate && !allday;
 
   const startDateLabel = showSingleDateField
     ? t("dateTimeFields.date")
@@ -204,22 +203,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     const newEnd = toDateTime(endDate, newTimeStr);
     const currentStart = toDateTime(startDate, startTime);
 
-    // If end is before start, adjust start to maintain duration
-    if (newEnd.isBefore(currentStart)) {
-      const duration = initialDurationRef.current ?? getCurrentDuration();
-      const newStart = newEnd.subtract(duration, "minute");
-
-      const newStartDate = dtDate(newStart);
-      const newStartTime = dtTime(newStart);
-
-      if (newStartDate !== startDate) {
-        onStartDateChange(newStartDate);
-      }
-      if (newStartTime !== startTime) {
-        onStartTimeChange(newStartTime);
-      }
-    } else {
-      // Update duration when user changes end
+    // Update duration when user changes end (if valid)
+    if (!newEnd.isBefore(currentStart)) {
       initialDurationRef.current = newEnd.diff(currentStart, "minute");
     }
 
@@ -244,7 +229,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     [endTime]
   );
 
-  const getSlotProps = (testId: string, hasError = false) => ({
+  const getSlotProps = (
+    testId: string,
+    hasError = false,
+    testLabel?: string
+  ) => ({
     textField: {
       size: "small" as const,
       margin: "dense" as const,
@@ -252,7 +241,64 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
       InputLabelProps: { shrink: true },
       error: hasError,
       sx: { width: "100%" },
-      inputProps: { "data-testid": testId },
+      inputProps: {
+        "data-testid": testId,
+        ...(testLabel ? { "aria-label": testLabel } : {}),
+      },
+    },
+  });
+
+  const getFieldSlotProps = (
+    testId: string,
+    hasError = false,
+    testLabel?: string
+  ): Partial<DatePickerFieldProps | TimePickerFieldProps> &
+    Pick<
+      TextFieldProps,
+      | "size"
+      | "margin"
+      | "fullWidth"
+      | "InputLabelProps"
+      | "error"
+      | "sx"
+      | "inputProps"
+    > => ({
+    size: "small" as const,
+    margin: "dense" as const,
+    fullWidth: true,
+    InputLabelProps: { shrink: true },
+    error: hasError,
+    sx: { width: "100%" },
+    inputProps: {
+      "data-testid": testId,
+      ...(testLabel ? { "aria-label": testLabel } : {}),
+    },
+  });
+
+  const getTimeFieldSlotProps = (
+    testId: string,
+    hasError = false,
+    testLabel?: string
+  ): Partial<TimePickerFieldProps> &
+    Pick<
+      TextFieldProps,
+      | "size"
+      | "margin"
+      | "fullWidth"
+      | "InputLabelProps"
+      | "error"
+      | "sx"
+      | "inputProps"
+    > => ({
+    size: "small" as const,
+    margin: "dense" as const,
+    fullWidth: true,
+    InputLabelProps: { shrink: true },
+    error: hasError,
+    sx: { width: "100%" },
+    inputProps: {
+      "data-testid": testId,
+      ...(testLabel ? { "aria-label": testLabel } : {}),
     },
   });
 
@@ -271,26 +317,62 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         flexDirection="column"
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
-        {isExpanded || shouldShowFullFieldsInNormal ? (
+        {isExpanded || showFourFieldsNormal ? (
           <>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
-                  label={t("dateTimeFields.startDate")}
                   format={LONG_DATE_FORMAT}
                   value={startDateValue}
                   onChange={handleStartDateChange}
-                  slotProps={getSlotProps("start-date-input")}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps(
+                      "start-date-input",
+                      false,
+                      t("dateTimeFields.startDate")
+                    ),
+                    field: getFieldSlotProps(
+                      "start-date-input",
+                      false,
+                      t("dateTimeFields.startDate")
+                    ),
+                  }}
                 />
               </Box>
               {!allday && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
-                    label={t("dateTimeFields.startTime")}
                     ampm={false}
                     value={startTimeValue}
                     onChange={handleStartTimeChange}
-                    slotProps={getSlotProps("start-time-input")}
+                    thresholdToRenderTimeInASingleColumn={48}
+                    timeSteps={{ minutes: 30 }}
+                    slots={{
+                      field: EditableTimeField,
+                      actionBar: () => null,
+                    }}
+                    slotProps={{
+                      openPickerButton: { sx: { display: "none" } },
+                      popper: {
+                        sx: {
+                          "& .MuiPaper-root": {
+                            width: "110px",
+                            minWidth: "110px",
+                          },
+                          "& .MuiMultiSectionDigitalClockSection-item": {
+                            justifyContent: "flex-start",
+                            width: "100%",
+                            textAlign: "left",
+                          },
+                        },
+                      },
+                      field: getTimeFieldSlotProps(
+                        "start-time-input",
+                        false,
+                        t("dateTimeFields.startTime")
+                      ),
+                    }}
                   />
                 </Box>
               )}
@@ -298,27 +380,57 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
                 <DatePicker
-                  label={t("dateTimeFields.endDate")}
                   format={LONG_DATE_FORMAT}
                   value={endDateValue}
                   onChange={handleEndDateChange}
-                  slotProps={getSlotProps(
-                    "end-date-input",
-                    !!validation.errors.dateTime
-                  )}
+                  slots={{ field: ReadOnlyDateField }}
+                  slotProps={{
+                    ...getSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime,
+                      t("dateTimeFields.endDate")
+                    ),
+                    field: getFieldSlotProps(
+                      "end-date-input",
+                      !!validation.errors.dateTime,
+                      t("dateTimeFields.endDate")
+                    ),
+                  }}
                 />
               </Box>
               {!allday && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
-                    label={t("dateTimeFields.endTime")}
                     ampm={false}
                     value={endTimeValue}
                     onChange={handleEndTimeChange}
-                    slotProps={getSlotProps(
-                      "end-time-input",
-                      !!validation.errors.dateTime
-                    )}
+                    thresholdToRenderTimeInASingleColumn={48}
+                    timeSteps={{ minutes: 30 }}
+                    slots={{
+                      field: EditableTimeField,
+                      actionBar: () => null,
+                    }}
+                    slotProps={{
+                      openPickerButton: { sx: { display: "none" } },
+                      popper: {
+                        sx: {
+                          "& .MuiPaper-root": {
+                            width: "110px",
+                            minWidth: "110px",
+                          },
+                          "& .MuiMultiSectionDigitalClockSection-item": {
+                            justifyContent: "flex-start",
+                            width: "100%",
+                            textAlign: "left",
+                          },
+                        },
+                      },
+                      field: getTimeFieldSlotProps(
+                        "end-time-input",
+                        !!validation.errors.dateTime,
+                        t("dateTimeFields.endTime")
+                      ),
+                    }}
                   />
                 </Box>
               )}
@@ -328,23 +440,42 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           <Box display="flex" gap={1} flexDirection="row" alignItems="center">
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label={t("dateTimeFields.startDate")}
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps(
+                    "start-date-input",
+                    false,
+                    t("dateTimeFields.startDate")
+                  ),
+                  field: getFieldSlotProps(
+                    "start-date-input",
+                    false,
+                    t("dateTimeFields.startDate")
+                  ),
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label={t("dateTimeFields.endDate")}
                 format={LONG_DATE_FORMAT}
                 value={endDateValue}
                 onChange={handleEndDateChange}
-                slotProps={getSlotProps(
-                  "end-date-input",
-                  !!validation.errors.dateTime
-                )}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime,
+                    t("dateTimeFields.endDate")
+                  ),
+                  field: getFieldSlotProps(
+                    "end-date-input",
+                    !!validation.errors.dateTime,
+                    t("dateTimeFields.endDate")
+                  ),
+                }}
               />
             </Box>
           </Box>
@@ -352,40 +483,98 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           <Box display="flex" gap={1} flexDirection="row" alignItems="center">
             <Box sx={{ maxWidth: "300px", width: "48%" }}>
               <DatePicker
-                label={startDateLabel}
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
                 onChange={handleStartDateChange}
-                slotProps={getSlotProps("start-date-input")}
+                slots={{ field: ReadOnlyDateField }}
+                slotProps={{
+                  ...getSlotProps("start-date-input", false, startDateLabel),
+                  field: getFieldSlotProps(
+                    "start-date-input",
+                    false,
+                    startDateLabel
+                  ),
+                }}
               />
             </Box>
             <Box sx={{ maxWidth: "110px" }}>
               <TimePicker
-                label={t("dateTimeFields.startTime")}
                 ampm={false}
                 value={startTimeValue}
                 onChange={handleStartTimeChange}
                 disabled={allday}
-                slotProps={getSlotProps("start-time-input")}
+                thresholdToRenderTimeInASingleColumn={48}
+                timeSteps={{ minutes: 30 }}
+                slots={{
+                  field: EditableTimeField,
+                  actionBar: () => null,
+                }}
+                slotProps={{
+                  openPickerButton: { sx: { display: "none" } },
+                  popper: {
+                    sx: {
+                      "& .MuiPaper-root": {
+                        width: "110px",
+                        minWidth: "110px",
+                      },
+                      "& .MuiMultiSectionDigitalClockSection-item": {
+                        justifyContent: "flex-start",
+                        width: "100%",
+                        textAlign: "left",
+                      },
+                    },
+                  },
+                  field: getTimeFieldSlotProps(
+                    "start-time-input",
+                    false,
+                    t("dateTimeFields.startTime")
+                  ),
+                }}
               />
             </Box>
+            {!allday && (
+              <Typography
+                sx={{
+                  alignSelf: "center",
+                  mx: 0.5,
+                  mt: 0.5,
+                }}
+              >
+                -
+              </Typography>
+            )}
             <Box sx={{ maxWidth: "110px" }}>
               <TimePicker
-                label={t("dateTimeFields.endTime")}
                 ampm={false}
                 value={endTimeValue}
                 onChange={handleEndTimeChange}
                 disabled={allday}
+                thresholdToRenderTimeInASingleColumn={48}
+                timeSteps={{ minutes: 30 }}
+                slots={{
+                  field: EditableTimeField,
+                  actionBar: () => null,
+                }}
                 slotProps={{
-                  textField: {
-                    size: "small",
-                    margin: "dense" as const,
-                    fullWidth: true,
-                    InputLabelProps: { shrink: true },
-                    error: !!validation.errors.dateTime,
-                    sx: { width: "100%" },
-                    inputProps: { "data-testid": "end-time-input" },
+                  openPickerButton: { sx: { display: "none" } },
+                  popper: {
+                    sx: {
+                      "& .MuiPaper-root": {
+                        width: "110px",
+                        minWidth: "110px",
+                      },
+                      "& .MuiMultiSectionDigitalClockSection-item": {
+                        justifyContent: "flex-start",
+                        width: "100%",
+                        textAlign: "left",
+                      },
+                    },
                   },
+                  field: getTimeFieldSlotProps(
+                    "end-time-input",
+                    !!validation.errors.dateTime,
+                    t("dateTimeFields.endTime")
+                  ),
                 }}
               />
             </Box>
