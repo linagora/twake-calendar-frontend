@@ -36,12 +36,12 @@ export default function SearchBar() {
     useAppSelector((state) => state.calendars.list)
   );
   const userId = useAppSelector((state) => state.user.userData?.openpaasId);
-  const personnalCalendars = calendars.filter(
-    (c) => c.id.split("/")[0] === userId
-  );
-  const sharedCalendars = calendars.filter(
-    (c) => c.id.split("/")[0] !== userId
-  );
+  const personnalCalendars = userId
+    ? calendars.filter((c) => c.id.split("/")[0] === userId)
+    : [];
+  const sharedCalendars = userId
+    ? calendars.filter((c) => c.id.split("/")[0] !== userId)
+    : calendars;
 
   const [search, setSearch] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<User[]>([]);
@@ -70,8 +70,9 @@ export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  type FilterField = "searchIn" | "keywords" | "organizers" | "attendees";
   const handleFilterChange = (
-    field: string,
+    field: FilterField,
     value: string | userAttendee[]
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -173,7 +174,7 @@ export default function SearchBar() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [filterOpen, search, extended, selectedContacts]);
+  }, [filterOpen, search, selectedContacts]);
 
   return (
     <>
