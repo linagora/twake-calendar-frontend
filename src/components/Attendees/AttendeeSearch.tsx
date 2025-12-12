@@ -6,10 +6,12 @@ export default function UserSearch({
   attendees,
   setAttendees,
   disabled,
+  small,
 }: {
   attendees: userAttendee[];
   setAttendees: Function;
   disabled?: boolean;
+  small?: boolean;
 }) {
   const [selectedUsers, setSelectedUsers] = useState(
     attendees.map((a) => ({
@@ -35,6 +37,7 @@ export default function UserSearch({
         selectedUsers={selectedUsers}
         objectTypes={["user", "contact"]}
         disabled={disabled}
+        small={small}
         onChange={(event: any, value: User[]) => {
           setAttendees(
             value.map((a: User) => ({
