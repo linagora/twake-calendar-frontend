@@ -102,12 +102,14 @@ export const eventToFullCalendarFormat = (
     .map((e) => {
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
+      const isPersonnalEvent = e.calId.split("/")[0] === userId;
 
       const convertedEvent: any = {
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
-        editable: e.calId.split("/")[0] === userId,
+        editable: isPersonnalEvent,
+        priority: isPersonnalEvent ? 1 : 0,
       };
 
       if (!isAllDay && e.start && eventTimezone) {
