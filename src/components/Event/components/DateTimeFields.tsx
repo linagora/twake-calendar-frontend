@@ -93,10 +93,20 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || showEndDate;
+  // Show full 4 fields when:
+  // 1. Non-allday with hasEndDateChanged
+  // 2. Multiple days with hasEndDateChanged (supports drag from week/month view grid with allday checked)
+  // 3. Multiple days without allday (original behavior)
   const shouldShowFullFieldsInNormal =
-    (!allday && hasEndDateChanged) || spansMultipleDays;
+    (!allday && hasEndDateChanged) ||
+    (hasEndDateChanged && spansMultipleDays) ||
+    (spansMultipleDays && !allday);
   const showSingleDateField =
     !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
+
+  // When shouldShowFullFieldsInNormal is true, show time fields even if allday is true
+  // This supports the case: drag from week/month view grid with multiple days
+  const shouldShowTimeFields = !allday || shouldShowFullFieldsInNormal;
 
   const startDateLabel = showSingleDateField
     ? t("dateTimeFields.date")
@@ -283,7 +293,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   slotProps={getSlotProps("start-date-input")}
                 />
               </Box>
-              {!allday && (
+              {shouldShowTimeFields && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     label={t("dateTimeFields.startTime")}
@@ -308,7 +318,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   )}
                 />
               </Box>
-              {!allday && (
+              {shouldShowTimeFields && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     label={t("dateTimeFields.endTime")}
