@@ -173,7 +173,7 @@ export default function SearchBar() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [filterOpen, search, extended]);
+  }, [filterOpen, search, extended, selectedContacts]);
 
   return (
     <>
