@@ -74,6 +74,17 @@ export default function SearchBar() {
     value: string | userAttendee[]
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    if (field === "organizers") {
+      setSelectedContacts(
+        (value as userAttendee[]).map(
+          (a: userAttendee) =>
+            ({
+              displayName: a.cn,
+              email: a.cal_address || "",
+            }) as User
+        )
+      );
+    }
   };
 
   const handleClearFilters = () => {
@@ -83,6 +94,7 @@ export default function SearchBar() {
       organizers: [] as userAttendee[],
       attendees: [] as userAttendee[],
     });
+    setSelectedContacts([]);
     setAnchorEl(null);
   };
 
@@ -157,6 +169,7 @@ export default function SearchBar() {
 
       if (!search.trim()) {
         setExtended(false);
+        setSelectedContacts([]);
       }
     }
 
