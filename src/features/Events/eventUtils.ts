@@ -188,7 +188,7 @@ export function parseCalendarEvent(
   }
 
   event.URL = eventURL;
-  if (!event.uid || !event.start || (!event.end && !duration)) {
+  if (!event.uid || !event.start) {
     console.error(
       `missing crucial event param in calendar ${calendarid} `,
       data
@@ -201,7 +201,9 @@ export function parseCalendarEvent(
 
   if (!event.end) {
     const start = event.start ? new Date(event.start) : new Date();
-    const timeToAdd = moment.duration(duration).asMilliseconds();
+    const timeToAdd = duration
+      ? moment.duration(duration).asMilliseconds()
+      : moment.duration(30, "minutes").asMilliseconds();
     const artificialEnd = new Date(start.getTime() + timeToAdd);
     event.end = formatDateToICal(artificialEnd, false, eventTimezone);
   }

@@ -13,7 +13,7 @@ import {
 import { TIMEZONES } from "../../../src/utils/timezone-data";
 
 describe("parseCalendarEvent", () => {
-  const baseColor = "#00FF00";
+  const baseColor = { light: "#00FF00" };
   const calendarId = "calendar-123";
 
   it("parses a full event with MAILTO in caps correctly", () => {
@@ -215,12 +215,12 @@ describe("parseCalendarEvent", () => {
     );
     expect(result.end).toBeDefined();
     expect(result.timezone).toBeDefined();
-    const endDate = new Date(result.end);
+    const endDate = new Date(result.end ?? "");
     const startDate = new Date(result.start);
     expect(endDate.getTime() - startDate.getTime()).toBe(60 * 60 * 1000);
   });
 
-  it("returns error if end and duration is missing", () => {
+  it("returns 30 minutes event if end and duration are missing", () => {
     const rawDataMissing: any = [
       ["UID", {}, "text", "event-1"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
@@ -232,7 +232,11 @@ describe("parseCalendarEvent", () => {
       calendarId,
       "/calendars/test.ics"
     );
-    expect(result.error).toMatch(/missing crucial event param/);
+    expect(result.end).toBeDefined();
+    expect(result.timezone).toBeDefined();
+    const endDate = new Date(result.end ?? "");
+    const startDate = new Date(result.start);
+    expect(endDate.getTime() - startDate.getTime()).toBe(30 * 60 * 1000);
   });
 
   it("parses alarm block correctly", () => {
