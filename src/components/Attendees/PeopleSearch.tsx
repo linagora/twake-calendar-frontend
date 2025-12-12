@@ -153,7 +153,7 @@ export function PeopleSearch({
         />
       </>
     ),
-    [inputError]
+    [inputError, t, onToggleEventPreview, loading]
   );
 
   return (
@@ -174,7 +174,7 @@ export function PeopleSearch({
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
         disabled={disabled}
-        loading={customRenderInput ? loading : undefined}
+        loading={loading}
         filterOptions={(x) => x}
         fullWidth
         noOptionsText={t("peopleSearch.noResults")}
