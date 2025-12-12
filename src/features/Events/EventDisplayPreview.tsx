@@ -80,9 +80,9 @@ export default function EventPreviewModal({
   const user = useAppSelector((state) => state.user);
 
   const isRecurring = event?.uid?.includes("/");
-  const isOwn = calendar.ownerEmails?.includes(user.userData.email);
+  const isOwn = calendar.ownerEmails?.includes(user.userData?.email);
   const isOrganizer = event.organizer
-    ? user.userData.email === event.organizer.cal_address
+    ? user.userData?.email === event.organizer.cal_address
     : isOwn;
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -274,7 +274,7 @@ export default function EventPreviewModal({
     : attendees.slice(0, attendeeDisplayLimit);
 
   const currentUserAttendee = event.attendee?.find(
-    (person) => person.cal_address === user.userData.email
+    (person) => person.cal_address === user.userData?.email
   );
 
   const organizer = event.attendee?.find(
@@ -365,7 +365,7 @@ export default function EventPreviewModal({
                         window.open(
                           `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                             .map((a) => a.cal_address)
-                            .filter((mail) => mail !== user.userData.email)
+                            .filter((mail) => mail !== user.userData?.email)
                             .join(",")}?subject=${event.title}`
                         )
                       }

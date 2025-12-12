@@ -34,7 +34,7 @@ export default function SearchBar() {
   const calendars = Object.values(
     useAppSelector((state) => state.calendars.list)
   );
-  const userId = useAppSelector((state) => state.user.userData.openpaasId);
+  const userId = useAppSelector((state) => state.user.userData?.openpaasId);
   const personnalCalendars = calendars.filter(
     (c) => c.id.split("/")[0] === userId
   );

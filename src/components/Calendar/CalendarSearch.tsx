@@ -282,15 +282,17 @@ export default function CalendarSearch({
 
           const cals = await Promise.all(
             value.map(async (user: User) => {
-              const cals = (await getCalendars(
-                user.openpaasId ?? "",
-                "sharedPublic=true&"
-              )) as Record<string, any>;
-              return cals._embedded?.["dav:calendar"]
-                ? cals._embedded["dav:calendar"].map(
-                    (cal: Record<string, any>) => ({ cal, owner: user })
-                  )
-                : { cal: undefined, owner: user };
+              if (user?.openpaasId) {
+                const cals = (await getCalendars(
+                  user.openpaasId,
+                  "sharedPublic=true&"
+                )) as Record<string, any>;
+                return cals._embedded?.["dav:calendar"]
+                  ? cals._embedded["dav:calendar"].map(
+                      (cal: Record<string, any>) => ({ cal, owner: user })
+                    )
+                  : { cal: undefined, owner: user };
+              }
             })
           );
 
