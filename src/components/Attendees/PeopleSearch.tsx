@@ -30,6 +30,7 @@ export function PeopleSearch({
   freeSolo,
   onToggleEventPreview,
   placeholder,
+  small,
 }: {
   selectedUsers: User[];
   onChange: Function;
@@ -38,6 +39,7 @@ export function PeopleSearch({
   freeSolo?: boolean;
   onToggleEventPreview?: () => void;
   placeholder?: string;
+  small?: boolean;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -151,6 +153,7 @@ export function PeopleSearch({
             </label>
             <TextField
               {...params}
+              size={small ? "small" : "medium"}
               error={!!inputError}
               helperText={inputError}
               placeholder={searchPlaceholder}

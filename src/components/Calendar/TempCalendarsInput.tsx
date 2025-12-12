@@ -105,6 +105,7 @@ export function TempCalendarsInput({
       onChange={handleUserChange}
       onToggleEventPreview={handleToggleEventPreview}
       placeholder={t("peopleSearch.availabilityPlaceholder")}
+      small
     />
   );
 }

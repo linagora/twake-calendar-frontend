@@ -524,7 +524,11 @@ export default function EventFormFields({
         label={t("event.form.participants")}
         isExpanded={showMore}
       >
-        <AttendeeSelector attendees={attendees} setAttendees={setAttendees} />
+        <AttendeeSelector
+          attendees={attendees}
+          setAttendees={setAttendees}
+          small
+        />
       </FieldWithLabel>
 
       <FieldWithLabel

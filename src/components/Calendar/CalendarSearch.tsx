@@ -275,6 +275,7 @@ export default function CalendarSearch({
       <PeopleSearch
         objectTypes={["user"]}
         selectedUsers={selectedUsers}
+        small
         onChange={async (event: any, value: User[]) => {
           setSelectedUsers(value);
 
