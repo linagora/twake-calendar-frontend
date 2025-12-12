@@ -1,5 +1,4 @@
 import {
-  type AutocompleteRenderInputParams,
   Box,
   Button,
   Card,
@@ -16,6 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import { useRef, useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
