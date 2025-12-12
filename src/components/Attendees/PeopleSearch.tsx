@@ -7,7 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import { useCallback, useEffect, useState } from "react";
+import {type ReactNode, useCallback, useEffect, useState } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
@@ -57,7 +57,7 @@ export function PeopleSearch({
     params: AutocompleteRenderInputParams,
     query: string,
     setQuery: (value: string) => void
-  ) => React.ReactNode;
+  ) => ReactNode;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -218,8 +218,10 @@ export function PeopleSearch({
             return;
           }
           setInputError(null);
-          const mapped = value.map((v: any) =>
-            typeof v === "string" ? { email: v.trim() } : v
+          const mapped = value.map((v: string | User) =>
+            typeof v === "string"
+              ? { email: v.trim(), displayName: v.trim() }
+              : v
           );
           onChange(event, mapped);
         }}

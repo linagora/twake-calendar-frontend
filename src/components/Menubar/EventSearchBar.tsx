@@ -1,4 +1,5 @@
 import {
+  type AutocompleteRenderInputParams,
   Box,
   Button,
   Card,
@@ -77,11 +78,10 @@ export default function SearchBar() {
     if (field === "organizers") {
       setSelectedContacts(
         (value as userAttendee[]).map(
-          (a: userAttendee) =>
-            ({
-              displayName: a.cn,
-              email: a.cal_address || "",
-            }) as User
+          (a: userAttendee): User => ({
+            displayName: a.cn ?? a.cal_address,
+            email: a.cal_address || "",
+          })
         )
       );
     }
@@ -94,7 +94,6 @@ export default function SearchBar() {
       organizers: [] as userAttendee[],
       attendees: [] as userAttendee[],
     });
-    setSelectedContacts([]);
     setAnchorEl(null);
   };
 
@@ -167,9 +166,8 @@ export default function SearchBar() {
         return;
       }
 
-      if (!search.trim()) {
+      if (!search.trim() && selectedContacts.length === 0) {
         setExtended(false);
-        setSelectedContacts([]);
       }
     }
 
@@ -202,7 +200,7 @@ export default function SearchBar() {
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
             customRenderInput={(
-              params: any,
+              params: AutocompleteRenderInputParams,
               query: string,
               setQuery: (value: string) => void
             ) => (
@@ -213,6 +211,7 @@ export default function SearchBar() {
                 placeholder={t("common.search")}
                 value={query}
                 inputRef={(el) => {
+                  inputRef.current = el;
                   const ref = params.InputProps.ref;
                   if (typeof ref === "function") {
                     ref(el);
@@ -458,6 +457,8 @@ export default function SearchBar() {
               variant="text"
               onClick={() => {
                 handleClearFilters();
+                setSelectedContacts([]);
+                setSearch("");
                 setExtended(false);
               }}
             >
