@@ -7,7 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
@@ -19,17 +19,9 @@ import { SnackbarAlert } from "../Loading/SnackBarAlert";
 export interface User {
   email: string;
   displayName: string;
-  avatarUrl: string;
-  openpaasId: string;
+  avatarUrl?: string;
+  openpaasId?: string;
   color?: Record<string, string>;
-}
-
-export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
-  error?: boolean;
-  helperText?: string | null;
-  placeholder?: string;
-  label?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
@@ -62,7 +54,7 @@ export function PeopleSearch({
     params: ExtendedAutocompleteRenderInputParams
   ) => React.ReactNode;
   customRenderInput?: (
-    params: any,
+    params: AutocompleteRenderInputParams,
     query: string,
     setQuery: (value: string) => void
   ) => React.ReactNode;
@@ -126,86 +118,55 @@ export function PeopleSearch({
     };
   }, [objectTypes, query, t]);
 
-  const defaultRenderInput = (params: any) => {
-    const inputProps = {
-      ...params.InputProps,
-      startAdornment: (
-        <>
-          <PeopleOutlineOutlinedIcon sx={{ mr: 1, color: "action.active" }} />
-          {params.InputProps.startAdornment}
-        </>
-      ),
-      endAdornment: (
-        <>
-          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-          {params.InputProps.endAdornment}
-        </>
-      ),
-    };
-
-    const enhancedParamsWithInputProps = {
-      ...params,
-      InputProps: inputProps,
-      inputProps: {
-        ...params.inputProps,
-        autoComplete: "off",
-      },
-    };
-
-    const { InputProps, ...enhancedParams } = enhancedParamsWithInputProps;
-
-    const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && onToggleEventPreview) {
-        e.preventDefault();
-        onToggleEventPreview();
-      }
-    };
-
-    const defaultTextFieldProps = {
-      error: !!inputError,
-      helperText: inputError,
-      placeholder: searchPlaceholder,
-      label: "",
-      onKeyDown: handleEnterKey,
-      slotProps: {
-        input: {
-          ...inputProps,
-        },
-      },
-    };
-
-    if (inputSlot) {
-      return (
-        <>
-          <label htmlFor={params.id} className="visually-hidden">
-            {t("peopleSearch.label")}
-          </label>
-          {inputSlot({
-            ...enhancedParamsWithInputProps,
-            error: !!inputError,
-            helperText: inputError,
-            placeholder: searchPlaceholder,
-            label: "",
-            onKeyDown: handleEnterKey,
-          })}
-        </>
-      );
-    }
-
-    return (
+  const defaultRenderInput = useCallback(
+    (params: any) => (
       <>
         <label htmlFor={params.id} className="visually-hidden">
           {t("peopleSearch.label")}
         </label>
         <TextField
-          {...enhancedParams}
-          {...defaultTextFieldProps}
-          InputProps={inputProps}
-          size="medium"
+          {...params}
+          error={!!inputError}
+          helperText={inputError}
+          placeholder={searchPlaceholder}
+          label=""
+          inputProps={{
+            ...params.inputProps,
+            autoComplete: "off",
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && onToggleEventPreview) {
+              e.preventDefault();
+              onToggleEventPreview();
+            }
+          }}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              autoComplete: "off",
+              startAdornment: (
+                <>
+                  <PeopleOutlineOutlinedIcon
+                    style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
+                  />
+                  {params.InputProps.startAdornment}
+                </>
+              ),
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            },
+          }}
         />
       </>
-    );
-  };
+    ),
+    [inputError]
+  );
 
   return (
     <>
@@ -225,7 +186,7 @@ export function PeopleSearch({
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
         disabled={disabled}
-        loading={loading}
+        loading={customRenderInput ? loading : undefined}
         filterOptions={(x) => x}
         fullWidth
         noOptionsText={t("peopleSearch.noResults")}
@@ -248,7 +209,7 @@ export function PeopleSearch({
         onInputChange={(_event, value) => setQuery(value)}
         onChange={(event, value) => {
           const last = value[value.length - 1];
-          if (typeof last === "string" && !isValidEmail(last)) {
+          if (typeof last === "string" && !isValidEmail(last.trim())) {
             const invalidEmailMessage = t("peopleSearch.invalidEmail").replace(
               "%{email}",
               last
@@ -258,7 +219,7 @@ export function PeopleSearch({
           }
           setInputError(null);
           const mapped = value.map((v: any) =>
-            typeof v === "string" ? { email: v } : v
+            typeof v === "string" ? { email: v.trim() } : v
           );
           onChange(event, mapped);
         }}
