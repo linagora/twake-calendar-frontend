@@ -170,7 +170,16 @@ export const getTempCalendarsListAsync = createAsyncThunk<
       tempUser.openpaasId ?? "",
       "sharedPublic=true&"
     )) as Record<string, any>;
-    const rawCalendars = calendars._embedded["dav:calendar"];
+
+    const rawCalendars = calendars._embedded?.["dav:calendar"];
+    if (!rawCalendars || rawCalendars.length === 0) {
+      const userName = tempUser.displayName || tempUser.email || "User";
+      // Format: TRANSLATION:key|param1=value1
+      const encodedName = encodeURIComponent(userName);
+      throw new Error(
+        `TRANSLATION:calendar.userDoesNotHavePublicCalendars|name=${encodedName}`
+      );
+    }
 
     for (const cal of rawCalendars) {
       const name = cal["dav:name"];
