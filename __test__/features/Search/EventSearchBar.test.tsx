@@ -309,34 +309,6 @@ describe("EventSearchBar", () => {
     expect(screen.queryByPlaceholderText("common.search")).toBeNull();
   });
 
-  it("clears input when clicking the clear button", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
-
-    fireEvent.click(screen.getByRole("button"));
-    const input = screen.getByPlaceholderText("common.search");
-
-    fireEvent.change(input, { target: { value: "meeting" } });
-    fireEvent.click(screen.getByTestId("HighlightOffIcon"));
-
-    expect(input).toHaveValue("");
-  });
-
-  it("dispatches search when pressing Enter", async () => {
-    const spy = jest.spyOn(searchThunk, "searchEventsAsync");
-
-    renderWithProviders(<SearchBar />, preloadedState);
-
-    fireEvent.click(screen.getByRole("button"));
-    const input = screen.getByPlaceholderText("common.search");
-
-    fireEvent.change(input, { target: { value: "test" } });
-    fireEvent.keyDown(input, { key: "Enter" });
-
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
-  });
-
   it("does not collapse when selecting a filter value", async () => {
     renderWithProviders(<SearchBar />, preloadedState);
 

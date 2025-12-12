@@ -1,11 +1,13 @@
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, {
+  AutocompleteRenderInputParams,
+} from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
@@ -17,10 +19,9 @@ import { SnackbarAlert } from "../Loading/SnackBarAlert";
 export interface User {
   email: string;
   displayName: string;
-  avatarUrl: string;
-  openpaasId: string;
+  avatarUrl?: string;
+  openpaasId?: string;
   color?: Record<string, string>;
-  cal_address?: string;
 }
 
 export function PeopleSearch({
@@ -41,7 +42,7 @@ export function PeopleSearch({
   onToggleEventPreview?: () => void;
   placeholder?: string;
   customRenderInput?: (
-    params: any,
+    params: AutocompleteRenderInputParams,
     query: string,
     setQuery: (value: string) => void
   ) => React.ReactNode;
@@ -105,51 +106,54 @@ export function PeopleSearch({
     };
   }, [objectTypes, query, t]);
 
-  const defaultRenderInput = (params: any) => (
-    <>
-      <label htmlFor={params.id} className="visually-hidden">
-        {t("peopleSearch.label")}
-      </label>
-      <TextField
-        {...params}
-        error={!!inputError}
-        helperText={inputError}
-        placeholder={searchPlaceholder}
-        label=""
-        inputProps={{
-          ...params.inputProps,
-          autoComplete: "off",
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && onToggleEventPreview) {
-            e.preventDefault();
-            onToggleEventPreview();
-          }
-        }}
-        slotProps={{
-          input: {
-            ...params.InputProps,
+  const defaultRenderInput = useCallback(
+    (params: any) => (
+      <>
+        <label htmlFor={params.id} className="visually-hidden">
+          {t("peopleSearch.label")}
+        </label>
+        <TextField
+          {...params}
+          error={!!inputError}
+          helperText={inputError}
+          placeholder={searchPlaceholder}
+          label=""
+          inputProps={{
+            ...params.inputProps,
             autoComplete: "off",
-            startAdornment: (
-              <>
-                <PeopleOutlineOutlinedIcon
-                  style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
-                />
-                {params.InputProps.startAdornment}
-              </>
-            ),
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          },
-        }}
-      />
-    </>
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && onToggleEventPreview) {
+              e.preventDefault();
+              onToggleEventPreview();
+            }
+          }}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              autoComplete: "off",
+              startAdornment: (
+                <>
+                  <PeopleOutlineOutlinedIcon
+                    style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
+                  />
+                  {params.InputProps.startAdornment}
+                </>
+              ),
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            },
+          }}
+        />
+      </>
+    ),
+    [inputError]
   );
 
   return (
@@ -170,7 +174,7 @@ export function PeopleSearch({
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
         disabled={disabled}
-        loading={loading}
+        loading={customRenderInput ? loading : undefined}
         filterOptions={(x) => x}
         fullWidth
         noOptionsText={t("peopleSearch.noResults")}
@@ -193,7 +197,7 @@ export function PeopleSearch({
         onInputChange={(_event, value) => setQuery(value)}
         onChange={(event, value) => {
           const last = value[value.length - 1];
-          if (typeof last === "string" && !isValidEmail(last)) {
+          if (typeof last === "string" && !isValidEmail(last.trim())) {
             const invalidEmailMessage = t("peopleSearch.invalidEmail").replace(
               "%{email}",
               last
@@ -203,7 +207,7 @@ export function PeopleSearch({
           }
           setInputError(null);
           const mapped = value.map((v: any) =>
-            typeof v === "string" ? { email: v } : v
+            typeof v === "string" ? { email: v.trim() } : v
           );
           onChange(event, mapped);
         }}

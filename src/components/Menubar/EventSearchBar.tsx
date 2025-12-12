@@ -200,8 +200,14 @@ export default function SearchBar() {
                 placeholder={t("common.search")}
                 value={query}
                 inputRef={(el) => {
-                  inputRef.current = el;
-                  if (params.InputProps.ref) params.InputProps.ref(el);
+                  const ref = params.InputProps.ref;
+                  if (typeof ref === "function") {
+                    ref(el);
+                  } else if (ref && "current" in ref) {
+                    (
+                      ref as React.MutableRefObject<HTMLInputElement | null>
+                    ).current = el;
+                  }
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -252,7 +258,7 @@ export default function SearchBar() {
                               "organizers",
                               selectedContacts.map((a: User) => ({
                                 cn: a.displayName,
-                                cal_address: a.email || a.cal_address || "",
+                                cal_address: a.email || "",
                                 partstat: "NEEDS-ACTION",
                                 rsvp: "FALSE",
                                 role: "REQ-PARTICIPANT",
