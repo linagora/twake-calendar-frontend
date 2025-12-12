@@ -81,6 +81,9 @@ export default function EventPreviewModal({
 
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.ownerEmails?.includes(user.userData.email);
+  const isOrganizer = event.organizer
+    ? user.userData.email === event.organizer.cal_address
+    : isOwn;
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
@@ -324,26 +327,25 @@ export default function EventPreviewModal({
                     <FileDownloadOutlinedIcon />
                   </IconButton>
                 )}
-                {user.userData.email === event.organizer?.cal_address &&
-                  calendar.ownerEmails?.includes(user.userData.email) && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        if (isRecurring) {
-                          setAfterChoiceFunc(() => () => {
-                            setHidePreview(true);
-                            setOpenUpdateModal(true);
-                          });
-                          setOpenEditModePopup("edit");
-                        } else {
+                {isOrganizer && isOwn && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (isRecurring) {
+                        setAfterChoiceFunc(() => () => {
                           setHidePreview(true);
                           setOpenUpdateModal(true);
-                        }
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  )}
+                        });
+                        setOpenEditModePopup("edit");
+                      } else {
+                        setHidePreview(true);
+                        setOpenUpdateModal(true);
+                      }
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
                 {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
                   <IconButton
                     size="small"
@@ -380,7 +382,7 @@ export default function EventPreviewModal({
                       setOpenDuplicateModal(true);
                     }}
                   />
-                  {user.userData.email === event.organizer?.cal_address && (
+                  {isOrganizer && (
                     <MenuItem
                       onClick={async () => {
                         if (isRecurring) {
