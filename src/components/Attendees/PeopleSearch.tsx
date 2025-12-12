@@ -87,7 +87,7 @@ export function PeopleSearch({
           setOptions(res);
           setHasSearched(true);
         }
-      } catch (error: any) {
+      } catch {
         if (!cancelled) {
           setHasSearched(false);
           setSnackbarMessage(t("peopleSearch.searchError"));
@@ -107,7 +107,7 @@ export function PeopleSearch({
   }, [objectTypes, query, t]);
 
   const defaultRenderInput = useCallback(
-    (params: any) => (
+    (params: AutocompleteRenderInputParams) => (
       <>
         <label htmlFor={params.id} className="visually-hidden">
           {t("peopleSearch.label")}
