@@ -545,7 +545,7 @@ export default function EventFormFields({
         <AttendeeSelector
           attendees={attendees}
           setAttendees={setAttendees}
-          small
+          inputSlot={(params) => <TextField {...params} size="small" />}
         />
       </FieldWithLabel>
 
