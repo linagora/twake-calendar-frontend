@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
-import TextField from "@mui/material/TextField";
 import { userAttendee } from "../../features/User/userDataTypes";
-import { PeopleSearch, User } from "./PeopleSearch";
+import { PeopleSearch, User, ExtendedAutocompleteRenderInputParams } from "./PeopleSearch";
 
 export default function UserSearch({
   attendees,
   setAttendees,
   disabled,
-  small,
+  inputSlot,
 }: {
   attendees: userAttendee[];
   setAttendees: Function;
   disabled?: boolean;
-  small?: boolean;
+  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => React.ReactNode;
 }) {
   const [selectedUsers, setSelectedUsers] = useState(
     attendees.map((a) => ({
@@ -33,29 +32,25 @@ export default function UserSearch({
     );
   }, [attendees]);
   return (
-    <>
-      <PeopleSearch
-        selectedUsers={selectedUsers}
-        objectTypes={["user", "contact"]}
-        disabled={disabled}
-        inputSlot={
-          small ? (params) => <TextField {...params} size="small" /> : undefined
-        }
-        onChange={(event: any, value: User[]) => {
-          setAttendees(
-            value.map((a: User) => ({
-              cn: a.displayName,
-              cal_address: a.email,
-              partstat: "NEED_ACTION",
-              rsvp: "FALSE",
-              role: "REQ-PARTICIPANT",
-              cutype: "INDIVIDUAL",
-            }))
-          );
-          setSelectedUsers(value);
-        }}
-        freeSolo
-      />
-    </>
+    <PeopleSearch
+      selectedUsers={selectedUsers}
+      objectTypes={["user", "contact"]}
+      disabled={disabled}
+      inputSlot={inputSlot}
+      onChange={(event: any, value: User[]) => {
+        setAttendees(
+          value.map((a: User) => ({
+            cn: a.displayName,
+            cal_address: a.email,
+            partstat: "NEED_ACTION",
+            rsvp: "FALSE",
+            role: "REQ-PARTICIPANT",
+            cutype: "INDIVIDUAL",
+          }))
+        );
+        setSelectedUsers(value);
+      }}
+      freeSolo
+    />
   );
 }
