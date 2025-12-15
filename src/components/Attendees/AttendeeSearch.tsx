@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { userAttendee } from "../../features/User/userDataTypes";
-import { PeopleSearch, User, ExtendedAutocompleteRenderInputParams } from "./PeopleSearch";
+import {
+  PeopleSearch,
+  User,
+  ExtendedAutocompleteRenderInputParams,
+} from "./PeopleSearch";
 
 export default function UserSearch({
   attendees,
@@ -11,7 +15,9 @@ export default function UserSearch({
   attendees: userAttendee[];
   setAttendees: Function;
   disabled?: boolean;
-  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => React.ReactNode;
+  inputSlot?: (
+    params: ExtendedAutocompleteRenderInputParams
+  ) => React.ReactNode;
 }) {
   const [selectedUsers, setSelectedUsers] = useState(
     attendees.map((a) => ({
