@@ -282,19 +282,21 @@ export default function CalendarSearch({
 
           const cals = await Promise.all(
             value.map(async (user: User) => {
-              const cals = (await getCalendars(
-                user.openpaasId,
-                "sharedPublic=true&"
-              )) as Record<string, any>;
-              return cals._embedded?.["dav:calendar"]
-                ? cals._embedded["dav:calendar"].map(
-                    (cal: Record<string, any>) => ({ cal, owner: user })
-                  )
-                : { cal: undefined, owner: user };
+              if (user?.openpaasId) {
+                const cals = (await getCalendars(
+                  user.openpaasId,
+                  "sharedPublic=true&"
+                )) as Record<string, any>;
+                return cals._embedded?.["dav:calendar"]
+                  ? cals._embedded["dav:calendar"].map(
+                      (cal: Record<string, any>) => ({ cal, owner: user })
+                    )
+                  : { cal: undefined, owner: user };
+              }
+              return null;
             })
           );
-
-          setSelectedCalendars(cals.flat());
+          setSelectedCalendars(cals.flat().filter(Boolean));
         }}
       />
 
@@ -302,16 +304,17 @@ export default function CalendarSearch({
         calendars={calendars}
         selectedCal={selectedCal}
         onRemove={(cal) => {
+          if (!cal.cal?._links?.self?.href) return;
           setSelectedCalendars((prev) =>
             prev.filter(
-              (c) => c.cal._links.self.href !== cal.cal._links.self.href
+              (c) => c.cal?._links?.self?.href !== cal.cal._links.self.href
             )
           );
           if (
             !selectedCal.find(
               (c) =>
                 cal.owner.email === c.owner.email &&
-                c.cal._links.self.href !== cal.cal._links.self.href
+                c.cal?._links?.self?.href !== cal.cal._links.self.href
             )
           ) {
             setSelectedUsers((prev) =>
