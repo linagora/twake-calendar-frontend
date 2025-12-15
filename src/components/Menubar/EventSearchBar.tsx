@@ -76,37 +76,17 @@ export default function SearchBar() {
     value: string | userAttendee[]
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
-    if (field === "organizers") {
-      setSelectedContacts(
-        (value as userAttendee[]).map(
-          (a: userAttendee): User => ({
-            displayName: a.cn ?? a.cal_address,
-            email: a.cal_address || "",
-          })
-        )
-      );
+  };
+
+  function buildQuery(
+    searchQuery: string,
+    filters: {
+      searchIn: string;
+      keywords: string;
+      organizers: userAttendee[];
+      attendees: userAttendee[];
     }
-  };
-
-  const handleClearFilters = () => {
-    setFilters({
-      searchIn: "my-calendars",
-      keywords: "",
-      organizers: [] as userAttendee[],
-      attendees: [] as userAttendee[],
-    });
-    setAnchorEl(null);
-  };
-
-  const handleContactSelect = (_event: any, contacts: User[]) => {
-    setSelectedContacts(contacts);
-    setSearch("");
-    if (contacts.length > 0) {
-      handleSearch(contacts.map((c) => c.email).join(","));
-    }
-  };
-
-  const handleSearch = async (searchQuery: string) => {
+  ) {
     const trimmedSearch = searchQuery.trim();
     const trimmedKeywords = filters.keywords.trim();
 
@@ -139,14 +119,53 @@ export default function SearchBar() {
       attendees: filters.attendees.map((u) => u.cal_address),
       searchIn: searchInCalendars,
     };
+    return {
+      search: trimmedSearch,
+      filters: cleanedFilters,
+    };
+  }
 
-    dispatch(
-      searchEventsAsync({
-        search: trimmedSearch,
-        filters: cleanedFilters,
-      })
-    );
+  const handleClearFilters = () => {
+    setFilters({
+      searchIn: "my-calendars",
+      keywords: "",
+      organizers: [] as userAttendee[],
+      attendees: [] as userAttendee[],
+    });
+    setAnchorEl(null);
+  };
 
+  const handleContactSelect = (_event: any, contacts: User[]) => {
+    setSelectedContacts(contacts);
+    setSearch("");
+    if (contacts.length > 0) {
+      handleSearch("", {
+        ...filters,
+        organizers: contacts.map((c) => ({
+          cal_address: c.email,
+          cutype: "INDIVIDUAL",
+          cn: c.displayName || c.email,
+          role: "Participant",
+          rsvp: "TRUE",
+          partstat: "",
+        })),
+      });
+    }
+  };
+
+  const handleSearch = async (
+    searchQuery: string,
+    filters: {
+      searchIn: string;
+      keywords: string;
+      organizers: userAttendee[];
+      attendees: userAttendee[];
+    }
+  ) => {
+    const cleanedQuery = buildQuery(searchQuery, filters);
+    if (cleanedQuery) {
+      dispatch(searchEventsAsync(cleanedQuery));
+    }
     dispatch(setView("search"));
     setAnchorEl(null);
   };
@@ -197,7 +216,9 @@ export default function SearchBar() {
         {extended && (
           <PeopleSearch
             selectedUsers={selectedContacts}
-            onChange={handleContactSelect}
+            onChange={(event, users) => {
+              handleContactSelect(event, users);
+            }}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
             customRenderInput={(
@@ -224,7 +245,7 @@ export default function SearchBar() {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleSearch(query);
+                    handleSearch(query, filters);
                   }
                 }}
                 onChange={(e) => {
@@ -467,7 +488,7 @@ export default function SearchBar() {
             </Button>
             <Button
               variant="contained"
-              onClick={() => handleSearch(filters.keywords)}
+              onClick={() => handleSearch(filters.keywords, filters)}
             >
               {t("common.search")}
             </Button>
