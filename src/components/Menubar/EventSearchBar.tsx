@@ -69,6 +69,7 @@ export default function SearchBar() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const shouldCollapseRef = useRef(false);
 
   type FilterField = "searchIn" | "keywords" | "organizers" | "attendees";
   const handleFilterChange = (
@@ -76,6 +77,17 @@ export default function SearchBar() {
     value: string | userAttendee[]
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    if (field === "organizers") {
+      setSelectedContacts(
+        (value as userAttendee[]).map(
+          (a: userAttendee) =>
+            ({
+              displayName: a.cn,
+              email: a.cal_address || "",
+            }) as User
+        )
+      );
+    }
   };
 
   function buildQuery(
@@ -336,6 +348,18 @@ export default function SearchBar() {
           paper: {
             sx: { mt: 1.2, width: extended ? searchWidth : "auto" },
           },
+          transition: {
+            onExited: () => {
+              if (
+                !search.trim() &&
+                selectedContacts.length === 0 &&
+                shouldCollapseRef.current
+              ) {
+                setExtended(false);
+              }
+              shouldCollapseRef.current = false;
+            },
+          },
         }}
       >
         <Card sx={{ p: 2, pb: 1 }}>
@@ -481,7 +505,7 @@ export default function SearchBar() {
                 handleClearFilters();
                 setSelectedContacts([]);
                 setSearch("");
-                setExtended(false);
+                shouldCollapseRef.current = true;
               }}
             >
               {t("common.cancel")}
