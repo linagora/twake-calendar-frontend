@@ -191,17 +191,19 @@ export function PeopleSearch({
           const { InputProps, ...enhancedParams } =
             enhancedParamsWithInputProps;
 
+          const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter" && onToggleEventPreview) {
+              e.preventDefault();
+              onToggleEventPreview();
+            }
+          };
+
           const defaultTextFieldProps = {
             error: !!inputError,
             helperText: inputError,
             placeholder: searchPlaceholder,
             label: "",
-            onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === "Enter" && onToggleEventPreview) {
-                e.preventDefault();
-                onToggleEventPreview();
-              }
-            },
+            onKeyDown: handleEnterKey,
             slotProps: {
               input: {
                 ...inputProps,
@@ -221,12 +223,7 @@ export function PeopleSearch({
                   helperText: inputError,
                   placeholder: searchPlaceholder,
                   label: "",
-                  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter" && onToggleEventPreview) {
-                      e.preventDefault();
-                      onToggleEventPreview();
-                    }
-                  },
+                  onKeyDown: handleEnterKey,
                 })}
               </>
             );
