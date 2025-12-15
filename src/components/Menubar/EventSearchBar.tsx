@@ -230,11 +230,6 @@ export default function SearchBar() {
             }}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
-            slotProps={{
-              popper: {
-                sx: { minWidth: containerRef.current?.offsetWidth },
-              },
-            }}
             customRenderInput={(
               params: AutocompleteRenderInputParams,
               query: string,
