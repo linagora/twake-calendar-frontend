@@ -304,16 +304,17 @@ export default function CalendarSearch({
         calendars={calendars}
         selectedCal={selectedCal}
         onRemove={(cal) => {
+          if (!cal.cal?._links?.self?.href) return;
           setSelectedCalendars((prev) =>
             prev.filter(
-              (c) => c.cal._links.self.href !== cal.cal._links.self.href
+              (c) => c.cal?._links?.self?.href !== cal.cal._links.self.href
             )
           );
           if (
             !selectedCal.find(
               (c) =>
                 cal.owner.email === c.owner.email &&
-                c.cal._links.self.href !== cal.cal._links.self.href
+                c.cal?._links?.self?.href !== cal.cal._links.self.href
             )
           ) {
             setSelectedUsers((prev) =>

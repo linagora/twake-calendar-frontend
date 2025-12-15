@@ -79,13 +79,10 @@ export default function SearchBar() {
     setFilters((prev) => ({ ...prev, [field]: value }));
     if (field === "organizers") {
       setSelectedContacts(
-        (value as userAttendee[]).map(
-          (a: userAttendee) =>
-            ({
-              displayName: a.cn,
-              email: a.cal_address || "",
-            }) as User
-        )
+        (value as userAttendee[]).map((a: userAttendee) => ({
+          displayName: a.cn ?? a.cal_address,
+          email: a.cal_address || "",
+        }))
       );
     }
   };
@@ -233,6 +230,11 @@ export default function SearchBar() {
             }}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
+            slotProps={{
+              popper: {
+                sx: { minWidth: containerRef.current?.offsetWidth },
+              },
+            }}
             customRenderInput={(
               params: AutocompleteRenderInputParams,
               query: string,
