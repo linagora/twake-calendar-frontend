@@ -14,6 +14,9 @@ export const DATETIME_FORMAT_WITHOUT_SECONDS = "YYYY-MM-DDTHH:mm";
 
 export const TIME_PARSE_FORMATS = ["HH:mm", "H:mm", "HHmm", "Hmm", "HH", "H"];
 
+// Strict parsing mode - input must exactly match the provided format(s)
+const STRICT_PARSING = true;
+
 /**
  * Detect datetime format based on string length
  * @param datetime - Datetime string to analyze
@@ -77,7 +80,7 @@ export function convertFormDateTimeToISO(
 
 /** Convert date + time strings → Dayjs */
 export const toDateTime = (date: string, time: string): Dayjs => {
-  const d = dayjs(date, "YYYY-MM-DD", true);
+  const d = dayjs(date, "YYYY-MM-DD", STRICT_PARSING);
   if (!time) return d.startOf("day");
   const [h, m] = time.split(":").map(Number);
   return d.hour(h).minute(m).second(0).millisecond(0);
@@ -108,7 +111,7 @@ export function parseTimeInput(
     trimmed = trimmed.padStart(4, "0");
   }
 
-  const parsed = dayjs(trimmed, TIME_PARSE_FORMATS, true);
+  const parsed = dayjs(trimmed, TIME_PARSE_FORMATS, STRICT_PARSING);
   if (parsed.isValid()) {
     const baseDate = currentDate || dayjs();
     return baseDate

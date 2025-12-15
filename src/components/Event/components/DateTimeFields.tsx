@@ -23,6 +23,18 @@ import { EditableTimeField } from "./EditableTimeField";
 
 dayjs.extend(customParseFormat);
 
+const timePickerPopperSx = {
+  "& .MuiPaper-root": {
+    width: "110px",
+    minWidth: "110px",
+  },
+  "& .MuiMultiSectionDigitalClockSection-item": {
+    justifyContent: "flex-start",
+    width: "100%",
+    textAlign: "left",
+  },
+};
+
 /**
  * Props for DateTimeFields component
  */
@@ -353,19 +365,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     }}
                     slotProps={{
                       openPickerButton: { sx: { display: "none" } },
-                      popper: {
-                        sx: {
-                          "& .MuiPaper-root": {
-                            width: "110px",
-                            minWidth: "110px",
-                          },
-                          "& .MuiMultiSectionDigitalClockSection-item": {
-                            justifyContent: "flex-start",
-                            width: "100%",
-                            textAlign: "left",
-                          },
-                        },
-                      },
+                      popper: { sx: timePickerPopperSx },
                       field: getTimeFieldSlotProps(
                         "start-time-input",
                         false,
@@ -411,19 +411,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     }}
                     slotProps={{
                       openPickerButton: { sx: { display: "none" } },
-                      popper: {
-                        sx: {
-                          "& .MuiPaper-root": {
-                            width: "110px",
-                            minWidth: "110px",
-                          },
-                          "& .MuiMultiSectionDigitalClockSection-item": {
-                            justifyContent: "flex-start",
-                            width: "100%",
-                            textAlign: "left",
-                          },
-                        },
-                      },
+                      popper: { sx: timePickerPopperSx },
                       field: getTimeFieldSlotProps(
                         "end-time-input",
                         !!validation.errors.dateTime,
@@ -510,19 +498,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
                 slotProps={{
                   openPickerButton: { sx: { display: "none" } },
-                  popper: {
-                    sx: {
-                      "& .MuiPaper-root": {
-                        width: "110px",
-                        minWidth: "110px",
-                      },
-                      "& .MuiMultiSectionDigitalClockSection-item": {
-                        justifyContent: "flex-start",
-                        width: "100%",
-                        textAlign: "left",
-                      },
-                    },
-                  },
+                  popper: { sx: timePickerPopperSx },
                   field: getTimeFieldSlotProps(
                     "start-time-input",
                     false,
@@ -556,19 +532,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
                 slotProps={{
                   openPickerButton: { sx: { display: "none" } },
-                  popper: {
-                    sx: {
-                      "& .MuiPaper-root": {
-                        width: "110px",
-                        minWidth: "110px",
-                      },
-                      "& .MuiMultiSectionDigitalClockSection-item": {
-                        justifyContent: "flex-start",
-                        width: "100%",
-                        textAlign: "left",
-                      },
-                    },
-                  },
+                  popper: { sx: timePickerPopperSx },
                   field: getTimeFieldSlotProps(
                     "end-time-input",
                     !!validation.errors.dateTime,
