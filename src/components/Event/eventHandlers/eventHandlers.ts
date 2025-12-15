@@ -30,7 +30,7 @@ export async function handleRSVP(
   const newEvent = {
     ...event,
     attendee: event.attendee?.map((a) =>
-      a.cal_address === user.userData.email ? { ...a, partstat: rsvp } : a
+      a.cal_address === user.userData?.email ? { ...a, partstat: rsvp } : a
     ),
   };
   if (typeOfAction === "solo") {
@@ -39,7 +39,7 @@ export async function handleRSVP(
     const calendarRange = getCalendarRange(new Date(event.start));
 
     // Update PARTSTAT on ALL VEVENTs (master + exceptions)
-    await updateSeriesPartstat(event, user.userData.email, rsvp);
+    await updateSeriesPartstat(event, user.userData?.email, rsvp);
 
     if (calendars) {
       await refreshCalendars(dispatch, calendars, calendarRange);

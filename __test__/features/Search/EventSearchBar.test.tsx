@@ -145,7 +145,7 @@ describe("EventSearchBar", () => {
     fireEvent.click(searchButton);
 
     const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.blur(searchInput);
+    fireEvent.mouseDown(document.body);
     expect(searchInput).not.toBeInTheDocument();
   });
 
@@ -220,7 +220,7 @@ describe("EventSearchBar", () => {
     await waitFor(() => {
       expect(searchSpy).toHaveBeenCalledWith({
         filters: {
-          keywords: "test",
+          keywords: "",
           organizers: [],
           attendees: [],
           searchIn: ["user1/cal1"],
@@ -262,5 +262,83 @@ describe("EventSearchBar", () => {
     await waitFor(() => {
       expect(searchSpy).not.toHaveBeenCalled();
     });
+  });
+  it("keeps search bar expanded when popover opens", () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    fireEvent.click(screen.getByRole("button"));
+    const tuneBtn = screen
+      .getAllByRole("button")
+      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+
+    fireEvent.click(tuneBtn!);
+
+    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
+  });
+
+  it("does NOT collapse search when clicking inside popover", () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    fireEvent.click(screen.getByRole("button"));
+    const tuneBtn = screen
+      .getAllByRole("button")
+      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+
+    fireEvent.click(tuneBtn!);
+
+    fireEvent.mouseDown(screen.getByText("search.searchIn"));
+
+    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
+  });
+
+  it("clicking Cancel closes popover and search collapses if empty", async () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    fireEvent.click(screen.getByRole("button"));
+    const tuneBtn = screen
+      .getAllByRole("button")
+      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+
+    fireEvent.click(tuneBtn!);
+
+    fireEvent.click(screen.getByText("common.cancel"));
+
+    await waitFor(() =>
+      expect(screen.queryByText("search.searchIn")).not.toBeInTheDocument()
+    );
+    expect(screen.queryByPlaceholderText("common.search")).toBeNull();
+  });
+
+  it("does not collapse when selecting a filter value", async () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    fireEvent.click(screen.getByRole("button"));
+
+    const tuneBtn = screen
+      .getAllByRole("button")
+      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+
+    fireEvent.click(tuneBtn!);
+
+    fireEvent.mouseDown(screen.getByText("search.searchIn")); // simulate interaction inside menu
+
+    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
+  });
+
+  it("keeps input value after popover closes if not empty", () => {
+    renderWithProviders(<SearchBar />, preloadedState);
+
+    fireEvent.click(screen.getByRole("button"));
+    userEvent.type(screen.getByPlaceholderText("common.search"), "hello");
+
+    const tuneBtn = screen
+      .getAllByRole("button")
+      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+
+    fireEvent.click(tuneBtn!);
+    fireEvent.click(document.body);
+
+    const inputAfter = screen.getByPlaceholderText("common.search");
+    expect(inputAfter).toHaveValue("hello");
   });
 });
