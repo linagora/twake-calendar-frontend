@@ -205,7 +205,6 @@ export function PeopleSearch({
             slotProps: {
               input: {
                 ...inputProps,
-                autoComplete: "off",
               },
             },
           };

@@ -46,11 +46,6 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
   const parsedFormat = useParsedFormat();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Get onChange from internalProps to call directly when value changes
-  const onChange = internalProps.onChange as
-    | ((value: Dayjs | null) => void)
-    | undefined;
-
   const getFormattedValue = useCallback(() => {
     if (pickerContext.value == null) return "";
     if (!pickerContext.value.isValid()) return "";
@@ -151,7 +146,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
         setInputValue(getFormattedValue());
       }
     },
-    [pickerContext, getFormattedValue, onChange]
+    [pickerContext, pickerActions, getFormattedValue]
   );
 
   // Commit pending input value when picker closes (after parseAndUpdateTime is defined)
