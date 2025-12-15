@@ -293,10 +293,10 @@ export default function CalendarSearch({
                     )
                   : { cal: undefined, owner: user };
               }
+              return null;
             })
           );
-
-          setSelectedCalendars(cals.flat());
+          setSelectedCalendars(cals.flat().filter(Boolean));
         }}
       />
 

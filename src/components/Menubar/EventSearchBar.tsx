@@ -142,7 +142,7 @@ export default function SearchBar() {
       handleSearch("", {
         ...filters,
         organizers: contacts.map((c) => ({
-          cal_address: c.email,
+          cal_address: c.email || c.displayName || "",
           cutype: "INDIVIDUAL",
           cn: c.displayName || c.email,
           role: "Participant",
