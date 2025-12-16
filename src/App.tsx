@@ -48,15 +48,9 @@ function App() {
   const savedLang = localStorage.getItem("lang");
   const defaultLang = (window as any).LANG;
 
-  const SUPPORTED_LANGUAGES = ["en", "fr", "ru", "vi"] as const;
-  type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
-
-  const isValidLanguage = (lang: string): lang is SupportedLanguage =>
-    SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
-
   const lang =
     [userLanguage, settingsLanguage, savedLang, defaultLang].find(
-      (l): l is string => !!l && isValidLanguage(l)
+      (l) => !!l && isValidLanguage(l)
     ) || "en";
 
   const dispatch = useAppDispatch();
