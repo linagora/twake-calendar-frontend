@@ -65,7 +65,10 @@
     "participants": "Participants",
     "noResults": "Aucun résultat",
     "resultsTitle": "Résultats de la recherche",
-    "noResultsSubtitle": "Essayez de changer vos filtres ou termes recherchés."
+    "noResultsSubtitle": "Essayez de changer vos filtres ou termes recherchés.",
+    "error": {
+      "emptySearch": "Essayez d'ajouter des mots clés ou d'autres filtres."
+    }
   },
   "calendarPopover": {
     "tabs": {
