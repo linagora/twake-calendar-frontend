@@ -2,14 +2,15 @@ import ky from "ky";
 import { Auth } from "../features/User/oidcAuth";
 
 const RETRY_CONFIG = {
-  maxRetries: 2,
+  maxRetries: 10,
   initialDelay: 1000,
   maxDelay: 120000,
 };
 
 function getRetryDelay(attemptNumber: number): number {
-  const delay = RETRY_CONFIG.initialDelay * Math.pow(2, attemptNumber);
-  return Math.min(delay, RETRY_CONFIG.maxDelay);
+  const cap = RETRY_CONFIG.maxDelay;
+  const base = RETRY_CONFIG.initialDelay * Math.pow(2, attemptNumber);
+  return Math.random() * Math.min(cap, base);
 }
 
 export const api = ky.extend({
