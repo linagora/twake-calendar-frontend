@@ -132,52 +132,86 @@ export function PeopleSearch({
   }, [objectTypes, query, t]);
 
   const defaultRenderInput = useCallback(
-    (params: AutocompleteRenderInputParams) => (
-      <>
-        <label htmlFor={params.id} className="visually-hidden">
-          {t("peopleSearch.label")}
-        </label>
-        <TextField
-          {...params}
-          error={!!inputError}
-          helperText={inputError}
-          placeholder={searchPlaceholder}
-          label=""
-          inputProps={{
-            ...params.inputProps,
-            autoComplete: "off",
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && onToggleEventPreview) {
-              e.preventDefault();
-              onToggleEventPreview();
-            }
-          }}
-          slotProps={{
-            input: {
-              ...params.InputProps,
-              autoComplete: "off",
-              startAdornment: (
-                <>
-                  <PeopleOutlineOutlinedIcon
-                    style={{ marginRight: 8, color: "rgba(0, 0, 0, 0.54)" }}
-                  />
-                  {params.InputProps.startAdornment}
-                </>
-              ),
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            },
-          }}
-        />
-      </>
-    ),
+    (params: AutocompleteRenderInputParams) => {
+      const inputProps = {
+        ...params.InputProps,
+        startAdornment: (
+          <>
+            <PeopleOutlineOutlinedIcon sx={{ mr: 1, color: "action.active" }} />
+            {params.InputProps.startAdornment}
+          </>
+        ),
+        endAdornment: (
+          <>
+            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+            {params.InputProps.endAdornment}
+          </>
+        ),
+      };
+
+      const enhancedParamsWithInputProps = {
+        ...params,
+        InputProps: inputProps,
+        inputProps: {
+          ...params.inputProps,
+          autoComplete: "off",
+        },
+      };
+
+      const { InputProps, ...enhancedParams } = enhancedParamsWithInputProps;
+
+      const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && onToggleEventPreview) {
+          e.preventDefault();
+          onToggleEventPreview();
+        }
+      };
+
+      const defaultTextFieldProps = {
+        error: !!inputError,
+        helperText: inputError,
+        placeholder: searchPlaceholder,
+        label: "",
+        onKeyDown: handleEnterKey,
+        slotProps: {
+          input: {
+            ...inputProps,
+          },
+        },
+      };
+
+      if (inputSlot) {
+        return (
+          <>
+            <label htmlFor={params.id} className="visually-hidden">
+              {t("peopleSearch.label")}
+            </label>
+            {inputSlot({
+              ...enhancedParamsWithInputProps,
+              error: !!inputError,
+              helperText: inputError,
+              placeholder: searchPlaceholder,
+              label: "",
+              onKeyDown: handleEnterKey,
+            })}
+          </>
+        );
+      }
+
+      return (
+        <>
+          <label htmlFor={params.id} className="visually-hidden">
+            {t("peopleSearch.label")}
+          </label>
+          <TextField
+            {...enhancedParams}
+            {...defaultTextFieldProps}
+            InputProps={inputProps}
+            size="medium"
+          />
+        </>
+      );
+    },
     [inputError, t, onToggleEventPreview, loading, searchPlaceholder]
   );
 
