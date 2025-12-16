@@ -67,7 +67,13 @@ export function HandleLogin() {
     ) {
       dispatch(push("/calendar"));
     }
-  }, [calendars.pending, userData.loading, userData.error, dispatch]);
+  }, [
+    calendars.pending,
+    userData.loading,
+    userData.error,
+    calendars.error,
+    dispatch,
+  ]);
   return <Loading />;
 }
 

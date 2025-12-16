@@ -11,13 +11,13 @@ export function Error() {
   const dispatch = useAppDispatch();
   const userError = useAppSelector((state) => state.user.error);
   const calendarError = useAppSelector((state) => state.calendars.error);
-  const initialUserError = useRef(userError).current;
+  const initialUserError = useRef(userError);
 
   useEffect(() => {
-    if (!initialUserError) {
+    if (!initialUserError.current) {
       dispatch(push("/"));
     }
-  }, [dispatch, initialUserError]);
+  }, [dispatch]);
 
   const errorMessage = userError || calendarError || t("error.unknown");
 
