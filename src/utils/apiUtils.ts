@@ -35,10 +35,9 @@ export const api = ky.extend({
     ],
 
     beforeRetry: [
-      async ({ request, options, error, retryCount }) => {
-        const delay = getRetryDelay(retryCount - 1);
+      async ({ request, error, retryCount }) => {
         console.warn(
-          `[API Retry] Attempt ${retryCount}/${RETRY_CONFIG.maxRetries} after ${delay}ms`,
+          `[API Retry] Attempt ${retryCount}/${RETRY_CONFIG.maxRetries}`,
           {
             url: request.url,
             error: error?.message,
