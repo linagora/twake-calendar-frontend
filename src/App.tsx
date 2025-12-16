@@ -50,7 +50,7 @@ function App() {
 
   const lang =
     [userLanguage, settingsLanguage, savedLang, defaultLang].find(
-      (l): l is string => isValidLanguage(l)
+      (l) => !!l && isValidLanguage(l)
     ) || "en";
 
   const dispatch = useAppDispatch();

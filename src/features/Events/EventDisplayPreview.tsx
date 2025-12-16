@@ -992,10 +992,9 @@ function formatEnd(
   const startDate = new Date(start);
   const endDate = new Date(end);
 
-  const sameDay =
-    startDate.getFullYear() === endDate.getFullYear() &&
-    startDate.getMonth() === endDate.getMonth() &&
-    startDate.getDate() === endDate.getDate();
+  const formatDatePart = (d: Date) =>
+    d.toLocaleDateString("en-CA", { timeZone }); // YYYY-MM-DD format
+  const sameDay = formatDatePart(startDate) === formatDatePart(endDate);
 
   if (allday) {
     return sameDay
