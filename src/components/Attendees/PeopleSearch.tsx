@@ -7,7 +7,13 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+  HTMLAttributes,
+} from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import Chip from "@mui/material/Chip";
@@ -15,6 +21,7 @@ import { useTheme } from "@mui/material/styles";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { PopperProps, PaperProps } from "@mui/material";
 
 export interface User {
   email: string;
@@ -42,6 +49,7 @@ export function PeopleSearch({
   placeholder,
   inputSlot,
   customRenderInput,
+  customSlotProps,
 }: {
   selectedUsers: User[];
   onChange: (event: any, users: User[]) => void;
@@ -58,6 +66,11 @@ export function PeopleSearch({
     query: string,
     setQuery: (value: string) => void
   ) => ReactNode;
+  customSlotProps?: {
+    popper?: Partial<PopperProps>;
+    paper?: Partial<PaperProps>;
+    listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
+  };
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -165,7 +178,7 @@ export function PeopleSearch({
         />
       </>
     ),
-    [inputError, t, onToggleEventPreview, loading]
+    [inputError, t, onToggleEventPreview, loading, searchPlaceholder]
   );
 
   return (
@@ -225,6 +238,7 @@ export function PeopleSearch({
           );
           onChange(event, mapped);
         }}
+        slotProps={customSlotProps}
         renderInput={(params) =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)

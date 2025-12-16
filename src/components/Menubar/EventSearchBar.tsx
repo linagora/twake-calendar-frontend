@@ -230,6 +230,26 @@ export default function SearchBar() {
             }}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}
+            customSlotProps={{
+              popper: {
+                anchorEl: containerRef.current,
+                placement: "bottom-start",
+                sx: {
+                  minWidth: searchWidth,
+                  "& .MuiPaper-root": {
+                    width: "100%",
+                  },
+                },
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: [0, 8],
+                    },
+                  },
+                ],
+              },
+            }}
             customRenderInput={(
               params: AutocompleteRenderInputParams,
               query: string,
