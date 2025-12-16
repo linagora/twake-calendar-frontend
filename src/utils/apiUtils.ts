@@ -1,8 +1,24 @@
 import ky from "ky";
 import { Auth } from "../features/User/oidcAuth";
 
+const RETRY_CONFIG = {
+  maxRetries: 2,
+  initialDelay: 1000,
+  maxDelay: 120000,
+};
+
+function getRetryDelay(attemptNumber: number): number {
+  const delay = RETRY_CONFIG.initialDelay * Math.pow(2, attemptNumber);
+  return Math.min(delay, RETRY_CONFIG.maxDelay);
+}
+
 export const api = ky.extend({
   prefixUrl: (window as any).CALENDAR_BASE_URL,
+  retry: {
+    limit: RETRY_CONFIG.maxRetries,
+    backoffLimit: RETRY_CONFIG.maxDelay,
+    delay: (attemptCount) => getRetryDelay(attemptCount - 1),
+  },
   hooks: {
     beforeRequest: [
       async (request) => {
@@ -10,11 +26,26 @@ export const api = ky.extend({
           ? JSON.parse(sessionStorage.getItem("tokenSet")!)
           : null;
         const access_token = saved?.access_token;
-
-        request.headers.set("Authorization", `Bearer ${access_token}`);
+        if (access_token) {
+          request.headers.set("Authorization", `Bearer ${access_token}`);
+        }
         return request;
       },
     ],
+
+    beforeRetry: [
+      async ({ request, options, error, retryCount }) => {
+        const delay = getRetryDelay(retryCount - 1);
+        console.warn(
+          `[API Retry] Attempt ${retryCount}/${RETRY_CONFIG.maxRetries} after ${delay}ms`,
+          {
+            url: request.url,
+            error: error?.message,
+          }
+        );
+      },
+    ],
+
     afterResponse: [
       async (request, options, response) => {
         if (response.status === 401) {
