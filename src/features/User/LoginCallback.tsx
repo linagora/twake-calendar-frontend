@@ -2,7 +2,12 @@ import { useEffect, useRef } from "react";
 import { Callback } from "./oidcAuth";
 import { useAppDispatch } from "../../app/hooks";
 import { push } from "redux-first-history";
-import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
+import {
+  getOpenPaasUserDataAsync,
+  setTokens,
+  setUserData,
+  setUserError,
+} from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
 import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
 
@@ -41,6 +46,9 @@ export function CallbackResume() {
       } catch (e) {
         console.error("OIDC callback error:", e);
         // Redirect to error page after error
+        dispatch(
+          setUserError(e instanceof Error ? e.message : "OAuth callback failed")
+        );
         dispatch(push("/error"));
       }
     };
