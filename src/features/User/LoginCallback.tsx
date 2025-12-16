@@ -26,7 +26,7 @@ export function CallbackResume() {
     const runCallback = async () => {
       try {
         const data = await Callback(saved?.code_verifier, saved?.state);
-        if (!data) {
+        if (!data || !data.userinfo || !data.tokenSet) {
           throw new Error("OAuth callback failed");
         }
         dispatch(setUserData(data?.userinfo));
