@@ -65,7 +65,8 @@
     "participants": "Participants",
     "noResults": "No events found",
     "resultsTitle": "Search Results",
-    "noResultsSubtitle": "Try adjusting your filters or search terms."
+    "noResultsSubtitle": "Try adjusting your filters or search terms.",
+    "error": { "emptySearch": "Try adding keywords or other filters." }
   },
   "calendarPopover": {
     "tabs": {

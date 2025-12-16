@@ -142,6 +142,7 @@ export default function SearchBar() {
       attendees: [] as userAttendee[],
     });
     setAnchorEl(null);
+    setFilterError(false);
   };
 
   const handleContactSelect = (_event: any, contacts: User[]) => {
@@ -449,6 +450,7 @@ export default function SearchBar() {
                 <TextField
                   fullWidth
                   error={filterError}
+                  helperText={filterError ? t("search.error.emptySearch") : ""}
                   placeholder={t("search.keywordsPlaceholder")}
                   value={filters.keywords}
                   onChange={(e) => {
@@ -474,9 +476,12 @@ export default function SearchBar() {
                 </InputLabel>
                 <UserSearch
                   attendees={filters.organizers}
-                  setAttendees={(users: userAttendee[]) =>
-                    handleFilterChange("organizers", users)
-                  }
+                  setAttendees={(users: userAttendee[]) => {
+                    handleFilterChange("organizers", users);
+                    if (users.length > 0) {
+                      setFilterError(false);
+                    }
+                  }}
                 />
               </Box>
 
@@ -493,9 +498,12 @@ export default function SearchBar() {
                 </InputLabel>
                 <UserSearch
                   attendees={filters.attendees}
-                  setAttendees={(users: userAttendee[]) =>
-                    handleFilterChange("attendees", users)
-                  }
+                  setAttendees={(users: userAttendee[]) => {
+                    handleFilterChange("attendees", users);
+                    if (users.length > 0) {
+                      setFilterError(false);
+                    }
+                  }}
                 />
               </Box>
             </Stack>
