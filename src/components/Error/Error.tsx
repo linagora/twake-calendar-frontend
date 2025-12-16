@@ -1,7 +1,7 @@
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { Box, Button, Fade, Paper, Stack, Typography } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { push } from "redux-first-history";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useI18n } from "twake-i18n";
@@ -11,12 +11,13 @@ export function Error() {
   const dispatch = useAppDispatch();
   const userError = useAppSelector((state) => state.user.error);
   const calendarError = useAppSelector((state) => state.calendars.error);
+  const initialUserError = useRef(userError).current;
 
   useEffect(() => {
-    if (!userError) {
+    if (!initialUserError) {
       dispatch(push("/"));
     }
-  }, [calendarError, dispatch]);
+  }, [dispatch, initialUserError]);
 
   const errorMessage = userError || calendarError || t("error.unknown");
 

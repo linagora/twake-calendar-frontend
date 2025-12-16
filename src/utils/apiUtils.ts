@@ -2,7 +2,7 @@ import ky from "ky";
 import { Auth } from "../features/User/oidcAuth";
 
 const RETRY_CONFIG = {
-  maxRetries: 10,
+  maxRetries: 2,
   initialDelay: 1000,
   maxDelay: 120000,
 };
