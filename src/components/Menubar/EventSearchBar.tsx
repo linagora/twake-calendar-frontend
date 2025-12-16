@@ -56,7 +56,7 @@ export default function SearchBar() {
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const filterOpen = Boolean(anchorEl);
-
+  const [filterError, setFilterError] = useState(false);
   const searchWidth = {
     xs: "10vw",
     sm: "20vw",
@@ -174,9 +174,11 @@ export default function SearchBar() {
     const cleanedQuery = buildQuery(searchQuery, filters);
     if (cleanedQuery) {
       dispatch(searchEventsAsync(cleanedQuery));
+      dispatch(setView("search"));
+      setAnchorEl(null);
+    } else {
+      filterOpen && setFilterError(true);
     }
-    dispatch(setView("search"));
-    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -446,11 +448,15 @@ export default function SearchBar() {
                 </InputLabel>
                 <TextField
                   fullWidth
+                  error={filterError}
                   placeholder={t("search.keywordsPlaceholder")}
                   value={filters.keywords}
-                  onChange={(e) =>
-                    handleFilterChange("keywords", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleFilterChange("keywords", e.target.value);
+                    if (e.target.value.trim()) {
+                      setFilterError(false);
+                    }
+                  }}
                   size="small"
                 />
               </Box>
