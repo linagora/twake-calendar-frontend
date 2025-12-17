@@ -170,9 +170,7 @@ export function DisplayedIcons(IconDisplayed: IconDisplayConfig) {
       {IconDisplayed.needAction && (
         <HelpOutlineIcon style={{ fontSize: "15px" }} />
       )}
-      {IconDisplayed.declined && (
-        <CancelIcon color="error" style={{ fontSize: "15px" }} />
-      )}
+      {IconDisplayed.declined && <CancelIcon style={{ fontSize: "15px" }} />}
       {IconDisplayed.tentative && (
         <HelpOutlineIcon style={{ fontSize: "15px" }} />
       )}
