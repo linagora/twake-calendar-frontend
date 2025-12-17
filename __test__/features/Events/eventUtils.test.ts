@@ -513,12 +513,12 @@ describe("calendarEventToJCal", () => {
     );
   });
 
-  it("converts all-day events adjusting dtend", () => {
+  it("converts all-day events", () => {
     const mockEvent: any = {
       uid: "event-11",
       title: "All Day",
       start: "2025-07-21T00:00:00.000Z",
-      end: "2025-07-21T00:00:00.000Z",
+      end: "2025-07-22T00:00:00.000Z",
       timezone: "Europe/Paris",
       allday: true,
       attendee: [],
@@ -542,7 +542,7 @@ describe("calendarEventToJCal", () => {
       calId: "test/test",
       title: "Team Meeting",
       start: "2025-07-23T00:00:00.000Z",
-      end: "2025-07-23T00:00:00.000Z",
+      end: "2025-07-24T00:00:00.000Z",
       timezone: "Europe/Paris",
       transp: "OPAQUE",
       class: "PUBLIC",

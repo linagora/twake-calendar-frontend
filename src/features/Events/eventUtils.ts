@@ -331,11 +331,6 @@ export function makeVevent(
     const endDate = new Date(event.end);
     let finalEndDate = endDate;
 
-    if (event.allday && endDate.getTime() === startDate.getTime()) {
-      finalEndDate = new Date(endDate);
-      finalEndDate.setDate(startDate.getDate() + 1);
-    }
-
     vevent[1].push([
       "dtend",
       { tzid },
