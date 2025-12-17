@@ -315,6 +315,7 @@ export default function SearchBar() {
                     <InputAdornment position="end">
                       {(query || selectedContacts.length > 0) && (
                         <IconButton
+                          aria-label={t("common.clear")}
                           onClick={() => {
                             setQuery("");
                             setSearch("");
@@ -326,6 +327,7 @@ export default function SearchBar() {
                         </IconButton>
                       )}
                       <IconButton
+                        aria-label={t("search.filter.filters")}
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
                           setAnchorEl(containerRef.current);
