@@ -181,6 +181,7 @@ function EventPopover({
     setTimezone(resolvedCalendarTimezone);
     setHasVideoConference(false);
     setMeetingLink(null);
+    setHasEndDateChanged(false);
   }, [resolvedCalendarTimezone, defaultCalendarId]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
@@ -286,11 +287,22 @@ function EventPopover({
         setStart(startValue);
         setEnd(endValue);
 
-        // If start date != end date, open extended mode
+        // Check if multiple days event
         const startDateOnly = startValue.slice(0, 10);
         const endDateOnly = endValue.slice(0, 10);
-        if (startDateOnly !== endDateOnly) {
-          setShowMore(true);
+        const isMultipleDays = startDateOnly !== endDateOnly;
+
+        if (isMultipleDays) {
+          // Keep normal mode (showMore = false) for multiple days events
+          setShowMore(false);
+
+          if (selectedRange.allDay) {
+            // Dragged from allday slot: allday already set to true at line 234
+            // Will show start date and end date (handled by showEndDate logic)
+          } else {
+            // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
+            setHasEndDateChanged(true);
+          }
         }
       } else {
         // Fallback: format Date objects using local time components
@@ -337,8 +349,19 @@ function EventPopover({
         if (formattedStart && formattedEnd) {
           const startDateOnly = formattedStart.slice(0, 10);
           const endDateOnly = formattedEnd.slice(0, 10);
-          if (startDateOnly !== endDateOnly) {
-            setShowMore(true);
+          const isMultipleDays = startDateOnly !== endDateOnly;
+
+          if (isMultipleDays) {
+            // Keep normal mode (showMore = false) for multiple days events
+            setShowMore(false);
+
+            if (selectedRange.allDay) {
+              // Dragged from allday slot: allday already set to true at line 234
+              // Will show start date and end date (handled by showEndDate logic)
+            } else {
+              // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
+              setHasEndDateChanged(true);
+            }
           }
         }
       }
@@ -493,6 +516,7 @@ function EventPopover({
       setBusy("OPAQUE");
       setHasVideoConference(false);
       setMeetingLink(null);
+      setHasEndDateChanged(false);
     }
 
     if (!isCreatingNew) {
