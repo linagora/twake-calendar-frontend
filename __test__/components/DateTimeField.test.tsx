@@ -279,4 +279,65 @@ describe("DateTimeFields", () => {
       "dateTimeFields.endTime"
     );
   });
+
+  describe("DateTimeFields - Drag and Drop Display Logic", () => {
+    // Test 1.1: Display 2 fields when drag from allday slot (multiple days)
+    it("displays only 2 date fields when allday=true and multiple days", async () => {
+      await renderField({
+        allday: true,
+        hasEndDateChanged: false,
+        startDate: "2025-07-18",
+        endDate: "2025-07-20",
+        showEndDate: true,
+        showMore: false,
+      });
+
+      expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
+      expect(screen.getByTestId("end-date-input")).toBeInTheDocument();
+      expect(screen.queryByTestId("start-time-input")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("end-time-input")).not.toBeInTheDocument();
+    });
+
+    // Test 1.2: Display 4 fields when drag from week view (multiple days)
+    it("displays 4 fields when allday=false, hasEndDateChanged=true, and multiple days", async () => {
+      await renderField({
+        allday: false,
+        hasEndDateChanged: true,
+        startDate: "2025-07-18",
+        endDate: "2025-07-20",
+        startTime: "09:00",
+        endTime: "10:00",
+        showEndDate: true,
+        showMore: false,
+      });
+
+      expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
+      expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
+      expect(screen.getByTestId("end-date-input")).toBeInTheDocument();
+      expect(screen.getByTestId("end-time-input")).toBeInTheDocument();
+    });
+
+    // Test 1.3: Display single date + time fields
+    it("displays single date field with time fields for single day event", async () => {
+      await renderField({
+        allday: false,
+        hasEndDateChanged: false,
+        startDate: "2025-07-18",
+        endDate: "2025-07-18",
+        startTime: "09:00",
+        endTime: "10:00",
+        showEndDate: false,
+        showMore: false,
+      });
+
+      const startDateInput = screen.getByTestId("start-date-input");
+      expect(startDateInput).toHaveAttribute(
+        "aria-label",
+        "dateTimeFields.date"
+      );
+      expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
+      expect(screen.getByTestId("end-time-input")).toBeInTheDocument();
+      expect(screen.queryByTestId("end-date-input")).not.toBeInTheDocument();
+    });
+  });
 });

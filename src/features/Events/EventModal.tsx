@@ -300,8 +300,7 @@ function EventPopover({
             // Dragged from allday slot: allday already set to true at line 234
             // Will show start date and end date (handled by showEndDate logic)
           } else {
-            // Dragged from week/month view grid: set allday to true and trigger 4 fields display
-            setAllDay(true);
+            // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
             setHasEndDateChanged(true);
           }
         }
@@ -360,8 +359,7 @@ function EventPopover({
               // Dragged from allday slot: allday already set to true at line 234
               // Will show start date and end date (handled by showEndDate logic)
             } else {
-              // Dragged from week/month view grid: set allday to true and trigger 4 fields display
-              setAllDay(true);
+              // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
               setHasEndDateChanged(true);
             }
           }

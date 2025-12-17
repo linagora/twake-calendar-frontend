@@ -344,4 +344,126 @@ describe("EventPopover", () => {
       )
     );
   });
+
+  describe("EventModal - Drag and Drop Scenarios", () => {
+    // Test 2.1: Drag from allday slot (single day)
+    it("sets allday=true when drag from allday slot (single day)", async () => {
+      const selectedRange = {
+        startStr: "2025-07-18",
+        endStr: "2025-07-19",
+        start: new Date("2025-07-18"),
+        end: new Date("2025-07-19"),
+        allDay: true,
+      } as unknown as DateSelectArg;
+
+      renderPopover(selectedRange);
+
+      const allDayCheckbox = screen.getByLabelText("event.form.allDay");
+      await waitFor(() => {
+        expect(allDayCheckbox).toBeChecked();
+      });
+    });
+
+    // Test 2.2: Drag from allday slot (multiple days)
+    it("sets allday=true and shows 2 date fields when drag from allday slot (multiple days)", async () => {
+      const selectedRange = {
+        startStr: "2025-07-18",
+        endStr: "2025-07-21",
+        start: new Date("2025-07-18"),
+        end: new Date("2025-07-21"),
+        allDay: true,
+      } as unknown as DateSelectArg;
+
+      renderPopover(selectedRange);
+
+      const allDayCheckbox = screen.getByLabelText("event.form.allDay");
+      await waitFor(() => {
+        expect(allDayCheckbox).toBeChecked();
+      });
+
+      // Verify only date fields are shown
+      await waitFor(() => {
+        expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-date-input")).toBeInTheDocument();
+        expect(
+          screen.queryByTestId("start-time-input")
+        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId("end-time-input")).not.toBeInTheDocument();
+      });
+    });
+
+    // Test 2.3: Drag from week view (single day)
+    it("keeps allday=false when drag from week view (single day)", async () => {
+      const selectedRange = {
+        startStr: "2025-07-18T09:00",
+        endStr: "2025-07-18T10:00",
+        start: new Date("2025-07-18T09:00"),
+        end: new Date("2025-07-18T10:00"),
+        allDay: false,
+      } as unknown as DateSelectArg;
+
+      renderPopover(selectedRange);
+
+      const allDayCheckbox = screen.getByLabelText("event.form.allDay");
+      await waitFor(() => {
+        expect(allDayCheckbox).not.toBeChecked();
+      });
+
+      // Verify time fields are shown
+      await waitFor(() => {
+        expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-time-input")).toBeInTheDocument();
+      });
+    });
+
+    // Test 2.4: Drag from week view (multiple days) - CRITICAL TEST
+    it("keeps allday=false and shows 4 fields when drag from week view (multiple days)", async () => {
+      const selectedRange = {
+        startStr: "2025-07-18T09:00",
+        endStr: "2025-07-20T10:00",
+        start: new Date("2025-07-18T09:00"),
+        end: new Date("2025-07-20T10:00"),
+        allDay: false,
+      } as unknown as DateSelectArg;
+
+      renderPopover(selectedRange);
+
+      const allDayCheckbox = screen.getByLabelText("event.form.allDay");
+      await waitFor(() => {
+        expect(allDayCheckbox).not.toBeChecked(); // CRITICAL: should NOT be checked
+      });
+
+      // Verify all 4 fields are shown
+      await waitFor(() => {
+        expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
+        expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-date-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-time-input")).toBeInTheDocument();
+      });
+    });
+
+    // Test 2.5: Drag from week view (multiple days) - fallback path
+    it("handles drag from week view (multiple days) with Date objects only", async () => {
+      const selectedRange = {
+        start: new Date("2025-07-18T09:00"),
+        end: new Date("2025-07-20T10:00"),
+        allDay: false,
+      } as unknown as DateSelectArg;
+
+      renderPopover(selectedRange);
+
+      const allDayCheckbox = screen.getByLabelText("event.form.allDay");
+      await waitFor(() => {
+        expect(allDayCheckbox).not.toBeChecked();
+      });
+
+      // Verify all 4 fields are shown
+      await waitFor(() => {
+        expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
+        expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-date-input")).toBeInTheDocument();
+        expect(screen.getByTestId("end-time-input")).toBeInTheDocument();
+      });
+    });
+  });
 });
