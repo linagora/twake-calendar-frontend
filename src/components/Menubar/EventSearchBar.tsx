@@ -312,44 +312,40 @@ export default function SearchBar() {
                     </>
                   ),
                   endAdornment: (
-                    <>
-                      {params.InputProps.endAdornment}
-                      <InputAdornment position="end">
+                    <InputAdornment position="end">
+                      {(query || selectedContacts.length > 0) && (
                         <IconButton
-                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
-                            setAnchorEl(containerRef.current);
-                            handleFilterChange("keywords", query);
-                            handleFilterChange(
-                              "organizers",
-                              selectedContacts.map((a: User) => ({
-                                cn: a.displayName,
-                                cal_address: a.email || "",
-                                partstat: "NEEDS-ACTION",
-                                rsvp: "FALSE",
-                                role: "REQ-PARTICIPANT",
-                                cutype: "INDIVIDUAL",
-                              }))
-                            );
+                            setQuery("");
+                            setSearch("");
+                            handleFilterChange("keywords", "");
+                            setSelectedContacts([]);
                           }}
                         >
-                          <TuneIcon />
+                          <HighlightOffIcon />
                         </IconButton>
-                      </InputAdornment>
-                      {query && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => {
-                              setQuery("");
-                              setSearch("");
-                              handleFilterChange("keywords", "");
-                            }}
-                          >
-                            <HighlightOffIcon />
-                          </IconButton>
-                        </InputAdornment>
                       )}
-                    </>
+                      <IconButton
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setAnchorEl(containerRef.current);
+                          handleFilterChange("keywords", query);
+                          handleFilterChange(
+                            "organizers",
+                            selectedContacts.map((a: User) => ({
+                              cn: a.displayName,
+                              cal_address: a.email || "",
+                              partstat: "NEEDS-ACTION",
+                              rsvp: "FALSE",
+                              role: "REQ-PARTICIPANT",
+                              cutype: "INDIVIDUAL",
+                            }))
+                          );
+                        }}
+                      >
+                        <TuneIcon />
+                      </IconButton>
+                    </InputAdornment>
                   ),
                 }}
               />
