@@ -29,10 +29,23 @@ export async function handleRSVP(
 ) {
   const newEvent = {
     ...event,
-    attendee: event.attendee?.map((a) =>
-      a.cal_address === user.userData?.email ? { ...a, partstat: rsvp } : a
-    ),
   };
+  if (event?.attendee?.length === 0) {
+    const userdata = {
+      cal_address: user.userData.email,
+      partstat: rsvp,
+      role: "CHAIR",
+      cutype: "INDIVIDUAL",
+      rsvp: "FALSE",
+      cn: `${user.userData.given_name} ${user.userData.family_name}`,
+    };
+    newEvent.organizer = userdata;
+    newEvent.attendee = [userdata];
+  } else {
+    newEvent.attendee = event.attendee?.map((a) =>
+      a.cal_address === user.userData?.email ? { ...a, partstat: rsvp } : a
+    );
+  }
   if (typeOfAction === "solo") {
     dispatch(updateEventInstanceAsync({ cal: calendar, event: newEvent }));
   } else if (typeOfAction === "all") {

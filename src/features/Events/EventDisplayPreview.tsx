@@ -276,6 +276,8 @@ export default function EventPreviewModal({
   const currentUserAttendee = event.attendee?.find(
     (person) => person.cal_address === user.userData?.email
   );
+  const hasNoAttendeesOrOrganizer =
+    !(event?.attendee?.length > 0) && !event?.organizer;
 
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
@@ -467,7 +469,7 @@ export default function EventPreviewModal({
           </>
         }
         actions={
-          currentUserAttendee &&
+          (currentUserAttendee || hasNoAttendeesOrOrganizer) &&
           isOwn && (
             <>
               <>
