@@ -30,7 +30,7 @@ export async function handleRSVP(
   const newEvent = {
     ...event,
   };
-  if (event?.attendee?.length === 0) {
+  if (!event?.attendee || event.attendee.length === 0) {
     const userdata = {
       cal_address: user.userData.email,
       partstat: rsvp,
