@@ -1009,7 +1009,6 @@ function formatEnd(
         });
   } else {
     const sameDay = formatDatePart(startDate) === formatDatePart(endDate);
-
     if (sameDay) {
       return endDate.toLocaleTimeString(t("locale"), {
         hour: "2-digit",
