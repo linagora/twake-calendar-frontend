@@ -104,10 +104,26 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     });
   }, [startDate, endDate, startTime, endTime, getCurrentDuration]);
 
+  const spansMultipleDays = React.useMemo(() => {
+    return startDate !== endDate;
+  }, [startDate, endDate]);
+
   const isExpanded = showMore;
   const shouldShowEndDateNormal = allday || showEndDate;
-  const showSingleDateField = !isExpanded && !shouldShowEndDateNormal;
-  const showFourFieldsNormal = !isExpanded && showEndDate && !allday;
+  // Show full 4 fields when:
+  // 1. Non-allday with hasEndDateChanged
+  // 2. Multiple days with hasEndDateChanged (supports drag from week/month view grid with allday checked)
+  // 3. Multiple days without allday (original behavior)
+  const shouldShowFullFieldsInNormal =
+    (!allday && hasEndDateChanged) ||
+    (hasEndDateChanged && spansMultipleDays) ||
+    (spansMultipleDays && !allday);
+  const showSingleDateField =
+    !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal;
+
+  // When shouldShowFullFieldsInNormal is true, show time fields even if allday is true
+  // This supports the case: drag from week/month view grid with multiple days
+  const shouldShowTimeFields = !allday || shouldShowFullFieldsInNormal;
 
   const startDateLabel = showSingleDateField
     ? t("dateTimeFields.date")
@@ -328,7 +344,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         flexDirection="column"
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
-        {isExpanded || showFourFieldsNormal ? (
+        {isExpanded || shouldShowFullFieldsInNormal ? (
           <>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
@@ -351,7 +367,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   }}
                 />
               </Box>
-              {!allday && (
+              {shouldShowTimeFields && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     ampm={false}
@@ -397,7 +413,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   }}
                 />
               </Box>
-              {!allday && (
+              {shouldShowTimeFields && (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     ampm={false}
