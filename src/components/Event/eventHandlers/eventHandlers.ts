@@ -8,6 +8,7 @@ import {
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { updateSeriesPartstat } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
+import { PartStat } from "../../../features/User/models/attendee";
 import { createAttendeeFromUserData } from "../../../features/User/models/attendee.mapper";
 import { userData } from "../../../features/User/userDataTypes";
 import { getCalendarRange } from "../../../utils/dateUtils";
@@ -16,7 +17,7 @@ import { refreshCalendars } from "../utils/eventUtils";
 function updateEventAttendees(
   event: CalendarEvent,
   user: userData | undefined,
-  rsvp: string
+  rsvp: PartStat
 ) {
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
   if (eventHasNoAttendees) {
@@ -44,7 +45,7 @@ export async function handleRSVP(
   calendar: Calendars,
   user: userData | undefined,
   event: CalendarEvent,
-  rsvp: string,
+  rsvp: PartStat,
   typeOfAction?: string,
   calendars?: Calendars[]
 ) {
