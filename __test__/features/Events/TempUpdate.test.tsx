@@ -13,7 +13,7 @@ import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
 import CalendarLayout from "../../../src/components/Calendar/CalendarLayout";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import { SpiedFunction } from "jest-mock";
-import { Calendar} from "../../../src/features/Calendars/CalendarTypes";
+import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 

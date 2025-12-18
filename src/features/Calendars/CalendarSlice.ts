@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Calendar} from "./CalendarTypes";
+import { Calendar } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import {
   addSharedCalendar,

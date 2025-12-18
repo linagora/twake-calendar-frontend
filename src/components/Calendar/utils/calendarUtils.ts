@@ -1,5 +1,5 @@
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlice";
 import { SlotLabelContentArg } from "@fullcalendar/core";

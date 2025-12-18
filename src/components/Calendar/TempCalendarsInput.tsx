@@ -6,7 +6,7 @@ import {
   getTempCalendarsListAsync,
   removeTempCal,
 } from "../../features/Calendars/CalendarSlice";
-import { Calendar} from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { setView } from "../../features/Settings/SettingsSlice";
 import TextField from "@mui/material/TextField";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";

@@ -1,7 +1,7 @@
 import { DateSelectArg } from "@fullcalendar/core";
 import { CalendarApi } from "@fullcalendar/core";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
   getCalendarDetailAsync,

@@ -4,7 +4,7 @@ import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import { Box, getContrastRatio } from "@mui/material";
 import moment from "moment";
 import React, { useLayoutEffect, useState } from "react";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EVENT_DURATION } from "./EventChip";

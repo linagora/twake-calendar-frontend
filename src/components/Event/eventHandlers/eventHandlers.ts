@@ -5,7 +5,7 @@ import {
   deleteEventInstanceAsync,
   deleteEventAsync,
 } from "../../../features/Calendars/CalendarSlice";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { updateSeriesPartstat } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { PartStat } from "../../../features/User/models/attendee";

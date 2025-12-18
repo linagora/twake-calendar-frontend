@@ -474,7 +474,9 @@ describe("Event Preview Display", () => {
       rsvpState
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "eventPreview.TENTATIVE" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "eventPreview.TENTATIVE" })
+    );
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();

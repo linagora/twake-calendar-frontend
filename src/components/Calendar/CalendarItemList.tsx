@@ -1,6 +1,6 @@
 import React from "react";
 import { MenuItem } from "@mui/material";
-import { Calendar} from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { CalendarName } from "./CalendarName";
 
 export function CalendarItemList(
