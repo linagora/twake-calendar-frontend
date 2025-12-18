@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { userAttendee } from "../../features/User/models/attendee";
-import { createAttendeeFromUser } from "../../features/User/models/attendee.mapper";
+import { createAttendee } from "../../features/User/models/attendee.mapper";
 import {
   PeopleSearch,
   User,
@@ -21,18 +21,18 @@ export default function UserSearch({
   ) => React.ReactNode;
 }) {
   const [selectedUsers, setSelectedUsers] = useState(
-    attendees.map((a) => ({
-      email: a.cal_address,
-      displayName: a.cn ?? "",
+    attendees.map((attendee) => ({
+      email: attendee.cal_address,
+      displayName: attendee.cn ?? "",
       avatarUrl: "",
       openpaasId: "",
     })) ?? []
   );
   useEffect(() => {
     setSelectedUsers(
-      attendees.map((a) => ({
-        email: a.cal_address,
-        displayName: a.cn ?? "",
+      attendees.map((attendee) => ({
+        email: attendee.cal_address,
+        displayName: attendee.cn ?? "",
         avatarUrl: "",
         openpaasId: "",
       }))
@@ -45,7 +45,14 @@ export default function UserSearch({
       disabled={disabled}
       inputSlot={inputSlot}
       onChange={(event: any, value: User[]) => {
-        setAttendees(value.map((a: User) => createAttendeeFromUser(a)));
+        setAttendees(
+          value.map((attendee: User) =>
+            createAttendee({
+              cal_address: attendee.email,
+              cn: attendee.displayName,
+            })
+          )
+        );
         setSelectedUsers(value);
       }}
       freeSolo

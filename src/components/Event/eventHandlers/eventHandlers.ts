@@ -5,12 +5,13 @@ import {
   deleteEventInstanceAsync,
   deleteEventAsync,
 } from "../../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../../features/Calendars/CalendarTypes";
 import { updateSeriesPartstat } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { PartStat } from "../../../features/User/models/attendee";
-import { createAttendeeFromUserData } from "../../../features/User/models/attendee.mapper";
+import { createAttendee } from "../../../features/User/models/attendee.mapper";
 import { userData } from "../../../features/User/userDataTypes";
+import { buildFamilyName } from "../../../utils/buildFamilyName";
 import { getCalendarRange } from "../../../utils/dateUtils";
 import { refreshCalendars } from "../utils/eventUtils";
 
@@ -19,9 +20,15 @@ function updateEventAttendees(
   user: userData | undefined,
   rsvp: PartStat
 ) {
+  if (!user) {
+    throw new Error("Cannot update attendees without user data");
+  }
+
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
   if (eventHasNoAttendees) {
-    const userdata = createAttendeeFromUserData(user, {
+    const userdata = createAttendee({
+      cal_address: user.email,
+      cn: buildFamilyName(user.given_name, user.family_name, user.email),
       role: "CHAIR",
       partstat: rsvp,
     });
@@ -33,21 +40,49 @@ function updateEventAttendees(
 
   return {
     attendee: event.attendee.map((attendeeData) =>
-      attendeeData.cal_address === user?.email
+      attendeeData.cal_address === user.email
         ? { ...attendeeData, partstat: rsvp }
         : attendeeData
     ),
   };
 }
 
+async function handleSoloRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendar: Calendar,
+  event: CalendarEvent
+) {
+  dispatch(updateEventInstanceAsync({ cal: calendar, event }));
+}
+
+async function handleAllRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  event: CalendarEvent,
+  userEmail: string,
+  rsvp: string,
+  calendars: Calendar[]
+) {
+  const calendarRange = getCalendarRange(new Date(event.start));
+  await updateSeriesPartstat(event, userEmail, rsvp);
+  await refreshCalendars(dispatch, calendars, calendarRange);
+}
+
+async function handleDefaultRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendar: Calendar,
+  newEvent: CalendarEvent
+) {
+  dispatch(putEventAsync({ cal: calendar, newEvent }));
+}
+
 export async function handleRSVP(
   dispatch: ThunkDispatch<any, any, any>,
-  calendar: Calendars,
+  calendar: Calendar,
   user: userData | undefined,
   event: CalendarEvent,
   rsvp: PartStat,
   typeOfAction?: string,
-  calendars?: Calendars[]
+  calendars?: Calendar[]
 ) {
   const newEvent = {
     ...event,
@@ -55,18 +90,11 @@ export async function handleRSVP(
   };
 
   if (typeOfAction === "solo") {
-    dispatch(updateEventInstanceAsync({ cal: calendar, event: newEvent }));
+    await handleSoloRSVP(dispatch, calendar, newEvent);
   } else if (typeOfAction === "all") {
-    const calendarRange = getCalendarRange(new Date(event.start));
-
-    // Update PARTSTAT on ALL VEVENTs (master + exceptions)
-    await updateSeriesPartstat(event, user?.email ?? "", rsvp);
-
-    if (calendars) {
-      await refreshCalendars(dispatch, calendars, calendarRange);
-    }
+    await handleAllRSVP(dispatch, event, user?.email ?? "", rsvp, calendars!);
   } else {
-    dispatch(putEventAsync({ cal: calendar, newEvent }));
+    await handleDefaultRSVP(dispatch, calendar, newEvent);
   }
 }
 
@@ -75,7 +103,7 @@ export function handleDelete(
   typeOfAction: "solo" | "all" | undefined,
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
   dispatch: Function,
-  calendar: Calendars,
+  calendar: Calendar,
   event: CalendarEvent,
   calId: string,
   eventId: string

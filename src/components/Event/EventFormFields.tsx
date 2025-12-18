@@ -26,7 +26,7 @@ import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
 import { userAttendee } from "../../features/User/models/attendee";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../features/Calendars/CalendarTypes";
 import {
   generateMeetingLink,
   addVideoConferenceToDescription,
@@ -87,7 +87,7 @@ interface EventFormFieldsProps {
   isOpen?: boolean;
 
   // Data
-  userPersonalCalendars: Calendars[];
+  userPersonalCalendars: Calendar[];
   timezoneList: {
     zones: string[];
     browserTz: string;

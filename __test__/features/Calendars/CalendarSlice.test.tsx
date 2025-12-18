@@ -22,7 +22,7 @@ import * as calAPI from "../../../src/features/Calendars/CalendarApi";
 import * as userAPI from "../../../src/features/User/userAPI";
 
 import { configureStore } from "@reduxjs/toolkit";
-import { Calendars } from "../../../src/features/Calendars/CalendarTypes";
+import { Calendar} from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 
 jest.mock("../../../src/features/Calendars/CalendarApi");
@@ -79,7 +79,7 @@ describe("CalendarSlice", () => {
           [calId]: {
             id: calId,
             events: { e1: { uid: "e1" } },
-          } as unknown as Calendars,
+          } as unknown as Calendar,
         },
       };
       const state = reducer(
@@ -97,7 +97,7 @@ describe("CalendarSlice", () => {
           [calId]: {
             id: calId,
             events: { e1: { uid: "e1", title: "Old" } },
-          } as unknown as Calendars,
+          } as unknown as Calendar,
         },
       };
       const state = reducer(
@@ -276,7 +276,7 @@ describe("CalendarSlice", () => {
           id: "u1/cal1",
           name: "Existing Calendar",
           events: {},
-        } as Calendars,
+        } as Calendar,
       };
 
       const store = storeFactory();
@@ -447,7 +447,7 @@ describe("CalendarSlice", () => {
           [calId]: {
             id: calId,
             events: { e1: { uid: "e1" } },
-          } as unknown as Calendars,
+          } as unknown as Calendar,
         },
       };
       const state = reducer(
@@ -473,7 +473,7 @@ describe("CalendarSlice", () => {
           ownerEmails: ["o@o.com"],
           link: "/calendars/t1.json",
           description: "desc",
-        } as Calendars,
+        } as Calendar,
       };
       const state = reducer(
         initialState,
@@ -533,7 +533,7 @@ describe("CalendarSlice", () => {
             ["c1"]: {
               id: "c1",
               events: {},
-            } as unknown as Calendars,
+            } as unknown as Calendar,
           },
         },
         getCalendarDetailAsync.fulfilled(payload, "req11", {

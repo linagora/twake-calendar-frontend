@@ -28,7 +28,7 @@ import { userAttendee } from "../../features/User/models/attendee";
 import UserSearch from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { createAttendeeFromUser } from "../../features/User/models/attendee.mapper";
+import { createAttendee } from "../../features/User/models/attendee.mapper";
 
 export default function SearchBar() {
   const { t } = useI18n();
@@ -152,7 +152,12 @@ export default function SearchBar() {
     if (contacts.length > 0) {
       handleSearch("", {
         ...filters,
-        organizers: contacts.map((c) => createAttendeeFromUser(c)),
+        organizers: contacts.map((contact) =>
+          createAttendee({
+            cal_address: contact.email,
+            cn: contact.displayName,
+          })
+        ),
       });
     }
   };

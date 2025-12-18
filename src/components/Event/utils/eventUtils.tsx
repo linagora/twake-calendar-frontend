@@ -10,7 +10,7 @@ import {
   getCalendarDetailAsync,
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 
@@ -111,7 +111,7 @@ export function stringAvatar(name: string) {
 
 export async function refreshCalendars(
   dispatch: ThunkDispatch<any, any, any>,
-  calendars: Calendars[],
+  calendars: Calendar[],
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
@@ -163,7 +163,7 @@ export async function refreshCalendars(
 
 export async function refreshSingularCalendar(
   dispatch: ThunkDispatch<any, any, any>,
-  calendar: Calendars,
+  calendar: Calendar,
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {

@@ -1,6 +1,6 @@
 import { CalendarEvent } from "../Events/EventsTypes";
 
-export interface Calendars {
+export interface Calendar{
   id: string;
   link: string;
   name: string;
