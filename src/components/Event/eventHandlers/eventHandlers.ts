@@ -15,7 +15,7 @@ import { refreshCalendars } from "../utils/eventUtils";
 
 function updateEventAttendees(
   event: CalendarEvent,
-  user: userData,
+  user: userData | undefined,
   rsvp: string
 ) {
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
@@ -32,7 +32,7 @@ function updateEventAttendees(
 
   return {
     attendee: event.attendee.map((attendeeData) =>
-      attendeeData.cal_address === user.email
+      attendeeData.cal_address === user?.email
         ? { ...attendeeData, partstat: rsvp }
         : attendeeData
     ),
@@ -42,7 +42,7 @@ function updateEventAttendees(
 export async function handleRSVP(
   dispatch: ThunkDispatch<any, any, any>,
   calendar: Calendars,
-  user: userData,
+  user: userData | undefined,
   event: CalendarEvent,
   rsvp: string,
   typeOfAction?: string,
@@ -59,7 +59,7 @@ export async function handleRSVP(
     const calendarRange = getCalendarRange(new Date(event.start));
 
     // Update PARTSTAT on ALL VEVENTs (master + exceptions)
-    await updateSeriesPartstat(event, user.email, rsvp);
+    await updateSeriesPartstat(event, user?.email ?? "", rsvp);
 
     if (calendars) {
       await refreshCalendars(dispatch, calendars, calendarRange);

@@ -18,7 +18,7 @@ export function AttendanceValidation(
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>,
   dispatch: AppDispatch,
   calendar: Calendars,
-  user: userData,
+  user: userData | undefined,
   event: CalendarEvent,
   calendarList: Calendars[],
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>
