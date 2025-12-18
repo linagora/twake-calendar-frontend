@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { userAttendee } from "../../features/User/userDataTypes";
+import { userAttendee } from "../../features/User/models/attendee";
+import { createAttendeeFromUser } from "../../features/User/models/attendee.mapper";
 import {
   PeopleSearch,
   User,
@@ -44,16 +45,7 @@ export default function UserSearch({
       disabled={disabled}
       inputSlot={inputSlot}
       onChange={(event: any, value: User[]) => {
-        setAttendees(
-          value.map((a: User) => ({
-            cn: a.displayName,
-            cal_address: a.email,
-            partstat: "NEED_ACTION",
-            rsvp: "FALSE",
-            role: "REQ-PARTICIPANT",
-            cutype: "INDIVIDUAL",
-          }))
-        );
+        setAttendees(value.map((a: User) => createAttendeeFromUser(a)));
         setSelectedUsers(value);
       }}
       freeSolo

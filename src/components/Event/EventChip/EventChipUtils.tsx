@@ -5,7 +5,7 @@ import { Box, getContrastRatio } from "@mui/material";
 import moment from "moment";
 import React, { useLayoutEffect, useState } from "react";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import { userAttendee } from "../../../features/User/userDataTypes";
+import { userAttendee } from "../../../features/User/models/attendee";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EVENT_DURATION } from "./EventChip";
 

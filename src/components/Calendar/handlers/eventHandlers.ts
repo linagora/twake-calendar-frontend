@@ -17,7 +17,8 @@ import { refreshCalendars } from "../../Event/utils/eventUtils";
 import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
 import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
-import { userAttendee } from "../../../features/User/userDataTypes";
+import { userAttendee } from "../../../features/User/models/attendee";
+import { createAttendeeFromUser } from "../../../features/User/models/attendee.mapper";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
@@ -72,14 +73,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         end: selectInfo?.end
           ? formatLocalDateTime(selectInfo?.end, timezone)
           : "",
-        attendee: tempUsers.map((u) => ({
-          cn: u.displayName,
-          cal_address: u.email,
-          partstat: "NEED-ACTION",
-          role: "REQ-PARTICIPANT",
-          rsvp: "TRUE",
-          cutype: "INDIVIDUAL",
-        })),
+        attendee: tempUsers.map((u) =>
+          createAttendeeFromUser(u, {
+            rsvp: "TRUE",
+          })
+        ),
       } as CalendarEvent;
 
       setTempEvent(newEvent);
