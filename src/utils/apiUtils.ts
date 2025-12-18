@@ -11,7 +11,7 @@ function getRetryDelay(attemptNumber: number): number {
   const cap = RETRY_CONFIG.maxDelay;
   const base = RETRY_CONFIG.initialDelay * Math.pow(2, attemptNumber);
   const jitter = 0.5 + Math.random();
-  return Math.random() * Math.min(cap, base * jitter);
+  return Math.min(cap, base * jitter);
 }
 
 export const api = ky.extend({
