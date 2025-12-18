@@ -469,7 +469,7 @@ export default function EventPreviewModal({
           </>
         }
         actions={
-          (currentUserAttendee || hasNoAttendeesOrOrganizer) &&
+          (currentUserAttendee || (isOwn && hasNoAttendeesOrOrganizer)) &&
           isOwn && (
             <>
               <>
