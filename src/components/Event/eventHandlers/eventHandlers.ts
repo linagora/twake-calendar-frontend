@@ -8,9 +8,7 @@ import {
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
 import { updateSeriesPartstat } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import {
-  createAttendeeFromUserData,
-} from "../../../features/User/models/attendee.mapper";
+import { createAttendeeFromUserData } from "../../../features/User/models/attendee.mapper";
 import { userData } from "../../../features/User/userDataTypes";
 import { getCalendarRange } from "../../../utils/dateUtils";
 import { refreshCalendars } from "../utils/eventUtils";
