@@ -79,6 +79,7 @@ export default function EventPreviewModal({
     : calendars.list[calId];
   const event = calendar.events[eventId];
   const user = useAppSelector((state) => state.user.userData);
+  if (!user) return null;
 
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.ownerEmails?.includes(user?.email);
@@ -468,13 +469,15 @@ export default function EventPreviewModal({
             </Typography>
           </>
         }
-        actions={AttendanceValidation({
-          contextualizedEvent,
-          calendarList,
-          user,
-          setAfterChoiceFunc,
-          setOpenEditModePopup,
-        })}
+        actions={
+          <AttendanceValidation
+            contextualizedEvent={contextualizedEvent}
+            calendarList={calendarList}
+            user={user}
+            setAfterChoiceFunc={setAfterChoiceFunc}
+            setOpenEditModePopup={setOpenEditModePopup}
+          />
+        }
       >
         {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
           <>

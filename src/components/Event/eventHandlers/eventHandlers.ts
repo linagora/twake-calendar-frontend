@@ -59,7 +59,7 @@ async function handleAllRSVP(
   dispatch: ThunkDispatch<any, any, any>,
   event: CalendarEvent,
   userEmail: string,
-  rsvp: string,
+  rsvp: PartStat,
   calendars: Calendar[]
 ) {
   const calendarRange = getCalendarRange(new Date(event.start));
@@ -92,6 +92,9 @@ export async function handleRSVP(
   if (typeOfAction === "solo") {
     await handleSoloRSVP(dispatch, calendar, newEvent);
   } else if (typeOfAction === "all") {
+    if (!calendars || calendars.length === 0) {
+      throw new Error("Cannot update all occurrences without calendar list");
+    }
     await handleAllRSVP(dispatch, event, user?.email ?? "", rsvp, calendars!);
   } else {
     await handleDefaultRSVP(dispatch, calendar, newEvent);
