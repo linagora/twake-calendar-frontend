@@ -6,7 +6,7 @@ import {
   getTempCalendarsListAsync,
   removeTempCal,
 } from "../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../features/Calendars/CalendarTypes";
 import { setView } from "../../features/Settings/SettingsSlice";
 import TextField from "@mui/material/TextField";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
@@ -134,7 +134,7 @@ function getCalendarsFromUsersDelta(
   return { calendarsToImport, calendarsToToggle };
 }
 
-function buildEmailToCalendarMap(calRecord: Record<string, Calendars>) {
+function buildEmailToCalendarMap(calRecord: Record<string, Calendar>) {
   const map = new Map<string, string[]>();
   for (const [id, cal] of Object.entries(calRecord)) {
     cal.ownerEmails?.forEach((email) => {

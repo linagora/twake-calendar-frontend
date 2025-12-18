@@ -1,10 +1,10 @@
 import { darken, getContrastRatio, lighten, Theme } from "@mui/material";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { updateCalColor } from "../../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../../features/Calendars/CalendarTypes";
 
 export function updateDarkColor(
-  calendars: Record<string, Calendars>,
+  calendars: Record<string, Calendar>,
   theme: Theme,
   dispatch: ThunkDispatch<any, any, any>
 ) {

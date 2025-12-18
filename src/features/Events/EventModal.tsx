@@ -12,7 +12,7 @@ import React, {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { ResponsiveDialog } from "../../components/Dialog";
 import { putEventAsync } from "../Calendars/CalendarSlice";
-import { Calendars } from "../Calendars/CalendarTypes";
+import { Calendar} from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
@@ -75,11 +75,11 @@ function EventPopover({
           if (id.split("/")[0] === userId) {
             return calendars.list?.[id];
           }
-          return {} as Calendars;
+          return {} as Calendar;
         })
         .filter((calendar) => calendar.id)
   );
-  const userPersonalCalendars: Calendars[] = useAppSelector(
+  const userPersonalCalendars: Calendar[] = useAppSelector(
     selectPersonalCalendars
   );
 
@@ -722,10 +722,10 @@ function EventPopover({
     const newEventUID = crypto.randomUUID();
 
     // Resolve target calendar safely
-    const targetCalendar: Calendars | undefined =
+    const targetCalendar: Calendar| undefined =
       calList[calendarid] ||
       userPersonalCalendars[0] ||
-      (Object.values(calList)[0] as Calendars | undefined);
+      (Object.values(calList)[0] as Calendar| undefined);
     if (!targetCalendar || !targetCalendar.id) {
       console.error("No target calendar available to save event");
       return;

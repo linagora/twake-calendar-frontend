@@ -2,7 +2,7 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import CalendarPopover from "../../../src/components/Calendar/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import { Calendars } from "../../../src/features/Calendars/CalendarTypes";
+import { Calendar} from "../../../src/features/Calendars/CalendarTypes";
 import { getSecretLink } from "../../../src/features/Calendars/CalendarApi";
 
 jest.mock("../../../src/features/Calendars/CalendarApi", () => ({
@@ -103,7 +103,7 @@ describe("CalendarPopover (editing mode)", () => {
     },
   };
 
-  const existingCalendar: Calendars = {
+  const existingCalendar: Calendar= {
     id: "user1/cal1",
     link: "/calendars/user/cal1",
     name: "Work Calendar",
@@ -208,7 +208,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     },
   });
 
-  const existingCalendar: Calendars = {
+  const existingCalendar: Calendar= {
     id: "user1/cal1",
     link: "/calendars/user1/cal1.json",
     name: "Work Calendar",

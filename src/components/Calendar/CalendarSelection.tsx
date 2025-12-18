@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useMemo, useEffect } from "react";
 import CalendarPopover from "./CalendarModal";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Checkbox from "@mui/material/Checkbox";
@@ -206,7 +206,7 @@ function CalendarSelector({
   handleCalendarToggle,
   setOpen,
 }: {
-  calendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
   id: string;
   isPersonal: boolean;
   selectedCalendars: string[];

@@ -13,7 +13,7 @@ import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
 import CalendarLayout from "../../../src/components/Calendar/CalendarLayout";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import { SpiedFunction } from "jest-mock";
-import { Calendars } from "../../../src/features/Calendars/CalendarTypes";
+import { Calendar} from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 
@@ -27,7 +27,7 @@ describe("Update tempcalendars called with correct params", () => {
   let refreshCalendarsSpy: SpiedFunction<
     (
       dispatch: ThunkDispatch<any, any, any>,
-      calendars: Calendars[],
+      calendars: Calendar[],
       calendarRange: { start: Date; end: Date },
       calType?: "temp"
     ) => Promise<void>
@@ -35,14 +35,14 @@ describe("Update tempcalendars called with correct params", () => {
   let refreshSingularCalendarSpy: SpiedFunction<
     (
       dispatch: ThunkDispatch<any, any, any>,
-      calendar: Calendars,
+      calendar: Calendar,
       calendarRange: { start: Date; end: Date },
       calType?: "temp"
     ) => Promise<void>
   >;
   let updateTempCalendarSpy: SpiedFunction<
     (
-      tempcalendars: Record<string, Calendars>,
+      tempcalendars: Record<string, Calendar>,
       event: CalendarEvent,
       dispatch: ThunkDispatch<any, any, any>,
       calendarRange: { start: Date; end: Date }

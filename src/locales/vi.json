@@ -245,9 +245,9 @@
       "tooltip": "Người khác sẽ thấy bạn rảnh trong khoảng thời gian này."
     },
     "attendingQuestion": "Tham gia?",
-    "accept": "Chấp nhận",
-    "maybe": "Có thể",
-    "decline": "Từ chối",
+    "ACCEPTED": "Chấp nhận",
+    "TENTATIVE": "Có thể",
+    "DECLINED": "Từ chối",
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "joinVideo": "Tham gia cuộc họp video",

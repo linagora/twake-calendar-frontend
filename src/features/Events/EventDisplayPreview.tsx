@@ -47,7 +47,10 @@ import EventUpdateModal from "./EventUpdateModal";
 import { useI18n } from "twake-i18n";
 import { userAttendee } from "../User/models/attendee";
 import { browserDefaultTimeZone } from "../../utils/timezone";
-import { AttendanceValidation } from "./AttendanceValidation";
+import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
+import { Calendar } from "../Calendars/CalendarTypes";
+import { userData } from "../User/userDataTypes";
+import { createEventContext } from "./createEventContext";
 
 export default function EventPreviewModal({
   eventId,
@@ -274,8 +277,7 @@ export default function EventPreviewModal({
   const currentUserAttendee = event.attendee?.find(
     (person) => person.cal_address === user?.email
   );
-  const hasNoAttendeesOrOrganizer =
-    !(event?.attendee?.length > 0) && !event?.organizer;
+  const contextualizedEvent = createEventContext(event, calendar, user);
 
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
@@ -466,20 +468,13 @@ export default function EventPreviewModal({
             </Typography>
           </>
         }
-        actions={AttendanceValidation(
-          currentUserAttendee,
-          hasNoAttendeesOrOrganizer,
-          isOwn,
-          t,
-          isRecurring,
-          setAfterChoiceFunc,
-          dispatch,
-          calendar,
-          user,
-          event,
+        actions={AttendanceValidation({
+          contextualizedEvent,
           calendarList,
-          setOpenEditModePopup
-        )}
+          user,
+          setAfterChoiceFunc,
+          setOpenEditModePopup,
+        })}
       >
         {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
           <>

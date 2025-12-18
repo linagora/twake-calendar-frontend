@@ -15,13 +15,13 @@ import {
   exportCalendar,
   getSecretLink,
 } from "../../features/Calendars/CalendarApi";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../features/Calendars/CalendarTypes";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 
-export function AccessTab({ calendar }: { calendar: Calendars }) {
+export function AccessTab({ calendar }: { calendar: Calendar}) {
   const { t } = useI18n();
   const calDAVLink = `${(window as any).CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
 

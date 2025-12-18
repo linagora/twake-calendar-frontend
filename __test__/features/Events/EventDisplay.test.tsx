@@ -300,13 +300,13 @@ describe("Event Preview Display", () => {
       screen.getByText("eventPreview.attendingQuestion")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "eventPreview.accept" })
+      screen.getByRole("button", { name: "eventPreview.ACCEPTED" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "eventPreview.maybe" })
+      screen.getByRole("button", { name: "eventPreview.TENTATIVE" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "eventPreview.decline" })
+      screen.getByRole("button", { name: "eventPreview.DECLINED" })
     ).toBeInTheDocument();
   });
   it("doesnt renders RSVP buttons when user isnt an attendee", () => {
@@ -354,13 +354,13 @@ describe("Event Preview Display", () => {
       screen.queryByText("eventPreview.attendingQuestion")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "eventPreview.accept" })
+      screen.queryByRole("button", { name: "eventPreview.ACCEPTED" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "eventPreview.maybe" })
+      screen.queryByRole("button", { name: "eventPreview.TENTATIVE" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "eventPreview.decline" })
+      screen.queryByRole("button", { name: "eventPreview.DECLINED" })
     ).not.toBeInTheDocument();
   });
 
@@ -414,7 +414,7 @@ describe("Event Preview Display", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "eventPreview.accept" })
+      screen.getByRole("button", { name: "eventPreview.ACCEPTED" })
     );
 
     await waitFor(() => {
@@ -474,7 +474,7 @@ describe("Event Preview Display", () => {
       rsvpState
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "eventPreview.maybe" }));
+    fireEvent.click(screen.getByRole("button", { name: "eventPreview.TENTATIVE" }));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
@@ -534,7 +534,7 @@ describe("Event Preview Display", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "eventPreview.decline" })
+      screen.getByRole("button", { name: "eventPreview.DECLINED" })
     );
 
     await waitFor(() => {
@@ -1020,7 +1020,7 @@ describe("Event Preview Display", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("displays only maybe count when all attendees tentative", () => {
+      it("displays only TENTATIVE count when all attendees tentative", () => {
         const attendees = [
           {
             cn: "organizer",
@@ -1262,7 +1262,7 @@ describe("Event Preview Display", () => {
         ).toBeInTheDocument();
       });
 
-      it("displays correct counts with multiple yes and maybe", () => {
+      it("displays correct counts with multiple yes and TENTATIVE", () => {
         const attendees = [
           {
             cn: "Guest 1",

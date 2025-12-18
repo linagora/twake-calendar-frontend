@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../features/Calendars/CalendarTypes";
 import TextField from "@mui/material/TextField";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
@@ -93,7 +93,7 @@ function SelectedCalendarsList({
   onRemove,
   onColorChange,
 }: {
-  calendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
   selectedCal: CalendarWithOwner[];
   onRemove: (cal: CalendarWithOwner) => void;
   onColorChange: (

@@ -1,7 +1,7 @@
 import { DateSelectArg } from "@fullcalendar/core";
 import { CalendarApi } from "@fullcalendar/core";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { Calendar} from "../../../features/Calendars/CalendarTypes";
 import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
   getCalendarDetailAsync,
@@ -18,21 +18,21 @@ import { updateTempCalendar } from "../utils/calendarUtils";
 import { User } from "../../Attendees/PeopleSearch";
 import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
 import { userAttendee } from "../../../features/User/models/attendee";
-import { createAttendeeFromUser } from "../../../features/User/models/attendee.mapper";
+import { createAttendee } from "../../../features/User/models/attendee.mapper";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
   setAnchorEl: (el: HTMLElement | null) => void;
   calendarRef: React.RefObject<CalendarApi | null>;
   selectedCalendars: string[];
-  tempcalendars: Record<string, Calendars>;
+  tempcalendars: Record<string, Calendar>;
   calendarRange: { start: Date; end: Date };
   dispatch: any;
   setOpenEventDisplay: (open: boolean) => void;
   setEventDisplayedId: (id: string) => void;
   setEventDisplayedCalId: (id: string) => void;
   setEventDisplayedTemp: (temp: boolean) => void;
-  calendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
   setSelectedEvent: (event: CalendarEvent) => void;
   setAfterChoiceFunc: (func: Function) => void;
   setOpenEditModePopup: (open: string) => void;
@@ -73,8 +73,10 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         end: selectInfo?.end
           ? formatLocalDateTime(selectInfo?.end, timezone)
           : "",
-        attendee: tempUsers.map((u) =>
-          createAttendeeFromUser(u, {
+        attendee: tempUsers.map((user) =>
+          createAttendee({
+            cal_address: user.email,
+            cn: user.displayName,
             rsvp: "TRUE",
           })
         ),
