@@ -7,7 +7,7 @@ import {
   patchACLCalendarAsync,
   patchCalendarAsync,
 } from "../../features/Calendars/CalendarSlice";
-import { Calendar} from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";

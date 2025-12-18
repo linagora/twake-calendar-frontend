@@ -22,7 +22,7 @@ import * as calAPI from "../../../src/features/Calendars/CalendarApi";
 import * as userAPI from "../../../src/features/User/userAPI";
 
 import { configureStore } from "@reduxjs/toolkit";
-import { Calendar} from "../../../src/features/Calendars/CalendarTypes";
+import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 
 jest.mock("../../../src/features/Calendars/CalendarApi");

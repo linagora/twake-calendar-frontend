@@ -2,7 +2,7 @@ import React from "react";
 import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
 import { createMouseHandlers } from "./mouseHandlers";
 import { userAttendee } from "../../../features/User/models/attendee";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EventChip } from "../../Event/EventChip/EventChip";
 

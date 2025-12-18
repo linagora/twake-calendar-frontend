@@ -12,7 +12,7 @@ import {
   updateEventLocal,
   clearFetchCache,
 } from "../Calendars/CalendarSlice";
-import { Calendar} from "../Calendars/CalendarTypes";
+import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { TIMEZONES } from "../../utils/timezone-data";

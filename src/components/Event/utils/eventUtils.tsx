@@ -10,7 +10,7 @@ import {
   getCalendarDetailAsync,
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
-import { Calendar} from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 

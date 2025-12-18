@@ -12,7 +12,7 @@ import React, {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { ResponsiveDialog } from "../../components/Dialog";
 import { putEventAsync } from "../Calendars/CalendarSlice";
-import { Calendar} from "../Calendars/CalendarTypes";
+import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
@@ -722,10 +722,10 @@ function EventPopover({
     const newEventUID = crypto.randomUUID();
 
     // Resolve target calendar safely
-    const targetCalendar: Calendar| undefined =
+    const targetCalendar: Calendar | undefined =
       calList[calendarid] ||
       userPersonalCalendars[0] ||
-      (Object.values(calList)[0] as Calendar| undefined);
+      (Object.values(calList)[0] as Calendar | undefined);
     if (!targetCalendar || !targetCalendar.id) {
       console.error("No target calendar available to save event");
       return;
