@@ -95,7 +95,7 @@ export async function handleRSVP(
     if (!calendars || calendars.length === 0) {
       throw new Error("Cannot update all occurrences without calendar list");
     }
-    await handleAllRSVP(dispatch, event, user?.email ?? "", rsvp, calendars!);
+    await handleAllRSVP(dispatch, event, user?.email ?? "", rsvp, calendars);
   } else {
     await handleDefaultRSVP(dispatch, calendar, newEvent);
   }
