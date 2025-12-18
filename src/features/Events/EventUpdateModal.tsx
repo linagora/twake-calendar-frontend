@@ -247,6 +247,7 @@ function EventUpdateModal({
         if (isAllDay) {
           // For all-day events, use date format (YYYY-MM-DD)
           const endDate = new Date(event.end);
+          endDate.setDate(endDate.getDate() - 1);
           setEnd(endDate.toISOString().split("T")[0]);
         } else {
           // For timed events, format in the event's original timezone
