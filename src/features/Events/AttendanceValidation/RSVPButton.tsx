@@ -8,12 +8,13 @@ import { userData } from "../../User/userDataTypes";
 import { ContextualizedEvent } from "../EventsTypes";
 import { handleRSVPClick } from "./handleRSVPClick";
 
-const rsvpColor = {
-  ACCEPTED: "success",
-  DECLINED: "error",
-  TENTATIVE: "warning",
-  "NEEDS-ACTION": "primary",
-};
+const rsvpColor: Record<PartStat, "success" | "error" | "warning" | "primary"> =
+  {
+    ACCEPTED: "success",
+    DECLINED: "error",
+    TENTATIVE: "warning",
+    "NEEDS-ACTION": "primary",
+  } as const;
 
 interface RSVPButtonProps {
   rsvpValue: PartStat;

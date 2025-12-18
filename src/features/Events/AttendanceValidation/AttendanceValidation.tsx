@@ -29,10 +29,7 @@ export function AttendanceValidation({
     !(contextualizedEvent.event?.attendee?.length > 0) &&
     !contextualizedEvent.event?.organizer;
 
-  if (
-    !currentUserAttendee ||
-    !((currentUserAttendee || hasNoAttendeesOrOrganizer) && isOwn)
-  ) {
+  if (!((currentUserAttendee || hasNoAttendeesOrOrganizer) && isOwn)) {
     return null;
   }
 

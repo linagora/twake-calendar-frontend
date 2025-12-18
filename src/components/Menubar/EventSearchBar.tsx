@@ -334,7 +334,10 @@ export default function SearchBar() {
                           handleFilterChange(
                             "organizers",
                             selectedContacts.map((a: User) =>
-                              createAttendeeFromUser(a)
+                              createAttendee({
+                                cal_address: a.email,
+                                cn: a.displayName,
+                              })
                             )
                           );
                         }}

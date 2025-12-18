@@ -254,7 +254,7 @@
     "joinVideoShort": "Join",
     "guests": "%{count} guests",
     "yesCount": "%{count} yes",
-    "maybeCount": "%{count} TENTATIVE",
+    "maybeCount": "%{count} maybe",
     "needActionCount": "%{count} waiting",
     "noCount": "%{count} no",
     "recurrentEvent": "Recurrent Event",
