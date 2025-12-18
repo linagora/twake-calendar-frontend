@@ -1,4 +1,4 @@
-import { userAttendee } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";

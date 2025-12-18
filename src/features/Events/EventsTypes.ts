@@ -1,4 +1,5 @@
-import { userAttendee, userOrganiser } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
+import { userOrganiser } from "../User/userDataTypes";
 
 export interface CalendarEvent {
   URL: string;

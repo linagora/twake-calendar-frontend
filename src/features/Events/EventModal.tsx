@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { ResponsiveDialog } from "../../components/Dialog";
 import { putEventAsync } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
-import { userAttendee } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { createSelector } from "@reduxjs/toolkit";
 import { TIMEZONES } from "../../utils/timezone-data";

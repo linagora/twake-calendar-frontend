@@ -11,7 +11,7 @@ import {
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import { userAttendee } from "../../../features/User/userDataTypes";
+import { userAttendee } from "../../../features/User/models/attendee";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 
 export function renderAttendeeBadge(

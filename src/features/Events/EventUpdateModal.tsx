@@ -13,7 +13,7 @@ import {
   clearFetchCache,
 } from "../Calendars/CalendarSlice";
 import { Calendars } from "../Calendars/CalendarTypes";
-import { userAttendee } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";

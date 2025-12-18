@@ -258,7 +258,7 @@ describe("EventPopover", () => {
       {
         cn: "John Doe",
         cal_address: "john@example.com",
-        partstat: "NEED_ACTION",
+        partstat: "NEEDS-ACTION",
         rsvp: "FALSE",
         role: "REQ-PARTICIPANT",
         cutype: "INDIVIDUAL",

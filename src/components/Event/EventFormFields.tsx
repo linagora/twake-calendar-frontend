@@ -25,7 +25,7 @@ import {
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
-import { userAttendee } from "../../features/User/userDataTypes";
+import { userAttendee } from "../../features/User/models/attendee";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import {
   generateMeetingLink,
