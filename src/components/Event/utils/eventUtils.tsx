@@ -7,12 +7,16 @@ import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import {
   emptyEventsCal,
-  getCalendarDetailAsync,
   getCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { api, noPrefixApi } from "../../../utils/apiUtils";
+import ky from "ky";
+import { fetchSyncTokenChanges } from "../../../features/Calendars/api/fetchSyncTokenChanges";
+import { refreshCalendarWithSyncToken } from "../../../features/Calendars/services/refreshCalendar";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -116,6 +120,7 @@ export async function refreshCalendars(
   calType?: "temp"
 ) {
   const isTestEnv = process.env.NODE_ENV === "test";
+  await dispatch(refreshCalendarWithSyncToken({ calendar: calendars[0] }));
 
   if (!calType && !isTestEnv) {
     await dispatch(getCalendarsListAsync());

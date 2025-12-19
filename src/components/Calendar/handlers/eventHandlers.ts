@@ -4,13 +4,13 @@ import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
-  getCalendarDetailAsync,
   getEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
   updateEventLocal,
   updateSeriesAsync,
 } from "../../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getEvent } from "../../../features/Events/EventApi";
 import { refreshCalendars } from "../../Event/utils/eventUtils";

@@ -31,9 +31,10 @@ import { getCalendarVisibility } from "../../components/Calendar/utils/calendarU
 import { importFile } from "../../utils/apiUtils";
 import { formatReduxError } from "../../utils/errorUtils";
 import { browserDefaultTimeZone } from "../../utils/timezone";
+import { getCalendarDetailAsync } from "./services/getCalendarDetailAsync";
 
 // Define error type for rejected actions
-interface RejectedError {
+export interface RejectedError {
   message: string;
   status?: number;
 }
@@ -219,51 +220,6 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     });
   }
 });
-
-export const getCalendarDetailAsync = createAsyncThunk<
-  { calId: string; events: CalendarEvent[]; calType?: string },
-  {
-    calId: string;
-    match: { start: string; end: string };
-    calType?: string;
-    signal?: AbortSignal;
-  },
-  { rejectValue: RejectedError }
->(
-  "calendars/getCalendarDetails",
-  async ({ calId, match, calType, signal }, { rejectWithValue }) => {
-    try {
-      const calendar = (await getCalendar(calId, match, signal)) as Record<
-        string,
-        any
-      >;
-      const color = calendar["apple:color"];
-      const events: CalendarEvent[] = calendar._embedded["dav:item"].flatMap(
-        (eventdata: any) => {
-          const vevents = eventdata.data[2] as any[][];
-          const valarm = eventdata.data[2][0][2][0];
-          const eventURL = eventdata._links.self.href;
-          return vevents.map((vevent: any[]) => {
-            return parseCalendarEvent(
-              vevent[1],
-              color,
-              calId,
-              eventURL,
-              valarm
-            );
-          });
-        }
-      );
-
-      return { calId, events, calType };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
-    }
-  }
-);
 
 export const putEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[]; calType?: "temp" },
@@ -781,6 +737,7 @@ const CalendarSlice = createSlice({
             calId: string;
             events: CalendarEvent[];
             calType?: string;
+            syncToken?: string;
           }>
         ) => {
           state.pending = false;
@@ -789,6 +746,8 @@ const CalendarSlice = createSlice({
           if (!state[type][action.payload.calId]) {
             return;
           }
+          state[type][action.payload.calId].syncToken =
+            action.payload.syncToken;
           action.payload.events.forEach((event) => {
             state[type][action.payload.calId].events[event.uid] = event;
           });

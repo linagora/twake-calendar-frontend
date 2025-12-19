@@ -15,4 +15,5 @@ export interface Calendar {
   events: Record<string, CalendarEvent>;
   visibility: "private" | "public";
   lastCacheCleared?: number;
+  syncToken?: string;
 }

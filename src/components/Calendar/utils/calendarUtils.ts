@@ -1,7 +1,7 @@
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
-import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { SlotLabelContentArg } from "@fullcalendar/core";
 import moment from "moment-timezone";
 import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
