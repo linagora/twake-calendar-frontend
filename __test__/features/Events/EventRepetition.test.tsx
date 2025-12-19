@@ -315,7 +315,7 @@ describe("EventPreviewModal - Recurring Event Interactions", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "eventPreview.accept" })
+      screen.getByRole("button", { name: "eventPreview.ACCEPTED" })
     );
 
     await waitFor(() => {
@@ -505,7 +505,7 @@ describe("RSVP to Recurring Event", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "eventPreview.accept" })
+      screen.getByRole("button", { name: "eventPreview.ACCEPTED" })
     );
 
     await waitFor(() => {
@@ -543,7 +543,7 @@ describe("RSVP to Recurring Event", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "eventPreview.accept" })
+      screen.getByRole("button", { name: "eventPreview.ACCEPTED" })
     );
 
     await waitFor(() => {
@@ -975,8 +975,7 @@ describe("handleRSVP function", () => {
       basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
       basePreloadedState.user,
       nonRecurringEvent,
-      "ACCEPTED",
-      mockOnClose
+      "ACCEPTED"
     );
 
     expect(mockDispatch).toHaveBeenCalled();

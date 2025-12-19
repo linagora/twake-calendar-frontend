@@ -71,9 +71,9 @@ describe("parseCalendarEvent", () => {
         cn: "Bob",
         cal_address: "bob@example.com",
         partstat: "ACCEPTED",
-        rsvp: "",
-        role: "",
-        cutype: "",
+        cutype: "INDIVIDUAL",
+        role: "REQ-PARTICIPANT",
+        rsvp: "FALSE",
       },
     ]);
   });
@@ -133,9 +133,9 @@ describe("parseCalendarEvent", () => {
         cn: "Bob",
         cal_address: "bob@example.com",
         partstat: "ACCEPTED",
-        rsvp: "",
-        role: "",
-        cutype: "",
+        cutype: "INDIVIDUAL",
+        role: "REQ-PARTICIPANT",
+        rsvp: "FALSE",
       },
     ]);
   });
@@ -285,10 +285,10 @@ describe("parseCalendarEvent", () => {
       {
         cn: "",
         cal_address: "john@example.com",
-        partstat: "",
-        rsvp: "",
-        role: "",
-        cutype: "",
+        partstat: "NEEDS-ACTION",
+        cutype: "INDIVIDUAL",
+        role: "REQ-PARTICIPANT",
+        rsvp: "FALSE",
       },
     ]);
 
