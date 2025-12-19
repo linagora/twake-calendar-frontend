@@ -6,7 +6,6 @@ import reducer, {
   removeTempCal,
   getCalendarsListAsync,
   getTempCalendarsListAsync,
-  getCalendarDetailAsync,
   putEventAsync,
   getEventAsync,
   patchCalendarAsync,
@@ -17,6 +16,7 @@ import reducer, {
   addSharedCalendarAsync,
   deleteEventAsync,
 } from "../../../src/features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../../src/features/Calendars/services/getCalendarDetailAsync";
 
 import * as calAPI from "../../../src/features/Calendars/CalendarApi";
 import * as userAPI from "../../../src/features/User/userAPI";
