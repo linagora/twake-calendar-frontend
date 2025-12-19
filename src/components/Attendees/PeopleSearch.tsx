@@ -1,12 +1,13 @@
-import Autocomplete, {
+import {
+  Autocomplete,
   AutocompleteRenderInputParams,
-} from "@mui/material/Autocomplete";
-import Avatar from "@mui/material/Avatar";
-import CircularProgress from "@mui/material/CircularProgress";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
-import TextField from "@mui/material/TextField";
+} from "twake-mui";
+import { Avatar } from "twake-mui";
+import { CircularProgress } from "twake-mui";
+import { ListItem } from "twake-mui";
+import { ListItemAvatar } from "twake-mui";
+import { ListItemText } from "twake-mui";
+import { TextField } from "twake-mui";
 import {
   type ReactNode,
   useCallback,
@@ -16,12 +17,12 @@ import {
 } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import Chip from "@mui/material/Chip";
-import { useTheme } from "@mui/material/styles";
+import { Chip } from "twake-mui";
+import { useTheme } from "twake-mui";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { PopperProps, PaperProps } from "@mui/material";
+import { PopperProps, PaperProps } from "twake-mui";
 
 export interface User {
   email: string;
@@ -244,11 +245,6 @@ export function PeopleSearch({
           } else {
             return option;
           }
-        }}
-        sx={{
-          "& .MuiAutocomplete-inputRoot": {
-            py: 0,
-          },
         }}
         filterSelectedOptions
         value={selectedUsers}

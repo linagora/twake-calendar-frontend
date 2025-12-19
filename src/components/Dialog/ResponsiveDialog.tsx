@@ -11,7 +11,7 @@ import {
   SxProps,
   Theme,
   Box,
-} from "@mui/material";
+} from "twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";

@@ -1,5 +1,5 @@
 import React from "react";
-import { MenuItem } from "@mui/material";
+import { MenuItem } from "twake-mui";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { CalendarName } from "./CalendarName";
 

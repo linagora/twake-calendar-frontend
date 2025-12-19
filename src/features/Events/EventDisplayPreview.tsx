@@ -13,7 +13,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "twake-mui";
 import EventPopover from "./EventModal";
 import {
   Button,
@@ -23,8 +23,8 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-} from "@mui/material";
-import AvatarGroup from "@mui/material/AvatarGroup";
+} from "twake-mui";
+import { AvatarGroup } from "twake-mui";
 import { useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarName } from "../../components/Calendar/CalendarName";

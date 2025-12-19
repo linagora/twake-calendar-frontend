@@ -1,10 +1,10 @@
-import Dialog from "@mui/material/Dialog";
+import { Dialog } from "twake-mui";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import { DialogTitle } from "twake-mui";
+import { DialogContent } from "twake-mui";
+import { DialogContentText } from "twake-mui";
+import { DialogActions } from "twake-mui";
+import { Button } from "twake-mui";
 import { useI18n } from "twake-i18n";
 
 export function DeleteCalendarDialog({

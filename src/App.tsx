@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "twake-mui";
 
 import {
   enGB,

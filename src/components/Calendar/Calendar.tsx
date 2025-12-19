@@ -20,8 +20,8 @@ import { push } from "redux-first-history";
 import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import AddIcon from "@mui/icons-material/Add";
 import { TempCalendarsInput } from "./TempCalendarsInput";
-import Button from "@mui/material/Button";
-import { Box } from "@mui/material";
+import { Button } from "twake-mui";
+import { Box } from "twake-mui";
 import {
   updateSlotLabelVisibility,
   eventToFullCalendarFormat,
@@ -36,7 +36,7 @@ import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { TimezoneSelector } from "./TimezoneSelector";
 import { MiniCalendar } from "./MiniCalendar";
 import { User } from "../Attendees/PeopleSearch";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "twake-mui";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
 import frLocale from "@fullcalendar/core/locales/fr";

@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, TextField } from "twake-mui";
 import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
 import { Description as DescriptionIcon } from "@mui/icons-material";

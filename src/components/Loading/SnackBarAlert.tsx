@@ -1,5 +1,5 @@
-import Alert, { AlertColor } from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
+import { Alert, AlertColor } from "twake-mui";
+import { Snackbar } from "twake-mui";
 
 export function SnackbarAlert({
   open,

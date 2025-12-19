@@ -22,7 +22,7 @@ import {
   Typography,
   Box,
   Divider,
-} from "@mui/material";
+} from "twake-mui";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "twake-i18n";
@@ -292,7 +292,6 @@ export function Menubar({
             minWidth: 230,
             mt: 2,
             p: "14px 8px",
-            borderRadius: "14px",
           },
         }}
       >
@@ -320,7 +319,6 @@ export function Menubar({
             minWidth: 280,
             mt: 1,
             padding: "0 !important",
-            borderRadius: "14px",
           },
         }}
       >
@@ -432,7 +430,6 @@ function AppIcon({ prop }: { prop: AppIconProps }) {
         flexDirection: "column",
         alignItems: "center",
         p: "8px 12px 5px",
-        borderRadius: "14px",
         "&:hover": {
           backgroundColor: "action.hover",
         },

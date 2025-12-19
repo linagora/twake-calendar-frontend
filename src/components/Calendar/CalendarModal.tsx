@@ -1,4 +1,4 @@
-import { Button, DialogActions, Tab, Tabs } from "@mui/material";
+import { Button, DialogActions, Tab, Tabs } from "twake-mui";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
