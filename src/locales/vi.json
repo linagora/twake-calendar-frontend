@@ -39,6 +39,7 @@
   },
   "common": {
     "cancel": "Hủy",
+    "clear": "Xóa",
     "ok": "OK",
     "link_copied": "Đã sao chép liên kết!",
     "import_file": "Tệp",
@@ -57,7 +58,8 @@
     "filter": {
       "allCalendar": "Tất cả lịch",
       "myCalendar": "Lịch của tôi",
-      "sharedCalendars": "Lịch được chia sẻ"
+      "sharedCalendars": "Lịch được chia sẻ",
+      "filters": "Bộ lọc"
     },
     "keywords": "Từ khóa*",
     "keywordsPlaceholder": "Nhập từ khóa",
