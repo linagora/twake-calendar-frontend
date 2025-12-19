@@ -86,6 +86,9 @@ export const userSlice = createSlice({
     setAlarmEmails: (state, action) => {
       state.alarmEmailsEnabled = action.payload;
     },
+    setUserError: (state, action) => {
+      state.error = action.payload;
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -218,6 +221,7 @@ export const {
   setLanguage,
   setTimezone,
   setAlarmEmails,
+  setUserError,
   clearError,
 } = userSlice.actions;
 

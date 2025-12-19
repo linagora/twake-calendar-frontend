@@ -59,10 +59,21 @@ export function HandleLogin() {
     if (userData.error) {
       dispatch(push("/error"));
     }
-    if (!calendars.pending && !userData.loading && !userData.error) {
+    if (
+      !calendars.pending &&
+      !userData.loading &&
+      !userData.error &&
+      !calendars.error
+    ) {
       dispatch(push("/calendar"));
     }
-  }, [calendars.pending, userData.loading, userData.error, dispatch]);
+  }, [
+    calendars.pending,
+    userData.loading,
+    userData.error,
+    calendars.error,
+    dispatch,
+  ]);
   return <Loading />;
 }
 
