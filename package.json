@@ -30,6 +30,7 @@
     "react-router-dom": "^6.23.1",
     "redux-first-history": "^5.2.0",
     "twake-i18n": "^0.3.0",
+    "twake-mui": "file:../twake-ui/packages/twake-mui",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

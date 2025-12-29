@@ -8,7 +8,7 @@ import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
 import { Error } from "./components/Error/Error";
-import { CustomThemeProvider } from "./theme/ThemeProvider";
+import { TwakeMuiThemeProvider } from "twake-mui";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
@@ -61,7 +61,7 @@ function App() {
   }, [error, dispatch]);
 
   return (
-    <CustomThemeProvider>
+    <TwakeMuiThemeProvider>
       <I18n
         dictRequire={(lang: keyof typeof locale) => locale[lang]}
         lang={lang}
@@ -79,7 +79,7 @@ function App() {
           <ErrorSnackbar error={error} type="user" />
         </Suspense>
       </I18n>
-    </CustomThemeProvider>
+    </TwakeMuiThemeProvider>
   );
 }
 

@@ -13,7 +13,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@linagora/twake-mui";
 import EventPopover from "./EventModal";
 import {
   Button,
@@ -23,8 +23,8 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-} from "@mui/material";
-import AvatarGroup from "@mui/material/AvatarGroup";
+} from "@linagora/twake-mui";
+import { AvatarGroup } from "@linagora/twake-mui";
 import { useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarName } from "../../components/Calendar/CalendarName";
@@ -49,7 +49,6 @@ import { userAttendee } from "../User/models/attendee";
 import { browserDefaultTimeZone } from "../../utils/timezone";
 import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
 import { Calendar } from "../Calendars/CalendarTypes";
-import { userData } from "../User/userDataTypes";
 import { createEventContext } from "./createEventContext";
 
 export default function EventPreviewModal({
@@ -100,7 +99,7 @@ export default function EventPreviewModal({
   const attendeePreview = makeAttendeePreview(event.attendee, t);
   const hasCheckedSessionStorageRef = useRef(false);
 
-  const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
+  const [toggleActionMenu, setToggleActionMenu] = useState<HTMLElement | null>(
     null
   );
   const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
@@ -369,7 +368,7 @@ export default function EventPreviewModal({
                           `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                             .map((a) => a.cal_address)
                             .filter((mail) => mail !== user.email)
-                            .join(",")}?subject=${event.title}`
+                            .join(",")}?subject=${encodeURIComponent(event.title ?? "")}`
                         )
                       }
                     >
@@ -402,18 +401,28 @@ export default function EventPreviewModal({
                                 eventId
                               )
                           );
-                          setOpenEditModePopup("edit");
+                          setOpenEditModePopup("delete");
                         } else {
                           onClose({}, "backdropClick");
-                          await dispatch(
-                            deleteEventAsync({
-                              calId,
-                              eventId,
-                              eventURL: event.URL,
-                            })
-                          );
+                          try {
+                            const result = await dispatch(
+                              deleteEventAsync({
+                                calId,
+                                eventId,
+                                eventURL: event.URL,
+                              })
+                            );
+
+                            // For compatibility with tests that may not mock unwrap
+                            if (result && typeof result.unwrap === "function") {
+                              await result.unwrap();
+                            }
+
+                            updateTempList();
+                          } catch (error) {
+                            console.error("Failed to delete event:", error);
+                          }
                         }
-                        updateTempList();
                       }}
                     >
                       {t("eventPreview.deleteEvent")}
@@ -616,7 +625,15 @@ export default function EventPreviewModal({
                 }
                 text={t("eventPreview.alarmText", {
                   trigger: t(`event.form.notifications.${event.alarm.trigger}`),
-                  action: t(`event.form.notifications.${event.alarm.action}`),
+                  action: (() => {
+                    if (!event.alarm.action) return "";
+                    const translationKey = `event.form.notifications.${event.alarm.action}`;
+                    const translated = t(translationKey);
+                    // If translation returns the key itself, it means translation not found, use raw value
+                    return translated === translationKey
+                      ? event.alarm.action
+                      : translated;
+                  })(),
                 })}
                 style={{
                   fontSize: "16px",

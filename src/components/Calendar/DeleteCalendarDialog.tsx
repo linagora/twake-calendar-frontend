@@ -1,10 +1,12 @@
-import Dialog from "@mui/material/Dialog";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@linagora/twake-mui";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { useI18n } from "twake-i18n";
 
 export function DeleteCalendarDialog({
@@ -17,7 +19,7 @@ export function DeleteCalendarDialog({
 }: {
   deletePopupOpen: boolean;
   setDeletePopupOpen: (e: boolean) => void;
-  calendars: Record<string, Calendar>;
+  calendars: Record<string, Calendars>;
   id: string;
   isPersonal: boolean;
   handleDeleteConfirm: () => void;

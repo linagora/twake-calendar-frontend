@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction } from "react";
 import { useI18n } from "twake-i18n";
 import { useAppDispatch } from "../../../app/hooks";
