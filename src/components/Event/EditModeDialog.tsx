@@ -8,7 +8,7 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-} from "@mui/material";
+} from "twake-mui";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useState } from "react";
 import { useI18n } from "twake-i18n";

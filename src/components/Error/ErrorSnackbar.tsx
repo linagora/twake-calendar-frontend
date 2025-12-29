@@ -1,6 +1,4 @@
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
+import { Snackbar, Alert, Button } from "twake-mui";
 import { useAppDispatch } from "../../app/hooks";
 import { clearError as calendarClearError } from "../../features/Calendars/CalendarSlice";
 import { clearError as userClearError } from "../../features/User/userSlice";

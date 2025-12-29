@@ -1,6 +1,6 @@
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { Box, Button, Fade, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Fade, Paper, Stack, Typography } from "twake-mui";
 import { useEffect, useRef } from "react";
 import { push } from "redux-first-history";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";

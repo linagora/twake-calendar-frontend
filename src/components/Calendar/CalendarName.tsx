@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "twake-mui";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 export function CalendarName({ calendar }: { calendar: Calendars }) {

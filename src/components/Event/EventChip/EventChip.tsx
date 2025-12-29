@@ -5,7 +5,7 @@ import {
   CardContent,
   CardHeader,
   Typography,
-} from "@mui/material";
+} from "twake-mui";
 import React, { useEffect, useRef, useState } from "react";
 import { stringAvatar } from "../utils/eventUtils";
 import { ErrorEventChip } from "./ErrorEventChip";

@@ -1,4 +1,4 @@
-import { MenuItem } from "@mui/material";
+import { MenuItem } from "twake-mui";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useI18n } from "twake-i18n";
 

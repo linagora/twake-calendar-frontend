@@ -1,4 +1,4 @@
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "twake-mui";
 import { useRef } from "react";
 import { useI18n } from "twake-i18n";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -8,7 +8,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { setView } from "../../features/Settings/SettingsSlice";
-import TextField from "@mui/material/TextField";
+import { TextField } from "twake-mui";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 import { getAccessiblePair } from "./utils/calendarColorsUtils";
 
