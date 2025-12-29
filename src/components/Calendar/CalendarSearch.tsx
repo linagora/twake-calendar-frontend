@@ -1,17 +1,19 @@
 import CloseIcon from "@mui/icons-material/Close";
-import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import { useTheme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  TextField,
+  useTheme,
+} from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
 import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
-import TextField from "@mui/material/TextField";
+import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
 import { ColorPicker } from "./CalendarColorPicker";
@@ -93,7 +95,7 @@ function SelectedCalendarsList({
   onRemove,
   onColorChange,
 }: {
-  calendars: Record<string, Calendar>;
+  calendars: Record<string, Calendars>;
   selectedCal: CalendarWithOwner[];
   onRemove: (cal: CalendarWithOwner) => void;
   onColorChange: (

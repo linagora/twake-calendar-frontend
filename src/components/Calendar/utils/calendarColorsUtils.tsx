@@ -1,4 +1,4 @@
-import { darken, getContrastRatio, lighten, Theme } from "@mui/material";
+import { darken, getContrastRatio, lighten, Theme } from "twake-mui";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { updateCalColor } from "../../../features/Calendars/CalendarSlice";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";

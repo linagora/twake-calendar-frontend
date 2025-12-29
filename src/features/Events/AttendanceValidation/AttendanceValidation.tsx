@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction } from "react";
 import { useI18n } from "twake-i18n";
 import { Calendar } from "../../Calendars/CalendarTypes";

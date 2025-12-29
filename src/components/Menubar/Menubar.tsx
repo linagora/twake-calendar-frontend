@@ -22,7 +22,7 @@ import {
   Typography,
   Box,
   Divider,
-} from "@mui/material";
+} from "twake-mui";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "twake-i18n";
@@ -194,7 +194,7 @@ export function Menubar({
           </div>
           <div className="menu-items">
             <div className="current-date-time">
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 {dateLabel}
               </Typography>
             </div>

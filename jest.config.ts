@@ -37,7 +37,11 @@ const config: Config = {
         "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui)/)",
       ],
 
-      moduleNameMapper: { "^preact(/(.*)|$)": "preact$1" },
+      moduleNameMapper: {
+        "^preact(/(.*)|$)": "preact$1",
+        "^react$": "<rootDir>/node_modules/react",
+        "^react-dom$": "<rootDir>/node_modules/react-dom",
+      },
       setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
     },
     {
