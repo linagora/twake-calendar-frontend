@@ -12,7 +12,7 @@ import {
   FormGroup,
   Radio,
   RadioGroup,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
 import { useI18n } from "twake-i18n";

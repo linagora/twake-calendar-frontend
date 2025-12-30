@@ -22,7 +22,7 @@ import {
   Typography,
   Box,
   Divider,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { push } from "redux-first-history";
 import { CalendarApi } from "@fullcalendar/core";
 import { useI18n } from "twake-i18n";

@@ -5,7 +5,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { Calendars } from "../../features/Calendars/CalendarTypes";
 import { useI18n } from "twake-i18n";
 

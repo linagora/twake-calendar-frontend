@@ -1,5 +1,13 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Avatar, Box, Button, IconButton, Typography, TextField, useTheme } from "twake-mui";
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  TextField,
+  useTheme,
+} from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";

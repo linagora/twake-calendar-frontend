@@ -1,4 +1,4 @@
-import { Box, Button } from "twake-mui";
+import { Box, Button } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";

@@ -9,7 +9,7 @@ import {
   ListItem,
   Menu,
   MenuItem,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useMemo, useEffect } from "react";

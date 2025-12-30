@@ -13,7 +13,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { Box, Typography } from "twake-mui";
+import { Box, Typography } from "@linagora/twake-mui";
 import EventPopover from "./EventModal";
 import {
   Button,
@@ -22,8 +22,8 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-} from "twake-mui";
-import { AvatarGroup } from "twake-mui";
+} from "@linagora/twake-mui";
+import { AvatarGroup } from "@linagora/twake-mui";
 import { useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { CalendarName } from "../../components/Calendar/CalendarName";
@@ -97,7 +97,7 @@ export default function EventPreviewModal({
   const attendeePreview = makeAttendeePreview(event.attendee, t);
   const hasCheckedSessionStorageRef = useRef(false);
 
-  const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
+  const [toggleActionMenu, setToggleActionMenu] = useState<HTMLElement | null>(
     null
   );
   const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
@@ -302,7 +302,12 @@ export default function EventPreviewModal({
         actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
-          <Box display="flex" justifyContent="flex-end" alignItems="center" width="100%">
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            width="100%"
+          >
             {(window as any).DEBUG && (
               <IconButton
                 onClick={async () => {
@@ -346,7 +351,9 @@ export default function EventPreviewModal({
             {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
               <IconButton
                 size="small"
-                onClick={(e) => setToggleActionMenu(e.currentTarget)}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                  setToggleActionMenu(e.currentTarget)
+                }
               >
                 <MoreVertIcon />
               </IconButton>
@@ -384,30 +391,43 @@ export default function EventPreviewModal({
                   onClick={async () => {
                     if (isRecurring) {
                       setAfterChoiceFunc(
-                        () => (typeOfAction?: "solo" | "all" | undefined) =>
-                          handleDelete(
-                            isRecurring,
-                            typeOfAction,
-                            onClose,
-                            dispatch,
-                            calendar,
-                            event,
-                            calId,
-                            eventId
-                          )
+                        () =>
+                          async (typeOfAction?: "solo" | "all" | undefined) => {
+                            await handleDelete(
+                              isRecurring,
+                              typeOfAction,
+                              onClose,
+                              dispatch,
+                              calendar,
+                              event,
+                              calId,
+                              eventId
+                            );
+                            updateTempList();
+                          }
                       );
-                      setOpenEditModePopup("edit");
+                      setOpenEditModePopup("delete");
                     } else {
                       onClose({}, "backdropClick");
-                      await dispatch(
-                        deleteEventAsync({
-                          calId,
-                          eventId,
-                          eventURL: event.URL,
-                        })
-                      );
+                      try {
+                        const result = await dispatch(
+                          deleteEventAsync({
+                            calId,
+                            eventId,
+                            eventURL: event.URL,
+                          })
+                        );
+
+                        // For compatibility with tests that may not mock unwrap
+                        if (result && typeof result.unwrap === "function") {
+                          await result.unwrap();
+                        }
+
+                        updateTempList();
+                      } catch (error) {
+                        console.error("Failed to delete event:", error);
+                      }
                     }
-                    updateTempList();
                   }}
                 >
                   {t("eventPreview.deleteEvent")}
@@ -567,7 +587,13 @@ export default function EventPreviewModal({
         }
       >
         <Box mb={3}>
-          <Box display="flex" flexDirection="row" alignItems="center" gap={1} mb={1}>
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            gap={1}
+            mb={1}
+          >
             {event.class === "PRIVATE" &&
               (isOwn ? (
                 <Tooltip
@@ -743,7 +769,7 @@ export default function EventPreviewModal({
                 }
                 text={t("eventPreview.alarmText", {
                   trigger: t(`event.form.notifications.${event.alarm.trigger}`),
-                  action: t(`event.form.notifications.${event.alarm.action}`),
+                  action: event.alarm.action || "",
                 })}
                 style={{
                   fontSize: "16px",

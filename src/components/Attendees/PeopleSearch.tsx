@@ -7,7 +7,7 @@ import {
   ListItemAvatar,
   ListItemText,
   TextField,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import {
   type ReactNode,
   useCallback,
@@ -17,11 +17,11 @@ import {
 } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import { Chip, useTheme } from "twake-mui";
+import { Chip, useTheme } from "@linagora/twake-mui";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { PopperProps, PaperProps } from "twake-mui";
+import { PopperProps, PaperProps } from "@linagora/twake-mui";
 
 export interface User {
   email: string;

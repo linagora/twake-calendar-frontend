@@ -8,7 +8,7 @@ import { Loading } from "./components/Loading/Loading";
 import HandleLogin from "./features/User/HandleLogin";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
 import { Error } from "./components/Error/Error";
-import { TwakeMuiThemeProvider } from "twake-mui";
+import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";

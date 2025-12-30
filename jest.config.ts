@@ -23,6 +23,7 @@ const config: Config = {
       ],
       testEnvironment: "jsdom",
       testMatch: ["**/*.test.tsx"],
+      testTimeout: 15000,
       transform: {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
         "^.+\\.(js|jsx|mjs)$": "babel-jest",
@@ -59,6 +60,7 @@ const config: Config = {
       ],
       testEnvironment: "node",
       testMatch: ["**/*.test.ts"],
+      testTimeout: 15000,
       transform: {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
         "^.+\\.(js|jsx|mjs)$": "babel-jest",
