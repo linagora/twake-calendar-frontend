@@ -14,8 +14,8 @@ import {
   Stack,
   TextField,
   Typography,
-} from "twake-mui";
-import { type AutocompleteRenderInputParams } from "twake-mui";
+} from "@linagora/twake-mui";
+import { type AutocompleteRenderInputParams } from "@linagora/twake-mui";
 import { useRef, useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";

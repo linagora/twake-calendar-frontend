@@ -5,7 +5,7 @@ import {
   CardContent,
   CardHeader,
   Typography,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import React, { useEffect, useRef, useState } from "react";
 import { stringAvatar } from "../utils/eventUtils";
 import { ErrorEventChip } from "./ErrorEventChip";

@@ -8,7 +8,7 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useState } from "react";
 import { useI18n } from "twake-i18n";
@@ -40,6 +40,7 @@ export function EditModeDialog({
     <Dialog open={Boolean(type)} onClose={handleClose}>
       <DialogTitle>
         {type === "edit" && t("editModeDialog.updateRecurrentEvent")}
+        {type === "delete" && t("editModeDialog.deleteRecurrentEvent")}
         {type === "attendance" && t("editModeDialog.updateParticipationStatus")}
       </DialogTitle>
       <DialogContent>

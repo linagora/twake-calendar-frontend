@@ -15,7 +15,7 @@ import {
   Snackbar,
   Switch,
   FormControlLabel,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
 // import SyncIcon from "@mui/icons-material/Sync";

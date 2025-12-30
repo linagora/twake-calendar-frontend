@@ -1,4 +1,4 @@
-import { Card, Typography } from "twake-mui";
+import { Card, Typography } from "@linagora/twake-mui";
 import { useRef, useEffect } from "react";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 
