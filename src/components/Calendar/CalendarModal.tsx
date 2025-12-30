@@ -1,4 +1,4 @@
-import { Button, Tab, Tabs } from "twake-mui";
+import { Button, Tab, Tabs } from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {

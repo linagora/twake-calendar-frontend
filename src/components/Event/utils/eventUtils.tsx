@@ -1,6 +1,6 @@
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Avatar, Badge, Box, Typography } from "twake-mui";
+import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import {
   emptyEventsCal,

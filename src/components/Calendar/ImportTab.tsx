@@ -9,7 +9,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../../app/hooks";
 import { CalendarItemList } from "./CalendarItemList";

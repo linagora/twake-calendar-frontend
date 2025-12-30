@@ -13,7 +13,7 @@ import {
   TextField,
   ToggleButtonGroup,
   ToggleButton,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import {
   Description as DescriptionIcon,
   Public as PublicIcon,

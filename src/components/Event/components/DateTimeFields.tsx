@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { Box, Typography } from "twake-mui";
-import { TextFieldProps } from "twake-mui";
+import { Box, Typography } from "@linagora/twake-mui";
+import { TextFieldProps } from "@linagora/twake-mui";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";

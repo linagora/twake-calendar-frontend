@@ -296,7 +296,7 @@ describe("EventPreviewModal - Recurring Event Interactions", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("editModeDialog.updateRecurrentEvent")
+        screen.getByText("editModeDialog.deleteRecurrentEvent")
       ).toBeInTheDocument();
     });
   });
@@ -381,7 +381,7 @@ describe("EventPreviewModal - Recurring Event Interactions", () => {
     });
 
     expect(
-      screen.queryByText("editModeDialog.updateRecurrentEvent")
+      screen.queryByText("editModeDialog.deleteRecurrentEvent")
     ).not.toBeInTheDocument();
   });
 });
@@ -416,7 +416,7 @@ describe("Delete Recurring Event Instance", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("editModeDialog.updateRecurrentEvent")
+        screen.getByText("editModeDialog.deleteRecurrentEvent")
       ).toBeInTheDocument();
     });
 
@@ -463,7 +463,7 @@ describe("Delete Recurring Event Instance", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("editModeDialog.updateRecurrentEvent")
+        screen.getByText("editModeDialog.deleteRecurrentEvent")
       ).toBeInTheDocument();
     });
 

@@ -8,7 +8,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "../../app/hooks";

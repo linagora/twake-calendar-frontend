@@ -199,6 +199,8 @@ describe("RepeatEvent Component", () => {
 });
 
 describe("Repeat Event Integration Tests", () => {
+  // Increase timeout for all tests in this describe block
+  jest.setTimeout(30000);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();

@@ -188,6 +188,7 @@
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",
     "updateParticipationStatus": "Update the participation status",
+    "deleteRecurrentEvent": "Delete the recurrent event",
     "thisEvent": "This event",
     "allEvents": "All the events"
   },

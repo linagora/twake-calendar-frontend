@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField } from "twake-mui";
+import { TextField } from "@linagora/twake-mui";
 import {
   PickerFieldAdapter,
   PickerValidationScope,

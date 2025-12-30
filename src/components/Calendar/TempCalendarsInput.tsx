@@ -1,4 +1,4 @@
-import { useTheme } from "twake-mui";
+import { useTheme } from "@linagora/twake-mui";
 import { useRef } from "react";
 import { useI18n } from "twake-i18n";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -8,7 +8,7 @@ import {
 } from "../../features/Calendars/CalendarSlice";
 import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { setView } from "../../features/Settings/SettingsSlice";
-import { TextField } from "twake-mui";
+import { TextField } from "@linagora/twake-mui";
 import { User, PeopleSearch } from "../Attendees/PeopleSearch";
 import { getAccessiblePair } from "./utils/calendarColorsUtils";
 

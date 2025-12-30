@@ -1,4 +1,4 @@
-import { Autocomplete, TextField } from "twake-mui";
+import { Autocomplete, TextField } from "@linagora/twake-mui";
 import { PublicOutlined as TimezoneIcon } from "@mui/icons-material";
 import { useMemo } from "react";
 

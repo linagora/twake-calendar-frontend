@@ -9,7 +9,7 @@ import {
   InputAdornment,
   Backdrop,
   CircularProgress,
-} from "twake-mui";
+} from "@linagora/twake-mui";
 import { useState, useEffect } from "react";
 import {
   exportCalendar,

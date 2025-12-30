@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "twake-mui";
+import { Box, Typography } from "@linagora/twake-mui";
 
 /**
  * Helper component for field with label

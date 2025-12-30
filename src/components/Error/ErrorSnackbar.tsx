@@ -1,4 +1,4 @@
-import { Snackbar, Alert, Button } from "twake-mui";
+import { Snackbar, Alert, Button } from "@linagora/twake-mui";
 import { useAppDispatch } from "../../app/hooks";
 import { clearError as calendarClearError } from "../../features/Calendars/CalendarSlice";
 import { clearError as userClearError } from "../../features/User/userSlice";
