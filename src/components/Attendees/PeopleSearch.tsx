@@ -1,12 +1,13 @@
-import Autocomplete, {
-  AutocompleteRenderInputParams,
-} from "@mui/material/Autocomplete";
-import Avatar from "@mui/material/Avatar";
-import CircularProgress from "@mui/material/CircularProgress";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
-import TextField from "@mui/material/TextField";
+import {
+  Autocomplete,
+  type AutocompleteRenderInputParams,
+  Avatar,
+  CircularProgress,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  TextField,
+} from "@linagora/twake-mui";
 import {
   type ReactNode,
   useCallback,
@@ -16,12 +17,11 @@ import {
 } from "react";
 import { searchUsers } from "../../features/User/userAPI";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import Chip from "@mui/material/Chip";
-import { useTheme } from "@mui/material/styles";
+import { Chip, useTheme } from "@linagora/twake-mui";
 import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { PopperProps, PaperProps } from "@mui/material";
+import { PopperProps, PaperProps } from "@linagora/twake-mui";
 
 export interface User {
   email: string;

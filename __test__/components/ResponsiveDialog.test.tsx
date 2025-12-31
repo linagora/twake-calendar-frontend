@@ -1,11 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { ResponsiveDialog } from "../../src/components/Dialog";
-import { Button, TextField } from "@mui/material";
+import { Button, TextField } from "@linagora/twake-mui";
+import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
 
 describe("ResponsiveDialog", () => {
   const mockOnClose = jest.fn();
   const mockOnExpandToggle = jest.fn();
+
+  const renderWithTheme = (ui: React.ReactElement) => {
+    return render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>);
+  };
 
   beforeEach(() => {
     mockOnClose.mockClear();
@@ -13,7 +18,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders in normal mode by default", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test Dialog">
         <TextField label="Name" />
       </ResponsiveDialog>
@@ -24,7 +29,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders title in normal mode", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -40,7 +45,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders back arrow in extended mode", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -57,7 +62,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("calls onExpandToggle when back arrow is clicked", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -76,7 +81,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders actions when provided", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -91,7 +96,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("does not render actions when not provided", () => {
-    const { container } = render(
+    const { container } = renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <div>Content</div>
       </ResponsiveDialog>
@@ -102,7 +107,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("calls onClose when backdrop is clicked", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <div>Content</div>
       </ResponsiveDialog>
@@ -117,7 +122,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("applies custom normalMaxWidth", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -132,7 +137,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("wraps children in Stack component", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <TextField label="Field 1" />
         <TextField label="Field 2" />
@@ -144,7 +149,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("uses correct spacing in normal mode", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -160,7 +165,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("uses correct spacing in extended mode", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -176,7 +181,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("applies contentSx custom styles", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -191,7 +196,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("applies titleSx custom styles", () => {
-    const { container } = render(
+    const { container } = renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -207,7 +212,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("shows dividers when dividers prop is true", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -222,7 +227,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("does not show back arrow when onExpandToggle is not provided", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -238,7 +243,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("accepts custom headerHeight", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -254,7 +259,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders with custom expandedContentMaxWidth", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -270,7 +275,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("does not render dialog content when open is false", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog open={false} onClose={mockOnClose} title="Test">
         <div>Test Content</div>
       </ResponsiveDialog>
@@ -280,7 +285,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders correctly in extended mode", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -297,7 +302,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("renders expand and close icons in normal mode when showHeaderActions is true", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -315,7 +320,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("does not render header icons when showHeaderActions is false", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -334,7 +339,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("calls onClose when close icon is clicked", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
@@ -353,7 +358,7 @@ describe("ResponsiveDialog", () => {
   });
 
   it("calls onExpandToggle when expand icon is clicked", () => {
-    render(
+    renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}

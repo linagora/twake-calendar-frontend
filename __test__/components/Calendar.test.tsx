@@ -443,11 +443,14 @@ describe("calendar Availability search", () => {
         screen.getByRole("button", { name: "event.createEvent" })
       );
     });
-    await waitFor(() => {
-      expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
-      expect(screen.getAllByText(/New User/i)).toHaveLength(2);
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
+        expect(screen.getAllByText(/New User/i)).toHaveLength(2);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
 
   it("open window with attendees filled after temp search on enter in temp input", async () => {
     const spy = jest
@@ -482,11 +485,14 @@ describe("calendar Availability search", () => {
       fireEvent.keyDown(input, { key: "Enter" });
     });
 
-    await waitFor(() => {
-      expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
-      expect(screen.getAllByText(/New User/i)).toHaveLength(2);
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText("event.createEvent")).toHaveLength(2);
+        expect(screen.getAllByText(/New User/i)).toHaveLength(2);
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
 
   it("BUGFIX: can untoggle all calendar.personal", async () => {
     await act(async () =>

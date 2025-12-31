@@ -11,7 +11,7 @@ import {
   SxProps,
   Theme,
   Box,
-} from "@mui/material";
+} from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
@@ -132,7 +132,7 @@ function ResponsiveDialog({
     "& .MuiDialogActions-root .MuiBox-root": {
       maxWidth: isExpanded ? expandedContentMaxWidth : undefined,
       margin: isExpanded ? "0 auto" : undefined,
-      padding: isExpanded ? "0 12px" : undefined,
+      padding: "0",
       width: isExpanded ? "100%" : undefined,
       justifyContent: isExpanded ? "flex-end" : undefined,
     },
@@ -140,7 +140,6 @@ function ResponsiveDialog({
 
   const baseContentSx: SxProps<Theme> = {
     width: "100%",
-    padding: isExpanded ? "16px" : undefined,
   };
 
   const contentWrapperSx: SxProps<Theme> = {
@@ -239,8 +238,6 @@ function ResponsiveDialog({
               ? (theme) => `1px solid ${theme.palette.divider}`
               : undefined,
             justifyContent: actionsJustifyContent,
-            paddingTop: "18px",
-            paddingBottom: "18px",
           }}
         >
           {actions}

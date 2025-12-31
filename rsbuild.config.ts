@@ -23,4 +23,15 @@ export default defineConfig({
     },
     minify: false,
   },
+  resolve: {
+    alias: {
+      react: require.resolve("react"),
+      "react-dom": require.resolve("react-dom"),
+    },
+  },
+  performance: {
+    chunkOverflow: {
+      maxAssetSize: 2000000,
+    },
+  },
 });

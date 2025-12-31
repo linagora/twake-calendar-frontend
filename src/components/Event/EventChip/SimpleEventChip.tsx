@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography } from "@mui/material";
+import { Card, Typography } from "@linagora/twake-mui";
 
 export function SimpleEventChip({ title }: { title: string }) {
   return (
