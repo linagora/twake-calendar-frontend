@@ -25,22 +25,26 @@ function updateEventAttendees(
   }
 
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
-  if (eventHasNoAttendees) {
+  const isOrganizer =
+    !event.organizer ||
+    event.organizer.cal_address.toLocaleLowerCase() ===
+      user.email.toLowerCase();
+  if (eventHasNoAttendees && isOrganizer) {
     const userdata = createAttendee({
       cal_address: user.email,
       cn: buildFamilyName(user.given_name, user.family_name, user.email),
-      role: "CHAIR",
+      role: isOrganizer ? "CHAIR" : "REQ-PARTICIPANT",
       partstat: rsvp,
     });
     return {
-      organizer: userdata,
+      organizer: isOrganizer ? userdata : event.organizer,
       attendee: [userdata],
     };
   }
 
   return {
     attendee: event.attendee.map((attendeeData) =>
-      attendeeData.cal_address === user.email
+      attendeeData.cal_address?.toLowerCase() === user.email.toLowerCase()
         ? { ...attendeeData, partstat: rsvp }
         : attendeeData
     ),
@@ -95,7 +99,10 @@ export async function handleRSVP(
     if (!calendars || calendars.length === 0) {
       throw new Error("Cannot update all occurrences without calendar list");
     }
-    await handleAllRSVP(dispatch, event, user?.email ?? "", rsvp, calendars);
+    if (!user?.email) {
+      throw new Error("Cannot update all occurrences without user email");
+    }
+    await handleAllRSVP(dispatch, event, user.email, rsvp, calendars);
   } else {
     await handleDefaultRSVP(dispatch, calendar, newEvent);
   }

@@ -33,36 +33,23 @@ export function AttendanceValidation({
     return null;
   }
 
+  const commonButtonProps = {
+    contextualizedEvent,
+    user,
+    calendarList,
+    setAfterChoiceFunc,
+    setOpenEditModePopup,
+  };
+
   return (
     <>
       <Typography sx={{ marginRight: 2 }}>
         {t("eventPreview.attendingQuestion")}
       </Typography>
       <Box display="flex" gap="15px" alignItems="center">
-        <RSVPButton
-          rsvpValue="ACCEPTED"
-          contextualizedEvent={contextualizedEvent}
-          user={user}
-          calendarList={calendarList}
-          setAfterChoiceFunc={setAfterChoiceFunc}
-          setOpenEditModePopup={setOpenEditModePopup}
-        />
-        <RSVPButton
-          rsvpValue="TENTATIVE"
-          contextualizedEvent={contextualizedEvent}
-          user={user}
-          calendarList={calendarList}
-          setAfterChoiceFunc={setAfterChoiceFunc}
-          setOpenEditModePopup={setOpenEditModePopup}
-        />
-        <RSVPButton
-          rsvpValue="DECLINED"
-          contextualizedEvent={contextualizedEvent}
-          user={user}
-          calendarList={calendarList}
-          setAfterChoiceFunc={setAfterChoiceFunc}
-          setOpenEditModePopup={setOpenEditModePopup}
-        />
+        <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
+        <RSVPButton rsvpValue="TENTATIVE" {...commonButtonProps} />
+        <RSVPButton rsvpValue="DECLINED" {...commonButtonProps} />
       </Box>
     </>
   );

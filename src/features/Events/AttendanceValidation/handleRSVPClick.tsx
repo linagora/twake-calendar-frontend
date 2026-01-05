@@ -17,12 +17,27 @@ export function handleRSVPClick(
 ) {
   const { isRecurring, calendar, event } = contextualizedEvent;
   if (isRecurring) {
-    setAfterChoiceFunc(
-      () => (type: string) =>
-        handleRSVP(dispatch, calendar, user, event, rsvp, type, calendarList)
-    );
+    setAfterChoiceFunc(() => async (type: string) => {
+      try {
+        await handleRSVP(
+          dispatch,
+          calendar,
+          user,
+          event,
+          rsvp,
+          type,
+          calendarList
+        );
+      } catch (error) {
+        console.error("Error handling RSVP:", error);
+      }
+    });
     setOpenEditModePopup("attendance");
   } else {
-    handleRSVP(dispatch, calendar, user, event, rsvp);
+    try {
+      handleRSVP(dispatch, calendar, user, event, rsvp);
+    } catch (error) {
+      console.error("Error handling RSVP:", error);
+    }
   }
 }

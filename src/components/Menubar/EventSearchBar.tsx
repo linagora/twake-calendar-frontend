@@ -333,10 +333,10 @@ export default function SearchBar() {
                           handleFilterChange("keywords", query);
                           handleFilterChange(
                             "organizers",
-                            selectedContacts.map((a: User) =>
+                            selectedContacts.map((attendee: User) =>
                               createAttendee({
-                                cal_address: a.email,
-                                cn: a.displayName,
+                                cal_address: attendee.email,
+                                cn: attendee.displayName,
                               })
                             )
                           );
