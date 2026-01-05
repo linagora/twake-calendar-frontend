@@ -418,11 +418,7 @@ export default function SettingsPage() {
               )}
               {activeSettingsSubTab === "notifications" && (
                 <Box className="settings-tab-content">
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 3 }}
-                  >
+                  <Typography variant="h6" sx={{ mb: 3 }}>
                     {t("settings.notifications.deliveryMethod") ||
                       "Delivery method"}
                   </Typography>
