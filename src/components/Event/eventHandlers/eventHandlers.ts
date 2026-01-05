@@ -27,9 +27,8 @@ function updateEventAttendees(
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
   const isOrganizer =
     !event.organizer ||
-    event.organizer.cal_address.toLocaleLowerCase() ===
-      user.email.toLowerCase();
-  if (eventHasNoAttendees && isOrganizer) {
+    event.organizer.cal_address?.toLowerCase() === user.email?.toLowerCase();
+  if (eventHasNoAttendees) {
     const userdata = createAttendee({
       cal_address: user.email,
       cn: buildFamilyName(user.given_name, user.family_name, user.email),
@@ -38,13 +37,13 @@ function updateEventAttendees(
     });
     return {
       organizer: isOrganizer ? userdata : event.organizer,
-      attendee: [userdata],
+      attendee: [userdata, event.organizer],
     };
   }
 
   return {
     attendee: event.attendee.map((attendeeData) =>
-      attendeeData.cal_address?.toLowerCase() === user.email.toLowerCase()
+      attendeeData.cal_address?.toLowerCase() === user.email?.toLowerCase()
         ? { ...attendeeData, partstat: rsvp }
         : attendeeData
     ),

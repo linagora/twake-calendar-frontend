@@ -6,7 +6,7 @@ import { PartStat } from "../../User/models/attendee";
 import { userData } from "../../User/userDataTypes";
 import { ContextualizedEvent } from "../EventsTypes";
 
-export function handleRSVPClick(
+export async function handleRSVPClick(
   rsvp: PartStat,
   contextualizedEvent: ContextualizedEvent,
   user: userData | undefined,
@@ -35,7 +35,7 @@ export function handleRSVPClick(
     setOpenEditModePopup("attendance");
   } else {
     try {
-      handleRSVP(dispatch, calendar, user, event, rsvp);
+      await handleRSVP(dispatch, calendar, user, event, rsvp);
     } catch (error) {
       console.error("Error handling RSVP:", error);
     }
