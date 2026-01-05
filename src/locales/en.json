@@ -39,6 +39,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "clear": "Clear",
     "ok": "Ok",
     "link_copied": "Link copied!",
     "import_file": "File",
@@ -57,7 +58,8 @@
     "filter": {
       "allCalendar": "All calendars",
       "myCalendar": "My calendars",
-      "sharedCalendars": "Shared calendars"
+      "sharedCalendars": "Shared calendars",
+      "filters": "Filters"
     },
     "keywords": "Keywords*",
     "keywordsPlaceholder": "Enter keywords",

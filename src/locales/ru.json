@@ -39,6 +39,7 @@
   },
   "common": {
     "cancel": "Отмена",
+    "clear": "Очистить",
     "ok": "Ок",
     "link_copied": "Ссылка скопирована",
     "import_file": "Файл",
@@ -57,7 +58,8 @@
     "filter": {
       "allCalendar": "Все календари",
       "myCalendar": "Мои календари",
-      "sharedCalendars": "Общие календари"
+      "sharedCalendars": "Общие календари",
+      "filters": "Фильтры"
     },
     "keywords": "Ключевые слова*",
     "keywordsPlaceholder": "Введите ключевые слова",

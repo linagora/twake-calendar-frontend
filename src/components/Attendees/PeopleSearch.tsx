@@ -273,6 +273,9 @@ export function PeopleSearch({
           onChange(event, mapped);
         }}
         slotProps={customSlotProps}
+        // When render input is custom, the adornments should be handled by the custom component
+        forcePopupIcon={!customRenderInput}
+        disableClearable={!!customRenderInput}
         renderInput={(params) =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
