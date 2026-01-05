@@ -37,7 +37,7 @@ function updateEventAttendees(
     });
     return {
       organizer: isOrganizer ? userdata : event.organizer,
-      attendee: [userdata, event.organizer],
+      attendee: [userdata],
     };
   }
 
