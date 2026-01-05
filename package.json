@@ -12,7 +12,7 @@
     "@fullcalendar/moment-timezone": "^6.1.19",
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
-    "@linagora/twake-mui": "1.1.0",
+    "@linagora/twake-mui": "1.1.1",
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
     "@mui/x-date-pickers": "^8.14.0",

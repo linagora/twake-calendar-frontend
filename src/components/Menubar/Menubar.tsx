@@ -9,6 +9,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { stringToColor } from "../Event/utils/eventUtils";
+import { stringToGradient } from "../../utils/avatarUtils";
 import {
   Avatar,
   IconButton,
@@ -255,16 +256,14 @@ export function Menubar({
           <div className="menu-items">
             <IconButton onClick={handleUserMenuClick}>
               <Avatar
-                style={{
-                  backgroundColor: stringToColor(
-                    user && user.family_name
-                      ? user.family_name
-                      : user && user.email
-                        ? user.email
-                        : ""
-                  ),
-                }}
-                sizes="large"
+                color={stringToGradient(
+                  user && user.family_name
+                    ? user.family_name
+                    : user && user.email
+                      ? user.email
+                      : ""
+                )}
+                size="m"
                 aria-label={t("menubar.userProfile")}
               >
                 {user?.name && user?.family_name
@@ -333,17 +332,15 @@ export function Menubar({
           }}
         >
           <Avatar
-            style={{
-              backgroundColor: stringToColor(
-                user && user.family_name
-                  ? user.family_name
-                  : user && user.email
-                    ? user.email
-                    : ""
-              ),
-              marginBottom: "8px",
-            }}
-            sizes="large"
+            color={stringToGradient(
+              user && user.family_name
+                ? user.family_name
+                : user && user.email
+                  ? user.email
+                  : ""
+            )}
+            size="m"
+            sx={{ marginBottom: "8px" }}
           >
             {user?.name && user?.family_name
               ? `${user.name[0]}${user.family_name[0]}`
