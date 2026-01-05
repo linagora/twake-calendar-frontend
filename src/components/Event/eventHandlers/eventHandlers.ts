@@ -45,7 +45,7 @@ function updateEventAttendees(
     attendee: (() => {
       const userEmailLower = user.email?.toLowerCase();
       const userExists = event.attendee.some(
-        (a) => a.cal_address?.toLowerCase() === userEmailLower
+        (attendee) => attendee.cal_address?.toLowerCase() === userEmailLower
       );
 
       const updatedAttendees = event.attendee.map((attendeeData) =>
