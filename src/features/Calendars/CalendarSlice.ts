@@ -956,8 +956,13 @@ const CalendarSlice = createSlice({
         state.pending = false;
         state.error = null;
 
-        const { calId, deletedEvents, createdOrUpdatedEvents, calType } =
-          action.payload;
+        const {
+          calId,
+          deletedEvents,
+          createdOrUpdatedEvents,
+          calType,
+          syncToken,
+        } = action.payload;
 
         const target =
           calType === "temp" ? state.templist[calId] : state.list[calId];
@@ -969,6 +974,7 @@ const CalendarSlice = createSlice({
         for (const event of createdOrUpdatedEvents) {
           target.events[event.uid] = event;
         }
+        target.syncToken = syncToken;
       })
       // Pending cases
       .addCase(getCalendarDetailAsync.pending, (state) => {
@@ -1151,10 +1157,10 @@ const CalendarSlice = createSlice({
       })
       .addCase(refreshCalendarWithSyncToken.rejected, (state, action) => {
         state.pending = false;
-        state.error = state.error =
+        state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to refreshCalendar";
+          "Failed to refresh calendar";
       });
   },
 });

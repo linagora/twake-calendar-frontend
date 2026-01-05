@@ -11,6 +11,35 @@ export interface SyncTokenUpdates {
   deletedEvents: string[];
   createdOrUpdatedEvents: CalendarEvent[];
   calType?: "temp";
+  syncToken?: string;
+}
+
+async function processConcurrently<T, R>(
+  items: T[],
+  processor: (item: T) => Promise<R>,
+  maxConcurrency: number
+): Promise<R[]> {
+  const results: R[] = [];
+  const executing: Promise<void>[] = [];
+
+  for (const item of items) {
+    const promise = processor(item).then((result) => {
+      results.push(result);
+    });
+
+    executing.push(promise);
+
+    if (executing.length >= maxConcurrency) {
+      await Promise.race(executing);
+      executing.splice(
+        executing.findIndex((p) => p === promise),
+        1
+      );
+    }
+  }
+
+  await Promise.all(executing);
+  return results;
 }
 
 export const refreshCalendarWithSyncToken = createAsyncThunk<
@@ -18,14 +47,14 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
   {
     calendar: Calendars;
     calType?: "temp";
-    batchSize?: number;
+    maxConcurrency?: number;
   },
   {
     rejectValue: RejectedError;
   }
 >(
   "calendars/refreshWithSyncToken",
-  async ({ calendar, batchSize = 8, calType }, { rejectWithValue }) => {
+  async ({ calendar, maxConcurrency = 8, calType }, { rejectWithValue }) => {
     try {
       if (!calendar?.syncToken) {
         return {
@@ -36,6 +65,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
       }
 
       const response = await fetchSyncTokenChanges(calendar);
+      const newSyncToken = response["sync-token"];
       const updates = response?._embedded?.["dav:item"] ?? [];
 
       const deletedEvents: string[] = [];
@@ -57,35 +87,30 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
         }
       }
 
-      const createdOrUpdatedEvents: CalendarEvent[] = [];
-
-      for (let i = 0; i < toExpand.length; i += batchSize) {
-        const batch = toExpand.slice(i, i + batchSize);
-
-        const batchResults = await Promise.all(
-          batch.map(async (eventUrl) => {
-            try {
-              return {
-                ...(await getEvent({ URL: eventUrl } as CalendarEvent)),
-                calId: calendar.id,
-              };
-            } catch (err) {
-              console.error("Failed to fetch event", eventUrl);
-              return undefined;
-            }
-          })
-        );
-
-        createdOrUpdatedEvents.push(
-          ...(batchResults.filter(Boolean) as CalendarEvent[])
-        );
-      }
+      const createdOrUpdatedEvents = await processConcurrently(
+        toExpand,
+        async (eventUrl) => {
+          try {
+            return {
+              ...(await getEvent({ URL: eventUrl } as CalendarEvent)),
+              calId: calendar.id,
+            };
+          } catch (err) {
+            console.error("Failed to fetch event", eventUrl);
+            return undefined;
+          }
+        },
+        maxConcurrency
+      );
 
       return {
         calId: calendar.id,
         deletedEvents,
-        createdOrUpdatedEvents,
+        createdOrUpdatedEvents: createdOrUpdatedEvents.filter(
+          Boolean
+        ) as CalendarEvent[],
         calType,
+        syncToken: newSyncToken,
       };
     } catch (err: any) {
       return rejectWithValue({
