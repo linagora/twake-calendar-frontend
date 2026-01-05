@@ -42,11 +42,30 @@ function updateEventAttendees(
   }
 
   return {
-    attendee: event.attendee.map((attendeeData) =>
-      attendeeData.cal_address?.toLowerCase() === user.email?.toLowerCase()
-        ? { ...attendeeData, partstat: rsvp }
-        : attendeeData
-    ),
+    attendee: (() => {
+      const userEmailLower = user.email?.toLowerCase();
+      const userExists = event.attendee.some(
+        (a) => a.cal_address?.toLowerCase() === userEmailLower
+      );
+
+      const updatedAttendees = event.attendee.map((attendeeData) =>
+        attendeeData.cal_address?.toLowerCase() === userEmailLower
+          ? { ...attendeeData, partstat: rsvp }
+          : attendeeData
+      );
+
+      if (!userExists) {
+        const newUserAttendee = createAttendee({
+          cal_address: user.email,
+          cn: buildFamilyName(user.given_name, user.family_name, user.email),
+          role: "REQ-PARTICIPANT",
+          partstat: rsvp,
+        });
+        return [...updatedAttendees, newUserAttendee];
+      }
+
+      return updatedAttendees;
+    })(),
   };
 }
 
