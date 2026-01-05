@@ -32,6 +32,8 @@ import { importFile } from "../../utils/apiUtils";
 import { formatReduxError } from "../../utils/errorUtils";
 import { browserDefaultTimeZone } from "../../utils/timezone";
 import { getCalendarDetailAsync } from "./services/getCalendarDetailAsync";
+import { refreshCalendarWithSyncToken } from "./services/refreshCalendar";
+import { fetchSyncTokenChanges } from "./api/fetchSyncTokenChanges";
 
 // Define error type for rejected actions
 export interface RejectedError {
@@ -950,6 +952,24 @@ const CalendarSlice = createSlice({
         state.pending = false;
         state.error = null;
       })
+      .addCase(refreshCalendarWithSyncToken.fulfilled, (state, action) => {
+        state.pending = false;
+        state.error = null;
+
+        const { calId, deletedEvents, createdOrUpdatedEvents, calType } =
+          action.payload;
+
+        const target =
+          calType === "temp" ? state.templist[calId] : state.list[calId];
+
+        for (const id of deletedEvents) {
+          delete target.events[id];
+        }
+
+        for (const event of createdOrUpdatedEvents) {
+          target.events[event.uid] = event;
+        }
+      })
       // Pending cases
       .addCase(getCalendarDetailAsync.pending, (state) => {
         state.pending = true;
@@ -997,6 +1017,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(importEventFromFileAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(refreshCalendarWithSyncToken.pending, (state) => {
         state.pending = true;
       })
       // Rejected cases
@@ -1125,6 +1148,13 @@ const CalendarSlice = createSlice({
           action.payload?.message ||
           action.error.message ||
           "Failed to import event from file";
+      })
+      .addCase(refreshCalendarWithSyncToken.rejected, (state, action) => {
+        state.pending = false;
+        state.error = state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to refreshCalendar";
       });
   },
 });

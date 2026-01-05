@@ -893,11 +893,7 @@ function EventUpdateModal({
               // If refreshCalendars fails, we need to throw error to reopen modal
               try {
                 const calendarRange = getCalendarRange(new Date(start));
-                await refreshCalendars(
-                  dispatch,
-                  Object.values(calendarsList),
-                  calendarRange
-                );
+                await refreshCalendars(dispatch, Object.values(calendarsList));
               } catch (refreshError: any) {
                 // If refreshCalendars fails, throw error to reopen modal
                 throw new Error(

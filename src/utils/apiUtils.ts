@@ -53,27 +53,18 @@ export const api = ky.extend({
           // Attempt token refresh on unauthorized response
           const loginurl = await Auth();
 
-        sessionStorage.setItem(
-          "redirectState",
-          JSON.stringify({
-            code_verifier: loginurl.code_verifier,
-            state: loginurl.state,
-          })
-        );
-
-        redirectTo(loginurl.redirectTo);
-      }
-    },
-  ],
-};
-
-export const noPrefixApi = ky.extend({
-  hooks: authHooks,
-});
-
-export const api = ky.extend({
-  prefixUrl: (window as any).CALENDAR_BASE_URL,
-  hooks: authHooks,
+          sessionStorage.setItem(
+            "redirectState",
+            JSON.stringify({
+              code_verifier: loginurl.code_verifier,
+              state: loginurl.state,
+            })
+          );
+          redirectTo(loginurl.redirectTo);
+        }
+      },
+    ],
+  },
 });
 
 export function redirectTo(url: URL) {

@@ -5,6 +5,7 @@ import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
+import { AppDispatch } from "../../../app/store";
 import {
   emptyEventsCal,
   getCalendarsListAsync,
@@ -12,11 +13,8 @@ import {
 import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
-import { api, noPrefixApi } from "../../../utils/apiUtils";
-import ky from "ky";
-import { fetchSyncTokenChanges } from "../../../features/Calendars/api/fetchSyncTokenChanges";
 import { refreshCalendarWithSyncToken } from "../../../features/Calendars/services/refreshCalendar";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -119,51 +117,13 @@ export async function refreshCalendars(
   calendarRange: { start: Date; end: Date },
   calType?: "temp"
 ) {
-  const isTestEnv = process.env.NODE_ENV === "test";
-  await dispatch(refreshCalendarWithSyncToken({ calendar: calendars[0] }));
+  if (process.env.NODE_ENV === "test") return;
 
-  if (!calType && !isTestEnv) {
-    await dispatch(getCalendarsListAsync());
-  }
-  calType && dispatch(emptyEventsCal({ calType }));
-
-  if (isTestEnv) {
-    return;
-  }
-
-  const results = await Promise.all(
-    calendars.map(
-      async (cal) =>
-        await dispatch(
-          getCalendarDetailAsync({
-            calId: cal.id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-            calType,
-          })
-        )
+  await Promise.all(
+    calendars.map((calendar) =>
+      dispatch(refreshCalendarWithSyncToken({ calendar, calType })).unwrap()
     )
   );
-
-  // Check if any result is rejected and throw error
-  for (const result of results) {
-    if (result && typeof (result as any).unwrap === "function") {
-      try {
-        await (result as any).unwrap();
-      } catch (unwrapError: any) {
-        throw unwrapError;
-      }
-    } else if (result.type && (result.type as string).endsWith("/rejected")) {
-      const rejectedResult = result as any;
-      throw new Error(
-        rejectedResult.error?.message ||
-          rejectedResult.payload?.message ||
-          "Failed to refresh calendar"
-      );
-    }
-  }
 }
 
 export async function refreshSingularCalendar(
