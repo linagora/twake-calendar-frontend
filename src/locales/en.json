@@ -1,9 +1,9 @@
 {
   "locale": "en-gb",
   "calendar": {
-    "personal": "Personal Calendar",
-    "delegated": "Delegated Calendar",
-    "other": "Other Calendar",
+    "personal": "Personal Calendars",
+    "delegated": "Delegated Calendars",
+    "other": "Other Calendars",
     "caldav_access": "CalDAV access",
     "secretUrl": "Secret URL",
     "secretUrlDesc": "The secret address can be used to view all calendar events even without access permissions. You can reset your current secret address and get a new one.",
