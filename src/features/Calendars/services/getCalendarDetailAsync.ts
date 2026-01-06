@@ -1,10 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { CalendarEvent } from "../../Events/EventsTypes";
-import { getCalendar } from "../CalendarApi";
-import { parseCalendarEvent } from "../../Events/eventUtils";
 import { formatReduxError } from "../../../utils/errorUtils";
-import { RejectedError } from "../CalendarSlice";
+import { CalendarEvent } from "../../Events/EventsTypes";
+import { parseCalendarEvent } from "../../Events/eventUtils";
 import { CalDavItem } from "../api/types";
+import { getCalendar } from "../CalendarApi";
+import { RejectedError } from "../CalendarSlice";
 
 export const getCalendarDetailAsync = createAsyncThunk<
   {
@@ -71,9 +71,7 @@ function extractCalendarEvents(
 
   // VALARM is optional and deeply nested
   const valarm =
-    Array.isArray(vevents) &&
-    Array.isArray(vevents[0]) &&
-    Array.isArray(vevents[0][2])
+    Array.isArray(vevents[0]) && Array.isArray(vevents[0][2])
       ? vevents[0][2][0]
       : undefined;
 
@@ -90,7 +88,7 @@ function extractCalendarEvents(
 
       return parseCalendarEvent(
         eventProps,
-        { light: options.color ?? "" },
+        { light: options.color ?? "", dark: "" },
         options.calId,
         eventURL,
         valarm

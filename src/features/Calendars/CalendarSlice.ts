@@ -10,7 +10,7 @@ import {
   removeCalendar,
   updateAclCalendar,
 } from "./CalendarApi";
-import { getOpenPaasUser, getUserDetails } from "../User/userAPI";
+import { getUserDetails } from "../User/userAPI";
 import { parseCalendarEvent } from "../Events/eventUtils";
 import {
   deleteEvent,
@@ -33,133 +33,13 @@ import { formatReduxError } from "../../utils/errorUtils";
 import { browserDefaultTimeZone } from "../../utils/timezone";
 import { getCalendarDetailAsync } from "./services/getCalendarDetailAsync";
 import { refreshCalendarWithSyncToken } from "./services/refreshCalendar";
-import { fetchSyncTokenChanges } from "./api/fetchSyncTokenChanges";
+import { getCalendarsListAsync } from "./services/getCalendarsListAsync";
 
 // Define error type for rejected actions
 export interface RejectedError {
   message: string;
   status?: number;
 }
-
-export const getCalendarsListAsync = createAsyncThunk<
-  { importedCalendars: Record<string, Calendar>; errors: string }, // Return type
-  void, // Arg type
-  { rejectValue: RejectedError; state: any } // ThunkAPI config
->("calendars/getCalendars", async (_, { rejectWithValue, getState }) => {
-  const state = getState() as any;
-  if (Object.keys(state.calendars.list).length > 0) {
-    return {
-      importedCalendars: state.calendars.list,
-      errors: "",
-    };
-  }
-
-  try {
-    const importedCalendars: Record<string, Calendar> = {};
-    const user = (await getOpenPaasUser()) as Record<string, string>;
-    const calendars = (await getCalendars(user.id)) as Record<string, any>;
-    const rawCalendars = calendars._embedded["dav:calendar"] as Record<
-      string,
-      any
-    >[];
-    const errors: string[] = [];
-
-    const normalizedCalendars = rawCalendars.map((cal) => {
-      const description = cal["caldav:description"];
-      let delegated = false;
-      let source = cal["calendarserver:source"]
-        ? cal["calendarserver:source"]._links.self.href
-        : cal._links.self.href;
-      const link = cal._links.self.href;
-      if (cal["calendarserver:delegatedsource"]) {
-        source = cal["calendarserver:delegatedsource"];
-        delegated = true;
-      }
-      const id = source.replace("/calendars/", "").replace(".json", "");
-      const ownerId = id.split("/")[0];
-      const visibility = getCalendarVisibility(cal["acl"]);
-      return {
-        cal,
-        description,
-        delegated,
-        source,
-        link,
-        id,
-        ownerId,
-        visibility,
-      };
-    });
-
-    const uniqueOwnerIds = Array.from(
-      new Set(normalizedCalendars.map(({ ownerId }) => ownerId).filter(Boolean))
-    );
-
-    const ownerDataMap = new Map<string, any>();
-    const OWNER_BATCH_SIZE = 20;
-
-    const fetchOwnerData = async (ownerId: string) => {
-      try {
-        const data = await getUserDetails(ownerId);
-        ownerDataMap.set(ownerId, data);
-      } catch (error: any) {
-        console.error(`Failed to fetch user details for ${ownerId}:`, error);
-        ownerDataMap.set(ownerId, {
-          firstname: "",
-          lastname: "Unknown User",
-          emails: [],
-        });
-        errors.push(formatReduxError(error));
-      }
-    };
-
-    for (let i = 0; i < uniqueOwnerIds.length; i += OWNER_BATCH_SIZE) {
-      const chunk = uniqueOwnerIds.slice(i, i + OWNER_BATCH_SIZE);
-      await Promise.all(chunk.map((ownerId) => fetchOwnerData(ownerId)));
-    }
-
-    normalizedCalendars.forEach(
-      ({ cal, description, delegated, link, id, ownerId, visibility }) => {
-        const ownerData = ownerDataMap.get(ownerId) || {
-          firstname: "",
-          lastname: "Unknown User",
-          emails: [],
-        };
-        const name =
-          ownerId !== user.id && cal["dav:name"] === "#default"
-            ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-                ownerData.lastname
-              }` + "'s calendar"
-            : cal["dav:name"];
-
-        const color = {
-          light: cal["apple:color"] ?? "#006BD8",
-          dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
-        };
-        importedCalendars[id] = {
-          id,
-          name,
-          link,
-          owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-            ownerData.lastname
-          }`,
-          ownerEmails: ownerData.emails,
-          description,
-          delegated,
-          color,
-          visibility,
-          events: {},
-        };
-      }
-    );
-
-    return { importedCalendars, errors: errors.join("\n") };
-  } catch (err: any) {
-    return rejectWithValue({
-      message: formatReduxError(err),
-      status: err.response?.status,
-    });
-  }
-});
 
 export const getTempCalendarsListAsync = createAsyncThunk<
   Record<string, Calendar>,
@@ -966,6 +846,10 @@ const CalendarSlice = createSlice({
 
         const target =
           calType === "temp" ? state.templist[calId] : state.list[calId];
+
+        if (!target) {
+          return;
+        }
 
         for (const id of deletedEvents) {
           delete target.events[id];

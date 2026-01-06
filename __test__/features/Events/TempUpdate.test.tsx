@@ -28,7 +28,6 @@ describe("Update tempcalendars called with correct params", () => {
     (
       dispatch: ThunkDispatch<any, any, any>,
       calendars: Calendar[],
-      calendarRange: { start: Date; end: Date },
       calType?: "temp"
     ) => Promise<void>
   >;

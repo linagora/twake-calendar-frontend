@@ -5,11 +5,11 @@ import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import { AppDispatch } from "../../../app/store";
 import {
   emptyEventsCal,
-  getCalendarsListAsync,
+  getTempCalendarsListAsync,
 } from "../../../features/Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../../../features/Calendars/services/getCalendarsListAsync";
 import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
@@ -118,6 +118,8 @@ export async function refreshCalendars(
   calType?: "temp"
 ) {
   if (process.env.NODE_ENV === "test") return;
+
+  !calType && (await dispatch(getCalendarsListAsync()));
 
   await Promise.all(
     calendars.map((calendar) =>

@@ -20,21 +20,17 @@ async function processConcurrently<T, R>(
   maxConcurrency: number
 ): Promise<R[]> {
   const results: R[] = [];
-  const executing: Promise<void>[] = [];
+  const executing = new Set<Promise<void>>();
 
   for (const item of items) {
-    const promise = processor(item).then((result) => {
-      results.push(result);
-    });
+    const promise = processor(item)
+      .then((result) => {
+        results.push(result);
+      })
+      .finally(() => executing.delete(promise));
 
-    executing.push(promise);
-
-    if (executing.length >= maxConcurrency) {
+    if (executing.size >= maxConcurrency) {
       await Promise.race(executing);
-      executing.splice(
-        executing.findIndex((p) => p === promise),
-        1
-      );
     }
   }
 
@@ -61,6 +57,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
           calId: calendar.id,
           deletedEvents: [],
           createdOrUpdatedEvents: [],
+          calType,
         };
       }
 

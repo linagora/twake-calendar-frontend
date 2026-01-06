@@ -4,7 +4,6 @@ import reducer, {
   createCalendar,
   updateEventLocal,
   removeTempCal,
-  getCalendarsListAsync,
   getTempCalendarsListAsync,
   putEventAsync,
   getEventAsync,
@@ -16,6 +15,7 @@ import reducer, {
   addSharedCalendarAsync,
   deleteEventAsync,
 } from "../../../src/features/Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../../../src/features/Calendars/services/getCalendarsListAsync";
 import { getCalendarDetailAsync } from "../../../src/features/Calendars/services/getCalendarDetailAsync";
 
 import * as calAPI from "../../../src/features/Calendars/CalendarApi";
@@ -24,6 +24,9 @@ import * as userAPI from "../../../src/features/User/userAPI";
 import { configureStore } from "@reduxjs/toolkit";
 import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
+import { cleanup } from "@testing-library/react";
+import { setUserData } from "../../../src/features/User/userSlice";
+import { afterEach } from "node:test";
 
 jest.mock("../../../src/features/Calendars/CalendarApi");
 jest.mock("../../../src/features/User/userAPI");
@@ -39,7 +42,7 @@ describe("CalendarSlice", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe("reducers", () => {
@@ -120,9 +123,11 @@ describe("CalendarSlice", () => {
   describe("extraReducers (thunks)", () => {
     const storeFactory = () =>
       configureStore({
-        reducer: { calendars: reducer },
+        reducer: { calendars: reducer, user: reducer },
       });
-
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     it("getCalendarsListAsync.fulfilled replaces list", async () => {
       (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
       (calAPI.getCalendars as jest.Mock).mockResolvedValue({
@@ -270,7 +275,7 @@ describe("CalendarSlice", () => {
       expect(Object.keys(state.list)).toHaveLength(45);
     });
 
-    it("getCalendarsListAsync returns early if calendars already exist in store", async () => {
+    it("getCalendarsListAsync doesnt call getUserDetails if userdata exist in store", async () => {
       const existingCalendars = {
         "u1/cal1": {
           id: "u1/cal1",
@@ -284,13 +289,11 @@ describe("CalendarSlice", () => {
         type: "calendars/getCalendars/fulfilled",
         payload: { importedCalendars: existingCalendars, errors: "" },
       });
-
+      store.dispatch(setUserData({ openpaasId: "bla" }));
       const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
-      const getCalendarsMock = calAPI.getCalendars as jest.Mock;
 
       await store.dispatch(getCalendarsListAsync() as any);
 
-      expect(getCalendarsMock).not.toHaveBeenCalled();
       expect(getUserDetailsMock).not.toHaveBeenCalled();
 
       const state = store.getState().calendars;

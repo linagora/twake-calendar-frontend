@@ -5,7 +5,7 @@ import { Loading } from "../../components/Loading/Loading";
 import { push } from "redux-first-history";
 import { redirectTo } from "../../utils/apiUtils";
 import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
-import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../Calendars/services/getCalendarsListAsync";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user);
