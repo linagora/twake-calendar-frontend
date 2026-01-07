@@ -88,8 +88,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
           deletedEvents.push(fileName);
         } else if (update.status === 200) {
           toExpand.push(href);
-        }
-        if (update.status === 410) {
+        } else if (update.status === 410) {
           throw new Error("SYNC_TOKEN_INVALID");
         }
       }

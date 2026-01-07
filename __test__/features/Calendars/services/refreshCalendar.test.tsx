@@ -4,7 +4,7 @@ import {
   refreshCalendarWithSyncToken,
   SyncTokenUpdates,
 } from "../../../../src/features/Calendars/services/refreshCalendar";
-import { Calendars } from "../../../../src/features/Calendars/CalendarTypes";
+import { Calendar } from "../../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../../src/features/Events/EventsTypes";
 import * as fetchSyncTokenChanges from "../../../../src/features/Calendars/api/fetchSyncTokenChanges";
 import * as EventApi from "../../../../src/features/Events/EventApi";
@@ -13,7 +13,7 @@ jest.mock("../../../../src/features/Calendars/api/fetchSyncTokenChanges");
 jest.mock("../../../../src/features/Events/EventApi");
 
 describe("refreshCalendarWithSyncToken", () => {
-  const mockCalendar: Calendars = {
+  const mockCalendar: Calendar = {
     id: "user1/cal1",
     name: "Test Calendar",
     link: "/calendars/user1/cal1.json",

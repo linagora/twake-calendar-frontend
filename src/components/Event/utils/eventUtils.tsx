@@ -122,17 +122,26 @@ export async function refreshCalendars(
 
   !calType && (await dispatch(getCalendarsListAsync()));
 
-  await Promise.all(
+  const results = await Promise.allSettled(
     calendars.map((calendar) =>
       dispatch(
         refreshCalendarWithSyncToken({ calendar, calType, calendarRange })
-      )
-        .unwrap()
-        .catch((err) => {
-          console.error(`Failed to refresh calendar ${calendar.id}:`, err);
-        })
+      ).unwrap()
     )
   );
+
+  const failures = results.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected"
+  );
+
+  if (failures.length > 0) {
+    failures.forEach((failure, index) => {
+      console.error(
+        `Failed to refresh calendar ${calendars[index].id}:`,
+        failure.reason
+      );
+    });
+  }
 }
 
 export async function refreshSingularCalendar(

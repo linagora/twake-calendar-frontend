@@ -15,7 +15,7 @@ export function extractCalendarEvents(
     return [];
   }
 
-  // According to CalDAV, VEVENTS is at index 2
+  // VEVENTS are at index 2
   const vevents = data[2];
   if (!Array.isArray(vevents)) {
     return [];
@@ -26,12 +26,6 @@ export function extractCalendarEvents(
     return [];
   }
 
-  // VALARM is optional and deeply nested
-  const valarm =
-    Array.isArray(vevents[0]) && Array.isArray(vevents[0][2])
-      ? vevents[0][2][0]
-      : undefined;
-
   return vevents
     .map((vevent) => {
       if (!Array.isArray(vevent)) {
@@ -39,9 +33,11 @@ export function extractCalendarEvents(
       }
 
       const eventProps = vevent[1];
-      if (!eventProps) {
+      if (!Array.isArray(eventProps)) {
         return null;
       }
+
+      const valarm = extractValarm(vevent);
 
       return parseCalendarEvent(
         eventProps,
@@ -52,4 +48,17 @@ export function extractCalendarEvents(
       );
     })
     .filter(Boolean) as CalendarEvent[];
+}
+
+function extractValarm(vevent: any[]) {
+  const subComponents = vevent[2];
+  if (!Array.isArray(subComponents)) {
+    return undefined;
+  }
+
+  const valarmComponent = subComponents.find(
+    (component) => Array.isArray(component) && component[0] === "valarm"
+  );
+
+  return valarmComponent;
 }

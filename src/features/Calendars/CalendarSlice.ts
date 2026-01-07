@@ -851,23 +851,23 @@ const CalendarSlice = createSlice({
           return;
         }
 
-        for (const id of deletedEvents) {
-          Object.keys(target.events).forEach((eventKey) => {
-            if (eventKey === id || eventKey.startsWith(id + "/")) {
-              delete target.events[eventKey];
-            }
-          });
-        }
+        const deletedSet = new Set(deletedEvents);
+        const updatedBaseUids = new Set(
+          createdOrUpdatedEvents.map((e) => e.uid.split("/")[0])
+        );
 
-        for (const event of createdOrUpdatedEvents) {
-          const baseUid = event.uid.split("/")[0];
+        Object.keys(target.events).forEach((eventKey) => {
+          const baseUid = eventKey.split("/")[0];
 
-          Object.keys(target.events).forEach((eventKey) => {
-            if (eventKey === baseUid || eventKey.startsWith(baseUid + "/")) {
-              delete target.events[eventKey];
-            }
-          });
-        }
+          if (deletedSet.has(eventKey) || deletedSet.has(baseUid)) {
+            delete target.events[eventKey];
+            return;
+          }
+
+          if (updatedBaseUids.has(baseUid)) {
+            delete target.events[eventKey];
+          }
+        });
 
         for (const event of createdOrUpdatedEvents) {
           target.events[event.uid] = event;
