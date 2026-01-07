@@ -439,7 +439,6 @@ describe("refreshCalendarWithSyncToken", () => {
       })
     );
 
-    
     const state = store.getState().calendars;
     expect(state.list[mockCalendar.id].syncToken).toBe(
       "new-sync-token-state-test"
