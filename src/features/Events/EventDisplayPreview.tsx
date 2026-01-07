@@ -381,7 +381,6 @@ export default function EventPreviewModal({
                     onOpenDuplicate={() => {
                       setToggleActionMenu(null);
                       setHidePreview(true);
-<<<<<<< HEAD
                       setOpenDuplicateModal(true);
                     }}
                   />
@@ -626,7 +625,6 @@ export default function EventPreviewModal({
                 }
                 text={t("eventPreview.alarmText", {
                   trigger: t(`event.form.notifications.${event.alarm.trigger}`),
-<<<<<<< HEAD
                   action: (() => {
                     if (!event.alarm.action) return "";
                     const translationKey = `event.form.notifications.${event.alarm.action}`;
@@ -636,9 +634,6 @@ export default function EventPreviewModal({
                       ? event.alarm.action
                       : translated;
                   })(),
-=======
-                  action: event.alarm.action || "",
->>>>>>> 4ddc44d (chore: update twake-mui dependency and use radius.lg for create event button)
                 })}
                 style={{
                   fontSize: "16px",
