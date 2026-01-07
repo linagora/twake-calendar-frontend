@@ -8,7 +8,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { stringToColor } from "../Event/utils/eventUtils";
 import { stringToGradient } from "../../utils/avatarUtils";
 import {
   Avatar,

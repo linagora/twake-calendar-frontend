@@ -99,7 +99,7 @@ export default function EventPreviewModal({
   const attendeePreview = makeAttendeePreview(event.attendee, t);
   const hasCheckedSessionStorageRef = useRef(false);
 
-  const [toggleActionMenu, setToggleActionMenu] = useState<HTMLElement | null>(
+  const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
     null
   );
   const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
@@ -368,7 +368,9 @@ export default function EventPreviewModal({
                           `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                             .map((a) => a.cal_address)
                             .filter((mail) => mail !== user.email)
-                            .join(",")}?subject=${encodeURIComponent(event.title ?? "")}`
+                            .join(
+                              ","
+                            )}?subject=${encodeURIComponent(event.title ?? "")}`
                         )
                       }
                     >

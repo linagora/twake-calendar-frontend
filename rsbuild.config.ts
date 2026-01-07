@@ -29,9 +29,4 @@ export default defineConfig({
       "react-dom": require.resolve("react-dom"),
     },
   },
-  performance: {
-    chunkOverflow: {
-      maxAssetSize: 2000000,
-    },
-  },
 });

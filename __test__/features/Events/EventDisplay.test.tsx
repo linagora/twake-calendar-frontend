@@ -662,7 +662,78 @@ describe("Event Preview Display", () => {
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
         "event1"
       ];
-    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Test Event`;
+    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Test%20Event`;
+
+    expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
+  });
+
+  it("message button encodes special characters in event title correctly", () => {
+    (window as any).MAIL_SPA_URL = "test";
+    const mockOpen = jest.fn();
+    window.open = mockOpen;
+
+    const specialCharState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              ...preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+                .events,
+              eventWithSpecialChars: {
+                uid: "eventWithSpecialChars",
+                title: "Meeting & Discussion? #Important",
+                calId: "667037022b752d0026472254/cal1",
+                start: day.toISOString(),
+                end: day.toISOString(),
+                organizer: { cn: "test", cal_address: "test@test.com" },
+                attendee: [
+                  {
+                    cn: "test",
+                    cal_address: "test@test.com",
+                    partstat: "NEEDS-ACTION",
+                    rsvp: "TRUE",
+                    role: "REQ-PARTICIPANT",
+                    cutype: "INDIVIDUAL",
+                  },
+                  {
+                    cn: "John",
+                    cal_address: "john@test.com",
+                    partstat: "NEEDS-ACTION",
+                    rsvp: "TRUE",
+                    role: "REQ-PARTICIPANT",
+                    cutype: "INDIVIDUAL",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    };
+
+    renderWithProviders(
+      <EventPreviewModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"eventWithSpecialChars"}
+      />,
+      specialCharState
+    );
+
+    fireEvent.click(screen.getByTestId("MoreVertIcon"));
+    const emailButton = screen.getByRole("menuitem", {
+      name: "eventPreview.emailAttendees",
+    });
+    expect(emailButton).toBeInTheDocument();
+
+    fireEvent.click(emailButton);
+
+    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Meeting%20%26%20Discussion%3F%20%23Important`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
