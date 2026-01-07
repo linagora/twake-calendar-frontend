@@ -1,7 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  formatDateToYYYYMMDDTHHMMSS
-} from "../../../utils/dateUtils";
+import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { formatReduxError } from "../../../utils/errorUtils";
 import { reportEvent } from "../../Events/EventApi";
 import { CalendarEvent } from "../../Events/EventsTypes";
