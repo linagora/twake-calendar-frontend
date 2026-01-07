@@ -24,10 +24,11 @@ import { useI18n } from "twake-i18n";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { searchEventsAsync } from "../../features/Search/SearchSlice";
 import { setView } from "../../features/Settings/SettingsSlice";
-import { userAttendee } from "../../features/User/userDataTypes";
+import { userAttendee } from "../../features/User/models/attendee";
 import UserSearch from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
+import { createAttendee } from "../../features/User/models/attendee.mapper";
 
 export default function SearchBar() {
   const { t } = useI18n();
@@ -151,14 +152,12 @@ export default function SearchBar() {
     if (contacts.length > 0) {
       handleSearch("", {
         ...filters,
-        organizers: contacts.map((c) => ({
-          cal_address: c.email || c.displayName || "",
-          cutype: "INDIVIDUAL",
-          cn: c.displayName || c.email,
-          role: "Participant",
-          rsvp: "TRUE",
-          partstat: "",
-        })),
+        organizers: contacts.map((contact) =>
+          createAttendee({
+            cal_address: contact.email,
+            cn: contact.displayName,
+          })
+        ),
       });
     }
   };
@@ -334,14 +333,12 @@ export default function SearchBar() {
                           handleFilterChange("keywords", query);
                           handleFilterChange(
                             "organizers",
-                            selectedContacts.map((a: User) => ({
-                              cn: a.displayName,
-                              cal_address: a.email || "",
-                              partstat: "NEEDS-ACTION",
-                              rsvp: "FALSE",
-                              role: "REQ-PARTICIPANT",
-                              cutype: "INDIVIDUAL",
-                            }))
+                            selectedContacts.map((attendee: User) =>
+                              createAttendee({
+                                cal_address: attendee.email,
+                                cn: attendee.displayName,
+                              })
+                            )
                           );
                         }}
                       >

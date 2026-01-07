@@ -7,7 +7,7 @@ import {
   patchACLCalendarAsync,
   patchCalendarAsync,
 } from "../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
@@ -25,7 +25,7 @@ function CalendarPopover({
     event: object | null,
     reason: "backdropClick" | "escapeKeyDown"
   ) => void;
-  calendar?: Calendars;
+  calendar?: Calendar;
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();

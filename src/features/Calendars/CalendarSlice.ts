@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Calendars } from "./CalendarTypes";
+import { Calendar } from "./CalendarTypes";
 import { CalendarEvent } from "../Events/EventsTypes";
 import {
   addSharedCalendar,
@@ -39,7 +39,7 @@ interface RejectedError {
 }
 
 export const getCalendarsListAsync = createAsyncThunk<
-  { importedCalendars: Record<string, Calendars>; errors: string }, // Return type
+  { importedCalendars: Record<string, Calendar>; errors: string }, // Return type
   void, // Arg type
   { rejectValue: RejectedError; state: any } // ThunkAPI config
 >("calendars/getCalendars", async (_, { rejectWithValue, getState }) => {
@@ -52,7 +52,7 @@ export const getCalendarsListAsync = createAsyncThunk<
   }
 
   try {
-    const importedCalendars: Record<string, Calendars> = {};
+    const importedCalendars: Record<string, Calendar> = {};
     const user = (await getOpenPaasUser()) as Record<string, string>;
     const calendars = (await getCalendars(user.id)) as Record<string, any>;
     const rawCalendars = calendars._embedded["dav:calendar"] as Record<
@@ -159,12 +159,12 @@ export const getCalendarsListAsync = createAsyncThunk<
 });
 
 export const getTempCalendarsListAsync = createAsyncThunk<
-  Record<string, Calendars>,
+  Record<string, Calendar>,
   User,
   { rejectValue: RejectedError }
 >("calendars/getTempCalendars", async (tempUser, { rejectWithValue }) => {
   try {
-    const importedCalendars: Record<string, Calendars> = {};
+    const importedCalendars: Record<string, Calendar> = {};
 
     const calendars = (await getCalendars(
       tempUser.openpaasId ?? "",
@@ -267,7 +267,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
 
 export const putEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[]; calType?: "temp" },
-  { cal: Calendars; newEvent: CalendarEvent; calType?: "temp" },
+  { cal: Calendar; newEvent: CalendarEvent; calType?: "temp" },
   { rejectValue: RejectedError }
 >(
   "calendars/putEvent",
@@ -395,7 +395,7 @@ export const removeCalendarAsync = createAsyncThunk<
 
 export const moveEventAsync = createAsyncThunk<
   { calId: string; events: CalendarEvent[] },
-  { cal: Calendars; newEvent: CalendarEvent; newURL: string },
+  { cal: Calendar; newEvent: CalendarEvent; newURL: string },
   { rejectValue: RejectedError }
 >(
   "calendars/moveEvent",
@@ -490,7 +490,7 @@ export const deleteEventAsync = createAsyncThunk<
 
 export const deleteEventInstanceAsync = createAsyncThunk<
   { calId: string; eventId: string },
-  { cal: Calendars; event: CalendarEvent },
+  { cal: Calendar; event: CalendarEvent },
   { rejectValue: RejectedError }
 >("calendars/delEventInstance", async ({ cal, event }, { rejectWithValue }) => {
   try {
@@ -506,7 +506,7 @@ export const deleteEventInstanceAsync = createAsyncThunk<
 
 export const updateEventInstanceAsync = createAsyncThunk<
   { calId: string; event: CalendarEvent },
-  { cal: Calendars; event: CalendarEvent },
+  { cal: Calendar; event: CalendarEvent },
   { rejectValue: RejectedError }
 >(
   "calendars/updateEventInstance",
@@ -525,7 +525,7 @@ export const updateEventInstanceAsync = createAsyncThunk<
 
 export const updateSeriesAsync = createAsyncThunk<
   void,
-  { cal: Calendars; event: CalendarEvent; removeOverrides?: boolean },
+  { cal: Calendar; event: CalendarEvent; removeOverrides?: boolean },
   { rejectValue: RejectedError }
 >(
   "calendars/updateSeries",
@@ -659,13 +659,13 @@ export const importEventFromFileAsync = createAsyncThunk<
 const CalendarSlice = createSlice({
   name: "calendars",
   initialState: {
-    list: {} as Record<string, Calendars>,
-    templist: {} as Record<string, Calendars>,
+    list: {} as Record<string, Calendar>,
+    templist: {} as Record<string, Calendar>,
     pending: false,
     error: null as string | null,
   } as {
-    list: Record<string, Calendars>;
-    templist: Record<string, Calendars>;
+    list: Record<string, Calendar>;
+    templist: Record<string, Calendar>;
     pending: boolean;
     error: string | null;
   },
@@ -675,7 +675,7 @@ const CalendarSlice = createSlice({
       action: PayloadAction<Record<string, string | Record<string, string>>>
     ) => {
       const id = Date.now().toString(36);
-      state.list[id] = {} as Calendars;
+      state.list[id] = {} as Calendar;
       state.list[id].name = action.payload.name as string;
       state.list[id].color = action.payload.color as Record<string, string>;
       state.list[id].description = action.payload.description as string;
@@ -753,7 +753,7 @@ const CalendarSlice = createSlice({
         (
           state,
           action: PayloadAction<{
-            importedCalendars: Record<string, Calendars>;
+            importedCalendars: Record<string, Calendar>;
             errors: string;
           }>
         ) => {
@@ -766,7 +766,7 @@ const CalendarSlice = createSlice({
       )
       .addCase(
         getTempCalendarsListAsync.fulfilled,
-        (state, action: PayloadAction<Record<string, Calendars>>) => {
+        (state, action: PayloadAction<Record<string, Calendar>>) => {
           state.pending = false;
           Object.keys(action.payload).forEach(
             (id) => (state.templist[id] = action.payload[id])
@@ -823,7 +823,7 @@ const CalendarSlice = createSlice({
             state[type][action.payload.calId] = {
               id: action.payload.calId,
               events: {},
-            } as Calendars;
+            } as Calendar;
           }
           action.payload.events.forEach((event) => {
             state[type][action.payload.calId].events[event.uid] = event;
@@ -853,7 +853,7 @@ const CalendarSlice = createSlice({
             state.list[action.payload.calId] = {
               id: action.payload.calId,
               events: {},
-            } as Calendars;
+            } as Calendar;
           }
 
           state.list[action.payload.calId].events[action.payload.event.uid] =
@@ -871,7 +871,7 @@ const CalendarSlice = createSlice({
             state.list[action.payload.calId] = {
               id: action.payload.calId,
               events: {},
-            } as Calendars;
+            } as Calendar;
           }
           action.payload.events.forEach((event) => {
             state.list[action.payload.calId].events[event.uid] = event;
@@ -932,7 +932,7 @@ const CalendarSlice = createSlice({
           owner: action.payload.owner,
           ownerEmails: action.payload.ownerEmails,
           events: {},
-        } as Calendars;
+        } as Calendar;
         state.error = null;
       })
       .addCase(patchCalendarAsync.fulfilled, (state, action) => {
@@ -973,7 +973,7 @@ const CalendarSlice = createSlice({
           events: {},
           owner: action.payload.owner,
           ownerEmails: action.payload.ownerEmails,
-        } as Calendars;
+        } as Calendar;
         state.error = null;
       })
       .addCase(removeCalendarAsync.fulfilled, (state, action) => {

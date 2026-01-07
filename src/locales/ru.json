@@ -247,9 +247,9 @@
       "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
-    "accept": "Да",
-    "maybe": "Возможно",
-    "decline": "Нет",
+    "ACCEPTED": "Да",
+    "TENTATIVE": "Возможно",
+    "DECLINED": "Нет",
     "showMore": "Показать больше",
     "showLess": "Показать меньше",
     "joinVideo": "Присоединиться к видеоконференции",

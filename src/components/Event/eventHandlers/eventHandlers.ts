@@ -1,51 +1,128 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import { useAppSelector } from "../../../app/hooks";
 import {
   updateEventInstanceAsync,
-  updateSeriesAsync,
   putEventAsync,
   deleteEventInstanceAsync,
   deleteEventAsync,
 } from "../../../features/Calendars/CalendarSlice";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import {
-  getEvent,
-  updateSeriesPartstat,
-} from "../../../features/Events/EventApi";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
+import { updateSeriesPartstat } from "../../../features/Events/EventApi";
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
+import { PartStat } from "../../../features/User/models/attendee";
+import { createAttendee } from "../../../features/User/models/attendee.mapper";
 import { userData } from "../../../features/User/userDataTypes";
+import { buildFamilyName } from "../../../utils/buildFamilyName";
 import { getCalendarRange } from "../../../utils/dateUtils";
 import { refreshCalendars } from "../utils/eventUtils";
 
+function updateEventAttendees(
+  event: CalendarEvent,
+  user: userData | undefined,
+  rsvp: PartStat
+) {
+  if (!user) {
+    throw new Error("Cannot update attendees without user data");
+  }
+
+  const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
+  const isOrganizer =
+    !event.organizer ||
+    event.organizer.cal_address?.toLowerCase() === user.email?.toLowerCase();
+  if (eventHasNoAttendees) {
+    const userdata = createAttendee({
+      cal_address: user.email,
+      cn: buildFamilyName(user.given_name, user.family_name, user.email),
+      role: isOrganizer ? "CHAIR" : "REQ-PARTICIPANT",
+      partstat: rsvp,
+    });
+    return {
+      organizer: isOrganizer ? userdata : event.organizer,
+      attendee: [userdata],
+    };
+  }
+
+  return {
+    attendee: (() => {
+      const userEmailLower = user.email?.toLowerCase();
+      const userExists = event.attendee.some(
+        (attendee) => attendee.cal_address?.toLowerCase() === userEmailLower
+      );
+
+      const updatedAttendees = event.attendee.map((attendeeData) =>
+        attendeeData.cal_address?.toLowerCase() === userEmailLower
+          ? { ...attendeeData, partstat: rsvp }
+          : attendeeData
+      );
+
+      if (!userExists) {
+        const newUserAttendee = createAttendee({
+          cal_address: user.email,
+          cn: buildFamilyName(user.given_name, user.family_name, user.email),
+          role: "REQ-PARTICIPANT",
+          partstat: rsvp,
+        });
+        return [...updatedAttendees, newUserAttendee];
+      }
+
+      return updatedAttendees;
+    })(),
+  };
+}
+
+async function handleSoloRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendar: Calendar,
+  event: CalendarEvent
+) {
+  dispatch(updateEventInstanceAsync({ cal: calendar, event }));
+}
+
+async function handleAllRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  event: CalendarEvent,
+  userEmail: string,
+  rsvp: PartStat,
+  calendars: Calendar[]
+) {
+  const calendarRange = getCalendarRange(new Date(event.start));
+  await updateSeriesPartstat(event, userEmail, rsvp);
+  await refreshCalendars(dispatch, calendars, calendarRange);
+}
+
+async function handleDefaultRSVP(
+  dispatch: ThunkDispatch<any, any, any>,
+  calendar: Calendar,
+  newEvent: CalendarEvent
+) {
+  dispatch(putEventAsync({ cal: calendar, newEvent }));
+}
+
 export async function handleRSVP(
   dispatch: ThunkDispatch<any, any, any>,
-  calendar: Calendars,
-  user: { userData: userData },
+  calendar: Calendar,
+  user: userData | undefined,
   event: CalendarEvent,
-  rsvp: string,
-  onClose?: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
+  rsvp: PartStat,
   typeOfAction?: string,
-  calendars?: Calendars[]
+  calendars?: Calendar[]
 ) {
   const newEvent = {
     ...event,
-    attendee: event.attendee?.map((a) =>
-      a.cal_address === user.userData?.email ? { ...a, partstat: rsvp } : a
-    ),
+    ...updateEventAttendees(event, user, rsvp),
   };
+
   if (typeOfAction === "solo") {
-    dispatch(updateEventInstanceAsync({ cal: calendar, event: newEvent }));
+    await handleSoloRSVP(dispatch, calendar, newEvent);
   } else if (typeOfAction === "all") {
-    const calendarRange = getCalendarRange(new Date(event.start));
-
-    // Update PARTSTAT on ALL VEVENTs (master + exceptions)
-    await updateSeriesPartstat(event, user.userData?.email, rsvp);
-
-    if (calendars) {
-      await refreshCalendars(dispatch, calendars, calendarRange);
+    if (!calendars || calendars.length === 0) {
+      throw new Error("Cannot update all occurrences without calendar list");
     }
+    if (!user?.email) {
+      throw new Error("Cannot update all occurrences without user email");
+    }
+    await handleAllRSVP(dispatch, event, user.email, rsvp, calendars);
   } else {
-    dispatch(putEventAsync({ cal: calendar, newEvent }));
+    await handleDefaultRSVP(dispatch, calendar, newEvent);
   }
 }
 
@@ -54,7 +131,7 @@ export function handleDelete(
   typeOfAction: "solo" | "all" | undefined,
   onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
   dispatch: Function,
-  calendar: Calendars,
+  calendar: Calendar,
   event: CalendarEvent,
   calId: string,
   eventId: string

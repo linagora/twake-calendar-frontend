@@ -1,4 +1,4 @@
-import { userAttendee } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 import ICAL from "ical.js";
 import { TIMEZONES } from "../../utils/timezone-data";
@@ -7,6 +7,7 @@ import {
   convertFormDateTimeToISO,
   detectDateTimeFormat,
 } from "../../components/Event/utils/dateTimeHelpers";
+import { createAttendee } from "../User/models/attendee.mapper";
 type RawEntry = [string, Record<string, string>, string, any];
 
 function resolveTimezoneId(tzid?: string): string | undefined {
@@ -119,14 +120,16 @@ export function parseCalendarEvent(
         };
         break;
       case "attendee":
-        (event.attendee as userAttendee[]).push({
-          cn: params?.cn ?? "",
-          cal_address: value.replace(/^mailto:/i, ""),
-          partstat: params?.partstat ?? "",
-          rsvp: params?.rsvp ?? "",
-          role: params?.role ?? "",
-          cutype: params?.cutype ?? "",
-        });
+        (event.attendee as userAttendee[]).push(
+          createAttendee({
+            cn: params?.cn,
+            cal_address: value.replace(/^mailto:/i, ""),
+            partstat: params?.partstat as userAttendee["partstat"],
+            rsvp: params?.rsvp as userAttendee["rsvp"],
+            role: params?.role as userAttendee["role"],
+            cutype: params?.cutype as userAttendee["cutype"],
+          })
+        );
         break;
       case "dtstamp":
         event.stamp = value;

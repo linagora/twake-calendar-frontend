@@ -247,9 +247,9 @@
       "tooltip": "Les autres vous voient comme disponible pendant la plage horaire de cet événement."
     },
     "attendingQuestion": "Vous participez ?",
-    "accept": "Accepter",
-    "maybe": "Peut-être",
-    "decline": "Décliner",
+    "ACCEPTED": "Accepter",
+    "TENTATIVE": "Peut-être",
+    "DECLINED": "Décliner",
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "joinVideo": "Rejoindre la visioconférence",
