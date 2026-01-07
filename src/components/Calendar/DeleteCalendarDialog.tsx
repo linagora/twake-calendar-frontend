@@ -6,7 +6,7 @@ import {
   DialogActions,
   Button,
 } from "@linagora/twake-mui";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { useI18n } from "twake-i18n";
 
 export function DeleteCalendarDialog({
@@ -19,7 +19,7 @@ export function DeleteCalendarDialog({
 }: {
   deletePopupOpen: boolean;
   setDeletePopupOpen: (e: boolean) => void;
-  calendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
   id: string;
   isPersonal: boolean;
   handleDeleteConfirm: () => void;
