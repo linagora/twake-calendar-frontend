@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-export function CalendarName({ calendar }: { calendar: Calendars }) {
+export function CalendarName({ calendar }: { calendar: Calendar }) {
   return (
     <Box style={{ display: "flex", flexDirection: "row", gap: 8 }}>
       <SquareRoundedIcon

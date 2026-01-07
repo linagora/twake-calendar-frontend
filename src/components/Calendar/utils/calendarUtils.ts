@@ -1,5 +1,5 @@
 import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { getCalendarDetailAsync } from "../../../features/Calendars/CalendarSlice";
 import { SlotLabelContentArg } from "@fullcalendar/core";
@@ -140,7 +140,7 @@ export const eventToFullCalendarFormat = (
 
 export const extractEvents = (
   selectedCalendars: string[],
-  calendars: Record<string, Calendars>,
+  calendars: Record<string, Calendar>,
   userAddress?: string,
   hideDeclinedEvents?: boolean | null
 ) => {
@@ -272,7 +272,7 @@ export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
 }
 
 export async function updateTempCalendar(
-  tempcalendars: Record<string, Calendars>,
+  tempcalendars: Record<string, Calendar>,
   event: CalendarEvent,
   dispatch: ThunkDispatch<any, any, any>,
   calendarRange: { start: Date; end: Date }

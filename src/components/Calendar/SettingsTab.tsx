@@ -12,7 +12,7 @@ import {
 import { useI18n } from "twake-i18n";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "../../app/hooks";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { AddDescButton } from "../Event/AddDescButton";
 import { ColorPicker } from "./CalendarColorPicker";
 
@@ -35,7 +35,7 @@ export function SettingsTab({
   setColor: Function;
   visibility: "public" | "private";
   setVisibility: Function;
-  calendar?: Calendars;
+  calendar?: Calendar;
 }) {
   const { t } = useI18n();
   const [toggleDesc, setToggleDesc] = useState(Boolean(description));

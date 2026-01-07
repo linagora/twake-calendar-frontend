@@ -1,8 +1,8 @@
 import React from "react";
 import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
 import { createMouseHandlers } from "./mouseHandlers";
-import { userAttendee } from "../../../features/User/userDataTypes";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
+import { userAttendee } from "../../../features/User/models/attendee";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EventChip } from "../../Event/EventChip/EventChip";
 
@@ -11,8 +11,8 @@ export interface ViewHandlersProps {
   setSelectedDate: (date: Date) => void;
   setSelectedMiniDate: (date: Date) => void;
   onViewChange?: (view: string) => void;
-  calendars: Record<string, Calendars>;
-  tempcalendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
+  tempcalendars: Record<string, Calendar>;
   errorHandler: EventErrorHandler;
 }
 

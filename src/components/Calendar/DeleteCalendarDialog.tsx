@@ -1,5 +1,5 @@
 import Dialog from "@mui/material/Dialog";
-import { Calendars } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "../../features/Calendars/CalendarTypes";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -17,7 +17,7 @@ export function DeleteCalendarDialog({
 }: {
   deletePopupOpen: boolean;
   setDeletePopupOpen: (e: boolean) => void;
-  calendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
   id: string;
   isPersonal: boolean;
   handleDeleteConfirm: () => void;

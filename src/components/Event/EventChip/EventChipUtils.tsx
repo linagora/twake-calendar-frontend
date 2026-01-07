@@ -4,8 +4,8 @@ import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import { Box, getContrastRatio } from "@mui/material";
 import moment from "moment";
 import React, { useLayoutEffect, useState } from "react";
-import { Calendars } from "../../../features/Calendars/CalendarTypes";
-import { userAttendee } from "../../../features/User/userDataTypes";
+import { Calendar } from "../../../features/Calendars/CalendarTypes";
+import { userAttendee } from "../../../features/User/models/attendee";
 import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EVENT_DURATION } from "./EventChip";
 
@@ -13,8 +13,8 @@ const COMPACT_WIDTH_THRESHOLD = 100;
 
 export interface EventChipProps {
   arg: any;
-  calendars: Record<string, Calendars>;
-  tempcalendars: Record<string, Calendars>;
+  calendars: Record<string, Calendar>;
+  tempcalendars: Record<string, Calendar>;
   errorHandler: EventErrorHandler;
 }
 export interface IconDisplayConfig {

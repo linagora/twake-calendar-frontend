@@ -12,8 +12,8 @@ import {
   updateEventLocal,
   clearFetchCache,
 } from "../Calendars/CalendarSlice";
-import { Calendars } from "../Calendars/CalendarTypes";
-import { userAttendee } from "../User/userDataTypes";
+import { Calendar } from "../Calendars/CalendarTypes";
+import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { TIMEZONES } from "../../utils/timezone-data";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
@@ -95,10 +95,10 @@ function EventUpdateModal({
 
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
-  const userPersonalCalendars: Calendars[] = useMemo(() => {
-    const allCalendars = Object.values(calendarsList) as Calendars[];
+  const userPersonalCalendars: Calendar[] = useMemo(() => {
+    const allCalendars = Object.values(calendarsList) as Calendar[];
     return allCalendars.filter(
-      (c: Calendars) => c.id?.split("/")[0] === user.userData?.openpaasId
+      (c: Calendar) => c.id?.split("/")[0] === user.userData?.openpaasId
     );
   }, [calendarsList, user.userData?.openpaasId]);
 

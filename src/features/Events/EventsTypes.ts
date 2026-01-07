@@ -1,4 +1,6 @@
-import { userAttendee, userOrganiser } from "../User/userDataTypes";
+import { Calendar } from "../Calendars/CalendarTypes";
+import { userAttendee } from "../User/models/attendee";
+import { userOrganiser } from "../User/userDataTypes";
 
 export interface CalendarEvent {
   URL: string;
@@ -38,4 +40,13 @@ export interface RepetitionObject {
 export interface AlarmObject {
   trigger: string;
   action: string;
+}
+
+export interface ContextualizedEvent {
+  event: CalendarEvent;
+  calendar: Calendar;
+  currentUserAttendee: userAttendee | undefined;
+  isOwn: boolean;
+  isRecurring: boolean;
+  isOrganizer: boolean;
 }

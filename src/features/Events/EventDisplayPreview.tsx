@@ -36,10 +36,7 @@ import {
 import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "../../components/Event/EditModeDialog";
 import EventDuplication from "../../components/Event/EventDuplicate";
-import {
-  handleDelete,
-  handleRSVP,
-} from "../../components/Event/eventHandlers/eventHandlers";
+import { handleDelete } from "../../components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "../../components/Event/InfoRow";
 import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { getCalendarRange } from "../../utils/dateUtils";
@@ -48,8 +45,12 @@ import { dlEvent } from "./EventApi";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
 import { useI18n } from "twake-i18n";
-import { userAttendee } from "../User/userDataTypes";
+import { userAttendee } from "../User/models/attendee";
 import { browserDefaultTimeZone } from "../../utils/timezone";
+import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
+import { Calendar } from "../Calendars/CalendarTypes";
+import { userData } from "../User/userDataTypes";
+import { createEventContext } from "./createEventContext";
 
 export default function EventPreviewModal({
   eventId,
@@ -77,12 +78,13 @@ export default function EventPreviewModal({
     ? calendars.templist[calId]
     : calendars.list[calId];
   const event = calendar.events[eventId];
-  const user = useAppSelector((state) => state.user);
+  const user = useAppSelector((state) => state.user.userData);
+  if (!user) return null;
 
   const isRecurring = event?.uid?.includes("/");
-  const isOwn = calendar.ownerEmails?.includes(user.userData?.email);
+  const isOwn = calendar.ownerEmails?.includes(user.email);
   const isOrganizer = event.organizer
-    ? user.userData?.email === event.organizer.cal_address
+    ? user.email === event.organizer.cal_address
     : isOwn;
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -274,8 +276,9 @@ export default function EventPreviewModal({
     : attendees.slice(0, attendeeDisplayLimit);
 
   const currentUserAttendee = event.attendee?.find(
-    (person) => person.cal_address === user.userData?.email
+    (person) => person.cal_address === user.email
   );
+  const contextualizedEvent = createEventContext(event, calendar, user);
 
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
@@ -365,7 +368,7 @@ export default function EventPreviewModal({
                         window.open(
                           `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                             .map((a) => a.cal_address)
-                            .filter((mail) => mail !== user.userData?.email)
+                            .filter((mail) => mail !== user.email)
                             .join(",")}?subject=${event.title}`
                         )
                       }
@@ -467,147 +470,13 @@ export default function EventPreviewModal({
           </>
         }
         actions={
-          currentUserAttendee &&
-          isOwn && (
-            <>
-              <>
-                <Typography sx={{ marginRight: 2 }}>
-                  {t("eventPreview.attendingQuestion")}
-                </Typography>
-                <Box display="flex" gap="15px" alignItems="center">
-                  <Button
-                    variant={
-                      currentUserAttendee?.partstat === "ACCEPTED"
-                        ? "contained"
-                        : "outlined"
-                    }
-                    color={
-                      currentUserAttendee?.partstat === "ACCEPTED"
-                        ? "success"
-                        : "primary"
-                    }
-                    size="large"
-                    sx={{ borderRadius: "50px" }}
-                    onClick={() => {
-                      if (isRecurring) {
-                        setAfterChoiceFunc(
-                          () => (type: string) =>
-                            handleRSVP(
-                              dispatch,
-                              calendar,
-                              user,
-                              event,
-                              "ACCEPTED",
-                              onClose,
-                              type,
-                              calendarList
-                            )
-                        );
-                        setOpenEditModePopup("attendance");
-                      } else {
-                        handleRSVP(
-                          dispatch,
-                          calendar,
-                          user,
-                          event,
-                          "ACCEPTED",
-                          onClose
-                        );
-                      }
-                    }}
-                  >
-                    {t("eventPreview.accept")}
-                  </Button>
-                  <Button
-                    variant={
-                      currentUserAttendee?.partstat === "TENTATIVE"
-                        ? "contained"
-                        : "outlined"
-                    }
-                    color={
-                      currentUserAttendee?.partstat === "TENTATIVE"
-                        ? "warning"
-                        : "primary"
-                    }
-                    size="large"
-                    sx={{ borderRadius: "50px" }}
-                    onClick={() => {
-                      if (isRecurring) {
-                        setAfterChoiceFunc(
-                          () => (type: string) =>
-                            handleRSVP(
-                              dispatch,
-                              calendar,
-                              user,
-                              event,
-                              "TENTATIVE",
-                              onClose,
-                              type,
-                              calendarList
-                            )
-                        );
-                        setOpenEditModePopup("attendance");
-                      } else {
-                        handleRSVP(
-                          dispatch,
-                          calendar,
-                          user,
-                          event,
-                          "TENTATIVE",
-                          onClose
-                        );
-                      }
-                    }}
-                  >
-                    {t("eventPreview.maybe")}
-                  </Button>
-                  <Button
-                    variant={
-                      currentUserAttendee?.partstat === "DECLINED"
-                        ? "contained"
-                        : "outlined"
-                    }
-                    color={
-                      currentUserAttendee?.partstat === "DECLINED"
-                        ? "error"
-                        : "primary"
-                    }
-                    size="large"
-                    sx={{ borderRadius: "50px" }}
-                    onClick={() => {
-                      if (isRecurring) {
-                        setAfterChoiceFunc(
-                          () => (type: string) =>
-                            handleRSVP(
-                              dispatch,
-                              calendar,
-                              user,
-                              event,
-                              "DECLINED",
-                              onClose,
-                              type,
-                              calendarList
-                            )
-                        );
-                        setOpenEditModePopup("attendance");
-                      } else {
-                        handleRSVP(
-                          dispatch,
-                          calendar,
-                          user,
-                          event,
-                          "DECLINED",
-                          onClose
-                        );
-                      }
-                    }}
-                  >
-                    {t("eventPreview.decline")}
-                  </Button>
-                </Box>
-              </>
-            </>
-          )
+          <AttendanceValidation
+            contextualizedEvent={contextualizedEvent}
+            calendarList={calendarList}
+            user={user}
+            setAfterChoiceFunc={setAfterChoiceFunc}
+            setOpenEditModePopup={setOpenEditModePopup}
+          />
         }
       >
         {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
