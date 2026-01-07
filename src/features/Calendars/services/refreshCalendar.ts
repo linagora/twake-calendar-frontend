@@ -104,7 +104,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
             });
             const events: CalendarEvent[] = extractCalendarEvents(item, {
               calId: calendar.id,
-              color: "",
+              color: calendar.color,
             });
             return events;
           } catch (err) {

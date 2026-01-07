@@ -104,6 +104,7 @@ export const getCalendarsListAsync = createAsyncThunk<
         if (fetchedCal) {
           importedCalendars[id] = {
             ...fetchedCal,
+            color: existingCal.color,
             events: existingCal.events || {},
           };
         }

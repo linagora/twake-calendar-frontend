@@ -1,3 +1,4 @@
+import { defaultColors } from "../../../components/Calendar/utils/calendarColorsUtils";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { parseCalendarEvent } from "../../Events/eventUtils";
 import { CalDavItem } from "../api/types";
@@ -6,7 +7,7 @@ export function extractCalendarEvents(
   item: CalDavItem,
   options: {
     calId: string;
-    color?: string;
+    color?: Record<string, string>;
   }
 ): CalendarEvent[] {
   const data = item.data;
@@ -44,7 +45,7 @@ export function extractCalendarEvents(
 
       return parseCalendarEvent(
         eventProps,
-        { light: options.color ?? "", dark: "" },
+        options?.color ?? defaultColors[0],
         options.calId,
         eventURL,
         valarm
