@@ -27,9 +27,18 @@ export default function CalendarLayout() {
       const calendarRange = getCalendarRange(view.activeStart);
 
       // Refresh events for selected calendars
-      await refreshCalendars(dispatch, Object.values(selectedCalendars));
+      await refreshCalendars(
+        dispatch,
+        Object.values(selectedCalendars),
+        calendarRange
+      );
       if (tempcalendars) {
-        await refreshCalendars(dispatch, Object.values(tempcalendars), "temp");
+        await refreshCalendars(
+          dispatch,
+          Object.values(tempcalendars),
+          calendarRange,
+          "temp"
+        );
       }
     }
   };

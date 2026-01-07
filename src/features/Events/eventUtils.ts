@@ -189,7 +189,7 @@ export function parseCalendarEvent(
       }
     }
   }
-
+  event.calId = calendarid;
   event.URL = eventURL;
   if (!event.uid || !event.start) {
     console.error(

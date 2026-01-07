@@ -11,6 +11,8 @@ import ICAL from "ical.js";
 import moment from "moment-timezone";
 import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
 import { User } from "../../components/Attendees/PeopleSearch";
+import { getCalendarRange } from "../../utils/dateUtils";
+import { CalDavItem } from "../Calendars/api/types";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;
@@ -21,6 +23,20 @@ function resolveTimezoneId(tzid?: string): string | undefined {
     return TIMEZONES.aliases[tzid].aliasTo;
   }
   return tzid;
+}
+
+export async function reportEvent(
+  event: CalendarEvent,
+  match: { start: string; end: string }
+): Promise<CalDavItem> {
+  const response = await api(`dav${event.URL}`, {
+    method: "REPORT",
+    body: JSON.stringify({ match }),
+    headers: { Accept: "application/json" },
+  });
+  const eventData: CalDavItem = await response.json();
+  console.log(eventData);
+  return eventData;
 }
 
 export async function getEvent(event: CalendarEvent, isMaster?: boolean) {

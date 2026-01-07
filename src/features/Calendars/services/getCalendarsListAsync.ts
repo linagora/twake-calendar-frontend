@@ -14,7 +14,6 @@ export const getCalendarsListAsync = createAsyncThunk<
   const state = getState() as any;
   const existingCalendars = state.calendars.list || {};
   const existingUser = { id: state.user?.userData?.openpaasId || undefined };
-  console.log(existingUser);
   try {
     const fetchedCalendars: Record<string, Calendars> = {};
     const user = existingUser.id

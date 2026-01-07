@@ -207,7 +207,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                 },
               })
             );
-            await refreshCalendars(dispatch, Object.values(calendars));
+            await refreshCalendars(
+              dispatch,
+              Object.values(calendars),
+              calendarRange
+            );
             await updateTempCalendar(
               tempcalendars,
               event,
@@ -283,7 +287,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                 },
               })
             );
-            await refreshCalendars(dispatch, Object.values(calendars));
+            await refreshCalendars(
+              dispatch,
+              Object.values(calendars),
+              calendarRange
+            );
             await updateTempCalendar(
               tempcalendars,
               event,

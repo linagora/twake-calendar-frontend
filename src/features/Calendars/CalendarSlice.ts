@@ -852,7 +852,21 @@ const CalendarSlice = createSlice({
         }
 
         for (const id of deletedEvents) {
-          delete target.events[id];
+          Object.keys(target.events).forEach((eventKey) => {
+            if (eventKey === id || eventKey.startsWith(id + "/")) {
+              delete target.events[eventKey];
+            }
+          });
+        }
+
+        for (const event of createdOrUpdatedEvents) {
+          const baseUid = event.uid.split("/")[0];
+
+          Object.keys(target.events).forEach((eventKey) => {
+            if (eventKey === baseUid || eventKey.startsWith(baseUid + "/")) {
+              delete target.events[eventKey];
+            }
+          });
         }
 
         for (const event of createdOrUpdatedEvents) {

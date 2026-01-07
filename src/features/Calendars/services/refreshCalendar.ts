@@ -1,10 +1,15 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  formatDateToYYYYMMDDTHHMMSS,
+  getCalendarRange,
+} from "../../../utils/dateUtils";
 import { formatReduxError } from "../../../utils/errorUtils";
-import { getEvent } from "../../Events/EventApi";
+import { getEvent, reportEvent } from "../../Events/EventApi";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";
 import { Calendars } from "../CalendarTypes";
+import { extractCalendarEvents } from "../utils/extractCalendarEvents";
 
 export interface SyncTokenUpdates {
   calId: string;
@@ -28,6 +33,7 @@ async function processConcurrently<T, R>(
         results.push(result);
       })
       .finally(() => executing.delete(promise));
+    executing.add(promise);
 
     if (executing.size >= maxConcurrency) {
       await Promise.race(executing);
@@ -43,6 +49,10 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
   {
     calendar: Calendars;
     calType?: "temp";
+    calendarRange: {
+      start: Date;
+      end: Date;
+    };
     maxConcurrency?: number;
   },
   {
@@ -50,7 +60,10 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
   }
 >(
   "calendars/refreshWithSyncToken",
-  async ({ calendar, maxConcurrency = 8, calType }, { rejectWithValue }) => {
+  async (
+    { calendar, maxConcurrency = 8, calendarRange, calType },
+    { rejectWithValue }
+  ) => {
     try {
       if (!calendar?.syncToken) {
         return {
@@ -88,10 +101,15 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
         toExpand,
         async (eventUrl) => {
           try {
-            return {
-              ...(await getEvent({ URL: eventUrl } as CalendarEvent)),
+            const item = await reportEvent({ URL: eventUrl } as CalendarEvent, {
+              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
+              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
+            });
+            const events: CalendarEvent[] = extractCalendarEvents(item, {
               calId: calendar.id,
-            };
+              color: "",
+            });
+            return events;
           } catch (err) {
             console.error("Failed to fetch event", eventUrl);
             return undefined;
@@ -103,9 +121,9 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
       return {
         calId: calendar.id,
         deletedEvents,
-        createdOrUpdatedEvents: createdOrUpdatedEvents.filter(
-          Boolean
-        ) as CalendarEvent[],
+        createdOrUpdatedEvents: createdOrUpdatedEvents
+          .flat()
+          .filter(Boolean) as CalendarEvent[],
         calType,
         syncToken: newSyncToken,
       };

@@ -15,6 +15,7 @@ import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
 import { refreshCalendarWithSyncToken } from "../../../features/Calendars/services/refreshCalendar";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { AppDispatch } from "../../../app/store";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -112,9 +113,12 @@ export function stringAvatar(name: string) {
 }
 
 export async function refreshCalendars(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendars: Calendar[],
-  calendarRange: { start: Date; end: Date },
+  calendarRange: {
+    start: Date;
+    end: Date;
+  },
   calType?: "temp"
 ) {
   if (process.env.NODE_ENV === "test") return;
@@ -123,7 +127,9 @@ export async function refreshCalendars(
 
   await Promise.all(
     calendars.map((calendar) =>
-      dispatch(refreshCalendarWithSyncToken({ calendar, calType })).unwrap()
+      dispatch(
+        refreshCalendarWithSyncToken({ calendar, calType, calendarRange })
+      ).unwrap()
     )
   );
 }

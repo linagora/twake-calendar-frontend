@@ -28,6 +28,7 @@ describe("Update tempcalendars called with correct params", () => {
     (
       dispatch: ThunkDispatch<any, any, any>,
       calendars: Calendar[],
+      calendarRange: { start: Date; end: Date },
       calType?: "temp"
     ) => Promise<void>
   >;
@@ -533,13 +534,21 @@ describe("Update tempcalendars called with correct params", () => {
       // Should call refreshCalendars for regular calendars
       expect(refreshCalendarsSpy).toHaveBeenCalledWith(
         expect.any(Function),
-        expect.any(Array)
+        expect.any(Array),
+        expect.objectContaining({
+          start: expect.any(Date),
+          end: expect.any(Date),
+        })
       );
 
       // Should also call refreshCalendars with 'temp' for templist
       expect(refreshCalendarsSpy).toHaveBeenCalledWith(
         expect.any(Function),
         expect.arrayContaining([expect.objectContaining({ id: "temp1" })]),
+        expect.objectContaining({
+          start: expect.any(Date),
+          end: expect.any(Date),
+        }),
         "temp"
       );
     });
