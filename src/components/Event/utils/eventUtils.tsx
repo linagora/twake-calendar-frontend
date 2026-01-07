@@ -5,10 +5,7 @@ import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import {
-  emptyEventsCal,
-  getTempCalendarsListAsync,
-} from "../../../features/Calendars/CalendarSlice";
+import { emptyEventsCal } from "../../../features/Calendars/CalendarSlice";
 import { getCalendarsListAsync } from "../../../features/Calendars/services/getCalendarsListAsync";
 import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";

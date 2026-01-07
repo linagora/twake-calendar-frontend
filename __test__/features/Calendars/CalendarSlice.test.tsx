@@ -24,9 +24,7 @@ import * as userAPI from "../../../src/features/User/userAPI";
 import { configureStore } from "@reduxjs/toolkit";
 import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
-import { cleanup } from "@testing-library/react";
 import { setUserData } from "../../../src/features/User/userSlice";
-import { afterEach } from "node:test";
 
 jest.mock("../../../src/features/Calendars/CalendarApi");
 jest.mock("../../../src/features/User/userAPI");

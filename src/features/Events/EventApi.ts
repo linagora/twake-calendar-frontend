@@ -10,8 +10,6 @@ import {
 import ICAL from "ical.js";
 import moment from "moment-timezone";
 import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
-import { User } from "../../components/Attendees/PeopleSearch";
-import { getCalendarRange } from "../../utils/dateUtils";
 import { CalDavItem } from "../Calendars/api/types";
 
 function resolveTimezoneId(tzid?: string): string | undefined {

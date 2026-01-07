@@ -1,10 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  formatDateToYYYYMMDDTHHMMSS,
-  getCalendarRange,
+  formatDateToYYYYMMDDTHHMMSS
 } from "../../../utils/dateUtils";
 import { formatReduxError } from "../../../utils/errorUtils";
-import { getEvent, reportEvent } from "../../Events/EventApi";
+import { reportEvent } from "../../Events/EventApi";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";

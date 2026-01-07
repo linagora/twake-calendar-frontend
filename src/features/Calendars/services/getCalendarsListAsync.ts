@@ -1,9 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Calendars } from "../CalendarTypes";
-import { getCalendars } from "../CalendarApi";
-import { getOpenPaasUser, getUserDetails } from "../../User/userAPI";
 import { formatReduxError } from "../../../utils/errorUtils";
+import { getOpenPaasUser, getUserDetails } from "../../User/userAPI";
+import { getCalendars } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
+import { Calendars } from "../CalendarTypes";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 
 export const getCalendarsListAsync = createAsyncThunk<

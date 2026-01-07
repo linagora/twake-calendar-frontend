@@ -7,7 +7,8 @@ export function extractCalendarEvents(
   options: {
     calId: string;
     color?: string;
-  }): CalendarEvent[] {
+  }
+): CalendarEvent[] {
   const data = item.data;
   if (!Array.isArray(data)) {
     return [];
@@ -25,9 +26,10 @@ export function extractCalendarEvents(
   }
 
   // VALARM is optional and deeply nested
-  const valarm = Array.isArray(vevents[0]) && Array.isArray(vevents[0][2])
-    ? vevents[0][2][0]
-    : undefined;
+  const valarm =
+    Array.isArray(vevents[0]) && Array.isArray(vevents[0][2])
+      ? vevents[0][2][0]
+      : undefined;
 
   return vevents
     .map((vevent) => {

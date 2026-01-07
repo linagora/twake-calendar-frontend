@@ -1,5 +1,4 @@
 // __test__/features/user/CallbackResume.test.tsx
-import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { CallbackResume } from "../../../src/features/User/LoginCallback";
 import { useAppDispatch } from "../../../src/app/hooks";
