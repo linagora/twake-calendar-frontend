@@ -126,7 +126,11 @@ export async function refreshCalendars(
     calendars.map((calendar) =>
       dispatch(
         refreshCalendarWithSyncToken({ calendar, calType, calendarRange })
-      ).unwrap()
+      )
+        .unwrap()
+        .catch((err) => {
+          console.error(`Failed to refresh calendar ${calendar.id}:`, err);
+        })
     )
   );
 }

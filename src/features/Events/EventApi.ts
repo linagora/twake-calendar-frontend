@@ -33,7 +33,6 @@ export async function reportEvent(
     headers: { Accept: "application/json" },
   });
   const eventData: CalDavItem = await response.json();
-  console.log(eventData);
   return eventData;
 }
 

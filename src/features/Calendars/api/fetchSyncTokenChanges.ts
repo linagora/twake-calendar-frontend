@@ -1,9 +1,9 @@
 import { api } from "../../../utils/apiUtils";
-import { Calendars } from "../CalendarTypes";
+import { Calendar } from "../CalendarTypes";
 import { DavSyncResponse } from "./types";
 
 export async function fetchSyncTokenChanges(
-  calendar: Calendars
+  calendar: Calendar
 ): Promise<DavSyncResponse> {
   const response = await api(`dav/calendars/${calendar.id}.json`, {
     method: "REPORT",

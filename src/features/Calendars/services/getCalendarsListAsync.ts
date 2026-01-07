@@ -3,11 +3,11 @@ import { formatReduxError } from "../../../utils/errorUtils";
 import { getOpenPaasUser, getUserDetails } from "../../User/userAPI";
 import { getCalendars } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
-import { Calendars } from "../CalendarTypes";
+import { Calendar } from "../CalendarTypes";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 
 export const getCalendarsListAsync = createAsyncThunk<
-  { importedCalendars: Record<string, Calendars>; errors: string },
+  { importedCalendars: Record<string, Calendar>; errors: string },
   void,
   { rejectValue: RejectedError; state: any }
 >("calendars/getCalendars", async (_, { rejectWithValue, getState }) => {
@@ -15,7 +15,7 @@ export const getCalendarsListAsync = createAsyncThunk<
   const existingCalendars = state.calendars.list || {};
   const existingUser = { id: state.user?.userData?.openpaasId || undefined };
   try {
-    const fetchedCalendars: Record<string, Calendars> = {};
+    const fetchedCalendars: Record<string, Calendar> = {};
     const user = existingUser.id
       ? existingUser
       : ((await getOpenPaasUser()) as Record<string, string>);
@@ -89,7 +89,7 @@ export const getCalendarsListAsync = createAsyncThunk<
       }
     );
 
-    const importedCalendars: Record<string, Calendars> = {};
+    const importedCalendars: Record<string, Calendar> = {};
 
     const fetchedIds = new Set(Object.keys(fetchedCalendars));
     const existingIds = new Set(Object.keys(existingCalendars));

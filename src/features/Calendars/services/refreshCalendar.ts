@@ -5,7 +5,7 @@ import { reportEvent } from "../../Events/EventApi";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";
-import { Calendars } from "../CalendarTypes";
+import { Calendar } from "../CalendarTypes";
 import { extractCalendarEvents } from "../utils/extractCalendarEvents";
 
 export interface SyncTokenUpdates {
@@ -44,7 +44,7 @@ async function processConcurrently<T, R>(
 export const refreshCalendarWithSyncToken = createAsyncThunk<
   SyncTokenUpdates,
   {
-    calendar: Calendars;
+    calendar: Calendar;
     calType?: "temp";
     calendarRange: {
       start: Date;
