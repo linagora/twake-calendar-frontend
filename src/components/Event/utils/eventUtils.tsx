@@ -130,18 +130,14 @@ export async function refreshCalendars(
     )
   );
 
-  const failures = results.filter(
-    (result): result is PromiseRejectedResult => result.status === "rejected"
-  );
-
-  if (failures.length > 0) {
-    failures.forEach((failure, index) => {
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
       console.error(
         `Failed to refresh calendar ${calendars[index].id}:`,
-        failure.reason
+        result.reason
       );
-    });
-  }
+    }
+  });
 }
 
 export async function refreshSingularCalendar(
