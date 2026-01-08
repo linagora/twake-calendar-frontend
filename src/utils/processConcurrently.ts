@@ -1,7 +1,8 @@
 export async function processConcurrently<T, R>(
   items: T[],
   processor: (item: T) => Promise<R>,
-  maxConcurrency: number): Promise<R[]> {
+  maxConcurrency: number
+): Promise<R[]> {
   const results: R[] = [];
   const executing = new Set<Promise<void>>();
 

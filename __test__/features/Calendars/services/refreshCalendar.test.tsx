@@ -234,7 +234,10 @@ describe("refreshCalendarWithSyncToken", () => {
     expect(result.type).toBe("calendars/refreshWithSyncToken/fulfilled");
     if (result.type === "calendars/refreshWithSyncToken/fulfilled") {
       const payload = result.payload as SyncTokenUpdates;
-      expect(payload?.deletedEvents).toEqual(["deleted-event"]);
+      expect(payload?.deletedEvents).toEqual([
+        "deleted-event",
+        "updated-event",
+      ]);
       expect(payload?.createdOrUpdatedEvents).toHaveLength(1);
       expect(payload?.createdOrUpdatedEvents[0].uid).toBe("updated-event");
     }

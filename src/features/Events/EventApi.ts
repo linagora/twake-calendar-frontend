@@ -33,6 +33,9 @@ export async function reportEvent(
     body: JSON.stringify({ match }),
     headers: { Accept: "application/json" },
   });
+  if (!response.ok) {
+    throw new Error(`REPORT request failed with status ${response.status}`);
+  }
   const eventData: CalDavItem = await response.json();
   return eventData;
 }

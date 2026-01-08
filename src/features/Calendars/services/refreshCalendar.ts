@@ -10,7 +10,7 @@ import { processSyncUpdates } from "../utils/processSyncTokenUpdates";
 
 export interface SyncTokenUpdates {
   calId: string;
-  deletedEvents: Set<string>; // working with a Set for deletion avoids O(nxm) complexity
+  deletedEvents: string[];
   createdOrUpdatedEvents: CalendarEvent[];
   calType?: "temp";
   syncToken?: string;
@@ -40,7 +40,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
       if (!calendar?.syncToken) {
         return {
           calId: calendar.id,
-          deletedEvents: new Set<string>(),
+          deletedEvents: [],
           createdOrUpdatedEvents: [],
           calType,
         };

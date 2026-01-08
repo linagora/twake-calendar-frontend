@@ -1,14 +1,14 @@
 import { DavSyncItem } from "../api/types";
 
 export interface ProcessedSyncUpdates {
-  toDelete: Set<string>;
+  toDelete: string[];
   toExpand: string[];
 }
 
 export function processSyncUpdates(
   updates: DavSyncItem[]
 ): ProcessedSyncUpdates {
-  const toDelete = new Set<string>();
+  const toDelete: string[] = [];
   const toExpand: string[] = [];
 
   for (const update of updates) {
@@ -17,10 +17,10 @@ export function processSyncUpdates(
     const fileName = extractFileNameFromHref(href);
 
     if (update.status === 404) {
-      toDelete.add(fileName);
+      toDelete.push(fileName);
     } else if (update.status === 200) {
       toExpand.push(href);
-      toDelete.add(fileName); // we delete the old version of the event to replace it by the new when it's updated
+      toDelete.push(fileName); // we delete the old version of the event to replace it by the new when it's updated
     } else if (update.status === 410) {
       throw new Error("SYNC_TOKEN_INVALID");
     }
@@ -30,6 +30,6 @@ export function processSyncUpdates(
 }
 
 function extractFileNameFromHref(href: string): string {
-  const fileNameMatch = href.match(/\/([^\/]+)\.ics$/);
+  const fileNameMatch = href.match(/\/([^\/]+)\.ics$/); // CalDAV href are like /calendars/userID/CalendarID/EventId.ics
   return fileNameMatch ? fileNameMatch[1] : href;
 }

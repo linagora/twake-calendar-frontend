@@ -33,7 +33,9 @@ function CalendarPopover({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
-  const isOwn = calendar ? extractEventBaseUuid(calendar?.id) === userId : true;
+  const isOwn = calendar?.id
+    ? extractEventBaseUuid(calendar.id) === userId
+    : true;
 
   // existing calendar params
   const [name, setName] = useState("");

@@ -533,7 +533,7 @@ const CalendarSlice = createSlice({
         action.payload.event.uid
       ].URL = `/calendars/${action.payload.calendarUid}/${extractEventBaseUuid(
         action.payload.event.uid
-      )}.isc`;
+      )}.ics`;
     },
     removeEvent: (
       state,
@@ -852,12 +852,11 @@ const CalendarSlice = createSlice({
           return;
         }
 
+        const deletedSet = new Set(deletedEvents); // working with a Set for deletion avoids O(nxm) complexity
         Object.keys(target.events)
           .filter((eventKey) => {
             const baseUid = extractEventBaseUuid(eventKey);
-            if (deletedEvents.has(eventKey) || deletedEvents.has(baseUid)) {
-              return eventKey;
-            }
+            return deletedSet.has(eventKey) || deletedSet.has(baseUid);
           })
           .forEach((eventKey) => delete target.events[eventKey]);
 

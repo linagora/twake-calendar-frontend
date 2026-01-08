@@ -5,8 +5,9 @@ import { Calendar } from "../CalendarTypes";
 import { extractCalendarEvents } from "./extractCalendarEvents";
 
 export function expandEventFunction(
-  calendarRange: { start: Date; end: Date; },
-  calendar: Calendar): (item: string) => Promise<CalendarEvent[] | undefined> {
+  calendarRange: { start: Date; end: Date },
+  calendar: Calendar
+): (item: string) => Promise<CalendarEvent[] | undefined> {
   return async (eventUrl) => {
     try {
       const item = await reportEvent({ URL: eventUrl } as CalendarEvent, {
