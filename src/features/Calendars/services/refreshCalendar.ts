@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import pMap from "p-map";
 import { formatReduxError } from "../../../utils/errorUtils";
-import { processConcurrently } from "../../../utils/processConcurrently";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";
@@ -52,10 +52,10 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
 
       const { toDelete, toExpand } = processSyncUpdates(updates);
 
-      const createdOrUpdatedEvents = await processConcurrently(
+      const createdOrUpdatedEvents = await pMap(
         toExpand,
         expandEventFunction(calendarRange, calendar),
-        maxConcurrency
+        { concurrency: maxConcurrency }
       );
 
       return {
