@@ -152,7 +152,9 @@
         "-PT1D": "1 ngày trước",
         "-PT2D": "2 ngày trước",
         "-PT1W": "1 tuần trước",
-        "EMAIL": "email"
+        "EMAIL": "email",
+        "DISPLAY": "hiển thị",
+        "AUDIO": "âm thanh"
       },
       "showMeAs": "Hiển thị tôi là",
       "free": "Rảnh",

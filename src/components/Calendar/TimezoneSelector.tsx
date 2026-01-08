@@ -1,4 +1,4 @@
-import { Button, Popover } from "@mui/material";
+import { Button, Popover } from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";

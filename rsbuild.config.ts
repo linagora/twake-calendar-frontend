@@ -23,4 +23,10 @@ export default defineConfig({
     },
     minify: false,
   },
+  resolve: {
+    alias: {
+      react: require.resolve("react"),
+      "react-dom": require.resolve("react-dom"),
+    },
+  },
 });

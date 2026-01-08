@@ -2,8 +2,14 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
+import {
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  Typography,
+  CircularProgress,
+} from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";

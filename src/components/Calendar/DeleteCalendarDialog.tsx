@@ -1,10 +1,12 @@
-import Dialog from "@mui/material/Dialog";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@linagora/twake-mui";
 import { Calendar } from "../../features/Calendars/CalendarTypes";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
 import { useI18n } from "twake-i18n";
 
 export function DeleteCalendarDialog({

@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIAL = credentials('dockerHub')
+        GITHUB_CREDENTIAL = credentials('github')
     }
 
     tools {
@@ -18,6 +19,12 @@ pipeline {
     stages {
       stage('Compile') {
           steps {
+            sh '''
+            cat > .npmrc << EOF
+            @linagora:registry=https://npm.pkg.github.com/
+            //npm.pkg.github.com/:_authToken=${GITHUB_CREDENTIAL_PSW}
+            EOF
+            '''
               sh 'npm install'
           }
       }

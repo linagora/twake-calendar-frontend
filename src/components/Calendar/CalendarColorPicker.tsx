@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
   useTheme,
-} from "@mui/material";
+} from "@linagora/twake-mui";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useI18n } from "twake-i18n";

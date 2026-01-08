@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Typography, Link } from "@linagora/twake-mui";
 
 type InfoRowProps = {
   icon: React.ReactNode;
