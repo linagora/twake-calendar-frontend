@@ -8,6 +8,7 @@ import { refreshSingularCalendar } from "../../Event/utils/eventUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { useI18n } from "twake-i18n";
 import { detectDateTimeFormat } from "../../Event/utils/dateTimeHelpers";
+import { extractEventBaseUuid } from "../../../utils/extractEventBaseUuid";
 
 function convertEventDateTimeToISO(
   datetime: string,
@@ -102,7 +103,7 @@ export const eventToFullCalendarFormat = (
     .map((e) => {
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
-      const isPersonnalEvent = e.calId.split("/")[0] === userId;
+      const isPersonnalEvent = extractEventBaseUuid(e.calId) === userId;
 
       const convertedEvent: any = {
         ...e,

@@ -29,6 +29,7 @@ import UserSearch from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { createAttendee } from "../../features/User/models/attendee.mapper";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export default function SearchBar() {
   const { t } = useI18n();
@@ -38,10 +39,10 @@ export default function SearchBar() {
   );
   const userId = useAppSelector((state) => state.user.userData?.openpaasId);
   const personnalCalendars = userId
-    ? calendars.filter((c) => c.id.split("/")[0] === userId)
+    ? calendars.filter((c) => extractEventBaseUuid(c.id) === userId)
     : [];
   const sharedCalendars = userId
-    ? calendars.filter((c) => c.id.split("/")[0] !== userId)
+    ? calendars.filter((c) => extractEventBaseUuid(c.id) !== userId)
     : calendars;
 
   const [search, setSearch] = useState("");

@@ -1,44 +1,19 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
 import { formatReduxError } from "../../../utils/errorUtils";
-import { reportEvent } from "../../Events/EventApi";
+import { processConcurrently } from "../../../utils/processConcurrently";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";
 import { Calendar } from "../CalendarTypes";
-import { extractCalendarEvents } from "../utils/extractCalendarEvents";
+import { expandEventFunction } from "../utils/expandEventFunction";
+import { processSyncUpdates } from "../utils/processSyncTokenUpdates";
 
 export interface SyncTokenUpdates {
   calId: string;
-  deletedEvents: string[];
+  deletedEvents: Set<string>; // working with a Set for deletion avoids O(nxm) complexity
   createdOrUpdatedEvents: CalendarEvent[];
   calType?: "temp";
   syncToken?: string;
-}
-
-async function processConcurrently<T, R>(
-  items: T[],
-  processor: (item: T) => Promise<R>,
-  maxConcurrency: number
-): Promise<R[]> {
-  const results: R[] = [];
-  const executing = new Set<Promise<void>>();
-
-  for (const item of items) {
-    const promise = processor(item)
-      .then((result) => {
-        results.push(result);
-      })
-      .finally(() => executing.delete(promise));
-    executing.add(promise);
-
-    if (executing.size >= maxConcurrency) {
-      await Promise.race(executing);
-    }
-  }
-
-  await Promise.all(executing);
-  return results;
 }
 
 export const refreshCalendarWithSyncToken = createAsyncThunk<
@@ -65,7 +40,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
       if (!calendar?.syncToken) {
         return {
           calId: calendar.id,
-          deletedEvents: [],
+          deletedEvents: new Set<string>(),
           createdOrUpdatedEvents: [],
           calType,
         };
@@ -75,48 +50,17 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
       const newSyncToken = response["sync-token"];
       const updates = response?._embedded?.["dav:item"] ?? [];
 
-      const deletedEvents: string[] = [];
-      const toExpand: string[] = [];
-
-      for (const update of updates) {
-        const href = update?._links?.self?.href;
-        if (!href) continue;
-
-        if (update.status === 404) {
-          const fileNameMatch = href.match(/\/([^\/]+)\.ics$/);
-          const fileName = fileNameMatch ? fileNameMatch[1] : href;
-          deletedEvents.push(fileName);
-        } else if (update.status === 200) {
-          toExpand.push(href);
-        } else if (update.status === 410) {
-          throw new Error("SYNC_TOKEN_INVALID");
-        }
-      }
+      const { toDelete, toExpand } = processSyncUpdates(updates);
 
       const createdOrUpdatedEvents = await processConcurrently(
         toExpand,
-        async (eventUrl) => {
-          try {
-            const item = await reportEvent({ URL: eventUrl } as CalendarEvent, {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            });
-            const events: CalendarEvent[] = extractCalendarEvents(item, {
-              calId: calendar.id,
-              color: calendar.color,
-            });
-            return events;
-          } catch (err) {
-            console.error("Failed to fetch event", eventUrl);
-            return undefined;
-          }
-        },
+        expandEventFunction(calendarRange, calendar),
         maxConcurrency
       );
 
       return {
         calId: calendar.id,
-        deletedEvents,
+        deletedEvents: toDelete,
         createdOrUpdatedEvents: createdOrUpdatedEvents
           .flat()
           .filter(Boolean) as CalendarEvent[],

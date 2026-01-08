@@ -14,6 +14,7 @@ import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
 import { defaultColors } from "./utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function CalendarPopover({
   open,
@@ -32,7 +33,7 @@ function CalendarPopover({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calendars = useAppSelector((state) => state.calendars.list);
-  const isOwn = calendar ? calendar?.id.split("/")[0] === userId : true;
+  const isOwn = calendar ? extractEventBaseUuid(calendar?.id) === userId : true;
 
   // existing calendar params
   const [name, setName] = useState("");

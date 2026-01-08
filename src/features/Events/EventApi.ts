@@ -11,6 +11,7 @@ import ICAL from "ical.js";
 import moment from "moment-timezone";
 import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
 import { CalDavItem } from "../Calendars/api/types";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;
@@ -240,7 +241,7 @@ export const deleteEventInstance = async (
   const seriesEvent = await getEvent(
     {
       ...event,
-      uid: event.uid.split("/")[0],
+      uid: extractEventBaseUuid(event.uid),
     },
     true
   );

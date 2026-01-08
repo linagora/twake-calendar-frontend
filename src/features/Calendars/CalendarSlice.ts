@@ -34,6 +34,7 @@ import { browserDefaultTimeZone } from "../../utils/timezone";
 import { getCalendarDetailAsync } from "./services/getCalendarDetailAsync";
 import { refreshCalendarWithSyncToken } from "./services/refreshCalendar";
 import { getCalendarsListAsync } from "./services/getCalendarsListAsync";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 // Define error type for rejected actions
 export interface RejectedError {
@@ -530,9 +531,9 @@ const CalendarSlice = createSlice({
         action.payload.event;
       state.list[action.payload.calendarUid].events[
         action.payload.event.uid
-      ].URL = `/calendars/${action.payload.calendarUid}/${
-        action.payload.event.uid.split("/")[0]
-      }.isc`;
+      ].URL = `/calendars/${action.payload.calendarUid}/${extractEventBaseUuid(
+        action.payload.event.uid
+      )}.isc`;
     },
     removeEvent: (
       state,
@@ -735,7 +736,7 @@ const CalendarSlice = createSlice({
         if (recurrenceId) {
           Object.keys(state.list[action.payload.calId].events).forEach(
             (element) => {
-              if (element.split("/")[0] === baseId) {
+              if (extractEventBaseUuid(element) === baseId) {
                 delete state.list[action.payload.calId].events[element];
               }
             }
@@ -851,23 +852,14 @@ const CalendarSlice = createSlice({
           return;
         }
 
-        const deletedSet = new Set(deletedEvents);
-        const updatedBaseUids = new Set(
-          createdOrUpdatedEvents.map((e) => e.uid.split("/")[0])
-        );
-
-        Object.keys(target.events).forEach((eventKey) => {
-          const baseUid = eventKey.split("/")[0];
-
-          if (deletedSet.has(eventKey) || deletedSet.has(baseUid)) {
-            delete target.events[eventKey];
-            return;
-          }
-
-          if (updatedBaseUids.has(baseUid)) {
-            delete target.events[eventKey];
-          }
-        });
+        Object.keys(target.events)
+          .filter((eventKey) => {
+            const baseUid = extractEventBaseUuid(eventKey);
+            if (deletedEvents.has(eventKey) || deletedEvents.has(baseUid)) {
+              return eventKey;
+            }
+          })
+          .forEach((eventKey) => delete target.events[eventKey]);
 
         for (const event of createdOrUpdatedEvents) {
           target.events[event.uid] = event;

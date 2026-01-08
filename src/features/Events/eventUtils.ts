@@ -8,6 +8,7 @@ import {
   detectDateTimeFormat,
 } from "../../components/Event/utils/dateTimeHelpers";
 import { createAttendee } from "../User/models/attendee.mapper";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 type RawEntry = [string, Record<string, string>, string, any];
 
 function resolveTimezoneId(tzid?: string): string | undefined {
@@ -293,7 +294,7 @@ export function makeVevent(
   const vevent: any[] = [
     "vevent",
     [
-      ["uid", {}, "text", event.uid.split("/")[0]],
+      ["uid", {}, "text", extractEventBaseUuid(event.uid)],
       ["transp", {}, "text", event.transp ?? "OPAQUE"],
       [
         "dtstart",
