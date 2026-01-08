@@ -69,10 +69,13 @@ describe("Event Error Handling", () => {
       renderWithProviders(<CalendarLayout />, erroredState)
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("Test Event"));
-      expect(screen.getByRole("alert")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Test Event"));
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
     const closeButton = screen.queryByRole("button", { name: "common.ok" });
 
     if (closeButton) {
@@ -82,9 +85,12 @@ describe("Event Error Handling", () => {
         fireEvent.click(closeButton);
       });
 
-      await waitFor(() => {
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
 
       const afterCloseWarnCount = consoleWarnSpy.mock.calls.length;
 

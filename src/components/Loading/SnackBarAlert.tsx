@@ -1,5 +1,5 @@
-import Alert, { AlertColor } from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
+import { Alert, Snackbar } from "@linagora/twake-mui";
+import type { AlertColor } from "@linagora/twake-mui";
 
 export function SnackbarAlert({
   open,

@@ -1,18 +1,23 @@
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import Typography from "@mui/material/Typography";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Typography,
+  IconButton,
+  Checkbox,
+  Divider,
+  ListItem,
+  Menu,
+  MenuItem,
+} from "@linagora/twake-mui";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useMemo, useEffect } from "react";
 import CalendarPopover from "./CalendarModal";
 import { Calendar } from "../../features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import IconButton from "@mui/material/IconButton";
-import Checkbox from "@mui/material/Checkbox";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarSearch from "./CalendarSearch";
-import { Divider, ListItem, Menu, MenuItem } from "@mui/material";
 import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { trimLongTextWithoutSpace } from "../../utils/textUtils";

@@ -1,4 +1,4 @@
-import { Button, DialogActions, Tab, Tabs } from "@mui/material";
+import { Button, Tab, Tabs } from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -198,7 +198,7 @@ function CalendarPopover({
         </Tabs>
       }
       actions={
-        <DialogActions>
+        <>
           <Button
             variant="outlined"
             onClick={(e) => handleClose({}, "backdropClick")}
@@ -216,7 +216,7 @@ function CalendarPopover({
                 ? t("actions.save")
                 : t("actions.create")}
           </Button>
-        </DialogActions>
+        </>
       }
     >
       {tab === "import" && (

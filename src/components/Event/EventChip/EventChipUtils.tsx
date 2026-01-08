@@ -1,7 +1,7 @@
 import CancelIcon from "@mui/icons-material/Cancel";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import { Box, getContrastRatio } from "@mui/material";
+import { Box, getContrastRatio } from "@linagora/twake-mui";
 import moment from "moment";
 import React, { useLayoutEffect, useState } from "react";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";

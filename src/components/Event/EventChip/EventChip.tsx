@@ -5,7 +5,7 @@ import {
   CardContent,
   CardHeader,
   Typography,
-} from "@mui/material";
+} from "@linagora/twake-mui";
 import React, { useEffect, useRef, useState } from "react";
 import { stringAvatar } from "../utils/eventUtils";
 import { ErrorEventChip } from "./ErrorEventChip";
@@ -110,7 +110,7 @@ export function EventChip({
           event._def.extendedProps.organizer?.cn ??
             event._def.extendedProps.organizer?.cal_address
         )
-      : { style: {}, children: null };
+      : { color: undefined, children: null };
 
     return (
       <Card
@@ -261,10 +261,9 @@ export function EventChip({
           (window as any).displayOrgAvatar && (
             <Avatar
               children={OrganizerAvatar.children}
-              style={{
-                ...OrganizerAvatar.style,
-                width: "20px",
-                height: "20px",
+              color={OrganizerAvatar.color}
+              size="xs"
+              sx={{
                 bottom: 0,
                 right: 0,
                 margin: "8px",

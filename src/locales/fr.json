@@ -154,7 +154,9 @@
         "-PT1D": "1 jour avant",
         "-PT2D": "2 jours avant",
         "-PT1W": "1 semaine avant",
-        "EMAIL": "e-mail"
+        "EMAIL": "e-mail",
+        "DISPLAY": "affichage",
+        "AUDIO": "audio"
       },
       "showMeAs": "M'afficher comme",
       "free": "Libre",

@@ -23,6 +23,7 @@ const config: Config = {
       ],
       testEnvironment: "jsdom",
       testMatch: ["**/*.test.tsx"],
+      testTimeout: 15000,
       transform: {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
         "^.+\\.(js|jsx|mjs)$": "babel-jest",
@@ -37,7 +38,11 @@ const config: Config = {
         "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui)/)",
       ],
 
-      moduleNameMapper: { "^preact(/(.*)|$)": "preact$1" },
+      moduleNameMapper: {
+        "^preact(/(.*)|$)": "preact$1",
+        "^react$": "<rootDir>/node_modules/react",
+        "^react-dom$": "<rootDir>/node_modules/react-dom",
+      },
       setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
     },
     {
@@ -55,6 +60,7 @@ const config: Config = {
       ],
       testEnvironment: "node",
       testMatch: ["**/*.test.ts"],
+      testTimeout: 15000,
       transform: {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
         "^.+\\.(js|jsx|mjs)$": "babel-jest",

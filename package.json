@@ -12,6 +12,7 @@
     "@fullcalendar/moment-timezone": "^6.1.19",
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
+    "@linagora/twake-mui": "1.1.1",
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
     "@mui/x-date-pickers": "^8.14.0",
@@ -89,6 +90,7 @@
     "jest-preview": "^0.3.1",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   }
 }

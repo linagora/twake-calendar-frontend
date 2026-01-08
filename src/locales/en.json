@@ -152,7 +152,9 @@
         "-PT1D": "1 day before",
         "-PT2D": "2 days before",
         "-PT1W": "1 week before",
-        "EMAIL": "email"
+        "EMAIL": "email",
+        "DISPLAY": "display",
+        "AUDIO": "audio"
       },
       "showMeAs": "Show me as",
       "free": "Free",
@@ -188,6 +190,7 @@
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",
     "updateParticipationStatus": "Update the participation status",
+    "deleteRecurrentEvent": "Delete the recurrent event",
     "thisEvent": "This event",
     "allEvents": "All the events"
   },
