@@ -47,7 +47,7 @@ export function RSVPButton({
           ? rsvpColor[rsvpValue]
           : "primary"
       }
-      size="large"
+      size="medium"
       sx={{ borderRadius: "50px" }}
       onClick={() =>
         handleRSVPClick(

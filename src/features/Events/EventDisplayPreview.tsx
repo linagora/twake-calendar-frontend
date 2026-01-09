@@ -18,7 +18,6 @@ import EventPopover from "./EventModal";
 import {
   Button,
   Chip,
-  DialogActions,
   IconButton,
   Menu,
   MenuItem,
@@ -305,180 +304,150 @@ export default function EventPreviewModal({
         actionsJustifyContent="center"
         style={{ overflow: "auto" }}
         title={
-          <>
-            <DialogActions>
-              <Box>
-                {(window as any).DEBUG && (
-                  <IconButton
-                    onClick={async () => {
-                      const icsContent = await dlEvent(event);
-                      const blob = new Blob([icsContent], {
-                        type: "text/calendar",
-                      });
-                      const url = URL.createObjectURL(blob);
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            gap={0.5}
+            width="100%"
+          >
+            {(window as any).DEBUG && (
+              <IconButton
+                size="small"
+                onClick={async () => {
+                  let url: string | null = null;
+                  try {
+                    const icsContent = await dlEvent(event);
+                    const blob = new Blob([icsContent], {
+                      type: "text/calendar",
+                    });
+                    url = URL.createObjectURL(blob);
 
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = `${eventId}.ics`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                      URL.revokeObjectURL(url);
-                    }}
-                  >
-                    <FileDownloadOutlinedIcon />
-                  </IconButton>
-                )}
-                {isOrganizer && isOwn && (
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (isRecurring) {
-                        setAfterChoiceFunc(() => () => {
-                          setHidePreview(true);
-                          setOpenUpdateModal(true);
-                        });
-                        setOpenEditModePopup("edit");
-                      } else {
-                        setHidePreview(true);
-                        setOpenUpdateModal(true);
-                      }
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                )}
-                {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
-                  <IconButton
-                    size="small"
-                    onClick={(e) => setToggleActionMenu(e.currentTarget)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                )}
-                <Menu
-                  open={Boolean(toggleActionMenu)}
-                  onClose={() => setToggleActionMenu(null)}
-                  anchorEl={toggleActionMenu}
-                >
-                  {mailSpaUrl && attendees.length > 0 && (
-                    <MenuItem
-                      onClick={() =>
-                        window.open(
-                          `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
-                            .map((a) => a.cal_address)
-                            .filter((mail) => mail !== user.email)
-                            .join(
-                              ","
-                            )}?subject=${encodeURIComponent(event.title ?? "")}`
-                        )
-                      }
-                    >
-                      {t("eventPreview.emailAttendees")}
-                    </MenuItem>
-                  )}
-                  <EventDuplication
-                    event={event}
-                    onClose={() => setToggleActionMenu(null)}
-                    onOpenDuplicate={() => {
-                      setToggleActionMenu(null);
-                      setHidePreview(true);
-                      setOpenDuplicateModal(true);
-                    }}
-                  />
-                  {isOrganizer && (
-                    <MenuItem
-                      onClick={async () => {
-                        if (isRecurring) {
-                          setAfterChoiceFunc(
-                            () => (typeOfAction?: "solo" | "all" | undefined) =>
-                              handleDelete(
-                                isRecurring,
-                                typeOfAction,
-                                onClose,
-                                dispatch,
-                                calendar,
-                                event,
-                                calId,
-                                eventId
-                              )
-                          );
-                          setOpenEditModePopup("delete");
-                        } else {
-                          onClose({}, "backdropClick");
-                          try {
-                            const result = await dispatch(
-                              deleteEventAsync({
-                                calId,
-                                eventId,
-                                eventURL: event.URL,
-                              })
-                            );
-
-                            // For compatibility with tests that may not mock unwrap
-                            if (result && typeof result.unwrap === "function") {
-                              await result.unwrap();
-                            }
-
-                            updateTempList();
-                          } catch (error) {
-                            console.error("Failed to delete event:", error);
-                          }
-                        }
-                      }}
-                    >
-                      {t("eventPreview.deleteEvent")}
-                    </MenuItem>
-                  )}
-                </Menu>
-                <IconButton
-                  size="small"
-                  onClick={() => onClose({}, "backdropClick")}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-            </DialogActions>
-            <Box display="flex" flexDirection="row">
-              {event.class === "PRIVATE" &&
-                (isOwn ? (
-                  <Tooltip
-                    title={t("eventPreview.privateEvent.tooltipOwn")}
-                    placement="top"
-                  >
-                    <LockOutlineIcon />
-                  </Tooltip>
-                ) : (
-                  <LockOutlineIcon />
-                ))}
-              <Typography
-                variant="h5"
-                sx={{
-                  fontSize: "24px",
-                  fontWeight: 600,
-                  wordBreak: "break-word",
-                  fontFamily: "Inter, sans-serif",
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `${eventId}.ics`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  } catch (error) {
+                    console.error("Failed to download ICS file:", error);
+                  } finally {
+                    if (url) URL.revokeObjectURL(url);
+                  }
                 }}
-                gutterBottom
               >
-                {formatEventChipTitle(event, t)}
-              </Typography>
-              {event.transp === "TRANSPARENT" && (
-                <Tooltip title={t("eventPreview.free.tooltip")} placement="top">
-                  <Chip
-                    icon={<CircleIcon color="success" fontSize="small" />}
-                    label={t("eventPreview.free.label")}
-                  />
-                </Tooltip>
+                <FileDownloadOutlinedIcon />
+              </IconButton>
+            )}
+            {isOrganizer && isOwn && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (isRecurring) {
+                    setAfterChoiceFunc(() => () => {
+                      setHidePreview(true);
+                      setOpenUpdateModal(true);
+                    });
+                    setOpenEditModePopup("edit");
+                  } else {
+                    setHidePreview(true);
+                    setOpenUpdateModal(true);
+                  }
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+              <IconButton
+                size="small"
+                onClick={(e) => setToggleActionMenu(e.currentTarget)}
+              >
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <Menu
+              open={Boolean(toggleActionMenu)}
+              onClose={() => setToggleActionMenu(null)}
+              anchorEl={toggleActionMenu}
+            >
+              {mailSpaUrl && attendees.length > 0 && (
+                <MenuItem
+                  onClick={() =>
+                    window.open(
+                      `${mailSpaUrl}/mailto/?uri=mailto:${attendees
+                        .map((a) => a.cal_address)
+                        .filter((mail) => mail !== user.email)
+                        .join(
+                          ","
+                        )}?subject=${encodeURIComponent(event.title ?? "")}`
+                    )
+                  }
+                >
+                  {t("eventPreview.emailAttendees")}
+                </MenuItem>
               )}
-            </Box>
-            <Typography color="text.secondaryContainer" gutterBottom>
-              {formatDate(event.start, t, timezone, event.allday)}
-              {event.end &&
-                formatEnd(event.start, event.end, t, timezone, event.allday) &&
-                ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
-            </Typography>
-          </>
+              <EventDuplication
+                event={event}
+                onClose={() => setToggleActionMenu(null)}
+                onOpenDuplicate={() => {
+                  setToggleActionMenu(null);
+                  setHidePreview(true);
+                  setOpenDuplicateModal(true);
+                }}
+              />
+              {isOrganizer && (
+                <MenuItem
+                  onClick={async () => {
+                    if (isRecurring) {
+                      setAfterChoiceFunc(
+                        () => (typeOfAction?: "solo" | "all" | undefined) =>
+                          handleDelete(
+                            isRecurring,
+                            typeOfAction,
+                            onClose,
+                            dispatch,
+                            calendar,
+                            event,
+                            calId,
+                            eventId
+                          )
+                      );
+                      setOpenEditModePopup("delete");
+                    } else {
+                      onClose({}, "backdropClick");
+                      try {
+                        const result = await dispatch(
+                          deleteEventAsync({
+                            calId,
+                            eventId,
+                            eventURL: event.URL,
+                          })
+                        );
+
+                        // For compatibility with tests that may not mock unwrap
+                        if (result && typeof result.unwrap === "function") {
+                          await result.unwrap();
+                        }
+
+                        await updateTempList();
+                      } catch (error) {
+                        console.error("Failed to delete event:", error);
+                      }
+                    }
+                  }}
+                >
+                  {t("eventPreview.deleteEvent")}
+                </MenuItem>
+              )}
+            </Menu>
+            <IconButton
+              size="small"
+              onClick={() => onClose({}, "backdropClick")}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
         }
         actions={
           <AttendanceValidation
@@ -490,6 +459,52 @@ export default function EventPreviewModal({
           />
         }
       >
+        <Box mb={3}>
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            gap={1}
+            mb={1}
+          >
+            {event.class === "PRIVATE" &&
+              (isOwn ? (
+                <Tooltip
+                  title={t("eventPreview.privateEvent.tooltipOwn")}
+                  placement="top"
+                >
+                  <LockOutlineIcon />
+                </Tooltip>
+              ) : (
+                <LockOutlineIcon />
+              ))}
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: "24px",
+                fontWeight: 600,
+                wordBreak: "break-word",
+                fontFamily: "Inter, sans-serif",
+              }}
+            >
+              {formatEventChipTitle(event, t)}
+            </Typography>
+            {event.transp === "TRANSPARENT" && (
+              <Tooltip title={t("eventPreview.free.tooltip")} placement="top">
+                <Chip
+                  icon={<CircleIcon color="success" fontSize="small" />}
+                  label={t("eventPreview.free.label")}
+                />
+              </Tooltip>
+            )}
+          </Box>
+          <Typography color="text.secondaryContainer">
+            {formatDate(event.start, t, timezone, event.allday)}
+            {event.end &&
+              formatEnd(event.start, event.end, t, timezone, event.allday) &&
+              ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
+          </Typography>
+        </Box>
         {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
           <>
             {/* Video */}
@@ -503,9 +518,11 @@ export default function EventPreviewModal({
                 content={
                   <Button
                     variant="contained"
+                    size="medium"
                     onClick={() =>
                       window.open(event.x_openpass_videoconference)
                     }
+                    sx={{ borderRadius: "4px" }}
                   >
                     {t("eventPreview.joinVideo")}
                   </Button>
@@ -701,11 +718,11 @@ export default function EventPreviewModal({
         )}
         {/* Calendar color dot */}
         <Box
-          style={{
+          sx={{
             display: "flex",
             alignItems: "center",
             gap: 1,
-            marginBottom: 2,
+            mb: 2,
           }}
         >
           <Box sx={{ minWidth: "25px", marginRight: 2 }}>
@@ -775,7 +792,7 @@ export default function EventPreviewModal({
         calendarRef={{ current: null }}
         onClose={() => {
           setOpenDuplicateModal(false);
-          onClose({}, "backdropClick"); // Đóng cả preview modal
+          onClose({}, "backdropClick"); // Close preview modal as well
         }}
         event={event}
       />
