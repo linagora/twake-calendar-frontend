@@ -75,6 +75,7 @@ describe("refreshCalendarWithSyncToken", () => {
       deletedEvents: [],
       createdOrUpdatedEvents: [],
       calType: undefined,
+      syncStatus: "NO_SYNC_TOKEN",
     });
     expect(fetchSyncTokenChanges.fetchSyncTokenChanges).not.toHaveBeenCalled();
   });

@@ -843,6 +843,7 @@ const CalendarSlice = createSlice({
           createdOrUpdatedEvents,
           calType,
           syncToken,
+          syncStatus,
         } = action.payload;
 
         const target =
@@ -852,18 +853,20 @@ const CalendarSlice = createSlice({
           return;
         }
 
-        const deletedSet = new Set(deletedEvents); // working with a Set for deletion avoids O(nxm) complexity
-        Object.keys(target.events)
-          .filter((eventKey) => {
-            const baseUid = extractEventBaseUuid(eventKey);
-            return deletedSet.has(eventKey) || deletedSet.has(baseUid);
-          })
-          .forEach((eventKey) => delete target.events[eventKey]);
+        if (syncStatus === "SUCCESS") {
+          const deletedSet = new Set(deletedEvents); // working with a Set for deletion avoids O(nxm) complexity
+          Object.keys(target.events)
+            .filter((eventKey) => {
+              const baseUid = extractEventBaseUuid(eventKey);
+              return deletedSet.has(eventKey) || deletedSet.has(baseUid);
+            })
+            .forEach((eventKey) => delete target.events[eventKey]);
 
-        for (const event of createdOrUpdatedEvents) {
-          target.events[event.uid] = event;
+          for (const event of createdOrUpdatedEvents) {
+            target.events[event.uid] = event;
+          }
+          target.syncToken = syncToken;
         }
-        target.syncToken = syncToken;
       })
       // Pending cases
       .addCase(getCalendarDetailAsync.pending, (state) => {

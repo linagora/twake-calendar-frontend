@@ -14,6 +14,7 @@ export interface SyncTokenUpdates {
   createdOrUpdatedEvents: CalendarEvent[];
   calType?: "temp";
   syncToken?: string;
+  syncStatus?: string;
 }
 
 export const refreshCalendarWithSyncToken = createAsyncThunk<
@@ -43,6 +44,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
           deletedEvents: [],
           createdOrUpdatedEvents: [],
           calType,
+          syncStatus: "NO_SYNC_TOKEN",
         };
       }
 
@@ -66,6 +68,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
           .filter(Boolean) as CalendarEvent[],
         calType,
         syncToken: newSyncToken,
+        syncStatus: newSyncToken ? "SUCCESS" : "NO_NEW_SYNC_TOKEN",
       };
     } catch (err: any) {
       return rejectWithValue({
