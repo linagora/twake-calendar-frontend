@@ -1,4 +1,5 @@
 export function setupWebsocket() {
+  const originalWebSocket = global.WebSocket;
   const webSocketInstances: any[] = [];
   const mockWebSocket = jest.fn().mockImplementation((url: string) => {
     const ws = {
@@ -26,5 +27,9 @@ export function setupWebsocket() {
   });
 
   global.WebSocket = mockWebSocket as any;
-  return { webSocketInstances, mockWebSocket };
+  const cleanup = () => {
+    global.WebSocket = originalWebSocket;
+    webSocketInstances.length = 0;
+  };
+  return { webSocketInstances, mockWebSocket, cleanup };
 }

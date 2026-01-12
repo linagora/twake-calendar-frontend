@@ -2,7 +2,7 @@ import { render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
-import { registerToCalendars } from "../../../src/websocket/websocketAPI/registerToCalendars";
+import { registerToCalendars } from "../../../src/websocket/ws/registerToCalendars";
 import { WebSocketGate } from "../../../src/websocket/WebSocketGate";
 import { setupWebsocket } from "./utils/setupWebsocket";
 

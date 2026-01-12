@@ -2,13 +2,21 @@ import { useEffect, useState } from "react";
 
 export function useSelectedCalendars(): string[] {
   const [calendars, setCalendars] = useState<string[]>(() => {
-    return JSON.parse(localStorage.getItem("selectedCalendars") ?? "[]");
+    try {
+      return JSON.parse(localStorage.getItem("selectedCalendars") ?? "[]");
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === "selectedCalendars") {
-        setCalendars(JSON.parse(e.newValue ?? "[]"));
+        try {
+          setCalendars(JSON.parse(e.newValue ?? "[]"));
+        } catch {
+          setCalendars([]);
+        }
       }
     };
 

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../app/hooks";
 import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
 import { createWebSocketConnection } from "./createWebSocketConnection";
-import { registerToCalendars } from "./websocketAPI/registerToCalendars";
-import { unregisterToCalendars } from "./websocketAPI/unregisterToCalendars";
+import { registerToCalendars } from "./ws/registerToCalendars";
+import { unregisterToCalendars } from "./ws/unregisterToCalendars";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocket | null>(null);
