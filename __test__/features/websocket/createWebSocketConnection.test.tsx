@@ -8,6 +8,7 @@ jest.mock("../../../src/websocket/api/fetchWebSocketTicket");
 
 describe("createWebSocketConnection", () => {
   let mockWebSocket: jest.Mock;
+  let cleanup: () => void;
   let webSocketInstances: any[] = [];
 
   const mockTicket = {
@@ -42,7 +43,7 @@ describe("createWebSocketConnection", () => {
   /** ---------- Setup ---------- */
 
   beforeEach(() => {
-    ({ webSocketInstances, mockWebSocket } = setupWebsocket());
+    ({ webSocketInstances, mockWebSocket, cleanup } = setupWebsocket());
     (window as any).WEBSOCKET_URL = "wss://calendar.example.com";
 
     (fetchWebSocketTicket as jest.Mock).mockResolvedValue(mockTicket);
@@ -52,6 +53,7 @@ describe("createWebSocketConnection", () => {
     jest.clearAllMocks();
     delete (window as any).WEBSOCKET_URL;
     delete (window as any).CALENDAR_BASE_URL;
+    cleanup();
   });
 
   /** ---------- Tests ---------- */
