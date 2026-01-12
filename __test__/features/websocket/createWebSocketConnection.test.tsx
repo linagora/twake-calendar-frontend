@@ -51,6 +51,7 @@ describe("createWebSocketConnection", () => {
   afterEach(() => {
     jest.clearAllMocks();
     delete (window as any).WEBSOCKET_URL;
+    delete (window as any).CALENDAR_BASE_URL;
   });
 
   /** ---------- Tests ---------- */

@@ -17,9 +17,21 @@ export async function createWebSocketConnection(): Promise<WebSocket> {
     `${wsBaseUrl}/ws?ticket=${encodeURIComponent(ticket.value)}`
   );
 
+  const CONNECTION_TIMEOUT_MS = 10_000;
+
   await new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      socket.removeEventListener(
+        WS_INBOUND_EVENTS.CONNECTION_OPENED,
+        openHandler
+      );
+      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
+      socket.close();
+      reject(new Error("WebSocket connection timed out"));
+    }, CONNECTION_TIMEOUT_MS);
     const openHandler = () => {
       console.log("WebSocket connection opened");
+      clearTimeout(timeoutId);
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
         openHandler
@@ -30,6 +42,7 @@ export async function createWebSocketConnection(): Promise<WebSocket> {
 
     const errorHandler = (error: Event) => {
       console.error("WebSocket connection failed:", error);
+      clearTimeout(timeoutId);
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
         openHandler
