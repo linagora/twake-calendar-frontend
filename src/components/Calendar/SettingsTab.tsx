@@ -1,5 +1,5 @@
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import LockIcon from "@mui/icons-material/Lock";
+import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import PublicIcon from "@mui/icons-material/Public";
 import {
   Box,
@@ -99,7 +99,7 @@ export function SettingsTab({
             </ToggleButton>
 
             <ToggleButton value="private" sx={{ width: "140px" }}>
-              <LockIcon fontSize="small" sx={{ mr: 1 }} />
+              <LockOutlineIcon fontSize="small" sx={{ mr: 1 }} />
               {t("common.you")}
             </ToggleButton>
           </ToggleButtonGroup>

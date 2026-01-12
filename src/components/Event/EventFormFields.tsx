@@ -17,12 +17,12 @@ import {
 import {
   Description as DescriptionIcon,
   Public as PublicIcon,
-  Lock as LockIcon,
   CameraAlt as VideocamIcon,
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
 } from "@mui/icons-material";
 import iconCamera from "../../static/images/icon-camera.svg";
+import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
@@ -652,6 +652,7 @@ export default function EventFormFields({
               <Select
                 labelId="notification"
                 value={alarm}
+                displayEmpty
                 onChange={(e: SelectChangeEvent) => setAlarm(e.target.value)}
               >
                 <MenuItem value="">{t("event.form.notifications.")}</MenuItem>
@@ -732,7 +733,7 @@ export default function EventFormFields({
                 {t("event.form.visibleAll")}
               </ToggleButton>
               <ToggleButton value="PRIVATE" sx={{ minWidth: "160px" }}>
-                <LockIcon sx={{ mr: 1 }} />
+                <LockOutlineIcon sx={{ mr: 1 }} />
                 {t("event.form.visibleParticipants")}
               </ToggleButton>
             </ToggleButtonGroup>
