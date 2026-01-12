@@ -26,7 +26,6 @@ import fr from "./locales/fr.json";
 import ru from "./locales/ru.json";
 import vi from "./locales/vi.json";
 import I18n from "twake-i18n";
-import { WebSocketGate } from "./websocket/WebSocketGate";
 
 const locale = { en, fr, ru, vi };
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
@@ -69,7 +68,6 @@ function App() {
         locales={dateLocales}
       >
         <Suspense fallback={<Loading />}>
-          <WebSocketGate />
           <Router history={history}>
             <Routes>
               <Route path="/" element={<HandleLogin />} />
