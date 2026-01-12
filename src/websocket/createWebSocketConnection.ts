@@ -4,7 +4,7 @@ import { WS_INBOUND_EVENTS } from "./protocols";
 export async function createWebSocketConnection(): Promise<WebSocket> {
   const wsBaseUrl =
     (window as any).WEBSOCKET_URL ??
-    (window as any).CALENDAR_BASE_URL.replace("https", "wss") ??
+    (window as any).CALENDAR_BASE_URL?.replace(/^https:/, "wss:") ??
     "";
 
   if (!wsBaseUrl) {

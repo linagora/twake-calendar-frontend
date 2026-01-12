@@ -31,7 +31,11 @@ export function WebSocketGate() {
       try {
         const socket = await createWebSocketConnection();
         socketRef.current = socket;
-        setIsSocketOpen(Boolean(socket.OPEN));
+        setIsSocketOpen(true);
+        socket.addEventListener("close", () => {
+          setIsSocketOpen(false);
+          socketRef.current = null;
+        });
       } catch (error) {
         console.error("Failed to create WebSocket connection:", error);
       }
@@ -67,14 +71,19 @@ export function WebSocketGate() {
       (path) => !currentPaths.includes(path)
     );
 
-    if (toRegister.length > 0) {
-      registerToCalendars(socketRef.current, toRegister);
-    }
+    try {
+      if (toRegister.length > 0) {
+        registerToCalendars(socketRef.current, toRegister);
+      }
 
-    if (toUnregister.length > 0) {
-      unregisterToCalendars(socketRef.current, toUnregister);
+      if (toUnregister.length > 0) {
+        unregisterToCalendars(socketRef.current, toUnregister);
+      }
+    } catch (error) {
+      console.error("Failed to update calendar registrations:", error);
+      setIsSocketOpen(false);
+      return; // Don't update previousCalendarListRef on failure
     }
-
     previousCalendarListRef.current = calendarList;
   }, [isSocketOpen, calendarList]);
 

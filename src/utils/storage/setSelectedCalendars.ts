@@ -7,7 +7,7 @@ export function setSelectedCalendars(calendars: string[]) {
         detail: calendars,
       })
     );
-  } catch {
-    console.error("localStorage error");
+  } catch (error) {
+    console.error("Failed to save selected calendars:", error);
   }
 }

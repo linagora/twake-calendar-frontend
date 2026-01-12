@@ -7,15 +7,17 @@ import { WebSocketGate } from "../../../src/websocket/WebSocketGate";
 import { setupWebsocket } from "./utils/setupWebsocket";
 
 jest.mock("../../../src/websocket/createWebSocketConnection");
-jest.mock("../../../src/websocket/websocketAPI/registerToCalendars");
+jest.mock("../../../src/websocket/ws/registerToCalendars");
 
 describe("WebSocketGate", () => {
   let mockWebSocket: jest.Mock;
   let store: any;
+  let cleanup: () => void;
 
   beforeEach(() => {
     // Setup the real WebSocket mock
     const setup = setupWebsocket();
+    cleanup = setup.cleanup;
     mockWebSocket = setup.mockWebSocket;
 
     store = configureStore({
@@ -29,6 +31,7 @@ describe("WebSocketGate", () => {
   });
 
   afterEach(() => {
+    cleanup();
     jest.clearAllMocks();
   });
 
@@ -62,7 +65,13 @@ describe("WebSocketGate", () => {
   });
 
   it("should not register if socket is not open", async () => {
-    mockWebSocket.readyState = WebSocket.CONNECTING;
+    // Configure the mock to return a socket that's not open
+    const mockSocket = {
+      readyState: WebSocket.CONNECTING,
+      close: jest.fn(),
+      OPEN: WebSocket.OPEN,
+    };
+    (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
     const storeWithCalendars = configureStore({
       reducer: {

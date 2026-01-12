@@ -76,6 +76,16 @@ describe("createWebSocketConnection", () => {
     );
   });
 
+  it("creates WebSocket with correct URL and ticket without the WEBSOCKET_URL", async () => {
+    delete (window as any).WEBSOCKET_URL;
+    (window as any).CALENDAR_BASE_URL = "https://calendar.example.com";
+    await createAndOpenConnection();
+
+    expect(mockWebSocket).toHaveBeenCalledWith(
+      "wss://calendar.example.com/ws?ticket=test-ticket-123"
+    );
+  });
+
   it("resolves with socket when connection opens", async () => {
     const { socket, ws } = await createAndOpenConnection();
     expect(socket).toBe(ws);
