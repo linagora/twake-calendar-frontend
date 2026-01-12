@@ -1,16 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../app/hooks";
+import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
 import { createWebSocketConnection } from "./createWebSocketConnection";
 import { registerToCalendars } from "./websocketAPI/registerToCalendars";
+import { unregisterToCalendars } from "./websocketAPI/unregisterToCalendars";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocket | null>(null);
+  const previousCalendarListRef = useRef<string[]>([]);
 
   const isAuthenticated = useAppSelector((state) =>
     Boolean(state.user.userData && state.user.tokens)
   );
+  const [isSocketOpen, setIsSocketOpen] = useState(false);
 
-  const calendarList = useAppSelector((state) => state.calendars.list);
+  const calendarList = useSelectedCalendars();
 
   // Manage WebSocket connection
   useEffect(() => {
@@ -18,6 +22,7 @@ export function WebSocketGate() {
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
+        setIsSocketOpen(false);
       }
       return;
     }
@@ -26,6 +31,7 @@ export function WebSocketGate() {
       try {
         const socket = await createWebSocketConnection();
         socketRef.current = socket;
+        setIsSocketOpen(Boolean(socket.OPEN));
       } catch (error) {
         console.error("Failed to create WebSocket connection:", error);
       }
@@ -37,31 +43,40 @@ export function WebSocketGate() {
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
+        setIsSocketOpen(false);
       }
     };
   }, [isAuthenticated]);
 
-  const hasRegisteredRef = useRef(false);
-
-  // Register to calendars once
+  // Register using a diff with previous calendars
   useEffect(() => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
+    if (!isSocketOpen || !socketRef.current) return;
 
-    if (hasRegisteredRef.current) {
-      return;
-    }
-
-    const calendarPaths = Object.values(calendarList).map(
-      (cal) => `/calendars/${cal.id}`
+    const currentPaths = calendarList.map((cal) => `/calendars/${cal}`);
+    const previousPaths = previousCalendarListRef.current.map(
+      (cal) => `/calendars/${cal}`
     );
 
-    if (calendarPaths.length > 0) {
-      registerToCalendars(socketRef.current, calendarPaths);
-      hasRegisteredRef.current = true;
+    // calendars to register
+    const toRegister = currentPaths.filter(
+      (path) => !previousPaths.includes(path)
+    );
+
+    // calendars to unregister
+    const toUnregister = previousPaths.filter(
+      (path) => !currentPaths.includes(path)
+    );
+
+    if (toRegister.length > 0) {
+      registerToCalendars(socketRef.current, toRegister);
     }
-  }, [calendarList]);
+
+    if (toUnregister.length > 0) {
+      unregisterToCalendars(socketRef.current, toUnregister);
+    }
+
+    previousCalendarListRef.current = calendarList;
+  }, [isSocketOpen, calendarList]);
 
   return null;
 }

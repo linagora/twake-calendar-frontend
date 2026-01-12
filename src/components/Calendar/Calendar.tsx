@@ -45,6 +45,7 @@ import SearchResultsPage from "../../features/Search/SearchResultsPage";
 import { setTimeZone } from "../../features/Settings/SettingsSlice";
 import { browserDefaultTimeZone } from "../../utils/timezone";
 import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
+import { setSelectedCalendars as setSelectedCalendarsToStorage } from "../../utils/storage/setSelectedCalendar";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
@@ -164,10 +165,7 @@ export default function CalendarApp({
   // Save selected cals to cache
   useEffect(() => {
     if (calendarIds.length > 0) {
-      localStorage.setItem(
-        "selectedCalendars",
-        JSON.stringify(selectedCalendars)
-      );
+      setSelectedCalendarsToStorage(selectedCalendars);
     }
   }, [selectedCalendars, calendarIds.length]);
 

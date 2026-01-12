@@ -10,14 +10,12 @@ jest.mock("../../../src/websocket/createWebSocketConnection");
 jest.mock("../../../src/websocket/websocketAPI/registerToCalendars");
 
 describe("WebSocketGate", () => {
-  let webSocketInstances: any[];
   let mockWebSocket: jest.Mock;
   let store: any;
 
   beforeEach(() => {
     // Setup the real WebSocket mock
     const setup = setupWebsocket();
-    webSocketInstances = setup.webSocketInstances;
     mockWebSocket = setup.mockWebSocket;
 
     store = configureStore({

@@ -5,7 +5,6 @@ export function registerToCalendars(
   if (socket.readyState !== WebSocket.OPEN) {
     throw new Error("Cannot register: WebSocket is not open");
   }
-  [];
 
   socket.send(
     JSON.stringify({
