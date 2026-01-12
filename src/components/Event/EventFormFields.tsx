@@ -17,7 +17,7 @@ import {
 import {
   Description as DescriptionIcon,
   Public as PublicIcon,
-  CameraAlt as VideocamIcon,
+  VideocamOutlined as VideocamOutlinedIcon,
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
 } from "@mui/icons-material";
