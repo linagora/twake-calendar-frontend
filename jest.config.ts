@@ -35,7 +35,7 @@ const config: Config = {
           "<rootDir>/fileTransformer.ts",
       },
       transformIgnorePatterns: [
-        "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map)/)",
+        "/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui)/)",
       ],
 
       moduleNameMapper: {
@@ -65,7 +65,7 @@ const config: Config = {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
         "^.+\\.(js|jsx|mjs)$": "babel-jest",
       },
-      transformIgnorePatterns: ["/node_modules/(?!(ky)/)"],
+      transformIgnorePatterns: ["/node_modules/(?!(ky|@linagora/twake-mui)/)"],
       setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
     },
   ],

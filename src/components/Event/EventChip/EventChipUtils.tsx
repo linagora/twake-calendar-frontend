@@ -156,28 +156,37 @@ export function getCardStyle(
   }
 }
 
-export function DisplayedIcons(IconDisplayed: IconDisplayConfig) {
+export function DisplayedIcons(
+  IconDisplayed: IconDisplayConfig,
+  iconColor?: string
+) {
   if (!Object.values(IconDisplayed).find((b) => b === true)) return;
+  const iconStyle: React.CSSProperties = {
+    fontSize: "15px",
+    color: iconColor || "inherit",
+    marginRight: 2,
+  };
   return (
-    <Box
+    <span
+      className="event-chip-icons"
       style={{
-        display: "flex",
+        display: "inline-flex",
         flexDirection: "row",
         gap: "1px",
+        color: iconColor || "inherit",
+        margin: 0,
         marginRight: "4px",
+        fontFamily: "inherit",
+        fontWeight: "inherit",
+        lineHeight: "inherit",
+        letterSpacing: "inherit",
       }}
     >
-      {IconDisplayed.needAction && (
-        <HelpOutlineIcon style={{ fontSize: "15px" }} />
-      )}
-      {IconDisplayed.declined && <CancelIcon style={{ fontSize: "15px" }} />}
-      {IconDisplayed.tentative && (
-        <HelpOutlineIcon style={{ fontSize: "15px" }} />
-      )}
-      {IconDisplayed.private && (
-        <LockOutlineIcon style={{ fontSize: "15px" }} />
-      )}
-    </Box>
+      {IconDisplayed.needAction && <HelpOutlineIcon style={iconStyle} />}
+      {IconDisplayed.declined && <CancelIcon style={iconStyle} />}
+      {IconDisplayed.tentative && <HelpOutlineIcon style={iconStyle} />}
+      {IconDisplayed.private && <LockOutlineIcon style={iconStyle} />}
+    </span>
   );
 }
 

@@ -67,6 +67,8 @@ export function SettingsTab({
         showMore={false}
         description={description}
         setDescription={setDescription}
+        buttonVariant="contained"
+        buttonColor="secondary"
       />
 
       <Box mt={2}>
@@ -88,7 +90,8 @@ export function SettingsTab({
             value={visibility}
             exclusive
             onChange={(e, val) => val && setVisibility(val)}
-            size="small"
+            size="medium"
+            sx={{ borderRadius: "12px" }}
           >
             <ToggleButton value="public" sx={{ width: "140px" }}>
               <PublicIcon fontSize="small" sx={{ mr: 1 }} />

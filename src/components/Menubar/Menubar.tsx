@@ -171,23 +171,30 @@ export function Menubar({
             <div className="navigation-controls">
               <ButtonGroup
                 variant="outlined"
-                size="small"
+                size="medium"
                 sx={{
-                  height: "43px",
-                  "& .MuiButton-root": {
-                    color: "#525256",
-                    borderColor: "#AEAEC0",
+                  "& button:first-of-type": {
+                    borderRadius: "12px 0 0 12px",
+                  },
+                  "& button:last-of-type": {
+                    borderRadius: "0 12px 12px 0",
                   },
                 }}
               >
-                <Button onClick={() => handleNavigation("prev")}>
-                  <ChevronLeftIcon />
+                <Button
+                  sx={{ width: 20 }}
+                  onClick={() => handleNavigation("prev")}
+                >
+                  <ChevronLeftIcon sx={{ height: 20 }} />
                 </Button>
                 <Button onClick={() => handleNavigation("today")}>
                   {t("menubar.today")}
                 </Button>
-                <Button onClick={() => handleNavigation("next")}>
-                  <ChevronRightIcon />
+                <Button
+                  sx={{ width: 20 }}
+                  onClick={() => handleNavigation("next")}
+                >
+                  <ChevronRightIcon sx={{ height: 20 }} />
                 </Button>
               </ButtonGroup>
             </div>

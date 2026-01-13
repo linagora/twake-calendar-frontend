@@ -9,12 +9,23 @@ export function AddDescButton({
   showMore,
   description,
   setDescription,
+  buttonVariant,
+  buttonColor,
 }: {
   showDescription: boolean;
   setShowDescription: (b: boolean) => void;
   showMore: boolean;
   description: string;
   setDescription: (d: string) => void;
+  buttonVariant?: "text" | "outlined" | "contained";
+  buttonColor?:
+    | "inherit"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "error"
+    | "info"
+    | "warning";
 }) {
   const { t } = useI18n();
   return (
@@ -25,11 +36,9 @@ export function AddDescButton({
             <Button
               startIcon={<DescriptionIcon />}
               onClick={() => setShowDescription(true)}
-              size="small"
-              sx={{
-                textTransform: "none",
-                color: "text.secondary",
-              }}
+              size="medium"
+              variant={buttonVariant}
+              color={buttonColor}
             >
               {t("event.form.addDescription")}
             </Button>
@@ -40,6 +49,7 @@ export function AddDescButton({
         <FieldWithLabel
           label={t("event.form.description")}
           isExpanded={showMore}
+          sx={{ padding: 0, margin: 0 }}
         >
           <TextField
             fullWidth
@@ -57,6 +67,7 @@ export function AddDescButton({
               "& .MuiInputBase-root": {
                 maxHeight: "33%",
                 overflowY: "auto",
+                padding: 0,
               },
               "& textarea": {
                 resize: "vertical",

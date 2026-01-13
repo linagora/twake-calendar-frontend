@@ -90,6 +90,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
             fullWidth
             label={t("calendar.caldav_access")}
             value={calDAVLink}
+            size="small"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -110,6 +111,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
             fullWidth
             label={t("calendar.secretUrl")}
             value={secretLink}
+            size="small"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -120,7 +122,12 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
               ),
             }}
           />
-          <Button variant="contained" onClick={handleResetSecretLink}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleResetSecretLink}
+            sx={{ borderRadius: "4px" }}
+          >
             {t("actions.reset")}
           </Button>
         </Box>
@@ -142,9 +149,11 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
 
         <Button
           variant="contained"
+          color="secondary"
           onClick={handleExport}
           startIcon={!exportLoading && <FileDownloadOutlinedIcon />}
           disabled={exportLoading}
+          sx={{ borderRadius: "4px" }}
         >
           {exportLoading ? (
             <Box display="flex" alignItems="center" gap={1}>

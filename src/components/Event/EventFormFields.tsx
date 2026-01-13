@@ -22,6 +22,7 @@ import {
   ContentCopy as CopyIcon,
   Close as DeleteIcon,
 } from "@mui/icons-material";
+import iconCamera from "../../static/images/icon-camera.svg";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import RepeatEvent from "./EventRepeat";
 import { RepetitionObject } from "../../features/Events/EventsTypes";
@@ -446,6 +447,8 @@ export default function EventFormFields({
         showMore={showMore}
         description={description}
         setDescription={setDescription}
+        buttonVariant="contained"
+        buttonColor="secondary"
       />
 
       <FieldWithLabel label={t("event.form.dateTime")} isExpanded={showMore}>
@@ -555,12 +558,15 @@ export default function EventFormFields({
       >
         <Box display="flex" gap={1} alignItems="center">
           <Button
-            startIcon={<VideocamIcon />}
+            startIcon={
+              <img src={iconCamera} alt="camera" width={24} height={24} />
+            }
             onClick={handleAddVideoConference}
             size="medium"
+            variant="contained"
+            color="secondary"
             sx={{
-              textTransform: "none",
-              color: "text.secondary",
+              borderRadius: "4px",
               display: hasVideoConference ? "none" : "flex",
             }}
           >
@@ -570,12 +576,15 @@ export default function EventFormFields({
           {hasVideoConference && meetingLink && (
             <>
               <Button
-                startIcon={<VideocamIcon />}
+                startIcon={
+                  <img src={iconCamera} alt="camera" width={24} height={24} />
+                }
                 onClick={() => window.open(meetingLink, "_blank")}
                 size="medium"
                 variant="contained"
+                color="primary"
                 sx={{
-                  textTransform: "none",
+                  borderRadius: "4px",
                   mr: 1,
                 }}
               >
@@ -716,14 +725,14 @@ export default function EventFormFields({
                   setEventClass(newValue);
                 }
               }}
-              size="small"
+              size="medium"
             >
-              <ToggleButton value="PUBLIC" sx={{ width: "140px" }}>
-                <PublicIcon sx={{ mr: 1, fontSize: "16px" }} />
+              <ToggleButton value="PUBLIC" sx={{ minWidth: "160px" }}>
+                <PublicIcon sx={{ mr: 1 }} />
                 {t("event.form.visibleAll")}
               </ToggleButton>
-              <ToggleButton value="PRIVATE" sx={{ width: "140px" }}>
-                <LockIcon sx={{ mr: 1, fontSize: "16px" }} />
+              <ToggleButton value="PRIVATE" sx={{ minWidth: "160px" }}>
+                <LockIcon sx={{ mr: 1 }} />
                 {t("event.form.visibleParticipants")}
               </ToggleButton>
             </ToggleButtonGroup>
