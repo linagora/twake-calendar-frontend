@@ -1,24 +1,18 @@
-import { render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
 import { registerToCalendars } from "../../../src/websocket/ws/registerToCalendars";
 import { WebSocketGate } from "../../../src/websocket/WebSocketGate";
-import { setupWebsocket } from "./utils/setupWebsocket";
 
 jest.mock("../../../src/websocket/createWebSocketConnection");
 jest.mock("../../../src/websocket/ws/registerToCalendars");
 
 describe("WebSocketGate", () => {
-  let mockWebSocket: jest.Mock;
   let store: any;
-  let cleanup: () => void;
 
   beforeEach(() => {
     // Setup the real WebSocket mock
-    const setup = setupWebsocket();
-    cleanup = setup.cleanup;
-    mockWebSocket = setup.mockWebSocket;
 
     store = configureStore({
       reducer: {
@@ -53,6 +47,12 @@ describe("WebSocketGate", () => {
   });
 
   it("should create connection when user is authenticated", async () => {
+    const mockSocket = {
+      readyState: WebSocket.OPEN,
+      close: jest.fn(),
+      addEventListener: jest.fn(),
+    };
+    (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
     render(
       <Provider store={store}>
         <WebSocketGate />
@@ -65,31 +65,21 @@ describe("WebSocketGate", () => {
   });
 
   it("should not register if socket is not open", async () => {
-    // Configure the mock to return a socket that's not open
+    // Setup localStorage with selected calendars
+    localStorage.setItem("selectedCalendars", JSON.stringify(["cal1", "cal2"]));
+    (createWebSocketConnection as jest.Mock).mockReset();
+
     const mockSocket = {
       readyState: WebSocket.CONNECTING,
       close: jest.fn(),
-      OPEN: WebSocket.OPEN,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
     };
+
     (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-    const storeWithCalendars = configureStore({
-      reducer: {
-        user: (
-          state = { userData: { id: "1" }, tokens: { access: "token" } }
-        ) => state,
-        calendars: (
-          state = {
-            list: {
-              cal1: { id: "cal1", name: "Calendar 1" },
-            },
-          }
-        ) => state,
-      },
-    });
-
-    render(
-      <Provider store={storeWithCalendars}>
+    const { unmount } = render(
+      <Provider store={store}>
         <WebSocketGate />
       </Provider>
     );
@@ -99,5 +89,8 @@ describe("WebSocketGate", () => {
     });
 
     expect(registerToCalendars).not.toHaveBeenCalled();
+
+    unmount();
+    localStorage.clear();
   });
 });

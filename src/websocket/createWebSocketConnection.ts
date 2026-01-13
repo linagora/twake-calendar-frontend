@@ -4,7 +4,10 @@ import { WS_INBOUND_EVENTS } from "./protocols";
 export async function createWebSocketConnection(): Promise<WebSocket> {
   const wsBaseUrl =
     (window as any).WEBSOCKET_URL ??
-    (window as any).CALENDAR_BASE_URL?.replace(/^https:/, "wss:") ??
+    (window as any).CALENDAR_BASE_URL?.replace(
+      /^http(s)?:/,
+      (_: boolean, s: boolean) => (s ? "wss:" : "ws:")
+    ) ??
     "";
 
   if (!wsBaseUrl) {
@@ -66,10 +69,13 @@ export async function createWebSocketConnection(): Promise<WebSocket> {
     }
   });
 
-  socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_CLOSED, (event) => {
-    console.log("WebSocket closed:", event.code, event.reason);
-    // TODO: Add reconnection logic
-  });
+  socket.addEventListener(
+    WS_INBOUND_EVENTS.CONNECTION_CLOSED,
+    (event: CloseEvent) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+      // TODO: Add reconnection logic
+    }
+  );
 
   socket.addEventListener(WS_INBOUND_EVENTS.ERROR, (error) => {
     console.error("WebSocket error:", error);

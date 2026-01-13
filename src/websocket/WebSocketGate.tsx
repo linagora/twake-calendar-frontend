@@ -31,11 +31,14 @@ export function WebSocketGate() {
       try {
         const socket = await createWebSocketConnection();
         socketRef.current = socket;
-        setIsSocketOpen(true);
         socket.addEventListener("close", () => {
           setIsSocketOpen(false);
           socketRef.current = null;
         });
+        // Check if socket closed during setup
+        if (socket.readyState === WebSocket.OPEN) {
+          setIsSocketOpen(true);
+        }
       } catch (error) {
         console.error("Failed to create WebSocket connection:", error);
       }

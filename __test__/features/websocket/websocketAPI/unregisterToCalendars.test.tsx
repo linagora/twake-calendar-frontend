@@ -10,6 +10,7 @@ describe("unregisterToCalendars", () => {
       readyState: WebSocket.OPEN,
       send: jest.fn(),
     };
+    jest.clearAllMocks();
   });
 
   it("should send unregistration message with calendar URIs", () => {
