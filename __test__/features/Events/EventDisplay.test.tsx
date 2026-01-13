@@ -2032,6 +2032,25 @@ describe("Helper functions", () => {
     expect(typeof result.color).toBe("string");
   });
 
+  it("stringAvatar returns 2-letter initials for full name", () => {
+    const result = stringAvatar("John Doe");
+    expect(result.children).toBe("JD");
+    expect(result.color).toBeDefined();
+    expect(typeof result.color).toBe("string");
+  });
+
+  it("stringAvatar handles single word names", () => {
+    const result = stringAvatar("Alice");
+    expect(result.children).toBe("A");
+    expect(result.color).toBeDefined();
+  });
+
+  it("stringAvatar handles email addresses", () => {
+    const result = stringAvatar("test@example.com");
+    expect(result.children).toBe("T");
+    expect(result.color).toBeDefined();
+  });
+
   it("InfoRow renders text and link if url is valid", () => {
     renderWithProviders(
       <InfoRow

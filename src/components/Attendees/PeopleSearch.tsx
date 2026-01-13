@@ -8,6 +8,7 @@ import {
   ListItemText,
   TextField,
 } from "@linagora/twake-mui";
+import { stringAvatar } from "../Event/utils/eventUtils";
 import {
   type ReactNode,
   useCallback,
@@ -287,7 +288,7 @@ export function PeopleSearch({
           return (
             <ListItem key={key + option?.email} {...otherProps} disableGutters>
               <ListItemAvatar>
-                <Avatar src={option.avatarUrl} alt={option.displayName} />
+                <Avatar {...stringAvatar(option.displayName || option.email)} />
               </ListItemAvatar>
               <ListItemText
                 primary={option.displayName}
