@@ -166,7 +166,7 @@ export function EventChip({
                         {startTime}
                       </Typography>
                     )}
-                  {DisplayedIcons(IconDisplayed)}
+                  {DisplayedIcons(IconDisplayed, titleStyle.color)}
                   <Typography variant="body2" noWrap style={titleStyle}>
                     {event.title}
                   </Typography>

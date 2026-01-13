@@ -56,15 +56,22 @@ export function ImportTab({
     <Box mt={2}>
       {importMode === "file" && (
         <>
-          <Button variant="outlined" component="label" sx={{ mb: 1 }}>
-            {t("common.select_file")}
-            <input
-              type="file"
-              hidden
-              accept=".ics"
-              onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
-            />
-          </Button>
+          <Box mb={1}>
+            <Button
+              variant="outlined"
+              component="label"
+              size="medium"
+              sx={{ borderRadius: "12px" }}
+            >
+              {t("common.select_file")}
+              <input
+                type="file"
+                hidden
+                accept=".ics"
+                onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+              />
+            </Button>
+          </Box>
           {importFile && (
             <Typography variant="body2" color="text.secondary">
               {importFile.name}

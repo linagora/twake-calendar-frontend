@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "@linagora/twake-mui";
+import { Box, Typography, SxProps, Theme } from "@linagora/twake-mui";
 
 /**
  * Helper component for field with label
@@ -10,15 +10,17 @@ export const FieldWithLabel = React.memo(
     label,
     isExpanded,
     children,
+    sx,
   }: {
     label: string | React.ReactNode;
     isExpanded: boolean;
     children: React.ReactNode;
+    sx?: SxProps<Theme>;
   }) => {
     if (!isExpanded) {
       // Normal mode: label on top
       return (
-        <Box>
+        <Box sx={sx}>
           <Typography
             component="div"
             sx={{
@@ -37,7 +39,7 @@ export const FieldWithLabel = React.memo(
 
     // Extended mode: label on left
     return (
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" sx={sx}>
         <Typography
           component="div"
           sx={{
