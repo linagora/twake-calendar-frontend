@@ -1,4 +1,4 @@
-import { cleanup, render, waitFor } from "@testing-library/react";
+import { cleanup, render, waitFor, act } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
@@ -137,10 +137,14 @@ describe("WebSocketGate", () => {
         expect(mockSocket.addEventListener).toHaveBeenCalled();
       });
 
-      closeHandler!();
+      await act(async () => {
+        closeHandler!();
+      });
 
       // Verify that subsequent calendar changes don't try to register
-      localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
+      await act(async () => {
+        setSelectedCalendars(["cal1"]);
+      });
 
       await waitFor(() => {
         expect(registerToCalendars).not.toHaveBeenCalled();
@@ -238,7 +242,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      const { rerender } = render(
+      render(
         <Provider store={store}>
           <WebSocketGate />
         </Provider>
@@ -252,7 +256,9 @@ describe("WebSocketGate", () => {
 
       jest.clearAllMocks();
 
-      setSelectedCalendars(["cal1", "cal2", "cal3"]);
+      await act(async () => {
+        setSelectedCalendars(["cal1", "cal2", "cal3"]);
+      });
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
@@ -269,7 +275,7 @@ describe("WebSocketGate", () => {
       );
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      const { rerender } = render(
+      render(
         <Provider store={store}>
           <WebSocketGate />
         </Provider>
@@ -281,7 +287,9 @@ describe("WebSocketGate", () => {
 
       jest.clearAllMocks();
 
-      setSelectedCalendars(["cal1"]);
+      await act(async () => {
+        setSelectedCalendars(["cal1"]);
+      });
 
       await waitFor(() => {
         expect(unregisterToCalendars).toHaveBeenCalledWith(mockSocket, [
@@ -310,7 +318,10 @@ describe("WebSocketGate", () => {
 
       jest.clearAllMocks();
 
-      setSelectedCalendars(["cal1", "cal3"]);
+      await act(async () => {
+        setSelectedCalendars(["cal1", "cal3"]);
+      });
+
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
           "/calendars/cal3",
@@ -342,12 +353,20 @@ describe("WebSocketGate", () => {
         );
       });
 
+      // The socket is closed after error, so verify that
+      await waitFor(() => {
+        expect(mockSocket.close).not.toHaveBeenCalled();
+      });
+
       jest.clearAllMocks();
       (registerToCalendars as jest.Mock).mockImplementation(() => {});
 
-      setSelectedCalendars(["cal1", "cal2"]);
+      await act(async () => {
+        setSelectedCalendars(["cal1", "cal2"]);
+      });
+
       await waitFor(() => {
-        // Should still register both calendars since previous update failed
+        // Should register both calendars since previous update failed and didn't update the ref
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
           "/calendars/cal1",
           "/calendars/cal2",
@@ -392,17 +411,10 @@ describe("WebSocketGate", () => {
       });
 
       // Rapid changes
-      localStorage.setItem(
-        "selectedCalendars",
-        JSON.stringify(["cal1", "cal2"])
-      );
-      window.dispatchEvent(new Event("storage"));
-
-      localStorage.setItem(
-        "selectedCalendars",
-        JSON.stringify(["cal1", "cal2", "cal3"])
-      );
-      window.dispatchEvent(new Event("storage"));
+      await act(async () => {
+        setSelectedCalendars(["cal1", "cal2"]);
+        setSelectedCalendars(["cal1", "cal2", "cal3"]);
+      });
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalled();
@@ -424,17 +436,83 @@ describe("WebSocketGate", () => {
       });
 
       jest.clearAllMocks();
-      mockSocket.readyState = WebSocket.CLOSED;
 
+      await act(async () => {
+        mockSocket.readyState = WebSocket.CLOSED;
+        setSelectedCalendars(["cal1", "cal2"]);
+      });
+
+      // Wait a bit to ensure the effect would have run if it was going to
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(registerToCalendars).not.toHaveBeenCalled();
+    });
+
+    it("should handle unregistration errors gracefully", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation();
       localStorage.setItem(
         "selectedCalendars",
         JSON.stringify(["cal1", "cal2"])
       );
-      window.dispatchEvent(new Event("storage"));
+      (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
+
+      render(
+        <Provider store={store}>
+          <WebSocketGate />
+        </Provider>
+      );
 
       await waitFor(() => {
-        expect(registerToCalendars).not.toHaveBeenCalled();
+        expect(registerToCalendars).toHaveBeenCalled();
       });
+
+      jest.clearAllMocks();
+      (unregisterToCalendars as jest.Mock).mockImplementation(() => {
+        throw new Error("Unregistration failed");
+      });
+
+      await act(async () => {
+        setSelectedCalendars(["cal1"]);
+      });
+
+      await waitFor(() => {
+        expect(consoleError).toHaveBeenCalledWith(
+          "Failed to update calendar registrations:",
+          expect.any(Error)
+        );
+      });
+
+      consoleError.mockRestore();
+    });
+
+    it("should handle socket that becomes open after initial connection", async () => {
+      const closedSocket = createMockSocket(WebSocket.CONNECTING);
+      localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
+      (createWebSocketConnection as jest.Mock).mockResolvedValue(closedSocket);
+
+      render(
+        <Provider store={store}>
+          <WebSocketGate />
+        </Provider>
+      );
+
+      await waitFor(() => {
+        expect(createWebSocketConnection).toHaveBeenCalled();
+      });
+
+      // Socket is not open yet, should not register
+      expect(registerToCalendars).not.toHaveBeenCalled();
+
+      // Simulate socket becoming open
+      await act(async () => {
+        closedSocket.readyState = WebSocket.OPEN;
+        // Trigger a calendar change to re-run the effect
+        setSelectedCalendars(["cal1", "cal2"]);
+      });
+
+      // Still should not register because isSocketOpen state is false
+      // The component only sets isSocketOpen to true when socket.readyState is OPEN during connection
+      expect(registerToCalendars).not.toHaveBeenCalled();
     });
   });
 });

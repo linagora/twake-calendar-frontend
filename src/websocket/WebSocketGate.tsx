@@ -57,7 +57,12 @@ export function WebSocketGate() {
 
   // Register using a diff with previous calendars
   useEffect(() => {
-    if (!isSocketOpen || !socketRef.current) return;
+    if (
+      !isSocketOpen ||
+      !socketRef.current ||
+      socketRef.current.readyState !== WebSocket.OPEN
+    )
+      return;
 
     const currentPaths = calendarList.map((cal) => `/calendars/${cal}`);
     const previousPaths = previousCalendarListRef.current.map(
@@ -84,7 +89,6 @@ export function WebSocketGate() {
       }
     } catch (error) {
       console.error("Failed to update calendar registrations:", error);
-      setIsSocketOpen(false);
       return; // Don't update previousCalendarListRef on failure
     }
     previousCalendarListRef.current = calendarList;
