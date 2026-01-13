@@ -42,6 +42,7 @@ import {
   EventFormContext,
 } from "../../utils/eventFormTempStorage";
 import { browserDefaultTimeZone } from "../../utils/timezone";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function EventUpdateModal({
   eventId,
@@ -261,7 +262,7 @@ function EventUpdateModal({
       setCalendarid(calId);
 
       // Handle repetition properly - check both current event and base event
-      const baseEventId = event.uid.split("/")[0];
+      const baseEventId = extractEventBaseUuid(event.uid);
       const baseEvent = calendarsList[calId]?.events[baseEventId];
       const repetitionSource = event.repetition || baseEvent?.repetition;
 
@@ -478,7 +479,7 @@ function EventUpdateModal({
 
       Object.keys(seriesEvents).forEach((eventId) => {
         const instance = seriesEvents[eventId];
-        if (instance && eventId.split("/")[0] === baseUID) {
+        if (instance && extractEventBaseUuid(eventId) === baseUID) {
           instances[eventId] = { ...instance };
         }
       });
@@ -614,7 +615,7 @@ function EventUpdateModal({
       event.repetition?.freq &&
       !repetition.freq
     ) {
-      const baseUID = event.uid.split("/")[0];
+      const baseUID = extractEventBaseUuid(event.uid);
 
       // Save current form data to temp storage before closing
       const formDataToSave = saveCurrentFormData();
@@ -653,7 +654,7 @@ function EventUpdateModal({
 
         // Collect all instances that need to be deleted
         const instancesToDelete = Object.keys(targetCalendar.events)
-          .filter((eventId) => eventId.split("/")[0] === baseUID)
+          .filter((eventId) => extractEventBaseUuid(eventId) === baseUID)
           .map((eventId) => targetCalendar.events[eventId]);
 
         // Get unique URLs to avoid deleting same file multiple times
@@ -819,7 +820,7 @@ function EventUpdateModal({
           }
         } else if (typeOfAction === "all") {
           // Update all instances - check if repetition rules changed
-          const baseUID = event.uid.split("/")[0];
+          const baseUID = extractEventBaseUuid(event.uid);
 
           const changes = detectRecurringEventChanges(
             event,
@@ -1074,7 +1075,7 @@ function EventUpdateModal({
           moveEventAsync({
             cal: targetCalendar,
             newEvent,
-            newURL: `/calendars/${newCalId}/${event.uid.split("/")[0]}.ics`,
+            newURL: `/calendars/${newCalId}/${extractEventBaseUuid(event.uid)}.ics`,
           })
         );
 

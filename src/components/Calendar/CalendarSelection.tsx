@@ -22,6 +22,7 @@ import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { trimLongTextWithoutSpace } from "../../utils/textUtils";
 import { useI18n } from "twake-i18n";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function CalendarAccordion({
   title,
@@ -112,13 +113,13 @@ export default function CalendarSelection({
   const calendars = useAppSelector((state) => state.calendars.list);
 
   const personalCalendars = Object.keys(calendars || {}).filter(
-    (id) => id.split("/")[0] === userId
+    (id) => extractEventBaseUuid(id) === userId
   );
   const delegatedCalendars = Object.keys(calendars || {}).filter(
-    (id) => id.split("/")[0] !== userId && calendars[id]?.delegated
+    (id) => extractEventBaseUuid(id) !== userId && calendars[id]?.delegated
   );
   const sharedCalendars = Object.keys(calendars || {}).filter(
-    (id) => id.split("/")[0] !== userId && !calendars?.[id]?.delegated
+    (id) => extractEventBaseUuid(id) !== userId && !calendars?.[id]?.delegated
   );
 
   const handleCalendarToggle = (name: string) => {

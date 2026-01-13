@@ -3,14 +3,14 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
 import { stringToGradient } from "../../../utils/avatarUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import {
-  emptyEventsCal,
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
-} from "../../../features/Calendars/CalendarSlice";
+import { emptyEventsCal } from "../../../features/Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../../../features/Calendars/services/getCalendarsListAsync";
+import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 import { userAttendee } from "../../../features/User/models/attendee";
+import { refreshCalendarWithSyncToken } from "../../../features/Calendars/services/refreshCalendar";
 import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { AppDispatch } from "../../../app/store";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -108,55 +108,34 @@ export function stringAvatar(name: string) {
 }
 
 export async function refreshCalendars(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendars: Calendar[],
-  calendarRange: { start: Date; end: Date },
+  calendarRange: {
+    start: Date;
+    end: Date;
+  },
   calType?: "temp"
 ) {
-  const isTestEnv = process.env.NODE_ENV === "test";
+  if (process.env.NODE_ENV === "test") return;
 
-  if (!calType && !isTestEnv) {
-    await dispatch(getCalendarsListAsync());
-  }
-  calType && dispatch(emptyEventsCal({ calType }));
+  !calType && (await dispatch(getCalendarsListAsync()));
 
-  if (isTestEnv) {
-    return;
-  }
-
-  const results = await Promise.all(
-    calendars.map(
-      async (cal) =>
-        await dispatch(
-          getCalendarDetailAsync({
-            calId: cal.id,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-            calType,
-          })
-        )
+  const results = await Promise.allSettled(
+    calendars.map((calendar) =>
+      dispatch(
+        refreshCalendarWithSyncToken({ calendar, calType, calendarRange })
+      ).unwrap()
     )
   );
 
-  // Check if any result is rejected and throw error
-  for (const result of results) {
-    if (result && typeof (result as any).unwrap === "function") {
-      try {
-        await (result as any).unwrap();
-      } catch (unwrapError: any) {
-        throw unwrapError;
-      }
-    } else if (result.type && (result.type as string).endsWith("/rejected")) {
-      const rejectedResult = result as any;
-      throw new Error(
-        rejectedResult.error?.message ||
-          rejectedResult.payload?.message ||
-          "Failed to refresh calendar"
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      console.error(
+        `Failed to refresh calendar ${calendars[index].id}:`,
+        result.reason
       );
     }
-  }
+  });
 }
 
 export async function refreshSingularCalendar(

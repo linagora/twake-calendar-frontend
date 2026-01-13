@@ -3,7 +3,8 @@ import CalendarApp from "../../src/components/Calendar/Calendar";
 import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 import { searchUsers } from "../../src/features/User/userAPI";
-import * as calendarThunks from "../../src/features/Calendars/CalendarSlice";
+import * as calendarDetailThunks from "../../src/features/Calendars/services/getCalendarDetailAsync";
+
 import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
@@ -552,7 +553,7 @@ describe("calendar Availability search", () => {
 
   it("should fetch calendar details with date range matching the displayed month", async () => {
     const spy = jest
-      .spyOn(calendarThunks, "getCalendarDetailAsync")
+      .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
@@ -620,7 +621,7 @@ describe("calendar Availability search", () => {
       };
 
       const spy = jest
-        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
         .mockImplementation(() => ({
           type: "getCalendarDetailAsync",
           unwrap: () => Promise.resolve({}),
@@ -674,7 +675,7 @@ describe("calendar Availability search", () => {
       };
 
       const spy = jest
-        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
         .mockImplementation(() => ({
           type: "getCalendarDetailAsync",
           unwrap: () => Promise.resolve({}),
@@ -707,7 +708,7 @@ describe("calendar Availability search", () => {
 
     it("does not make duplicate API calls for same calendar and range", async () => {
       const spy = jest
-        .spyOn(calendarThunks, "getCalendarDetailAsync")
+        .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
         .mockImplementation(() => ({
           type: "getCalendarDetailAsync",
           unwrap: () => Promise.resolve({}),

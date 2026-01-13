@@ -15,6 +15,7 @@ import { useAppSelector } from "../../app/hooks";
 import { CalendarItemList } from "./CalendarItemList";
 import { SettingsTab } from "./SettingsTab";
 import { useI18n } from "twake-i18n";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export function ImportTab({
   userId,
@@ -44,7 +45,7 @@ export function ImportTab({
   const [importUrl, setImportUrl] = useState("");
   const calendars = useAppSelector((state) => state.calendars.list);
   const personalCalendars = Object.values(calendars).filter(
-    (cal) => cal.id.split("/")[0] === userId
+    (cal) => extractEventBaseUuid(cal.id) === userId
   );
 
   useEffect(() => {

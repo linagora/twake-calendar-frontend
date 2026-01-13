@@ -5,6 +5,7 @@ import { userAttendee } from "../User/models/attendee";
 import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
 import { browserDefaultTimeZone } from "../../utils/timezone";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export interface TimezoneListResult {
   zones: string[];
@@ -133,7 +134,7 @@ export function populateFormFromEvent(
   // Handle repetition - check both current event and base event (for update modal)
   let repetitionSource = event.repetition;
   if (calendarsList && calId && event.uid) {
-    const baseEventId = event.uid.split("/")[0];
+    const baseEventId = extractEventBaseUuid(event.uid);
     const baseEvent = calendarsList[calId]?.events[baseEventId];
     if (baseEvent?.repetition) {
       repetitionSource = baseEvent.repetition;

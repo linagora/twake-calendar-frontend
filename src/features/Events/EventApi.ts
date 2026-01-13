@@ -10,7 +10,8 @@ import {
 import ICAL from "ical.js";
 import moment from "moment-timezone";
 import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
-import { User } from "../../components/Attendees/PeopleSearch";
+import { CalDavItem } from "../Calendars/api/types";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;
@@ -21,6 +22,22 @@ function resolveTimezoneId(tzid?: string): string | undefined {
     return TIMEZONES.aliases[tzid].aliasTo;
   }
   return tzid;
+}
+
+export async function reportEvent(
+  event: CalendarEvent,
+  match: { start: string; end: string }
+): Promise<CalDavItem> {
+  const response = await api(`dav${event.URL}`, {
+    method: "REPORT",
+    body: JSON.stringify({ match }),
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`REPORT request failed with status ${response.status}`);
+  }
+  const eventData: CalDavItem = await response.json();
+  return eventData;
 }
 
 export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
@@ -227,7 +244,7 @@ export const deleteEventInstance = async (
   const seriesEvent = await getEvent(
     {
       ...event,
-      uid: event.uid.split("/")[0],
+      uid: extractEventBaseUuid(event.uid),
     },
     true
   );

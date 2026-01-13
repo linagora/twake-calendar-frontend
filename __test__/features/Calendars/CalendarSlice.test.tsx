@@ -4,9 +4,7 @@ import reducer, {
   createCalendar,
   updateEventLocal,
   removeTempCal,
-  getCalendarsListAsync,
   getTempCalendarsListAsync,
-  getCalendarDetailAsync,
   putEventAsync,
   getEventAsync,
   patchCalendarAsync,
@@ -17,6 +15,8 @@ import reducer, {
   addSharedCalendarAsync,
   deleteEventAsync,
 } from "../../../src/features/Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../../../src/features/Calendars/services/getCalendarsListAsync";
+import { getCalendarDetailAsync } from "../../../src/features/Calendars/services/getCalendarDetailAsync";
 
 import * as calAPI from "../../../src/features/Calendars/CalendarApi";
 import * as userAPI from "../../../src/features/User/userAPI";
@@ -24,6 +24,8 @@ import * as userAPI from "../../../src/features/User/userAPI";
 import { configureStore } from "@reduxjs/toolkit";
 import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
 import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
+import { setUserData } from "../../../src/features/User/userSlice";
+import userReducer from "../../../src/features/User/userSlice";
 
 jest.mock("../../../src/features/Calendars/CalendarApi");
 jest.mock("../../../src/features/User/userAPI");
@@ -36,10 +38,11 @@ describe("CalendarSlice", () => {
     list: {},
     templist: {},
     pending: false,
+    error: null,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe("reducers", () => {
@@ -120,9 +123,11 @@ describe("CalendarSlice", () => {
   describe("extraReducers (thunks)", () => {
     const storeFactory = () =>
       configureStore({
-        reducer: { calendars: reducer },
+        reducer: { calendars: reducer, user: userReducer },
       });
-
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     it("getCalendarsListAsync.fulfilled replaces list", async () => {
       (userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: "u1" });
       (calAPI.getCalendars as jest.Mock).mockResolvedValue({
@@ -270,7 +275,7 @@ describe("CalendarSlice", () => {
       expect(Object.keys(state.list)).toHaveLength(45);
     });
 
-    it("getCalendarsListAsync returns early if calendars already exist in store", async () => {
+    it("getCalendarsListAsync doesnt call getUserDetails if userdata exist in store", async () => {
       const existingCalendars = {
         "u1/cal1": {
           id: "u1/cal1",
@@ -284,13 +289,11 @@ describe("CalendarSlice", () => {
         type: "calendars/getCalendars/fulfilled",
         payload: { importedCalendars: existingCalendars, errors: "" },
       });
-
+      store.dispatch(setUserData({ openpaasId: "bla" }));
       const getUserDetailsMock = userAPI.getUserDetails as jest.Mock;
-      const getCalendarsMock = calAPI.getCalendars as jest.Mock;
 
       await store.dispatch(getCalendarsListAsync() as any);
 
-      expect(getCalendarsMock).not.toHaveBeenCalled();
       expect(getUserDetailsMock).not.toHaveBeenCalled();
 
       const state = store.getState().calendars;
@@ -343,7 +346,7 @@ describe("CalendarSlice", () => {
         ...initialState,
         list: { c1: { id: calId, events: { e1: { uid: "e1" } } } as any },
       };
-      const patch = { name: "N", desc: "D", color: "#00f" };
+      const patch = { name: "N", desc: "D", color: { "apple:color": "#00f" } };
       const state = reducer(
         prev,
         patchCalendarAsync.fulfilled(
@@ -358,7 +361,7 @@ describe("CalendarSlice", () => {
       );
       expect(state.list[calId].name).toBe("N");
       expect(state.list[calId].description).toBe("D");
-      expect(state.list[calId].color).toBe("#00f");
+      expect(state.list[calId].color?.["apple:color"]).toBe("#00f");
     });
 
     it("removeCalendarAsync.fulfilled deletes calendar", () => {
@@ -396,7 +399,7 @@ describe("CalendarSlice", () => {
       const payload = {
         userId: "u1",
         calId: "cal1",
-        color: "#f00",
+        color: { "apple:color": "#f00" },
         name: "Test",
         desc: "Desc",
         owner: "Owner",
@@ -407,13 +410,13 @@ describe("CalendarSlice", () => {
         createCalendarAsync.fulfilled(payload, "req4", payload)
       );
       expect(state.list["u1/cal1"].name).toBe("Test");
-      expect(state.list["u1/cal1"].color).toBe("#f00");
+      expect(state.list["u1/cal1"].color?.["apple:color"]).toBe("#f00");
     });
 
     it("addSharedCalendarAsync.fulfilled adds shared calendar", () => {
       const payload = {
         calId: "c1",
-        color: "#0f0",
+        color: { "apple:color": "#0f0" },
         link: "/calendars/u1/c1.json",
         name: "Shared",
         desc: "Shared Desc",
@@ -466,7 +469,7 @@ describe("CalendarSlice", () => {
         t1: {
           id: "t1",
           name: "Temp",
-          color: "#aaa",
+          color: { "apple:color": "#aaa" },
           events: {},
           visibility: "public",
           owner: "O",
@@ -479,7 +482,7 @@ describe("CalendarSlice", () => {
         initialState,
         getTempCalendarsListAsync.fulfilled(payload, "req7", {
           openpaasId: "u1",
-          color: "#aaa",
+          color: { "apple:color": "#aaa" },
           displayName: "test",
           avatarUrl: "",
           email: "test@test.com",

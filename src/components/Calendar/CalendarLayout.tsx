@@ -8,7 +8,6 @@ import { refreshCalendars } from "../Event/utils/eventUtils";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 
 import SettingsPage from "../../features/Settings/SettingsPage";
-import SearchResultsPage from "../../features/Search/SearchResultsPage";
 
 export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);
