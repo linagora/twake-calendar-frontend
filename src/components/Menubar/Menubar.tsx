@@ -8,7 +8,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./Menubar.styl";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { stringToGradient } from "../../utils/avatarUtils";
+import { stringToGradient, getInitials } from "../../utils/avatarUtils";
 import {
   Avatar,
   IconButton,
@@ -262,19 +262,11 @@ export function Menubar({
           <div className="menu-items">
             <IconButton onClick={handleUserMenuClick}>
               <Avatar
-                color={stringToGradient(
-                  user && user.family_name
-                    ? user.family_name
-                    : user && user.email
-                      ? user.email
-                      : ""
-                )}
+                color={stringToGradient(getUserDisplayName(user))}
                 size="m"
                 aria-label={t("menubar.userProfile")}
               >
-                {user?.name && user?.family_name
-                  ? `${user.name[0]}${user.family_name[0]}`
-                  : (user?.email?.[0] ?? "")}
+                {getInitials(getUserDisplayName(user))}
               </Avatar>
             </IconButton>
           </div>
@@ -338,19 +330,11 @@ export function Menubar({
           }}
         >
           <Avatar
-            color={stringToGradient(
-              user && user.family_name
-                ? user.family_name
-                : user && user.email
-                  ? user.email
-                  : ""
-            )}
+            color={stringToGradient(getUserDisplayName(user))}
             size="m"
             sx={{ marginBottom: "8px" }}
           >
-            {user?.name && user?.family_name
-              ? `${user.name[0]}${user.family_name[0]}`
-              : (user?.email?.[0] ?? "")}
+            {getInitials(getUserDisplayName(user))}
           </Avatar>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {getUserDisplayName(user)}

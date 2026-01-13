@@ -100,7 +100,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByText("t")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
   });
 
   // Edge cases for avatar display logic
@@ -131,7 +131,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByText("t")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
   });
 
   it("handles user with only name", () => {
@@ -161,7 +161,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByText("t")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
   });
 
   it("handles user with both name and family_name", () => {
@@ -221,7 +221,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByText("t")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
   });
 
   it("handles user with empty email", () => {
