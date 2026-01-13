@@ -1,5 +1,4 @@
 // __test__/features/user/CallbackResume.test.tsx
-import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { CallbackResume } from "../../../src/features/User/LoginCallback";
 import { useAppDispatch } from "../../../src/app/hooks";
@@ -10,7 +9,7 @@ import {
   setUserData,
   getOpenPaasUserDataAsync,
 } from "../../../src/features/User/userSlice";
-import { getCalendarsListAsync } from "../../../src/features/Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../../../src/features/Calendars/services/getCalendarsListAsync";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 // Mocks
@@ -40,20 +39,23 @@ jest.mock("../../../src/features/User/userSlice", () => {
   };
 });
 
-jest.mock("../../../src/features/Calendars/CalendarSlice", () => {
-  const mockGetCalendars = Object.assign(
-    jest.fn(() => ({ type: "GET_CALENDARS" })),
-    {
-      pending: { type: "GET_CALENDARS/pending" },
-      fulfilled: { type: "GET_CALENDARS/fulfilled" },
-      rejected: { type: "GET_CALENDARS/rejected" },
-    }
-  );
+jest.mock(
+  "../../../src/features/Calendars/services/getCalendarsListAsync",
+  () => {
+    const mockGetCalendars = Object.assign(
+      jest.fn(() => ({ type: "GET_CALENDARS" })),
+      {
+        pending: { type: "GET_CALENDARS/pending" },
+        fulfilled: { type: "GET_CALENDARS/fulfilled" },
+        rejected: { type: "GET_CALENDARS/rejected" },
+      }
+    );
 
-  return {
-    getCalendarsListAsync: mockGetCalendars,
-  };
-});
+    return {
+      getCalendarsListAsync: mockGetCalendars,
+    };
+  }
+);
 
 describe("CallbackResume", () => {
   const dispatch = jest.fn();

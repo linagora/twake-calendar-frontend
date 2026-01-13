@@ -9,7 +9,7 @@ import {
   setUserError,
 } from "./userSlice";
 import { Loading } from "../../components/Loading/Loading";
-import { getCalendarsListAsync } from "../Calendars/CalendarSlice";
+import { getCalendarsListAsync } from "../Calendars/services/getCalendarsListAsync";
 
 export function CallbackResume() {
   const dispatch = useAppDispatch();

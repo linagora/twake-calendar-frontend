@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import EventPopover from "../../features/Events/EventModal";
 import { CalendarEvent } from "../../features/Events/EventsTypes";
 import CalendarSelection from "./CalendarSelection";
-import { getCalendarDetailAsync } from "../../features/Calendars/CalendarSlice";
+import { getCalendarDetailAsync } from "../../features/Calendars/services/getCalendarDetailAsync";
 import ImportAlert from "../../features/Events/ImportAlert";
 import {
   formatDateToYYYYMMDDTHHMMSS,
@@ -44,6 +44,7 @@ import viLocale from "@fullcalendar/core/locales/vi";
 import SearchResultsPage from "../../features/Search/SearchResultsPage";
 import { setTimeZone } from "../../features/Settings/SettingsSlice";
 import { browserDefaultTimeZone } from "../../utils/timezone";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
@@ -152,7 +153,7 @@ export default function CalendarApp({
         setSelectedCalendars(valid);
       } else {
         const personalCalendarIds = calendarIds.filter(
-          (id) => id.split("/")[0] === userId
+          (id) => extractEventBaseUuid(id) === userId
         );
         setSelectedCalendars(personalCalendarIds);
       }

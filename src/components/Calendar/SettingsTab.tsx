@@ -15,6 +15,7 @@ import { useAppSelector } from "../../app/hooks";
 import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { AddDescButton } from "../Event/AddDescButton";
 import { ColorPicker } from "./CalendarColorPicker";
+import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export function SettingsTab({
   name,
@@ -41,7 +42,7 @@ export function SettingsTab({
   const [toggleDesc, setToggleDesc] = useState(Boolean(description));
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
-  const isOwn = calendar ? calendar.id.split("/")[0] === userId : true;
+  const isOwn = calendar ? extractEventBaseUuid(calendar.id) === userId : true;
 
   useEffect(() => {
     if (description) setToggleDesc(true);
