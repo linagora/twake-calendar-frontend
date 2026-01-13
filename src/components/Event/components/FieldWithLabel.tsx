@@ -46,6 +46,8 @@ export const FieldWithLabel = React.memo(
             minWidth: "115px",
             marginRight: "12px",
             flexShrink: 0,
+            fontSize: "0.875rem",
+            fontWeight: 500,
           }}
         >
           {label}

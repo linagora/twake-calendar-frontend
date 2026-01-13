@@ -12,7 +12,7 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
-import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Box, Typography } from "@linagora/twake-mui";
 import EventPopover from "./EventModal";
 import {
@@ -512,7 +512,7 @@ export default function EventPreviewModal({
               <InfoRow
                 icon={
                   <Box sx={{ minWidth: "25px", marginRight: 2 }}>
-                    <VideocamIcon />
+                    <VideocamOutlinedIcon />
                   </Box>
                 }
                 content={
