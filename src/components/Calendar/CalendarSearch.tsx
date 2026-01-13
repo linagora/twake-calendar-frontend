@@ -9,6 +9,7 @@ import {
   useTheme,
 } from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
+import { stringAvatar } from "../Event/utils/eventUtils";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCalendars } from "../../features/Calendars/CalendarApi";
@@ -50,8 +51,7 @@ function CalendarItem({
     >
       <Box display="flex" alignItems="center" gap={2}>
         <Avatar
-          src={cal.owner.avatarUrl}
-          alt={cal.owner.email}
+          {...stringAvatar(cal.owner.displayName || cal.owner.email)}
           style={{
             border: `2px solid ${cal.cal["apple:color"] || defaultColors[0].light}`,
             boxShadow: cal.cal["apple:color"]

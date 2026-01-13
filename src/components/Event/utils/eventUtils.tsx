@@ -1,7 +1,7 @@
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
-import { stringToGradient } from "../../../utils/avatarUtils";
+import { stringToGradient, getInitials } from "../../../utils/avatarUtils";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { emptyEventsCal } from "../../../features/Calendars/CalendarSlice";
 import { getCalendarsListAsync } from "../../../features/Calendars/services/getCalendarsListAsync";
@@ -103,7 +103,7 @@ export function stringToColor(string: string) {
 export function stringAvatar(name: string) {
   return {
     color: stringToGradient(name),
-    children: name[0],
+    children: getInitials(name),
   };
 }
 
