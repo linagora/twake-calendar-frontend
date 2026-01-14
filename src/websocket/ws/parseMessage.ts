@@ -1,10 +1,10 @@
-import { useAppSelector } from "../../app/hooks";
 import { AppDispatch, store } from "../../app/store";
 import { refreshCalendarWithSyncToken } from "../../features/Calendars/services/refreshCalendar";
 import { getDisplayedDate } from "../../utils/calendarDateManager";
 import { getCalendarRange } from "../../utils/dateUtils";
-import { WS_OUTBOUND_EVENTS } from "../protocols";
 import { findCalendarById } from "../../utils/findCalendarById";
+import { WS_OUTBOUND_EVENTS } from "../protocols";
+
 const CALENDAR_PATH_REGEX = /^\/calendars\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/;
 
 function parseCalendarPath(key: string) {
@@ -17,29 +17,26 @@ function parseCalendarPath(key: string) {
   return `${calendarId}/${entryId}`;
 }
 export async function parseMessage(message: unknown, dispatch: AppDispatch) {
+  const calendarsToRefresh = new Set<string>();
   if (typeof message !== "object" || message === null) {
-    return [];
+    return calendarsToRefresh;
   }
-  let calendarsToRefresh: string[] = [];
   const currentDate = getDisplayedDate();
 
   for (const [key, value] of Object.entries(message)) {
     switch (key) {
       case WS_OUTBOUND_EVENTS.REGISTER_CLIENT:
-        calendarsToRefresh = calendarsToRefresh.concat(
-          value,
-          calendarsToRefresh
-        );
+        value.forEach((cal: string) => calendarsToRefresh.add(cal));
         break;
       case WS_OUTBOUND_EVENTS.UNREGISTER_CLIENT:
         console.log("Unregistered Calendar", value);
         break;
       default: {
-        calendarsToRefresh.push(key);
+        calendarsToRefresh.add(key);
       }
     }
   }
-  calendarsToRefresh.map((calendarPath) => {
+  calendarsToRefresh.forEach((calendarPath) => {
     updateCalendar(calendarPath, dispatch, currentDate);
   });
   return calendarsToRefresh;

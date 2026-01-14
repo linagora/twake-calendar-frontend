@@ -12,11 +12,11 @@ class CalendarDateManager {
   }
 
   public getDate(): Date {
-    return this.displayedDate;
+    return new Date(this.displayedDate);
   }
 
   public setDate(date: Date) {
-    this.displayedDate = date;
+    this.displayedDate = new Date(date);
   }
 }
 

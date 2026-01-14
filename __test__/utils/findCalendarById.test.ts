@@ -77,6 +77,18 @@ describe("findCalendarById", () => {
     expect(result?.type).toBeUndefined();
   });
 
+  it("should handle undefined list or templist", () => {
+    const stateWithPartialCalendars = {
+      calendars: {
+        list: undefined,
+        templist: { temp1: mockTempCalendar },
+      },
+    } as unknown as Partial<RootState>;
+
+    const result = findCalendarById(stateWithPartialCalendars, "temp1");
+    expect(result?.calendar).toEqual(mockTempCalendar);
+  });
+
   it("should handle missing calendars state", () => {
     const emptyState = {};
 

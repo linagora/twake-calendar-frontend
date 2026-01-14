@@ -13,7 +13,7 @@ describe("calendarDateManager", () => {
     const instance1 = calendarDateManager;
     const instance2 = calendarDateManager;
 
-    expect(instance1).toBe(instance2);
+    expect(instance1).toStrictEqual(instance2);
   });
 
   it("should get the default date", () => {
@@ -26,7 +26,7 @@ describe("calendarDateManager", () => {
     setDisplayedDate(testDate);
 
     const retrievedDate = getDisplayedDate();
-    expect(retrievedDate).toBe(testDate);
+    expect(retrievedDate).toStrictEqual(testDate);
   });
 
   it("should persist date across multiple calls", () => {
@@ -36,8 +36,8 @@ describe("calendarDateManager", () => {
     const date1 = getDisplayedDate();
     const date2 = getDisplayedDate();
 
-    expect(date1).toBe(date2);
-    expect(date1).toBe(testDate);
+    expect(date1).toStrictEqual(date2);
+    expect(date1).toStrictEqual(testDate);
   });
 
   it("should update date when set multiple times", () => {
@@ -45,9 +45,17 @@ describe("calendarDateManager", () => {
     const date2 = new Date("2025-12-31T23:59:59Z");
 
     setDisplayedDate(date1);
-    expect(getDisplayedDate()).toBe(date1);
+    expect(getDisplayedDate()).toStrictEqual(date1);
 
     setDisplayedDate(date2);
-    expect(getDisplayedDate()).toBe(date2);
+    expect(getDisplayedDate()).toStrictEqual(date2);
+  });
+
+  it("should maintain shared state (singleton behavior)", () => {
+    const testDate = new Date("2025-03-01");
+    setDisplayedDate(testDate);
+
+    // Verify calendarDateManager reflects the same state
+    expect(calendarDateManager.getDate()).toStrictEqual(testDate);
   });
 });

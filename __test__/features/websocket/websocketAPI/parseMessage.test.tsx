@@ -38,9 +38,9 @@ describe("parseMessage", () => {
     const result2 = await parseMessage("string", mockDispatch);
     const result3 = await parseMessage(123, mockDispatch);
 
-    expect(result1).toEqual([]);
-    expect(result2).toEqual([]);
-    expect(result3).toEqual([]);
+    expect(result1).toEqual(new Set<string>());
+    expect(result2).toEqual(new Set<string>());
+    expect(result3).toEqual(new Set<string>());
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
@@ -122,9 +122,17 @@ describe("parseMessage", () => {
     expect(getDisplayedDate).toHaveBeenCalled();
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith(
       expect.objectContaining({
-        calendarRange: expect.any(Object),
+        calendarRange: expect.objectContaining({
+          start: expect.any(Date),
+          end: expect.any(Date),
+        }),
       })
     );
+
+    const callArgs = (refreshCalendarWithSyncToken as unknown as jest.Mock).mock
+      .calls[0][0];
+    expect(callArgs.calendarRange.start).toBeInstanceOf(Date);
+    expect(callArgs.calendarRange.end).toBeInstanceOf(Date);
   });
 
   it("should handle multiple event types in single message", async () => {
@@ -136,8 +144,8 @@ describe("parseMessage", () => {
 
     const result = await parseMessage(message, mockDispatch);
 
-    expect(result.length).toBe(2);
-    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
+    expect(result.size).toBe(1);
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1);
   });
 
   it("should dispatch refreshCalendarWithSyncToken with correct parameters", async () => {

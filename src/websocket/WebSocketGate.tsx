@@ -58,7 +58,7 @@ export function WebSocketGate() {
         setIsSocketOpen(false);
       }
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, dispatch]);
 
   // Register using a diff with previous calendars
   useEffect(() => {
