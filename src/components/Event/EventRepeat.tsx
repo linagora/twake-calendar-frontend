@@ -80,7 +80,14 @@ export default function RepeatEvent({
       <Stack>
         {/* Interval */}
         <Box display="flex" alignItems="center" gap={2} mb={2}>
-          <Typography variant="h6">{t("event.repeat.repeatEvery")}</Typography>
+          <Typography
+            sx={{
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+          >
+            {t("event.repeat.repeatEvery")}
+          </Typography>
           <TextField
             type="number"
             value={repetition.interval ?? 1}
@@ -161,7 +168,13 @@ export default function RepeatEvent({
 
         {/* End options */}
         <Box>
-          <Typography variant="h6" gutterBottom>
+          <Typography
+            sx={{
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+            gutterBottom
+          >
             {t("event.repeat.end.label")}
           </Typography>
           <RadioGroup
@@ -194,7 +207,12 @@ export default function RepeatEvent({
               value="never"
               control={<Radio />}
               label={
-                <Typography variant="h6">
+                <Typography
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                  }}
+                >
                   {t("event.repeat.end.never")}
                 </Typography>
               }
@@ -206,7 +224,12 @@ export default function RepeatEvent({
               control={<Radio />}
               label={
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Typography variant="h6">
+                  <Typography
+                    sx={{
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                    }}
+                  >
                     {t("event.repeat.end.after")}
                   </Typography>
                   <TextField
@@ -224,7 +247,12 @@ export default function RepeatEvent({
                     inputProps={{ min: 1, "data-testid": "occurrences-input" }}
                     disabled={!isOwn || endOption !== "after"}
                   />
-                  <Typography variant="h6">
+                  <Typography
+                    sx={{
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                    }}
+                  >
                     {t("event.repeat.end.occurrences")}
                   </Typography>
                 </Box>
@@ -237,7 +265,12 @@ export default function RepeatEvent({
               control={<Radio />}
               label={
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Typography variant="h6">
+                  <Typography
+                    sx={{
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                    }}
+                  >
                     {t("event.repeat.end.on")}
                   </Typography>
                   <TextField

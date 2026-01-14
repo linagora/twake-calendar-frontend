@@ -18,7 +18,6 @@ import {
   SelectChangeEvent,
   TextField,
   ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@linagora/twake-mui";
 import {
@@ -478,7 +477,18 @@ export default function EventFormFields({
               <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
             label={
+<<<<<<< HEAD
               <Typography variant="h6">{t("event.form.allDay")}</Typography>
+=======
+              <Typography
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                {t("event.form.allDay")}
+              </Typography>
+>>>>>>> 64f3a51 (update spacing event modal)
             }
           />
           <FormControlLabel
@@ -512,7 +522,18 @@ export default function EventFormFields({
               />
             }
             label={
+<<<<<<< HEAD
               <Typography variant="h6">{t("event.form.repeat")}</Typography>
+=======
+              <Typography
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                {t("event.form.repeat")}
+              </Typography>
+>>>>>>> 64f3a51 (update spacing event modal)
             }
           />
           <TimezoneAutocomplete
