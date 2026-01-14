@@ -13,6 +13,7 @@ import {
   TextField,
   ToggleButtonGroup,
   ToggleButton,
+  Typography,
 } from "@linagora/twake-mui";
 import {
   Description as DescriptionIcon,
@@ -481,7 +482,16 @@ export default function EventFormFields({
             control={
               <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
-            label={t("event.form.allDay")}
+            label={
+              <Typography
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                {t("event.form.allDay")}
+              </Typography>
+            }
           />
           <FormControlLabel
             control={
@@ -513,7 +523,16 @@ export default function EventFormFields({
                 }}
               />
             }
-            label={t("event.form.repeat")}
+            label={
+              <Typography
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                {t("event.form.repeat")}
+              </Typography>
+            }
           />
           <TimezoneAutocomplete
             value={timezone}
