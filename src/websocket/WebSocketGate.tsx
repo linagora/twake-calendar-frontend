@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { store } from "../app/store";
 import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
 import { WebSocketWithCleanup } from "./createWebSocketConnection";
 import { closeWebSocketConnection } from "./utils/closeWebSocketConnection";
@@ -11,15 +12,16 @@ export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
   const previousCalendarListRef = useRef<string[]>([]);
   const dispatch = useAppDispatch();
-  const state = useAppSelector((state) => state);
-  const isAuthenticated = Boolean(state.user.userData && state.user.tokens);
+  const isAuthenticated = useAppSelector((state) =>
+    Boolean(state.user.userData && state.user.tokens)
+  );
 
   const [isSocketOpen, setIsSocketOpen] = useState(false);
 
   const calendarList = useSelectedCalendars();
   const onMessage = useCallback(
     (message: unknown) => {
-      updateCalendars(message, dispatch, state);
+      updateCalendars(message, dispatch);
     },
     [dispatch]
   );

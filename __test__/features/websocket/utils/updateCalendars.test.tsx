@@ -38,9 +38,9 @@ describe("updateCalendars", () => {
   });
 
   it("should not dispatch for non-object messages", () => {
-    updateCalendars(null, mockDispatch, mockState);
-    updateCalendars("string", mockDispatch, mockState);
-    updateCalendars(123, mockDispatch, mockState);
+    updateCalendars(null, mockDispatch);
+    updateCalendars("string", mockDispatch);
+    updateCalendars(123, mockDispatch);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
@@ -53,7 +53,7 @@ describe("updateCalendars", () => {
       ],
     };
 
-    updateCalendars(message, mockDispatch, mockState);
+    updateCalendars(message, mockDispatch);
 
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
   });
@@ -63,7 +63,7 @@ describe("updateCalendars", () => {
       "/calendars/cal1/entry1": { updated: true },
     };
 
-    updateCalendars(message, mockDispatch, mockState);
+    updateCalendars(message, mockDispatch);
 
     expect(refreshCalendarWithSyncToken).toHaveBeenCalled();
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
@@ -78,7 +78,7 @@ describe("updateCalendars", () => {
       "/calendars/cal1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch, mockState);
+    updateCalendars(message, mockDispatch);
 
     expect(getDisplayedCalendarRange).toHaveBeenCalled();
   });
@@ -103,7 +103,7 @@ describe("updateCalendars", () => {
       "/calendars/temp1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch, mockState);
+    updateCalendars(message, mockDispatch);
 
     waitFor(() =>
       expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
@@ -120,7 +120,7 @@ describe("updateCalendars", () => {
       "not-a-path": {},
     };
 
-    updateCalendars(message, mockDispatch, mockState);
+    updateCalendars(message, mockDispatch);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
