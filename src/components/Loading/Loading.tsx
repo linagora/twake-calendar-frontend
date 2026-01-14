@@ -1,6 +1,7 @@
 import React from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Box } from "@linagora/twake-mui";
+import twakeLogo from "../../static/twake-workplace.svg";
 
 export function Loading() {
   return (
@@ -22,6 +23,18 @@ export function Loading() {
         loop
         autoplay
         style={{ width: "175px" }}
+      />
+      <Box
+        component="img"
+        src={twakeLogo}
+        alt="twake workplace"
+        sx={{
+          position: "absolute",
+          bottom: "50px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "210px",
+        }}
       />
     </Box>
   );
