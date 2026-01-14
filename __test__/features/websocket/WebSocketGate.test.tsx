@@ -32,6 +32,7 @@ describe("WebSocketGate", () => {
     close: jest.fn(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
+    cleanup: jest.fn(),
   });
 
   beforeEach(() => {

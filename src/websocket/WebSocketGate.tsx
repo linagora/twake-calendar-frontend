@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../app/hooks";
 import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
-import { createWebSocketConnection } from "./createWebSocketConnection";
+import {
+  createWebSocketConnection,
+  WebSocketWithCleanup,
+} from "./createWebSocketConnection";
 import { registerToCalendars } from "./ws/registerToCalendars";
 import { unregisterToCalendars } from "./ws/unregisterToCalendars";
 
 export function WebSocketGate() {
-  const socketRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<WebSocketWithCleanup | null>(null);
   const previousCalendarListRef = useRef<string[]>([]);
 
   const isAuthenticated = useAppSelector((state) =>
@@ -20,6 +23,7 @@ export function WebSocketGate() {
   useEffect(() => {
     if (!isAuthenticated) {
       if (socketRef.current) {
+        socketRef.current.cleanup();
         socketRef.current.close();
         socketRef.current = null;
         setIsSocketOpen(false);
@@ -48,6 +52,7 @@ export function WebSocketGate() {
 
     return () => {
       if (socketRef.current) {
+        socketRef.current.cleanup();
         socketRef.current.close();
         socketRef.current = null;
         setIsSocketOpen(false);
@@ -87,11 +92,12 @@ export function WebSocketGate() {
       if (toUnregister.length > 0) {
         unregisterToCalendars(socketRef.current, toUnregister);
       }
+
+      // Only update the ref if operations succeeded
+      previousCalendarListRef.current = calendarList;
     } catch (error) {
       console.error("Failed to update calendar registrations:", error);
-      return; // Don't update previousCalendarListRef on failure
     }
-    previousCalendarListRef.current = calendarList;
   }, [isSocketOpen, calendarList]);
 
   return null;

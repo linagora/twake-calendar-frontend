@@ -1,7 +1,11 @@
 import { fetchWebSocketTicket } from "./api/fetchWebSocketTicket";
 import { WS_INBOUND_EVENTS } from "./protocols";
 
-export async function createWebSocketConnection(): Promise<WebSocket> {
+export interface WebSocketWithCleanup extends WebSocket {
+  cleanup: () => void;
+}
+
+export async function createWebSocketConnection(): Promise<WebSocketWithCleanup> {
   const wsBaseUrl =
     (window as any).WEBSOCKET_URL ??
     (window as any).CALENDAR_BASE_URL?.replace(
@@ -58,7 +62,8 @@ export async function createWebSocketConnection(): Promise<WebSocket> {
     socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
   });
 
-  socket.addEventListener(WS_INBOUND_EVENTS.MESSAGE, (event) => {
+  // Store references to event handlers so they can be cleaned up later
+  const messageHandler = (event: MessageEvent) => {
     try {
       const message = JSON.parse(event.data);
       console.log("WebSocket message received:", message);
@@ -67,19 +72,36 @@ export async function createWebSocketConnection(): Promise<WebSocket> {
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }
-  });
+  };
 
-  socket.addEventListener(
-    WS_INBOUND_EVENTS.CONNECTION_CLOSED,
-    (event: CloseEvent) => {
-      console.log("WebSocket closed:", event.code, event.reason);
-      // TODO: Add reconnection logic
-    }
-  );
+  const closeHandler = (event: CloseEvent) => {
+    console.log("WebSocket closed:", event.code, event.reason);
+    // Clean up all event listeners when socket closes
+    cleanup();
+    // TODO: Add reconnection logic
+  };
 
-  socket.addEventListener(WS_INBOUND_EVENTS.ERROR, (error) => {
+  const errorHandler = (error: Event) => {
     console.error("WebSocket error:", error);
-  });
+  };
 
-  return socket;
+  // Cleanup function to remove all event listeners
+  const cleanup = () => {
+    socket.removeEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler);
+    socket.removeEventListener(
+      WS_INBOUND_EVENTS.CONNECTION_CLOSED,
+      closeHandler
+    );
+    socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
+  };
+
+  socket.addEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler);
+  socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_CLOSED, closeHandler);
+  socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
+
+  // Attach cleanup method to socket
+  const socketWithCleanup = socket as WebSocketWithCleanup;
+  socketWithCleanup.cleanup = cleanup;
+
+  return socketWithCleanup;
 }
