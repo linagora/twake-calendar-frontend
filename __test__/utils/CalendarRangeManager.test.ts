@@ -1,17 +1,17 @@
 import {
   getDisplayedDate,
-  setDisplayedDate,
-  calendarDateManager,
-} from "../../src/utils/calendarDateManager";
+  setDisplayedDateAndRange,
+  calendarRangeManager,
+} from "../../src/utils/CalendarRangeManager";
 
-describe("calendarDateManager", () => {
+describe("CalendarRangeManager", () => {
   beforeEach(() => {
-    setDisplayedDate(new Date());
+    setDisplayedDateAndRange(new Date());
   });
 
   it("should return a singleton instance", () => {
-    const instance1 = calendarDateManager;
-    const instance2 = calendarDateManager;
+    const instance1 = calendarRangeManager;
+    const instance2 = calendarRangeManager;
 
     expect(instance1).toStrictEqual(instance2);
   });
@@ -23,7 +23,7 @@ describe("calendarDateManager", () => {
 
   it("should set and get a date", () => {
     const testDate = new Date("2025-01-15T10:00:00Z");
-    setDisplayedDate(testDate);
+    setDisplayedDateAndRange(testDate);
 
     const retrievedDate = getDisplayedDate();
     expect(retrievedDate).toStrictEqual(testDate);
@@ -31,7 +31,7 @@ describe("calendarDateManager", () => {
 
   it("should persist date across multiple calls", () => {
     const testDate = new Date("2025-06-20T15:30:00Z");
-    setDisplayedDate(testDate);
+    setDisplayedDateAndRange(testDate);
 
     const date1 = getDisplayedDate();
     const date2 = getDisplayedDate();
@@ -44,18 +44,18 @@ describe("calendarDateManager", () => {
     const date1 = new Date("2025-01-01T00:00:00Z");
     const date2 = new Date("2025-12-31T23:59:59Z");
 
-    setDisplayedDate(date1);
+    setDisplayedDateAndRange(date1);
     expect(getDisplayedDate()).toStrictEqual(date1);
 
-    setDisplayedDate(date2);
+    setDisplayedDateAndRange(date2);
     expect(getDisplayedDate()).toStrictEqual(date2);
   });
 
   it("should maintain shared state (singleton behavior)", () => {
     const testDate = new Date("2025-03-01");
-    setDisplayedDate(testDate);
+    setDisplayedDateAndRange(testDate);
 
-    // Verify calendarDateManager reflects the same state
-    expect(calendarDateManager.getDate()).toStrictEqual(testDate);
+    // Verify CalendarRangeManager reflects the same state
+    expect(calendarRangeManager.getDate()).toStrictEqual(testDate);
   });
 });

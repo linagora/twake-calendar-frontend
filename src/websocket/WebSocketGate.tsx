@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
-import {
-  createWebSocketConnection,
-  WebSocketWithCleanup,
-} from "./createWebSocketConnection";
-import { registerToCalendars } from "./ws/registerToCalendars";
-import { unregisterToCalendars } from "./ws/unregisterToCalendars";
+import { closeWebSocketConnection } from "./utils/closeWebSocketConnection";
+import { WebSocketWithCleanup } from "./createWebSocketConnection";
+import { establishWebSocketConnection } from "./utils/establishWebSocketConnection";
+import { syncCalendarRegistrations } from "./utils/syncCalendarRegistrations";
+import { updateCalendars } from "./utils/updateCalendars";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -19,85 +18,42 @@ export function WebSocketGate() {
 
   const calendarList = useSelectedCalendars();
 
+  const callBacks = {
+    onMessage: (message: unknown) => {
+      updateCalendars(message, dispatch);
+    },
+    onClose: (event: CloseEvent) => {
+      setIsSocketOpen(false);
+      socketRef.current = null;
+      // TODO: Add reconnection logic here
+    },
+    onError: (error: Event) => {
+      console.error("WebSocket error:", error);
+    },
+  };
+
   // Manage WebSocket connection
   useEffect(() => {
     if (!isAuthenticated) {
-      if (socketRef.current) {
-        socketRef.current.cleanup();
-        socketRef.current.close();
-        socketRef.current = null;
-        setIsSocketOpen(false);
-      }
+      closeWebSocketConnection(socketRef, setIsSocketOpen);
       return;
     }
 
-    const connect = async () => {
-      try {
-        const socket = await createWebSocketConnection(dispatch);
-        socketRef.current = socket;
-        socket.addEventListener("close", () => {
-          setIsSocketOpen(false);
-          socketRef.current = null;
-        });
-        // Check if socket closed during setup
-        if (socket.readyState === WebSocket.OPEN) {
-          setIsSocketOpen(true);
-        }
-      } catch (error) {
-        console.error("Failed to create WebSocket connection:", error);
-      }
-    };
-
-    connect();
+    establishWebSocketConnection(callBacks, socketRef, setIsSocketOpen);
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.cleanup();
-        socketRef.current.close();
-        socketRef.current = null;
-        setIsSocketOpen(false);
-      }
+      closeWebSocketConnection(socketRef, setIsSocketOpen);
     };
   }, [isAuthenticated, dispatch]);
 
   // Register using a diff with previous calendars
   useEffect(() => {
-    if (
-      !isSocketOpen ||
-      !socketRef.current ||
-      socketRef.current.readyState !== WebSocket.OPEN
-    )
-      return;
-
-    const currentPaths = calendarList.map((cal) => `/calendars/${cal}`);
-    const previousPaths = previousCalendarListRef.current.map(
-      (cal) => `/calendars/${cal}`
+    syncCalendarRegistrations(
+      isSocketOpen,
+      socketRef,
+      calendarList,
+      previousCalendarListRef
     );
-
-    // calendars to register
-    const toRegister = currentPaths.filter(
-      (path) => !previousPaths.includes(path)
-    );
-
-    // calendars to unregister
-    const toUnregister = previousPaths.filter(
-      (path) => !currentPaths.includes(path)
-    );
-
-    try {
-      if (toRegister.length > 0) {
-        registerToCalendars(socketRef.current, toRegister);
-      }
-
-      if (toUnregister.length > 0) {
-        unregisterToCalendars(socketRef.current, toUnregister);
-      }
-
-      // Only update the ref if operations succeeded
-      previousCalendarListRef.current = calendarList;
-    } catch (error) {
-      console.error("Failed to update calendar registrations:", error);
-    }
   }, [isSocketOpen, calendarList]);
 
   return null;

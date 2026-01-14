@@ -1,14 +1,18 @@
-import { AppDispatch } from "../app/store";
 import { fetchWebSocketTicket } from "./api/fetchWebSocketTicket";
-import { WS_INBOUND_EVENTS } from "./protocols";
-import { parseMessage } from "./ws/parseMessage";
+import { WS_INBOUND_EVENTS } from "./utils/protocols";
 
 export interface WebSocketWithCleanup extends WebSocket {
   cleanup: () => void;
 }
 
+export interface WebSocketCallbacks {
+  onMessage: (data: any) => void;
+  onClose?: (event: CloseEvent) => void;
+  onError?: (error: Event) => void;
+}
+
 export async function createWebSocketConnection(
-  dispatch: AppDispatch
+  callbacks: WebSocketCallbacks
 ): Promise<WebSocketWithCleanup> {
   const wsBaseUrl =
     (window as any).WEBSOCKET_URL ??
@@ -40,6 +44,7 @@ export async function createWebSocketConnection(
       socket.close();
       reject(new Error("WebSocket connection timed out"));
     }, CONNECTION_TIMEOUT_MS);
+
     const openHandler = () => {
       console.log("WebSocket connection opened");
       clearTimeout(timeoutId);
@@ -70,9 +75,7 @@ export async function createWebSocketConnection(
   const messageHandler = (event: MessageEvent) => {
     try {
       const message = JSON.parse(event.data);
-      console.log("WebSocket message received:", message);
-
-      parseMessage(message, dispatch);
+      callbacks.onMessage(message);
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }
@@ -80,13 +83,13 @@ export async function createWebSocketConnection(
 
   const closeHandler = (event: CloseEvent) => {
     console.log("WebSocket closed:", event.code, event.reason);
-    // Clean up all event listeners when socket closes
     cleanup();
-    // TODO: Add reconnection logic
+    callbacks.onClose?.(event);
   };
 
   const errorHandler = (error: Event) => {
     console.error("WebSocket error:", error);
+    callbacks.onError?.(error);
   };
 
   // Cleanup function to remove all event listeners

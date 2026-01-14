@@ -101,7 +101,7 @@ describe("WebSocketGate", () => {
   });
 
   describe("Socket Connection Management", () => {
-    it("should add close event listener on socket connection", async () => {
+    it("should create connection with callbacks", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
       render(
@@ -111,22 +111,25 @@ describe("WebSocketGate", () => {
       );
 
       await waitFor(() => {
-        expect(mockSocket.addEventListener).toHaveBeenCalledWith(
-          "close",
-          expect.any(Function)
+        expect(createWebSocketConnection).toHaveBeenCalledWith(
+          expect.objectContaining({
+            onMessage: expect.any(Function),
+            onClose: expect.any(Function),
+            onError: expect.any(Function),
+          })
         );
       });
     });
 
-    it("should handle socket close event", async () => {
-      let closeHandler: Function;
-      mockSocket.addEventListener = jest.fn((event, handler) => {
-        if (event === "close") {
-          closeHandler = handler;
-        }
-      });
+    it("should handle socket close via callback", async () => {
+      let onCloseCallback: Function;
 
-      (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
+      (createWebSocketConnection as jest.Mock).mockImplementation(
+        (callbacks) => {
+          onCloseCallback = callbacks.onClose;
+          return Promise.resolve(mockSocket);
+        }
+      );
 
       render(
         <Provider store={store}>
@@ -135,11 +138,12 @@ describe("WebSocketGate", () => {
       );
 
       await waitFor(() => {
-        expect(mockSocket.addEventListener).toHaveBeenCalled();
+        expect(createWebSocketConnection).toHaveBeenCalled();
       });
 
+      // Simulate close event
       await act(async () => {
-        closeHandler!();
+        onCloseCallback!(new CloseEvent("close"));
       });
 
       // Verify that subsequent calendar changes don't try to register
