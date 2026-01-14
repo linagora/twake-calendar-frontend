@@ -354,7 +354,6 @@ describe("WebSocketGate", () => {
         );
       });
 
-      // The socket is closed after error, so verify that
       await waitFor(() => {
         expect(mockSocket.close).not.toHaveBeenCalled();
       });
