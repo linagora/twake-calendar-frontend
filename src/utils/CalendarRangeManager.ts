@@ -3,10 +3,9 @@ import { getCalendarRange } from "./dateUtils";
 class CalendarRangeManager {
   private static instance: CalendarRangeManager;
   private displayedDate: Date = new Date();
-  private displayedCalendarRange: { start: Date; end: Date } = {
-    start: new Date(),
-    end: new Date(),
-  };
+  private displayedCalendarRange: { start: Date; end: Date } = getCalendarRange(
+    new Date()
+  );
 
   private constructor() {}
 
@@ -27,7 +26,10 @@ class CalendarRangeManager {
   }
 
   public getRange(): { start: Date; end: Date } {
-    return this.displayedCalendarRange;
+    return {
+      start: this.displayedCalendarRange.start,
+      end: this.displayedCalendarRange.end,
+    };
   }
 }
 

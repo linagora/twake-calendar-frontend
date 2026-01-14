@@ -2,6 +2,7 @@ import {
   getDisplayedDate,
   setDisplayedDateAndRange,
   calendarRangeManager,
+  getDisplayedCalendarRange,
 } from "../../src/utils/CalendarRangeManager";
 
 describe("CalendarRangeManager", () => {
@@ -14,6 +15,17 @@ describe("CalendarRangeManager", () => {
     const instance2 = calendarRangeManager;
 
     expect(instance1).toStrictEqual(instance2);
+  });
+
+  it("should compute and return calendar range when date is set", () => {
+    const testDate = new Date("2025-06-15T10:00:00Z");
+    setDisplayedDateAndRange(testDate);
+
+    const range = getDisplayedCalendarRange();
+    expect(range.start).toBeInstanceOf(Date);
+    expect(range.end).toBeInstanceOf(Date);
+    expect(range.start.getTime()).toBeLessThanOrEqual(testDate.getTime());
+    expect(range.end.getTime()).toBeGreaterThanOrEqual(testDate.getTime());
   });
 
   it("should get the default date", () => {

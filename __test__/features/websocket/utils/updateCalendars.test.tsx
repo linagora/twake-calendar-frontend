@@ -1,8 +1,9 @@
 import { updateCalendars } from "../../../../src/websocket/utils/updateCalendars";
 import { refreshCalendarWithSyncToken } from "../../../../src/features/Calendars/services/refreshCalendar";
-import { store } from "../../../../src/app/store";
-import { WS_OUTBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
+import { RootState, store } from "../../../../src/app/store";
+import { WS_INBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
 import { getDisplayedCalendarRange } from "../../../../src/utils/CalendarRangeManager";
+import { waitFor } from "@testing-library/dom";
 
 jest.mock("../../../../src/features/Calendars/services/refreshCalendar");
 jest.mock("../../../../src/utils/CalendarRangeManager");
@@ -27,32 +28,32 @@ describe("updateCalendars", () => {
       },
       templist: {},
     },
-  };
+  } as unknown as RootState;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockDispatch = jest.fn();
     (getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange);
     (store.getState as jest.Mock).mockReturnValue(mockState);
-    jest.clearAllMocks();
   });
 
   it("should not dispatch for non-object messages", () => {
-    updateCalendars(null, mockDispatch);
-    updateCalendars("string", mockDispatch);
-    updateCalendars(123, mockDispatch);
+    updateCalendars(null, mockDispatch, mockState);
+    updateCalendars("string", mockDispatch, mockState);
+    updateCalendars(123, mockDispatch, mockState);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
 
   it("should dispatch for registered calendars", () => {
     const message = {
-      [WS_OUTBOUND_EVENTS.REGISTER_CLIENT]: [
+      [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: [
         "/calendars/cal1/entry1",
         "/calendars/cal2/entry2",
       ],
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockState);
 
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
   });
@@ -62,7 +63,7 @@ describe("updateCalendars", () => {
       "/calendars/cal1/entry1": { updated: true },
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockState);
 
     expect(refreshCalendarWithSyncToken).toHaveBeenCalled();
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
@@ -77,7 +78,7 @@ describe("updateCalendars", () => {
       "/calendars/cal1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockState);
 
     expect(getDisplayedCalendarRange).toHaveBeenCalled();
   });
@@ -102,13 +103,15 @@ describe("updateCalendars", () => {
       "/calendars/temp1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockState);
 
-    expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
-      calendar: stateWithTemp.calendars.templist["temp1/entry1"],
-      calType: "temp",
-      calendarRange: mockRange,
-    });
+    waitFor(() =>
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
+        calendar: stateWithTemp.calendars.templist["temp1/entry1"],
+        calType: "temp",
+        calendarRange: mockRange,
+      })
+    );
   });
 
   it("should handle invalid calendar paths gracefully", () => {
@@ -117,7 +120,7 @@ describe("updateCalendars", () => {
       "not-a-path": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockState);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });

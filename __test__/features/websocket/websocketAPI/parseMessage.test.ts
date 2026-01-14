@@ -1,5 +1,5 @@
+import { WS_INBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
 import { parseMessage } from "../../../../src/websocket/ws/parseMessage";
-import { WS_OUTBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
 
 describe("parseMessage", () => {
   it("should return empty set for non-object messages", () => {
@@ -14,7 +14,7 @@ describe("parseMessage", () => {
 
   it("should handle registered event", () => {
     const message = {
-      [WS_OUTBOUND_EVENTS.REGISTER_CLIENT]: [
+      [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: [
         "/calendars/cal1/entry1",
         "/calendars/cal2/entry2",
       ],
@@ -30,7 +30,7 @@ describe("parseMessage", () => {
   it("should handle unregistered event", () => {
     const consoleSpy = jest.spyOn(console, "log").mockImplementation();
     const message = {
-      [WS_OUTBOUND_EVENTS.UNREGISTER_CLIENT]: ["/calendars/cal1/entry1"],
+      [WS_INBOUND_EVENTS.CLIENT_UNREGISTERED]: ["/calendars/cal1/entry1"],
     };
 
     parseMessage(message);
@@ -68,8 +68,8 @@ describe("parseMessage", () => {
 
   it("should handle multiple event types in single message", () => {
     const message = {
-      [WS_OUTBOUND_EVENTS.REGISTER_CLIENT]: ["/calendars/cal1/entry1"],
-      [WS_OUTBOUND_EVENTS.UNREGISTER_CLIENT]: ["/calendars/cal2/entry2"],
+      [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: ["/calendars/cal1/entry1"],
+      [WS_INBOUND_EVENTS.CLIENT_UNREGISTERED]: ["/calendars/cal2/entry2"],
       "/calendars/cal1/entry1": {},
     };
 

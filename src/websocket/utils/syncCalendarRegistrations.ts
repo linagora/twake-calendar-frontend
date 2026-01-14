@@ -6,10 +6,13 @@ export function syncCalendarRegistrations(
   isSocketOpen: boolean,
   socketRef: React.MutableRefObject<WebSocketWithCleanup | null>,
   calendarList: string[],
-  previousCalendarListRef: React.MutableRefObject<string[]>) {
-  if (!isSocketOpen ||
+  previousCalendarListRef: React.MutableRefObject<string[]>
+) {
+  if (
+    !isSocketOpen ||
     !socketRef.current ||
-    socketRef.current.readyState !== WebSocket.OPEN) {
+    socketRef.current.readyState !== WebSocket.OPEN
+  ) {
     return;
   }
 

@@ -1,16 +1,14 @@
 import {
   createWebSocketConnection,
-  WebSocketWithCleanup
+  WebSocketCallbacks,
+  WebSocketWithCleanup,
 } from "../createWebSocketConnection";
 
 export async function establishWebSocketConnection(
-  callbacks: {
-    onMessage: (message: unknown) => void;
-    onClose: (event: CloseEvent) => void;
-    onError: (error: Event) => void;
-  },
+  callbacks: WebSocketCallbacks,
   socketRef: React.MutableRefObject<WebSocketWithCleanup | null>,
-  setIsSocketOpen: (value: boolean) => void) {
+  setIsSocketOpen: (value: boolean) => void
+) {
   try {
     const socket = await createWebSocketConnection(callbacks);
     socketRef.current = socket;

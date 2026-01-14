@@ -122,7 +122,7 @@ describe("WebSocketGate", () => {
     });
 
     it("should handle socket close via callback", async () => {
-      let onCloseCallback: Function;
+      let onCloseCallback: Function | undefined;
 
       (createWebSocketConnection as jest.Mock).mockImplementation(
         (callbacks) => {
@@ -143,7 +143,7 @@ describe("WebSocketGate", () => {
 
       // Simulate close event
       await act(async () => {
-        onCloseCallback!(new CloseEvent("close"));
+        onCloseCallback?.(new CloseEvent("close"));
       });
 
       // Verify that subsequent calendar changes don't try to register
@@ -447,8 +447,7 @@ describe("WebSocketGate", () => {
       });
 
       // Wait a bit to ensure the effect would have run if it was going to
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
+      jest.useFakeTimers().advanceTimersByTime(100);
       expect(registerToCalendars).not.toHaveBeenCalled();
     });
 
