@@ -16,7 +16,7 @@ function parseCalendarPath(key: string) {
 
   return `${calendarId}/${entryId}`;
 }
-export function parseMessage(message: unknown, dispatch: AppDispatch) {
+export async function parseMessage(message: unknown, dispatch: AppDispatch) {
   if (typeof message !== "object" || message === null) {
     return [];
   }
@@ -26,32 +26,36 @@ export function parseMessage(message: unknown, dispatch: AppDispatch) {
   for (const [key, value] of Object.entries(message)) {
     switch (key) {
       case WS_OUTBOUND_EVENTS.REGISTER_CLIENT:
-        console.log("Registered Calendar", value);
         calendarsToRefresh = calendarsToRefresh.concat(
           value,
           calendarsToRefresh
         );
         break;
-
       case WS_OUTBOUND_EVENTS.UNREGISTER_CLIENT:
         console.log("Unregistered Calendar", value);
         break;
-
       default: {
-        const calendarId = parseCalendarPath(key) ?? "";
-        const state = store.getState();
-        const { calendar, type } = findCalendarById(state, calendarId);
-        dispatch(
-          refreshCalendarWithSyncToken({
-            calendar: calendar,
-            calType: type,
-            calendarRange: getCalendarRange(currentDate),
-          })
-        );
+        calendarsToRefresh.push(key);
       }
     }
   }
+  calendarsToRefresh.map((calendarPath) => {
+    updateCalendar(calendarPath, dispatch, currentDate);
+  });
   return calendarsToRefresh;
 }
 
-
+function updateCalendar(key: string, dispatch: AppDispatch, currentDate: Date) {
+  const calendarId = parseCalendarPath(key) ?? "";
+  const state = store.getState();
+  const calendar = findCalendarById(state, calendarId);
+  if (calendar) {
+    dispatch(
+      refreshCalendarWithSyncToken({
+        calendar: calendar.calendar,
+        calType: calendar.type,
+        calendarRange: getCalendarRange(currentDate),
+      })
+    );
+  }
+}

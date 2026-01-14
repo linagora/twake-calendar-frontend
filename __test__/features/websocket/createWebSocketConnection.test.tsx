@@ -2,9 +2,11 @@ import { waitFor } from "@testing-library/dom";
 import { fetchWebSocketTicket } from "../../../src/websocket/api/fetchWebSocketTicket";
 import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
 import { WS_INBOUND_EVENTS } from "../../../src/websocket/protocols";
+import { parseMessage } from "../../../src/websocket/ws/parseMessage";
 import { setupWebsocket } from "./utils/setupWebsocket";
 
 jest.mock("../../../src/websocket/api/fetchWebSocketTicket");
+jest.mock("../../../src/websocket/ws/parseMessage");
 
 describe("createWebSocketConnection", () => {
   let mockWebSocket: jest.Mock;
@@ -28,7 +30,8 @@ describe("createWebSocketConnection", () => {
   };
 
   const createAndOpenConnection = async () => {
-    const promise = createWebSocketConnection();
+    const mockDispatch = jest.fn();
+    const promise = createWebSocketConnection(mockDispatch);
 
     await waitFor(() => {
       expect(webSocketInstances.length).toBe(1);
@@ -37,7 +40,7 @@ describe("createWebSocketConnection", () => {
     triggerEvent(getWs(), WS_INBOUND_EVENTS.CONNECTION_OPENED);
     const socket = await promise;
 
-    return { socket, ws: getWs(), promise };
+    return { socket, ws: getWs(), promise, mockDispatch };
   };
 
   /** ---------- Setup ---------- */
@@ -47,6 +50,7 @@ describe("createWebSocketConnection", () => {
     (window as any).WEBSOCKET_URL = "wss://calendar.example.com";
 
     (fetchWebSocketTicket as jest.Mock).mockResolvedValue(mockTicket);
+    (parseMessage as jest.Mock).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -60,8 +64,9 @@ describe("createWebSocketConnection", () => {
 
   it("throws when WEBSOCKET_URL is not defined", async () => {
     delete (window as any).WEBSOCKET_URL;
+    const mockDispatch = jest.fn();
 
-    await expect(createWebSocketConnection()).rejects.toThrow(
+    await expect(createWebSocketConnection(mockDispatch)).rejects.toThrow(
       "WEBSOCKET_URL is not defined"
     );
   });
@@ -95,7 +100,8 @@ describe("createWebSocketConnection", () => {
   });
 
   it("rejects when connection fails", async () => {
-    const promise = createWebSocketConnection();
+    const mockDispatch = jest.fn();
+    const promise = createWebSocketConnection(mockDispatch);
 
     await waitFor(() => {
       expect(webSocketInstances.length).toBe(1);
@@ -121,16 +127,18 @@ describe("createWebSocketConnection", () => {
   it("parses and logs incoming messages", async () => {
     const logSpy = jest.spyOn(console, "log").mockImplementation();
 
-    const { ws } = await createAndOpenConnection();
+    const { ws, mockDispatch } = await createAndOpenConnection();
 
+    const testMessage = { type: "test", payload: "data" };
     triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, {
-      data: JSON.stringify({ type: "test", payload: "data" }),
+      data: JSON.stringify(testMessage),
     });
 
-    expect(logSpy).toHaveBeenCalledWith("WebSocket message received:", {
-      type: "test",
-      payload: "data",
-    });
+    expect(logSpy).toHaveBeenCalledWith(
+      "WebSocket message received:",
+      testMessage
+    );
+    expect(parseMessage).toHaveBeenCalledWith(testMessage, mockDispatch);
 
     logSpy.mockRestore();
   });
@@ -148,5 +156,25 @@ describe("createWebSocketConnection", () => {
     );
 
     errorSpy.mockRestore();
+  });
+
+  it("calls parseMessage with dispatch when valid message received", async () => {
+    const { ws, mockDispatch } = await createAndOpenConnection();
+
+    const testMessage = { registered: ["/calendars/cal1"] };
+    triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, {
+      data: JSON.stringify(testMessage),
+    });
+
+    expect(parseMessage).toHaveBeenCalledWith(testMessage, mockDispatch);
+  });
+
+  it("does not call parseMessage when JSON parsing fails", async () => {
+    jest.spyOn(console, "error").mockImplementation();
+    const { ws } = await createAndOpenConnection();
+
+    triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, { data: "invalid json" });
+
+    expect(parseMessage).not.toHaveBeenCalled();
   });
 });
