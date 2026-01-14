@@ -1,11 +1,15 @@
+import { AppDispatch } from "../app/store";
 import { fetchWebSocketTicket } from "./api/fetchWebSocketTicket";
 import { WS_INBOUND_EVENTS } from "./protocols";
+import { parseMessage } from "./ws/parseMessage";
 
 export interface WebSocketWithCleanup extends WebSocket {
   cleanup: () => void;
 }
 
-export async function createWebSocketConnection(): Promise<WebSocketWithCleanup> {
+export async function createWebSocketConnection(
+  dispatch: AppDispatch
+): Promise<WebSocketWithCleanup> {
   const wsBaseUrl =
     (window as any).WEBSOCKET_URL ??
     (window as any).CALENDAR_BASE_URL?.replace(
@@ -68,7 +72,7 @@ export async function createWebSocketConnection(): Promise<WebSocketWithCleanup>
       const message = JSON.parse(event.data);
       console.log("WebSocket message received:", message);
 
-      // TODO: Handle different message types
+      parseMessage(message, dispatch);
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }

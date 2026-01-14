@@ -8,6 +8,6 @@ export const WS_INBOUND_EVENTS = {
 
 // WebSocket message types sent to server
 export const WS_OUTBOUND_EVENTS = {
-  REGISTER_CLIENT: "register",
-  UNREGISTER_CLIENT: "unregister",
+  REGISTER_CLIENT: "registered",
+  UNREGISTER_CLIENT: "unregistered",
 } as const;

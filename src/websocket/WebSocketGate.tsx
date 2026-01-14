@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
 import {
   createWebSocketConnection,
@@ -11,7 +11,7 @@ import { unregisterToCalendars } from "./ws/unregisterToCalendars";
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
   const previousCalendarListRef = useRef<string[]>([]);
-
+  const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) =>
     Boolean(state.user.userData && state.user.tokens)
   );
@@ -33,7 +33,7 @@ export function WebSocketGate() {
 
     const connect = async () => {
       try {
-        const socket = await createWebSocketConnection();
+        const socket = await createWebSocketConnection(dispatch);
         socketRef.current = socket;
         socket.addEventListener("close", () => {
           setIsSocketOpen(false);
