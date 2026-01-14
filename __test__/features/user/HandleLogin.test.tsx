@@ -56,7 +56,7 @@ describe("HandleLogin", () => {
     };
 
     renderWithProviders(<HandleLogin />, preloadedState);
-    expect(screen.getByAltText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByTestId("loading")).toBeInTheDocument();
   });
   test("shows Loading when userData exists and calendars pending is false", () => {
     const preloadedState = {
@@ -71,7 +71,7 @@ describe("HandleLogin", () => {
     };
     renderWithProviders(<HandleLogin />, preloadedState);
 
-    expect(screen.getByAltText("loading")).toBeInTheDocument();
+    expect(screen.getByTestId("loading")).toBeInTheDocument();
   });
   test("goes to error page when there is error in user data", () => {
     const dispatch = appHooks.useAppDispatch();
