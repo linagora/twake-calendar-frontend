@@ -1,13 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { WebSocketWithCleanup } from './connection';
+import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
-import { updateCalendars } from './messaging';
-import { syncCalendarRegistrations } from './operations';
-
-
+import { updateCalendars } from "./messaging";
+import { syncCalendarRegistrations } from "./operations";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -28,7 +26,9 @@ export function WebSocketGate() {
   );
 
   const onClose = useCallback((event: CloseEvent) => {
-    closeWebSocketConnection(socketRef, setIsSocketOpen);
+    // Socket already cleaned up by internal handler before this callback fires
+    socketRef.current = null;
+    setIsSocketOpen(false);
     // TODO: Add reconnection logic here
   }, []);
 
@@ -47,17 +47,24 @@ export function WebSocketGate() {
 
   // Manage WebSocket connection
   useEffect(() => {
+    const abortController = new AbortController();
     if (!isAuthenticated) {
       closeWebSocketConnection(socketRef, setIsSocketOpen);
       return;
     }
 
-    establishWebSocketConnection(callBacks, socketRef, setIsSocketOpen);
+    establishWebSocketConnection(
+      callBacks,
+      socketRef,
+      setIsSocketOpen,
+      abortController.signal
+    );
 
     return () => {
+      abortController.abort();
       closeWebSocketConnection(socketRef, setIsSocketOpen);
     };
-  }, [isAuthenticated, dispatch, callBacks]);
+  }, [isAuthenticated, callBacks]);
 
   // Register using a diff with previous calendars
   useEffect(() => {

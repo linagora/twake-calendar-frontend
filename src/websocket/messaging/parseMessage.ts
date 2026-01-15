@@ -3,8 +3,9 @@ import { WS_INBOUND_EVENTS } from "../protocols";
 export function parseMessage(message: unknown) {
   console.log("WebSocket message received:", message);
   const calendarsToRefresh = new Set<string>();
+  const calendarsToHide = new Set<string>();
   if (typeof message !== "object" || message === null) {
-    return calendarsToRefresh;
+    return { calendarsToRefresh, calendarsToHide };
   }
 
   for (const [key, value] of Object.entries(message)) {
@@ -15,7 +16,9 @@ export function parseMessage(message: unknown) {
         }
         break;
       case WS_INBOUND_EVENTS.CLIENT_UNREGISTERED:
-        console.log("Unregistered Calendar", value);
+        if (Array.isArray(value)) {
+          value.forEach((cal: string) => calendarsToHide.add(cal));
+        }
         break;
       default: {
         calendarsToRefresh.add(key);
@@ -23,5 +26,5 @@ export function parseMessage(message: unknown) {
     }
   }
 
-  return calendarsToRefresh;
+  return { calendarsToRefresh, calendarsToHide };
 }

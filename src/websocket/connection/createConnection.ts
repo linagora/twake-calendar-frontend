@@ -9,7 +9,7 @@ export async function createWebSocketConnection(
     (window as any).WEBSOCKET_URL ??
     (window as any).CALENDAR_BASE_URL?.replace(
       /^http(s)?:/,
-      (_: boolean, s: boolean) => (s ? "wss:" : "ws:")
+      (_: string, s: string | undefined) => (s ? "wss:" : "ws:")
     ) ??
     "";
 

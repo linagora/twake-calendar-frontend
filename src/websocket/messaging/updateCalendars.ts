@@ -8,9 +8,13 @@ import { parseCalendarPath } from "./parseCalendarPath";
 export function updateCalendars(message: unknown, dispatch: AppDispatch) {
   const currentRange = getDisplayedCalendarRange();
   const state = store.getState();
-  const calendarsToRefresh = parseMessage(message);
+  const { calendarsToRefresh, calendarsToHide } = parseMessage(message);
   calendarsToRefresh.forEach((calendarPath) => {
-    const calendarId = parseCalendarPath(calendarPath) ?? "";
+    const calendarId = parseCalendarPath(calendarPath);
+    if (!calendarId) {
+      console.warn("Invalid calendar path received:", calendarPath);
+      return;
+    }
     const calendar = findCalendarById(state, calendarId);
     if (calendar) {
       dispatch(
@@ -20,6 +24,8 @@ export function updateCalendars(message: unknown, dispatch: AppDispatch) {
           calendarRange: currentRange,
         })
       );
+    } else {
+      console.warn("Calendar not found for id:", calendarId);
     }
   });
 }

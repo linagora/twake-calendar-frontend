@@ -447,7 +447,9 @@ describe("WebSocketGate", () => {
       });
 
       // Wait a bit to ensure the effect would have run if it was going to
-      jest.useFakeTimers().advanceTimersByTime(100);
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(100);
+      jest.useRealTimers();
       expect(registerToCalendars).not.toHaveBeenCalled();
     });
 

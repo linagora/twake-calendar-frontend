@@ -7,9 +7,9 @@ describe("parseMessage", () => {
     const result2 = parseMessage("string");
     const result3 = parseMessage(123);
 
-    expect(result1).toEqual(new Set<string>());
-    expect(result2).toEqual(new Set<string>());
-    expect(result3).toEqual(new Set<string>());
+    expect(result1.calendarsToRefresh).toEqual(new Set<string>());
+    expect(result2.calendarsToRefresh).toEqual(new Set<string>());
+    expect(result3.calendarsToRefresh).toEqual(new Set<string>());
   });
 
   it("should handle registered event", () => {
@@ -22,24 +22,19 @@ describe("parseMessage", () => {
 
     const result = parseMessage(message);
 
-    expect(result).toContain("/calendars/cal1/entry1");
-    expect(result).toContain("/calendars/cal2/entry2");
-    expect(result.size).toBe(2);
+    expect(result.calendarsToRefresh).toContain("/calendars/cal1/entry1");
+    expect(result.calendarsToRefresh).toContain("/calendars/cal2/entry2");
+    expect(result.calendarsToRefresh.size).toBe(2);
   });
 
   it("should handle unregistered event", () => {
-    const consoleSpy = jest.spyOn(console, "log").mockImplementation();
     const message = {
       [WS_INBOUND_EVENTS.CLIENT_UNREGISTERED]: ["/calendars/cal1/entry1"],
     };
 
-    parseMessage(message);
+    const result = parseMessage(message);
 
-    expect(consoleSpy).toHaveBeenCalledWith("Unregistered Calendar", [
-      "/calendars/cal1/entry1",
-    ]);
-
-    consoleSpy.mockRestore();
+    expect(result.calendarsToHide).toContain("/calendars/cal1/entry1");
   });
 
   it("should handle calendar path updates", () => {
@@ -49,8 +44,8 @@ describe("parseMessage", () => {
 
     const result = parseMessage(message);
 
-    expect(result).toContain("/calendars/cal1/entry1");
-    expect(result.size).toBe(1);
+    expect(result.calendarsToRefresh).toContain("/calendars/cal1/entry1");
+    expect(result.calendarsToRefresh.size).toBe(1);
   });
 
   it("should parse multiple calendar paths", () => {
@@ -61,9 +56,9 @@ describe("parseMessage", () => {
 
     const result = parseMessage(message);
 
-    expect(result.size).toBe(2);
-    expect(result).toContain("/calendars/cal1/entry1");
-    expect(result).toContain("/calendars/cal2/entry2");
+    expect(result.calendarsToRefresh.size).toBe(2);
+    expect(result.calendarsToRefresh).toContain("/calendars/cal1/entry1");
+    expect(result.calendarsToRefresh).toContain("/calendars/cal2/entry2");
   });
 
   it("should handle multiple event types in single message", () => {
@@ -75,7 +70,7 @@ describe("parseMessage", () => {
 
     const result = parseMessage(message);
 
-    expect(result.size).toBe(1);
-    expect(result).toContain("/calendars/cal1/entry1");
+    expect(result.calendarsToRefresh.size).toBe(1);
+    expect(result.calendarsToRefresh).toContain("/calendars/cal1/entry1");
   });
 });

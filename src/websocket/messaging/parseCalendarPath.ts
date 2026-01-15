@@ -5,7 +5,7 @@ export function parseCalendarPath(key: string) {
     return null;
   }
 
-  const [, , calendarId, entryId] = key.split("/");
+  const [, , userId, calendarId] = key.split("/");
 
-  return `${calendarId}/${entryId}`;
+  return `${userId}/${calendarId}`;
 }
