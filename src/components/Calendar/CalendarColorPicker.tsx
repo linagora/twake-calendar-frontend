@@ -8,7 +8,7 @@ import {
   Typography,
   useTheme,
 } from "@linagora/twake-mui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useI18n } from "twake-i18n";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
@@ -27,6 +27,15 @@ export function ColorPicker({
       ? selectedColor
       : undefined
   );
+
+  useEffect(() => {
+    if (!colors.find((c) => c.light === selectedColor?.light)) {
+      setCustomColor(selectedColor);
+    } else {
+      setCustomColor(undefined);
+    }
+  }, [selectedColor, colors]);
+
   return (
     <Box display="flex" alignItems="center" gap={1}>
       {colors.map((c) => (
