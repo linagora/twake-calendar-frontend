@@ -20,7 +20,7 @@ export const FieldWithLabel = React.memo(
     if (!isExpanded) {
       // Normal mode: label on top
       const isEmptyLabel = label === " " || label === "";
-      
+
       return (
         <Box
           sx={{
