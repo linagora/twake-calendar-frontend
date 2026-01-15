@@ -52,7 +52,7 @@ export const FieldWithLabel = React.memo(
             "& > .MuiBox-root > .MuiBox-root > .MuiBox-root": {
               marginTop: 0,
             },
-            ...(Array.isArray(sx) ? sx : [sx]),
+            ...(sx ? (Array.isArray(sx) ? sx : [sx]) : []),
           }}
         >
           {!isEmptyLabel && (
