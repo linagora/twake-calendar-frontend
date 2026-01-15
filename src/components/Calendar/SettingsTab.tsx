@@ -49,62 +49,91 @@ export function SettingsTab({
   }, [description]);
 
   return (
-    <Box mt={2}>
-      <TextField
-        fullWidth
-        label=""
-        inputProps={{ "aria-label": t("common.name") }}
-        placeholder={t("common.name")}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        size="small"
-        margin="dense"
-      />
-
-      <AddDescButton
-        showDescription={toggleDesc}
-        setShowDescription={setToggleDesc}
-        showMore={false}
-        description={description}
-        setDescription={setDescription}
-        buttonVariant="contained"
-        buttonColor="secondary"
-      />
-
-      <Box mt={2}>
-        <Typography variant="body2" gutterBottom>
-          {t("calendar.color")}
-        </Typography>
-        <ColorPicker
-          onChange={(color) => setColor(color)}
-          selectedColor={color}
+    <>
+      {/* Form group 1: Name field - first group, margin top 0 */}
+      <Box mt={0}>
+        <TextField
+          fullWidth
+          label=""
+          inputProps={{ "aria-label": t("common.name") }}
+          placeholder={t("common.name")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          size="small"
+          sx={{
+            "&.MuiFormControl-root": {
+              marginTop: 0,
+              marginBottom: 0,
+            },
+          }}
         />
       </Box>
 
+      {/* Form group 2: Description */}
+      <Box mt={2}>
+        <AddDescButton
+          showDescription={toggleDesc}
+          setShowDescription={setToggleDesc}
+          showMore={false}
+          description={description}
+          setDescription={setDescription}
+          buttonVariant="contained"
+          buttonColor="secondary"
+        />
+      </Box>
+
+      {/* Form group 3: Color */}
+      <Box mt={2}>
+        <Typography
+          sx={{
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            margin: 0,
+          }}
+        >
+          {t("calendar.color")}
+        </Typography>
+        <Box sx={{ marginTop: "6px" }}>
+          <ColorPicker
+            onChange={(color) => setColor(color)}
+            selectedColor={color}
+          />
+        </Box>
+      </Box>
+
+      {/* Form group 4: New events visibility */}
       {isOwn && (
         <Box mt={2}>
-          <Typography variant="body2" gutterBottom>
+          <Typography
+            sx={{
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
             {t("calendar.newEventsVisibility")}
           </Typography>
-          <ToggleButtonGroup
-            value={visibility}
-            exclusive
-            onChange={(e, val) => val && setVisibility(val)}
-            size="medium"
-            sx={{ borderRadius: "12px" }}
-          >
-            <ToggleButton value="public" sx={{ width: "140px" }}>
-              <PublicIcon fontSize="small" sx={{ mr: 1 }} />
-              {t("common.all")}
-            </ToggleButton>
+          <Box sx={{ marginTop: "6px" }}>
+            <ToggleButtonGroup
+              value={visibility}
+              exclusive
+              onChange={(e, val) => val && setVisibility(val)}
+              size="medium"
+              sx={{ borderRadius: "12px" }}
+            >
+              <ToggleButton value="public" sx={{ width: "140px" }}>
+                <PublicIcon fontSize="small" sx={{ mr: 1 }} />
+                {t("common.all")}
+              </ToggleButton>
 
-            <ToggleButton value="private" sx={{ width: "140px" }}>
-              <LockOutlineIcon fontSize="small" sx={{ mr: 1 }} />
-              {t("common.you")}
-            </ToggleButton>
-          </ToggleButtonGroup>
+              <ToggleButton value="private" sx={{ width: "140px" }}>
+                <LockOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+                {t("common.you")}
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
         </Box>
       )}
-    </Box>
+    </>
   );
 }

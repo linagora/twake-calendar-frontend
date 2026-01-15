@@ -88,7 +88,8 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
           <TextField
             disabled
             fullWidth
-            label={t("calendar.caldav_access")}
+            label=""
+            inputProps={{ "aria-label": t("calendar.caldav_access") }}
             value={calDAVLink}
             size="small"
             InputProps={{
@@ -109,7 +110,8 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
           <TextField
             disabled
             fullWidth
-            label={t("calendar.secretUrl")}
+            label=""
+            inputProps={{ "aria-label": t("calendar.secretUrl") }}
             value={secretLink}
             size="small"
             InputProps={{
