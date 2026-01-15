@@ -1,13 +1,13 @@
-import { updateCalendars } from "../../../../src/websocket/utils/updateCalendars";
-import { refreshCalendarWithSyncToken } from "../../../../src/features/Calendars/services/refreshCalendar";
-import { RootState, store } from "../../../../src/app/store";
-import { WS_INBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
-import { getDisplayedCalendarRange } from "../../../../src/utils/CalendarRangeManager";
+import { updateCalendars } from "@/websocket/messaging/updateCalendars";
+import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
+import { RootState, store } from "@/app/store";
+import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
+import { getDisplayedCalendarRange } from "@/utils/CalendarRangeManager";
 import { waitFor } from "@testing-library/dom";
 
-jest.mock("../../../../src/features/Calendars/services/refreshCalendar");
-jest.mock("../../../../src/utils/CalendarRangeManager");
-jest.mock("../../../../src/app/store", () => ({
+jest.mock("@/features/Calendars/services/refreshCalendar");
+jest.mock("@/utils/CalendarRangeManager");
+jest.mock("@/app/store", () => ({
   store: {
     getState: jest.fn(),
   },
@@ -83,7 +83,7 @@ describe("updateCalendars", () => {
     expect(getDisplayedCalendarRange).toHaveBeenCalled();
   });
 
-  it("should handle temp calendars", () => {
+  it("should handle temp calendars", async () => {
     const stateWithTemp = {
       calendars: {
         list: {},
@@ -105,7 +105,7 @@ describe("updateCalendars", () => {
 
     updateCalendars(message, mockDispatch);
 
-    waitFor(() =>
+    await waitFor(() =>
       expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
         calendar: stateWithTemp.calendars.templist["temp1/entry1"],
         calType: "temp",

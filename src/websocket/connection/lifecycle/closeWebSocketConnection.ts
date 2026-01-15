@@ -1,4 +1,4 @@
-import { WebSocketWithCleanup } from "../createWebSocketConnection";
+import { WebSocketWithCleanup } from "../types";
 
 export function closeWebSocketConnection(
   socketRef: React.MutableRefObject<WebSocketWithCleanup | null>,

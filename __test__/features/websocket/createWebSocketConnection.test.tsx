@@ -1,10 +1,10 @@
 import { waitFor } from "@testing-library/dom";
-import { fetchWebSocketTicket } from "../../../src/websocket/api/fetchWebSocketTicket";
-import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
-import { WS_INBOUND_EVENTS } from "../../../src/websocket/utils/protocols";
+import { fetchWebSocketTicket } from "@/websocket/api/fetchWebSocketTicket";
+import { createWebSocketConnection } from "@/websocket/connection/createConnection";
+import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
 import { setupWebsocket } from "./utils/setupWebsocket";
 
-jest.mock("../../../src/websocket/api/fetchWebSocketTicket");
+jest.mock("@/websocket/api/fetchWebSocketTicket");
 
 describe("createWebSocketConnection", () => {
   let mockWebSocket: jest.Mock;

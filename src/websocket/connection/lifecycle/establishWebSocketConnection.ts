@@ -1,8 +1,5 @@
-import {
-  createWebSocketConnection,
-  WebSocketCallbacks,
-  WebSocketWithCleanup,
-} from "../createWebSocketConnection";
+import { createWebSocketConnection } from "../createConnection";
+import { WebSocketCallbacks, WebSocketWithCleanup } from "../types";
 
 export async function establishWebSocketConnection(
   callbacks: WebSocketCallbacks,

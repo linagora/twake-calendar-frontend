@@ -1,12 +1,13 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { store } from "../app/store";
-import { useSelectedCalendars } from "../utils/storage/useSelectedCalendars";
-import { WebSocketWithCleanup } from "./createWebSocketConnection";
-import { closeWebSocketConnection } from "./utils/closeWebSocketConnection";
-import { establishWebSocketConnection } from "./utils/establishWebSocketConnection";
-import { syncCalendarRegistrations } from "./utils/syncCalendarRegistrations";
-import { updateCalendars } from "./utils/updateCalendars";
+import type { WebSocketWithCleanup } from './connection';
+import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
+import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
+import { updateCalendars } from './messaging';
+import { syncCalendarRegistrations } from './operations';
+
+
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -27,8 +28,7 @@ export function WebSocketGate() {
   );
 
   const onClose = useCallback((event: CloseEvent) => {
-    setIsSocketOpen(false);
-    socketRef.current = null;
+    closeWebSocketConnection(socketRef, setIsSocketOpen);
     // TODO: Add reconnection logic here
   }, []);
 
@@ -57,7 +57,7 @@ export function WebSocketGate() {
     return () => {
       closeWebSocketConnection(socketRef, setIsSocketOpen);
     };
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, callBacks]);
 
   // Register using a diff with previous calendars
   useEffect(() => {

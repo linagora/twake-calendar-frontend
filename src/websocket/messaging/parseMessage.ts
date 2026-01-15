@@ -1,4 +1,4 @@
-import { WS_INBOUND_EVENTS } from "../utils/protocols";
+import { WS_INBOUND_EVENTS } from "../protocols";
 
 export function parseMessage(message: unknown) {
   console.log("WebSocket message received:", message);
@@ -10,7 +10,9 @@ export function parseMessage(message: unknown) {
   for (const [key, value] of Object.entries(message)) {
     switch (key) {
       case WS_INBOUND_EVENTS.CLIENT_REGISTERED:
-        value.forEach((cal: string) => calendarsToRefresh.add(cal));
+        if (Array.isArray(value)) {
+          value.forEach((cal: string) => calendarsToRefresh.add(cal));
+        }
         break;
       case WS_INBOUND_EVENTS.CLIENT_UNREGISTERED:
         console.log("Unregistered Calendar", value);

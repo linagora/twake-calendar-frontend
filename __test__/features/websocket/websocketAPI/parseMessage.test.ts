@@ -1,5 +1,5 @@
-import { WS_INBOUND_EVENTS } from "../../../../src/websocket/utils/protocols";
-import { parseMessage } from "../../../../src/websocket/ws/parseMessage";
+import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
+import { parseMessage } from "@/websocket/messaging/parseMessage";
 
 describe("parseMessage", () => {
   it("should return empty set for non-object messages", () => {

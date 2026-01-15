@@ -1,8 +1,8 @@
-import { AppDispatch, store } from "../../app/store";
-import { refreshCalendarWithSyncToken } from "../../features/Calendars/services/refreshCalendar";
-import { getDisplayedCalendarRange } from "../../utils/CalendarRangeManager";
-import { findCalendarById } from "../../utils/findCalendarById";
-import { parseMessage } from "../ws/parseMessage";
+import type { AppDispatch } from "@/app/store";
+import { store } from "@/app/store";
+import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
+import { getDisplayedCalendarRange, findCalendarById } from "@/utils";
+import { parseMessage } from "./parseMessage";
 import { parseCalendarPath } from "./parseCalendarPath";
 
 export function updateCalendars(message: unknown, dispatch: AppDispatch) {

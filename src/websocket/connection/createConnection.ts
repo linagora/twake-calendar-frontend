@@ -1,15 +1,6 @@
-import { fetchWebSocketTicket } from "./api/fetchWebSocketTicket";
-import { WS_INBOUND_EVENTS } from "./utils/protocols";
-
-export interface WebSocketWithCleanup extends WebSocket {
-  cleanup: () => void;
-}
-
-export interface WebSocketCallbacks {
-  onMessage: (data: any) => void;
-  onClose?: (event: CloseEvent) => void;
-  onError?: (error: Event) => void;
-}
+import { fetchWebSocketTicket } from "../api/fetchWebSocketTicket";
+import { WS_INBOUND_EVENTS } from "../protocols";
+import { WebSocketCallbacks, WebSocketWithCleanup } from "./types";
 
 export async function createWebSocketConnection(
   callbacks: WebSocketCallbacks

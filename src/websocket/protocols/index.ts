@@ -1,4 +1,3 @@
-// WebSocket event listeners (browser events)
 export const WS_INBOUND_EVENTS = {
   CONNECTION_OPENED: "open",
   MESSAGE: "message",

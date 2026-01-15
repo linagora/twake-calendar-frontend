@@ -1,6 +1,6 @@
 // src/websocket/__tests__/unregisterToCalendars.test.ts
 
-import { unregisterToCalendars } from "../../../../src/websocket/ws/unregisterToCalendars";
+import { unregisterToCalendars } from "@/websocket/operations/unregisterToCalendars";
 
 describe("unregisterToCalendars", () => {
   let mockSocket: any;

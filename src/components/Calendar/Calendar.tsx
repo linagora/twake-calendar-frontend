@@ -15,7 +15,7 @@ import ImportAlert from "../../features/Events/ImportAlert";
 import {
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
-} from "../../utils/dateUtils";
+} from "@/utils/dateUtils";
 import { push } from "redux-first-history";
 import EventPreviewModal from "../../features/Events/EventDisplayPreview";
 import AddIcon from "@mui/icons-material/Add";
@@ -43,10 +43,10 @@ import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";
 import SearchResultsPage from "../../features/Search/SearchResultsPage";
 import { setTimeZone } from "../../features/Settings/SettingsSlice";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
-import { setSelectedCalendars as setSelectedCalendarsToStorage } from "../../utils/storage/setSelectedCalendars";
-import { setDisplayedDateAndRange } from "../../utils/CalendarRangeManager";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
+import { setDisplayedDateAndRange } from "@/utils/CalendarRangeManager";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,
