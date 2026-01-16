@@ -19,51 +19,49 @@ export const FieldWithLabel = React.memo(
   }) => {
     if (!isExpanded) {
       // Normal mode: label on top
-      const isEmptyLabel = label === " " || label === "";
+      const isEmptyLabel =
+        label === null ||
+        label === undefined ||
+        (typeof label === "string" && label.trim() === "");
 
       return (
         <Box
-          sx={{
-            "& > *:not(:first-of-type)": {
-              marginTop: isEmptyLabel ? 0 : "6px",
+          sx={[
+            {
+              "& > *:not(:first-of-type)": {
+                marginTop: isEmptyLabel ? 0 : "6px",
+              },
+              // Only apply margin to direct child MuiTextField-root
+              "& > .MuiFormControl-root": {
+                marginTop: "6px",
+                marginBottom: 0,
+              },
+              "& > .MuiTextField-root": {
+                marginTop: "6px",
+                marginBottom: 0,
+              },
+              // Reset margin for nested MuiTextField-root
+              "& .MuiFormControl-root .MuiTextField-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+              "& .MuiTextField-root .MuiTextField-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+              // Reset margin for nested Box children (DateTimeFields structure)
+              "& > .MuiBox-root > .MuiBox-root": {
+                marginTop: 0,
+              },
+              "& > .MuiBox-root > .MuiBox-root > .MuiBox-root": {
+                marginTop: 0,
+              },
             },
-            // Only apply margin to direct child MuiTextField-root
-            "& > .MuiFormControl-root": {
-              marginTop: "6px",
-              marginBottom: 0,
-            },
-            "& > .MuiTextField-root": {
-              marginTop: "6px",
-              marginBottom: 0,
-            },
-            // Reset margin for nested MuiTextField-root
-            "& .MuiFormControl-root .MuiTextField-root": {
-              marginTop: 0,
-              marginBottom: 0,
-            },
-            "& .MuiTextField-root .MuiTextField-root": {
-              marginTop: 0,
-              marginBottom: 0,
-            },
-            // Reset margin for nested Box children (DateTimeFields structure)
-            "& > .MuiBox-root > .MuiBox-root": {
-              marginTop: 0,
-            },
-            "& > .MuiBox-root > .MuiBox-root > .MuiBox-root": {
-              marginTop: 0,
-            },
-            ...(sx ? (Array.isArray(sx) ? sx : [sx]) : []),
-          }}
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
         >
           {!isEmptyLabel && (
-            <Typography
-              component="div"
-              sx={{
-                display: "block",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-              }}
-            >
+            <Typography component="div" variant="h6" sx={{ display: "block" }}>
               {label}
             </Typography>
           )}

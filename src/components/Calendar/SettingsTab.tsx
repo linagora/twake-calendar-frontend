@@ -82,13 +82,7 @@ export function SettingsTab({
 
       {/* Form group 3: Color */}
       <Box mt={2}>
-        <Typography
-          sx={{
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            margin: 0,
-          }}
-        >
+        <Typography variant="h6" sx={{ margin: 0 }}>
           {t("calendar.color")}
         </Typography>
         <Box sx={{ marginTop: "6px" }}>
@@ -102,13 +96,7 @@ export function SettingsTab({
       {/* Form group 4: New events visibility */}
       {isOwn && (
         <Box mt={2}>
-          <Typography
-            sx={{
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              margin: 0,
-            }}
-          >
+          <Typography variant="h6" sx={{ margin: 0 }}>
             {t("calendar.newEventsVisibility")}
           </Typography>
           <Box sx={{ marginTop: "6px" }}>
