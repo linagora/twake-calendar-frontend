@@ -483,14 +483,7 @@ export default function EventFormFields({
               <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
             label={
-              <Typography
-                sx={{
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                }}
-              >
-                {t("event.form.allDay")}
-              </Typography>
+              <Typography variant="h6">{t("event.form.allDay")}</Typography>
             }
           />
           <FormControlLabel
@@ -524,14 +517,7 @@ export default function EventFormFields({
               />
             }
             label={
-              <Typography
-                sx={{
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                }}
-              >
-                {t("event.form.repeat")}
-              </Typography>
+              <Typography variant="h6">{t("event.form.repeat")}</Typography>
             }
           />
           <TimezoneAutocomplete
