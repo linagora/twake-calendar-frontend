@@ -50,7 +50,19 @@ export const api = ky.extend({
     afterResponse: [
       async (request, options, response) => {
         if (response.status === 401) {
-          // Attempt token refresh on unauthorized response
+          // Check if we're already on login flow to prevent redirect loop
+          const currentPath = window.location.pathname;
+          if (currentPath === "/" || currentPath === "/callback") {
+            return response;
+          }
+
+          // Check if we have a token in the request
+          const hasAuthHeader = request.headers.has("Authorization");
+          if (!hasAuthHeader) {
+            return response;
+          }
+
+          // Only redirect to SSO if we're sure token is invalid (not just missing)
           const loginurl = await Auth();
 
           sessionStorage.setItem(
@@ -62,6 +74,7 @@ export const api = ky.extend({
           );
           redirectTo(loginurl.redirectTo);
         }
+        return response;
       },
     ],
   },
