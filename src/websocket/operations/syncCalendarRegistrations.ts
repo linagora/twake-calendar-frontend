@@ -31,17 +31,18 @@ export function syncCalendarRegistrations(
   try {
     if (toRegister.length > 0) {
       registerToCalendars(socketRef.current, toRegister);
-      previousCalendarListRef.current = calendarList;
     }
   } catch (error) {
     console.error("Failed to register calendar:", error);
+    return;
   }
   try {
     if (toUnregister.length > 0) {
       unregisterToCalendars(socketRef.current, toUnregister);
-      previousCalendarListRef.current = calendarList;
     }
   } catch (error) {
     console.error("Failed to unregister calendar:", error);
+    return;
   }
+  previousCalendarListRef.current = calendarList;
 }

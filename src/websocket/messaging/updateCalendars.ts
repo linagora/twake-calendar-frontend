@@ -1,9 +1,10 @@
 import type { AppDispatch } from "@/app/store";
 import { store } from "@/app/store";
 import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
-import { getDisplayedCalendarRange, findCalendarById } from "@/utils";
-import { parseMessage } from "./parseMessage";
+import { findCalendarById, getDisplayedCalendarRange } from "@/utils";
+import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 import { parseCalendarPath } from "./parseCalendarPath";
+import { parseMessage } from "./parseMessage";
 
 export function updateCalendars(message: unknown, dispatch: AppDispatch) {
   const currentRange = getDisplayedCalendarRange();
@@ -28,4 +29,17 @@ export function updateCalendars(message: unknown, dispatch: AppDispatch) {
       console.warn("Calendar not found for id:", calendarId);
     }
   });
+  const currentSelectedCalendars = JSON.parse(
+    localStorage.getItem("selectedCalendars") ?? "[]"
+  ) as string[];
+
+  const calendarIdsToHide = [...calendarsToHide]
+    .map(parseCalendarPath)
+    .filter((id): id is string => Boolean(id));
+
+  const updatedSelectedCalendars = currentSelectedCalendars.filter(
+    (id) => !calendarIdsToHide.includes(id)
+  );
+
+  setSelectedCalendars(updatedSelectedCalendars);
 }
