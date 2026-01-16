@@ -53,27 +53,30 @@ export function ImportTab({
   }, [importFile, importUrl, importMode]);
 
   return (
-    <Box mt={2}>
+    <>
+      {/* Form group 1: Select file button - first group, margin top 0 */}
       {importMode === "file" && (
-        <>
-          <Box mb={1}>
-            <Button
-              variant="outlined"
-              component="label"
-              size="medium"
-              sx={{ borderRadius: "12px" }}
-            >
-              {t("common.select_file")}
-              <input
-                type="file"
-                hidden
-                accept=".ics"
-                onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
-              />
-            </Button>
-          </Box>
+        <Box mt={0}>
+          <Button
+            variant="outlined"
+            component="label"
+            size="medium"
+            sx={{ borderRadius: "12px" }}
+          >
+            {t("common.select_file")}
+            <input
+              type="file"
+              hidden
+              accept=".ics"
+              onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+            />
+          </Button>
           {importFile && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ marginTop: "6px" }}
+            >
               {importFile.name}
             </Typography>
           )}
@@ -81,38 +84,67 @@ export function ImportTab({
             variant="caption"
             color="text.secondary"
             display="block"
-            mb={2}
+            sx={{ marginTop: "6px" }}
           >
             {t("calendar.import_file_description")}
           </Typography>
-        </>
+        </Box>
       )}
 
+      {/* Form group 2: URL field */}
       {importMode === "url" && (
-        <TextField
+        <Box mt={0}>
+          <TextField
+            fullWidth
+            label={t("calendar.ics_feed_url")}
+            value={importUrl}
+            onChange={(e) => setImportUrl(e.target.value)}
+            size="small"
+            margin="dense"
+            sx={{
+              "&.MuiFormControl-root.MuiFormControl-marginDense": {
+                marginTop: "6px",
+                marginBottom: 0,
+              },
+            }}
+          />
+        </Box>
+      )}
+
+      {/* Form group 3: Import to */}
+      <Box mt={2}>
+        <FormControl
           fullWidth
-          label={t("calendar.ics_feed_url")}
-          value={importUrl}
-          onChange={(e) => setImportUrl(e.target.value)}
           size="small"
           margin="dense"
-        />
-      )}
-
-      <FormControl fullWidth size="small" sx={{ mt: 2 }}>
-        <InputLabel id="import-to-label">{t("calendar.import_to")}</InputLabel>
-        <Select
-          labelId="import-to-label"
-          label={t("calendar.import_to")}
-          value={importTarget}
-          onChange={(e) => setImportTarget(e.target.value)}
+          sx={{
+            "&.MuiFormControl-root.MuiFormControl-marginDense": {
+              marginTop: "6px",
+              marginBottom: 0,
+            },
+          }}
         >
-          <MenuItem value="new">{t("calendar.new_calendar")}</MenuItem>
-          {CalendarItemList(personalCalendars)}
-        </Select>
-      </FormControl>
+          <InputLabel id="import-to-label">
+            {t("calendar.import_to")}
+          </InputLabel>
+          <Select
+            labelId="import-to-label"
+            label={t("calendar.import_to")}
+            value={importTarget}
+            onChange={(e) => setImportTarget(e.target.value)}
+          >
+            <MenuItem value="new">{t("calendar.new_calendar")}</MenuItem>
+            {CalendarItemList(personalCalendars)}
+          </Select>
+        </FormControl>
+      </Box>
 
-      {importTarget === "new" && <SettingsTab {...newCalParams} />}
-    </Box>
+      {/* Form group 4: SettingsTab (when importing to new calendar) */}
+      {importTarget === "new" && (
+        <Box mt={2}>
+          <SettingsTab {...newCalParams} />
+        </Box>
+      )}
+    </>
   );
 }

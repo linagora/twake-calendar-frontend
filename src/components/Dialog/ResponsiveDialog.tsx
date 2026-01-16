@@ -66,7 +66,7 @@ interface ResponsiveDialogProps extends Omit<
   headerHeight?: string;
   /** Spacing between children in normal mode (default: 2 = 16px) */
   normalSpacing?: number;
-  /** Spacing between children in expanded mode (default: 3 = 24px) */
+  /** Spacing between children in expanded mode (default: 2 = 16px) */
   expandedSpacing?: number;
   /** Custom styles for DialogContent - merged with base styles */
   contentSx?: SxProps<Theme>;
@@ -102,7 +102,7 @@ function ResponsiveDialog({
   expandedContentMaxWidth = "990px",
   headerHeight = "90px",
   normalSpacing = 2,
-  expandedSpacing = 3,
+  expandedSpacing = 2,
   contentSx,
   titleSx,
   dialogContentProps,

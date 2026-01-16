@@ -342,6 +342,9 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
       <Box
         display="flex"
         flexDirection="column"
+        className={`date-time-group ${
+          isExpanded || shouldShowFullFieldsInNormal ? "show-full-field" : ""
+        }`.trim()}
         sx={{ maxWidth: showMore ? "calc(100% - 145px)" : "100%" }}
       >
         {isExpanded || shouldShowFullFieldsInNormal ? (

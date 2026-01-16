@@ -32,7 +32,7 @@ export function AddDescButton({
     <>
       {!showDescription && (
         <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={1} mb={1}>
+          <Box display="flex" gap={1}>
             <Button
               startIcon={<DescriptionIcon />}
               onClick={() => setShowDescription(true)}

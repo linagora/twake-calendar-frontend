@@ -245,6 +245,7 @@ export function EventChip({
                       whiteSpace: "normal",
                       flex: 1,
                       maxWidth: "75%",
+                      color: titleStyle.color,
                     }}
                   >
                     {event._def.extendedProps.description}
