@@ -1,15 +1,15 @@
 import { cleanup, render, waitFor, act } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
-import { registerToCalendars } from "../../../src/websocket/ws/registerToCalendars";
-import { unregisterToCalendars } from "../../../src/websocket/ws/unregisterToCalendars";
-import { WebSocketGate } from "../../../src/websocket/WebSocketGate";
-import { setSelectedCalendars } from "../../../src/utils/storage/setSelectedCalendars";
+import { createWebSocketConnection } from "@/websocket/connection/createConnection";
+import { registerToCalendars } from "@/websocket/operations/registerToCalendars";
+import { unregisterToCalendars } from "@/websocket/operations/unregisterToCalendars";
+import { WebSocketGate } from "@/websocket/WebSocketGate";
+import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 
-jest.mock("../../../src/websocket/createWebSocketConnection");
-jest.mock("../../../src/websocket/ws/registerToCalendars");
-jest.mock("../../../src/websocket/ws/unregisterToCalendars");
+jest.mock("@/websocket/connection/createConnection");
+jest.mock("@/websocket/operations/registerToCalendars");
+jest.mock("@/websocket/operations/unregisterToCalendars");
 
 describe("WebSocketGate", () => {
   let store: any;
@@ -101,7 +101,7 @@ describe("WebSocketGate", () => {
   });
 
   describe("Socket Connection Management", () => {
-    it("should add close event listener on socket connection", async () => {
+    it("should create connection with callbacks", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
       render(
@@ -111,22 +111,25 @@ describe("WebSocketGate", () => {
       );
 
       await waitFor(() => {
-        expect(mockSocket.addEventListener).toHaveBeenCalledWith(
-          "close",
-          expect.any(Function)
+        expect(createWebSocketConnection).toHaveBeenCalledWith(
+          expect.objectContaining({
+            onMessage: expect.any(Function),
+            onClose: expect.any(Function),
+            onError: expect.any(Function),
+          })
         );
       });
     });
 
-    it("should handle socket close event", async () => {
-      let closeHandler: Function;
-      mockSocket.addEventListener = jest.fn((event, handler) => {
-        if (event === "close") {
-          closeHandler = handler;
-        }
-      });
+    it("should handle socket close via callback", async () => {
+      let onCloseCallback: Function | undefined;
 
-      (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
+      (createWebSocketConnection as jest.Mock).mockImplementation(
+        (callbacks) => {
+          onCloseCallback = callbacks.onClose;
+          return Promise.resolve(mockSocket);
+        }
+      );
 
       render(
         <Provider store={store}>
@@ -135,11 +138,12 @@ describe("WebSocketGate", () => {
       );
 
       await waitFor(() => {
-        expect(mockSocket.addEventListener).toHaveBeenCalled();
+        expect(createWebSocketConnection).toHaveBeenCalled();
       });
 
+      // Simulate close event
       await act(async () => {
-        closeHandler!();
+        onCloseCallback?.(new CloseEvent("close"));
       });
 
       // Verify that subsequent calendar changes don't try to register
@@ -349,7 +353,7 @@ describe("WebSocketGate", () => {
 
       await waitFor(() => {
         expect(consoleError).toHaveBeenCalledWith(
-          "Failed to update calendar registrations:",
+          "Failed to register calendar:",
           expect.any(Error)
         );
       });
@@ -443,8 +447,9 @@ describe("WebSocketGate", () => {
       });
 
       // Wait a bit to ensure the effect would have run if it was going to
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(100);
+      jest.useRealTimers();
       expect(registerToCalendars).not.toHaveBeenCalled();
     });
 
@@ -477,7 +482,7 @@ describe("WebSocketGate", () => {
 
       await waitFor(() => {
         expect(consoleError).toHaveBeenCalledWith(
-          "Failed to update calendar registrations:",
+          "Failed to unregister calendar:",
           expect.any(Error)
         );
       });

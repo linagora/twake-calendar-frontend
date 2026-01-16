@@ -42,6 +42,7 @@ const config: Config = {
         "^preact(/(.*)|$)": "preact$1",
         "^react$": "<rootDir>/node_modules/react",
         "^react-dom$": "<rootDir>/node_modules/react-dom",
+        "^@/(.*)$": "<rootDir>/src/$1",
       },
       setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
     },
@@ -67,6 +68,9 @@ const config: Config = {
       },
       transformIgnorePatterns: ["/node_modules/(?!(ky|@linagora/twake-mui)/)"],
       setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
+      moduleNameMapper: {
+        "^@/(.*)$": "<rootDir>/src/$1",
+      },
     },
   ],
 };
