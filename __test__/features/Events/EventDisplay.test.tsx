@@ -1,5 +1,15 @@
+import * as appHooks from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
+import { InfoRow } from "@/components/Event/InfoRow";
+import { LONG_DATE_FORMAT } from "@/components/Event/utils/dateTimeFormatters";
+import {
+  stringAvatar,
+  stringToColor,
+} from "@/components/Event/utils/eventUtils";
+import * as calendarSlice from "@/features/Calendars/CalendarSlice";
 import * as eventThunks from "@/features/Calendars/services";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import {
   act,
   cleanup,
@@ -8,15 +18,6 @@ import {
   waitFor,
 } from "@testing-library/react";
 import dayjs from "dayjs";
-import * as appHooks from "@/app/hooks";
-import { InfoRow } from "@/components/Event/InfoRow";
-import { LONG_DATE_FORMAT } from "@/components/Event/utils/dateTimeFormatters";
-import {
-  stringAvatar,
-  stringToColor,
-} from "@/components/Event/utils/eventUtils";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
-import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("Event Preview Display", () => {
@@ -1831,7 +1832,7 @@ describe("Event Full Display", () => {
         (promise as any).unwrap = () => promise;
         return () => promise as any;
       });
-    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+    const spyRemove = jest.spyOn(calendarSlice, "removeEvent");
 
     const testDate = new Date("2025-01-15T10:00:00.000Z");
     const testEndDate = new Date("2025-01-15T11:00:00.000Z");

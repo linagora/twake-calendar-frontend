@@ -1,14 +1,3 @@
-import {
-  addSharedCalendarAsync,
-  createCalendarAsync,
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
-  getEventAsync,
-  getTempCalendarsListAsync,
-  patchACLCalendarAsync,
-  patchCalendarAsync,
-  removeCalendarAsync,
-} from "@/features/Calendars/services";
 import * as calAPI from "@/features/Calendars/CalendarApi";
 import reducer, {
   addEvent,
@@ -17,11 +6,25 @@ import reducer, {
   removeTempCal,
   updateEventLocal,
 } from "@/features/Calendars/CalendarSlice";
-import * as userAPI from "@/features/User/userAPI";
-
-import { configureStore } from "@reduxjs/toolkit";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
+import {
+  addSharedCalendarAsync,
+  createCalendarAsync,
+  deleteEventAsync,
+  getCalendarDetailAsync,
+  getCalendarsListAsync,
+  getEventAsync,
+  getTempCalendarsListAsync,
+  moveEventAsync,
+  patchACLCalendarAsync,
+  patchCalendarAsync,
+  putEventAsync,
+  removeCalendarAsync,
+} from "@/features/Calendars/services";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import * as userAPI from "@/features/User/userAPI";
 import userReducer, { setUserData } from "@/features/User/userSlice";
+import { configureStore } from "@reduxjs/toolkit";
 
 jest.mock("@/features/Calendars/CalendarApi");
 jest.mock("@/features/User/userAPI");

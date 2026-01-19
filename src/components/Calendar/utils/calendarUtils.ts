@@ -1,11 +1,13 @@
+import { refreshSingularCalendar } from "@/components/Event/utils/eventUtils";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { SlotLabelContentArg } from "@fullcalendar/core";
+import { ThunkDispatch } from "@reduxjs/toolkit";
 import moment from "moment-timezone";
 import { useI18n } from "twake-i18n";
-import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { detectDateTimeFormat } from "../../Event/utils/dateTimeHelpers";
 
 function convertEventDateTimeToISO(

@@ -696,10 +696,10 @@ describe("calendar Availability search", () => {
       );
 
       const selectedCalls = spy.mock.calls.filter(
-        (call) => call[0].calId === "user1/cal1"
+        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
       );
       const hiddenCalls = spy.mock.calls.filter(
-        (call) =>
+        (call: { calId: string }[]) =>
           call[0].calId === "user1/cal2" || call[0].calId === "user1/cal3"
       );
 
@@ -729,12 +729,13 @@ describe("calendar Availability search", () => {
       );
 
       const callsForCal1 = spy.mock.calls.filter(
-        (call) => call[0].calId === "user1/cal1"
+        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
       );
 
       const uniqueRanges = new Set(
         callsForCal1.map(
-          (call) => `${call[0].match.start}_${call[0].match.end}`
+          (call: { match: { end: string; start: string } }[]) =>
+            `${call[0].match.start}_${call[0].match.end}`
         )
       );
 

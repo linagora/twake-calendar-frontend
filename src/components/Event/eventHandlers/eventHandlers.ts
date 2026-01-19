@@ -12,6 +12,8 @@ import { PartStat } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
 import { userData } from "@/features/User/userDataTypes";
 import { buildFamilyName } from "@/utils/buildFamilyName";
+import { getCalendarRange } from "@/utils/dateUtils";
+import { refreshCalendars } from "../utils/eventUtils";
 
 function updateEventAttendees(
   event: CalendarEvent,
@@ -76,11 +78,15 @@ async function handleSoloRSVP(
 }
 
 async function handleAllRSVP(
+  dispatch: AppDispatch,
   event: CalendarEvent,
   userEmail: string,
-  rsvp: PartStat
+  rsvp: PartStat,
+  calendars: Calendar[]
 ) {
+  const calendarRange = getCalendarRange(new Date(event.start));
   await updateSeriesPartstat(event, userEmail, rsvp);
+  await refreshCalendars(dispatch, calendars, calendarRange);
 }
 
 async function handleDefaultRSVP(
@@ -97,7 +103,8 @@ export async function handleRSVP(
   user: userData | undefined,
   event: CalendarEvent,
   rsvp: PartStat,
-  typeOfAction?: string
+  typeOfAction?: string,
+  calendars?: Calendar[]
 ) {
   const newEvent = {
     ...event,

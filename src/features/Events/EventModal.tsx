@@ -1,3 +1,17 @@
+import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { getCalendarRange } from "@/utils/dateUtils";
+import {
+  buildEventFormTempData,
+  clearEventFormTempData,
+  EventFormState,
+  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
+  restoreFormDataFromTemp,
+  saveEventFormDataToTemp,
+  showErrorNotification,
+} from "@/utils/eventFormTempStorage";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { TIMEZONES } from "@/utils/timezone-data";
+import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import { Box, Button } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,18 +38,6 @@ import {
   formatLocalDateTime,
 } from "../../components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
-import {
-  buildEventFormTempData,
-  clearEventFormTempData,
-  EventFormState,
-  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
-  restoreFormDataFromTemp,
-  saveEventFormDataToTemp,
-  showErrorNotification,
-} from "@/utils/eventFormTempStorage";
-import { browserDefaultTimeZone } from "@/utils/timezone";
-import { TIMEZONES } from "@/utils/timezone-data";
-import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { putEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
