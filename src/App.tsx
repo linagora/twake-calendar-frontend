@@ -7,7 +7,7 @@ import "./App.styl";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { history } from "./app/store";
 import CalendarLayout from "./components/Calendar/CalendarLayout";
-import { Error } from "./components/Error/Error";
+import { Error as ErrorPage } from "./components/Error/Error";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
 import { Loading } from "./components/Loading/Loading";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
@@ -75,7 +75,7 @@ function App() {
               <Route path="/" element={<HandleLogin />} />
               <Route path="/calendar" element={<CalendarLayout />} />
               <Route path="/callback" element={<CallbackResume />} />
-              <Route path="/error" element={<Error />} />
+              <Route path="/error" element={<ErrorPage />} />
             </Routes>
           </Router>
           <ErrorSnackbar error={error} type="user" />
