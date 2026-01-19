@@ -47,9 +47,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setSelectedRange,
     setAnchorEl,
     calendarRef,
-    selectedCalendars,
-    tempcalendars,
-    calendarRange,
     dispatch,
     setOpenEventDisplay,
     setEventDisplayedId,
@@ -88,35 +85,10 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setAnchorEl(document.body);
   };
 
-  const handleClosePopover = (refresh?: boolean) => {
+  const handleClosePopover = () => {
     calendarRef.current?.unselect();
     setAnchorEl(null);
     setSelectedRange(null);
-    if (refresh) {
-      selectedCalendars.forEach((calId) =>
-        dispatch(
-          getCalendarDetailAsync({
-            calId,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-          })
-        )
-      );
-      Object.keys(tempcalendars).forEach((calId) =>
-        dispatch(
-          getCalendarDetailAsync({
-            calId,
-            match: {
-              start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-              end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-            },
-            calType: "temp",
-          })
-        )
-      );
-    }
   };
 
   const handleCloseEventDisplay = () => {
@@ -151,11 +123,11 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     }
   };
 
-  const handleEventAllow = (dropInfo: any, draggedEvent: any) => {
+  const handleEventAllow = () => {
     return true;
   };
 
-  const handleEventDrop = async (arg: any) => {
+  const handleEventDrop = async (arg: EventDropArg) => {
     if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
       return;
     }
@@ -182,7 +154,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       } as CalendarEvent,
       true
     );
-
     if (isRecurring) {
       setSelectedEvent(event);
       setOpenEditModePopup("edit");
@@ -191,9 +162,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
           if (typeOfAction === "solo") {
             await dispatch(
               updateEventInstanceAsync({ cal: calendar, event: newEvent })
-            );
-            dispatch(
-              updateEventLocal({ calId: newEvent.calId, event: newEvent })
             );
           } else if (typeOfAction === "all") {
             const master = await getEvent(newEvent, true);
@@ -208,30 +176,17 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                 },
               })
             );
-            await refreshCalendars(
-              dispatch,
-              Object.values(calendars),
-              calendarRange
-            );
-            await updateTempCalendar(
-              tempcalendars,
-              event,
-              dispatch,
-              calendarRange
-            );
           }
         }
       );
     } else {
-      dispatch(updateEventLocal({ calId: newEvent.calId, event: newEvent }));
       await dispatch(
         putEventAsync({ cal: calendars[newEvent.calId], newEvent })
       );
     }
-    await updateTempCalendar(tempcalendars, event, dispatch, calendarRange);
   };
 
-  const handleEventResize = async (arg: any) => {
+  const handleEventResize = async (arg: EventResizeDoneArg) => {
     if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
       return;
     }
@@ -261,7 +216,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       } as CalendarEvent,
       true
     );
-
     if (isRecurring) {
       setSelectedEvent(event);
       setOpenEditModePopup("edit");
@@ -270,9 +224,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
           if (typeOfAction === "solo") {
             await dispatch(
               updateEventInstanceAsync({ cal: calendar, event: newEvent })
-            );
-            dispatch(
-              updateEventLocal({ calId: newEvent.calId, event: newEvent })
             );
           } else if (typeOfAction === "all") {
             const master = await getEvent(newEvent, true);
@@ -288,17 +239,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
                 },
               })
             );
-            await refreshCalendars(
-              dispatch,
-              Object.values(calendars),
-              calendarRange
-            );
-            await updateTempCalendar(
-              tempcalendars,
-              event,
-              dispatch,
-              calendarRange
-            );
           }
         }
       );
@@ -307,7 +247,6 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         putEventAsync({ cal: calendars[newEvent.calId], newEvent })
       );
     }
-    await updateTempCalendar(tempcalendars, event, dispatch, calendarRange);
   };
 
   return {

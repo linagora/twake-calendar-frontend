@@ -29,15 +29,17 @@ export const createCalendarAsync = createAsyncThunk<
       await postCalendar(userId, calId, color, name, desc);
       const ownerData: any = await getUserDetails(userId.split("/")[0]);
 
+      const owner = [ownerData.firstname, ownerData.lastname]
+        .filter(Boolean)
+        .join(" ");
+
       return {
         userId,
         calId,
         color,
         name,
         desc,
-        owner: [ownerData.firstname, ownerData.lastname]
-          .filter(Boolean)
-          .join(" "),
+        owner,
         ownerEmails: ownerData.emails ?? [],
       };
     } catch (err: any) {
