@@ -1,8 +1,8 @@
 import { AppDispatch } from "@/app/store";
 import { handleRSVP } from "@/components/Event/eventHandlers/eventHandlers";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
-import { Calendar } from "@fullcalendar/core";
 import { Dispatch, SetStateAction } from "react";
 import { ContextualizedEvent } from "../EventsTypes";
 

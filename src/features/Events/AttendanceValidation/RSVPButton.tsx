@@ -1,7 +1,7 @@
 import { useAppDispatch } from "@/app/hooks";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
-import { Calendar } from "@fullcalendar/core";
 import { Button } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction } from "react";
 import { useI18n } from "twake-i18n";
