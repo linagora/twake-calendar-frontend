@@ -14,7 +14,16 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/websocket": ["src/websocket/index.ts"],
+      "@/websocket/*": ["src/websocket/*"],
+      "@/utils": ["src/utils/index.ts"],
+      "@/features/*": ["src/features/*"],
+      "@/app/*": ["src/app/*"]
+    }
   },
   "include": ["src", "__test__"]
 }
