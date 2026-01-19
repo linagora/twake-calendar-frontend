@@ -1,10 +1,10 @@
 import { waitFor } from "@testing-library/dom";
-import { fetchWebSocketTicket } from "../../../src/websocket/api/fetchWebSocketTicket";
-import { createWebSocketConnection } from "../../../src/websocket/createWebSocketConnection";
-import { WS_INBOUND_EVENTS } from "../../../src/websocket/protocols";
+import { fetchWebSocketTicket } from "@/websocket/api/fetchWebSocketTicket";
+import { createWebSocketConnection } from "@/websocket/connection/createConnection";
+import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
 import { setupWebsocket } from "./utils/setupWebsocket";
 
-jest.mock("../../../src/websocket/api/fetchWebSocketTicket");
+jest.mock("@/websocket/api/fetchWebSocketTicket");
 
 describe("createWebSocketConnection", () => {
   let mockWebSocket: jest.Mock;
@@ -28,7 +28,12 @@ describe("createWebSocketConnection", () => {
   };
 
   const createAndOpenConnection = async () => {
-    const promise = createWebSocketConnection();
+    const mockCallbacks = {
+      onMessage: jest.fn(),
+      onClose: jest.fn(),
+      onError: jest.fn(),
+    };
+    const promise = createWebSocketConnection(mockCallbacks);
 
     await waitFor(() => {
       expect(webSocketInstances.length).toBe(1);
@@ -37,7 +42,7 @@ describe("createWebSocketConnection", () => {
     triggerEvent(getWs(), WS_INBOUND_EVENTS.CONNECTION_OPENED);
     const socket = await promise;
 
-    return { socket, ws: getWs(), promise };
+    return { socket, ws: getWs(), promise, mockCallbacks };
   };
 
   /** ---------- Setup ---------- */
@@ -60,8 +65,11 @@ describe("createWebSocketConnection", () => {
 
   it("throws when WEBSOCKET_URL is not defined", async () => {
     delete (window as any).WEBSOCKET_URL;
+    const mockCallbacks = {
+      onMessage: jest.fn(),
+    };
 
-    await expect(createWebSocketConnection()).rejects.toThrow(
+    await expect(createWebSocketConnection(mockCallbacks)).rejects.toThrow(
       "WEBSOCKET_URL is not defined"
     );
   });
@@ -95,7 +103,10 @@ describe("createWebSocketConnection", () => {
   });
 
   it("rejects when connection fails", async () => {
-    const promise = createWebSocketConnection();
+    const mockCallbacks = {
+      onMessage: jest.fn(),
+    };
+    const promise = createWebSocketConnection(mockCallbacks);
 
     await waitFor(() => {
       expect(webSocketInstances.length).toBe(1);
@@ -118,23 +129,6 @@ describe("createWebSocketConnection", () => {
     expect(ws._listeners[WS_INBOUND_EVENTS.CONNECTION_CLOSED]).toBeDefined();
   });
 
-  it("parses and logs incoming messages", async () => {
-    const logSpy = jest.spyOn(console, "log").mockImplementation();
-
-    const { ws } = await createAndOpenConnection();
-
-    triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, {
-      data: JSON.stringify({ type: "test", payload: "data" }),
-    });
-
-    expect(logSpy).toHaveBeenCalledWith("WebSocket message received:", {
-      type: "test",
-      payload: "data",
-    });
-
-    logSpy.mockRestore();
-  });
-
   it("handles invalid JSON messages", async () => {
     const errorSpy = jest.spyOn(console, "error").mockImplementation();
 
@@ -148,5 +142,70 @@ describe("createWebSocketConnection", () => {
     );
 
     errorSpy.mockRestore();
+  });
+
+  it("rejects on timeout", async () => {
+    jest.useFakeTimers();
+    const mockCallbacks = {
+      onMessage: jest.fn(),
+    };
+    const promise = createWebSocketConnection(mockCallbacks);
+
+    await waitFor(() => {
+      expect(webSocketInstances.length).toBe(1);
+    });
+
+    jest.advanceTimersByTime(10000);
+
+    await expect(promise).rejects.toThrow("WebSocket connection timed out");
+
+    jest.useRealTimers();
+  });
+
+  it("calls onMessage callback when message received", async () => {
+    const { ws, mockCallbacks } = await createAndOpenConnection();
+
+    const testMessage = { type: "test", payload: "data" };
+    triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, {
+      data: JSON.stringify(testMessage),
+    });
+
+    expect(mockCallbacks.onMessage).toHaveBeenCalledWith(testMessage);
+  });
+
+  it("does not call onMessage when JSON parsing fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation();
+    const { ws, mockCallbacks } = await createAndOpenConnection();
+
+    triggerEvent(ws, WS_INBOUND_EVENTS.MESSAGE, { data: "invalid json" });
+
+    expect(mockCallbacks.onMessage).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to parse WebSocket message:",
+      expect.any(Error)
+    );
+
+    errorSpy.mockRestore();
+  });
+
+  it("calls onClose callback when connection closes", async () => {
+    const { ws, mockCallbacks } = await createAndOpenConnection();
+
+    const closeEvent = new CloseEvent("close", {
+      code: 1000,
+      reason: "Normal closure",
+    });
+    triggerEvent(ws, WS_INBOUND_EVENTS.CONNECTION_CLOSED, closeEvent);
+
+    expect(mockCallbacks.onClose).toHaveBeenCalledWith(closeEvent);
+  });
+
+  it("calls onError callback when error occurs", async () => {
+    const { ws, mockCallbacks } = await createAndOpenConnection();
+
+    const errorEvent = new Event("error");
+    triggerEvent(ws, WS_INBOUND_EVENTS.ERROR, errorEvent);
+
+    expect(mockCallbacks.onError).toHaveBeenCalledWith(errorEvent);
   });
 });
