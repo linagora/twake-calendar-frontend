@@ -1,4 +1,4 @@
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
+import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { reportEvent } from "../../Events/EventApi";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { Calendar } from "../CalendarTypes";

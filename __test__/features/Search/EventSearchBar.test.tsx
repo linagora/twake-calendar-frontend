@@ -1,8 +1,8 @@
+import * as searchThunk from "@/features/Search/SearchSlice";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import SearchBar from "../../../src/components/Menubar/EventSearchBar";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import * as searchThunk from "../../../src/features/Search/SearchSlice";
 import userEvent from "@testing-library/user-event";
+import SearchBar from "@/components/Menubar/EventSearchBar";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("EventSearchBar", () => {
   const today = new Date();

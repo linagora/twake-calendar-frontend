@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import CalendarApp from "./Calendar";
 import { useAppDispatch } from "../../app/hooks";
-import { getCalendarRange } from "../../utils/dateUtils";
+import { getCalendarRange } from "@/utils/dateUtils";
 import { useAppSelector } from "../../app/hooks";
 import { refreshCalendars } from "../Event/utils/eventUtils";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";

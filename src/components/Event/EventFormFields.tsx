@@ -1,4 +1,11 @@
-import React from "react";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { RepetitionObject } from "@/features/Events/EventsTypes";
+import { userAttendee } from "@/features/User/models/attendee";
+import iconCamera from "@/static/images/icon-camera.svg";
+import {
+  addVideoConferenceToDescription,
+  generateMeetingLink,
+} from "@/utils/videoConferenceUtils";
 import {
   Box,
   Button,
@@ -6,45 +13,33 @@ import {
   FormControl,
   FormControlLabel,
   IconButton,
-  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
   TextField,
-  ToggleButtonGroup,
   ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@linagora/twake-mui";
 import {
-  Description as DescriptionIcon,
-  Public as PublicIcon,
-  VideocamOutlined as VideocamOutlinedIcon,
-  ContentCopy as CopyIcon,
   Close as DeleteIcon,
+  ContentCopy as CopyIcon,
+  Public as PublicIcon,
 } from "@mui/icons-material";
-import iconCamera from "../../static/images/icon-camera.svg";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import AttendeeSelector from "../Attendees/AttendeeSearch";
-import RepeatEvent from "./EventRepeat";
-import { RepetitionObject } from "../../features/Events/EventsTypes";
-import { userAttendee } from "../../features/User/models/attendee";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
-import {
-  generateMeetingLink,
-  addVideoConferenceToDescription,
-} from "../../utils/videoConferenceUtils";
-import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
-import { CalendarItemList } from "../Calendar/CalendarItemList";
+import React from "react";
 import { useI18n } from "twake-i18n";
-import { FieldWithLabel } from "./components/FieldWithLabel";
-import { DateTimeFields } from "./components/DateTimeFields";
-import { useAllDayToggle } from "./hooks/useAllDayToggle";
-import { splitDateTime, combineDateTime } from "./utils/dateTimeHelpers";
-import {} from "./utils/dateRules";
-import {} from "./utils/dateTimeFormatters";
-import { validateEventForm } from "./utils/formValidation";
+import AttendeeSelector from "../Attendees/AttendeeSearch";
+import { CalendarItemList } from "../Calendar/CalendarItemList";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { AddDescButton } from "./AddDescButton";
+import { DateTimeFields } from "./components/DateTimeFields";
+import { FieldWithLabel } from "./components/FieldWithLabel";
+import RepeatEvent from "./EventRepeat";
+import { useAllDayToggle } from "./hooks/useAllDayToggle";
+import { combineDateTime, splitDateTime } from "./utils/dateTimeHelpers";
+import { validateEventForm } from "./utils/formValidation";
 
 interface EventFormFieldsProps {
   // Form state

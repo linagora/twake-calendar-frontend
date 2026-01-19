@@ -1,8 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import EventDuplication from "../../src/components/Event/EventDuplicate";
-import EventPopover from "../../src/features/Events/EventModal";
+import EventDuplication from "@/components/Event/EventDuplicate";
+import EventPopover from "@/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
 
 const day = new Date();
 const preloadedState = {

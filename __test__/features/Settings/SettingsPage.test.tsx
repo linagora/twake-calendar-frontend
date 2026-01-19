@@ -1,10 +1,10 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import SettingsPage from "../../../src/features/Settings/SettingsPage";
+import SettingsPage from "@/features/Settings/SettingsPage";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import { api } from "../../../src/utils/apiUtils";
+import { api } from "@/utils/apiUtils";
 
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/utils/apiUtils");
 
 describe("SettingsPage", () => {
   beforeEach(() => {

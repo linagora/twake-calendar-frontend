@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";
-import { formatReduxError } from "../../../utils/errorUtils";
+import { formatReduxError } from "@/utils/errorUtils";
 import { CalendarEvent } from "../../Events/EventsTypes";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
 import { RejectedError } from "../CalendarSlice";

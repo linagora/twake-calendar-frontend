@@ -1,16 +1,17 @@
+import {
+  getCalendarDetailAsync,
+  getCalendarsListAsync,
+  refreshCalendarWithSyncToken,
+} from "@/features/Calendars/services";
+import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
-import { stringToGradient, getInitials } from "../../../utils/avatarUtils";
-import { ThunkDispatch } from "@reduxjs/toolkit";
-import { emptyEventsCal } from "../../../features/Calendars/CalendarSlice";
-import { getCalendarsListAsync } from "../../../features/Calendars/services/getCalendarsListAsync";
-import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
-import { userAttendee } from "../../../features/User/models/attendee";
-import { refreshCalendarWithSyncToken } from "../../../features/Calendars/services/refreshCalendar";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
-import { AppDispatch } from "../../../app/store";
+import { AppDispatch } from "@/app/store";
+import { emptyEventsCal } from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { userAttendee } from "@/features/User/models/attendee";
+import { getInitials, stringToGradient } from "@/utils/avatarUtils";
+import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -139,7 +140,7 @@ export async function refreshCalendars(
 }
 
 export async function refreshSingularCalendar(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendar: Calendar,
   calendarRange: { start: Date; end: Date },
   calType?: "temp"

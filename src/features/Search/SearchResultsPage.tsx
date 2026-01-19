@@ -15,8 +15,8 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AppDispatch } from "../../app/store";
 import logo from "../../static/noResult-logo.svg";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { getEventAsync } from "../Calendars/CalendarSlice";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { getEventAsync } from "../Calendars/services";
 import EventPreviewModal from "../Events/EventDisplayPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
 

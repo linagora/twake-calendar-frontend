@@ -1,15 +1,15 @@
+import * as calendarDetailThunks from "@/features/Calendars/services";
+import * as servicesModule from "@/features/Calendars/services";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import CalendarApp from "../../src/components/Calendar/Calendar";
-import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
+import CalendarApp from "@/components/Calendar/Calendar";
+import { searchUsers } from "@/features/User/userAPI";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import { searchUsers } from "../../src/features/User/userAPI";
-import * as calendarDetailThunks from "../../src/features/Calendars/services/getCalendarDetailAsync";
 
 import { useRef } from "react";
 
 import userEvent from "@testing-library/user-event";
-import CalendarLayout from "../../src/components/Calendar/CalendarLayout";
-jest.mock("../../src/features/User/userAPI");
+import CalendarLayout from "@/components/Calendar/CalendarLayout";
+jest.mock("@/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers
 >;
@@ -348,7 +348,7 @@ describe("calendar Availability search", () => {
 
   it("imports temporary calendars when selecting new users", async () => {
     const spy = jest
-      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .spyOn(servicesModule, "getTempCalendarsListAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
@@ -389,7 +389,7 @@ describe("calendar Availability search", () => {
       },
     ]);
     const spy = jest
-      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .spyOn(servicesModule, "getTempCalendarsListAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
@@ -411,7 +411,7 @@ describe("calendar Availability search", () => {
 
   it("open window with attendees filled after temp search on create event button click", async () => {
     const spy = jest
-      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .spyOn(servicesModule, "getTempCalendarsListAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
@@ -455,7 +455,7 @@ describe("calendar Availability search", () => {
 
   it("open window with attendees filled after temp search on enter in temp input", async () => {
     const spy = jest
-      .spyOn(eventThunks, "getTempCalendarsListAsync")
+      .spyOn(servicesModule, "getTempCalendarsListAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });

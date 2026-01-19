@@ -1,24 +1,19 @@
-import { DateSelectArg } from "@fullcalendar/core";
-import { CalendarApi } from "@fullcalendar/core";
-import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
-import { getDeltaInMilliseconds } from "../../../utils/dateUtils";
 import {
   getEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
-  updateEventLocal,
   updateSeriesAsync,
-} from "../../../features/Calendars/CalendarSlice";
-import { getCalendarDetailAsync } from "../../../features/Calendars/services/getCalendarDetailAsync";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
-import { getEvent } from "../../../features/Events/EventApi";
-import { refreshCalendars } from "../../Event/utils/eventUtils";
-import { updateTempCalendar } from "../utils/calendarUtils";
+} from "@/features/Calendars/services";
+import { CalendarApi, DateSelectArg, EventDropArg } from "@fullcalendar/core";
+import { EventResizeDoneArg } from "@fullcalendar/interaction";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { getEvent } from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { userAttendee } from "@/features/User/models/attendee";
+import { createAttendee } from "@/features/User/models/attendee.mapper";
+import { getDeltaInMilliseconds } from "@/utils/dateUtils";
 import { User } from "../../Attendees/PeopleSearch";
 import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
-import { userAttendee } from "../../../features/User/models/attendee";
-import { createAttendee } from "../../../features/User/models/attendee.mapper";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;

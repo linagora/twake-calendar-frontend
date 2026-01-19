@@ -9,12 +9,12 @@ import {
   postCalendar,
   proppatchCalendar,
   removeCalendar,
-} from "../../../src/features/Calendars/CalendarApi";
-import { clientConfig } from "../../../src/features/User/oidcAuth";
-import { api } from "../../../src/utils/apiUtils";
+} from "@/features/Calendars/CalendarApi";
+import { clientConfig } from "@/features/User/oidcAuth";
+import { api } from "@/utils/apiUtils";
 clientConfig.url = "https://example.com";
 
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/utils/apiUtils");
 
 describe("Calendar API", () => {
   afterEach(() => {

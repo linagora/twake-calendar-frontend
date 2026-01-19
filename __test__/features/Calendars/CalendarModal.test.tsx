@@ -1,11 +1,11 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
-import CalendarPopover from "../../../src/components/Calendar/CalendarModal";
+import CalendarPopover from "@/components/Calendar/CalendarModal";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
-import { getSecretLink } from "../../../src/features/Calendars/CalendarApi";
+import * as eventThunks from "@/features/Calendars/services";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { getSecretLink } from "@/features/Calendars/CalendarApi";
 
-jest.mock("../../../src/features/Calendars/CalendarApi", () => ({
+jest.mock("@/features/Calendars/CalendarApi", () => ({
   getSecretLink: jest.fn(),
 }));
 
@@ -108,7 +108,7 @@ describe("CalendarPopover (editing mode)", () => {
     link: "/calendars/user/cal1",
     name: "Work Calendar",
     description: "Team meetings",
-    color: "#33B679",
+    color: { light: "#33B679" },
     owner: "alice",
     ownerEmails: ["alice@example.com"],
     visibility: "public",
@@ -181,7 +181,7 @@ describe("CalendarPopover (editing mode)", () => {
           calId: "user1/cal1",
           calLink: "/calendars/user/cal1",
           patch: {
-            color: "#33B679",
+            color: { light: "#33B679" },
             desc: "Team meetings",
             name: "Updated Calendar",
           },
@@ -213,7 +213,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     link: "/calendars/user1/cal1.json",
     name: "Work Calendar",
     description: "Team meetings",
-    color: "#33B679",
+    color: { light: "#33B679" },
     owner: "alice",
     ownerEmails: ["alice@example.com"],
     visibility: "public",

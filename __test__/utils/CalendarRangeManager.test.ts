@@ -3,7 +3,7 @@ import {
   setDisplayedDateAndRange,
   calendarRangeManager,
   getDisplayedCalendarRange,
-} from "../../src/utils/CalendarRangeManager";
+} from "@/utils/CalendarRangeManager";
 
 describe("CalendarRangeManager", () => {
   beforeEach(() => {

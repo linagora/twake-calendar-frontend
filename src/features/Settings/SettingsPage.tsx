@@ -42,7 +42,7 @@ import {
   getTimezoneOffset,
 } from "../../components/Calendar/TimezoneSelector";
 import { TimezoneAutocomplete } from "../../components/Timezone/TimezoneAutocomplete";
-import { browserDefaultTimeZone } from "../../utils/timezone";
+import { browserDefaultTimeZone } from "@/utils/timezone";
 
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";

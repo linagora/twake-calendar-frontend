@@ -9,7 +9,7 @@ import userEvent from "@testing-library/user-event";
 import {
   DateTimeFieldsProps,
   DateTimeFields,
-} from "../../src/components/Event/components/DateTimeFields";
+} from "@/components/Event/components/DateTimeFields";
 
 jest.mock("twake-i18n", () => ({
   useI18n: () => ({

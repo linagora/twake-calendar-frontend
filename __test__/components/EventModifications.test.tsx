@@ -1,6 +1,7 @@
+import { AppDispatch } from "@/app/store";
+import * as eventThunks from "@/features/Calendars/services";
 import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
 import {
   act,
@@ -9,15 +10,14 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import * as appHooks from "../../src/app/hooks";
-import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
-import CalendarApp from "../../src/components/Calendar/Calendar";
-import EventUpdateModal from "../../src/features/Events/EventUpdateModal";
-import { renderWithProviders } from "../utils/Renderwithproviders";
+import * as appHooks from "@/app/hooks";
+import CalendarApp from "@/components/Calendar/Calendar";
 import {
   createEventHandlers,
   EventHandlersProps,
-} from "../../src/components/Calendar/handlers/eventHandlers";
+} from "@/components/Calendar/handlers/eventHandlers";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("CalendarApp integration", () => {
   const today = new Date();
@@ -28,7 +28,7 @@ describe("CalendarApp integration", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    const dispatch = jest.fn() as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
   });
 

@@ -5,8 +5,8 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { I18nContext } from "twake-i18n";
 import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
-import type { AppStore, RootState } from "../../src/app/store";
-import { setupStore } from "../../src/app/store";
+import type { AppStore, RootState } from "@/app/store";
+import { setupStore } from "@/app/store";
 interface ExtendedRenderOptions extends Omit<RenderOptions, "queries"> {
   preloadedState?: Partial<RootState>;
   store?: AppStore;

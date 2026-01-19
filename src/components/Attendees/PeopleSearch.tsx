@@ -1,28 +1,30 @@
+import { searchUsers } from "@/features/User/userAPI";
 import {
   Autocomplete,
-  type AutocompleteRenderInputParams,
   Avatar,
+  Chip,
   CircularProgress,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  PaperProps,
+  PopperProps,
   TextField,
+  useTheme,
+  type AutocompleteRenderInputParams,
 } from "@linagora/twake-mui";
-import { stringAvatar } from "../Event/utils/eventUtils";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import {
-  type ReactNode,
+  HTMLAttributes,
   useCallback,
   useEffect,
   useState,
-  HTMLAttributes,
+  type ReactNode,
 } from "react";
-import { searchUsers } from "../../features/User/userAPI";
-import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import { Chip, useTheme } from "@linagora/twake-mui";
-import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
 import { useI18n } from "twake-i18n";
+import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
+import { stringAvatar } from "../Event/utils/eventUtils";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { PopperProps, PaperProps } from "@linagora/twake-mui";
 
 export interface User {
   email: string;

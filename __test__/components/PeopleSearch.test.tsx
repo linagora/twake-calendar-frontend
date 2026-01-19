@@ -3,11 +3,11 @@ import userEvent from "@testing-library/user-event";
 import {
   User,
   PeopleSearch,
-} from "../../src/components/Attendees/PeopleSearch";
+} from "@/components/Attendees/PeopleSearch";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import { searchUsers } from "../../src/features/User/userAPI";
+import { searchUsers } from "@/features/User/userAPI";
 
-jest.mock("../../src/features/User/userAPI");
+jest.mock("@/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers
 >;

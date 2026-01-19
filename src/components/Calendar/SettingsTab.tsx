@@ -1,21 +1,19 @@
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import PublicIcon from "@mui/icons-material/Public";
+import { useAppSelector } from "@/app/hooks";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import {
   Box,
-  Button,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@linagora/twake-mui";
+import LockOutlineIcon from "@mui/icons-material/LockOutline";
+import PublicIcon from "@mui/icons-material/Public";
+import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { useState, useEffect } from "react";
-import { useAppSelector } from "../../app/hooks";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
 import { AddDescButton } from "../Event/AddDescButton";
 import { ColorPicker } from "./CalendarColorPicker";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export function SettingsTab({
   name,

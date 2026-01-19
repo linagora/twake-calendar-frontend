@@ -1,12 +1,12 @@
 import { screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
-import * as EventApi from "../../../src/features/Events/EventApi";
-import * as CalendarApi from "../../../src/features/Calendars/CalendarApi";
-import * as eventUtils from "../../../src/components/Event/utils/eventUtils";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import * as EventApi from "@/features/Events/EventApi";
+import * as CalendarApi from "@/features/Calendars/CalendarApi";
+import * as eventUtils from "@/components/Event/utils/eventUtils";
 
-jest.mock("../../../src/features/Events/EventApi");
-jest.mock("../../../src/features/Calendars/CalendarApi");
+jest.mock("@/features/Events/EventApi");
+jest.mock("@/features/Calendars/CalendarApi");
 
 describe("EventUpdateModal Timezone Handling", () => {
   const mockOnClose = jest.fn();

@@ -10,19 +10,19 @@ import {
   Menu,
   MenuItem,
 } from "@linagora/twake-mui";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useMemo, useEffect } from "react";
 import CalendarPopover from "./CalendarModal";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarSearch from "./CalendarSearch";
-import { removeCalendarAsync } from "../../features/Calendars/CalendarSlice";
+import { removeCalendarAsync } from "@/features/Calendars/services";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
-import { trimLongTextWithoutSpace } from "../../utils/textUtils";
+import { trimLongTextWithoutSpace } from "@/utils/textUtils";
 import { useI18n } from "twake-i18n";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 
 function CalendarAccordion({
   title,

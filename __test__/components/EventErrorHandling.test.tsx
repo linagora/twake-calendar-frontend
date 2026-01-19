@@ -1,6 +1,6 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import CalendarLayout from "../../src/components/Calendar/CalendarLayout";
+import CalendarLayout from "@/components/Calendar/CalendarLayout";
 
 describe("Event Error Handling", () => {
   beforeEach(() => {

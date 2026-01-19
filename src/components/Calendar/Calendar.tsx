@@ -1,52 +1,51 @@
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import "./Calendar.styl";
-import "./CustomCalendar.styl";
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import EventPopover from "../../features/Events/EventModal";
-import { CalendarEvent } from "../../features/Events/EventsTypes";
-import CalendarSelection from "./CalendarSelection";
-import { getCalendarDetailAsync } from "../../features/Calendars/services/getCalendarDetailAsync";
-import ImportAlert from "../../features/Events/ImportAlert";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { getCalendarDetailAsync } from "@/features/Calendars/services";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPopover from "@/features/Events/EventModal";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import ImportAlert from "@/features/Events/ImportAlert";
+import SearchResultsPage from "@/features/Search/SearchResultsPage";
+import { setTimeZone } from "@/features/Settings/SettingsSlice";
+import { setDisplayedDateAndRange } from "@/utils/CalendarRangeManager";
 import {
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
 } from "@/utils/dateUtils";
-import { push } from "redux-first-history";
-import EventPreviewModal from "../../features/Events/EventDisplayPreview";
-import AddIcon from "@mui/icons-material/Add";
-import { TempCalendarsInput } from "./TempCalendarsInput";
-import { Button, Box, radius } from "@linagora/twake-mui";
-import {
-  updateSlotLabelVisibility,
-  eventToFullCalendarFormat,
-  extractEvents,
-} from "./utils/calendarUtils";
-import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
-import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
-import { EditModeDialog } from "../Event/EditModeDialog";
-import { EventErrorHandler } from "../Error/EventErrorHandler";
-import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
-import momentTimezonePlugin from "@fullcalendar/moment-timezone";
-import { TimezoneSelector } from "./TimezoneSelector";
-import { MiniCalendar } from "./MiniCalendar";
-import { User } from "../Attendees/PeopleSearch";
-import { useTheme } from "@linagora/twake-mui";
-import { updateDarkColor } from "./utils/calendarColorsUtils";
-import { useI18n } from "twake-i18n";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import frLocale from "@fullcalendar/core/locales/fr";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import viLocale from "@fullcalendar/core/locales/vi";
-import SearchResultsPage from "../../features/Search/SearchResultsPage";
-import { setTimeZone } from "../../features/Settings/SettingsSlice";
-import { browserDefaultTimeZone } from "@/utils/timezone";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
-import { setDisplayedDateAndRange } from "@/utils/CalendarRangeManager";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import momentTimezonePlugin from "@fullcalendar/moment-timezone";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import { Box, Button, radius, useTheme } from "@linagora/twake-mui";
+import AddIcon from "@mui/icons-material/Add";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import { push } from "redux-first-history";
+import { useI18n } from "twake-i18n";
+import { User } from "../Attendees/PeopleSearch";
+import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
+import { EventErrorHandler } from "../Error/EventErrorHandler";
+import { EditModeDialog } from "../Event/EditModeDialog";
+import "./Calendar.styl";
+import CalendarSelection from "./CalendarSelection";
+import "./CustomCalendar.styl";
+import { useCalendarEventHandlers } from "./hooks/useCalendarEventHandlers";
+import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
+import { MiniCalendar } from "./MiniCalendar";
+import { TempCalendarsInput } from "./TempCalendarsInput";
+import { TimezoneSelector } from "./TimezoneSelector";
+import { updateDarkColor } from "./utils/calendarColorsUtils";
+import {
+  eventToFullCalendarFormat,
+  extractEvents,
+  updateSlotLabelVisibility,
+} from "./utils/calendarUtils";
 
 const localeMap: Record<string, any> = {
   fr: frLocale,

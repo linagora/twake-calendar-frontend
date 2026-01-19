@@ -1,20 +1,20 @@
-import { Button, Tab, Tabs } from "@linagora/twake-mui";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   createCalendarAsync,
   importEventFromFileAsync,
   patchACLCalendarAsync,
   patchCalendarAsync,
-} from "../../features/Calendars/CalendarSlice";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
+} from "@/features/Calendars/services";
+import { Button, Tab, Tabs } from "@linagora/twake-mui";
+import { useEffect, useState } from "react";
+import { useI18n } from "twake-i18n";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
 import { defaultColors } from "./utils/calendarColorsUtils";
-import { useI18n } from "twake-i18n";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function CalendarPopover({
   open,

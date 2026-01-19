@@ -1,15 +1,15 @@
-import { renderWithProviders } from "../utils/Renderwithproviders";
-import { screen } from "@testing-library/react";
+import { AppDispatch } from "@/app/store";
 import { jest } from "@jest/globals";
-import CalendarApp from "../../src/components/Calendar/Calendar";
-import * as appHooks from "../../src/app/hooks";
-import { ThunkDispatch } from "@reduxjs/toolkit";
+import { screen } from "@testing-library/react";
+import * as appHooks from "@/app/hooks";
+import CalendarApp from "@/components/Calendar/Calendar";
+import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("MiniCalendar", () => {
   const day = new Date();
   beforeEach(() => {
     jest.clearAllMocks();
-    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    const dispatch = jest.fn() as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     jest.useFakeTimers().clearAllTimers();
   });

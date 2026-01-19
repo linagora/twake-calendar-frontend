@@ -1,12 +1,12 @@
+import { AppDispatch } from "@/app/store";
 import { darken, getContrastRatio, lighten, Theme } from "@linagora/twake-mui";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import { updateCalColor } from "../../../features/Calendars/CalendarSlice";
 import { Calendar } from "../../../features/Calendars/CalendarTypes";
 
 export function updateDarkColor(
   calendars: Record<string, Calendar>,
   theme: Theme,
-  dispatch: ThunkDispatch<any, any, any>
+  dispatch: AppDispatch
 ) {
   Object.values(calendars).forEach((cal) => {
     if (!cal?.color?.light || typeof cal.color.light !== "string") return;

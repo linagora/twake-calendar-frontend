@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import SearchResultsPage from "../../../src/features/Search/SearchResultsPage";
+import SearchResultsPage from "@/features/Search/SearchResultsPage";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("SearchResultsPage", () => {

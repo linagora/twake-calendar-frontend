@@ -1,10 +1,10 @@
-import { TIMEZONES } from "../../utils/timezone-data";
+import { TIMEZONES } from "@/utils/timezone-data";
 import { resolveTimezone } from "../../components/Calendar/TimezoneSelector";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { userAttendee } from "../User/models/attendee";
 import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
 import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
-import { browserDefaultTimeZone } from "../../utils/timezone";
+import { browserDefaultTimeZone } from "@/utils";
 import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export interface TimezoneListResult {

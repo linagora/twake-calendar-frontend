@@ -6,8 +6,8 @@ import {
   Auth,
   Logout,
   Callback,
-} from "../../../src/features/User/oidcAuth";
-import * as apiUtils from "../../../src/utils/apiUtils";
+} from "@/features/User/oidcAuth";
+import * as apiUtils from "@/utils/apiUtils";
 
 clientConfig.url = "https://example.com";
 const localAdress = "https://local.exemple.com";

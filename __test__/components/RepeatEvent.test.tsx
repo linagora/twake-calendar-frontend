@@ -1,13 +1,10 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { renderWithProviders } from "../utils/Renderwithproviders";
-import RepeatEvent from "../../src/components/Event/EventRepeat";
-import EventPopover from "../../src/features/Events/EventModal";
-import { RepetitionObject } from "../../src/features/Events/EventsTypes";
+import * as eventThunks from "@/features/Calendars/services";
+import EventPopover from "@/features/Events/EventModal";
+import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
-import { formatDateToYYYYMMDDTHHMMSS } from "../../src/utils/dateUtils";
-import * as eventThunks from "../../src/features/Calendars/CalendarSlice";
-import * as apiUtils from "../../src/utils/apiUtils";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import RepeatEvent from "@/components/Event/EventRepeat";
+import { renderWithProviders } from "../utils/Renderwithproviders";
 
 const baseRepetition: RepetitionObject = {
   freq: "",

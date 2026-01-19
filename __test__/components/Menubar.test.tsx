@@ -1,8 +1,8 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { Menubar } from "../../src/components/Menubar/Menubar";
+import { Menubar } from "@/components/Menubar/Menubar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import * as oidcAuth from "../../src/features/User/oidcAuth";
+import * as oidcAuth from "@/features/User/oidcAuth";
 
 describe("Calendar App Component Display Tests", () => {
   const preloadedState = {

@@ -1,16 +1,16 @@
-import { configureStore } from "@reduxjs/toolkit";
-import reducer from "../../../../src/features/Calendars/CalendarSlice";
+import reducer from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
   refreshCalendarWithSyncToken,
   SyncTokenUpdates,
-} from "../../../../src/features/Calendars/services/refreshCalendar";
-import { Calendar } from "../../../../src/features/Calendars/CalendarTypes";
-import { CalendarEvent } from "../../../../src/features/Events/EventsTypes";
-import * as fetchSyncTokenChanges from "../../../../src/features/Calendars/api/fetchSyncTokenChanges";
-import * as EventApi from "../../../../src/features/Events/EventApi";
+} from "@/features/Calendars/services/refreshCalendar";
+import * as EventApi from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { configureStore } from "@reduxjs/toolkit";
+import * as fetchSyncTokenChanges from "@/features/Calendars/api/fetchSyncTokenChanges";
 
-jest.mock("../../../../src/features/Calendars/api/fetchSyncTokenChanges");
-jest.mock("../../../../src/features/Events/EventApi");
+jest.mock("@/features/Calendars/api/fetchSyncTokenChanges");
+jest.mock("@/features/Events/EventApi");
 
 describe("refreshCalendarWithSyncToken", () => {
   const mockCalendar: Calendar = {
