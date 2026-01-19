@@ -7,7 +7,6 @@ import { EditModeDialog } from "@/components/Event/EditModeDialog";
 import * as eventThunks from "@/features/Calendars/services";
 import * as EventApi from "@/features/Events/EventApi";
 import EventPreviewModal from "@/features/Events/EventDisplayPreview";
-import { CalendarEvent } from "@/features/Events/EventsTypes";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import preview from "jest-preview";
@@ -102,7 +101,7 @@ const basePreloadedState = {
     pending: false,
     templist: {},
   },
-} as unknown as Partial<RootState>;
+} as unknown as RootState;
 
 describe("EditModeDialog Component", () => {
   beforeEach(() => {
@@ -117,8 +116,8 @@ describe("EditModeDialog Component", () => {
           type="edit"
           setOpen={mockSetOpen}
           event={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-              .events["recurring-base/20250315T100000"] ?? ({} as CalendarEvent)
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+              .events["recurring-base/20250315T100000"]
           }
           eventAction={mockEventAction}
         />,
@@ -142,8 +141,8 @@ describe("EditModeDialog Component", () => {
           type="attendance"
           setOpen={mockSetOpen}
           event={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-              .events["recurring-base/20250315T100000"] ?? ({} as CalendarEvent)
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+              .events["recurring-base/20250315T100000"]
           }
           eventAction={mockEventAction}
         />,
@@ -166,8 +165,8 @@ describe("EditModeDialog Component", () => {
           type="edit"
           setOpen={mockSetOpen}
           event={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-              .events["recurring-base/20250315T100000"] ?? ({} as CalendarEvent)
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+              .events["recurring-base/20250315T100000"]
           }
           eventAction={mockEventAction}
         />,
@@ -195,8 +194,8 @@ describe("EditModeDialog Component", () => {
           type="edit"
           setOpen={mockSetOpen}
           event={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-              .events["recurring-base/20250315T100000"] ?? ({} as CalendarEvent)
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+              .events["recurring-base/20250315T100000"]
           }
           eventAction={mockEventAction}
         />,
@@ -223,8 +222,8 @@ describe("EditModeDialog Component", () => {
           type="edit"
           setOpen={mockSetOpen}
           event={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-              .events["recurring-base/20250315T100000"] ?? ({} as CalendarEvent)
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
+              .events["recurring-base/20250315T100000"]
           }
           eventAction={mockEventAction}
         />,
@@ -251,7 +250,7 @@ describe("EventPreviewModal - Recurring Event Interactions", () => {
         Promise.resolve({
           calId: payload.calId,
           event:
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
               .events["recurring-base/20250315T100000"],
         }) as any;
     });
@@ -332,7 +331,7 @@ describe("EventPreviewModal - Recurring Event Interactions", () => {
         ...basePreloadedState.calendars,
         list: {
           "667037022b752d0026472254/cal1": {
-            ...basePreloadedState.calendars?.list[
+            ...basePreloadedState.calendars.list[
               "667037022b752d0026472254/cal1"
             ],
             events: {
@@ -433,7 +432,7 @@ describe("Delete Recurring Event Instance", () => {
 
   it("calls deleteEventAsync when deleting all instances", async () => {
     jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-      ...basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+      ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
         .events["recurring-base/20250315T100000"],
       uid: "recurring-base",
     } as any);
@@ -590,7 +589,7 @@ describe("Edit Recurring Event in Full Display", () => {
 
   it("calls updateEventInstanceAsync when saving single instance with typeOfAction='solo'", async () => {
     jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-      ...basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+      ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
         .events["recurring-base/20250315T100000"],
     } as any);
     const spy = jest
@@ -635,7 +634,7 @@ describe("Edit Recurring Event in Full Display", () => {
 
   it("calls updateSeriesAsync when saving all instances with typeOfAction='all'", async () => {
     const getEventSpy = jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-      ...basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+      ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
         .events["recurring-base/20250315T100000"],
     } as any);
 
@@ -691,7 +690,7 @@ describe("Edit Recurring Event in Full Display", () => {
           eventId={"recurring-base/20250315T100000"}
           typeOfAction="solo"
           eventData={
-            basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+            basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
               .events["recurring-base/20250315T100000"]
           }
         />,
@@ -712,7 +711,7 @@ describe("Edit Recurring Event in Full Display", () => {
 
   it("fetches master event data when typeOfAction='all'", async () => {
     const getEventSpy = jest.spyOn(EventApi, "getEvent").mockResolvedValue({
-      ...basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
+      ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"]
         .events["recurring-base/20250315T100000"],
       uid: "recurring-base",
       title: "Master Event Title",
@@ -761,7 +760,7 @@ describe("Event Drag and Drop - Recurring Events", () => {
       setEventDisplayedId: jest.fn(),
       setEventDisplayedCalId: jest.fn(),
       setEventDisplayedTemp: jest.fn(),
-      calendars: basePreloadedState.calendars?.list,
+      calendars: basePreloadedState.calendars.list,
       setSelectedEvent: mockSetSelectedEvent,
       setAfterChoiceFunc: mockSetAfterChoiceFunc,
       setOpenEditModePopup: mockSetOpenEditModePopup,
@@ -790,7 +789,7 @@ describe("Event Drag and Drop - Recurring Events", () => {
     const mockDispatch = jest.fn();
     const nonRecurringState = {
       "667037022b752d0026472254/cal1": {
-        ...basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"],
+        ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
         events: {
           "single-event": {
             uid: "single-event",
@@ -862,7 +861,7 @@ describe("Event Resize - Recurring Events", () => {
       setEventDisplayedId: jest.fn(),
       setEventDisplayedCalId: jest.fn(),
       setEventDisplayedTemp: jest.fn(),
-      calendars: basePreloadedState.calendars?.list,
+      calendars: basePreloadedState.calendars.list,
       setSelectedEvent: mockSetSelectedEvent,
       setAfterChoiceFunc: mockSetAfterChoiceFunc,
       setOpenEditModePopup: mockSetOpenEditModePopup,
@@ -913,7 +912,7 @@ describe("RepeatEvent Component - Recurrence Editing", () => {
                 color: "#00FF00",
                 events: {
                   "recurring-base/20250315T100000": {
-                    ...basePreloadedState.calendars?.list[
+                    ...basePreloadedState.calendars.list[
                       "667037022b752d0026472254/cal1"
                     ].events["recurring-base/20250315T100000"],
                     calId: "otherCal/cal",
@@ -972,7 +971,7 @@ describe("handleRSVP function", () => {
 
     await handleRSVP(
       mockDispatch,
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
       basePreloadedState.user,
       nonRecurringEvent,
       "ACCEPTED"
@@ -1012,7 +1011,7 @@ describe("handleDelete function", () => {
       undefined,
       mockOnClose,
       mockDispatch,
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
       nonRecurringEvent,
       "667037022b752d0026472254/cal1",
       "single-event"
@@ -1041,9 +1040,10 @@ describe("handleDelete function", () => {
       "solo",
       mockOnClose,
       mockDispatch,
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"],
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-        .events["recurring-base/20250315T100000"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
+        "recurring-base/20250315T100000"
+      ],
       "667037022b752d0026472254/cal1",
       "recurring-base/20250315T100000"
     );
@@ -1071,9 +1071,10 @@ describe("handleDelete function", () => {
       "all",
       mockOnClose,
       mockDispatch,
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"],
-      basePreloadedState.calendars?.list["667037022b752d0026472254/cal1"]
-        .events["recurring-base/20250315T100000"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
+      basePreloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
+        "recurring-base/20250315T100000"
+      ],
       "667037022b752d0026472254/cal1",
       "recurring-base/20250315T100000"
     );

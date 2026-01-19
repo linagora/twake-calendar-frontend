@@ -1,9 +1,9 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventUpdateModal from "@/features/Events/EventUpdateModal";
-import * as EventApi from "@/features/Events/EventApi";
-import * as CalendarApi from "@/features/Calendars/CalendarApi";
 import * as eventUtils from "@/components/Event/utils/eventUtils";
+import * as CalendarApi from "@/features/Calendars/CalendarApi";
+import * as EventApi from "@/features/Events/EventApi";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("@/features/Events/EventApi");
 jest.mock("@/features/Calendars/CalendarApi");

@@ -1,11 +1,11 @@
-import { AppDispatch } from "@/app/store";
-import { screen, waitFor } from "@testing-library/react";
-import { push } from "redux-first-history";
 import * as appHooks from "@/app/hooks";
+import { AppDispatch } from "@/app/store";
 import HandleLogin from "@/features/User/HandleLogin";
 import * as oidcAuth from "@/features/User/oidcAuth";
 import { clientConfig } from "@/features/User/oidcAuth";
 import * as apiUtils from "@/utils/apiUtils";
+import { screen, waitFor } from "@testing-library/react";
+import { push } from "redux-first-history";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 clientConfig.url = "https://example.com";

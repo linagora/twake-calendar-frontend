@@ -1,8 +1,8 @@
+import { importEventFromFile } from "@/features/Events/EventApi";
 import { importFile } from "@/utils/apiUtils";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { importEventFromFile } from "../../Events/EventApi";
-import type { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../CalendarSlice";
 
 export const importEventFromFileAsync = createAsyncThunk<
   void,
@@ -13,7 +13,14 @@ export const importEventFromFileAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >("calendars/importEvent", async ({ calLink, file }, { rejectWithValue }) => {
   try {
-    const id = ((await importFile(file)) as Record<string, string>)._id;
+    const response = await importFile(file);
+    const id = response?._id;
+    if (!id) {
+      return rejectWithValue({
+        message: "Failed to upload file: missing file ID",
+        status: undefined,
+      });
+    }
     await importEventFromFile(id, calLink);
   } catch (err: any) {
     return rejectWithValue({

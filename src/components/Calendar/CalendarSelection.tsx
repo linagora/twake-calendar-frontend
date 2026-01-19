@@ -1,28 +1,28 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { removeCalendarAsync } from "@/features/Calendars/services";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { trimLongTextWithoutSpace } from "@/utils/textUtils";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Typography,
-  IconButton,
   Checkbox,
   Divider,
+  IconButton,
   ListItem,
   Menu,
   MenuItem,
+  Typography,
 } from "@linagora/twake-mui";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import AddIcon from "@mui/icons-material/Add";
-import { useState, useMemo, useEffect } from "react";
-import CalendarPopover from "./CalendarModal";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CalendarSearch from "./CalendarSearch";
-import { removeCalendarAsync } from "@/features/Calendars/services";
-import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
-import { trimLongTextWithoutSpace } from "@/utils/textUtils";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import CalendarPopover from "./CalendarModal";
+import CalendarSearch from "./CalendarSearch";
+import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 
 function CalendarAccordion({
   title,

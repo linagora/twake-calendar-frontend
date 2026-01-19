@@ -1,17 +1,17 @@
+import { AppDispatch } from "@/app/store";
+import { emptyEventsCal } from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
   getCalendarDetailAsync,
   getCalendarsListAsync,
   refreshCalendarWithSyncToken,
 } from "@/features/Calendars/services";
-import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { AppDispatch } from "@/app/store";
-import { emptyEventsCal } from "@/features/Calendars/CalendarSlice";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { userAttendee } from "@/features/User/models/attendee";
 import { getInitials, stringToGradient } from "@/utils/avatarUtils";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
+import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function renderAttendeeBadge(
   a: userAttendee,

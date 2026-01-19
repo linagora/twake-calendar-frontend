@@ -1,9 +1,9 @@
+import RepeatEvent from "@/components/Event/EventRepeat";
 import * as eventThunks from "@/features/Calendars/services";
 import EventPopover from "@/features/Events/EventModal";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { DateSelectArg } from "@fullcalendar/core";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import RepeatEvent from "@/components/Event/EventRepeat";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
 const baseRepetition: RepetitionObject = {

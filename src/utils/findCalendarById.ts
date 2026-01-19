@@ -1,5 +1,5 @@
-import { RootState } from "../app/store";
-import { Calendar } from "../features/Calendars/CalendarTypes";
+import { RootState } from "@/app/store";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 
 export function findCalendarById(
   state: Partial<RootState>,

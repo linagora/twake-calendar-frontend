@@ -1,5 +1,3 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
 import SettingsPage from "@/features/Settings/SettingsPage";
 import settingsReducer, {
   setIsBrowserDefaultTimeZone,
@@ -11,6 +9,8 @@ import userReducer, {
 } from "@/features/User/userSlice";
 import { api } from "@/utils/apiUtils";
 import { browserDefaultTimeZone } from "@/utils/timezone";
+import { configureStore } from "@reduxjs/toolkit";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("@/utils/apiUtils");

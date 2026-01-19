@@ -1,3 +1,5 @@
+import { User } from "@/components/Attendees/PeopleSearch";
+import { formatLocalDateTime } from "@/components/Event/utils/dateTimeFormatters";
 import { refreshCalendars } from "@/components/Event/utils/eventUtils";
 import { updateEventLocal } from "@/features/Calendars/CalendarSlice";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
@@ -17,8 +19,6 @@ import {
   getDeltaInMilliseconds,
 } from "@/utils/dateUtils";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import { User } from "../../Attendees/PeopleSearch";
-import { formatLocalDateTime } from "../../Event/utils/dateTimeFormatters";
 import { updateTempCalendar } from "../utils/calendarUtils";
 
 export interface EventHandlersProps {

@@ -1,5 +1,3 @@
-// __test__/features/calendars/calendarApi.test.ts
-
 import {
   addSharedCalendar,
   exportCalendar,

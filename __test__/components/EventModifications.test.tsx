@@ -1,5 +1,12 @@
+import * as appHooks from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
+import CalendarApp from "@/components/Calendar/Calendar";
+import {
+  createEventHandlers,
+  EventHandlersProps,
+} from "@/components/Calendar/handlers/eventHandlers";
 import * as eventThunks from "@/features/Calendars/services";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { CalendarApi } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import "@testing-library/jest-dom";
@@ -10,13 +17,6 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import * as appHooks from "@/app/hooks";
-import CalendarApp from "@/components/Calendar/Calendar";
-import {
-  createEventHandlers,
-  EventHandlersProps,
-} from "@/components/Calendar/handlers/eventHandlers";
-import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("CalendarApp integration", () => {

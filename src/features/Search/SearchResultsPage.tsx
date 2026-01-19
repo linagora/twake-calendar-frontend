@@ -1,25 +1,24 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { AppDispatch } from "@/app/store";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Typography,
+} from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import {
-  Box,
-  Button,
-  IconButton,
-  Stack,
-  Typography,
-  CircularProgress,
-} from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { AppDispatch } from "../../app/store";
+import { useI18n } from "twake-i18n";
 import logo from "../../static/noResult-logo.svg";
-import { browserDefaultTimeZone } from "@/utils/timezone";
 import { getEventAsync } from "../Calendars/services";
 import EventPreviewModal from "../Events/EventDisplayPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
-
 import { setView } from "../Settings/SettingsSlice";
 import "./searchResult.styl";
 

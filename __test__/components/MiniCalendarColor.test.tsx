@@ -1,8 +1,8 @@
+import * as appHooks from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
+import CalendarApp from "@/components/Calendar/Calendar";
 import { jest } from "@jest/globals";
 import { screen } from "@testing-library/react";
-import * as appHooks from "@/app/hooks";
-import CalendarApp from "@/components/Calendar/Calendar";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("MiniCalendar", () => {

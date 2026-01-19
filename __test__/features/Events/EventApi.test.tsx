@@ -1,14 +1,15 @@
 import {
-  putEvent,
-  moveEvent,
   deleteEvent,
   importEventFromFile,
+  moveEvent,
+  putEvent,
   searchEvent,
 } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { calendarEventToJCal } from "@/features/Events/eventUtils";
 import { clientConfig } from "@/features/User/oidcAuth";
 import { api } from "@/utils/apiUtils";
+
 clientConfig.url = "https://example.com";
 
 jest.mock("@/utils/apiUtils");

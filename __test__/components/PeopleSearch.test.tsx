@@ -1,8 +1,8 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { User, PeopleSearch } from "@/components/Attendees/PeopleSearch";
-import { renderWithProviders } from "../utils/Renderwithproviders";
+import { PeopleSearch, User } from "@/components/Attendees/PeopleSearch";
 import { searchUsers } from "@/features/User/userAPI";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "../utils/Renderwithproviders";
 
 jest.mock("@/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<

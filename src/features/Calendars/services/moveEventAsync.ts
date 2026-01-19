@@ -1,3 +1,5 @@
+import { moveEvent } from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { parseCalendarEvent } from "@/features/Events/eventUtils";
 import {
   computeWeekRange,
@@ -5,8 +7,6 @@ import {
 } from "@/utils/dateUtils";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { moveEvent } from "../../Events/EventApi";
-import { CalendarEvent } from "../../Events/EventsTypes";
 import { getCalendar } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
 import { Calendar } from "../CalendarTypes";

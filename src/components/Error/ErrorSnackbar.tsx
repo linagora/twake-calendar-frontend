@@ -1,7 +1,7 @@
-import { Snackbar, Alert, Button } from "@linagora/twake-mui";
-import { useAppDispatch } from "../../app/hooks";
-import { clearError as calendarClearError } from "../../features/Calendars/CalendarSlice";
-import { clearError as userClearError } from "../../features/User/userSlice";
+import { useAppDispatch } from "@/app/hooks";
+import { clearError as calendarClearError } from "@/features/Calendars/CalendarSlice";
+import { clearError as userClearError } from "@/features/User/userSlice";
+import { Alert, Button, Snackbar } from "@linagora/twake-mui";
 import { useI18n } from "twake-i18n";
 
 export function ErrorSnackbar({

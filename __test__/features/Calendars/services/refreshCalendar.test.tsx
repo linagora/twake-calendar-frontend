@@ -1,3 +1,4 @@
+import * as fetchSyncTokenChanges from "@/features/Calendars/api/fetchSyncTokenChanges";
 import reducer from "@/features/Calendars/CalendarSlice";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
@@ -7,7 +8,6 @@ import {
 import * as EventApi from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { configureStore } from "@reduxjs/toolkit";
-import * as fetchSyncTokenChanges from "@/features/Calendars/api/fetchSyncTokenChanges";
 
 jest.mock("@/features/Calendars/api/fetchSyncTokenChanges");
 jest.mock("@/features/Events/EventApi");

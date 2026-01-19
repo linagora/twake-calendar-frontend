@@ -1,48 +1,47 @@
-import React, { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import {
+  getTimezoneOffset,
+  useTimeZoneList,
+} from "@/components/Calendar/TimezoneSelector";
+import { TimezoneAutocomplete } from "@/components/Timezone/TimezoneAutocomplete";
+import { browserDefaultTimeZone } from "@/utils/timezone";
 import {
   Box,
+  FormControl,
+  FormControlLabel,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Tabs,
-  Tab,
-  IconButton,
-  FormControl,
-  Select,
   MenuItem,
-  Typography,
+  Select,
   Snackbar,
   Switch,
-  FormControlLabel,
+  Tab,
+  Tabs,
+  Typography,
 } from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
-// import SyncIcon from "@mui/icons-material/Sync";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import React, { useState } from "react";
+import { useI18n } from "twake-i18n";
 import {
-  setView,
-  setLanguage as setSettingsLanguage,
-  setTimeZone as setSettingsTimeZone,
-  setIsBrowserDefaultTimeZone,
-  setHideDeclinedEvents,
-  setDisplayWeekNumbers,
-} from "./SettingsSlice";
-import {
-  updateUserConfigurationsAsync,
+  setAlarmEmails,
   setLanguage as setUserLanguage,
   setTimezone as setUserTimeZone,
-  setAlarmEmails,
+  updateUserConfigurationsAsync,
 } from "../User/userSlice";
 import { AVAILABLE_LANGUAGES } from "./constants";
-import { useI18n } from "twake-i18n";
 import "./SettingsPage.styl";
 import {
-  useTimeZoneList,
-  getTimezoneOffset,
-} from "../../components/Calendar/TimezoneSelector";
-import { TimezoneAutocomplete } from "../../components/Timezone/TimezoneAutocomplete";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+  setDisplayWeekNumbers,
+  setHideDeclinedEvents,
+  setIsBrowserDefaultTimeZone,
+  setLanguage as setSettingsLanguage,
+  setTimeZone as setSettingsTimeZone,
+  setView,
+} from "./SettingsSlice";
 
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";

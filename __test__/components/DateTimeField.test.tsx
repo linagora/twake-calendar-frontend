@@ -1,15 +1,15 @@
 import {
-  screen,
-  fireEvent,
-  waitFor,
+  DateTimeFields,
+  DateTimeFieldsProps,
+} from "@/components/Event/components/DateTimeFields";
+import {
   act,
+  fireEvent,
   render,
+  screen,
+  waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {
-  DateTimeFieldsProps,
-  DateTimeFields,
-} from "@/components/Event/components/DateTimeFields";
 
 jest.mock("twake-i18n", () => ({
   useI18n: () => ({

@@ -1,8 +1,8 @@
+import { User } from "@/components/Attendees/PeopleSearch";
+import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
+import { getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { User } from "../../../components/Attendees/PeopleSearch";
-import { getCalendarVisibility } from "../../../components/Calendar/utils/calendarUtils";
-import { getUserDetails } from "../../User/userAPI";
 import { getCalendars } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
 import { Calendar } from "../CalendarTypes";

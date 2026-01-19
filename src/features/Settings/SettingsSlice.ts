@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { browserDefaultTimeZone } from "@/utils/timezone";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getOpenPaasUserDataAsync } from "../User/userSlice";
 
 export interface SettingsState {

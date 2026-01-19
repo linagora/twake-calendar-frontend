@@ -1,13 +1,13 @@
 // __tests__/auth.test.ts
-import * as client from "openid-client";
 import {
+  Auth,
+  Callback,
   clientConfig,
   getClientConfig,
-  Auth,
   Logout,
-  Callback,
 } from "@/features/User/oidcAuth";
 import * as apiUtils from "@/utils/apiUtils";
+import * as client from "openid-client";
 
 clientConfig.url = "https://example.com";
 const localAdress = "https://local.exemple.com";

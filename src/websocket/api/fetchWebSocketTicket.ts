@@ -1,4 +1,4 @@
-import { api } from "../../utils/apiUtils";
+import { api } from "@/utils/apiUtils";
 import { WebSocketTicket } from "./types";
 
 export async function fetchWebSocketTicket(): Promise<WebSocketTicket> {

@@ -1,7 +1,7 @@
 import { AppDispatch } from "@/app/store";
+import { updateCalColor } from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { darken, getContrastRatio, lighten, Theme } from "@linagora/twake-mui";
-import { updateCalColor } from "../../../features/Calendars/CalendarSlice";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
 
 export function updateDarkColor(
   calendars: Record<string, Calendar>,

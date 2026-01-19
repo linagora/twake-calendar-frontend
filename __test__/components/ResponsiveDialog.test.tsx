@@ -1,8 +1,7 @@
+import { ResponsiveDialog } from "@/components/Dialog";
+import { Button, TextField, TwakeMuiThemeProvider } from "@linagora/twake-mui";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { ResponsiveDialog } from "@/components/Dialog";
-import { Button, TextField } from "@linagora/twake-mui";
-import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
 
 describe("ResponsiveDialog", () => {
   const mockOnClose = jest.fn();

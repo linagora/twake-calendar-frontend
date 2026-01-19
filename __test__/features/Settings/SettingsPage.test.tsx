@@ -1,8 +1,8 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import SettingsPage from "@/features/Settings/SettingsPage";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
 import { api } from "@/utils/apiUtils";
+import "@testing-library/jest-dom";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("@/utils/apiUtils");
 

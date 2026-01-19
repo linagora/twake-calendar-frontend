@@ -1,9 +1,9 @@
-import { fireEvent, screen, waitFor, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import CalendarSearch from "@/components/Calendar/CalendarSearch";
 import * as CalendarApi from "@/features/Calendars/CalendarApi";
 import * as CalendarSlice from "@/features/Calendars/services";
 import { searchUsers } from "@/features/User/userAPI";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
 jest.mock("@/features/User/userAPI");

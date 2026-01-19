@@ -1,14 +1,13 @@
+import CalendarApp from "@/components/Calendar/Calendar";
+import CalendarLayout from "@/components/Calendar/CalendarLayout";
 import * as calendarDetailThunks from "@/features/Calendars/services";
 import * as servicesModule from "@/features/Calendars/services";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import CalendarApp from "@/components/Calendar/Calendar";
 import { searchUsers } from "@/features/User/userAPI";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { useRef } from "react";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
-import { useRef } from "react";
-
-import userEvent from "@testing-library/user-event";
-import CalendarLayout from "@/components/Calendar/CalendarLayout";
 jest.mock("@/features/User/userAPI");
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers

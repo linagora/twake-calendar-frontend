@@ -1,13 +1,12 @@
 import { CalendarEvent, RepetitionObject } from "@/features/Events/EventsTypes";
 import {
   calendarEventToJCal,
-  parseCalendarEvent,
   combineMasterDateWithFormTime,
+  detectRecurringEventChanges,
   normalizeRepetition,
   normalizeTimezone,
-  detectRecurringEventChanges,
+  parseCalendarEvent,
 } from "@/features/Events/eventUtils";
-import { TIMEZONES } from "@/utils/timezone-data";
 
 describe("parseCalendarEvent", () => {
   const baseColor = { light: "#00FF00" };

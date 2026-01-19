@@ -1,8 +1,8 @@
 import {
-  getDisplayedDate,
-  setDisplayedDateAndRange,
   calendarRangeManager,
   getDisplayedCalendarRange,
+  getDisplayedDate,
+  setDisplayedDateAndRange,
 } from "@/utils/CalendarRangeManager";
 
 describe("CalendarRangeManager", () => {

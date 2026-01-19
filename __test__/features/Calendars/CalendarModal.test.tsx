@@ -1,9 +1,9 @@
-import { screen, fireEvent, waitFor } from "@testing-library/react";
 import CalendarPopover from "@/components/Calendar/CalendarModal";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import * as eventThunks from "@/features/Calendars/services";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getSecretLink } from "@/features/Calendars/CalendarApi";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import * as eventThunks from "@/features/Calendars/services";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("@/features/Calendars/CalendarApi", () => ({
   getSecretLink: jest.fn(),

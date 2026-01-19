@@ -1,6 +1,6 @@
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getUserDetails } from "../../User/userAPI";
+import { getUserDetails } from "@/features/User/userAPI";
 import { addSharedCalendar } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
 

@@ -1,6 +1,6 @@
+import { getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getUserDetails } from "../../User/userAPI";
 import { postCalendar } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
 
@@ -35,10 +35,10 @@ export const createCalendarAsync = createAsyncThunk<
         color,
         name,
         desc,
-        owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-          ownerData.lastname
-        }`,
-        ownerEmails: ownerData.emails,
+        owner: [ownerData.firstname, ownerData.lastname]
+          .filter(Boolean)
+          .join(" "),
+        ownerEmails: ownerData.emails ?? [],
       };
     } catch (err: any) {
       return rejectWithValue({

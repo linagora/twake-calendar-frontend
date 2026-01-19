@@ -1,3 +1,6 @@
+import { getAccessiblePair } from "@/components/Calendar/utils/calendarColorsUtils";
+import { stringAvatar } from "@/components/Event/utils/eventUtils";
+import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
 import { searchUsers } from "@/features/User/userAPI";
 import {
   Autocomplete,
@@ -22,9 +25,6 @@ import {
   type ReactNode,
 } from "react";
 import { useI18n } from "twake-i18n";
-import { getAccessiblePair } from "../Calendar/utils/calendarColorsUtils";
-import { stringAvatar } from "../Event/utils/eventUtils";
-import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 export interface User {
   email: string;

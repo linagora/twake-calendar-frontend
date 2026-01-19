@@ -1,5 +1,5 @@
+import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { formatReduxError } from "../../utils/errorUtils";
 import { searchEvent } from "../Events/EventApi";
 
 export interface SearchResultsState {

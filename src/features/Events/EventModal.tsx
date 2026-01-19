@@ -1,4 +1,17 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import {
+  getTimezoneOffset,
+  resolveTimezone,
+} from "@/components/Calendar/TimezoneSelector";
 import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { ResponsiveDialog } from "@/components/Dialog";
+import EventFormFields from "@/components/Event/EventFormFields";
+import { addDays } from "@/components/Event/utils/dateRules";
+import {
+  formatDateTimeInTimezone,
+  formatLocalDateTime,
+} from "@/components/Event/utils/dateTimeFormatters";
+import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
 import { getCalendarRange } from "@/utils/dateUtils";
 import {
   buildEventFormTempData,
@@ -25,19 +38,6 @@ import React, {
   useState,
 } from "react";
 import { useI18n } from "twake-i18n";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-  getTimezoneOffset,
-  resolveTimezone,
-} from "../../components/Calendar/TimezoneSelector";
-import { ResponsiveDialog } from "../../components/Dialog";
-import EventFormFields from "../../components/Event/EventFormFields";
-import { addDays } from "../../components/Event/utils/dateRules";
-import {
-  formatDateTimeInTimezone,
-  formatLocalDateTime,
-} from "../../components/Event/utils/dateTimeFormatters";
-import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { putEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";

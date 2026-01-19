@@ -1,6 +1,6 @@
+import { deleteEvent } from "@/features/Events/EventApi";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { deleteEvent } from "../../Events/EventApi";
 import { RejectedError } from "../CalendarSlice";
 
 export const deleteEventAsync = createAsyncThunk<

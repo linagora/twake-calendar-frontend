@@ -1,4 +1,11 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { updateAttendeesAfterTimeChange } from "@/components/Calendar/handlers/eventHandlers";
 import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { ResponsiveDialog } from "@/components/Dialog";
+import EventFormFields from "@/components/Event/EventFormFields";
+import { addDays } from "@/components/Event/utils/dateRules";
+import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
+import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
 import { refreshCalendars } from "@/components/Event/utils/eventUtils";
 import {
   moveEventAsync,
@@ -25,13 +32,6 @@ import { Box, Button } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
-import { ResponsiveDialog } from "../../components/Dialog";
-import EventFormFields from "../../components/Event/EventFormFields";
-import { addDays } from "../../components/Event/utils/dateRules";
-import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
-import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
 import {
   clearFetchCache,
   removeEvent,

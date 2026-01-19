@@ -1,7 +1,7 @@
+import SearchBar from "@/components/Menubar/EventSearchBar";
 import * as searchThunk from "@/features/Search/SearchSlice";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import SearchBar from "@/components/Menubar/EventSearchBar";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("EventSearchBar", () => {

@@ -1,9 +1,9 @@
+import { AppDispatch } from "@/app/store";
+import { handleRSVP } from "@/components/Event/eventHandlers/eventHandlers";
+import { PartStat } from "@/features/User/models/attendee";
+import { userData } from "@/features/User/userDataTypes";
+import { Calendar } from "@fullcalendar/core";
 import { Dispatch, SetStateAction } from "react";
-import { AppDispatch } from "../../../app/store";
-import { handleRSVP } from "../../../components/Event/eventHandlers/eventHandlers";
-import { Calendar } from "../../Calendars/CalendarTypes";
-import { PartStat } from "../../User/models/attendee";
-import { userData } from "../../User/userDataTypes";
 import { ContextualizedEvent } from "../EventsTypes";
 
 export async function handleRSVPClick(

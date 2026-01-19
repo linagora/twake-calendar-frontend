@@ -1,18 +1,17 @@
-import React from "react";
 import { TextField } from "@linagora/twake-mui";
+import { DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
+import {
+  useParsedFormat,
+  usePickerContext,
+  useSplitFieldProps,
+} from "@mui/x-date-pickers/hooks";
+import { PickerFieldProps } from "@mui/x-date-pickers/models";
 import {
   PickerFieldAdapter,
   PickerValidationScope,
   useValidation,
   validateDate,
 } from "@mui/x-date-pickers/validation";
-import {
-  useSplitFieldProps,
-  useParsedFormat,
-  usePickerContext,
-} from "@mui/x-date-pickers/hooks";
-import { PickerFieldProps } from "@mui/x-date-pickers/models";
-import { DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
 
 type FieldType = "date" | "time" | "date-time";
 

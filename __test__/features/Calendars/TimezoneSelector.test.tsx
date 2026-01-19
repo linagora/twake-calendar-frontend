@@ -1,5 +1,5 @@
-import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import { TimezoneSelector } from "@/components/Calendar/TimezoneSelector";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("TimezoneSelector", () => {

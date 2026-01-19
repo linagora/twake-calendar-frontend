@@ -19,7 +19,6 @@ export const removeCalendarAsync = createAsyncThunk<
       await removeCalendar(calLink);
       return {
         calId,
-        calLink,
       };
     } catch (err: any) {
       return rejectWithValue({

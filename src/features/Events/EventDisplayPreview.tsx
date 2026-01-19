@@ -1,3 +1,16 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { CalendarName } from "@/components/Calendar/CalendarName";
+import { getTimezoneOffset } from "@/components/Calendar/TimezoneSelector";
+import {
+  formatEventChipTitle,
+  updateTempCalendar,
+} from "@/components/Calendar/utils/calendarUtils";
+import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
+import { EditModeDialog } from "@/components/Event/EditModeDialog";
+import EventDuplication from "@/components/Event/EventDuplicate";
+import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
+import { InfoRow } from "@/components/Event/InfoRow";
+import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
 import { getCalendarRange } from "@/utils/dateUtils";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
@@ -28,19 +41,6 @@ import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { CalendarName } from "../../components/Calendar/CalendarName";
-import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
-import {
-  formatEventChipTitle,
-  updateTempCalendar,
-} from "../../components/Calendar/utils/calendarUtils";
-import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
-import { EditModeDialog } from "../../components/Event/EditModeDialog";
-import EventDuplication from "../../components/Event/EventDuplicate";
-import { handleDelete } from "../../components/Event/eventHandlers/eventHandlers";
-import { InfoRow } from "../../components/Event/InfoRow";
-import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
 import { deleteEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
 import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";

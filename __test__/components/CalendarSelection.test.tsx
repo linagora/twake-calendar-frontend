@@ -1,9 +1,9 @@
-import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import CalendarSelection from "@/components/Calendar/CalendarSelection";
-import { renderWithProviders } from "../utils/Renderwithproviders";
 import * as calendarThunks from "@/features/Calendars/services";
+import "@testing-library/jest-dom";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithProviders } from "../utils/Renderwithproviders";
 
 describe("CalendarSelection", () => {
   beforeEach(() => {

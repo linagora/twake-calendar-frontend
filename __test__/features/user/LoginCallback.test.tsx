@@ -1,7 +1,5 @@
-import { getCalendarsListAsync } from "@/features/Calendars/services/getCalendarsListAsync";
-import { render, waitFor } from "@testing-library/react";
-import { push } from "redux-first-history";
 import { useAppDispatch } from "@/app/hooks";
+import { getCalendarsListAsync } from "@/features/Calendars/services/getCalendarsListAsync";
 import { CallbackResume } from "@/features/User/LoginCallback";
 import * as oidcAuth from "@/features/User/oidcAuth";
 import {
@@ -9,6 +7,8 @@ import {
   setTokens,
   setUserData,
 } from "@/features/User/userSlice";
+import { render, waitFor } from "@testing-library/react";
+import { push } from "redux-first-history";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 // Mocks

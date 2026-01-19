@@ -1,15 +1,15 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
   createCalendarAsync,
   importEventFromFileAsync,
   patchACLCalendarAsync,
   patchCalendarAsync,
 } from "@/features/Calendars/services";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { Button, Tab, Tabs } from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";

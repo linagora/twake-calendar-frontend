@@ -1,15 +1,15 @@
+import { useAppDispatch } from "@/app/hooks";
+import { Loading } from "@/components/Loading/Loading";
 import { useEffect, useRef } from "react";
-import { Callback } from "./oidcAuth";
-import { useAppDispatch } from "../../app/hooks";
 import { push } from "redux-first-history";
+import { getCalendarsListAsync } from "../Calendars/services";
+import { Callback } from "./oidcAuth";
 import {
   getOpenPaasUserDataAsync,
   setTokens,
   setUserData,
   setUserError,
 } from "./userSlice";
-import { Loading } from "../../components/Loading/Loading";
-import { getCalendarsListAsync } from "../Calendars/services";
 
 export function CallbackResume() {
   const dispatch = useAppDispatch();

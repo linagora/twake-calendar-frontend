@@ -1,3 +1,4 @@
+import { detectDateTimeFormat } from "@/components/Event/utils/dateTimeHelpers";
 import { refreshSingularCalendar } from "@/components/Event/utils/eventUtils";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
@@ -8,7 +9,6 @@ import { SlotLabelContentArg } from "@fullcalendar/core";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import moment from "moment-timezone";
 import { useI18n } from "twake-i18n";
-import { detectDateTimeFormat } from "../../Event/utils/dateTimeHelpers";
 
 function convertEventDateTimeToISO(
   datetime: string,
