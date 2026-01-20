@@ -1,5 +1,5 @@
-import { Alert, Snackbar } from "@linagora/twake-mui";
 import type { AlertColor } from "@linagora/twake-mui";
+import { Alert, Snackbar } from "@linagora/twake-mui";
 
 export function SnackbarAlert({
   open,

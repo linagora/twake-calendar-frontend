@@ -1,12 +1,12 @@
+import * as eventThunks from "@/features/Calendars/services";
+import EventPopover from "@/features/Events/EventModal";
+import { api } from "@/utils/apiUtils";
 import { DateSelectArg } from "@fullcalendar/core";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import EventPopover from "../../../src/features/Events/EventModal";
-import { api } from "../../../src/utils/apiUtils";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/utils/apiUtils");
 
 describe("EventPopover", () => {
   beforeEach(() => {

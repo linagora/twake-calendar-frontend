@@ -1,11 +1,11 @@
-import { TIMEZONES } from "../../utils/timezone-data";
-import { resolveTimezone } from "../../components/Calendar/TimezoneSelector";
-import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { resolveTimezone } from "@/components/Calendar/TimezoneSelector";
+import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { TIMEZONES } from "@/utils/timezone-data";
+import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { userAttendee } from "../User/models/attendee";
-import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
-import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
 export interface TimezoneListResult {
   zones: string[];

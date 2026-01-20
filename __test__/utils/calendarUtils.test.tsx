@@ -1,4 +1,4 @@
-import { getCalendarVisibility } from "../../src/components/Calendar/utils/calendarUtils";
+import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
 
 interface AclEntry {
   privilege: string;

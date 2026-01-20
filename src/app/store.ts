@@ -1,10 +1,10 @@
+import eventsCalendar from "@/features/Calendars/CalendarSlice";
+import searchResultReducer from "@/features/Search/SearchSlice";
+import settingsReducer from "@/features/Settings/SettingsSlice";
+import userReducer from "@/features/User/userSlice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import userReducer from "../features/User/userSlice";
-import settingsReducer from "../features/Settings/SettingsSlice";
-import searchResultReducer from "../features/Search/SearchSlice";
-import eventsCalendar from "../features/Calendars/CalendarSlice";
-import { createReduxHistoryContext } from "redux-first-history";
 import { createBrowserHistory } from "history";
+import { createReduxHistoryContext } from "redux-first-history";
 
 const { createReduxHistory, routerMiddleware, routerReducer } =
   createReduxHistoryContext({ history: createBrowserHistory() });

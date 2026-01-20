@@ -1,4 +1,4 @@
-import { userData } from "../features/User/userDataTypes";
+import { userData } from "@/features/User/userDataTypes";
 
 /**
  * Get user display name for UI display

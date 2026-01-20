@@ -1,5 +1,5 @@
 import * as client from "openid-client";
-import { getLocation } from "../../utils/apiUtils";
+import { getLocation } from "@/utils/apiUtils";
 
 export const clientConfig = {
   url: (window as any).SSO_BASE_URL ?? "",

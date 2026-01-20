@@ -1,11 +1,11 @@
+import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { userData, userOrganiser } from "./userDataTypes";
 import {
   getOpenPaasUser,
   updateUserConfigurations,
   UserConfigurationUpdates,
 } from "./userAPI";
-import { formatReduxError } from "../../utils/errorUtils";
+import { userData, userOrganiser } from "./userDataTypes";
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
   Record<string, any>,

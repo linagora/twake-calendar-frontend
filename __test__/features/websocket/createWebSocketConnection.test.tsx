@@ -1,7 +1,7 @@
-import { waitFor } from "@testing-library/dom";
 import { fetchWebSocketTicket } from "@/websocket/api/fetchWebSocketTicket";
 import { createWebSocketConnection } from "@/websocket/connection/createConnection";
 import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
+import { waitFor } from "@testing-library/dom";
 import { setupWebsocket } from "./utils/setupWebsocket";
 
 jest.mock("@/websocket/api/fetchWebSocketTicket");

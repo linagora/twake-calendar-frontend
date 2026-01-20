@@ -1,23 +1,24 @@
+import * as appHooks from "@/app/hooks";
+import { AppDispatch } from "@/app/store";
+import { InfoRow } from "@/components/Event/InfoRow";
+import { LONG_DATE_FORMAT } from "@/components/Event/utils/dateTimeFormatters";
 import {
-  screen,
-  fireEvent,
-  waitFor,
+  stringAvatar,
+  stringToColor,
+} from "@/components/Event/utils/eventUtils";
+import * as calendarSlice from "@/features/Calendars/CalendarSlice";
+import * as eventThunks from "@/features/Calendars/services";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import {
   act,
   cleanup,
+  fireEvent,
+  screen,
+  waitFor,
 } from "@testing-library/react";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-import { InfoRow } from "../../../src/components/Event/InfoRow";
-import {
-  stringToColor,
-  stringAvatar,
-} from "../../../src/components/Event/utils/eventUtils";
-import * as appHooks from "../../../src/app/hooks";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import dayjs from "dayjs";
-import { LONG_DATE_FORMAT } from "../../../src/components/Event/utils/dateTimeFormatters";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("Event Preview Display", () => {
   const mockOnClose = jest.fn();
@@ -747,7 +748,7 @@ describe("Event Preview Display", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+      const dispatch = jest.fn() as AppDispatch;
       jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     });
 
@@ -1831,7 +1832,7 @@ describe("Event Full Display", () => {
         (promise as any).unwrap = () => promise;
         return () => promise as any;
       });
-    const spyRemove = jest.spyOn(eventThunks, "removeEvent");
+    const spyRemove = jest.spyOn(calendarSlice, "removeEvent");
 
     const testDate = new Date("2025-01-15T10:00:00.000Z");
     const testEndDate = new Date("2025-01-15T11:00:00.000Z");

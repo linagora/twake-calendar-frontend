@@ -22,6 +22,10 @@
       "@/websocket/*": ["src/websocket/*"],
       "@/utils": ["src/utils/index.ts"],
       "@/features/*": ["src/features/*"],
+      "@/features/Calendars/services": [
+        "src/features/Calendars/services/index.ts"
+      ],
+      "@/features/Calendars/services/*": ["src/features/Calendars/services/*"],
       "@/app/*": ["src/app/*"]
     }
   },

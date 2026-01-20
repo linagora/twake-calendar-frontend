@@ -1,5 +1,3 @@
-// src/websocket/__tests__/unregisterToCalendars.test.ts
-
 import { unregisterToCalendars } from "@/websocket/operations/unregisterToCalendars";
 
 describe("unregisterToCalendars", () => {

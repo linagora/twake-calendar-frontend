@@ -1,33 +1,30 @@
-import React, { useEffect, useState } from "react";
-import logo from "../../static/header-logo.svg";
-import AppsIcon from "@mui/icons-material/Apps";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoutIcon from "@mui/icons-material/Logout";
-import "./Menubar.styl";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { stringToGradient, getInitials } from "../../utils/avatarUtils";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { setView } from "@/features/Settings/SettingsSlice";
+import { Logout } from "@/features/User/oidcAuth";
+import logo from "@/static/header-logo.svg";
+import { getInitials, stringToGradient } from "@/utils/avatarUtils";
+import { getUserDisplayName } from "@/utils/userUtils";
+import { CalendarApi } from "@fullcalendar/core";
 import {
   Avatar,
+  Box,
+  Button,
+  ButtonGroup,
+  Divider,
+  FormControl,
   IconButton,
-  Popover,
   Menu,
   MenuItem,
-  ButtonGroup,
-  Button,
+  Popover,
   Select,
-  FormControl,
   Typography,
-  Box,
-  Divider,
 } from "@linagora/twake-mui";
-import { push } from "redux-first-history";
-import { CalendarApi } from "@fullcalendar/core";
-import { useI18n } from "twake-i18n";
-import { setView } from "../../features/Settings/SettingsSlice";
-import { getUserDisplayName } from "../../utils/userUtils";
+import AppsIcon from "@mui/icons-material/Apps";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import LogoutIcon from "@mui/icons-material/Logout";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { format } from "date-fns";
 import {
   enGB,
@@ -35,8 +32,11 @@ import {
   ru as ruLocale,
   vi as viLocale,
 } from "date-fns/locale";
+import React, { useEffect, useState } from "react";
+import { push } from "redux-first-history";
+import { useI18n } from "twake-i18n";
 import SearchBar from "./EventSearchBar";
-import { Logout } from "../../features/User/oidcAuth";
+import "./Menubar.styl";
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {

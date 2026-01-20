@@ -1,20 +1,20 @@
+import { RepetitionObject } from "@/features/Events/EventsTypes";
 import {
-  FormControl,
-  Select,
-  SelectChangeEvent,
-  MenuItem,
   Box,
-  Stack,
-  Typography,
-  TextField,
   Checkbox,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  MenuItem,
   Radio,
   RadioGroup,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+  Typography,
 } from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
-import { RepetitionObject } from "../../features/Events/EventsTypes";
 import { useI18n } from "twake-i18n";
 
 export default function RepeatEvent({

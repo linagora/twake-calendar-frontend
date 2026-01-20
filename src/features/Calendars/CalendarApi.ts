@@ -1,4 +1,4 @@
-import { api } from "../../utils/apiUtils";
+import { api } from "@/utils/apiUtils";
 
 export async function getCalendars(
   userId: string,

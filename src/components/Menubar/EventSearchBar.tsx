@@ -1,3 +1,9 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { searchEventsAsync } from "@/features/Search/SearchSlice";
+import { setView } from "@/features/Settings/SettingsSlice";
+import { userAttendee } from "@/features/User/models/attendee";
+import { createAttendee } from "@/features/User/models/attendee.mapper";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import {
   Box,
   Button,
@@ -14,22 +20,16 @@ import {
   Stack,
   TextField,
   Typography,
+  type AutocompleteRenderInputParams,
 } from "@linagora/twake-mui";
-import { type AutocompleteRenderInputParams } from "@linagora/twake-mui";
-import { useRef, useState, useEffect } from "react";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import SearchIcon from "@mui/icons-material/Search";
 import TuneIcon from "@mui/icons-material/Tune";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { searchEventsAsync } from "../../features/Search/SearchSlice";
-import { setView } from "../../features/Settings/SettingsSlice";
-import { userAttendee } from "../../features/User/models/attendee";
 import UserSearch from "../Attendees/AttendeeSearch";
-import { CalendarItemList } from "../Calendar/CalendarItemList";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { createAttendee } from "../../features/User/models/attendee.mapper";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
+import { CalendarItemList } from "../Calendar/CalendarItemList";
 
 export default function SearchBar() {
   const { t } = useI18n();

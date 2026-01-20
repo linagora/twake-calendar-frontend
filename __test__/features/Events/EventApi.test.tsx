@@ -1,17 +1,18 @@
 import {
-  putEvent,
-  moveEvent,
   deleteEvent,
   importEventFromFile,
+  moveEvent,
+  putEvent,
   searchEvent,
-} from "../../../src/features/Events/EventApi";
-import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
-import { calendarEventToJCal } from "../../../src/features/Events/eventUtils";
-import { clientConfig } from "../../../src/features/User/oidcAuth";
-import { api } from "../../../src/utils/apiUtils";
+} from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { calendarEventToJCal } from "@/features/Events/eventUtils";
+import { clientConfig } from "@/features/User/oidcAuth";
+import { api } from "@/utils/apiUtils";
+
 clientConfig.url = "https://example.com";
 
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/utils/apiUtils");
 
 const day = new Date();
 

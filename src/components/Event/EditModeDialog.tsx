@@ -1,3 +1,4 @@
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import {
   Button,
   ButtonGroup,
@@ -9,7 +10,6 @@ import {
   Radio,
   RadioGroup,
 } from "@linagora/twake-mui";
-import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useState } from "react";
 import { useI18n } from "twake-i18n";
 

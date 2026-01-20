@@ -1,6 +1,6 @@
-import React from "react";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { MenuItem } from "@linagora/twake-mui";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
+import React from "react";
 import { CalendarName } from "./CalendarName";
 
 export function CalendarItemList(

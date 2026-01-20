@@ -1,22 +1,22 @@
-import CloseIcon from "@mui/icons-material/Close";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { getCalendars } from "@/features/Calendars/CalendarApi";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { addSharedCalendarAsync } from "@/features/Calendars/services";
 import {
   Avatar,
   Box,
   Button,
   IconButton,
-  Typography,
   TextField,
+  Typography,
   useTheme,
 } from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
-import { stringAvatar } from "../Event/utils/eventUtils";
+import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { getCalendars } from "../../features/Calendars/CalendarApi";
-import { addSharedCalendarAsync } from "../../features/Calendars/CalendarSlice";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
+import { useI18n } from "twake-i18n";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
+import { stringAvatar } from "../Event/utils/eventUtils";
 import { ColorPicker } from "./CalendarColorPicker";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 

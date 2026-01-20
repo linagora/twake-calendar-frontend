@@ -1,6 +1,5 @@
 import React from "react";
 import { combineDateTime } from "../utils/dateTimeHelpers";
-import { getRoundedCurrentTime } from "../utils/dateTimeFormatters";
 
 /**
  * Parameters for all-day toggle hook

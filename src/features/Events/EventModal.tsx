@@ -1,47 +1,47 @@
-import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import { Box, Button } from "@linagora/twake-mui";
-import AddIcon from "@mui/icons-material/Add";
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  startTransition,
-} from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { ResponsiveDialog } from "../../components/Dialog";
-import { putEventAsync } from "../Calendars/CalendarSlice";
-import { Calendar } from "../Calendars/CalendarTypes";
-import { userAttendee } from "../User/models/attendee";
-import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { createSelector } from "@reduxjs/toolkit";
-import { TIMEZONES } from "../../utils/timezone-data";
-import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   getTimezoneOffset,
   resolveTimezone,
-} from "../../components/Calendar/TimezoneSelector";
-import { getCalendarRange } from "../../utils/dateUtils";
-import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
-import EventFormFields from "../../components/Event/EventFormFields";
+} from "@/components/Calendar/TimezoneSelector";
+import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { ResponsiveDialog } from "@/components/Dialog";
+import EventFormFields from "@/components/Event/EventFormFields";
+import { addDays } from "@/components/Event/utils/dateRules";
 import {
-  formatLocalDateTime,
   formatDateTimeInTimezone,
-} from "../../components/Event/utils/dateTimeFormatters";
-import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
-import { addDays } from "../../components/Event/utils/dateRules";
-import { useI18n } from "twake-i18n";
+  formatLocalDateTime,
+} from "@/components/Event/utils/dateTimeFormatters";
+import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
+import { getCalendarRange } from "@/utils/dateUtils";
 import {
-  saveEventFormDataToTemp,
-  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
-  clearEventFormTempData,
-  showErrorNotification,
   buildEventFormTempData,
-  restoreFormDataFromTemp,
+  clearEventFormTempData,
   EventFormState,
-} from "../../utils/eventFormTempStorage";
-import { browserDefaultTimeZone } from "../../utils/timezone";
+  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
+  restoreFormDataFromTemp,
+  saveEventFormDataToTemp,
+  showErrorNotification,
+} from "@/utils/eventFormTempStorage";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { TIMEZONES } from "@/utils/timezone-data";
+import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
+import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
+import { Box, Button } from "@linagora/twake-mui";
+import AddIcon from "@mui/icons-material/Add";
+import { createSelector } from "@reduxjs/toolkit";
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useI18n } from "twake-i18n";
+import { Calendar } from "../Calendars/CalendarTypes";
+import { putEventAsync } from "../Calendars/services";
+import { userAttendee } from "../User/models/attendee";
+import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
 function EventPopover({
   open,

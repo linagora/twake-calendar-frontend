@@ -1,6 +1,6 @@
-import { formatDateToYYYYMMDDTHHMMSS } from "../../../utils/dateUtils";
-import { reportEvent } from "../../Events/EventApi";
-import { CalendarEvent } from "../../Events/EventsTypes";
+import { reportEvent } from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { Calendar } from "../CalendarTypes";
 import { extractCalendarEvents } from "./extractCalendarEvents";
 

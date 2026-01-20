@@ -1,25 +1,24 @@
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import {
-  Box,
-  IconButton,
-  TextField,
-  Button,
-  Typography,
-  InputAdornment,
-  Backdrop,
-  CircularProgress,
-} from "@linagora/twake-mui";
-import { useState, useEffect } from "react";
 import {
   exportCalendar,
   getSecretLink,
-} from "../../features/Calendars/CalendarApi";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
-import { FieldWithLabel } from "../Event/components/FieldWithLabel";
-import { SnackbarAlert } from "../Loading/SnackBarAlert";
+} from "@/features/Calendars/CalendarApi";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@linagora/twake-mui";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
+import { FieldWithLabel } from "../Event/components/FieldWithLabel";
+import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 export function AccessTab({ calendar }: { calendar: Calendar }) {
   const { t } = useI18n();

@@ -1,8 +1,8 @@
 import {
-  generateMeetingId,
-  generateMeetingLink,
   addVideoConferenceToDescription,
   extractVideoConferenceFromDescription,
+  generateMeetingId,
+  generateMeetingLink,
 } from "../videoConferenceUtils";
 
 // Mock window object for Node.js environment

@@ -1,5 +1,5 @@
+import { Box, SxProps, Theme, Typography } from "@linagora/twake-mui";
 import React from "react";
-import { Box, Typography, SxProps, Theme } from "@linagora/twake-mui";
 
 /**
  * Helper component for field with label

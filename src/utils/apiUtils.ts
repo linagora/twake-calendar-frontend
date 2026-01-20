@@ -1,5 +1,5 @@
+import { Auth } from "@/features/User/oidcAuth";
 import ky from "ky";
-import { Auth } from "../features/User/oidcAuth";
 
 const RETRY_CONFIG = {
   maxRetries: 10,

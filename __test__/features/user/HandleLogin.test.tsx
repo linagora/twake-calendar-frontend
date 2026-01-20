@@ -1,12 +1,12 @@
+import * as appHooks from "@/app/hooks";
+import { AppDispatch } from "@/app/store";
+import HandleLogin from "@/features/User/HandleLogin";
+import * as oidcAuth from "@/features/User/oidcAuth";
+import { clientConfig } from "@/features/User/oidcAuth";
+import * as apiUtils from "@/utils/apiUtils";
 import { screen, waitFor } from "@testing-library/react";
-import thunk, { ThunkDispatch } from "redux-thunk";
-import HandleLogin from "../../../src/features/User/HandleLogin";
-import * as oidcAuth from "../../../src/features/User/oidcAuth";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import { clientConfig } from "../../../src/features/User/oidcAuth";
-import * as apiUtils from "../../../src/utils/apiUtils";
-import * as appHooks from "../../../src/app/hooks";
 import { push } from "redux-first-history";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 clientConfig.url = "https://example.com";
 
@@ -14,7 +14,7 @@ describe("HandleLogin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(apiUtils, "redirectTo").mockImplementation(() => {});
-    const dispatch = jest.fn() as ThunkDispatch<any, any, any>;
+    const dispatch = jest.fn() as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     sessionStorage.clear();
   });

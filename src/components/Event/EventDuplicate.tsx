@@ -1,5 +1,5 @@
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { MenuItem } from "@linagora/twake-mui";
-import { CalendarEvent } from "../../features/Events/EventsTypes";
 import { useI18n } from "twake-i18n";
 
 export default function EventDuplication({

@@ -1,6 +1,6 @@
 import type { AppDispatch } from "@/app/store";
 import { store } from "@/app/store";
-import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
+import { refreshCalendarWithSyncToken } from "@/features/Calendars/services";
 import { findCalendarById, getDisplayedCalendarRange } from "@/utils";
 import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 import { parseCalendarPath } from "./parseCalendarPath";

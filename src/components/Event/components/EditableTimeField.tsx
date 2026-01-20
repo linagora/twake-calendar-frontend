@@ -1,20 +1,20 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
 import { TextField } from "@linagora/twake-mui";
+import {
+  useParsedFormat,
+  usePickerActionsContext,
+  usePickerContext,
+  useSplitFieldProps,
+} from "@mui/x-date-pickers/hooks";
+import { PickerFieldProps } from "@mui/x-date-pickers/models";
+import { TimePickerFieldProps } from "@mui/x-date-pickers/TimePicker";
 import {
   PickerFieldAdapter,
   PickerValidationScope,
   useValidation,
   validateTime,
 } from "@mui/x-date-pickers/validation";
-import {
-  useSplitFieldProps,
-  useParsedFormat,
-  usePickerContext,
-  usePickerActionsContext,
-} from "@mui/x-date-pickers/hooks";
-import { PickerFieldProps } from "@mui/x-date-pickers/models";
-import { TimePickerFieldProps } from "@mui/x-date-pickers/TimePicker";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { parseTimeInput } from "../utils/dateTimeHelpers";
 
 type FieldType = "date" | "time" | "date-time";

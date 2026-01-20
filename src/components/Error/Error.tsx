@@ -1,5 +1,4 @@
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import ReplayIcon from "@mui/icons-material/Replay";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   Box,
   Button,
@@ -8,9 +7,10 @@ import {
   Stack,
   Typography,
 } from "@linagora/twake-mui";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ReplayIcon from "@mui/icons-material/Replay";
 import { useEffect, useRef } from "react";
 import { push } from "redux-first-history";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useI18n } from "twake-i18n";
 
 export function Error() {

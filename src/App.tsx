@@ -1,18 +1,19 @@
+import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
 import { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { HistoryRouter as Router } from "redux-first-history/rr6";
-import { CallbackResume } from "./features/User/LoginCallback";
-import { history } from "./app/store";
-import "./App.styl";
-import { Loading } from "./components/Loading/Loading";
-import HandleLogin from "./features/User/HandleLogin";
-import CalendarLayout from "./components/Calendar/CalendarLayout";
-import { Error } from "./components/Error/Error";
-import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
-import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { push } from "redux-first-history";
+import { HistoryRouter as Router } from "redux-first-history/rr6";
+import "./App.styl";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import { history } from "./app/store";
+import CalendarLayout from "./components/Calendar/CalendarLayout";
+import { Error as ErrorPage } from "./components/Error/Error";
 import { ErrorSnackbar } from "./components/Error/ErrorSnackbar";
+import { Loading } from "./components/Loading/Loading";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
+import HandleLogin from "./features/User/HandleLogin";
+import { CallbackResume } from "./features/User/LoginCallback";
+import { WebSocketGate } from "./websocket/WebSocketGate";
 
 import {
   enGB,
@@ -21,12 +22,11 @@ import {
   vi as viLocale,
 } from "date-fns/locale";
 
+import I18n from "twake-i18n";
 import en from "./locales/en.json";
 import fr from "./locales/fr.json";
 import ru from "./locales/ru.json";
 import vi from "./locales/vi.json";
-import I18n from "twake-i18n";
-import { WebSocketGate } from "./websocket/WebSocketGate";
 
 const locale = { en, fr, ru, vi };
 const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
@@ -75,7 +75,7 @@ function App() {
               <Route path="/" element={<HandleLogin />} />
               <Route path="/calendar" element={<CalendarLayout />} />
               <Route path="/callback" element={<CallbackResume />} />
-              <Route path="/error" element={<Error />} />
+              <Route path="/error" element={<ErrorPage />} />
             </Routes>
           </Router>
           <ErrorSnackbar error={error} type="user" />

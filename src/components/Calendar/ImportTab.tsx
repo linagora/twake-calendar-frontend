@@ -1,3 +1,5 @@
+import { useAppSelector } from "@/app/hooks";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import {
   Box,
   Button,
@@ -6,16 +8,12 @@ import {
   MenuItem,
   Select,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@linagora/twake-mui";
 import { useEffect, useState } from "react";
-import { useAppSelector } from "../../app/hooks";
+import { useI18n } from "twake-i18n";
 import { CalendarItemList } from "./CalendarItemList";
 import { SettingsTab } from "./SettingsTab";
-import { useI18n } from "twake-i18n";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 export function ImportTab({
   userId,

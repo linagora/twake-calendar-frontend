@@ -18,7 +18,7 @@ export interface CalendarEvent {
   organizer?: userOrganiser;
   attendee: userAttendee[];
   stamp?: string;
-  sequence?: Number;
+  sequence?: number;
   color?: Record<string, string>;
   allday?: boolean;
   error?: string;

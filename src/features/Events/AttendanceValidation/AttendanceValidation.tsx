@@ -1,8 +1,8 @@
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { userData } from "@/features/User/userDataTypes";
 import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction } from "react";
 import { useI18n } from "twake-i18n";
-import { Calendar } from "../../Calendars/CalendarTypes";
-import { userData } from "../../User/userDataTypes";
 import { ContextualizedEvent } from "../EventsTypes";
 import { RSVPButton } from "./RSVPButton";
 

@@ -1,17 +1,17 @@
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { DateCalendar } from "@mui/x-date-pickers";
-import moment from "moment";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { getCalendarDetailAsync } from "@/features/Calendars/services";
+import { setView } from "@/features/Settings/SettingsSlice";
 import {
   computeStartOfTheWeek,
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
-} from "../../utils/dateUtils";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { getCalendarDetailAsync } from "../../features/Calendars/services/getCalendarDetailAsync";
+} from "@/utils/dateUtils";
+import { DateCalendar } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { setView } from "../../features/Settings/SettingsSlice";
 
 export function MiniCalendar({
   calendarRef,

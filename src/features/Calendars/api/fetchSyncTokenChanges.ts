@@ -1,4 +1,4 @@
-import { api } from "../../../utils/apiUtils";
+import { api } from "@/utils/apiUtils";
 import { Calendar } from "../CalendarTypes";
 import { DavSyncResponse } from "./types";
 

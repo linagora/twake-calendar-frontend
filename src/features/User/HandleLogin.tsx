@@ -1,11 +1,11 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { Loading } from "@/components/Loading/Loading";
+import { redirectTo } from "@/utils/apiUtils";
 import { useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Auth } from "./oidcAuth";
-import { Loading } from "../../components/Loading/Loading";
 import { push } from "redux-first-history";
-import { redirectTo } from "../../utils/apiUtils";
+import { getCalendarsListAsync } from "../Calendars/services";
+import { Auth } from "./oidcAuth";
 import { getOpenPaasUserDataAsync, setTokens, setUserData } from "./userSlice";
-import { getCalendarsListAsync } from "../Calendars/services/getCalendarsListAsync";
 
 export function HandleLogin() {
   const userData = useAppSelector((state) => state.user);

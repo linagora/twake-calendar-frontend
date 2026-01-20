@@ -1,21 +1,22 @@
+import * as appHooks from "@/app/hooks";
+import CalendarLayout from "@/components/Calendar/CalendarLayout";
+import * as calendarUtils from "@/components/Calendar/utils/calendarUtils";
+import * as eventUtils from "@/components/Event/utils/eventUtils";
+import * as CalendarSlice from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import * as eventThunks from "@/features/Calendars/services";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPopover from "@/features/Events/EventModal";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import * as userApi from "@/features/User/userAPI";
+import { DateSelectArg } from "@fullcalendar/core";
 import { jest } from "@jest/globals";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import "@testing-library/jest-dom";
-import { screen, waitFor, fireEvent, act } from "@testing-library/react";
-import * as appHooks from "../../../src/app/hooks";
-import * as eventUtils from "../../../src/components/Event/utils/eventUtils";
-import * as userApi from "../../../src/features/User/userAPI";
-import * as calendarUtils from "../../../src/components/Calendar/utils/calendarUtils";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-import EventPopover from "../../../src/features/Events/EventModal";
-import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
-import CalendarLayout from "../../../src/components/Calendar/CalendarLayout";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { SpiedFunction } from "jest-mock";
-import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
-import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
-import { DateSelectArg } from "@fullcalendar/core";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("Update tempcalendars called with correct params", () => {
   const today = new Date();
@@ -612,7 +613,7 @@ describe("Update tempcalendars called with correct params", () => {
   });
 
   it("should call emptyEventsCal with correct params before refreshing", async () => {
-    const emptyEventsCalSpy = jest.spyOn(eventThunks, "emptyEventsCal");
+    const emptyEventsCalSpy = jest.spyOn(CalendarSlice, "emptyEventsCal");
 
     const preloadedState = createPreloadedState(true);
 

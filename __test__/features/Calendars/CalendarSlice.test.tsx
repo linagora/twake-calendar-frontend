@@ -1,37 +1,36 @@
+import * as calAPI from "@/features/Calendars/CalendarApi";
 import reducer, {
   addEvent,
-  removeEvent,
   createCalendar,
-  updateEventLocal,
+  removeEvent,
   removeTempCal,
-  getTempCalendarsListAsync,
-  putEventAsync,
+  updateEventLocal,
+} from "@/features/Calendars/CalendarSlice";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import {
+  addSharedCalendarAsync,
+  createCalendarAsync,
+  deleteEventAsync,
+  getCalendarDetailAsync,
+  getCalendarsListAsync,
   getEventAsync,
-  patchCalendarAsync,
-  removeCalendarAsync,
+  getTempCalendarsListAsync,
   moveEventAsync,
   patchACLCalendarAsync,
-  createCalendarAsync,
-  addSharedCalendarAsync,
-  deleteEventAsync,
-} from "../../../src/features/Calendars/CalendarSlice";
-import { getCalendarsListAsync } from "../../../src/features/Calendars/services/getCalendarsListAsync";
-import { getCalendarDetailAsync } from "../../../src/features/Calendars/services/getCalendarDetailAsync";
-
-import * as calAPI from "../../../src/features/Calendars/CalendarApi";
-import * as userAPI from "../../../src/features/User/userAPI";
-
+  patchCalendarAsync,
+  putEventAsync,
+  removeCalendarAsync,
+} from "@/features/Calendars/services";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import * as userAPI from "@/features/User/userAPI";
+import userReducer, { setUserData } from "@/features/User/userSlice";
 import { configureStore } from "@reduxjs/toolkit";
-import { Calendar } from "../../../src/features/Calendars/CalendarTypes";
-import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
-import { setUserData } from "../../../src/features/User/userSlice";
-import userReducer from "../../../src/features/User/userSlice";
 
-jest.mock("../../../src/features/Calendars/CalendarApi");
-jest.mock("../../../src/features/User/userAPI");
-jest.mock("../../../src/features/Events/EventApi");
-jest.mock("../../../src/features/Events/eventUtils");
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/features/Calendars/CalendarApi");
+jest.mock("@/features/User/userAPI");
+jest.mock("@/features/Events/EventApi");
+jest.mock("@/features/Events/eventUtils");
+jest.mock("@/utils/apiUtils");
 
 describe("CalendarSlice", () => {
   const initialState = {

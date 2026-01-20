@@ -1,4 +1,4 @@
-import { getInitials, stringToGradient } from "../../src/utils/avatarUtils";
+import { getInitials, stringToGradient } from "@/utils/avatarUtils";
 
 jest.mock("@linagora/twake-mui", () => ({
   nameToColor: jest.fn((name: string) => {

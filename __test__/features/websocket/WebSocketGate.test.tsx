@@ -1,11 +1,11 @@
-import { cleanup, render, waitFor, act } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 import { createWebSocketConnection } from "@/websocket/connection/createConnection";
 import { registerToCalendars } from "@/websocket/operations/registerToCalendars";
 import { unregisterToCalendars } from "@/websocket/operations/unregisterToCalendars";
 import { WebSocketGate } from "@/websocket/WebSocketGate";
-import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
+import { configureStore } from "@reduxjs/toolkit";
+import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { Provider } from "react-redux";
 
 jest.mock("@/websocket/connection/createConnection");
 jest.mock("@/websocket/operations/registerToCalendars");

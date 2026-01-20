@@ -1,18 +1,18 @@
-import { ThunkDispatch } from "@reduxjs/toolkit";
+import { AppDispatch } from "@/app/store";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
-  updateEventInstanceAsync,
-  putEventAsync,
-  deleteEventInstanceAsync,
   deleteEventAsync,
-} from "../../../features/Calendars/CalendarSlice";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
-import { updateSeriesPartstat } from "../../../features/Events/EventApi";
-import { CalendarEvent } from "../../../features/Events/EventsTypes";
-import { PartStat } from "../../../features/User/models/attendee";
-import { createAttendee } from "../../../features/User/models/attendee.mapper";
-import { userData } from "../../../features/User/userDataTypes";
-import { buildFamilyName } from "../../../utils/buildFamilyName";
-import { getCalendarRange } from "../../../utils/dateUtils";
+  deleteEventInstanceAsync,
+  putEventAsync,
+  updateEventInstanceAsync,
+} from "@/features/Calendars/services";
+import { updateSeriesPartstat } from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { PartStat } from "@/features/User/models/attendee";
+import { createAttendee } from "@/features/User/models/attendee.mapper";
+import { userData } from "@/features/User/userDataTypes";
+import { buildFamilyName } from "@/utils/buildFamilyName";
+import { getCalendarRange } from "@/utils/dateUtils";
 import { refreshCalendars } from "../utils/eventUtils";
 
 function updateEventAttendees(
@@ -70,7 +70,7 @@ function updateEventAttendees(
 }
 
 async function handleSoloRSVP(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendar: Calendar,
   event: CalendarEvent
 ) {
@@ -78,7 +78,7 @@ async function handleSoloRSVP(
 }
 
 async function handleAllRSVP(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   event: CalendarEvent,
   userEmail: string,
   rsvp: PartStat,
@@ -90,7 +90,7 @@ async function handleAllRSVP(
 }
 
 async function handleDefaultRSVP(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendar: Calendar,
   newEvent: CalendarEvent
 ) {
@@ -98,7 +98,7 @@ async function handleDefaultRSVP(
 }
 
 export async function handleRSVP(
-  dispatch: ThunkDispatch<any, any, any>,
+  dispatch: AppDispatch,
   calendar: Calendar,
   user: userData | undefined,
   event: CalendarEvent,

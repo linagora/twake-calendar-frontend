@@ -1,6 +1,6 @@
+import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
+import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { formatReduxError } from "../../../utils/errorUtils";
-import { getOpenPaasUser, getUserDetails } from "../../User/userAPI";
 import { getCalendars } from "../CalendarApi";
 import { RejectedError } from "../CalendarSlice";
 import { Calendar } from "../CalendarTypes";

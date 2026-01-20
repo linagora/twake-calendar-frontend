@@ -1,4 +1,4 @@
-import { EventErrorHandler } from "../../../src/components/Error/EventErrorHandler";
+import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
 
 describe("EventErrorHandler", () => {
   it("calls the callback when a new error is reported", () => {
