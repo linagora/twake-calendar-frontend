@@ -9,7 +9,7 @@ A highly reusable dialog component that supports both normal and expanded (fulls
 - ✅ **Clean Expanded View**: No backdrop/shadow in expanded mode for seamless integration
 - ✅ **Instant Transition**: No animation when expanding for immediate feedback
 - ✅ **Back Navigation**: Expanded mode shows back arrow icon in header for easy collapse
-- ✅ **MUI Stack Spacing**: Uses MUI Stack component with configurable spacing prop (2=16px normal, 3=24px expanded)
+- ✅ **MUI Stack Spacing**: Uses MUI Stack component with configurable spacing prop (2=16px for both normal and expanded modes)
 - ✅ **Fully Customizable**: Override styles with `sx`, `contentSx`, `titleSx` props
 - ✅ **Container Support**: Content container with configurable max-width
 - ✅ **Type Safe**: Full TypeScript support
@@ -45,7 +45,7 @@ function MyComponent() {
     >
       <TextField label="Name" fullWidth />
       <TextField label="Email" fullWidth />
-      {/* Wrapped in Stack with spacing={2} (normal) or spacing={3} (expanded) */}
+      {/* Wrapped in Stack with spacing={2} for both normal and expanded modes */}
     </ResponsiveDialog>
   );
 }
@@ -66,7 +66,7 @@ function MyComponent() {
 | `expandedContentMaxWidth` | `string`              | `"990px"` | Content container max-width in expanded mode                |
 | `headerHeight`            | `string`              | `"90px"`  | App header height to preserve                               |
 | `normalSpacing`           | `number`              | `2`       | Stack spacing in normal mode (MUI spacing units: 1 = 8px)   |
-| `expandedSpacing`         | `number`              | `3`       | Stack spacing in expanded mode (MUI spacing units: 1 = 8px) |
+| `expandedSpacing`         | `number`              | `2`       | Stack spacing in expanded mode (MUI spacing units: 1 = 8px) |
 | `contentSx`               | `SxProps<Theme>`      | -         | Custom styles for DialogContent                             |
 | `titleSx`                 | `SxProps<Theme>`      | -         | Custom styles for DialogTitle                               |
 | `dialogContentProps`      | `DialogContentProps`  | -         | Additional DialogContent props                              |
@@ -175,7 +175,7 @@ For apps with different header heights:
 - Shadow: removed (no elevation in expanded mode)
 - Transition: disabled (instant expand/collapse for better UX)
 - Title: replaced by back arrow IconButton (calls `onExpandToggle`)
-- Children spacing: `expandedSpacing={3}` (24px via MUI Stack component)
+- Children spacing: `expandedSpacing={2}` (16px via MUI Stack component)
 - Actions (MuiBox): max-width = `expandedContentMaxWidth` (990px), centered container with buttons right-aligned
   - padding: 0 12px
   - width: 100%

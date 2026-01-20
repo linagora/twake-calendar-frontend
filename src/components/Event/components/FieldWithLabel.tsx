@@ -19,19 +19,52 @@ export const FieldWithLabel = React.memo(
   }) => {
     if (!isExpanded) {
       // Normal mode: label on top
+      const isEmptyLabel =
+        label === null ||
+        label === undefined ||
+        (typeof label === "string" && label.trim() === "");
+
       return (
-        <Box sx={sx}>
-          <Typography
-            component="div"
-            sx={{
-              display: "block",
-              marginBottom: "4px",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-            }}
-          >
-            {label}
-          </Typography>
+        <Box
+          sx={[
+            {
+              "& > *:not(:first-of-type)": {
+                marginTop: isEmptyLabel ? 0 : "6px",
+              },
+              // Only apply margin to direct child MuiTextField-root
+              "& > .MuiFormControl-root": {
+                marginTop: "6px",
+                marginBottom: 0,
+              },
+              "& > .MuiTextField-root": {
+                marginTop: "6px",
+                marginBottom: 0,
+              },
+              // Reset margin for nested MuiTextField-root
+              "& .MuiFormControl-root .MuiTextField-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+              "& .MuiTextField-root .MuiTextField-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+              // Reset margin for nested Box children (DateTimeFields structure)
+              "& > .MuiBox-root > .MuiBox-root": {
+                marginTop: 0,
+              },
+              "& > .MuiBox-root > .MuiBox-root > .MuiBox-root": {
+                marginTop: 0,
+              },
+            },
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
+        >
+          {!isEmptyLabel && (
+            <Typography component="div" variant="h6" sx={{ display: "block" }}>
+              {label}
+            </Typography>
+          )}
           {children}
         </Box>
       );
@@ -42,17 +75,35 @@ export const FieldWithLabel = React.memo(
       <Box display="flex" alignItems="center" sx={sx}>
         <Typography
           component="div"
+          variant="h6"
           sx={{
             minWidth: "115px",
             marginRight: "12px",
             flexShrink: 0,
-            fontSize: "0.875rem",
-            fontWeight: 500,
           }}
         >
           {label}
         </Typography>
-        <Box flexGrow={1}>{children}</Box>
+        <Box
+          flexGrow={1}
+          sx={{
+            // Set margin-top: 8px for second row in DateTimeFields (4 fields layout)
+            "& > .MuiBox-root > .MuiBox-root:nth-of-type(2)": {
+              marginTop: "8px",
+            },
+            // Remove margin from MuiFormControl-root MuiFormControl-marginDense in extended mode
+            "& .MuiFormControl-root.MuiFormControl-marginDense": {
+              marginTop: 0,
+              marginBottom: 0,
+            },
+            "& .MuiTextField-root.MuiFormControl-marginDense": {
+              marginTop: 0,
+              marginBottom: 0,
+            },
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     );
   }
