@@ -2,7 +2,7 @@ import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 

@@ -396,6 +396,20 @@ describe("CalendarSlice", () => {
 
     it("createCalendarAsync.fulfilled adds a new calendar", () => {
       const payload = {
+        userData: {
+          openpaasId: "u1",
+          family_name: "Owner",
+          email: "o@example.com",
+        },
+        calId: "cal1",
+        color: { "apple:color": "#f00" },
+        name: "Test",
+        desc: "Desc",
+        owner: "Owner",
+        ownerEmails: ["o@example.com"],
+      };
+
+      const payloadResponse = {
         userId: "u1",
         calId: "cal1",
         color: { "apple:color": "#f00" },
@@ -406,7 +420,7 @@ describe("CalendarSlice", () => {
       };
       const state = reducer(
         initialState,
-        createCalendarAsync.fulfilled(payload, "req4", payload)
+        createCalendarAsync.fulfilled(payloadResponse, "req4", payload)
       );
       expect(state.list["u1/cal1"].name).toBe("Test");
       expect(state.list["u1/cal1"].color?.["apple:color"]).toBe("#f00");

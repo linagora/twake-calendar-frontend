@@ -1,10 +1,7 @@
 import { User } from "@/components/Attendees/PeopleSearch";
 import { formatLocalDateTime } from "@/components/Event/utils/dateTimeFormatters";
-import { refreshCalendars } from "@/components/Event/utils/eventUtils";
-import { updateEventLocal } from "@/features/Calendars/CalendarSlice";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
-  getCalendarDetailAsync,
   getEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
@@ -14,12 +11,9 @@ import { getEvent } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { userAttendee } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
-import {
-  formatDateToYYYYMMDDTHHMMSS,
-  getDeltaInMilliseconds,
-} from "@/utils/dateUtils";
-import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import { updateTempCalendar } from "../utils/calendarUtils";
+import { getDeltaInMilliseconds } from "@/utils/dateUtils";
+import { CalendarApi, DateSelectArg, EventDropArg } from "@fullcalendar/core";
+import { EventResizeDoneArg } from "@fullcalendar/interaction";
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;

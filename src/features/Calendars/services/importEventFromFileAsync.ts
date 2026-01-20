@@ -2,7 +2,7 @@ import { importEventFromFile } from "@/features/Events/EventApi";
 import { importFile } from "@/utils/apiUtils";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 
 export const importEventFromFileAsync = createAsyncThunk<
   void,

@@ -3,7 +3,7 @@ import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
 import { expandEventFunction } from "../utils/expandEventFunction";
 import { processSyncUpdates } from "../utils/processSyncTokenUpdates";

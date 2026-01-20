@@ -1,8 +1,9 @@
 import { getUserDetails } from "@/features/User/userAPI";
+import { userData } from "@/features/User/userDataTypes";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { postCalendar } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 
 export const createCalendarAsync = createAsyncThunk<
   {
@@ -15,7 +16,7 @@ export const createCalendarAsync = createAsyncThunk<
     ownerEmails: string[];
   },
   {
-    userId: string;
+    userData: userData;
     calId: string;
     color: Record<string, string>;
     name: string;
@@ -24,23 +25,25 @@ export const createCalendarAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >(
   "calendars/createCalendar",
-  async ({ userId, calId, color, name, desc }, { rejectWithValue }) => {
+  async ({ userData, calId, color, name, desc }, { rejectWithValue }) => {
     try {
-      await postCalendar(userId, calId, color, name, desc);
-      const ownerData: any = await getUserDetails(userId.split("/")[0]);
+      if (!userData.openpaasId) {
+        throw new Error("No openpaasId");
+      }
 
-      const owner = [ownerData.firstname, ownerData.lastname]
+      await postCalendar(userData.openpaasId, calId, color, name, desc);
+      const owner = [userData.given_name, userData.family_name]
         .filter(Boolean)
         .join(" ");
 
       return {
-        userId,
+        userId: userData.openpaasId,
         calId,
         color,
         name,
         desc,
         owner,
-        ownerEmails: ownerData.emails ?? [],
+        ownerEmails: userData.email ? [userData.email] : [],
       };
     } catch (err: any) {
       return rejectWithValue({
