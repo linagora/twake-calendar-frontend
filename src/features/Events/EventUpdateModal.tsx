@@ -1,48 +1,50 @@
-import { Box, Button } from "@linagora/twake-mui";
-import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { ResponsiveDialog } from "../../components/Dialog";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { updateAttendeesAfterTimeChange } from "@/components/Calendar/handlers/eventHandlers";
+import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { ResponsiveDialog } from "@/components/Dialog";
+import EventFormFields from "@/components/Event/EventFormFields";
+import { addDays } from "@/components/Event/utils/dateRules";
+import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
+import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
+import { refreshCalendars } from "@/components/Event/utils/eventUtils";
 import {
-  putEventAsync,
-  removeEvent,
   moveEventAsync,
+  putEventAsync,
   updateEventInstanceAsync,
   updateSeriesAsync,
-  updateEventLocal,
+} from "@/features/Calendars/services";
+import { getCalendarRange } from "@/utils/dateUtils";
+import {
+  buildEventFormTempData,
+  clearEventFormTempData,
+  EventFormContext,
+  EventFormState,
+  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
+  restoreFormDataFromTemp,
+  saveEventFormDataToTemp,
+  showErrorNotification,
+} from "@/utils/eventFormTempStorage";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { TIMEZONES } from "@/utils/timezone-data";
+import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
+import { Box, Button } from "@linagora/twake-mui";
+import AddIcon from "@mui/icons-material/Add";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "twake-i18n";
+import {
   clearFetchCache,
+  removeEvent,
+  updateEventLocal,
 } from "../Calendars/CalendarSlice";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
+import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { TIMEZONES } from "../../utils/timezone-data";
-import { addVideoConferenceToDescription } from "../../utils/videoConferenceUtils";
-import EventFormFields from "../../components/Event/EventFormFields";
-import { formatDateTimeInTimezone } from "../../components/Event/utils/dateTimeFormatters";
-import { addDays } from "../../components/Event/utils/dateRules";
-import { getEvent, deleteEvent, putEvent } from "./EventApi";
-import { refreshCalendars } from "../../components/Event/utils/eventUtils";
-import { getCalendarRange } from "../../utils/dateUtils";
 import {
   combineMasterDateWithFormTime,
   detectRecurringEventChanges,
 } from "./eventUtils";
-import { updateTempCalendar } from "../../components/Calendar/utils/calendarUtils";
-import { useI18n } from "twake-i18n";
-import { updateAttendeesAfterTimeChange } from "../../components/Calendar/handlers/eventHandlers";
-import { convertFormDateTimeToISO } from "../../components/Event/utils/dateTimeHelpers";
-import {
-  saveEventFormDataToTemp,
-  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
-  clearEventFormTempData,
-  showErrorNotification,
-  buildEventFormTempData,
-  restoreFormDataFromTemp,
-  EventFormState,
-  EventFormContext,
-} from "../../utils/eventFormTempStorage";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function EventUpdateModal({
   eventId,

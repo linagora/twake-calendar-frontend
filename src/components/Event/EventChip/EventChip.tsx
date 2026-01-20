@@ -6,7 +6,7 @@ import {
   CardHeader,
   Typography,
 } from "@linagora/twake-mui";
-import React, { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { stringAvatar } from "../utils/eventUtils";
 import { ErrorEventChip } from "./ErrorEventChip";
 import {
@@ -21,7 +21,6 @@ import {
   IconDisplayConfig,
   useCompactMode,
 } from "./EventChipUtils";
-import { SimpleEventChip } from "./SimpleEventChip";
 
 const PRIVATE_CLASSIFICATIONS = ["PRIVATE", "CONFIDENTIAL"];
 

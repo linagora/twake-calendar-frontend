@@ -1,26 +1,25 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
-import * as eventThunks from "../../../src/features/Calendars/CalendarSlice";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
-import EventUpdateModal from "../../../src/features/Events/EventUpdateModal";
-import { EditModeDialog } from "../../../src/components/Event/EditModeDialog";
-import * as EventApi from "../../../src/features/Events/EventApi";
+import { RootState } from "@/app/store";
 import {
   createEventHandlers,
   EventHandlersProps,
-} from "../../../src/components/Calendar/handlers/eventHandlers";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
+} from "@/components/Calendar/handlers/eventHandlers";
+import { EditModeDialog } from "@/components/Event/EditModeDialog";
+import * as eventThunks from "@/features/Calendars/services";
+import * as EventApi from "@/features/Events/EventApi";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventUpdateModal from "@/features/Events/EventUpdateModal";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import preview from "jest-preview";
+import { renderWithProviders } from "../../utils/Renderwithproviders";
 
-jest.mock("../../../src/components/Event/utils/eventUtils", () => {
-  const actual = jest.requireActual(
-    "../../../src/components/Event/utils/eventUtils"
-  );
+jest.mock("@/components/Event/utils/eventUtils", () => {
+  const actual = jest.requireActual("@/components/Event/utils/eventUtils");
   return {
     ...actual,
     refreshCalendars: jest.fn(() => Promise.resolve()),
     refreshSingularCalendar: jest.fn(() => Promise.resolve()),
   };
 });
-import preview from "jest-preview";
 const mockOnClose = jest.fn();
 const day = new Date("2025-03-15T10:00:00Z");
 
@@ -102,7 +101,7 @@ const basePreloadedState = {
     pending: false,
     templist: {},
   },
-};
+} as unknown as RootState;
 
 describe("EditModeDialog Component", () => {
   beforeEach(() => {
@@ -946,7 +945,7 @@ describe("handleRSVP function", () => {
 
     const {
       handleRSVP,
-    } = require("../../../src/components/Event/eventHandlers/eventHandlers");
+    } = require("@/components/Event/eventHandlers/eventHandlers");
 
     jest.spyOn(eventThunks, "putEventAsync").mockImplementation((payload) => {
       const promise = Promise.resolve(payload);
@@ -992,7 +991,7 @@ describe("handleDelete function", () => {
 
     const {
       handleDelete,
-    } = require("../../../src/components/Event/eventHandlers/eventHandlers");
+    } = require("@/components/Event/eventHandlers/eventHandlers");
 
     jest
       .spyOn(eventThunks, "deleteEventAsync")
@@ -1028,7 +1027,7 @@ describe("handleDelete function", () => {
 
     const {
       handleDelete,
-    } = require("../../../src/components/Event/eventHandlers/eventHandlers");
+    } = require("@/components/Event/eventHandlers/eventHandlers");
 
     jest
       .spyOn(eventThunks, "deleteEventInstanceAsync")
@@ -1059,7 +1058,7 @@ describe("handleDelete function", () => {
 
     const {
       handleDelete,
-    } = require("../../../src/components/Event/eventHandlers/eventHandlers");
+    } = require("@/components/Event/eventHandlers/eventHandlers");
 
     jest
       .spyOn(eventThunks, "deleteEventAsync")

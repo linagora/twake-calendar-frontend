@@ -1,10 +1,10 @@
+import CalendarApp from "@/components/Calendar/Calendar";
+import * as calendarUtils from "@/components/Calendar/utils/calendarUtils";
+import { updateSlotLabelVisibility } from "@/components/Calendar/utils/calendarUtils";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import * as SettingsSlice from "@/features/Settings/SettingsSlice";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import CalendarApp from "../../../src/components/Calendar/Calendar";
-import { updateSlotLabelVisibility } from "../../../src/components/Calendar/utils/calendarUtils";
-import EventPreviewModal from "../../../src/features/Events/EventDisplayPreview";
-import * as SettingsSlice from "../../../src/features/Settings/SettingsSlice";
-import * as calendarUtils from "../../../src/components/Calendar/utils/calendarUtils";
-import { CalendarEvent } from "../../../src/features/Events/EventsTypes";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 describe("Calendar - Timezone Integration", () => {
@@ -199,7 +199,6 @@ describe("EventDisplayPreview - Timezone Display", () => {
         onClose={mockOnClose}
         eventId="allDayEvent"
         calId="user1/cal1"
-        event={allDayEvent}
       />,
       baseState
     );
@@ -236,7 +235,6 @@ describe("EventDisplayPreview - Timezone Display", () => {
           eventId="event1"
           calId="user1/cal1"
           onClose={mockOnClose}
-          event={baseEvent}
         />,
         state
       );

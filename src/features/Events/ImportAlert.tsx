@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
-import { useAppSelector } from "../../app/hooks";
-import { EventErrorSnackbar } from "../../components/Error/ErrorSnackbar";
+import { useAppSelector } from "@/app/hooks";
+import { EventErrorSnackbar } from "@/components/Error/ErrorSnackbar";
+import { useMemo, useState } from "react";
 
 export default function ImportAlert() {
   const calendars = useAppSelector((state) => state.calendars.list);

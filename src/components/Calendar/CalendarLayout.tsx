@@ -1,13 +1,11 @@
-import { useRef, useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import SettingsPage from "@/features/Settings/SettingsPage";
+import { getCalendarRange } from "@/utils/dateUtils";
+import { useEffect, useRef, useState } from "react";
+import { ErrorSnackbar } from "../Error/ErrorSnackbar";
+import { refreshCalendars } from "../Event/utils/eventUtils";
 import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import CalendarApp from "./Calendar";
-import { useAppDispatch } from "../../app/hooks";
-import { getCalendarRange } from "../../utils/dateUtils";
-import { useAppSelector } from "../../app/hooks";
-import { refreshCalendars } from "../Event/utils/eventUtils";
-import { ErrorSnackbar } from "../Error/ErrorSnackbar";
-
-import SettingsPage from "../../features/Settings/SettingsPage";
 
 export default function CalendarLayout() {
   const calendarRef = useRef<any>(null);

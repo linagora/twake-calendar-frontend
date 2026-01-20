@@ -1,5 +1,5 @@
-import { RepetitionObject } from "../features/Events/EventsTypes";
-import { userAttendee } from "../features/User/models/attendee";
+import { RepetitionObject } from "@/features/Events/EventsTypes";
+import { userAttendee } from "@/features/User/models/attendee";
 
 export interface EventFormTempData {
   // Form fields

@@ -1,16 +1,16 @@
 import {
+  Box,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentProps,
+  DialogProps,
   DialogTitle,
   DialogTitleProps,
-  DialogProps,
   IconButton,
   Stack,
   SxProps,
   Theme,
-  Box,
 } from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";

@@ -1,6 +1,6 @@
-import { findCalendarById } from "../../src/utils/findCalendarById";
-import { Calendar } from "../../src/features/Calendars/CalendarTypes";
-import { RootState } from "../../src/app/store";
+import { RootState } from "@/app/store";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { findCalendarById } from "@/utils";
 
 describe("findCalendarById", () => {
   const mockCalendar1: Calendar = {

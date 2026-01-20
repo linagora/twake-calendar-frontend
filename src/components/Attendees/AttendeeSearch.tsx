@@ -1,10 +1,10 @@
+import { userAttendee } from "@/features/User/models/attendee";
+import { createAttendee } from "@/features/User/models/attendee.mapper";
 import { useEffect, useState } from "react";
-import { userAttendee } from "../../features/User/models/attendee";
-import { createAttendee } from "../../features/User/models/attendee.mapper";
 import {
+  ExtendedAutocompleteRenderInputParams,
   PeopleSearch,
   User,
-  ExtendedAutocompleteRenderInputParams,
 } from "./PeopleSearch";
 
 export default function UserSearch({

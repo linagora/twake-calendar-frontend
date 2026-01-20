@@ -18,7 +18,7 @@ A highly reusable dialog component that supports both normal and expanded (fulls
 ## Basic Usage
 
 ```tsx
-import { ResponsiveDialog } from "../../components/Dialog";
+import { ResponsiveDialog } from "@/components/Dialog";
 import { useState } from "react";
 
 function MyComponent() {
@@ -199,7 +199,7 @@ All `sx` props are **merged** with base styles, not overridden:
 Full type inference and validation:
 
 ```tsx
-import { ResponsiveDialog } from "../../components/Dialog";
+import { ResponsiveDialog } from "@/components/Dialog";
 
 // All props are type-checked
 <ResponsiveDialog

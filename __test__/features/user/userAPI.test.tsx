@@ -1,11 +1,11 @@
-import { clientConfig } from "../../../src/features/User/oidcAuth";
+import { clientConfig } from "@/features/User/oidcAuth";
 import {
   getOpenPaasUser,
   updateUserConfigurations,
-} from "../../../src/features/User/userAPI";
-import { api } from "../../../src/utils/apiUtils";
+} from "@/features/User/userAPI";
+import { api } from "@/utils/apiUtils";
 
-jest.mock("../../../src/utils/apiUtils");
+jest.mock("@/utils/apiUtils");
 
 clientConfig.url = "https://example.com";
 

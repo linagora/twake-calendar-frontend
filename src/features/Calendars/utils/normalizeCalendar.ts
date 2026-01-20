@@ -1,4 +1,4 @@
-import { getCalendarVisibility } from "../../../components/Calendar/utils/calendarUtils";
+import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
 
 export function normalizeCalendar(rawCalendar: Record<string, any>) {
   const description = rawCalendar["caldav:description"];

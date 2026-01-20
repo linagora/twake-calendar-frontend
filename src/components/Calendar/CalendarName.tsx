@@ -1,5 +1,5 @@
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { Box, Typography } from "@linagora/twake-mui";
-import { Calendar } from "../../features/Calendars/CalendarTypes";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 export function CalendarName({ calendar }: { calendar: Calendar }) {
   return (

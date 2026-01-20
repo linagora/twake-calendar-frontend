@@ -1,7 +1,7 @@
 import { Box, Button, TextField } from "@linagora/twake-mui";
+import { Description as DescriptionIcon } from "@mui/icons-material";
 import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
-import { Description as DescriptionIcon } from "@mui/icons-material";
 
 export function AddDescButton({
   showDescription,

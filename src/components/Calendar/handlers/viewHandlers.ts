@@ -1,10 +1,10 @@
-import React from "react";
+import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
+import { EventChip } from "@/components/Event/EventChip/EventChip";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { userAttendee } from "@/features/User/models/attendee";
 import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
+import React from "react";
 import { createMouseHandlers } from "./mouseHandlers";
-import { userAttendee } from "../../../features/User/models/attendee";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
-import { EventErrorHandler } from "../../Error/EventErrorHandler";
-import { EventChip } from "../../Event/EventChip/EventChip";
 
 export interface ViewHandlersProps {
   calendarRef: React.RefObject<CalendarApi | null>;

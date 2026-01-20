@@ -1,13 +1,12 @@
-// SearchSlice.test.ts
-import { configureStore } from "@reduxjs/toolkit";
+import * as EventApi from "@/features/Events/EventApi";
 import searchResultReducer, {
   searchEventsAsync,
-  setResults,
   setHits,
-} from "../../../src/features/Search/SearchSlice";
-import * as EventApi from "../../../src/features/Events/EventApi";
+  setResults,
+} from "@/features/Search/SearchSlice";
+import { configureStore } from "@reduxjs/toolkit";
 
-jest.mock("../../../src/features/Events/EventApi");
+jest.mock("@/features/Events/EventApi");
 
 describe("SearchSlice", () => {
   let store: any;

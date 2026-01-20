@@ -1,13 +1,13 @@
-import { fireEvent, screen, waitFor, act } from "@testing-library/react";
+import CalendarSearch from "@/components/Calendar/CalendarSearch";
+import * as CalendarApi from "@/features/Calendars/CalendarApi";
+import * as CalendarSlice from "@/features/Calendars/services";
+import { searchUsers } from "@/features/User/userAPI";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CalendarSearch from "../../src/components/Calendar/CalendarSearch";
-import * as CalendarApi from "../../src/features/Calendars/CalendarApi";
-import * as CalendarSlice from "../../src/features/Calendars/CalendarSlice";
-import { searchUsers } from "../../src/features/User/userAPI";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
-jest.mock("../../src/features/User/userAPI");
-jest.mock("../../src/features/Calendars/CalendarApi");
+jest.mock("@/features/User/userAPI");
+jest.mock("@/features/Calendars/CalendarApi");
 
 const mockedSearchUsers = searchUsers as jest.MockedFunction<
   typeof searchUsers

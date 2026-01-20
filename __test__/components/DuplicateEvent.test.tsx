@@ -1,8 +1,9 @@
+import { RootState } from "@/app/store";
+import EventDuplication from "@/components/Event/EventDuplicate";
+import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPopover from "@/features/Events/EventModal";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import EventDuplication from "../../src/components/Event/EventDuplicate";
-import EventPopover from "../../src/features/Events/EventModal";
 import { renderWithProviders } from "../utils/Renderwithproviders";
-import EventPreviewModal from "../../src/features/Events/EventDisplayPreview";
 
 const day = new Date();
 const preloadedState = {
@@ -58,7 +59,7 @@ const preloadedState = {
     },
     pending: false,
   },
-};
+} as unknown as RootState;
 
 describe("EventDuplication", () => {
   it("calls onOpenDuplicate when button clicked", () => {
@@ -155,7 +156,7 @@ describe("EventDisplayModal", () => {
     expect(
       screen.getByDisplayValue(
         preloadedState.calendars.list["667037022b752d0026472254/cal1"].events
-          .event1.title
+          .event1.title as string
       )
     ).toBeInTheDocument();
   });

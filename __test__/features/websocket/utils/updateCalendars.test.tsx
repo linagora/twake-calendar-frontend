@@ -1,8 +1,8 @@
-import { updateCalendars } from "@/websocket/messaging/updateCalendars";
-import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
 import { RootState, store } from "@/app/store";
-import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
+import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
 import { getDisplayedCalendarRange } from "@/utils/CalendarRangeManager";
+import { updateCalendars } from "@/websocket/messaging/updateCalendars";
+import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
 import { waitFor } from "@testing-library/dom";
 
 jest.mock("@/features/Calendars/services/refreshCalendar");

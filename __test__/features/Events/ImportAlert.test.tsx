@@ -1,7 +1,6 @@
-import { screen, fireEvent } from "@testing-library/react";
+import ImportAlert from "@/features/Events/ImportAlert";
+import { fireEvent, screen } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import ImportAlert from "../../../src/features/Events/ImportAlert";
-import { clearError } from "../../../src/features/Calendars/CalendarSlice";
 
 // Mock the ErrorSnackbar component since we want to test ImportAlert logic,
 // but we can also test integration if we don't mock it.

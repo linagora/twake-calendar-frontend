@@ -1,6 +1,6 @@
+import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
 import { Card, Typography } from "@linagora/twake-mui";
-import { useRef, useEffect } from "react";
-import { EventErrorHandler } from "../../Error/EventErrorHandler";
+import { useEffect, useRef } from "react";
 
 export function ErrorEventChip({
   event,

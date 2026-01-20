@@ -1,5 +1,5 @@
-import { getUserDisplayName } from "../../src/utils/userUtils";
-import { userData } from "../../src/features/User/userDataTypes";
+import { userData } from "@/features/User/userDataTypes";
+import { getUserDisplayName } from "@/utils/userUtils";
 
 describe("userUtils", () => {
   describe("getUserDisplayName", () => {

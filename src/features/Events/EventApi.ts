@@ -1,5 +1,10 @@
-import { api } from "../../utils/apiUtils";
-import { TIMEZONES } from "../../utils/timezone-data";
+import { detectDateTimeFormat } from "@/components/Event/utils/dateTimeHelpers";
+import { api } from "@/utils/apiUtils";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { TIMEZONES } from "@/utils/timezone-data";
+import ICAL from "ical.js";
+import moment from "moment-timezone";
+import { CalDavItem } from "../Calendars/api/types";
 import { CalendarEvent } from "./EventsTypes";
 import {
   calendarEventToJCal,
@@ -7,11 +12,6 @@ import {
   makeVevent,
   parseCalendarEvent,
 } from "./eventUtils";
-import ICAL from "ical.js";
-import moment from "moment-timezone";
-import { detectDateTimeFormat } from "../../components/Event/utils/dateTimeHelpers";
-import { CalDavItem } from "../Calendars/api/types";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 
 function resolveTimezoneId(tzid?: string): string | undefined {
   if (!tzid) return undefined;

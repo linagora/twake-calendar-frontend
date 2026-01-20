@@ -1,9 +1,9 @@
+import { browserDefaultTimeZone } from "@/utils/timezone";
+import { TIMEZONES } from "@/utils/timezone-data";
 import { Button, Popover } from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
 import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { TIMEZONES } from "../../utils/timezone-data";
+import { useI18n } from "twake-i18n";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 
 interface TimezoneSelectProps {

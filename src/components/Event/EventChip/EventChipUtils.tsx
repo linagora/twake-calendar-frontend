@@ -1,12 +1,12 @@
+import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { userAttendee } from "@/features/User/models/attendee";
+import { getContrastRatio } from "@linagora/twake-mui";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import { Box, getContrastRatio } from "@linagora/twake-mui";
 import moment from "moment";
 import React, { useLayoutEffect, useState } from "react";
-import { Calendar } from "../../../features/Calendars/CalendarTypes";
-import { userAttendee } from "../../../features/User/models/attendee";
-import { EventErrorHandler } from "../../Error/EventErrorHandler";
 import { EVENT_DURATION } from "./EventChip";
 
 const COMPACT_WIDTH_THRESHOLD = 100;

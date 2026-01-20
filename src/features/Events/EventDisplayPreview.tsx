@@ -1,4 +1,30 @@
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { CalendarName } from "@/components/Calendar/CalendarName";
+import { getTimezoneOffset } from "@/components/Calendar/TimezoneSelector";
+import {
+  formatEventChipTitle,
+  updateTempCalendar,
+} from "@/components/Calendar/utils/calendarUtils";
+import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
+import { EditModeDialog } from "@/components/Event/EditModeDialog";
+import EventDuplication from "@/components/Event/EventDuplicate";
+import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
+import { InfoRow } from "@/components/Event/InfoRow";
+import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
+import { getCalendarRange } from "@/utils/dateUtils";
+import { browserDefaultTimeZone } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
+import {
+  AvatarGroup,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+} from "@linagora/twake-mui";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -13,42 +39,16 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import { Box, Typography } from "@linagora/twake-mui";
-import EventPopover from "./EventModal";
-import {
-  Button,
-  Chip,
-  IconButton,
-  Menu,
-  MenuItem,
-  Tooltip,
-} from "@linagora/twake-mui";
-import { AvatarGroup } from "@linagora/twake-mui";
-import { useEffect, useState, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { CalendarName } from "../../components/Calendar/CalendarName";
-import { getTimezoneOffset } from "../../components/Calendar/TimezoneSelector";
-import {
-  formatEventChipTitle,
-  updateTempCalendar,
-} from "../../components/Calendar/utils/calendarUtils";
-import ResponsiveDialog from "../../components/Dialog/ResponsiveDialog";
-import { EditModeDialog } from "../../components/Event/EditModeDialog";
-import EventDuplication from "../../components/Event/EventDuplicate";
-import { handleDelete } from "../../components/Event/eventHandlers/eventHandlers";
-import { InfoRow } from "../../components/Event/InfoRow";
-import { renderAttendeeBadge } from "../../components/Event/utils/eventUtils";
-import { getCalendarRange } from "../../utils/dateUtils";
-import { deleteEventAsync } from "../Calendars/CalendarSlice";
+import { useEffect, useRef, useState } from "react";
+import { useI18n } from "twake-i18n";
+import { deleteEventAsync } from "../Calendars/services";
+import { userAttendee } from "../User/models/attendee";
+import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
+import { createEventContext } from "./createEventContext";
 import { dlEvent } from "./EventApi";
+import EventPopover from "./EventModal";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
-import { useI18n } from "twake-i18n";
-import { userAttendee } from "../User/models/attendee";
-import { browserDefaultTimeZone } from "../../utils/timezone";
-import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
-import { Calendar } from "../Calendars/CalendarTypes";
-import { createEventContext } from "./createEventContext";
 
 export default function EventPreviewModal({
   eventId,
