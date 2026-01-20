@@ -2,10 +2,10 @@ import {
   convertFormDateTimeToISO,
   detectDateTimeFormat,
 } from "@/components/Event/utils/dateTimeHelpers";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import moment from "moment-timezone";
-import { extractEventBaseUuid } from "../../utils/extractEventBaseUuid";
 import { userAttendee } from "../User/models/attendee";
 import { createAttendee } from "../User/models/attendee.mapper";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
