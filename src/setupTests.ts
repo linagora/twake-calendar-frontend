@@ -51,6 +51,14 @@ class ResizeObserverMock {
 
 (global as any).ResizeObserver = ResizeObserverMock;
 
+class IntersectionObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+(global as any).IntersectionObserver = IntersectionObserverMock;
+
 beforeAll(() => {
   console.warn = (...args: unknown[]) => {
     if (
