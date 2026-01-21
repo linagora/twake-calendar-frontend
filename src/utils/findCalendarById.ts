@@ -8,10 +8,10 @@ export function findCalendarById(
   if (calendarId.length === 0) {
     return;
   }
-  if (state.calendars?.list?.[calendarId]) {
-    return { calendar: state.calendars.list[calendarId] };
-  }
   if (state.calendars?.templist?.[calendarId]) {
     return { calendar: state.calendars.templist[calendarId], type: "temp" };
+  }
+  if (state.calendars?.list?.[calendarId]) {
+    return { calendar: state.calendars.list[calendarId] };
   }
 }

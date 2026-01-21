@@ -59,7 +59,7 @@ describe("findCalendarById", () => {
     expect(result).toBeUndefined();
   });
 
-  it("should prioritize main list over temp list", () => {
+  it("should prioritize temp list over main list", () => {
     const stateWithDuplicate = {
       calendars: {
         list: {
@@ -73,8 +73,8 @@ describe("findCalendarById", () => {
 
     const result = findCalendarById(stateWithDuplicate, "dup1");
 
-    expect(result?.calendar).toEqual(mockCalendar1);
-    expect(result?.type).toBeUndefined();
+    expect(result?.calendar).toEqual(mockTempCalendar);
+    expect(result?.type).toBe("temp");
   });
 
   it("should handle undefined list or templist", () => {

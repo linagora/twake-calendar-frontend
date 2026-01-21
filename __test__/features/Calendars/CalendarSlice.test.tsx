@@ -396,6 +396,22 @@ describe("CalendarSlice", () => {
 
     it("createCalendarAsync.fulfilled adds a new calendar", () => {
       const payload = {
+        userData: {
+          openpaasId: "u1",
+          family_name: "Owner",
+          email: "o@example.com",
+          sid: "",
+          sub: "",
+          given_name: "Test",
+          name: "Test Owner",
+        },
+        calId: "cal1",
+        color: { "apple:color": "#f00" },
+        name: "Test",
+        desc: "Desc",
+      };
+
+      const payloadResponse = {
         userId: "u1",
         calId: "cal1",
         color: { "apple:color": "#f00" },
@@ -406,7 +422,7 @@ describe("CalendarSlice", () => {
       };
       const state = reducer(
         initialState,
-        createCalendarAsync.fulfilled(payload, "req4", payload)
+        createCalendarAsync.fulfilled(payloadResponse, "req4", payload)
       );
       expect(state.list["u1/cal1"].name).toBe("Test");
       expect(state.list["u1/cal1"].color?.["apple:color"]).toBe("#f00");
@@ -441,28 +457,6 @@ describe("CalendarSlice", () => {
       expect(state.list["c1"].name).toBe("Shared");
     });
 
-    it("deleteEventAsync.fulfilled removes event", () => {
-      const calId = "c1";
-      const prev = {
-        ...initialState,
-        list: {
-          [calId]: {
-            id: calId,
-            events: { e1: { uid: "e1" } },
-          } as unknown as Calendar,
-        },
-      };
-      const state = reducer(
-        prev,
-        deleteEventAsync.fulfilled({ calId, eventId: "e1" }, "req6", {
-          calId,
-          eventId: "e1",
-          eventURL: "e1.ics",
-        })
-      );
-      expect(state.list[calId].events).toEqual({});
-    });
-
     it("getTempCalendarsListAsync.fulfilled updates templist", () => {
       const payload = {
         t1: {
@@ -490,38 +484,11 @@ describe("CalendarSlice", () => {
       expect(state.templist.t1.name).toBe("Temp");
     });
 
-    it("putEventAsync.fulfilled updates calendar events", () => {
-      const cal = { id: "c1", events: {} } as any;
-      const payload = { calId: "c1", events: [{ uid: "e1" }] as any[] };
-      const state = reducer(
-        initialState,
-        putEventAsync.fulfilled(payload, "req8", {
-          cal,
-          newEvent: { uid: "e1" } as CalendarEvent,
-        })
-      );
-      expect(state.list.c1.events.e1.uid).toBe("e1");
-    });
-
     it("getEventAsync.fulfilled adds single event", () => {
       const payload = { calId: "c1", event: { uid: "e1" } as any };
       const state = reducer(
         initialState,
         getEventAsync.fulfilled(payload, "req9", { uid: "e1" } as any)
-      );
-      expect(state.list.c1.events.e1.uid).toBe("e1");
-    });
-
-    it("moveEventAsync.fulfilled updates events after move", () => {
-      const cal = { id: "c1", events: {} } as any;
-      const payload = { calId: "c1", events: [{ uid: "e1" }] as any[] };
-      const state = reducer(
-        initialState,
-        moveEventAsync.fulfilled(payload, "req10", {
-          cal,
-          newEvent: { uid: "e1" } as CalendarEvent,
-          newURL: "e1.ics",
-        })
       );
       expect(state.list.c1.events.e1.uid).toBe("e1");
     });

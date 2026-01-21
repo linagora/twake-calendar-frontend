@@ -1,5 +1,4 @@
 import { useAppDispatch } from "@/app/hooks";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
 import { Button } from "@linagora/twake-mui";
@@ -20,7 +19,6 @@ interface RSVPButtonProps {
   rsvpValue: PartStat;
   contextualizedEvent: ContextualizedEvent;
   user: userData | undefined;
-  calendarList: Calendar[];
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>;
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
 }
@@ -29,7 +27,6 @@ export function RSVPButton({
   rsvpValue,
   contextualizedEvent,
   user,
-  calendarList,
   setAfterChoiceFunc,
   setOpenEditModePopup,
 }: RSVPButtonProps) {
@@ -54,7 +51,6 @@ export function RSVPButton({
           rsvpValue,
           contextualizedEvent,
           user,
-          calendarList,
           setAfterChoiceFunc,
           setOpenEditModePopup,
           dispatch

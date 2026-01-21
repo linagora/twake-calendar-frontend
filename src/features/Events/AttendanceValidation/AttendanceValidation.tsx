@@ -1,4 +1,3 @@
-import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { userData } from "@/features/User/userDataTypes";
 import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction } from "react";
@@ -8,7 +7,6 @@ import { RSVPButton } from "./RSVPButton";
 
 interface AttendanceValidationProps {
   contextualizedEvent: ContextualizedEvent;
-  calendarList: Calendar[];
   user: userData | undefined;
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>;
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
@@ -16,7 +14,6 @@ interface AttendanceValidationProps {
 
 export function AttendanceValidation({
   contextualizedEvent,
-  calendarList,
   user,
   setAfterChoiceFunc,
   setOpenEditModePopup,
@@ -36,7 +33,6 @@ export function AttendanceValidation({
   const commonButtonProps = {
     contextualizedEvent,
     user,
-    calendarList,
     setAfterChoiceFunc,
     setOpenEditModePopup,
   };

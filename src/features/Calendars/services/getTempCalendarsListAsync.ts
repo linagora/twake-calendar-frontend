@@ -4,7 +4,7 @@ import { getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
 
 export const getTempCalendarsListAsync = createAsyncThunk<
@@ -14,9 +14,14 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 >("calendars/getTempCalendars", async (tempUser, { rejectWithValue }) => {
   try {
     const importedCalendars: Record<string, Calendar> = {};
-
+    if (!tempUser.openpaasId) {
+      const username = tempUser.displayName || tempUser.email || "User";
+      throw new Error(
+        `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
+      );
+    }
     const calendars = (await getCalendars(
-      tempUser.openpaasId ?? "",
+      tempUser.openpaasId,
       "sharedPublic=true&"
     )) as Record<string, any>;
 
