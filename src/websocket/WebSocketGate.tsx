@@ -170,7 +170,7 @@ export function WebSocketGate() {
   useEffect(() => {
     const handleOnline = () => {
       console.log("Browser is online, attempting WebSocket reconnection");
-      if (!isSocketOpen && isAuthenticated) {
+      if (!isSocketOpen && isAuthenticatedRef.current) {
         reconnectAttemptsRef.current = 0;
         clearReconnectTimeout();
         setShouldConnect((prev) => !prev);

@@ -46,7 +46,7 @@ export function useWebSocketReconnect(
         `Attempting WebSocket reconnection (attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`
       );
 
-      setShouldConnect((prev: any) => !prev);
+      setShouldConnect((prev: boolean) => !prev);
     }, delay);
   }, [clearReconnectTimeout]);
   return { scheduleReconnect, clearReconnectTimeout };
