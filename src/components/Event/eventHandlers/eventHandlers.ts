@@ -12,8 +12,6 @@ import { PartStat } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
 import { userData } from "@/features/User/userDataTypes";
 import { buildFamilyName } from "@/utils/buildFamilyName";
-import { getCalendarRange } from "@/utils/dateUtils";
-import { refreshCalendars } from "../utils/eventUtils";
 
 function updateEventAttendees(
   event: CalendarEvent,
@@ -78,15 +76,11 @@ async function handleSoloRSVP(
 }
 
 async function handleAllRSVP(
-  dispatch: AppDispatch,
   event: CalendarEvent,
   userEmail: string,
-  rsvp: PartStat,
-  calendars: Calendar[]
+  rsvp: PartStat
 ) {
-  const calendarRange = getCalendarRange(new Date(event.start));
   await updateSeriesPartstat(event, userEmail, rsvp);
-  await refreshCalendars(dispatch, calendars, calendarRange);
 }
 
 async function handleDefaultRSVP(
@@ -103,8 +97,7 @@ export async function handleRSVP(
   user: userData | undefined,
   event: CalendarEvent,
   rsvp: PartStat,
-  typeOfAction?: string,
-  calendars?: Calendar[]
+  typeOfAction?: string
 ) {
   const newEvent = {
     ...event,
@@ -114,13 +107,10 @@ export async function handleRSVP(
   if (typeOfAction === "solo") {
     await handleSoloRSVP(dispatch, calendar, newEvent);
   } else if (typeOfAction === "all") {
-    if (!calendars || calendars.length === 0) {
-      throw new Error("Cannot update all occurrences without calendar list");
-    }
     if (!user?.email) {
       throw new Error("Cannot update all occurrences without user email");
     }
-    await handleAllRSVP(dispatch, event, user.email, rsvp, calendars);
+    await handleAllRSVP(event, user.email, rsvp);
   } else {
     await handleDefaultRSVP(dispatch, calendar, newEvent);
   }

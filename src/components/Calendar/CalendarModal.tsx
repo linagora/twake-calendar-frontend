@@ -30,11 +30,10 @@ function CalendarPopover({
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
-  const userId =
-    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
+  const userData = useAppSelector((state) => state.user.userData) ?? {};
   const calendars = useAppSelector((state) => state.calendars.list);
   const isOwn = calendar?.id
-    ? extractEventBaseUuid(calendar.id) === userId
+    ? extractEventBaseUuid(calendar.id) === userData.openpaasId
     : true;
 
   // existing calendar params
@@ -104,14 +103,14 @@ function CalendarPopover({
         name: name.trim(),
         desc: desc.trim(),
         color: color,
-        userId,
+        userData,
         calId,
       })
     );
     dispatch(
       patchACLCalendarAsync({
-        calId: `${userId}/${calId}`,
-        calLink: `/calendars/${userId}/${calId}.json`,
+        calId: `${userData.openpaasId}/${calId}`,
+        calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
         request: visibility === "public" ? "{DAV:}read" : "",
       })
     );
@@ -142,7 +141,7 @@ function CalendarPopover({
         importedContent &&
           dispatch(
             importEventFromFileAsync({
-              calLink: `/calendar/${userId}/${calId}.json`,
+              calLink: `/calendar/${userData.openpaasId}/${calId}.json`,
               file: importedContent,
             })
           );
@@ -227,7 +226,7 @@ function CalendarPopover({
           importTarget={importTarget}
           setImportTarget={setImportTarget}
           setImportedContent={setImportedContent}
-          userId={userId}
+          userId={userData.openpaasId ?? ""}
           newCalParams={{
             name: newCalName,
             setName: setNewCalName,

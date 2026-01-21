@@ -1832,7 +1832,6 @@ describe("Event Full Display", () => {
         (promise as any).unwrap = () => promise;
         return () => promise as any;
       });
-    const spyRemove = jest.spyOn(calendarSlice, "removeEvent");
 
     const testDate = new Date("2025-01-15T10:00:00.000Z");
     const testEndDate = new Date("2025-01-15T11:00:00.000Z");
@@ -1899,13 +1898,6 @@ describe("Event Full Display", () => {
     await waitFor(
       () => {
         expect(spyMove).toHaveBeenCalled();
-      },
-      { timeout: 3000 }
-    );
-
-    await waitFor(
-      () => {
-        expect(spyRemove).toHaveBeenCalled();
       },
       { timeout: 3000 }
     );

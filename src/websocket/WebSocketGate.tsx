@@ -10,6 +10,7 @@ import { syncCalendarRegistrations } from "./operations";
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
   const previousCalendarListRef = useRef<string[]>([]);
+  const previousTempCalendarListRef = useRef<string[]>([]);
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) =>
     Boolean(state.user.userData && state.user.tokens)
@@ -18,6 +19,10 @@ export function WebSocketGate() {
   const [isSocketOpen, setIsSocketOpen] = useState(false);
 
   const calendarList = useSelectedCalendars();
+  const tempCalendarList = Object.keys(
+    useAppSelector((state) => state?.calendars?.templist) ?? {}
+  );
+
   const onMessage = useCallback(
     (message: unknown) => {
       updateCalendars(message, dispatch);
@@ -75,6 +80,15 @@ export function WebSocketGate() {
       previousCalendarListRef
     );
   }, [isSocketOpen, calendarList]);
+
+  useEffect(() => {
+    syncCalendarRegistrations(
+      isSocketOpen,
+      socketRef,
+      tempCalendarList,
+      previousTempCalendarListRef
+    );
+  }, [isSocketOpen, tempCalendarList]);
 
   return null;
 }

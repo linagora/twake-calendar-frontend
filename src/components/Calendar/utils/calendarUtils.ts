@@ -271,35 +271,3 @@ export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   if (hasRead) return "public";
   return "private";
 }
-
-export async function updateTempCalendar(
-  tempcalendars: Record<string, Calendar>,
-  event: CalendarEvent,
-  dispatch: ThunkDispatch<any, any, any>,
-  calendarRange: { start: Date; end: Date }
-) {
-  if (tempcalendars && event?.attendee) {
-    const attendeesEmails = event.attendee
-      .map((a) => a.cal_address)
-      .filter(Boolean);
-
-    const tempCalendarValues = Object.values(tempcalendars);
-
-    for (const tempCalendar of tempCalendarValues) {
-      const ownerEmails = tempCalendar.ownerEmails || [];
-
-      // Check if any of the attendees are owners of this temp calendar
-      const isOwnerAttendee = ownerEmails.some((ownerEmail) =>
-        attendeesEmails.includes(ownerEmail)
-      );
-      if (isOwnerAttendee) {
-        await refreshSingularCalendar(
-          dispatch,
-          tempCalendar,
-          calendarRange,
-          "temp"
-        );
-      }
-    }
-  }
-}

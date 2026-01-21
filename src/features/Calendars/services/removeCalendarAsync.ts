@@ -1,7 +1,7 @@
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { removeCalendar } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 
 export const removeCalendarAsync = createAsyncThunk<
   {

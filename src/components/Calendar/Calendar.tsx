@@ -406,10 +406,6 @@ export default function CalendarApp({
     });
   }, [calendarsWithClearedCache, dispatch, rangeKey, rangeStart, rangeEnd]);
 
-  const tempCalendarControllersRef = useRef<Map<string, AbortController>>(
-    new Map()
-  );
-
   useEffect(() => {
     const currentIds = new Set(tempCalendarIds);
     Object.keys(tempFetchedRangesRef.current).forEach((id) => {
@@ -558,9 +554,6 @@ export default function CalendarApp({
     setSelectedRange,
     setAnchorEl,
     calendarRef,
-    selectedCalendars,
-    tempcalendars,
-    calendarRange,
     dispatch,
     setOpenEventDisplay,
     setEventDisplayedId,

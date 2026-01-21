@@ -1,17 +1,13 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
 import { getTimezoneOffset } from "@/components/Calendar/TimezoneSelector";
-import {
-  formatEventChipTitle,
-  updateTempCalendar,
-} from "@/components/Calendar/utils/calendarUtils";
+import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
 import EventDuplication from "@/components/Event/EventDuplicate";
 import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "@/components/Event/InfoRow";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
-import { getCalendarRange } from "@/utils/dateUtils";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import {
@@ -282,18 +278,6 @@ export default function EventPreviewModal({
     (a) => a.cal_address === event.organizer?.cal_address
   );
 
-  const updateTempList = async () => {
-    if (calendars.templist) {
-      const calendarRange = getCalendarRange(new Date(event.start));
-      await updateTempCalendar(
-        calendars.templist,
-        event,
-        dispatch,
-        calendarRange
-      );
-    }
-  };
-
   return (
     <>
       <ResponsiveDialog
@@ -429,8 +413,6 @@ export default function EventPreviewModal({
                         if (result && typeof result.unwrap === "function") {
                           await result.unwrap();
                         }
-
-                        await updateTempList();
                       } catch (error) {
                         console.error("Failed to delete event:", error);
                       }

@@ -23,12 +23,6 @@ import {
   updateSeriesAsync,
 } from "./services";
 
-// Define error type for rejected actions
-export interface RejectedError {
-  message: string;
-  status?: number;
-}
-
 const CalendarSlice = createSlice({
   name: "calendars",
   initialState: {
@@ -182,42 +176,10 @@ const CalendarSlice = createSlice({
           );
         }
       )
-      .addCase(
-        putEventAsync.fulfilled,
-        (
-          state,
-          action: PayloadAction<{
-            calId: string;
-            events: CalendarEvent[];
-            calType?: "temp";
-          }>
-        ) => {
-          state.pending = false;
-          const type = action.payload.calType === "temp" ? "templist" : "list";
-
-          if (!state[type][action.payload.calId]) {
-            state[type][action.payload.calId] = {
-              id: action.payload.calId,
-              events: {},
-            } as Calendar;
-          }
-          action.payload.events.forEach((event) => {
-            state[type][action.payload.calId].events[event.uid] = event;
-          });
-          Object.keys(state[type][action.payload.calId].events).forEach(
-            (id) => {
-              state[type][action.payload.calId].events[id].color =
-                state[type][action.payload.calId].color;
-              state[type][action.payload.calId].events[id].calId =
-                action.payload.calId;
-              if (!state[type][action.payload.calId].events[id].timezone) {
-                state[type][action.payload.calId].events[id].timezone =
-                  browserDefaultTimeZone;
-              }
-            }
-          );
-        }
-      )
+      .addCase(putEventAsync.fulfilled, (state) => {
+        state.pending = false;
+        state.error = null;
+      })
       .addCase(
         getEventAsync.fulfilled,
         (
@@ -236,50 +198,12 @@ const CalendarSlice = createSlice({
             action.payload.event;
         }
       )
-      .addCase(
-        moveEventAsync.fulfilled,
-        (
-          state,
-          action: PayloadAction<{ calId: string; events: CalendarEvent[] }>
-        ) => {
-          state.pending = false;
-          if (!state.list[action.payload.calId]) {
-            state.list[action.payload.calId] = {
-              id: action.payload.calId,
-              events: {},
-            } as Calendar;
-          }
-          action.payload.events.forEach((event) => {
-            state.list[action.payload.calId].events[event.uid] = event;
-          });
-          Object.keys(state.list[action.payload.calId].events).forEach((id) => {
-            state.list[action.payload.calId].events[id].color =
-              state.list[action.payload.calId].color;
-            state.list[action.payload.calId].events[id].calId =
-              action.payload.calId;
-            if (!state.list[action.payload.calId].events[id].timezone) {
-              state.list[action.payload.calId].events[id].timezone =
-                browserDefaultTimeZone;
-            }
-          });
-        }
-      )
-      .addCase(deleteEventAsync.fulfilled, (state, action) => {
+      .addCase(moveEventAsync.fulfilled, (state) => {
         state.pending = false;
-        const [baseId, recurrenceId] = action.payload.eventId.split("/");
-        if (recurrenceId) {
-          Object.keys(state.list[action.payload.calId].events).forEach(
-            (element) => {
-              if (extractEventBaseUuid(element) === baseId) {
-                delete state.list[action.payload.calId].events[element];
-              }
-            }
-          );
-        } else {
-          delete state.list[action.payload.calId].events[
-            action.payload.eventId
-          ];
-        }
+        state.error = null;
+      })
+      .addCase(deleteEventAsync.fulfilled, (state) => {
+        state.pending = false;
         state.error = null;
       })
       .addCase(deleteEventInstanceAsync.fulfilled, (state, action) => {

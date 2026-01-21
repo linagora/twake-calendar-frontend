@@ -784,61 +784,6 @@ describe("Event Drag and Drop - Recurring Events", () => {
     expect(mockSetOpenEditModePopup).toHaveBeenCalledWith("edit");
     expect(mockSetAfterChoiceFunc).toHaveBeenCalled();
   });
-
-  it("directly updates non-recurring event on drag", () => {
-    const mockDispatch = jest.fn();
-    const nonRecurringState = {
-      "667037022b752d0026472254/cal1": {
-        ...basePreloadedState.calendars.list["667037022b752d0026472254/cal1"],
-        events: {
-          "single-event": {
-            uid: "single-event",
-            title: "Single Event",
-            calId: "667037022b752d0026472254/cal1",
-            start: day.toISOString(),
-            end: new Date("2025-03-15T11:00:00Z").toISOString(),
-            timezone: "UTC",
-          },
-        },
-      },
-    };
-
-    const eventHandlers = createEventHandlers({
-      setSelectedRange: jest.fn(),
-      setOpenEventModal: jest.fn(),
-      setTempEvent: jest.fn(),
-      setOpenEventDisplay: jest.fn(),
-      dispatch: mockDispatch,
-      calendarRange: { start: new Date(), end: new Date() },
-      setEventDisplayedId: jest.fn(),
-      setEventDisplayedCalId: jest.fn(),
-      setEventDisplayedTemp: jest.fn(),
-      calendars: nonRecurringState,
-      setSelectedEvent: jest.fn(),
-      setAfterChoiceFunc: jest.fn(),
-      setOpenEditModePopup: jest.fn(),
-    } as unknown as EventHandlersProps);
-
-    const mockArg = {
-      event: {
-        _def: {
-          extendedProps: {
-            uid: "single-event",
-            calId: "667037022b752d0026472254/cal1",
-          },
-        },
-      },
-      delta: { years: 0, months: 0, days: 1, milliseconds: 0 },
-    };
-
-    eventHandlers.handleEventDrop(mockArg);
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringContaining("updateEventLocal"),
-      })
-    );
-  });
 });
 
 describe("Event Resize - Recurring Events", () => {

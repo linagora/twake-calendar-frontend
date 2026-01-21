@@ -2,7 +2,7 @@ import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getUserDetails } from "@/features/User/userAPI";
 import { addSharedCalendar } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 
 export const addSharedCalendarAsync = createAsyncThunk<
   {

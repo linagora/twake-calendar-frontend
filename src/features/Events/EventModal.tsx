@@ -60,12 +60,11 @@ function EventPopover({
   event?: CalendarEvent;
 }) {
   const dispatch = useAppDispatch();
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
 
   const organizer = useAppSelector((state) => state.user.organiserData);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
-  const tempList = useAppSelector((state) => state.calendars.templist);
   const calList = useAppSelector((state) => state.calendars.list);
   const selectPersonalCalendars = createSelector(
     (state: any) => state.calendars,
@@ -836,11 +835,6 @@ function EventPopover({
         } catch (unwrapError: any) {
           throw unwrapError;
         }
-      }
-
-      if (tempList) {
-        const calendarRange = getCalendarRange(new Date(start));
-        await updateTempCalendar(tempList, newEvent, dispatch, calendarRange);
       }
 
       // Clear temp data on successful save

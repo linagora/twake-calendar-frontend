@@ -65,7 +65,6 @@ function EventUpdateModal({
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
-  const tempList = useAppSelector((state) => state.calendars.templist);
   const calList = useAppSelector((state) => state.calendars.list);
   // Get event from Redux store (cached data) as fallback
   const cachedEvent = useAppSelector(
@@ -77,6 +76,10 @@ function EventUpdateModal({
 
   // Use fresh data if available, otherwise use eventData from props, otherwise use cached data
   const event = freshEvent || eventData || cachedEvent;
+
+  useEffect(() => {
+    setFreshEvent(null);
+  }, [eventId, calId]);
 
   // Fetch fresh event data when modal opens
   useEffect(() => {
@@ -714,11 +717,6 @@ function EventUpdateModal({
         // Clear cache to ensure navigation to other weeks works
         dispatch(clearFetchCache(calId));
 
-        if (tempList) {
-          const calendarRange = getCalendarRange(new Date(start));
-          await updateTempCalendar(tempList, event, dispatch, calendarRange);
-        }
-
         // STEP 5: Remove old recurring instances only after the rest succeeds
         removeSeriesInstancesFromUI();
 
@@ -834,7 +832,7 @@ function EventUpdateModal({
           const repetitionRulesChanged = changes.repetitionRulesChanged;
 
           if (repetitionRulesChanged) {
-            // Date/time or repetition rules changed - remove all overrides and refresh
+            // Date/time or repetition rules changed - remove all overrides
 
             const seriesInstancesSnapshot = getSeriesInstances();
 
@@ -890,23 +888,6 @@ function EventUpdateModal({
                       "API call failed"
                   );
                 }
-              }
-
-              // STEP 3: Fetch to get new instances with correct timing
-              // If refreshCalendars fails, we need to throw error to reopen modal
-              try {
-                const calendarRange = getCalendarRange(new Date(start));
-                await refreshCalendars(
-                  dispatch,
-                  Object.values(calendarsList),
-                  calendarRange
-                );
-              } catch (refreshError: any) {
-                // If refreshCalendars fails, throw error to reopen modal
-                throw new Error(
-                  refreshError?.message ||
-                    "Failed to refresh calendar events. Please try again."
-                );
               }
 
               // Clear cache after reload
@@ -1085,14 +1066,9 @@ function EventUpdateModal({
         if (moveResult && typeof moveResult.unwrap === "function") {
           await moveResult.unwrap();
         }
-        dispatch(removeEvent({ calendarUid: calId, eventUid: event.uid }));
 
         // Clear temp data on successful move
         clearEventFormTempData("update");
-      }
-      if (tempList) {
-        const calendarRange = getCalendarRange(new Date(start));
-        await updateTempCalendar(tempList, event, dispatch, calendarRange);
       }
 
       // Reset all state to default values only on successful save (after all branches)

@@ -2,7 +2,7 @@ import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendar } from "../CalendarApi";
-import { RejectedError } from "../CalendarSlice";
+import { RejectedError } from "../types/RejectedError";
 import { extractCalendarEvents } from "../utils/extractCalendarEvents";
 
 export const getCalendarDetailAsync = createAsyncThunk<
