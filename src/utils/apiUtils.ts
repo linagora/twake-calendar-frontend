@@ -1,25 +1,22 @@
 import { Auth } from "@/features/User/oidcAuth";
 import ky from "ky";
+import { getRetryDelay } from "./getRetryDelay";
 
 const RETRY_CONFIG = {
   maxRetries: 10,
   initialDelay: 1000,
   maxDelay: 120000,
 };
-
-function getRetryDelay(attemptNumber: number): number {
-  const cap = RETRY_CONFIG.maxDelay;
-  const base = RETRY_CONFIG.initialDelay * Math.pow(2, attemptNumber);
-  const jitter = 0.5 + Math.random();
-  return Math.min(cap, base * jitter);
-}
-
 export const api = ky.extend({
   prefixUrl: (window as any).CALENDAR_BASE_URL,
   retry: {
     limit: RETRY_CONFIG.maxRetries,
     backoffLimit: RETRY_CONFIG.maxDelay,
-    delay: (attemptCount) => getRetryDelay(attemptCount - 1),
+    delay: (attemptCount) =>
+      getRetryDelay(attemptCount - 1, {
+        initialDelay: RETRY_CONFIG.initialDelay,
+        maxDelay: RETRY_CONFIG.maxDelay,
+      }),
   },
   hooks: {
     beforeRequest: [

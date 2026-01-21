@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
+import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconnect";
 import { updateCalendars } from "./messaging/updateCalendars";
 import { syncCalendarRegistrations } from "./operations";
 
@@ -12,13 +13,19 @@ export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
   const previousCalendarListRef = useRef<string[]>([]);
   const previousTempCalendarListRef = useRef<string[]>([]);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const justReconnectedRef = useRef(false);
+
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) =>
     Boolean(state.user.userData && state.user.tokens)
   );
+  const isAuthenticatedRef = useRef(isAuthenticated);
 
   const [isSocketOpen, setIsSocketOpen] = useState(false);
   const isPending = useAppSelector((state) => state.calendars.pending);
+  const [shouldConnect, setShouldConnect] = useState(false);
 
   const calendarList = useSelectedCalendars();
   const tempCalendarList = Object.keys(
@@ -48,12 +55,34 @@ export function WebSocketGate() {
     [dispatch]
   );
 
-  const onClose = useCallback((event: CloseEvent) => {
-    // Socket already cleaned up by internal handler before this callback fires
-    socketRef.current = null;
-    setIsSocketOpen(false);
-    // TODO: Add reconnection logic here
-  }, []);
+  const { scheduleReconnect, clearReconnectTimeout } = useWebSocketReconnect(
+    reconnectTimeoutRef,
+    isAuthenticatedRef,
+    reconnectAttemptsRef,
+    setShouldConnect
+  );
+
+  const onClose = useCallback(
+    (event: CloseEvent) => {
+      // Socket already cleaned up by internal handler before this callback fires
+      socketRef.current = null;
+      setIsSocketOpen(false);
+
+      // Only attempt reconnection if it wasn't a normal closure
+      // Code 1000 = normal closure, 1001 = going away (e.g., page unload)
+      if (event.code !== 1000 && event.code !== 1001) {
+        console.warn(
+          `WebSocket closed unexpectedly (code: ${event.code}, reason: ${event.reason || "none"}). ` +
+            `Attempting to reconnect...`
+        );
+        scheduleReconnect();
+      } else {
+        reconnectAttemptsRef.current = 0;
+        clearReconnectTimeout();
+      }
+    },
+    [scheduleReconnect, clearReconnectTimeout]
+  );
 
   const onError = useCallback((error: Event) => {
     console.error("WebSocket error:", error);
@@ -68,11 +97,30 @@ export function WebSocketGate() {
     [onMessage, onClose, onError]
   );
 
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
+  // Reset reconnection state on successful connection and mark for calendar re-sync
+  useEffect(() => {
+    if (isSocketOpen) {
+      console.log("WebSocket connected successfully");
+      if (reconnectAttemptsRef.current > 0) {
+        justReconnectedRef.current = true;
+      }
+      reconnectAttemptsRef.current = 0;
+      clearReconnectTimeout();
+    }
+  }, [isSocketOpen, clearReconnectTimeout]);
+
   // Manage WebSocket connection
   useEffect(() => {
     const abortController = new AbortController();
+
     if (!isAuthenticated) {
       closeWebSocketConnection(socketRef, setIsSocketOpen);
+      clearReconnectTimeout();
+      reconnectAttemptsRef.current = 0;
       return;
     }
 
@@ -86,12 +134,20 @@ export function WebSocketGate() {
     return () => {
       abortController.abort();
       closeWebSocketConnection(socketRef, setIsSocketOpen);
+      clearReconnectTimeout();
     };
-  }, [isAuthenticated, callBacks]);
+  }, [isAuthenticated, callBacks, clearReconnectTimeout, shouldConnect]);
 
   // Register using a diff with previous calendars
   useEffect(() => {
     if (isPending) return;
+
+    // If we just reconnected, force a re-sync
+    if (justReconnectedRef.current && isSocketOpen && calendarList.length > 0) {
+      console.log("Re-syncing calendars after reconnection");
+      previousCalendarListRef.current = [];
+      justReconnectedRef.current = false;
+    }
 
     syncCalendarRegistrations(
       isSocketOpen,
@@ -109,6 +165,33 @@ export function WebSocketGate() {
       previousTempCalendarListRef
     );
   }, [isSocketOpen, tempCalendarList]);
+
+  // Handle browser online/offline events
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("Browser is online, attempting WebSocket reconnection");
+      if (!isSocketOpen && isAuthenticated) {
+        reconnectAttemptsRef.current = 0;
+        clearReconnectTimeout();
+        setShouldConnect((prev) => !prev);
+      }
+    };
+
+    const handleOffline = () => {
+      console.log(
+        "Browser is offline, pausing WebSocket reconnection attempts"
+      );
+      clearReconnectTimeout();
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [isSocketOpen, isAuthenticated, clearReconnectTimeout]);
 
   return null;
 }
