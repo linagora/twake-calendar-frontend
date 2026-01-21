@@ -10,6 +10,7 @@ import { DateCalendar } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import moment from "moment";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
 
@@ -65,7 +66,16 @@ export function MiniCalendar({
           );
         }}
         views={["month", "day"]}
-        sx={{ width: "100%" }}
+        slots={{
+          switchViewIcon: KeyboardArrowDownIcon,
+        }}
+        sx={{ 
+          width: "100%",
+          height: "300px",
+          "& .MuiPickersCalendarHeader-root": {
+            marginTop: 3
+          }
+        }}
         slotProps={{
           day: (ownerState) => {
             const date = ownerState.day.toDate();

@@ -249,6 +249,7 @@ export function PeopleSearch({
           }
         }}
         sx={{
+          mt: 2,
           "& .MuiAutocomplete-inputRoot": {
             py: 0,
           },
