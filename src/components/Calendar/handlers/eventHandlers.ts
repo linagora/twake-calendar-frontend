@@ -1,3 +1,4 @@
+import { AppDispatch } from "@/app/store";
 import { User } from "@/components/Attendees/PeopleSearch";
 import { formatLocalDateTime } from "@/components/Event/utils/dateTimeFormatters";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
@@ -19,10 +20,7 @@ export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void;
   setAnchorEl: (el: HTMLElement | null) => void;
   calendarRef: React.RefObject<CalendarApi | null>;
-  selectedCalendars: string[];
-  tempcalendars: Record<string, Calendar>;
-  calendarRange: { start: Date; end: Date };
-  dispatch: any;
+  dispatch: AppDispatch;
   setOpenEventDisplay: (open: boolean) => void;
   setEventDisplayedId: (id: string) => void;
   setEventDisplayedCalId: (id: string) => void;

@@ -15,8 +15,9 @@ export const getTempCalendarsListAsync = createAsyncThunk<
   try {
     const importedCalendars: Record<string, Calendar> = {};
     if (!tempUser.openpaasId) {
+      const username = tempUser.displayName || tempUser.email || "User";
       throw new Error(
-        `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(tempUser.displayName)}`
+        `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
       );
     }
     const calendars = (await getCalendars(

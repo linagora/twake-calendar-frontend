@@ -400,13 +400,15 @@ describe("CalendarSlice", () => {
           openpaasId: "u1",
           family_name: "Owner",
           email: "o@example.com",
+          sid: "",
+          sub: "",
+          given_name: "Test",
+          name: "Test Owner",
         },
         calId: "cal1",
         color: { "apple:color": "#f00" },
         name: "Test",
         desc: "Desc",
-        owner: "Owner",
-        ownerEmails: ["o@example.com"],
       };
 
       const payloadResponse = {
