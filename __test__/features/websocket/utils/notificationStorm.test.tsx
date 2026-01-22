@@ -3,7 +3,6 @@ import { store } from "@/app/store";
 import { refreshCalendarWithSyncToken } from "@/features/Calendars/services";
 import { getDisplayedCalendarRange } from "@/utils";
 import { updateCalendars } from "@/websocket/messaging/updateCalendars";
-import { useRef } from "react";
 
 jest.mock("@/features/Calendars/services", () => ({
   refreshCalendarWithSyncToken: jest.fn(),
@@ -47,7 +46,7 @@ const mockAccumulators: {
   calendarsToRefresh: new Map<string, any>(),
   calendarsToHide: new Set(),
   currentDebouncePeriod: 0,
-  debouncedUpdateFn: jest.fn(),
+  debouncedUpdateFn: undefined,
 };
 
 describe("websocket messages storm", () => {
@@ -62,7 +61,7 @@ describe("websocket messages storm", () => {
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
     mockAccumulators.currentDebouncePeriod = 0;
-    mockAccumulators.debouncedUpdateFn = jest.fn();
+    mockAccumulators.debouncedUpdateFn = undefined;
   });
   it("debounces calendar updates during message storm", () => {
     const mockMessage = {
@@ -76,11 +75,12 @@ describe("websocket messages storm", () => {
     }
 
     // Dispatch called once because of leading edge
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1);
 
     // Trailing edge
     jest.advanceTimersByTime(500);
 
+    // only one call for the last message + leading edge message
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
   });
 
@@ -108,12 +108,12 @@ describe("websocket messages storm", () => {
     }
 
     // Dispatch called once because of leading edge
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1);
 
     // Trailing edge
     jest.advanceTimersByTime(500);
 
-    // Trailing edge updates once per calendar
+    // Trailing edge updates once per calendar + the original leading edge
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(4);
   });
 

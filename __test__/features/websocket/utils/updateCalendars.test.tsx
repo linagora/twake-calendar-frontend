@@ -4,7 +4,6 @@ import { getDisplayedCalendarRange } from "@/utils/CalendarRangeManager";
 import { updateCalendars } from "@/websocket/messaging/updateCalendars";
 import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
 import { waitFor } from "@testing-library/dom";
-import { useRef } from "react";
 
 jest.mock("@/features/Calendars/services/refreshCalendar");
 jest.mock("@/utils/CalendarRangeManager");
@@ -92,7 +91,7 @@ describe("updateCalendars", () => {
     });
   });
 
-  it("should  displayed calendar range", async () => {
+  it("should use displayed calendar range", async () => {
     const message = {
       "/calendars/cal1/entry1": {},
     };

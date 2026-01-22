@@ -6,15 +6,9 @@ import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 import { debounce } from "lodash";
 import { parseCalendarPath } from "./parseCalendarPath";
 import { parseMessage } from "./parseMessage";
+import { UpdateCalendarsAccumulators } from "./type/UpdateCalendarsAccumulators";
 
 const DEFAULT_DEBOUNCE_MS = 0;
-
-interface UpdateCalendarsAccumulators {
-  calendarsToRefresh: Map<string, any>;
-  calendarsToHide: Set<string>;
-  debouncedUpdateFn?: (dispatch: AppDispatch) => void;
-  currentDebouncePeriod?: number;
-}
 
 function createDebouncedUpdate(
   debouncePeriodMs: number,
