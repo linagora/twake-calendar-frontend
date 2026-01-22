@@ -1,14 +1,25 @@
-import { RootState, store } from "@/app/store";
+import type { AppDispatch, RootState } from "@/app/store";
+import { store } from "@/app/store";
+import { refreshCalendarWithSyncToken } from "@/features/Calendars/services";
 import { getDisplayedCalendarRange } from "@/utils";
-import { updateCalendars } from "@/websocket/messaging";
-jest.mock("@/features/Calendars/services/refreshCalendar");
+import { updateCalendars } from "@/websocket/messaging/updateCalendars";
+import { useRef } from "react";
 
-jest.mock("@/utils/CalendarRangeManager");
+jest.mock("@/features/Calendars/services", () => ({
+  refreshCalendarWithSyncToken: jest.fn(),
+}));
+
+jest.mock("@/utils", () => ({
+  getDisplayedCalendarRange: jest.fn(),
+  findCalendarById: jest.requireActual("@/utils").findCalendarById,
+}));
+
 jest.mock("@/app/store", () => ({
   store: {
     getState: jest.fn(),
   },
 }));
+
 jest.useFakeTimers();
 const mockDispatch = jest.fn();
 const mockRange = {
@@ -27,59 +38,94 @@ const mockState = {
     templist: {},
   },
 } as unknown as RootState;
-beforeEach(() => {
-  jest.clearAllMocks();
-  (getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange);
-  (store.getState as jest.Mock).mockReturnValue(mockState);
-});
-test("debounces calendar updates during message storm", () => {
-  const mockMessage = {
-    "/calendars/cal1/entry1": {
-      syncToken: "ldsk",
-    },
-  };
+const mockAccumulators: {
+  calendarsToRefresh: Map<string, any>;
+  calendarsToHide: Set<string>;
+  debouncedUpdateFn?: (dispatch: AppDispatch) => void;
+  currentDebouncePeriod?: number;
+} = {
+  calendarsToRefresh: new Map<string, any>(),
+  calendarsToHide: new Set(),
+  currentDebouncePeriod: 0,
+  debouncedUpdateFn: jest.fn(),
+};
 
-  // Send 100 messages rapidly
-  for (let i = 0; i < 100; i++) {
-    updateCalendars(mockMessage, mockDispatch);
-  }
+describe("websocket messages storm", () => {
+  beforeEach(() => {
+    (refreshCalendarWithSyncToken as unknown as jest.Mock).mockClear();
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    jest.resetModules();
+    (getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange);
+    (store.getState as jest.Mock).mockReturnValue(mockState);
+    (window as any).WS_DEBOUNCE_PERIOD_MS = 500;
+    mockAccumulators.calendarsToRefresh = new Map<string, any>();
+    mockAccumulators.calendarsToHide = new Set();
+    mockAccumulators.currentDebouncePeriod = 0;
+    mockAccumulators.debouncedUpdateFn = jest.fn();
+  });
+  it("debounces calendar updates during message storm", () => {
+    const mockMessage = {
+      "/calendars/cal1/entry1": {
+        syncToken: "ldsk",
+      },
+    };
 
-  // Dispatch should NOT have been called yet
-  expect(mockDispatch).not.toHaveBeenCalled();
+    for (let i = 0; i < 50; i++) {
+      updateCalendars(mockMessage, mockDispatch, mockAccumulators);
+    }
 
-  // Fast-forward time by 500ms
-  jest.advanceTimersByTime(500);
+    // Dispatch called once because of leading edge
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
 
-  // Now dispatch should be called only once
-  expect(mockDispatch).toHaveBeenCalledTimes(1);
-});
+    // Trailing edge
+    jest.advanceTimersByTime(500);
 
-test("debounces calendar updates during message storm with multiple updates", () => {
-  // Send a storm with mixed messages
-  for (let i = 0; i < 100; i++) {
-    if (i % 3 === 0)
-      updateCalendars(
-        { "/calendars/cal/A": { syncToken: "ldskfjsld" + i } },
-        mockDispatch
-      );
-    else if (i % 3 === 1)
-      updateCalendars(
-        { "/calendars/cal/B": { syncToken: "ldskfjsld" + i } },
-        mockDispatch
-      );
-    else
-      updateCalendars(
-        { "/calendars/cal/C": { syncToken: "ldskfjsld" + i } },
-        mockDispatch
-      );
-  }
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
+  });
 
-  // Dispatch should NOT have been called yet
-  expect(mockDispatch).not.toHaveBeenCalled();
+  it("debounces calendar updates during message storm with multiple updates", () => {
+    // Send a storm with mixed messages
+    for (let i = 0; i < 50; i++) {
+      if (i % 3 === 0)
+        updateCalendars(
+          { "/calendars/cal/A": { syncToken: "ldskfjsld" + i } },
+          mockDispatch,
+          mockAccumulators
+        );
+      else if (i % 3 === 1)
+        updateCalendars(
+          { "/calendars/cal/B": { syncToken: "ldskfjsld" + i } },
+          mockDispatch,
+          mockAccumulators
+        );
+      else
+        updateCalendars(
+          { "/calendars/cal/C": { syncToken: "ldskfjsld" + i } },
+          mockDispatch,
+          mockAccumulators
+        );
+    }
 
-  // Fast-forward time by 500ms
-  jest.advanceTimersByTime(500);
+    // Dispatch called once because of leading edge
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
 
-  // Now dispatch should be called only once per calendar
-  expect(mockDispatch).toHaveBeenCalledTimes(3);
+    // Trailing edge
+    jest.advanceTimersByTime(500);
+
+    // Trailing edge updates once per calendar
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(4);
+  });
+
+  it("executes immediately when debounce is disabled", () => {
+    (window as any).WS_DEBOUNCE_PERIOD_MS = 0;
+
+    updateCalendars(
+      { "/calendars/cal1/entry1": { syncToken: "abc" } },
+      mockDispatch,
+      mockAccumulators
+    );
+
+    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1);
+  });
 });

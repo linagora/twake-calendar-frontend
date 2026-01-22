@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
-import { updateCalendars } from "./messaging";
+import { updateCalendars } from "./messaging/updateCalendars";
 import { syncCalendarRegistrations } from "./operations";
 
 export function WebSocketGate() {
@@ -23,9 +23,19 @@ export function WebSocketGate() {
     useAppSelector((state) => state?.calendars?.templist) ?? {}
   );
 
+  const calendarsToRefreshRef = useRef<Map<string, any>>(new Map());
+  const calendarsToHideRef = useRef<Set<string>>(new Set());
+  let debouncedUpdateFnRef = useRef();
+  let currentDebouncePeriodRef = useRef();
+
   const onMessage = useCallback(
     (message: unknown) => {
-      updateCalendars(message, dispatch);
+      updateCalendars(message, dispatch, {
+        calendarsToRefresh: calendarsToRefreshRef.current,
+        calendarsToHide: calendarsToHideRef.current,
+        debouncedUpdateFn: debouncedUpdateFnRef.current,
+        currentDebouncePeriod: currentDebouncePeriodRef.current,
+      });
     },
     [dispatch]
   );

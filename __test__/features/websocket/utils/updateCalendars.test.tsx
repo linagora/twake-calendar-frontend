@@ -1,9 +1,10 @@
-import { RootState, store } from "@/app/store";
+import { AppDispatch, RootState, store } from "@/app/store";
 import { refreshCalendarWithSyncToken } from "@/features/Calendars/services/refreshCalendar";
 import { getDisplayedCalendarRange } from "@/utils/CalendarRangeManager";
 import { updateCalendars } from "@/websocket/messaging/updateCalendars";
 import { WS_INBOUND_EVENTS } from "@/websocket/protocols";
 import { waitFor } from "@testing-library/dom";
+import { useRef } from "react";
 
 jest.mock("@/features/Calendars/services/refreshCalendar");
 jest.mock("@/utils/CalendarRangeManager");
@@ -29,18 +30,33 @@ describe("updateCalendars", () => {
       templist: {},
     },
   } as unknown as RootState;
+  const mockAccumulators: {
+    calendarsToRefresh: Map<string, any>;
+    calendarsToHide: Set<string>;
+    debouncedUpdateFn?: (dispatch: AppDispatch) => void;
+    currentDebouncePeriod?: number;
+  } = {
+    calendarsToRefresh: new Map<string, any>(),
+    calendarsToHide: new Set(),
+    currentDebouncePeriod: 0,
+    debouncedUpdateFn: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockDispatch = jest.fn();
     (getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange);
     (store.getState as jest.Mock).mockReturnValue(mockState);
+    mockAccumulators.calendarsToRefresh = new Map<string, any>();
+    mockAccumulators.calendarsToHide = new Set();
+    mockAccumulators.currentDebouncePeriod = 0;
+    mockAccumulators.debouncedUpdateFn = jest.fn();
   });
 
   it("should not dispatch for non-object messages", () => {
-    updateCalendars(null, mockDispatch);
-    updateCalendars("string", mockDispatch);
-    updateCalendars(123, mockDispatch);
+    updateCalendars(null, mockDispatch, mockAccumulators);
+    updateCalendars("string", mockDispatch, mockAccumulators);
+    updateCalendars(123, mockDispatch, mockAccumulators);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
@@ -53,7 +69,7 @@ describe("updateCalendars", () => {
       ],
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockAccumulators);
 
     await waitFor(() =>
       expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
@@ -65,7 +81,7 @@ describe("updateCalendars", () => {
       "/calendars/cal1/entry1": { updated: true },
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockAccumulators);
     await waitFor(() =>
       expect(refreshCalendarWithSyncToken).toHaveBeenCalled()
     );
@@ -76,12 +92,12 @@ describe("updateCalendars", () => {
     });
   });
 
-  it("should use current displayed calendar range", async () => {
+  it("should  displayed calendar range", async () => {
     const message = {
       "/calendars/cal1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockAccumulators);
     await waitFor(() => expect(getDisplayedCalendarRange).toHaveBeenCalled());
   });
 
@@ -105,7 +121,7 @@ describe("updateCalendars", () => {
       "/calendars/temp1/entry1": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockAccumulators);
 
     await waitFor(() =>
       expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
@@ -122,7 +138,7 @@ describe("updateCalendars", () => {
       "not-a-path": {},
     };
 
-    updateCalendars(message, mockDispatch);
+    updateCalendars(message, mockDispatch, mockAccumulators);
 
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
