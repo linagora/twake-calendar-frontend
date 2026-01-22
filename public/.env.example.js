@@ -11,3 +11,4 @@ var VIDEO_CONFERENCE_BASE_URL = "https://meet.linagora.com";
 var DEBUG = false;
 var LANG = "en";
 var WEBSOCKET_URL = "wss://calendar.example.com";
+var WS_DEBOUNCE_PERIOD_MS = 100; // milliseconds, remove or set to 0 to disable debounce
