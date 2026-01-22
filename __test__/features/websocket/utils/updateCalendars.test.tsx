@@ -45,7 +45,7 @@ describe("updateCalendars", () => {
     expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled();
   });
 
-  it("should dispatch for registered calendars", () => {
+  it("should dispatch for registered calendars", async () => {
     const message = {
       [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: [
         "/calendars/cal1/entry1",
@@ -55,17 +55,20 @@ describe("updateCalendars", () => {
 
     updateCalendars(message, mockDispatch);
 
-    expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2);
+    await waitFor(() =>
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
+    );
   });
 
-  it("should dispatch for calendar path updates", () => {
+  it("should dispatch for calendar path updates", async () => {
     const message = {
       "/calendars/cal1/entry1": { updated: true },
     };
 
     updateCalendars(message, mockDispatch);
-
-    expect(refreshCalendarWithSyncToken).toHaveBeenCalled();
+    await waitFor(() =>
+      expect(refreshCalendarWithSyncToken).toHaveBeenCalled()
+    );
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
       calendar: mockState.calendars.list["cal1/entry1"],
       calType: undefined,
@@ -73,14 +76,13 @@ describe("updateCalendars", () => {
     });
   });
 
-  it("should use current displayed calendar range", () => {
+  it("should use current displayed calendar range", async () => {
     const message = {
       "/calendars/cal1/entry1": {},
     };
 
     updateCalendars(message, mockDispatch);
-
-    expect(getDisplayedCalendarRange).toHaveBeenCalled();
+    await waitFor(() => expect(getDisplayedCalendarRange).toHaveBeenCalled());
   });
 
   it("should handle temp calendars", async () => {
