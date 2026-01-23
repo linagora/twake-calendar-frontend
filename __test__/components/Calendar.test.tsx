@@ -340,7 +340,7 @@ describe("calendar Availability search", () => {
           events: {},
         },
       },
-      pending: false,
+      pending: true,
       templist: {},
     },
   };
@@ -500,7 +500,6 @@ describe("calendar Availability search", () => {
         user: preloadedState.user,
         calendars: {
           list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
-          pending: false,
         },
       })
     );
@@ -572,8 +571,8 @@ describe("calendar Availability search", () => {
       calendarApi.changeView("dayGridMonth");
       fireEvent.click(screen.getByTestId("ChevronRightIcon"));
     });
-    expect(spy).toHaveBeenCalledTimes(4);
-    const callArgs = spy.mock.calls[3][0];
+    expect(spy).toHaveBeenCalledTimes(2);
+    const callArgs = spy.mock.calls[1][0];
     expect(callArgs.calId).toBe("user1/cal1");
 
     const startDate = new Date(

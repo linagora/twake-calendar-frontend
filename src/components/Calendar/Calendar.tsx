@@ -168,10 +168,10 @@ export default function CalendarApp({
 
   // Save selected cals to cache
   useEffect(() => {
-    if (calendarIds.length > 0 && !isPending) {
+    if (calendarIds.length > 0) {
       setSelectedCalendarsToStorage(selectedCalendars);
     }
-  }, [selectedCalendars, calendarIds.length, isPending]);
+  }, [selectedCalendars, calendarIds.length]);
 
   const prevCalendarLightSignature = useRef<string | null>(null);
 
@@ -336,7 +336,7 @@ export default function CalendarApp({
     sortedSelectedCalendars,
     rangeStart,
     rangeEnd,
-    isPending,
+    // isPending,
   ]);
 
   useEffect(() => {
