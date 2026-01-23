@@ -25,7 +25,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Button, radius, useTheme } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
-import { MutableRefObject, useMemo, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { User } from "../Attendees/PeopleSearch";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
