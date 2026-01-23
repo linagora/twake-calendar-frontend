@@ -330,14 +330,7 @@ export default function CalendarApp({
     return () => {
       cancelled = true;
     };
-  }, [
-    dispatch,
-    rangeKey,
-    sortedSelectedCalendars,
-    rangeStart,
-    rangeEnd,
-    // isPending,
-  ]);
+  }, [dispatch, rangeKey, sortedSelectedCalendars, rangeStart, rangeEnd]);
 
   useEffect(() => {
     if (!rangeKey || !activeLoadCompleted || isPending) return;

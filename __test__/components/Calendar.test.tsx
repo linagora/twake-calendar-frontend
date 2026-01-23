@@ -495,6 +495,15 @@ describe("calendar Availability search", () => {
   }, 15000);
 
   it("BUGFIX: can untoggle all calendar.personal", async () => {
+    jest
+      .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
+      .mockImplementation(
+        () =>
+          ({
+            type: "getCalendarDetailAsync",
+            unwrap: () => Promise.resolve({}),
+          }) as any
+      );
     await act(async () =>
       renderWithProviders(<CalendarTestWrapper />, {
         user: preloadedState.user,
@@ -620,10 +629,13 @@ describe("calendar Availability search", () => {
 
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(
@@ -674,10 +686,13 @@ describe("calendar Availability search", () => {
 
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(
@@ -707,10 +722,13 @@ describe("calendar Availability search", () => {
     it("does not make duplicate API calls for same calendar and range", async () => {
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(
