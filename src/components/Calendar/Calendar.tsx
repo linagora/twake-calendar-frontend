@@ -13,6 +13,7 @@ import {
 } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
+import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import frLocale from "@fullcalendar/core/locales/fr";
@@ -83,11 +84,14 @@ export default function CalendarApp({
     (state) => state.settings.hideDeclinedEvents
   );
   const calendars = useAppSelector((state) => state.calendars.list);
+  const isPending = useAppSelector((state) => state.calendars.pending);
   const displayWeekNumbers = useAppSelector(
     (state) => state.settings.displayWeekNumbers
   );
   const tempcalendars = useAppSelector((state) => state.calendars.templist);
-  const [selectedCalendars, setSelectedCalendars] = useState<string[]>([]);
+  const storedCalendars = useSelectedCalendars();
+  const [selectedCalendars, setSelectedCalendars] =
+    useState<string[]>(storedCalendars);
 
   const calendarLightSignature = useMemo(() => {
     return Object.values(calendars || {})
@@ -164,10 +168,10 @@ export default function CalendarApp({
 
   // Save selected cals to cache
   useEffect(() => {
-    if (calendarIds.length > 0) {
+    if (calendarIds.length > 0 || !isPending) {
       setSelectedCalendarsToStorage(selectedCalendars);
     }
-  }, [selectedCalendars, calendarIds.length]);
+  }, [selectedCalendars, calendarIds.length, isPending]);
 
   const prevCalendarLightSignature = useRef<string | null>(null);
 
@@ -260,6 +264,8 @@ export default function CalendarApp({
   }, [rangeKey]);
 
   useEffect(() => {
+    if (isPending) return;
+
     if (!rangeKey || sortedSelectedCalendars.length === 0) {
       activeLoadCompletedRef.current = true;
       setActiveLoadCompleted(true);
@@ -327,8 +333,7 @@ export default function CalendarApp({
   }, [dispatch, rangeKey, sortedSelectedCalendars, rangeStart, rangeEnd]);
 
   useEffect(() => {
-    if (!rangeKey || !activeLoadCompleted) return;
-
+    if (!rangeKey || !activeLoadCompleted || isPending) return;
     const hiddenCalendars = calendarIds
       .filter((id) => !selectedCalendars.includes(id))
       .filter((id) => {
@@ -362,6 +367,7 @@ export default function CalendarApp({
     rangeStart,
     rangeEnd,
     activeLoadCompleted,
+    isPending,
   ]);
 
   const calendarsWithClearedCache = useMemo(() => {
@@ -376,6 +382,7 @@ export default function CalendarApp({
   const processedCacheClearRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
+    if (isPending) return;
     calendarsWithClearedCache.forEach(({ id, cleared }) => {
       if (processedCacheClearRef.current[id] === cleared) {
         return;

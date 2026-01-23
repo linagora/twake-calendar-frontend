@@ -135,7 +135,7 @@ describe("CalendarSelection", () => {
           },
         },
       },
-      pending: false,
+      pending: true,
     },
   };
   it("renders calendars", async () => {
