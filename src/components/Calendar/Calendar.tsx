@@ -168,7 +168,7 @@ export default function CalendarApp({
 
   // Save selected cals to cache
   useEffect(() => {
-    if (calendarIds.length > 0 || !isPending) {
+    if (calendarIds.length > 0 && !isPending) {
       setSelectedCalendarsToStorage(selectedCalendars);
     }
   }, [selectedCalendars, calendarIds.length, isPending]);
@@ -330,7 +330,14 @@ export default function CalendarApp({
     return () => {
       cancelled = true;
     };
-  }, [dispatch, rangeKey, sortedSelectedCalendars, rangeStart, rangeEnd]);
+  }, [
+    dispatch,
+    rangeKey,
+    sortedSelectedCalendars,
+    rangeStart,
+    rangeEnd,
+    isPending,
+  ]);
 
   useEffect(() => {
     if (!rangeKey || !activeLoadCompleted || isPending) return;
@@ -411,7 +418,14 @@ export default function CalendarApp({
           prefetchedCalendarsRef.current[id] = "";
         });
     });
-  }, [calendarsWithClearedCache, dispatch, rangeKey, rangeStart, rangeEnd]);
+  }, [
+    calendarsWithClearedCache,
+    dispatch,
+    rangeKey,
+    rangeStart,
+    rangeEnd,
+    isPending,
+  ]);
 
   useEffect(() => {
     const currentIds = new Set(tempCalendarIds);
