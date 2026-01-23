@@ -259,7 +259,6 @@ function CalendarSelector({
           alignItems: "center",
           justifyContent: "space-between",
           transition: "background-color 0.2s ease",
-          padding: "8px 24px 8px 16px",
           "& .MoreBtn": { opacity: 0 },
           "&:hover": {
             backgroundColor: "#F3F3F6",

@@ -140,7 +140,7 @@ export function PeopleSearch({
         ...params.InputProps,
         startAdornment: (
           <>
-            <PeopleOutlineOutlinedIcon sx={{ mr: 1, color: "action.active" }} />
+            <PeopleOutlineOutlinedIcon fontSize="small" sx={{ mr: 1, color: "action.active" }} />
             {params.InputProps.startAdornment}
           </>
         ),
@@ -250,6 +250,7 @@ export function PeopleSearch({
         }}
         sx={{
           mt: 2,
+          mb: 3,
           "& .MuiAutocomplete-inputRoot": {
             py: 0,
           },

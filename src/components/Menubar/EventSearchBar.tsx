@@ -213,7 +213,6 @@ export default function SearchBar() {
         ref={containerRef}
         sx={{
           margin: "0 auto",
-          height: "44px",
           position: "relative",
           width: extended ? searchWidth : "auto",
           transition: "width 0.25s ease-out",
