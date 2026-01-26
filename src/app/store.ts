@@ -3,6 +3,7 @@ import searchResultReducer from "@/features/Search/SearchSlice";
 import settingsReducer from "@/features/Settings/SettingsSlice";
 import userReducer from "@/features/User/userSlice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import loadingReducer from "./loadingSlice";
 import { createBrowserHistory } from "history";
 import { createReduxHistoryContext } from "redux-first-history";
 
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   calendars: eventsCalendar,
   settings: settingsReducer,
   searchResult: searchResultReducer,
+  loading: loadingReducer,
 });
 
 export const setupStore = (preloadedState?: Partial<RootState>) => {

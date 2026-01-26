@@ -1,4 +1,4 @@
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { getCalendarsListAsync } from "@/features/Calendars/services/getCalendarsListAsync";
 import { CallbackResume } from "@/features/User/LoginCallback";
 import * as oidcAuth from "@/features/User/oidcAuth";
@@ -8,13 +8,26 @@ import {
   setUserData,
 } from "@/features/User/userSlice";
 import { render, waitFor } from "@testing-library/react";
-import { push } from "redux-first-history";
+import { replace } from "redux-first-history";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
+import { setAppLoading } from "@/app/loadingSlice";
 
 // Mocks
 jest.mock("@/app/hooks", () => ({
   useAppDispatch: jest.fn(),
-  useAppSelector: jest.fn(() => ({})),
+  useAppSelector: jest.fn(() => ({
+    user: {
+      userData: null,
+      tokens: null,
+      loading: false,
+      error: null,
+    },
+    calendars: {
+      list: {},
+      pending: false,
+      error: null,
+    },
+  })),
 }));
 
 jest.mock("@/features/User/oidcAuth", () => ({
@@ -55,10 +68,33 @@ jest.mock("@/features/Calendars/services/getCalendarsListAsync", () => {
 
 describe("CallbackResume", () => {
   const dispatch = jest.fn();
+  let mockUserState: any;
+  let mockCalendarsState: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useAppDispatch as unknown as jest.Mock).mockReturnValue(dispatch);
+
+    // Initialize mock states
+    mockUserState = {
+      userData: null,
+      tokens: null,
+      loading: false,
+      error: null,
+    };
+    mockCalendarsState = {
+      list: {},
+      pending: false,
+      error: null,
+    };
+
+    (useAppSelector as jest.Mock).mockImplementation((selector) => {
+      const state = {
+        user: mockUserState,
+        calendars: mockCalendarsState,
+      };
+      return selector(state);
+    });
   });
 
   it("should call Callback and dispatch necessary actions", async () => {
@@ -77,10 +113,13 @@ describe("CallbackResume", () => {
       JSON.stringify({ code_verifier: "verifier123", state: "state456" })
     );
 
-    render(<CallbackResume />);
+    const { rerender } = render(<CallbackResume />);
 
     await waitFor(() => {
       expect(oidcAuth.Callback).toHaveBeenCalledWith("verifier123", "state456");
+    });
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(setAppLoading(true));
     });
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setUserData(mockUserInfo));
@@ -94,9 +133,35 @@ describe("CallbackResume", () => {
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getCalendarsListAsync());
     });
-    await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(push("/"));
-    });
+
+    // Simulate async actions completing by updating mock state
+    mockUserState = {
+      userData: mockUserInfo,
+      tokens: mockTokenSet,
+      loading: false,
+      error: null,
+    };
+    mockCalendarsState = {
+      list: { calendar1: {} },
+      pending: false,
+      error: null,
+    };
+
+    // Re-render to trigger navigation effect
+    rerender(<CallbackResume />);
+
+    await waitFor(
+      () => {
+        expect(dispatch).toHaveBeenCalledWith(setAppLoading(false));
+      },
+      { timeout: 3000 }
+    );
+    await waitFor(
+      () => {
+        expect(dispatch).toHaveBeenCalledWith(replace("/calendar"));
+      },
+      { timeout: 3000 }
+    );
     await waitFor(() => {
       expect(sessionStorage.getItem("redirectState")).toBe(null);
     });
@@ -112,7 +177,7 @@ describe("CallbackResume", () => {
     renderWithProviders(<CallbackResume />);
 
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(push("/"));
+      expect(dispatch).toHaveBeenCalledWith(replace("/"));
     });
   });
 });

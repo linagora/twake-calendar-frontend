@@ -42,6 +42,7 @@ const isValidLanguage = (
 
 function App() {
   const error = useAppSelector((state) => state.user.error);
+  const appLoading = useAppSelector((state) => state.loading.isLoading);
   const userLanguage = useAppSelector(
     (state) => state.user.coreConfig.language
   );
@@ -80,6 +81,7 @@ function App() {
           </Router>
           <ErrorSnackbar error={error} type="user" />
         </Suspense>
+        {appLoading && <Loading />}
       </I18n>
     </TwakeMuiThemeProvider>
   );

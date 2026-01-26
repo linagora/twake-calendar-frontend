@@ -26,7 +26,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Button, radius, useTheme } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import { push } from "redux-first-history";
 import { useI18n } from "twake-i18n";
 import { User } from "../Attendees/PeopleSearch";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
@@ -67,16 +66,10 @@ export default function CalendarApp({
 }: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
-  const tokens = useAppSelector((state) => state.user.tokens);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const dispatch = useAppDispatch();
   const theme = useTheme();
-  useEffect(() => {
-    if (!tokens || !userId) {
-      dispatch(push("/"));
-    }
-  }, [dispatch, tokens, userId]);
   const view = useAppSelector((state) => state.settings.view);
   const userData = useAppSelector((state) => state.user.userData);
   const hideDeclinedEvents = useAppSelector(
