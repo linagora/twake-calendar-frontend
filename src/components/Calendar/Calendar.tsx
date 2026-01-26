@@ -639,15 +639,17 @@ export default function CalendarApp({
           setSelectedMiniDate={setSelectedMiniDate}
           dottedEvents={dottedEvents}
         />
-        <TempCalendarsInput
-          tempUsers={tempUsers}
-          setTempUsers={setTempUsers}
-          handleToggleEventPreview={() => {
-            eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
-          }}
-          selectedCalendars={selectedCalendars}
-          setSelectedCalendars={setSelectedCalendars}
-        />
+        <Box sx={{ mb: 3, mt: 2 }}>
+          <TempCalendarsInput
+            tempUsers={tempUsers}
+            setTempUsers={setTempUsers}
+            handleToggleEventPreview={() => {
+              eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
+            }}
+            selectedCalendars={selectedCalendars}
+            setSelectedCalendars={setSelectedCalendars}
+          />
+        </Box>
         <div className="calendarList">
           <CalendarSelection
             selectedCalendars={selectedCalendars}

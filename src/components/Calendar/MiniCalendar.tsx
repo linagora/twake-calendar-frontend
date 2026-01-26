@@ -69,12 +69,12 @@ export function MiniCalendar({
         slots={{
           switchViewIcon: KeyboardArrowDownIcon,
         }}
-        sx={{ 
+        sx={{
           width: "100%",
           height: "300px",
           "& .MuiPickersCalendarHeader-root": {
-            marginTop: 3
-          }
+            marginTop: 3,
+          },
         }}
         slotProps={{
           day: (ownerState) => {

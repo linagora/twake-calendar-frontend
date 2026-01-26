@@ -51,10 +51,16 @@ function CalendarAccordion({
 
   if (calendars.length === 0 && !showAddButton) return null;
   return (
-      <Accordion
+    <Accordion
       defaultExpanded={defaultExpanded}
       expanded={expended}
-      style={{ width: "100%", padding: 0, margin: 0, marginBottom: "12px", boxShadow: "none" }}
+      style={{
+        width: "100%",
+        padding: 0,
+        margin: 0,
+        marginBottom: "12px",
+        boxShadow: "none",
+      }}
       sx={{
         "&::before": {
           display: "none",

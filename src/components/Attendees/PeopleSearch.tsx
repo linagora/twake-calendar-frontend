@@ -140,7 +140,10 @@ export function PeopleSearch({
         ...params.InputProps,
         startAdornment: (
           <>
-            <PeopleOutlineOutlinedIcon fontSize="small" sx={{ mr: 1, color: "action.active" }} />
+            <PeopleOutlineOutlinedIcon
+              fontSize="small"
+              sx={{ mr: 1, color: "action.active" }}
+            />
             {params.InputProps.startAdornment}
           </>
         ),
@@ -249,8 +252,6 @@ export function PeopleSearch({
           }
         }}
         sx={{
-          mt: 2,
-          mb: 3,
           "& .MuiAutocomplete-inputRoot": {
             py: 0,
           },
@@ -277,7 +278,14 @@ export function PeopleSearch({
           );
           onChange(event, mapped);
         }}
-        slotProps={customSlotProps}
+        slotProps={{
+          ...customSlotProps,
+          popper: {
+            placement: "bottom-start",
+            sx: { minWidth: "300px", ...customSlotProps?.popper?.sx },
+            ...customSlotProps?.popper,
+          },
+        }}
         // When render input is custom, the adornments should be handled by the custom component
         forcePopupIcon={!customRenderInput}
         disableClearable={!!customRenderInput}
