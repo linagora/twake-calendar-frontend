@@ -15,6 +15,12 @@ export function WebSocketGate() {
   const previousTempCalendarListRef = useRef<string[]>([]);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const isConnectingRef = useRef(false);
+
+  const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const CONNECT_TIMEOUT_MS = 10_000;
+
+  const hadSocketBeforeRef = useRef(false);
   const justReconnectedRef = useRef(false);
 
   const dispatch = useAppDispatch();
@@ -105,10 +111,19 @@ export function WebSocketGate() {
   useEffect(() => {
     if (isSocketOpen) {
       console.log("WebSocket connected successfully");
-      if (reconnectAttemptsRef.current > 0) {
+
+      if (connectTimeoutRef.current) {
+        clearTimeout(connectTimeoutRef.current);
+        connectTimeoutRef.current = null;
+      }
+
+      if (hadSocketBeforeRef.current) {
         justReconnectedRef.current = true;
       }
+
+      hadSocketBeforeRef.current = true;
       reconnectAttemptsRef.current = 0;
+
       clearReconnectTimeout();
     }
   }, [isSocketOpen, clearReconnectTimeout]);
@@ -117,33 +132,75 @@ export function WebSocketGate() {
   useEffect(() => {
     const abortController = new AbortController();
 
-    if (!isAuthenticated) {
-      closeWebSocketConnection(socketRef, setIsSocketOpen);
-      clearReconnectTimeout();
-      reconnectAttemptsRef.current = 0;
-      return;
-    }
-
-    establishWebSocketConnection(
-      callBacks,
-      socketRef,
-      setIsSocketOpen,
-      abortController.signal
-    );
-
-    return () => {
-      abortController.abort();
+    const cleanup = () => {
+      if (connectTimeoutRef.current) {
+        clearTimeout(connectTimeoutRef.current);
+        connectTimeoutRef.current = null;
+      }
       closeWebSocketConnection(socketRef, setIsSocketOpen);
       clearReconnectTimeout();
     };
-  }, [isAuthenticated, callBacks, clearReconnectTimeout, shouldConnect]);
+
+    if (!isAuthenticated) {
+      cleanup();
+      reconnectAttemptsRef.current = 0;
+
+      hadSocketBeforeRef.current = false;
+      return;
+    }
+
+    const connect = async () => {
+      if (isConnectingRef.current || isSocketOpen) return;
+      isConnectingRef.current = true;
+      connectTimeoutRef.current = setTimeout(() => {
+        console.warn("WebSocket connection attempt timed out");
+
+        cleanup();
+
+        scheduleReconnect();
+      }, CONNECT_TIMEOUT_MS);
+
+      try {
+        await establishWebSocketConnection(
+          callBacks,
+          socketRef,
+          setIsSocketOpen,
+          abortController.signal
+        );
+      } catch (err) {
+        console.warn("WebSocket establishment failed:", err);
+
+        if (connectTimeoutRef.current) {
+          clearTimeout(connectTimeoutRef.current);
+          connectTimeoutRef.current = null;
+        }
+
+        scheduleReconnect();
+      } finally {
+        isConnectingRef.current = false;
+      }
+    };
+
+    connect();
+
+    return () => {
+      abortController.abort();
+      cleanup();
+    };
+  }, [
+    isAuthenticated,
+    callBacks,
+    clearReconnectTimeout,
+    shouldConnect,
+    scheduleReconnect,
+  ]);
 
   // Register using a diff with previous calendars
   useEffect(() => {
     if (isPending) return;
 
     // If we just reconnected, force a re-sync
-    if (justReconnectedRef.current && isSocketOpen && calendarList.length > 0) {
+    if (justReconnectedRef.current && isSocketOpen) {
       console.log("Re-syncing calendars after reconnection");
       previousCalendarListRef.current = [];
       previousTempCalendarListRef.current = [];
@@ -182,7 +239,16 @@ export function WebSocketGate() {
       console.log(
         "Browser is offline, pausing WebSocket reconnection attempts"
       );
+      cleanupConnection();
+    };
+
+    const cleanupConnection = () => {
+      closeWebSocketConnection(socketRef, setIsSocketOpen);
       clearReconnectTimeout();
+      if (connectTimeoutRef.current) {
+        clearTimeout(connectTimeoutRef.current);
+        connectTimeoutRef.current = null;
+      }
     };
 
     window.addEventListener("online", handleOnline);

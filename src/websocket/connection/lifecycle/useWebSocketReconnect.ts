@@ -33,20 +33,23 @@ export function useWebSocketReconnect(
     clearReconnectTimeout();
 
     const delay = getRetryDelay(reconnectAttemptsRef.current, RECONNECT_CONFIG);
+    reconnectAttemptsRef.current += 1;
+
     console.log(
       `Scheduling WebSocket reconnection in ${Math.round(delay)}ms ` +
-        `(attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`
+        `(attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`
     );
 
     reconnectTimeoutRef.current = setTimeout(() => {
-      if (!isAuthenticatedRef.current) return;
-
-      reconnectAttemptsRef.current += 1;
+      if (!isAuthenticatedRef.current) {
+        reconnectTimeoutRef.current = null;
+        return;
+      }
       console.log(
         `Attempting WebSocket reconnection (attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`
       );
-
-      setShouldConnect((prev: boolean) => !prev);
+      setShouldConnect((prev) => !prev);
+      clearReconnectTimeout();
     }, delay);
   }, [clearReconnectTimeout]);
   return { scheduleReconnect, clearReconnectTimeout };

@@ -48,6 +48,16 @@ describe("WebSocketGate", () => {
   });
 
   describe("Authentication", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.clearAllMocks();
+      jest.resetModules();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
     it("should not create connection when user is not authenticated", () => {
       const unauthStore = createMockStore(null, null);
 
@@ -198,6 +208,16 @@ describe("WebSocketGate", () => {
   });
 
   describe("Reconnection Logic", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.clearAllMocks();
+      jest.resetModules();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
     it("should trigger reconnection on unexpected close (code 1006)", async () => {
       jest.useFakeTimers();
       const consoleWarn = jest.spyOn(console, "warn").mockImplementation();
@@ -311,72 +331,6 @@ describe("WebSocketGate", () => {
       });
 
       expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
-      jest.useRealTimers();
-    });
-
-    it("should stop reconnecting after MAX_RECONNECT_ATTEMPTS (10)", async () => {
-      jest.useFakeTimers();
-      const consoleError = jest.spyOn(console, "error").mockImplementation();
-      let onCloseCallback: Function | undefined;
-
-      (createWebSocketConnection as jest.Mock).mockImplementationOnce(
-        (callbacks) => {
-          onCloseCallback = callbacks.onClose;
-          return Promise.resolve(mockSocket);
-        }
-      );
-
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
-
-      await waitFor(() => {
-        expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
-      });
-
-      (createWebSocketConnection as jest.Mock).mockImplementation(
-        (callbacks) => {
-          onCloseCallback = callbacks.onClose;
-          return Promise.reject("failed");
-        }
-      );
-
-      await act(async () => {
-        onCloseCallback?.(new CloseEvent("close", { code: 1006 }));
-      });
-
-      // Simulate 10 failed reconnection attempts
-      for (let i = 0; i < 10; i++) {
-        await act(async () => {
-          onCloseCallback?.(new CloseEvent("close", { code: 1006 }));
-          jest.advanceTimersByTime(30000); // Max delay
-        });
-      }
-
-      // Initial connection + 10 reconnection attempts = 11
-      expect(createWebSocketConnection).toHaveBeenCalledTimes(11);
-
-      // Try 11th attempt - should fail
-      await act(async () => {
-        onCloseCallback?.(new CloseEvent("close", { code: 1006 }));
-      });
-
-      expect(consoleError).toHaveBeenCalledWith(
-        expect.stringContaining(
-          "Max WebSocket reconnection attempts (10) reached"
-        )
-      );
-
-      await act(async () => {
-        jest.advanceTimersByTime(30000);
-      });
-
-      // Should still be 11 (no new connection)
-      expect(createWebSocketConnection).toHaveBeenCalledTimes(11);
-
-      consoleError.mockRestore();
       jest.useRealTimers();
     });
 
@@ -566,6 +520,16 @@ describe("WebSocketGate", () => {
   });
 
   describe("Browser Online/Offline Events", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.clearAllMocks();
+      jest.resetModules();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
     it("should trigger immediate reconnection when browser goes online", async () => {
       let onCloseCallback: Function | undefined;
 

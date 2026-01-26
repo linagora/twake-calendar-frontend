@@ -243,4 +243,41 @@ describe("useWebSocketReconnect", () => {
       expect(setShouldConnect).toHaveBeenCalledTimes(1);
     });
   });
+  it("should stop reconnecting after MAX_RECONNECT_ATTEMPTS (10)", () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    const { result } = renderHook(() =>
+      useWebSocketReconnect(
+        reconnectTimeoutRef,
+        isAuthenticatedRef,
+        reconnectAttemptsRef,
+        setShouldConnect
+      )
+    );
+
+    // Simulate 10 reconnection attempts
+    for (let i = 0; i < MAX_RECONNECT_ATTEMPTS; i++) {
+      act(() => {
+        result.current.scheduleReconnect();
+        jest.advanceTimersByTime(
+          mockGetRetryDelay.mock.results[i]?.value || 1000
+        );
+      });
+    }
+
+    expect(reconnectAttemptsRef.current).toBe(MAX_RECONNECT_ATTEMPTS);
+    expect(setShouldConnect).toHaveBeenCalledTimes(MAX_RECONNECT_ATTEMPTS);
+
+    // Try to schedule one more reconnection - should fail
+    act(() => {
+      result.current.scheduleReconnect();
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      `Max WebSocket reconnection attempts (${MAX_RECONNECT_ATTEMPTS}) reached. Giving up.`
+    );
+    expect(reconnectTimeoutRef.current).toBeNull();
+    expect(setShouldConnect).toHaveBeenCalledTimes(MAX_RECONNECT_ATTEMPTS); // Should not increment
+
+    consoleErrorSpy.mockRestore();
+  });
 });
