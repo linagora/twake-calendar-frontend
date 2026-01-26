@@ -146,6 +146,7 @@ export function WebSocketGate() {
     if (justReconnectedRef.current && isSocketOpen && calendarList.length > 0) {
       console.log("Re-syncing calendars after reconnection");
       previousCalendarListRef.current = [];
+      previousTempCalendarListRef.current = [];
       justReconnectedRef.current = false;
     }
 
