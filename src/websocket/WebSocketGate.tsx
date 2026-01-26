@@ -1,10 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { AppDispatch } from "@/app/store";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
-import { updateCalendars } from "./messaging";
+import { updateCalendars } from "./messaging/updateCalendars";
 import { syncCalendarRegistrations } from "./operations";
 
 export function WebSocketGate() {
@@ -24,9 +25,25 @@ export function WebSocketGate() {
     useAppSelector((state) => state?.calendars?.templist) ?? {}
   );
 
+  const calendarsToRefreshRef = useRef<Map<string, any>>(new Map());
+  const calendarsToHideRef = useRef<Set<string>>(new Set());
+  const debouncedUpdateFnRef = useRef<
+    ((dispatch: AppDispatch) => void) | undefined
+  >();
+  const currentDebouncePeriodRef = useRef<number | undefined>();
+
   const onMessage = useCallback(
     (message: unknown) => {
-      updateCalendars(message, dispatch);
+      const accumulators = {
+        calendarsToRefresh: calendarsToRefreshRef.current,
+        calendarsToHide: calendarsToHideRef.current,
+        debouncedUpdateFn: debouncedUpdateFnRef.current,
+        currentDebouncePeriod: currentDebouncePeriodRef.current,
+      };
+      updateCalendars(message, dispatch, accumulators);
+      // Persist any mutations back to refs
+      debouncedUpdateFnRef.current = accumulators.debouncedUpdateFn;
+      currentDebouncePeriodRef.current = accumulators.currentDebouncePeriod;
     },
     [dispatch]
   );
