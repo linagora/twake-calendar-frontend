@@ -12,6 +12,7 @@ export default function UserSearch({
   setAttendees,
   disabled,
   inputSlot,
+  placeholder,
 }: {
   attendees: userAttendee[];
   setAttendees: Function;
@@ -19,8 +20,9 @@ export default function UserSearch({
   inputSlot?: (
     params: ExtendedAutocompleteRenderInputParams
   ) => React.ReactNode;
+  placeholder?: string;
 }) {
-  const [selectedUsers, setSelectedUsers] = useState(
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
     attendees.map((attendee) => ({
       email: attendee.cal_address,
       displayName: attendee.cn ?? "",
@@ -44,6 +46,7 @@ export default function UserSearch({
       objectTypes={["user", "contact"]}
       disabled={disabled}
       inputSlot={inputSlot}
+      placeholder={placeholder}
       onChange={(event: any, value: User[]) => {
         setAttendees(
           value.map((attendee: User) =>
