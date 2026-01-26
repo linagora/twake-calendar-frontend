@@ -1,5 +1,6 @@
-import { Box, Button, TextField } from "@linagora/twake-mui";
-import { Description as DescriptionIcon } from "@mui/icons-material";
+import { Box, Button, TextField, useTheme } from "@linagora/twake-mui";
+import { alpha } from "@mui/material/styles";
+import { Notes as NotesIcon } from "@mui/icons-material";
 import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
 
@@ -28,21 +29,40 @@ export function AddDescButton({
     | "warning";
 }) {
   const { t } = useI18n();
+  const theme = useTheme();
   return (
     <>
       {!showDescription && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={1}>
+        <FieldWithLabel
+          label={showMore || showDescription ? t("event.form.description") : ""}
+          isExpanded={showMore}
+        >
+          {!showMore ? (
             <Button
-              startIcon={<DescriptionIcon />}
+              startIcon={<NotesIcon />}
               onClick={() => setShowDescription(true)}
-              size="medium"
-              variant={buttonVariant}
-              color={buttonColor}
+              fullWidth
+              sx={{
+                justifyContent: "flex-start",
+                borderRadius: "4px",
+                color: alpha(theme.palette.grey[900], 0.9),
+              }}
             >
               {t("event.form.addDescription")}
             </Button>
-          </Box>
+          ) : (
+            <Box display="flex" gap={1}>
+              <Button
+                startIcon={<NotesIcon />}
+                onClick={() => setShowDescription(true)}
+                size="medium"
+                variant={buttonVariant}
+                color={buttonColor}
+              >
+                {t("event.form.addDescription")}
+              </Button>
+            </Box>
+          )}
         </FieldWithLabel>
       )}
       {showDescription && (
