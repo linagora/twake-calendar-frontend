@@ -111,9 +111,31 @@ describe("HandleLogin", () => {
     // HandleLogin now returns null, loading is shown at App level via appLoading state
     expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
   });
-  test("goes to error page when there is error in user data", () => {
-    const dispatch = appHooks.useAppDispatch();
-    renderWithProviders(<HandleLogin />, { user: { error: true } });
-    expect(dispatch).toHaveBeenCalledWith(push("/error"));
+  test("goes to error page when there is error in user data", async () => {
+    const mockDispatch = jest.fn();
+    jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(mockDispatch);
+
+    renderWithProviders(<HandleLogin />, {
+      user: {
+        error: true,
+        loading: false,
+        userData: {
+          sub: "test",
+          email: "test@test.com",
+          sid: "testSid",
+          openpaasId: "testId",
+        },
+        tokens: { access_token: "test" },
+      },
+      calendars: {
+        pending: false,
+        error: false,
+        list: {},
+      },
+    });
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(push("/error"));
+    });
   });
 });
