@@ -28,7 +28,7 @@ const CalendarSlice = createSlice({
   initialState: {
     list: {} as Record<string, Calendar>,
     templist: {} as Record<string, Calendar>,
-    pending: false,
+    pending: true,
     error: null as string | null,
   } as {
     list: Record<string, Calendar>;

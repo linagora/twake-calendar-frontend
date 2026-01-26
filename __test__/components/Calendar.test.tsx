@@ -135,7 +135,7 @@ describe("CalendarSelection", () => {
           },
         },
       },
-      pending: false,
+      pending: true,
     },
   };
   it("renders calendars", async () => {
@@ -340,7 +340,7 @@ describe("calendar Availability search", () => {
           events: {},
         },
       },
-      pending: false,
+      pending: true,
       templist: {},
     },
   };
@@ -495,12 +495,20 @@ describe("calendar Availability search", () => {
   }, 15000);
 
   it("BUGFIX: can untoggle all calendar.personal", async () => {
+    jest
+      .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
+      .mockImplementation(
+        () =>
+          ({
+            type: "getCalendarDetailAsync",
+            unwrap: () => Promise.resolve({}),
+          }) as any
+      );
     await act(async () =>
       renderWithProviders(<CalendarTestWrapper />, {
         user: preloadedState.user,
         calendars: {
           list: { "user1/cal1": preloadedState.calendars.list["user1/cal1"] },
-          pending: false,
         },
       })
     );
@@ -572,8 +580,8 @@ describe("calendar Availability search", () => {
       calendarApi.changeView("dayGridMonth");
       fireEvent.click(screen.getByTestId("ChevronRightIcon"));
     });
-    expect(spy).toHaveBeenCalledTimes(4);
-    const callArgs = spy.mock.calls[3][0];
+    expect(spy).toHaveBeenCalledTimes(2);
+    const callArgs = spy.mock.calls[1][0];
     expect(callArgs.calId).toBe("user1/cal1");
 
     const startDate = new Date(
@@ -621,10 +629,13 @@ describe("calendar Availability search", () => {
 
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(
@@ -675,10 +686,13 @@ describe("calendar Availability search", () => {
 
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(
@@ -708,10 +722,13 @@ describe("calendar Availability search", () => {
     it("does not make duplicate API calls for same calendar and range", async () => {
       const spy = jest
         .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
-        .mockImplementation(() => ({
-          type: "getCalendarDetailAsync",
-          unwrap: () => Promise.resolve({}),
-        })) as any;
+        .mockImplementation(
+          () =>
+            ({
+              type: "getCalendarDetailAsync",
+              unwrap: () => Promise.resolve({}),
+            }) as any
+        );
 
       await act(async () => {
         renderWithProviders(

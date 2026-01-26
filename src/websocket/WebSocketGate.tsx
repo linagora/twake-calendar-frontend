@@ -17,6 +17,7 @@ export function WebSocketGate() {
   );
 
   const [isSocketOpen, setIsSocketOpen] = useState(false);
+  const isPending = useAppSelector((state) => state.calendars.pending);
 
   const calendarList = useSelectedCalendars();
   const tempCalendarList = Object.keys(
@@ -73,13 +74,15 @@ export function WebSocketGate() {
 
   // Register using a diff with previous calendars
   useEffect(() => {
+    if (isPending) return;
+
     syncCalendarRegistrations(
       isSocketOpen,
       socketRef,
       calendarList,
       previousCalendarListRef
     );
-  }, [isSocketOpen, calendarList]);
+  }, [isSocketOpen, calendarList, isPending]);
 
   useEffect(() => {
     syncCalendarRegistrations(
