@@ -663,7 +663,7 @@ describe("Event Preview Display", () => {
       preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
         "event1"
       ];
-    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Test%20Event`;
+    const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Test%20Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
@@ -734,7 +734,7 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(emailButton);
 
-    const expectedUrl = `test/mailto/?uri=mailto:john@test.com?subject=Meeting%20%26%20Discussion%3F%20%23Important`;
+    const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Meeting%20%26%20Discussion%3F%20%23Important`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
