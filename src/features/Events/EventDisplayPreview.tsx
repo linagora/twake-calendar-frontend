@@ -359,12 +359,12 @@ export default function EventPreviewModal({
                 <MenuItem
                   onClick={() =>
                     window.open(
-                      `${mailSpaUrl}/mailto/?uri=mailto:${attendees
+                      `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
                         .map((a) => a.cal_address)
                         .filter((mail) => mail !== user.email)
                         .join(
                           ","
-                        )}?subject=${encodeURIComponent(event.title ?? "")}`
+                        )}&subject=${encodeURIComponent(event.title ?? "")}`
                     )
                   }
                 >
