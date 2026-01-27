@@ -3,13 +3,39 @@ import { createWebSocketConnection } from "@/websocket/connection/createConnecti
 import { registerToCalendars } from "@/websocket/operations/registerToCalendars";
 import { unregisterToCalendars } from "@/websocket/operations/unregisterToCalendars";
 import { WebSocketGate } from "@/websocket/WebSocketGate";
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, Store } from "@reduxjs/toolkit";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
+import { I18nContext } from "twake-i18n";
 
 jest.mock("@/websocket/connection/createConnection");
 jest.mock("@/websocket/operations/registerToCalendars");
 jest.mock("@/websocket/operations/unregisterToCalendars");
+
+function TestWrapper({ store }: { store: Store }) {
+  return (
+    <I18nContext.Provider
+      value={{
+        t: (key: string, vars?: Record<string, string>) => {
+          if (key === "locale") return "en";
+          if (vars) {
+            const params = Object.entries(vars)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(",");
+            return `${key}(${params})`;
+          }
+          return key;
+        },
+        f: (date: Date) => date.toString(),
+        lang: "en",
+      }}
+    >
+      <Provider store={store}>
+        <WebSocketGate />
+      </Provider>
+    </I18nContext.Provider>
+  );
+}
 
 describe("WebSocketGate", () => {
   let store: any;
@@ -61,11 +87,7 @@ describe("WebSocketGate", () => {
     it("should not create connection when user is not authenticated", () => {
       const unauthStore = createMockStore(null, null);
 
-      render(
-        <Provider store={unauthStore}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={unauthStore} />);
 
       expect(createWebSocketConnection).not.toHaveBeenCalled();
     });
@@ -73,11 +95,7 @@ describe("WebSocketGate", () => {
     it("should create connection when user is authenticated", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -87,22 +105,14 @@ describe("WebSocketGate", () => {
     it("should close existing socket when user logs out", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      const { rerender } = render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      const { rerender } = render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
       });
 
       const unauthStore = createMockStore(null, null);
-      rerender(
-        <Provider store={unauthStore}>
-          <WebSocketGate />
-        </Provider>
-      );
+      rerender(<TestWrapper store={unauthStore} />);
 
       await waitFor(() => {
         expect(mockSocket.close).toHaveBeenCalled();
@@ -114,11 +124,7 @@ describe("WebSocketGate", () => {
     it("should create connection with callbacks", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledWith(
@@ -141,11 +147,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
@@ -172,11 +174,7 @@ describe("WebSocketGate", () => {
         new Error("Connection failed")
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(consoleError).toHaveBeenCalledWith(
@@ -191,11 +189,7 @@ describe("WebSocketGate", () => {
     it("should close socket on component unmount", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      const { unmount } = render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      const { unmount } = render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
@@ -230,11 +224,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -275,11 +265,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -311,11 +297,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -346,11 +328,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -400,11 +378,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      const { rerender } = render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      const { rerender } = render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -417,11 +391,7 @@ describe("WebSocketGate", () => {
 
       // Lose authentication before timeout fires
       const unauthStore = createMockStore(null, null);
-      rerender(
-        <Provider store={unauthStore}>
-          <WebSocketGate />
-        </Provider>
-      );
+      rerender(<TestWrapper store={unauthStore} />);
 
       // Advance timer
       await act(async () => {
@@ -444,11 +414,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      const { unmount } = render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      const { unmount } = render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -487,11 +453,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
@@ -540,11 +502,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -577,11 +535,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -609,11 +563,7 @@ describe("WebSocketGate", () => {
     it("should not reconnect when online event fires if already connected", async () => {
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -640,11 +590,7 @@ describe("WebSocketGate", () => {
         }
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
@@ -693,11 +639,7 @@ describe("WebSocketGate", () => {
         connectingSocket
       );
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
@@ -713,11 +655,7 @@ describe("WebSocketGate", () => {
       );
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
@@ -731,11 +669,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledWith(mockSocket, [
@@ -764,11 +698,7 @@ describe("WebSocketGate", () => {
       );
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalled();
@@ -795,11 +725,7 @@ describe("WebSocketGate", () => {
       );
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalled();
@@ -829,11 +755,7 @@ describe("WebSocketGate", () => {
         throw new Error("Registration failed");
       });
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(consoleError).toHaveBeenCalledWith(
@@ -868,11 +790,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify([]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
@@ -888,11 +806,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalledTimes(1);
@@ -913,11 +827,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalled();
@@ -945,11 +855,7 @@ describe("WebSocketGate", () => {
       );
       (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(registerToCalendars).toHaveBeenCalled();
@@ -979,11 +885,7 @@ describe("WebSocketGate", () => {
       localStorage.setItem("selectedCalendars", JSON.stringify(["cal1"]));
       (createWebSocketConnection as jest.Mock).mockResolvedValue(closedSocket);
 
-      render(
-        <Provider store={store}>
-          <WebSocketGate />
-        </Provider>
-      );
+      render(<TestWrapper store={store} />);
 
       await waitFor(() => {
         expect(createWebSocketConnection).toHaveBeenCalled();
