@@ -304,7 +304,7 @@
     "browserOffline": "Vous êtes hors ligne. Les mises à jour en temps réel sont mises en pause jusqu’au rétablissement de la connexion.",
     "reconnected": "Les mises à jour en temps réel sont de nouveau actives.",
     "error": "Un problème est survenu avec les mises à jour en temps réel : %{error}",
-    "closedUnexpectedly": "Les mises à jour en temps réel ont été interrompues.\nTentative de reconnexion…"
+    "closedUnexpectedly": "Les mises à jour en temps réel ont été interrompues. Tentative de reconnexion…"
   },
   "months": {
     "standalone": {

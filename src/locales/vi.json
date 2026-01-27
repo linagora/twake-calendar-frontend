@@ -302,7 +302,7 @@
     "browserOffline": "Bạn đang ngoại tuyến. Cập nhật thời gian thực sẽ tạm dừng cho đến khi kết nối được khôi phục.",
     "reconnected": "Cập nhật thời gian thực đã hoạt động trở lại.",
     "error": "Đã xảy ra sự cố với cập nhật thời gian thực: %{error}",
-    "closedUnexpectedly": "Cập nhật thời gian thực đã bị gián đoạn.\nĐang thử kết nối lại…"
+    "closedUnexpectedly": "Cập nhật thời gian thực đã bị gián đoạn. Đang thử kết nối lại…"
   },
   "months": {
     "standalone": {
