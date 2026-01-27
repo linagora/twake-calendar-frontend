@@ -297,6 +297,6 @@
     "browserOffline": "You’re offline. Live updates are paused until the connection is restored.",
     "reconnected": "Live updates are back.",
     "error": "There was a problem with live updates: %{error}",
-    "closedUnexpectedly": "Live updates were interrupted.\nTrying to reconnect…"
+    "closedUnexpectedly": "Live updates were interrupted. Trying to reconnect…"
   }
 }

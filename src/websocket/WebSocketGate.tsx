@@ -102,7 +102,9 @@ export function WebSocketGate() {
 
   const onError = useCallback((error: Event) => {
     console.error("WebSocket error:", error);
-    setWebSocketStatus(t("websocket.error", { error: error }));
+    const errorMessage =
+      (error as ErrorEvent)?.message ?? error.type ?? "unknown";
+    setWebSocketStatus(t("websocket.error", { error: errorMessage }));
     setWebSocketStatusSerity("error");
   }, []);
 
