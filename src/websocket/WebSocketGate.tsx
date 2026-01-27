@@ -2,12 +2,14 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "twake-i18n";
 import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
 import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconnect";
 import { updateCalendars } from "./messaging/updateCalendars";
 import { syncCalendarRegistrations } from "./operations";
+import { WebSocketStatusSnackbar } from "./WebSocketStatusSnackbar";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -22,6 +24,12 @@ export function WebSocketGate() {
 
   const hadSocketBeforeRef = useRef(false);
   const justReconnectedRef = useRef(false);
+  const [websocketStatus, setWebSocketStatus] = useState("");
+  const [websocketStatusSerity, setWebSocketStatusSerity] = useState<
+    "success" | "info" | "warning" | "error" | undefined
+  >();
+
+  const { t } = useI18n();
 
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) =>
@@ -81,6 +89,8 @@ export function WebSocketGate() {
           `WebSocket closed unexpectedly (code: ${event.code}, reason: ${event.reason || "none"}). ` +
             `Attempting to reconnect...`
         );
+        setWebSocketStatus(t("websocket.closedUnexpectedly"));
+        setWebSocketStatusSerity("warning");
         scheduleReconnect();
       } else {
         reconnectAttemptsRef.current = 0;
@@ -92,6 +102,8 @@ export function WebSocketGate() {
 
   const onError = useCallback((error: Event) => {
     console.error("WebSocket error:", error);
+    setWebSocketStatus(t("websocket.error", { error: error }));
+    setWebSocketStatusSerity("error");
   }, []);
 
   const callBacks = useMemo(
@@ -119,6 +131,8 @@ export function WebSocketGate() {
 
       if (hadSocketBeforeRef.current) {
         justReconnectedRef.current = true;
+        setWebSocketStatus(t("websocket.reconnected"));
+        setWebSocketStatusSerity("success");
       }
 
       hadSocketBeforeRef.current = true;
@@ -227,7 +241,8 @@ export function WebSocketGate() {
   // Handle browser online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      console.log("Browser is online, attempting WebSocket reconnection");
+      setWebSocketStatus(t("websocket.browserOnline"));
+      setWebSocketStatusSerity("success");
       if (!isSocketOpen && isAuthenticatedRef.current) {
         reconnectAttemptsRef.current = 0;
         clearReconnectTimeout();
@@ -236,9 +251,8 @@ export function WebSocketGate() {
     };
 
     const handleOffline = () => {
-      console.log(
-        "Browser is offline, pausing WebSocket reconnection attempts"
-      );
+      setWebSocketStatus(t("websocket.browserOffline"));
+      setWebSocketStatusSerity("warning");
       cleanupConnection();
     };
 
@@ -260,5 +274,14 @@ export function WebSocketGate() {
     };
   }, [isSocketOpen, isAuthenticated, clearReconnectTimeout]);
 
-  return null;
+  return websocketStatus ? (
+    <WebSocketStatusSnackbar
+      message={websocketStatus}
+      severity={websocketStatusSerity}
+      onClose={() => {
+        setWebSocketStatus("");
+        setWebSocketStatusSerity(undefined);
+      }}
+    />
+  ) : null;
 }

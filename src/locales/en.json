@@ -298,6 +298,13 @@
     "endDate": "End Date",
     "endTime": "End Time"
   },
+  "websocket": {
+    "browserOnline": "You’re back online. Reconnecting live updates…",
+    "browserOffline": "You’re offline. Live updates are paused until the connection is restored.",
+    "reconnected": "Live updates are back.",
+    "error": "There was a problem with live updates: %{error}",
+    "closedUnexpectedly": "Live updates were interrupted.\nTrying to reconnect…"
+  },
   "months": {
     "standalone": {
       "0": "January",
