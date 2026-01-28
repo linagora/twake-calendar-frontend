@@ -75,8 +75,6 @@ export function SettingsTab({
           showMore={false}
           description={description}
           setDescription={setDescription}
-          buttonVariant="contained"
-          buttonColor="secondary"
         />
       </Box>
 

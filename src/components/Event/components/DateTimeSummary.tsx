@@ -2,12 +2,16 @@ import { Box, Typography, useTheme } from "@linagora/twake-mui";
 import { alpha } from "@mui/material/styles";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import dayjs from "dayjs";
+import "dayjs/locale/en";
+import "dayjs/locale/fr";
+import "dayjs/locale/ru";
+import "dayjs/locale/vi";
 import React from "react";
 import { useI18n } from "twake-i18n";
-import { getTimezoneOffset } from "../../Calendar/TimezoneSelector";
+import { getTimezoneOffset } from "@/utils/timezone";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
-import { toDateTime } from "../utils/dateTimeHelpers";
+import { SectionPreviewRow } from "./SectionPreviewRow";
 
 interface DateTimeSummaryProps {
   startDate: string;
@@ -35,28 +39,45 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   const { t, lang } = useI18n();
   const theme = useTheme();
 
-  // Format date: "Wednesday, January 28, 2026"
+  // Format date with current locale. VI: "Thứ 4, 4 Tháng 2, 2026"; FR: "mercredi, 5 février 2026"; RU: first letter capitalized
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return "";
     const date = dayjs(dateStr);
-    return date.format(LONG_DATE_FORMAT);
+    const locale =
+      lang && ["en", "vi", "fr", "ru"].includes(lang) ? lang : "en";
+
+    if (locale === "vi") {
+      const dow = date.day(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const weekdayLabel = dow === 0 ? "Chủ nhật" : `Thứ ${dow + 1}`; // Mon=Thứ 2, Wed=Thứ 4, ...
+      const day = date.date();
+      const month = date.month() + 1;
+      const year = date.year();
+      return `${weekdayLabel}, ${day} Tháng ${month}, ${year}`;
+    }
+
+    // French: "5 février" (day before month), not "février 5"
+    if (locale === "fr") {
+      const formatted = date.locale("fr").format("dddd, D MMMM YYYY");
+      return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+
+    const formatted = date.locale(locale).format(LONG_DATE_FORMAT);
+    if (locale === "ru") {
+      return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+    return formatted;
   };
 
-  // Format time: "1:00pm - 2:00pm"
+  // Format time in 24h: "03:30 - 16:30"
   const formatTime = (startTimeStr: string, endTimeStr: string): string => {
     if (allday || !startTimeStr || !endTimeStr) return "";
-    
-    const format12Hour = (timeStr: string): string => {
-      const [hours, minutes] = timeStr.split(":").map(Number);
-      const hour12 = hours % 12 || 12;
-      const ampm = hours >= 12 ? "pm" : "am";
-      const mins = minutes === 0 ? "" : `:${minutes.toString().padStart(2, "0")}`;
-      return `${hour12}${mins}${ampm}`;
+
+    const toHHmm = (timeStr: string): string => {
+      const [h, m] = timeStr.split(":").map((s) => parseInt(s, 10) || 0);
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     };
 
-    const start = format12Hour(startTimeStr);
-    const end = format12Hour(endTimeStr);
-    return `${start} - ${end}`;
+    return `${toHHmm(startTimeStr)} - ${toHHmm(endTimeStr)}`;
   };
 
   // Format timezone: "(UTC+2) Paris"
@@ -74,7 +95,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   // Format repeat: "Doesn't repeat" or repeat info
   const formatRepeat = (rep: RepetitionObject): string => {
     if (!rep || !rep.freq) {
-      return "Doesn't repeat";
+      return t("event.repeat.doesNotRepeat");
     }
 
     const interval = rep.interval || 1;
@@ -86,12 +107,12 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
     };
 
     const freqText = freqMap[rep.freq] || rep.freq;
-    
+
     if (interval === 1) {
-      return `Every ${freqText}`;
+      return `${t("event.repeat.every")} ${freqText}`;
     }
-    
-    return `Every ${interval} ${freqText}`;
+
+    return `${t("event.repeat.every")} ${interval} ${freqText}`;
   };
 
   // Format date text: show both start and end date if showEndDate is true
@@ -114,40 +135,28 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
     return null;
   }
 
+  const primaryStyle = {
+    fontSize: "14px",
+    fontWeight: 500,
+    color: alpha(theme.palette.grey[900], 0.9),
+  };
+
   return (
-    <Box
+    <SectionPreviewRow
+      icon={<AccessTimeIcon sx={{ color: "text.secondary" }} />}
       onClick={onClick}
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 1.5,
-        cursor: "pointer",
-        padding: 1,
-        borderRadius: 1,
-        "&:hover": {
-          backgroundColor: "action.hover",
-        },
-      }}
     >
-      <AccessTimeIcon sx={{ color: "text.secondary", mt: 0.5 }} />
-      <Box flex={1}>
-        <Box display="flex" gap={2} alignItems="center" mb={0.5}>
-          <Typography
-            variant="body2"
-            sx={{ color: alpha(theme.palette.grey[900], 0.9), fontWeight: 500 }}
-          >
-            {dateText}
-          </Typography>
+      <Box>
+        <Typography component="p" sx={primaryStyle}>
+          {dateText}
+          {showEndDate && <br />}
           {timeText && (
-            <Typography
-              variant="body2"
-              sx={{ color: alpha(theme.palette.grey[900], 0.9), fontWeight: 500 }}
-            >
+            <Box component="span" sx={{ ml: showEndDate ? 0 : 2 }}>
               {timeText}
-            </Typography>
+            </Box>
           )}
-        </Box>
-        <Box display="flex" gap={2} alignItems="center">
+        </Typography>
+        <Box display="flex" gap={2} alignItems="center" mt={0.5}>
           <Typography variant="caption" sx={{ color: "#444746" }}>
             {timezoneText}
           </Typography>
@@ -156,6 +165,6 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
           </Typography>
         </Box>
       </Box>
-    </Box>
+    </SectionPreviewRow>
   );
 };
