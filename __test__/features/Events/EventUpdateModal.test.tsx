@@ -93,6 +93,9 @@ describe("EventUpdateModal Timezone Handling", () => {
     const titleInput = screen.getByDisplayValue("Timezone Event");
     expect(titleInput).toBeInTheDocument();
 
+    // Expand to show date/time inputs (normal mode shows DateTimeSummary)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
+
     // Verify the start date and time inputs exist
     await waitFor(() => {
       const startDateInput = screen.getByTestId("start-date-input");
@@ -279,6 +282,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       expect(screen.getByDisplayValue("Recurring Meeting")).toBeInTheDocument();
     });
 
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     // Uncheck repeat checkbox
     const repeatCheckbox = screen.getByLabelText("event.form.repeat");
     expect(repeatCheckbox).toBeChecked();
@@ -397,6 +401,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       expect(screen.getByDisplayValue("Recurring Meeting")).toBeInTheDocument();
     });
 
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     // Uncheck repeat checkbox and save
     const repeatCheckbox = screen.getByLabelText("event.form.repeat");
 
@@ -512,6 +517,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       expect(screen.getByDisplayValue("Recurring Meeting")).toBeInTheDocument();
     });
 
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     // Uncheck repeat and save
     const repeatCheckbox = screen.getByLabelText("event.form.repeat");
 

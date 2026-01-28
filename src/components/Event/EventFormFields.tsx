@@ -41,6 +41,7 @@ import { AddDescButton } from "./AddDescButton";
 import { DateTimeFields } from "./components/DateTimeFields";
 import { DateTimeSummary } from "./components/DateTimeSummary";
 import { FieldWithLabel } from "./components/FieldWithLabel";
+import { SectionPreviewRow } from "./components/SectionPreviewRow";
 import RepeatEvent from "./EventRepeat";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
 import { combineDateTime, splitDateTime } from "./utils/dateTimeHelpers";
@@ -171,19 +172,23 @@ export default function EventFormFields({
 
   // Track if user has manually changed end date in extended mode
   const [hasEndDateChanged, setHasEndDateChanged] = React.useState(false);
-  
+
   // Track if user has clicked on datetime clickable section in normal mode
   // Once clicked, normal mode will always show full fields until modal closes
-  const [hasClickedDateTimeSection, setHasClickedDateTimeSection] = React.useState(false);
-  
+  const [hasClickedDateTimeSection, setHasClickedDateTimeSection] =
+    React.useState(false);
+
   // Track if user has clicked on location section in normal mode
-  const [hasClickedLocationSection, setHasClickedLocationSection] = React.useState(false);
-  
+  const [hasClickedLocationSection, setHasClickedLocationSection] =
+    React.useState(false);
+
   // Track if user has clicked on calendar section in normal mode
-  const [hasClickedCalendarSection, setHasClickedCalendarSection] = React.useState(false);
-  
+  const [hasClickedCalendarSection, setHasClickedCalendarSection] =
+    React.useState(false);
+
   // Track if user has clicked on video meeting section in normal mode
-  const [hasClickedVideoMeetingSection, setHasClickedVideoMeetingSection] = React.useState(false);
+  const [hasClickedVideoMeetingSection, setHasClickedVideoMeetingSection] =
+    React.useState(false);
 
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
@@ -277,7 +282,6 @@ export default function EventFormFields({
     // Always update previous value
     prevShowMoreRef.current = showMore;
   }, [showMore, isOpen]);
-
 
   // Sync start prop to startDate/startTime
   React.useEffect(() => {
@@ -413,9 +417,9 @@ export default function EventFormFields({
     setDescription(updatedDescription);
     setHasVideoConference(true);
     setMeetingLink(newMeetingLink);
-    // Open description field when adding video conference
-    setShowDescription(true);
-    // Track click on video meeting section in normal mode
+    if (showMore) {
+      setShowDescription(true);
+    }
     if (!showMore) {
       setHasClickedVideoMeetingSection(true);
     }
@@ -472,7 +476,9 @@ export default function EventFormFields({
 
       <FieldWithLabel
         label={
-          !showMore && !hasClickedDateTimeSection ? "" : t("event.form.dateTime")
+          !showMore && !hasClickedDateTimeSection
+            ? ""
+            : t("event.form.dateTime")
         }
         isExpanded={showMore}
       >
@@ -532,7 +538,8 @@ export default function EventFormFields({
               control={
                 <Checkbox
                   checked={
-                    showRepeat || (typeOfAction === "solo" && !!repetition?.freq)
+                    showRepeat ||
+                    (typeOfAction === "solo" && !!repetition?.freq)
                   }
                   disabled={typeOfAction === "solo"}
                   onChange={() => {
@@ -602,33 +609,51 @@ export default function EventFormFields({
       <FieldWithLabel
         label={showMore ? t("event.form.videoMeeting") : ""}
         isExpanded={showMore}
-        sx={
-          hasClickedVideoMeetingSection && !showMore
-            ? {
-                marginTop: "0 !important",
-                "& > .MuiBox-root": {
-                  marginTop: "0 !important",
-                },
-              }
-            : undefined
-        }
       >
         {!showMore ? (
-          <Button
-            startIcon={
-              <img src={iconCamera} alt="camera" width={24} height={24} />
-            }
-            onClick={handleAddVideoConference}
-            fullWidth
-            sx={{
-              justifyContent: "flex-start",
-              display: hasVideoConference ? "none" : "flex",
-              borderRadius: "4px",
-              color: alpha(theme.palette.grey[900], 0.9),
-            }}
-          >
-            {t("event.form.addVisioConference")}
-          </Button>
+          hasVideoConference && meetingLink ? (
+            <Box display="flex" gap={1} alignItems="center">
+              <Button
+                startIcon={
+                  <img src={iconCamera} alt="camera" width={24} height={24} />
+                }
+                onClick={() => window.open(meetingLink, "_blank")}
+                size="medium"
+                variant="contained"
+                color="primary"
+                sx={{ borderRadius: "4px", mr: 1 }}
+              >
+                {t("event.form.joinVisioConference")}
+              </Button>
+              <IconButton
+                onClick={handleCopyMeetingLink}
+                size="small"
+                sx={{ color: "primary.main" }}
+                aria-label={t("event.form.copyMeetingLink")}
+                title={t("event.form.copyMeetingLink")}
+              >
+                <CopyIcon />
+              </IconButton>
+              <IconButton
+                onClick={handleDeleteVideoConference}
+                size="small"
+                sx={{ color: "error.main" }}
+                aria-label={t("event.form.removeVideoConference")}
+                title={t("event.form.removeVideoConference")}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ) : (
+            <SectionPreviewRow
+              icon={
+                <img src={iconCamera} alt="camera" width={24} height={24} />
+              }
+              onClick={handleAddVideoConference}
+            >
+              {t("event.form.addVisioConference")}
+            </SectionPreviewRow>
+          )
         ) : (
           <Box display="flex" gap={1} alignItems="center">
             <Button
@@ -700,25 +725,17 @@ export default function EventFormFields({
 
       <FieldWithLabel
         label={
-          showMore || hasClickedLocationSection
-            ? t("event.form.location")
-            : ""
+          showMore || hasClickedLocationSection ? t("event.form.location") : ""
         }
         isExpanded={showMore}
       >
         {!showMore && !hasClickedLocationSection ? (
-          <Button
-            startIcon={<LocationIcon />}
+          <SectionPreviewRow
+            icon={<LocationIcon />}
             onClick={() => setHasClickedLocationSection(true)}
-            fullWidth
-            sx={{
-              justifyContent: "flex-start",
-              borderRadius: "4px",
-              color: alpha(theme.palette.grey[900], 0.9),
-            }}
           >
             {location || t("event.form.locationPlaceholder")}
-          </Button>
+          </SectionPreviewRow>
         ) : (
           <TextField
             fullWidth
@@ -735,15 +752,13 @@ export default function EventFormFields({
 
       <FieldWithLabel
         label={
-          showMore || hasClickedCalendarSection
-            ? t("event.form.calendar")
-            : ""
+          showMore || hasClickedCalendarSection ? t("event.form.calendar") : ""
         }
         isExpanded={showMore}
       >
         {!showMore && !hasClickedCalendarSection ? (
-          <Button
-            startIcon={
+          <SectionPreviewRow
+            icon={
               <SquareRoundedIcon
                 sx={{
                   color:
@@ -755,16 +770,10 @@ export default function EventFormFields({
               />
             }
             onClick={() => setHasClickedCalendarSection(true)}
-            fullWidth
-            sx={{
-              justifyContent: "flex-start",
-              borderRadius: "4px",
-              color: alpha(theme.palette.grey[900], 0.9),
-            }}
           >
             {userPersonalCalendars.find((cal) => cal.id === calendarid)?.name ||
               t("event.form.calendar")}
-          </Button>
+          </SectionPreviewRow>
         ) : (
           <FormControl fullWidth margin="dense" size="small">
             <Select
