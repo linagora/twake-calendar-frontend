@@ -1,8 +1,8 @@
-import { Box, Button, TextField, useTheme } from "@linagora/twake-mui";
-import { alpha } from "@mui/material/styles";
+import { Box, Button, TextField } from "@linagora/twake-mui";
 import { Notes as NotesIcon } from "@mui/icons-material";
 import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
+import { SectionPreviewRow } from "./components/SectionPreviewRow";
 
 export function AddDescButton({
   showDescription,
@@ -29,7 +29,6 @@ export function AddDescButton({
     | "warning";
 }) {
   const { t } = useI18n();
-  const theme = useTheme();
   return (
     <>
       {!showDescription && (
@@ -38,18 +37,12 @@ export function AddDescButton({
           isExpanded={showMore}
         >
           {!showMore ? (
-            <Button
-              startIcon={<NotesIcon />}
+            <SectionPreviewRow
+              icon={<NotesIcon />}
               onClick={() => setShowDescription(true)}
-              fullWidth
-              sx={{
-                justifyContent: "flex-start",
-                borderRadius: "4px",
-                color: alpha(theme.palette.grey[900], 0.9),
-              }}
             >
               {t("event.form.addDescription")}
-            </Button>
+            </SectionPreviewRow>
           ) : (
             <Box display="flex" gap={1}>
               <Button

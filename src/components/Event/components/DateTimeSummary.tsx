@@ -7,7 +7,7 @@ import { useI18n } from "twake-i18n";
 import { getTimezoneOffset } from "../../Calendar/TimezoneSelector";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
-import { toDateTime } from "../utils/dateTimeHelpers";
+import { SectionPreviewRow } from "./SectionPreviewRow";
 
 interface DateTimeSummaryProps {
   startDate: string;
@@ -45,12 +45,13 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   // Format time: "1:00pm - 2:00pm"
   const formatTime = (startTimeStr: string, endTimeStr: string): string => {
     if (allday || !startTimeStr || !endTimeStr) return "";
-    
+
     const format12Hour = (timeStr: string): string => {
       const [hours, minutes] = timeStr.split(":").map(Number);
       const hour12 = hours % 12 || 12;
       const ampm = hours >= 12 ? "pm" : "am";
-      const mins = minutes === 0 ? "" : `:${minutes.toString().padStart(2, "0")}`;
+      const mins =
+        minutes === 0 ? "" : `:${minutes.toString().padStart(2, "0")}`;
       return `${hour12}${mins}${ampm}`;
     };
 
@@ -86,11 +87,11 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
     };
 
     const freqText = freqMap[rep.freq] || rep.freq;
-    
+
     if (interval === 1) {
       return `Every ${freqText}`;
     }
-    
+
     return `Every ${interval} ${freqText}`;
   };
 
@@ -114,40 +115,28 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
     return null;
   }
 
+  const primaryStyle = {
+    fontSize: "14px",
+    fontWeight: 500,
+    color: alpha(theme.palette.grey[900], 0.9),
+  };
+
   return (
-    <Box
+    <SectionPreviewRow
+      icon={<AccessTimeIcon sx={{ color: "text.secondary" }} />}
       onClick={onClick}
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 1.5,
-        cursor: "pointer",
-        padding: 1,
-        borderRadius: 1,
-        "&:hover": {
-          backgroundColor: "action.hover",
-        },
-      }}
     >
-      <AccessTimeIcon sx={{ color: "text.secondary", mt: 0.5 }} />
-      <Box flex={1}>
-        <Box display="flex" gap={2} alignItems="center" mb={0.5}>
-          <Typography
-            variant="body2"
-            sx={{ color: alpha(theme.palette.grey[900], 0.9), fontWeight: 500 }}
-          >
-            {dateText}
-          </Typography>
+      <Box>
+        <Typography component="p" sx={primaryStyle}>
+          {dateText}
+          {showEndDate && <br />}
           {timeText && (
-            <Typography
-              variant="body2"
-              sx={{ color: alpha(theme.palette.grey[900], 0.9), fontWeight: 500 }}
-            >
+            <Box component="span" sx={{ ml: showEndDate ? 0 : 2 }}>
               {timeText}
-            </Typography>
+            </Box>
           )}
-        </Box>
-        <Box display="flex" gap={2} alignItems="center">
+        </Typography>
+        <Box display="flex" gap={2} alignItems="center" mt={0.5}>
           <Typography variant="caption" sx={{ color: "#444746" }}>
             {timezoneText}
           </Typography>
@@ -156,6 +145,6 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
           </Typography>
         </Box>
       </Box>
-    </Box>
+    </SectionPreviewRow>
   );
 };
