@@ -98,6 +98,8 @@
         "years": "Năm"
       },
       "repeatOn": "Lặp vào:",
+      "doesNotRepeat": "Không lặp lại",
+      "every": "Mỗi",
       "days": {
         "monday": "Th 2",
         "tuesday": "Th 3",
@@ -127,6 +129,7 @@
       "allDay": "Cả ngày",
       "repeat": "Lặp lại",
       "timezonePlaceholder": "Chọn múi giờ",
+      "addGuestsPlaceholder": "Thêm khách",
       "participants": "Người tham gia",
       "videoMeeting": "Cuộc họp video",
       "meetCopied": "Đã sao chép liên kết họp!",

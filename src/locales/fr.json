@@ -100,6 +100,8 @@
         "years": "année(s)"
       },
       "repeatOn": "Répéter le :",
+      "doesNotRepeat": "Ne se répète pas",
+      "every": "Tous les",
       "days": {
         "monday": "LU",
         "tuesday": "MA",
@@ -129,6 +131,7 @@
       "allDay": "Toute la journée",
       "repeat": "Répéter",
       "timezonePlaceholder": "Sélectionner un fuseau horaire",
+      "addGuestsPlaceholder": "Ajouter des invités",
       "participants": "Participants",
       "videoMeeting": "Visioconférence",
       "meetCopied": "Lien de la visio copié!",
@@ -288,7 +291,7 @@
   },
   "dateTimeFields": {
     "date": "Date",
-    "startDate": "Daye du début",
+    "startDate": "Date du début",
     "startTime": "Heure du début",
     "endDate": "Date de la fin",
     "endTime": "Heure de la fin"

@@ -98,6 +98,8 @@
         "years": "Year(s)"
       },
       "repeatOn": "Repeat on:",
+      "doesNotRepeat": "Doesn't repeat",
+      "every": "Every",
       "days": {
         "monday": "MO",
         "tuesday": "TU",
@@ -127,6 +129,7 @@
       "allDay": "All day",
       "repeat": "Repeat",
       "timezonePlaceholder": "Select timezone",
+      "addGuestsPlaceholder": "Add guests",
       "participants": "Participants",
       "videoMeeting": "Video meeting",
       "meetCopied": "Meeting link copied!",

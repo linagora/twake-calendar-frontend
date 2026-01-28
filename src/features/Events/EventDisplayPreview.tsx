@@ -860,6 +860,7 @@ function formatDate(
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
       timeZone,
     });
   }
@@ -896,6 +897,7 @@ function formatEnd(
       return endDate.toLocaleTimeString(t("locale"), {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
         timeZone,
       });
     }
@@ -905,6 +907,7 @@ function formatEnd(
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
       timeZone,
     });
   }

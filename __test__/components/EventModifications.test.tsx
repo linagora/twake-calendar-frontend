@@ -400,6 +400,10 @@ describe("CalendarApp integration", () => {
         preloadedState
       );
 
+      // Expand to show date/time inputs (normal mode shows DateTimeSummary)
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
       const startDateInput = await screen.findByTestId("start-time-input");
 
       await act(async () => {
