@@ -1,6 +1,7 @@
 import * as eventUtils from "@/components/Event/utils/eventUtils";
 import * as CalendarApi from "@/features/Calendars/CalendarApi";
 import * as EventApi from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
@@ -287,8 +288,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    expect(repeatCheckbox).not.toBeChecked();
-
+    await waitFor(() => expect(repeatCheckbox).not.toBeChecked());
     // Click Save button
     const saveButton = screen.getByRole("button", { name: "actions.save" });
 
@@ -346,7 +346,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
       URL: `/calendars/${calId}/${baseUID}.ics`,
-    };
+    } as CalendarEvent;
 
     const instance1 = {
       ...masterEvent,
@@ -377,6 +377,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       .spyOn(EventApi, "putEvent")
       .mockResolvedValue({ status: 201 } as any);
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    jest.spyOn(EventApi, "getEvent").mockResolvedValue(masterEvent);
 
     // Mock refreshCalendars
     jest.spyOn(eventUtils, "refreshCalendars").mockResolvedValue(undefined);
