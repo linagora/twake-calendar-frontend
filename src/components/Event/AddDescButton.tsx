@@ -1,7 +1,8 @@
 import { Box, Button, TextField } from "@linagora/twake-mui";
-import { Description as DescriptionIcon } from "@mui/icons-material";
+import { Notes as NotesIcon } from "@mui/icons-material";
 import { useI18n } from "twake-i18n";
 import { FieldWithLabel } from "./components/FieldWithLabel";
+import { SectionPreviewRow } from "./components/SectionPreviewRow";
 
 export function AddDescButton({
   showDescription,
@@ -31,18 +32,30 @@ export function AddDescButton({
   return (
     <>
       {!showDescription && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={1}>
-            <Button
-              startIcon={<DescriptionIcon />}
+        <FieldWithLabel
+          label={showMore || showDescription ? t("event.form.description") : ""}
+          isExpanded={showMore}
+        >
+          {!showMore ? (
+            <SectionPreviewRow
+              icon={<NotesIcon />}
               onClick={() => setShowDescription(true)}
-              size="medium"
-              variant={buttonVariant}
-              color={buttonColor}
             >
               {t("event.form.addDescription")}
-            </Button>
-          </Box>
+            </SectionPreviewRow>
+          ) : (
+            <Box display="flex" gap={1}>
+              <Button
+                startIcon={<NotesIcon />}
+                onClick={() => setShowDescription(true)}
+                size="medium"
+                variant={buttonVariant}
+                color={buttonColor}
+              >
+                {t("event.form.addDescription")}
+              </Button>
+            </Box>
+          )}
         </FieldWithLabel>
       )}
       {showDescription && (
