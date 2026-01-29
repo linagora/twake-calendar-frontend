@@ -206,14 +206,13 @@ const CalendarSlice = createSlice({
                 const baseUid = extractEventBaseUuid(eventKey);
                 return baseUid === action.payload.event.uid;
               })
-              .forEach(
-                (eventKey) =>
-                  (state.list[action.payload.calId].events[eventKey] = {
-                    ...state.list[action.payload.calId].events[eventKey],
-                    repetition: action.payload.event.repetition,
-                    timezone: action.payload.event.timezone,
-                  })
-              );
+              .forEach((eventKey) => {
+                state.list[action.payload.calId].events[eventKey] = {
+                  ...state.list[action.payload.calId].events[eventKey],
+                  repetition: action.payload.event.repetition,
+                  timezone: action.payload.event.timezone,
+                };
+              });
           } else {
             state.list[action.payload.calId].events[action.payload.event.uid] =
               action.payload.event;
