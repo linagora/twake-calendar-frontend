@@ -148,7 +148,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButtons = screen.getAllByTestId("MoreVertIcon");
+    const addButtons = screen.getAllByTestId("MoreHorizIcon");
     fireEvent.click(addButtons[0]);
 
     userEvent.click(screen.getByText(/delete/i));
@@ -180,7 +180,7 @@ describe("CalendarSelection", () => {
       }
     );
 
-    const addButtons = screen.getAllByTestId("MoreVertIcon");
+    const addButtons = screen.getAllByTestId("MoreHorizIcon");
     fireEvent.click(addButtons[1]);
 
     userEvent.click(screen.getByText(/remove/i));
