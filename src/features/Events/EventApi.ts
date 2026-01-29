@@ -1,9 +1,8 @@
-import { detectDateTimeFormat } from "@/components/Event/utils/dateTimeHelpers";
 import { api } from "@/utils/apiUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
-import moment from "moment-timezone";
 import { CalDavItem } from "../Calendars/api/types";
 import { CalendarEvent } from "./EventsTypes";
 import {
@@ -12,17 +11,6 @@ import {
   makeVevent,
   parseCalendarEvent,
 } from "./eventUtils";
-
-function resolveTimezoneId(tzid?: string): string | undefined {
-  if (!tzid) return undefined;
-  if (TIMEZONES.zones[tzid]) {
-    return tzid;
-  }
-  if (TIMEZONES.aliases[tzid]) {
-    return TIMEZONES.aliases[tzid].aliasTo;
-  }
-  return tzid;
-}
 
 export async function reportEvent(
   event: CalendarEvent,
@@ -146,32 +134,6 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const merged = { ...event, ...eventjson };
   merged.timezone = finalTimezone;
   return merged;
-}
-
-function convertEventDateTimeToISO(
-  datetime: string,
-  eventTimezone: string
-): string | undefined {
-  if (!datetime || !eventTimezone) return undefined;
-
-  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
-    return datetime;
-  }
-
-  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
-  if (dateOnlyRegex.test(datetime)) {
-    return undefined;
-  }
-
-  const format = detectDateTimeFormat(datetime);
-  const momentDate = moment.tz(datetime, format, eventTimezone);
-  if (!momentDate.isValid()) {
-    console.warn(
-      `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${eventTimezone}"`
-    );
-    return undefined;
-  }
-  return momentDate.toISOString();
 }
 
 export async function dlEvent(event: CalendarEvent) {

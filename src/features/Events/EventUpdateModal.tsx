@@ -25,7 +25,11 @@ import {
   showErrorNotification,
 } from "@/utils/eventFormTempStorage";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import {
+  browserDefaultTimeZone,
+  resolveTimezone,
+  getTimezoneOffset,
+} from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { Box, Button } from "@linagora/twake-mui";
@@ -108,38 +112,9 @@ function EventUpdateModal({
     );
   }, [calendarsList, user.userData?.openpaasId]);
 
-  // Helper function to resolve timezone aliases
-  const resolveTimezone = (tzName: string): string => {
-    if (TIMEZONES.zones[tzName]) {
-      return tzName;
-    }
-    if (TIMEZONES.aliases[tzName]) {
-      return TIMEZONES.aliases[tzName].aliasTo;
-    }
-    return tzName;
-  };
-
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
     const browserTz = resolveTimezone(browserDefaultTimeZone);
-
-    const getTimezoneOffset = (tzName: string): string => {
-      const resolvedTz = resolveTimezone(tzName);
-      const tzData = TIMEZONES.zones[resolvedTz];
-      if (!tzData) return "";
-
-      const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
-      if (!icsMatch) return "";
-
-      const offset = icsMatch[1];
-      const hours = parseInt(offset.slice(0, 3));
-      const minutes = parseInt(offset.slice(3));
-
-      if (minutes === 0) {
-        return `UTC${hours >= 0 ? "+" : ""}${hours}`;
-      }
-      return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
-    };
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
