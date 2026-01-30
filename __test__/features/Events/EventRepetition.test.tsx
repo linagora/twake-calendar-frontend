@@ -699,7 +699,6 @@ describe("Edit Recurring Event in Full Display", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
-    preview.debug();
     expect(screen.getByText("event.repeat.repeatEvery")).toBeInTheDocument();
     expect(screen.getByText("event.repeat.end.label")).toBeInTheDocument();
 
@@ -1191,7 +1190,6 @@ describe("Event URL handling for recurring events", () => {
       await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
-    preview.debug();
     await waitFor(() => {
       expect(moveEventSpy).toHaveBeenCalled();
     });
