@@ -5,7 +5,6 @@ import { CalendarEvent } from "@/features/Events/EventsTypes";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
-import preview from "jest-preview";
 
 jest.mock("@/features/Events/EventApi");
 jest.mock("@/features/Calendars/CalendarApi");
@@ -424,7 +423,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
     });
 
     // Uncheck repeat checkbox and save
-    const repeatCheckbox = screen.getByLabelText("    await act(async () => {
+    await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
