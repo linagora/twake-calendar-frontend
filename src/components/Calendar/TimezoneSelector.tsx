@@ -1,7 +1,10 @@
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import {
+  browserDefaultTimeZone,
+  getTimezoneOffset,
+  resolveTimezone,
+} from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import { Button, Popover } from "@linagora/twake-mui";
-import moment from "moment";
 import { MouseEvent, useMemo, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
@@ -98,29 +101,4 @@ export function useTimeZoneList() {
 
     return { zones, browserTz, getTimezoneOffset };
   }, []);
-}
-
-export function resolveTimezone(tzName: string): string {
-  if (TIMEZONES.zones[tzName]) {
-    return tzName;
-  }
-  if (TIMEZONES.aliases[tzName]) {
-    return TIMEZONES.aliases[tzName].aliasTo;
-  }
-  return tzName;
-}
-
-export function getTimezoneOffset(
-  tzName: string,
-  date: Date = new Date()
-): string {
-  const fmt = new Intl.DateTimeFormat(undefined, {
-    timeZone: tzName,
-    timeZoneName: "shortOffset",
-  });
-
-  const currentDate = moment(date).isValid() ? date : new Date();
-  const parts = fmt.formatToParts(currentDate);
-  const offsetPart = parts.find((p) => p.type === "timeZoneName");
-  return offsetPart?.value.replace("GMT", "UTC") ?? "";
 }

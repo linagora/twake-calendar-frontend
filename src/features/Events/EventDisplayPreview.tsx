@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
-import { getTimezoneOffset } from "@/components/Calendar/TimezoneSelector";
+import { getTimezoneOffset } from "@/utils/timezone";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
