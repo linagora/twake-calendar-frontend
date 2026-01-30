@@ -1,7 +1,7 @@
 {
   "locale": "fr-fr",
   "calendar": {
-    "personal": "Calendriers personnels",
+    "personal": "Mes calendriers",
     "delegated": "Calendriers délégués",
     "other": "Autres calendriers",
     "caldav_access": "Accès CalDAV",
@@ -87,7 +87,7 @@
     "hex": "Hex"
   },
   "event": {
-    "createEvent": "Créer un événement",
+    "createEvent": "Créer",
     "updateEvent": "Mettre à jour un événement",
     "organizer": "Organisateur",
     "untitled": "Sans titre",
@@ -248,7 +248,7 @@
       "label": "Libre",
       "tooltip": "Les autres vous voient comme disponible pendant la plage horaire de cet événement."
     },
-    "attendingQuestion": "Vous participez ?",
+    "attendingQuestion": "Participer ?",
     "ACCEPTED": "Accepter",
     "TENTATIVE": "Peut-être",
     "DECLINED": "Décliner",
