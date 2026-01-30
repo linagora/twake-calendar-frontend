@@ -601,7 +601,7 @@ export default function EventFormFields({
         <AttendeeSelector
           attendees={attendees}
           setAttendees={setAttendees}
-          placeholder="Add guests"
+          placeholder={t("event.form.addGuests")}
           inputSlot={(params) => <TextField {...params} size="small" />}
         />
       </FieldWithLabel>
