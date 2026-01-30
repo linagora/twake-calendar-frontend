@@ -193,9 +193,30 @@ const CalendarSlice = createSlice({
               events: {},
             } as Calendar;
           }
-
-          state.list[action.payload.calId].events[action.payload.event.uid] =
-            action.payload.event;
+          if (
+            Object.keys(state.list[action.payload.calId].events).find(
+              (eventId: string) => {
+                const eventIdBase = extractEventBaseUuid(eventId);
+                return eventIdBase === action.payload.event.uid;
+              }
+            )
+          ) {
+            Object.keys(state.list[action.payload.calId].events)
+              .filter((eventKey) => {
+                const baseUid = extractEventBaseUuid(eventKey);
+                return baseUid === action.payload.event.uid;
+              })
+              .forEach((eventKey) => {
+                state.list[action.payload.calId].events[eventKey] = {
+                  ...state.list[action.payload.calId].events[eventKey],
+                  repetition: action.payload.event.repetition,
+                  timezone: action.payload.event.timezone,
+                };
+              });
+          } else {
+            state.list[action.payload.calId].events[action.payload.event.uid] =
+              action.payload.event;
+          }
         }
       )
       .addCase(moveEventAsync.fulfilled, (state) => {

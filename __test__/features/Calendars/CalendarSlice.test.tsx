@@ -512,5 +512,72 @@ describe("CalendarSlice", () => {
       );
       expect(state.list.c1.events.e1.uid).toBe("e1");
     });
+
+    it("getEventAsync.fulfilled doesnt create new events when there are already event with base UID", () => {
+      const baseUid = "recurring-event-base";
+      const existingEvent = {
+        uid: `${baseUid}/20240115`,
+        title: "Existing Recurring Event",
+        recurrenceId: null,
+      } as unknown as CalendarEvent;
+
+      const newEventInstance = {
+        uid: baseUid,
+        title: "Fetched Master Event",
+        recurrenceId: "20240115",
+      } as CalendarEvent;
+
+      const stateWithEvent = {
+        ...initialState,
+        list: {
+          c1: {
+            id: "c1",
+            events: { [`${baseUid}/20240115`]: existingEvent },
+          } as unknown as Calendar,
+        },
+      };
+
+      const payload = { calId: "c1", event: newEventInstance };
+      const state = reducer(
+        stateWithEvent,
+        getEventAsync.fulfilled(payload, "req", newEventInstance)
+      );
+
+      // Should still only have the base event, not the instance
+      expect(Object.keys(state.list.c1.events)).toHaveLength(1);
+      expect(state.list.c1.events[`${baseUid}/20240115`]).toBeDefined();
+      expect(state.list.c1.events[baseUid]).toBeUndefined();
+    });
+
+    it("getEventAsync.fulfilled create new event when there isn't any event with base UID", () => {
+      const eventUid = "new-event-uid";
+      const newEvent = {
+        uid: eventUid,
+        title: "New Event",
+        recurrenceId: null,
+      } as unknown as CalendarEvent;
+
+      const stateWithoutEvent = {
+        ...initialState,
+        list: {
+          c1: {
+            id: "c1",
+            events: {},
+          } as unknown as Calendar,
+        },
+      };
+
+      const payload = { calId: "c1", event: newEvent };
+      const state = reducer(
+        stateWithoutEvent,
+        getEventAsync.fulfilled(payload, "req", newEvent)
+      );
+
+      // Should create the new event
+      expect(Object.keys(state.list.c1.events)).toHaveLength(1);
+      expect(state.list.c1.events[eventUid]).toBeDefined();
+      expect(state.list.c1.events[eventUid].uid).toBe(eventUid);
+      expect(state.list.c1.events[eventUid].title).toBe("New Event");
+    });
   });
 });
