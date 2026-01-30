@@ -6,6 +6,7 @@ import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 import userEvent from "@testing-library/user-event";
+
 jest.mock("@/features/Events/EventApi");
 jest.mock("@/features/Calendars/CalendarApi");
 
