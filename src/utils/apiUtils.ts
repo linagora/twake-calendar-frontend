@@ -49,7 +49,7 @@ export const api = ky.extend({
         if (response.status === 401) {
           // Check if we're already on login flow to prevent redirect loop
           const currentPath = window.location.pathname;
-          if (currentPath === "/" || currentPath === "/callback") {
+          if (currentPath === "/callback") {
             return response;
           }
 
