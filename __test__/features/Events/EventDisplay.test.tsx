@@ -1719,6 +1719,9 @@ describe("Event Full Display", () => {
 
     expect(screen.getByDisplayValue("Test Event")).toBeInTheDocument();
 
+    // Expand to show date/time inputs (normal mode shows DateTimeSummary)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
+
     const startDateInput = screen.getByTestId("start-date-input");
     const startTimeInput = screen.getByTestId("start-time-input");
     const endTimeInput = screen.getByTestId("end-time-input");
@@ -1804,6 +1807,7 @@ describe("Event Full Display", () => {
       preloadedState
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     const allDayCheckbox = screen.getByLabelText("event.form.allDay");
     fireEvent.click(allDayCheckbox);
     expect(allDayCheckbox).toBeChecked();
@@ -1878,6 +1882,7 @@ describe("Event Full Display", () => {
       )
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     const calendarSelect = screen.getByLabelText("event.form.calendar");
     await act(async () => fireEvent.mouseDown(calendarSelect));
 
@@ -1947,9 +1952,9 @@ describe("Event Full Display", () => {
       stateWithTimezone
     );
 
+    // Expand to show timezone selector (normal mode hides it)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     // The timezone select should have Asia/Bangkok selected
-    // Since the component uses formatLocalDateTime, the displayed time will be in local format
-    // but the timezone selector should show Asia/Bangkok
     const timeZone = screen.getByDisplayValue(/Asia\/Bangkok/i);
     expect(timeZone).toBeInTheDocument();
   });
