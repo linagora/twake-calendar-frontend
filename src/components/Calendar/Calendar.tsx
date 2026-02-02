@@ -597,8 +597,11 @@ export default function CalendarApp({
       <Box
         className="sidebar"
         sx={{
-          padding: "0 15px 16px 25px",
-          position: "relative",
+          paddingTop: 0,
+          paddingBottom: 3,
+          paddingLeft: 3,
+          paddingRight: 2,
+          width: "270px",
         }}
       >
         <Box
@@ -607,11 +610,11 @@ export default function CalendarApp({
             top: 0,
             zIndex: 10,
             backgroundColor: "#fff",
-            paddingTop: "16px",
+            paddingTop: 3,
           }}
         >
           <Button
-            size="large"
+            size="medium"
             variant="contained"
             fullWidth
             onClick={() =>
@@ -619,9 +622,13 @@ export default function CalendarApp({
             }
             sx={{
               borderRadius: radius.lg,
+              fontSize: "16px",
+              fontWeight: 500,
+              lineHeight: "normal",
             }}
           >
-            <AddIcon /> <p>{t("event.createEvent")}</p>
+            <AddIcon sx={{ marginRight: 0.5, fontSize: "20px" }} />{" "}
+            {t("event.createEvent")}
           </Button>
         </Box>
 
@@ -632,15 +639,17 @@ export default function CalendarApp({
           setSelectedMiniDate={setSelectedMiniDate}
           dottedEvents={dottedEvents}
         />
-        <TempCalendarsInput
-          tempUsers={tempUsers}
-          setTempUsers={setTempUsers}
-          handleToggleEventPreview={() => {
-            eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
-          }}
-          selectedCalendars={selectedCalendars}
-          setSelectedCalendars={setSelectedCalendars}
-        />
+        <Box sx={{ mb: 3, mt: 2 }}>
+          <TempCalendarsInput
+            tempUsers={tempUsers}
+            setTempUsers={setTempUsers}
+            handleToggleEventPreview={() => {
+              eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
+            }}
+            selectedCalendars={selectedCalendars}
+            setSelectedCalendars={setSelectedCalendars}
+          />
+        </Box>
         <div className="calendarList">
           <CalendarSelection
             selectedCalendars={selectedCalendars}
