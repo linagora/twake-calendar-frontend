@@ -1,8 +1,6 @@
-import {
-  convertFormDateTimeToISO,
-  detectDateTimeFormat,
-} from "@/components/Event/utils/dateTimeHelpers";
+import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import moment from "moment-timezone";
@@ -10,18 +8,6 @@ import { userAttendee } from "../User/models/attendee";
 import { createAttendee } from "../User/models/attendee.mapper";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
 type RawEntry = [string, Record<string, string>, string, any];
-
-function resolveTimezoneId(tzid?: string): string | undefined {
-  if (!tzid) return undefined;
-  if (TIMEZONES.zones[tzid]) {
-    return tzid;
-  }
-  const alias = TIMEZONES.aliases[tzid];
-  if (alias) {
-    return alias.aliasTo;
-  }
-  return tzid;
-}
 
 function inferTimezoneFromValue(
   params: Record<string, string> | undefined,
@@ -213,46 +199,20 @@ export function parseCalendarEvent(
   }
 
   if (!event.allday && event.start && eventTimezone) {
-    const startISO = convertDateTimeStringToISO(event.start, eventTimezone);
+    const startISO = convertEventDateTimeToISO(event.start, eventTimezone);
     if (startISO) {
       event.start = startISO;
     }
   }
 
   if (!event.allday && event.end && eventTimezone) {
-    const endISO = convertDateTimeStringToISO(event.end, eventTimezone);
+    const endISO = convertEventDateTimeToISO(event.end, eventTimezone);
     if (endISO) {
       event.end = endISO;
     }
   }
 
   return event as CalendarEvent;
-}
-
-function convertDateTimeStringToISO(
-  datetime: string,
-  timezone: string
-): string | undefined {
-  if (!datetime || !timezone) return undefined;
-
-  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
-    return undefined;
-  }
-
-  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
-  if (dateOnlyRegex.test(datetime)) {
-    return undefined;
-  }
-
-  const format = detectDateTimeFormat(datetime);
-  const momentDate = moment.tz(datetime, format, timezone);
-  if (!momentDate.isValid()) {
-    console.warn(
-      `[convertDateTimeStringToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${timezone}"`
-    );
-    return undefined;
-  }
-  return momentDate.toISOString();
 }
 
 export function calendarEventToJCal(

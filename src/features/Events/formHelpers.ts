@@ -1,4 +1,4 @@
-import { resolveTimezone } from "@/components/Calendar/TimezoneSelector";
+import { resolveTimezone } from "@/utils/timezone";
 import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { browserDefaultTimeZone } from "@/utils/timezone";

@@ -1,8 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import {
-  getTimezoneOffset,
-  resolveTimezone,
-} from "@/components/Calendar/TimezoneSelector";
+import { getTimezoneOffset, resolveTimezone } from "@/utils/timezone";
 import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";

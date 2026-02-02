@@ -1,41 +1,14 @@
-import { detectDateTimeFormat } from "@/components/Event/utils/dateTimeHelpers";
 import { refreshSingularCalendar } from "@/components/Event/utils/eventUtils";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { convertEventDateTimeToISO } from "@/utils/timezone";
 import { SlotLabelContentArg } from "@fullcalendar/core";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import moment from "moment-timezone";
 import { useI18n } from "twake-i18n";
-
-function convertEventDateTimeToISO(
-  datetime: string,
-  eventTimezone: string,
-  isAllDay: boolean
-): string {
-  if (!datetime || isAllDay) return datetime;
-
-  if (datetime.includes("Z") || datetime.match(/[+-]\d{2}:\d{2}$/)) {
-    return datetime;
-  }
-
-  const dateOnlyRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
-  if (dateOnlyRegex.test(datetime)) {
-    return datetime;
-  }
-
-  const format = detectDateTimeFormat(datetime);
-  const momentDate = moment.tz(datetime, format, eventTimezone);
-  if (!momentDate.isValid()) {
-    console.warn(
-      `[convertEventDateTimeToISO] Invalid datetime: "${datetime}" with format "${format}" in timezone "${eventTimezone}"`
-    );
-    return datetime;
-  }
-  return momentDate.toISOString();
-}
 
 export const updateSlotLabelVisibility = (
   currentTime: Date,
@@ -114,22 +87,18 @@ export const eventToFullCalendarFormat = (
       };
 
       if (!isAllDay && e.start && eventTimezone) {
-        const startISO = convertEventDateTimeToISO(
-          e.start,
-          eventTimezone,
-          isAllDay
-        );
+        const startISO = convertEventDateTimeToISO(e.start, eventTimezone, {
+          isAllDay,
+        });
         if (startISO) {
           convertedEvent.start = startISO;
         }
       }
 
       if (!isAllDay && e.end && eventTimezone) {
-        const endISO = convertEventDateTimeToISO(
-          e.end,
-          eventTimezone,
-          isAllDay
-        );
+        const endISO = convertEventDateTimeToISO(e.end, eventTimezone, {
+          isAllDay,
+        });
         if (endISO) {
           convertedEvent.end = endISO;
         }
