@@ -380,8 +380,8 @@ const CalendarSlice = createSlice({
       })
       // Rejected cases
       .addCase(getCalendarsListAsync.rejected, (state, action) => {
+        state.pending = false;
         if (action.payload?.status !== 401) {
-          state.pending = false;
           state.error =
             action.payload?.message ||
             action.error.message ||
