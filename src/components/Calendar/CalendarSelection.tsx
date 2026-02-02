@@ -17,7 +17,7 @@ import {
 } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "twake-i18n";
 import CalendarPopover from "./CalendarModal";
@@ -54,7 +54,18 @@ function CalendarAccordion({
     <Accordion
       defaultExpanded={defaultExpanded}
       expanded={expended}
-      style={{ width: "100%", padding: 0, margin: 0, boxShadow: "none" }}
+      style={{
+        width: "100%",
+        padding: 0,
+        margin: 0,
+        marginBottom: "12px",
+        boxShadow: "none",
+      }}
+      sx={{
+        "&::before": {
+          display: "none",
+        },
+      }}
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
@@ -70,7 +81,7 @@ function CalendarAccordion({
           },
         }}
       >
-        <Typography component="h3">{title}</Typography>
+        <span>{title}</span>
         {showAddButton && (
           <IconButton
             component="span"
@@ -254,7 +265,6 @@ function CalendarSelector({
           alignItems: "center",
           justifyContent: "space-between",
           transition: "background-color 0.2s ease",
-          padding: "8px 24px 8px 16px",
           "& .MoreBtn": { opacity: 0 },
           "&:hover": {
             backgroundColor: "#F3F3F6",
@@ -290,7 +300,7 @@ function CalendarSelector({
           </span>
         </label>
         <IconButton className="MoreBtn" onClick={handleClick}>
-          <MoreVertIcon />
+          <MoreHorizIcon />
         </IconButton>
       </ListItem>
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>

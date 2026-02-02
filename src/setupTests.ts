@@ -59,6 +59,30 @@ class IntersectionObserverMock {
 
 (global as any).IntersectionObserver = IntersectionObserverMock;
 
+// Suppress jsdom CSS selector parsing errors for Emotion/MUI
+if (typeof window !== "undefined" && window.getComputedStyle) {
+  const originalGetComputedStyle = window.getComputedStyle;
+  window.getComputedStyle = function (
+    element: Element,
+    pseudoElement?: string | null
+  ) {
+    try {
+      return originalGetComputedStyle.call(this, element, pseudoElement);
+    } catch (error) {
+      // If CSS selector parsing fails, return a minimal computed style
+      if (
+        error instanceof Error &&
+        error.message.includes("is not a valid selector")
+      ) {
+        return {
+          getPropertyValue: () => "",
+        } as CSSStyleDeclaration;
+      }
+      throw error;
+    }
+  };
+}
+
 beforeAll(() => {
   console.warn = (...args: unknown[]) => {
     if (

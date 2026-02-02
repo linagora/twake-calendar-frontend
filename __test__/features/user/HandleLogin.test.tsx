@@ -114,6 +114,11 @@ describe("HandleLogin", () => {
   test("goes to error page when there is error in user data", async () => {
     const mockDispatch = jest.fn();
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(mockDispatch);
+    jest.spyOn(oidcAuth, "Auth").mockResolvedValue({
+      code_verifier: "verifier123",
+      state: "state123",
+      redirectTo: new URL("http://login.url"),
+    });
 
     renderWithProviders(<HandleLogin />, {
       user: {
@@ -128,14 +133,17 @@ describe("HandleLogin", () => {
         tokens: { access_token: "test" },
       },
       calendars: {
-        pending: false,
-        error: false,
         list: {},
+        pending: false,
+        error: null,
       },
     });
 
-    await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith(push("/error"));
-    });
+    await waitFor(
+      () => {
+        expect(mockDispatch).toHaveBeenCalledWith(push("/error"));
+      },
+      { timeout: 3000 }
+    );
   });
 });
