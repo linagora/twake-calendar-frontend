@@ -1,8 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import {
-  getTimezoneOffset,
-  useTimeZoneList,
-} from "@/components/Calendar/TimezoneSelector";
+import { useTimeZoneList } from "@/components/Calendar/TimezoneSelector";
+import { getTimezoneOffset } from "@/utils/timezone";
 import { TimezoneAutocomplete } from "@/components/Timezone/TimezoneAutocomplete";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import {
