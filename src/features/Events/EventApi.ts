@@ -203,6 +203,22 @@ export const deleteEventInstance = async (
   event: CalendarEvent,
   calOwnerEmail?: string
 ) => {
+  // Get all VEVENTs (master + overrides) from the series
+  const vevents = await getAllRecurrentEvent(event);
+
+  // Find the master VEVENT
+  const masterIndex = vevents.findIndex(
+    ([, props]: [string, any[]]) =>
+      !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+  );
+
+  if (masterIndex === -1) {
+    throw new Error("No master VEVENT found for this series");
+  }
+
+  const exdateValue = event.start;
+
+  // Fetch the master event to determine if it's all-day
   const seriesEvent = await getEvent(
     {
       ...event,
@@ -210,10 +226,83 @@ export const deleteEventInstance = async (
     },
     true
   );
-  seriesEvent.exdates = [...(seriesEvent.exdates || []), event.start];
-  delete seriesEvent.recurrenceId;
 
-  return putEvent(seriesEvent, calOwnerEmail);
+  // Format the datetime appropriately based on whether it's all-day
+  let formattedExdate: string;
+  if (seriesEvent.allday) {
+    // For all-day events, use date-only format (YYYYMMDD)
+    const dateMatch = exdateValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (dateMatch) {
+      formattedExdate = `${dateMatch[1]}${dateMatch[2]}${dateMatch[3]}`;
+    } else {
+      formattedExdate = exdateValue;
+    }
+  } else {
+    // For timed events, convert to the event's timezone format
+    const timezone = seriesEvent.timezone || "Etc/UTC";
+    const format = detectDateTimeFormat(exdateValue);
+    const momentDate = moment.tz(exdateValue, format, timezone);
+
+    if (momentDate.isValid()) {
+      // Format as iCalendar DATETIME (YYYYMMDDTHHmmss)
+      formattedExdate = momentDate.format("YYYYMMDDTHHmmss");
+    } else {
+      // Fallback to using the value as-is
+      formattedExdate = exdateValue;
+    }
+  }
+
+  // Get existing EXDATE properties from master VEVENT
+  const masterProps = vevents[masterIndex][1];
+
+  // Check if this date is already in EXDATE (avoid duplicates)
+  const isDuplicate = masterProps.some((prop: any[]) => {
+    if (prop[0].toLowerCase() === "exdate" && prop[3]) {
+      return prop[3] === formattedExdate;
+    }
+    return false;
+  });
+
+  if (!isDuplicate) {
+    // Add new EXDATE property as a separate entry
+    const valueType = seriesEvent.allday ? "date" : "date-time";
+    masterProps.push([
+      "exdate",
+      { tzid: event.timezone },
+      valueType,
+      formattedExdate,
+    ]);
+  }
+
+  // Update the master VEVENT with the new properties
+  vevents[masterIndex][1] = masterProps;
+
+  // Remove the override instance if it exists (in case it was an override being deleted)
+  const filteredVevents = vevents.filter(([, props]: [string, any[]]) => {
+    const recurrenceIdProp = props.find(
+      ([k]: string[]) => k.toLowerCase() === "recurrence-id"
+    );
+    if (!recurrenceIdProp) return true; // Keep master
+    return recurrenceIdProp[3] !== event.recurrenceId; // Remove matching override
+  });
+
+  // Build the updated jCal with all VEVENTs and timezone
+  const timezoneData = TIMEZONES.zones[seriesEvent.timezone];
+  const vtimezone = makeTimezone(timezoneData, seriesEvent);
+
+  const newJCal = [
+    "vcalendar",
+    [],
+    [...filteredVevents, vtimezone.component.jCal],
+  ];
+
+  return api(`dav${event.URL}`, {
+    method: "PUT",
+    body: JSON.stringify(newJCal),
+    headers: {
+      "content-type": "text/calendar; charset=utf-8",
+    },
+  });
 };
 
 export const updateSeriesPartstat = async (

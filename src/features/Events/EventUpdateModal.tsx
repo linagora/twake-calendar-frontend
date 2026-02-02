@@ -42,10 +42,7 @@ import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import {
-  combineMasterDateWithFormTime,
-  detectRecurringEventChanges,
-} from "./eventUtils";
+import { detectRecurringEventChanges } from "./eventUtils";
 
 function EventUpdateModal({
   eventId,
@@ -546,58 +543,42 @@ function EventUpdateModal({
     let startDate: string;
     let endDate: string;
 
-    // For "all events" update, use master event's DATE but apply user's TIME from form
-    if (masterEventData && typeOfAction === "all") {
-      const combined = combineMasterDateWithFormTime(
-        masterEventData,
-        start,
-        end,
-        timezone,
-        allday,
-        formatDateTimeInTimezone
+    // For single events or "solo" edits, use the edited dates from form
+    if (allday) {
+      // For all-day events, use date format (YYYY-MM-DD)
+      // Extract date string directly to avoid timezone conversion issues
+      const startDateOnly = (start || "").split("T")[0];
+      const endDateOnlyUI = (end || start || "").split("T")[0];
+      // API needs end date = UI end date + 1 day
+      const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
+      // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+      const [startYear, startMonth, startDay] = startDateOnly
+        .split("-")
+        .map(Number);
+      const [endYear, endMonth, endDay] = endDateOnlyAPI.split("-").map(Number);
+      const startDateObj = new Date(
+        Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
       );
-      startDate = combined.startDate;
-      endDate = combined.endDate;
+      const endDateObj = new Date(
+        Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+      );
+      startDate = startDateObj.toISOString();
+      endDate = endDateObj.toISOString();
     } else {
-      // For single events or "solo" edits, use the edited dates from form
-      if (allday) {
-        // For all-day events, use date format (YYYY-MM-DD)
-        // Extract date string directly to avoid timezone conversion issues
-        const startDateOnly = (start || "").split("T")[0];
-        const endDateOnlyUI = (end || start || "").split("T")[0];
-        // API needs end date = UI end date + 1 day
-        const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
-        // Parse date string and create Date at UTC midnight to avoid timezone offset issues
-        const [startYear, startMonth, startDay] = startDateOnly
-          .split("-")
-          .map(Number);
-        const [endYear, endMonth, endDay] = endDateOnlyAPI
-          .split("-")
-          .map(Number);
-        const startDateObj = new Date(
-          Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
-        );
-        const endDateObj = new Date(
-          Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
-        );
-        startDate = startDateObj.toISOString();
-        endDate = endDateObj.toISOString();
+      // For timed events
+      startDate = convertFormDateTimeToISO(start, timezone);
+      // In normal mode, only override end date when the end date field is not shown and end date is same as start date
+      const startDateOnly = (start || "").split("T")[0];
+      const endDateOnly = (end || "").split("T")[0];
+      if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
+        const endTimeOnly = end.includes("T")
+          ? end.split("T")[1]?.slice(0, 5) || "00:00"
+          : "00:00";
+        const endDateTime = `${startDateOnly}T${endTimeOnly}`;
+        endDate = convertFormDateTimeToISO(endDateTime, timezone);
       } else {
-        // For timed events
-        startDate = convertFormDateTimeToISO(start, timezone);
-        // In normal mode, only override end date when the end date field is not shown and end date is same as start date
-        const startDateOnly = (start || "").split("T")[0];
-        const endDateOnly = (end || "").split("T")[0];
-        if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
-          const endTimeOnly = end.includes("T")
-            ? end.split("T")[1]?.slice(0, 5) || "00:00"
-            : "00:00";
-          const endDateTime = `${startDateOnly}T${endTimeOnly}`;
-          endDate = convertFormDateTimeToISO(endDateTime, timezone);
-        } else {
-          // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
-          endDate = convertFormDateTimeToISO(end, timezone);
-        }
+        // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
+        endDate = convertFormDateTimeToISO(end, timezone);
       }
     }
 
