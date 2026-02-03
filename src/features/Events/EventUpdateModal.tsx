@@ -823,8 +823,7 @@ function EventUpdateModal({
             event,
             { repetition, timezone, allday, start, end },
             masterEventData,
-            resolveTimezone,
-            formatDateTimeInTimezone
+            resolveTimezone
           );
           const repetitionRulesChanged = changes.repetitionRulesChanged;
 

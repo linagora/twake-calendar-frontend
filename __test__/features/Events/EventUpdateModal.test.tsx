@@ -558,7 +558,6 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
 
     await act(async () => {
       fireEvent.click(saveButton);
-      await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
     // Verify onCloseAll was called to close both preview and update modals
