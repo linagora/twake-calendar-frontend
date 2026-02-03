@@ -220,7 +220,7 @@ export const deleteEventInstance = async (
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
-  const normalizeRecurrenceId = (id: string) => id.replace(/Z$/, "") || "";
+  const normalizeRecurrenceId = (id: string) => (id ?? "").replace(/Z$/, "");
   const isDuplicate = masterProps.some((prop: any[]) => {
     if (prop[0].toLowerCase() === "exdate" && prop[3]) {
       return (

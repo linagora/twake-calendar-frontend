@@ -524,9 +524,8 @@ export function detectRecurringEventChanges(
 
   // Parse old times (ISO strings from the server) into the event's timezone
   // and extract HH:mm for comparison.
-  const oldStartTime = moment.tz(oldStart, newTimezone).format("HH:mm");
-  const oldEndTime = moment.tz(oldEnd, newTimezone).format("HH:mm");
-
+  const oldStartTime = moment.tz(oldStart, oldTimezone).format("HH:mm");
+  const oldEndTime = moment.tz(oldEnd, oldTimezone).format("HH:mm");
   // Parse new times from the form. These may be either:
   //   - local datetime strings like "2025-01-15T10:00" (from the form)
   //   - ISO strings like "2025-01-15T10:00:00.000Z" (if pre-converted)
