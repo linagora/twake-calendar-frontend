@@ -179,7 +179,6 @@ export function parseCalendarEvent(
   }
 
   const eventTimezone = event.timezone;
-  event.timezone = eventTimezone;
 
   if (!event.end) {
     const start = event.start ? new Date(event.start) : new Date();

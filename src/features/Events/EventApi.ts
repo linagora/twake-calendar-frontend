@@ -245,7 +245,10 @@ export const deleteEventInstance = async (
       ([k]: string[]) => k.toLowerCase() === "recurrence-id"
     );
     if (!recurrenceIdProp) return true; // Keep master
-    return recurrenceIdProp[3] !== event.recurrenceId; // Remove matching override
+    return (
+      normalizeRecurrenceId(recurrenceIdProp[3]) !==
+      normalizeRecurrenceId(event.recurrenceId ?? "")
+    ); // Remove matching override
   });
 
   // Build the updated jCal with all VEVENTs and timezone

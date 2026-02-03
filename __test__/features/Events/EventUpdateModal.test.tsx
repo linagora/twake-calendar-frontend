@@ -1,4 +1,3 @@
-import * as eventUtils from "@/components/Event/utils/eventUtils";
 import * as CalendarApi from "@/features/Calendars/CalendarApi";
 import * as EventApi from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
