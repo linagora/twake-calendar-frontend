@@ -14,9 +14,6 @@ function inferTimezoneFromValue(
   value: string
 ): string | undefined {
   if (!params) {
-    if (typeof value === "string" && value.endsWith("Z")) {
-      return "Etc/UTC";
-    }
     return undefined;
   }
 
@@ -29,11 +26,6 @@ function inferTimezoneFromValue(
       return resolved;
     }
   }
-
-  if (typeof value === "string" && value.endsWith("Z")) {
-    return "Etc/UTC";
-  }
-
   return undefined;
 }
 
@@ -186,7 +178,7 @@ export function parseCalendarEvent(
     event.error = `missing crucial event param in calendar ${calendarid} `;
   }
 
-  const eventTimezone = event.timezone || "Etc/UTC";
+  const eventTimezone = event.timezone;
   event.timezone = eventTimezone;
 
   if (!event.end) {

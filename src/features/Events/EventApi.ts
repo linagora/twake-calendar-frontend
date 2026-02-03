@@ -1,6 +1,5 @@
 import { api } from "@/utils/apiUtils";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
+import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
@@ -216,49 +215,14 @@ export const deleteEventInstance = async (
     throw new Error("No master VEVENT found for this series");
   }
 
-  const exdateValue = event.start;
-
-  // Fetch the master event to determine if it's all-day
-  const seriesEvent = await getEvent(
-    {
-      ...event,
-      uid: extractEventBaseUuid(event.uid),
-    },
-    true
-  );
-
-  // Format the datetime appropriately based on whether it's all-day
-  let formattedExdate: string;
-  if (seriesEvent.allday) {
-    // For all-day events, use date-only format (YYYYMMDD)
-    const dateMatch = exdateValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (dateMatch) {
-      formattedExdate = `${dateMatch[1]}${dateMatch[2]}${dateMatch[3]}`;
-    } else {
-      formattedExdate = exdateValue;
-    }
-  } else {
-    // For timed events, convert to the event's timezone format
-    const timezone = seriesEvent.timezone || "Etc/UTC";
-    const format = detectDateTimeFormat(exdateValue);
-    const momentDate = moment.tz(exdateValue, format, timezone);
-
-    if (momentDate.isValid()) {
-      // Format as iCalendar DATETIME (YYYYMMDDTHHmmss)
-      formattedExdate = momentDate.format("YYYYMMDDTHHmmss");
-    } else {
-      // Fallback to using the value as-is
-      formattedExdate = exdateValue;
-    }
-  }
-
-  // Get existing EXDATE properties from master VEVENT
+  const exdateValue = event.recurrenceId || event.start;
+  const seriesEvent = parseCalendarEvent(vevents[masterIndex][1], {}, "", "");
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
   const isDuplicate = masterProps.some((prop: any[]) => {
     if (prop[0].toLowerCase() === "exdate" && prop[3]) {
-      return prop[3] === formattedExdate;
+      return prop[3] === exdateValue;
     }
     return false;
   });
@@ -266,12 +230,7 @@ export const deleteEventInstance = async (
   if (!isDuplicate) {
     // Add new EXDATE property as a separate entry
     const valueType = seriesEvent.allday ? "date" : "date-time";
-    masterProps.push([
-      "exdate",
-      { tzid: event.timezone },
-      valueType,
-      formattedExdate,
-    ]);
+    masterProps.push(["exdate", {}, valueType, exdateValue]);
   }
 
   // Update the master VEVENT with the new properties
