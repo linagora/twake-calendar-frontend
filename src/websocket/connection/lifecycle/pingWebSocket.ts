@@ -140,10 +140,21 @@ export function setupWebSocketPing(
   const originalOnMessage = socket?.onmessage;
   if (socket) {
     socket.onmessage = (event) => {
-      try {
+      let isPong = false;
+      if (typeof event.data === "string") {
+        try {
+          const payload = JSON.parse(event.data);
+          // Check if it's an empty object {}
+          isPong =
+            typeof payload === "object" &&
+            payload !== null &&
+            Object.keys(payload).length === 0;
+        } catch {
+          // Non-JSON payload
+        }
+      }
+      if (isPong) {
         handlePong();
-      } catch (e) {
-        // Not JSON or not a pong message, ignore
       }
       // Call original handler
       originalOnMessage?.call(socket, event);
@@ -158,8 +169,8 @@ export function setupWebSocketPing(
       isStopped = true;
       cleanup();
       // Restore original onmessage handler
-      if (socket && originalOnMessage) {
-        socket.onmessage = originalOnMessage;
+      if (socket) {
+        socket.onmessage = originalOnMessage ?? null;
       }
     },
     sendPing: () => {
