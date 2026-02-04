@@ -20,7 +20,9 @@ import {
   MenuItem,
   Tooltip,
   Typography,
+  useTheme,
 } from "@linagora/twake-mui";
+import { alpha } from "@mui/material/styles";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -73,6 +75,9 @@ export default function EventPreviewModal({
     : calendars.list[calId];
   const event = calendar.events[eventId];
   const user = useAppSelector((state) => state.user.userData);
+  const theme = useTheme();
+  const infoIconColor = alpha(theme.palette.grey[900], 0.9);
+  const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
   if (!user) return null;
 
   const isRecurring = event?.uid?.includes("/");
@@ -451,10 +456,10 @@ export default function EventPreviewModal({
                   title={t("eventPreview.privateEvent.tooltipOwn")}
                   placement="top"
                 >
-                  <LockOutlineIcon />
+                  <LockOutlineIcon sx={{ color: infoIconColor }} />
                 </Tooltip>
               ) : (
-                <LockOutlineIcon />
+                <LockOutlineIcon sx={{ color: infoIconColor }} />
               ))}
             <Typography
               variant="h5"
@@ -488,8 +493,9 @@ export default function EventPreviewModal({
             {/* Video */}
             {event.x_openpass_videoconference && (
               <InfoRow
+                alignItems="flex-start"
                 icon={
-                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                  <Box sx={{ ...infoIconSx, mt: 1 }}>
                     <VideocamOutlinedIcon />
                   </Box>
                 }
@@ -511,8 +517,9 @@ export default function EventPreviewModal({
             {attendees?.length > 0 && (
               <>
                 <InfoRow
+                  alignItems="flex-start"
                   icon={
-                    <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                    <Box sx={{ ...infoIconSx, mt: 1 }}>
                       <PeopleAltOutlinedIcon />
                     </Box>
                   }
@@ -585,8 +592,9 @@ export default function EventPreviewModal({
             {/* Location */}
             {event.location && (
               <InfoRow
+                alignItems="flex-start"
                 icon={
-                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                  <Box sx={infoIconSx}>
                     <LocationOnOutlinedIcon />
                   </Box>
                 }
@@ -600,8 +608,9 @@ export default function EventPreviewModal({
             {/* Description */}
             {event.description && (
               <InfoRow
+                alignItems="flex-start"
                 icon={
-                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                  <Box sx={infoIconSx}>
                     <SubjectIcon />
                   </Box>
                 }
@@ -615,8 +624,9 @@ export default function EventPreviewModal({
             {/* ALARM */}
             {event.alarm && (
               <InfoRow
+                alignItems="flex-start"
                 icon={
-                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                  <Box sx={infoIconSx}>
                     <NotificationsNoneIcon />
                   </Box>
                 }
@@ -641,8 +651,9 @@ export default function EventPreviewModal({
             {/* Repetition */}
             {event.repetition && (
               <InfoRow
+                alignItems="flex-start"
                 icon={
-                  <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+                  <Box sx={infoIconSx}>
                     <RepeatIcon />
                   </Box>
                 }
@@ -681,8 +692,9 @@ export default function EventPreviewModal({
         {/* Error */}
         {event.error && (
           <InfoRow
+            alignItems="flex-start"
             icon={
-              <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+              <Box sx={infoIconSx}>
                 <ErrorOutlineIcon color="error" />
               </Box>
             }
@@ -698,12 +710,12 @@ export default function EventPreviewModal({
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
             gap: 1,
             mb: 2,
           }}
         >
-          <Box sx={{ minWidth: "25px", marginRight: 2 }}>
+          <Box sx={infoIconSx}>
             <CalendarTodayIcon />
           </Box>
           <CalendarName calendar={calendar} />

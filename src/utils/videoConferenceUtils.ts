@@ -33,7 +33,8 @@ export function generateMeetingLink(baseUrl?: string): string {
 }
 
 /**
- * Add video conference footer to event description
+ * Add video conference footer to event description.
+ * If description is empty, adds on first line; otherwise adds on the line below existing content.
  * @param {string} description - Original description
  * @param {string} meetingLink - Generated meeting link
  * @returns {string} Description with video conference footer
@@ -42,8 +43,9 @@ export function addVideoConferenceToDescription(
   description: string,
   meetingLink: string
 ): string {
-  const footer = `\nVisio: ${meetingLink}`;
-  return description + footer;
+  const line = `Visio: ${meetingLink}`;
+  const trimmed = description.trimEnd();
+  return trimmed ? `${trimmed}\n${line}` : line;
 }
 
 /**

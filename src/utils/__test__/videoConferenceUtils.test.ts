@@ -45,11 +45,11 @@ describe("videoConferenceUtils", () => {
   });
 
   describe("addVideoConferenceToDescription", () => {
-    it("should add video conference footer to empty description", () => {
+    it("should add video conference on first line when description is empty", () => {
       const description = "";
       const meetingLink = "https://meet.linagora.com/abc-defg-hij";
       const result = addVideoConferenceToDescription(description, meetingLink);
-      expect(result).toBe("\nVisio: https://meet.linagora.com/abc-defg-hij");
+      expect(result).toBe("Visio: https://meet.linagora.com/abc-defg-hij");
     });
 
     it("should add video conference footer to existing description", () => {

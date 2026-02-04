@@ -13,6 +13,13 @@ import { Avatar, Badge, Box, Typography } from "@linagora/twake-mui";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
+const EMAIL_DISPLAY_MAX_LENGTH = 50;
+
+function truncateDisplayText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength)}...`;
+}
+
 export function renderAttendeeBadge(
   a: userAttendee,
   key: string,
@@ -65,15 +72,11 @@ export function renderAttendeeBadge(
           <Avatar {...stringAvatar(a.cn || a.cal_address)} />
         </Badge>
         <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <Typography
-            noWrap
-            style={{
-              maxWidth: "180px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {a.cn || a.cal_address}
+          <Typography noWrap>
+            {truncateDisplayText(
+              a.cn || a.cal_address,
+              EMAIL_DISPLAY_MAX_LENGTH
+            )}
           </Typography>
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
