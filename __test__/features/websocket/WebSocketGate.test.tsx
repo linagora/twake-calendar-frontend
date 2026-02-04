@@ -11,6 +11,7 @@ import { I18nContext } from "twake-i18n";
 jest.mock("@/websocket/connection/createConnection");
 jest.mock("@/websocket/operations/registerToCalendars");
 jest.mock("@/websocket/operations/unregisterToCalendars");
+jest.mock("@/websocket/connection/lifecycle/pingWebSocket");
 
 function TestWrapper({ store }: { store: Store }) {
   return (
@@ -72,6 +73,7 @@ describe("WebSocketGate", () => {
   afterEach(() => {
     cleanup();
     jest.clearAllMocks();
+    jest.clearAllTimers();
     localStorage.clear();
   });
 

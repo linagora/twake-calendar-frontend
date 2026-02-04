@@ -62,6 +62,8 @@ class IntersectionObserverMock {
 // Suppress jsdom CSS selector parsing errors for Emotion/MUI
 if (typeof window !== "undefined" && window.getComputedStyle) {
   const originalGetComputedStyle = window.getComputedStyle;
+  (window as any).WS_PING_PERIOD_MS = 5000;
+  (window as any).WS_PING_TIMEOUT_PERIOD_MS = 5000;
   window.getComputedStyle = function (
     element: Element,
     pseudoElement?: string | null
