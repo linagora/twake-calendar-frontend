@@ -4,6 +4,7 @@ import { Logout } from "@/features/User/oidcAuth";
 import logo from "@/static/header-logo.svg";
 import { getInitials, stringToGradient } from "@/utils/avatarUtils";
 import { getUserDisplayName } from "@/utils/userUtils";
+import { redirectTo } from "@/utils/navigation";
 import { CalendarApi } from "@fullcalendar/core";
 import {
   Avatar,
@@ -19,7 +20,8 @@ import {
   Select,
   Typography,
 } from "@linagora/twake-mui";
-import AppsIcon from "@mui/icons-material/Apps";
+import WidgetsOutlinedIcon from "@mui/icons-material/WidgetsOutlined";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -139,7 +141,7 @@ export function Menubar({
   const handleLogoutClick = async () => {
     const logoutUrl = await Logout();
     sessionStorage.removeItem("tokenSet");
-    window.location.assign(logoutUrl.href);
+    redirectTo(logoutUrl.href);
     handleUserMenuClose();
   };
 
@@ -195,9 +197,9 @@ export function Menubar({
           </div>
           <div className="menu-items">
             <div className="current-date-time">
-              <Typography variant="h3" component="div">
+              <p>
                 {dateLabel}
-              </Typography>
+              </p>
             </div>
           </div>
         </div>
@@ -211,6 +213,7 @@ export function Menubar({
               onClick={onRefresh}
               aria-label={t("menubar.refresh")}
               title={t("menubar.refresh")}
+              sx={{ mr: 1 }}
             >
               <RefreshIcon />
             </IconButton>
@@ -226,7 +229,11 @@ export function Menubar({
                 onChange={(e) => handleViewChange(e.target.value)}
                 variant="outlined"
                 aria-label={t("menubar.viewSelector")}
-                sx={{ height: "43px" }}
+                sx={{
+                  borderRadius: "12px",
+                  marginLeft: 1,
+                  "& fieldset": { borderRadius: "12px" }
+                }}
               >
                 <MenuItem value="dayGridMonth">
                   {t("menubar.views.month")}
@@ -241,6 +248,19 @@ export function Menubar({
             </FormControl>
           </div>
           <div className="menu-items">
+            <IconButton
+              component="a"
+              href="https://twake.app/support/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginRight: 8 }}
+              aria-label={t("menubar.help")}
+              title={t("menubar.help")}
+            >
+              <HelpOutlineIcon />
+            </IconButton>
+          </div>
+          <div className="menu-items">
             {applist.length > 0 && (
               <IconButton
                 onClick={handleOpen}
@@ -248,7 +268,7 @@ export function Menubar({
                 aria-label={t("menubar.apps")}
                 title={t("menubar.apps")}
               >
-                <AppsIcon />
+                <WidgetsOutlinedIcon />
               </IconButton>
             )}
           </div>

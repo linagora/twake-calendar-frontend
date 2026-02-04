@@ -64,7 +64,7 @@ function MyComponent() {
 | `onExpandToggle`          | `() => void`          | -         | Handler for back button click when expanded                 |
 | `normalMaxWidth`          | `string`              | `"570px"` | Max width in normal mode                                    |
 | `expandedContentMaxWidth` | `string`              | `"990px"` | Content container max-width in expanded mode                |
-| `headerHeight`            | `string`              | `"90px"`  | App header height to preserve                               |
+| `headerHeight`            | `string`              | `"70px"`  | App header height to preserve                               |
 | `normalSpacing`           | `number`              | `2`       | Stack spacing in normal mode (MUI spacing units: 1 = 8px)   |
 | `expandedSpacing`         | `number`              | `2`       | Stack spacing in expanded mode (MUI spacing units: 1 = 8px) |
 | `contentSx`               | `SxProps<Theme>`      | -         | Custom styles for DialogContent                             |
@@ -149,7 +149,7 @@ For apps with different header heights:
   open={open}
   onClose={handleClose}
   title="Custom Header Height"
-  headerHeight="80px"
+  headerHeight="70px"
   isExpanded={true}
 >
   <TextField label="Content" />

@@ -100,7 +100,7 @@ function ResponsiveDialog({
   onExpandToggle,
   normalMaxWidth = "570px",
   expandedContentMaxWidth = "990px",
-  headerHeight = "90px",
+  headerHeight = "70px",
   normalSpacing = 2,
   expandedSpacing = 2,
   contentSx,
