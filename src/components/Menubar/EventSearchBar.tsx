@@ -214,7 +214,7 @@ export default function SearchBar() {
         }}
       >
         {!extended && (
-          <IconButton onClick={() => setExtended(true)}>
+          <IconButton sx={{ mr: 1 }} onClick={() => setExtended(true)}>
             <SearchIcon />
           </IconButton>
         )}

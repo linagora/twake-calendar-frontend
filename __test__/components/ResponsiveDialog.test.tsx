@@ -248,7 +248,7 @@ describe("ResponsiveDialog", () => {
         onClose={mockOnClose}
         title="Test"
         isExpanded={true}
-        headerHeight="100px"
+        headerHeight="70px"
       >
         <div>Custom Header Content</div>
       </ResponsiveDialog>
