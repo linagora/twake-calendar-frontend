@@ -19,8 +19,8 @@ export interface PingCleanup {
   sendPing: () => void;
 }
 
-const DEFAULT_PING_INTERVAL = (window as any).WS_PING_PERIOD_MS;
-const DEFAULT_PONG_TIMEOUT = (window as any).WS_PING_TIMEOUT_PERIOD_MS;
+const DEFAULT_PING_INTERVAL = (window as any).WS_PING_PERIOD_MS ?? 30000;
+const DEFAULT_PONG_TIMEOUT = (window as any).WS_PING_TIMEOUT_PERIOD_MS ?? 35000;
 
 /**
  * Sets up a ping/pong mechanism to monitor WebSocket connection health
