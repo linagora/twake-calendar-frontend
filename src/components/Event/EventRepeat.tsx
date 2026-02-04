@@ -33,7 +33,7 @@ export default function RepeatEvent({
   const day = new Date(eventStart);
   // derive endOption based on repetition
   const getEndOption = () => {
-    if (repetition.occurrences && repetition.occurrences >= 0) return "after";
+    if (repetition.occurrences && repetition.occurrences > 0) return "after";
     if (repetition.endDate) return "on";
     return "never";
   };
@@ -171,19 +171,26 @@ export default function RepeatEvent({
               setEndOption(value);
 
               if (value === "never") {
-                setRepetition({ ...repetition, occurrences: 0, endDate: "" });
+                setRepetition({
+                  ...repetition,
+                  occurrences: null,
+                  endDate: null,
+                });
               }
               if (value === "after") {
                 setRepetition({
                   ...repetition,
-                  occurrences: 0,
-                  endDate: "",
+                  occurrences:
+                    repetition.occurrences && repetition.occurrences > 0
+                      ? repetition.occurrences
+                      : 1,
+                  endDate: null,
                 });
               }
               if (value === "on") {
                 setRepetition({
                   ...repetition,
-                  occurrences: 0,
+                  occurrences: null,
                   endDate: new Date().toISOString().slice(0, 16),
                 });
               }
@@ -212,14 +219,15 @@ export default function RepeatEvent({
                   <TextField
                     type="number"
                     size="small"
-                    value={repetition.occurrences ?? 0}
-                    onChange={(e) =>
+                    value={repetition.occurrences ?? 1}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
                       setRepetition({
                         ...repetition,
-                        endDate: "",
-                        occurrences: Number(e.target.value),
-                      })
-                    }
+                        endDate: null,
+                        occurrences: value > 0 ? value : 1,
+                      });
+                    }}
                     style={{ width: 100 }}
                     inputProps={{ min: 1, "data-testid": "occurrences-input" }}
                     disabled={!isOwn || endOption !== "after"}
@@ -248,11 +256,11 @@ export default function RepeatEvent({
                     onChange={(e) =>
                       setRepetition({
                         ...repetition,
-                        occurrences: 0,
+                        occurrences: null,
                         endDate: e.target.value,
                       })
                     }
-                    disabled={endOption !== "on"}
+                    disabled={!isOwn || endOption !== "on"}
                   />
                 </Box>
               }
