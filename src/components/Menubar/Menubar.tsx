@@ -197,9 +197,7 @@ export function Menubar({
           </div>
           <div className="menu-items">
             <div className="current-date-time">
-              <p>
-                {dateLabel}
-              </p>
+              <p>{dateLabel}</p>
             </div>
           </div>
         </div>
@@ -232,7 +230,7 @@ export function Menubar({
                 sx={{
                   borderRadius: "12px",
                   marginLeft: 1,
-                  "& fieldset": { borderRadius: "12px" }
+                  "& fieldset": { borderRadius: "12px" },
                 }}
               >
                 <MenuItem value="dayGridMonth">

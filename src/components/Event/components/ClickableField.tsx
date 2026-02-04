@@ -8,6 +8,7 @@ interface ClickableFieldProps {
   onClick: () => void;
   iconColor?: string;
   children?: React.ReactNode;
+  ariaLabel?: string;
 }
 
 export const ClickableField: React.FC<ClickableFieldProps> = ({
@@ -16,12 +17,22 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
   onClick,
   iconColor,
   children,
+  ariaLabel,
 }) => {
   const theme = useTheme();
 
   return (
     <Box
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={ariaLabel ?? text}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       sx={{
         display: "flex",
         alignItems: children ? "flex-start" : "center",
@@ -30,6 +41,10 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
         borderRadius: "4px",
         "&:hover": {
           backgroundColor: "action.hover",
+        },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: "2px",
         },
       }}
     >

@@ -5,6 +5,7 @@ import iconCamera from "@/static/images/icon-camera.svg";
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
+  removeVideoConferenceFromDescription,
 } from "@/utils/videoConferenceUtils";
 import {
   Box,
@@ -186,10 +187,6 @@ export default function EventFormFields({
   const [hasClickedCalendarSection, setHasClickedCalendarSection] =
     React.useState(false);
 
-  // Track if user has clicked on video meeting section in normal mode
-  const [hasClickedVideoMeetingSection, setHasClickedVideoMeetingSection] =
-    React.useState(false);
-
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
     if (!isOpen) {
@@ -197,7 +194,6 @@ export default function EventFormFields({
       setHasClickedDateTimeSection(false);
       setHasClickedLocationSection(false);
       setHasClickedCalendarSection(false);
-      setHasClickedVideoMeetingSection(false);
     }
   }, [isOpen]);
 
@@ -428,9 +424,6 @@ export default function EventFormFields({
     if (showMore) {
       setShowDescription(true);
     }
-    if (!showMore) {
-      setHasClickedVideoMeetingSection(true);
-    }
   };
 
   const [openToast, setOpenToast] = React.useState(false);
@@ -447,11 +440,7 @@ export default function EventFormFields({
   };
 
   const handleDeleteVideoConference = () => {
-    const updatedDescription = description.replace(
-      /\nVisio: https?:\/\/[^\s]+/,
-      ""
-    );
-    setDescription(updatedDescription);
+    setDescription(removeVideoConferenceFromDescription(description));
     setHasVideoConference(false);
     setMeetingLink(null);
   };
