@@ -361,9 +361,71 @@ export const updateSeries = async (
     // When date/time/timezone/repeat rules changed, remove all override instances
     finalVevents = [updatedMaster];
   } else {
-    // When only properties changed, keep override instances
-    vevents[masterIndex] = updatedMaster;
-    finalVevents = vevents;
+    // When only properties changed, keep override instances and update their metadata
+    const updatedVevents = vevents.map((vevent, index) => {
+      if (index === masterIndex) {
+        return updatedMaster;
+      }
+
+      const [veventType, props] = vevent;
+      const updatedProps = [...updatedMaster[1]];
+
+      // Fields that should be updated from master (metadata)
+      const updateFields = [
+        "summary",
+        "description",
+        "location",
+        "class",
+        "transp",
+        "attendee",
+        "organizer",
+        "valarm",
+        "x-openpaas-videoconference",
+      ];
+
+      // Start with existing exception properties
+      const newProps = [...props];
+
+      // Update each metadata field from the master
+      updateFields.forEach((fieldName) => {
+        const fieldNameLower = fieldName.toLowerCase();
+
+        // Remove old values of this field from exception
+        const filteredProps = newProps.filter(
+          ([k]) => k.toLowerCase() !== fieldNameLower
+        );
+
+        // Get new values from updated master
+        const newValues = updatedProps.filter(
+          ([k]) => k.toLowerCase() === fieldNameLower
+        );
+
+        // Replace with new values
+        newProps.length = 0;
+        newProps.push(...filteredProps, ...newValues);
+      });
+
+      // Increment sequence number for the exception
+      const sequenceIndex = newProps.findIndex(
+        ([k]) => k.toLowerCase() === "sequence"
+      );
+      if (sequenceIndex !== -1) {
+        const currentSequence = parseInt(newProps[sequenceIndex][3] || "0", 10);
+        newProps[sequenceIndex] = [
+          newProps[sequenceIndex][0],
+          newProps[sequenceIndex][1],
+          newProps[sequenceIndex][2],
+          String(currentSequence + 1),
+        ];
+      } else {
+        // Add sequence if it doesn't exist
+        newProps.push(["sequence", {}, "integer", "1"]);
+      }
+
+      return [veventType, newProps];
+    });
+
+    finalVevents = updatedVevents;
   }
 
   const newJCal = [
