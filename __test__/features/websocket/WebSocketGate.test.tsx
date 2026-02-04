@@ -904,14 +904,8 @@ describe("WebSocketGate", () => {
   });
 
   describe("Ping/Pong Integration", () => {
-    let mockPingCleanup: { stop: jest.Mock; sendPing: jest.Mock };
-
     beforeEach(() => {
       jest.useFakeTimers();
-      mockPingCleanup = {
-        stop: jest.fn(),
-        sendPing: jest.fn(),
-      };
     });
 
     afterEach(() => {
