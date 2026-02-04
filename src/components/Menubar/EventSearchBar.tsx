@@ -41,9 +41,6 @@ export default function SearchBar() {
   const personnalCalendars = userId
     ? calendars.filter((c) => extractEventBaseUuid(c.id) === userId)
     : [];
-  const sharedCalendars = userId
-    ? calendars.filter((c) => extractEventBaseUuid(c.id) !== userId)
-    : calendars;
 
   const [search, setSearch] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<User[]>([]);
@@ -118,8 +115,6 @@ export default function SearchBar() {
       searchInCalendars = calendars.map((c) => c.id);
     } else if (filters.searchIn === "my-calendars") {
       searchInCalendars = personnalCalendars.map((c) => c.id);
-    } else if (filters.searchIn === "shared-calendars") {
-      searchInCalendars = sharedCalendars.map((c) => c.id);
     } else {
       searchInCalendars = [filters.searchIn];
     }
@@ -434,20 +429,6 @@ export default function SearchBar() {
                     {t("search.filter.myCalendar")}
                   </MenuItem>
                   {CalendarItemList(personnalCalendars)}
-                  <Divider />
-                  <MenuItem
-                    value="shared-calendars"
-                    sx={{
-                      color: "#243B55",
-                      font: "Roboto",
-                      fontSize: "12px",
-                      weight: 400,
-                      pointerEvents: "auto",
-                    }}
-                  >
-                    {t("search.filter.sharedCalendars")}
-                  </MenuItem>
-                  {CalendarItemList(sharedCalendars)}
                 </Select>
               </Box>
 
