@@ -116,6 +116,7 @@ function ResponsiveDialog({
 }: ResponsiveDialogProps) {
   const baseSx: SxProps<Theme> = {
     "& .MuiBackdrop-root": {
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
       opacity: isExpanded ? "0 !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
       pointerEvents: isExpanded ? "none" : undefined,
