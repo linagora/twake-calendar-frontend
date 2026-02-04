@@ -5,7 +5,7 @@ A highly reusable dialog component that supports both normal and expanded (fulls
 ## Features
 
 - ✅ **Two Modes**: Normal popup (570px) and expanded fullscreen mode
-- ✅ **Preserves Header**: Expanded mode doesn't cover app header (90px default)
+- ✅ **Preserves Header**: Expanded mode doesn't cover app header (70px default)
 - ✅ **Clean Expanded View**: No backdrop/shadow in expanded mode for seamless integration
 - ✅ **Instant Transition**: No animation when expanding for immediate feedback
 - ✅ **Back Navigation**: Expanded mode shows back arrow icon in header for easy collapse

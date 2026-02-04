@@ -59,3 +59,19 @@ export function extractVideoConferenceFromDescription(
   const match = description.match(/Visio:\s*(https?:\/\/[^\s]+)/);
   return match ? match[1] : null;
 }
+
+const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/;
+
+/**
+ * Remove the Visio video conference line from description.
+ * Finds and removes the line matching "Visio: <url>" regardless of position (start, middle, end).
+ * @param {string} description - Event description
+ * @returns {string} Description with the Visio line removed
+ */
+export function removeVideoConferenceFromDescription(
+  description: string
+): string {
+  const lines = description.split("\n");
+  const filtered = lines.filter((line) => !VISIO_LINE_REGEX.test(line.trim()));
+  return filtered.join("\n").trimEnd();
+}
