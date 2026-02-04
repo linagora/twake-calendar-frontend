@@ -1,6 +1,5 @@
 import { api } from "@/utils/apiUtils";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
+import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
@@ -203,17 +202,72 @@ export const deleteEventInstance = async (
   event: CalendarEvent,
   calOwnerEmail?: string
 ) => {
-  const seriesEvent = await getEvent(
-    {
-      ...event,
-      uid: extractEventBaseUuid(event.uid),
-    },
-    true
-  );
-  seriesEvent.exdates = [...(seriesEvent.exdates || []), event.start];
-  delete seriesEvent.recurrenceId;
+  // Get all VEVENTs (master + overrides) from the series
+  const vevents = await getAllRecurrentEvent(event);
 
-  return putEvent(seriesEvent, calOwnerEmail);
+  // Find the master VEVENT
+  const masterIndex = vevents.findIndex(
+    ([, props]: [string, any[]]) =>
+      !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+  );
+
+  if (masterIndex === -1) {
+    throw new Error("No master VEVENT found for this series");
+  }
+
+  const exdateValue = event.recurrenceId || event.start;
+  const seriesEvent = parseCalendarEvent(vevents[masterIndex][1], {}, "", "");
+  const masterProps = vevents[masterIndex][1];
+
+  // Check if this date is already in EXDATE (avoid duplicates)
+  const normalizeRecurrenceId = (id: string) => (id ?? "").replace(/Z$/, "");
+  const isDuplicate = masterProps.some((prop: any[]) => {
+    if (prop[0].toLowerCase() === "exdate" && prop[3]) {
+      return (
+        normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateValue)
+      );
+    }
+    return false;
+  });
+
+  if (!isDuplicate) {
+    // Add new EXDATE property as a separate entry
+    const valueType = seriesEvent.allday ? "date" : "date-time";
+    masterProps.push(["exdate", {}, valueType, exdateValue]);
+  }
+
+  // Update the master VEVENT with the new properties
+  vevents[masterIndex][1] = masterProps;
+
+  // Remove the override instance if it exists (in case it was an override being deleted)
+  const filteredVevents = vevents.filter(([, props]: [string, any[]]) => {
+    const recurrenceIdProp = props.find(
+      ([k]: string[]) => k.toLowerCase() === "recurrence-id"
+    );
+    if (!recurrenceIdProp) return true; // Keep master
+    return (
+      normalizeRecurrenceId(recurrenceIdProp[3]) !==
+      normalizeRecurrenceId(event.recurrenceId ?? "")
+    ); // Remove matching override
+  });
+
+  // Build the updated jCal with all VEVENTs and timezone
+  const timezoneData = TIMEZONES.zones[seriesEvent.timezone];
+  const vtimezone = makeTimezone(timezoneData, seriesEvent);
+
+  const newJCal = [
+    "vcalendar",
+    [],
+    [...filteredVevents, vtimezone.component.jCal],
+  ];
+
+  return api(`dav${event.URL}`, {
+    method: "PUT",
+    body: JSON.stringify(newJCal),
+    headers: {
+      "content-type": "text/calendar; charset=utf-8",
+    },
+  });
 };
 
 export const updateSeriesPartstat = async (

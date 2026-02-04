@@ -14,9 +14,6 @@ function inferTimezoneFromValue(
   value: string
 ): string | undefined {
   if (!params) {
-    if (typeof value === "string" && value.endsWith("Z")) {
-      return "Etc/UTC";
-    }
     return undefined;
   }
 
@@ -29,11 +26,6 @@ function inferTimezoneFromValue(
       return resolved;
     }
   }
-
-  if (typeof value === "string" && value.endsWith("Z")) {
-    return "Etc/UTC";
-  }
-
   return undefined;
 }
 
@@ -186,8 +178,7 @@ export function parseCalendarEvent(
     event.error = `missing crucial event param in calendar ${calendarid} `;
   }
 
-  const eventTimezone = event.timezone || "Etc/UTC";
-  event.timezone = eventTimezone;
+  const eventTimezone = event.timezone;
 
   if (!event.end) {
     const start = event.start ? new Date(event.start) : new Date();
@@ -516,52 +507,38 @@ export function detectRecurringEventChanges(
     end: string;
   },
   masterEventData: CalendarEvent | null,
-  resolveTimezone: (tz: string) => string,
-  formatDateTimeInTimezone: (iso: string, tz: string) => string
+  resolveTimezone: (tz: string) => string
 ): {
   timeChanged: boolean;
   timezoneChanged: boolean;
   repetitionRulesChanged: boolean;
 } {
-  const oldRepetition = normalizeRepetition(oldEvent.repetition);
-  const newRepetition = normalizeRepetition(newData.repetition);
-
-  const oldTimezone = normalizeTimezone(oldEvent.timezone, resolveTimezone);
-  const newTimezone = normalizeTimezone(newData.timezone, resolveTimezone);
+  const oldTimezone = resolveTimezone(oldEvent.timezone || "UTC");
+  const newTimezone = resolveTimezone(newData.timezone || "UTC");
   const timezoneChanged = oldTimezone !== newTimezone;
 
-  // Check if TIME changed (compare time portion only, not date)
-  const extractTimeFromForm = (localDateTimeStr: string) => {
-    if (!localDateTimeStr) return null;
-    const timePart = localDateTimeStr.includes("T")
-      ? localDateTimeStr.split("T")[1]
-      : localDateTimeStr.substring(11);
-    return timePart?.substring(0, 5); // HH:MM
-  };
+  // Use master event as the source of truth for the "old" times,
+  // falling back to the clicked instance if master isn't available.
+  const oldStart = masterEventData?.start || oldEvent.start;
+  const oldEnd = masterEventData?.end || oldEvent.end;
 
-  const extractTimeFromISO = (isoString: string | undefined, tz: string) => {
-    if (!isoString) return null;
-    const formatted = formatDateTimeInTimezone(isoString, tz);
-    const timePart = formatted.includes("T")
-      ? formatted.split("T")[1]
-      : formatted.substring(11);
-    return timePart?.substring(0, 5); // HH:MM
-  };
-
-  const masterOldStart = masterEventData?.start || oldEvent.start;
-  const masterOldEnd = masterEventData?.end || oldEvent.end;
-
-  const formStartTime = extractTimeFromForm(newData.start);
-  const formEndTime = extractTimeFromForm(newData.end);
-
-  const oldStartTime = extractTimeFromISO(masterOldStart, newData.timezone);
-  const oldEndTime = extractTimeFromISO(masterOldEnd, newData.timezone);
+  // Parse old times (ISO strings from the server) into the event's timezone
+  // and extract HH:mm for comparison.
+  const oldStartTime = moment.tz(oldStart, oldTimezone).format("HH:mm");
+  const oldEndTime = moment.tz(oldEnd, oldTimezone).format("HH:mm");
+  // Parse new times from the form. These may be either:
+  //   - local datetime strings like "2025-01-15T10:00" (from the form)
+  //   - ISO strings like "2025-01-15T10:00:00.000Z" (if pre-converted)
+  // moment.tz with a format avoids ambiguous parsing in both cases.
+  const newStartTime = moment.tz(newData.start, newTimezone).format("HH:mm");
+  const newEndTime = moment.tz(newData.end, newTimezone).format("HH:mm");
 
   const timeChanged =
-    formStartTime !== oldStartTime || formEndTime !== oldEndTime;
+    oldStartTime !== newStartTime || oldEndTime !== newEndTime;
 
   const repetitionRulesChanged =
-    JSON.stringify(oldRepetition) !== JSON.stringify(newRepetition) ||
+    JSON.stringify(normalizeRepetition(oldEvent.repetition)) !==
+      JSON.stringify(normalizeRepetition(newData.repetition)) ||
     timezoneChanged ||
     oldEvent.allday !== newData.allday ||
     timeChanged;

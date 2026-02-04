@@ -1,19 +1,16 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { updateAttendeesAfterTimeChange } from "@/components/Calendar/handlers/eventHandlers";
-import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";
 import { addDays } from "@/components/Event/utils/dateRules";
 import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
-import { refreshCalendars } from "@/components/Event/utils/eventUtils";
 import {
   moveEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
   updateSeriesAsync,
 } from "@/features/Calendars/services";
-import { getCalendarRange } from "@/utils/dateUtils";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -45,10 +42,7 @@ import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import {
-  combineMasterDateWithFormTime,
-  detectRecurringEventChanges,
-} from "./eventUtils";
+import { detectRecurringEventChanges } from "./eventUtils";
 
 function EventUpdateModal({
   eventId,
@@ -75,31 +69,8 @@ function EventUpdateModal({
     (state) => state.calendars.list[calId]?.events[eventId]
   );
 
-  // State for fresh event data
-  const [freshEvent, setFreshEvent] = useState<CalendarEvent | null>(null);
-
   // Use fresh data if available, otherwise use eventData from props, otherwise use cached data
-  const event = freshEvent || eventData || cachedEvent;
-
-  useEffect(() => {
-    setFreshEvent(null);
-  }, [eventId, calId]);
-
-  // Fetch fresh event data when modal opens
-  useEffect(() => {
-    if (open && cachedEvent && !eventData) {
-      const fetchFreshData = async () => {
-        try {
-          const freshData = await getEvent(cachedEvent);
-          setFreshEvent(freshData);
-        } catch (err) {
-          // Keep using cached data if API fails
-        }
-      };
-
-      fetchFreshData();
-    }
-  }, [open, cachedEvent, eventData]);
+  const event = eventData || cachedEvent;
 
   const user = useAppSelector((state) => state.user);
 
@@ -186,53 +157,112 @@ function EventUpdateModal({
   // Track when restoring from error to prevent other useEffects from overriding restored data
   const isRestoringFromErrorRef = useRef(false);
 
+  // State to hold the master event when editing "all events"
+  const [masterEvent, setMasterEvent] = useState<CalendarEvent | null>(null);
+  const [isLoadingMasterEvent, setIsLoadingMasterEvent] = useState(false);
+
+  // Fetch master event when editing "all events" of a recurring series
+  useEffect(() => {
+    if (!event || !open || typeOfAction !== "all") {
+      setMasterEvent(null);
+      return;
+    }
+
+    const isRecurringEvent = !!event.repetition?.freq;
+    if (!isRecurringEvent) {
+      setMasterEvent(null);
+      return;
+    }
+
+    // Check if this is an instance (has recurrence-id)
+    const [baseUID, recurrenceId] = event.uid.split("/");
+    if (!recurrenceId) {
+      // This is already the master event
+      setMasterEvent(event);
+      return;
+    }
+
+    // Fetch the master event
+    const fetchMasterEvent = async () => {
+      setIsLoadingMasterEvent(true);
+      try {
+        const masterEventToFetch = {
+          ...event,
+          uid: baseUID, // Use base UID to get master event
+        };
+        const fetchedMasterEvent = await getEvent(masterEventToFetch, true);
+        setMasterEvent(fetchedMasterEvent);
+      } catch (err: any) {
+        console.error("Failed to fetch master event:", err);
+        // Fallback to using the clicked instance
+        setMasterEvent(event);
+      } finally {
+        setIsLoadingMasterEvent(false);
+      }
+    };
+
+    fetchMasterEvent();
+  }, [event, open, typeOfAction]);
+
   // Initialize form state when event data is available
   useEffect(() => {
     // Skip if restoring from error - data already restored
     if (isRestoringFromErrorRef.current) {
       return;
     }
+
+    // Skip if still loading master event
+    if (isLoadingMasterEvent) {
+      return;
+    }
+
     if (event && open) {
+      // Use master event for "all" action, otherwise use the clicked event
+      const eventToDisplay =
+        typeOfAction === "all" && masterEvent ? masterEvent : event;
+
       // Reset validation errors when modal opens
       setShowValidationErrors(false);
 
       // Editing existing event - populate fields with event data
-      setTitle(event.title ?? "");
-      setDescription(event.description ?? "");
-      setLocation(event.location ?? "");
+      setTitle(eventToDisplay.title ?? "");
+      setDescription(eventToDisplay.description ?? "");
+      setLocation(eventToDisplay.location ?? "");
 
       // Handle all-day events properly
-      const isAllDay = event.allday ?? false;
+      const isAllDay = eventToDisplay.allday ?? false;
       setAllDay(isAllDay);
 
       // Get event's original timezone
-      const eventTimezone = event.timezone
-        ? resolveTimezone(event.timezone)
+      const eventTimezone = eventToDisplay.timezone
+        ? resolveTimezone(eventToDisplay.timezone)
         : resolveTimezone(browserDefaultTimeZone);
 
       // Format dates based on all-day status
-      if (event.start) {
+      if (eventToDisplay.start) {
         if (isAllDay) {
           // For all-day events, use date format (YYYY-MM-DD)
-          const startDate = new Date(event.start);
+          const startDate = new Date(eventToDisplay.start);
           setStart(startDate.toISOString().split("T")[0]);
         } else {
           // For timed events, format in the event's original timezone
-          setStart(formatDateTimeInTimezone(event.start, eventTimezone));
+          setStart(
+            formatDateTimeInTimezone(eventToDisplay.start, eventTimezone)
+          );
         }
       } else {
         setStart("");
       }
 
-      if (event.end) {
+      if (eventToDisplay.end) {
         if (isAllDay) {
           // For all-day events, use date format (YYYY-MM-DD)
-          const endDate = new Date(event.end);
+          const endDate = new Date(eventToDisplay.end);
           endDate.setDate(endDate.getDate() - 1);
           setEnd(endDate.toISOString().split("T")[0]);
         } else {
           // For timed events, format in the event's original timezone
-          setEnd(formatDateTimeInTimezone(event.end, eventTimezone));
+          setEnd(formatDateTimeInTimezone(eventToDisplay.end, eventTimezone));
         }
       } else {
         setEnd("");
@@ -242,9 +272,10 @@ function EventUpdateModal({
       setCalendarid(calId);
 
       // Handle repetition properly - check both current event and base event
-      const baseEventId = extractEventBaseUuid(event.uid);
+      const baseEventId = extractEventBaseUuid(eventToDisplay.uid);
       const baseEvent = calendarsList[calId]?.events[baseEventId];
-      const repetitionSource = event.repetition || baseEvent?.repetition;
+      const repetitionSource =
+        eventToDisplay.repetition || baseEvent?.repetition;
 
       if (repetitionSource && repetitionSource.freq) {
         const repetitionData: RepetitionObject = {
@@ -262,44 +293,57 @@ function EventUpdateModal({
       }
 
       setAttendees(
-        event.attendee
-          ? event.attendee.filter(
+        eventToDisplay.attendee
+          ? eventToDisplay.attendee.filter(
               (a: userAttendee) =>
-                a.cal_address !== event.organizer?.cal_address
+                a.cal_address !== eventToDisplay.organizer?.cal_address
             )
           : []
       );
-      setAlarm(event.alarm?.trigger ?? "");
-      setEventClass(event.class ?? "PUBLIC");
-      setBusy(event.transp ?? "OPAQUE");
+      setAlarm(eventToDisplay.alarm?.trigger ?? "");
+      setEventClass(eventToDisplay.class ?? "PUBLIC");
+      setBusy(eventToDisplay.transp ?? "OPAQUE");
 
-      if (event.timezone) {
-        const resolvedTimezone = resolveTimezone(event.timezone);
+      if (eventToDisplay.timezone) {
+        const resolvedTimezone = resolveTimezone(eventToDisplay.timezone);
         setTimezone(resolvedTimezone);
       } else {
         const browserTz = resolveTimezone(browserDefaultTimeZone);
         setTimezone(browserTz);
       }
-      setHasVideoConference(event.x_openpass_videoconference ? true : false);
-      setMeetingLink(event.x_openpass_videoconference || null);
-      setNewCalId(event.calId || calId);
+      setHasVideoConference(
+        eventToDisplay.x_openpass_videoconference ? true : false
+      );
+      setMeetingLink(eventToDisplay.x_openpass_videoconference || null);
+      setNewCalId(eventToDisplay.calId || calId);
 
       // Update description to include video conference footer if exists
-      if (event.x_openpass_videoconference && event.description) {
-        const hasVideoFooter = event.description.includes("Visio:");
+      if (
+        eventToDisplay.x_openpass_videoconference &&
+        eventToDisplay.description
+      ) {
+        const hasVideoFooter = eventToDisplay.description.includes("Visio:");
         if (!hasVideoFooter) {
           setDescription(
             addVideoConferenceToDescription(
-              event.description,
-              event.x_openpass_videoconference
+              eventToDisplay.description,
+              eventToDisplay.x_openpass_videoconference
             )
           );
         } else {
-          setDescription(event.description);
+          setDescription(eventToDisplay.description);
         }
       }
     }
-  }, [open, event, calId, userPersonalCalendars, calendarsList]);
+  }, [
+    open,
+    event,
+    calId,
+    userPersonalCalendars,
+    calendarsList,
+    masterEvent,
+    isLoadingMasterEvent,
+  ]);
 
   // Helper to close modal(s) - use onCloseAll if available to close preview modal too
   const closeModal = () => {
@@ -316,7 +360,6 @@ function EventUpdateModal({
     closeModal();
     setShowValidationErrors(false);
     resetAllStateToDefault();
-    setFreshEvent(null);
     initializedKeyRef.current = null;
   };
 
@@ -467,19 +510,14 @@ function EventUpdateModal({
       return instances;
     };
 
-    // When editing "all events" of a recurring series, fetch master event to get original start time
+    // When editing "all events" of a recurring series, use the master event we already fetched
     let masterEventData: CalendarEvent | null = null;
     if (isRecurringEvent && typeOfAction === "all") {
-      try {
-        // Fetch master event using base UID (without recurrence-id)
-        const masterEventToFetch = {
-          ...event,
-          uid: baseUID, // Use base UID to get master event
-        };
-        const masterEvent = await getEvent(masterEventToFetch, true);
-        masterEventData = masterEvent;
-      } catch (err: any) {
-        // API failed - restore form data and mark as error
+      // We already have the master event from state
+      masterEventData = masterEvent;
+
+      if (!masterEventData) {
+        // This shouldn't happen, but handle it gracefully
         const formDataToSave = saveCurrentFormData();
         const errorFormData = {
           ...formDataToSave,
@@ -488,7 +526,7 @@ function EventUpdateModal({
         saveEventFormDataToTemp("update", errorFormData);
 
         showErrorNotification(
-          err?.message || "Failed to fetch event data. Please try again."
+          "Failed to load master event data. Please try again."
         );
 
         // Dispatch eventModalError to reopen modal
@@ -505,58 +543,42 @@ function EventUpdateModal({
     let startDate: string;
     let endDate: string;
 
-    // For "all events" update, use master event's DATE but apply user's TIME from form
-    if (masterEventData && typeOfAction === "all") {
-      const combined = combineMasterDateWithFormTime(
-        masterEventData,
-        start,
-        end,
-        timezone,
-        allday,
-        formatDateTimeInTimezone
+    // For single events or "solo" edits, use the edited dates from form
+    if (allday) {
+      // For all-day events, use date format (YYYY-MM-DD)
+      // Extract date string directly to avoid timezone conversion issues
+      const startDateOnly = (start || "").split("T")[0];
+      const endDateOnlyUI = (end || start || "").split("T")[0];
+      // API needs end date = UI end date + 1 day
+      const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
+      // Parse date string and create Date at UTC midnight to avoid timezone offset issues
+      const [startYear, startMonth, startDay] = startDateOnly
+        .split("-")
+        .map(Number);
+      const [endYear, endMonth, endDay] = endDateOnlyAPI.split("-").map(Number);
+      const startDateObj = new Date(
+        Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
       );
-      startDate = combined.startDate;
-      endDate = combined.endDate;
+      const endDateObj = new Date(
+        Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
+      );
+      startDate = startDateObj.toISOString();
+      endDate = endDateObj.toISOString();
     } else {
-      // For single events or "solo" edits, use the edited dates from form
-      if (allday) {
-        // For all-day events, use date format (YYYY-MM-DD)
-        // Extract date string directly to avoid timezone conversion issues
-        const startDateOnly = (start || "").split("T")[0];
-        const endDateOnlyUI = (end || start || "").split("T")[0];
-        // API needs end date = UI end date + 1 day
-        const endDateOnlyAPI = addDays(endDateOnlyUI, 1);
-        // Parse date string and create Date at UTC midnight to avoid timezone offset issues
-        const [startYear, startMonth, startDay] = startDateOnly
-          .split("-")
-          .map(Number);
-        const [endYear, endMonth, endDay] = endDateOnlyAPI
-          .split("-")
-          .map(Number);
-        const startDateObj = new Date(
-          Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
-        );
-        const endDateObj = new Date(
-          Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
-        );
-        startDate = startDateObj.toISOString();
-        endDate = endDateObj.toISOString();
+      // For timed events
+      startDate = convertFormDateTimeToISO(start, timezone);
+      // In normal mode, only override end date when the end date field is not shown and end date is same as start date
+      const startDateOnly = (start || "").split("T")[0];
+      const endDateOnly = (end || "").split("T")[0];
+      if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
+        const endTimeOnly = end.includes("T")
+          ? end.split("T")[1]?.slice(0, 5) || "00:00"
+          : "00:00";
+        const endDateTime = `${startDateOnly}T${endTimeOnly}`;
+        endDate = convertFormDateTimeToISO(endDateTime, timezone);
       } else {
-        // For timed events
-        startDate = convertFormDateTimeToISO(start, timezone);
-        // In normal mode, only override end date when the end date field is not shown and end date is same as start date
-        const startDateOnly = (start || "").split("T")[0];
-        const endDateOnly = (end || "").split("T")[0];
-        if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
-          const endTimeOnly = end.includes("T")
-            ? end.split("T")[1]?.slice(0, 5) || "00:00"
-            : "00:00";
-          const endDateTime = `${startDateOnly}T${endTimeOnly}`;
-          endDate = convertFormDateTimeToISO(endDateTime, timezone);
-        } else {
-          // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
-          endDate = convertFormDateTimeToISO(end, timezone);
-        }
+        // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
+        endDate = convertFormDateTimeToISO(end, timezone);
       }
     }
 
@@ -680,6 +702,7 @@ function EventUpdateModal({
           uid: newEventUID,
           URL: `/calendars/${newCalId || calId}/${newEventUID}.ics`,
           sequence: 1, // New event with new UID starts at sequence 1
+          recurrenceId: undefined,
         };
 
         // STEP 3: Persist new event to server
@@ -700,7 +723,6 @@ function EventUpdateModal({
 
         // Reset all state to default values only on successful save
         resetAllStateToDefault();
-        setFreshEvent(null);
         initializedKeyRef.current = null;
       } catch (err: any) {
         // API failed - restore form data and mark as error
@@ -801,8 +823,7 @@ function EventUpdateModal({
             event,
             { repetition, timezone, allday, start, end },
             masterEventData,
-            resolveTimezone,
-            formatDateTimeInTimezone
+            resolveTimezone
           );
           const repetitionRulesChanged = changes.repetitionRulesChanged;
 
@@ -834,11 +855,18 @@ function EventUpdateModal({
               // STEP 1: Remove ALL old instances from UI (including solo overrides)
               removeSeriesInstancesFromUI();
 
-              // STEP 2: Update series on server with removeOverrides=true (await to ensure it completes)
+              // STEP 2: Update series on server with removeOverrides=true
+              // IMPORTANT: Use base event UID (master), not instance UID with recurrence-id
+              const masterEventForUpdate = {
+                ...newEvent,
+                uid: baseUID, // Use base UID for updating the master
+                recurrenceId: undefined, // Don't send recurrence-id for master update
+              };
+
               const result = await dispatch(
                 updateSeriesAsync({
                   cal: targetCalendar,
-                  event: { ...newEvent, recurrenceId },
+                  event: masterEventForUpdate,
                   removeOverrides: true,
                 })
               );
@@ -865,12 +893,13 @@ function EventUpdateModal({
                 }
               }
 
-              // Clear cache after reload
+              // Clear cache after successful update
               dispatch(clearFetchCache(calId));
 
               // Clear temp data on successful save
               clearEventFormTempData("update");
             } catch (seriesError) {
+              // Restore instances on error
               restoreSeriesInstancesFromSnapshot();
               throw seriesError;
             }
@@ -904,10 +933,17 @@ function EventUpdateModal({
             });
 
             // Update server in background with removeOverrides=false
+            // IMPORTANT: Use base event UID (master), not instance UID with recurrence-id
+            const masterEventForUpdate = {
+              ...newEvent,
+              uid: baseUID, // Use base UID for updating the master
+              recurrenceId: undefined, // Don't send recurrence-id for master update
+            };
+
             const result = await dispatch(
               updateSeriesAsync({
                 cal: targetCalendar,
-                event: { ...newEvent, recurrenceId },
+                event: masterEventForUpdate,
                 removeOverrides: false,
               })
             );
@@ -1049,7 +1085,6 @@ function EventUpdateModal({
       // Reset all state to default values only on successful save (after all branches)
       clearEventFormTempData("update");
       resetAllStateToDefault();
-      setFreshEvent(null);
       initializedKeyRef.current = null;
     } catch (error: any) {
       // Handle errors for all branches

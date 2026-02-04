@@ -55,7 +55,7 @@ describe("parseCalendarEvent", () => {
     expect(result.transp).toBe("OPAQUE");
     expect(result.class).toBe("PUBLIC");
     expect(result.x_openpass_videoconference).toBe("https://meet.link");
-    expect(result.timezone).toBe("Etc/UTC");
+    expect(result.timezone).not.toBeDefined();
 
     expect(result.organizer).toEqual({
       cn: "Alice",
@@ -117,7 +117,7 @@ describe("parseCalendarEvent", () => {
     expect(result.transp).toBe("OPAQUE");
     expect(result.class).toBe("PUBLIC");
     expect(result.x_openpass_videoconference).toBe("https://meet.link");
-    expect(result.timezone).toBe("Etc/UTC");
+    expect(result.timezone).not.toBeDefined();
 
     expect(result.organizer).toEqual({
       cn: "Alice",
@@ -210,7 +210,6 @@ describe("parseCalendarEvent", () => {
       "/calendars/test.ics"
     );
     expect(result.end).toBeDefined();
-    expect(result.timezone).toBeDefined();
     const endDate = new Date(result.end ?? "");
     const startDate = new Date(result.start);
     expect(endDate.getTime() - startDate.getTime()).toBe(60 * 60 * 1000);
@@ -229,7 +228,6 @@ describe("parseCalendarEvent", () => {
       "/calendars/test.ics"
     );
     expect(result.end).toBeDefined();
-    expect(result.timezone).toBeDefined();
     const endDate = new Date(result.end ?? "");
     const startDate = new Date(result.start);
     expect(endDate.getTime() - startDate.getTime()).toBe(30 * 60 * 1000);
@@ -332,7 +330,6 @@ describe("parseCalendarEvent", () => {
 
     expect(result.start).toBe("2025-07-18T09:00:00Z");
     expect(result.end).toBe("2025-07-18T10:00:00Z");
-    expect(result.timezone).toBe("Etc/UTC");
   });
 
   it("preserves all-day event dates without conversion", () => {
@@ -356,15 +353,6 @@ describe("parseCalendarEvent", () => {
 });
 
 describe("calendarEventToJCal", () => {
-  beforeAll(() => {
-    jest.mock("ical.js", () => ({
-      Timezone: jest.fn().mockImplementation(({ component, tzid }) => ({
-        component: {
-          jCal: [`vtimezone`, [], [["tzid", {}, "text", tzid]]],
-        },
-      })),
-    }));
-  });
   it("should convert a CalendarEvent to JCal format", () => {
     const mockEvent = {
       uid: "event-123",
@@ -1165,8 +1153,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T10:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.timeChanged).toBe(true);
@@ -1192,8 +1179,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.timeChanged).toBe(false);
@@ -1218,8 +1204,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.timezoneChanged).toBe(true);
@@ -1249,8 +1234,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      resolveWithAlias,
-      mockFormatDateTime
+      resolveWithAlias
     );
 
     expect(result.timezoneChanged).toBe(false);
@@ -1274,8 +1258,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.repetitionRulesChanged).toBe(true);
@@ -1299,8 +1282,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.repetitionRulesChanged).toBe(true);
@@ -1332,8 +1314,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T08:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.repetitionRulesChanged).toBe(true);
@@ -1357,8 +1338,7 @@ describe("detectRecurringEventChanges", () => {
         end: "2025-10-15T10:00",
       },
       null,
-      mockResolveTimezone,
-      mockFormatDateTime
+      mockResolveTimezone
     );
 
     expect(result.timeChanged).toBe(true);
