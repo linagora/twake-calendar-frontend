@@ -14,8 +14,10 @@ export function WebSocketStatusSnackbar({
   return (
     <Snackbar
       open={!!message}
-      autoHideDuration={6000}
       onClose={onClose}
+      autoHideDuration={
+        severity === "warning" || severity === "error" ? null : 6000
+      }
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
       <Alert

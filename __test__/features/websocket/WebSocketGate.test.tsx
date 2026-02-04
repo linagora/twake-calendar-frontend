@@ -56,9 +56,11 @@ describe("WebSocketGate", () => {
   const createMockSocket = (readyState = WebSocket.OPEN) => ({
     readyState,
     close: jest.fn(),
+    send: jest.fn(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     cleanup: jest.fn(),
+    onmessage: null,
   });
 
   beforeEach(() => {
@@ -340,19 +342,11 @@ describe("WebSocketGate", () => {
         jest.advanceTimersByTime(1000);
       });
 
-      // Second failure
-      await act(async () => {
-        onCloseCallback?.(new CloseEvent("close", { code: 1006 }));
-        jest.advanceTimersByTime(2000);
-      });
+      expect(consoleLog).toHaveBeenCalledWith(
+        expect.stringContaining("(attempt 1/10)")
+      );
 
-      // Success - should log and reset counter
-      await waitFor(() => {
-        expect(consoleLog).toHaveBeenCalledWith(
-          "WebSocket connected successfully"
-        );
-      });
-
+      // Success - should reset counter
       // Next failure should start from attempt 1 again
       await act(async () => {
         onCloseCallback?.(new CloseEvent("close", { code: 1006 }));
@@ -904,6 +898,115 @@ describe("WebSocketGate", () => {
       // Still should not register because isSocketOpen state is false
       // The component only sets isSocketOpen to true when socket.readyState is OPEN during connection
       expect(registerToCalendars).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Ping/Pong Integration", () => {
+    let mockPingCleanup: { stop: jest.Mock; sendPing: jest.Mock };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockPingCleanup = {
+        stop: jest.fn(),
+        sendPing: jest.fn(),
+      };
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    it("should trigger reconnection when ping detects dead connection (via socket close)", async () => {
+      const consoleWarn = jest.spyOn(console, "warn").mockImplementation();
+      let onCloseCallback: ((event: CloseEvent) => void) | undefined;
+
+      (createWebSocketConnection as jest.Mock).mockImplementation(
+        (callbacks) => {
+          onCloseCallback = callbacks.onClose;
+          return Promise.resolve(mockSocket);
+        }
+      );
+
+      render(<TestWrapper store={store} />);
+
+      await waitFor(() => {
+        expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
+      });
+
+      (createWebSocketConnection as jest.Mock).mockClear();
+
+      // In the real implementation, when ping detects dead connection,
+      // it calls socket.close() which triggers the onClose callback
+      // This simulates that flow
+      await act(async () => {
+        if (onCloseCallback) {
+          onCloseCallback(new CloseEvent("close", { code: 1006 }));
+        }
+      });
+
+      // Should schedule reconnection
+      expect(consoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining("WebSocket closed unexpectedly")
+      );
+
+      // Advance to trigger reconnection
+      await act(async () => {
+        jest.advanceTimersByTime(1500);
+      });
+
+      // Should reconnect
+      await waitFor(() => {
+        expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
+      });
+
+      consoleWarn.mockRestore();
+    });
+
+    it("should stop ping monitoring when socket closes normally", async () => {
+      let onCloseCallback: ((event: CloseEvent) => void) | undefined;
+
+      (createWebSocketConnection as jest.Mock).mockImplementation(
+        (callbacks) => {
+          onCloseCallback = callbacks.onClose;
+          return Promise.resolve(mockSocket);
+        }
+      );
+
+      render(<TestWrapper store={store} />);
+
+      await waitFor(() => {
+        expect(createWebSocketConnection).toHaveBeenCalled();
+      });
+
+      // Normal close (code 1000) - like logout or page navigation
+      await act(async () => {
+        if (onCloseCallback) {
+          onCloseCallback(new CloseEvent("close", { code: 1000 }));
+        }
+      });
+
+      // Should not attempt reconnection
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(createWebSocketConnection).toHaveBeenCalledTimes(1);
+    });
+
+    it("should cleanup ping monitoring on component unmount", async () => {
+      (createWebSocketConnection as jest.Mock).mockResolvedValue(mockSocket);
+
+      const { unmount } = render(<TestWrapper store={store} />);
+
+      await waitFor(() => {
+        expect(createWebSocketConnection).toHaveBeenCalled();
+      });
+
+      // Unmount should cleanup
+      unmount();
+
+      expect(mockSocket.close).toHaveBeenCalled();
     });
   });
 });

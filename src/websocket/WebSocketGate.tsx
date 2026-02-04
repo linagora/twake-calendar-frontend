@@ -10,6 +10,10 @@ import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconn
 import { updateCalendars } from "./messaging/updateCalendars";
 import { syncCalendarRegistrations } from "./operations";
 import { WebSocketStatusSnackbar } from "./WebSocketStatusSnackbar";
+import {
+  setupWebSocketPing,
+  type PingCleanup,
+} from "./connection/lifecycle/pingWebSocket";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -18,6 +22,7 @@ export function WebSocketGate() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isConnectingRef = useRef(false);
+  const pingCleanupRef = useRef<PingCleanup | null>(null);
 
   const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const CONNECT_TIMEOUT_MS = 10_000;
@@ -124,8 +129,6 @@ export function WebSocketGate() {
   // Reset reconnection state on successful connection and mark for calendar re-sync
   useEffect(() => {
     if (isSocketOpen) {
-      console.log("WebSocket connected successfully");
-
       if (connectTimeoutRef.current) {
         clearTimeout(connectTimeoutRef.current);
         connectTimeoutRef.current = null;
@@ -275,6 +278,44 @@ export function WebSocketGate() {
       window.removeEventListener("offline", handleOffline);
     };
   }, [isSocketOpen, isAuthenticated, clearReconnectTimeout]);
+
+  useEffect(() => {
+    // Only set up ping if socket is open
+    if (!isSocketOpen || !socketRef.current) {
+      // Clean up existing ping if socket closed
+      if (pingCleanupRef.current) {
+        pingCleanupRef.current.stop();
+        pingCleanupRef.current = null;
+      }
+      return;
+    }
+
+    // Set up ping monitoring
+    const pingCleanup = setupWebSocketPing(socketRef.current, {
+      onConnectionDead: () => {
+        console.warn("WebSocket connection appears dead (no pong received)");
+        setWebSocketStatus(t("websocket.browserOffline"));
+        setWebSocketStatusSerity("warning");
+
+        // Trigger reconnection
+        if (socketRef.current) {
+          socketRef.current.close();
+        }
+      },
+      onPingFail: () => {
+        console.warn("Failed to send ping");
+      },
+    });
+
+    pingCleanupRef.current = pingCleanup;
+
+    return () => {
+      if (pingCleanupRef.current) {
+        pingCleanupRef.current.stop();
+        pingCleanupRef.current = null;
+      }
+    };
+  }, [isSocketOpen]);
 
   return websocketStatus ? (
     <WebSocketStatusSnackbar
