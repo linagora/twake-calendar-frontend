@@ -1,6 +1,6 @@
-import * as eventUtils from "@/components/Event/utils/eventUtils";
 import * as CalendarApi from "@/features/Calendars/CalendarApi";
 import * as EventApi from "@/features/Events/EventApi";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
@@ -257,6 +257,9 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       status: 201,
       url: `/calendars/${calId}/new-event.ics`,
     } as any);
+    const mockGetMasterEvent = jest
+      .spyOn(EventApi, "getEvent")
+      .mockResolvedValue(masterEvent);
     jest.spyOn(CalendarApi, "getCalendar").mockResolvedValue({
       _embedded: {
         "dav:item": [],
@@ -274,28 +277,37 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       stateWithRecurringEvent
     );
 
-    // Wait for component to load
+    // Wait for master event to be fetched AND form to be initialized
     await waitFor(() => {
-      expect(screen.getByDisplayValue("Recurring Meeting")).toBeInTheDocument();
+      expect(mockGetMasterEvent).toHaveBeenCalled();
     });
 
-    // Uncheck repeat checkbox
-    const repeatCheckbox = screen.getByLabelText("event.form.repeat");
-    expect(repeatCheckbox).toBeChecked();
+    // Wait for the repeat checkbox to be checked (indicating form is initialized)
+    const repeatCheckbox = await waitFor(() => {
+      const checkbox = screen.getByLabelText("event.form.repeat");
+      expect(checkbox).toBeChecked();
+      return checkbox;
+    });
 
+    // Now uncheck repeat checkbox
     await act(async () => {
       fireEvent.click(repeatCheckbox);
     });
 
-    expect(repeatCheckbox).not.toBeChecked();
+    // Wait for checkbox to be unchecked
+    await waitFor(() => {
+      expect(repeatCheckbox).not.toBeChecked();
+    });
 
     // Click Save button
     const saveButton = screen.getByRole("button", { name: "actions.save" });
 
     await act(async () => {
       fireEvent.click(saveButton);
-      // Wait for the 500ms delay in the code
-      await new Promise((resolve) => setTimeout(resolve, 600));
+    });
+
+    await waitFor(() => {
+      expect(mockPutEvent).toHaveBeenCalled();
     });
 
     // Verify API calls - should delete all instances
@@ -346,7 +358,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
       URL: `/calendars/${calId}/${baseUID}.ics`,
-    };
+    } as CalendarEvent;
 
     const instance1 = {
       ...masterEvent,
@@ -369,17 +381,17 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       },
     };
 
-    // Mock deleteEvent to fail
-    jest
+    // Mock deleteEvent to fail with a non-404 error
+    const mockDeleteEvent = jest
       .spyOn(EventApi, "deleteEvent")
       .mockRejectedValue(new Error("Network error"));
     const mockPutEvent = jest
       .spyOn(EventApi, "putEvent")
       .mockResolvedValue({ status: 201 } as any);
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-
-    // Mock refreshCalendars
-    jest.spyOn(eventUtils, "refreshCalendars").mockResolvedValue(undefined);
+    const mockGetMasterEvent = jest
+      .spyOn(EventApi, "getEvent")
+      .mockResolvedValue(masterEvent);
 
     const { store } = renderWithProviders(
       <EventUpdateModal
@@ -392,24 +404,46 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       stateWithRecurringEvent
     );
 
+    // Wait for master event to be fetched
+    await waitFor(() => {
+      expect(mockGetMasterEvent).toHaveBeenCalled();
+    });
+
     // Wait for component to load
     await waitFor(() => {
       expect(screen.getByDisplayValue("Recurring Meeting")).toBeInTheDocument();
     });
 
-    // Uncheck repeat checkbox and save
-    const repeatCheckbox = screen.getByLabelText("event.form.repeat");
+    // Wait for repeat checkbox to be checked
+    const repeatCheckbox = await waitFor(() => {
+      const checkbox = screen.getByLabelText("event.form.repeat");
+      expect(checkbox).toBeChecked();
+      return checkbox;
+    });
 
+    // Uncheck repeat checkbox and save
     await act(async () => {
       fireEvent.click(repeatCheckbox);
+    });
+
+    // Wait for checkbox to be unchecked
+    await waitFor(() => {
+      expect(repeatCheckbox).not.toBeChecked();
     });
 
     const saveButton = screen.getByRole("button", { name: "actions.save" });
 
     await act(async () => {
       fireEvent.click(saveButton);
-      await new Promise((resolve) => setTimeout(resolve, 600));
     });
+
+    // Wait for delete to be attempted
+    await waitFor(
+      () => {
+        expect(mockDeleteEvent).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
 
     // Verify error was logged for failed deletion
     await waitFor(
@@ -523,7 +557,6 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
 
     await act(async () => {
       fireEvent.click(saveButton);
-      await new Promise((resolve) => setTimeout(resolve, 600));
     });
 
     // Verify onCloseAll was called to close both preview and update modals
