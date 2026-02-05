@@ -25,19 +25,11 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { format } from "date-fns";
-import {
-  enGB,
-  fr as frLocale,
-  ru as ruLocale,
-  vi as viLocale,
-} from "date-fns/locale";
 import React, { useEffect, useState } from "react";
 import { push } from "redux-first-history";
 import { useI18n } from "twake-i18n";
 import SearchBar from "./EventSearchBar";
 import "./Menubar.styl";
-const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale };
 
 export type AppIconProps = {
   name: string;
@@ -151,9 +143,11 @@ export function Menubar({
     handleUserMenuClose();
   };
 
-  const dateLabel = format(currentDate, "MMMM yyyy", {
-    locale: dateLocales[lang as keyof typeof dateLocales] || enGB,
-  });
+  // Use i18n for month names instead of date-fns
+  const monthIndex = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+  const monthName = t(`months.standalone.${monthIndex}`);
+  const dateLabel = `${monthName} ${year}`;
 
   return (
     <>
