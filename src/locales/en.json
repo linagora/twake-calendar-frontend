@@ -76,6 +76,9 @@
       "addNew": "Add new calendar",
       "access": "Access",
       "import": "Import"
+    },
+    "settings": {
+      "calendarName": "Calendar name"
     }
   },
   "colorPicker": {
