@@ -60,7 +60,7 @@ export function TimezoneAutocomplete({
         }
       }}
       options={options}
-      getOptionLabel={(option) => `(${option.offset}) ${option.label}`}
+      getOptionLabel={(option) => `${option.label} (${option.offset})`}
       size={size}
       sx={width ? { width } : undefined}
       disableClearable={disableClearable}

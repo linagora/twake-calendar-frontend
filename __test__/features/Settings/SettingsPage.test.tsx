@@ -611,7 +611,7 @@ describe("SettingsPage", () => {
 
       renderWithProviders(<SettingsPage />, stateWithoutTimeZone);
 
-      const timezoneInput = screen.getByDisplayValue("(UTC) UTC");
+      const timezoneInput = screen.getByDisplayValue("UTC (UTC)");
       expect(timezoneInput).toBeDefined();
     });
 
