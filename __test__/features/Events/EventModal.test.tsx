@@ -124,8 +124,10 @@ describe("EventPopover", () => {
     });
     expect(addDescriptionButton).toBeInTheDocument();
 
-    const calendarSelect = screen.getByRole("combobox", { name: /calendar/i });
-    expect(calendarSelect).toBeInTheDocument();
+    // In normal mode calendar is a SectionPreviewRow (button), not combobox
+    expect(
+      screen.getByRole("button", { name: "Calendar 1" })
+    ).toBeInTheDocument();
 
     // Check button
     expect(
@@ -154,7 +156,8 @@ describe("EventPopover", () => {
       allDay: false,
     } as unknown as DateSelectArg);
 
-    // MUI DatePicker/TimePicker values are stored differently - just check elements exist
+    // Expand to show date/time inputs (normal mode shows DateTimeSummary)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     expect(screen.getByTestId("start-date-input")).toBeInTheDocument();
     expect(screen.getByTestId("start-time-input")).toBeInTheDocument();
   });
@@ -179,6 +182,10 @@ describe("EventPopover", () => {
       "Event Description"
     );
 
+    // Expand location section (normal mode shows SectionPreviewRow)
+    fireEvent.click(
+      screen.getByRole("button", { name: "event.form.locationPlaceholder" })
+    );
     fireEvent.change(screen.getByLabelText("event.form.location"), {
       target: { value: "Conference Room" },
     });
@@ -190,13 +197,14 @@ describe("EventPopover", () => {
   it("changes selected calendar", async () => {
     renderPopover();
 
+    // Expand to show calendar combobox (normal mode shows SectionPreviewRow)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     const select = screen.getByLabelText("event.form.calendar");
     fireEvent.mouseDown(select); // Open menu
 
     const option = await screen.findByText("Calendar 2");
     fireEvent.click(option);
 
-    // Find the calendar combobox specifically by its aria-labelledby
     const calendarSelect = screen.getByRole("combobox", { name: /Calendar/i });
     expect(calendarSelect).toHaveTextContent("Calendar 2");
   });
@@ -290,6 +298,9 @@ describe("EventPopover", () => {
     fireEvent.change(screen.getByLabelText("event.form.description"), {
       target: { value: newEvent.description },
     });
+    fireEvent.click(
+      screen.getByRole("button", { name: "event.form.locationPlaceholder" })
+    );
     fireEvent.change(screen.getByLabelText("event.form.location"), {
       target: { value: newEvent.location },
     });
@@ -338,10 +349,11 @@ describe("EventPopover", () => {
 
   it("BUGFIX: Prefill Calendar field", async () => {
     renderPopover();
+    // In normal mode calendar is a SectionPreviewRow (button) with calendar name
     await waitFor(() =>
-      expect(screen.getByLabelText("event.form.calendar")).toHaveTextContent(
-        "Calendar 1"
-      )
+      expect(
+        screen.getByRole("button", { name: "Calendar 1" })
+      ).toHaveTextContent("Calendar 1")
     );
   });
 
@@ -357,6 +369,9 @@ describe("EventPopover", () => {
       } as unknown as DateSelectArg;
 
       renderPopover(selectedRange);
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
 
       const allDayCheckbox = screen.getByLabelText("event.form.allDay");
       await waitFor(() => {
@@ -375,6 +390,9 @@ describe("EventPopover", () => {
       } as unknown as DateSelectArg;
 
       renderPopover(selectedRange);
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
 
       const allDayCheckbox = screen.getByLabelText("event.form.allDay");
       await waitFor(() => {
@@ -403,6 +421,9 @@ describe("EventPopover", () => {
       } as unknown as DateSelectArg;
 
       renderPopover(selectedRange);
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
 
       const allDayCheckbox = screen.getByLabelText("event.form.allDay");
       await waitFor(() => {
@@ -427,6 +448,9 @@ describe("EventPopover", () => {
       } as unknown as DateSelectArg;
 
       renderPopover(selectedRange);
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
 
       const allDayCheckbox = screen.getByLabelText("event.form.allDay");
       await waitFor(() => {
@@ -451,6 +475,9 @@ describe("EventPopover", () => {
       } as unknown as DateSelectArg;
 
       renderPopover(selectedRange);
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
 
       const allDayCheckbox = screen.getByLabelText("event.form.allDay");
       await waitFor(() => {

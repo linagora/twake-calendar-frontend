@@ -65,16 +65,7 @@ export function renderAttendeeBadge(
           <Avatar {...stringAvatar(a.cn || a.cal_address)} />
         </Badge>
         <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <Typography
-            noWrap
-            style={{
-              maxWidth: "180px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {a.cn || a.cal_address}
-          </Typography>
+          <Typography noWrap>{a.cn || a.cal_address}</Typography>
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
               {t("event.organizer")}

@@ -50,21 +50,26 @@ export function SettingsTab({
     <>
       {/* Form group 1: Name field - first group, margin top 0 */}
       <Box mt={0}>
-        <TextField
-          fullWidth
-          label=""
-          inputProps={{ "aria-label": t("common.name") }}
-          placeholder={t("common.name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          size="small"
-          sx={{
-            "&.MuiFormControl-root": {
-              marginTop: 0,
-              marginBottom: 0,
-            },
-          }}
-        />
+        <Typography variant="h6" sx={{ margin: 0 }}>
+          {t("calendarPopover.settings.calendarName")}
+        </Typography>
+        <Box sx={{ marginTop: "6px" }}>
+          <TextField
+            fullWidth
+            label=""
+            inputProps={{ "aria-label": t("common.name") }}
+            placeholder={t("common.name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            size="small"
+            sx={{
+              "&.MuiFormControl-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+            }}
+          />
+        </Box>
       </Box>
 
       {/* Form group 2: Description */}
@@ -75,8 +80,6 @@ export function SettingsTab({
           showMore={false}
           description={description}
           setDescription={setDescription}
-          buttonVariant="contained"
-          buttonColor="secondary"
         />
       </Box>
 

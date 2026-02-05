@@ -3,6 +3,7 @@ import {
   extractVideoConferenceFromDescription,
   generateMeetingId,
   generateMeetingLink,
+  removeVideoConferenceFromDescription,
 } from "../videoConferenceUtils";
 
 // Mock window object for Node.js environment
@@ -45,11 +46,11 @@ describe("videoConferenceUtils", () => {
   });
 
   describe("addVideoConferenceToDescription", () => {
-    it("should add video conference footer to empty description", () => {
+    it("should add video conference on first line when description is empty", () => {
       const description = "";
       const meetingLink = "https://meet.linagora.com/abc-defg-hij";
       const result = addVideoConferenceToDescription(description, meetingLink);
-      expect(result).toBe("\nVisio: https://meet.linagora.com/abc-defg-hij");
+      expect(result).toBe("Visio: https://meet.linagora.com/abc-defg-hij");
     });
 
     it("should add video conference footer to existing description", () => {
@@ -80,6 +81,41 @@ describe("videoConferenceUtils", () => {
       const description = "";
       const result = extractVideoConferenceFromDescription(description);
       expect(result).toBeNull();
+    });
+  });
+
+  describe("removeVideoConferenceFromDescription", () => {
+    it("should return empty string when description is only the Visio line", () => {
+      const description = "Visio: https://meet.linagora.com/abc-defg-hij";
+      const result = removeVideoConferenceFromDescription(description);
+      expect(result).toBe("");
+    });
+
+    it("should remove Visio line when at end of description", () => {
+      const description =
+        "This is a meeting description.\nVisio: https://meet.linagora.com/abc-defg-hij";
+      const result = removeVideoConferenceFromDescription(description);
+      expect(result).toBe("This is a meeting description.");
+    });
+
+    it("should remove Visio line when in middle of description", () => {
+      const description =
+        "Line one\nVisio: https://meet.linagora.com/abc-defg-hij\nLine two";
+      const result = removeVideoConferenceFromDescription(description);
+      expect(result).toBe("Line one\nLine two");
+    });
+
+    it("should leave description unchanged when no Visio line present", () => {
+      const description = "Just a regular meeting description.";
+      const result = removeVideoConferenceFromDescription(description);
+      expect(result).toBe(description);
+    });
+
+    it("should remove Visio line when at start of description", () => {
+      const description =
+        "Visio: https://meet.linagora.com/abc-defg-hij\nRest of the text";
+      const result = removeVideoConferenceFromDescription(description);
+      expect(result).toBe("Rest of the text");
     });
   });
 });

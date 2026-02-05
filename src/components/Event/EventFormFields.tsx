@@ -5,6 +5,7 @@ import iconCamera from "@/static/images/icon-camera.svg";
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
+  removeVideoConferenceFromDescription,
 } from "@/utils/videoConferenceUtils";
 import {
   Box,
@@ -20,12 +21,16 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  useTheme,
 } from "@linagora/twake-mui";
+import { alpha } from "@mui/material/styles";
 import {
   Close as DeleteIcon,
   ContentCopy as CopyIcon,
   Public as PublicIcon,
+  LocationOn as LocationIcon,
 } from "@mui/icons-material";
+import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
 import React from "react";
 import { useI18n } from "twake-i18n";
@@ -35,7 +40,9 @@ import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { AddDescButton } from "./AddDescButton";
 import { DateTimeFields } from "./components/DateTimeFields";
+import { DateTimeSummary } from "./components/DateTimeSummary";
 import { FieldWithLabel } from "./components/FieldWithLabel";
+import { SectionPreviewRow } from "./components/SectionPreviewRow";
 import RepeatEvent from "./EventRepeat";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
 import { combineDateTime, splitDateTime } from "./utils/dateTimeHelpers";
@@ -156,6 +163,7 @@ export default function EventFormFields({
   onHasEndDateChangedChange,
 }: EventFormFieldsProps) {
   const { t } = useI18n();
+  const theme = useTheme();
 
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState("");
@@ -166,10 +174,26 @@ export default function EventFormFields({
   // Track if user has manually changed end date in extended mode
   const [hasEndDateChanged, setHasEndDateChanged] = React.useState(false);
 
-  // Reset hasEndDateChanged when modal closes
+  // Track if user has clicked on datetime clickable section in normal mode
+  // Once clicked, normal mode will always show full fields until modal closes
+  const [hasClickedDateTimeSection, setHasClickedDateTimeSection] =
+    React.useState(false);
+
+  // Track if user has clicked on location section in normal mode
+  const [hasClickedLocationSection, setHasClickedLocationSection] =
+    React.useState(false);
+
+  // Track if user has clicked on calendar section in normal mode
+  const [hasClickedCalendarSection, setHasClickedCalendarSection] =
+    React.useState(false);
+
+  // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
     if (!isOpen) {
       setHasEndDateChanged(false);
+      setHasClickedDateTimeSection(false);
+      setHasClickedLocationSection(false);
+      setHasClickedCalendarSection(false);
     }
   }, [isOpen]);
 
@@ -210,9 +234,17 @@ export default function EventFormFields({
 
   // Ref for title input field to enable auto-focus
   const titleInputRef = React.useRef<HTMLInputElement>(null);
+  const locationInputRef = React.useRef<HTMLInputElement>(null);
 
   // Track previous showMore state to detect changes
   const prevShowMoreRef = React.useRef<boolean | undefined>(undefined);
+
+  // Focus location field when user clicks the location preview row
+  React.useEffect(() => {
+    if (hasClickedLocationSection && process.env.NODE_ENV !== "test") {
+      locationInputRef.current?.focus();
+    }
+  }, [hasClickedLocationSection]);
 
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
@@ -389,6 +421,9 @@ export default function EventFormFields({
     setDescription(updatedDescription);
     setHasVideoConference(true);
     setMeetingLink(newMeetingLink);
+    if (showMore) {
+      setShowDescription(true);
+    }
   };
 
   const [openToast, setOpenToast] = React.useState(false);
@@ -405,11 +440,7 @@ export default function EventFormFields({
   };
 
   const handleDeleteVideoConference = () => {
-    const updatedDescription = description.replace(
-      /\nVisio: https?:\/\/[^\s]+/,
-      ""
-    );
-    setDescription(updatedDescription);
+    setDescription(removeVideoConferenceFromDescription(description));
     setHasVideoConference(false);
     setMeetingLink(null);
   };
@@ -421,7 +452,10 @@ export default function EventFormFields({
 
   return (
     <>
-      <FieldWithLabel label={t("event.form.title")} isExpanded={showMore}>
+      <FieldWithLabel
+        label={showMore ? t("event.form.title") : ""}
+        isExpanded={showMore}
+      >
         <TextField
           fullWidth
           label=""
@@ -437,156 +471,159 @@ export default function EventFormFields({
         />
       </FieldWithLabel>
 
-      <AddDescButton
-        showDescription={showDescription}
-        setShowDescription={setShowDescription}
-        showMore={showMore}
-        description={description}
-        setDescription={setDescription}
-        buttonVariant="contained"
-        buttonColor="secondary"
-      />
-
-      <FieldWithLabel label={t("event.form.dateTime")} isExpanded={showMore}>
-        <DateTimeFields
-          startDate={startDate}
-          startTime={startTime}
-          endDate={endDate}
-          endTime={endTime}
-          allday={allday}
-          showMore={showMore}
-          hasEndDateChanged={hasEndDateChanged}
-          validation={validation}
-          onStartDateChange={handleStartDateChange}
-          onStartTimeChange={handleStartTimeChange}
-          onEndDateChange={handleEndDateChange}
-          onEndTimeChange={handleEndTimeChange}
-          showEndDate={
-            showMore ||
-            allday ||
-            (hasEndDateChanged && startDate !== endDate) ||
-            (!showMore && !allday && startDate !== endDate)
-          }
-          onToggleEndDate={() => {}}
-        />
-      </FieldWithLabel>
-
-      <FieldWithLabel label=" " isExpanded={showMore}>
-        <Box display="flex" gap={2} alignItems="center">
-          <FormControlLabel
-            control={
-              <Checkbox checked={allday} onChange={handleAllDayToggle} />
-            }
-            label={
-              <Typography variant="h6">{t("event.form.allDay")}</Typography>
-            }
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={
-                  showRepeat || (typeOfAction === "solo" && !!repetition?.freq)
-                }
-                disabled={typeOfAction === "solo"}
-                onChange={() => {
-                  const newShowRepeat = !showRepeat;
-                  setShowRepeat(newShowRepeat);
-                  if (newShowRepeat) {
-                    setRepetition({
-                      freq: "daily",
-                      interval: 1,
-                      occurrences: 0,
-                      endDate: "",
-                      byday: null,
-                    } as RepetitionObject);
-                  } else {
-                    setRepetition({
-                      freq: "",
-                      interval: 1,
-                      occurrences: 0,
-                      endDate: "",
-                      byday: null,
-                    } as RepetitionObject);
-                  }
-                }}
-              />
-            }
-            label={
-              <Typography variant="h6">{t("event.form.repeat")}</Typography>
-            }
-          />
-          <TimezoneAutocomplete
-            value={timezone}
-            onChange={setTimezone}
-            zones={timezoneList.zones}
-            getTimezoneOffset={(tzName: string) =>
-              timezoneList.getTimezoneOffset(tzName, new Date(start))
-            }
-            showIcon={false}
-            width={240}
-            size="small"
-            placeholder={t("event.form.timezonePlaceholder")}
-          />
-        </Box>
-      </FieldWithLabel>
-
-      {(showRepeat || (typeOfAction === "solo" && repetition?.freq)) && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <RepeatEvent
+      <FieldWithLabel
+        label={
+          !showMore && !hasClickedDateTimeSection
+            ? ""
+            : t("event.form.dateTime")
+        }
+        isExpanded={showMore}
+      >
+        {!showMore && !hasClickedDateTimeSection ? (
+          <DateTimeSummary
+            startDate={startDate}
+            startTime={startTime}
+            endDate={endDate}
+            endTime={endTime}
+            allday={allday}
+            timezone={timezone}
             repetition={repetition}
-            eventStart={new Date(start)}
-            setRepetition={setRepetition}
-            isOwn={typeOfAction !== "solo"}
+            showEndDate={
+              allday ||
+              (hasEndDateChanged && startDate !== endDate) ||
+              (!allday && startDate !== endDate)
+            }
+            onClick={() => setHasClickedDateTimeSection(true)}
           />
+        ) : (
+          <DateTimeFields
+            startDate={startDate}
+            startTime={startTime}
+            endDate={endDate}
+            endTime={endTime}
+            allday={allday}
+            showMore={showMore}
+            hasEndDateChanged={hasEndDateChanged}
+            validation={validation}
+            onStartDateChange={handleStartDateChange}
+            onStartTimeChange={handleStartTimeChange}
+            onEndDateChange={handleEndDateChange}
+            onEndTimeChange={handleEndTimeChange}
+            showEndDate={
+              showMore ||
+              allday ||
+              (hasEndDateChanged && startDate !== endDate) ||
+              (!showMore && !allday && startDate !== endDate)
+            }
+            onToggleEndDate={() => {}}
+          />
+        )}
+      </FieldWithLabel>
+
+      {!(!showMore && !hasClickedDateTimeSection) && (
+        <FieldWithLabel label=" " isExpanded={showMore}>
+          <Box display="flex" gap={2} alignItems="center">
+            <FormControlLabel
+              control={
+                <Checkbox checked={allday} onChange={handleAllDayToggle} />
+              }
+              label={
+                <Typography variant="h6">{t("event.form.allDay")}</Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={
+                    showRepeat ||
+                    (typeOfAction === "solo" && !!repetition?.freq)
+                  }
+                  disabled={typeOfAction === "solo"}
+                  onChange={() => {
+                    const newShowRepeat = !showRepeat;
+                    setShowRepeat(newShowRepeat);
+                    if (newShowRepeat) {
+                      setRepetition({
+                        freq: "daily",
+                        interval: 1,
+                        occurrences: 0,
+                        endDate: "",
+                        byday: null,
+                      } as RepetitionObject);
+                    } else {
+                      setRepetition({
+                        freq: "",
+                        interval: 1,
+                        occurrences: 0,
+                        endDate: "",
+                        byday: null,
+                      } as RepetitionObject);
+                    }
+                  }}
+                />
+              }
+              label={
+                <Typography variant="h6">{t("event.form.repeat")}</Typography>
+              }
+            />
+            <TimezoneAutocomplete
+              value={timezone}
+              onChange={setTimezone}
+              zones={timezoneList.zones}
+              getTimezoneOffset={(tzName: string) =>
+                timezoneList.getTimezoneOffset(tzName, new Date(start))
+              }
+              showIcon={false}
+              width={220}
+              size="small"
+              placeholder={t("event.form.timezonePlaceholder")}
+            />
+          </Box>
         </FieldWithLabel>
       )}
 
+      {!(!showMore && !hasClickedDateTimeSection) &&
+        (showRepeat || (typeOfAction === "solo" && repetition?.freq)) && (
+          <FieldWithLabel label=" " isExpanded={showMore}>
+            <RepeatEvent
+              repetition={repetition}
+              eventStart={new Date(start)}
+              setRepetition={setRepetition}
+              isOwn={typeOfAction !== "solo"}
+            />
+          </FieldWithLabel>
+        )}
+
       <FieldWithLabel
-        label={t("event.form.participants")}
+        label={showMore ? t("event.form.participants") : ""}
         isExpanded={showMore}
       >
         <AttendeeSelector
           attendees={attendees}
           setAttendees={setAttendees}
+          placeholder={t("event.form.addGuestsPlaceholder")}
           inputSlot={(params) => <TextField {...params} size="small" />}
         />
       </FieldWithLabel>
 
       <FieldWithLabel
-        label={t("event.form.videoMeeting")}
+        label={showMore ? t("event.form.videoMeeting") : ""}
         isExpanded={showMore}
       >
-        <Box display="flex" gap={1} alignItems="center">
-          <Button
-            startIcon={
-              <img src={iconCamera} alt="camera" width={24} height={24} />
-            }
-            onClick={handleAddVideoConference}
-            size="medium"
-            variant="contained"
-            color="secondary"
-            sx={{
-              borderRadius: "4px",
-              display: hasVideoConference ? "none" : "flex",
-            }}
-          >
-            {t("event.form.addVisioConference")}
-          </Button>
-
-          {hasVideoConference && meetingLink && (
-            <>
+        {!showMore ? (
+          hasVideoConference && meetingLink ? (
+            <Box display="flex" gap={1} alignItems="center">
               <Button
                 startIcon={
                   <img src={iconCamera} alt="camera" width={24} height={24} />
                 }
-                onClick={() => window.open(meetingLink, "_blank")}
+                onClick={() =>
+                  window.open(meetingLink, "_blank", "noopener,noreferrer")
+                }
                 size="medium"
                 variant="contained"
                 color="primary"
-                sx={{
-                  borderRadius: "4px",
-                  mr: 1,
-                }}
+                sx={{ borderRadius: "4px", mr: 1 }}
               >
                 {t("event.form.joinVisioConference")}
               </Button>
@@ -608,38 +645,153 @@ export default function EventFormFields({
               >
                 <DeleteIcon />
               </IconButton>
-            </>
-          )}
-        </Box>
+            </Box>
+          ) : (
+            <SectionPreviewRow
+              icon={
+                <img src={iconCamera} alt="camera" width={24} height={24} />
+              }
+              onClick={handleAddVideoConference}
+            >
+              {t("event.form.addVisioConference")}
+            </SectionPreviewRow>
+          )
+        ) : (
+          <Box display="flex" gap={1} alignItems="center">
+            <Button
+              startIcon={
+                <img src={iconCamera} alt="camera" width={24} height={24} />
+              }
+              onClick={handleAddVideoConference}
+              size="medium"
+              variant="contained"
+              color="secondary"
+              sx={{
+                borderRadius: "4px",
+                display: hasVideoConference ? "none" : "flex",
+              }}
+            >
+              {t("event.form.addVisioConference")}
+            </Button>
+
+            {hasVideoConference && meetingLink && (
+              <>
+                <Button
+                  startIcon={
+                    <img src={iconCamera} alt="camera" width={24} height={24} />
+                  }
+                  onClick={() =>
+                    window.open(meetingLink, "_blank", "noopener,noreferrer")
+                  }
+                  size="medium"
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    borderRadius: "4px",
+                    mr: 1,
+                  }}
+                >
+                  {t("event.form.joinVisioConference")}
+                </Button>
+                <IconButton
+                  onClick={handleCopyMeetingLink}
+                  size="small"
+                  sx={{ color: "primary.main" }}
+                  aria-label={t("event.form.copyMeetingLink")}
+                  title={t("event.form.copyMeetingLink")}
+                >
+                  <CopyIcon />
+                </IconButton>
+                <IconButton
+                  onClick={handleDeleteVideoConference}
+                  size="small"
+                  sx={{ color: "error.main" }}
+                  aria-label={t("event.form.removeVideoConference")}
+                  title={t("event.form.removeVideoConference")}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </>
+            )}
+          </Box>
+        )}
       </FieldWithLabel>
 
-      <FieldWithLabel label={t("event.form.location")} isExpanded={showMore}>
-        <TextField
-          fullWidth
-          label=""
-          inputProps={{ "aria-label": t("event.form.location") }}
-          placeholder={t("event.form.locationPlaceholder")}
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          size="small"
-          margin="dense"
-        />
-      </FieldWithLabel>
+      <AddDescButton
+        showDescription={showDescription}
+        setShowDescription={setShowDescription}
+        showMore={showMore}
+        description={description}
+        setDescription={setDescription}
+      />
 
-      <FieldWithLabel label={t("event.form.calendar")} isExpanded={showMore}>
-        <FormControl fullWidth margin="dense" size="small">
-          <Select
-            value={calendarid ?? ""}
-            label=""
-            SelectDisplayProps={{ "aria-label": t("event.form.calendar") }}
-            displayEmpty
-            onChange={(e: SelectChangeEvent) =>
-              handleCalendarChange(e.target.value)
-            }
+      <FieldWithLabel
+        label={
+          showMore || hasClickedLocationSection ? t("event.form.location") : ""
+        }
+        isExpanded={showMore}
+      >
+        {!showMore && !hasClickedLocationSection ? (
+          <SectionPreviewRow
+            icon={<LocationIcon />}
+            onClick={() => setHasClickedLocationSection(true)}
           >
-            {CalendarItemList(userPersonalCalendars)}
-          </Select>
-        </FormControl>
+            {location || t("event.form.locationPlaceholder")}
+          </SectionPreviewRow>
+        ) : (
+          <TextField
+            fullWidth
+            label=""
+            inputRef={locationInputRef}
+            inputProps={{ "aria-label": t("event.form.location") }}
+            placeholder={t("event.form.locationPlaceholder")}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            size="small"
+            margin="dense"
+          />
+        )}
+      </FieldWithLabel>
+
+      <FieldWithLabel
+        label={
+          showMore || hasClickedCalendarSection ? t("event.form.calendar") : ""
+        }
+        isExpanded={showMore}
+      >
+        {!showMore && !hasClickedCalendarSection ? (
+          <SectionPreviewRow
+            icon={
+              <SquareRoundedIcon
+                sx={{
+                  color:
+                    userPersonalCalendars.find((cal) => cal.id === calendarid)
+                      ?.color?.light ?? "#3788D8",
+                  width: 24,
+                  height: 24,
+                }}
+              />
+            }
+            onClick={() => setHasClickedCalendarSection(true)}
+          >
+            {userPersonalCalendars.find((cal) => cal.id === calendarid)?.name ||
+              t("event.form.calendar")}
+          </SectionPreviewRow>
+        ) : (
+          <FormControl fullWidth margin="dense" size="small">
+            <Select
+              value={calendarid ?? ""}
+              label=""
+              SelectDisplayProps={{ "aria-label": t("event.form.calendar") }}
+              displayEmpty
+              onChange={(e: SelectChangeEvent) =>
+                handleCalendarChange(e.target.value)
+              }
+            >
+              {CalendarItemList(userPersonalCalendars)}
+            </Select>
+          </FormControl>
+        )}
       </FieldWithLabel>
 
       {showMore && (
