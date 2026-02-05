@@ -2,6 +2,7 @@ import { useAppDispatch } from "@/app/hooks";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
 import { Button, CircularProgress } from "@linagora/twake-mui";
+import { Theme } from "@mui/material";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
@@ -22,7 +23,8 @@ interface RSVPButtonProps {
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>;
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
   isLoading: boolean;
-  onLoadingChange: (loading: boolean) => void;
+  onLoadingChange: (loading: boolean, rsvpValue?: PartStat) => void;
+  loadingValue: PartStat | null;
 }
 
 export function RSVPButton({
@@ -33,43 +35,23 @@ export function RSVPButton({
   setOpenEditModePopup,
   isLoading,
   onLoadingChange,
+  loadingValue,
 }: RSVPButtonProps) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { currentUserAttendee } = contextualizedEvent;
   const [showLoading, setShowLoading] = useState(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout>();
-  const fallbackTimeoutRef = useRef<NodeJS.Timeout>();
   const previousPartstatRef = useRef<PartStat | undefined>(
     currentUserAttendee?.partstat
   );
 
   useEffect(() => {
-    if (isLoading) {
-      // Start a 2-second timer for showing loading indicator
-      loadingTimeoutRef.current = setTimeout(() => {
-        setShowLoading(true);
-      }, 2000);
+    if (isLoading && loadingValue === rsvpValue) {
+      setShowLoading(true);
     } else {
-      // Clear timeouts and hide loading
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-      if (fallbackTimeoutRef.current) {
-        clearTimeout(fallbackTimeoutRef.current);
-      }
       setShowLoading(false);
     }
-
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-      if (fallbackTimeoutRef.current) {
-        clearTimeout(fallbackTimeoutRef.current);
-      }
-    };
-  }, [isLoading, rsvpValue, onLoadingChange]);
+  }, [isLoading, loadingValue, rsvpValue]);
 
   // Detect when attendee status changes (via WebSocket) and clear loading
   useEffect(() => {
@@ -90,8 +72,10 @@ export function RSVPButton({
     const startTime = performance.now();
     // Store current partstat before making changes
     previousPartstatRef.current = currentUserAttendee?.partstat;
-
-    onLoadingChange(true);
+    if (previousPartstatRef.current === rsvpValue) {
+      return;
+    }
+    onLoadingChange(true, rsvpValue);
 
     try {
       await handleRSVPClick(
@@ -113,22 +97,38 @@ export function RSVPButton({
     }
   };
 
+  const isCurrentlyActive = currentUserAttendee?.partstat === rsvpValue;
+  const isLoadingThis = showLoading && loadingValue === rsvpValue;
+
+  // Show as active (colored) if:
+  // 1. This button is currently loading, OR
+  // 2. This is the active status AND nothing is loading
+  const shouldShowActive = isLoadingThis || (isCurrentlyActive && !isLoading);
+
+  const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : "primary";
+
   return (
     <Button
-      variant={
-        currentUserAttendee?.partstat === rsvpValue ? "contained" : "outlined"
-      }
-      color={
-        currentUserAttendee?.partstat === rsvpValue
-          ? rsvpColor[rsvpValue]
-          : "primary"
-      }
+      variant={shouldShowActive ? "contained" : "outlined"}
+      color={buttonColor}
       size="medium"
-      sx={{ borderRadius: "50px", minWidth: showLoading ? "100px" : "auto" }}
+      sx={{
+        borderRadius: "50px",
+        minWidth: showLoading ? "100px" : "auto",
+        // Override MUI's default disabled styles to keep the color
+        "&.Mui-disabled": shouldShowActive
+          ? {
+              backgroundColor: (theme: Theme) =>
+                theme.palette[buttonColor].main,
+              color: (theme: Theme) => theme.palette[buttonColor].contrastText,
+              borderColor: (theme: Theme) => theme.palette[buttonColor].main,
+            }
+          : {},
+      }}
       onClick={handleClick}
       disabled={isLoading}
     >
-      {showLoading ? (
+      {isLoadingThis ? (
         <CircularProgress size={20} color="inherit" />
       ) : (
         t(`eventPreview.${rsvpValue}`)
