@@ -33,7 +33,8 @@ export function generateMeetingLink(baseUrl?: string): string {
 }
 
 /**
- * Add video conference footer to event description
+ * Add video conference footer to event description.
+ * If description is empty, adds on first line; otherwise adds on the line below existing content.
  * @param {string} description - Original description
  * @param {string} meetingLink - Generated meeting link
  * @returns {string} Description with video conference footer
@@ -42,8 +43,9 @@ export function addVideoConferenceToDescription(
   description: string,
   meetingLink: string
 ): string {
-  const footer = `\nVisio: ${meetingLink}`;
-  return description + footer;
+  const line = `Visio: ${meetingLink}`;
+  const trimmed = description.trimEnd();
+  return trimmed ? `${trimmed}\n${line}` : line;
 }
 
 /**
@@ -56,4 +58,20 @@ export function extractVideoConferenceFromDescription(
 ): string | null {
   const match = description.match(/Visio:\s*(https?:\/\/[^\s]+)/);
   return match ? match[1] : null;
+}
+
+const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/;
+
+/**
+ * Remove the Visio video conference line from description.
+ * Finds and removes the line matching "Visio: <url>" regardless of position (start, middle, end).
+ * @param {string} description - Event description
+ * @returns {string} Description with the Visio line removed
+ */
+export function removeVideoConferenceFromDescription(
+  description: string
+): string {
+  const lines = description.split("\n");
+  const filtered = lines.filter((line) => !VISIO_LINE_REGEX.test(line.trim()));
+  return filtered.join("\n").trimEnd();
 }

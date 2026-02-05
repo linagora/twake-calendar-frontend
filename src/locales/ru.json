@@ -78,6 +78,9 @@
       "addNew": "Добавить новый календарь",
       "access": "Доступ",
       "import": "Импорт"
+    },
+    "settings": {
+      "calendarName": "Название календаря"
     }
   },
   "colorPicker": {
@@ -100,6 +103,8 @@
         "years": "год(лет)"
       },
       "repeatOn": "Повторять по:",
+      "doesNotRepeat": "Не повторяется",
+      "every": "Каждый",
       "days": {
         "monday": "ПН",
         "tuesday": "ВТ",
@@ -129,6 +134,7 @@
       "allDay": "Весь день",
       "repeat": "Повторять",
       "timezonePlaceholder": "Выберите часовой пояс",
+      "addGuestsPlaceholder": "Добавить гостей",
       "participants": "Участники",
       "videoMeeting": "Видеовстреча",
       "meetCopied": "Ссылка на встречу скопирована",

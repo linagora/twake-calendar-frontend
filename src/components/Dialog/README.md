@@ -4,8 +4,8 @@ A highly reusable dialog component that supports both normal and expanded (fulls
 
 ## Features
 
-- ✅ **Two Modes**: Normal popup (685px) and expanded fullscreen mode
-- ✅ **Preserves Header**: Expanded mode doesn't cover app header (90px default)
+- ✅ **Two Modes**: Normal popup (570px) and expanded fullscreen mode
+- ✅ **Preserves Header**: Expanded mode doesn't cover app header (70px default)
 - ✅ **Clean Expanded View**: No backdrop/shadow in expanded mode for seamless integration
 - ✅ **Instant Transition**: No animation when expanding for immediate feedback
 - ✅ **Back Navigation**: Expanded mode shows back arrow icon in header for easy collapse
@@ -62,9 +62,9 @@ function MyComponent() {
 | `actions`                 | `ReactNode`           | -         | Action buttons                                              |
 | `isExpanded`              | `boolean`             | `false`   | Toggle fullscreen mode                                      |
 | `onExpandToggle`          | `() => void`          | -         | Handler for back button click when expanded                 |
-| `normalMaxWidth`          | `string`              | `"685px"` | Max width in normal mode                                    |
+| `normalMaxWidth`          | `string`              | `"570px"` | Max width in normal mode                                    |
 | `expandedContentMaxWidth` | `string`              | `"990px"` | Content container max-width in expanded mode                |
-| `headerHeight`            | `string`              | `"90px"`  | App header height to preserve                               |
+| `headerHeight`            | `string`              | `"70px"`  | App header height to preserve                               |
 | `normalSpacing`           | `number`              | `2`       | Stack spacing in normal mode (MUI spacing units: 1 = 8px)   |
 | `expandedSpacing`         | `number`              | `2`       | Stack spacing in expanded mode (MUI spacing units: 1 = 8px) |
 | `contentSx`               | `SxProps<Theme>`      | -         | Custom styles for DialogContent                             |
@@ -149,7 +149,7 @@ For apps with different header heights:
   open={open}
   onClose={handleClose}
   title="Custom Header Height"
-  headerHeight="80px"
+  headerHeight="70px"
   isExpanded={true}
 >
   <TextField label="Content" />
@@ -160,7 +160,7 @@ For apps with different header heights:
 
 ### Normal Mode (`isExpanded={false}`)
 
-- Dialog: max-width = `normalMaxWidth` (default 685px)
+- Dialog: max-width = `normalMaxWidth` (default 570px)
 - Content: 100% width
 - Height: auto (fits content)
 - Position: centered with 32px margin
@@ -215,7 +215,7 @@ import { ResponsiveDialog } from "@/components/Dialog";
 1. **Use `isExpanded` for Show More/Less**: Toggle between modes for better UX
 2. **Provide `onExpandToggle` handler**: Required for back button functionality in expanded mode
 3. **Hide expand button in actions when expanded**: Back arrow in header provides collapse action
-4. **Keep `normalMaxWidth` reasonable**: 685px works well for forms
+4. **Keep `normalMaxWidth` reasonable**: 570px works well for forms
 5. **Center content in expanded mode**: Default 990px provides good reading width
 6. **Preserve header**: Default 90px - adjust via `headerHeight` prop if needed
 7. **MUI Stack handles spacing**: Children wrapped in Stack with configurable spacing prop - override with `normalSpacing`/`expandedSpacing` if needed

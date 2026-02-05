@@ -21,7 +21,7 @@ import React, { ReactNode } from "react";
  * ResponsiveDialog - A reusable dialog component that can switch between normal and expanded modes
  *
  * Features:
- * - Normal mode: Dialog with customizable max-width (default 685px)
+ * - Normal mode: Dialog with customizable max-width (default 570px)
  * - Expanded mode: Full height dialog (excluding app header) with centered content container
  * - Fully customizable with sx props for Dialog, DialogTitle, and DialogContent
  * - Preserves app header visibility in expanded mode
@@ -58,7 +58,7 @@ interface ResponsiveDialogProps extends Omit<
   isExpanded?: boolean;
   /** Callback when expand/collapse button is clicked (required if using isExpanded) */
   onExpandToggle?: () => void;
-  /** Max width in normal mode (default: "685px") */
+  /** Max width in normal mode (default: "570px") */
   normalMaxWidth?: string;
   /** Max width of content container in expanded mode (default: "990px") */
   expandedContentMaxWidth?: string;
@@ -98,9 +98,9 @@ function ResponsiveDialog({
   actions,
   isExpanded = false,
   onExpandToggle,
-  normalMaxWidth = "685px",
+  normalMaxWidth = "570px",
   expandedContentMaxWidth = "990px",
-  headerHeight = "90px",
+  headerHeight = "70px",
   normalSpacing = 2,
   expandedSpacing = 2,
   contentSx,
@@ -116,6 +116,7 @@ function ResponsiveDialog({
 }: ResponsiveDialogProps) {
   const baseSx: SxProps<Theme> = {
     "& .MuiBackdrop-root": {
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
       opacity: isExpanded ? "0 !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
       pointerEvents: isExpanded ? "none" : undefined,
@@ -202,8 +203,9 @@ function ResponsiveDialog({
                   onClick={onExpandToggle}
                   aria-label="expand"
                   size="small"
+                  sx={{ marginRight: 1 }}
                 >
-                  <OpenInFullIcon />
+                  <OpenInFullIcon sx={{ padding: "2px" }} />
                 </IconButton>
               )}
               <IconButton onClick={onClose} aria-label="close" size="small">

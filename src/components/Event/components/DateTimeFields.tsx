@@ -37,6 +37,15 @@ const timePickerPopperSx = {
   },
 };
 
+// twake-mui datePickerOverrides also uses this selector. Repeating ensures our override wins.
+const dateCalendarLayoutSx = {
+  "& .MuiDateCalendar-root.MuiDateCalendar-root": {
+    width: "260px",
+    maxWidth: "260px",
+    padding: "0 15px",
+  },
+};
+
 /**
  * Props for DateTimeFields component
  */
@@ -369,6 +378,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                       false,
                       t("dateTimeFields.startDate")
                     ),
+                    layout: { sx: dateCalendarLayoutSx },
                   }}
                 />
               </Box>
@@ -415,6 +425,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                       !!validation.errors.dateTime,
                       t("dateTimeFields.endDate")
                     ),
+                    layout: { sx: dateCalendarLayoutSx },
                   }}
                 />
               </Box>
@@ -463,6 +474,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     false,
                     t("dateTimeFields.startDate")
                   ),
+                  layout: { sx: dateCalendarLayoutSx },
                 }}
               />
             </Box>
@@ -483,6 +495,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     !!validation.errors.dateTime,
                     t("dateTimeFields.endDate")
                   ),
+                  layout: { sx: dateCalendarLayoutSx },
                 }}
               />
             </Box>
@@ -502,6 +515,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     false,
                     startDateLabel
                   ),
+                  layout: { sx: dateCalendarLayoutSx },
                 }}
               />
             </Box>

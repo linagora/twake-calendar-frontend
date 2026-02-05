@@ -1,8 +1,13 @@
 import { Menubar } from "@/components/Menubar/Menubar";
 import * as oidcAuth from "@/features/User/oidcAuth";
+import { redirectTo } from "@/utils/navigation";
 import "@testing-library/jest-dom";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../utils/Renderwithproviders";
+
+jest.mock("@/utils/navigation", () => ({
+  redirectTo: jest.fn(),
+}));
 
 describe("Calendar App Component Display Tests", () => {
   const preloadedState = {
@@ -320,7 +325,7 @@ describe("Calendar App Component Display Tests", () => {
     expect(avatar).toBeInTheDocument();
   });
 
-  it("shows AppsIcon when applist is not empty", () => {
+  it("shows apps button when applist is not empty", () => {
     (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
@@ -335,10 +340,10 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    expect(screen.getByTestId("AppsIcon")).toBeInTheDocument();
+    expect(screen.getByLabelText("menubar.apps")).toBeInTheDocument();
   });
 
-  it("opens popover when clicking AppsIcon", () => {
+  it("opens popover when clicking apps button", () => {
     (window as any).appList = [
       { name: "Twake", icon: "twake.svg", link: "/twake" },
       { name: "Calendar", icon: "calendar.svg", link: "/calendar" },
@@ -356,7 +361,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    const appsButton = screen.getByTestId("AppsIcon");
+    const appsButton = screen.getByLabelText("menubar.apps");
     fireEvent.click(appsButton);
     expect(screen.getByText("Twake")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
@@ -377,7 +382,7 @@ describe("Calendar App Component Display Tests", () => {
       />,
       preloadedState
     );
-    const appsButton = screen.getByTestId("AppsIcon");
+    const appsButton = screen.getByLabelText("menubar.apps");
     fireEvent.click(appsButton);
 
     const testLink = screen.getByRole("link", { name: /test/i });
@@ -532,7 +537,7 @@ describe("Menubar interaction with expanded Dialog", () => {
       preloadedState
     );
 
-    const appsButton = screen.getByTestId("AppsIcon");
+    const appsButton = screen.getByLabelText("menubar.apps");
     expect(appsButton).toBeVisible();
 
     fireEvent.click(appsButton);
@@ -717,10 +722,17 @@ describe("Menubar interaction with expanded Dialog", () => {
 });
 
 describe("Menubar logout flow", () => {
+  const redirectToMock = redirectTo as jest.Mock;
+
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
     jest.clearAllMocks();
+    redirectToMock.mockReset();
+  });
+
+  afterEach(() => {
+    redirectToMock.mockReset();
   });
 
   function renderMenubar(user = { name: "John", email: "test@example.com" }) {
@@ -756,6 +768,7 @@ describe("Menubar logout flow", () => {
       fireEvent.click(screen.getByText("menubar.logout"));
     });
     expect(logoutSpy).toHaveBeenCalled();
+    expect(redirectToMock).toHaveBeenCalledWith("https://logout.url/");
 
     expect(sessionStorage.length).toBe(0);
   });

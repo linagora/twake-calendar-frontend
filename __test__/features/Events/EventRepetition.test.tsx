@@ -1176,7 +1176,8 @@ describe("Event URL handling for recurring events", () => {
       )
     );
 
-    // Change calendar
+    // Expand to show calendar combobox (normal mode shows SectionPreviewRow)
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
     fireEvent.mouseDown(screen.getByLabelText("event.form.calendar"));
     const option = await screen.findByText("Calendar 2");
     fireEvent.click(option);
