@@ -129,6 +129,10 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         screen.queryByDisplayValue("Modified Instance Title")
       ).not.toBeInTheDocument();
 
+      // Expand more options to show timezone (normal mode shows summary first)
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
       // Verify timezone dropdown shows master timezone
       await waitFor(() => {
         expect(screen.getByDisplayValue(/New York/i)).toBeDefined();
@@ -493,8 +497,12 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         expect(screen.getByDisplayValue("Daily Standup")).toBeInTheDocument();
       });
 
+      // Expand more options to show date/time inputs (normal mode shows DateTimeSummary first)
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
+      const input = await waitFor(() => screen.getByTestId("start-time-input"));
       // Change time to 2:00 PM (14:00)
-      const input = screen.getByTestId("start-time-input");
       await userEvent.click(input);
       await userEvent.clear(input);
       await userEvent.type(input, "14:00{enter}");

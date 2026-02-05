@@ -78,6 +78,9 @@
       "addNew": "Добавить новый календарь",
       "access": "Доступ",
       "import": "Импорт"
+    },
+    "settings": {
+      "calendarName": "Название календаря"
     }
   },
   "colorPicker": {

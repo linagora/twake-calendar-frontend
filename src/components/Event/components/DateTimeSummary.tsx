@@ -80,11 +80,12 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
     return `${toHHmm(startTimeStr)} - ${toHHmm(endTimeStr)}`;
   };
 
-  // Format timezone: "(UTC+2) Paris"
-  const formatTimezone = (tz: string): string => {
+  // Format timezone: "(UTC+2) Paris". Use event date for offset (DST correctness).
+  const formatTimezone = (tz: string, dateStr?: string): string => {
     if (!tz) return "";
     try {
-      const offset = getTimezoneOffset(tz, new Date());
+      const dateForOffset = dateStr ? dayjs(dateStr).toDate() : new Date();
+      const offset = getTimezoneOffset(tz, dateForOffset);
       const tzName = tz.replace(/_/g, " ");
       return `(${offset}) ${tzName}`;
     } catch (error) {
@@ -127,7 +128,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
 
   const dateText = formatDateText();
   const timeText = formatTime(startTime, endTime);
-  const timezoneText = formatTimezone(timezone);
+  const timezoneText = formatTimezone(timezone, startDate);
   const repeatText = formatRepeat(repetition);
 
   // Don't render if no date

@@ -76,6 +76,9 @@
       "addNew": "Thêm lịch mới",
       "access": "Quyền truy cập",
       "import": "Nhập"
+    },
+    "settings": {
+      "calendarName": "Tên lịch"
     }
   },
   "colorPicker": {
