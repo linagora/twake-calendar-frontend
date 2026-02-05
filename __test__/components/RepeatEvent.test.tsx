@@ -383,8 +383,6 @@ describe("Repeat Event Integration Tests", () => {
     await expectRRule({
       freq: "yearly",
       interval: 1,
-      occurrences: 0,
-      endDate: "",
     });
     expect(mockOnClose).toHaveBeenCalledWith(true);
   });
