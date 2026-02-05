@@ -13,6 +13,7 @@ import PublicIcon from "@mui/icons-material/Public";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { AddDescButton } from "../Event/AddDescButton";
+import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { ColorPicker } from "./CalendarColorPicker";
 
 export function SettingsTab({
@@ -49,23 +50,29 @@ export function SettingsTab({
   return (
     <>
       {/* Form group 1: Name field - first group, margin top 0 */}
-      <Box mt={0}>
-        <TextField
-          fullWidth
-          label=""
-          inputProps={{ "aria-label": t("common.name") }}
-          placeholder={t("common.name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          size="small"
-          sx={{
-            "&.MuiFormControl-root": {
-              marginTop: 0,
-              marginBottom: 0,
-            },
-          }}
-        />
-      </Box>
+      <FieldWithLabel
+        label={t("common.name")}
+        isExpanded={false}
+        sx={{ padding: 0, margin: 0 }}
+      >
+        <Box mt={0}>
+          <TextField
+            fullWidth
+            label=""
+            inputProps={{ "aria-label": t("common.name") }}
+            placeholder={t("common.name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            size="small"
+            sx={{
+              "&.MuiFormControl-root": {
+                marginTop: 0,
+                marginBottom: 0,
+              },
+            }}
+          />
+        </Box>
+      </FieldWithLabel>
 
       {/* Form group 2: Description */}
       <Box mt={2}>
