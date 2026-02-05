@@ -1,7 +1,7 @@
 import { useAppDispatch } from "@/app/hooks";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
-import { Button, CircularProgress } from "@linagora/twake-mui";
+import { Button, CircularProgress, Box } from "@linagora/twake-mui";
 import { Theme } from "@mui/material";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
@@ -128,11 +128,10 @@ export function RSVPButton({
       onClick={handleClick}
       disabled={isLoading}
     >
-      {isLoadingThis ? (
-        <CircularProgress size={20} color="inherit" />
-      ) : (
-        t(`eventPreview.${rsvpValue}`)
-      )}
+      <Box display="flex" alignItems="center" gap={1}>
+        {isLoadingThis && <CircularProgress size={20} color="inherit" />}
+        {t(`eventPreview.${rsvpValue}`)}
+      </Box>
     </Button>
   );
 }
