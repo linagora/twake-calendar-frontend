@@ -265,10 +265,6 @@ export default function EventPreviewModal({
       (a) => a.cal_address !== event.organizer?.cal_address
     ) || [];
 
-  const visibleAttendees = showAllAttendees
-    ? attendees
-    : attendees.slice(0, attendeeDisplayLimit);
-
   const currentUserAttendee = event.attendee?.find(
     (person) => person.cal_address === user.email
   );
@@ -550,7 +546,7 @@ export default function EventPreviewModal({
                               showAllAttendees,
                               true
                             )}
-                          {visibleAttendees.map((a, idx) =>
+                          {attendees.map((a, idx) =>
                             renderAttendeeBadge(
                               a,
                               idx.toString(),
@@ -583,7 +579,7 @@ export default function EventPreviewModal({
               organizer &&
               renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
             {showAllAttendees &&
-              visibleAttendees.map((a, idx) =>
+              attendees.map((a, idx) =>
                 renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
               )}
             {/* Location */}
