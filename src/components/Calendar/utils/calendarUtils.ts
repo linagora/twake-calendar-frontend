@@ -78,10 +78,11 @@ export const eventToFullCalendarFormat = (
     .map((e) => {
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
+      const isOrganiser = e.organizer
+        ? e.organizer.cal_address === userAddress
+        : true; // if there are no organizer in the event we assume it was organized by the owner
       const isPersonnalEvent =
-        extractEventBaseUuid(e.calId) === userId &&
-        e.organizer?.cal_address === userAddress;
-
+        extractEventBaseUuid(e.calId) === userId && isOrganiser;
       const convertedEvent: any = {
         ...e,
         title: formatEventChipTitle(e, t),
