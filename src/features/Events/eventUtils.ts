@@ -385,7 +385,7 @@ function formatDateToICal(date: Date, allday: Boolean, timezone?: string) {
   const hours = pad(date.getUTCHours());
   const minutes = pad(date.getUTCMinutes());
   const seconds = pad(date.getUTCSeconds());
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
 }
 
 /**
