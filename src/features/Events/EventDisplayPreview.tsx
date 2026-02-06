@@ -435,7 +435,6 @@ export default function EventPreviewModal({
         actions={
           <AttendanceValidation
             contextualizedEvent={contextualizedEvent}
-            calendarList={calendarList}
             user={user}
             setAfterChoiceFunc={setAfterChoiceFunc}
             setOpenEditModePopup={setOpenEditModePopup}
