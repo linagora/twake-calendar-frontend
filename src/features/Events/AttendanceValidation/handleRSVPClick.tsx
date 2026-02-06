@@ -11,15 +11,31 @@ export async function handleRSVPClick(
   user: userData | undefined,
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>,
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>,
-  dispatch: AppDispatch
+  dispatch: AppDispatch,
+  onLoadingChange?: (loading: boolean, value?: PartStat) => void
 ) {
   const { isRecurring, calendar, event } = contextualizedEvent;
+
   if (isRecurring) {
-    setAfterChoiceFunc(() => async (type: string) => {
+    setAfterChoiceFunc(() => async (type: string | null) => {
+      // If user cancelled the modal, don't proceed
+      if (type === null) {
+        return;
+      }
+
+      // Now start loading since user made a choice
+      if (onLoadingChange) {
+        onLoadingChange(true, rsvp);
+      }
+
       try {
         await handleRSVP(dispatch, calendar, user, event, rsvp, type);
       } catch (error) {
         console.error("Error handling RSVP:", error);
+        // Clear loading on error
+        if (onLoadingChange) {
+          onLoadingChange(false);
+        }
       }
     });
     setOpenEditModePopup("attendance");

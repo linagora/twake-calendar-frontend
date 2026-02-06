@@ -1,8 +1,7 @@
 import { useAppDispatch } from "@/app/hooks";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
-import { Button, CircularProgress, Box } from "@linagora/twake-mui";
-import { Theme } from "@mui/material";
+import { Button, CircularProgress, Box, Theme } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
@@ -23,7 +22,7 @@ interface RSVPButtonProps {
   setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>;
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
   isLoading: boolean;
-  onLoadingChange: (loading: boolean, rsvpValue?: PartStat) => void;
+  onLoadingChange: (loading: boolean, value?: PartStat) => void;
   loadingValue: PartStat | null;
 }
 
@@ -69,13 +68,16 @@ export function RSVPButton({
   }, [currentUserAttendee?.partstat, isLoading, rsvpValue, onLoadingChange]);
 
   const handleClick = async () => {
-    const startTime = performance.now();
     // Store current partstat before making changes
     previousPartstatRef.current = currentUserAttendee?.partstat;
     if (previousPartstatRef.current === rsvpValue) {
       return;
     }
-    onLoadingChange(true, rsvpValue);
+
+    // For recurring events, don't set loading yet - wait for modal choice
+    if (!contextualizedEvent.isRecurring) {
+      onLoadingChange(true, rsvpValue);
+    }
 
     try {
       await handleRSVPClick(
@@ -84,12 +86,12 @@ export function RSVPButton({
         user,
         setAfterChoiceFunc,
         setOpenEditModePopup,
-        dispatch
+        dispatch,
+        onLoadingChange
       );
     } catch (error) {
-      const endTime = performance.now();
       console.error(
-        `[RSVPButton ${rsvpValue}] Error in handleRSVPClick after ${(endTime - startTime).toFixed(2)}ms:`,
+        `[RSVPButton ${rsvpValue}] Error in handleRSVPClick:`,
         error
       );
       // Clear loading on error
@@ -114,7 +116,6 @@ export function RSVPButton({
       size="medium"
       sx={{
         borderRadius: "50px",
-        minWidth: showLoading ? "100px" : "auto",
         // Override MUI's default disabled styles to keep the color
         "&.Mui-disabled": shouldShowActive
           ? {
