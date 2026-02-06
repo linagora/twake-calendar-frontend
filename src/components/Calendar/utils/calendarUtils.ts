@@ -81,14 +81,13 @@ export const eventToFullCalendarFormat = (
       const isOrganiser = e.organizer
         ? e.organizer.cal_address?.toLowerCase() === userAddress?.toLowerCase()
         : true; // if there are no organizer in the event we assume it was organized by the owner
-      const isPersonnalEvent =
-        extractEventBaseUuid(e.calId) === userId && isOrganiser;
+      const isPersonnalEvent = extractEventBaseUuid(e.calId) === userId;
       const convertedEvent: any = {
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
-        editable: isPersonnalEvent,
-        priority: isPersonnalEvent && !pending ? 1 : 0,
+        editable: isPersonnalEvent && isOrganiser && !pending,
+        priority: isPersonnalEvent ? 1 : 0,
       };
 
       if (!isAllDay && e.start && eventTimezone) {
