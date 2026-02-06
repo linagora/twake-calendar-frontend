@@ -83,14 +83,12 @@ export function setupWebSocketPing(
       );
       onPingFail?.();
       onConnectionDead?.();
+      isStopped = true;
       cleanup();
       return;
     }
 
     try {
-      // Send a ping frame (WebSocket protocol-level ping)
-      // Most WebSocket implementations handle this automatically
-      // If your server expects a custom ping message, modify this:
       socket.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
 
       isWaitingForPong = true;
