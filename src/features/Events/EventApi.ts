@@ -331,6 +331,7 @@ export const updateSeries = async (
 
   const tzid = event.timezone;
 
+  const oldMaster = vevents[masterIndex];
   const updatedMaster = makeVevent(event, tzid, calOwnerEmail, true);
   const newRrule = updatedMaster[1].find(([k]: string[]) => k === "rrule");
   if (!newRrule) {
@@ -345,9 +346,106 @@ export const updateSeries = async (
     // When date/time/timezone/repeat rules changed, remove all override instances
     finalVevents = [updatedMaster];
   } else {
-    // When only properties changed, keep override instances
-    vevents[masterIndex] = updatedMaster;
-    finalVevents = vevents;
+    // When only properties changed, keep override instances and update their metadata
+
+    // Helper function to get field values from props
+    const getFieldValues = (props: any[], fieldName: string) => {
+      return props.filter(([k]) => k.toLowerCase() === fieldName.toLowerCase());
+    };
+
+    // Helper function to serialize for comparison
+    const serialize = (values: any[]) => JSON.stringify(values);
+
+    // Detect which fields changed in the master
+    const changedFields = new Map<string, any[]>();
+    const oldMasterProps = oldMaster[1];
+    const newMasterProps = updatedMaster[1];
+
+    // Fields that are metadata (not time-related)
+    const metadataFields = [
+      "summary",
+      "description",
+      "location",
+      "class",
+      "transp",
+      "attendee",
+      "organizer",
+      "x-openpaas-videoconference",
+    ];
+
+    metadataFields.forEach((fieldName) => {
+      const oldValues = getFieldValues(oldMasterProps, fieldName);
+      const newValues = getFieldValues(newMasterProps, fieldName);
+
+      if (serialize(oldValues) !== serialize(newValues)) {
+        changedFields.set(fieldName.toLowerCase(), newValues);
+      }
+    });
+
+    // Check if VALARM component changed
+    const oldMasterComponents = oldMaster[2] || [];
+    const newMasterComponents = updatedMaster[2] || [];
+    const oldValarm = oldMasterComponents.filter(
+      ([name]) => name.toLowerCase() === "valarm"
+    );
+    const newValarm = newMasterComponents.filter(
+      ([name]) => name.toLowerCase() === "valarm"
+    );
+    const valarmChanged = serialize(oldValarm) !== serialize(newValarm);
+
+    const updatedVevents = vevents.map((vevent, index) => {
+      if (index === masterIndex) {
+        return updatedMaster;
+      }
+
+      const [veventType, props, components = []] = vevent;
+      let newProps = [...props];
+
+      // Only update fields that actually changed in the master
+      changedFields.forEach((newValues, fieldNameLower) => {
+        // Remove old values of this changed field from exception
+        const filteredProps = newProps.filter(
+          ([k]) => k.toLowerCase() !== fieldNameLower
+        );
+
+        // Add new values from updated master
+        newProps = [...filteredProps, ...newValues];
+      });
+
+      // Increment sequence number if any changes were made
+      if (changedFields.size > 0 || valarmChanged) {
+        const sequenceIndex = newProps.findIndex(
+          ([k]) => k.toLowerCase() === "sequence"
+        );
+        if (sequenceIndex !== -1) {
+          const currentSequence = parseInt(
+            newProps[sequenceIndex][3] || "0",
+            10
+          );
+          newProps[sequenceIndex] = [
+            newProps[sequenceIndex][0],
+            newProps[sequenceIndex][1],
+            newProps[sequenceIndex][2],
+            String(currentSequence + 1),
+          ];
+        } else {
+          newProps.push(["sequence", {}, "integer", "1"]);
+        }
+      }
+
+      // Handle VALARM component updates
+      let updatedComponents = components;
+      if (valarmChanged) {
+        // Remove old VALARM and add new one
+        updatedComponents = components
+          .filter(([name]) => name.toLowerCase() !== "valarm")
+          .concat(newValarm);
+      }
+
+      return [veventType, newProps, updatedComponents];
+    });
+
+    finalVevents = updatedVevents;
   }
 
   const newJCal = [
