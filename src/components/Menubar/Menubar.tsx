@@ -26,7 +26,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import SettingsIcon from "@mui/icons-material/Settings";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import React, { useEffect, useState } from "react";
 import { push } from "redux-first-history";
 import { useI18n } from "twake-i18n";
@@ -343,25 +343,49 @@ export function Menubar({
         >
           <Avatar
             color={stringToGradient(getUserDisplayName(user))}
-            size="m"
+            size="l"
             sx={{ marginBottom: "8px" }}
           >
             {getInitials(getUserDisplayName(user))}
           </Avatar>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          <Typography
+            sx={{
+              color: "#424244",
+              fontFamily: "Inter",
+              fontSize: 22,
+              fontWeight: 600,
+            }}
+          >
             {getUserDisplayName(user)}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            sx={{
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          >
             {user?.email}
           </Typography>
         </Box>
         <MenuItem onClick={handleSettingsClick} sx={{ py: 1.5 }}>
-          <SettingsIcon sx={{ mr: 2 }} />
+          <SettingsOutlinedIcon
+            sx={{
+              mr: 2,
+              color: "rgba(28, 27, 31, 0.48)",
+              fontSize: 20,
+            }}
+          />
           {t("menubar.settings") || "Settings"}
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogoutClick} sx={{ py: 1.5 }}>
-          <LogoutIcon sx={{ mr: 2 }} />
+          <LogoutIcon
+            sx={{
+              mr: 2,
+              color: "rgba(28, 27, 31, 0.48)",
+              fontSize: 20,
+            }}
+          />
           {t("menubar.logout") || "Logout"}
         </MenuItem>
       </Menu>
