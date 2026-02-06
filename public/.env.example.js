@@ -12,3 +12,5 @@ var DEBUG = false;
 var LANG = "en";
 var WEBSOCKET_URL = "wss://calendar.example.com";
 var WS_DEBOUNCE_PERIOD_MS = 100; // milliseconds, remove or set to 0 to disable debounce
+var WS_PING_PERIOD_MS = 30000;
+var WS_PING_TIMEOUT_PERIOD_MS = 35000;
