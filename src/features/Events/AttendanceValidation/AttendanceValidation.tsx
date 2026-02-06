@@ -1,9 +1,10 @@
 import { userData } from "@/features/User/userDataTypes";
 import { Box, Typography } from "@linagora/twake-mui";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
 import { RSVPButton } from "./RSVPButton";
+import { PartStat } from "@/features/User/models/attendee";
 
 interface AttendanceValidationProps {
   contextualizedEvent: ContextualizedEvent;
@@ -20,6 +21,8 @@ export function AttendanceValidation({
 }: AttendanceValidationProps) {
   const { currentUserAttendee, isOwn } = contextualizedEvent;
   const { t } = useI18n();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingValue, setLoadingValue] = useState<PartStat | null>(null);
 
   // Check if we should show RSVP buttons
   const hasNoAttendeesOrOrganizer =
@@ -30,11 +33,19 @@ export function AttendanceValidation({
     return null;
   }
 
+  const handleLoadingChange = (loading: boolean, value?: PartStat) => {
+    setIsLoading(loading);
+    setLoadingValue(loading && value ? value : null);
+  };
+
   const commonButtonProps = {
     contextualizedEvent,
     user,
     setAfterChoiceFunc,
     setOpenEditModePopup,
+    isLoading,
+    onLoadingChange: handleLoadingChange,
+    loadingValue,
   };
 
   return (
