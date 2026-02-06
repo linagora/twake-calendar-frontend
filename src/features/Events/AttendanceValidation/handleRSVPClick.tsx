@@ -44,6 +44,9 @@ export async function handleRSVPClick(
       await handleRSVP(dispatch, calendar, user, event, rsvp);
     } catch (error) {
       console.error("Error handling RSVP:", error);
+      if (onLoadingChange) {
+        onLoadingChange(false);
+      }
     }
   }
 }

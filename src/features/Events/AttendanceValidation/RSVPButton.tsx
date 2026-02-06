@@ -39,18 +39,10 @@ export function RSVPButton({
   const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { currentUserAttendee } = contextualizedEvent;
-  const [showLoading, setShowLoading] = useState(false);
+  const showLoading = isLoading && loadingValue === rsvpValue;
   const previousPartstatRef = useRef<PartStat | undefined>(
     currentUserAttendee?.partstat
   );
-
-  useEffect(() => {
-    if (isLoading && loadingValue === rsvpValue) {
-      setShowLoading(true);
-    } else {
-      setShowLoading(false);
-    }
-  }, [isLoading, loadingValue, rsvpValue]);
 
   // Detect when attendee status changes (via WebSocket) and clear loading
   useEffect(() => {
@@ -100,12 +92,11 @@ export function RSVPButton({
   };
 
   const isCurrentlyActive = currentUserAttendee?.partstat === rsvpValue;
-  const isLoadingThis = showLoading && loadingValue === rsvpValue;
 
   // Show as active (colored) if:
   // 1. This button is currently loading, OR
   // 2. This is the active status AND nothing is loading
-  const shouldShowActive = isLoadingThis || (isCurrentlyActive && !isLoading);
+  const shouldShowActive = showLoading || (isCurrentlyActive && !isLoading);
 
   const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : "primary";
 
@@ -130,7 +121,7 @@ export function RSVPButton({
       disabled={isLoading}
     >
       <Box display="flex" alignItems="center" gap={1}>
-        {isLoadingThis && <CircularProgress size={20} color="inherit" />}
+        {showLoading && <CircularProgress size={20} color="inherit" />}
         {t(`eventPreview.${rsvpValue}`)}
       </Box>
     </Button>
