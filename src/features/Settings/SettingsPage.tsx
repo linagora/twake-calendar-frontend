@@ -278,7 +278,7 @@ export default function SettingsPage() {
             aria-label={t("settings.back") || "Back to calendar"}
             className="back-button"
           >
-            <ArrowBackIcon />
+            <ArrowBackIcon sx={{ color: "#605D62", fontSize: 30 }} />
           </IconButton>
           {activeNavItem === "settings" && (
             <Tabs

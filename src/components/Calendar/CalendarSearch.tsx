@@ -40,8 +40,8 @@ function CalendarItem({
     <Box
       key={cal.owner.email + cal.cal["dav:name"]}
       display="flex"
-      alignItems="center"
-      justifyContent="space-between"
+      flexDirection="column"
+      alignItems="flex-start"
       style={{
         borderRadius: 8,
         border: "1px solid #e5e7eb",
@@ -49,7 +49,7 @@ function CalendarItem({
         marginBottom: 8,
       }}
     >
-      <Box display="flex" alignItems="center" gap={2}>
+      <Box display="flex" alignItems="center" gap={2} mb={1}>
         <Avatar
           {...stringAvatar(cal.owner.displayName || cal.owner.email)}
           style={{

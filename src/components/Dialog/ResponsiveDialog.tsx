@@ -187,7 +187,7 @@ function ResponsiveDialog({
             aria-label="show less"
             sx={{ marginLeft: "-8px" }}
           >
-            <ArrowBackIcon />
+            <ArrowBackIcon sx={{ color: "#605D62", fontSize: 30 }} />
           </IconButton>
         ) : showHeaderActions ? (
           <Box
