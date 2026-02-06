@@ -68,7 +68,9 @@ export function formatEventChipTitle(e: CalendarEvent, t: Function) {
 export const eventToFullCalendarFormat = (
   filteredEvents: CalendarEvent[],
   filteredTempEvents: CalendarEvent[],
-  userId: string | undefined
+  userId: string | undefined,
+  userAddress: string | undefined,
+  pending: boolean
 ) => {
   const { t } = useI18n();
   return filteredEvents
@@ -76,14 +78,17 @@ export const eventToFullCalendarFormat = (
     .map((e) => {
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
-      const isPersonnalEvent = extractEventBaseUuid(e.calId) === userId;
-
+      const isOrganiser = e.organizer
+        ? e.organizer.cal_address?.toLowerCase() === userAddress?.toLowerCase()
+        : true; // if there are no organizer in the event we assume it was organized by the owner
+      const isPersonnalEvent =
+        extractEventBaseUuid(e.calId) === userId && isOrganiser;
       const convertedEvent: any = {
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
         editable: isPersonnalEvent,
-        priority: isPersonnalEvent ? 1 : 0,
+        priority: isPersonnalEvent && !pending ? 1 : 0,
       };
 
       if (!isAllDay && e.start && eventTimezone) {

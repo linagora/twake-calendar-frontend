@@ -693,7 +693,9 @@ export default function CalendarApp({
             events={eventToFullCalendarFormat(
               filteredEvents,
               filteredTempEvents,
-              userId
+              userId,
+              userData?.email,
+              isPending
             )}
             eventOrder={(a: any, b: any) =>
               a.extendedProps.priority - b.extendedProps.priority
