@@ -1,10 +1,8 @@
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import {
   Box,
-  Checkbox,
   FormControl,
   FormControlLabel,
-  FormGroup,
   MenuItem,
   Radio,
   RadioGroup,
@@ -13,9 +11,30 @@ import {
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from "@linagora/twake-mui";
-import { useEffect, useState } from "react";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/en";
+import "dayjs/locale/fr";
+import "dayjs/locale/ru";
+import "dayjs/locale/vi";
+import React, { useMemo, useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
+import { ReadOnlyDateField } from "./components/ReadOnlyPickerField";
+import { LONG_DATE_FORMAT } from "./utils/dateTimeFormatters";
+import { dtDate } from "./utils/dateTimeHelpers";
+
+const dateCalendarLayoutSx = {
+  "& .MuiDateCalendar-root.MuiDateCalendar-root": {
+    width: "260px",
+    maxWidth: "260px",
+    padding: "0 15px",
+  },
+};
 
 export default function RepeatEvent({
   repetition,
@@ -29,8 +48,9 @@ export default function RepeatEvent({
   isOwn?: boolean;
 }) {
   const { t } = useI18n();
+  const theme = useTheme();
   const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
-  const day = new Date(eventStart);
+  const eventStartDay = new Date(eventStart);
   // derive endOption based on repetition
   const getEndOption = () => {
     if (repetition.occurrences && repetition.occurrences > 0) return "after";
@@ -39,6 +59,23 @@ export default function RepeatEvent({
   };
 
   const [endOption, setEndOption] = useState(getEndOption());
+
+  const endDateValue = useMemo<Dayjs | null>(
+    () =>
+      repetition.endDate
+        ? dayjs(repetition.endDate.slice(0, 10), "YYYY-MM-DD")
+        : null,
+    [repetition.endDate]
+  );
+
+  const handleRepeatEndDateChange = (value: PickerValue) => {
+    if (!value || !(value as Dayjs).isValid()) return;
+    setRepetition({
+      ...repetition,
+      occurrences: null,
+      endDate: dtDate(value as Dayjs),
+    });
+  };
 
   // keep endOption in sync if repetition changes from parent
   useEffect(() => {
@@ -101,9 +138,8 @@ export default function RepeatEvent({
               disabled={!isOwn}
               onChange={(e: SelectChangeEvent) => {
                 if (e.target.value === "weekly") {
-                  // Adjust day index for MO-SU (0-6) to match JS getDay() (0-6, SU is 0)
-                  const jsDay = day.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-                  const icsDay = days[(jsDay + 6) % 7]; // MO is 0, TU is 1, ..., SU is 6
+                  const jsDay = eventStartDay.getDay();
+                  const icsDay = days[(jsDay + 6) % 7];
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
@@ -137,25 +173,49 @@ export default function RepeatEvent({
 
         {/* Weekly selection */}
         {repetition.freq === "weekly" && (
-          <Box>
+          <Box mb={1}>
             <Typography variant="body2" gutterBottom>
               {t("event.repeat.repeatOn")}
             </Typography>
-            <FormGroup row>
-              {days.map((day) => (
-                <FormControlLabel
-                  key={day}
-                  disabled={!isOwn}
-                  control={
-                    <Checkbox
-                      checked={repetition.byday?.includes(day) ?? false}
-                      onChange={() => handleDayChange(day)}
-                    />
-                  }
-                  label={getDayLabel(day)}
-                />
-              ))}
-            </FormGroup>
+            <Box display="flex" flexWrap="wrap" sx={{ "& > *:not(:last-child)": { mr: 1 } }}>
+              {days.map((dayCode) => {
+                const checked = repetition.byday?.includes(dayCode) ?? false;
+                const primaryMain = theme.palette.primary.main;
+                return (
+                  <Box
+                    key={dayCode}
+                    component="button"
+                    type="button"
+                    title={getDayLabel(dayCode)}
+                    disabled={!isOwn}
+                    onClick={() => handleDayChange(dayCode)}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1,
+                      border: "1px solid",
+                      borderColor: checked ? primaryMain : "#AEAEC0",
+                      bgcolor: checked ? primaryMain : "transparent",
+                      color: checked ? "#fff" : "#8C9CAF",
+                      fontSize: 16,
+                      fontWeight: 400,
+                      lineHeight: "24px",
+                      fontStyle: "normal",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: isOwn ? "pointer" : "default",
+                      "&:hover": isOwn
+                        ? { opacity: 0.9 }
+                        : undefined,
+                      "&:disabled": { cursor: "default", opacity: 0.7 },
+                    }}
+                  >
+                    {dayCode[0]}
+                  </Box>
+                );
+              })}
+            </Box>
           </Box>
         )}
 
@@ -191,7 +251,7 @@ export default function RepeatEvent({
                 setRepetition({
                   ...repetition,
                   occurrences: null,
-                  endDate: new Date().toISOString().slice(0, 16),
+                  endDate: dayjs().format("YYYY-MM-DD"),
                 });
               }
             }}
@@ -205,6 +265,7 @@ export default function RepeatEvent({
                   {t("event.repeat.end.never")}
                 </Typography>
               }
+              sx={{ mb: 1 }}
             />
 
             <FormControlLabel
@@ -237,6 +298,7 @@ export default function RepeatEvent({
                   </Typography>
                 </Box>
               }
+              sx={{ mb: 1 }}
             />
 
             <FormControlLabel
@@ -248,20 +310,36 @@ export default function RepeatEvent({
                   <Typography variant="h6">
                     {t("event.repeat.end.on")}
                   </Typography>
-                  <TextField
-                    type="date"
-                    inputProps={{ "data-testid": "end-date" }}
-                    size="small"
-                    value={repetition.endDate ?? ""}
-                    onChange={(e) =>
-                      setRepetition({
-                        ...repetition,
-                        occurrences: null,
-                        endDate: e.target.value,
-                      })
-                    }
-                    disabled={!isOwn || endOption !== "on"}
-                  />
+                  <LocalizationProvider
+                    dateAdapter={AdapterDayjs}
+                    adapterLocale={t("locale") ?? "en"}
+                    localeText={{
+                      okButtonLabel: t("common.ok"),
+                      cancelButtonLabel: t("common.cancel"),
+                      todayButtonLabel: t("menubar.today"),
+                    }}
+                  >
+                    <Box
+                      sx={{ maxWidth: 300 }}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    >
+                      <DatePicker
+                        format={LONG_DATE_FORMAT}
+                        value={endDateValue}
+                        referenceDate={endDateValue ?? dayjs()}
+                        onChange={handleRepeatEndDateChange}
+                        disabled={!isOwn || endOption !== "on"}
+                        slots={{ field: ReadOnlyDateField }}
+                        slotProps={{
+                          field: {
+                            inputProps: { "data-testid": "end-date" },
+                            placeholder: "dd/mm/yyyy",
+                          } as Record<string, unknown>,
+                          layout: { sx: dateCalendarLayoutSx },
+                        }}
+                      />
+                    </Box>
+                  </LocalizationProvider>
                 </Box>
               }
             />

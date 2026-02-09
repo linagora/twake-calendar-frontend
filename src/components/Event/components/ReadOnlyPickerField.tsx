@@ -68,7 +68,7 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
     <TextField
       {...forwardedProps}
       value={valueToDisplay}
-      placeholder={parsedFormat as string}
+      placeholder={(forwardedProps.placeholder as string) ?? (parsedFormat as string)}
       InputProps={mergedInputProps}
       error={hasValidationError}
       focused={pickerContext.open}
