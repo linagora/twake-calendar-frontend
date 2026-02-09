@@ -1,7 +1,6 @@
 import { WS_INBOUND_EVENTS } from "../protocols";
 
 export function parseMessage(message: unknown) {
-  console.log("WebSocket message received:", message);
   const calendarsToRefresh = new Set<string>();
   const calendarsToHide = new Set<string>();
   if (typeof message !== "object" || message === null) {
@@ -19,6 +18,8 @@ export function parseMessage(message: unknown) {
         if (Array.isArray(value)) {
           value.forEach((cal: string) => calendarsToHide.add(cal));
         }
+        break;
+      case WS_INBOUND_EVENTS.CALENDAR_CLIENT_REGISTERED:
         break;
       default: {
         calendarsToRefresh.add(key);
