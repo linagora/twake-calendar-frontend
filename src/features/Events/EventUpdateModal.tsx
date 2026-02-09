@@ -24,8 +24,8 @@ import {
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import {
   browserDefaultTimeZone,
-  resolveTimezone,
   getTimezoneOffset,
+  resolveTimezone,
 } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
@@ -39,6 +39,7 @@ import {
   updateEventLocal,
 } from "../Calendars/CalendarSlice";
 import { Calendar } from "../Calendars/CalendarTypes";
+import { AsyncThunkResult } from "../Calendars/types/AsyncThunkResult";
 import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
@@ -56,7 +57,7 @@ function EventUpdateModal({
   eventId: string;
   calId: string;
   open: boolean;
-  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void;
   onCloseAll?: () => void;
   eventData?: CalendarEvent | null;
   typeOfAction?: "solo" | "all";
@@ -192,7 +193,7 @@ function EventUpdateModal({
         };
         const fetchedMasterEvent = await getEvent(masterEventToFetch, true);
         setMasterEvent(fetchedMasterEvent);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to fetch master event:", err);
         // Fallback to using the clicked instance
         setMasterEvent(event);
@@ -335,6 +336,7 @@ function EventUpdateModal({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     open,
     event,
@@ -675,16 +677,22 @@ function EventUpdateModal({
         const deletePromises = Array.from(uniqueURLs).map(async (url) => {
           try {
             await deleteEvent(url);
-          } catch (deleteError: any) {
+          } catch (deleteError) {
+            // Check if error is an object with response or message properties
+            const errorObj = deleteError as {
+              response?: { status?: number };
+              message?: string;
+            };
+
             // Silently ignore 404 - file might already be deleted
             const is404 =
-              deleteError.response?.status === 404 ||
-              deleteError.message?.includes("404") ||
-              deleteError.message?.includes("Not Found");
+              errorObj.response?.status === 404 ||
+              errorObj.message?.includes("404") ||
+              errorObj.message?.includes("Not Found");
 
             if (!is404) {
               console.error(
-                `Failed to delete event file: ${deleteError.message}`
+                `Failed to delete event file: ${errorObj.message || "Unknown error"}`
               );
             }
           }
@@ -724,7 +732,10 @@ function EventUpdateModal({
         // Reset all state to default values only on successful save
         resetAllStateToDefault();
         initializedKeyRef.current = null;
-      } catch (err: any) {
+      } catch (err) {
+        // Check if error is an object with a message property
+        const errorObj = err as { message?: string };
+
         // API failed - restore form data and mark as error
         const errorFormData = {
           ...formDataToSave,
@@ -734,7 +745,8 @@ function EventUpdateModal({
 
         // Show error notification
         showErrorNotification(
-          err?.message || "Failed to convert recurring event. Please try again."
+          errorObj.message ||
+            "Failed to convert recurring event. Please try again."
         );
 
         if (createdSingleEventUid) {
@@ -769,7 +781,6 @@ function EventUpdateModal({
       if (recurrenceId) {
         if (typeOfAction === "solo") {
           // Update single instance with optimistic update + rollback
-          const oldEvent = { ...event };
 
           dispatch(
             updateEventLocal({
@@ -778,43 +789,30 @@ function EventUpdateModal({
             })
           );
 
-          try {
-            const result = await dispatch(
-              updateEventInstanceAsync({
-                cal: targetCalendar,
-                event: { ...newEvent, recurrenceId },
-              })
-            );
+          const result = await dispatch(
+            updateEventInstanceAsync({
+              cal: targetCalendar,
+              event: { ...newEvent, recurrenceId },
+            })
+          );
 
-            // Handle result of updateEventInstanceAsync
-            if (result && typeof (result as any).unwrap === "function") {
-              try {
-                await (result as any).unwrap();
-              } catch (unwrapError: any) {
-                throw unwrapError;
-              }
-            } else {
-              // Check if result is rejected
-              if (
-                result.type &&
-                (result.type as string).endsWith("/rejected")
-              ) {
-                const rejectedResult = result as any;
-                throw new Error(
-                  rejectedResult.error?.message ||
-                    rejectedResult.payload?.message ||
-                    "API call failed"
-                );
-              }
+          // Handle result of updateEventInstanceAsync
+          const typedResult = result as AsyncThunkResult;
+          if (typedResult && typeof typedResult.unwrap === "function") {
+            await typedResult.unwrap();
+          } else {
+            // Check if result is rejected
+            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
+              throw new Error(
+                typedResult.error?.message ||
+                  typedResult.payload?.message ||
+                  "API call failed"
+              );
             }
-
-            // Clear temp data on successful save
-            clearEventFormTempData("update");
-          } catch (error: any) {
-            // Rollback optimistic update
-            dispatch(updateEventLocal({ calId, event: oldEvent }));
-            throw error; // Re-throw to be caught by outer catch
           }
+
+          // Clear temp data on successful save
+          clearEventFormTempData("update");
         } else if (typeOfAction === "all") {
           // Update all instances - check if repetition rules changed
           const baseUID = extractEventBaseUuid(event.uid);
@@ -872,22 +870,18 @@ function EventUpdateModal({
               );
 
               // Handle result of updateSeriesAsync
-              if (result && typeof (result as any).unwrap === "function") {
-                try {
-                  await (result as any).unwrap();
-                } catch (unwrapError: any) {
-                  throw unwrapError;
-                }
+              const typedResult = result as AsyncThunkResult;
+              if (typedResult && typeof typedResult.unwrap === "function") {
+                await typedResult.unwrap();
               } else {
                 // Check if result is rejected
                 if (
-                  result.type &&
-                  (result.type as string).endsWith("/rejected")
+                  typedResult.type &&
+                  typedResult.type.endsWith("/rejected")
                 ) {
-                  const rejectedResult = result as any;
                   throw new Error(
-                    rejectedResult.error?.message ||
-                      rejectedResult.payload?.message ||
+                    typedResult.error?.message ||
+                      typedResult.payload?.message ||
                       "API call failed"
                   );
                 }
@@ -949,22 +943,15 @@ function EventUpdateModal({
             );
 
             // Handle result of updateSeriesAsync
-            if (result && typeof (result as any).unwrap === "function") {
-              try {
-                await (result as any).unwrap();
-              } catch (unwrapError: any) {
-                throw unwrapError;
-              }
+            const typedResult = result as AsyncThunkResult;
+            if (typedResult && typeof typedResult.unwrap === "function") {
+              await typedResult.unwrap();
             } else {
               // Check if result is rejected
-              if (
-                result.type &&
-                (result.type as string).endsWith("/rejected")
-              ) {
-                const rejectedResult = result as any;
+              if (typedResult.type && typedResult.type.endsWith("/rejected")) {
                 throw new Error(
-                  rejectedResult.error?.message ||
-                    rejectedResult.payload?.message ||
+                  typedResult.error?.message ||
+                    typedResult.payload?.message ||
                     "API call failed"
                 );
               }
@@ -990,19 +977,16 @@ function EventUpdateModal({
           );
 
           // Handle result of putEventAsync - check if rejected first
-          if (result.type && result.type.endsWith("/rejected")) {
+          const typedResult = result as AsyncThunkResult;
+          if (typedResult.type && typedResult.type.endsWith("/rejected")) {
             throw new Error(
-              result.error?.message ||
-                result.payload?.message ||
+              typedResult.error?.message ||
+                typedResult.payload?.message ||
                 "API call failed"
             );
           }
-          if (result && typeof result.unwrap === "function") {
-            try {
-              await result.unwrap();
-            } catch (unwrapError: any) {
-              throw unwrapError;
-            }
+          if (typedResult && typeof typedResult.unwrap === "function") {
+            await typedResult.unwrap();
           }
 
           // Remove old single event AFTER new recurring instances are added to store
@@ -1024,19 +1008,16 @@ function EventUpdateModal({
             );
 
             // Handle result of putEventAsync - check if rejected first
-            if (result.type && result.type.endsWith("/rejected")) {
+            const typedResult = result as AsyncThunkResult;
+            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
               throw new Error(
-                result.error?.message ||
-                  result.payload?.message ||
+                typedResult.error?.message ||
+                  typedResult.payload?.message ||
                   "API call failed"
               );
             }
-            if (result && typeof result.unwrap === "function") {
-              try {
-                await result.unwrap();
-              } catch (unwrapError: any) {
-                throw unwrapError;
-              }
+            if (typedResult && typeof typedResult.unwrap === "function") {
+              await typedResult.unwrap();
             }
 
             // Clear temp data on successful save
@@ -1060,8 +1041,9 @@ function EventUpdateModal({
         );
 
         // Handle result of putEventAsync
-        if (putResult && typeof putResult.unwrap === "function") {
-          await putResult.unwrap();
+        const typedPutResult = putResult as AsyncThunkResult;
+        if (typedPutResult && typeof typedPutResult.unwrap === "function") {
+          await typedPutResult.unwrap();
         }
 
         // Then move it to the new calendar
@@ -1074,8 +1056,9 @@ function EventUpdateModal({
         );
 
         // Handle result of moveEventAsync
-        if (moveResult && typeof moveResult.unwrap === "function") {
-          await moveResult.unwrap();
+        const typedMoveResult = moveResult as AsyncThunkResult;
+        if (typedMoveResult && typeof typedMoveResult.unwrap === "function") {
+          await typedMoveResult.unwrap();
         }
 
         // Clear temp data on successful move
@@ -1086,7 +1069,10 @@ function EventUpdateModal({
       clearEventFormTempData("update");
       resetAllStateToDefault();
       initializedKeyRef.current = null;
-    } catch (error: any) {
+    } catch (error) {
+      // Check if error is an object with a message property
+      const errorObj = error as { message?: string };
+
       // Handle errors for all branches
       // Rollback optimistic updates if any
       // API failed - restore form data and mark as error
@@ -1098,7 +1084,7 @@ function EventUpdateModal({
 
       // Show error notification
       showErrorNotification(
-        error?.message || "Failed to update event. Please try again."
+        errorObj.message || "Failed to update event. Please try again."
       );
 
       // Try to reopen modal

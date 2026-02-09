@@ -11,7 +11,7 @@ const mockWindow = {
   VIDEO_CONFERENCE_BASE_URL: "https://meet.linagora.com",
 };
 
-// @ts-ignore
+// @ts-expect-error :  Mock window object for Node.js environment
 global.window = mockWindow;
 
 describe("videoConferenceUtils", () => {

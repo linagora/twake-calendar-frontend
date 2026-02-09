@@ -19,7 +19,7 @@ export function expandEventFunction(
         color: calendar.color,
       });
       return events;
-    } catch (err) {
+    } catch {
       console.error("Failed to fetch event", eventUrl);
       return undefined;
     }

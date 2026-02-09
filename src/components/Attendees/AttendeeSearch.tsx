@@ -15,7 +15,7 @@ export default function UserSearch({
   placeholder,
 }: {
   attendees: userAttendee[];
-  setAttendees: Function;
+  setAttendees: (attendees: userAttendee[]) => void;
   disabled?: boolean;
   inputSlot?: (
     params: ExtendedAutocompleteRenderInputParams
@@ -47,7 +47,7 @@ export default function UserSearch({
       disabled={disabled}
       inputSlot={inputSlot}
       placeholder={placeholder}
-      onChange={(event: any, value: User[]) => {
+      onChange={(_event, value: User[]) => {
         setAttendees(
           value.map((attendee: User) =>
             createAttendee({

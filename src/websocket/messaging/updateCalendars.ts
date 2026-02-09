@@ -1,5 +1,6 @@
 import type { AppDispatch } from "@/app/store";
 import { store } from "@/app/store";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { refreshCalendarWithSyncToken } from "@/features/Calendars/services";
 import { findCalendarById, getDisplayedCalendarRange } from "@/utils";
 import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
@@ -12,7 +13,10 @@ const DEFAULT_DEBOUNCE_MS = 0;
 
 function createDebouncedUpdate(
   debouncePeriodMs: number,
-  getCalendarsToRefresh: () => Map<string, any>,
+  getCalendarsToRefresh: () => Map<
+    string,
+    { calendar: Calendar; type?: "temp" }
+  >,
   getCalendarsToHide: () => Set<string>
 ) {
   return debounce(
@@ -55,8 +59,7 @@ export function updateCalendars(
   );
   accumulateCalendarsToHide(calendarsToHide, accumulators.calendarsToHide);
 
-  const debouncePeriod =
-    (window as any).WS_DEBOUNCE_PERIOD_MS ?? DEFAULT_DEBOUNCE_MS;
+  const debouncePeriod = window.WS_DEBOUNCE_PERIOD_MS ?? DEFAULT_DEBOUNCE_MS;
 
   if (debouncePeriod > 0) {
     if (
@@ -94,7 +97,7 @@ export function updateCalendars(
 function accumulateCalendarsToRefresh(
   state: ReturnType<typeof store.getState>,
   calendarPaths: Set<string>,
-  calendarsToRefreshMap: Map<string, any>
+  calendarsToRefreshMap: Map<string, { calendar: Calendar; type?: "temp" }>
 ) {
   calendarPaths.forEach((calendarPath) => {
     const calendarId = parseCalendarPath(calendarPath);
@@ -126,7 +129,7 @@ function accumulateCalendarsToHide(
 function processCalendarsToRefresh(
   dispatch: AppDispatch,
   currentRange: { start: Date; end: Date },
-  calendarsMap: Map<string, any>
+  calendarsMap: Map<string, { calendar: Calendar; type?: "temp" }>
 ) {
   calendarsMap.forEach((calendar) => {
     dispatch(

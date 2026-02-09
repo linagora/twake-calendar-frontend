@@ -1,6 +1,7 @@
 import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { userAttendee } from "@/features/User/models/attendee";
+import { EventContentArg } from "@fullcalendar/core";
 import { getContrastRatio } from "@linagora/twake-mui";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -12,7 +13,7 @@ import { EVENT_DURATION } from "./EventChip";
 const COMPACT_WIDTH_THRESHOLD = 100;
 
 export interface EventChipProps {
-  arg: any;
+  arg: EventContentArg["event"];
   calendars: Record<string, Calendar>;
   tempcalendars: Record<string, Calendar>;
   errorHandler: EventErrorHandler;
@@ -23,9 +24,9 @@ export interface IconDisplayConfig {
   needAction: boolean;
   private: boolean;
 }
-export function getEventDuration(event: any): number {
-  return moment(event._instance.range.end).diff(
-    moment(event._instance.range.start),
+export function getEventDuration(event: EventContentArg["event"]): number {
+  return moment(event._instance?.range.end).diff(
+    moment(event._instance?.range.start),
     "minutes"
   );
 }
@@ -34,7 +35,10 @@ export function getBestColor(colors: { light: string; dark: string }): string {
   const contrastToLight = getContrastRatio(colors?.light, "#fff");
   return contrastToDark > contrastToLight ? colors?.dark : colors?.light;
 }
-export function getEventTimes(event: any, timeZone: string) {
+export function getEventTimes(
+  event: EventContentArg["event"],
+  timeZone: string
+) {
   return {
     startTime: moment.tz(event.start, timeZone).format("HH:mm"),
     endTime: moment.tz(event.end, timeZone).format("HH:mm"),
@@ -52,7 +56,7 @@ export function getOwnerAttendee(
 export function getTitleStyle(
   bestColor: string,
   partstat?: string,
-  calendar?: any
+  calendar?: Calendar
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = {
     fontFamily: "Roboto",
@@ -122,7 +126,7 @@ export function getCardStyle(
   bestColor: string,
   eventLength: number,
   partstat?: string,
-  calendar?: any
+  calendar?: Calendar
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = getCardVariantStyle(
     getEventVariant(eventLength),

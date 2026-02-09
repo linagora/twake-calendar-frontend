@@ -30,6 +30,6 @@ export function processSyncUpdates(
 }
 
 function extractFileNameFromHref(href: string): string {
-  const fileNameMatch = href.match(/\/([^\/]+)\.ics$/); // CalDAV href are like /calendars/userID/CalendarID/EventId.ics
+  const fileNameMatch = href.match(/\/([^/]+)\.ics$/); // CalDAV href are like /calendars/userID/CalendarID/EventId.ics
   return fileNameMatch ? fileNameMatch[1] : href;
 }

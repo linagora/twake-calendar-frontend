@@ -1,5 +1,11 @@
 import { User } from "@/components/Attendees/PeopleSearch";
 import { api } from "@/utils/apiUtils";
+import { OpenPaasUserData } from "./type/OpenPaasUserData";
+import {
+  ConfigurationItem,
+  ModuleConfiguration,
+  SearchResponseItem,
+} from "./userDataTypes";
 
 export async function getOpenPaasUser() {
   const user = await api.get(`api/user`);
@@ -10,7 +16,7 @@ export async function searchUsers(
   query: string,
   objectTypes: string[] = ["user", "contact"]
 ): Promise<User[]> {
-  const response: any[] = await api
+  const response: SearchResponseItem[] = await api
     .post(`api/people/search`, {
       body: JSON.stringify({
         limit: 10,
@@ -29,9 +35,9 @@ export async function searchUsers(
   }));
 }
 
-export async function getUserDetails(id: string) {
+export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
   const user = await api.get(`api/users/${id}`).json();
-  return user;
+  return user as OpenPaasUserData;
 }
 
 export interface UserConfigurationUpdates {
@@ -39,7 +45,7 @@ export interface UserConfigurationUpdates {
   notifications?: Record<string, unknown>;
   timezone?: string | null;
   displayWeekNumbers?: boolean;
-  previousConfig?: Record<string, any>;
+  previousConfig?: Record<string, unknown>;
   alarmEmails?: boolean;
   hideDeclinedEvents?: boolean;
 }
@@ -47,9 +53,9 @@ export interface UserConfigurationUpdates {
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
 ): Promise<Response | { status: number }> {
-  const coreConfigs: Array<{ name: string; value: any }> = [];
-  const calendarConfigs: Array<{ name: string; value: any }> = [];
-  const esnCalendarConfigs: Array<{ name: string; value: any }> = [];
+  const coreConfigs: ConfigurationItem[] = [];
+  const calendarConfigs: ConfigurationItem[] = [];
+  const esnCalendarConfigs: ConfigurationItem[] = [];
 
   if (updates.language !== undefined) {
     coreConfigs.push({ name: "language", value: updates.language });
@@ -58,10 +64,13 @@ export async function updateUserConfigurations(
     coreConfigs.push({ name: "notifications", value: updates.notifications });
   }
   if (updates.timezone !== undefined) {
+    const previousDatetime = updates.previousConfig?.datetime as
+      | { timeZone?: string }
+      | undefined;
     coreConfigs.push({
       name: "datetime",
       value: {
-        ...updates.previousConfig?.datetime,
+        ...previousDatetime,
         timeZone: updates.timezone,
       },
     });
@@ -85,10 +94,7 @@ export async function updateUserConfigurations(
     });
   }
 
-  const modules: Array<{
-    name: string;
-    configurations: Array<{ name: string; value: any }>;
-  }> = [];
+  const modules: ModuleConfiguration[] = [];
 
   if (coreConfigs.length > 0) {
     modules.push({

@@ -24,21 +24,21 @@ export function ImportTab({
 }: {
   userId: string;
   importTarget: string;
-  setImportTarget: Function;
-  setImportedContent: Function;
+  setImportTarget: (target: string) => void;
+  setImportedContent: (content: File | null) => void;
   newCalParams: {
     name: string;
-    setName: Function;
+    setName: (name: string) => void;
     description: string;
     setDescription: (d: string) => void;
     color: Record<string, string>;
-    setColor: Function;
+    setColor: (color: Record<string, string>) => void;
     visibility: "public" | "private";
-    setVisibility: Function;
+    setVisibility: (visibility: "public" | "private") => void;
   };
 }) {
   const { t } = useI18n();
-  const [importMode, setImportMode] = useState<"file" | "url">("file");
+  const [importMode] = useState<"file" | "url">("file");
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importUrl, setImportUrl] = useState("");
   const calendars = useAppSelector((state) => state.calendars.list);
@@ -48,6 +48,7 @@ export function ImportTab({
 
   useEffect(() => {
     setImportedContent(importMode === "file" ? importFile : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importFile, importUrl, importMode]);
 
   return (

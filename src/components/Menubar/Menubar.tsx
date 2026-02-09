@@ -56,9 +56,9 @@ export function Menubar({
   currentView,
   onViewChange,
 }: MenubarProps) {
-  const { t, lang } = useI18n(); // deliberately NOT using f()
+  const { t } = useI18n(); // deliberately NOT using f()
   const user = useAppSelector((state) => state.user.userData);
-  const applist: AppIconProps[] = (window as any).appList ?? [];
+  const applist: AppIconProps[] = window.appList ?? [];
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
     null

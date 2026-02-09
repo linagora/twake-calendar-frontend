@@ -1,32 +1,37 @@
+import { RootState } from "@/app/store";
+import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
+import { CalendarData } from "../types/CalendarData";
+import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 
 export const getCalendarsListAsync = createAsyncThunk<
   { importedCalendars: Record<string, Calendar>; errors: string },
   void,
-  { rejectValue: RejectedError; state: any }
+  { rejectValue: RejectedError; state: RootState }
 >("calendars/getCalendars", async (_, { rejectWithValue, getState }) => {
-  const state = getState() as any;
+  const state = getState();
   const existingCalendars = state.calendars.list || {};
   const existingUser = { id: state.user?.userData?.openpaasId || undefined };
   try {
     const fetchedCalendars: Record<string, Calendar> = {};
     const user = existingUser.id
       ? existingUser
-      : ((await getOpenPaasUser()) as Record<string, string>);
-    const calendars = (await getCalendars(user.id)) as Record<string, any>;
-    const rawCalendars = calendars._embedded["dav:calendar"] as Record<
-      string,
-      any
-    >[];
+      : ((await getOpenPaasUser()) as OpenPaasUserData);
+    const calendars = (await getCalendars(user.id)) as unknown as {
+      _embedded: {
+        "dav:calendar": unknown[];
+      };
+    };
+    const rawCalendars = calendars._embedded["dav:calendar"] as CalendarData[];
+
     const errors: string[] = [];
 
-    const normalizedCalendars = rawCalendars.map((cal) =>
+    const normalizedCalendars = rawCalendars.map((cal: CalendarData) =>
       normalizeCalendar(cal)
     );
 
@@ -34,14 +39,14 @@ export const getCalendarsListAsync = createAsyncThunk<
       new Set(normalizedCalendars.map(({ ownerId }) => ownerId).filter(Boolean))
     );
 
-    const ownerDataMap = new Map<string, any>();
+    const ownerDataMap = new Map<string, OpenPaasUserData>();
     const OWNER_BATCH_SIZE = 20;
 
     const fetchOwnerData = async (ownerId: string) => {
       try {
         const data = await getUserDetails(ownerId);
         ownerDataMap.set(ownerId, data);
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Failed to fetch user details for ${ownerId}:`, error);
         ownerDataMap.set(ownerId, {
           firstname: "",
@@ -72,7 +77,7 @@ export const getCalendarsListAsync = createAsyncThunk<
 
         const color = {
           light: cal["apple:color"] ?? "#006BD8",
-          dark: cal["X-TWAKE-Dark-theme-color"] ?? "#FFF",
+          dark: "#FFF",
         };
         fetchedCalendars[id] = {
           id,
@@ -120,10 +125,11 @@ export const getCalendarsListAsync = createAsyncThunk<
       importedCalendars,
       errors: errors.join("\n"),
     };
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });

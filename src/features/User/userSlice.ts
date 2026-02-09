@@ -5,20 +5,56 @@ import {
   updateUserConfigurations,
   UserConfigurationUpdates,
 } from "./userAPI";
-import { userData, userOrganiser } from "./userDataTypes";
+import {
+  ConfigurationItem,
+  ModuleConfiguration,
+  userData,
+  userOrganiser,
+} from "./userDataTypes";
+
+// Type definitions for OpenPaaS user data
+interface OpenPaasUser {
+  firstname?: string;
+  lastname?: string;
+  id?: string;
+  preferredEmail?: string;
+  configurations?: {
+    modules?: Array<{
+      name: string;
+      configurations?: Array<{
+        name: string;
+        value: unknown;
+      }>;
+    }>;
+  };
+}
+
+// Type for core config datetime
+interface DatetimeConfig {
+  timeZone: string | null;
+  [key: string]: unknown;
+}
+
+// Type for core config
+interface CoreConfig {
+  language: string | null;
+  datetime: DatetimeConfig;
+  [key: string]: unknown;
+}
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
-  Record<string, any>,
+  OpenPaasUser,
   void,
   { rejectValue: { message: string; status?: number } }
 >("user/getOpenPaasUserData", async (_, { rejectWithValue }) => {
   try {
-    const user = (await getOpenPaasUser()) as Record<string, any>;
-    return user;
-  } catch (err: any) {
+    const user = await getOpenPaasUser();
+    return user as OpenPaasUser;
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });
@@ -31,10 +67,11 @@ export const updateUserConfigurationsAsync = createAsyncThunk<
   try {
     await updateUserConfigurations(updates);
     return updates;
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });
@@ -46,11 +83,11 @@ export const userSlice = createSlice({
     organiserData: null as unknown as userOrganiser,
     tokens: null as unknown as Record<string, string>,
     coreConfig: {
-      language: null as string | null,
+      language: null,
       datetime: {
-        timeZone: null as string | null,
+        timeZone: null,
       },
-    } as Record<string, any>,
+    } as CoreConfig,
     alarmEmailsEnabled: null as boolean | null,
     loading: true,
     error: null as unknown as string | null,
@@ -76,7 +113,7 @@ export const userSlice = createSlice({
     },
     setTimezone: (state, action) => {
       if (!state.coreConfig.datetime) {
-        state.coreConfig.datetime = {};
+        state.coreConfig.datetime = { timeZone: null };
       }
       state.coreConfig.datetime.timeZone = action.payload;
       if (state.userData) {
@@ -110,40 +147,41 @@ export const userSlice = createSlice({
           state.organiserData.cal_address = action.payload.preferredEmail;
           state.userData.email = action.payload.preferredEmail;
         }
-
         // Extract data from configurations.modules
         if (action.payload.configurations?.modules) {
           const coreModule = action.payload.configurations.modules.find(
-            (module: any) => module.name === "core"
+            (module: ModuleConfiguration) => module.name === "core"
           );
           if (coreModule?.configurations) {
             const newCoreConfig = Object.fromEntries(
-              coreModule.configurations.map(
-                (e: { name: string; value: any }) => [e.name, e.value]
-              )
+              coreModule.configurations.map((e: ConfigurationItem) => [
+                e.name,
+                e.value,
+              ])
             );
-
             state.coreConfig = {
               ...state.coreConfig,
               ...newCoreConfig,
-            };
+            } as CoreConfig;
             const languageConfig = coreModule.configurations.find(
-              (config: any) => config.name === "language"
+              (config: ConfigurationItem) => config.name === "language"
             );
             if (languageConfig?.value) {
-              state.coreConfig.language = languageConfig.value;
+              state.coreConfig.language = languageConfig.value as string;
               if (state.userData)
-                state.userData.language = languageConfig.value;
+                state.userData.language = languageConfig.value as string;
             }
-
             const datetimeConfig = coreModule.configurations.find(
-              (config: any) => config.name === "datetime"
+              (config: ConfigurationItem) => config.name === "datetime"
             );
             if (datetimeConfig?.value) {
-              const serverTimeZone = datetimeConfig.value.timeZone;
+              const datetimeValue = datetimeConfig.value as {
+                timeZone?: string;
+              };
+              const serverTimeZone = datetimeValue.timeZone;
               state.coreConfig.datetime = {
                 ...state.coreConfig.datetime,
-                ...datetimeConfig.value,
+                ...(datetimeConfig.value as object),
                 timeZone: serverTimeZone !== undefined ? serverTimeZone : null,
               };
               if (state.userData) {
@@ -160,14 +198,13 @@ export const userSlice = createSlice({
               }
             }
           }
-
           // Extract alarmEmails from configurations.modules
           const calendarModule = action.payload.configurations.modules.find(
-            (module: any) => module.name === "calendar"
+            (module: ModuleConfiguration) => module.name === "calendar"
           );
           if (calendarModule?.configurations) {
             const alarmEmailsConfig = calendarModule.configurations.find(
-              (config: any) => config.name === "alarmEmails"
+              (config: ConfigurationItem) => config.name === "alarmEmails"
             );
             if (alarmEmailsConfig) {
               state.alarmEmailsEnabled = alarmEmailsConfig.value === true;
@@ -194,7 +231,7 @@ export const userSlice = createSlice({
         }
         if (action.payload.timezone !== undefined) {
           if (!state.coreConfig.datetime) {
-            state.coreConfig.datetime = {};
+            state.coreConfig.datetime = { timeZone: null };
           }
           state.coreConfig.datetime.timeZone = action.payload.timezone;
           if (state.userData) {

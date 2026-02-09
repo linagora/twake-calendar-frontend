@@ -16,7 +16,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 export function renderAttendeeBadge(
   a: userAttendee,
   key: string,
-  t: Function,
+  t: (t: string) => string,
   isFull?: boolean,
   isOrganizer?: boolean
 ) {
@@ -110,7 +110,9 @@ export async function refreshCalendars(
 ) {
   if (process.env.NODE_ENV === "test") return;
 
-  !calType && (await dispatch(getCalendarsListAsync()));
+  if (!calType) {
+    await dispatch(getCalendarsListAsync());
+  }
 
   const results = await Promise.allSettled(
     calendars.map((calendar) =>

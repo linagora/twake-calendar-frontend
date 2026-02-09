@@ -532,7 +532,7 @@ describe("calendar Availability search", () => {
       })
     );
 
-    const calendarRef = (window as any).__calendarRef;
+    const calendarRef = window.__calendarRef;
 
     await waitFor(() => {
       expect(calendarRef.current).not.toBeNull();
@@ -573,7 +573,7 @@ describe("calendar Availability search", () => {
       expect(spy).toHaveBeenCalled();
     });
 
-    const calendarRef = (window as any).__calendarRef;
+    const calendarRef = window.__calendarRef;
     const calendarApi = calendarRef.current;
     const view = calendarApi?.view;
     await act(async () => {

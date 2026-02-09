@@ -70,10 +70,11 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
         syncToken: newSyncToken,
         syncStatus: newSyncToken ? "SUCCESS" : "NO_NEW_SYNC_TOKEN",
       };
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { response?: { status?: number } };
       return rejectWithValue({
         message: formatReduxError(err),
-        status: err.response?.status,
+        status: error.response?.status,
       });
     }
   }

@@ -105,7 +105,9 @@ export default function SettingsPage() {
     setActiveSettingsSubTab(newValue);
   };
 
-  const handleLanguageChange = (event: any) => {
+  const handleLanguageChange = (
+    event: React.ChangeEvent<{ value: string }>
+  ) => {
     const newLanguage = event.target.value;
     const previousLanguage = currentLanguage;
 

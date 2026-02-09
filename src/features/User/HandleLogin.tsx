@@ -52,6 +52,7 @@ export function HandleLogin() {
     };
 
     initiateLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.userData, calendars.list, dispatch]);
 
   // Navigate to /calendar only when all data is ready

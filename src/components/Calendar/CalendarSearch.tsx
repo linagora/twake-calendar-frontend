@@ -21,7 +21,7 @@ import { ColorPicker } from "./CalendarColorPicker";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 interface CalendarWithOwner {
-  cal: Record<string, any>;
+  cal: Record<string, unknown>;
   owner: User;
 }
 
@@ -117,7 +117,7 @@ function SelectedCalendarsList({
     >
   >((acc, cal) => {
     const exists = Object.values(calendars).some(
-      (existing: any) =>
+      (existing: Calendar) =>
         existing.id ===
         cal.cal?._links?.self?.href
           .replace("/calendars/", "")
@@ -190,13 +190,14 @@ function SelectedCalendarsList({
 }
 
 export default function CalendarSearch({
-  anchorEl,
   open,
   onClose,
 }: {
-  anchorEl: HTMLElement | null;
   open: boolean;
-  onClose: Function;
+  onClose: (
+    result?: string[] | unknown,
+    reason?: "backdropClick" | "escapeKeyDown"
+  ) => void;
 }) {
   const dispatch = useAppDispatch();
   const theme = useTheme();
@@ -214,7 +215,7 @@ export default function CalendarSearch({
         selectedCal.map(async (cal) => {
           const calId = crypto.randomUUID();
           const exists = Object.values(calendars).some(
-            (existing: any) =>
+            (existing: Calendar) =>
               existing.id ===
               cal.cal?._links?.self?.href
                 .replace("/calendars/", "")
@@ -279,7 +280,7 @@ export default function CalendarSearch({
         objectTypes={["user"]}
         selectedUsers={selectedUsers}
         inputSlot={(params) => <TextField {...params} size="small" />}
-        onChange={async (event: any, value: User[]) => {
+        onChange={async (_event: React.SyntheticEvent, value: User[]) => {
           setSelectedUsers(value);
 
           const cals = await Promise.all(
@@ -288,10 +289,10 @@ export default function CalendarSearch({
                 const cals = (await getCalendars(
                   user.openpaasId,
                   "sharedPublic=true&"
-                )) as Record<string, any>;
+                )) as Record<string, unknown>;
                 return cals._embedded?.["dav:calendar"]
                   ? cals._embedded["dav:calendar"].map(
-                      (cal: Record<string, any>) => ({ cal, owner: user })
+                      (cal: Record<string, unknown>) => ({ cal, owner: user })
                     )
                   : { cal: undefined, owner: user };
               }

@@ -68,7 +68,7 @@ describe("eventApi", () => {
   });
 
   it("putEvent logs when status is 201", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    const consoleLogSpy = jest.spyOn(console, "info").mockImplementation();
     const mockResponse = { status: 201, url: "/dav/cals/test.ics" };
     (api as unknown as jest.Mock).mockReturnValue(mockResponse);
 

@@ -119,8 +119,8 @@ export async function handleRSVP(
 export function handleDelete(
   isRecurring: boolean,
   typeOfAction: "solo" | "all" | undefined,
-  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
-  dispatch: Function,
+  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void,
+  dispatch: AppDispatch,
   calendar: Calendar,
   event: CalendarEvent,
   calId: string,

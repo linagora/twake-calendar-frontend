@@ -42,7 +42,7 @@ describe("registerToCalendars", () => {
   });
 
   it("should log registration", () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    const consoleLogSpy = jest.spyOn(console, "info").mockImplementation();
     const calendarURIs = ["/calendars/cal1", "/calendars/cal2"];
 
     registerToCalendars(mockSocket, calendarURIs);

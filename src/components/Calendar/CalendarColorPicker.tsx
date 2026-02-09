@@ -127,8 +127,8 @@ function ColorPickerBox({
   const open = Boolean(anchorEl);
   const theme = useTheme();
 
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(event.currentTarget as unknown as HTMLButtonElement);
   };
 
   const handleClose = () => {

@@ -13,7 +13,6 @@ import {
   ListItem,
   Menu,
   MenuItem,
-  Typography,
 } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -39,9 +38,9 @@ function CalendarAccordion({
   selectedCalendars: string[];
   handleToggle: (id: string) => void;
   showAddButton?: boolean;
-  onAddClick?: Function;
+  onAddClick?: () => void;
   defaultExpanded?: boolean;
-  setOpen: Function;
+  setOpen: (id: string) => void;
 }) {
   const allCalendars = useAppSelector((state) => state.calendars.list);
   const { t } = useI18n();
@@ -86,8 +85,12 @@ function CalendarAccordion({
           <IconButton
             component="span"
             onClick={(e) => {
-              expended && e.stopPropagation();
-              onAddClick && onAddClick();
+              if (expended) {
+                e.stopPropagation();
+              }
+              if (onAddClick) {
+                onAddClick();
+              }
             }}
           >
             <AddIcon />
@@ -116,7 +119,7 @@ export default function CalendarSelection({
   setSelectedCalendars,
 }: {
   selectedCalendars: string[];
-  setSelectedCalendars: Function;
+  setSelectedCalendars: (selectedCalendars: string[]) => void;
 }) {
   const { t } = useI18n();
   const userId =
@@ -202,7 +205,6 @@ export default function CalendarSelection({
         }}
       />
       <CalendarSearch
-        anchorEl={anchorElCalOthers}
         open={Boolean(anchorElCalOthers)}
         onClose={(newCalIds?: string[]) => {
           setAnchorElCalOthers(null);
@@ -228,7 +230,7 @@ function CalendarSelector({
   isPersonal: boolean;
   selectedCalendars: string[];
   handleCalendarToggle: (name: string) => void;
-  setOpen: Function;
+  setOpen: () => void;
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();

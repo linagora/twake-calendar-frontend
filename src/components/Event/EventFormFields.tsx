@@ -21,17 +21,15 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  useTheme,
 } from "@linagora/twake-mui";
-import { alpha } from "@mui/material/styles";
 import {
   Close as DeleteIcon,
   ContentCopy as CopyIcon,
-  Public as PublicIcon,
   LocationOn as LocationIcon,
+  Public as PublicIcon,
 } from "@mui/icons-material";
-import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import LockOutlineIcon from "@mui/icons-material/LockOutline";
+import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import React from "react";
 import { useI18n } from "twake-i18n";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
@@ -163,7 +161,6 @@ export default function EventFormFields({
   onHasEndDateChangedChange,
 }: EventFormFieldsProps) {
   const { t } = useI18n();
-  const theme = useTheme();
 
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState("");
@@ -377,7 +374,6 @@ export default function EventFormFields({
       showMore,
     });
   }, [
-    title,
     startDate,
     startTime,
     endDate,

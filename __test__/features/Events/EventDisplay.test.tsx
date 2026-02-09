@@ -27,7 +27,7 @@ describe("Event Preview Display", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
-    (window as any).MAIL_SPA_URL = null;
+    window.MAIL_SPA_URL = null;
   });
 
   const preloadedState = {
@@ -598,7 +598,7 @@ describe("Event Preview Display", () => {
     });
   });
   it("properly render message button when MAIL_SPA_URL is not null and event has attendees", () => {
-    (window as any).MAIL_SPA_URL = "test";
+    window.MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -612,7 +612,7 @@ describe("Event Preview Display", () => {
     expect(screen.getByText("eventPreview.emailAttendees")).toBeInTheDocument();
   });
   it("doesnt render message button when MAIL_SPA_URL is not null and event has no attendees", () => {
-    (window as any).MAIL_SPA_URL = "test";
+    window.MAIL_SPA_URL = "test";
     renderWithProviders(
       <EventPreviewModal
         open={true}
@@ -637,7 +637,7 @@ describe("Event Preview Display", () => {
     expect(screen.queryByTestId("EmailIcon")).not.toBeInTheDocument();
   });
   it("message button opens url with attendees as uri and title as subject", () => {
-    (window as any).MAIL_SPA_URL = "test";
+    window.MAIL_SPA_URL = "test";
     const mockOpen = jest.fn();
     window.open = mockOpen;
 
@@ -669,7 +669,7 @@ describe("Event Preview Display", () => {
   });
 
   it("message button encodes special characters in event title correctly", () => {
-    (window as any).MAIL_SPA_URL = "test";
+    window.MAIL_SPA_URL = "test";
     const mockOpen = jest.fn();
     window.open = mockOpen;
 
@@ -952,7 +952,7 @@ describe("Event Preview Display", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (window as any).MAIL_SPA_URL = null;
+      window.MAIL_SPA_URL = null;
     });
 
     const createStateWithAttendees = (attendees: any[]) => ({

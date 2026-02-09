@@ -158,7 +158,7 @@ function ResponsiveDialog({
   }, [isExpanded]);
 
   const handleClose = (
-    event: {},
+    event: unknown,
     reason: "backdropClick" | "escapeKeyDown"
   ) => {
     if (isExpanded && reason === "backdropClick") {

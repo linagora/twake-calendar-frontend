@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { getTimezoneOffset, resolveTimezone } from "@/utils/timezone";
-import { updateTempCalendar } from "@/components/Calendar/utils/calendarUtils";
+import { RootState } from "@/app/store";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";
 import { addDays } from "@/components/Event/utils/dateRules";
@@ -9,7 +8,6 @@ import {
   formatLocalDateTime,
 } from "@/components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
-import { getCalendarRange } from "@/utils/dateUtils";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -19,7 +17,11 @@ import {
   saveEventFormDataToTemp,
   showErrorNotification,
 } from "@/utils/eventFormTempStorage";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import {
+  browserDefaultTimeZone,
+  getTimezoneOffset,
+  resolveTimezone,
+} from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
@@ -37,6 +39,7 @@ import React, {
 import { useI18n } from "twake-i18n";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { putEventAsync } from "../Calendars/services";
+import { AsyncThunkResult } from "../Calendars/types/AsyncThunkResult";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 
@@ -52,7 +55,7 @@ function EventPopover({
   open: boolean;
   onClose: (refresh?: boolean) => void;
   selectedRange: DateSelectArg | null;
-  setSelectedRange: Function;
+  setSelectedRange: (range: DateSelectArg) => void;
   calendarRef: React.RefObject<CalendarApi | null>;
   event?: CalendarEvent;
 }) {
@@ -64,8 +67,13 @@ function EventPopover({
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calList = useAppSelector((state) => state.calendars.list);
   const selectPersonalCalendars = createSelector(
-    (state: any) => state.calendars,
-    (calendars: any) =>
+    (state: RootState) => state.calendars,
+    (calendars: {
+      list: Record<string, Calendar>;
+      templist: Record<string, Calendar>;
+      pending: boolean;
+      error: string | null;
+    }) =>
       Object.keys(calendars.list || {})
         .map((id) => {
           if (id.split("/")[0] === userId) {
@@ -704,7 +712,6 @@ function EventPopover({
         }, 0);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, event?.uid]);
 
   const handleSave = async () => {
@@ -818,20 +825,20 @@ function EventPopover({
       );
 
       // Handle result of putEventAsync - check if rejected first
+      const typedResult = result as AsyncThunkResult;
+
       // Check if result is a rejected action
-      if (result.type && result.type.endsWith("/rejected")) {
+      if (typedResult.type && typedResult.type.endsWith("/rejected")) {
         throw new Error(
-          result.error?.message || result.payload?.message || "API call failed"
+          typedResult.error?.message ||
+            typedResult.payload?.message ||
+            "API call failed"
         );
       }
 
       // If result has unwrap, call it (it will throw if rejected)
-      if (result && typeof result.unwrap === "function") {
-        try {
-          await result.unwrap();
-        } catch (unwrapError: any) {
-          throw unwrapError;
-        }
+      if (typedResult && typeof typedResult.unwrap === "function") {
+        await typedResult.unwrap();
       }
 
       // Clear temp data on successful save
@@ -839,7 +846,9 @@ function EventPopover({
 
       // Reset all state to default values only on successful save
       resetAllStateToDefault();
-    } catch (error: any) {
+    } catch (error) {
+      const errorObj = error as { message?: string };
+
       // API failed - restore form data and mark as error
       const errorFormData = {
         ...formDataToSave,
@@ -849,7 +858,7 @@ function EventPopover({
 
       // Show error notification
       showErrorNotification(
-        error?.message || "Failed to create event. Please try again."
+        errorObj.message || "Failed to create event. Please try again."
       );
 
       // Try to reopen modal by dispatching custom event

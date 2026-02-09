@@ -2,6 +2,7 @@ import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { parseCalendarEvent } from "@/features/Events/eventUtils";
 import { CalDavItem } from "../api/types";
+import { VObjectProperty } from "../types/CalendarData";
 
 export function extractCalendarEvents(
   item: CalDavItem,
@@ -50,7 +51,7 @@ export function extractCalendarEvents(
     .filter(Boolean) as CalendarEvent[];
 }
 
-function extractValarm(vevent: any[]) {
+function extractValarm(vevent: VObjectProperty[]) {
   const subComponents = vevent[2];
   if (!Array.isArray(subComponents)) {
     return undefined;

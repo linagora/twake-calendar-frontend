@@ -9,7 +9,9 @@ export async function handleRSVPClick(
   rsvp: PartStat,
   contextualizedEvent: ContextualizedEvent,
   user: userData | undefined,
-  setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>,
+  setAfterChoiceFunc: (
+    func: ((type: "solo" | "all" | undefined) => void) | undefined
+  ) => void,
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>,
   dispatch: AppDispatch,
   onLoadingChange?: (loading: boolean, value?: PartStat) => void

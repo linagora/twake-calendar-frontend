@@ -138,28 +138,30 @@ function CalendarPopover({
           newCalColor,
           newCalVisibility
         );
-        importedContent &&
+        if (importedContent) {
           dispatch(
             importEventFromFileAsync({
               calLink: `/calendar/${userData.openpaasId}/${calId}.json`,
               file: importedContent,
             })
           );
+        }
       }
     } else {
-      importedContent &&
+      if (importedContent) {
         dispatch(
           importEventFromFileAsync({
             calLink: calendars[importTarget].link,
             file: importedContent,
           })
         );
+      }
     }
     handleClose({}, "backdropClick");
   };
 
   const handleClose = (
-    e: {},
+    e: unknown,
     reason: "backdropClick" | "escapeKeyDown"
   ): void => {
     onClose(e, reason);
@@ -182,7 +184,7 @@ function CalendarPopover({
       open={open}
       onClose={() => handleClose({}, "backdropClick")}
       title={
-        <Tabs value={tab} onChange={(e, v) => setTab(v)}>
+        <Tabs value={tab} onChange={(_e, v) => setTab(v)}>
           <Tab
             value="settings"
             label={
@@ -203,7 +205,7 @@ function CalendarPopover({
         <>
           <Button
             variant="outlined"
-            onClick={(e) => handleClose({}, "backdropClick")}
+            onClick={() => handleClose({}, "backdropClick")}
           >
             {t("common.cancel")}
           </Button>
