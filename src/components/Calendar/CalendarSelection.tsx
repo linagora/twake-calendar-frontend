@@ -17,7 +17,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { useEffect, useMemo, useState } from "react";
+import { SetStateAction, useEffect, useMemo, useState } from "react";
 import { useI18n } from "twake-i18n";
 import CalendarPopover from "./CalendarModal";
 import CalendarSearch from "./CalendarSearch";
@@ -119,7 +119,7 @@ export default function CalendarSelection({
   setSelectedCalendars,
 }: {
   selectedCalendars: string[];
-  setSelectedCalendars: (selectedCalendars: string[]) => void;
+  setSelectedCalendars: (value: SetStateAction<string[]>) => void;
 }) {
   const { t } = useI18n();
   const userId =

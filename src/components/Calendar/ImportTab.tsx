@@ -48,8 +48,7 @@ export function ImportTab({
 
   useEffect(() => {
     setImportedContent(importMode === "file" ? importFile : null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [importFile, importUrl, importMode]);
+  }, [importFile, importUrl, importMode, setImportedContent]);
 
   return (
     <>

@@ -126,21 +126,11 @@ export function handleDelete(
   calId: string,
   eventId: string
 ) {
-  if (isRecurring) {
-    onClose({}, "backdropClick");
-    if (typeOfAction === "solo") {
-      dispatch(deleteEventInstanceAsync({ cal: calendar, event }));
-    } else {
-      dispatch(
-        deleteEventAsync({
-          calId,
-          eventId,
-          eventURL: event.URL,
-        })
-      );
-    }
+  onClose({}, "backdropClick");
+
+  if (isRecurring && typeOfAction === "solo") {
+    dispatch(deleteEventInstanceAsync({ cal: calendar, event }));
   } else {
-    onClose({}, "backdropClick");
     dispatch(
       deleteEventAsync({
         calId,

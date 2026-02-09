@@ -235,7 +235,8 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
-  const normalizeRecurrenceId = (id: string) => (id ?? "").replace(/Z$/, "");
+  const normalizeRecurrenceId = (id: JCalValue) =>
+    String(id ?? "").replace(/Z$/, "");
   const isDuplicate = masterProps.some((prop: JCalProperty) => {
     if (prop[0].toLowerCase() === "exdate" && prop[3]) {
       return (
@@ -336,7 +337,7 @@ export const updateSeries = async (
 ) => {
   const vevents = await getAllRecurrentEvent(event);
   const masterIndex = vevents.findIndex(
-    ([, props]: [string, string[]]) =>
+    ([, props]: JCalComponent) =>
       !props.find(([k]) => k.toLowerCase() === "recurrence-id")
   );
   if (masterIndex === -1) {
@@ -419,7 +420,7 @@ export async function searchEvent(
     organizers: string[];
     attendees: string[];
   }
-): SearchEventsResponse {
+): Promise<SearchEventsResponse> {
   const { keywords, searchIn, organizers, attendees } = filters;
 
   const reqParam: {

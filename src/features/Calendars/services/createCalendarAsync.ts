@@ -45,11 +45,7 @@ export const createCalendarAsync = createAsyncThunk<
         ownerEmails: userData.email ? [userData.email] : [],
       };
     } catch (err) {
-      const error = err as { response?: { status?: number } };
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: error.response?.status,
-      });
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

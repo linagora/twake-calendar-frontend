@@ -15,11 +15,7 @@ export const updateSeriesAsync = createAsyncThunk<
     try {
       await updateSeries(event, cal.ownerEmails?.[0] ?? "", removeOverrides);
     } catch (err) {
-      const error = err as { response?: { status?: number } };
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: error.response?.status,
-      });
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

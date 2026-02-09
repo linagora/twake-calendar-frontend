@@ -12,8 +12,11 @@ export function normalizeCalendar(rawCalendar: CalendarData) {
     source = rawCalendar["calendarserver:delegatedsource"];
     delegated = true;
   }
-  const id = source?.replace("/calendars/", "").replace(".json", "");
-  const ownerId = id?.split("/")[0];
+  if (!source) {
+    throw new Error("No source for calendar");
+  }
+  const id = source.replace("/calendars/", "").replace(".json", "");
+  const ownerId = id.split("/")[0];
   const visibility = getCalendarVisibility(rawCalendar["acl"] ?? []);
   return {
     cal: rawCalendar,

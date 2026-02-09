@@ -1,6 +1,11 @@
+import { ModuleConfiguration } from "../userDataTypes";
+
 export interface OpenPaasUserData {
-  id?: string;
   firstname?: string;
   lastname?: string;
-  emails: string[];
+  id?: string;
+  preferredEmail?: string;
+  configurations?: {
+    modules?: ModuleConfiguration[];
+  };
 }

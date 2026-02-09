@@ -1,3 +1,7 @@
+import type { AppIconProps } from "@/components/Menubar/Menubar";
+import type { MutableRefObject } from "react";
+import type { CalendarApi } from "@fullcalendar/core";
+
 export {};
 
 declare global {

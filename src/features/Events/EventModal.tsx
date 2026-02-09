@@ -55,7 +55,7 @@ function EventPopover({
   open: boolean;
   onClose: (refresh?: boolean) => void;
   selectedRange: DateSelectArg | null;
-  setSelectedRange: (range: DateSelectArg) => void;
+  setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectArg | null>>;
   calendarRef: React.RefObject<CalendarApi | null>;
   event?: CalendarEvent;
 }) {
@@ -68,12 +68,7 @@ function EventPopover({
   const calList = useAppSelector((state) => state.calendars.list);
   const selectPersonalCalendars = createSelector(
     (state: RootState) => state.calendars,
-    (calendars: {
-      list: Record<string, Calendar>;
-      templist: Record<string, Calendar>;
-      pending: boolean;
-      error: string | null;
-    }) =>
+    (calendars: RootState["calendars"]) =>
       Object.keys(calendars.list || {})
         .map((id) => {
           if (id.split("/")[0] === userId) {

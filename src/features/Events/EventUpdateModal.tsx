@@ -11,6 +11,7 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync,
 } from "@/features/Calendars/services";
+import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -797,19 +798,7 @@ function EventUpdateModal({
           );
 
           // Handle result of updateEventInstanceAsync
-          const typedResult = result as AsyncThunkResult;
-          if (typedResult && typeof typedResult.unwrap === "function") {
-            await typedResult.unwrap();
-          } else {
-            // Check if result is rejected
-            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-              throw new Error(
-                typedResult.error?.message ||
-                  typedResult.payload?.message ||
-                  "API call failed"
-              );
-            }
-          }
+          assertThunkSuccess(result);
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
@@ -870,22 +859,7 @@ function EventUpdateModal({
               );
 
               // Handle result of updateSeriesAsync
-              const typedResult = result as AsyncThunkResult;
-              if (typedResult && typeof typedResult.unwrap === "function") {
-                await typedResult.unwrap();
-              } else {
-                // Check if result is rejected
-                if (
-                  typedResult.type &&
-                  typedResult.type.endsWith("/rejected")
-                ) {
-                  throw new Error(
-                    typedResult.error?.message ||
-                      typedResult.payload?.message ||
-                      "API call failed"
-                  );
-                }
-              }
+              assertThunkSuccess(result);
 
               // Clear cache after successful update
               dispatch(clearFetchCache(calId));
@@ -943,19 +917,7 @@ function EventUpdateModal({
             );
 
             // Handle result of updateSeriesAsync
-            const typedResult = result as AsyncThunkResult;
-            if (typedResult && typeof typedResult.unwrap === "function") {
-              await typedResult.unwrap();
-            } else {
-              // Check if result is rejected
-              if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-                throw new Error(
-                  typedResult.error?.message ||
-                    typedResult.payload?.message ||
-                    "API call failed"
-                );
-              }
-            }
+            assertThunkSuccess(result);
 
             // Clear cache to ensure navigation shows updated data
             dispatch(clearFetchCache(calId));
@@ -977,17 +939,7 @@ function EventUpdateModal({
           );
 
           // Handle result of putEventAsync - check if rejected first
-          const typedResult = result as AsyncThunkResult;
-          if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-            throw new Error(
-              typedResult.error?.message ||
-                typedResult.payload?.message ||
-                "API call failed"
-            );
-          }
-          if (typedResult && typeof typedResult.unwrap === "function") {
-            await typedResult.unwrap();
-          }
+          assertThunkSuccess(result);
 
           // Remove old single event AFTER new recurring instances are added to store
           // This prevents empty grid during the transition
@@ -1008,17 +960,7 @@ function EventUpdateModal({
             );
 
             // Handle result of putEventAsync - check if rejected first
-            const typedResult = result as AsyncThunkResult;
-            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-              throw new Error(
-                typedResult.error?.message ||
-                  typedResult.payload?.message ||
-                  "API call failed"
-              );
-            }
-            if (typedResult && typeof typedResult.unwrap === "function") {
-              await typedResult.unwrap();
-            }
+            assertThunkSuccess(result);
 
             // Clear temp data on successful save
             clearEventFormTempData("update");

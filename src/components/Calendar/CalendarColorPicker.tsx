@@ -123,12 +123,12 @@ function ColorPickerBox({
     selectedColor ?? { light: "#ffffff", dark: "#808080" }
   );
   const [color, setColor] = useState(oldColor);
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(event.currentTarget as unknown as HTMLButtonElement);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {

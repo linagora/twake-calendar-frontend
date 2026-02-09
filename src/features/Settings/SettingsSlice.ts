@@ -94,11 +94,11 @@ export const settingsSlice = createSlice({
         (module: ModuleConfiguration) => module.name === "calendar"
       );
       if (calendarModule?.configurations) {
-        const alarmEmailsConfig = calendarModule.configurations.find(
+        const displayWeekNumbersConfig = calendarModule.configurations.find(
           (config: ConfigurationItem) => config.name === "displayWeekNumbers"
         );
-        if (alarmEmailsConfig) {
-          state.displayWeekNumbers = alarmEmailsConfig.value === true;
+        if (displayWeekNumbersConfig) {
+          state.displayWeekNumbers = displayWeekNumbersConfig.value === true;
         }
       }
     });

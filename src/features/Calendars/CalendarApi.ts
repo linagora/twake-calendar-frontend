@@ -71,7 +71,7 @@ export async function addSharedCalendar(
       ...cal.cal,
       "dav:name":
         cal.cal["dav:name"] === "#default"
-          ? cal.owner?.displayName + "'s calendar"
+          ? (cal.owner?.displayName ?? "Unknown") + "'s calendar"
           : cal.cal["dav:name"],
       "calendarserver:source": {
         acl: cal.cal.acl,

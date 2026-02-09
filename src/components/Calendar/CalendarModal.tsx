@@ -161,7 +161,7 @@ function CalendarPopover({
   };
 
   const handleClose = (
-    e: unknown,
+    e: object | null,
     reason: "backdropClick" | "escapeKeyDown"
   ): void => {
     onClose(e, reason);

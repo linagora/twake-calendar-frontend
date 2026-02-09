@@ -22,12 +22,8 @@ export const getCalendarsListAsync = createAsyncThunk<
     const user = existingUser.id
       ? existingUser
       : ((await getOpenPaasUser()) as OpenPaasUserData);
-    const calendars = (await getCalendars(user.id)) as unknown as {
-      _embedded: {
-        "dav:calendar": unknown[];
-      };
-    };
-    const rawCalendars = calendars._embedded["dav:calendar"] as CalendarData[];
+    const calendars = await getCalendars(user.id);
+    const rawCalendars = calendars._embedded["dav:calendar"];
 
     const errors: string[] = [];
 

@@ -16,7 +16,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 export function renderAttendeeBadge(
   a: userAttendee,
   key: string,
-  t: (t: string) => string,
+  t: (key: string) => string,
   isFull?: boolean,
   isOrganizer?: boolean
 ) {

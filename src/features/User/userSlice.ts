@@ -1,5 +1,6 @@
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { OpenPaasUserData } from "./type/OpenPaasUserData";
 import {
   getOpenPaasUser,
   updateUserConfigurations,
@@ -11,23 +12,6 @@ import {
   userData,
   userOrganiser,
 } from "./userDataTypes";
-
-// Type definitions for OpenPaaS user data
-interface OpenPaasUser {
-  firstname?: string;
-  lastname?: string;
-  id?: string;
-  preferredEmail?: string;
-  configurations?: {
-    modules?: Array<{
-      name: string;
-      configurations?: Array<{
-        name: string;
-        value: unknown;
-      }>;
-    }>;
-  };
-}
 
 // Type for core config datetime
 interface DatetimeConfig {
@@ -43,13 +27,13 @@ interface CoreConfig {
 }
 
 export const getOpenPaasUserDataAsync = createAsyncThunk<
-  OpenPaasUser,
+  OpenPaasUserData,
   void,
   { rejectValue: { message: string; status?: number } }
 >("user/getOpenPaasUserData", async (_, { rejectWithValue }) => {
   try {
     const user = await getOpenPaasUser();
-    return user as OpenPaasUser;
+    return user as OpenPaasUserData;
   } catch (err) {
     const error = err as { response?: { status?: number } };
     return rejectWithValue({
@@ -181,7 +165,10 @@ export const userSlice = createSlice({
               const serverTimeZone = datetimeValue.timeZone;
               state.coreConfig.datetime = {
                 ...state.coreConfig.datetime,
-                ...(datetimeConfig.value as object),
+                ...(typeof datetimeConfig.value === "object" &&
+                datetimeConfig.value !== null
+                  ? datetimeConfig.value
+                  : {}),
                 timeZone: serverTimeZone !== undefined ? serverTimeZone : null,
               };
               if (state.userData) {

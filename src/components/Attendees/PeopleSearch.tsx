@@ -156,7 +156,7 @@ export function PeopleSearch({
         ),
       };
 
-      const enhancedParamsWithInputProps = {
+      const enhancedParams = {
         ...params,
         InputProps: inputProps,
         inputProps: {
@@ -164,8 +164,6 @@ export function PeopleSearch({
           autoComplete: "off",
         },
       };
-
-      const { ...enhancedParams } = enhancedParamsWithInputProps;
 
       const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && onToggleEventPreview) {

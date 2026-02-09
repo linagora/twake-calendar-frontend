@@ -11,13 +11,7 @@ export interface userData {
 }
 
 export interface UserConfigurations {
-  modules?: Array<{
-    name: string;
-    configurations?: Array<{
-      name: string;
-      value: unknown;
-    }>;
-  }>;
+  modules?: ModuleConfiguration[];
 }
 
 export interface NotificationSettings {

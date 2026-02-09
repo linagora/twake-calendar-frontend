@@ -35,7 +35,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
       )) as CalendarData;
 
       const color = calendar["apple:color"]
-        ? { light: calendar["apple:color"] }
+        ? { light: calendar["apple:color"], dark: calendar["apple:color"] }
         : defaultColors[0];
       const syncToken = calendar._embedded?.["sync-token"];
 
@@ -48,11 +48,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
 
       return { calId, events, calType, syncToken };
     } catch (err) {
-      const error = err as { response?: { status?: number } };
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: error.response?.status,
-      });
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

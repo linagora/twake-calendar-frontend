@@ -16,11 +16,7 @@ export const updateEventInstanceAsync = createAsyncThunk<
       await putEventWithOverrides(event, cal.ownerEmails?.[0]);
       return { calId: cal.id, event };
     } catch (err) {
-      const error = err as { response?: { status?: number } };
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: error.response?.status,
-      });
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

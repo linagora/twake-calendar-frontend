@@ -195,7 +195,7 @@ export default function CalendarSearch({
 }: {
   open: boolean;
   onClose: (
-    result?: string[] | unknown,
+    result?: string[] | Record<string, never>,
     reason?: "backdropClick" | "escapeKeyDown"
   ) => void;
 }) {

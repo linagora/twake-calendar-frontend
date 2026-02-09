@@ -56,7 +56,6 @@ export async function Callback(
     const currentLocation = getLocation();
 
     console.info("Callback URL:", currentLocation);
-    console.info("Code verifier:", code_verifier);
 
     const tokenSet = await client.authorizationCodeGrant(
       openIdClientConfig,

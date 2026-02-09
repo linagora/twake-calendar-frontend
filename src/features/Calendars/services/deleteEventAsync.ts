@@ -14,11 +14,7 @@ export const deleteEventAsync = createAsyncThunk<
       await deleteEvent(eventURL);
       return { calId, eventId };
     } catch (err) {
-      const error = err as { response?: { status?: number } };
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: error.response?.status,
-      });
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

@@ -27,6 +27,13 @@ export type VObjectProperty = [
   VObjectValue,
 ];
 
+export type VCalComponent = [
+  string,
+  VObjectProperty[],
+  VCalComponent[],
+  ...unknown[],
+];
+
 export interface Organizer {
   cn?: string;
   email: string;
@@ -59,7 +66,7 @@ export interface CalendarData {
     "dav:item": CalendarItem[];
   };
   "calendarserver:source"?: { _links: CalDavLink };
-  "calendarserver:delegatedsource": string;
+  "calendarserver:delegatedsource"?: string;
 }
 
 export interface CalendarList {

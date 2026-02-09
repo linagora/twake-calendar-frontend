@@ -254,7 +254,7 @@ export function makeVevent(
   calOwnerEmail: string | undefined,
   isMasterEvent?: boolean
 ) {
-  const vevent = [
+  const vevent: [string, unknown[]] = [
     "vevent",
     [
       ["uid", {}, "text", extractEventBaseUuid(event.uid)],
@@ -293,14 +293,11 @@ export function makeVevent(
   }
 
   if (event.end) {
-    const endDate = new Date(event.end);
-    const finalEndDate = endDate;
-
     vevent[1].push([
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(finalEndDate, event.allday ?? false, tzid),
+      formatDateToICal(new Date(event.end), event.allday ?? false, tzid),
     ]);
   }
   if (event.organizer) {
