@@ -1,4 +1,4 @@
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { updateAclCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";

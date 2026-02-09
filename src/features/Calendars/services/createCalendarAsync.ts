@@ -1,5 +1,5 @@
 import { userData } from "@/features/User/userDataTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { postCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";

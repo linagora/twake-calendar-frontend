@@ -1,6 +1,6 @@
 import { putEventWithOverrides } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
