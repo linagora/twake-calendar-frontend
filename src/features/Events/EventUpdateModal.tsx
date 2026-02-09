@@ -798,7 +798,19 @@ function EventUpdateModal({
           );
 
           // Handle result of updateEventInstanceAsync
-          assertThunkSuccess(result);
+          const typedResult = result as AsyncThunkResult;
+          if (typedResult && typeof typedResult.unwrap === "function") {
+            await typedResult.unwrap();
+          } else {
+            // Check if result is rejected
+            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
+              throw new Error(
+                typedResult.error?.message ||
+                  typedResult.payload?.message ||
+                  "API call failed"
+              );
+            }
+          }
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
@@ -859,7 +871,22 @@ function EventUpdateModal({
               );
 
               // Handle result of updateSeriesAsync
-              assertThunkSuccess(result);
+              const typedResult = result as AsyncThunkResult;
+              if (typedResult && typeof typedResult.unwrap === "function") {
+                await typedResult.unwrap();
+              } else {
+                // Check if result is rejected
+                if (
+                  typedResult.type &&
+                  typedResult.type.endsWith("/rejected")
+                ) {
+                  throw new Error(
+                    typedResult.error?.message ||
+                      typedResult.payload?.message ||
+                      "API call failed"
+                  );
+                }
+              }
 
               // Clear cache after successful update
               dispatch(clearFetchCache(calId));
@@ -960,7 +987,17 @@ function EventUpdateModal({
             );
 
             // Handle result of putEventAsync - check if rejected first
-            assertThunkSuccess(result);
+            const typedResult = result as AsyncThunkResult;
+            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
+              throw new Error(
+                typedResult.error?.message ||
+                  typedResult.payload?.message ||
+                  "API call failed"
+              );
+            }
+            if (typedResult && typeof typedResult.unwrap === "function") {
+              await typedResult.unwrap();
+            }
 
             // Clear temp data on successful save
             clearEventFormTempData("update");

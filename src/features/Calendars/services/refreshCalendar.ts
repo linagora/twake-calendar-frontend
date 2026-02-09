@@ -1,5 +1,5 @@
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";

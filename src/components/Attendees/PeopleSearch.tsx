@@ -192,7 +192,7 @@ export function PeopleSearch({
               {t("peopleSearch.label")}
             </label>
             {inputSlot({
-              ...enhancedParamsWithInputProps,
+              ...enhancedParams,
               error: !!inputError,
               helperText: inputError,
               placeholder: searchPlaceholder,
