@@ -1,17 +1,19 @@
 import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
+import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import moment from "moment-timezone";
+import {
+  RepetitionRule,
+  VObjectProperty,
+} from "../Calendars/types/CalendarData";
 import { userAttendee } from "../User/models/attendee";
 import { createAttendee } from "../User/models/attendee.mapper";
 import { AlarmObject, CalendarEvent, RepetitionObject } from "./EventsTypes";
-type RawEntry = [string, Record<string, string>, string, any];
 
 function inferTimezoneFromValue(
-  params: Record<string, string> | undefined,
-  value: string
+  params: Record<string, string> | undefined
 ): string | undefined {
   if (!params) {
     return undefined;
@@ -30,11 +32,11 @@ function inferTimezoneFromValue(
 }
 
 export function parseCalendarEvent(
-  data: RawEntry[],
+  data: VObjectProperty[],
   color: Record<string, string>,
   calendarid: string,
   eventURL: string,
-  valarm?: RawEntry[]
+  valarm?: VObjectProperty[]
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;
@@ -44,18 +46,20 @@ export function parseCalendarEvent(
   for (const [key, params, , value] of data) {
     switch (key.toLowerCase()) {
       case "uid":
-        event.uid = value;
+        event.uid = String(value);
         break;
       case "transp":
-        event.transp = value;
+        event.transp = String(value);
         break;
       case "dtstart": {
-        event.start = value;
-        const detectedTz = inferTimezoneFromValue(params, value);
+        event.start = String(value);
+        const detectedTz = inferTimezoneFromValue(
+          params as Record<string, string>
+        );
         if (detectedTz) {
           event.timezone = detectedTz;
         }
-        if (dateRegex.test(value)) {
+        if (dateRegex.test(String(value))) {
           event.allday = true;
         } else {
           event.allday = false;
@@ -63,14 +67,16 @@ export function parseCalendarEvent(
         break;
       }
       case "dtend": {
-        event.end = value;
+        event.end = String(value);
         if (!event.timezone) {
-          const detectedTz = inferTimezoneFromValue(params, value);
+          const detectedTz = inferTimezoneFromValue(
+            params as Record<string, string>
+          );
           if (detectedTz) {
             event.timezone = detectedTz;
           }
         }
-        if (dateRegex.test(value)) {
+        if (dateRegex.test(String(value))) {
           event.allday = true;
         } else {
           event.allday = false;
@@ -78,50 +84,54 @@ export function parseCalendarEvent(
         break;
       }
       case "class":
-        event.class = value;
+        event.class = String(value);
         break;
       case "x-openpaas-videoconference":
-        event.x_openpass_videoconference = value;
+        event.x_openpass_videoconference = String(value);
         break;
       case "summary":
-        event.title = value;
+        event.title = String(value);
         break;
       case "description":
-        event.description = value;
+        event.description = String(value);
         break;
       case "location":
-        event.location = value;
+        event.location = String(value);
         break;
-      case "organizer":
+      case "organizer": {
+        const paramsObj = params as Record<string, string>;
         event.organizer = {
-          cn: params?.cn ?? "",
-          cal_address: value?.replace(/^mailto:/i, ""),
+          cn: paramsObj?.cn ?? "",
+          cal_address: String(value).replace(/^mailto:/i, ""),
         };
         break;
-      case "attendee":
+      }
+      case "attendee": {
+        const paramsObj = params as Record<string, string>;
         (event.attendee as userAttendee[]).push(
           createAttendee({
-            cn: params?.cn,
-            cal_address: value.replace(/^mailto:/i, ""),
-            partstat: params?.partstat as userAttendee["partstat"],
-            rsvp: params?.rsvp as userAttendee["rsvp"],
-            role: params?.role as userAttendee["role"],
-            cutype: params?.cutype as userAttendee["cutype"],
+            cn: paramsObj?.cn,
+            cal_address: String(value).replace(/^mailto:/i, ""),
+            partstat: paramsObj?.partstat as userAttendee["partstat"],
+            rsvp: paramsObj?.rsvp as userAttendee["rsvp"],
+            role: paramsObj?.role as userAttendee["role"],
+            cutype: paramsObj?.cutype as userAttendee["cutype"],
           })
         );
         break;
+      }
       case "dtstamp":
-        event.stamp = value;
+        event.stamp = String(value);
         break;
       case "sequence":
         event.sequence = Number(value);
         break;
       case "recurrence-id":
-        recurrenceId = value;
+        recurrenceId = String(value);
         break;
       case "exdate":
         if (!event.exdates) event.exdates = [];
-        event.exdates.push(value);
+        event.exdates.push(String(value));
         break;
       case "status":
         event.status = String(value);
@@ -129,25 +139,27 @@ export function parseCalendarEvent(
       case "duration":
         duration = String(value);
         break;
-      case "rrule":
-        event.repetition = { freq: value.freq.toLowerCase() };
-        if (value.byday) {
-          if (typeof value.byday === "string") {
-            event.repetition.byday = [value.byday];
+      case "rrule": {
+        const ruleValue = value as RepetitionRule;
+        event.repetition = { freq: ruleValue.freq.toLowerCase() };
+        if (ruleValue.byday) {
+          if (typeof ruleValue.byday === "string") {
+            event.repetition.byday = [ruleValue.byday];
           } else {
-            event.repetition.byday = value.byday;
+            event.repetition.byday = ruleValue.byday;
           }
         }
-        if (value.until) {
-          event.repetition.endDate = value.until;
+        if (ruleValue.until) {
+          event.repetition.endDate = ruleValue.until;
         }
-        if (value.count) {
-          event.repetition.occurrences = value.count;
+        if (ruleValue.count) {
+          event.repetition.occurrences = ruleValue.count;
         }
-        if (value.interval) {
-          event.repetition.interval = value.interval;
+        if (ruleValue.interval) {
+          event.repetition.interval = ruleValue.interval;
         }
         break;
+      }
     }
   }
   if (recurrenceId && event.uid) {
@@ -160,10 +172,10 @@ export function parseCalendarEvent(
     for (const [key, , , value] of valarm[1]) {
       switch (key.toLowerCase()) {
         case "action":
-          event.alarm.action = value;
+          event.alarm.action = String(value);
           break;
         case "trigger":
-          event.alarm.trigger = value;
+          event.alarm.trigger = String(value);
           break;
       }
     }
@@ -209,10 +221,10 @@ export function parseCalendarEvent(
 export function calendarEventToJCal(
   event: CalendarEvent,
   calOwnerEmail?: string
-): any[] {
+) {
   const tzid = event.timezone; // Fallback to UTC if no timezone provided
 
-  const vevent: any[] = makeVevent(event, tzid, calOwnerEmail);
+  const vevent = makeVevent(event, tzid, calOwnerEmail);
 
   const timezoneData = TIMEZONES.zones[event.timezone];
   const vtimezone = makeTimezone(timezoneData, event);
@@ -242,7 +254,7 @@ export function makeVevent(
   calOwnerEmail: string | undefined,
   isMasterEvent?: boolean
 ) {
-  const vevent: any[] = [
+  const vevent: [string, unknown[]] = [
     "vevent",
     [
       ["uid", {}, "text", extractEventBaseUuid(event.uid)],
@@ -279,18 +291,13 @@ export function makeVevent(
     ];
     vevent.push([["valarm", valarm]]);
   }
-  vevent.push([]);
 
   if (event.end) {
-    const startDate = new Date(event.start);
-    const endDate = new Date(event.end);
-    let finalEndDate = endDate;
-
     vevent[1].push([
       "dtend",
       { tzid },
       event.allday ? "date" : "date-time",
-      formatDateToICal(finalEndDate, event.allday ?? false, tzid),
+      formatDateToICal(new Date(event.end), event.allday ?? false, tzid),
     ]);
   }
   if (event.organizer) {
@@ -311,21 +318,21 @@ export function makeVevent(
     vevent[1].push(["description", {}, "text", event.description]);
   }
   if (event.repetition?.freq) {
-    const repetitionRule: Record<string, any> = { freq: event.repetition.freq };
+    const repetitionRule: RepetitionRule = { freq: event.repetition.freq };
     if (event.repetition.interval) {
-      repetitionRule["interval"] = event.repetition.interval;
+      repetitionRule.interval = event.repetition.interval;
     }
     if (event.repetition.occurrences) {
-      repetitionRule["count"] = event.repetition.occurrences;
+      repetitionRule.count = event.repetition.occurrences;
     }
     if (event.repetition.endDate) {
-      repetitionRule["until"] = event.repetition.endDate;
+      repetitionRule.until = event.repetition.endDate;
     }
     if (
       event.repetition.byday !== null &&
       event.repetition.byday !== undefined
     ) {
-      repetitionRule["byday"] = event.repetition.byday;
+      repetitionRule.byday = event.repetition.byday;
     }
     vevent[1].push(["rrule", {}, "recur", repetitionRule]);
   }
@@ -362,7 +369,7 @@ export function makeVevent(
   return vevent;
 }
 
-function formatDateToICal(date: Date, allday: Boolean, timezone?: string) {
+function formatDateToICal(date: Date, allday: boolean, timezone?: string) {
   const pad = (n: number) => n.toString().padStart(2, "0");
 
   if (allday) {

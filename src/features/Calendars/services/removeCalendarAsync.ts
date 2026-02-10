@@ -1,4 +1,4 @@
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { removeCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
@@ -20,11 +20,8 @@ export const removeCalendarAsync = createAsyncThunk<
       return {
         calId,
       };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

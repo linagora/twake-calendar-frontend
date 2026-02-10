@@ -1,10 +1,5 @@
 import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
-
-interface AclEntry {
-  privilege: string;
-  principal: string;
-  protected: boolean;
-}
+import { AclEntry } from "@/features/Calendars/types/CalendarData";
 
 describe("getCalendarVisibility", () => {
   it("returns 'public' when {DAV:}authenticated has {DAV:}read", () => {

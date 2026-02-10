@@ -1,6 +1,5 @@
-import { getUserDetails } from "@/features/User/userAPI";
 import { userData } from "@/features/User/userDataTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { postCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
@@ -45,11 +44,8 @@ export const createCalendarAsync = createAsyncThunk<
         owner,
         ownerEmails: userData.email ? [userData.email] : [],
       };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

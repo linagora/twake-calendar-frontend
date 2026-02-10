@@ -22,14 +22,14 @@ export function registerTimezones() {
   }
 }
 
-function buildTimezone(tzid: string, ics: string): any {
+function buildTimezone(tzid: string, ics: string): ICAL.Timezone {
   return (
     ICAL.TimezoneService.get(tzid) ||
     new ICAL.Timezone(new ICAL.Component(ICAL.parse(ics)))
   );
 }
 
-function findTimezone(tzid: string): any {
+function findTimezone(tzid: string): ICAL.Timezone {
   if (TIMEZONES.zones[tzid]) {
     return buildTimezone(tzid, TIMEZONES.zones[tzid].ics);
   }

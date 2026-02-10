@@ -88,7 +88,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
       const offset = getTimezoneOffset(tz, dateForOffset);
       const tzName = tz.replace(/_/g, " ");
       return `(${offset}) ${tzName}`;
-    } catch (error) {
+    } catch {
       return tz.replace(/_/g, " ");
     }
   };

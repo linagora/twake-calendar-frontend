@@ -4,8 +4,8 @@ import { getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
+import { RejectedError } from "../types/RejectedError";
 
 export const getTempCalendarsListAsync = createAsyncThunk<
   Record<string, Calendar>,
@@ -20,10 +20,10 @@ export const getTempCalendarsListAsync = createAsyncThunk<
         `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
       );
     }
-    const calendars = (await getCalendars(
+    const calendars = await getCalendars(
       tempUser.openpaasId,
       "sharedPublic=true&"
-    )) as Record<string, any>;
+    );
 
     const rawCalendars = calendars._embedded?.["dav:calendar"];
     if (!rawCalendars || rawCalendars.length === 0) {
@@ -36,17 +36,20 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     }
 
     for (const cal of rawCalendars) {
-      const name = cal["dav:name"];
-      const description = cal["caldav:description"];
+      const name = cal["dav:name"] ?? "";
+      const description = cal["caldav:description"] ?? "";
       const delegated = cal["calendarserver:delegatedsource"] ? true : false;
       const source = cal["calendarserver:source"]
-        ? cal["calendarserver:source"]._links.self.href
-        : cal._links.self.href;
-      const link = cal._links.self.href;
+        ? cal["calendarserver:source"]._links.self?.href
+        : cal._links.self?.href;
+      if (!source) {
+        throw new Error("No source for calendar");
+      }
+      const link = cal._links.self?.href ?? "";
 
       const id = source.replace("/calendars/", "").replace(".json", "");
-      const visibility = getCalendarVisibility(cal["acl"]);
-      const ownerData: any = await getUserDetails(id.split("/")[0]);
+      const visibility = getCalendarVisibility(cal["acl"] ?? []);
+      const ownerData = await getUserDetails(id.split("/")[0]);
 
       importedCalendars[id] = {
         id,
@@ -66,10 +69,11 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     }
 
     return importedCalendars;
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });

@@ -21,6 +21,7 @@ import EventPreviewModal from "../Events/EventDisplayPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
 import { setView } from "../Settings/SettingsSlice";
 import "./searchResult.styl";
+import { SearchEventResult } from "./types/SearchEventResult";
 
 const styles = {
   M3BodyLarge: {
@@ -110,7 +111,7 @@ export default function SearchResultsPage() {
     layout = (
       <Box className="search-result-content-body">
         <Stack sx={{ mt: 2 }}>
-          {results?.map((r: any, idx: number) => (
+          {results.map((r: SearchEventResult, idx: number) => (
             <ResultItem
               key={`row-${idx}-event-${r.data.uid}`}
               eventData={r}
@@ -144,7 +145,7 @@ function ResultItem({
   eventData,
   dispatch,
 }: {
-  eventData: Record<string, any>;
+  eventData: SearchEventResult;
   dispatch: AppDispatch;
 }) {
   const { t } = useI18n();
@@ -163,7 +164,7 @@ function ResultItem({
 
   const [openPreview, setOpenPreview] = useState(false);
 
-  const handleOpenResult = async (eventData: Record<string, any>) => {
+  const handleOpenResult = async (eventData: SearchEventResult) => {
     if (calendar) {
       const event = {
         URL: eventData._links.self.href,

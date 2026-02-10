@@ -6,6 +6,7 @@ import { TIMEZONES } from "@/utils/timezone-data";
 import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { Calendar } from "../Calendars/CalendarTypes";
 
 export interface TimezoneListResult {
   zones: string[];
@@ -58,7 +59,7 @@ export interface PopulateFormFromEventParams {
   setHasVideoConference: (value: boolean) => void;
   setMeetingLink: (value: string | null) => void;
   setCalendarid?: (value: string) => void;
-  calendarsList?: Record<string, any>;
+  calendarsList?: Record<string, Calendar>;
   calId?: string;
 }
 

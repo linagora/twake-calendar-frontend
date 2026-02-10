@@ -25,9 +25,7 @@ export function generateMeetingId(): string {
  */
 export function generateMeetingLink(baseUrl?: string): string {
   const base =
-    baseUrl ||
-    (window as any).VIDEO_CONFERENCE_BASE_URL ||
-    "https://meet.linagora.com";
+    baseUrl || window.VIDEO_CONFERENCE_BASE_URL || "https://meet.linagora.com";
   const meetingId = generateMeetingId();
   return `${base}/${meetingId}`;
 }

@@ -20,7 +20,7 @@ export function expandEventFunction(
       });
       return events;
     } catch (err) {
-      console.error("Failed to fetch event", eventUrl);
+      console.error("Failed to fetch event", eventUrl, err);
       return undefined;
     }
   };

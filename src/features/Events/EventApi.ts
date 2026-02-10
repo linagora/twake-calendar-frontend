@@ -3,6 +3,7 @@ import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
+import { SearchEventsResponse } from "../Search/types/SearchEventsResponse";
 import { CalendarEvent } from "./EventsTypes";
 import {
   calendarEventToJCal,
@@ -10,6 +11,23 @@ import {
   makeVevent,
   parseCalendarEvent,
 } from "./eventUtils";
+
+type JCalValue = string | number | boolean | null;
+
+type JCalParams = Record<string, JCalValue | JCalValue[]>;
+
+type JCalProperty = [
+  name: string,
+  params: JCalParams,
+  type: string,
+  value: JCalValue,
+];
+
+type JCalComponent = [
+  name: string,
+  properties: JCalProperty[],
+  components?: JCalComponent[],
+];
 
 export async function reportEvent(
   event: CalendarEvent,
@@ -43,8 +61,8 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   let targetVevent;
   if (isMaster) {
     targetVevent = vevents.find(
-      ([, props]: [string, any[]]) =>
-        !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+      ([, props]: JCalComponent) =>
+        !props.find(([k]) => k.toLowerCase() === "recurrence-id")
     );
     if (!targetVevent) {
       targetVevent = vevents[0];
@@ -152,7 +170,7 @@ export async function putEvent(event: CalendarEvent, calOwnerEmail?: string) {
   });
 
   if (response.status === 201) {
-    console.log("Event created successfully:", response.url || event.URL);
+    console.info("Event created successfully:", response.url || event.URL);
   }
 
   return response;
@@ -198,17 +216,14 @@ export async function putEventWithOverrides(
   });
 }
 
-export const deleteEventInstance = async (
-  event: CalendarEvent,
-  calOwnerEmail?: string
-) => {
+export const deleteEventInstance = async (event: CalendarEvent) => {
   // Get all VEVENTs (master + overrides) from the series
   const vevents = await getAllRecurrentEvent(event);
 
   // Find the master VEVENT
   const masterIndex = vevents.findIndex(
-    ([, props]: [string, any[]]) =>
-      !props.find(([k]: string[]) => k.toLowerCase() === "recurrence-id")
+    ([, props]: JCalComponent) =>
+      !props.find(([k]) => k.toLowerCase() === "recurrence-id")
   );
 
   if (masterIndex === -1) {
@@ -220,8 +235,9 @@ export const deleteEventInstance = async (
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
-  const normalizeRecurrenceId = (id: string) => (id ?? "").replace(/Z$/, "");
-  const isDuplicate = masterProps.some((prop: any[]) => {
+  const normalizeRecurrenceId = (id: JCalValue) =>
+    String(id ?? "").replace(/Z$/, "");
+  const isDuplicate = masterProps.some((prop: JCalProperty) => {
     if (prop[0].toLowerCase() === "exdate" && prop[3]) {
       return (
         normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateValue)
@@ -240,9 +256,9 @@ export const deleteEventInstance = async (
   vevents[masterIndex][1] = masterProps;
 
   // Remove the override instance if it exists (in case it was an override being deleted)
-  const filteredVevents = vevents.filter(([, props]: [string, any[]]) => {
+  const filteredVevents = vevents.filter(([, props]: JCalComponent) => {
     const recurrenceIdProp = props.find(
-      ([k]: string[]) => k.toLowerCase() === "recurrence-id"
+      ([k]) => k.toLowerCase() === "recurrence-id"
     );
     if (!recurrenceIdProp) return true; // Keep master
     return (
@@ -278,9 +294,9 @@ export const updateSeriesPartstat = async (
   const vevents = await getAllRecurrentEvent(event);
 
   // Update PARTSTAT in ALL VEVENTs (master + exceptions)
-  const updatedVevents = vevents.map((vevent: any[]) => {
+  const updatedVevents = vevents.map((vevent: JCalComponent) => {
     const properties = vevent[1];
-    const updatedProperties = properties.map((prop: any[]) => {
+    const updatedProperties = properties.map((prop: JCalProperty) => {
       // Find ATTENDEE properties
       if (prop[0] === "attendee") {
         const calAddress = prop[3];
@@ -321,7 +337,7 @@ export const updateSeries = async (
 ) => {
   const vevents = await getAllRecurrentEvent(event);
   const masterIndex = vevents.findIndex(
-    ([, props]: [string, string[]]) =>
+    ([, props]: JCalComponent) =>
       !props.find(([k]) => k.toLowerCase() === "recurrence-id")
   );
   if (masterIndex === -1) {
@@ -404,7 +420,7 @@ export async function searchEvent(
     organizers: string[];
     attendees: string[];
   }
-) {
+): Promise<SearchEventsResponse> {
   const { keywords, searchIn, organizers, attendees } = filters;
 
   const reqParam: {
@@ -413,7 +429,7 @@ export async function searchEvent(
     organizers?: string[];
     attendees?: string[];
   } = {
-    query: !!keywords ? keywords : query,
+    query: keywords ? keywords : query,
     calendars: searchIn.map((calId) => {
       const [userId, calendarId] = calId.split("/");
       return { calendarId, userId };
@@ -431,5 +447,5 @@ export async function searchEvent(
     })
     .json();
 
-  return response;
+  return response as SearchEventsResponse;
 }

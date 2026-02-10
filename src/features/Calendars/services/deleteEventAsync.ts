@@ -1,5 +1,5 @@
 import { deleteEvent } from "@/features/Events/EventApi";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RejectedError } from "../types/RejectedError";
 
@@ -13,11 +13,8 @@ export const deleteEventAsync = createAsyncThunk<
     try {
       await deleteEvent(eventURL);
       return { calId, eventId };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

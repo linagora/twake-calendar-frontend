@@ -6,8 +6,8 @@ export async function createWebSocketConnection(
   callbacks: WebSocketCallbacks
 ): Promise<WebSocketWithCleanup> {
   const wsBaseUrl =
-    (window as any).WEBSOCKET_URL ??
-    (window as any).CALENDAR_BASE_URL?.replace(
+    window.WEBSOCKET_URL ??
+    window.CALENDAR_BASE_URL?.replace(
       /^http(s)?:/,
       (_: string, s: string | undefined) => (s ? "wss:" : "ws:")
     ) ??
@@ -37,7 +37,7 @@ export async function createWebSocketConnection(
     }, CONNECTION_TIMEOUT_MS);
 
     const openHandler = () => {
-      console.log("WebSocket connection opened");
+      console.info("WebSocket connection opened");
       clearTimeout(timeoutId);
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
@@ -73,7 +73,7 @@ export async function createWebSocketConnection(
   };
 
   const closeHandler = (event: CloseEvent) => {
-    console.log("WebSocket closed:", event.code, event.reason);
+    console.info("WebSocket closed:", event.code, event.reason);
     cleanup();
     callbacks.onClose?.(event);
   };

@@ -1,5 +1,9 @@
+interface CalendarHTMLElement extends HTMLElement {
+  __calendarMouseMoveHandler?: (e: MouseEvent) => void;
+  __calendarMouseLeaveHandler?: () => void;
+}
 export interface MouseHandlersProps {
-  calendarEl: HTMLElement;
+  calendarEl: CalendarHTMLElement;
 }
 
 export const createMouseHandlers = (props: MouseHandlersProps) => {
@@ -75,24 +79,24 @@ export const createMouseHandlers = (props: MouseHandlersProps) => {
     calendarEl.addEventListener("mousemove", handleMouseMove);
     calendarEl.addEventListener("mouseleave", handleMouseLeave);
 
-    (calendarEl as any).__calendarMouseMoveHandler = handleMouseMove;
-    (calendarEl as any).__calendarMouseLeaveHandler = handleMouseLeave;
+    calendarEl.__calendarMouseMoveHandler = handleMouseMove;
+    calendarEl.__calendarMouseLeaveHandler = handleMouseLeave;
   };
 
   const removeMouseEventListeners = () => {
-    if ((calendarEl as any).__calendarMouseMoveHandler) {
+    if (calendarEl.__calendarMouseMoveHandler) {
       calendarEl.removeEventListener(
         "mousemove",
-        (calendarEl as any).__calendarMouseMoveHandler
+        calendarEl.__calendarMouseMoveHandler
       );
-      delete (calendarEl as any).__calendarMouseMoveHandler;
+      delete calendarEl.__calendarMouseMoveHandler;
     }
-    if ((calendarEl as any).__calendarMouseLeaveHandler) {
+    if (calendarEl.__calendarMouseLeaveHandler) {
       calendarEl.removeEventListener(
         "mouseleave",
-        (calendarEl as any).__calendarMouseLeaveHandler
+        calendarEl.__calendarMouseLeaveHandler
       );
-      delete (calendarEl as any).__calendarMouseLeaveHandler;
+      delete calendarEl.__calendarMouseLeaveHandler;
     }
   };
 

@@ -22,7 +22,7 @@ import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 export function AccessTab({ calendar }: { calendar: Calendar }) {
   const { t } = useI18n();
-  const calDAVLink = `${(window as any).CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
+  const calDAVLink = `${window.CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
 
   const [secretLink, setSecretLink] = useState("");
   const [open, setOpen] = useState(false);

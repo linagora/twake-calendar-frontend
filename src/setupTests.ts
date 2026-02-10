@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "@testing-library/jest-dom";
 
 import { TextEncoder } from "util";
@@ -49,7 +50,7 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-(global as any).ResizeObserver = ResizeObserverMock;
+global.ResizeObserver = ResizeObserverMock;
 
 class IntersectionObserverMock {
   observe() {}
@@ -59,8 +60,8 @@ class IntersectionObserverMock {
 
 (global as any).IntersectionObserver = IntersectionObserverMock;
 if (typeof window !== "undefined") {
-  (window as any).WS_PING_PERIOD_MS = 5000;
-  (window as any).WS_PING_TIMEOUT_PERIOD_MS = 5000;
+  window.WS_PING_PERIOD_MS = 5000;
+  window.WS_PING_TIMEOUT_PERIOD_MS = 5000;
 }
 // Suppress jsdom CSS selector parsing errors for Emotion/MUI
 if (typeof window !== "undefined" && window.getComputedStyle) {

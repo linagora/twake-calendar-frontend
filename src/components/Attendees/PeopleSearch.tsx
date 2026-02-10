@@ -23,6 +23,7 @@ import {
   useEffect,
   useState,
   type ReactNode,
+  type SyntheticEvent,
 } from "react";
 import { useI18n } from "twake-i18n";
 
@@ -55,7 +56,7 @@ export function PeopleSearch({
   customSlotProps,
 }: {
   selectedUsers: User[];
-  onChange: (event: any, users: User[]) => void;
+  onChange: (event: SyntheticEvent, users: User[]) => void;
   objectTypes: string[];
   disabled?: boolean;
   freeSolo?: boolean;
@@ -155,7 +156,7 @@ export function PeopleSearch({
         ),
       };
 
-      const enhancedParamsWithInputProps = {
+      const enhancedParams = {
         ...params,
         InputProps: inputProps,
         inputProps: {
@@ -163,8 +164,6 @@ export function PeopleSearch({
           autoComplete: "off",
         },
       };
-
-      const { InputProps, ...enhancedParams } = enhancedParamsWithInputProps;
 
       const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && onToggleEventPreview) {
@@ -193,7 +192,7 @@ export function PeopleSearch({
               {t("peopleSearch.label")}
             </label>
             {inputSlot({
-              ...enhancedParamsWithInputProps,
+              ...enhancedParams,
               error: !!inputError,
               helperText: inputError,
               placeholder: searchPlaceholder,
@@ -218,6 +217,7 @@ export function PeopleSearch({
         </>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [inputError, t, onToggleEventPreview, loading, searchPlaceholder]
   );
 
@@ -296,7 +296,7 @@ export function PeopleSearch({
         }
         renderOption={(props, option) => {
           if (selectedUsers.find((u) => u.email === option.email)) return null;
-          const { key, ...otherProps } = props as any;
+          const { key, ...otherProps } = props;
           return (
             <ListItem key={key + option?.email} {...otherProps} disableGutters>
               <ListItemAvatar>
