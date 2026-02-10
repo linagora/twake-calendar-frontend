@@ -342,7 +342,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
-      adapterLocale={t("locale") ?? "en"}
+      adapterLocale={dayjs.locale(t("locale") ?? "en")}
       localeText={{
         okButtonLabel: t("common.ok"),
         cancelButtonLabel: t("common.cancel"),

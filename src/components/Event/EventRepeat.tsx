@@ -242,7 +242,8 @@ export default function RepeatEvent({
                   ...repetition,
                   occurrences: null,
                   endDate:
-                    repetition.endDate ?? new Date().toISOString().slice(0, 10),
+                    repetition.endDate ??
+                    dayjs(eventStart).add(1, "day").format("YYYY-MM-DD"),
                 });
               }
             }}
@@ -283,7 +284,9 @@ export default function RepeatEvent({
                         sx={{ width: "100%" }}
                         format={LONG_DATE_FORMAT}
                         value={
-                          repetition.endDate ? dayjs(repetition.endDate) : null
+                          repetition.endDate
+                            ? dayjs(repetition.endDate)
+                            : dayjs(eventStart).add(1, "day")
                         }
                         onChange={(value) => {
                           if (!value || !value.isValid()) return;
@@ -304,7 +307,9 @@ export default function RepeatEvent({
                             setRepetition({
                               ...repetition,
                               occurrences: null,
-                              endDate: new Date().toISOString().slice(0, 10),
+                              endDate: dayjs(eventStart)
+                                .add(1, "day")
+                                .format("YYYY-MM-DD"),
                             });
                           } else {
                             setRepetition({
