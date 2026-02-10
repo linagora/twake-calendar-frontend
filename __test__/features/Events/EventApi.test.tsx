@@ -1,16 +1,15 @@
+import { updateSeries } from "@/features/Events/api/updateSeries";
 import {
   deleteEvent,
   importEventFromFile,
   moveEvent,
   putEvent,
   searchEvent,
-  updateSeries,
 } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { calendarEventToJCal } from "@/features/Events/eventUtils";
 import { clientConfig } from "@/features/User/oidcAuth";
 import { api } from "@/utils/apiUtils";
-import ICAL from "ical.js";
 
 clientConfig.url = "https://example.com";
 

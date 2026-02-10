@@ -1,9 +1,13 @@
 import { api } from "@/utils/apiUtils";
-import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
+import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
-import { VCalComponent } from "../Calendars/types/CalendarData";
+import {
+  VCalComponent,
+  VObjectProperty,
+  VObjectValue,
+} from "../Calendars/types/CalendarData";
 import { SearchEventsResponse } from "../Search/types/SearchEventsResponse";
 import { CalendarEvent } from "./EventsTypes";
 import {
@@ -12,23 +16,6 @@ import {
   makeVevent,
   parseCalendarEvent,
 } from "./eventUtils";
-
-type JCalValue = string | number | boolean | null;
-
-type JCalParams = Record<string, JCalValue | JCalValue[]>;
-
-type JCalProperty = [
-  name: string,
-  params: JCalParams,
-  type: string,
-  value: JCalValue,
-];
-
-type JCalComponent = [
-  name: string,
-  properties: JCalProperty[],
-  components?: JCalComponent[],
-];
 
 export async function reportEvent(
   event: CalendarEvent,
@@ -62,7 +49,7 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   let targetVevent;
   if (isMaster) {
     targetVevent = vevents.find(
-      ([, props]: JCalComponent) =>
+      ([, props]: VCalComponent) =>
         !props.find(([k]) => k.toLowerCase() === "recurrence-id")
     );
     if (!targetVevent) {
@@ -223,7 +210,7 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
 
   // Find the master VEVENT
   const masterIndex = vevents.findIndex(
-    ([, props]: JCalComponent) =>
+    ([, props]: VCalComponent) =>
       !props.find(([k]) => k.toLowerCase() === "recurrence-id")
   );
 
@@ -236,9 +223,9 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
-  const normalizeRecurrenceId = (id: JCalValue) =>
+  const normalizeRecurrenceId = (id: VObjectValue) =>
     String(id ?? "").replace(/Z$/, "");
-  const isDuplicate = masterProps.some((prop: JCalProperty) => {
+  const isDuplicate = masterProps.some((prop: VObjectProperty) => {
     if (prop[0].toLowerCase() === "exdate" && prop[3]) {
       return (
         normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateValue)
@@ -257,7 +244,7 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
   vevents[masterIndex][1] = masterProps;
 
   // Remove the override instance if it exists (in case it was an override being deleted)
-  const filteredVevents = vevents.filter(([, props]: JCalComponent) => {
+  const filteredVevents = vevents.filter(([, props]: VCalComponent) => {
     const recurrenceIdProp = props.find(
       ([k]) => k.toLowerCase() === "recurrence-id"
     );
@@ -295,12 +282,12 @@ export const updateSeriesPartstat = async (
   const vevents = await getAllRecurrentEvent(event);
 
   // Update PARTSTAT in ALL VEVENTs (master + exceptions)
-  const updatedVevents = vevents.map((vevent: JCalComponent) => {
+  const updatedVevents = vevents.map((vevent: VCalComponent) => {
     const properties = vevent[1];
-    const updatedProperties = properties.map((prop: JCalProperty) => {
+    const updatedProperties = properties.map((prop: VObjectProperty) => {
       // Find ATTENDEE properties
       if (prop[0] === "attendee") {
-        const calAddress = prop[3];
+        const calAddress = prop[3] as string;
         // Check if this is the target attendee
         if (calAddress.toLowerCase().includes(attendeeEmail.toLowerCase())) {
           // Update PARTSTAT parameter
@@ -331,155 +318,7 @@ export const updateSeriesPartstat = async (
   });
 };
 
-export const updateSeries = async (
-  event: CalendarEvent,
-  calOwnerEmail?: string,
-  removeOverrides: boolean = true
-) => {
-  const vevents = await getAllRecurrentEvent(event);
-  const masterIndex = vevents.findIndex(
-    ([, props]: JCalComponent) =>
-      !props.find(([k]) => k.toLowerCase() === "recurrence-id")
-  );
-  if (masterIndex === -1) {
-    throw new Error("No master VEVENT found for this series");
-  }
-  const rrule = vevents[masterIndex][1].find(([k]: string[]) => k === "rrule");
-
-  const tzid = event.timezone;
-
-  const oldMaster = vevents[masterIndex];
-  const updatedMaster = makeVevent(event, tzid, calOwnerEmail, true);
-  const newRrule = updatedMaster[1].find(([k]: string[]) => k === "rrule");
-  if (!newRrule) {
-    updatedMaster[1].push(rrule);
-  }
-
-  const timezoneData = TIMEZONES.zones[event.timezone];
-  const vtimezone = makeTimezone(timezoneData, event);
-
-  let finalVevents;
-  if (removeOverrides) {
-    // When date/time/timezone/repeat rules changed, remove all override instances
-    finalVevents = [updatedMaster];
-  } else {
-    // When only properties changed, keep override instances and update their metadata
-
-    // Helper function to get field values from props
-    const getFieldValues = (props: VCalComponent[], fieldName: string) => {
-      return props.filter(([k]) => k.toLowerCase() === fieldName.toLowerCase());
-    };
-
-    // Helper function to serialize for comparison
-    const serialize = (values: VCalComponent[]) => JSON.stringify(values);
-
-    // Detect which fields changed in the master
-    const changedFields = new Map<string, VCalComponent[]>();
-    const oldMasterProps = oldMaster[1];
-    const newMasterProps = updatedMaster[1];
-
-    // Fields that are metadata (not time-related)
-    const metadataFields = [
-      "summary",
-      "description",
-      "location",
-      "class",
-      "transp",
-      "attendee",
-      "organizer",
-      "x-openpaas-videoconference",
-    ];
-
-    metadataFields.forEach((fieldName) => {
-      const oldValues = getFieldValues(oldMasterProps, fieldName);
-      const newValues = getFieldValues(newMasterProps, fieldName);
-
-      if (serialize(oldValues) !== serialize(newValues)) {
-        changedFields.set(fieldName.toLowerCase(), newValues);
-      }
-    });
-
-    // Check if VALARM component changed
-    const oldMasterComponents = oldMaster[2] || [];
-    const newMasterComponents = updatedMaster[2] || [];
-    const oldValarm = oldMasterComponents.filter(
-      ([name]) => name.toLowerCase() === "valarm"
-    );
-    const newValarm = newMasterComponents.filter(
-      ([name]) => name.toLowerCase() === "valarm"
-    );
-    const valarmChanged = serialize(oldValarm) !== serialize(newValarm);
-
-    const updatedVevents = vevents.map((vevent, index) => {
-      if (index === masterIndex) {
-        return updatedMaster;
-      }
-
-      const [veventType, props, components = []] = vevent;
-      let newProps = [...props];
-
-      // Only update fields that actually changed in the master
-      changedFields.forEach((newValues, fieldNameLower) => {
-        // Remove old values of this changed field from exception
-        const filteredProps = newProps.filter(
-          ([k]) => k.toLowerCase() !== fieldNameLower
-        );
-
-        // Add new values from updated master
-        newProps = [...filteredProps, ...newValues];
-      });
-
-      // Increment sequence number if any changes were made
-      if (changedFields.size > 0 || valarmChanged) {
-        const sequenceIndex = newProps.findIndex(
-          ([k]) => k.toLowerCase() === "sequence"
-        );
-        if (sequenceIndex !== -1) {
-          const currentSequence = parseInt(
-            newProps[sequenceIndex][3] || "0",
-            10
-          );
-          newProps[sequenceIndex] = [
-            newProps[sequenceIndex][0],
-            newProps[sequenceIndex][1],
-            newProps[sequenceIndex][2],
-            String(currentSequence + 1),
-          ];
-        } else {
-          newProps.push(["sequence", {}, "integer", "1"]);
-        }
-      }
-
-      // Handle VALARM component updates
-      let updatedComponents = components;
-      if (valarmChanged) {
-        // Remove old VALARM and add new one
-        updatedComponents = components
-          .filter(([name]) => name.toLowerCase() !== "valarm")
-          .concat(newValarm);
-      }
-
-      return [veventType, newProps, updatedComponents];
-    });
-
-    finalVevents = updatedVevents;
-  }
-
-  const newJCal = [
-    "vcalendar",
-    [],
-    [...finalVevents, vtimezone.component.jCal],
-  ];
-  return api(`dav${event.URL}`, {
-    method: "PUT",
-    body: JSON.stringify(newJCal),
-    headers: {
-      "content-type": "text/calendar; charset=utf-8",
-    },
-  });
-};
-
-async function getAllRecurrentEvent(event: CalendarEvent) {
+export async function getAllRecurrentEvent(event: CalendarEvent) {
   const response = await api.get(`dav${event.URL}`);
   const eventData = await response.text();
   const jcal = ICAL.parse(eventData);
