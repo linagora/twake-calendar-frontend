@@ -112,7 +112,7 @@ const incrementSequenceNumber = (props: VObjectProperty[]) => {
       newProps[sequenceIndex][0],
       newProps[sequenceIndex][1],
       newProps[sequenceIndex][2],
-      String(currentSequence + 1),
+      currentSequence + 1,
     ];
   } else {
     newProps.push(["sequence", {}, "integer", "1"]);
@@ -225,7 +225,7 @@ export const updateSeries = async (
     true
   ) as VCalComponent;
   const newRrule = findFieldValue(updatedMaster[1], "rrule");
-  if (!newRrule) {
+  if (!newRrule && rrule) {
     updatedMaster[1].push(rrule!);
   }
 

@@ -17,12 +17,6 @@ jest.mock("@/utils/apiUtils");
 
 const day = new Date();
 
-const vevent = (props: any[], components: any[] = []) => [
-  "vevent",
-  props,
-  components,
-];
-
 const mockEvent = {
   uid: "event1",
   title: "Test Event",
