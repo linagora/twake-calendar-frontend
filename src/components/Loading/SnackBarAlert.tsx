@@ -8,7 +8,7 @@ export function SnackbarAlert({
   severity = "success",
 }: {
   open: boolean;
-  setOpen: Function;
+  setOpen: (o: boolean) => void;
   message: string;
   severity?: AlertColor;
 }) {

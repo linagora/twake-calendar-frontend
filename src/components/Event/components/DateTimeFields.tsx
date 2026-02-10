@@ -83,7 +83,6 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   showMore,
   hasEndDateChanged,
   showEndDate,
-  onToggleEndDate,
   validation,
   onStartDateChange,
   onStartTimeChange,

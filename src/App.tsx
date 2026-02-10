@@ -48,7 +48,7 @@ function App() {
   );
   const settingsLanguage = useAppSelector((state) => state.settings.language);
   const savedLang = localStorage.getItem("lang");
-  const defaultLang = (window as any).LANG;
+  const defaultLang = window.LANG;
 
   const lang =
     [userLanguage, settingsLanguage, savedLang, defaultLang].find(

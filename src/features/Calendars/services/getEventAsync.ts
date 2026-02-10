@@ -15,10 +15,11 @@ export const getEventAsync = createAsyncThunk<
       calId: event.calId,
       event: response,
     };
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });

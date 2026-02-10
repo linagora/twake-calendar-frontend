@@ -1,9 +1,9 @@
 import { putEvent } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
+import { RejectedError } from "../types/RejectedError";
 
 export const putEventAsync = createAsyncThunk<
   { calId: string; calType?: "temp" },
@@ -22,11 +22,8 @@ export const putEventAsync = createAsyncThunk<
         calId: cal.id,
         calType,
       };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

@@ -1,10 +1,11 @@
 import { api } from "@/utils/apiUtils";
+import { CalendarInput, CalendarList } from "./types/CalendarData";
 
 export async function getCalendars(
   userId: string,
   scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&",
   signal?: AbortSignal
-) {
+): Promise<CalendarList> {
   const calendars = await api
     .get(`dav/calendars/${userId}.json?${scope}`, {
       headers: {
@@ -13,7 +14,7 @@ export async function getCalendars(
       signal,
     })
     .json();
-  return calendars;
+  return calendars as CalendarList;
 }
 
 export async function getCalendar(
@@ -59,7 +60,7 @@ export async function postCalendar(
 export async function addSharedCalendar(
   userId: string,
   calId: string,
-  cal: Record<string, any>
+  cal: CalendarInput
 ) {
   const response = await api.post(`dav/calendars/${userId}.json`, {
     headers: {
@@ -70,7 +71,7 @@ export async function addSharedCalendar(
       ...cal.cal,
       "dav:name":
         cal.cal["dav:name"] === "#default"
-          ? cal.owner.displayName + "'s calendar"
+          ? (cal.owner?.displayName ?? "Unknown") + "'s calendar"
           : cal.cal["dav:name"],
       "calendarserver:source": {
         acl: cal.cal.acl,

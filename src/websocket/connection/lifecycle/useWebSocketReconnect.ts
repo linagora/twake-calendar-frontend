@@ -18,6 +18,7 @@ export function useWebSocketReconnect(
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scheduleReconnect = useCallback(() => {
@@ -35,7 +36,7 @@ export function useWebSocketReconnect(
     const delay = getRetryDelay(reconnectAttemptsRef.current, RECONNECT_CONFIG);
     reconnectAttemptsRef.current += 1;
 
-    console.log(
+    console.info(
       `Scheduling WebSocket reconnection in ${Math.round(delay)}ms ` +
         `(attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`
     );
@@ -45,12 +46,13 @@ export function useWebSocketReconnect(
         reconnectTimeoutRef.current = null;
         return;
       }
-      console.log(
+      console.info(
         `Attempting WebSocket reconnection (attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`
       );
       setShouldConnect((prev) => !prev);
       clearReconnectTimeout();
     }, delay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearReconnectTimeout]);
   return { scheduleReconnect, clearReconnectTimeout };
 }

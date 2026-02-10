@@ -12,5 +12,5 @@ export function registerToCalendars(
     })
   );
 
-  console.log("Registered to calendars", calendarURIList);
+  console.info("Registered to calendars", calendarURIList);
 }

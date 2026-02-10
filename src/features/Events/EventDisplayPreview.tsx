@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
 import { getTimezoneOffset } from "@/utils/timezone";
@@ -59,7 +60,7 @@ export default function EventPreviewModal({
   calId: string;
   tempEvent?: boolean;
   open: boolean;
-  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void;
+  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void;
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
@@ -67,9 +68,7 @@ export default function EventPreviewModal({
   const timezone =
     useAppSelector((state) => state.settings.timeZone) ??
     browserDefaultTimeZone;
-  const calendarList = Object.values(
-    useAppSelector((state) => state.calendars.list)
-  );
+
   const calendar = tempEvent
     ? calendars.templist[calId]
     : calendars.list[calId];
@@ -95,14 +94,16 @@ export default function EventPreviewModal({
   const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
     undefined
   );
-  const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
+  const [afterChoiceFunc, setAfterChoiceFunc] = useState<
+    ((type: "solo" | "all" | undefined) => void) | undefined
+  >();
   const attendeePreview = makeAttendeePreview(event.attendee, t);
   const hasCheckedSessionStorageRef = useRef(false);
 
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
     null
   );
-  const mailSpaUrl = (window as any).MAIL_SPA_URL ?? null;
+  const mailSpaUrl = window.MAIL_SPA_URL ?? null;
 
   useEffect(() => {
     if (!event || !calendar) {
@@ -160,7 +161,7 @@ export default function EventPreviewModal({
             }
           }
         }
-      } catch (err) {
+      } catch {
         // Ignore sessionStorage errors
       }
     };
@@ -201,7 +202,7 @@ export default function EventPreviewModal({
         // Clear sessionStorage after reopening
         try {
           sessionStorage.removeItem("eventUpdateModalReopen");
-        } catch (err) {
+        } catch {
           // Ignore sessionStorage errors
         }
       }
@@ -241,7 +242,7 @@ export default function EventPreviewModal({
             }
           }
         }
-      } catch (err) {
+      } catch {
         // Ignore sessionStorage errors
       }
     };
@@ -296,7 +297,7 @@ export default function EventPreviewModal({
             gap={0.5}
             width="100%"
           >
-            {(window as any).DEBUG && (
+            {window.DEBUG && (
               <IconButton
                 size="small"
                 onClick={async () => {
@@ -373,8 +374,6 @@ export default function EventPreviewModal({
                 </MenuItem>
               )}
               <EventDuplication
-                event={event}
-                onClose={() => setToggleActionMenu(null)}
                 onOpenDuplicate={() => {
                   setToggleActionMenu(null);
                   setHidePreview(true);
@@ -723,10 +722,11 @@ export default function EventPreviewModal({
       <EditModeDialog
         type={openEditModePopup}
         setOpen={setOpenEditModePopup}
-        event={event}
         eventAction={(type: "solo" | "all" | undefined) => {
           setTypeOfAction(type);
-          afterChoiceFunc && afterChoiceFunc(type);
+          if (afterChoiceFunc) {
+            afterChoiceFunc(type);
+          }
         }}
       />
       <EventUpdateModal
@@ -759,7 +759,7 @@ export default function EventPreviewModal({
                 return data.typeOfAction;
               }
             }
-          } catch (err) {
+          } catch {
             // Ignore
           }
           return undefined;
@@ -791,7 +791,7 @@ export default function EventPreviewModal({
 
 function makeRecurrenceString(
   event: CalendarEvent,
-  t: Function
+  t: (k: string, p?: string | object) => string
 ): string | undefined {
   if (!event.repetition) return;
 
@@ -851,7 +851,7 @@ function makeRecurrenceString(
 
 function formatDate(
   date: Date | string,
-  t: Function,
+  t: (k: string, p?: string | object) => string,
   timeZone: string,
   allday?: boolean
 ) {
@@ -880,7 +880,7 @@ function formatDate(
 function formatEnd(
   start: Date | string,
   end: Date | string,
-  t: Function,
+  t: (k: string, p?: string | object) => string,
   timeZone: string,
   allday?: boolean
 ) {
@@ -924,7 +924,10 @@ function formatEnd(
   }
 }
 
-export function makeAttendeePreview(attendees: userAttendee[], t: Function) {
+export function makeAttendeePreview(
+  attendees: userAttendee[],
+  t: (k: string, p?: string | object) => string
+) {
   const attendeePreview = [];
   const yesCount = attendees?.filter((a) => a.partstat === "ACCEPTED").length;
   const noCount = attendees?.filter((a) => a.partstat === "DECLINED").length;

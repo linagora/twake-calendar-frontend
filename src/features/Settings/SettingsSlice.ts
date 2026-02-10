@@ -1,5 +1,6 @@
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ConfigurationItem, ModuleConfiguration } from "../User/userDataTypes";
 import { getOpenPaasUserDataAsync } from "../User/userSlice";
 
 export interface SettingsState {
@@ -12,7 +13,7 @@ export interface SettingsState {
 }
 
 const savedLang = localStorage.getItem("lang");
-const defaultLang = savedLang ?? (window as any).LANG ?? "en";
+const defaultLang = savedLang ?? window.LANG ?? "en";
 
 const savedTimeZone = localStorage.getItem("timeZone");
 // If savedTimeZone is the string "null" or doesn't exist, use null
@@ -59,12 +60,15 @@ export const settingsSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
       const coreModule = action.payload.configurations?.modules?.find(
-        (module: any) => module.name === "core"
+        (module: ModuleConfiguration) => module.name === "core"
       );
       const datetimeConfig = coreModule?.configurations?.find(
-        (config: any) => config.name === "datetime"
+        (config: ConfigurationItem) => config.name === "datetime"
       );
-      const timeZone = datetimeConfig?.value?.timeZone;
+      const datetimeValue = datetimeConfig?.value as
+        | { timeZone?: string }
+        | undefined;
+      const timeZone = datetimeValue?.timeZone;
 
       if (timeZone) {
         state.timeZone = timeZone;
@@ -76,25 +80,25 @@ export const settingsSlice = createSlice({
         localStorage.setItem("timeZone", browserDefaultTimeZone);
       }
       const esnCalendarModule = action.payload.configurations?.modules?.find(
-        (module: any) => module.name === "linagora.esn.calendar"
+        (module: ModuleConfiguration) => module.name === "linagora.esn.calendar"
       );
       const hideDeclinedEventsConfig = esnCalendarModule?.configurations?.find(
-        (config: any) => config.name === "hideDeclinedEvents"
+        (config: ConfigurationItem) => config.name === "hideDeclinedEvents"
       );
       state.hideDeclinedEvents =
         typeof hideDeclinedEventsConfig?.value === "boolean"
           ? hideDeclinedEventsConfig.value
           : null;
 
-      const calendarModule = action.payload.configurations.modules.find(
-        (module: any) => module.name === "calendar"
+      const calendarModule = action.payload.configurations?.modules?.find(
+        (module: ModuleConfiguration) => module.name === "calendar"
       );
       if (calendarModule?.configurations) {
-        const alarmEmailsConfig = calendarModule.configurations.find(
-          (config: any) => config.name === "displayWeekNumbers"
+        const displayWeekNumbersConfig = calendarModule.configurations.find(
+          (config: ConfigurationItem) => config.name === "displayWeekNumbers"
         );
-        if (alarmEmailsConfig) {
-          state.displayWeekNumbers = alarmEmailsConfig.value === true;
+        if (displayWeekNumbersConfig) {
+          state.displayWeekNumbers = displayWeekNumbersConfig.value === true;
         }
       }
     });

@@ -59,7 +59,7 @@ export function EventChip({
     const ownerEmails = new Set(
       calendar.ownerEmails?.map((e) => e.toLowerCase())
     );
-    const delegated = calendar.delegated;
+    // const delegated = calendar.delegated;
 
     // Determine owner attendee
     const ownerAttendee = getOwnerAttendee(attendees, ownerEmails);
@@ -258,7 +258,7 @@ export function EventChip({
           !event._def.extendedProps.allday &&
           event._def.extendedProps.organizer &&
           !showCompact &&
-          (window as any).displayOrgAvatar && (
+          window.displayOrgAvatar && (
             <Avatar
               children={OrganizerAvatar.children}
               color={OrganizerAvatar.color}

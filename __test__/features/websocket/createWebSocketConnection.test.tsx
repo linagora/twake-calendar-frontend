@@ -49,22 +49,22 @@ describe("createWebSocketConnection", () => {
 
   beforeEach(() => {
     ({ webSocketInstances, mockWebSocket, cleanup } = setupWebsocket());
-    (window as any).WEBSOCKET_URL = "wss://calendar.example.com";
+    window.WEBSOCKET_URL = "wss://calendar.example.com";
 
     (fetchWebSocketTicket as jest.Mock).mockResolvedValue(mockTicket);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    delete (window as any).WEBSOCKET_URL;
-    delete (window as any).CALENDAR_BASE_URL;
+    delete window.WEBSOCKET_URL;
+    delete window.CALENDAR_BASE_URL;
     cleanup();
   });
 
   /** ---------- Tests ---------- */
 
   it("throws when WEBSOCKET_URL is not defined", async () => {
-    delete (window as any).WEBSOCKET_URL;
+    delete window.WEBSOCKET_URL;
     const mockCallbacks = {
       onMessage: jest.fn(),
     };
@@ -88,8 +88,8 @@ describe("createWebSocketConnection", () => {
   });
 
   it("creates WebSocket with correct URL and ticket without the WEBSOCKET_URL", async () => {
-    delete (window as any).WEBSOCKET_URL;
-    (window as any).CALENDAR_BASE_URL = "https://calendar.example.com";
+    delete window.WEBSOCKET_URL;
+    window.CALENDAR_BASE_URL = "https://calendar.example.com";
     await createAndOpenConnection();
 
     expect(mockWebSocket).toHaveBeenCalledWith(

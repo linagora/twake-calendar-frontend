@@ -19,12 +19,12 @@ import { parseTimeInput } from "../utils/dateTimeHelpers";
 
 type FieldType = "date" | "time" | "date-time";
 
-type GenericPickerFieldProps = PickerFieldProps<any, any, any> & {
+type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
   fieldType: FieldType;
   validator: (
-    value: any,
+    value: Dayjs | null,
     context: PickerValidationScope,
-    adapter: PickerFieldAdapter<any>
+    adapter: PickerFieldAdapter<Dayjs>
   ) => string | null;
 };
 
@@ -223,7 +223,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
     dispatchCloseOtherPickers();
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = (_e: React.FocusEvent<HTMLInputElement>) => {
     // If dropdown is open, don't parse input
     // MUI will handle selection and sync value via useEffect
     if (pickerContext.open) {

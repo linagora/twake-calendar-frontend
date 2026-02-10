@@ -1,6 +1,6 @@
 import { putEventWithOverrides } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
@@ -15,11 +15,8 @@ export const updateEventInstanceAsync = createAsyncThunk<
     try {
       await putEventWithOverrides(event, cal.ownerEmails?.[0]);
       return { calId: cal.id, event };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

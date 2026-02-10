@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
+import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
@@ -51,7 +52,9 @@ export function WebSocketGate() {
     useAppSelector((state) => state?.calendars?.templist) ?? {}
   );
 
-  const calendarsToRefreshRef = useRef<Map<string, any>>(new Map());
+  const calendarsToRefreshRef = useRef<
+    Map<string, { calendar: Calendar; type?: "temp" }>
+  >(new Map());
   const calendarsToHideRef = useRef<Set<string>>(new Set());
   const debouncedUpdateFnRef = useRef<
     ((dispatch: AppDispatch) => void) | undefined
@@ -102,6 +105,7 @@ export function WebSocketGate() {
         clearReconnectTimeout();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scheduleReconnect, clearReconnectTimeout]
   );
 
@@ -111,6 +115,7 @@ export function WebSocketGate() {
       (error as ErrorEvent)?.message ?? error.type ?? "unknown";
     setWebSocketStatus(t("websocket.error", { error: errorMessage }));
     setWebSocketStatusSerity("error");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const callBacks = useMemo(
@@ -145,6 +150,7 @@ export function WebSocketGate() {
 
       clearReconnectTimeout();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen, clearReconnectTimeout]);
 
   // Manage WebSocket connection
@@ -206,6 +212,7 @@ export function WebSocketGate() {
       abortController.abort();
       cleanup();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isAuthenticated,
     callBacks,
@@ -220,7 +227,7 @@ export function WebSocketGate() {
 
     // If we just reconnected, force a re-sync
     if (justReconnectedRef.current && isSocketOpen) {
-      console.log("Re-syncing calendars after reconnection");
+      console.info("Re-syncing calendars after reconnection");
       previousCalendarListRef.current = [];
       previousTempCalendarListRef.current = [];
       justReconnectedRef.current = false;
@@ -277,6 +284,7 @@ export function WebSocketGate() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen, isAuthenticated, clearReconnectTimeout]);
 
   useEffect(() => {
@@ -315,6 +323,7 @@ export function WebSocketGate() {
         pingCleanupRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen]);
 
   return websocketStatus ? (

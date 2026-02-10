@@ -1,8 +1,8 @@
 import { useAppDispatch } from "@/app/hooks";
 import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
-import { Button, CircularProgress, Box, Theme } from "@linagora/twake-mui";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Box, Button, CircularProgress, Theme } from "@linagora/twake-mui";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
 import { handleRSVPClick } from "./handleRSVPClick";
@@ -19,7 +19,9 @@ interface RSVPButtonProps {
   rsvpValue: PartStat;
   contextualizedEvent: ContextualizedEvent;
   user: userData | undefined;
-  setAfterChoiceFunc: Dispatch<SetStateAction<Function | undefined>>;
+  setAfterChoiceFunc: (
+    func: ((type: "solo" | "all" | undefined) => void) | undefined
+  ) => void;
   setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
   isLoading: boolean;
   onLoadingChange: (loading: boolean, value?: PartStat) => void;

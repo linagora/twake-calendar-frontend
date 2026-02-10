@@ -22,7 +22,7 @@ export function TempCalendarsInput({
   setTempUsers: (users: User[]) => void;
   handleToggleEventPreview: () => void;
   selectedCalendars: string[];
-  setSelectedCalendars: Function;
+  setSelectedCalendars: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const dispatch = useAppDispatch();
   const tempcalendars =
@@ -34,7 +34,7 @@ export function TempCalendarsInput({
   const prevUsersRef = useRef<User[]>([]);
   const userColorsRef = useRef(new Map<string, string>());
 
-  const handleUserChange = async (_: any, users: User[]) => {
+  const handleUserChange = async (_: React.SyntheticEvent, users: User[]) => {
     setTempUsers(users);
 
     const prevUsers = prevUsersRef.current;

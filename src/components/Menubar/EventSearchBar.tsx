@@ -142,7 +142,7 @@ export default function SearchBar() {
     setFilterError(false);
   };
 
-  const handleContactSelect = (_event: any, contacts: User[]) => {
+  const handleContactSelect = (contacts: User[]) => {
     setSelectedContacts(contacts);
     setSearch("");
     if (contacts.length > 0) {
@@ -173,7 +173,9 @@ export default function SearchBar() {
       dispatch(setView("search"));
       setAnchorEl(null);
     } else {
-      filterOpen && setFilterError(true);
+      if (filterOpen) {
+        setFilterError(true);
+      }
     }
   };
 
@@ -222,8 +224,8 @@ export default function SearchBar() {
         {extended && (
           <PeopleSearch
             selectedUsers={selectedContacts}
-            onChange={(event, users) => {
-              handleContactSelect(event, users);
+            onChange={(_event, users) => {
+              handleContactSelect(users);
             }}
             objectTypes={["user", "contact"]}
             onToggleEventPreview={() => {}}

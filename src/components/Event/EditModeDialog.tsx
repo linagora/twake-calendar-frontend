@@ -1,4 +1,3 @@
-import { CalendarEvent } from "@/features/Events/EventsTypes";
 import {
   Button,
   ButtonGroup,
@@ -16,12 +15,10 @@ import { useI18n } from "twake-i18n";
 export function EditModeDialog({
   type,
   setOpen,
-  event,
   eventAction,
 }: {
   type: string | null;
   setOpen: (e: string | null) => void;
-  event: CalendarEvent;
   eventAction: (type: "solo" | "all" | undefined) => void;
 }) {
   const { t } = useI18n();

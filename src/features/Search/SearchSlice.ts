@@ -4,7 +4,7 @@ import { searchEvent } from "../Events/EventApi";
 
 export interface SearchResultsState {
   hits: number;
-  results: Record<string, any>[];
+  results: Record<string, unknown>[];
   error: string | null;
   loading: boolean;
 }
@@ -17,24 +17,30 @@ const initialState: SearchResultsState = {
 };
 
 export const searchEventsAsync = createAsyncThunk<
-  { hits: number; events: Record<string, any>[] },
-  { search: string; filters: any },
+  { hits: number; events: Record<string, unknown>[] },
+  {
+    search: string;
+    filters: {
+      searchIn: string[];
+      keywords: string;
+      organizers: string[];
+      attendees: string[];
+    };
+  },
   { rejectValue: { message: string; status?: number } }
 >("events/searchEvents", async ({ search, filters }, { rejectWithValue }) => {
   try {
-    const response = (await searchEvent(search, filters)) as Record<
-      string,
-      any
-    >;
+    const response = await searchEvent(search, filters);
 
     return {
       hits: Number(response._total_hits),
       events: response._embedded?.events ?? [],
     };
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });

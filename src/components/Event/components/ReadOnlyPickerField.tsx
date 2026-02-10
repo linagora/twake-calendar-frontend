@@ -12,15 +12,16 @@ import {
   useValidation,
   validateDate,
 } from "@mui/x-date-pickers/validation";
+import { Dayjs } from "dayjs";
 
 type FieldType = "date" | "time" | "date-time";
 
-type GenericPickerFieldProps = PickerFieldProps<any, any, any> & {
+type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
   fieldType: FieldType;
   validator: (
-    value: any,
+    value: Dayjs | null,
     context: PickerValidationScope,
-    adapter: PickerFieldAdapter<any>
+    adapter: PickerFieldAdapter<Dayjs>
   ) => string | null;
 };
 

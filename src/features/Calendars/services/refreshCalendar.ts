@@ -1,10 +1,10 @@
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";
 import { fetchSyncTokenChanges } from "../api/fetchSyncTokenChanges";
-import { RejectedError } from "../types/RejectedError";
 import { Calendar } from "../CalendarTypes";
+import { RejectedError } from "../types/RejectedError";
 import { expandEventFunction } from "../utils/expandEventFunction";
 import { processSyncUpdates } from "../utils/processSyncTokenUpdates";
 
@@ -70,11 +70,8 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
         syncToken: newSyncToken,
         syncStatus: newSyncToken ? "SUCCESS" : "NO_NEW_SYNC_TOKEN",
       };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

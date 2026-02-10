@@ -322,7 +322,7 @@ describe("WebSocketGate", () => {
 
     it("should reset reconnection attempts counter on successful connection", async () => {
       jest.useFakeTimers();
-      const consoleLog = jest.spyOn(console, "log").mockImplementation();
+      const consoleLog = jest.spyOn(console, "info").mockImplementation();
       let onCloseCallback: Function | undefined;
 
       (createWebSocketConnection as jest.Mock).mockImplementation(
@@ -576,7 +576,7 @@ describe("WebSocketGate", () => {
 
     it("should reset attempt counter when online event fires", async () => {
       jest.useFakeTimers();
-      const consoleLog = jest.spyOn(console, "log").mockImplementation();
+      const consoleLog = jest.spyOn(console, "info").mockImplementation();
       let onCloseCallback: Function | undefined;
 
       (createWebSocketConnection as jest.Mock).mockImplementation(

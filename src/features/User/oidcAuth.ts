@@ -1,14 +1,14 @@
-import * as client from "openid-client";
 import { getLocation } from "@/utils/apiUtils";
+import * as client from "openid-client";
 
 export const clientConfig = {
-  url: (window as any).SSO_BASE_URL ?? "",
-  client_id: (window as any).SSO_CLIENT_ID ?? "",
-  scope: (window as any).SSO_SCOPE ?? "",
-  redirect_uri: (window as any).SSO_REDIRECT_URI ?? "",
-  response_type: (window as any).SSO_RESPONSE_TYPE ?? "",
-  code_challenge_method: (window as any).SSO_CODE_CHALLENGE_METHOD ?? "",
-  post_logout_redirect_uri: (window as any).SSO_POST_LOGOUT_REDIRECT ?? "",
+  url: window.SSO_BASE_URL ?? "",
+  client_id: window.SSO_CLIENT_ID ?? "",
+  scope: window.SSO_SCOPE ?? "",
+  redirect_uri: window.SSO_REDIRECT_URI ?? "",
+  response_type: window.SSO_RESPONSE_TYPE ?? "",
+  code_challenge_method: window.SSO_CODE_CHALLENGE_METHOD ?? "",
+  post_logout_redirect_uri: window.SSO_POST_LOGOUT_REDIRECT ?? "",
 };
 
 export async function getClientConfig() {
@@ -19,18 +19,21 @@ export async function getClientConfig() {
 }
 
 export async function Auth() {
-  let code_verifier = client.randomPKCECodeVerifier();
-  let code_challenge = await client.calculatePKCECodeChallenge(code_verifier);
+  const code_verifier = client.randomPKCECodeVerifier();
+  const code_challenge = await client.calculatePKCECodeChallenge(code_verifier);
   const openIdClientConfig = await getClientConfig();
-  let state = client.randomState();
-  let parameters: Record<string, string> = {
+  const state = client.randomState();
+  const parameters: Record<string, string> = {
     redirect_uri: clientConfig.redirect_uri,
     scope: clientConfig.scope!,
     code_challenge,
     code_challenge_method: clientConfig.code_challenge_method,
     state,
   };
-  let redirectTo = client.buildAuthorizationUrl(openIdClientConfig, parameters);
+  const redirectTo = client.buildAuthorizationUrl(
+    openIdClientConfig,
+    parameters
+  );
 
   return { redirectTo, code_verifier, state };
 }
@@ -44,13 +47,15 @@ export async function Logout() {
   return endSessionUrl;
 }
 
-export async function Callback(code_verifier: string, state: any) {
+export async function Callback(
+  code_verifier: string,
+  state: string | undefined
+) {
   try {
     const openIdClientConfig = await getClientConfig();
     const currentLocation = getLocation();
 
-    console.log("Callback URL:", currentLocation);
-    console.log("Code verifier:", code_verifier);
+    console.info("Callback URL:", currentLocation);
 
     const tokenSet = await client.authorizationCodeGrant(
       openIdClientConfig,

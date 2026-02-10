@@ -13,7 +13,12 @@ import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { userAttendee } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
 import { getDeltaInMilliseconds } from "@/utils/dateUtils";
-import { CalendarApi, DateSelectArg, EventDropArg } from "@fullcalendar/core";
+import {
+  CalendarApi,
+  DateSelectArg,
+  EventClickArg,
+  EventDropArg,
+} from "@fullcalendar/core";
 import { EventResizeDoneArg } from "@fullcalendar/interaction";
 
 export interface EventHandlersProps {
@@ -27,7 +32,9 @@ export interface EventHandlersProps {
   setEventDisplayedTemp: (temp: boolean) => void;
   calendars: Record<string, Calendar>;
   setSelectedEvent: (event: CalendarEvent) => void;
-  setAfterChoiceFunc: (func: Function) => void;
+  setAfterChoiceFunc: (
+    func: ((type: "solo" | "all" | undefined) => void) | undefined
+  ) => void;
   setOpenEditModePopup: (open: string) => void;
   tempUsers: User[];
   setTempEvent: (event: CalendarEvent) => void;
@@ -87,7 +94,7 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     setOpenEventDisplay(false);
   };
 
-  const handleEventClick = (info: any) => {
+  const handleEventClick = (info: EventClickArg) => {
     info.jsEvent.preventDefault();
 
     if (info.event.url) {

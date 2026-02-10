@@ -25,7 +25,7 @@ export default function RepeatEvent({
 }: {
   repetition: RepetitionObject;
   eventStart: Date;
-  setRepetition: Function;
+  setRepetition: (repetition: RepetitionObject) => void;
   isOwn?: boolean;
 }) {
   const { t } = useI18n();

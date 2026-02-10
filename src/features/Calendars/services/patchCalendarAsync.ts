@@ -1,4 +1,4 @@
-import { formatReduxError } from "@/utils/errorUtils";
+import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { proppatchCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
@@ -25,11 +25,8 @@ export const patchCalendarAsync = createAsyncThunk<
         calLink,
         patch,
       };
-    } catch (err: any) {
-      return rejectWithValue({
-        message: formatReduxError(err),
-        status: err.response?.status,
-      });
+    } catch (err) {
+      return rejectWithValue(toRejectedError(err));
     }
   }
 );

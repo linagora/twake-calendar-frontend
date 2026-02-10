@@ -10,15 +10,12 @@ import { Calendar } from "@/features/Calendars/CalendarTypes";
 import {
   addSharedCalendarAsync,
   createCalendarAsync,
-  deleteEventAsync,
   getCalendarDetailAsync,
   getCalendarsListAsync,
   getEventAsync,
   getTempCalendarsListAsync,
-  moveEventAsync,
   patchACLCalendarAsync,
   patchCalendarAsync,
-  putEventAsync,
   removeCalendarAsync,
 } from "@/features/Calendars/services";
 import { CalendarEvent } from "@/features/Events/EventsTypes";

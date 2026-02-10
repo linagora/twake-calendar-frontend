@@ -1,12 +1,12 @@
-import { refreshSingularCalendar } from "@/components/Event/utils/eventUtils";
+import { AppDispatch } from "@/app/store";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
+import { AclEntry } from "@/features/Calendars/types/CalendarData";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { convertEventDateTimeToISO } from "@/utils/timezone";
 import { SlotLabelContentArg } from "@fullcalendar/core";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import moment from "moment-timezone";
 import { useI18n } from "twake-i18n";
 
@@ -56,7 +56,10 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
   return !!nowIndicator;
 };
 
-export function formatEventChipTitle(e: CalendarEvent, t: Function) {
+export function formatEventChipTitle(
+  e: CalendarEvent,
+  t: (key: string) => string
+) {
   if (!e.title) {
     return t("event.untitled");
   }
@@ -72,6 +75,7 @@ export const eventToFullCalendarFormat = (
   userAddress: string | undefined,
   pending: boolean
 ) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { t } = useI18n();
   return filteredEvents
     .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
@@ -83,7 +87,11 @@ export const eventToFullCalendarFormat = (
         : true; // if there are no organizer in the event we assume it was organized by the owner
       const isPersonnalEvent =
         extractEventBaseUuid(e.calId) === userId && isOrganiser;
-      const convertedEvent: any = {
+      const convertedEvent: CalendarEvent & {
+        colors: Record<string, string> | undefined;
+        editable: boolean;
+        priority: number;
+      } = {
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
@@ -147,7 +155,7 @@ export const updateCalsDetails = (
   pending: boolean,
   rangeKey: string,
   previousRangeKey: string,
-  dispatch: Function,
+  dispatch: AppDispatch,
   calendarRange: { start: Date; end: Date },
   calType?: "temp",
   controllers?: Map<string, AbortController>
@@ -223,15 +231,9 @@ export const updateCalsDetails = (
   }
 };
 
-interface AclEntry {
-  privilege: string;
-  principal: string;
-  protected: boolean;
-}
-
 export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   let hasRead = false;
-  let hasFreeBusy = false;
+  // const hasFreeBusy = false;
   if (acl) {
     for (const entry of acl) {
       if (entry.principal !== "{DAV:}authenticated") continue;

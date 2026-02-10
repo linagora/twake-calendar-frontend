@@ -15,6 +15,7 @@ import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import { browserDefaultTimeZone } from "@/utils/timezone";
+import type { EventApi, LocaleInput } from "@fullcalendar/core";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import frLocale from "@fullcalendar/core/locales/fr";
 import ruLocale from "@fullcalendar/core/locales/ru";
@@ -47,7 +48,7 @@ import {
   updateSlotLabelVisibility,
 } from "./utils/calendarUtils";
 
-const localeMap: Record<string, any> = {
+const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
   ru: ruLocale,
   vi: viLocale,
@@ -221,7 +222,7 @@ export default function CalendarApp({
     [rangeStart, rangeEnd]
   );
 
-  let filteredEvents: CalendarEvent[] = extractEvents(
+  const filteredEvents: CalendarEvent[] = extractEvents(
     selectedCalendars,
     calendars || {},
     userData?.email,
@@ -233,7 +234,7 @@ export default function CalendarApp({
     [tempcalendars]
   );
 
-  let filteredTempEvents: CalendarEvent[] = extractEvents(
+  const filteredTempEvents: CalendarEvent[] = extractEvents(
     tempCalendarIds,
     tempcalendars || {},
     userData?.email,
@@ -303,7 +304,7 @@ export default function CalendarApp({
                   },
                 })
               ).unwrap();
-            } catch (error) {
+            } catch {
               fetchedRangesRef.current[id] = "";
             }
           });
@@ -323,6 +324,7 @@ export default function CalendarApp({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, rangeKey, sortedSelectedCalendars, rangeStart, rangeEnd]);
 
   useEffect(() => {
@@ -352,6 +354,7 @@ export default function CalendarApp({
           prefetchedCalendarsRef.current[id] = "";
         });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     calendarIdsString,
     selectedCalendars,
@@ -458,7 +461,7 @@ export default function CalendarApp({
                 calType: "temp",
               })
             ).unwrap();
-          } catch (error) {
+          } catch {
             tempFetchedRangesRef.current[id] = "";
           }
         });
@@ -521,7 +524,7 @@ export default function CalendarApp({
               })
             );
           }
-        } catch (err) {
+        } catch {
           // Ignore sessionStorage errors
         }
       }
@@ -543,10 +546,10 @@ export default function CalendarApp({
     null
   );
   const [, setTypeOfAction] = useState<"solo" | "all" | undefined>(undefined);
-  const [afterChoiceFunc, setAfterChoiceFunc] = useState<Function>();
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent>(
-    {} as CalendarEvent
-  );
+  const [afterChoiceFunc, setAfterChoiceFunc] = useState<
+    ((type: "solo" | "all" | undefined) => void) | undefined
+  >();
+  const [, setSelectedEvent] = useState<CalendarEvent>({} as CalendarEvent);
   const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(
     null
   );
@@ -587,7 +590,7 @@ export default function CalendarApp({
   });
 
   if (process.env.NODE_ENV === "test") {
-    (window as any).__calendarRef = calendarRef;
+    window.__calendarRef = calendarRef;
   }
 
   const { t, lang } = useI18n();
@@ -635,7 +638,6 @@ export default function CalendarApp({
         <MiniCalendar
           calendarRef={calendarRef}
           selectedDate={selectedMiniDate}
-          setSelectedDate={setSelectedDate}
           setSelectedMiniDate={setSelectedMiniDate}
           dottedEvents={dottedEvents}
         />
@@ -697,7 +699,7 @@ export default function CalendarApp({
               userData?.email,
               isPending
             )}
-            eventOrder={(a: any, b: any) =>
+            eventOrder={(a: EventApi, b: EventApi) =>
               a.extendedProps.priority - b.extendedProps.priority
             }
             weekNumbers={
@@ -825,10 +827,11 @@ export default function CalendarApp({
         <EditModeDialog
           type={openEditModePopup}
           setOpen={setOpenEditModePopup}
-          event={selectedEvent}
           eventAction={(type: "solo" | "all" | undefined) => {
             setTypeOfAction(type);
-            afterChoiceFunc && afterChoiceFunc(type);
+            if (afterChoiceFunc) {
+              afterChoiceFunc(type);
+            }
           }}
         />
         {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (

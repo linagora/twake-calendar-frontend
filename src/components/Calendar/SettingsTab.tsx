@@ -27,13 +27,13 @@ export function SettingsTab({
   calendar,
 }: {
   name: string;
-  setName: Function;
+  setName: (name: string) => void;
   description: string;
   setDescription: (d: string) => void;
   color: Record<string, string>;
-  setColor: Function;
+  setColor: (color: Record<string, string>) => void;
   visibility: "public" | "private";
-  setVisibility: Function;
+  setVisibility: (visibility: "public" | "private") => void;
   calendar?: Calendar;
 }) {
   const { t } = useI18n();

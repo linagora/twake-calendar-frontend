@@ -8,7 +8,7 @@ const RETRY_CONFIG = {
   maxDelay: 120000,
 };
 export const api = ky.extend({
-  prefixUrl: (window as any).CALENDAR_BASE_URL,
+  prefixUrl: window.CALENDAR_BASE_URL,
   retry: {
     limit: RETRY_CONFIG.maxRetries,
     backoffLimit: RETRY_CONFIG.maxDelay,
@@ -90,7 +90,7 @@ export function isValidUrl(string?: string) {
 
   try {
     url = new URL(string ?? "");
-  } catch (_) {
+  } catch {
     return false;
   }
   return url;

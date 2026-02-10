@@ -11,12 +11,13 @@ export const deleteEventInstanceAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >("calendars/delEventInstance", async ({ cal, event }, { rejectWithValue }) => {
   try {
-    await deleteEventInstance(event, cal.ownerEmails?.[0]);
+    await deleteEventInstance(event);
     return { calId: cal.id, eventId: event.uid };
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as { response?: { status?: number } };
     return rejectWithValue({
       message: formatReduxError(err),
-      status: err.response?.status,
+      status: error.response?.status,
     });
   }
 });

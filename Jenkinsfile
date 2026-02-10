@@ -33,6 +33,11 @@ pipeline {
           sh 'npm run test'
         }
       }
+      stage('Check Lint') {
+        steps {
+          sh 'npm run lint'
+        }
+      }
       stage('Check Formatting') {
         steps {
           sh 'npx prettier --check .'

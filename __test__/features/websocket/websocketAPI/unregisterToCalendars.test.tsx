@@ -43,16 +43,16 @@ describe("unregisterToCalendars", () => {
   });
 
   it("should log unregistration", () => {
-    const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    const consoleInfoSpy = jest.spyOn(console, "info").mockImplementation();
     const calendarURIs = ["/calendars/cal1", "/calendars/cal2"];
 
     unregisterToCalendars(mockSocket, calendarURIs);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       "Unregistered to calendars",
       calendarURIs
     );
 
-    consoleLogSpy.mockRestore();
+    consoleInfoSpy.mockRestore();
   });
 });

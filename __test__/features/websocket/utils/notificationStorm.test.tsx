@@ -57,7 +57,7 @@ describe("websocket messages storm", () => {
     jest.resetModules();
     (getDisplayedCalendarRange as jest.Mock).mockReturnValue(mockRange);
     (store.getState as jest.Mock).mockReturnValue(mockState);
-    (window as any).WS_DEBOUNCE_PERIOD_MS = 500;
+    window.WS_DEBOUNCE_PERIOD_MS = 500;
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
     mockAccumulators.currentDebouncePeriod = 0;
@@ -118,7 +118,7 @@ describe("websocket messages storm", () => {
   });
 
   it("executes immediately when debounce is disabled", () => {
-    (window as any).WS_DEBOUNCE_PERIOD_MS = 0;
+    window.WS_DEBOUNCE_PERIOD_MS = 0;
 
     updateCalendars(
       { "/calendars/cal1/entry1": { syncToken: "abc" } },

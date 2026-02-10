@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import SettingsPage from "@/features/Settings/SettingsPage";
 import { getCalendarRange } from "@/utils/dateUtils";
+import type { CalendarApi } from "@fullcalendar/core";
 import { useEffect, useRef, useState } from "react";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { refreshCalendars } from "../Event/utils/eventUtils";
@@ -8,7 +9,7 @@ import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import CalendarApp from "./Calendar";
 
 export default function CalendarLayout() {
-  const calendarRef = useRef<any>(null);
+  const calendarRef = useRef<CalendarApi | null>(null);
   const dispatch = useAppDispatch();
   const error = useAppSelector((state) => state.calendars.error);
   const selectedCalendars = useAppSelector((state) => state.calendars.list);

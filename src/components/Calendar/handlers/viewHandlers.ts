@@ -2,7 +2,14 @@ import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
 import { EventChip } from "@/components/Event/EventChip/EventChip";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { userAttendee } from "@/features/User/models/attendee";
-import { CalendarApi, NowIndicatorContentArg } from "@fullcalendar/core";
+import {
+  CalendarApi,
+  DayHeaderMountArg,
+  EventContentArg,
+  EventMountArg,
+  NowIndicatorContentArg,
+  ViewMountArg,
+} from "@fullcalendar/core";
 import React from "react";
 import { createMouseHandlers } from "./mouseHandlers";
 
@@ -46,7 +53,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     }
   };
 
-  const handleDayHeaderDidMount = (arg: any) => {
+  const handleDayHeaderDidMount = (arg: DayHeaderMountArg) => {
     if (arg.view.type === "timeGridWeek") {
       const headerEl = arg.el;
 
@@ -61,22 +68,19 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
       };
 
       headerEl.addEventListener("click", handleDayHeaderClick);
-      (headerEl as any).__dayHeaderClickHandler = handleDayHeaderClick;
+      headerEl.__dayHeaderClickHandler = handleDayHeaderClick;
     }
   };
 
-  const handleDayHeaderWillUnmount = (arg: any) => {
+  const handleDayHeaderWillUnmount = (arg: DayHeaderMountArg) => {
     const headerEl = arg.el;
-    if ((headerEl as any).__dayHeaderClickHandler) {
-      headerEl.removeEventListener(
-        "click",
-        (headerEl as any).__dayHeaderClickHandler
-      );
-      delete (headerEl as any).__dayHeaderClickHandler;
+    if (headerEl.__dayHeaderClickHandler) {
+      headerEl.removeEventListener("click", headerEl.__dayHeaderClickHandler);
+      delete headerEl.__dayHeaderClickHandler;
     }
   };
 
-  const handleViewDidMount = (arg: any) => {
+  const handleViewDidMount = (arg: ViewMountArg) => {
     if (arg.view.type === "timeGridWeek" || arg.view.type === "timeGridDay") {
       const calendarEl = document.querySelector(".fc") as HTMLElement;
       if (calendarEl) {
@@ -86,15 +90,15 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     }
   };
 
-  const handleViewWillUnmount = (arg: any) => {
-    if ((arg.el as any).__timeInterval) {
-      clearInterval((arg.el as any).__timeInterval);
-      delete (arg.el as any).__timeInterval;
+  const handleViewWillUnmount = (arg: ViewMountArg) => {
+    if (arg.el.__timeInterval) {
+      clearInterval(arg.el.__timeInterval);
+      delete arg.el.__timeInterval;
     }
 
-    if ((arg.el as any).__timeObserver) {
-      (arg.el as any).__timeObserver.disconnect();
-      delete (arg.el as any).__timeObserver;
+    if (arg.el.__timeObserver) {
+      arg.el.__timeObserver.disconnect();
+      delete arg.el.__timeObserver;
     }
 
     const calendarEl = document.querySelector(".fc") as HTMLElement;
@@ -104,7 +108,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     }
   };
 
-  const handleEventContent = (arg: any) => {
+  const handleEventContent = (arg: EventContentArg) => {
     return React.createElement(EventChip, {
       arg,
       calendars,
@@ -113,7 +117,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     });
   };
 
-  const handleEventDidMount = (arg: any) => {
+  const handleEventDidMount = (arg: EventMountArg) => {
     const attendees = arg.event._def.extendedProps.attendee || [];
     if (!calendars[arg.event._def.extendedProps.calId]) return;
     const ownerEmails = new Set(

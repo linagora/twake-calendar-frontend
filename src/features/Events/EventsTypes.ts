@@ -31,10 +31,10 @@ export interface CalendarEvent {
 
 export interface RepetitionObject {
   freq: string;
-  interval?: number;
+  interval?: number | null;
   byday?: string[] | null;
-  occurrences?: number;
-  endDate?: string;
+  occurrences?: number | null;
+  endDate?: string | null;
 }
 
 export interface AlarmObject {

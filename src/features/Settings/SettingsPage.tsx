@@ -1,8 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useTimeZoneList } from "@/components/Calendar/TimezoneSelector";
-import { getTimezoneOffset } from "@/utils/timezone";
 import { TimezoneAutocomplete } from "@/components/Timezone/TimezoneAutocomplete";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
 import {
   Box,
   FormControl,
@@ -14,6 +13,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Snackbar,
   Switch,
   Tab,
@@ -105,7 +105,7 @@ export default function SettingsPage() {
     setActiveSettingsSubTab(newValue);
   };
 
-  const handleLanguageChange = (event: any) => {
+  const handleLanguageChange = (event: SelectChangeEvent<string>) => {
     const newLanguage = event.target.value;
     const previousLanguage = currentLanguage;
 

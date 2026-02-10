@@ -12,5 +12,5 @@ export function unregisterToCalendars(
     })
   );
 
-  console.log("Unregistered to calendars", calendarURIList);
+  console.info("Unregistered to calendars", calendarURIList);
 }

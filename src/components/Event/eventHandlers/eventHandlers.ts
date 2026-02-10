@@ -119,28 +119,18 @@ export async function handleRSVP(
 export function handleDelete(
   isRecurring: boolean,
   typeOfAction: "solo" | "all" | undefined,
-  onClose: (event: {}, reason: "backdropClick" | "escapeKeyDown") => void,
-  dispatch: Function,
+  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void,
+  dispatch: AppDispatch,
   calendar: Calendar,
   event: CalendarEvent,
   calId: string,
   eventId: string
 ) {
-  if (isRecurring) {
-    onClose({}, "backdropClick");
-    if (typeOfAction === "solo") {
-      dispatch(deleteEventInstanceAsync({ cal: calendar, event }));
-    } else {
-      dispatch(
-        deleteEventAsync({
-          calId,
-          eventId,
-          eventURL: event.URL,
-        })
-      );
-    }
+  onClose({}, "backdropClick");
+
+  if (isRecurring && typeOfAction === "solo") {
+    dispatch(deleteEventInstanceAsync({ cal: calendar, event }));
   } else {
-    onClose({}, "backdropClick");
     dispatch(
       deleteEventAsync({
         calId,

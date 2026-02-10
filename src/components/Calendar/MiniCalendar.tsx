@@ -13,19 +13,20 @@ import moment from "moment";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
+import { CalendarEvent } from "@/features/Events/EventsTypes";
+import type { CalendarApi } from "@fullcalendar/core";
 
 export function MiniCalendar({
   calendarRef,
   selectedDate,
-  setSelectedDate,
+
   setSelectedMiniDate,
   dottedEvents,
 }: {
-  calendarRef: any;
+  calendarRef: React.MutableRefObject<CalendarApi | null>;
   selectedDate: Date;
-  setSelectedDate: (d: Date) => void;
   setSelectedMiniDate: (d: Date) => void;
-  dottedEvents: any[];
+  dottedEvents: CalendarEvent[];
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
