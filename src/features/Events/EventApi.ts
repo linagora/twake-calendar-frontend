@@ -3,6 +3,7 @@ import { resolveTimezoneId, convertEventDateTimeToISO } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
+import { VCalComponent } from "../Calendars/types/CalendarData";
 import { SearchEventsResponse } from "../Search/types/SearchEventsResponse";
 import { CalendarEvent } from "./EventsTypes";
 import {
@@ -365,15 +366,15 @@ export const updateSeries = async (
     // When only properties changed, keep override instances and update their metadata
 
     // Helper function to get field values from props
-    const getFieldValues = (props: any[], fieldName: string) => {
+    const getFieldValues = (props: VCalComponent[], fieldName: string) => {
       return props.filter(([k]) => k.toLowerCase() === fieldName.toLowerCase());
     };
 
     // Helper function to serialize for comparison
-    const serialize = (values: any[]) => JSON.stringify(values);
+    const serialize = (values: VCalComponent[]) => JSON.stringify(values);
 
     // Detect which fields changed in the master
-    const changedFields = new Map<string, any[]>();
+    const changedFields = new Map<string, VCalComponent[]>();
     const oldMasterProps = oldMaster[1];
     const newMasterProps = updatedMaster[1];
 
