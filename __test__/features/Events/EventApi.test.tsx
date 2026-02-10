@@ -352,7 +352,7 @@ END:VCALENDAR
       );
 
       const sequence = override[1].find(([k]: any) => k === "sequence");
-      expect(sequence[3]).toBe("2");
+      expect(sequence[3]).toBe(2);
     });
 
     it("propagates description, location, class, and transp changes", async () => {
@@ -626,7 +626,7 @@ END:VCALENDAR
         const summary = override[1].find(([k]: any) => k === "summary");
         const sequence = override[1].find(([k]: any) => k === "sequence");
         expect(summary[3]).toBe("New title");
-        expect(sequence[3]).toBe("2");
+        expect(sequence[3]).toBe(2);
       });
     });
 
@@ -667,7 +667,7 @@ END:VCALENDAR
       );
 
       const sequence = override[1].find(([k]: any) => k === "sequence");
-      expect(sequence[3]).toBe("1");
+      expect(sequence[3]).toBe(1);
     });
 
     it("preserves override-specific fields when propagating metadata", async () => {

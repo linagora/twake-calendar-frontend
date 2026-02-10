@@ -115,7 +115,7 @@ const incrementSequenceNumber = (props: VObjectProperty[]) => {
       currentSequence + 1,
     ];
   } else {
-    newProps.push(["sequence", {}, "integer", "1"]);
+    newProps.push(["sequence", {}, "integer", 1]);
   }
 
   return newProps;
