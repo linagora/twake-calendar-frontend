@@ -9,6 +9,7 @@ import { renderWithProviders } from "../../utils/Renderwithproviders";
 
 jest.mock("@/features/Events/EventApi");
 jest.mock("@/features/Calendars/CalendarApi");
+jest.mock("@/features/Events/api/updateSeries");
 
 describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
   const mockOnClose = jest.fn();

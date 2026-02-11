@@ -1,4 +1,4 @@
-import { updateSeries } from "@/features/Events/EventApi";
+import { updateSeries } from "@/features/Events/api/updateSeries";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
