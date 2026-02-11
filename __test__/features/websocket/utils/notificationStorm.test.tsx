@@ -41,10 +41,12 @@ const mockAccumulators: {
   calendarsToRefresh: Map<string, any>;
   calendarsToHide: Set<string>;
   debouncedUpdateFn?: (dispatch: AppDispatch) => void;
+  shouldRefreshCalendarListRef: React.MutableRefObject<boolean>;
   currentDebouncePeriod?: number;
 } = {
   calendarsToRefresh: new Map<string, any>(),
   calendarsToHide: new Set(),
+  shouldRefreshCalendarListRef: { current: false },
   currentDebouncePeriod: 0,
   debouncedUpdateFn: undefined,
 };
@@ -61,6 +63,7 @@ describe("websocket messages storm", () => {
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
     mockAccumulators.currentDebouncePeriod = 0;
+
     mockAccumulators.debouncedUpdateFn = undefined;
   });
   it("debounces calendar updates during message storm", () => {

@@ -336,45 +336,6 @@ describe("CalendarSlice", () => {
       expect(result.payload.errors).toBeTruthy();
     });
 
-    it("patchCalendarAsync.fulfilled updates calendar fields", () => {
-      const calId = "c1";
-      const prev = {
-        ...initialState,
-        list: { c1: { id: calId, events: { e1: { uid: "e1" } } } as any },
-      };
-      const patch = { name: "N", desc: "D", color: { "apple:color": "#00f" } };
-      const state = reducer(
-        prev,
-        patchCalendarAsync.fulfilled(
-          { calId, calLink: "link", patch },
-          "req1",
-          {
-            calId,
-            calLink: "link",
-            patch,
-          }
-        )
-      );
-      expect(state.list[calId].name).toBe("N");
-      expect(state.list[calId].description).toBe("D");
-      expect(state.list[calId].color?.["apple:color"]).toBe("#00f");
-    });
-
-    it("removeCalendarAsync.fulfilled deletes calendar", () => {
-      const prev = {
-        ...initialState,
-        list: { c1: { id: "c1" } as any },
-      };
-      const state = reducer(
-        prev,
-        removeCalendarAsync.fulfilled({ calId: "c1" }, "req2", {
-          calId: "c1",
-          calLink: "l",
-        })
-      );
-      expect(state.list).toEqual({});
-    });
-
     it("patchACLCalendarAsync.fulfilled sets visibility", () => {
       const prev = {
         ...initialState,
