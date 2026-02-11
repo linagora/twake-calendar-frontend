@@ -105,13 +105,12 @@ async function setupEventPopover(
   });
   fireEvent.click(showMoreButton);
 
-  // Check Repeat checkbox to show repeat options
-  const repeatCheckbox = screen.getByLabelText("event.form.repeat");
-  fireEvent.click(repeatCheckbox);
-
+  // Repeat is now auto-enabled with weekly frequency for new events
   // Wait for RepeatEvent component to be rendered
   await waitFor(() => {
-    expect(screen.getByText("event.repeat.frequency.days")).toBeInTheDocument();
+    expect(
+      screen.getByText("event.repeat.frequency.weeks")
+    ).toBeInTheDocument();
   });
 }
 
@@ -186,8 +185,8 @@ describe("RepeatEvent Component", () => {
   it("toggles day selection for weekly frequency", () => {
     const { setRepetition } = setupRepeatEvent({ freq: "weekly" });
 
-    const mondayCheckbox = screen.getByLabelText("event.repeat.days.monday");
-    fireEvent.click(mondayCheckbox);
+    const mondayButton = screen.getByTitle("event.repeat.days.monday");
+    fireEvent.click(mondayButton);
 
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ byday: ["MO"] })
@@ -206,9 +205,8 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct CalendarEvent payload for daily repeat", async () => {
     await setupEventPopover();
 
-    // When Repeat checkbox is checked, repetition is set to empty object
-    // We need to set the frequency manually
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Default frequency is weekly, switch to daily
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const dailyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.days",
@@ -222,9 +220,23 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat daily with 2 day interval", async () => {
     await setupEventPopover();
 
-    // Set interval to 2
-    const intervalInput = screen.getByDisplayValue("1");
-    fireEvent.change(intervalInput, { target: { value: "2" } });
+    // Default frequency is weekly, switch to daily
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
+    fireEvent.mouseDown(frequencySelect);
+    const dailyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.days",
+    });
+    fireEvent.click(dailyOption);
+
+    // Set interval to 2 (filter out the disabled occurrences input)
+    const intervalInput = screen
+      .getAllByDisplayValue("1")
+      .find(
+        (el) =>
+          !el.hasAttribute("disabled") &&
+          el.getAttribute("data-testid") !== "occurrences-input"
+      );
+    fireEvent.change(intervalInput!, { target: { value: "2" } });
 
     await expectRRule({ freq: "daily", interval: 2 });
     expect(mockOnClose).toHaveBeenCalledWith(true);
@@ -232,6 +244,14 @@ describe("Repeat Event Integration Tests", () => {
 
   it("sends correct API payload for repeat daily for 5 repetitions", async () => {
     await setupEventPopover();
+
+    // Default frequency is weekly, switch to daily
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
+    fireEvent.mouseDown(frequencySelect);
+    const dailyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.days",
+    });
+    fireEvent.click(dailyOption);
 
     // Select "After" end option
     const afterRadio = screen.getByLabelText(/after/i);
@@ -248,25 +268,34 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat daily until specific date", async () => {
     await setupEventPopover();
 
-    // Select "On" end option
+    // Default frequency is weekly, switch to daily
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
+    fireEvent.mouseDown(frequencySelect);
+    const dailyOption = screen.getByRole("option", {
+      name: "event.repeat.frequency.days",
+    });
+    fireEvent.click(dailyOption);
+
+    // Select "On" (Until) end option — sets endDate to today
     const onRadio = screen
       .getAllByLabelText(/on/i)
       .find((el) => el.type === "radio");
     fireEvent.click(onRadio!);
 
-    // Set end date
-    const endDateInput = screen.getByTestId("end-date");
-    fireEvent.change(endDateInput, { target: { value: "2025-12-31" } });
-
-    await expectRRule({ freq: "daily", interval: 1, endDate: "2025-12-31" });
+    // ReadOnlyDateField does not respond to fireEvent.change,
+    // so verify endDate is set to today (default when "On" is selected).
+    // Use local date (same as dayjs().format("YYYY-MM-DD") in the component)
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    await expectRRule({ freq: "daily", interval: 1, endDate: today });
     expect(mockOnClose).toHaveBeenCalledWith(true);
   });
 
   it("sends correct API payload for repeat weekly on specific days", async () => {
     await setupEventPopover();
 
-    // Select Week(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Default frequency is already weekly, reselect to reset byday
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const weeklyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.weeks",
@@ -274,10 +303,8 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(weeklyOption);
 
     // Select Thursday
-    const thursdayCheckbox = screen.getByLabelText(
-      "event.repeat.days.thursday"
-    );
-    fireEvent.click(thursdayCheckbox);
+    const thursdayButton = screen.getByTitle("event.repeat.days.thursday");
+    fireEvent.click(thursdayButton);
 
     await expectRRule({
       freq: "weekly",
@@ -290,17 +317,23 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat weekly with 3 week interval", async () => {
     await setupEventPopover();
 
-    // Select Week(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Default frequency is already weekly, reselect to confirm
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const weeklyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.weeks",
     });
     fireEvent.click(weeklyOption);
 
-    // Set interval to 3
-    const intervalInput = screen.getByDisplayValue("1");
-    fireEvent.change(intervalInput, { target: { value: "3" } });
+    // Set interval to 3 (filter out the disabled occurrences input)
+    const intervalInput = screen
+      .getAllByDisplayValue("1")
+      .find(
+        (el) =>
+          !el.hasAttribute("disabled") &&
+          el.getAttribute("data-testid") !== "occurrences-input"
+      );
+    fireEvent.change(intervalInput!, { target: { value: "3" } });
 
     await expectRRule({ freq: "weekly", interval: 3 });
     expect(mockOnClose).toHaveBeenCalledWith(true);
@@ -309,8 +342,8 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat monthly", async () => {
     await setupEventPopover();
 
-    // Select Month(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Switch from default weekly to monthly
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const monthlyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.months",
@@ -324,8 +357,8 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat monthly and end after 5 occurrences", async () => {
     await setupEventPopover();
 
-    // Select Month(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Switch from default weekly to monthly
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const monthlyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.months",
@@ -347,8 +380,8 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat yearly", async () => {
     await setupEventPopover();
 
-    // Select Year(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Switch from default weekly to yearly
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const yearlyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.years",
@@ -362,8 +395,8 @@ describe("Repeat Event Integration Tests", () => {
   it("sends correct API payload for repeat yearly with end option changes", async () => {
     await setupEventPopover();
 
-    // Select Year(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.days");
+    // Switch from default weekly to yearly
+    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
     fireEvent.mouseDown(frequencySelect);
     const yearlyOption = screen.getByRole("option", {
       name: "event.repeat.frequency.years",

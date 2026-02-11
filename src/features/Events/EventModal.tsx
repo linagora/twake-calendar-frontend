@@ -160,6 +160,7 @@ function EventPopover({
   }, [calendarid, defaultCalendarId]);
 
   const resetAllStateToDefault = useCallback(() => {
+    isInitializedRef.current = false;
     setShowMore(false);
     setShowDescription(false);
     setShowRepeat(false);
@@ -401,7 +402,8 @@ function EventPopover({
     if ((!event || !event.uid) && startForRepeat) {
       const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
       const dateStr = startForRepeat.slice(0, 10);
-      const icsDay = days[(new Date(dateStr).getDay() + 6) % 7];
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const icsDay = days[(new Date(y, m - 1, d).getDay() + 6) % 7];
       setRepetition({
         freq: "weekly",
         interval: 1,

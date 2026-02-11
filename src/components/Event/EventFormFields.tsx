@@ -575,7 +575,9 @@ export default function EventFormFields({
               placeholder={t("event.form.timezonePlaceholder")}
               inputSx={{
                 border: 0,
-                "& .MuiOutlinedInput-notchedOutline": { border: "2px solid transparent !important" },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "2px solid transparent !important",
+                },
                 "& .MuiOutlinedInput-root.MuiInputBase-sizeSmall": {
                   paddingLeft: "0 !important",
                 },
@@ -791,6 +793,17 @@ export default function EventFormFields({
               onChange={(e: SelectChangeEvent) =>
                 handleCalendarChange(e.target.value)
               }
+              sx={{
+                "& .MuiSelect-select p": {
+                  fontSize: 14,
+                  color: "#000",
+                  lineHeight: 1.4,
+                },
+                "& .MuiSelect-select svg": {
+                  marginTop: "-2px",
+                  marginBottom: "-2px",
+                },
+              }}
             >
               {CalendarItemList(userPersonalCalendars)}
             </Select>

@@ -92,10 +92,10 @@ export default function RepeatEvent({
       ? currentDays.filter((d) => d !== day)
       : [...currentDays, day];
 
-    // Only set byday if there are selected days, otherwise set to null
+    // Keep at least one day selected for weekly repeat to avoid confusing empty state
     setRepetition({
       ...repetition,
-      byday: updatedDays.length > 0 ? updatedDays : null,
+      byday: updatedDays.length > 0 ? updatedDays : currentDays,
     });
   };
 
@@ -180,7 +180,11 @@ export default function RepeatEvent({
         {/* Weekly selection */}
         {repetition.freq === "weekly" && (
           <Box mb={1}>
-            <Box display="flex" flexWrap="wrap" sx={{ "& > *:not(:last-child)": { mr: 1 } }}>
+            <Box
+              display="flex"
+              flexWrap="wrap"
+              sx={{ "& > *:not(:last-child)": { mr: 1 } }}
+            >
               {days.map((dayCode) => {
                 const checked = repetition.byday?.includes(dayCode) ?? false;
                 const primaryMain = theme.palette.primary.main;
@@ -208,9 +212,7 @@ export default function RepeatEvent({
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: isOwn ? "pointer" : "default",
-                      "&:hover": isOwn
-                        ? { opacity: 0.9 }
-                        : undefined,
+                      "&:hover": isOwn ? { opacity: 0.9 } : undefined,
                       "&:disabled": { cursor: "default", opacity: 0.7 },
                     }}
                   >
@@ -283,7 +285,7 @@ export default function RepeatEvent({
                   </Typography>
                   <LocalizationProvider
                     dateAdapter={AdapterDayjs}
-                    adapterLocale={t("locale") ?? "en"}
+                    adapterLocale={(t("locale") ?? "en").split("-")[0]}
                     localeText={{
                       okButtonLabel: t("common.ok"),
                       cancelButtonLabel: t("common.cancel"),
