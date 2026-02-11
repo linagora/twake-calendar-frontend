@@ -103,6 +103,7 @@ export function updateCalendars(
 
   accumulators.calendarsToRefresh.clear();
   accumulators.calendarsToHide.clear();
+  accumulators.shouldRefreshCalendarListRef.current = false;
 
   try {
     processCalendarsToRefresh(dispatch, currentRange, calendarsToProcess);

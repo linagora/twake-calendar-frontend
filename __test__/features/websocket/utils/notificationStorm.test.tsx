@@ -62,6 +62,7 @@ describe("websocket messages storm", () => {
     window.WS_DEBOUNCE_PERIOD_MS = 500;
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
+    mockAccumulators.shouldRefreshCalendarListRef.current = false;
     mockAccumulators.currentDebouncePeriod = 0;
 
     mockAccumulators.debouncedUpdateFn = undefined;

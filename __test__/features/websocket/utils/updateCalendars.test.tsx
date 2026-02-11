@@ -51,6 +51,7 @@ describe("updateCalendars", () => {
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
     mockAccumulators.currentDebouncePeriod = 0;
+    mockAccumulators.shouldRefreshCalendarListRef.current = false;
     mockAccumulators.debouncedUpdateFn = jest.fn();
   });
 
