@@ -94,13 +94,16 @@ export function EventChip({
     const titleStyle = getTitleStyle(
       bestColor,
       ownerAttendee?.partstat,
-      calendar
+      calendar,
+      isPrivate
     );
+
     const cardStyle = getCardStyle(
       bestColor,
       eventLength,
       ownerAttendee?.partstat,
-      calendar
+      calendar,
+      isPrivate
     );
 
     // Organizer avatar
