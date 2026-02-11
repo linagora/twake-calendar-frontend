@@ -56,7 +56,8 @@ export function getOwnerAttendee(
 export function getTitleStyle(
   bestColor: string,
   partstat?: string,
-  calendar?: Calendar
+  calendar?: Calendar,
+  isPrivate?: boolean
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = {
     fontFamily: "Roboto",
@@ -82,6 +83,9 @@ export function getTitleStyle(
     case "NEEDS-ACTION":
       return baseStyle;
     default:
+      if (isPrivate) {
+        return { ...baseStyle, color: calendar?.color?.dark };
+      }
       return baseStyle;
   }
 }
@@ -126,7 +130,8 @@ export function getCardStyle(
   bestColor: string,
   eventLength: number,
   partstat?: string,
-  calendar?: Calendar
+  calendar?: Calendar,
+  isPrivate?: boolean
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = getCardVariantStyle(
     getEventVariant(eventLength),
@@ -156,6 +161,14 @@ export function getCardStyle(
         border: "1px solid white",
       };
     default:
+      if (isPrivate) {
+        return {
+          ...baseStyle,
+          backgroundColor: calendar?.color?.light,
+          color: calendar?.color?.dark,
+          border: "1px solid white",
+        };
+      }
       return baseStyle;
   }
 }
