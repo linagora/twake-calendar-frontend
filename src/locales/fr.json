@@ -95,7 +95,7 @@
     "organizer": "Organisateur",
     "untitled": "Sans titre",
     "repeat": {
-      "repeatEvery": "Répéter tous les",
+      "repeatEvery": "Tous les",
       "frequency": {
         "days": "jour(s)",
         "weeks": "semaine(s)",
@@ -115,10 +115,10 @@
         "sunday": "DI"
       },
       "end": {
-        "label": "Fin :",
-        "never": "Jamais",
+        "label": "Combien de fois répéter",
+        "never": "Toujours",
         "after": "Après",
-        "on": "Le",
+        "on": "Jusqu'à",
         "occurrences": "occurrences"
       }
     },

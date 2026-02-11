@@ -116,7 +116,7 @@ export default function RepeatEvent({
     <Box>
       <Stack>
         {/* Interval */}
-        <Box display="flex" alignItems="center" gap={2} mb={2}>
+        <Box display="flex" alignItems="center" gap={2} mb={1}>
           <Typography variant="h6">{t("event.repeat.repeatEvery")}</Typography>
           <TextField
             type="number"
@@ -130,6 +130,12 @@ export default function RepeatEvent({
             }
             size="small"
             style={{ width: 80 }}
+            sx={{
+              "& .MuiInputBase-input": {
+                textAlign: "center",
+                paddingRight: "5px",
+              },
+            }}
             inputProps={{ min: 1 }}
           />
           <FormControl size="small" style={{ minWidth: 120 }}>
@@ -174,9 +180,6 @@ export default function RepeatEvent({
         {/* Weekly selection */}
         {repetition.freq === "weekly" && (
           <Box mb={1}>
-            <Typography variant="body2" gutterBottom>
-              {t("event.repeat.repeatOn")}
-            </Typography>
             <Box display="flex" flexWrap="wrap" sx={{ "& > *:not(:last-child)": { mr: 1 } }}>
               {days.map((dayCode) => {
                 const checked = repetition.byday?.includes(dayCode) ?? false;
@@ -220,7 +223,7 @@ export default function RepeatEvent({
         )}
 
         {/* End options */}
-        <Box>
+        <Box mt={2}>
           <Typography variant="h6" gutterBottom>
             {t("event.repeat.end.label")}
           </Typography>
@@ -270,41 +273,9 @@ export default function RepeatEvent({
 
             <FormControlLabel
               disabled={!isOwn}
-              value="after"
-              control={<Radio />}
-              label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Typography variant="h6">
-                    {t("event.repeat.end.after")}
-                  </Typography>
-                  <TextField
-                    type="number"
-                    size="small"
-                    value={repetition.occurrences ?? 1}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      setRepetition({
-                        ...repetition,
-                        endDate: null,
-                        occurrences: value > 0 ? value : 1,
-                      });
-                    }}
-                    style={{ width: 100 }}
-                    inputProps={{ min: 1, "data-testid": "occurrences-input" }}
-                    disabled={!isOwn || endOption !== "after"}
-                  />
-                  <Typography variant="h6">
-                    {t("event.repeat.end.occurrences")}
-                  </Typography>
-                </Box>
-              }
-              sx={{ mb: 1 }}
-            />
-
-            <FormControlLabel
-              disabled={!isOwn}
               value="on"
               control={<Radio />}
+              sx={{ mb: "8px" }}
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography variant="h6">
@@ -340,6 +311,38 @@ export default function RepeatEvent({
                       />
                     </Box>
                   </LocalizationProvider>
+                </Box>
+              }
+            />
+
+            <FormControlLabel
+              disabled={!isOwn}
+              value="after"
+              control={<Radio />}
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography variant="h6">
+                    {t("event.repeat.end.after")}
+                  </Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={repetition.occurrences ?? 1}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setRepetition({
+                        ...repetition,
+                        endDate: null,
+                        occurrences: value > 0 ? value : 1,
+                      });
+                    }}
+                    style={{ width: 100 }}
+                    inputProps={{ min: 1, "data-testid": "occurrences-input" }}
+                    disabled={!isOwn || endOption !== "after"}
+                  />
+                  <Typography variant="h6">
+                    {t("event.repeat.end.occurrences")}
+                  </Typography>
                 </Box>
               }
             />

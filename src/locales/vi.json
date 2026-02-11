@@ -93,7 +93,7 @@
     "organizer": "Người tổ chức",
     "untitled": "Không có tiêu đề",
     "repeat": {
-      "repeatEvery": "Lặp lại mỗi",
+      "repeatEvery": "Mỗi",
       "frequency": {
         "days": "Ngày",
         "weeks": "Tuần",
@@ -113,10 +113,10 @@
         "sunday": "CN"
       },
       "end": {
-        "label": "Kết thúc:",
-        "never": "Không bao giờ",
+        "label": "Lặp bao nhiêu lần",
+        "never": "Luôn",
         "after": "Sau",
-        "on": "Vào ngày",
+        "on": "Đến khi",
         "occurrences": "lần"
       }
     },

@@ -22,6 +22,8 @@ interface TimezoneAutocompleteProps {
   inputPadding?: string;
   onClose?: () => void;
   disableClearable?: boolean;
+  /** Sx applied to the TextField (input wrapper) */
+  inputSx?: object;
 }
 
 export function TimezoneAutocomplete({
@@ -38,6 +40,7 @@ export function TimezoneAutocomplete({
   inputPadding,
   onClose,
   disableClearable = false,
+  inputSx,
 }: TimezoneAutocompleteProps) {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map((tz) => ({
@@ -70,6 +73,7 @@ export function TimezoneAutocomplete({
           placeholder={placeholder}
           variant="outlined"
           autoComplete="off"
+          sx={inputSx}
           slotProps={{
             input: {
               ...params.InputProps,

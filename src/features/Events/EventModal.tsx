@@ -228,6 +228,8 @@ function EventPopover({
       return;
     }
 
+    let startForRepeat: string | null = null;
+
     if (selectedRange && selectedRange.start && selectedRange.end) {
       // Auto-check allday if selectedRange is all-day
       if (selectedRange.allDay) {
@@ -285,6 +287,7 @@ function EventPopover({
 
         setStart(startValue);
         setEnd(endValue);
+        startForRepeat = startValue;
 
         // Check if multiple days event
         const startDateOnly = startValue.slice(0, 10);
@@ -343,7 +346,10 @@ function EventPopover({
           }
         }
 
-        if (formattedStart) setStart(formattedStart);
+        if (formattedStart) {
+          setStart(formattedStart);
+          startForRepeat = formattedStart;
+        }
         if (formattedEnd) setEnd(formattedEnd);
         if (formattedStart && formattedEnd) {
           const startDateOnly = formattedStart.slice(0, 10);
@@ -382,11 +388,26 @@ function EventPopover({
       const formattedStart = formatLocalDateTime(nextHour);
       const formattedEnd = formatLocalDateTime(endTime);
 
-      if (formattedStart) setStart(formattedStart);
+      if (formattedStart) {
+        setStart(formattedStart);
+        startForRepeat = formattedStart;
+      }
       if (formattedEnd) setEnd(formattedEnd);
 
       // Default to non-all-day when no selectedRange
       setAllDay(false);
+    }
+
+    if ((!event || !event.uid) && startForRepeat) {
+      const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+      const dateStr = startForRepeat.slice(0, 10);
+      const icsDay = days[(new Date(dateStr).getDay() + 6) % 7];
+      setRepetition({
+        freq: "weekly",
+        interval: 1,
+        byday: [icsDay],
+      } as RepetitionObject);
+      setShowRepeat(true);
     }
 
     shouldSyncFromRangeRef.current = false;

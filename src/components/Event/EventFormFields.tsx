@@ -573,6 +573,14 @@ export default function EventFormFields({
               width={220}
               size="small"
               placeholder={t("event.form.timezonePlaceholder")}
+              inputSx={{
+                border: 0,
+                "& .MuiOutlinedInput-notchedOutline": { border: "2px solid transparent !important" },
+                "& .MuiOutlinedInput-root.MuiInputBase-sizeSmall": {
+                  paddingLeft: "0 !important",
+                },
+                "& .MuiInputBase-input": { paddingLeft: 0 },
+              }}
             />
           </Box>
         </FieldWithLabel>

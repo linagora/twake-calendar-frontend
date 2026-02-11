@@ -93,7 +93,7 @@
     "organizer": "Organizer",
     "untitled": "Untitled",
     "repeat": {
-      "repeatEvery": "Repeat every",
+      "repeatEvery": "Every",
       "frequency": {
         "days": "Day(s)",
         "weeks": "Week(s)",
@@ -113,10 +113,10 @@
         "sunday": "SU"
       },
       "end": {
-        "label": "End:",
-        "never": "Never",
+        "label": "How many times to repeat",
+        "never": "Always",
         "after": "After",
-        "on": "On",
+        "on": "Until",
         "occurrences": "occurrences"
       }
     },
