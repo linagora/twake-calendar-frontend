@@ -22,17 +22,12 @@ export type VObjectValue =
 // VObject property tuple
 export type VObjectProperty = [
   string,
-  Record<string, unknown>,
-  string | Array<unknown>,
+  Record<string, VObjectValue | VObjectValue[]>,
+  string,
   VObjectValue,
 ];
 
-export type VCalComponent = [
-  string,
-  VObjectProperty[],
-  VCalComponent[],
-  ...unknown[],
-];
+export type VCalComponent = [string, VObjectProperty[], VCalComponent[]?];
 
 export interface Organizer {
   cn?: string;
@@ -44,12 +39,7 @@ export interface CalendarItem {
   _links: CalDavLink;
   etag: string;
   status: number;
-  data: [
-    "vcalendar",
-    Array<
-      VObjectProperty | [string, VObjectProperty[], unknown[]] // vevent array
-    >,
-  ];
+  data: VCalComponent;
 }
 
 // Main calendar data
