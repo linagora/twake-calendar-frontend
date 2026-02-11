@@ -26,6 +26,7 @@ export function WebSocketGate() {
   const pingCleanupRef = useRef<PingCleanup | null>(null);
 
   const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const didConnectTimeoutRef = useRef(false);
   const CONNECT_TIMEOUT_MS = 10_000;
 
   const hadSocketBeforeRef = useRef(false);
@@ -139,6 +140,9 @@ export function WebSocketGate() {
         connectTimeoutRef.current = null;
       }
 
+      // Reset timeout marker on successful connection
+      didConnectTimeoutRef.current = false;
+
       if (hadSocketBeforeRef.current) {
         justReconnectedRef.current = true;
         setWebSocketStatus(t("websocket.reconnected"));
@@ -177,9 +181,14 @@ export function WebSocketGate() {
     const connect = async () => {
       if (isConnectingRef.current || isSocketOpen) return;
       isConnectingRef.current = true;
+      didConnectTimeoutRef.current = false;
       connectTimeoutRef.current = setTimeout(() => {
         console.warn("WebSocket connection attempt timed out");
 
+        didConnectTimeoutRef.current = true;
+        abortController.abort();
+        connectTimeoutRef.current = null;
+        isConnectingRef.current = false;
         cleanup();
 
         scheduleReconnect();
@@ -200,7 +209,10 @@ export function WebSocketGate() {
           connectTimeoutRef.current = null;
         }
 
-        scheduleReconnect();
+        // Only schedule reconnect if the timeout handler hasn't already done so
+        if (!didConnectTimeoutRef.current) {
+          scheduleReconnect();
+        }
       } finally {
         isConnectingRef.current = false;
       }
