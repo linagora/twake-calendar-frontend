@@ -237,7 +237,7 @@ describe("refreshCalendarWithSyncToken", () => {
       const payload = result.payload as SyncTokenUpdates;
       expect(payload?.deletedEvents).toEqual([
         "/calendars/user1/cal1/deleted-event.ics",
-        "updated-event",
+        "/calendars/user1/cal1/updated-event.ics",
       ]);
       expect(payload?.createdOrUpdatedEvents).toHaveLength(1);
       expect(payload?.createdOrUpdatedEvents[0].uid).toBe("updated-event");
