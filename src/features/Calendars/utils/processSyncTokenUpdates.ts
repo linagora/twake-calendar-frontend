@@ -17,7 +17,7 @@ export function processSyncUpdates(
     const fileName = extractFileNameFromHref(href);
 
     if (update.status === 404) {
-      toDelete.push(fileName);
+      toDelete.push(href);
     } else if (update.status === 200) {
       toExpand.push(href);
       toDelete.push(fileName); // we delete the old version of the event to replace it by the new when it's updated
