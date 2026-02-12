@@ -162,11 +162,14 @@ export default function RepeatEvent({
             <Box display="flex" gap={1}>
               {days.map((dayCode) => {
                 const isSelected = repetition.byday?.includes(dayCode) ?? false;
-                const label = getDayLabel(dayCode).charAt(0);
+                const fullLabel = getDayLabel(dayCode);
+                const label = fullLabel.charAt(0);
 
                 return (
                   <Box
                     key={dayCode}
+                    role="button"
+                    aria-label={fullLabel}
                     onClick={() => {
                       if (!isOwn) return;
                       handleDayChange(dayCode);
