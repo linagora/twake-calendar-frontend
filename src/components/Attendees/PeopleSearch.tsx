@@ -95,7 +95,7 @@ export function PeopleSearch({
   const handleBlurCommit = useCallback(
     (event: React.SyntheticEvent) => {
       const trimmed = query.trim();
-      if (!trimmed) return;
+      if (!trimmed || isOpen) return;
       if (!isValidEmail(trimmed)) {
         setInputError(
           t("peopleSearch.invalidEmail").replace("%{email}", trimmed)
@@ -111,7 +111,7 @@ export function PeopleSearch({
       onChange(event, [...selectedUsers, newUser]);
       setQuery("");
     },
-    [query, selectedUsers, onChange, t]
+    [query, isOpen, selectedUsers, onChange, t]
   );
 
   useEffect(() => {
