@@ -1,5 +1,6 @@
 import SettingsPage from "@/features/Settings/SettingsPage";
 import { api } from "@/utils/apiUtils";
+import * as timezoneUtils from "@/utils/timezone";
 import "@testing-library/jest-dom";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
@@ -608,6 +609,8 @@ describe("SettingsPage", () => {
           view: "settings",
         },
       };
+
+      jest.spyOn(timezoneUtils, "getTimezoneOffset").mockReturnValue("UTC");
 
       renderWithProviders(<SettingsPage />, stateWithoutTimeZone);
 
