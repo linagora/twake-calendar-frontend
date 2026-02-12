@@ -338,7 +338,9 @@ const CalendarSlice = createSlice({
             .filter((event) => {
               return deletedSet.has(event.URL);
             })
-            .forEach((event) => delete target.events[event.uid]);
+            .forEach((event) => {
+              delete target.events[event.uid];
+            });
 
           for (const event of createdOrUpdatedEvents) {
             target.events[event.uid] = event;
