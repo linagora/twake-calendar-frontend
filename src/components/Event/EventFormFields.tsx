@@ -577,6 +577,8 @@ export default function EventFormFields({
               width={220}
               size="small"
               placeholder={t("event.form.timezonePlaceholder")}
+              hideBorder
+              inputPadding="8px 65px 8px 0px"
             />
           </Box>
         </FieldWithLabel>

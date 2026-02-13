@@ -22,6 +22,7 @@ interface TimezoneAutocompleteProps {
   inputPadding?: string;
   onClose?: () => void;
   disableClearable?: boolean;
+  hideBorder?: boolean;
 }
 
 export function TimezoneAutocomplete({
@@ -38,6 +39,7 @@ export function TimezoneAutocomplete({
   inputPadding,
   onClose,
   disableClearable = false,
+  hideBorder = false,
 }: TimezoneAutocompleteProps) {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map((tz) => ({
@@ -70,6 +72,21 @@ export function TimezoneAutocomplete({
           placeholder={placeholder}
           variant="outlined"
           autoComplete="off"
+          sx={
+            hideBorder
+              ? {
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                }
+              : undefined
+          }
           slotProps={{
             input: {
               ...params.InputProps,
