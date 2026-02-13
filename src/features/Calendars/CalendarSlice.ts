@@ -256,31 +256,8 @@ const CalendarSlice = createSlice({
         } as Calendar;
         state.error = null;
       })
-      .addCase(patchCalendarAsync.fulfilled, (state, action) => {
+      .addCase(patchCalendarAsync.fulfilled, (state) => {
         state.pending = false;
-        if (action.payload.patch.color) {
-          state.list[action.payload.calId] = {
-            ...state.list[action.payload.calId],
-            color: action.payload.patch.color,
-          };
-          Object.keys(state.list[action.payload.calId].events).forEach(
-            (evId) =>
-              (state.list[action.payload.calId].events[evId].color =
-                action.payload.patch.color)
-          );
-        }
-        if (action.payload.patch.desc) {
-          state.list[action.payload.calId] = {
-            ...state.list[action.payload.calId],
-            description: action.payload.patch.desc,
-          };
-        }
-        if (action.payload.patch.name) {
-          state.list[action.payload.calId] = {
-            ...state.list[action.payload.calId],
-            name: action.payload.patch.name,
-          };
-        }
         state.error = null;
       })
       .addCase(addSharedCalendarAsync.fulfilled, (state, action) => {
@@ -297,9 +274,8 @@ const CalendarSlice = createSlice({
         } as Calendar;
         state.error = null;
       })
-      .addCase(removeCalendarAsync.fulfilled, (state, action) => {
+      .addCase(removeCalendarAsync.fulfilled, (state) => {
         state.pending = false;
-        delete state.list[action.payload.calId];
         state.error = null;
       })
       .addCase(patchACLCalendarAsync.fulfilled, (state, action) => {

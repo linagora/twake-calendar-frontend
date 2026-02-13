@@ -6,4 +6,5 @@ export const WS_INBOUND_EVENTS = {
   CLIENT_REGISTERED: "registered",
   CLIENT_UNREGISTERED: "unregistered",
   CALENDAR_CLIENT_REGISTERED: "calendarListRegistered",
+  CALENDAR_LIST: "calendarList",
 } as const;
