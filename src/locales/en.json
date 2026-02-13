@@ -113,10 +113,10 @@
         "sunday": "SU"
       },
       "end": {
-        "label": "End:",
-        "never": "Never",
+        "label": "How many times to repeat",
+        "never": "Always",
         "after": "After",
-        "on": "On",
+        "on": "Until",
         "occurrences": "occurrences"
       }
     },

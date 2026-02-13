@@ -699,7 +699,7 @@ describe("Edit Recurring Event in Full Display", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
-    expect(screen.getByText("event.repeat.repeatEvery")).toBeInTheDocument();
+    expect(screen.getByText("event.repeat.every")).toBeInTheDocument();
     expect(screen.getByText("event.repeat.end.label")).toBeInTheDocument();
 
     const frequencySelect = screen.getByRole("radio", {

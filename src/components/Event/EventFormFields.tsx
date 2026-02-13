@@ -539,12 +539,16 @@ export default function EventFormFields({
                     const newShowRepeat = !showRepeat;
                     setShowRepeat(newShowRepeat);
                     if (newShowRepeat) {
+                      const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+                      const eventStartDate = new Date(start);
+                      const jsDay = eventStartDate.getDay();
+                      const icsDay = days[(jsDay + 6) % 7];
                       setRepetition({
-                        freq: "daily",
+                        freq: "weekly",
                         interval: 1,
                         occurrences: 0,
                         endDate: "",
-                        byday: null,
+                        byday: [icsDay],
                       } as RepetitionObject);
                     } else {
                       setRepetition({
