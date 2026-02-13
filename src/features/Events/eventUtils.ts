@@ -563,6 +563,9 @@ export function buildDelegatedEventURL(
   event: CalendarEvent
 ): string {
   const calendarBasePath = calendar.link.replace(/\.json$/, "");
-  const eventFilename = event.URL.split("/").pop(); // "d7dde620-020c-4967-901e-f4c98c85cf23.ics"
+  const eventFilename = event.URL.split("/").pop();
+  if (!eventFilename) {
+    throw new Error(`Cannot extract filename from event URL: ${event.URL}`);
+  }
   return `${calendarBasePath}/${eventFilename}`;
 }

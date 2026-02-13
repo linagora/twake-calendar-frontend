@@ -38,7 +38,13 @@ export const createCalendarAsync = createAsyncThunk<
         color,
         name,
         desc,
-        owner: { ...userData, emails: userData.email ? [userData.email] : [] },
+        owner: {
+          firstname: userData.given_name,
+          lastname: userData.family_name,
+          id: userData.openpaasId,
+          preferredEmail: userData.email,
+          emails: userData.email ? [userData.email] : [],
+        },
       };
     } catch (err) {
       return rejectWithValue(toRejectedError(err));
