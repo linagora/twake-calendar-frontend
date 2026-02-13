@@ -104,19 +104,19 @@
       "doesNotRepeat": "Không lặp lại",
       "every": "Mỗi",
       "days": {
-        "monday": "Th 2",
-        "tuesday": "Th 3",
-        "wednesday": "Th 4",
-        "thursday": "Th 5",
-        "friday": "Th 6",
-        "saturday": "Th 7",
+        "monday": "Hai",
+        "tuesday": "Ba",
+        "wednesday": "Tư",
+        "thursday": "Năm",
+        "friday": "Sáu",
+        "saturday": "Bảy",
         "sunday": "CN"
       },
       "end": {
-        "label": "Kết thúc:",
-        "never": "Không bao giờ",
+        "label": "Lặp lại bao nhiêu lần",
+        "never": "Luôn luôn",
         "after": "Sau",
-        "on": "Vào ngày",
+        "on": "Đến khi",
         "occurrences": "lần"
       }
     },
