@@ -8,4 +8,5 @@ export interface OpenPaasUserData {
   configurations?: {
     modules?: ModuleConfiguration[];
   };
+  emails: string[];
 }

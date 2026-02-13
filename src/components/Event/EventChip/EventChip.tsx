@@ -57,7 +57,7 @@ export function EventChip({
     // Event properties
     const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification);
     const ownerEmails = new Set(
-      calendar.ownerEmails?.map((e) => e.toLowerCase())
+      calendar.owner?.emails?.map((e) => e.toLowerCase())
     );
     // const delegated = calendar.delegated;
 

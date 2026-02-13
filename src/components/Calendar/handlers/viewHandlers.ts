@@ -121,8 +121,8 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     const attendees = arg.event._def.extendedProps.attendee || [];
     if (!calendars[arg.event._def.extendedProps.calId]) return;
     const ownerEmails = new Set(
-      calendars[arg.event._def.extendedProps.calId].ownerEmails?.map((email) =>
-        email.toLowerCase()
+      calendars[arg.event._def.extendedProps.calId].owner?.emails?.map(
+        (email) => email.toLowerCase()
       )
     );
     const showSpecialDisplay = attendees.filter((att: userAttendee) =>

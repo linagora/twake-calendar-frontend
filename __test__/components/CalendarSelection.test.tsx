@@ -24,20 +24,20 @@ describe("CalendarSelection", () => {
       name: "Calendar personal",
       id: "user1/cal1",
       color: "#FF0000",
-      ownerEmails: ["alice@example.com"],
+      owner: { emails: ["alice@example.com"] },
     },
     "user2/cal1": {
       name: "Calendar delegated",
       delegated: true,
       id: "user2/cal1",
       color: "#00FF00",
-      ownerEmails: ["bob@example.com"],
+      owner: { emails: ["bob@example.com"] },
     },
     "user3/cal1": {
       name: "Calendar shared",
       id: "user3/cal1",
       color: "#0000FF",
-      ownerEmails: ["charlie@example.com"],
+      owner: { emails: ["charlie@example.com"] },
     },
   };
   beforeAll(() => {
