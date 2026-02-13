@@ -80,7 +80,8 @@ export default function EventPreviewModal({
   if (!user) return null;
 
   const isRecurring = event?.uid?.includes("/");
-  const isOwn = calendar.ownerEmails?.includes(user.email);
+  const isOwn = calendar.owner?.emails?.includes(user.email);
+  const isDelegated = calendar.delegated;
   const isOrganizer = event.organizer
     ? user.email === event.organizer.cal_address
     : isOwn;
@@ -325,7 +326,7 @@ export default function EventPreviewModal({
                 <FileDownloadOutlinedIcon />
               </IconButton>
             )}
-            {isOrganizer && isOwn && (
+            {isOrganizer && (isOwn || isDelegated) && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -380,7 +381,7 @@ export default function EventPreviewModal({
                   setOpenDuplicateModal(true);
                 }}
               />
-              {isOwn && (
+              {(isOwn || isDelegated) && (
                 <MenuItem
                   onClick={async () => {
                     if (isRecurring) {

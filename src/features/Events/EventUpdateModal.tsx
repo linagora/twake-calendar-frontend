@@ -715,7 +715,7 @@ function EventUpdateModal({
         };
 
         // STEP 3: Persist new event to server
-        await putEvent(finalNewEvent, targetCalendar.ownerEmails?.[0]);
+        await putEvent(finalNewEvent, targetCalendar.owner?.emails?.[0]);
 
         // STEP 4: Update Redux store - Add new event first to prevent empty grid
         dispatch(updateEventLocal({ calId, event: finalNewEvent }));

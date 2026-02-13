@@ -43,7 +43,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
           name: "Test Calendar",
           color: "#FF0000",
           events: {},
-          ownerEmails: ["test@test.com"],
+          owner: { emails: ["test@test.com"] },
         },
       },
       pending: false,

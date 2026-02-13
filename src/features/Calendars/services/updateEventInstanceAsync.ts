@@ -13,7 +13,7 @@ export const updateEventInstanceAsync = createAsyncThunk<
   "calendars/updateEventInstance",
   async ({ cal, event }, { rejectWithValue }) => {
     try {
-      await putEventWithOverrides(event, cal.ownerEmails?.[0]);
+      await putEventWithOverrides(event, cal.owner?.emails?.[0]);
       return { calId: cal.id, event };
     } catch (err) {
       return rejectWithValue(toRejectedError(err));

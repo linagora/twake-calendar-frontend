@@ -6,7 +6,6 @@ import {
   stringAvatar,
   stringToColor,
 } from "@/components/Event/utils/eventUtils";
-import * as calendarSlice from "@/features/Calendars/CalendarSlice";
 import * as eventThunks from "@/features/Calendars/services";
 import EventPreviewModal from "@/features/Events/EventDisplayPreview";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
@@ -98,7 +97,7 @@ describe("Event Preview Display", () => {
               end: day.toISOString(),
             },
           },
-          ownerEmails: ["test@test.com"],
+          owner: { emails: ["test@test.com"] },
         },
         "otherCal/cal": {
           id: "otherCal/cal",
@@ -659,10 +658,6 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(emailButton);
 
-    const event =
-      preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
-        "event1"
-      ];
     const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Test%20Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
@@ -774,7 +769,7 @@ describe("Event Preview Display", () => {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
             color: "#FF0000",
-            ownerEmails: ownerEmails,
+            owner: { emails: ownerEmails },
             events: {
               event1: {
                 uid: "event1",
@@ -988,7 +983,7 @@ describe("Event Preview Display", () => {
                 attendee: attendees,
               },
             },
-            ownerEmails: ["test@test.com"],
+            owner: { emails: ["test@test.com"] },
           },
         },
         pending: false,

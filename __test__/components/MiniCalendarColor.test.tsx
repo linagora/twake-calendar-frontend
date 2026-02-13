@@ -29,7 +29,7 @@ describe("MiniCalendar", () => {
           "667037022b752d0026472254/cal1": {
             name: "Calendar 1",
             color: { light: "#FF0000", dark: "#000" },
-            ownerEmails: ["test@test.com"],
+            owner: { emails: ["test@test.com"] },
             events: {
               event1: {
                 calId: "667037022b752d0026472254/cal1",

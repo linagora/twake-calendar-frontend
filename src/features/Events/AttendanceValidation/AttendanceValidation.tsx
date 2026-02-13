@@ -31,7 +31,12 @@ export function AttendanceValidation({
     !(contextualizedEvent.event?.attendee?.length > 0) &&
     !contextualizedEvent.event?.organizer;
 
-  if (!((currentUserAttendee || hasNoAttendeesOrOrganizer) && isOwn)) {
+  if (
+    !(
+      ((currentUserAttendee || hasNoAttendeesOrOrganizer) && isOwn) ||
+      contextualizedEvent.calendar.delegated
+    )
+  ) {
     return null;
   }
 

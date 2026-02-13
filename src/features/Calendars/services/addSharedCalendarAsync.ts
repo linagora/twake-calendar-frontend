@@ -1,3 +1,4 @@
+import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getUserDetails } from "@/features/User/userAPI";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -12,8 +13,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
     link: string;
     name: string;
     desc: string;
-    owner: string;
-    ownerEmails: string[];
+    owner: OpenPaasUserData;
   },
   { userId: string; calId: string; cal: CalendarInput },
   { rejectValue: RejectedError }
@@ -37,10 +37,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
         link: `/calendars/${userId}/${calId}.json`,
         desc: cal.cal["caldav:description"] ?? "",
         name: cal.cal["dav:name"] ?? "",
-        owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-          ownerData.lastname ?? ""
-        }`,
-        ownerEmails: ownerData.emails,
+        owner: ownerData,
       };
     } catch (err) {
       return rejectWithValue(toRejectedError(err));

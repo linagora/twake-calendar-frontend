@@ -30,7 +30,7 @@ describe("Event Error Handling", () => {
           name: "Calendar personal",
           id: "user1/cal1",
           color: { light: "#FF0000", dark: "#000" },
-          ownerEmails: ["alice@example.com"],
+          owner: { emails: ["alice@example.com"] },
           events: {
             event1: {
               id: "event1",

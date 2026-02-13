@@ -13,7 +13,7 @@ export const updateSeriesAsync = createAsyncThunk<
   "calendars/updateSeries",
   async ({ cal, event, removeOverrides = true }, { rejectWithValue }) => {
     try {
-      await updateSeries(event, cal.ownerEmails?.[0] ?? "", removeOverrides);
+      await updateSeries(event, cal.owner?.emails?.[0] ?? "", removeOverrides);
     } catch (err) {
       return rejectWithValue(toRejectedError(err));
     }
