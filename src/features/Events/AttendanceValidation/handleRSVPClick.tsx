@@ -17,6 +17,9 @@ export async function handleRSVPClick(
   onLoadingChange?: (loading: boolean, value?: PartStat) => void
 ) {
   const { isRecurring, calendar, event } = contextualizedEvent;
+  const effectiveUser = calendar.delegated
+    ? ({ ...user, email: calendar.owner?.emails?.[0] } as userData)
+    : user;
 
   if (isRecurring) {
     setAfterChoiceFunc(() => async (type: string | null) => {
@@ -31,7 +34,7 @@ export async function handleRSVPClick(
       }
 
       try {
-        await handleRSVP(dispatch, calendar, user, event, rsvp, type);
+        await handleRSVP(dispatch, calendar, effectiveUser, event, rsvp, type);
       } catch (error) {
         console.error("Error handling RSVP:", error);
         // Clear loading on error
@@ -43,7 +46,7 @@ export async function handleRSVPClick(
     setOpenEditModePopup("attendance");
   } else {
     try {
-      await handleRSVP(dispatch, calendar, user, event, rsvp);
+      await handleRSVP(dispatch, calendar, effectiveUser, event, rsvp);
     } catch (error) {
       console.error("Error handling RSVP:", error);
       if (onLoadingChange) {

@@ -134,7 +134,7 @@ function getCalendarsFromUsersDelta(
 function buildEmailToCalendarMap(calRecord: Record<string, Calendar>) {
   const map = new Map<string, string[]>();
   for (const [id, cal] of Object.entries(calRecord)) {
-    cal.ownerEmails?.forEach((email) => {
+    cal.owner?.emails?.forEach((email) => {
       const existing = map.get(email);
       if (existing) {
         existing.push(id);

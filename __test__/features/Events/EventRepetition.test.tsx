@@ -95,7 +95,7 @@ const basePreloadedState = {
             ],
           },
         },
-        ownerEmails: ["test@test.com"],
+        owner: { emails: ["test@test.com"] },
       },
     },
     pending: false,
@@ -1151,7 +1151,7 @@ describe("Event URL handling for recurring events", () => {
                 ],
               },
             },
-            ownerEmails: ["test@test.com"],
+            owner: { emails: ["test@test.com"] },
           },
           "667037022b752d0026472254/cal2": {
             id: "667037022b752d0026472254/cal2",

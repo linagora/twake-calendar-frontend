@@ -4,6 +4,7 @@ import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import moment from "moment-timezone";
+import { Calendar } from "../Calendars/CalendarTypes";
 import {
   RepetitionRule,
   VObjectProperty,
@@ -555,4 +556,13 @@ export function detectRecurringEventChanges(
     timezoneChanged,
     repetitionRulesChanged,
   };
+}
+
+export function buildDelegatedEventURL(
+  calendar: Calendar,
+  event: CalendarEvent
+): string {
+  const calendarBasePath = calendar.link.replace(/\.json$/, "");
+  const eventFilename = event.URL.split("/").pop(); // "d7dde620-020c-4967-901e-f4c98c85cf23.ics"
+  return `${calendarBasePath}/${eventFilename}`;
 }

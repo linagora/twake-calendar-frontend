@@ -51,7 +51,7 @@ describe("CalendarSearch", () => {
           name: "My Calendar",
           id: "user1/cal1",
           color: "#0000FF",
-          ownerEmails: ["test@test.com"],
+          owner: { emails: ["test@test.com"] },
           events: {},
         },
       },
