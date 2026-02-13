@@ -92,6 +92,28 @@ export function PeopleSearch({
 
   const searchPlaceholder = placeholder ?? t("peopleSearch.placeholder");
 
+  const handleBlurCommit = useCallback(
+    (event: React.SyntheticEvent) => {
+      const trimmed = query.trim();
+      if (!trimmed) return;
+      if (!isValidEmail(trimmed)) {
+        setInputError(
+          t("peopleSearch.invalidEmail").replace("%{email}", trimmed)
+        );
+        return;
+      }
+      if (selectedUsers.find((u) => u.email === trimmed)) {
+        setQuery("");
+        return;
+      }
+      setInputError(null);
+      const newUser: User = { email: trimmed, displayName: trimmed };
+      onChange(event, [...selectedUsers, newUser]);
+      setQuery("");
+    },
+    [query, selectedUsers, onChange, t]
+  );
+
   useEffect(() => {
     let cancelled = false;
 
@@ -230,7 +252,7 @@ export function PeopleSearch({
         options={options}
         autoComplete={false}
         clearOnBlur={false}
-        blurOnSelect={true}
+        onBlur={freeSolo ? handleBlurCommit : undefined}
         open={
           customRenderInput
             ? isOpen && !!query && (loading || options.length > 0)
