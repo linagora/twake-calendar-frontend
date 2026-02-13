@@ -110,7 +110,7 @@ describe("refreshCalendarWithSyncToken", () => {
     expect(result.type).toBe("calendars/refreshWithSyncToken/fulfilled");
     expect(result.payload).toMatchObject({
       calId: mockCalendar.id,
-      deletedEvents: ["deleted-event"],
+      deletedEvents: ["/calendars/user1/cal1/deleted-event.ics"],
       createdOrUpdatedEvents: [],
       syncToken: "new-sync-token-456",
     });
@@ -236,8 +236,8 @@ describe("refreshCalendarWithSyncToken", () => {
     if (result.type === "calendars/refreshWithSyncToken/fulfilled") {
       const payload = result.payload as SyncTokenUpdates;
       expect(payload?.deletedEvents).toEqual([
-        "deleted-event",
-        "updated-event",
+        "/calendars/user1/cal1/deleted-event.ics",
+        "/calendars/user1/cal1/updated-event.ics",
       ]);
       expect(payload?.createdOrUpdatedEvents).toHaveLength(1);
       expect(payload?.createdOrUpdatedEvents[0].uid).toBe("updated-event");
