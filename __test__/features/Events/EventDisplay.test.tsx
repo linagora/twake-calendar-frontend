@@ -1550,6 +1550,104 @@ describe("Event Preview Display", () => {
     });
   });
 
+  describe("EventDisplayPreview - delegation", () => {
+    const delegatedBaseEvent = {
+      uid: "event-1",
+      calId: "user2/cal1",
+      title: "Delegated Event",
+      start: day.toISOString(),
+      end: day.toISOString(),
+      organizer: { cal_address: "owner@example.com" },
+      attendee: [
+        { cal_address: "owner@example.com", partstat: "NEEDS-ACTION" },
+      ],
+      URL: "/calendars/user2/cal1/event-1.ics",
+    };
+
+    const makeDelegatedState = (eventOverrides = {}) => ({
+      ...preloadedState,
+      calendars: {
+        list: {
+          "user2/cal1": {
+            id: "user2/cal1",
+            name: "Delegated Calendar",
+            delegated: true,
+            owner: {
+              id: "user2",
+              firstname: "Bob",
+              lastname: "Owner",
+              emails: ["owner@example.com"],
+              preferredEmail: "owner@example.com",
+            },
+            color: { light: "#FF0000", dark: "#000" },
+            events: {
+              "event-1": { ...delegatedBaseEvent, ...eventOverrides },
+            },
+          },
+        },
+        templist: {},
+        pending: false,
+      },
+      user: {
+        userData: {
+          ...preloadedState.user.userData,
+          email: "alice@example.com",
+          openpaasId: "user1",
+        },
+      },
+    });
+
+    describe("edit button visibility", () => {
+      it("shows edit button when calendar is delegated and owner is organizer", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState()
+        );
+        expect(
+          screen.getByTestId("EditIcon").closest("button")
+        ).toBeInTheDocument();
+      });
+
+      it("does not show edit button when delegated but owner is not organizer", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({
+            organizer: { cal_address: "someone-else@example.com" },
+          })
+        );
+        expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+      });
+    });
+
+    describe("delete menu item visibility", () => {
+      it("shows delete option for delegated calendar", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState()
+        );
+        fireEvent.click(screen.getByTestId("MoreVertIcon"));
+        expect(
+          screen.getByText("eventPreview.deleteEvent")
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("BUGFIX", () => {
     it("doesnt render anything next to date of all day preview", () => {
       const allDayState = {

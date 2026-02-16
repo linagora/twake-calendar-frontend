@@ -1,3 +1,5 @@
+import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { VObjectProperty } from "@/features/Calendars/types/CalendarData";
 import { CalendarEvent, RepetitionObject } from "@/features/Events/EventsTypes";
 import {
   calendarEventToJCal,
@@ -1344,5 +1346,71 @@ describe("detectRecurringEventChanges", () => {
     expect(result.timeChanged).toBe(true);
     expect(result.timezoneChanged).toBe(true);
     expect(result.repetitionRulesChanged).toBe(true);
+  });
+});
+
+describe("parseCalendarEvent - delegated calendar URL handling", () => {
+  const baseColor = { light: "#00FF00" };
+  const rawData: VObjectProperty[] = [
+    ["uid", {}, "text", "event-uid-123"],
+    ["dtstart", {}, "date-time", "20240115T100000Z"],
+    ["dtend", {}, "date-time", "20240115T110000Z"],
+    ["summary", {}, "text", "Test Event"],
+  ];
+
+  const eventURL = "/calendars/user2/cal1/event-uid-123.ics";
+
+  describe("non-delegated calendar", () => {
+    const calendar = {
+      id: "user1/cal1",
+      delegated: false,
+      link: "/calendars/user1/cal1.json",
+    } as Calendar;
+
+    it("uses the raw eventURL as-is", () => {
+      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL);
+      expect(result.URL).toBe(eventURL);
+    });
+  });
+
+  describe("delegated calendar", () => {
+    const calendar = {
+      id: "user2/cal1",
+      delegated: true,
+      link: "/calendars/user2/cal1.json",
+      owner: { emails: ["owner@example.com"] },
+    } as unknown as Calendar;
+
+    it("rewrites URL using calendar link base path", () => {
+      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL);
+      expect(result.URL).toBe("/calendars/user2/cal1/event-uid-123.ics");
+    });
+
+    it("preserves the event filename from the original URL", () => {
+      const differentSourceURL = "/calendars/someother/path/event-uid-123.ics";
+      const result = parseCalendarEvent(
+        rawData,
+        baseColor,
+        calendar,
+        differentSourceURL
+      );
+      // filename is extracted and rebased onto calendar link
+      expect(result.URL).toMatch(
+        /\/calendars\/user2\/cal1\/event-uid-123\.ics$/
+      );
+    });
+
+    it("still sets calId from calendar.id", () => {
+      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL);
+      expect(result.calId).toBe("user2/cal1");
+    });
+  });
+
+  describe("empty calendar object (used in deleteEventInstance)", () => {
+    it("does not throw and sets URL to empty string", () => {
+      const result = parseCalendarEvent(rawData, baseColor, {} as Calendar, "");
+      expect(result.URL).toBe("");
+      expect(result.calId).toBeUndefined();
+    });
   });
 });

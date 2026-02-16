@@ -73,7 +73,7 @@ export default function EventPreviewModal({
   const calendar = tempEvent
     ? calendars.templist[calId]
     : calendars.list[calId];
-  const event = calendar.events[eventId];
+  const event = calendar?.events[eventId];
   const user = useAppSelector((state) => state.user.userData);
   const theme = useTheme();
   const infoIconColor = alpha(theme.palette.grey[900], 0.9);
