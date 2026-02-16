@@ -2,6 +2,8 @@
   "locale": "fr-fr",
   "calendar": {
     "personal": "Mes calendriers",
+    "defaultPersonnalCalendarName": "Mon calendrier",
+    "defaultCalendarName": "Calendrier de %{name}",
     "delegated": "Calendriers délégués",
     "other": "Autres calendriers",
     "caldav_access": "Accès CalDAV",

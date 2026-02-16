@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { removeCalendarAsync } from "@/features/Calendars/services";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { renameDefault } from "@/utils/renameDefault";
 import { trimLongTextWithoutSpace } from "@/utils/textUtils";
 import {
   Accordion,
@@ -298,7 +299,7 @@ function CalendarSelector({
               wordBreak: "break-word",
             }}
           >
-            {trimmedName}
+            {renameDefault(trimmedName, calendars[id].owner, t, isPersonal)}
           </span>
         </label>
         <IconButton className="MoreBtn" onClick={handleClick}>

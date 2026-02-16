@@ -2,6 +2,8 @@
   "locale": "vi",
   "calendar": {
     "personal": "Lịch cá nhân",
+    "defaultPersonnalCalendarName": "Lịch của tôi",
+    "defaultCalendarName": "Lịch của %{name}",
     "delegated": "Lịch được ủy quyền",
     "other": "Lịch khác",
     "caldav_access": "Truy cập CalDAV",
