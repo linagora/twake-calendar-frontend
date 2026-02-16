@@ -697,7 +697,8 @@ export default function CalendarApp({
               filteredTempEvents,
               userId,
               userData?.email,
-              isPending
+              isPending,
+              calendars
             )}
             eventOrder={(a: EventApi, b: EventApi) =>
               a.extendedProps.priority - b.extendedProps.priority

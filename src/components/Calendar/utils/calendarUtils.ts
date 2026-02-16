@@ -6,7 +6,7 @@ import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { convertEventDateTimeToISO } from "@/utils/timezone";
-import { SlotLabelContentArg } from "@fullcalendar/core";
+import { EventInput, SlotLabelContentArg } from "@fullcalendar/core";
 import moment from "moment-timezone";
 import { useI18n } from "twake-i18n";
 
@@ -73,8 +73,9 @@ export const eventToFullCalendarFormat = (
   filteredTempEvents: CalendarEvent[],
   userId: string | undefined,
   userAddress: string | undefined,
-  pending: boolean
-) => {
+  pending: boolean,
+  calendars: Record<string, Calendar>
+): EventInput[] => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { t } = useI18n();
   return filteredEvents
@@ -82,8 +83,15 @@ export const eventToFullCalendarFormat = (
     .map((e) => {
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
+      const calendar = calendars[e.calId];
+      const isDelegated = calendar?.delegated ?? false;
+      const effectiveEmail = isDelegated
+        ? calendar?.owner?.emails?.[0]
+        : userAddress;
+
       const isOrganiser = e.organizer
-        ? e.organizer.cal_address?.toLowerCase() === userAddress?.toLowerCase()
+        ? e.organizer.cal_address?.toLowerCase() ===
+          effectiveEmail?.toLowerCase()
         : true; // if there are no organizer in the event we assume it was organized by the owner
       const isPersonnalEvent = extractEventBaseUuid(e.calId) === userId;
       const convertedEvent: CalendarEvent & {
@@ -94,7 +102,7 @@ export const eventToFullCalendarFormat = (
         ...e,
         title: formatEventChipTitle(e, t),
         colors: e.color,
-        editable: isPersonnalEvent && isOrganiser && !pending,
+        editable: (isPersonnalEvent || isDelegated) && isOrganiser && !pending,
         priority: isPersonnalEvent ? 1 : 0,
       };
 
@@ -117,7 +125,7 @@ export const eventToFullCalendarFormat = (
       }
 
       return convertedEvent;
-    });
+    }) as EventInput[];
 };
 
 export const extractEvents = (
