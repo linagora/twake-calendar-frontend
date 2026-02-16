@@ -4,6 +4,9 @@ export function renameDefault(
   t: (key: string, params?: object) => string,
   isOwnCalendar?: boolean
 ) {
+  if (!davName) {
+    return t("calendar.defaultCalendarName", { name: ownerName });
+  }
   if (davName !== "#default") {
     return davName;
   }
