@@ -1,8 +1,9 @@
+import { RootState } from "@/app/store";
 import RepeatEvent from "@/components/Event/EventRepeat";
 import * as eventThunks from "@/features/Calendars/services";
 import EventPopover from "@/features/Events/EventModal";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
-import { DateSelectArg } from "@fullcalendar/core";
+import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../utils/Renderwithproviders";
 
@@ -15,7 +16,9 @@ const baseRepetition: RepetitionObject = {
 
 const mockOnClose = jest.fn();
 const mockSetSelectedRange = jest.fn();
-const mockCalendarRef = { current: { select: jest.fn() } } as any;
+const mockCalendarRef = {
+  current: { select: jest.fn() } as unknown as CalendarApi,
+};
 
 const preloadedState = {
   user: {
@@ -56,7 +59,10 @@ const defaultSelectedRange = {
   resource: undefined,
 } as unknown as DateSelectArg;
 
-function setupRepeatEvent(props?: Partial<RepetitionObject>, state?: any) {
+function setupRepeatEvent(
+  props?: Partial<RepetitionObject>,
+  state?: RootState
+) {
   const setRepetition = jest.fn();
   renderWithProviders(
     <RepeatEvent
@@ -70,9 +76,7 @@ function setupRepeatEvent(props?: Partial<RepetitionObject>, state?: any) {
   return { setRepetition };
 }
 
-async function setupEventPopover(
-  overrides?: Partial<{ start: string; end: string }>
-) {
+async function setupEventPopover() {
   jest
     .spyOn(crypto, "randomUUID")
     .mockReturnValue("fixed-uuid-with-correct-format");
@@ -140,10 +144,10 @@ describe("RepeatEvent Component", () => {
   });
 
   it("renders with no repetition by default", () => {
-    const { setRepetition } = setupRepeatEvent();
+    setupRepeatEvent();
 
     // Check that interval input shows default value
-    const intervalInput = screen.getByDisplayValue("1");
+    const intervalInput = screen.getByTestId("repeat-interval");
     expect(intervalInput).toBeInTheDocument();
 
     // Check that frequency dropdown shows default value
@@ -170,14 +174,14 @@ describe("RepeatEvent Component", () => {
   it("renders interval input when frequency is selected", () => {
     setupRepeatEvent({ freq: "daily" });
 
-    const intervalInput = screen.getByDisplayValue("1");
+    const intervalInput = screen.getByTestId("repeat-interval");
     expect(intervalInput).toBeInTheDocument();
   });
 
   it("updates interval value", () => {
     const { setRepetition } = setupRepeatEvent();
 
-    const intervalInput = screen.getByDisplayValue("1");
+    const intervalInput = screen.getByTestId("repeat-interval");
     fireEvent.change(intervalInput, { target: { value: "3" } });
 
     expect(setRepetition).toHaveBeenCalledWith(
@@ -233,7 +237,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(dailyOption);
 
     // Set interval to 2
-    const intervalInput = screen.getByDisplayValue("1");
+    const intervalInput = screen.getByTestId("repeat-interval");
     fireEvent.change(intervalInput, { target: { value: "2" } });
 
     await expectRRule({ freq: "daily", interval: 2 });
@@ -326,7 +330,7 @@ describe("Repeat Event Integration Tests", () => {
     fireEvent.click(weeklyOption);
 
     // Set interval to 3
-    const intervalInput = screen.getByDisplayValue("1");
+    const intervalInput = screen.getByTestId("repeat-interval");
     fireEvent.change(intervalInput, { target: { value: "3" } });
 
     await expectRRule({ freq: "weekly", interval: 3 });

@@ -20,7 +20,6 @@ import "dayjs/locale/en";
 import "dayjs/locale/fr";
 import "dayjs/locale/ru";
 import "dayjs/locale/vi";
-import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ReadOnlyDateField } from "./components/ReadOnlyPickerField";
 import { LONG_DATE_FORMAT } from "./utils/dateTimeFormatters";
@@ -46,31 +45,24 @@ export default function RepeatEvent({
       padding: "0 15px",
     },
   };
-  // derive endOption based on repetition
+
+  // Fully derived — occurrences takes priority over endDate
   const getEndOption = () => {
-    if (repetition.occurrences && repetition.occurrences > 0) return "after";
+    if (repetition.occurrences) return "after";
     if (repetition.endDate) return "on";
     return "never";
   };
 
-  const [endOption, setEndOption] = useState(getEndOption());
+  const endOption = getEndOption();
 
-  // keep endOption in sync if repetition changes from parent
-  useEffect(() => {
-    const newEndOption = getEndOption();
-    if (endOption !== newEndOption) {
-      setEndOption(newEndOption);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repetition.occurrences, repetition.endDate]);
+  const defaultEndDate = dayjs(eventStart).add(1, "day").format("YYYY-MM-DD");
 
-  const handleDayChange = (day: string) => {
+  const handleDayChange = (dayCode: string) => {
     const currentDays = repetition.byday || [];
-    const updatedDays = currentDays.includes(day)
-      ? currentDays.filter((d) => d !== day)
-      : [...currentDays, day];
+    const updatedDays = currentDays.includes(dayCode)
+      ? currentDays.filter((d) => d !== dayCode)
+      : [...currentDays, dayCode];
 
-    // Only set byday if there are selected days, otherwise set to null
     setRepetition({
       ...repetition,
       byday: updatedDays.length > 0 ? updatedDays : null,
@@ -110,6 +102,7 @@ export default function RepeatEvent({
             style={{ width: 80 }}
             inputProps={{
               min: 1,
+              "data-testid": "repeat-interval",
               style: {
                 textAlign: "center",
                 paddingRight: 5,
@@ -122,16 +115,14 @@ export default function RepeatEvent({
               disabled={!isOwn}
               onChange={(e: SelectChangeEvent) => {
                 if (e.target.value === "weekly") {
-                  // Adjust day index for MO-SU (0-6) to match JS getDay() (0-6, SU is 0)
-                  const jsDay = day.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-                  const icsDay = days[(jsDay + 6) % 7]; // MO is 0, TU is 1, ..., SU is 6
+                  const jsDay = day.getDay();
+                  const icsDay = days[(jsDay + 6) % 7];
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
-                    byday: [icsDay], // Use byday instead of selectedDays
+                    byday: [icsDay],
                   });
                 } else {
-                  // For non-weekly frequencies, clear byday
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
@@ -218,8 +209,6 @@ export default function RepeatEvent({
               const value = e.target.value;
               if (value === endOption) return;
 
-              setEndOption(value);
-
               if (value === "never") {
                 setRepetition({
                   ...repetition,
@@ -241,8 +230,7 @@ export default function RepeatEvent({
                 setRepetition({
                   ...repetition,
                   occurrences: null,
-                  endDate:
-                    repetition.endDate ?? new Date().toISOString().slice(0, 10),
+                  endDate: repetition.endDate || defaultEndDate,
                 });
               }
             }}
@@ -282,8 +270,11 @@ export default function RepeatEvent({
                       <DatePicker
                         sx={{ width: "100%" }}
                         format={LONG_DATE_FORMAT}
+                        minDate={dayjs(eventStart)}
                         value={
-                          repetition.endDate ? dayjs(repetition.endDate) : null
+                          repetition.endDate
+                            ? dayjs(repetition.endDate)
+                            : dayjs(defaultEndDate)
                         }
                         onChange={(value) => {
                           if (!value || !value.isValid()) return;
@@ -293,26 +284,14 @@ export default function RepeatEvent({
                             occurrences: null,
                             endDate: newDateStr,
                           });
-                          if (endOption !== "on") {
-                            setEndOption("on");
-                          }
                         }}
                         onOpen={() => {
                           if (!isOwn || endOption === "on") return;
-                          setEndOption("on");
-                          if (!repetition.endDate) {
-                            setRepetition({
-                              ...repetition,
-                              occurrences: null,
-                              endDate: new Date().toISOString().slice(0, 10),
-                            });
-                          } else {
-                            setRepetition({
-                              ...repetition,
-                              occurrences: null,
-                              endDate: repetition.endDate,
-                            });
-                          }
+                          setRepetition({
+                            ...repetition,
+                            occurrences: null,
+                            endDate: repetition.endDate || defaultEndDate,
+                          });
                         }}
                         slots={{ field: ReadOnlyDateField }}
                         slotProps={{
@@ -339,7 +318,6 @@ export default function RepeatEvent({
                   gap={1}
                   onClick={() => {
                     if (!isOwn || endOption === "after") return;
-                    setEndOption("after");
                     setRepetition({
                       ...repetition,
                       endDate: null,
@@ -357,7 +335,7 @@ export default function RepeatEvent({
                     type="number"
                     inputProps={{ min: 1, "data-testid": "occurrences-input" }}
                     size="small"
-                    value={repetition.occurrences ?? 1}
+                    value={repetition.occurrences || 1}
                     onChange={(e) => {
                       const value = Number(e.target.value);
                       setRepetition({
@@ -365,9 +343,6 @@ export default function RepeatEvent({
                         endDate: null,
                         occurrences: value > 0 ? value : 1,
                       });
-                      if (endOption !== "after") {
-                        setEndOption("after");
-                      }
                     }}
                     style={{ width: 100 }}
                     disabled={!isOwn}
