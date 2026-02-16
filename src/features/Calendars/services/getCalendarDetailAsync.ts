@@ -9,6 +9,7 @@ import { getCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
 import { extractCalendarEvents } from "../utils/extractCalendarEvents";
 import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
+import { type RootState } from "@/app/store";
 
 export const getCalendarDetailAsync = createAsyncThunk<
   {
@@ -26,8 +27,11 @@ export const getCalendarDetailAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >(
   "calendars/getCalendarDetails",
-  async ({ calId, match, calType, signal }, { rejectWithValue }) => {
+  async ({ calId, match, calType, signal }, { rejectWithValue, getState }) => {
     try {
+      const state = getState() as RootState;
+      const calendarStored =
+        state.calendars[calType === "temp" ? "templist" : "list"][calId];
       const calendar = (await getCalendar(
         calId,
         match,
@@ -42,7 +46,7 @@ export const getCalendarDetailAsync = createAsyncThunk<
       const items = calendar._embedded?.["dav:item"];
       const events: CalendarEvent[] = Array.isArray(items)
         ? items.flatMap((item: CalendarItem) =>
-            extractCalendarEvents(item, { calId, color })
+            extractCalendarEvents(item, { cal: calendarStored, color })
           )
         : [];
 

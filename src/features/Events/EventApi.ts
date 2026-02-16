@@ -3,6 +3,7 @@ import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalDavItem } from "../Calendars/api/types";
+import { Calendar } from "../Calendars/CalendarTypes";
 import {
   VCalComponent,
   VObjectProperty,
@@ -106,7 +107,7 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
   const eventjson = parseCalendarEvent(
     targetVevent[1],
     event.color ?? {},
-    event.calId,
+    { id: event?.calId } as Calendar,
     event.URL
   );
 
@@ -219,7 +220,7 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
   }
 
   const exdateValue = event.recurrenceId || event.start;
-  const seriesEvent = parseCalendarEvent(vevents[masterIndex][1], {}, "", "");
+  const seriesEvent = parseCalendarEvent(vevents[masterIndex][1], {}, {}, "");
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)

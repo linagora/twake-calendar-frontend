@@ -1,7 +1,6 @@
 import { Calendar } from "../Calendars/CalendarTypes";
 import { userData } from "../User/userDataTypes";
 import { CalendarEvent, ContextualizedEvent } from "./EventsTypes";
-import { buildDelegatedEventURL } from "./eventUtils";
 
 export function createEventContext(
   event: CalendarEvent,
@@ -16,15 +15,11 @@ export function createEventContext(
   const attendeeEmail = calendar.delegated
     ? calendar.owner?.emails?.[0]
     : user.email;
-  const eventURL = calendar.delegated
-    ? buildDelegatedEventURL(calendar, event)
-    : event.URL;
   const currentUserAttendee = event.attendee?.find(
     (a) => a.cal_address === attendeeEmail
   );
-
   return {
-    event: { ...event, URL: eventURL },
+    event,
     calendar,
     currentUserAttendee,
     isOwn,

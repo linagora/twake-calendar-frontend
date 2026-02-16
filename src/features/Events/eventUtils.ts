@@ -35,7 +35,7 @@ function inferTimezoneFromValue(
 export function parseCalendarEvent(
   data: VObjectProperty[],
   color: Record<string, string>,
-  calendarid: string,
+  calendar: Calendar,
   eventURL: string,
   valarm?: VObjectProperty[]
 ): CalendarEvent {
@@ -181,14 +181,19 @@ export function parseCalendarEvent(
       }
     }
   }
-  event.calId = calendarid;
-  event.URL = eventURL;
+  event.calId = calendar.id;
+  event.URL = calendar.delegated
+    ? buildDelegatedEventURL(calendar, {
+        ...event,
+        URL: eventURL,
+      } as CalendarEvent)
+    : eventURL;
   if (!event.uid || !event.start) {
     console.error(
-      `missing crucial event param in calendar ${calendarid} `,
+      `missing crucial event param in calendar ${calendar.id} `,
       data
     );
-    event.error = `missing crucial event param in calendar ${calendarid} `;
+    event.error = `missing crucial event param in calendar ${calendar.id} `;
   }
 
   const eventTimezone = event.timezone;

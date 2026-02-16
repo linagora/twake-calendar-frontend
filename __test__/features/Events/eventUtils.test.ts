@@ -10,7 +10,7 @@ import {
 
 describe("parseCalendarEvent", () => {
   const baseColor = { light: "#00FF00" };
-  const calendarId = "calendar-123";
+  const calendar = { id: "calendar-123" };
 
   it("parses a full event with MAILTO in caps correctly", () => {
     const rawData = [
@@ -38,7 +38,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -100,7 +100,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -146,7 +146,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -163,7 +163,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -178,7 +178,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawDataMissingUid,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
     expect(result.error).toMatch(/missing crucial event param/);
@@ -188,7 +188,7 @@ describe("parseCalendarEvent", () => {
     const result2 = parseCalendarEvent(
       rawDataMissingStart,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
     expect(result2.error).toMatch(/missing crucial event param/);
@@ -206,7 +206,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawDataMissing,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
     expect(result.end).toBeDefined();
@@ -224,7 +224,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawDataMissing,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
     expect(result.end).toBeDefined();
@@ -250,7 +250,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics",
       valarm
     );
@@ -271,7 +271,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -302,7 +302,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -324,7 +324,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 
@@ -342,7 +342,7 @@ describe("parseCalendarEvent", () => {
     const result = parseCalendarEvent(
       rawData,
       baseColor,
-      calendarId,
+      calendar,
       "/calendars/test.ics"
     );
 

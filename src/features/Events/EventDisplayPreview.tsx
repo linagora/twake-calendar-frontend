@@ -48,6 +48,7 @@ import { dlEvent } from "./EventApi";
 import EventPopover from "./EventModal";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
+import { ToUserData } from "../User/type/OpenPaasUserData";
 
 export default function EventPreviewModal({
   eventId,
@@ -82,8 +83,9 @@ export default function EventPreviewModal({
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
   const isDelegated = calendar.delegated;
+  const effectiveEmail = isDelegated ? calendar.owner?.emails?.[0] : user.email;
   const isOrganizer = event.organizer
-    ? user.email === event.organizer.cal_address
+    ? effectiveEmail === event.organizer.cal_address
     : isOwn;
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -435,7 +437,7 @@ export default function EventPreviewModal({
         actions={
           <AttendanceValidation
             contextualizedEvent={contextualizedEvent}
-            user={user}
+            user={isDelegated ? ToUserData(calendar.owner) : user}
             setAfterChoiceFunc={setAfterChoiceFunc}
             setOpenEditModePopup={setOpenEditModePopup}
           />
