@@ -2,7 +2,7 @@
   "locale": "en-gb",
   "calendar": {
     "personal": "My calendars",
-    "defaultPersonnalCalendarName": "My calendar",
+    "defaultPersonalCalendarName": "My calendar",
     "defaultCalendarName": "%{name}'s calendar",
     "delegated": "Delegated calendars",
     "other": "Other calendars",

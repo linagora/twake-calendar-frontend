@@ -2,7 +2,7 @@
   "locale": "ru-ru",
   "calendar": {
     "personal": "Личные",
-    "defaultPersonnalCalendarName": "Мой календарь",
+    "defaultPersonalCalendarName": "Мой календарь",
     "defaultCalendarName": "Календарь %{name}",
     "delegated": "Делегированные",
     "other": "Другие",

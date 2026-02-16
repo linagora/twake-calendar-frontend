@@ -64,7 +64,7 @@ function CalendarItem({
         <Box>
           <Typography variant="body1">
             {renameDefault(
-              String(cal.cal["dav:name"]),
+              cal.cal["dav:name"],
               cal.owner.displayName,
               t,
               false
