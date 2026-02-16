@@ -32,6 +32,11 @@ export const getCalendarDetailAsync = createAsyncThunk<
       const state = getState() as RootState;
       const calendarStored =
         state.calendars[calType === "temp" ? "templist" : "list"][calId];
+      if (!calendarStored) {
+        return rejectWithValue(
+          toRejectedError(new Error(`Calendar ${calId} not found in store`))
+        );
+      }
       const calendar = (await getCalendar(
         calId,
         match,

@@ -11,7 +11,10 @@ export interface OpenPaasUserData {
   emails: string[];
 }
 
-export function ToUserData(openpaas: OpenPaasUserData): userData {
+export function ToUserData(
+  openpaas: OpenPaasUserData | undefined
+): userData | undefined {
+  if (!openpaas) return undefined;
   const email = openpaas.preferredEmail ?? openpaas.emails?.[0] ?? "";
 
   const given_name = openpaas.firstname ?? "";

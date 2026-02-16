@@ -437,7 +437,9 @@ export default function EventPreviewModal({
         actions={
           <AttendanceValidation
             contextualizedEvent={contextualizedEvent}
-            user={isDelegated ? ToUserData(calendar.owner) : user}
+            user={
+              isDelegated && calendar.owner ? ToUserData(calendar.owner) : user
+            }
             setAfterChoiceFunc={setAfterChoiceFunc}
             setOpenEditModePopup={setOpenEditModePopup}
           />

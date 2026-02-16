@@ -220,7 +220,12 @@ export const deleteEventInstance = async (event: CalendarEvent) => {
   }
 
   const exdateValue = event.recurrenceId || event.start;
-  const seriesEvent = parseCalendarEvent(vevents[masterIndex][1], {}, {}, "");
+  const seriesEvent = parseCalendarEvent(
+    vevents[masterIndex][1],
+    {},
+    { id: event.calId } as Calendar,
+    ""
+  );
   const masterProps = vevents[masterIndex][1];
 
   // Check if this date is already in EXDATE (avoid duplicates)
