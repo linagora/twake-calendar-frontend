@@ -12,7 +12,7 @@ import {
 
 describe("parseCalendarEvent", () => {
   const baseColor = { light: "#00FF00" };
-  const calendar = { id: "calendar-123" };
+  const calendar = { id: "calendar-123" } as Calendar;
 
   it("parses a full event with MAILTO in caps correctly", () => {
     const rawData = [
@@ -35,7 +35,7 @@ describe("parseCalendarEvent", () => {
       ["TRANSP", {}, "text", "OPAQUE"],
       ["CLASS", {}, "text", "PUBLIC"],
       ["DTSTAMP", {}, "date-time", "2025-07-18T08:00:00Z"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -97,7 +97,7 @@ describe("parseCalendarEvent", () => {
       ["TRANSP", {}, "text", "OPAQUE"],
       ["CLASS", {}, "text", "PUBLIC"],
       ["DTSTAMP", {}, "date-time", "2025-07-18T08:00:00Z"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -139,11 +139,11 @@ describe("parseCalendarEvent", () => {
   });
 
   it("marks allday true for DATE format", () => {
-    const rawData = [
+    const rawData: VObjectProperty[] = [
       ["UID", {}, "text", "event-2"],
       ["DTSTART", {}, "date", "2025-07-20"],
       ["DTEND", {}, "date", "2025-07-21"],
-    ] as any;
+    ];
 
     const result = parseCalendarEvent(
       rawData,
@@ -156,7 +156,7 @@ describe("parseCalendarEvent", () => {
   });
 
   it("appends recurrence-id to UID if present", () => {
-    const rawData: any = [
+    const rawData: VObjectProperty[] = [
       ["UID", {}, "text", "event-2"],
       ["RECURRENCE-ID", {}, "date-time", "2025-07-18T09:00:00Z"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
@@ -173,7 +173,7 @@ describe("parseCalendarEvent", () => {
   });
 
   it("returns error if UID or start is missing", () => {
-    const rawDataMissingUid: any = [
+    const rawDataMissingUid: VObjectProperty[] = [
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
     ];
 
@@ -185,7 +185,9 @@ describe("parseCalendarEvent", () => {
     );
     expect(result.error).toMatch(/missing crucial event param/);
 
-    const rawDataMissingStart: any = [["UID", {}, "text", "event-3"]];
+    const rawDataMissingStart: VObjectProperty[] = [
+      ["UID", {}, "text", "event-3"],
+    ];
 
     const result2 = parseCalendarEvent(
       rawDataMissingStart,
@@ -199,7 +201,7 @@ describe("parseCalendarEvent", () => {
   it("returns computed end when there is no end but a duration", () => {
     jest.useFakeTimers().setSystemTime(new Date("2025-07-18T00:00:00Z"));
 
-    const rawDataMissing: any = [
+    const rawDataMissing: VObjectProperty[] = [
       ["UID", {}, "text", "event-1"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00"],
       ["duration", {}, "duration", "PT60M"],
@@ -218,7 +220,7 @@ describe("parseCalendarEvent", () => {
   });
 
   it("returns 30 minutes event if end and duration are missing", () => {
-    const rawDataMissing: any = [
+    const rawDataMissing: VObjectProperty[] = [
       ["UID", {}, "text", "event-1"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
     ];
@@ -236,18 +238,18 @@ describe("parseCalendarEvent", () => {
   });
 
   it("parses alarm block correctly", () => {
-    const rawData = [
+    const rawData: VObjectProperty[] = [
       ["UID", {}, "text", "event-5"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
-    ] as any;
+    ];
 
-    const valarm: any = [
+    const valarm = [
       "VALARM",
       [
         ["ACTION", {}, "text", "DISPLAY"],
         ["TRIGGER", {}, "duration", "-PT15M"],
       ],
-    ];
+    ] as unknown as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -268,7 +270,7 @@ describe("parseCalendarEvent", () => {
       ["DTEND", {}, "date-time", "2025-07-18T10:00:00Z"],
       ["ATTENDEE", {}, "cal-address", "john@example.com"],
       ["ORGANIZER", {}, "cal-address", "jane@example.com"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -299,7 +301,7 @@ describe("parseCalendarEvent", () => {
       ["UID", {}, "text", "event-tz"],
       ["DTSTART", { tzid: "Asia/Bangkok" }, "date-time", "2025-07-18T09:00:00"],
       ["DTEND", { tzid: "Asia/Bangkok" }, "date-time", "2025-07-18T10:00:00"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -321,7 +323,7 @@ describe("parseCalendarEvent", () => {
       ["UID", {}, "text", "event-utc"],
       ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
       ["DTEND", {}, "date-time", "2025-07-18T10:00:00Z"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -339,7 +341,7 @@ describe("parseCalendarEvent", () => {
       ["UID", {}, "text", "event-allday"],
       ["DTSTART", {}, "date", "2025-07-18"],
       ["DTEND", {}, "date", "2025-07-19"],
-    ] as unknown as [string, Record<string, string>, string, any];
+    ] as VObjectProperty[];
 
     const result = parseCalendarEvent(
       rawData,
@@ -393,8 +395,8 @@ describe("calendarEventToJCal", () => {
     expect(vevent[0]).toBe("vevent");
 
     const props = vevent[1];
-    const dtstart = props.find((p: any[]) => p[0] === "dtstart");
-    const dtend = props.find((p: any[]) => p[0] === "dtend");
+    const dtstart = props.find((p: VObjectProperty) => p[0] === "dtstart");
+    const dtend = props.find((p: VObjectProperty) => p[0] === "dtend");
 
     expect(dtstart).toBeDefined();
     expect(dtstart[1]).toEqual({ tzid: "Europe/Paris" });
@@ -476,7 +478,7 @@ describe("calendarEventToJCal", () => {
   });
 
   it("converts with alarm included", () => {
-    const mockEvent: any = {
+    const mockEvent = {
       uid: "event-10",
       title: "Alarm Event",
       start: "2025-07-20T07:00:00.000Z",
@@ -485,7 +487,7 @@ describe("calendarEventToJCal", () => {
       allday: false,
       alarm: { trigger: "-PT10M", action: "DISPLAY" },
       attendee: [],
-    };
+    } as unknown as CalendarEvent;
 
     const result = calendarEventToJCal(mockEvent, "owner@example.com");
     const vevent = result[2][0];
@@ -500,7 +502,7 @@ describe("calendarEventToJCal", () => {
   });
 
   it("converts all-day events", () => {
-    const mockEvent: any = {
+    const mockEvent = {
       uid: "event-11",
       title: "All Day",
       start: "2025-07-21T00:00:00.000Z",
@@ -508,7 +510,7 @@ describe("calendarEventToJCal", () => {
       timezone: "Europe/Paris",
       allday: true,
       attendee: [],
-    };
+    } as unknown as CalendarEvent;
 
     const result = calendarEventToJCal(mockEvent);
     const veventProps = result[2][0][1];
@@ -845,7 +847,9 @@ describe("calendarEventToJCal", () => {
     const [vevent] = result[2];
     const props = vevent[1];
 
-    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    const sequenceProp = props.find(
+      (p: VObjectProperty) => p[0] === "sequence"
+    );
     expect(sequenceProp).toBeDefined();
     expect(sequenceProp).toEqual(["sequence", {}, "integer", 3]);
   });
@@ -866,7 +870,9 @@ describe("calendarEventToJCal", () => {
     const [vevent] = result[2];
     const props = vevent[1];
 
-    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    const sequenceProp = props.find(
+      (p: VObjectProperty) => p[0] === "sequence"
+    );
     expect(sequenceProp).toBeDefined();
     expect(sequenceProp).toEqual(["sequence", {}, "integer", 1]);
   });
@@ -889,7 +895,9 @@ describe("calendarEventToJCal", () => {
     const [vevent] = result[2];
     const props = vevent[1];
 
-    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    const sequenceProp = props.find(
+      (p: VObjectProperty) => p[0] === "sequence"
+    );
     expect(sequenceProp).toBeDefined();
     expect(sequenceProp).toEqual(["sequence", {}, "integer", 2]);
   });
@@ -912,18 +920,22 @@ describe("calendarEventToJCal", () => {
     const [vevent] = result[2];
     const props = vevent[1];
 
-    const sequenceProp = props.find((p: any[]) => p[0] === "sequence");
+    const sequenceProp = props.find(
+      (p: VObjectProperty) => p[0] === "sequence"
+    );
     expect(sequenceProp).toBeDefined();
     expect(sequenceProp).toEqual(["sequence", {}, "integer", 5]);
 
     // Also verify recurrence-id is present
-    const recurrenceIdProp = props.find((p: any[]) => p[0] === "recurrence-id");
+    const recurrenceIdProp = props.find(
+      (p: VObjectProperty) => p[0] === "recurrence-id"
+    );
     expect(recurrenceIdProp).toBeDefined();
   });
 });
 
 describe("combineMasterDateWithFormTime", () => {
-  const mockFormatDateTime = (iso: string, tz: string) => {
+  const mockFormatDateTime = (iso: string) => {
     const date = new Date(iso);
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -1129,12 +1141,6 @@ describe("normalizeTimezone", () => {
 
 describe("detectRecurringEventChanges", () => {
   const mockResolveTimezone = (tz: string) => tz;
-  const mockFormatDateTime = (iso: string, tz: string) => {
-    const date = new Date(iso);
-    const hour = String(date.getUTCHours()).padStart(2, "0");
-    const minute = String(date.getUTCMinutes()).padStart(2, "0");
-    return `2025-10-14T${hour}:${minute}`;
-  };
 
   it("should detect when only time changes", () => {
     const oldEvent = {

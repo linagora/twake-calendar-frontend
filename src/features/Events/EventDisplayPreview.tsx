@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
-import { getTimezoneOffset } from "@/utils/timezone";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
@@ -9,7 +8,7 @@ import EventDuplication from "@/components/Event/EventDuplicate";
 import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "@/components/Event/InfoRow";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import {
   AvatarGroup,
@@ -23,7 +22,6 @@ import {
   Typography,
   useTheme,
 } from "@linagora/twake-mui";
-import { alpha } from "@mui/material/styles";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,17 +36,18 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import { alpha } from "@mui/material/styles";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { deleteEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
+import { ToUserData } from "../User/type/OpenPaasUserData";
 import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
 import { createEventContext } from "./createEventContext";
 import { dlEvent } from "./EventApi";
 import EventPopover from "./EventModal";
 import { CalendarEvent } from "./EventsTypes";
 import EventUpdateModal from "./EventUpdateModal";
-import { ToUserData } from "../User/type/OpenPaasUserData";
 
 export default function EventPreviewModal({
   eventId,
@@ -83,6 +82,7 @@ export default function EventPreviewModal({
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
   const isDelegated = calendar.delegated;
+  const isWriteDelegated = isDelegated && calendar.access === "write";
   const effectiveEmail = isDelegated ? calendar.owner?.emails?.[0] : user.email;
   const isOrganizer = event.organizer
     ? effectiveEmail === event.organizer.cal_address
@@ -328,7 +328,7 @@ export default function EventPreviewModal({
                 <FileDownloadOutlinedIcon />
               </IconButton>
             )}
-            {isOrganizer && (isOwn || isDelegated) && (
+            {isOrganizer && (isOwn || isWriteDelegated) && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -383,7 +383,7 @@ export default function EventPreviewModal({
                   setOpenDuplicateModal(true);
                 }}
               />
-              {(isOwn || isDelegated) && (
+              {(isOwn || isWriteDelegated) && (
                 <MenuItem
                   onClick={async () => {
                     if (isRecurring) {
@@ -438,7 +438,9 @@ export default function EventPreviewModal({
           <AttendanceValidation
             contextualizedEvent={contextualizedEvent}
             user={
-              isDelegated && calendar.owner ? ToUserData(calendar.owner) : user
+              isWriteDelegated && calendar.owner
+                ? ToUserData(calendar.owner)
+                : user
             }
             setAfterChoiceFunc={setAfterChoiceFunc}
             setOpenEditModePopup={setOpenEditModePopup}

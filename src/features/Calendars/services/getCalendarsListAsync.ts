@@ -28,7 +28,7 @@ export const getCalendarsListAsync = createAsyncThunk<
     const errors: string[] = [];
 
     const normalizedCalendars = rawCalendars.map((cal: CalendarData) =>
-      normalizeCalendar(cal)
+      normalizeCalendar(cal, user.id)
     );
 
     const uniqueOwnerIds = Array.from(
@@ -59,7 +59,16 @@ export const getCalendarsListAsync = createAsyncThunk<
     }
 
     normalizedCalendars.forEach(
-      ({ cal, description, delegated, link, id, ownerId, visibility }) => {
+      ({
+        cal,
+        description,
+        delegated,
+        link,
+        id,
+        ownerId,
+        visibility,
+        access,
+      }) => {
         const ownerData = ownerDataMap.get(ownerId) || {
           firstname: "",
           lastname: "Unknown User",
@@ -79,6 +88,7 @@ export const getCalendarsListAsync = createAsyncThunk<
           delegated,
           color,
           visibility,
+          access,
           events: {},
         };
       }

@@ -16,7 +16,7 @@ export function createEventContext(
     ? calendar.owner?.emails?.[0]
     : user.email;
   const currentUserAttendee = event.attendee?.find(
-    (a) => a.cal_address === attendeeEmail
+    (person) => person.cal_address === attendeeEmail
   );
   return {
     event,

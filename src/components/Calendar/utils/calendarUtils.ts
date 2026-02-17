@@ -1,5 +1,5 @@
 import { AppDispatch } from "@/app/store";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { Calendar, DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
 import { AclEntry } from "@/features/Calendars/types/CalendarData";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
@@ -254,3 +254,48 @@ export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   if (hasRead) return "public";
   return "private";
 }
+
+export function getCalendarDelegationAccess(
+  acl: AclEntry[],
+  userId: string
+): DelegationAccess {
+  const userPrincipal = `principals/users/${userId}`;
+  let highestRank = 0;
+  let highestAccess: DelegationAccess = "none";
+
+  for (const entry of acl ?? []) {
+    if (entry.principal !== userPrincipal) continue;
+
+    const rank = PRIVILEGE_RANK[entry.privilege] ?? 0;
+    if (rank > highestRank) {
+      highestRank = rank;
+      highestAccess = privilegeToAccess(entry.privilege);
+    }
+  }
+
+  return highestAccess;
+}
+
+function privilegeToAccess(privilege: string): DelegationAccess {
+  switch (privilege) {
+    case "{urn:ietf:params:xml:ns:caldav}read-free-busy":
+      return "freebusy";
+    case "{DAV:}read":
+      return "read";
+    case "{DAV:}write-properties":
+      return "write-properties";
+    case "{DAV:}write":
+      return "write";
+    case "{DAV:}all":
+      return "all";
+    default:
+      return "none";
+  }
+}
+
+const PRIVILEGE_RANK: Record<string, number> = {
+  "{urn:ietf:params:xml:ns:caldav}read-free-busy": 1,
+  "{DAV:}read": 2,
+  "{DAV:}write": 3,
+  "{DAV:}all": 4,
+};

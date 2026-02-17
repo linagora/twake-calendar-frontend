@@ -3,7 +3,7 @@ import { CalendarInput, CalendarList } from "./types/CalendarData";
 
 export async function getCalendars(
   userId: string,
-  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&",
+  scope: string = "personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true",
   signal?: AbortSignal
 ): Promise<CalendarList> {
   const calendars = await api

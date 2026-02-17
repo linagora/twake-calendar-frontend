@@ -30,7 +30,7 @@ describe("Calendar API", () => {
     const calendars = await getCalendars(mockUserId);
 
     expect(api.get).toHaveBeenCalledWith(
-      `dav/calendars/${mockUserId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&`,
+      `dav/calendars/${mockUserId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
       {
         headers: { Accept: "application/calendar+json" },
       }

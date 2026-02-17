@@ -6,6 +6,7 @@ import {
   stringAvatar,
   stringToColor,
 } from "@/components/Event/utils/eventUtils";
+import { DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import * as eventThunks from "@/features/Calendars/services";
 import EventPreviewModal from "@/features/Events/EventDisplayPreview";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
@@ -1564,7 +1565,10 @@ describe("Event Preview Display", () => {
       URL: "/calendars/user2/cal1/event-1.ics",
     };
 
-    const makeDelegatedState = (eventOverrides = {}) => ({
+    const makeDelegatedState = (
+      eventOverrides = {},
+      access: DelegationAccess = "write"
+    ) => ({
       ...preloadedState,
       calendars: {
         list: {
@@ -1572,6 +1576,7 @@ describe("Event Preview Display", () => {
             id: "user2/cal1",
             name: "Delegated Calendar",
             delegated: true,
+            access,
             owner: {
               id: "user2",
               firstname: "Bob",
@@ -1598,7 +1603,7 @@ describe("Event Preview Display", () => {
     });
 
     describe("edit button visibility", () => {
-      it("shows edit button when calendar is delegated and owner is organizer", () => {
+      it("shows edit button when calendar is write-delegated and owner is organizer", () => {
         renderWithProviders(
           <EventPreviewModal
             eventId="event-1"
@@ -1627,10 +1632,23 @@ describe("Event Preview Display", () => {
         );
         expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
       });
+
+      it("does not show edit button when delegated with read-only access", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({}, "read")
+        );
+        expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+      });
     });
 
     describe("delete menu item visibility", () => {
-      it("shows delete option for delegated calendar", () => {
+      it("shows delete option when calendar is write-delegated", () => {
         renderWithProviders(
           <EventPreviewModal
             eventId="event-1"
@@ -1644,6 +1662,22 @@ describe("Event Preview Display", () => {
         expect(
           screen.getByText("eventPreview.deleteEvent")
         ).toBeInTheDocument();
+      });
+
+      it("does not show delete option when delegated with read-only access", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({}, "read")
+        );
+        fireEvent.click(screen.getByTestId("MoreVertIcon"));
+        expect(
+          screen.queryByText("eventPreview.deleteEvent")
+        ).not.toBeInTheDocument();
       });
     });
   });
