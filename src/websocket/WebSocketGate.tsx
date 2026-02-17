@@ -57,6 +57,7 @@ export function WebSocketGate() {
     Map<string, { calendar: Calendar; type?: "temp" }>
   >(new Map());
   const calendarsToHideRef = useRef<Set<string>>(new Set());
+  const shouldRefreshCalendarListRef = useRef<boolean>(false);
   const debouncedUpdateFnRef = useRef<
     ((dispatch: AppDispatch) => void) | undefined
   >();
@@ -67,6 +68,7 @@ export function WebSocketGate() {
       const accumulators = {
         calendarsToRefresh: calendarsToRefreshRef.current,
         calendarsToHide: calendarsToHideRef.current,
+        shouldRefreshCalendarListRef,
         debouncedUpdateFn: debouncedUpdateFnRef.current,
         currentDebouncePeriod: currentDebouncePeriodRef.current,
       };

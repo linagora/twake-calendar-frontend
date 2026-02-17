@@ -1,7 +1,10 @@
 import type { AppDispatch } from "@/app/store";
 import { store } from "@/app/store";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { refreshCalendarWithSyncToken } from "@/features/Calendars/services";
+import {
+  getCalendarsListAsync,
+  refreshCalendarWithSyncToken,
+} from "@/features/Calendars/services";
 import { findCalendarById, getDisplayedCalendarRange } from "@/utils";
 import { setSelectedCalendars } from "@/utils/storage/setSelectedCalendars";
 import { debounce } from "lodash";
@@ -17,7 +20,9 @@ function createDebouncedUpdate(
     string,
     { calendar: Calendar; type?: "temp" }
   >,
-  getCalendarsToHide: () => Set<string>
+  getCalendarsToHide: () => Set<string>,
+  getShouldRefreshCalendarList: () => boolean,
+  resetShouldRefreshCalendarList: () => void
 ) {
   return debounce(
     (dispatch: AppDispatch) => {
@@ -26,14 +31,20 @@ function createDebouncedUpdate(
       // Snapshot state
       const calendarsToProcess = new Map(getCalendarsToRefresh());
       const calendarsToHideSnapshot = new Set(getCalendarsToHide());
+      const shouldRefresh = getShouldRefreshCalendarList();
 
       // Clear accumulators
       getCalendarsToRefresh().clear();
       getCalendarsToHide().clear();
+      resetShouldRefreshCalendarList();
 
       try {
         processCalendarsToRefresh(dispatch, currentRange, calendarsToProcess);
         processCalendarsToHide(calendarsToHideSnapshot);
+
+        if (shouldRefresh) {
+          dispatch(getCalendarsListAsync());
+        }
       } catch (error) {
         console.warn("Error processing accumulated calendar updates:", error);
       }
@@ -49,7 +60,8 @@ export function updateCalendars(
   accumulators: UpdateCalendarsAccumulators
 ) {
   const state = store.getState();
-  const { calendarsToRefresh, calendarsToHide } = parseMessage(message);
+  const { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList } =
+    parseMessage(message);
 
   // Accumulate
   accumulateCalendarsToRefresh(
@@ -58,6 +70,9 @@ export function updateCalendars(
     accumulators.calendarsToRefresh
   );
   accumulateCalendarsToHide(calendarsToHide, accumulators.calendarsToHide);
+
+  accumulators.shouldRefreshCalendarListRef.current ||=
+    shouldRefreshCalendarList;
 
   const debouncePeriod = window.WS_DEBOUNCE_PERIOD_MS ?? DEFAULT_DEBOUNCE_MS;
 
@@ -69,7 +84,11 @@ export function updateCalendars(
       accumulators.debouncedUpdateFn = createDebouncedUpdate(
         debouncePeriod,
         () => accumulators.calendarsToRefresh,
-        () => accumulators.calendarsToHide
+        () => accumulators.calendarsToHide,
+        () => accumulators.shouldRefreshCalendarListRef.current,
+        () => {
+          accumulators.shouldRefreshCalendarListRef.current = false;
+        }
       );
       accumulators.currentDebouncePeriod = debouncePeriod;
     }
@@ -84,10 +103,14 @@ export function updateCalendars(
 
   accumulators.calendarsToRefresh.clear();
   accumulators.calendarsToHide.clear();
+  accumulators.shouldRefreshCalendarListRef.current = false;
 
   try {
     processCalendarsToRefresh(dispatch, currentRange, calendarsToProcess);
     processCalendarsToHide(calendarsToHideSnapshot);
+    if (shouldRefreshCalendarList) {
+      dispatch(getCalendarsListAsync());
+    }
   } catch (error) {
     console.warn("Error processing calendar updates:", error);
   }
