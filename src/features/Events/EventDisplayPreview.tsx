@@ -380,7 +380,7 @@ export default function EventPreviewModal({
                   setOpenDuplicateModal(true);
                 }}
               />
-              {isOrganizer && (
+              {isOwn && (
                 <MenuItem
                   onClick={async () => {
                     if (isRecurring) {
