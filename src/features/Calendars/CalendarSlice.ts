@@ -334,12 +334,13 @@ const CalendarSlice = createSlice({
 
         if (syncStatus === "SUCCESS") {
           const deletedSet = new Set(deletedEvents); // working with a Set for deletion avoids O(nxm) complexity
-          Object.keys(target.events)
-            .filter((eventKey) => {
-              const baseUid = extractEventBaseUuid(eventKey);
-              return deletedSet.has(eventKey) || deletedSet.has(baseUid);
+          Object.values(target.events)
+            .filter((event) => {
+              return deletedSet.has(event.URL);
             })
-            .forEach((eventKey) => delete target.events[eventKey]);
+            .forEach((event) => {
+              delete target.events[event.uid];
+            });
 
           for (const event of createdOrUpdatedEvents) {
             target.events[event.uid] = event;
