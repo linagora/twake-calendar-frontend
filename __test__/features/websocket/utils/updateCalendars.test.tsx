@@ -33,10 +33,12 @@ describe("updateCalendars", () => {
     calendarsToRefresh: Map<string, any>;
     calendarsToHide: Set<string>;
     debouncedUpdateFn?: (dispatch: AppDispatch) => void;
+    shouldRefreshCalendarListRef: React.MutableRefObject<boolean>;
     currentDebouncePeriod?: number;
   } = {
     calendarsToRefresh: new Map<string, any>(),
     calendarsToHide: new Set(),
+    shouldRefreshCalendarListRef: { current: false },
     currentDebouncePeriod: 0,
     debouncedUpdateFn: jest.fn(),
   };
@@ -49,6 +51,7 @@ describe("updateCalendars", () => {
     mockAccumulators.calendarsToRefresh = new Map<string, any>();
     mockAccumulators.calendarsToHide = new Set();
     mockAccumulators.currentDebouncePeriod = 0;
+    mockAccumulators.shouldRefreshCalendarListRef.current = false;
     mockAccumulators.debouncedUpdateFn = jest.fn();
   });
 
