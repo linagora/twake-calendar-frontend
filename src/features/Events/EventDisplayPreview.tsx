@@ -82,7 +82,7 @@ export default function EventPreviewModal({
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
   const isDelegated = calendar.delegated;
-  const isWriteDelegated = isDelegated && calendar.access === "write";
+  const isWriteDelegated = isDelegated && calendar.access?.write;
   const effectiveEmail = isDelegated ? calendar.owner?.emails?.[0] : user.email;
   const isOrganizer = event.organizer
     ? effectiveEmail === event.organizer.cal_address

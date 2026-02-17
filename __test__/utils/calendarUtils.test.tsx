@@ -2,7 +2,7 @@ import {
   eventToFullCalendarFormat,
   getCalendarVisibility,
 } from "@/components/Calendar/utils/calendarUtils";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { Calendar, DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import { AclEntry } from "@/features/Calendars/types/CalendarData";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { userOrganiser } from "@/features/User/userDataTypes";
@@ -94,6 +94,7 @@ const makeCalendar = (overrides: Partial<Calendar> = {}): Calendar =>
     id: "user1/cal1",
     name: "Test Calendar",
     delegated: false,
+    access: {} as DelegationAccess,
     owner: { emails: ["alice@example.com"], firstname: "Alice" },
     color: { light: "#FF0000" },
     events: {},
@@ -148,22 +149,40 @@ describe("eventToFullCalendarFormat - editable flag", () => {
   });
 
   describe("delegated calendar", () => {
-    const calendar = makeCalendar({
+    const writeDelegatedCalendar = makeCalendar({
       id: "user2/cal1",
       delegated: true,
+      access: { write: true } as DelegationAccess,
+      owner: { emails: ["owner@example.com"], firstname: "Owner" },
+    });
+    const readDelegatedCalendar = makeCalendar({
+      id: "user2/cal1",
+      delegated: true,
+      access: { read: true } as DelegationAccess,
       owner: { emails: ["owner@example.com"], firstname: "Owner" },
     });
     const event = { ...baseEvent, calId: "user2/cal1" };
 
-    it("is editable when owner is organizer", () => {
+    it("is editable when owner is organizer and delegated user has write rights", () => {
       const [result] = callFormat(
         {
           ...event,
           organizer: { cal_address: "owner@example.com" },
         } as CalendarEvent,
-        { "user2/cal1": calendar }
+        { "user2/cal1": writeDelegatedCalendar }
       );
       expect(result.editable).toBe(true);
+    });
+
+    it("is not editable when owner is organizer but delegated user only has read access", () => {
+      const [result] = callFormat(
+        {
+          ...event,
+          organizer: { cal_address: "owner@example.com" },
+        } as CalendarEvent,
+        { "user2/cal1": readDelegatedCalendar }
+      );
+      expect(result.editable).toBe(false);
     });
 
     it("is not editable when owner is not organizer", () => {
@@ -172,7 +191,7 @@ describe("eventToFullCalendarFormat - editable flag", () => {
           ...event,
           organizer: { cal_address: "someone-else@example.com" },
         } as CalendarEvent,
-        { "user2/cal1": calendar }
+        { "user2/cal1": writeDelegatedCalendar }
       );
       expect(result.editable).toBe(false);
     });
@@ -189,7 +208,7 @@ describe("eventToFullCalendarFormat - editable flag", () => {
         "user1",
         "alice@example.com",
         true,
-        { "user2/cal1": calendar }
+        { "user2/cal1": writeDelegatedCalendar }
       );
       expect(result.editable).toBe(false);
     });
@@ -202,7 +221,7 @@ describe("eventToFullCalendarFormat - editable flag", () => {
           ...event,
           organizer: { cal_address: "owner@example.com" },
         } as CalendarEvent,
-        { "user2/cal1": calendar },
+        { "user2/cal1": writeDelegatedCalendar },
         "alice@example.com" // logged-in user, should NOT be used for delegated
       );
       expect(result.editable).toBe(true);

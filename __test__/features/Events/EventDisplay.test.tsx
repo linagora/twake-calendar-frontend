@@ -1567,7 +1567,13 @@ describe("Event Preview Display", () => {
 
     const makeDelegatedState = (
       eventOverrides = {},
-      access: DelegationAccess = "write"
+      access: DelegationAccess = {
+        write: true,
+        freebusy: false,
+        read: true,
+        "write-properties": false,
+        all: false,
+      }
     ) => ({
       ...preloadedState,
       calendars: {
@@ -1641,7 +1647,16 @@ describe("Event Preview Display", () => {
             open={true}
             onClose={mockOnClose}
           />,
-          makeDelegatedState({}, "read")
+          makeDelegatedState(
+            {},
+            {
+              write: false,
+              freebusy: false,
+              read: true,
+              "write-properties": false,
+              all: false,
+            }
+          )
         );
         expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
       });
@@ -1672,7 +1687,16 @@ describe("Event Preview Display", () => {
             open={true}
             onClose={mockOnClose}
           />,
-          makeDelegatedState({}, "read")
+          makeDelegatedState(
+            {},
+            {
+              write: false,
+              freebusy: false,
+              read: true,
+              "write-properties": false,
+              all: false,
+            }
+          )
         );
         fireEvent.click(screen.getByTestId("MoreVertIcon"));
         expect(

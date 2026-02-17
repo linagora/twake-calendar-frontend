@@ -42,7 +42,8 @@ export function RSVPButton({
   const dispatch = useAppDispatch();
   const { currentUserAttendee, calendar } = contextualizedEvent;
   const showLoading = isLoading && loadingValue === rsvpValue;
-  const isReadDelegated = calendar.delegated && calendar.access === "read";
+  const isReadDelegated =
+    calendar.delegated && calendar.access?.read && !calendar.access?.write;
   const previousPartstatRef = useRef<PartStat | undefined>(
     currentUserAttendee?.partstat
   );

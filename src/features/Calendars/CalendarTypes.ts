@@ -14,15 +14,15 @@ export interface Calendar {
   version?: string;
   events: Record<string, CalendarEvent>;
   visibility: "private" | "public";
-  access: DelegationAccess;
+  access?: DelegationAccess;
   lastCacheCleared?: number;
   syncToken?: string;
 }
 
-export type DelegationAccess =
-  | "none"
-  | "freebusy"
-  | "read"
-  | "write"
-  | "write-properties"
-  | "all";
+export interface DelegationAccess {
+  freebusy: boolean;
+  read: boolean;
+  write: boolean;
+  "write-properties": boolean;
+  all: boolean;
+}

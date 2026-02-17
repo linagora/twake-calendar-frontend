@@ -84,7 +84,8 @@ export const eventToFullCalendarFormat = (
       const eventTimezone = e.timezone || "Etc/UTC";
       const isAllDay = e.allday ?? false;
       const calendar = calendars[e.calId];
-      const isDelegated = calendar?.delegated ?? false;
+      const isDelegated =
+        (calendar?.delegated && calendar.access?.write) ?? false;
       const effectiveEmail = isDelegated
         ? calendar?.owner?.emails?.[0]
         : userAddress;
@@ -260,42 +261,40 @@ export function getCalendarDelegationAccess(
   userId: string
 ): DelegationAccess {
   const userPrincipal = `principals/users/${userId}`;
-  let highestRank = 0;
-  let highestAccess: DelegationAccess = "none";
+  const access: DelegationAccess = {
+    freebusy: false,
+    read: false,
+    write: false,
+    "write-properties": false,
+    all: false,
+  };
 
   for (const entry of acl ?? []) {
     if (entry.principal !== userPrincipal) continue;
-
-    const rank = PRIVILEGE_RANK[entry.privilege] ?? 0;
-    if (rank > highestRank) {
-      highestRank = rank;
-      highestAccess = privilegeToAccess(entry.privilege);
-    }
+    privilegeToAccess(entry.privilege, access);
   }
 
-  return highestAccess;
+  return access;
 }
 
-function privilegeToAccess(privilege: string): DelegationAccess {
+function privilegeToAccess(privilege: string, currentAccess: DelegationAccess) {
   switch (privilege) {
     case "{urn:ietf:params:xml:ns:caldav}read-free-busy":
-      return "freebusy";
+      currentAccess["freebusy"] = true;
+      break;
     case "{DAV:}read":
-      return "read";
+      currentAccess["read"] = true;
+      break;
     case "{DAV:}write-properties":
-      return "write-properties";
+      currentAccess["write-properties"] = true;
+      break;
     case "{DAV:}write":
-      return "write";
+      currentAccess["write"] = true;
+      break;
     case "{DAV:}all":
-      return "all";
+      currentAccess["all"] = true;
+      break;
     default:
-      return "none";
+      break;
   }
 }
-
-const PRIVILEGE_RANK: Record<string, number> = {
-  "{urn:ietf:params:xml:ns:caldav}read-free-busy": 1,
-  "{DAV:}read": 2,
-  "{DAV:}write": 3,
-  "{DAV:}all": 4,
-};
