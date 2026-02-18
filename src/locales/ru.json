@@ -2,6 +2,8 @@
   "locale": "ru-ru",
   "calendar": {
     "personal": "Личные",
+    "defaultPersonalCalendarName": "Мой календарь",
+    "defaultCalendarName": "Календарь %{name}",
     "delegated": "Делегированные",
     "other": "Другие",
     "caldav_access": "Доступ CalDAV",

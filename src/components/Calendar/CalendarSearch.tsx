@@ -2,6 +2,8 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { getCalendars } from "@/features/Calendars/CalendarApi";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { addSharedCalendarAsync } from "@/features/Calendars/services";
+import { CalendarData } from "@/features/Calendars/types/CalendarData";
+import { renameDefault } from "@/utils/renameDefault";
 import {
   Avatar,
   Box,
@@ -21,7 +23,7 @@ import { ColorPicker } from "./CalendarColorPicker";
 import { defaultColors, getAccessiblePair } from "./utils/calendarColorsUtils";
 
 interface CalendarWithOwner {
-  cal: Record<string, unknown>;
+  cal: CalendarData;
   owner: User;
 }
 
@@ -35,7 +37,7 @@ function CalendarItem({
   onColorChange: (color: Record<string, string>) => void;
 }) {
   const theme = useTheme();
-
+  const { t } = useI18n();
   return (
     <Box
       key={cal.owner.email + cal.cal["dav:name"]}
@@ -61,9 +63,12 @@ function CalendarItem({
         />
         <Box>
           <Typography variant="body1">
-            {cal.cal["dav:name"] === "#default"
-              ? cal.owner.displayName + "'s calendar"
-              : cal.cal["dav:name"]}
+            {renameDefault(
+              cal.cal["dav:name"],
+              cal.owner.displayName,
+              t,
+              false
+            )}
           </Typography>
           <Typography variant="body2" color="textSecondary">
             {cal.owner.email}
@@ -120,7 +125,7 @@ function SelectedCalendarsList({
       (existing: Calendar) =>
         existing.id ===
         cal.cal?._links?.self?.href
-          .replace("/calendars/", "")
+          ?.replace("/calendars/", "")
           .replace(".json", "")
     );
 
@@ -218,7 +223,7 @@ export default function CalendarSearch({
             (existing: Calendar) =>
               existing.id ===
               cal.cal?._links?.self?.href
-                .replace("/calendars/", "")
+                ?.replace("/calendars/", "")
                 .replace(".json", "")
           );
           if (!exists && cal.cal) {
@@ -237,15 +242,15 @@ export default function CalendarSearch({
                 },
               })
             );
-            return cal.cal._links.self.href
-              .replace("/calendars/", "")
+            return cal.cal._links.self?.href
+              ?.replace("/calendars/", "")
               .replace(".json", "");
           }
           return null;
         })
       );
 
-      onClose(idList.filter(Boolean));
+      onClose(idList.filter(Boolean) as string[]);
       setSelectedCalendars([]);
       setSelectedUsers([]);
     }
@@ -286,20 +291,23 @@ export default function CalendarSearch({
           const cals = await Promise.all(
             value.map(async (user: User) => {
               if (user?.openpaasId) {
-                const cals = (await getCalendars(
+                const cals = await getCalendars(
                   user.openpaasId,
                   "sharedPublic=true&"
-                )) as Record<string, unknown>;
+                );
                 return cals._embedded?.["dav:calendar"]
-                  ? cals._embedded["dav:calendar"].map(
-                      (cal: Record<string, unknown>) => ({ cal, owner: user })
-                    )
+                  ? cals._embedded["dav:calendar"].map((cal) => ({
+                      cal,
+                      owner: user,
+                    }))
                   : { cal: undefined, owner: user };
               }
               return null;
             })
           );
-          setSelectedCalendars(cals.flat().filter(Boolean));
+          setSelectedCalendars(
+            cals.flat().filter(Boolean) as CalendarWithOwner[]
+          );
         }}
       />
 
@@ -310,14 +318,14 @@ export default function CalendarSearch({
           if (!cal.cal?._links?.self?.href) return;
           setSelectedCalendars((prev) =>
             prev.filter(
-              (c) => c.cal?._links?.self?.href !== cal.cal._links.self.href
+              (c) => c.cal?._links?.self?.href !== cal.cal._links.self?.href
             )
           );
           if (
             !selectedCal.find(
               (c) =>
                 cal.owner.email === c.owner.email &&
-                c.cal?._links?.self?.href !== cal.cal._links.self.href
+                c.cal?._links?.self?.href !== cal.cal._links.self?.href
             )
           ) {
             setSelectedUsers((prev) =>
@@ -329,7 +337,7 @@ export default function CalendarSearch({
           setSelectedCalendars((prev) =>
             prev.map((prevcal) =>
               prevcal.owner.email === cal.owner.email &&
-              prevcal.cal._links.self.href === cal.cal._links.self.href
+              prevcal.cal._links.self?.href === cal.cal._links.self?.href
                 ? {
                     ...prevcal,
                     cal: {
