@@ -55,8 +55,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
         id,
         name,
         link,
-        owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${ownerData.lastname}`,
-        ownerEmails: ownerData.emails,
+        owner: ownerData,
         description,
         delegated,
         color: {

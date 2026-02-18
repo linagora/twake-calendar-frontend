@@ -78,12 +78,17 @@ function EventUpdateModal({
 
   const calendarsList = useAppSelector((state) => state.calendars.list);
 
+  // if the event's calendar is delegated then it shall be the only calendar accessible from the event update modal
   const userPersonalCalendars: Calendar[] = useMemo(() => {
     const allCalendars = Object.values(calendarsList) as Calendar[];
+    if (calList[calId]?.delegated) {
+      return [calList[calId]];
+    }
     return allCalendars.filter(
-      (c: Calendar) => c.id?.split("/")[0] === user.userData?.openpaasId
+      (calendar: Calendar) =>
+        calendar.id?.split("/")[0] === user.userData?.openpaasId
     );
-  }, [calendarsList, user.userData?.openpaasId]);
+  }, [calList, calId, calendarsList, user.userData?.openpaasId]);
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
