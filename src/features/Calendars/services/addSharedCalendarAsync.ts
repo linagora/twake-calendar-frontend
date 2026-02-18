@@ -36,12 +36,7 @@ export const addSharedCalendarAsync = createAsyncThunk<
         color: cal.color,
         link: `/calendars/${userId}/${calId}.json`,
         desc: cal.cal["caldav:description"] ?? "",
-        name:
-          ownerData.id !== userId && cal.cal["dav:name"] === "#default"
-            ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
-                ownerData.lastname ?? ""
-              }` + "'s calendar"
-            : (cal.cal["dav:name"] ?? ""),
+        name: cal.cal["dav:name"] ?? "",
         owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${
           ownerData.lastname ?? ""
         }`,

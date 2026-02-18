@@ -65,11 +65,6 @@ export const getCalendarsListAsync = createAsyncThunk<
           lastname: "Unknown User",
           emails: [],
         };
-        const name =
-          ownerId !== user.id && cal["dav:name"] === "#default"
-            ? `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${ownerData.lastname}` +
-              "'s calendar"
-            : cal["dav:name"];
 
         const color = {
           light: cal["apple:color"] ?? "#006BD8",
@@ -77,7 +72,7 @@ export const getCalendarsListAsync = createAsyncThunk<
         };
         fetchedCalendars[id] = {
           id,
-          name,
+          name: cal["dav:name"] ?? "",
           link,
           owner: `${ownerData.firstname ? `${ownerData.firstname} ` : ""}${ownerData.lastname}`,
           ownerEmails: ownerData.emails,
