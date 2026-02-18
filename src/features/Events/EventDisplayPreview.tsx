@@ -87,6 +87,8 @@ export default function EventPreviewModal({
   const isOrganizer = event.organizer
     ? effectiveEmail === event.organizer.cal_address
     : isOwn;
+  const isNotPrivate =
+    event.class !== "PRIVATE" && event.class !== "CONFIDENTIAL";
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
@@ -328,7 +330,7 @@ export default function EventPreviewModal({
                 <FileDownloadOutlinedIcon />
               </IconButton>
             )}
-            {isOrganizer && (isOwn || isWriteDelegated) && (
+            {isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate)) && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -347,7 +349,7 @@ export default function EventPreviewModal({
                 <EditIcon />
               </IconButton>
             )}
-            {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+            {((isNotPrivate && !isOwn) || isOwn) && (
               <IconButton
                 size="small"
                 onClick={(e) => setToggleActionMenu(e.currentTarget)}
@@ -493,7 +495,7 @@ export default function EventPreviewModal({
               ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
           </Typography>
         </Box>
-        {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+        {((isNotPrivate && !isOwn) || isOwn) && (
           <>
             {/* Video */}
             {event.x_openpass_videoconference && (

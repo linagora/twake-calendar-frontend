@@ -87,7 +87,7 @@ export const eventToFullCalendarFormat = (
       const isWriteDelegated =
         (calendar?.delegated &&
           calendar.access?.write &&
-          event.class === "PUBLIC") ??
+          (!event.class || event.class === "PUBLIC")) ??
         false;
       const effectiveEmail = isWriteDelegated
         ? calendar?.owner?.emails?.[0]
