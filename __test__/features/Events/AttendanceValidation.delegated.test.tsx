@@ -98,6 +98,7 @@ describe("AttendanceValidation - delegation", () => {
         cal_address: "owner@example.com",
         partstat: "NEEDS-ACTION",
       } as userAttendee,
+      event: { class: "PUBLIC" },
     });
 
     it("renders even when isOwn is false", () => {

@@ -87,6 +87,7 @@ const baseEvent: CalendarEvent = {
   allday: false,
   organizer: { cal_address: "owner@example.com" } as userOrganiser,
   color: { light: "#FF0000" },
+  class: "PUBLIC",
 } as unknown as CalendarEvent;
 
 const makeCalendar = (overrides: Partial<Calendar> = {}): Calendar =>

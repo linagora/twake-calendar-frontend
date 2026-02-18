@@ -79,36 +79,40 @@ export const eventToFullCalendarFormat = (
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { t } = useI18n();
   return filteredEvents
-    .concat(filteredTempEvents.map((e) => ({ ...e, temp: true })))
-    .map((e) => {
-      const eventTimezone = e.timezone || "Etc/UTC";
-      const isAllDay = e.allday ?? false;
-      const calendar = calendars[e.calId];
-      const isDelegated =
-        (calendar?.delegated && calendar.access?.write) ?? false;
-      const effectiveEmail = isDelegated
+    .concat(filteredTempEvents.map((event) => ({ ...event, temp: true })))
+    .map((event) => {
+      const eventTimezone = event.timezone || "Etc/UTC";
+      const isAllDay = event.allday ?? false;
+      const calendar = calendars[event.calId];
+      const isWriteDelegated =
+        (calendar?.delegated &&
+          calendar.access?.write &&
+          event.class === "PUBLIC") ??
+        false;
+      const effectiveEmail = isWriteDelegated
         ? calendar?.owner?.emails?.[0]
         : userAddress;
 
-      const isOrganiser = e.organizer
-        ? e.organizer.cal_address?.toLowerCase() ===
+      const isOrganiser = event.organizer
+        ? event.organizer.cal_address?.toLowerCase() ===
           effectiveEmail?.toLowerCase()
         : true; // if there are no organizer in the event we assume it was organized by the owner
-      const isPersonnalEvent = extractEventBaseUuid(e.calId) === userId;
+      const isPersonnalEvent = extractEventBaseUuid(event.calId) === userId;
       const convertedEvent: CalendarEvent & {
         colors: Record<string, string> | undefined;
         editable: boolean;
         priority: number;
       } = {
-        ...e,
-        title: formatEventChipTitle(e, t),
-        colors: e.color,
-        editable: (isPersonnalEvent || isDelegated) && isOrganiser && !pending,
+        ...event,
+        title: formatEventChipTitle(event, t),
+        colors: event.color,
+        editable:
+          (isPersonnalEvent || isWriteDelegated) && isOrganiser && !pending,
         priority: isPersonnalEvent ? 1 : 0,
       };
 
-      if (!isAllDay && e.start && eventTimezone) {
-        const startISO = convertEventDateTimeToISO(e.start, eventTimezone, {
+      if (!isAllDay && event.start && eventTimezone) {
+        const startISO = convertEventDateTimeToISO(event.start, eventTimezone, {
           isAllDay,
         });
         if (startISO) {
@@ -116,8 +120,8 @@ export const eventToFullCalendarFormat = (
         }
       }
 
-      if (!isAllDay && e.end && eventTimezone) {
-        const endISO = convertEventDateTimeToISO(e.end, eventTimezone, {
+      if (!isAllDay && event.end && eventTimezone) {
+        const endISO = convertEventDateTimeToISO(event.end, eventTimezone, {
           isAllDay,
         });
         if (endISO) {

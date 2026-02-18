@@ -33,8 +33,11 @@ export function AttendanceValidation({
 
   const createByTheUser = currentUserAttendee || hasNoAttendeesOrOrganizer;
   const editRightInSelfCalendar = createByTheUser && isOwn;
+  const isWriteDelegated =
+    contextualizedEvent.calendar.delegated &&
+    contextualizedEvent.event.class === "PUBLIC";
 
-  if (!(editRightInSelfCalendar || contextualizedEvent.calendar.delegated)) {
+  if (!(editRightInSelfCalendar || isWriteDelegated)) {
     return null;
   }
 
