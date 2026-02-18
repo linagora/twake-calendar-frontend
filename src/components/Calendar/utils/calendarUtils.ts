@@ -83,7 +83,7 @@ function applyTimezoneToEvent(
   const eventTimezone = event.timezone || "Etc/UTC";
   const isAllDay = event.allday ?? false;
 
-  if (!isAllDay && event.start && eventTimezone) {
+  if (!isAllDay && event.start) {
     const startISO = convertEventDateTimeToISO(event.start, eventTimezone, {
       isAllDay,
     });

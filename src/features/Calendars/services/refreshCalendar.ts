@@ -1,4 +1,5 @@
 import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { buildDelegatedEventURL } from "@/features/Events/eventUtils";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";
@@ -62,7 +63,11 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
 
       return {
         calId: calendar.id,
-        deletedEvents: toDelete,
+        deletedEvents: toDelete.map((eventURL) =>
+          calendar.delegated
+            ? buildDelegatedEventURL(calendar, { URL: eventURL })
+            : eventURL
+        ),
         createdOrUpdatedEvents: createdOrUpdatedEvents
           .flat()
           .filter(Boolean) as CalendarEvent[],

@@ -5,7 +5,7 @@ export function isEventOrganiser(
   effectiveEmail: string | undefined
 ): boolean {
   if (!event.organizer) return true; // no organizer = assume owner
-  return (
-    event.organizer.cal_address?.toLowerCase() === effectiveEmail?.toLowerCase()
-  );
+  const organizerEmail = event.organizer.cal_address?.toLowerCase();
+  if (!organizerEmail || !effectiveEmail) return false;
+  return organizerEmail === effectiveEmail.toLowerCase();
 }

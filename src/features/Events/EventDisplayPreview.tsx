@@ -9,6 +9,7 @@ import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "@/components/Event/InfoRow";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
 import { getEffectiveEmail } from "@/utils/getEffectiveEmail";
+import { isEventOrganiser } from "@/utils/isEventOrganiser";
 import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import {
@@ -90,7 +91,7 @@ export default function EventPreviewModal({
     user.email
   );
   const isOrganizer = event.organizer
-    ? effectiveEmail === event.organizer.cal_address
+    ? isEventOrganiser(event, effectiveEmail)
     : isOwn;
   const isNotPrivate =
     event.class !== "PRIVATE" && event.class !== "CONFIDENTIAL";
