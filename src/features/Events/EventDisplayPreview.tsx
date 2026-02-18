@@ -8,6 +8,7 @@ import EventDuplication from "@/components/Event/EventDuplicate";
 import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "@/components/Event/InfoRow";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
+import { getEffectiveEmail } from "@/utils/getEffectiveEmail";
 import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import {
@@ -82,8 +83,12 @@ export default function EventPreviewModal({
   const isRecurring = event?.uid?.includes("/");
   const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
   const isDelegated = calendar.delegated;
-  const isWriteDelegated = isDelegated && calendar.access?.write;
-  const effectiveEmail = isDelegated ? calendar.owner?.emails?.[0] : user.email;
+  const isWriteDelegated = (isDelegated && calendar.access?.write) ?? false;
+  const effectiveEmail = getEffectiveEmail(
+    calendar,
+    isWriteDelegated,
+    user.email
+  );
   const isOrganizer = event.organizer
     ? effectiveEmail === event.organizer.cal_address
     : isOwn;
@@ -673,7 +678,7 @@ export default function EventPreviewModal({
             )}
           </>
         )}
-        {event.class === "PRIVATE" && !isOwn && (
+        {!isNotPrivate && !isOwn && (
           <Box
             sx={{
               backgroundColor: "#F3F4F6",

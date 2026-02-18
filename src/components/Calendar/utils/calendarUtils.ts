@@ -5,6 +5,8 @@ import { AclEntry } from "@/features/Calendars/types/CalendarData";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { formatDateToYYYYMMDDTHHMMSS } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { getEffectiveEmail } from "@/utils/getEffectiveEmail";
+import { isEventOrganiser } from "@/utils/isEventOrganiser";
 import { convertEventDateTimeToISO } from "@/utils/timezone";
 import { EventInput, SlotLabelContentArg } from "@fullcalendar/core";
 import moment from "moment-timezone";
@@ -68,6 +70,69 @@ export function formatEventChipTitle(
     : e.title;
 }
 
+type ConvertedEvent = CalendarEvent & {
+  colors: Record<string, string> | undefined;
+  editable: boolean;
+  priority: number;
+};
+
+function applyTimezoneToEvent(
+  event: CalendarEvent,
+  convertedEvent: ConvertedEvent
+): void {
+  const eventTimezone = event.timezone || "Etc/UTC";
+  const isAllDay = event.allday ?? false;
+
+  if (!isAllDay && event.start && eventTimezone) {
+    const startISO = convertEventDateTimeToISO(event.start, eventTimezone, {
+      isAllDay,
+    });
+    if (startISO) convertedEvent.start = startISO;
+  }
+
+  if (!isAllDay && event.end && eventTimezone) {
+    const endISO = convertEventDateTimeToISO(event.end, eventTimezone, {
+      isAllDay,
+    });
+    if (endISO) convertedEvent.end = endISO;
+  }
+}
+
+function buildConvertedEvent(
+  event: CalendarEvent,
+  calendar: Calendar | undefined,
+  userId: string | undefined,
+  userAddress: string | undefined,
+  pending: boolean,
+  t: (key: string) => string
+): ConvertedEvent {
+  const isWriteDelegated =
+    (calendar?.delegated &&
+      calendar.access?.write &&
+      (!event.class || event.class === "PUBLIC")) ??
+    false;
+
+  const effectiveEmail = getEffectiveEmail(
+    calendar,
+    isWriteDelegated,
+    userAddress
+  );
+  const isOrganiser = isEventOrganiser(event, effectiveEmail);
+  const isPersonalEvent = extractEventBaseUuid(event.calId) === userId;
+
+  const convertedEvent: ConvertedEvent = {
+    ...event,
+    title: formatEventChipTitle(event, t),
+    colors: event.color,
+    editable: (isPersonalEvent || isWriteDelegated) && isOrganiser && !pending,
+    priority: isPersonalEvent ? 1 : 0,
+  };
+
+  applyTimezoneToEvent(event, convertedEvent);
+
+  return convertedEvent;
+}
+
 export const eventToFullCalendarFormat = (
   filteredEvents: CalendarEvent[],
   filteredTempEvents: CalendarEvent[],
@@ -80,57 +145,16 @@ export const eventToFullCalendarFormat = (
   const { t } = useI18n();
   return filteredEvents
     .concat(filteredTempEvents.map((event) => ({ ...event, temp: true })))
-    .map((event) => {
-      const eventTimezone = event.timezone || "Etc/UTC";
-      const isAllDay = event.allday ?? false;
-      const calendar = calendars[event.calId];
-      const isWriteDelegated =
-        (calendar?.delegated &&
-          calendar.access?.write &&
-          (!event.class || event.class === "PUBLIC")) ??
-        false;
-      const effectiveEmail = isWriteDelegated
-        ? calendar?.owner?.emails?.[0]
-        : userAddress;
-
-      const isOrganiser = event.organizer
-        ? event.organizer.cal_address?.toLowerCase() ===
-          effectiveEmail?.toLowerCase()
-        : true; // if there are no organizer in the event we assume it was organized by the owner
-      const isPersonnalEvent = extractEventBaseUuid(event.calId) === userId;
-      const convertedEvent: CalendarEvent & {
-        colors: Record<string, string> | undefined;
-        editable: boolean;
-        priority: number;
-      } = {
-        ...event,
-        title: formatEventChipTitle(event, t),
-        colors: event.color,
-        editable:
-          (isPersonnalEvent || isWriteDelegated) && isOrganiser && !pending,
-        priority: isPersonnalEvent ? 1 : 0,
-      };
-
-      if (!isAllDay && event.start && eventTimezone) {
-        const startISO = convertEventDateTimeToISO(event.start, eventTimezone, {
-          isAllDay,
-        });
-        if (startISO) {
-          convertedEvent.start = startISO;
-        }
-      }
-
-      if (!isAllDay && event.end && eventTimezone) {
-        const endISO = convertEventDateTimeToISO(event.end, eventTimezone, {
-          isAllDay,
-        });
-        if (endISO) {
-          convertedEvent.end = endISO;
-        }
-      }
-
-      return convertedEvent;
-    }) as EventInput[];
+    .map((event) =>
+      buildConvertedEvent(
+        event,
+        calendars[event.calId],
+        userId,
+        userAddress,
+        pending,
+        t
+      )
+    ) as EventInput[];
 };
 
 export const extractEvents = (
@@ -245,7 +269,6 @@ export const updateCalsDetails = (
 
 export function getCalendarVisibility(acl: AclEntry[]): "private" | "public" {
   let hasRead = false;
-  // const hasFreeBusy = false;
   if (acl) {
     for (const entry of acl) {
       if (entry.principal !== "{DAV:}authenticated") continue;
@@ -288,14 +311,20 @@ function privilegeToAccess(privilege: string, currentAccess: DelegationAccess) {
       break;
     case "{DAV:}read":
       currentAccess["read"] = true;
+      currentAccess["freebusy"] = true; // read implies read-free-busy
       break;
     case "{DAV:}write-properties":
       currentAccess["write-properties"] = true;
       break;
     case "{DAV:}write":
+      currentAccess["write-properties"] = true; // write implies write-properties
       currentAccess["write"] = true;
       break;
     case "{DAV:}all":
+      currentAccess["freebusy"] = true;
+      currentAccess["read"] = true;
+      currentAccess["write-properties"] = true;
+      currentAccess["write"] = true;
       currentAccess["all"] = true;
       break;
     default:
