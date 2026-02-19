@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Divider,
   FormControl,
   FormControlLabel,
   IconButton,
@@ -183,6 +184,12 @@ export default function EventFormFields({
   // Track if user has clicked on calendar section in normal mode
   const [hasClickedCalendarSection, setHasClickedCalendarSection] =
     React.useState(false);
+  const delegatedCalendars = userPersonalCalendars.filter(
+    (cal) => cal.delegated
+  );
+  const personalCalendars = userPersonalCalendars.filter(
+    (cal) => !delegatedCalendars.includes(cal)
+  );
 
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
@@ -790,7 +797,11 @@ export default function EventFormFields({
                 handleCalendarChange(e.target.value)
               }
             >
-              {CalendarItemList(userPersonalCalendars)}
+              {CalendarItemList(personalCalendars)}
+              {delegatedCalendars.length && personalCalendars.length && (
+                <Divider />
+              )}
+              {CalendarItemList(delegatedCalendars)}
             </Select>
           </FormControl>
         )}
