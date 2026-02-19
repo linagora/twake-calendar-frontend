@@ -66,17 +66,10 @@ function EventPopover({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calList = useAppSelector((state) => state.calendars.list);
-  const userPersonalCalendars: Calendar[] = Object.values(calList || {})
-    .filter((cal) => {
-      if (
-        cal.id?.split("/")[0] === userId ||
-        (cal.delegated && cal.access?.write)
-      ) {
-        return cal;
-      }
-      return {} as Calendar;
-    })
-    .filter((cal) => cal);
+  const userPersonalCalendars: Calendar[] = Object.values(calList || {}).filter(
+    (cal) =>
+      cal.id?.split("/")[0] === userId || (cal.delegated && cal.access?.write)
+  );
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();

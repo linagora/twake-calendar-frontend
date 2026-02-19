@@ -76,11 +76,9 @@ function EventUpdateModal({
 
   const user = useAppSelector((state) => state.user);
 
-  const calendarsList = useAppSelector((state) => state.calendars.list);
-
   // if the event's calendar is delegated then it shall be the only calendar accessible from the event update modal
   const userPersonalCalendars: Calendar[] = useMemo(() => {
-    const allCalendars = Object.values(calendarsList) as Calendar[];
+    const allCalendars = Object.values(calList) as Calendar[];
     if (calList[calId]?.delegated) {
       return [calList[calId]];
     }
@@ -88,7 +86,7 @@ function EventUpdateModal({
       (calendar: Calendar) =>
         calendar.id?.split("/")[0] === user.userData?.openpaasId
     );
-  }, [calList, calId, calendarsList, user.userData?.openpaasId]);
+  }, [calList, calId, user.userData?.openpaasId]);
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
@@ -280,7 +278,7 @@ function EventUpdateModal({
 
       // Handle repetition properly - check both current event and base event
       const baseEventId = extractEventBaseUuid(eventToDisplay.uid);
-      const baseEvent = calendarsList[calId]?.events[baseEventId];
+      const baseEvent = calList[calId]?.events[baseEventId];
       const repetitionSource =
         eventToDisplay.repetition || baseEvent?.repetition;
 
@@ -348,7 +346,7 @@ function EventUpdateModal({
     event,
     calId,
     userPersonalCalendars,
-    calendarsList,
+    calList,
     masterEvent,
     isLoadingMasterEvent,
   ]);
