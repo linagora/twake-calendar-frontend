@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
-import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import {
   Box,

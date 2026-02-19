@@ -1,7 +1,7 @@
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { Box, Typography } from "@linagora/twake-mui";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-import { defaultColors } from "./utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 export function CalendarName({ calendar }: { calendar: Calendar }) {
   return (
     <Box style={{ display: "flex", flexDirection: "row", gap: 8 }}>

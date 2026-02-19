@@ -35,7 +35,7 @@ import React from "react";
 import { useI18n } from "twake-i18n";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
-import { defaultColors } from "../Calendar/utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { AddDescButton } from "./AddDescButton";

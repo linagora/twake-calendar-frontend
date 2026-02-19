@@ -114,7 +114,7 @@ describe("Calendar API", () => {
     });
   });
 
-  it("get secret link ", async () => {
+  it("get secret link without reset", async () => {
     const calLink = "/calendars/calId.json";
     (api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue("link"),
@@ -131,7 +131,7 @@ describe("Calendar API", () => {
       }
     );
   });
-  it("get secret link ", async () => {
+  it("get secret link with reset", async () => {
     const calLink = "/calendars/calId.json";
     (api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue("link"),
@@ -162,7 +162,7 @@ describe("Calendar API", () => {
     });
   });
 
-  it("When adding a sharedCal with #default as a name a new name is sent to the back", async () => {
+  it("When adding a sharedCal with #default #default is preserved", async () => {
     const mockApiPost = jest.spyOn(api, "post");
 
     const calData = {
