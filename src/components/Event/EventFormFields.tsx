@@ -188,7 +188,7 @@ export default function EventFormFields({
     (cal) => cal.delegated
   );
   const personalCalendars = userPersonalCalendars.filter(
-    (cal) => !delegatedCalendars.includes(cal)
+    (cal) => !cal.delegated
   );
 
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
@@ -798,9 +798,8 @@ export default function EventFormFields({
               }
             >
               {CalendarItemList(personalCalendars)}
-              {delegatedCalendars.length && personalCalendars.length && (
-                <Divider />
-              )}
+              {delegatedCalendars.length > 0 &&
+                personalCalendars.length > 0 && <Divider component={"li"} />}
               {CalendarItemList(delegatedCalendars)}
             </Select>
           </FormControl>
