@@ -6,7 +6,7 @@ import {
   stringAvatar,
   stringToColor,
 } from "@/components/Event/utils/eventUtils";
-import * as calendarSlice from "@/features/Calendars/CalendarSlice";
+import { DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import * as eventThunks from "@/features/Calendars/services";
 import EventPreviewModal from "@/features/Events/EventDisplayPreview";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
@@ -98,7 +98,7 @@ describe("Event Preview Display", () => {
               end: day.toISOString(),
             },
           },
-          ownerEmails: ["test@test.com"],
+          owner: { emails: ["test@test.com"] },
         },
         "otherCal/cal": {
           id: "otherCal/cal",
@@ -659,10 +659,6 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(emailButton);
 
-    const event =
-      preloadedState.calendars.list["667037022b752d0026472254/cal1"].events[
-        "event1"
-      ];
     const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Test%20Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
@@ -774,7 +770,7 @@ describe("Event Preview Display", () => {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
             color: "#FF0000",
-            ownerEmails: ownerEmails,
+            owner: { emails: ownerEmails },
             events: {
               event1: {
                 uid: "event1",
@@ -988,7 +984,7 @@ describe("Event Preview Display", () => {
                 attendee: attendees,
               },
             },
-            ownerEmails: ["test@test.com"],
+            owner: { emails: ["test@test.com"] },
           },
         },
         pending: false,
@@ -1551,6 +1547,161 @@ describe("Event Preview Display", () => {
         expect(
           screen.getByText(/eventPreview.noCount\(count\=2\)/i)
         ).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("EventDisplayPreview - delegation", () => {
+    const delegatedBaseEvent = {
+      uid: "event-1",
+      calId: "user2/cal1",
+      title: "Delegated Event",
+      start: day.toISOString(),
+      end: day.toISOString(),
+      organizer: { cal_address: "owner@example.com" },
+      attendee: [
+        { cal_address: "owner@example.com", partstat: "NEEDS-ACTION" },
+      ],
+      URL: "/calendars/user2/cal1/event-1.ics",
+    };
+
+    const makeDelegatedState = (
+      eventOverrides = {},
+      access: DelegationAccess = {
+        write: true,
+        freebusy: false,
+        read: true,
+        "write-properties": false,
+        all: false,
+      }
+    ) => ({
+      ...preloadedState,
+      calendars: {
+        list: {
+          "user2/cal1": {
+            id: "user2/cal1",
+            name: "Delegated Calendar",
+            delegated: true,
+            access,
+            owner: {
+              id: "user2",
+              firstname: "Bob",
+              lastname: "Owner",
+              emails: ["owner@example.com"],
+              preferredEmail: "owner@example.com",
+            },
+            color: { light: "#FF0000", dark: "#000" },
+            events: {
+              "event-1": { ...delegatedBaseEvent, ...eventOverrides },
+            },
+          },
+        },
+        templist: {},
+        pending: false,
+      },
+      user: {
+        userData: {
+          ...preloadedState.user.userData,
+          email: "alice@example.com",
+          openpaasId: "user1",
+        },
+      },
+    });
+
+    describe("edit button visibility", () => {
+      it("shows edit button when calendar is write-delegated and owner is organizer", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState()
+        );
+        expect(
+          screen.getByTestId("EditIcon").closest("button")
+        ).toBeInTheDocument();
+      });
+
+      it("does not show edit button when delegated but owner is not organizer", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({
+            organizer: { cal_address: "someone-else@example.com" },
+          })
+        );
+        expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+      });
+
+      it("does not show edit button when delegated with read-only access", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState(
+            {},
+            {
+              write: false,
+              freebusy: false,
+              read: true,
+              "write-properties": false,
+              all: false,
+            }
+          )
+        );
+        expect(screen.queryByTestId("EditIcon")).not.toBeInTheDocument();
+      });
+    });
+
+    describe("delete menu item visibility", () => {
+      it("shows delete option when calendar is write-delegated", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState()
+        );
+        fireEvent.click(screen.getByTestId("MoreVertIcon"));
+        expect(
+          screen.getByText("eventPreview.deleteEvent")
+        ).toBeInTheDocument();
+      });
+
+      it("does not show delete option when delegated with read-only access", () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState(
+            {},
+            {
+              write: false,
+              freebusy: false,
+              read: true,
+              "write-properties": false,
+              all: false,
+            }
+          )
+        );
+        fireEvent.click(screen.getByTestId("MoreVertIcon"));
+        expect(
+          screen.queryByText("eventPreview.deleteEvent")
+        ).not.toBeInTheDocument();
       });
     });
   });

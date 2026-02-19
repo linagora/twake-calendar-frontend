@@ -195,9 +195,9 @@ describe("CalendarSlice", () => {
       expect(getUserDetailsMock).toHaveBeenCalledWith("u3");
 
       const state = store.getState().calendars;
-      expect(state.list["u1/cal1"].owner).toContain("Alice");
-      expect(state.list["u2/cal2"].owner).toContain("Bob");
-      expect(state.list["u3/cal3"].owner).toContain("Charlie");
+      expect(state.list["u1/cal1"].owner.firstname).toContain("Alice");
+      expect(state.list["u2/cal2"].owner.firstname).toContain("Bob");
+      expect(state.list["u3/cal3"].owner.firstname).toContain("Charlie");
     });
 
     it("getCalendarsListAsync deduplicates getUserDetails calls for same ownerId", async () => {
@@ -331,8 +331,8 @@ describe("CalendarSlice", () => {
 
       expect(getUserDetailsMock).toHaveBeenCalledTimes(2);
       const state = store.getState().calendars;
-      expect(state.list["u1/cal1"].owner).toContain("Alice");
-      expect(state.list["u2/cal2"].owner).toContain("Unknown User");
+      expect(state.list["u1/cal1"].owner.firstname).toContain("Alice");
+      expect(state.list["u2/cal2"].owner.lastname).toContain("Unknown User");
       expect(result.payload.errors).toBeTruthy();
     });
 
@@ -375,8 +375,7 @@ describe("CalendarSlice", () => {
         color: { "apple:color": "#f00" },
         name: "Test",
         desc: "Desc",
-        owner: "Owner",
-        ownerEmails: ["o@example.com"],
+        owner: { firstname: "Owner", emails: ["o@example.com"] },
       };
       const state = reducer(
         initialState,
@@ -393,8 +392,7 @@ describe("CalendarSlice", () => {
         link: "/calendars/u1/c1.json",
         name: "Shared",
         desc: "Shared Desc",
-        owner: "O",
-        ownerEmails: ["o@example.com"],
+        owner: { firstname: "O", emails: ["o@example.com"] },
       };
       const mockCal = {
         cal: {
@@ -423,8 +421,7 @@ describe("CalendarSlice", () => {
           color: { "apple:color": "#aaa" },
           events: {},
           visibility: "public",
-          owner: "O",
-          ownerEmails: ["o@o.com"],
+          owner: { firstname: "O", emails: ["o@o.com"] },
           link: "/calendars/t1.json",
           description: "desc",
         } as Calendar,

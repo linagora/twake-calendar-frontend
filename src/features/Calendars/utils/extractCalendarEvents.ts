@@ -2,12 +2,13 @@ import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { parseCalendarEvent } from "@/features/Events/eventUtils";
 import { CalDavItem } from "../api/types";
+import { Calendar } from "../CalendarTypes";
 import { VCalComponent } from "../types/CalendarData";
 
 export function extractCalendarEvents(
   item: CalDavItem,
   options: {
-    calId: string;
+    cal: Calendar;
     color?: Record<string, string>;
   }
 ): CalendarEvent[] {
@@ -43,7 +44,7 @@ export function extractCalendarEvents(
       return parseCalendarEvent(
         eventProps,
         options?.color ?? defaultColors[0],
-        options.calId,
+        options.cal,
         eventURL,
         valarm
       );

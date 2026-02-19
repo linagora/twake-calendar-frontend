@@ -10,7 +10,7 @@ export interface CalendarEvent {
   transp?: string;
   start: string; // ISO date string
   end?: string;
-  class?: string;
+  class?: "PRIVATE" | "PUBLIC" | "CONFIDENTIAL";
   x_openpass_videoconference?: string;
   title?: string;
   description?: string;

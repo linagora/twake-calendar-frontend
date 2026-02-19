@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
-import { getTimezoneOffset } from "@/utils/timezone";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
@@ -9,7 +8,9 @@ import EventDuplication from "@/components/Event/EventDuplicate";
 import { handleDelete } from "@/components/Event/eventHandlers/eventHandlers";
 import { InfoRow } from "@/components/Event/InfoRow";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
-import { browserDefaultTimeZone } from "@/utils/timezone";
+import { getEffectiveEmail } from "@/utils/getEffectiveEmail";
+import { isEventOrganiser } from "@/utils/isEventOrganiser";
+import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import {
   AvatarGroup,
@@ -23,7 +24,6 @@ import {
   Typography,
   useTheme,
 } from "@linagora/twake-mui";
-import { alpha } from "@mui/material/styles";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,10 +38,12 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import { alpha } from "@mui/material/styles";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { deleteEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
+import { ToUserData } from "../User/type/OpenPaasUserData";
 import { AttendanceValidation } from "./AttendanceValidation/AttendanceValidation";
 import { createEventContext } from "./createEventContext";
 import { dlEvent } from "./EventApi";
@@ -72,7 +74,7 @@ export default function EventPreviewModal({
   const calendar = tempEvent
     ? calendars.templist[calId]
     : calendars.list[calId];
-  const event = calendar.events[eventId];
+  const event = calendar?.events[eventId];
   const user = useAppSelector((state) => state.user.userData);
   const theme = useTheme();
   const infoIconColor = alpha(theme.palette.grey[900], 0.9);
@@ -80,10 +82,19 @@ export default function EventPreviewModal({
   if (!user) return null;
 
   const isRecurring = event?.uid?.includes("/");
-  const isOwn = calendar.ownerEmails?.includes(user.email);
+  const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
+  const isDelegated = calendar.delegated;
+  const isWriteDelegated = (isDelegated && calendar.access?.write) ?? false;
+  const effectiveEmail = getEffectiveEmail(
+    calendar,
+    isWriteDelegated,
+    user.email
+  );
   const isOrganizer = event.organizer
-    ? user.email === event.organizer.cal_address
+    ? isEventOrganiser(event, effectiveEmail)
     : isOwn;
+  const isNotPrivate =
+    event.class !== "PRIVATE" && event.class !== "CONFIDENTIAL";
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
@@ -325,7 +336,7 @@ export default function EventPreviewModal({
                 <FileDownloadOutlinedIcon />
               </IconButton>
             )}
-            {isOrganizer && isOwn && (
+            {isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate)) && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -344,7 +355,7 @@ export default function EventPreviewModal({
                 <EditIcon />
               </IconButton>
             )}
-            {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+            {((isNotPrivate && !isOwn) || isOwn) && (
               <IconButton
                 size="small"
                 onClick={(e) => setToggleActionMenu(e.currentTarget)}
@@ -380,7 +391,7 @@ export default function EventPreviewModal({
                   setOpenDuplicateModal(true);
                 }}
               />
-              {isOwn && (
+              {(isOwn || isWriteDelegated) && (
                 <MenuItem
                   onClick={async () => {
                     if (isRecurring) {
@@ -434,7 +445,11 @@ export default function EventPreviewModal({
         actions={
           <AttendanceValidation
             contextualizedEvent={contextualizedEvent}
-            user={user}
+            user={
+              isWriteDelegated && calendar.owner
+                ? ToUserData(calendar.owner)
+                : user
+            }
             setAfterChoiceFunc={setAfterChoiceFunc}
             setOpenEditModePopup={setOpenEditModePopup}
           />
@@ -486,7 +501,7 @@ export default function EventPreviewModal({
               ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
           </Typography>
         </Box>
-        {((event.class !== "PRIVATE" && !isOwn) || isOwn) && (
+        {((isNotPrivate && !isOwn) || isOwn) && (
           <>
             {/* Video */}
             {event.x_openpass_videoconference && (
@@ -664,7 +679,7 @@ export default function EventPreviewModal({
             )}
           </>
         )}
-        {event.class === "PRIVATE" && !isOwn && (
+        {!isNotPrivate && !isOwn && (
           <Box
             sx={{
               backgroundColor: "#F3F4F6",

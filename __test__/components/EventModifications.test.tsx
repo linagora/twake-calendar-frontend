@@ -49,7 +49,7 @@ describe("CalendarApp integration", () => {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
             color: { light: "#FFFFFF", dark: "#000000" },
-            ownerEmails: ["alice@example.com"],
+            owner: { emails: ["alice@example.com"] },
             events: {
               event1: {
                 id: "event1",
@@ -136,7 +136,7 @@ describe("CalendarApp integration", () => {
           name: "Calendar 1",
           id: "667037022b752d0026472254/cal1",
           color: { light: "#FFFFFF", dark: "#000000" },
-          ownerEmails: ["alice@example.com"],
+          owner: { emails: ["alice@example.com"] },
           events: {
             event1: {
               id: "event1",
@@ -247,7 +247,7 @@ describe("CalendarApp integration", () => {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
             color: { light: "#FF0000", dark: "#000" },
-            ownerEmails: ["alice@example.com"],
+            owner: { emails: ["alice@example.com"] },
             events: {
               event1: {
                 id: "event1",
@@ -291,7 +291,7 @@ describe("CalendarApp integration", () => {
             name: "Calendar 1",
             id: "667037022b752d0026472254/cal1",
             color: { light: "#FFFFFF", dark: "#000000" },
-            ownerEmails: ["alice@example.com"],
+            owner: { emails: ["alice@example.com"] },
             events: {
               event1: {
                 id: "event1",

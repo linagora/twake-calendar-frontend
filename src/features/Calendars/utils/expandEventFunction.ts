@@ -15,7 +15,7 @@ export function expandEventFunction(
         end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
       });
       const events: CalendarEvent[] = extractCalendarEvents(item, {
-        calId: calendar.id,
+        cal: calendar,
         color: calendar.color,
       });
       return events;
