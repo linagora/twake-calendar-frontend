@@ -818,10 +818,20 @@ function makeRecurrenceString(
   ];
 
   const recurType: Record<string, string> = {
-    daily: t("eventPreview.days"),
-    monthly: t("eventPreview.months"),
-    yearly: t("eventPreview.years"),
+    daily: t("event.repeat.frequency.days"),
+    weekly: t("event.repeat.frequency.weeks"),
+    monthly: t("event.repeat.frequency.months"),
+    yearly: t("event.repeat.frequency.years"),
   };
+
+  if (event.repetition.interval && event.repetition.interval > 1) {
+    recur.push(
+      t("eventPreview.everyInterval", {
+        interval: event.repetition.interval,
+        unit: recurType[event.repetition.freq] ?? event.repetition.freq,
+      })
+    );
+  }
 
   if (event.repetition.byday) {
     recur.push(
@@ -832,14 +842,7 @@ function makeRecurrenceString(
       })
     );
   }
-  if (event.repetition.interval && event.repetition.interval > 1) {
-    recur.push(
-      t("eventPreview.everyInterval", {
-        interval: event.repetition.interval,
-        unit: recurType[event.repetition.freq],
-      })
-    );
-  }
+
   if (event.repetition.occurrences) {
     recur.push(
       t("eventPreview.forOccurrences", {
