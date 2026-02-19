@@ -192,12 +192,11 @@ describe("Calendar API", () => {
     expect(mockApiPost).toHaveBeenCalledWith(
       "dav/calendars/currentUserId.json",
       expect.objectContaining({
-        body: expect.stringContaining('"dav:name":"John Doe\'s calendar"'),
+        body: expect.stringContaining('"dav:name":"#default"'),
       })
     );
 
     const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body));
-    expect(callBody["dav:name"]).toBe("John Doe's calendar");
-    expect(callBody["dav:name"]).not.toBe("#default");
+    expect(callBody["dav:name"]).toBe("#default");
   });
 });

@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { AppDispatch } from "@/app/store";
+import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import {
   Box,
@@ -239,7 +240,7 @@ function ResultItem({
 
         <SquareRoundedIcon
           style={{
-            color: calendarColor ?? "#3788D8",
+            color: calendarColor ?? defaultColors[0].light,
             width: 24,
             height: 24,
             flexShrink: 0,

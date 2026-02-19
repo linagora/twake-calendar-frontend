@@ -69,15 +69,11 @@ export async function addSharedCalendar(
     body: JSON.stringify({
       id: calId,
       ...cal.cal,
-      "dav:name":
-        cal.cal["dav:name"] === "#default"
-          ? (cal.owner?.displayName ?? "Unknown") + "'s calendar"
-          : cal.cal["dav:name"],
+      "dav:name": cal.cal["dav:name"],
       "calendarserver:source": {
         acl: cal.cal.acl,
         calendarHomeId: cal.cal.id,
         color: cal.cal["apple:color"],
-
         description: cal.cal["caldav:description"],
         href: cal.cal._links.self.href,
         id: cal.cal.id,
