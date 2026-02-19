@@ -14,7 +14,7 @@ import { ResponsiveDialog } from "../Dialog";
 import { AccessTab } from "./AccessTab";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
-import { defaultColors } from "./utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 
 function CalendarPopover({
   open,
