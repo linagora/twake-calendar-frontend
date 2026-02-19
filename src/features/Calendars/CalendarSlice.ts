@@ -251,7 +251,6 @@ const CalendarSlice = createSlice({
           description: action.payload.desc,
           name: action.payload.name,
           owner: action.payload.owner,
-          ownerEmails: action.payload.ownerEmails,
           events: {},
         } as Calendar;
         state.error = null;
@@ -270,7 +269,6 @@ const CalendarSlice = createSlice({
           name: action.payload.name,
           events: {},
           owner: action.payload.owner,
-          ownerEmails: action.payload.ownerEmails,
         } as Calendar;
         state.error = null;
       })

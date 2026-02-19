@@ -109,8 +109,7 @@ describe("CalendarPopover (editing mode)", () => {
     name: "Work Calendar",
     description: "Team meetings",
     color: { light: "#33B679" },
-    owner: "alice",
-    ownerEmails: ["alice@example.com"],
+    owner: { firstname: "alice", emails: ["alice@example.com"] },
     visibility: "public",
     events: {},
   };
@@ -214,8 +213,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
     name: "Work Calendar",
     description: "Team meetings",
     color: { light: "#33B679" },
-    owner: "alice",
-    ownerEmails: ["alice@example.com"],
+    owner: { firstname: "alice", emails: ["alice@example.com"] },
     visibility: "public",
     events: {},
   };

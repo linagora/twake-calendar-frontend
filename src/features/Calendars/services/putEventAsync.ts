@@ -15,7 +15,7 @@ export const putEventAsync = createAsyncThunk<
     try {
       await putEvent(
         newEvent,
-        cal.ownerEmails ? cal.ownerEmails[0] : undefined
+        cal.owner?.emails ? cal.owner.emails[0] : undefined
       );
 
       return {

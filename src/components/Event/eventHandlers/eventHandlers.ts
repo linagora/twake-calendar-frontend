@@ -12,6 +12,7 @@ import { PartStat } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
 import { userData } from "@/features/User/userDataTypes";
 import { buildFamilyName } from "@/utils/buildFamilyName";
+import { isEventOrganiser } from "@/utils/isEventOrganiser";
 
 function updateEventAttendees(
   event: CalendarEvent,
@@ -23,9 +24,7 @@ function updateEventAttendees(
   }
 
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
-  const isOrganizer =
-    !event.organizer ||
-    event.organizer.cal_address?.toLowerCase() === user.email?.toLowerCase();
+  const isOrganizer = isEventOrganiser(event, user.email);
   if (eventHasNoAttendees) {
     const userdata = createAttendee({
       cal_address: user.email,

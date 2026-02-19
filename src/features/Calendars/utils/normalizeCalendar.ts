@@ -1,7 +1,10 @@
-import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
+import {
+  getCalendarDelegationAccess,
+  getCalendarVisibility,
+} from "@/components/Calendar/utils/calendarUtils";
 import { CalendarData } from "../types/CalendarData";
 
-export function normalizeCalendar(rawCalendar: CalendarData) {
+export function normalizeCalendar(rawCalendar: CalendarData, userId: string) {
   const description = rawCalendar["caldav:description"];
   let delegated = false;
   let source = rawCalendar["calendarserver:source"]
@@ -18,6 +21,8 @@ export function normalizeCalendar(rawCalendar: CalendarData) {
   const id = source.replace("/calendars/", "").replace(".json", "");
   const ownerId = id.split("/")[0];
   const visibility = getCalendarVisibility(rawCalendar["acl"] ?? []);
+  const access = getCalendarDelegationAccess(rawCalendar["acl"] ?? [], userId);
+
   return {
     cal: rawCalendar,
     description,
@@ -27,5 +32,6 @@ export function normalizeCalendar(rawCalendar: CalendarData) {
     id,
     ownerId,
     visibility,
+    access,
   };
 }

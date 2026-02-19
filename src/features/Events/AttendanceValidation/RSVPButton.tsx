@@ -40,8 +40,10 @@ export function RSVPButton({
 }: RSVPButtonProps) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
-  const { currentUserAttendee } = contextualizedEvent;
+  const { currentUserAttendee, calendar } = contextualizedEvent;
   const showLoading = isLoading && loadingValue === rsvpValue;
+  const isReadDelegated =
+    calendar.delegated && calendar.access?.read && !calendar.access?.write;
   const previousPartstatRef = useRef<PartStat | undefined>(
     currentUserAttendee?.partstat
   );
@@ -67,7 +69,6 @@ export function RSVPButton({
     if (previousPartstatRef.current === rsvpValue) {
       return;
     }
-
     // For recurring events, don't set loading yet - wait for modal choice
     if (!contextualizedEvent.isRecurring) {
       onLoadingChange(true, rsvpValue);
@@ -120,7 +121,7 @@ export function RSVPButton({
           : {},
       }}
       onClick={handleClick}
-      disabled={isLoading}
+      disabled={isLoading || isReadDelegated}
     >
       <Box display="flex" alignItems="center" gap={1}>
         {showLoading && <CircularProgress size={20} color="inherit" />}

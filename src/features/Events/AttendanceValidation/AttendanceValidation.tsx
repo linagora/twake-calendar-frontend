@@ -1,10 +1,10 @@
+import { PartStat } from "@/features/User/models/attendee";
 import { userData } from "@/features/User/userDataTypes";
 import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
 import { RSVPButton } from "./RSVPButton";
-import { PartStat } from "@/features/User/models/attendee";
 
 interface AttendanceValidationProps {
   contextualizedEvent: ContextualizedEvent;
@@ -31,7 +31,14 @@ export function AttendanceValidation({
     !(contextualizedEvent.event?.attendee?.length > 0) &&
     !contextualizedEvent.event?.organizer;
 
-  if (!((currentUserAttendee || hasNoAttendeesOrOrganizer) && isOwn)) {
+  const createByTheUser = currentUserAttendee || hasNoAttendeesOrOrganizer;
+  const editRightInSelfCalendar = createByTheUser && isOwn;
+  const isDelegatedPublicEvent =
+    contextualizedEvent.calendar.delegated &&
+    (!contextualizedEvent.event.class ||
+      contextualizedEvent.event.class === "PUBLIC");
+
+  if (!(editRightInSelfCalendar || isDelegatedPublicEvent)) {
     return null;
   }
 
