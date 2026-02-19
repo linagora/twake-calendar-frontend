@@ -35,6 +35,7 @@ import React from "react";
 import { useI18n } from "twake-i18n";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
+import { defaultColors } from "../Calendar/utils/calendarColorsUtils";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { AddDescButton } from "./AddDescButton";
@@ -775,7 +776,7 @@ export default function EventFormFields({
                 sx={{
                   color:
                     userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.color?.light ?? "#3788D8",
+                      ?.color?.light ?? defaultColors[0].light,
                   width: 24,
                   height: 24,
                 }}
