@@ -1,7 +1,8 @@
+import { type MutableRefObject } from "react";
 import type { WebSocketWithCleanup } from "./types";
 
 interface WebSocketState {
-  socketRef: React.MutableRefObject<WebSocketWithCleanup | null> | null;
+  socketRef: MutableRefObject<WebSocketWithCleanup | null> | null;
   triggerReconnect: (() => void) | null;
   isConnecting: boolean;
 }
@@ -24,6 +25,6 @@ export function setWebSocketConnecting(value: boolean) {
   state.isConnecting = value;
 }
 
-export function getWebSocketState() {
+export function getWebSocketState(): Readonly<WebSocketState> {
   return state;
 }

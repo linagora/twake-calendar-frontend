@@ -1,12 +1,12 @@
-// connection/lifecycle/assertWebSocketAlive.ts
-
+import { type MutableRefObject } from "react";
 import type { WebSocketWithCleanup } from "../types";
 import { getWebSocketState } from "../webSocketState";
 
-const TIMEOUT_MS = window.WS_PING_TIMEOUT_PERIOD_MS;
+const TIMEOUT_MS = window.WS_PING_TIMEOUT_PERIOD_MS ?? 10_000;
+let inFlightCheck: Promise<void> | null = null;
 
 function waitForSocketOpen(
-  socketRef: React.MutableRefObject<WebSocketWithCleanup | null>
+  socketRef: MutableRefObject<WebSocketWithCleanup | null>
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + TIMEOUT_MS;
@@ -23,6 +23,7 @@ function waitForSocketOpen(
 }
 
 export function assertWebSocketAlive(): Promise<void> {
+  if (inFlightCheck) return inFlightCheck;
   const { socketRef, triggerReconnect, isConnecting } = getWebSocketState();
 
   // Not registered yet or mid-bootstrap — don't interfere, don't block
@@ -31,17 +32,16 @@ export function assertWebSocketAlive(): Promise<void> {
   const socket = socketRef.current;
 
   if (!socket || socket.readyState !== WebSocket.OPEN) {
-    // Already trying to connect — just wait for it, don't trigger another reconnect
     triggerReconnect();
     return waitForSocketOpen(socketRef);
   }
 
-  return new Promise((resolve) => {
+  const promise = new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       cleanup();
       console.warn("[WS] Pong not received — triggering reconnect");
       triggerReconnect();
-      waitForSocketOpen(socketRef).then(resolve);
+      waitForSocketOpen(socketRef).then(resolve, reject);
     }, TIMEOUT_MS);
 
     const handlePong = (event: MessageEvent) => {
@@ -63,5 +63,9 @@ export function assertWebSocketAlive(): Promise<void> {
 
     socket.addEventListener("message", handlePong);
     socket.send(JSON.stringify({ type: "ping" }));
+  }).finally(() => {
+    inFlightCheck = null;
   });
+  inFlightCheck = promise;
+  return promise;
 }

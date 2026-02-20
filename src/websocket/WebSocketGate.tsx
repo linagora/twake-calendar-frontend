@@ -196,6 +196,7 @@ export function WebSocketGate() {
         abortController.abort();
         connectTimeoutRef.current = null;
         isConnectingRef.current = false;
+        setWebSocketConnecting(false);
         cleanup();
 
         scheduleReconnect();
@@ -354,7 +355,7 @@ export function WebSocketGate() {
 
   useEffect(() => {
     registerWebSocketState(socketRef, triggerReconnect);
-  }, [triggerReconnect, socketRef]);
+  }, [triggerReconnect]);
 
   return websocketStatus ? (
     <WebSocketStatusSnackbar
