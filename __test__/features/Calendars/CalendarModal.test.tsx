@@ -441,7 +441,7 @@ describe("CalendarPopover - Tabs Scenarios", () => {
   });
 
   it("fetches and resets the secret link", async () => {
-    window.CALENDAR_BASE_URL = "https://cal.example.org";
+    window.DAV_BASE_URL = "https://cal.example.org";
 
     (getSecretLink as jest.Mock)
       .mockResolvedValueOnce({
