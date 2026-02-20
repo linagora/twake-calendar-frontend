@@ -183,10 +183,7 @@ export function parseCalendarEvent(
   }
   event.calId = calendar.id;
   event.URL = calendar.delegated
-    ? buildDelegatedEventURL(calendar, {
-        ...event,
-        URL: eventURL,
-      } as CalendarEvent)
+    ? buildDelegatedEventURL(calendar, eventURL)
     : eventURL;
   if (!event.uid || !event.start) {
     console.error(
@@ -565,12 +562,12 @@ export function detectRecurringEventChanges(
 
 export function buildDelegatedEventURL(
   calendar: Calendar,
-  event: CalendarEvent
+  eventURL: string
 ): string {
   const calendarBasePath = calendar.link.replace(/\.json$/, "");
-  const eventFilename = event.URL.split("/").pop();
+  const eventFilename = eventURL.split("/").pop();
   if (!eventFilename) {
-    throw new Error(`Cannot extract filename from event URL: ${event.URL}`);
+    throw new Error(`Cannot extract filename from event URL: ${eventURL}`);
   }
   return `${calendarBasePath}/${eventFilename}`;
 }
