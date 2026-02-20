@@ -1,12 +1,16 @@
 import { Auth } from "@/features/User/oidcAuth";
+import { assertWebSocketAlive } from "@/websocket/connection/lifecycle/assertWebSocketAlive";
 import ky from "ky";
 import { getRetryDelay } from "./getRetryDelay";
+
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 const RETRY_CONFIG = {
   maxRetries: 10,
   initialDelay: 1000,
   maxDelay: 120000,
 };
+
 export const api = ky.extend({
   prefixUrl: window.CALENDAR_BASE_URL,
   retry: {
@@ -27,6 +31,10 @@ export const api = ky.extend({
         const access_token = saved?.access_token;
         if (access_token) {
           request.headers.set("Authorization", `Bearer ${access_token}`);
+        }
+
+        if (MUTATING_METHODS.has(request.method)) {
+          await assertWebSocketAlive();
         }
         return request;
       },
