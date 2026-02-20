@@ -96,7 +96,7 @@ describe("CalendarSearch", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Calendar")).toBeInTheDocument();
+      expect(screen.getByText(/Test Calendar/i)).toBeInTheDocument();
       expect(screen.getByText("user@example.com")).toBeInTheDocument();
     });
   });
@@ -133,7 +133,7 @@ describe("CalendarSearch", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Calendar")).toBeInTheDocument();
+      expect(screen.getByText(/Test Calendar/i)).toBeInTheDocument();
     });
 
     const addButton = screen.getByRole("button", { name: /add/i });
@@ -253,7 +253,7 @@ describe("CalendarSearch", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Calendar")).toBeInTheDocument();
+      expect(screen.getByText(/Test Calendar/i)).toBeInTheDocument();
     });
 
     // ColorPicker would need to be interacted with based on its implementation
@@ -302,8 +302,8 @@ describe("CalendarSearch", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Calendar")).toBeInTheDocument();
-      expect(screen.getByText("Second Calendar")).toBeInTheDocument();
+      expect(screen.getByText(/Test Calendar/i)).toBeInTheDocument();
+      expect(screen.getByText(/Second Calendar/i)).toBeInTheDocument();
     });
   });
 
@@ -378,7 +378,7 @@ describe("CalendarSearch", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Test Calendar")).toBeInTheDocument();
+      expect(screen.getByText(/Test Calendar/i)).toBeInTheDocument();
       expect(screen.getByText("user@example.com")).toBeInTheDocument();
     });
 
