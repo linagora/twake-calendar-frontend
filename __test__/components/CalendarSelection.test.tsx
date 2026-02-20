@@ -24,20 +24,20 @@ describe("CalendarSelection", () => {
       name: "Calendar personal",
       id: "user1/cal1",
       color: "#FF0000",
-      owner: { emails: ["alice@example.com"] },
+      owner: { emails: ["alice@example.com"], lastname: "alice" },
     },
     "user2/cal1": {
       name: "Calendar delegated",
       delegated: true,
       id: "user2/cal1",
       color: "#00FF00",
-      owner: { emails: ["bob@example.com"] },
+      owner: { emails: ["bob@example.com"], lastname: "bob" },
     },
     "user3/cal1": {
       name: "Calendar shared",
       id: "user3/cal1",
       color: "#0000FF",
-      owner: { emails: ["charlie@example.com"] },
+      owner: { emails: ["charlie@example.com"], lastname: "charlie" },
     },
   };
   beforeAll(() => {
@@ -61,8 +61,10 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(screen.getByLabelText(/Calendar delegated/i)).not.toBeChecked();
-    expect(screen.getByLabelText(/Calendar shared/i)).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated - bob")).not.toBeChecked();
+    expect(
+      screen.getByLabelText("Calendar shared - charlie")
+    ).not.toBeChecked();
   });
 
   it("toggles a calendar selection on click", () => {
