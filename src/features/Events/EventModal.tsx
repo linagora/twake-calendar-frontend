@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { RootState } from "@/app/store";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";
 import { addDays } from "@/components/Event/utils/dateRules";
@@ -27,7 +26,6 @@ import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
 import { Box, Button } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
-import { createSelector } from "@reduxjs/toolkit";
 import React, {
   startTransition,
   useCallback,
@@ -42,6 +40,8 @@ import { putEventAsync } from "../Calendars/services";
 import { AsyncThunkResult } from "../Calendars/types/AsyncThunkResult";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
+import { buildDelegatedEventURL } from "./eventUtils";
+import { useEventOrganizer } from "./useEventOrganizer";
 
 function EventPopover({
   open,
@@ -62,24 +62,13 @@ function EventPopover({
   const dispatch = useAppDispatch();
   const { t } = useI18n();
 
-  const organizer = useAppSelector((state) => state.user.organiserData);
+  const userOrganizer = useAppSelector((state) => state.user.organiserData);
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const calList = useAppSelector((state) => state.calendars.list);
-  const selectPersonalCalendars = createSelector(
-    (state: RootState) => state.calendars,
-    (calendars: RootState["calendars"]) =>
-      Object.keys(calendars.list || {})
-        .map((id) => {
-          if (id.split("/")[0] === userId) {
-            return calendars.list?.[id];
-          }
-          return {} as Calendar;
-        })
-        .filter((calendar) => calendar.id)
-  );
-  const userPersonalCalendars: Calendar[] = useAppSelector(
-    selectPersonalCalendars
+  const userPersonalCalendars: Calendar[] = Object.values(calList || {}).filter(
+    (cal) =>
+      cal.id?.split("/")[0] === userId || (cal.delegated && cal.access?.write)
   );
 
   const timezoneList = useMemo(() => {
@@ -121,6 +110,16 @@ function EventPopover({
   const [repetition, setRepetition] = useState<RepetitionObject>(
     event?.repetition ?? ({} as RepetitionObject)
   );
+
+  // Derive the effective organizer based on the selected calendar.
+  // When a delegated calendar is selected, the organizer must be the
+  // calendar owner, not the logged-in user.
+  const { organizer } = useEventOrganizer({
+    calendarid,
+    calList,
+    userOrganizer,
+  });
+
   const [attendees, setAttendees] = useState<userAttendee[]>(
     event?.attendee
       ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
@@ -728,11 +727,13 @@ function EventPopover({
       console.error("No target calendar available to save event");
       return;
     }
-
+    const newEventURL = `/calendars/${targetCalendar.id}/${newEventUID}.ics`;
     const newEvent: CalendarEvent = {
       calId: targetCalendar.id,
       title,
-      URL: `/calendars/${targetCalendar.id}/${newEventUID}.ics`,
+      URL: targetCalendar.delegated
+        ? buildDelegatedEventURL(targetCalendar, newEventURL)
+        : newEventURL,
       start: "",
       allday,
       uid: newEventUID,
@@ -865,6 +866,7 @@ function EventPopover({
       );
     }
   };
+
   const dialogActions = (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {!showMore && (

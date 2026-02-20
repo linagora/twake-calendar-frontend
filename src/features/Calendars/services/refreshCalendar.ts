@@ -65,7 +65,7 @@ export const refreshCalendarWithSyncToken = createAsyncThunk<
         calId: calendar.id,
         deletedEvents: toDelete.map((eventURL) =>
           calendar.delegated
-            ? buildDelegatedEventURL(calendar, { URL: eventURL })
+            ? buildDelegatedEventURL(calendar, eventURL)
             : eventURL
         ),
         createdOrUpdatedEvents: createdOrUpdatedEvents
