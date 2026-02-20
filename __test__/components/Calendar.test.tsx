@@ -76,7 +76,7 @@ describe("CalendarSelection", () => {
           delegated: true,
           id: "user2/cal1",
           color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+          owner: { emails: ["alice@example.com"], lastname: "alice" },
           events: {
             event1: {
               id: "event1",
@@ -107,7 +107,7 @@ describe("CalendarSelection", () => {
           name: "Calendar shared",
           id: "user3/cal1",
           color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+          owner: { emails: ["alice@example.com"], lastname: "alice" },
           events: {
             event1: {
               id: "event1",
@@ -151,8 +151,12 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Calendar delegated - alice")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Calendar shared - alice")
+    ).toBeInTheDocument();
   });
   it("open accordeon when clicking on button only", async () => {
     const mockCalendarRef = { current: null };
@@ -167,8 +171,12 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
-    expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Calendar delegated - alice")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Calendar shared - alice")
+    ).toBeInTheDocument();
 
     const sharedAccordionSummary = screen
       .getByText("calendar.other")
@@ -227,7 +235,7 @@ describe("CalendarSelection", () => {
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
-    const checkbox = screen.getByLabelText("Calendar delegated");
+    const checkbox = screen.getByLabelText("Calendar delegated - alice");
 
     expect(
       screen.getByTestId(
@@ -254,7 +262,7 @@ describe("CalendarSelection", () => {
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
-    const checkbox = screen.getByLabelText("Calendar shared");
+    const checkbox = screen.getByLabelText("Calendar shared - alice");
 
     // checkbox unchecked : events hidden
     expect(
@@ -287,8 +295,8 @@ describe("CalendarSelection", () => {
     });
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(screen.getByLabelText("Calendar delegated")).toBeChecked();
-    expect(screen.getByLabelText("Calendar shared")).toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated - alice")).toBeChecked();
+    expect(screen.getByLabelText("Calendar shared - alice")).toBeChecked();
   });
   it("persist selected calendars in local storage", async () => {
     const mockCalendarRef = { current: null };
@@ -300,12 +308,14 @@ describe("CalendarSelection", () => {
     });
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
-    expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
+    expect(
+      screen.getByLabelText("Calendar delegated - alice")
+    ).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar shared - alice")).not.toBeChecked();
 
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
-      fireEvent.click(screen.getByLabelText("Calendar shared"));
+      fireEvent.click(screen.getByLabelText("Calendar shared - alice"));
     });
 
     expect(localStorage.getItem("selectedCalendars")).toBe('["user3/cal1"]');
@@ -709,10 +719,10 @@ describe("calendar Availability search", () => {
       );
 
       const selectedCalls = spy.mock.calls.filter(
-        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
+        (call) => call[0].calId === "user1/cal1"
       );
-      const hiddenCalls = spy.mock.calls.filter(
-        (call: { calId: string }[]) =>
+      spy.mock.calls.filter(
+        (call) =>
           call[0].calId === "user1/cal2" || call[0].calId === "user1/cal3"
       );
 
@@ -745,13 +755,12 @@ describe("calendar Availability search", () => {
       );
 
       const callsForCal1 = spy.mock.calls.filter(
-        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
+        (call) => call[0].calId === "user1/cal1"
       );
 
       const uniqueRanges = new Set(
         callsForCal1.map(
-          (call: { match: { end: string; start: string } }[]) =>
-            `${call[0].match.start}_${call[0].match.end}`
+          (call) => `${call[0].match.start}_${call[0].match.end}`
         )
       );
 
@@ -762,8 +771,8 @@ describe("calendar Availability search", () => {
       const stateWithUndefinedCalendars = {
         ...preloadedState,
         calendars: {
-          list: undefined as any,
-          templist: undefined as any,
+          list: undefined,
+          templist: undefined,
           pending: false,
         },
       };
@@ -783,7 +792,7 @@ describe("calendar Availability search", () => {
         ...preloadedState,
         calendars: {
           ...preloadedState.calendars,
-          templist: undefined as any,
+          templist: undefined,
         },
       };
 
