@@ -15,7 +15,6 @@ import {
   ListItem,
   Menu,
   MenuItem,
-  Typography,
 } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -25,6 +24,7 @@ import { useI18n } from "twake-i18n";
 import CalendarPopover from "./CalendarModal";
 import CalendarSearch from "./CalendarSearch";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
+import { OwnerCaption } from "./OwnerCaption";
 
 function CalendarAccordion({
   title,
@@ -326,17 +326,10 @@ function CalendarSelector({
             >
               {displayName}
             </span>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                wordBreak: "break-word",
-              }}
-            >
-              {showCaption && ownerDisplayName}
-            </Typography>
+            <OwnerCaption
+              showCaption={showCaption}
+              ownerDisplayName={ownerDisplayName ?? ""}
+            />
           </div>
         </label>
         <IconButton className="MoreBtn" onClick={handleClick}>
