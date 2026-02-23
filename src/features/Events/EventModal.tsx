@@ -16,6 +16,7 @@ import {
   saveEventFormDataToTemp,
   showErrorNotification,
 } from "@/utils/eventFormTempStorage";
+import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
 import {
   browserDefaultTimeZone,
   getTimezoneOffset,
@@ -61,6 +62,7 @@ function EventPopover({
 }) {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
+  const selectedCalendarIds = useSelectedCalendars();
 
   const userOrganizer = useAppSelector((state) => state.user.organiserData);
   const userId =
@@ -98,10 +100,25 @@ function EventPopover({
   const [location, setLocation] = useState(event?.location ?? "");
   const [start, setStart] = useState(event?.start ? event.start : "");
   const [end, setEnd] = useState(event?.end ? event.end : "");
-  const defaultCalendarId = useMemo(
-    () => userPersonalCalendars[0]?.id ?? "",
-    [userPersonalCalendars]
-  );
+  const defaultCalendarId = useMemo(() => {
+    const selectedAndWritable = Object.values(calList ?? {})
+      .filter((cal) => selectedCalendarIds.includes(cal.id))
+      .filter(
+        (cal) =>
+          (cal.delegated && cal.access?.write) ||
+          userId === cal.id?.split("/")[0]
+      );
+
+    if (selectedAndWritable.length > 0) {
+      return selectedAndWritable[0].id!;
+    }
+
+    const firstPersonal = Object.values(calList ?? {}).find(
+      (cal) =>
+        cal.id?.split("/")[0] === userId || (cal.delegated && cal.access?.write)
+    );
+    return firstPersonal?.id ?? "";
+  }, [selectedCalendarIds, calList, userId]);
 
   const [calendarid, setCalendarid] = useState(
     event?.calId ?? defaultCalendarId
@@ -146,17 +163,20 @@ function EventPopover({
   const userPersonalCalendarsRef = useRef(userPersonalCalendars);
   // Track when restoring from error to prevent other useEffects from overriding restored data
   const isRestoringFromErrorRef = useRef(false);
+  // Track whether the user has explicitly picked a calendar so we don't override their choice
+  const isCalendarIdUserSelectedRef = useRef(false);
 
   // Update ref when userPersonalCalendars changes
   useEffect(() => {
     userPersonalCalendarsRef.current = userPersonalCalendars;
   }, [userPersonalCalendars]);
 
+  // Sync calendarid whenever defaultCalendarId resolves, unless the user already picked one
   useEffect(() => {
-    if (!calendarid && defaultCalendarId) {
+    if (!isCalendarIdUserSelectedRef.current && defaultCalendarId) {
       setCalendarid(defaultCalendarId);
     }
-  }, [calendarid, defaultCalendarId]);
+  }, [defaultCalendarId]);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -606,6 +626,12 @@ function EventPopover({
     []
   );
 
+  // Wrap setCalendarid so we can track explicit user selections
+  const handleCalendaridChange = useCallback((id: string) => {
+    isCalendarIdUserSelectedRef.current = true;
+    setCalendarid(id);
+  }, []);
+
   const handleClose = () => {
     // Clear temp data when user manually closes modal
     clearEventFormTempData("create");
@@ -615,6 +641,7 @@ function EventPopover({
     setStart("");
     setEnd("");
     shouldSyncFromRangeRef.current = true; // Reset for next time
+    isCalendarIdUserSelectedRef.current = false; // Reset so next open gets fresh default
   };
 
   // Function to save current form data to temp storage
@@ -926,7 +953,7 @@ function EventPopover({
         timezone={timezone}
         setTimezone={setTimezone}
         calendarid={calendarid}
-        setCalendarid={setCalendarid}
+        setCalendarid={handleCalendaridChange}
         hasVideoConference={hasVideoConference}
         setHasVideoConference={setHasVideoConference}
         meetingLink={meetingLink}
