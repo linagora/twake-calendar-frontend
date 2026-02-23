@@ -262,6 +262,20 @@ function CalendarSelector({
     () => trimLongTextWithoutSpace(calendars[id].name),
     [calendars, id]
   );
+
+  const ownerDisplayName = useMemo(
+    () => makeDisplayName(calendars[id]),
+    [calendars, id]
+  );
+
+  const displayName = useMemo(
+    () => renameDefault(trimmedName, ownerDisplayName ?? "", t, isPersonal),
+    [trimmedName, ownerDisplayName, t, isPersonal]
+  );
+
+  const showCaption =
+    !isPersonal && trimmedName !== "#default" && ownerDisplayName != null;
+
   return (
     <>
       <ListItem
@@ -293,22 +307,14 @@ function CalendarSelector({
             size="small"
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
-            inputProps={{
-              "aria-label": renameDefault(
-                trimmedName,
-                makeDisplayName(calendars[id]) ?? "",
-                t,
-                isPersonal
-              ),
-            }}
+            inputProps={{ "aria-label": displayName }}
           />
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              padding:
-                !isPersonal && trimmedName !== "#default" ? "6px" : undefined,
+              padding: showCaption ? "6px" : undefined,
             }}
           >
             <span
@@ -318,12 +324,7 @@ function CalendarSelector({
                 wordBreak: "break-word",
               }}
             >
-              {renameDefault(
-                trimmedName,
-                makeDisplayName(calendars[id]) ?? "",
-                t,
-                isPersonal
-              )}
+              {displayName}
             </span>
             <Typography
               variant="caption"
@@ -334,9 +335,7 @@ function CalendarSelector({
                 wordBreak: "break-word",
               }}
             >
-              {!isPersonal &&
-                trimmedName !== "#default" &&
-                makeDisplayName(calendars[id])}
+              {showCaption && ownerDisplayName}
             </Typography>
           </div>
         </label>
