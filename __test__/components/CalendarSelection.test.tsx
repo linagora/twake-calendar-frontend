@@ -61,10 +61,8 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(screen.getByLabelText("Calendar delegated - bob")).not.toBeChecked();
-    expect(
-      screen.getByLabelText("Calendar shared - charlie")
-    ).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
   });
 
   it("toggles a calendar selection on click", () => {

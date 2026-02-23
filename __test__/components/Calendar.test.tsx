@@ -151,12 +151,8 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Calendar delegated - alice")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Calendar shared - alice")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
   });
   it("open accordeon when clicking on button only", async () => {
     const mockCalendarRef = { current: null };
@@ -171,12 +167,8 @@ describe("CalendarSelection", () => {
     expect(screen.getByText("calendar.other")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Calendar personal")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Calendar delegated - alice")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Calendar shared - alice")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar delegated")).toBeInTheDocument();
+    expect(screen.getByLabelText("Calendar shared")).toBeInTheDocument();
 
     const sharedAccordionSummary = screen
       .getByText("calendar.other")
@@ -235,7 +227,7 @@ describe("CalendarSelection", () => {
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
-    const checkbox = screen.getByLabelText("Calendar delegated - alice");
+    const checkbox = screen.getByLabelText("Calendar delegated");
 
     expect(
       screen.getByTestId(
@@ -262,7 +254,7 @@ describe("CalendarSelection", () => {
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
     });
-    const checkbox = screen.getByLabelText("Calendar shared - alice");
+    const checkbox = screen.getByLabelText("Calendar shared");
 
     // checkbox unchecked : events hidden
     expect(
@@ -295,8 +287,8 @@ describe("CalendarSelection", () => {
     });
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(screen.getByLabelText("Calendar delegated - alice")).toBeChecked();
-    expect(screen.getByLabelText("Calendar shared - alice")).toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated")).toBeChecked();
+    expect(screen.getByLabelText("Calendar shared")).toBeChecked();
   });
   it("persist selected calendars in local storage", async () => {
     const mockCalendarRef = { current: null };
@@ -308,14 +300,12 @@ describe("CalendarSelection", () => {
     });
 
     expect(screen.getByLabelText("Calendar personal")).toBeChecked();
-    expect(
-      screen.getByLabelText("Calendar delegated - alice")
-    ).not.toBeChecked();
-    expect(screen.getByLabelText("Calendar shared - alice")).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar delegated")).not.toBeChecked();
+    expect(screen.getByLabelText("Calendar shared")).not.toBeChecked();
 
     await act(async () => {
       fireEvent.click(screen.getByLabelText("Calendar personal"));
-      fireEvent.click(screen.getByLabelText("Calendar shared - alice"));
+      fireEvent.click(screen.getByLabelText("Calendar shared"));
     });
 
     expect(localStorage.getItem("selectedCalendars")).toBe('["user3/cal1"]');

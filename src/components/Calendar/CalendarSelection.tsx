@@ -15,6 +15,7 @@ import {
   ListItem,
   Menu,
   MenuItem,
+  Typography,
 } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -292,21 +293,52 @@ function CalendarSelector({
             size="small"
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
+            inputProps={{
+              "aria-label": renameDefault(
+                trimmedName,
+                makeDisplayName(calendars[id]) ?? "",
+                t,
+                isPersonal
+              ),
+            }}
           />
-          <span
+          <div
             style={{
+              display: "flex",
+              flexDirection: "column",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              wordBreak: "break-word",
+              padding:
+                !isPersonal && trimmedName !== "#default" ? "6px" : undefined,
             }}
           >
-            {renameDefault(
-              trimmedName,
-              makeDisplayName(calendars[id]) ?? "",
-              t,
-              isPersonal
-            )}
-          </span>
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+              }}
+            >
+              {renameDefault(
+                trimmedName,
+                makeDisplayName(calendars[id]) ?? "",
+                t,
+                isPersonal
+              )}
+            </span>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+              }}
+            >
+              {!isPersonal &&
+                trimmedName !== "#default" &&
+                makeDisplayName(calendars[id])}
+            </Typography>
+          </div>
         </label>
         <IconButton className="MoreBtn" onClick={handleClick}>
           <MoreHorizIcon />

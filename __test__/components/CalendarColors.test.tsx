@@ -73,7 +73,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -117,7 +117,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -170,7 +170,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -205,7 +205,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -237,7 +237,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -286,7 +286,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -316,7 +316,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });
@@ -351,7 +351,7 @@ describe("CalendarSearch", () => {
 
     await act(async () => {
       renderWithProviders(
-        <CalendarSearch anchorEl={null} open={true} onClose={mockOnClose} />,
+        <CalendarSearch open={true} onClose={mockOnClose} />,
         preloadedState
       );
     });

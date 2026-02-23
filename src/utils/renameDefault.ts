@@ -11,7 +11,7 @@ export function renameDefault(
     return t("calendar.defaultCalendarName", { name: ownerName });
   }
   if (davName !== "#default") {
-    return isOwnCalendar ? davName : `${davName} - ${ownerName}`;
+    return davName;
   }
   if (isOwnCalendar) {
     return t("calendar.defaultPersonalCalendarName");
