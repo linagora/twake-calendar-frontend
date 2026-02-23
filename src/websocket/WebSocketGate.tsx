@@ -7,14 +7,18 @@ import { useI18n } from "twake-i18n";
 import type { WebSocketWithCleanup } from "./connection";
 import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
 import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
-import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconnect";
-import { updateCalendars } from "./messaging/updateCalendars";
-import { syncCalendarRegistrations } from "./operations";
-import { WebSocketStatusSnackbar } from "./WebSocketStatusSnackbar";
 import {
   setupWebSocketPing,
   type PingCleanup,
 } from "./connection/lifecycle/pingWebSocket";
+import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconnect";
+import {
+  registerWebSocketState,
+  setWebSocketConnecting,
+} from "./connection/webSocketState";
+import { updateCalendars } from "./messaging/updateCalendars";
+import { syncCalendarRegistrations } from "./operations";
+import { WebSocketStatusSnackbar } from "./WebSocketStatusSnackbar";
 
 export function WebSocketGate() {
   const socketRef = useRef<WebSocketWithCleanup | null>(null);
@@ -183,6 +187,7 @@ export function WebSocketGate() {
     const connect = async () => {
       if (isConnectingRef.current || isSocketOpen) return;
       isConnectingRef.current = true;
+      setWebSocketConnecting(true);
       didConnectTimeoutRef.current = false;
       connectTimeoutRef.current = setTimeout(() => {
         console.warn("WebSocket connection attempt timed out");
@@ -191,6 +196,7 @@ export function WebSocketGate() {
         abortController.abort();
         connectTimeoutRef.current = null;
         isConnectingRef.current = false;
+        setWebSocketConnecting(false);
         cleanup();
 
         scheduleReconnect();
@@ -217,6 +223,7 @@ export function WebSocketGate() {
         }
       } finally {
         isConnectingRef.current = false;
+        setWebSocketConnecting(false);
       }
     };
 
@@ -339,6 +346,16 @@ export function WebSocketGate() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen]);
+
+  const triggerReconnect = useCallback(() => {
+    reconnectAttemptsRef.current = 0;
+    clearReconnectTimeout();
+    setShouldConnect((prev) => !prev);
+  }, [clearReconnectTimeout]);
+
+  useEffect(() => {
+    registerWebSocketState(socketRef, triggerReconnect);
+  }, [triggerReconnect]);
 
   return websocketStatus ? (
     <WebSocketStatusSnackbar
