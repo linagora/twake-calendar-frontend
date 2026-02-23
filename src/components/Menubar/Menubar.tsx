@@ -299,6 +299,7 @@ export function Menubar({
                     color: "rgba(28, 27, 31, 0.48)",
                     fontSize: 20,
                   }}
+                  aria-label={isIframe ? t("menubar.settings") : undefined}
                 />
               )}
             </IconButton>

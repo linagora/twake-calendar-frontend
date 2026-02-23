@@ -664,7 +664,7 @@ export default function CalendarApp({
       </Box>
       <div className="calendar">
         <ImportAlert />
-        <Menubar {...menubarProps} />
+        {menubarProps?.isIframe && <Menubar {...menubarProps} />}
         {view === "calendar" && (
           <FullCalendar
             ref={(ref) => {
