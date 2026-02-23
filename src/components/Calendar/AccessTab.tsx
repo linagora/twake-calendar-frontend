@@ -22,7 +22,7 @@ import { SnackbarAlert } from "../Loading/SnackBarAlert";
 
 export function AccessTab({ calendar }: { calendar: Calendar }) {
   const { t } = useI18n();
-  const calDAVLink = `${window.CALENDAR_BASE_URL}${calendar.link.replace(".json", "")}`;
+  const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
 
   const [secretLink, setSecretLink] = useState("");
   const [open, setOpen] = useState(false);
@@ -82,28 +82,32 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
 
   return (
     <>
-      <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
-        <Box mt={2}>
-          <TextField
-            disabled
-            fullWidth
-            label=""
-            inputProps={{ "aria-label": t("calendar.caldav_access") }}
-            value={calDAVLink}
-            size="small"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => handleCopy(calDAVLink)} edge="end">
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-      </FieldWithLabel>
-
+      {!!window.DAV_BASE_URL && (
+        <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
+          <Box mt={2}>
+            <TextField
+              disabled
+              fullWidth
+              label=""
+              inputProps={{ "aria-label": t("calendar.caldav_access") }}
+              value={calDAVLink}
+              size="small"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => handleCopy(calDAVLink)}
+                      edge="end"
+                    >
+                      <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </FieldWithLabel>
+      )}
       <FieldWithLabel label={t("calendar.secretUrl")} isExpanded={false}>
         <Box mt={3} display="flex" alignItems="center" gap={1}>
           <TextField
