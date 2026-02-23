@@ -24,7 +24,7 @@ describe("Event Full Display", () => {
       },
       organiserData: {
         cn: "test",
-        cal_address: "mailto:test@test.com",
+        cal_address: "test@test.com",
       },
     },
     calendars: {
@@ -177,9 +177,6 @@ describe("Event Full Display", () => {
     await waitFor(() => {
       expect(screen.getByText("event.form.notification")).toBeInTheDocument();
     });
-
-    // Debug: Print DOM to see what's rendered
-    console.log("DOM after Show More clicked:", document.body.innerHTML);
 
     // EventDisplay modal doesn't have Repeat checkbox, only RepeatEvent component
     // which shows repetition settings when repetition data exists

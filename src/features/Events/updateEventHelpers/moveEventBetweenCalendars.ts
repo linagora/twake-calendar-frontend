@@ -8,7 +8,7 @@ import {
 import { AsyncThunkResult } from "@/features/Calendars/types/AsyncThunkResult";
 import { userAttendee } from "@/features/User/models/attendee";
 import { userOrganiser } from "@/features/User/userDataTypes";
-import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
+import { assertThunkSuccess, unwrapOrAssert } from "@/utils/assertThunkSuccess";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { makeDisplayName } from "@/utils/makeDisplayName";
 import { CalendarEvent } from "../EventsTypes";
@@ -22,12 +22,6 @@ export interface MoveEventBetweenCalendarsParams {
   newCalId: string;
 }
 
-/**
- * Derives the organizer for the event in its new calendar.
- *
- * When moving into (or out of) a delegated calendar, the organizer must
- * become the owner of the target calendar rather than the original organizer.
- */
 function resolveOrganizerForCalendar(
   calendar: Calendar,
   originalOrganizer: CalendarEvent["organizer"]
@@ -44,14 +38,6 @@ function resolveOrganizerForCalendar(
   };
 }
 
-/**
- * Rewrites the attendee list so that:
- *  - The old organizer is removed (they were implicitly the organizer, not an attendee).
- *  - The new organizer is added as a CHAIR attendee if not already present.
- *
- * This keeps the attendee list consistent after an organizer change caused by a
- * delegated-calendar move.
- */
 function rewriteAttendeesForOrganizerChange(
   attendees: userAttendee[],
   oldOrganizer?: userOrganiser,
@@ -64,12 +50,12 @@ function rewriteAttendeesForOrganizerChange(
   const oldAddr = normalise(oldOrganizer?.cal_address);
   const newAddr = normalise(newOrganizer.cal_address);
 
-  // Remove the old organizer from the attendee list.
+  // Remove the old organizer from the attendee list if there is one
   const filtered = attendees.filter(
     (a) => normalise(a.cal_address) !== oldAddr
   );
 
-  // Add the new organizer as CHAIR if they are not already listed.
+  // Add the new organizer as CHAIR if they are not already listed
   const alreadyPresent = filtered.some(
     (a) => normalise(a.cal_address) === newAddr
   );
@@ -88,23 +74,6 @@ function rewriteAttendeesForOrganizerChange(
   return filtered;
 }
 
-/**
- * Moves an event from one calendar to another.
- *
- * Two strategies are used depending on whether either calendar is delegated:
- *
- * Standard move (neither calendar is delegated):
- *  1. MOVE the event to the new calendar via the dedicated move endpoint.
- *
- * Delegated move (at least one calendar is delegated):
- *  The organizer and attendees must change to reflect the new calendar's owner,
- *  so a server-side MOVE is not safe. Instead:
- *  1. Build a new event with the updated organizer and attendee list.
- *  2. DELETE the event from the old calendar.
- *  3. PUT the new event directly into the target calendar.
- *
- * Throws if either calendar is missing or any API call fails.
- */
 export async function moveEventBetweenCalendars({
   dispatch,
   calList,
@@ -141,10 +110,6 @@ export async function moveEventBetweenCalendars({
   }
 }
 
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
-
 interface StandardMoveParams {
   dispatch: AppDispatch;
   newEvent: CalendarEvent;
@@ -152,9 +117,6 @@ interface StandardMoveParams {
   oldCalendar: Calendar;
 }
 
-/**
- * Standard (non-delegated) move: MOVE the event to the new calendar.
- */
 async function moveStandardEvent({
   dispatch,
   newEvent,
@@ -163,23 +125,13 @@ async function moveStandardEvent({
 }: StandardMoveParams): Promise<void> {
   const newCalId = targetCalendar.id;
 
-  // Step 1: Update the event in the old calendar so the server has the
-  // latest data before we issue the move request.
   const putResult = await dispatch(
     putEventAsync({
       cal: oldCalendar,
       newEvent: { ...newEvent, calId: oldCalendar.id },
     })
   );
-
-  const typedPutResult = putResult as AsyncThunkResult;
-  if (typedPutResult && typeof typedPutResult.unwrap === "function") {
-    await typedPutResult.unwrap();
-  } else {
-    assertThunkSuccess(putResult);
-  }
-
-  // Step 2: Move the event to the target calendar.
+  unwrapOrAssert(putResult);
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
 
   const moveResult = await dispatch(
@@ -189,13 +141,7 @@ async function moveStandardEvent({
       newURL,
     })
   );
-
-  const typedMoveResult = moveResult as AsyncThunkResult;
-  if (typedMoveResult && typeof typedMoveResult.unwrap === "function") {
-    await typedMoveResult.unwrap();
-  } else {
-    assertThunkSuccess(moveResult);
-  }
+  unwrapOrAssert(moveResult);
 }
 
 interface DelegatedMoveParams {
@@ -205,9 +151,6 @@ interface DelegatedMoveParams {
   targetCalendar: Calendar;
 }
 
-/**
- * Delegated move: resolve new organizer + attendees, DELETE old, PUT new.
- */
 async function moveDelegatedEvent({
   dispatch,
   newEvent,
@@ -216,21 +159,20 @@ async function moveDelegatedEvent({
 }: DelegatedMoveParams): Promise<void> {
   const newCalId = targetCalendar.id;
 
-  // 1. Resolve the organizer for the target calendar
   const newOrganizer = resolveOrganizerForCalendar(
     targetCalendar,
     newEvent.organizer
   );
 
-  // 2. Rewrite attendees to reflect the organizer change
   const newAttendees = rewriteAttendeesForOrganizerChange(
     newEvent.attendee ?? [],
     newEvent.organizer,
     newOrganizer
   );
 
-  // 3. Build the event as it should exist in the target calendar
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
+  console.log(buildDelegatedEventURL(targetCalendar, newURL));
+
   const eventForTargetCalendar: CalendarEvent = {
     ...newEvent,
     calId: newCalId,
@@ -241,7 +183,17 @@ async function moveDelegatedEvent({
     attendee: newAttendees,
   };
 
-  // 4. Delete the event from the old calendar
+  const putResult = await dispatch(
+    putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
+  );
+
+  const typedPutResult = putResult as AsyncThunkResult;
+  if (typedPutResult && typeof typedPutResult.unwrap === "function") {
+    await typedPutResult.unwrap();
+  } else {
+    assertThunkSuccess(putResult);
+  }
+
   const deleteResult = await dispatch(
     deleteEventAsync({
       calId: oldCalendar.id,
@@ -255,17 +207,5 @@ async function moveDelegatedEvent({
     await typedDeleteResult.unwrap();
   } else {
     assertThunkSuccess(deleteResult);
-  }
-
-  // 5. PUT the updated event into the target calendar
-  const putResult = await dispatch(
-    putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
-  );
-
-  const typedPutResult = putResult as AsyncThunkResult;
-  if (typedPutResult && typeof typedPutResult.unwrap === "function") {
-    await typedPutResult.unwrap();
-  } else {
-    assertThunkSuccess(putResult);
   }
 }

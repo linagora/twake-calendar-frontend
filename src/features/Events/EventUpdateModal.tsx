@@ -10,7 +10,7 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync,
 } from "@/features/Calendars/services";
-import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
+import { assertThunkSuccess, unwrapOrAssert } from "@/utils/assertThunkSuccess";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -984,17 +984,7 @@ function EventUpdateModal({
             putEventAsync({ cal: targetCalendar, newEvent })
           );
 
-          const typedResult = result as AsyncThunkResult;
-          if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-            throw new Error(
-              typedResult.error?.message ||
-                typedResult.payload?.message ||
-                "API call failed"
-            );
-          }
-          if (typedResult && typeof typedResult.unwrap === "function") {
-            await typedResult.unwrap();
-          }
+          unwrapOrAssert(result);
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
