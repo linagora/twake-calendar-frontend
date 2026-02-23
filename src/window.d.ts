@@ -15,6 +15,7 @@ declare global {
     SSO_POST_LOGOUT_REDIRECT: string;
 
     CALENDAR_BASE_URL: string;
+    DAV_BASE_URL: string;
     MAIL_SPA_URL: string;
     VIDEO_CONFERENCE_BASE_URL: string;
 
