@@ -283,6 +283,7 @@ export function Menubar({
           <div className="menu-items">
             <IconButton
               onClick={!isIframe ? handleUserMenuClick : handleSettingsClick}
+              aria-label={isIframe ? t("menubar.settings") : undefined}
             >
               {!isIframe ? (
                 <Avatar
@@ -293,14 +294,7 @@ export function Menubar({
                   {getInitials(getUserDisplayName(user))}
                 </Avatar>
               ) : (
-                <SettingsOutlinedIcon
-                  sx={{
-                    mr: 2,
-                    color: "rgba(28, 27, 31, 0.48)",
-                    fontSize: 20,
-                  }}
-                  aria-label={isIframe ? t("menubar.settings") : undefined}
-                />
+                <SettingsOutlinedIcon />
               )}
             </IconButton>
           </div>
