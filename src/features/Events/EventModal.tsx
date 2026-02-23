@@ -113,8 +113,12 @@ function EventPopover({
       return selectedAndWritable[0].id!;
     }
 
-    return userPersonalCalendars[0]?.id ?? "";
-  }, [selectedCalendarIds, userPersonalCalendars, calList, userId]);
+    const firstPersonal = Object.values(calList ?? {}).find(
+      (cal) =>
+        cal.id?.split("/")[0] === userId || (cal.delegated && cal.access?.write)
+    );
+    return firstPersonal?.id ?? "";
+  }, [selectedCalendarIds, calList, userId]);
 
   const [calendarid, setCalendarid] = useState(
     event?.calId ?? defaultCalendarId
