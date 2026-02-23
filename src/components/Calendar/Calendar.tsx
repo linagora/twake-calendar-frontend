@@ -33,6 +33,7 @@ import { User } from "../Attendees/PeopleSearch";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 import { EventErrorHandler } from "../Error/EventErrorHandler";
 import { EditModeDialog } from "../Event/EditModeDialog";
+import { Menubar, MenubarProps } from "../Menubar/Menubar";
 import "./Calendar.styl";
 import CalendarSelection from "./CalendarSelection";
 import "./CustomCalendar.styl";
@@ -59,12 +60,14 @@ interface CalendarAppProps {
   calendarRef: MutableRefObject<CalendarApi | null>;
   onDateChange?: (date: Date) => void;
   onViewChange?: (view: string) => void;
+  menubarProps?: MenubarProps;
 }
 
 export default function CalendarApp({
   calendarRef,
   onDateChange,
   onViewChange,
+  menubarProps,
 }: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date());
@@ -661,6 +664,7 @@ export default function CalendarApp({
       </Box>
       <div className="calendar">
         <ImportAlert />
+        <Menubar {...menubarProps} />
         {view === "calendar" && (
           <FullCalendar
             ref={(ref) => {

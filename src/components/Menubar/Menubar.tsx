@@ -46,6 +46,7 @@ export type MenubarProps = {
   onDateChange?: (date: Date) => void;
   currentView: string;
   onViewChange?: (view: string) => void;
+  isIframe?: boolean;
 };
 
 export function Menubar({
@@ -55,6 +56,7 @@ export function Menubar({
   onDateChange,
   currentView,
   onViewChange,
+  isIframe,
 }: MenubarProps) {
   const { t } = useI18n(); // deliberately NOT using f()
   const user = useAppSelector((state) => state.user.userData);
@@ -155,14 +157,16 @@ export function Menubar({
     <>
       <header className="menubar">
         <div className="left-menu">
-          <div className="menu-items">
-            <MainTitle
-              calendarRef={calendarRef}
-              currentView={currentView}
-              onViewChange={onViewChange}
-              onDateChange={onDateChange}
-            />
-          </div>
+          {!isIframe && (
+            <div className="menu-items">
+              <MainTitle
+                calendarRef={calendarRef}
+                currentView={currentView}
+                onViewChange={onViewChange}
+                onDateChange={onDateChange}
+              />
+            </div>
+          )}
           <div className="menu-items">
             <div className="navigation-controls">
               <ButtonGroup
@@ -245,41 +249,58 @@ export function Menubar({
               </Select>
             </FormControl>
           </div>
-          <div className="menu-items">
-            <IconButton
-              component="a"
-              href="https://twake.app/support/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ marginRight: 8 }}
-              aria-label={t("menubar.help")}
-              title={t("menubar.help")}
-            >
-              <HelpOutlineIcon />
-            </IconButton>
-          </div>
-          <div className="menu-items">
-            {applist.length > 0 && (
-              <IconButton
-                onClick={handleOpen}
-                style={{ marginRight: 8 }}
-                aria-label={t("menubar.apps")}
-                title={t("menubar.apps")}
-              >
-                <WidgetsOutlinedIcon />
-              </IconButton>
-            )}
-          </div>
+          {!isIframe && (
+            <>
+              <div className="menu-items">
+                <IconButton
+                  component="a"
+                  href="https://twake.app/support/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginRight: 8 }}
+                  aria-label={t("menubar.help")}
+                  title={t("menubar.help")}
+                >
+                  <HelpOutlineIcon />
+                </IconButton>
+              </div>
+
+              <div className="menu-items">
+                {applist.length > 0 && (
+                  <IconButton
+                    onClick={handleOpen}
+                    style={{ marginRight: 8 }}
+                    aria-label={t("menubar.apps")}
+                    title={t("menubar.apps")}
+                  >
+                    <WidgetsOutlinedIcon />
+                  </IconButton>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="menu-items">
-            <IconButton onClick={handleUserMenuClick}>
-              <Avatar
-                color={stringToGradient(getUserDisplayName(user))}
-                size="m"
-                aria-label={t("menubar.userProfile")}
-              >
-                {getInitials(getUserDisplayName(user))}
-              </Avatar>
+            <IconButton
+              onClick={!isIframe ? handleUserMenuClick : handleSettingsClick}
+            >
+              {!isIframe ? (
+                <Avatar
+                  color={stringToGradient(getUserDisplayName(user))}
+                  size="m"
+                  aria-label={t("menubar.userProfile")}
+                >
+                  {getInitials(getUserDisplayName(user))}
+                </Avatar>
+              ) : (
+                <SettingsOutlinedIcon
+                  sx={{
+                    mr: 2,
+                    color: "rgba(28, 27, 31, 0.48)",
+                    fontSize: 20,
+                  }}
+                />
+              )}
             </IconButton>
           </div>
         </div>
