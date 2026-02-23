@@ -6,7 +6,6 @@ import { addDays } from "@/components/Event/utils/dateRules";
 import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
 import {
-  moveEventAsync,
   putEventAsync,
   updateEventInstanceAsync,
   updateSeriesAsync,
@@ -45,6 +44,7 @@ import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { detectRecurringEventChanges } from "./eventUtils";
+import { moveEventBetweenCalendars } from "./updateEventHelpers/moveEventBetweenCalendars";
 
 function EventUpdateModal({
   eventId,
@@ -79,14 +79,12 @@ function EventUpdateModal({
   // if the event's calendar is delegated then it shall be the only calendar accessible from the event update modal
   const userPersonalCalendars: Calendar[] = useMemo(() => {
     const allCalendars = Object.values(calList) as Calendar[];
-    if (calList[calId]?.delegated) {
-      return [calList[calId]];
-    }
     return allCalendars.filter(
       (calendar: Calendar) =>
-        calendar.id?.split("/")[0] === user.userData?.openpaasId
+        calendar.id?.split("/")[0] === user.userData?.openpaasId ||
+        calendar.delegated
     );
-  }, [calList, calId, user.userData?.openpaasId]);
+  }, [calList, user.userData?.openpaasId]);
 
   const timezoneList = useMemo(() => {
     const zones = Object.keys(TIMEZONES.zones).sort();
@@ -980,68 +978,40 @@ function EventUpdateModal({
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
-        } else {
-          // Normal non-recurring event update
-          // If calendar is changing, we'll handle it separately with moveEventAsync
-          // So only call putEventAsync if calendar is NOT changing
-          if (newCalId === calId) {
-            const result = await dispatch(
-              putEventAsync({ cal: targetCalendar, newEvent })
+        } else if (newCalId === calId) {
+          // Normal non-recurring event update (same calendar)
+          const result = await dispatch(
+            putEventAsync({ cal: targetCalendar, newEvent })
+          );
+
+          const typedResult = result as AsyncThunkResult;
+          if (typedResult.type && typedResult.type.endsWith("/rejected")) {
+            throw new Error(
+              typedResult.error?.message ||
+                typedResult.payload?.message ||
+                "API call failed"
             );
-
-            // Handle result of putEventAsync - check if rejected first
-            const typedResult = result as AsyncThunkResult;
-            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-              throw new Error(
-                typedResult.error?.message ||
-                  typedResult.payload?.message ||
-                  "API call failed"
-              );
-            }
-            if (typedResult && typeof typedResult.unwrap === "function") {
-              await typedResult.unwrap();
-            }
-
-            // Clear temp data on successful save
-            clearEventFormTempData("update");
           }
+          if (typedResult && typeof typedResult.unwrap === "function") {
+            await typedResult.unwrap();
+          }
+
+          // Clear temp data on successful save
+          clearEventFormTempData("update");
         }
+        // Note: when newCalId !== calId, the move is handled below in the
+        // "Handle calendar change" block, so we intentionally skip putEventAsync here.
       }
 
-      // Handle calendar change
+      // Handle calendar change (move to a different calendar)
       if (newCalId !== calId) {
-        // Get the old calendar for updating
-        const oldCalendar = calList[calId];
-        if (!oldCalendar) {
-          console.error("Old calendar not found");
-          return;
-        }
-
-        // First update the event in the old calendar, then move it
-        const putResult = await dispatch(
-          putEventAsync({ cal: oldCalendar, newEvent: { ...newEvent, calId } })
-        );
-
-        // Handle result of putEventAsync
-        const typedPutResult = putResult as AsyncThunkResult;
-        if (typedPutResult && typeof typedPutResult.unwrap === "function") {
-          await typedPutResult.unwrap();
-        }
-
-        // Then move it to the new calendar
-        const moveResult = await dispatch(
-          moveEventAsync({
-            cal: targetCalendar,
-            newEvent,
-            newURL: `/calendars/${newCalId}/${extractEventBaseUuid(event.uid)}.ics`,
-          })
-        );
-
-        // Handle result of moveEventAsync
-        const typedMoveResult = moveResult as AsyncThunkResult;
-        if (typedMoveResult && typeof typedMoveResult.unwrap === "function") {
-          await typedMoveResult.unwrap();
-        }
+        await moveEventBetweenCalendars({
+          dispatch,
+          calList,
+          newEvent,
+          oldCalId: calId,
+          newCalId,
+        });
 
         // Clear temp data on successful move
         clearEventFormTempData("update");
