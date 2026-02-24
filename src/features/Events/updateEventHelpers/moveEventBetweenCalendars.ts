@@ -171,7 +171,6 @@ async function moveDelegatedEvent({
   );
 
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
-  console.log(buildDelegatedEventURL(targetCalendar, newURL));
 
   const eventForTargetCalendar: CalendarEvent = {
     ...newEvent,
