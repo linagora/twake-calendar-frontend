@@ -94,6 +94,7 @@ describe("Event Full Display", () => {
     const stateWithFixedDate = {
       ...preloadedState,
       calendars: {
+        pending: false,
         list: {
           "667037022b752d0026472254/cal1": {
             ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
@@ -244,6 +245,7 @@ describe("Event Full Display", () => {
     const preloadedTwoCals = {
       ...preloadedState,
       calendars: {
+        pending: false,
         list: {
           "667037022b752d0026472254/cal1": {
             id: "667037022b752d0026472254/cal1",
@@ -319,6 +321,7 @@ describe("Event Full Display", () => {
     const stateWithTimezone = {
       ...preloadedState,
       calendars: {
+        pending: false,
         list: {
           "667037022b752d0026472254/cal1": {
             id: "667037022b752d0026472254/cal1",
@@ -386,6 +389,7 @@ describe("Event Full Display", () => {
     const videoState = {
       ...preloadedState,
       calendars: {
+        pending: false,
         list: {
           "667037022b752d0026472254/cal1": {
             ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],

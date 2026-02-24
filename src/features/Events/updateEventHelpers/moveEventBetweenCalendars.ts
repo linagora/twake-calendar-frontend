@@ -8,7 +8,7 @@ import {
 import { AsyncThunkResult } from "@/features/Calendars/types/AsyncThunkResult";
 import { userAttendee } from "@/features/User/models/attendee";
 import { userOrganiser } from "@/features/User/userDataTypes";
-import { assertThunkSuccess, unwrapOrAssert } from "@/utils/assertThunkSuccess";
+import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { makeDisplayName } from "@/utils/makeDisplayName";
 import { CalendarEvent } from "../EventsTypes";
@@ -131,7 +131,7 @@ async function moveStandardEvent({
       newEvent: { ...newEvent, calId: oldCalendar.id },
     })
   );
-  unwrapOrAssert(putResult);
+  await assertThunkSuccess(putResult);
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
 
   const moveResult = await dispatch(
@@ -141,7 +141,7 @@ async function moveStandardEvent({
       newURL,
     })
   );
-  unwrapOrAssert(moveResult);
+  await assertThunkSuccess(moveResult);
 }
 
 interface DelegatedMoveParams {
@@ -190,7 +190,7 @@ async function moveDelegatedEvent({
   if (typedPutResult && typeof typedPutResult.unwrap === "function") {
     await typedPutResult.unwrap();
   } else {
-    assertThunkSuccess(putResult);
+    await assertThunkSuccess(putResult);
   }
 
   const deleteResult = await dispatch(
@@ -205,6 +205,6 @@ async function moveDelegatedEvent({
   if (typedDeleteResult && typeof typedDeleteResult.unwrap === "function") {
     await typedDeleteResult.unwrap();
   } else {
-    assertThunkSuccess(deleteResult);
+    await assertThunkSuccess(deleteResult);
   }
 }

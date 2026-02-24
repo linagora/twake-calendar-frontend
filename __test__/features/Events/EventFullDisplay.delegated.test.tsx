@@ -48,8 +48,8 @@ describe("Event Full Display — delegated calendar move", () => {
               attendee: [{ cn: "test", cal_address: "test@test.com" }],
               URL: "/calendar/user1/cal1/event1.ics",
             },
-            link: "/calendar/user1/cal1.json",
           },
+          link: "/calendar/user1/cal1.json",
         },
         "user2/cal2": {
           id: "user2/cal2",

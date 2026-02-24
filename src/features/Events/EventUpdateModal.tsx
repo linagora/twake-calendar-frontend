@@ -10,7 +10,7 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync,
 } from "@/features/Calendars/services";
-import { assertThunkSuccess, unwrapOrAssert } from "@/utils/assertThunkSuccess";
+import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -945,7 +945,7 @@ function EventUpdateModal({
             );
 
             // Handle result of updateSeriesAsync
-            assertThunkSuccess(result);
+            await assertThunkSuccess(result);
 
             // Clear cache to ensure navigation shows updated data
             dispatch(clearFetchCache(calId));
@@ -967,7 +967,7 @@ function EventUpdateModal({
           );
 
           // Handle result of putEventAsync - check if rejected first
-          assertThunkSuccess(result);
+          await assertThunkSuccess(result);
 
           // Remove old single event AFTER new recurring instances are added to store
           // This prevents empty grid during the transition
@@ -984,7 +984,7 @@ function EventUpdateModal({
             putEventAsync({ cal: targetCalendar, newEvent })
           );
 
-          unwrapOrAssert(result);
+          await assertThunkSuccess(result);
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
