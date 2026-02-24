@@ -3,9 +3,6 @@ import { updateAttendeesAfterTimeChange } from "@/features/Events/updateEventHel
 import { userAttendee } from "@/features/User/models/attendee";
 import { userOrganiser } from "@/features/User/userDataTypes";
 
-jest.mock("@/features/Events/EventApi");
-jest.mock("@/features/Calendars/CalendarApi");
-
 describe("updateAttendeesAfterTimeChange", () => {
   const mockAttendee: userAttendee = {
     cal_address: "attendee@example.com",

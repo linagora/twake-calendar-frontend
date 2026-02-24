@@ -41,10 +41,16 @@ export const updateAttendeesAfterTimeChange = (
           })
         : null;
 
+    const deduped = organizerEntry
+      ? updatedAttendees.filter(
+          (attendee) => attendee.cal_address !== organizerAddr
+        )
+      : updatedAttendees;
+
     return {
       ...event,
       attendee: organizerEntry
-        ? [...updatedAttendees, organizerEntry]
+        ? [...deduped, organizerEntry]
         : updatedAttendees,
     };
   }
