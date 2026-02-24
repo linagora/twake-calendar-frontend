@@ -78,7 +78,6 @@ describe("Event Full Display", () => {
           },
         },
       },
-      pending: false,
     },
   };
 
