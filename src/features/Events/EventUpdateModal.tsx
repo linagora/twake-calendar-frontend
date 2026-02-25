@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { updateAttendeesAfterTimeChange } from "@/components/Calendar/handlers/eventHandlers";
+import { updateAttendeesAfterTimeChange } from "@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";
 import { addDays } from "@/components/Event/utils/dateRules";
