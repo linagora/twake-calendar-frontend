@@ -7,7 +7,11 @@
 .main-layout
   display flex
   height calc(100vh - 70px)
-  
+
+.main-layout.isInIframe
+  margin-top 8px
+  height calc(100vh - 8px)
+
 .main-layout.calendar-layout
   background-color #fff
   flex-direction row
@@ -16,6 +20,16 @@
   flex-grow 1
   height 100%
   overflow hidden
+
+.main-layout.isInIframe .calendar
+  display flex
+  flex-direction column
+  height 100%
+  overflow hidden
+
+.main-layout.isInIframe .fc
+  flex 1
+  min-height 0
 
 .calendarListHeader
   padding-top 10px

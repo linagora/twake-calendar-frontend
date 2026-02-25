@@ -599,7 +599,9 @@ export default function CalendarApp({
   const { t, lang } = useI18n();
 
   return (
-    <main className="main-layout calendar-layout">
+    <main
+      className={`main-layout calendar-layout ${menubarProps?.isIframe ? " isInIframe" : ""}`}
+    >
       <Box
         className="sidebar"
         sx={{
@@ -616,7 +618,7 @@ export default function CalendarApp({
             top: 0,
             zIndex: 10,
             backgroundColor: "#fff",
-            paddingTop: 3,
+            paddingTop: menubarProps?.isIframe ? "10px" : 3,
           }}
         >
           <Button

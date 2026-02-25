@@ -86,7 +86,7 @@ export default function CalendarLayout() {
           menubarProps={menubarProps}
         />
       )}
-      {view === "settings" && <SettingsPage />}
+      {view === "settings" && <SettingsPage isInIframe={isInIframe} />}
       <ErrorSnackbar error={error} type="calendar" />
     </div>
   );
