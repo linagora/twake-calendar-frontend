@@ -28,8 +28,6 @@ describe("CalendarApp integration", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const dispatch = jest.fn() as AppDispatch;
-    jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
   });
 
   const renderCalendar = () => {
@@ -89,7 +87,8 @@ describe("CalendarApp integration", () => {
   };
 
   it("renders the event on the calendar and calendarRef works", async () => {
-    const dispatch = appHooks.useAppDispatch();
+    const dispatch = jest.fn() as AppDispatch;
+    jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
 
     renderCalendar();
     const calendarRef: React.RefObject<CalendarApi | null> = (window as any)
@@ -334,7 +333,13 @@ describe("CalendarApp integration", () => {
     };
 
     it("keeps all attendees event participation on title update", async () => {
-      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      const updateSpy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
       const onClose = jest.fn();
       renderWithProviders(
         <EventUpdateModal
@@ -387,7 +392,13 @@ describe("CalendarApp integration", () => {
     });
 
     it("changes normal attendee to need action on time update and no organizer changes", async () => {
-      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      const updateSpy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
       const onClose = jest.fn();
       renderWithProviders(
         <EventUpdateModal
@@ -450,9 +461,22 @@ describe("CalendarApp integration", () => {
       // Verify SEQUENCE is incremented
       expect(updatedEvent?.sequence).toBe(3); // 2 + 1
     });
+
     it("update event attendees on drag", async () => {
+      // Mock dispatch locally — this test calls createEventHandlers directly
+      // and does not go through the Redux store or useAppDispatch.
       const mockDispatch = jest.fn();
-      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      jest
+        .spyOn(appHooks, "useAppDispatch")
+        .mockReturnValue(mockDispatch as unknown as AppDispatch);
+
+      const updateSpy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
 
       const eventHandlers = createEventHandlers({
         setSelectedRange: jest.fn(),
@@ -513,8 +537,20 @@ describe("CalendarApp integration", () => {
     });
 
     it("update event attendees on resize", async () => {
+      // Mock dispatch locally — this test calls createEventHandlers directly
+      // and does not go through the Redux store or useAppDispatch.
       const mockDispatch = jest.fn();
-      const updateSpy = jest.spyOn(eventThunks, "putEventAsync");
+      jest
+        .spyOn(appHooks, "useAppDispatch")
+        .mockReturnValue(mockDispatch as unknown as AppDispatch);
+
+      const updateSpy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
 
       const eventHandlers = createEventHandlers({
         setSelectedRange: jest.fn(),
