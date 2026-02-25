@@ -15,7 +15,8 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import React, { ReactNode } from "react";
+import CozyBridge from "cozy-external-bridge";
+import React, { ReactNode, useMemo } from "react";
 
 /**
  * ResponsiveDialog - A reusable dialog component that can switch between normal and expanded modes
@@ -114,6 +115,7 @@ function ResponsiveDialog({
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
+  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), []);
   const baseSx: SxProps<Theme> = {
     "& .MuiBackdrop-root": {
       backgroundColor: "rgba(0, 0, 0, 0.1)",
@@ -124,8 +126,11 @@ function ResponsiveDialog({
     "& .MuiDialog-paper": {
       maxWidth: isExpanded ? "100%" : normalMaxWidth,
       width: "100%",
-      height: isExpanded ? `calc(100vh - ${headerHeight})` : undefined,
-      margin: isExpanded ? `${headerHeight} 0 0 0` : "32px",
+      height: isExpanded
+        ? `calc(100vh - ${isInIframe ? "0px" : headerHeight})`
+        : undefined,
+      maxHeight: isInIframe ? "100%" : undefined,
+      margin: isExpanded ? `${isInIframe ? 0 : headerHeight} 0 0 0` : "32px",
       boxShadow: isExpanded ? "none !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
       zIndex: isExpanded ? 1200 : 1300,
