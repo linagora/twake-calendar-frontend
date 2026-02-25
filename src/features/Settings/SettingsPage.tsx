@@ -44,7 +44,7 @@ import {
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";
 
-export default function SettingsPage() {
+export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
   const previousConfig = useAppSelector((state) => state.user.coreConfig);
@@ -246,7 +246,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <main className="main-layout settings-layout">
+    <main
+      className={`main-layout settings-layout${isInIframe ? " isInIframe" : ""}`}
+    >
       <Box className="settings-sidebar">
         <List>
           <ListItem
