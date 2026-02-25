@@ -24,20 +24,28 @@ describe("CalendarSelection", () => {
       name: "Calendar personal",
       id: "user1/cal1",
       color: "#FF0000",
-      owner: { emails: ["alice@example.com"] },
+      owner: { emails: ["alice@example.com"], lastname: "alice" },
     },
     "user2/cal1": {
       name: "Calendar delegated",
       delegated: true,
       id: "user2/cal1",
       color: "#00FF00",
-      owner: { emails: ["bob@example.com"] },
+      owner: {
+        firstname: "Bob",
+        lastname: "Builder",
+        emails: ["bob@example.com"],
+      },
     },
     "user3/cal1": {
       name: "Calendar shared",
       id: "user3/cal1",
       color: "#0000FF",
-      owner: { emails: ["charlie@example.com"] },
+      owner: {
+        firstname: "Charlie",
+        lastname: "Chaplin",
+        emails: ["charlie@example.com"],
+      },
     },
   };
   beforeAll(() => {
@@ -272,5 +280,19 @@ describe("CalendarSelection", () => {
 
     fireEvent.click(delegatedAccordionSummary!);
     expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("renders owner name caption for non-personal, non-default calendars", () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      { user: baseUser, calendars: { list: calendarsMock, pending: false } }
+    );
+    expect(screen.getByText("Bob Builder")).toBeInTheDocument();
+    expect(screen.getByText("Charlie Chaplin")).toBeInTheDocument();
+    // personal calendar should NOT show a caption
+    expect(screen.queryByText("alice")).not.toBeInTheDocument();
   });
 });

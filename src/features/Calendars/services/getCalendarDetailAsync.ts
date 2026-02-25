@@ -8,7 +8,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
 import { extractCalendarEvents } from "../utils/extractCalendarEvents";
-import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 import { type RootState } from "@/app/store";
 
 export const getCalendarDetailAsync = createAsyncThunk<

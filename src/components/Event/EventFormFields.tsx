@@ -2,6 +2,8 @@ import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { userAttendee } from "@/features/User/models/attendee";
 import iconCamera from "@/static/images/icon-camera.svg";
+import { defaultColors } from "@/utils/defaultColors";
+import { makeDisplayName } from "@/utils/makeDisplayName";
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
@@ -35,6 +37,7 @@ import React from "react";
 import { useI18n } from "twake-i18n";
 import AttendeeSelector from "../Attendees/AttendeeSearch";
 import { CalendarItemList } from "../Calendar/CalendarItemList";
+import { OwnerCaption } from "../Calendar/OwnerCaption";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 import { AddDescButton } from "./AddDescButton";
@@ -775,7 +778,7 @@ export default function EventFormFields({
                 sx={{
                   color:
                     userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.color?.light ?? "#3788D8",
+                      ?.color?.light ?? defaultColors[0].light,
                   width: 24,
                   height: 24,
                 }}
@@ -783,8 +786,34 @@ export default function EventFormFields({
             }
             onClick={() => setHasClickedCalendarSection(true)}
           >
-            {userPersonalCalendars.find((cal) => cal.id === calendarid)?.name ||
-              t("event.form.calendar")}
+            {userPersonalCalendars.find((cal) => cal.id === calendarid)
+              ?.name ? (
+              <Box style={{ display: "flex", flexDirection: "column" }}>
+                <Typography sx={{ wordBreak: "break-word" }}>
+                  {
+                    userPersonalCalendars.find((cal) => cal.id === calendarid)
+                      ?.name
+                  }
+                </Typography>
+                <OwnerCaption
+                  showCaption={
+                    delegatedCalendars.find((cal) => cal.id === calendarid) !==
+                      undefined &&
+                    userPersonalCalendars.find((cal) => cal.id === calendarid)
+                      ?.name !== "#default"
+                  }
+                  ownerDisplayName={
+                    makeDisplayName(
+                      userPersonalCalendars.find(
+                        (cal) => cal.id === calendarid
+                      ) ?? ({} as Calendar)
+                    ) ?? ""
+                  }
+                />
+              </Box>
+            ) : (
+              t("event.form.calendar")
+            )}
           </SectionPreviewRow>
         ) : (
           <FormControl fullWidth margin="dense" size="small">
