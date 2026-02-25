@@ -599,7 +599,9 @@ export default function CalendarApp({
   const { t, lang } = useI18n();
 
   return (
-    <main className="main-layout calendar-layout">
+    <main
+      className={`main-layout calendar-layout ${menubarProps?.isIframe ? " isInIframe" : ""}`}
+    >
       <Box
         className="sidebar"
         sx={{
