@@ -19,6 +19,7 @@ import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { CalendarAccessRights, UserWithAccess } from "./CalendarAccessRights";
 
 export function AccessTab({ calendar }: { calendar: Calendar }) {
   const { t } = useI18n();
@@ -26,6 +27,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
 
   const [secretLink, setSecretLink] = useState("");
   const [open, setOpen] = useState(false);
+  const [usersWithAccess, setUsersWithAccess] = useState<UserWithAccess[]>([]);
 
   useEffect(() => {
     async function fetchSecret() {
@@ -82,6 +84,12 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
 
   return (
     <>
+      <CalendarAccessRights
+        calendar={calendar}
+        value={usersWithAccess}
+        onChange={setUsersWithAccess}
+      />
+
       {!!window.DAV_BASE_URL && (
         <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
           <Box mt={2}>
@@ -147,7 +155,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
       <FieldWithLabel label={t("calendar.exportCalendar")} isExpanded={false}>
         <Typography
           variant="body2"
-          sx={{ color: "text.secondary", m: 1, lineHeight: 1.5 }}
+          sx={{ color: "text.secondary", my: 1, lineHeight: 1.5 }}
         >
           {t("calendar.exportDesc")}
         </Typography>

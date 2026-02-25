@@ -17,6 +17,7 @@ export interface Calendar {
   access?: DelegationAccess;
   lastCacheCleared?: number;
   syncToken?: string;
+  invite: CalendarInvite[];
 }
 
 export interface DelegationAccess {
@@ -26,3 +27,12 @@ export interface DelegationAccess {
   "write-properties": boolean;
   all: boolean;
 }
+
+export type CalendarInvite = {
+  href: string;
+  principal: string;
+  access: AccessRight;
+  inviteStatus: number;
+};
+
+export type AccessRight = 2 | 3 | 5;

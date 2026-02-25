@@ -5,7 +5,7 @@ import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { Calendar } from "../CalendarTypes";
+import { AccessRight, Calendar, CalendarInvite } from "../CalendarTypes";
 import { CalendarData } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
@@ -82,6 +82,23 @@ export const getCalendarsListAsync = createAsyncThunk<
               dark: "#FFF",
             }
           : defaultColors[0];
+
+        const invite: CalendarInvite[] = (
+          (cal.invite as CalendarInvite[]) ?? []
+        ).map(
+          (invite: {
+            href: string;
+            principal: string;
+            access: AccessRight;
+            inviteStatus: number;
+          }) => ({
+            href: invite.href,
+            principal: invite.principal,
+            access: invite.access,
+            inviteStatus: invite.inviteStatus,
+          })
+        );
+
         fetchedCalendars[id] = {
           id,
           name: cal["dav:name"] ?? "",
@@ -93,6 +110,7 @@ export const getCalendarsListAsync = createAsyncThunk<
           visibility,
           access,
           events: {},
+          invite,
         };
       }
     );
