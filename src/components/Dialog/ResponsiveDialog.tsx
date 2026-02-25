@@ -129,7 +129,7 @@ function ResponsiveDialog({
       height: isExpanded
         ? `calc(100vh - ${isInIframe ? "0px" : headerHeight})`
         : undefined,
-      maxHeight: isInIframe ? "100%" : undefined,
+      maxHeight: isExpanded && isInIframe ? "100%" : undefined,
       margin: isExpanded ? `${isInIframe ? 0 : headerHeight} 0 0 0` : "32px",
       boxShadow: isExpanded ? "none !important" : undefined,
       transition: isExpanded ? "none !important" : undefined,
