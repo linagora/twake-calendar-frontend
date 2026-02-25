@@ -76,7 +76,7 @@ describe("CalendarSelection", () => {
           delegated: true,
           id: "user2/cal1",
           color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+          owner: { emails: ["alice@example.com"], lastname: "alice" },
           events: {
             event1: {
               id: "event1",
@@ -107,7 +107,7 @@ describe("CalendarSelection", () => {
           name: "Calendar shared",
           id: "user3/cal1",
           color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+          owner: { emails: ["alice@example.com"], lastname: "alice" },
           events: {
             event1: {
               id: "event1",
@@ -709,10 +709,10 @@ describe("calendar Availability search", () => {
       );
 
       const selectedCalls = spy.mock.calls.filter(
-        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
+        (call) => call[0].calId === "user1/cal1"
       );
-      const hiddenCalls = spy.mock.calls.filter(
-        (call: { calId: string }[]) =>
+      spy.mock.calls.filter(
+        (call) =>
           call[0].calId === "user1/cal2" || call[0].calId === "user1/cal3"
       );
 
@@ -745,13 +745,12 @@ describe("calendar Availability search", () => {
       );
 
       const callsForCal1 = spy.mock.calls.filter(
-        (call: { calId: string }[]) => call[0].calId === "user1/cal1"
+        (call) => call[0].calId === "user1/cal1"
       );
 
       const uniqueRanges = new Set(
         callsForCal1.map(
-          (call: { match: { end: string; start: string } }[]) =>
-            `${call[0].match.start}_${call[0].match.end}`
+          (call) => `${call[0].match.start}_${call[0].match.end}`
         )
       );
 
@@ -762,8 +761,8 @@ describe("calendar Availability search", () => {
       const stateWithUndefinedCalendars = {
         ...preloadedState,
         calendars: {
-          list: undefined as any,
-          templist: undefined as any,
+          list: undefined,
+          templist: undefined,
           pending: false,
         },
       };
@@ -783,7 +782,7 @@ describe("calendar Availability search", () => {
         ...preloadedState,
         calendars: {
           ...preloadedState.calendars,
-          templist: undefined as any,
+          templist: undefined,
         },
       };
 

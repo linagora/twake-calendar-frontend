@@ -114,7 +114,7 @@ describe("Calendar API", () => {
     });
   });
 
-  it("get secret link ", async () => {
+  it("get secret link without reset", async () => {
     const calLink = "/calendars/calId.json";
     (api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue("link"),
@@ -131,7 +131,7 @@ describe("Calendar API", () => {
       }
     );
   });
-  it("get secret link ", async () => {
+  it("get secret link with reset", async () => {
     const calLink = "/calendars/calId.json";
     (api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue("link"),
@@ -162,7 +162,7 @@ describe("Calendar API", () => {
     });
   });
 
-  it("When adding a sharedCal with #default as a name a new name is sent to the back", async () => {
+  it("When adding a sharedCal with #default #default is preserved", async () => {
     const mockApiPost = jest.spyOn(api, "post");
 
     const calData = {
@@ -192,12 +192,11 @@ describe("Calendar API", () => {
     expect(mockApiPost).toHaveBeenCalledWith(
       "dav/calendars/currentUserId.json",
       expect.objectContaining({
-        body: expect.stringContaining('"dav:name":"John Doe\'s calendar"'),
+        body: expect.stringContaining('"dav:name":"#default"'),
       })
     );
 
     const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body));
-    expect(callBody["dav:name"]).toBe("John Doe's calendar");
-    expect(callBody["dav:name"]).not.toBe("#default");
+    expect(callBody["dav:name"]).toBe("#default");
   });
 });

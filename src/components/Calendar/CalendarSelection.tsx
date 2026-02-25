@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { removeCalendarAsync } from "@/features/Calendars/services";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+import { makeDisplayName } from "@/utils/makeDisplayName";
 import { renameDefault } from "@/utils/renameDefault";
 import { trimLongTextWithoutSpace } from "@/utils/textUtils";
 import {
@@ -23,6 +24,7 @@ import { useI18n } from "twake-i18n";
 import CalendarPopover from "./CalendarModal";
 import CalendarSearch from "./CalendarSearch";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
+import { OwnerCaption } from "./OwnerCaption";
 
 function CalendarAccordion({
   title,
@@ -260,6 +262,20 @@ function CalendarSelector({
     () => trimLongTextWithoutSpace(calendars[id].name),
     [calendars, id]
   );
+
+  const ownerDisplayName = useMemo(
+    () => makeDisplayName(calendars[id]),
+    [calendars, id]
+  );
+
+  const displayName = useMemo(
+    () => renameDefault(trimmedName, ownerDisplayName ?? "", t, isPersonal),
+    [trimmedName, ownerDisplayName, t, isPersonal]
+  );
+
+  const showCaption =
+    !isPersonal && trimmedName !== "#default" && ownerDisplayName != null;
+
   return (
     <>
       <ListItem
@@ -291,16 +307,30 @@ function CalendarSelector({
             size="small"
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
+            inputProps={{ "aria-label": displayName }}
           />
-          <span
+          <div
             style={{
+              display: "flex",
+              flexDirection: "column",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              wordBreak: "break-word",
+              padding: showCaption ? "6px" : undefined,
             }}
           >
-            {renameDefault(trimmedName, calendars[id].owner, t, isPersonal)}
-          </span>
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+              }}
+            >
+              {displayName}
+            </span>
+            <OwnerCaption
+              showCaption={showCaption}
+              ownerDisplayName={ownerDisplayName ?? ""}
+            />
+          </div>
         </label>
         <IconButton className="MoreBtn" onClick={handleClick}>
           <MoreHorizIcon />

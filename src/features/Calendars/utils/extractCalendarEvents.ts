@@ -1,4 +1,4 @@
-import { defaultColors } from "@/components/Calendar/utils/calendarColorsUtils";
+import { defaultColors } from "@/utils/defaultColors";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { parseCalendarEvent } from "@/features/Events/eventUtils";
 import { CalDavItem } from "../api/types";

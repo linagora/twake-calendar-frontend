@@ -1,4 +1,5 @@
 import { RootState } from "@/app/store";
+import { defaultColors } from "@/utils/defaultColors";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
@@ -75,10 +76,12 @@ export const getCalendarsListAsync = createAsyncThunk<
           emails: [],
         };
 
-        const color = {
-          light: cal["apple:color"] ?? "#006BD8",
-          dark: "#FFF",
-        };
+        const color = cal["apple:color"]
+          ? {
+              light: cal["apple:color"],
+              dark: "#FFF",
+            }
+          : defaultColors[0];
         fetchedCalendars[id] = {
           id,
           name: cal["dav:name"] ?? "",

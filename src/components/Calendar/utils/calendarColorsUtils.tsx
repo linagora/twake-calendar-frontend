@@ -2,6 +2,7 @@ import { AppDispatch } from "@/app/store";
 import { updateCalColor } from "@/features/Calendars/CalendarSlice";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { darken, getContrastRatio, lighten, Theme } from "@linagora/twake-mui";
+import { defaultColors } from "@/utils/defaultColors";
 
 export function updateDarkColor(
   calendars: Record<string, Calendar>,
@@ -53,10 +54,3 @@ export function getAccessiblePair(baseColor: string, theme: Theme): string {
 
   return theme.palette.getContrastText(baseColor);
 }
-
-export const defaultColors = [
-  { light: "#D0ECDA", dark: "#329655" },
-  { light: "#FAE3CE", dark: "#E15300" },
-  { light: "#F5CFD0", dark: "#BE0103" },
-  { light: "#AFCBEF", dark: "#0654B1" },
-];
