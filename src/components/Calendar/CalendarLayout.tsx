@@ -2,7 +2,8 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import SettingsPage from "@/features/Settings/SettingsPage";
 import { getCalendarRange } from "@/utils/dateUtils";
 import type { CalendarApi } from "@fullcalendar/core";
-import { useEffect, useRef, useState } from "react";
+import CozyBridge from "cozy-external-bridge";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { refreshCalendars } from "../Event/utils/eventUtils";
 import { Menubar, MenubarProps } from "../Menubar/Menubar";
@@ -17,6 +18,7 @@ export default function CalendarLayout() {
   const view = useAppSelector((state) => state.settings.view);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<string>("timeGridWeek");
+  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), []);
 
   const handleRefresh = async () => {
     // Get current calendar range
@@ -70,16 +72,18 @@ export default function CalendarLayout() {
     onDateChange: handleDateChange,
     currentView,
     onViewChange: handleViewChange,
+    isIframe: isInIframe,
   };
 
   return (
     <div className="App">
-      <Menubar {...menubarProps} />
+      {!isInIframe && <Menubar {...menubarProps} />}
       {(view === "calendar" || view === "search") && (
         <CalendarApp
           calendarRef={calendarRef}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
+          menubarProps={menubarProps}
         />
       )}
       {view === "settings" && <SettingsPage />}
