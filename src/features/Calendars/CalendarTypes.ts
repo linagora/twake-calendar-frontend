@@ -17,7 +17,7 @@ export interface Calendar {
   access?: DelegationAccess;
   lastCacheCleared?: number;
   syncToken?: string;
-  invite: CalendarInvite[];
+  invite?: CalendarInvite[];
 }
 
 export interface DelegationAccess {
@@ -35,4 +35,4 @@ export type CalendarInvite = {
   inviteStatus: number;
 };
 
-export type AccessRight = 2 | 3 | 5;
+export type AccessRight = 2 | 3 | 5; // VIEW = 2, EDITOR = 3, ADMIN = 5

@@ -61,31 +61,34 @@ export function CalendarAccessRights({
       try {
         const loaded: UserWithAccess[] = (
           await Promise.all(
-            calendar.invite
-              .filter((invite) => invite.access !== 1)
-              .map(async (invite) => {
-                const principalId = invite.principal.split("/").pop();
-                if (!principalId) return null;
-                try {
-                  const details = await getUserDetails(principalId);
-                  const email =
-                    details?.preferredEmail ?? details.emails?.[0] ?? "";
-                  return {
-                    openpaasId: principalId,
-                    displayName:
-                      `${details.firstname} ${details.lastname}`.trim() ||
-                      email,
-                    email,
-                    accessRight: invite.access as AccessRight,
-                  } satisfies UserWithAccess;
-                } catch {
-                  return null;
-                }
-              })
+            calendar.invite.map(async (invite) => {
+              const principalId = invite.principal.split("/").pop();
+              if (!principalId) return null;
+              try {
+                const details = await getUserDetails(principalId);
+                const email =
+                  details?.preferredEmail ?? details.emails?.[0] ?? "";
+                return {
+                  openpaasId: principalId,
+                  displayName:
+                    `${details.firstname} ${details.lastname}`.trim() || email,
+                  email,
+                  accessRight: invite.access as AccessRight,
+                } satisfies UserWithAccess;
+              } catch {
+                return null;
+              }
+            })
           )
         ).filter((u): u is UserWithAccess => u !== null);
 
-        onChange(loaded);
+        onChange((prev: UserWithAccess[]) => {
+          const loadedIds = new Set(loaded.map((u) => u.openpaasId));
+          const manuallyAdded = prev.filter(
+            (u) => !loadedIds.has(u.openpaasId)
+          );
+          return [...loaded, ...manuallyAdded];
+        });
       } finally {
         setInvitesLoading(false);
       }
@@ -180,7 +183,9 @@ export function CalendarAccessRights({
                 ...params.InputProps,
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PeopleOutlineOutlinedIcon sx={{ color: "#605D62" }} />
+                    <PeopleOutlineOutlinedIcon
+                      sx={{ color: "text.secondary" }}
+                    />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -206,7 +211,7 @@ export function CalendarAccessRights({
                         <MenuItem
                           key={opt.value}
                           value={opt.value}
-                          sx={{ color: "#605D62" }}
+                          sx={{ color: "text.secondary" }}
                         >
                           {opt.label}
                         </MenuItem>
@@ -243,13 +248,13 @@ export function CalendarAccessRights({
                 <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
                   <Avatar
                     {...stringAvatar(user.displayName)}
-                    sx={{ size: "28px" }}
+                    sx={{ width: 28, height: 28, fontSize: "0.875rem" }}
                   >
                     {user.displayName?.[0]?.toUpperCase()}
                   </Avatar>
                   <Box minWidth={0}>
                     <Typography noWrap>{user.displayName}</Typography>
-                    <Typography variant="caption" noWrap>
+                    <Typography variant="caption" color="text.secondary">
                       {user.email}
                     </Typography>
                   </Box>
@@ -281,7 +286,11 @@ export function CalendarAccessRights({
                     }}
                   >
                     {accessRightOptions.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
+                      <MenuItem
+                        key={opt.value}
+                        value={opt.value}
+                        sx={{ color: "text.secondary" }}
+                      >
                         {opt.label}
                       </MenuItem>
                     ))}

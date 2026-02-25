@@ -84,19 +84,14 @@ export const getCalendarsListAsync = createAsyncThunk<
           : defaultColors[0];
 
         const invite: CalendarInvite[] = (
-          (cal.invite as CalendarInvite[]) ?? []
-        ).map(
-          (invite: {
+          (cal.invite ?? []) as Array<{
             href: string;
             principal: string;
-            access: AccessRight;
+            access: number;
             inviteStatus: number;
-          }) => ({
-            href: invite.href,
-            principal: invite.principal,
-            access: invite.access,
-            inviteStatus: invite.inviteStatus,
-          })
+          }>
+        ).filter((inv): inv is CalendarInvite =>
+          [2, 3, 5].includes(inv.access)
         );
 
         fetchedCalendars[id] = {
