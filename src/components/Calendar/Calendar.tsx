@@ -618,7 +618,7 @@ export default function CalendarApp({
             top: 0,
             zIndex: 10,
             backgroundColor: "#fff",
-            paddingTop: 3,
+            paddingTop: menubarProps?.isIframe ? "10px" : 3,
           }}
         >
           <Button
