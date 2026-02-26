@@ -61,6 +61,7 @@ export function Menubar({
   const { t } = useI18n(); // deliberately NOT using f()
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = window.appList ?? [];
+  const supportLink = window.SUPPORT_URL;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
     null
@@ -251,19 +252,21 @@ export function Menubar({
           </div>
           {!isIframe && (
             <>
-              <div className="menu-items">
-                <IconButton
-                  component="a"
-                  href="https://twake.app/support/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ marginRight: 8 }}
-                  aria-label={t("menubar.help")}
-                  title={t("menubar.help")}
-                >
-                  <HelpOutlineIcon />
-                </IconButton>
-              </div>
+              {supportLink && (
+                <div className="menu-items">
+                  <IconButton
+                    component="a"
+                    href={supportLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ marginRight: 8 }}
+                    aria-label={t("menubar.help")}
+                    title={t("menubar.help")}
+                  >
+                    <HelpOutlineIcon />
+                  </IconButton>
+                </div>
+              )}
 
               <div className="menu-items">
                 {applist.length > 0 && (

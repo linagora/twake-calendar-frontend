@@ -18,6 +18,7 @@ declare global {
     DAV_BASE_URL: string;
     MAIL_SPA_URL: string;
     VIDEO_CONFERENCE_BASE_URL: string;
+    SUPPORT_URL: string;
 
     DEBUG: boolean;
     LANG: string;
