@@ -42,6 +42,11 @@ export function CalendarAccessRights({
   const [accessRight, setAccessRight] = useState<AccessRight>(2);
   const [inviteLoading, setInvitesLoading] = useState(false);
 
+  const currentUsersRef = useRef<UserWithAccess[]>(usersWithAccess);
+  useEffect(() => {
+    currentUsersRef.current = usersWithAccess;
+  }, [usersWithAccess]);
+
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -82,13 +87,11 @@ export function CalendarAccessRights({
           )
         ).filter((u): u is UserWithAccess => u !== null);
 
-        onChange((prev: UserWithAccess[]) => {
-          const loadedIds = new Set(loaded.map((u) => u.openpaasId));
-          const manuallyAdded = prev.filter(
-            (u) => !loadedIds.has(u.openpaasId)
-          );
-          return [...loaded, ...manuallyAdded];
-        });
+        const loadedIds = new Set(loaded.map((u) => u.openpaasId));
+        const manuallyAdded = currentUsersRef.current.filter(
+          (u) => !loadedIds.has(u.openpaasId)
+        );
+        onChange([...loaded, ...manuallyAdded]);
       } finally {
         setInvitesLoading(false);
       }

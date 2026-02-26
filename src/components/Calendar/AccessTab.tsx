@@ -21,13 +21,22 @@ import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
 import { CalendarAccessRights, UserWithAccess } from "./CalendarAccessRights";
 
-export function AccessTab({ calendar }: { calendar: Calendar }) {
+interface AccessTabProps {
+  calendar: Calendar;
+  usersWithAccess: UserWithAccess[];
+  onUsersWithAccessChange: (users: UserWithAccess[]) => void;
+}
+
+export function AccessTab({
+  calendar,
+  usersWithAccess,
+  onUsersWithAccessChange,
+}: AccessTabProps) {
   const { t } = useI18n();
   const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
 
   const [secretLink, setSecretLink] = useState("");
   const [open, setOpen] = useState(false);
-  const [usersWithAccess, setUsersWithAccess] = useState<UserWithAccess[]>([]);
 
   useEffect(() => {
     async function fetchSecret() {
@@ -87,7 +96,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
       <CalendarAccessRights
         calendar={calendar}
         value={usersWithAccess}
-        onChange={setUsersWithAccess}
+        onChange={onUsersWithAccessChange}
       />
 
       {!!window.DAV_BASE_URL && (
