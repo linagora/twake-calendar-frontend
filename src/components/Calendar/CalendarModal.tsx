@@ -97,22 +97,22 @@ function CalendarPopover({
 
   const [saveError, setSaveError] = useState("");
 
-  const updateCalendar = (calId: string, calLink: string) => {
-    dispatch(
+  const updateCalendar = async (calId: string, calLink: string) => {
+    await dispatch(
       patchCalendarAsync({
         calId,
         calLink,
         patch: { name: name.trim(), desc: description.trim(), color },
       })
-    );
+    ).unwrap();
     if (visibility !== calendar?.visibility) {
-      dispatch(
+      await dispatch(
         patchACLCalendarAsync({
           calId,
           calLink,
           request: visibility === "public" ? "{DAV:}read" : "",
         })
-      );
+      ).unwrap();
     }
   };
 
@@ -120,18 +120,23 @@ function CalendarPopover({
     const normaliseEmail = (u: UserWithAccess) =>
       u.email?.trim().toLowerCase() ?? "";
 
-    const currentMap = new Map(usersWithAccess.map((u) => [u.email, u]));
+    const currentMap = new Map(
+      usersWithAccess
+        .filter((u) => !!normaliseEmail(u))
+        .map((u) => [normaliseEmail(u), u])
+    );
 
     const set = usersWithAccess
-      .filter((u) => !!u.email)
+      .filter((u) => !!normaliseEmail(u))
       .map((u) => ({
         "dav:href": `mailto:${normaliseEmail(u)}`,
         [accessRightToDavProp(u.accessRight)]: true,
       }));
 
     const remove = initialUsersRef.current
-      .filter((u) => !!u.email && !currentMap.has(u.email))
+      .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
       .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
+
     if (set.length === 0 && remove.length === 0) return;
 
     await dispatch(
@@ -171,11 +176,11 @@ function CalendarPopover({
   const handleSave = async () => {
     if (!name.trim()) return;
     if (calendar) {
-      updateCalendar(calendar.id, calendar.link);
       try {
+        await updateCalendar(calendar.id, calendar.link);
         await updateCalendarInvites(calendar.link);
       } catch {
-        setSaveError(t("calendar.access.saveError"));
+        setSaveError(t("error.title"));
         return;
       }
     } else {
