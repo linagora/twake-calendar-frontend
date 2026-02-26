@@ -56,6 +56,7 @@ describe("Event Full Display — delegated calendar move", () => {
           name: "Delegated Calendar",
           color: "#00FF00",
           delegated: true,
+          access: { write: true },
           owner: {
             emails: ["delegate@test.com"],
             name: "Delegate User",
