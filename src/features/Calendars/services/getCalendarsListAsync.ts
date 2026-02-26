@@ -1,11 +1,11 @@
 import { RootState } from "@/app/store";
-import { defaultColors } from "@/utils/defaultColors";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
+import { defaultColors } from "@/utils/defaultColors";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { AccessRight, Calendar, CalendarInvite } from "../CalendarTypes";
+import { Calendar, CalendarInvite } from "../CalendarTypes";
 import { CalendarData } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
