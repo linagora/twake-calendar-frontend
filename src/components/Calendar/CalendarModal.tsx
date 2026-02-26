@@ -7,17 +7,17 @@ import {
   patchCalendarAsync,
 } from "@/features/Calendars/services";
 import { updateDelegationCalendarAsync } from "@/features/Calendars/services/updateDelegationCalendarAsync";
+import { accessRightToDavProp } from "@/utils/accessRightToDavProp";
+import { defaultColors } from "@/utils/defaultColors";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { Button, Tab, Tabs } from "@linagora/twake-mui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ResponsiveDialog } from "../Dialog";
-import { accessRightToDavProp } from "@/utils/accessRightToDavProp";
 import { AccessTab } from "./AccessTab";
 import { UserWithAccess } from "./CalendarAccessRights";
 import { ImportTab } from "./ImportTab";
 import { SettingsTab } from "./SettingsTab";
-import { defaultColors } from "@/utils/defaultColors";
 
 function CalendarPopover({
   open,
@@ -45,7 +45,7 @@ function CalendarPopover({
   const [color, setColor] = useState<Record<string, string>>(defaultColors[0]);
   const [visibility, setVisibility] = useState<"private" | "public">("public");
 
-  // access tab state — lifted up so handleSave can read it
+  // access tab state
   const [usersWithAccess, setUsersWithAccess] = useState<UserWithAccess[]>([]);
 
   // Snapshot of the invitee list as loaded from calendar.invite on open.
@@ -86,7 +86,10 @@ function CalendarPopover({
 
   const handleUsersWithAccessChange = useCallback((users: UserWithAccess[]) => {
     setUsersWithAccess(users);
-    if (initialUsersRef.current.length === 0 && users.length > 0) {
+  }, []);
+
+  const handleInvitesLoaded = useCallback((users: UserWithAccess[]) => {
+    if (initialUsersRef.current.length === 0) {
       initialUsersRef.current = users;
     }
   }, []);
@@ -111,27 +114,24 @@ function CalendarPopover({
   };
 
   function updateCalendarInvites(calLink: string) {
-    const currentMap = new Map(usersWithAccess.map((u) => [u.openpaasId, u]));
+    const currentMap = new Map(usersWithAccess.map((u) => [u.email, u]));
 
-    const set = usersWithAccess.map((u) => ({
-      "dav:href": `mailto:${u.email}`,
-      [accessRightToDavProp(u.accessRight)]: true,
-    }));
-
-    // Users that were present on open but have since been removed
-    const remove = initialUsersRef.current
-      ?.filter((u) => !currentMap.has(u.openpaasId))
+    const set = usersWithAccess
+      .filter((u) => !!u.email)
       .map((u) => ({
         "dav:href": `mailto:${u.email}`,
+        [accessRightToDavProp(u.accessRight)]: true,
       }));
 
-    const share = { set, remove };
+    const remove = initialUsersRef.current
+      .filter((u) => !!u.email && !currentMap.has(u.email))
+      .map((u) => ({ "dav:href": `mailto:${u.email}` }));
 
     dispatch(
       updateDelegationCalendarAsync({
         calId: calendar?.id,
         calLink,
-        share,
+        share: { set, remove },
       })
     );
   }
@@ -163,7 +163,6 @@ function CalendarPopover({
 
   const handleSave = () => {
     if (!name.trim()) return;
-
     if (calendar) {
       updateCalendar(calendar.id, calendar.link);
       updateCalendarInvites(calendar.link);
@@ -220,7 +219,6 @@ function CalendarPopover({
     setImportedContent(null);
     setUsersWithAccess([]);
     initialUsersRef.current = [];
-
     setNewCalName("");
     setNewCalDescription("");
     setNewCalColor(defaultColors[0]);
@@ -307,6 +305,7 @@ function CalendarPopover({
           calendar={calendar}
           usersWithAccess={usersWithAccess}
           onUsersWithAccessChange={handleUsersWithAccessChange}
+          onInvitesLoaded={handleInvitesLoaded}
         />
       )}
     </ResponsiveDialog>

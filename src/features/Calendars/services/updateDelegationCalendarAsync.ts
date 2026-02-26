@@ -18,7 +18,7 @@ export const updateDelegationCalendarAsync = createAsyncThunk<
   },
   { rejectValue: RejectedError }
 >(
-  "calendars/patchCalendar",
+  "calendars/patchDelegationCalendar",
   async ({ calId, calLink, share }, { rejectWithValue }) => {
     try {
       await updateDelegationCalendar(calLink, share);

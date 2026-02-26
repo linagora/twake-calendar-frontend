@@ -28,12 +28,14 @@ interface CalendarAccessRightsProps {
   calendar: Calendar;
   value: UserWithAccess[];
   onChange: (users: UserWithAccess[]) => void;
+  onInvitesLoaded: (users: UserWithAccess[]) => void;
 }
 
 export function CalendarAccessRights({
   calendar,
   value: usersWithAccess,
   onChange,
+  onInvitesLoaded,
 }: CalendarAccessRightsProps) {
   const { t } = useI18n();
 
@@ -61,6 +63,8 @@ export function CalendarAccessRights({
   useEffect(() => {
     if (!calendar.invite?.length) return;
 
+    let cancelled = false;
+
     async function loadInvitedUsers() {
       setInvitesLoading(true);
       try {
@@ -87,37 +91,43 @@ export function CalendarAccessRights({
           )
         ).filter((u): u is UserWithAccess => u !== null);
 
-        const loadedIds = new Set(loaded.map((u) => u.openpaasId));
+        if (cancelled) return;
+
+        const loadedIds = new Set(loaded.map((u) => u.email));
         const manuallyAdded = currentUsersRef.current.filter(
-          (u) => !loadedIds.has(u.openpaasId)
+          (u) => !loadedIds.has(u.email)
         );
-        onChange([...loaded, ...manuallyAdded]);
+        const merged = [...loaded, ...manuallyAdded];
+
+        onInvitesLoaded(loaded);
+        onChange(merged);
       } finally {
-        setInvitesLoading(false);
+        if (!cancelled) setInvitesLoading(false);
       }
     }
 
     loadInvitedUsers();
-  }, [calendar.invite, onChange]);
+    return () => {
+      cancelled = true;
+    };
+  }, [calendar.invite, onChange, onInvitesLoaded]);
 
   const handleUserSelect = (_event: unknown, users: User[]) => {
     const updated: UserWithAccess[] = users.map((user) => {
-      const existing = usersWithAccess.find(
-        (u) => u.openpaasId === user.openpaasId
-      );
+      const existing = usersWithAccess.find((u) => u.email === user.email);
       return existing ?? { ...user, accessRight };
     });
     onChange(updated);
   };
 
-  const handleRemoveUser = (userId: string) => {
-    onChange(usersWithAccess.filter((u) => u.openpaasId !== userId));
+  const handleRemoveUser = (email: string) => {
+    onChange(usersWithAccess.filter((u) => u.email !== email));
   };
 
-  const handleChangeUserRight = (userId: string, right: AccessRight) => {
+  const handleChangeUserRight = (email: string, right: AccessRight) => {
     onChange(
       usersWithAccess.map((u) =>
-        u.openpaasId === userId ? { ...u, accessRight: right } : u
+        u.email === email ? { ...u, accessRight: right } : u
       )
     );
   };
@@ -182,6 +192,13 @@ export function CalendarAccessRights({
               }}
               onChange={(e) => setQuery(e.target.value)}
               variant="outlined"
+              inputProps={{
+                ...params.inputProps,
+                sx: {
+                  fontSize: "14px",
+                  "&::placeholder": { fontSize: "14px" },
+                },
+              }}
               InputProps={{
                 ...params.InputProps,
                 startAdornment: (
@@ -207,6 +224,7 @@ export function CalendarAccessRights({
                           paddingRight: "24px !important",
                           paddingY: 0,
                         },
+                        "& .MuiSelect-icon": { fontSize: "1rem" },
                         "&:before, &:after": { display: "none" },
                       }}
                     >
@@ -237,7 +255,7 @@ export function CalendarAccessRights({
           <Box mt={2} display="flex" flexDirection="column" gap={1}>
             {usersWithAccess.map((user) => (
               <Box
-                key={user.openpaasId}
+                key={user.email}
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
@@ -255,7 +273,12 @@ export function CalendarAccessRights({
                   >
                     {user.displayName?.[0]?.toUpperCase()}
                   </Avatar>
-                  <Box minWidth={0}>
+                  <Box
+                    minWidth={0}
+                    display="flex"
+                    flexDirection="column"
+                    gap={0}
+                  >
                     <Typography noWrap>{user.displayName}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {user.email}
@@ -273,7 +296,7 @@ export function CalendarAccessRights({
                     value={user.accessRight}
                     onChange={(e) =>
                       handleChangeUserRight(
-                        user.openpaasId ?? "",
+                        user.email,
                         e.target.value as AccessRight
                       )
                     }
@@ -286,6 +309,7 @@ export function CalendarAccessRights({
                         paddingRight: "24px !important",
                         paddingY: 0,
                       },
+                      "& .MuiSelect-icon": { fontSize: "1rem" },
                     }}
                   >
                     {accessRightOptions.map((opt) => (
@@ -301,7 +325,7 @@ export function CalendarAccessRights({
                   <IconButton
                     size="small"
                     aria-label={t("actions.remove")}
-                    onClick={() => handleRemoveUser(user.openpaasId ?? "")}
+                    onClick={() => handleRemoveUser(user.email)}
                     sx={{ color: "text.secondary" }}
                   >
                     <HighlightOffIcon fontSize="small" />
