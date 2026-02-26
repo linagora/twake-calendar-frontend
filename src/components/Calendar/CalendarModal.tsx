@@ -14,6 +14,7 @@ import { Button, Tab, Tabs } from "@linagora/twake-mui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ResponsiveDialog } from "../Dialog";
+import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { AccessTab } from "./AccessTab";
 import { UserWithAccess } from "./CalendarAccessRights";
 import { ImportTab } from "./ImportTab";
@@ -94,6 +95,8 @@ function CalendarPopover({
     }
   }, []);
 
+  const [saveError, setSaveError] = useState("");
+
   const updateCalendar = (calId: string, calLink: string) => {
     dispatch(
       patchCalendarAsync({
@@ -113,27 +116,31 @@ function CalendarPopover({
     }
   };
 
-  function updateCalendarInvites(calLink: string) {
+  async function updateCalendarInvites(calLink: string) {
+    const normaliseEmail = (u: UserWithAccess) =>
+      u.email?.trim().toLowerCase() ?? "";
+
     const currentMap = new Map(usersWithAccess.map((u) => [u.email, u]));
 
     const set = usersWithAccess
       .filter((u) => !!u.email)
       .map((u) => ({
-        "dav:href": `mailto:${u.email}`,
+        "dav:href": `mailto:${normaliseEmail(u)}`,
         [accessRightToDavProp(u.accessRight)]: true,
       }));
 
     const remove = initialUsersRef.current
       .filter((u) => !!u.email && !currentMap.has(u.email))
-      .map((u) => ({ "dav:href": `mailto:${u.email}` }));
+      .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
+    if (set.length === 0 && remove.length === 0) return;
 
-    dispatch(
+    await dispatch(
       updateDelegationCalendarAsync({
         calId: calendar?.id,
         calLink,
         share: { set, remove },
       })
-    );
+    ).unwrap();
   }
 
   const createCalendar = async (
@@ -161,11 +168,16 @@ function CalendarPopover({
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return;
     if (calendar) {
       updateCalendar(calendar.id, calendar.link);
-      updateCalendarInvites(calendar.link);
+      try {
+        await updateCalendarInvites(calendar.link);
+      } catch {
+        setSaveError(t("calendar.access.saveError"));
+        return;
+      }
     } else {
       createCalendar(crypto.randomUUID(), name, description, color, visibility);
     }
@@ -219,6 +231,7 @@ function CalendarPopover({
     setImportedContent(null);
     setUsersWithAccess([]);
     initialUsersRef.current = [];
+    setSaveError("");
     setNewCalName("");
     setNewCalDescription("");
     setNewCalColor(defaultColors[0]);
@@ -308,6 +321,7 @@ function CalendarPopover({
           onInvitesLoaded={handleInvitesLoaded}
         />
       )}
+      <ErrorSnackbar error={saveError} type="calendar" />
     </ResponsiveDialog>
   );
 }

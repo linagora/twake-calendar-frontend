@@ -89,7 +89,7 @@ export function CalendarAccessRights({
               }
             })
           )
-        ).filter((u): u is UserWithAccess => u !== null);
+        ).filter((u) => u !== null && !!u.email);
 
         if (cancelled) return;
 
