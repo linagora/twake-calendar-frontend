@@ -9,6 +9,7 @@ var CALENDAR_BASE_URL = "https://calendar.example.com";
 var DAV_BASE_URL = "https://dav.example.com";
 var MAIL_SPA_URL = "https://mail.example.com";
 var VIDEO_CONFERENCE_BASE_URL = "https://meet.linagora.com";
+var SUPPORT_URL = "https://twake.app/support/";
 var DEBUG = false;
 var LANG = "en";
 var WEBSOCKET_URL = "wss://calendar.example.com";
