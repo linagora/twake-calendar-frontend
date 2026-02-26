@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/app/hooks";
 import {
   exportCalendar,
   getSecretLink,
@@ -35,6 +36,12 @@ export function AccessTab({
   onInvitesLoaded,
 }: AccessTabProps) {
   const { t } = useI18n();
+  const userData = useAppSelector((state) => state.user.userData);
+  const isPersonalCalendar = userData.openpaasId === calendar.id.split("/")[0];
+  const isDelegatedWithAdministration = calendar.invite?.find(
+    (invite) => invite.href.includes(userData.email) && invite.access === 5
+  );
+
   const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
 
   const [secretLink, setSecretLink] = useState("");
@@ -91,12 +98,14 @@ export function AccessTab({
 
   return (
     <>
-      <CalendarAccessRights
-        calendar={calendar}
-        value={usersWithAccess}
-        onChange={onUsersWithAccessChange}
-        onInvitesLoaded={onInvitesLoaded}
-      />
+      {(isPersonalCalendar || isDelegatedWithAdministration) && (
+        <CalendarAccessRights
+          calendar={calendar}
+          value={usersWithAccess}
+          onChange={onUsersWithAccessChange}
+          onInvitesLoaded={onInvitesLoaded}
+        />
+      )}
 
       {!!window.DAV_BASE_URL && (
         <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
