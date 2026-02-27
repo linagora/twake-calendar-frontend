@@ -1,6 +1,5 @@
 import { AccessRight, Calendar } from "@/features/Calendars/CalendarTypes";
 import { getUserDetails } from "@/features/User/userAPI";
-import { makeDisplayName } from "@/utils/makeDisplayName";
 import {
   AutocompleteRenderInputParams,
   Avatar,
@@ -77,14 +76,14 @@ export function CalendarAccessRights({
               try {
                 const details = await getUserDetails(principalId);
                 const email =
-                  details?.preferredEmail ?? details.emails?.[0] ?? "";
+                  details?.preferredEmail ?? details?.emails?.[0] ?? "";
                 return {
                   openpaasId: principalId,
                   displayName:
                     [details?.firstname, details?.lastname]
                       .filter(Boolean)
                       .join(" ")
-                      .trim() ?? email,
+                      .trim() || email,
                   email,
                   accessRight: invite.access as AccessRight,
                 } satisfies UserWithAccess;
