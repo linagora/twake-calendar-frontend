@@ -4,6 +4,7 @@ import { userAttendee } from "@/features/User/models/attendee";
 import iconCamera from "@/static/images/icon-camera.svg";
 import { defaultColors } from "@/utils/defaultColors";
 import { makeDisplayName } from "@/utils/makeDisplayName";
+import { renameDefault } from "@/utils/renameDefault";
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
@@ -790,10 +791,18 @@ export default function EventFormFields({
               ?.name ? (
               <Box style={{ display: "flex", flexDirection: "column" }}>
                 <Typography sx={{ wordBreak: "break-word" }}>
-                  {
+                  {renameDefault(
                     userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.name
-                  }
+                      ?.name,
+                    makeDisplayName(
+                      userPersonalCalendars.find(
+                        (cal) => cal.id === calendarid
+                      ) ?? ({} as Calendar)
+                    ) ?? "",
+                    t,
+                    delegatedCalendars.find((cal) => cal.id === calendarid) ===
+                      undefined
+                  )}
                 </Typography>
                 <OwnerCaption
                   showCaption={

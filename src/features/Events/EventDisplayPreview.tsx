@@ -728,9 +728,6 @@ export default function EventPreviewModal({
             mb: 2,
           }}
         >
-          <Box sx={infoIconSx}>
-            <CalendarTodayIcon />
-          </Box>
           <CalendarName calendar={calendar} />
         </Box>
       </ResponsiveDialog>
