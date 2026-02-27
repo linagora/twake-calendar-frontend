@@ -1,5 +1,6 @@
 import { AccessRight, Calendar } from "@/features/Calendars/CalendarTypes";
 import { getUserDetails } from "@/features/User/userAPI";
+import { makeDisplayName } from "@/utils/makeDisplayName";
 import {
   AutocompleteRenderInputParams,
   Avatar,
@@ -80,7 +81,10 @@ export function CalendarAccessRights({
                 return {
                   openpaasId: principalId,
                   displayName:
-                    `${details.firstname} ${details.lastname}`.trim() || email,
+                    [details?.firstname, details?.lastname]
+                      .filter(Boolean)
+                      .join(" ")
+                      .trim() ?? email,
                   email,
                   accessRight: invite.access as AccessRight,
                 } satisfies UserWithAccess;
@@ -93,9 +97,9 @@ export function CalendarAccessRights({
 
         if (cancelled) return;
 
-        const loadedIds = new Set(loaded.map((u) => u.email));
+        const loadedIds = new Set(loaded.map((u) => normalizeEmail(u.email)));
         const manuallyAdded = currentUsersRef.current.filter(
-          (u) => !loadedIds.has(u.email)
+          (u) => !loadedIds.has(normalizeEmail(u.email))
         );
         const merged = [...loaded, ...manuallyAdded];
 
@@ -112,22 +116,32 @@ export function CalendarAccessRights({
     };
   }, [calendar.invite, onChange, onInvitesLoaded]);
 
+  const normalizeEmail = (email?: string) => email?.trim().toLowerCase() ?? "";
+
   const handleUserSelect = (_event: unknown, users: User[]) => {
     const updated: UserWithAccess[] = users.map((user) => {
-      const existing = usersWithAccess.find((u) => u.email === user.email);
+      const existing = usersWithAccess.find(
+        (u) => normalizeEmail(u.email) === normalizeEmail(user.email)
+      );
       return existing ?? { ...user, accessRight };
     });
     onChange(updated);
   };
 
   const handleRemoveUser = (email: string) => {
-    onChange(usersWithAccess.filter((u) => u.email !== email));
+    onChange(
+      usersWithAccess.filter(
+        (u) => normalizeEmail(u.email) !== normalizeEmail(email)
+      )
+    );
   };
 
   const handleChangeUserRight = (email: string, right: AccessRight) => {
     onChange(
       usersWithAccess.map((u) =>
-        u.email === email ? { ...u, accessRight: right } : u
+        normalizeEmail(u.email) === normalizeEmail(email)
+          ? { ...u, accessRight: right }
+          : u
       )
     );
   };
