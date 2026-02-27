@@ -194,6 +194,13 @@ export default function EventFormFields({
   const personalCalendars = userPersonalCalendars.filter(
     (cal) => !cal.delegated
   );
+  const selectedCalendar = userPersonalCalendars.find(
+    (cal) => cal.id === calendarid
+  );
+  const selectedOwnerDisplayName = selectedCalendar
+    ? (makeDisplayName(selectedCalendar) ?? "")
+    : "";
+  const isSelectedDelegated = !!selectedCalendar?.delegated;
 
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
@@ -787,37 +794,21 @@ export default function EventFormFields({
             }
             onClick={() => setHasClickedCalendarSection(true)}
           >
-            {userPersonalCalendars.find((cal) => cal.id === calendarid)
-              ?.name ? (
+            {selectedCalendar?.name ? (
               <Box style={{ display: "flex", flexDirection: "column" }}>
                 <Typography sx={{ wordBreak: "break-word" }}>
                   {renameDefault(
-                    userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.name,
-                    makeDisplayName(
-                      userPersonalCalendars.find(
-                        (cal) => cal.id === calendarid
-                      ) ?? ({} as Calendar)
-                    ) ?? "",
+                    selectedCalendar.name,
+                    selectedOwnerDisplayName,
                     t,
-                    delegatedCalendars.find((cal) => cal.id === calendarid) ===
-                      undefined
+                    !isSelectedDelegated
                   )}
                 </Typography>
                 <OwnerCaption
                   showCaption={
-                    delegatedCalendars.find((cal) => cal.id === calendarid) !==
-                      undefined &&
-                    userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.name !== "#default"
+                    isSelectedDelegated && selectedCalendar.name !== "#default"
                   }
-                  ownerDisplayName={
-                    makeDisplayName(
-                      userPersonalCalendars.find(
-                        (cal) => cal.id === calendarid
-                      ) ?? ({} as Calendar)
-                    ) ?? ""
-                  }
+                  ownerDisplayName={selectedOwnerDisplayName}
                 />
               </Box>
             ) : (

@@ -10,10 +10,12 @@ import { OwnerCaption } from "./OwnerCaption";
 
 export function CalendarName({ calendar }: { calendar: Calendar }) {
   const userData = useAppSelector((state) => state.user.userData);
-  const showCaption =
-    calendar.name !== "#default" &&
-    userData.openpaasId !== calendar.id.split("/")[0];
   const { t } = useI18n();
+
+  const ownerId = calendar.id.split("/")[0];
+  const ownerDisplayName = makeDisplayName(calendar) ?? "";
+  const isOwnCalendar = userData.openpaasId === ownerId;
+  const showCaption = calendar.name !== "#default" && !isOwnCalendar;
 
   return (
     <Box
@@ -33,16 +35,11 @@ export function CalendarName({ calendar }: { calendar: Calendar }) {
       />
       <Box style={{ display: "flex", flexDirection: "column" }}>
         <Typography sx={{ wordBreak: "break-word" }}>
-          {renameDefault(
-            calendar.name,
-            makeDisplayName(calendar) ?? "",
-            t,
-            userData.openpaasId === calendar.id.split("/")[0]
-          )}
+          {renameDefault(calendar.name, ownerDisplayName, t, isOwnCalendar)}
         </Typography>
         <OwnerCaption
           showCaption={showCaption}
-          ownerDisplayName={makeDisplayName(calendar) ?? ""}
+          ownerDisplayName={ownerDisplayName}
         />
       </Box>
     </Box>
