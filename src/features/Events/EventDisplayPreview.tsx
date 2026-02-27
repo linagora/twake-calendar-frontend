@@ -24,7 +24,6 @@ import {
   Typography,
   useTheme,
 } from "@linagora/twake-mui";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
