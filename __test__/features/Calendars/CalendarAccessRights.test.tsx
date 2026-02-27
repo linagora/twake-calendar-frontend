@@ -49,7 +49,7 @@ describe("accessRightToDavProp", () => {
   });
 
   it("defaults to dav:read for unknown values (covered by default case)", () => {
-    expect(accessRightToDavProp(2 as AccessRight)).toBe("dav:read");
+    expect(accessRightToDavProp(999 as AccessRight)).toBe("dav:read");
   });
 });
 
@@ -306,7 +306,9 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
       }
     );
 
-    expect(screen.queryByText(/grant access rights/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("calendarPopover.access.grantAccessRights")
+    ).not.toBeInTheDocument();
   });
 
   it("shows CalendarAccessRights when the user has access=5 (admin) delegation", () => {
@@ -420,22 +422,5 @@ describe("CalendarModal – cancel button", () => {
       delegationThunks.updateDelegationCalendarAsync
     ).not.toHaveBeenCalled();
     expect(eventThunks.patchCalendarAsync).not.toHaveBeenCalled();
-  });
-});
-
-describe("CalendarInvite access filtering (unit)", () => {
-  it("only keeps invite entries with access values 2, 3, or 5", () => {
-    const rawInvites = [
-      { href: "a", principal: "/p/a", access: 2, inviteStatus: 1 },
-      { href: "b", principal: "/p/b", access: 3, inviteStatus: 1 },
-      { href: "c", principal: "/p/c", access: 5, inviteStatus: 1 },
-      { href: "d", principal: "/p/d", access: 1, inviteStatus: 1 }, // invalid
-      { href: "e", principal: "/p/e", access: 99, inviteStatus: 1 }, // invalid
-    ];
-
-    const filtered = rawInvites.filter((inv) => [2, 3, 5].includes(inv.access));
-
-    expect(filtered).toHaveLength(3);
-    expect(filtered.map((i) => i.access)).toEqual([2, 3, 5]);
   });
 });
