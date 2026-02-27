@@ -98,13 +98,22 @@ function CalendarPopover({
   const [saveError, setSaveError] = useState("");
 
   const updateCalendar = async (calId: string, calLink: string) => {
-    await dispatch(
-      patchCalendarAsync({
-        calId,
-        calLink,
-        patch: { name: name.trim(), desc: description.trim(), color },
-      })
-    ).unwrap();
+    const nameChanged = name.trim() !== calendar?.name;
+    const descChanged = description.trim() !== (calendar?.description ?? "");
+    const colorChanged =
+      JSON.stringify(color) !==
+      JSON.stringify(calendar?.color ?? defaultColors[0]);
+
+    if (nameChanged || descChanged || colorChanged) {
+      await dispatch(
+        patchCalendarAsync({
+          calId,
+          calLink,
+          patch: { name: name.trim(), desc: description.trim(), color },
+        })
+      ).unwrap();
+    }
+
     if (visibility !== calendar?.visibility) {
       await dispatch(
         patchACLCalendarAsync({
@@ -186,7 +195,6 @@ function CalendarPopover({
     } else {
       createCalendar(crypto.randomUUID(), name, description, color, visibility);
     }
-    handleClose({}, "backdropClick");
   };
 
   const handleImport = async () => {
@@ -224,9 +232,14 @@ function CalendarPopover({
 
   const handleClose = (
     e: object | null,
-    reason: "backdropClick" | "escapeKeyDown"
+    reason: "backdropClick" | "escapeKeyDown" | "cancel"
   ): void => {
-    onClose(e, reason);
+    if (reason !== "cancel") {
+      handleSave();
+      onClose(e, reason);
+    } else {
+      onClose(e, "backdropClick");
+    }
     setName("");
     setDescription("");
     setColor(defaultColors[0]);
@@ -267,16 +280,17 @@ function CalendarPopover({
       }
       actions={
         <>
-          <Button
-            variant="outlined"
-            onClick={() => handleClose({}, "backdropClick")}
-          >
+          <Button variant="outlined" onClick={() => handleClose({}, "cancel")}>
             {t("common.cancel")}
           </Button>
           <Button
             disabled={tab === "import" ? !importedContent : !name.trim()}
             variant="contained"
-            onClick={tab === "import" ? handleImport : handleSave}
+            onClick={
+              tab === "import"
+                ? handleImport
+                : () => handleClose({}, "backdropClick")
+            }
           >
             {tab === "import"
               ? t("actions.import")

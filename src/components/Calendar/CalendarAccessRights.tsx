@@ -147,7 +147,7 @@ export function CalendarAccessRights({
         <PeopleSearch
           selectedUsers={usersWithAccess}
           onChange={handleUserSelect}
-          objectTypes={["user", "contact"]}
+          objectTypes={["user"]}
           onToggleEventPreview={() => {}}
           customSlotProps={{
             popper: {
