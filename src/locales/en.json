@@ -81,6 +81,12 @@
     },
     "settings": {
       "calendarName": "Calendar name"
+    },
+    "access": {
+      "grantAccessRights": "Grant Access rights",
+      "viewAllEvents": "View all events",
+      "editor": "Editor",
+      "administrator": "Administrator"
     }
   },
   "colorPicker": {
