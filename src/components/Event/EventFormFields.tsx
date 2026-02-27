@@ -4,6 +4,7 @@ import { userAttendee } from "@/features/User/models/attendee";
 import iconCamera from "@/static/images/icon-camera.svg";
 import { defaultColors } from "@/utils/defaultColors";
 import { makeDisplayName } from "@/utils/makeDisplayName";
+import { renameDefault } from "@/utils/renameDefault";
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
@@ -193,6 +194,13 @@ export default function EventFormFields({
   const personalCalendars = userPersonalCalendars.filter(
     (cal) => !cal.delegated
   );
+  const selectedCalendar = userPersonalCalendars.find(
+    (cal) => cal.id === calendarid
+  );
+  const selectedOwnerDisplayName = selectedCalendar
+    ? (makeDisplayName(selectedCalendar) ?? "")
+    : "";
+  const isSelectedDelegated = !!selectedCalendar?.delegated;
 
   // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
   React.useEffect(() => {
@@ -786,29 +794,21 @@ export default function EventFormFields({
             }
             onClick={() => setHasClickedCalendarSection(true)}
           >
-            {userPersonalCalendars.find((cal) => cal.id === calendarid)
-              ?.name ? (
+            {selectedCalendar?.name ? (
               <Box style={{ display: "flex", flexDirection: "column" }}>
                 <Typography sx={{ wordBreak: "break-word" }}>
-                  {
-                    userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.name
-                  }
+                  {renameDefault(
+                    selectedCalendar.name,
+                    selectedOwnerDisplayName,
+                    t,
+                    !isSelectedDelegated
+                  )}
                 </Typography>
                 <OwnerCaption
                   showCaption={
-                    delegatedCalendars.find((cal) => cal.id === calendarid) !==
-                      undefined &&
-                    userPersonalCalendars.find((cal) => cal.id === calendarid)
-                      ?.name !== "#default"
+                    isSelectedDelegated && selectedCalendar.name !== "#default"
                   }
-                  ownerDisplayName={
-                    makeDisplayName(
-                      userPersonalCalendars.find(
-                        (cal) => cal.id === calendarid
-                      ) ?? ({} as Calendar)
-                    ) ?? ""
-                  }
+                  ownerDisplayName={selectedOwnerDisplayName}
                 />
               </Box>
             ) : (
