@@ -2,6 +2,7 @@ import { useAppSelector } from "@/app/hooks";
 import { AccessRight, Calendar } from "@/features/Calendars/CalendarTypes";
 import { getUserDetails } from "@/features/User/userAPI";
 import { makeDisplayName } from "@/utils/makeDisplayName";
+import { normalizeEmail } from "@/utils/normalizeEmail";
 import {
   AutocompleteRenderInputParams,
   Avatar,
@@ -42,11 +43,15 @@ export function CalendarAccessRights({
   const { t } = useI18n();
   const userData = useAppSelector((state) => state.user.userData);
   const isPersonalCalendar = userData?.openpaasId === calendar.id.split("/")[0];
-  const isDelegatedWithAdministration = calendar.invite?.find(
-    (invite) => invite.href.includes(userData.email) && invite.access === 5
-  );
+  const currentUserEmail = normalizeEmail(userData?.email);
+  const isDelegatedWithAdministration = !!calendar.invite?.some((invite) => {
+    const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ""));
+    return invitedEmail === currentUserEmail && invite.access === 5;
+  });
 
-  const ownerName = makeDisplayName(calendar) ?? "";
+  const ownerEmail =
+    calendar.owner?.preferredEmail ?? calendar.owner?.emails?.[0] ?? "";
+  const ownerName = makeDisplayName(calendar) ?? ownerEmail;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchWidth, setSearchWidth] = useState<number | undefined>(undefined);
@@ -123,8 +128,6 @@ export function CalendarAccessRights({
       cancelled = true;
     };
   }, [calendar.invite, onChange, onInvitesLoaded]);
-
-  const normalizeEmail = (email?: string) => email?.trim().toLowerCase() ?? "";
 
   const handleUserSelect = (_event: unknown, users: User[]) => {
     const updated: UserWithAccess[] = users.map((user) => {
@@ -276,7 +279,7 @@ export function CalendarAccessRights({
 
       <Box mt={2} display="flex" flexDirection="column" gap={1}>
         <Box
-          key={calendar.owner.preferredEmail}
+          key={ownerEmail}
           display="flex"
           alignItems="center"
           justifyContent="space-between"
@@ -295,7 +298,7 @@ export function CalendarAccessRights({
             <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
               <Typography noWrap>{ownerName}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {calendar.owner.preferredEmail}
+                {ownerEmail}
               </Typography>
             </Box>
           </Box>

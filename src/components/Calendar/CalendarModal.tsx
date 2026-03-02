@@ -39,6 +39,17 @@ function CalendarPopover({
   const isOwn = calendar?.id
     ? extractEventBaseUuid(calendar.id) === userData.openpaasId
     : true;
+  const canManageInvites =
+    isOwn ||
+    !!calendar?.invite?.some((invite) => {
+      const inviteEmail = invite.href
+        .replace(/^mailto:/i, "")
+        .trim()
+        .toLowerCase();
+      const currentEmail = userData.email?.trim().toLowerCase();
+      return inviteEmail === currentEmail && invite.access === 5;
+    }) ||
+    !!calendar?.access?.write;
 
   // existing calendar params
   const [name, setName] = useState("");
@@ -146,11 +157,7 @@ function CalendarPopover({
       .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
       .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
 
-    if (
-      (set.length === 0 && remove.length === 0) ||
-      !(isOwn || calendar?.access?.write)
-    )
-      return;
+    if ((set.length === 0 && remove.length === 0) || !canManageInvites) return;
 
     await dispatch(
       updateDelegationCalendarAsync({
