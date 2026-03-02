@@ -6,27 +6,23 @@ import {
   formatDateToYYYYMMDDTHHMMSS,
   getCalendarRange,
 } from "@/utils/dateUtils";
+import type { CalendarApi } from "@fullcalendar/core";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { DateCalendar } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import moment from "moment";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
-import { CalendarEvent } from "@/features/Events/EventsTypes";
-import type { CalendarApi } from "@fullcalendar/core";
 
 export function MiniCalendar({
   calendarRef,
   selectedDate,
-
   setSelectedMiniDate,
-  dottedEvents,
 }: {
   calendarRef: React.MutableRefObject<CalendarApi | null>;
   selectedDate: Date;
   setSelectedMiniDate: (d: Date) => void;
-  dottedEvents: CalendarEvent[];
 }) {
   const dispatch = useAppDispatch();
   const calendars = useAppSelector((state) => state.calendars);
@@ -102,21 +98,10 @@ export function MiniCalendar({
                   })()
                 : false;
 
-            const hasEvents = dottedEvents.some((event) => {
-              const eventDate = new Date(event.start);
-              return (
-                eventDate.getFullYear() === date.getFullYear() &&
-                eventDate.getMonth() === date.getMonth() &&
-                eventDate.getDate() === date.getDate() &&
-                event.status !== "CANCELLED"
-              );
-            });
-
             const classNames = [
               isToday ? "today" : "",
               isSelectedDay ? "selectedDay" : "",
               isInSelectedWeek ? "selectedWeek" : "",
-              hasEvents ? "event-dot" : "",
             ].join(" ");
 
             return {
@@ -144,12 +129,7 @@ export function MiniCalendar({
                 },
               },
               "data-testid": `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-              children: (
-                <>
-                  {ownerState.day.date()}
-                  {hasEvents && <div className="event-dot" />}
-                </>
-              ),
+              children: <>{ownerState.day.date()}</>,
             };
           },
         }}

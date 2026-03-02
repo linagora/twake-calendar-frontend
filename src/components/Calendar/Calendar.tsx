@@ -109,12 +109,6 @@ export default function CalendarApp({
     [calendarIdsString]
   );
 
-  const dottedEvents: CalendarEvent[] = selectedCalendars.flatMap((calId) => {
-    const calendar = calendars[calId];
-    if (!calendar?.events) return [];
-    return Object.values(calendar.events);
-  });
-
   const [currentView, setCurrentView] = useState("timeGridWeek");
   const timezone =
     useAppSelector((state) => state.settings.timeZone) ??
@@ -644,7 +638,6 @@ export default function CalendarApp({
           calendarRef={calendarRef}
           selectedDate={selectedMiniDate}
           setSelectedMiniDate={setSelectedMiniDate}
-          dottedEvents={dottedEvents}
         />
         <Box sx={{ mb: 3, mt: 2 }}>
           <TempCalendarsInput
