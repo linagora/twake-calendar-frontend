@@ -15,19 +15,14 @@ export function TempCalendarsInput({
   tempUsers,
   setTempUsers,
   handleToggleEventPreview,
-  selectedCalendars,
-  setSelectedCalendars,
 }: {
   tempUsers: User[];
   setTempUsers: (users: User[]) => void;
   handleToggleEventPreview: () => void;
-  selectedCalendars: string[];
-  setSelectedCalendars: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const dispatch = useAppDispatch();
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
-  const calendars = useAppSelector((state) => state.calendars.list);
   const theme = useTheme();
   const { t } = useI18n();
 
@@ -48,14 +43,8 @@ export function TempCalendarsInput({
 
     prevUsersRef.current = users;
 
-    const { calendarsToImport, calendarsToToggle } = getCalendarsFromUsersDelta(
-      addedUsers,
-      buildEmailToCalendarMap(calendars),
-      selectedCalendars
-    );
-
-    if (calendarsToImport.length > 0) {
-      for (const user of calendarsToImport) {
+    if (addedUsers.length > 0) {
+      for (const user of addedUsers) {
         const controller = new AbortController();
         requestControllers.set(user.email, controller);
 
@@ -75,12 +64,6 @@ export function TempCalendarsInput({
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );
       }
-    }
-
-    if (calendarsToToggle.length > 0) {
-      setSelectedCalendars((prev: string[]) => [
-        ...new Set([...prev, ...calendarsToToggle]),
-      ]);
     }
 
     for (const user of removedUsers) {
@@ -106,29 +89,6 @@ export function TempCalendarsInput({
       inputSlot={(params) => <TextField {...params} size="small" />}
     />
   );
-}
-
-function getCalendarsFromUsersDelta(
-  addedUsers: User[],
-  emailToCalendarId: Map<string, string[]>,
-  selectedCalendars: string[]
-) {
-  const selectedSet = new Set(selectedCalendars);
-
-  const calendarsToImport: User[] = [];
-  const calendarsToToggle: string[] = [];
-
-  for (const user of addedUsers) {
-    const calIds = emailToCalendarId.get(user.email) ?? [];
-
-    if (!calIds || calIds.every((calId) => !selectedSet.has(calId))) {
-      calendarsToImport.push(user);
-    } else {
-      // calIds.forEach((calId) => calendarsToToggle.push(calId));
-    }
-  }
-
-  return { calendarsToImport, calendarsToToggle };
 }
 
 function buildEmailToCalendarMap(calRecord: Record<string, Calendar>) {

@@ -646,8 +646,6 @@ export default function CalendarApp({
             handleToggleEventPreview={() => {
               eventHandlers.handleDateSelect(null as unknown as DateSelectArg);
             }}
-            selectedCalendars={selectedCalendars}
-            setSelectedCalendars={setSelectedCalendars}
           />
         </Box>
         <div className="calendarList">
