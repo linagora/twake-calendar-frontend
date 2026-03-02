@@ -23,6 +23,7 @@ interface TimezoneAutocompleteProps {
   onClose?: () => void;
   disableClearable?: boolean;
   hideBorder?: boolean;
+  openOnFocus?: boolean;
 }
 
 export function TimezoneAutocomplete({
@@ -40,6 +41,7 @@ export function TimezoneAutocomplete({
   onClose,
   disableClearable = false,
   hideBorder = false,
+  openOnFocus = false,
 }: TimezoneAutocompleteProps) {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map((tz) => ({
@@ -53,7 +55,7 @@ export function TimezoneAutocomplete({
 
   return (
     <Autocomplete
-      openOnFocus
+      openOnFocus={openOnFocus}
       value={selectedOption}
       onChange={(event, newValue) => {
         if (newValue) {

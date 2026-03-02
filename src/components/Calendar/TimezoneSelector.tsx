@@ -76,7 +76,6 @@ export function TimezoneSelector({
           transition: {
             onEntered: () => {
               inputRef.current?.focus();
-              inputRef.current?.click();
             },
           },
         }}
@@ -90,6 +89,7 @@ export function TimezoneSelector({
             getTimezoneOffset(tzName, referenceDate)
           }
           inputRef={inputRef}
+          openOnFocus
           showIcon={false}
           inputFontSize="14px"
           inputPadding="2px 4px"
