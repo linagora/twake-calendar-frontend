@@ -5,7 +5,7 @@ import {
 } from "@/utils/timezone";
 import { TIMEZONES } from "@/utils/timezone-data";
 import { Button, Popover } from "@linagora/twake-mui";
-import { MouseEvent, useMemo, useState } from "react";
+import { MouseEvent, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
 
@@ -21,6 +21,7 @@ export function TimezoneSelector({
   referenceDate,
 }: TimezoneSelectProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const timezoneList = useTimeZoneList();
 
@@ -72,6 +73,12 @@ export function TimezoneSelector({
           paper: {
             sx: { width: 280, maxHeight: 400, overflow: "hidden", p: 0 },
           },
+          transition: {
+            onEntered: () => {
+              inputRef.current?.focus();
+              inputRef.current?.click();
+            },
+          },
         }}
       >
         <TimezoneAutocomplete
@@ -82,7 +89,7 @@ export function TimezoneSelector({
           getTimezoneOffset={(tzName: string) =>
             getTimezoneOffset(tzName, referenceDate)
           }
-          autoFocus={true}
+          inputRef={inputRef}
           showIcon={false}
           inputFontSize="14px"
           inputPadding="2px 4px"

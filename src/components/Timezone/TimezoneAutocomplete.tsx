@@ -14,7 +14,7 @@ interface TimezoneAutocompleteProps {
   zones: string[];
   getTimezoneOffset: (tzName: string) => string;
   showIcon?: boolean;
-  autoFocus?: boolean;
+  inputRef?: React.Ref<HTMLInputElement>;
   width?: number | string;
   size?: "small" | "medium";
   placeholder?: string;
@@ -31,7 +31,7 @@ export function TimezoneAutocomplete({
   zones,
   getTimezoneOffset,
   showIcon = false,
-  autoFocus = false,
+  inputRef,
   width,
   size = "small",
   placeholder = "Select timezone",
@@ -53,7 +53,7 @@ export function TimezoneAutocomplete({
 
   return (
     <Autocomplete
-      autoFocus={autoFocus}
+      openOnFocus
       value={selectedOption}
       onChange={(event, newValue) => {
         if (newValue) {
@@ -72,6 +72,7 @@ export function TimezoneAutocomplete({
           placeholder={placeholder}
           variant="outlined"
           autoComplete="off"
+          inputRef={inputRef}
           sx={
             hideBorder
               ? {
