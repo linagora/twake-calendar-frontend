@@ -44,6 +44,7 @@ export function TempCalendarsInput({
     prevUsersRef.current = users;
 
     if (addedUsers.length > 0) {
+      dispatch(setView("calendar"));
       for (const user of addedUsers) {
         const controller = new AbortController();
         requestControllers.set(user.email, controller);
@@ -59,7 +60,6 @@ export function TempCalendarsInput({
           light: lightColor,
           dark: getAccessiblePair(lightColor, theme),
         };
-        dispatch(setView("calendar"));
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );
