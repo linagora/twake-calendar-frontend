@@ -176,9 +176,7 @@ export default function CalendarSelection({
             setAnchorElCal(document.body);
             setSelectedCalId(id);
           }}
-          defaultExpanded={selectedCalendars.some((id) =>
-            delegatedCalendars.includes(id)
-          )}
+          defaultExpanded
         />
 
         <CalendarAccordion
@@ -194,9 +192,7 @@ export default function CalendarSelection({
             setAnchorElCal(document.body);
             setSelectedCalId(id);
           }}
-          defaultExpanded={selectedCalendars.some((id) =>
-            sharedCalendars.includes(id)
-          )}
+          defaultExpanded
         />
       </div>
       <CalendarPopover
