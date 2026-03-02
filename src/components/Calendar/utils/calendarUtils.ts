@@ -179,7 +179,9 @@ export const extractEvents = (
         !(
           hideDeclinedEvents &&
           event.attendee?.some(
-            (a) => a.cal_address === userAddress && a.partstat === "DECLINED"
+            (a) =>
+              calendars[event.calId].owner.emails.includes(a.cal_address) &&
+              a.partstat === "DECLINED"
           )
         )
     );
