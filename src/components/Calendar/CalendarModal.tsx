@@ -146,7 +146,11 @@ function CalendarPopover({
       .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
       .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
 
-    if (set.length === 0 && remove.length === 0) return;
+    if (
+      (set.length === 0 && remove.length === 0) ||
+      !(isOwn || calendar?.access?.write)
+    )
+      return;
 
     await dispatch(
       updateDelegationCalendarAsync({

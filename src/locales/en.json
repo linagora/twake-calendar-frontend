@@ -84,8 +84,10 @@
     },
     "access": {
       "grantAccessRights": "Grant Access rights",
+      "accessRights": "Access rights",
       "viewAllEvents": "View all events",
       "editor": "Editor",
+      "owner": "Owner",
       "administrator": "Administrator"
     }
   },
