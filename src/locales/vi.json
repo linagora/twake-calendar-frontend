@@ -81,6 +81,12 @@
     },
     "settings": {
       "calendarName": "Tên lịch"
+    },
+    "access": {
+      "grantAccessRights": "Cấp quyền truy cập",
+      "viewAllEvents": "Xem tất cả sự kiện",
+      "editor": "Biên tập viên",
+      "administrator": "Quản trị viên"
     }
   },
   "colorPicker": {
@@ -199,7 +205,8 @@
     "updateRecurrentEvent": "Cập nhật sự kiện lặp lại",
     "updateParticipationStatus": "Cập nhật trạng thái tham gia",
     "thisEvent": "Sự kiện này",
-    "allEvents": "Tất cả sự kiện"
+    "allEvents": "Tất cả sự kiện",
+    "deleteRecurrentEvent": "Xóa sự kiện lặp lại"
   },
   "eventDuplication": {
     "duplicateEvent": "Nhân bản sự kiện"

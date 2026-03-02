@@ -83,6 +83,12 @@
     },
     "settings": {
       "calendarName": "Название календаря"
+    },
+    "access": {
+      "grantAccessRights": "Предоставить права доступа",
+      "viewAllEvents": "Просмотр всех событий",
+      "editor": "Редактор",
+      "administrator": "Администратор"
     }
   },
   "colorPicker": {
@@ -201,7 +207,8 @@
     "updateRecurrentEvent": "Обновить повторяющееся событие",
     "updateParticipationStatus": "Обновить статус участия",
     "thisEvent": "Это событие",
-    "allEvents": "Все события"
+    "allEvents": "Все события",
+    "deleteRecurrentEvent": "Удалить повторяющееся событие"
   },
   "eventDuplication": {
     "duplicateEvent": "Дублировать"
