@@ -83,6 +83,12 @@
     },
     "settings": {
       "calendarName": "Nom du calendrier"
+    },
+    "access": {
+      "grantAccessRights": "Accorder des droits d'accès",
+      "viewAllEvents": "Voir tous les événements",
+      "editor": "Éditeur",
+      "administrator": "Administrateur"
     }
   },
   "colorPicker": {
@@ -201,7 +207,8 @@
     "updateRecurrentEvent": "Mettre à jour l'événement récurrent",
     "updateParticipationStatus": "Mettre à jour le statut de participation",
     "thisEvent": "Cet événement",
-    "allEvents": "Tous les événements"
+    "allEvents": "Tous les événements",
+    "deleteRecurrentEvent": "Supprimer l'événement récurrent"
   },
   "eventDuplication": {
     "duplicateEvent": "Dupliquer l'événement"
