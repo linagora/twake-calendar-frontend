@@ -1,11 +1,11 @@
 import { RootState } from "@/app/store";
-import { defaultColors } from "@/utils/defaultColors";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
+import { defaultColors } from "@/utils/defaultColors";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
-import { Calendar } from "../CalendarTypes";
+import { Calendar, CalendarInvite } from "../CalendarTypes";
 import { CalendarData } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
@@ -82,6 +82,18 @@ export const getCalendarsListAsync = createAsyncThunk<
               dark: "#FFF",
             }
           : defaultColors[0];
+
+        const invite: CalendarInvite[] = (
+          (cal.invite ?? []) as Array<{
+            href: string;
+            principal: string;
+            access: number;
+            inviteStatus: number;
+          }>
+        ).filter((inv): inv is CalendarInvite =>
+          [2, 3, 5].includes(inv.access)
+        );
+
         fetchedCalendars[id] = {
           id,
           name: cal["dav:name"] ?? "",
@@ -93,6 +105,7 @@ export const getCalendarsListAsync = createAsyncThunk<
           visibility,
           access,
           events: {},
+          invite,
         };
       }
     );

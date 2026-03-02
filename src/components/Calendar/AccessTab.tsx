@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/app/hooks";
 import {
   exportCalendar,
   getSecretLink,
@@ -19,9 +20,28 @@ import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { SnackbarAlert } from "../Loading/SnackBarAlert";
+import { CalendarAccessRights, UserWithAccess } from "./CalendarAccessRights";
 
-export function AccessTab({ calendar }: { calendar: Calendar }) {
+interface AccessTabProps {
+  calendar: Calendar;
+  usersWithAccess: UserWithAccess[];
+  onUsersWithAccessChange: (users: UserWithAccess[]) => void;
+  onInvitesLoaded: (users: UserWithAccess[]) => void;
+}
+
+export function AccessTab({
+  calendar,
+  usersWithAccess,
+  onUsersWithAccessChange,
+  onInvitesLoaded,
+}: AccessTabProps) {
   const { t } = useI18n();
+  const userData = useAppSelector((state) => state.user.userData);
+  const isPersonalCalendar = userData.openpaasId === calendar.id.split("/")[0];
+  const isDelegatedWithAdministration = calendar.invite?.find(
+    (invite) => invite.href.includes(userData.email) && invite.access === 5
+  );
+
   const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
 
   const [secretLink, setSecretLink] = useState("");
@@ -60,11 +80,8 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
       const exportedData = await exportCalendar(
         calendar.link.replace(".json", "")
       );
-      const blob = new Blob([exportedData], {
-        type: "text/calendar",
-      });
+      const blob = new Blob([exportedData], { type: "text/calendar" });
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.download = `${calendar.id.split("/")[1]}.ics`;
@@ -74,7 +91,6 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
       URL.revokeObjectURL(url);
     } catch (e) {
       setExportError((e as Error).message);
-      setExportLoading(false);
     } finally {
       setExportLoading(false);
     }
@@ -82,6 +98,15 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
 
   return (
     <>
+      {(isPersonalCalendar || isDelegatedWithAdministration) && (
+        <CalendarAccessRights
+          calendar={calendar}
+          value={usersWithAccess}
+          onChange={onUsersWithAccessChange}
+          onInvitesLoaded={onInvitesLoaded}
+        />
+      )}
+
       {!!window.DAV_BASE_URL && (
         <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
           <Box mt={2}>
@@ -108,6 +133,7 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
           </Box>
         </FieldWithLabel>
       )}
+
       <FieldWithLabel label={t("calendar.secretUrl")} isExpanded={false}>
         <Box mt={3} display="flex" alignItems="center" gap={1}>
           <TextField
@@ -147,11 +173,10 @@ export function AccessTab({ calendar }: { calendar: Calendar }) {
       <FieldWithLabel label={t("calendar.exportCalendar")} isExpanded={false}>
         <Typography
           variant="body2"
-          sx={{ color: "text.secondary", m: 1, lineHeight: 1.5 }}
+          sx={{ color: "text.secondary", my: 1, lineHeight: 1.5 }}
         >
           {t("calendar.exportDesc")}
         </Typography>
-
         <Button
           variant="contained"
           color="secondary"
