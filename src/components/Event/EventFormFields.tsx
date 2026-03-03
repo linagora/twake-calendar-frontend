@@ -188,6 +188,10 @@ export default function EventFormFields({
   // Track if user has clicked on calendar section in normal mode
   const [hasClickedCalendarSection, setHasClickedCalendarSection] =
     React.useState(false);
+
+  // Track whether the calendar Select dropdown is open
+  const [calendarSelectOpen, setCalendarSelectOpen] = React.useState(false);
+
   const delegatedCalendars = userPersonalCalendars.filter(
     (cal) => cal.delegated
   );
@@ -202,13 +206,14 @@ export default function EventFormFields({
     : "";
   const isSelectedDelegated = !!selectedCalendar?.delegated;
 
-  // Reset hasEndDateChanged and hasClickedDateTimeSection when modal closes
+  // Reset all click-tracking state when modal closes
   React.useEffect(() => {
     if (!isOpen) {
       setHasEndDateChanged(false);
       setHasClickedDateTimeSection(false);
       setHasClickedLocationSection(false);
       setHasClickedCalendarSection(false);
+      setCalendarSelectOpen(false);
     }
   }, [isOpen]);
 
@@ -229,6 +234,13 @@ export default function EventFormFields({
       setHasEndDateChanged(false);
     }
   }, [showMore, hasEndDateChanged, startDate, endDate]);
+
+  // Auto-open the calendar Select once it is mounted after clicking the preview row
+  React.useEffect(() => {
+    if (hasClickedCalendarSection) {
+      setCalendarSelectOpen(true);
+    }
+  }, [hasClickedCalendarSection]);
 
   // Use all-day toggle hook
   const { handleAllDayToggle } = useAllDayToggle({
@@ -822,6 +834,9 @@ export default function EventFormFields({
               label=""
               SelectDisplayProps={{ "aria-label": t("event.form.calendar") }}
               displayEmpty
+              open={calendarSelectOpen}
+              onOpen={() => setCalendarSelectOpen(true)}
+              onClose={() => setCalendarSelectOpen(false)}
               onChange={(e: SelectChangeEvent) =>
                 handleCalendarChange(e.target.value)
               }
