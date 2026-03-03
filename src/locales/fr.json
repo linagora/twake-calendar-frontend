@@ -331,5 +331,11 @@
       "10": "Novembre",
       "11": "Décembre"
     }
+  },
+  "mobile": {
+    "commingSoon": {
+      "subtitle": "Veuillez ouvrir Twake Calendar sur un ordinateur pour profiter de toutes les fonctionnalités. Une version mobile optimisée arrive bientôt.",
+      "title": "Version mobile bientôt disponible"
+    }
   }
 }
