@@ -65,7 +65,7 @@ function App() {
   const [isTooSmall, setIsTooSmall] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767.98px)");
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
     const onChange = (event: MediaQueryListEvent) =>
       setIsTooSmall(event.matches);
     setIsTooSmall(mediaQuery.matches);
