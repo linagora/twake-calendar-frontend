@@ -19,13 +19,13 @@ export function ScreenTooSmall() {
     >
       <img src={calendarImage} style={{ width: 80, height: 80 }} alt="logo" />
 
-      <Typography variant="h6">{t("mobile.commingSoon.title")}</Typography>
+      <Typography variant="h6">{t("mobile.comingSoon.title")}</Typography>
       <Typography
         variant="caption"
         color="text.secondary"
         sx={{ maxWidth: "264px" }}
       >
-        {t("mobile.commingSoon.subtitle")}
+        {t("mobile.comingSoon.subtitle")}
       </Typography>
     </Box>
   );
