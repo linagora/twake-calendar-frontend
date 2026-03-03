@@ -88,22 +88,16 @@ export async function proppatchCalendar(
   calLink: string,
   patch: { name: string; desc: string; color: Record<string, string> }
 ) {
-  const body: Record<string, string> = {};
-  if (patch.name) {
-    body["dav:name"] = patch.name;
-  }
-  if (patch.desc) {
-    body["caldav:description"] = patch.desc;
-  }
-  if (patch.color.light) {
-    body["apple:color"] = patch.color.light;
-  }
   const response = await api(`dav${calLink}`, {
     method: "PROPPATCH",
     headers: {
       Accept: "application/json, text/plain, */*",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      "dav:name": patch.name,
+      "caldav:description": patch.desc,
+      "apple:color": patch.color.light,
+    }),
   });
   return response;
 }
