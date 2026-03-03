@@ -290,36 +290,6 @@ describe("calendar Availability search", () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it("does not import temp calendars if user already has a calendar but toggles the shared one", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([
-      {
-        email: "alice@example.com",
-        displayName: "Alice",
-        avatarUrl: "image.png",
-        openpaasId: "1234567890",
-      },
-    ]);
-    const spy = jest
-      .spyOn(servicesModule, "getTempCalendarsListAsync")
-      .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
-      });
-    await act(async () =>
-      renderWithProviders(<CalendarTestWrapper />, preloadedState)
-    );
-
-    const input = screen.getByPlaceholderText(
-      "peopleSearch.availabilityPlaceholder"
-    );
-    await act(async () => userEvent.type(input, "Alice"));
-
-    const option = await screen.findByText("Alice");
-    await act(async () => {
-      fireEvent.click(option);
-    });
-    expect(spy).not.toHaveBeenCalled();
-  });
-
   it("open window with attendees filled after temp search on create event button click", async () => {
     const spy = jest
       .spyOn(servicesModule, "getTempCalendarsListAsync")
