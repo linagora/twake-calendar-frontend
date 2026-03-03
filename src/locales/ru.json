@@ -4,7 +4,7 @@
     "personal": "Личные",
     "defaultPersonalCalendarName": "Мой календарь",
     "defaultCalendarName": "Календарь %{name}",
-    "delegated": "Делегированные",
+    "delegated": "Общий",
     "other": "Другие",
     "caldav_access": "Доступ CalDAV",
     "secretUrl": "Секретный URL",

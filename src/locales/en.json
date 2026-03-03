@@ -4,7 +4,7 @@
     "personal": "My calendars",
     "defaultPersonalCalendarName": "My calendar",
     "defaultCalendarName": "%{name}'s calendar",
-    "delegated": "Delegated calendars",
+    "delegated": "Shared calendars",
     "other": "Other calendars",
     "caldav_access": "CalDAV access",
     "secretUrl": "Secret URL",
