@@ -86,6 +86,7 @@
     },
     "access": {
       "grantAccessRights": "Accorder des droits d'accès",
+      "accessRights": "Droits d'accès",
       "viewAllEvents": "Voir tous les événements",
       "editor": "Éditeur",
       "administrator": "Administrateur"

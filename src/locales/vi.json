@@ -84,6 +84,7 @@
     },
     "access": {
       "grantAccessRights": "Cấp quyền truy cập",
+      "accessRights": "Quyền truy cập",
       "viewAllEvents": "Xem tất cả sự kiện",
       "editor": "Biên tập viên",
       "administrator": "Quản trị viên"

@@ -87,6 +87,8 @@ const baseCalendar: Calendar = {
   events: {},
   invite: [],
   owner: { emails: ["user1@example.com"] },
+  access: { write: true },
+  delegated: true,
 };
 
 describe("CalendarAccessRights", () => {
@@ -102,7 +104,8 @@ describe("CalendarAccessRights", () => {
         value={[]}
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
-      />
+      />,
+      { ...userState }
     );
 
     expect(
@@ -113,7 +116,7 @@ describe("CalendarAccessRights", () => {
   it("shows a list of users already passed in via value prop", () => {
     const users: UserWithAccess[] = [
       {
-        openpaasId: "abc",
+        openpaasId: "user1",
         displayName: "Alice",
         email: "alice@example.com",
         accessRight: 2,
@@ -136,10 +139,10 @@ describe("CalendarAccessRights", () => {
   it("calls onChange with user removed when remove button is clicked", () => {
     const users: UserWithAccess[] = [
       {
-        openpaasId: "abc",
+        openpaasId: "user1",
         displayName: "Alice",
         email: "alice@example.com",
-        accessRight: 2,
+        accessRight: 5,
       },
     ];
 
@@ -149,7 +152,8 @@ describe("CalendarAccessRights", () => {
         value={users}
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
-      />
+      />,
+      { ...userState }
     );
 
     fireEvent.click(screen.getByLabelText(/remove/i));
@@ -182,7 +186,8 @@ describe("CalendarAccessRights", () => {
         value={[]}
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
-      />
+      />,
+      { ...userState }
     );
 
     await waitFor(() => expect(getUserDetails).toHaveBeenCalledWith("bob123"));
@@ -219,7 +224,8 @@ describe("CalendarAccessRights", () => {
         value={[]}
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
-      />
+      />,
+      { ...userState }
     );
 
     await waitFor(() => expect(mockOnInvitesLoaded).toHaveBeenCalledWith([]));
@@ -249,7 +255,8 @@ describe("CalendarAccessRights", () => {
         value={[]}
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
-      />
+      />,
+      { ...userState }
     );
 
     expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument();
@@ -286,7 +293,7 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
     ).toBeInTheDocument();
   });
 
-  it("hides CalendarAccessRights for a non-owner without admin delegation", () => {
+  it("hides CalendarAccessRights textfield for a non-owner without admin delegation", () => {
     const foreignCalendar: Calendar = {
       ...baseCalendar,
       id: "otherUser/cal1",
@@ -306,9 +313,10 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
       }
     );
 
+    expect(screen.queryByText("peopleSearch.label")).not.toBeInTheDocument();
     expect(
-      screen.queryByText("calendarPopover.access.grantAccessRights")
-    ).not.toBeInTheDocument();
+      screen.getByText("calendarPopover.access.accessRights")
+    ).toBeInTheDocument();
   });
 
   it("shows CalendarAccessRights when the user has access=5 (admin) delegation", () => {
