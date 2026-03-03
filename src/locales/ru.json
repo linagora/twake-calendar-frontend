@@ -86,6 +86,7 @@
     },
     "access": {
       "grantAccessRights": "Предоставить права доступа",
+      "accessRights": "Права доступа",
       "viewAllEvents": "Просмотр всех событий",
       "editor": "Редактор",
       "administrator": "Администратор"

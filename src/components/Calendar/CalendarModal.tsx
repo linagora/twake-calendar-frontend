@@ -48,8 +48,7 @@ function CalendarPopover({
         .toLowerCase();
       const currentEmail = userData.email?.trim().toLowerCase();
       return inviteEmail === currentEmail && invite.access === 5;
-    }) ||
-    !!calendar?.access?.write;
+    });
 
   // existing calendar params
   const [name, setName] = useState("");
