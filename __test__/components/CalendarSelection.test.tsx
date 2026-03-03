@@ -276,10 +276,10 @@ describe("CalendarSelection", () => {
       .closest(".MuiAccordionSummary-root");
 
     fireEvent.click(delegatedAccordionSummary!);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
 
     fireEvent.click(delegatedAccordionSummary!);
-    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "false");
+    expect(delegatedAccordionSummary).toHaveAttribute("aria-expanded", "true");
   });
 
   it("renders owner name caption for non-personal, non-default calendars", () => {
