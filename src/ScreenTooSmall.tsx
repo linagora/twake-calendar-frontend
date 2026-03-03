@@ -17,7 +17,7 @@ export function ScreenTooSmall() {
         gap: 1,
       }}
     >
-      <img src={calendarImage} style={{ width: 80, height: 80 }} />
+      <img src={calendarImage} style={{ width: 80, height: 80 }} alt="logo" />
 
       <Typography variant="h6">{t("mobile.commingSoon.title")}</Typography>
       <Typography

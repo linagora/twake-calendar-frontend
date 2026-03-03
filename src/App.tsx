@@ -62,15 +62,15 @@ function App() {
       dispatch(push("/error"));
     }
   }, [error, dispatch]);
-  const [isTooSmall, setIsTooSmall] = useState(false);
+  const [isTooSmall, setIsTooSmall] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    const check = () => {
-      setIsTooSmall(window.outerWidth < 768);
-    };
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const mediaQuery = window.matchMedia("(max-width: 767.98px)");
+    const onChange = (event: MediaQueryListEvent) =>
+      setIsTooSmall(event.matches);
+    setIsTooSmall(mediaQuery.matches);
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
   }, []);
 
   return (
