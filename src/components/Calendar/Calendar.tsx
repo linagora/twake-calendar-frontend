@@ -7,11 +7,7 @@ import ImportAlert from "@/features/Events/ImportAlert";
 import SearchResultsPage from "@/features/Search/SearchResultsPage";
 import { setTimeZone } from "@/features/Settings/SettingsSlice";
 import { setDisplayedDateAndRange } from "@/utils/CalendarRangeManager";
-import {
-  formatDateToYYYYMMDDTHHMMSS,
-  getAdjacentWeekRanges,
-  getViewRange,
-} from "@/utils/dateUtils";
+import { formatDateToYYYYMMDDTHHMMSS, getViewRange } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
 import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
