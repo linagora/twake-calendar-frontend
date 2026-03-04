@@ -161,14 +161,13 @@ export function PeopleSearch({
     (params: AutocompleteRenderInputParams) => {
       const inputProps = {
         ...params.InputProps,
-        startAdornment: (
-          <>
-            <PeopleOutlineOutlinedIcon
-              fontSize="small"
-              sx={{ mr: 1, color: "action.active" }}
-            />
-            {params.InputProps.startAdornment}
-          </>
+        startAdornment: params.InputProps.startAdornment ? (
+          params.InputProps.startAdornment
+        ) : (
+          <PeopleOutlineOutlinedIcon
+            fontSize="small"
+            sx={{ mr: 1, color: "action.active" }}
+          />
         ),
         endAdornment: (
           <>
@@ -309,8 +308,8 @@ export function PeopleSearch({
           },
         }}
         // When render input is custom, the adornments should be handled by the custom component
-        forcePopupIcon={!customRenderInput}
-        disableClearable={!!customRenderInput}
+        forcePopupIcon={false}
+        disableClearable
         renderInput={(params) =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
