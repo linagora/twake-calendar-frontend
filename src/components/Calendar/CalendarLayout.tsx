@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import SettingsPage from "@/features/Settings/SettingsPage";
-import { getCalendarRange, getViewRange } from "@/utils/dateUtils";
+import { getViewRange } from "@/utils/dateUtils";
 import type { CalendarApi } from "@fullcalendar/core";
 import CozyBridge from "cozy-external-bridge";
 import { useEffect, useMemo, useRef, useState } from "react";
