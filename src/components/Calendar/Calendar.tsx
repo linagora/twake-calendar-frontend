@@ -9,7 +9,8 @@ import { setTimeZone } from "@/features/Settings/SettingsSlice";
 import { setDisplayedDateAndRange } from "@/utils/CalendarRangeManager";
 import {
   formatDateToYYYYMMDDTHHMMSS,
-  getCalendarRange,
+  getAdjacentWeekRanges,
+  getViewRange,
 } from "@/utils/dateUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from "@/utils/storage/setSelectedCalendars";
@@ -196,8 +197,8 @@ export default function CalendarApp({
   }, [calendarIds]);
 
   const calendarRange = useMemo(
-    () => getCalendarRange(selectedDate),
-    [selectedDate]
+    () => getViewRange(selectedDate, currentView),
+    [selectedDate, currentView]
   );
 
   const calendarRangeStart = calendarRange.start.getTime();

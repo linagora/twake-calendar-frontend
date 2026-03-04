@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import SettingsPage from "@/features/Settings/SettingsPage";
-import { getCalendarRange } from "@/utils/dateUtils";
+import { getCalendarRange, getViewRange } from "@/utils/dateUtils";
 import type { CalendarApi } from "@fullcalendar/core";
 import CozyBridge from "cozy-external-bridge";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +24,7 @@ export default function CalendarLayout() {
     // Get current calendar range
     if (calendarRef.current) {
       const view = calendarRef.current.view;
-      const calendarRange = getCalendarRange(view.activeStart);
+      const calendarRange = getViewRange(view.activeStart, view.type);
 
       // Refresh events for selected calendars
       await refreshCalendars(

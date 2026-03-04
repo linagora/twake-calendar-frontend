@@ -67,3 +67,27 @@ export const computeWeekRange = (date: Date): { start: Date; end: Date } => {
   weekEnd.setDate(weekStart.getDate() + 7);
   return { start: weekStart, end: weekEnd };
 };
+
+export function getViewRange(
+  date = new Date(),
+  view: string
+): { start: Date; end: Date } {
+  if (view === "dayGridMonth") {
+    return getCalendarRange(date);
+  }
+
+  return {
+    start: computeWeekRange(date).start,
+    end: getAdjacentWeekRange(date).end,
+  };
+}
+
+export function getAdjacentWeekRange(date = new Date()): {
+  start: Date;
+  end: Date;
+} {
+  const nextWeekDate = new Date(date);
+  nextWeekDate.setDate(date.getDate() + 7);
+
+  return computeWeekRange(nextWeekDate);
+}
