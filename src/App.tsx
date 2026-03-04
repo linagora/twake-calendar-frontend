@@ -62,7 +62,8 @@ function App() {
       dispatch(push("/error"));
     }
   }, [error, dispatch]);
-  const SMALL_SCREEN_QUERY = "(max-width: 767px)";
+
+  const SMALL_SCREEN_QUERY = "(max-width: 925px)";
   const [isTooSmall, setIsTooSmall] = useState(
     () => window.matchMedia(SMALL_SCREEN_QUERY).matches
   );
