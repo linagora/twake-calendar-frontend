@@ -14,7 +14,7 @@ export function ScreenTooSmall() {
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
-        gap: 1,
+        gap: 2,
       }}
     >
       <img src={calendarImage} style={{ width: 80, height: 80 }} alt="logo" />
