@@ -221,7 +221,7 @@ function CalendarPopover({
         if (importedContent) {
           dispatch(
             importEventFromFileAsync({
-              calLink: `/calendar/${userData.openpaasId}/${calId}.json`,
+              calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
               file: importedContent,
             })
           );

@@ -373,7 +373,7 @@ export async function searchEvent(
     organizers?: string[];
     attendees?: string[];
   } = {
-    query: keywords ? keywords : query,
+    query: keywords || query,
     calendars: searchIn.map((calId) => {
       const [userId, calendarId] = calId.split("/");
       return { calendarId, userId };

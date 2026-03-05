@@ -5,7 +5,6 @@ import {
   moveEventAsync,
   putEventAsync,
 } from "@/features/Calendars/services";
-import { AsyncThunkResult } from "@/features/Calendars/types/AsyncThunkResult";
 import { userAttendee } from "@/features/User/models/attendee";
 import { userOrganiser } from "@/features/User/userDataTypes";
 import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
@@ -186,12 +185,7 @@ async function moveDelegatedEvent({
     putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
   );
 
-  const typedPutResult = putResult as AsyncThunkResult;
-  if (typedPutResult && typeof typedPutResult.unwrap === "function") {
-    await typedPutResult.unwrap();
-  } else {
-    await assertThunkSuccess(putResult);
-  }
+  await assertThunkSuccess(putResult);
 
   const deleteResult = await dispatch(
     deleteEventAsync({
@@ -201,10 +195,5 @@ async function moveDelegatedEvent({
     })
   );
 
-  const typedDeleteResult = deleteResult as AsyncThunkResult;
-  if (typedDeleteResult && typeof typedDeleteResult.unwrap === "function") {
-    await typedDeleteResult.unwrap();
-  } else {
-    await assertThunkSuccess(deleteResult);
-  }
+  await assertThunkSuccess(deleteResult);
 }
