@@ -23,6 +23,7 @@ import "dayjs/locale/vi";
 import { useI18n } from "twake-i18n";
 import { ReadOnlyDateField } from "./components/ReadOnlyPickerField";
 import { LONG_DATE_FORMAT } from "./utils/dateTimeFormatters";
+import { FC_DAYS, WeekDaySelector } from "./WeekDaySelector";
 
 export default function RepeatEvent({
   repetition,
@@ -56,31 +57,6 @@ export default function RepeatEvent({
   const endOption = getEndOption();
 
   const defaultEndDate = dayjs(eventStart).add(1, "day").format("YYYY-MM-DD");
-
-  const handleDayChange = (dayCode: string) => {
-    const currentDays = repetition.byday || [];
-    const updatedDays = currentDays.includes(dayCode)
-      ? currentDays.filter((d) => d !== dayCode)
-      : [...currentDays, dayCode];
-
-    setRepetition({
-      ...repetition,
-      byday: updatedDays.length > 0 ? updatedDays : null,
-    });
-  };
-
-  const getDayLabel = (day: string) => {
-    const dayMap: { [key: string]: string } = {
-      MO: t("event.repeat.days.monday"),
-      TU: t("event.repeat.days.tuesday"),
-      WE: t("event.repeat.days.wednesday"),
-      TH: t("event.repeat.days.thursday"),
-      FR: t("event.repeat.days.friday"),
-      SA: t("event.repeat.days.saturday"),
-      SU: t("event.repeat.days.sunday"),
-    };
-    return dayMap[day] || day;
-  };
 
   return (
     <Box>
@@ -150,51 +126,21 @@ export default function RepeatEvent({
         {/* Weekly selection */}
         {repetition.freq === "weekly" && (
           <Box mb={2}>
-            <Box display="flex" gap={1}>
-              {days.map((dayCode) => {
-                const isSelected = repetition.byday?.includes(dayCode) ?? false;
-                const fullLabel = getDayLabel(dayCode);
-                const label = fullLabel.charAt(0);
-
-                return (
-                  <Box
-                    key={dayCode}
-                    role="button"
-                    aria-label={fullLabel}
-                    onClick={() => {
-                      if (!isOwn) return;
-                      handleDayChange(dayCode);
-                    }}
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "4px",
-                      border: "1px solid",
-                      borderColor: isSelected ? "primary.main" : "#AEAEC0",
-                      color: isSelected ? "#fff" : "#8C9CAF",
-                      fontSize: 16,
-                      fontWeight: 400,
-                      lineHeight: "24px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      bgcolor: isSelected ? "primary.main" : "transparent",
-                      cursor: isOwn ? "pointer" : "default",
-                      "&:hover": isOwn
-                        ? {
-                            borderColor: "primary.main",
-                            bgcolor: "primary.main",
-                            color: "#fff",
-                          }
-                        : undefined,
-                    }}
-                  >
-                    {label}
-                  </Box>
-                );
-              })}
-            </Box>
+            <WeekDaySelector
+              selectedDays={(repetition.byday ?? [])
+                .map((ics) => FC_DAYS.find((d) => d.ics === ics)?.fc ?? -1)
+                .filter((d) => d !== -1)}
+              onChange={(fcDays) => {
+                const icsDays = fcDays
+                  .map((fc) => FC_DAYS.find((d) => d.fc === fc)?.ics ?? "")
+                  .filter(Boolean);
+                setRepetition({
+                  ...repetition,
+                  byday: icsDays.length > 0 ? icsDays : null,
+                });
+              }}
+              disabled={!isOwn}
+            />
           </Box>
         )}
 
