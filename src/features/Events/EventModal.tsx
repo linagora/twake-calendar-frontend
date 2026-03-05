@@ -847,7 +847,7 @@ function EventPopover({
         })
       );
 
-      assertThunkSuccess(result);
+      await assertThunkSuccess(result);
 
       // Clear temp data on successful save
       clearEventFormTempData("create");

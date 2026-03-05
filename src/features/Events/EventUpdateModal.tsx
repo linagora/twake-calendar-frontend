@@ -797,7 +797,7 @@ function EventUpdateModal({
           );
 
           // Handle result of updateEventInstanceAsync
-          assertThunkSuccess(result);
+          await assertThunkSuccess(result);
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
@@ -858,7 +858,7 @@ function EventUpdateModal({
               );
 
               // Handle result of updateSeriesAsync
-              assertThunkSuccess(result);
+              await assertThunkSuccess(result);
 
               // Clear cache after successful update
               dispatch(clearFetchCache(calId));
