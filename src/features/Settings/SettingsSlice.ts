@@ -10,8 +10,14 @@ export interface SettingsState {
   hideDeclinedEvents: boolean | null;
   displayWeekNumbers: boolean;
   view: "calendar" | "settings" | "search";
+  businessHours: BusinessHour | null;
+  workingDays: boolean | null;
 }
-
+export interface BusinessHour {
+  start: string;
+  end: string;
+  daysOfWeek: number[];
+}
 const savedLang = localStorage.getItem("lang");
 const defaultLang = savedLang ?? window.LANG ?? "en";
 
@@ -27,6 +33,8 @@ const initialState: SettingsState = {
   hideDeclinedEvents: null,
   displayWeekNumbers: true,
   view: "calendar",
+  businessHours: null,
+  workingDays: null,
 };
 
 export const settingsSlice = createSlice({
@@ -55,6 +63,12 @@ export const settingsSlice = createSlice({
       action: PayloadAction<"calendar" | "settings" | "search">
     ) => {
       state.view = action.payload;
+    },
+    setBusinessHours: (state, action: PayloadAction<BusinessHour | null>) => {
+      state.businessHours = action.payload ?? null;
+    },
+    setWorkingDays: (state, action: PayloadAction<boolean | null>) => {
+      state.workingDays = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -90,6 +104,23 @@ export const settingsSlice = createSlice({
           ? hideDeclinedEventsConfig.value
           : null;
 
+      const businessHoursConfig = coreModule?.configurations?.find(
+        (config: ConfigurationItem) => config.name === "businessHours"
+      );
+      state.businessHours =
+        Array.isArray(businessHoursConfig?.value) &&
+        businessHoursConfig?.value?.[0]
+          ? businessHoursConfig.value[0]
+          : null;
+
+      // From esnCalendarModule (alongside hideDeclinedEvents)
+      const workingDaysConfig = esnCalendarModule?.configurations?.find(
+        (config: ConfigurationItem) => config.name === "workingDays"
+      );
+      state.workingDays =
+        typeof workingDaysConfig?.value === "boolean"
+          ? workingDaysConfig.value
+          : null;
       const calendarModule = action.payload.configurations?.modules?.find(
         (module: ModuleConfiguration) => module.name === "calendar"
       );
@@ -112,5 +143,7 @@ export const {
   setIsBrowserDefaultTimeZone,
   setHideDeclinedEvents,
   setDisplayWeekNumbers,
+  setBusinessHours,
+  setWorkingDays,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;
