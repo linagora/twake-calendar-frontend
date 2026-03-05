@@ -158,6 +158,11 @@ export function useCalendarDataLoader({
         ),
       ];
 
+      const savedGaps = new Map<number, Interval>();
+      prefetchUnits.forEach(({ gap }, index) => {
+        savedGaps.set(index, { ...gap });
+      });
+
       // Optimistically mark before firing to avoid duplicate kicks
       prefetchUnits.forEach(({ id, gap }) => {
         fetchedIntervalsRef.current[id] = mergeInterval(
@@ -166,19 +171,33 @@ export function useCalendarDataLoader({
         );
       });
 
-      prefetchUnits.forEach(({ id, gap }) => {
+      prefetchUnits.forEach(({ id }, index) => {
+        const originalGap = savedGaps.get(index)!;
         Promise.resolve(
           dispatch(
             getCalendarDetailAsync({
               calId: id,
-              match: { start: toApiDate(gap.start), end: toApiDate(gap.end) },
+              match: {
+                start: toApiDate(originalGap.start),
+                end: toApiDate(originalGap.end),
+              },
             })
           )
         ).catch(() => {
-          // Roll back optimistic mark so it can be retried
+          // Roll back by subtracting the original gap
           fetchedIntervalsRef.current[id] = (
             fetchedIntervalsRef.current[id] ?? []
-          ).filter((iv) => !(iv.start === gap.start && iv.end === gap.end));
+          ).flatMap((iv) => {
+            if (iv.end <= originalGap.start || iv.start >= originalGap.end) {
+              return [iv]; // no overlap, keep as-is
+            }
+            const pieces: Interval[] = [];
+            if (iv.start < originalGap.start)
+              pieces.push({ start: iv.start, end: originalGap.start });
+            if (iv.end > originalGap.end)
+              pieces.push({ start: originalGap.end, end: iv.end });
+            return pieces;
+          });
         });
       });
     };

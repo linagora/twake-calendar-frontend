@@ -23,6 +23,9 @@ describe("CalendarSelection", () => {
   beforeEach(() => {
     localStorage.clear();
   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   const today = new Date();
   const start = new Date(today);
   start.setHours(10, 0, 0, 0);
