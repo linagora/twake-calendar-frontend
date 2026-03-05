@@ -89,6 +89,7 @@ export function useCalendarDataLoader({
   }, [selectedDate, currentView]);
 
   const fetchedIntervalsRef = useRef<Record<string, Interval[]>>({});
+  const inFlightRef = useRef<Record<string, Interval[]>>({});
   const tempFetchedIntervalsRef = useRef<Record<string, Interval[]>>({});
   const processedCacheClearRef = useRef<Record<string, number>>({});
 
@@ -99,13 +100,26 @@ export function useCalendarDataLoader({
 
     const run = async () => {
       // Active load: selected calendars, visible range, gaps only
-      const activeUnits = sortedSelectedCalendars.flatMap((id) =>
-        subtractIntervals(
-          visibleStart,
-          visibleEnd,
-          fetchedIntervalsRef.current[id] ?? []
-        ).map((gap) => ({ id, gap }))
-      );
+      // Exclude intervals already fetched OR currently in-flight to avoid duplicates.
+      const activeUnits = sortedSelectedCalendars.flatMap((id) => {
+        const fetched = fetchedIntervalsRef.current[id] ?? [];
+        const inFlight = inFlightRef.current[id] ?? [];
+        // Build the union of fetched + inFlight intervals to subtract against.
+        const covered = inFlight.reduce(
+          (acc, iv) => mergeInterval(acc, iv),
+          fetched
+        );
+        return subtractIntervals(visibleStart, visibleEnd, covered).map(
+          (gap) => ({ id, gap })
+        );
+      });
+
+      activeUnits.forEach(({ id, gap }) => {
+        inFlightRef.current[id] = mergeInterval(
+          inFlightRef.current[id] ?? [],
+          gap
+        );
+      });
 
       for (let i = 0; i < activeUnits.length; i += BATCH_SIZE) {
         if (cancelled) return;
@@ -122,13 +136,25 @@ export function useCalendarDataLoader({
                 })
               ).unwrap();
               if (!cancelled) {
+                // Promote gap from in-flight → fetched.
                 fetchedIntervalsRef.current[id] = mergeInterval(
                   fetchedIntervalsRef.current[id] ?? [],
                   gap
                 );
               }
             } catch {
-              /* leave unrecorded for retry */
+              // Remove gap from in-flight so it can be retried.
+              inFlightRef.current[id] = (inFlightRef.current[id] ?? []).flatMap(
+                (iv) => {
+                  if (iv.end <= gap.start || iv.start >= gap.end) return [iv];
+                  const pieces: Interval[] = [];
+                  if (iv.start < gap.start)
+                    pieces.push({ start: iv.start, end: gap.start });
+                  if (iv.end > gap.end)
+                    pieces.push({ start: gap.end, end: iv.end });
+                  return pieces;
+                }
+              );
             }
           })
         );
@@ -154,7 +180,9 @@ export function useCalendarDataLoader({
             visibleEnd,
             prefetchEnd,
             fetchedIntervalsRef.current[id] ?? []
-          ).map((gap) => ({ id, gap }))
+          )
+            .filter((gap) => gap.start < gap.end)
+            .map((gap) => ({ id, gap }))
         ),
       ];
 
@@ -233,7 +261,6 @@ export function useCalendarDataLoader({
     const toApiDate = (ms: number) => formatDateToYYYYMMDDTHHMMSS(new Date(ms));
     calendarsWithClearedCache.forEach(({ id, cleared }) => {
       if (processedCacheClearRef.current[id] === cleared) return;
-      processedCacheClearRef.current[id] = cleared;
       delete fetchedIntervalsRef.current[id];
 
       void dispatch(
@@ -247,6 +274,7 @@ export function useCalendarDataLoader({
       )
         .unwrap()
         .then(() => {
+          processedCacheClearRef.current[id] = cleared;
           fetchedIntervalsRef.current[id] = mergeInterval(
             fetchedIntervalsRef.current[id] ?? [],
             { start: visibleStart, end: visibleEnd }
