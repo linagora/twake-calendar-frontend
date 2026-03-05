@@ -440,50 +440,78 @@ describe("calendar Availability search", () => {
     expect(dayNumbersWithContent.length).toBe(0);
   });
 
-  it("should fetch calendar details with date range matching the displayed month", async () => {
+  it("should fetch calendar details for February after navigating to month view and clicking next", async () => {
     const spy = jest
       .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
       .mockImplementation((payload) => {
         return () => Promise.resolve(payload) as any;
       });
     jest.useFakeTimers().setSystemTime(new Date("2025-01-01"));
+
     await act(async () =>
-      renderWithProviders(<CalendarLayout />, preloadedState)
+      renderWithProviders(<CalendarLayout />, {
+        ...preloadedState,
+        calendars: { ...preloadedState.calendars, pending: false },
+      })
     );
+
+    // Advance past debounce so the initial load fires
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
     });
 
+    spy.mockClear();
+
     const calendarRef = window.__calendarRef;
     const calendarApi = calendarRef.current;
-    const view = calendarApi?.view;
+
     await act(async () => {
       calendarApi.changeView("dayGridMonth");
       fireEvent.click(screen.getByTestId("ChevronRightIcon"));
     });
-    expect(spy).toHaveBeenCalledTimes(2);
-    const callArgs = spy.mock.calls[1][0];
+
+    // Advance past debounce so the navigation fetch fires
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    // Find the call that covers February 2025 (the navigated-to month)
+    const februaryCall = spy.mock.calls.find((call) => {
+      const start = call[0].match.start as string;
+      // start should be in January or February 2025 (month view includes padding days)
+      return start.startsWith("2025");
+    });
+
+    expect(februaryCall).toBeDefined();
+    const callArgs = februaryCall![0];
     expect(callArgs.calId).toBe("user1/cal1");
 
-    const startDate = new Date(
-      callArgs.match.start.replace(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
-        "$1-$2-$3T$4:$5:$6"
-      )
-    );
-    const endDate = new Date(
-      callArgs.match.end.replace(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
-        "$1-$2-$3T$4:$5:$6"
-      )
-    );
-    // Verify the date range matches the displayed view
-    const viewStart = new Date(view.currentStart);
-    const viewEnd = new Date(view.currentEnd);
+    const parseDate = (s: string) =>
+      new Date(
+        s.replace(
+          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+          "$1-$2-$3T$4:$5:$6"
+        )
+      );
 
-    expect(startDate.getTime()).toBeLessThanOrEqual(viewStart.getTime());
-    expect(endDate.getTime()).toBeGreaterThanOrEqual(viewEnd.getTime());
+    const startDate = parseDate(callArgs.match.start);
+    const endDate = parseDate(callArgs.match.end);
+
+    // February 2025 month view: range must cover Feb 1 through Mar 1
+    expect(startDate.getTime()).toBeLessThanOrEqual(
+      new Date("2025-02-01").getTime()
+    );
+    expect(endDate.getTime()).toBeGreaterThanOrEqual(
+      new Date("2025-03-01").getTime()
+    );
   });
 
   describe("Batch loading and prefetching", () => {
@@ -506,6 +534,7 @@ describe("calendar Availability search", () => {
         calendars: {
           ...preloadedState.calendars,
           list: manyCalendars,
+          pending: false,
         },
       };
 
@@ -563,6 +592,7 @@ describe("calendar Availability search", () => {
               events: {},
             },
           },
+          pending: false,
         },
       };
 
@@ -613,10 +643,10 @@ describe("calendar Availability search", () => {
         );
 
       await act(async () => {
-        renderWithProviders(
-          <CalendarApp calendarRef={{ current: null }} />,
-          preloadedState
-        );
+        renderWithProviders(<CalendarApp calendarRef={{ current: null }} />, {
+          ...preloadedState,
+          calendars: { ...preloadedState.calendars, pending: false },
+        });
       });
 
       await waitFor(

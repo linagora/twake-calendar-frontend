@@ -17,15 +17,12 @@ export function getCalendarRange(date = new Date()) {
 
   const lastOfMonth = new Date(year, month + 1, 0);
 
-  // Calculate how many days from startDate to lastOfMonth
   const daysFromStart = Math.floor(
     (lastOfMonth.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  // Calculate number of weeks needed to cover all days (round up)
   const weeksNeeded = Math.ceil((daysFromStart + 1) / 7);
 
-  // endDate is the Sunday of the last week (startDate + weeks * 7 - 1)
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + weeksNeeded * 7 - 1);
   endDate.setHours(23, 59, 59, 999);
@@ -43,8 +40,8 @@ export function getDeltaInMilliseconds(delta: {
   milliseconds: number;
 }) {
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  const AVG_MS_PER_MONTH = 30.44 * MS_PER_DAY; // approx
-  const AVG_MS_PER_YEAR = 365.25 * MS_PER_DAY; // approx
+  const AVG_MS_PER_MONTH = 30.44 * MS_PER_DAY;
+  const AVG_MS_PER_YEAR = 365.25 * MS_PER_DAY;
 
   return (
     (delta.years || 0) * AVG_MS_PER_YEAR +
@@ -75,11 +72,7 @@ export function getViewRange(
   if (view === "dayGridMonth") {
     return getCalendarRange(date);
   }
-
-  return {
-    start: computeWeekRange(date).start,
-    end: getAdjacentWeekRange(date).end,
-  };
+  return computeWeekRange(date);
 }
 
 export function getAdjacentWeekRange(date = new Date()): {
@@ -90,4 +83,12 @@ export function getAdjacentWeekRange(date = new Date()): {
   nextWeekDate.setDate(date.getDate() + 7);
 
   return computeWeekRange(nextWeekDate);
+}
+
+export function getTwoWeekRange(date = new Date()): { start: Date; end: Date } {
+  const start = computeStartOfTheWeek(date);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 14);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
 }
