@@ -231,6 +231,9 @@ describe("calendar Availability search", () => {
   beforeEach(() => {
     localStorage.clear();
   });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   const preloadedState = {
     user: {
       userData: {
@@ -447,7 +450,9 @@ describe("calendar Availability search", () => {
     const spy = jest
       .spyOn(calendarDetailThunks, "getCalendarDetailAsync")
       .mockImplementation((payload) => {
-        return () => Promise.resolve(payload) as any;
+        const promise = Promise.resolve(payload);
+        const thunk = () => Object.assign(promise, { unwrap: () => promise });
+        return thunk as any;
       });
     jest.useFakeTimers().setSystemTime(new Date("2025-01-01"));
 

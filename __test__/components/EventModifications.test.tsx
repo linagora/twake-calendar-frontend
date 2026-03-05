@@ -87,7 +87,11 @@ describe("CalendarApp integration", () => {
   };
 
   it("renders the event on the calendar and calendarRef works", async () => {
-    const dispatch = jest.fn() as AppDispatch;
+    const dispatch = jest.fn().mockReturnValue(
+      Object.assign(Promise.resolve({}), {
+        unwrap: () => Promise.resolve({}),
+      })
+    ) as unknown as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
 
     renderCalendar();
@@ -465,7 +469,11 @@ describe("CalendarApp integration", () => {
     it("update event attendees on drag", async () => {
       // Mock dispatch locally — this test calls createEventHandlers directly
       // and does not go through the Redux store or useAppDispatch.
-      const mockDispatch = jest.fn();
+      const mockDispatch = jest.fn().mockReturnValue(
+        Object.assign(Promise.resolve({}), {
+          unwrap: () => Promise.resolve({}),
+        })
+      ) as unknown as AppDispatch;
       jest
         .spyOn(appHooks, "useAppDispatch")
         .mockReturnValue(mockDispatch as unknown as AppDispatch);
@@ -539,7 +547,11 @@ describe("CalendarApp integration", () => {
     it("update event attendees on resize", async () => {
       // Mock dispatch locally — this test calls createEventHandlers directly
       // and does not go through the Redux store or useAppDispatch.
-      const mockDispatch = jest.fn();
+      const mockDispatch = jest.fn().mockReturnValue(
+        Object.assign(Promise.resolve({}), {
+          unwrap: () => Promise.resolve({}),
+        })
+      ) as unknown as AppDispatch;
       jest
         .spyOn(appHooks, "useAppDispatch")
         .mockReturnValue(mockDispatch as unknown as AppDispatch);

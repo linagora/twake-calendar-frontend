@@ -173,32 +173,32 @@ export function useCalendarDataLoader({
 
       prefetchUnits.forEach(({ id }, index) => {
         const originalGap = savedGaps.get(index)!;
-        Promise.resolve(
-          dispatch(
-            getCalendarDetailAsync({
-              calId: id,
-              match: {
-                start: toApiDate(originalGap.start),
-                end: toApiDate(originalGap.end),
-              },
-            })
-          )
-        ).catch(() => {
-          // Roll back by subtracting the original gap
-          fetchedIntervalsRef.current[id] = (
-            fetchedIntervalsRef.current[id] ?? []
-          ).flatMap((iv) => {
-            if (iv.end <= originalGap.start || iv.start >= originalGap.end) {
-              return [iv]; // no overlap, keep as-is
-            }
-            const pieces: Interval[] = [];
-            if (iv.start < originalGap.start)
-              pieces.push({ start: iv.start, end: originalGap.start });
-            if (iv.end > originalGap.end)
-              pieces.push({ start: originalGap.end, end: iv.end });
-            return pieces;
+        void dispatch(
+          getCalendarDetailAsync({
+            calId: id,
+            match: {
+              start: toApiDate(originalGap.start),
+              end: toApiDate(originalGap.end),
+            },
+          })
+        )
+          .unwrap()
+          .catch(() => {
+            // Roll back by subtracting the original gap
+            fetchedIntervalsRef.current[id] = (
+              fetchedIntervalsRef.current[id] ?? []
+            ).flatMap((iv) => {
+              if (iv.end <= originalGap.start || iv.start >= originalGap.end) {
+                return [iv]; // no overlap, keep as-is
+              }
+              const pieces: Interval[] = [];
+              if (iv.start < originalGap.start)
+                pieces.push({ start: iv.start, end: originalGap.start });
+              if (iv.end > originalGap.end)
+                pieces.push({ start: originalGap.end, end: iv.end });
+              return pieces;
+            });
           });
-        });
       });
     };
 
@@ -236,17 +236,16 @@ export function useCalendarDataLoader({
       processedCacheClearRef.current[id] = cleared;
       delete fetchedIntervalsRef.current[id];
 
-      Promise.resolve(
-        dispatch(
-          getCalendarDetailAsync({
-            calId: id,
-            match: {
-              start: toApiDate(visibleStart),
-              end: toApiDate(visibleEnd),
-            },
-          })
-        )
+      void dispatch(
+        getCalendarDetailAsync({
+          calId: id,
+          match: {
+            start: toApiDate(visibleStart),
+            end: toApiDate(visibleEnd),
+          },
+        })
       )
+        .unwrap()
         .then(() => {
           fetchedIntervalsRef.current[id] = mergeInterval(
             fetchedIntervalsRef.current[id] ?? [],
