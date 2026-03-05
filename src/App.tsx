@@ -1,5 +1,5 @@
 import { TwakeMuiThemeProvider } from "@linagora/twake-mui";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { push } from "redux-first-history";
 import { HistoryRouter as Router } from "redux-first-history/rr6";
@@ -13,6 +13,7 @@ import { Loading } from "./components/Loading/Loading";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
 import HandleLogin from "./features/User/HandleLogin";
 import { CallbackResume } from "./features/User/LoginCallback";
+import { ScreenTooSmall } from "./ScreenTooSmall";
 import { WebSocketGate } from "./websocket/WebSocketGate";
 
 import {
@@ -62,6 +63,20 @@ function App() {
     }
   }, [error, dispatch]);
 
+  const SMALL_SCREEN_QUERY = "(max-width: 925px)";
+  const [isTooSmall, setIsTooSmall] = useState(
+    () => window.matchMedia(SMALL_SCREEN_QUERY).matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(SMALL_SCREEN_QUERY);
+    const onChange = (event: MediaQueryListEvent) =>
+      setIsTooSmall(event.matches);
+    setIsTooSmall(mediaQuery.matches);
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <TwakeMuiThemeProvider>
       <I18n
@@ -69,19 +84,25 @@ function App() {
         lang={lang}
         locales={dateLocales}
       >
-        <Suspense fallback={<Loading />}>
-          <WebSocketGate />
-          <Router history={history}>
-            <Routes>
-              <Route path="/" element={<HandleLogin />} />
-              <Route path="/calendar" element={<CalendarLayout />} />
-              <Route path="/callback" element={<CallbackResume />} />
-              <Route path="/error" element={<ErrorPage />} />
-            </Routes>
-          </Router>
-          <ErrorSnackbar error={error} type="user" />
-        </Suspense>
-        {appLoading && <Loading />}
+        {isTooSmall ? (
+          <ScreenTooSmall />
+        ) : (
+          <>
+            <Suspense fallback={<Loading />}>
+              <WebSocketGate />
+              <Router history={history}>
+                <Routes>
+                  <Route path="/" element={<HandleLogin />} />
+                  <Route path="/calendar" element={<CalendarLayout />} />
+                  <Route path="/callback" element={<CallbackResume />} />
+                  <Route path="/error" element={<ErrorPage />} />
+                </Routes>
+              </Router>
+              <ErrorSnackbar error={error} type="user" />
+            </Suspense>
+            {appLoading && <Loading />}
+          </>
+        )}
       </I18n>
     </TwakeMuiThemeProvider>
   );

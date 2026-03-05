@@ -330,5 +330,11 @@
       "10": "Tháng 11",
       "11": "Tháng 12"
     }
+  },
+  "mobile": {
+    "comingSoon": {
+      "subtitle": "Vui lòng mở Twake Calendar trên máy tính để sử dụng đầy đủ tính năng. Phiên bản di động được tối ưu hóa hoàn toàn sẽ sớm ra mắt.",
+      "title": "Phiên bản di động sắp ra mắt"
+    }
   }
 }
