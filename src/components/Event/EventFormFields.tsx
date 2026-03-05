@@ -808,7 +808,7 @@ export default function EventFormFields({
           >
             {selectedCalendar?.name ? (
               <Box style={{ display: "flex", flexDirection: "column" }}>
-                <Typography sx={{ wordBreak: "break-word" }}>
+                <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
                   {renameDefault(
                     selectedCalendar.name,
                     selectedOwnerDisplayName,
