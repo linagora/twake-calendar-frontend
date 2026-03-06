@@ -53,11 +53,13 @@ export function WeekDaySelector({
 
         return (
           <Box
+            component="button"
+            type="button"
             key={ics}
-            role="button"
             aria-label={fullLabel}
             aria-pressed={isSelected}
             onClick={() => handleToggle(fc)}
+            disabled={disabled}
             sx={{
               width: 40,
               height: 40,

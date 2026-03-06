@@ -86,8 +86,10 @@ export default function CalendarApp({
     (state) => state.settings.hideDeclinedEvents
   );
   const hiddenDays = useMemo(() => {
-    if (!hideWorkingDays || !workingDays) return [];
-    return [0, 1, 2, 3, 4, 5, 6].filter((d) => !workingDays.includes(d));
+    if (!hideWorkingDays || !workingDays || workingDays.length === 0) return [];
+    const validWorkingDays = workingDays.filter((d) => d >= 0 && d <= 6);
+    if (validWorkingDays.length === 0) return [];
+    return [0, 1, 2, 3, 4, 5, 6].filter((d) => !validWorkingDays.includes(d));
   }, [hideWorkingDays, workingDays]);
 
   const calendars = useAppSelector((state) => state.calendars.list);

@@ -13,6 +13,7 @@ import {
   Switch,
   Typography,
 } from "@linagora/twake-mui";
+import { useRef, useCallback } from "react";
 import { useI18n } from "twake-i18n";
 import {
   setLanguage as setUserLanguage,
@@ -75,6 +76,10 @@ export function GeneralSettings({
   );
   const workingDays = useAppSelector((state) => state.settings.workingDays);
   const businessHours = useAppSelector((state) => state.settings.businessHours);
+  const pendingBusinessHoursRef = useRef<BusinessHour | null>(null);
+  const businessHoursTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const handleLanguageChange = (event: SelectChangeEvent<string>) => {
     const newLanguage = event.target.value;
@@ -143,23 +148,36 @@ export function GeneralSettings({
         onDisplayWeekNumbersError();
       });
   };
-  const handleBusinessHour = ({ days }: { days: number[] }) => {
-    const previousHours = businessHours;
-    const value: BusinessHour | null = businessHours
-      ? { ...businessHours, daysOfWeek: days }
-      : null;
-    dispatch(setBusinessHours(value));
-    dispatch(
-      updateUserConfigurationsAsync({
-        businessHours: value,
-      })
-    )
-      .unwrap()
-      .catch(() => {
-        dispatch(setBusinessHours(previousHours));
-        onWorkingDaysError();
-      });
-  };
+
+  const handleBusinessHour = useCallback(
+    ({ days }: { days: number[] }) => {
+      const previousHours = businessHours;
+      const value: BusinessHour | null = businessHours
+        ? { ...businessHours, daysOfWeek: days }
+        : null;
+
+      dispatch(setBusinessHours(value));
+      pendingBusinessHoursRef.current = value;
+
+      if (businessHoursTimeoutRef.current) {
+        clearTimeout(businessHoursTimeoutRef.current);
+      }
+
+      businessHoursTimeoutRef.current = setTimeout(() => {
+        dispatch(
+          updateUserConfigurationsAsync({
+            businessHours: pendingBusinessHoursRef.current,
+          })
+        )
+          .unwrap()
+          .catch(() => {
+            dispatch(setBusinessHours(previousHours));
+            onWorkingDaysError();
+          });
+      }, 500);
+    },
+    [businessHours, dispatch, onWorkingDaysError]
+  );
   const handleWorkingDays = (value: boolean) => {
     dispatch(setWorkingDays(value));
     dispatch(updateUserConfigurationsAsync({ workingDays: value }))

@@ -126,38 +126,36 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
           )}
         </Box>
         <Box className="settings-content-body">
-          <Box className="settings-content-body">
-            {activeNavItem === "settings" && (
-              <>
-                {activeSettingsSubTab === "settings" && (
-                  <GeneralSettings
-                    onLanguageError={() => setLanguageErrorOpen(true)}
-                    onTimeZoneError={() => setTimeZoneErrorOpen(true)}
-                    onHideDeclinedEventsError={() =>
-                      setHideDeclinedEventsErrorOpen(true)
-                    }
-                    onDisplayWeekNumbersError={() =>
-                      setDisplayWeekNumbersErrorOpen(true)
-                    }
-                    onWorkingDaysError={() => setWorkingDaysErrorOpen(true)}
-                  />
-                )}
-                {activeSettingsSubTab === "notifications" && (
-                  <NotificationsSettings
-                    onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
-                  />
-                )}
-              </>
-            )}
-          </Box>
-          {activeNavItem === "sync" && (
-            <Box className="settings-tab-content">
-              <Typography variant="body1" color="text.secondary">
-                {t("settings.sync.empty") || "Sync settings coming soon"}
-              </Typography>
-            </Box>
+          {activeNavItem === "settings" && (
+            <>
+              {activeSettingsSubTab === "settings" && (
+                <GeneralSettings
+                  onLanguageError={() => setLanguageErrorOpen(true)}
+                  onTimeZoneError={() => setTimeZoneErrorOpen(true)}
+                  onHideDeclinedEventsError={() =>
+                    setHideDeclinedEventsErrorOpen(true)
+                  }
+                  onDisplayWeekNumbersError={() =>
+                    setDisplayWeekNumbersErrorOpen(true)
+                  }
+                  onWorkingDaysError={() => setWorkingDaysErrorOpen(true)}
+                />
+              )}
+              {activeSettingsSubTab === "notifications" && (
+                <NotificationsSettings
+                  onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
+                />
+              )}
+            </>
           )}
         </Box>
+        {activeNavItem === "sync" && (
+          <Box className="settings-tab-content">
+            <Typography variant="body1" color="text.secondary">
+              {t("settings.sync.empty") || "Sync settings coming soon"}
+            </Typography>
+          </Box>
+        )}
       </Box>
       <Snackbar
         open={languageErrorOpen}
