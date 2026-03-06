@@ -191,7 +191,7 @@ export function GeneralSettings({
   return (
     <Box className="settings-tab-content">
       {/* Language */}
-      <Box sx={{ mb: 6 }}>
+      <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           {t("settings.language") || "Language"}
         </Typography>
@@ -216,15 +216,15 @@ export function GeneralSettings({
       </Box>
 
       {/* Timezone */}
-      <Box>
+      <Box
+        sx={{
+          mb: 4,
+        }}
+      >
         <Typography variant="h6" sx={{ mb: 1 }}>
           {t("settings.timeZone")}
         </Typography>
-        <Box
-          sx={{
-            mb: 6,
-          }}
-        >
+        <Box>
           <FormControl size="small" sx={{ minWidth: 500 }}>
             <FormControlLabel
               control={
@@ -258,7 +258,7 @@ export function GeneralSettings({
       </Box>
 
       {/* Working  */}
-      <Box sx={{ mb: 6 }}>
+      <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           {t("settings.chooseWorkingDays")}
         </Typography>
@@ -266,7 +266,7 @@ export function GeneralSettings({
           selectedDays={businessHours?.daysOfWeek ?? []}
           onChange={(days) => handleBusinessHour({ days })}
         />
-        <FormControl size="small" sx={{ minWidth: 500 }}>
+        <FormControl size="small" sx={{ minWidth: 500, mt: 2 }}>
           <FormControlLabel
             control={
               <Switch
@@ -286,7 +286,7 @@ export function GeneralSettings({
       </Box>
 
       {/* Calendar & Events */}
-      <Box sx={{ mb: 6 }}>
+      <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           {t("settings.calAndEvent")}
         </Typography>
