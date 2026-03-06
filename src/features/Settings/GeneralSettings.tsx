@@ -13,7 +13,7 @@ import {
   Switch,
   Typography,
 } from "@linagora/twake-mui";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { useI18n } from "twake-i18n";
 import {
   setLanguage as setUserLanguage,
@@ -178,6 +178,15 @@ export function GeneralSettings({
     },
     [businessHours, dispatch, onWorkingDaysError]
   );
+
+  useEffect(() => {
+    return () => {
+      if (businessHoursTimeoutRef.current) {
+        clearTimeout(businessHoursTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleWorkingDays = (value: boolean) => {
     dispatch(setWorkingDays(value));
     dispatch(updateUserConfigurationsAsync({ workingDays: value }))
