@@ -210,12 +210,21 @@ export function useAttendeesFreeBusy({
           return [email, (busy ? "busy" : "free") as FreeBusyStatus] as const;
         })
       ).then(Object.fromEntries)
-    ).then((updates) => {
-      if (!cancelled) {
-        Object.keys(updates).forEach((e) => fetchedNewEmailsRef.current.add(e));
-        setStatusMap((prev) => ({ ...prev, ...updates }));
-      }
-    });
+    )
+      .then((updates) => {
+        if (!cancelled) {
+          Object.keys(updates).forEach((e) =>
+            fetchedNewEmailsRef.current.add(e)
+          );
+          setStatusMap((prev) => ({ ...prev, ...updates }));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          toFetch.forEach((a) => fetchedNewEmailsRef.current.add(a.email));
+          setStatusMap((prev) => ({ ...prev, ...toUnknownMap(toFetch) }));
+        }
+      });
 
     return () => {
       cancelled = true;

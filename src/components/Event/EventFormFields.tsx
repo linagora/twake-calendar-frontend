@@ -100,7 +100,7 @@ interface EventFormFieldsProps {
     browserTz: string;
     getTimezoneOffset: (tzName: string, date: Date) => string;
   };
-  eventId: string | null;
+  eventId?: string | null;
 
   // Event handlers
   onStartChange?: (newStart: string) => void;

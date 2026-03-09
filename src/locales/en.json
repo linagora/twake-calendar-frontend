@@ -131,7 +131,7 @@
       }
     },
     "freeBusy": {
-      "unknown": "Unknonw status",
+      "unknown": "Unknown status",
       "busy": "User is busy",
       "loading": "Status is loading"
     },

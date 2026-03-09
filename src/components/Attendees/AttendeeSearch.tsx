@@ -36,14 +36,14 @@ export default function AttendeeSearch({
   placeholder?: string;
   start?: string;
   end?: string;
-  timezone: string;
+  timezone?: string;
   eventUid?: string | null;
 }) {
   const [userIdMap, setUserIdMap] = useState<Record<string, string>>({});
 
   const [addedUsers, setAddedUsers] = useState<User[]>([]);
 
-  const initialEmailsRef = useRef<Set<string>>(new Set<string>());
+  const initialEmailsRef = useRef<Set<string> | null>(null);
   if (initialEmailsRef.current === null && attendees.length > 0) {
     initialEmailsRef.current = new Set(attendees.map((a) => a.cal_address));
   }
@@ -73,7 +73,7 @@ export default function AttendeeSearch({
     newAttendees,
     start: start ?? "",
     end: end ?? "",
-    timezone,
+    timezone: timezone ?? "",
     eventUid,
     enabled: !!(start && end && selectedUsers.length > 0),
   });
