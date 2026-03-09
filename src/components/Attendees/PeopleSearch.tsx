@@ -54,6 +54,7 @@ export function PeopleSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
+  getChipIcon,
 }: {
   selectedUsers: User[];
   onChange: (event: SyntheticEvent, users: User[]) => void;
@@ -75,6 +76,7 @@ export function PeopleSearch({
     paper?: Partial<PaperProps>;
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
   };
+  getChipIcon?: (user: User) => ReactNode;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -307,7 +309,6 @@ export function PeopleSearch({
             ...customSlotProps?.popper,
           },
         }}
-        // When render input is custom, the adornments should be handled by the custom component
         forcePopupIcon={false}
         disableClearable
         renderInput={(params) =>
@@ -349,6 +350,9 @@ export function PeopleSearch({
               <Chip
                 {...getTagProps({ index })}
                 key={label}
+                icon={
+                  !isString && getChipIcon ? getChipIcon(option) : undefined
+                }
                 style={{
                   backgroundColor: chipColor,
                   color: textColor,

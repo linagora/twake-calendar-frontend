@@ -100,6 +100,7 @@ interface EventFormFieldsProps {
     browserTz: string;
     getTimezoneOffset: (tzName: string, date: Date) => string;
   };
+  eventId: string | null;
 
   // Event handlers
   onStartChange?: (newStart: string) => void;
@@ -157,6 +158,7 @@ export default function EventFormFields({
   isOpen = false,
   userPersonalCalendars,
   timezoneList,
+  eventId,
   onStartChange,
   onEndChange,
   onAllDayChange,
@@ -633,6 +635,10 @@ export default function EventFormFields({
         <AttendeeSelector
           attendees={attendees}
           setAttendees={setAttendees}
+          start={start}
+          eventUid={eventId}
+          timezone={timezone}
+          end={end}
           placeholder={t("event.form.addGuestsPlaceholder")}
           inputSlot={(params) => <TextField {...params} size="small" />}
         />
