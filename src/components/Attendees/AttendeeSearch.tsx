@@ -43,7 +43,7 @@ export default function AttendeeSearch({
 
   const [addedUsers, setAddedUsers] = useState<User[]>([]);
 
-  const initialEmailsRef = useRef<Set<string> | null>(null);
+  const initialEmailsRef = useRef<Set<string>>(new Set<string>());
   if (initialEmailsRef.current === null && attendees.length > 0) {
     initialEmailsRef.current = new Set(attendees.map((a) => a.cal_address));
   }
