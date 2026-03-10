@@ -326,6 +326,10 @@ export function PeopleSearch({
               <ListItemText
                 primary={option.displayName}
                 secondary={option.email}
+                slotProps={{
+                  primary: { variant: "body2" },
+                  secondary: { variant: "caption" },
+                }}
               />
             </ListItem>
           );
