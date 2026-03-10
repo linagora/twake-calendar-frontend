@@ -22,10 +22,7 @@ interface ResolvedAttendee {
   userId: string;
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
-
 async function resolveUserId(attendee: Attendee): Promise<string | null> {
   if (attendee.userId) return attendee.userId;
   return getUserDataFromEmail(attendee.email)
@@ -116,19 +113,12 @@ function toFreeBusyMap(
     );
 }
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
-
 interface UseAttendeesFreeBusyOptions {
-  /** Attendees present when the form opened — queried via bulk POST. */
   existingAttendees: Attendee[];
-  /** Attendees added during this editing session — queried via per-user REPORT. */
   newAttendees: Attendee[];
   start: string;
   end: string;
   timezone: string;
-  /** UID of the event being edited — required for Flow A (bulk POST). */
   eventUid?: string | null;
   enabled?: boolean;
 }
@@ -148,13 +138,11 @@ export function useAttendeesFreeBusy({
   const existingKey = existingAttendees.map((a) => a.email).join(",");
   const newKey = newAttendees.map((a) => a.email).join(",");
 
-  // Invalidate all cached results when the time window or timezone changes
   useEffect(() => {
     fetchedNewEmailsRef.current = new Set();
     setStatusMap({});
   }, [start, end, timezone]);
 
-  // Flow A — existing attendees via bulk POST
   useEffect(() => {
     if (
       !enabled ||
@@ -193,20 +181,22 @@ export function useAttendeesFreeBusy({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingKey, start, end, eventUid, enabled, timezone]);
 
-  // Flow B — newly added attendees via per-user REPORT
   useEffect(() => {
     if (!enabled || !start || !end) return;
 
-    // Remove departed attendees from the map
     const currentEmails = new Set(newAttendees.map((a) => a.email));
     const removedEmails = [...fetchedNewEmailsRef.current].filter(
       (e) => !currentEmails.has(e)
     );
     if (removedEmails.length > 0) {
-      removedEmails.forEach((e) => fetchedNewEmailsRef.current.delete(e));
+      removedEmails.forEach((e) => {
+        fetchedNewEmailsRef.current.delete(e);
+      });
       setStatusMap((prev) => {
         const next = { ...prev };
-        removedEmails.forEach((e) => delete next[e]);
+        removedEmails.forEach((e) => {
+          delete next[e];
+        });
         return next;
       });
     }
@@ -214,39 +204,39 @@ export function useAttendeesFreeBusy({
     const toFetch = newAttendees.filter(
       (a) => !fetchedNewEmailsRef.current.has(a.email)
     );
-    console.log("[FreeBusy Flow B]", {
-      newAttendees,
-      toFetch,
-      fetched: [...fetchedNewEmailsRef.current],
-    });
     if (toFetch.length === 0) return;
 
     let cancelled = false;
     setStatusMap((prev) => ({ ...prev, ...toLoadingMap(toFetch) }));
-
     fetchFreeBusyMap(toFetch, (resolved) =>
       Promise.all(
         resolved.map(async ({ email, userId }) => {
-          const busy = await getFreeBusyForAddedAttendeesREPORT(
-            userId,
-            toUtcIcal(start, timezone),
-            toUtcIcal(end, timezone)
-          );
-          return [email, (busy ? "busy" : "free") as FreeBusyStatus] as const;
+          try {
+            const busy = await getFreeBusyForAddedAttendeesREPORT(
+              userId,
+              moment.tz(start, timezone).utc().format("YYYYMMDDTHHmmss"),
+              moment.tz(end, timezone).utc().format("YYYYMMDDTHHmmss")
+            );
+            return [email, (busy ? "busy" : "free") as FreeBusyStatus] as const;
+          } catch {
+            return [email, "unknown" as FreeBusyStatus] as const;
+          }
         })
       ).then(Object.fromEntries)
     )
       .then((updates) => {
         if (!cancelled) {
-          Object.keys(updates).forEach((e) =>
-            fetchedNewEmailsRef.current.add(e)
-          );
+          Object.keys(updates).forEach((e) => {
+            fetchedNewEmailsRef.current.add(e);
+          });
           setStatusMap((prev) => ({ ...prev, ...updates }));
         }
       })
       .catch(() => {
         if (!cancelled) {
-          toFetch.forEach((a) => fetchedNewEmailsRef.current.add(a.email));
+          toFetch.forEach((a) => {
+            fetchedNewEmailsRef.current.add(a.email);
+          });
           setStatusMap((prev) => ({ ...prev, ...toUnknownMap(toFetch) }));
         }
       });
