@@ -34,7 +34,7 @@ export function CalendarName({ calendar }: { calendar: Calendar }) {
         }}
       />
       <Box style={{ display: "flex", flexDirection: "column" }}>
-        <Typography sx={{ wordBreak: "break-word" }}>
+        <Typography variant="body2" sx={{ wordBreak: "break-word" }}>
           {renameDefault(calendar.name, ownerDisplayName, t, isOwnCalendar)}
         </Typography>
         <OwnerCaption
