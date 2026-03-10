@@ -131,6 +131,12 @@
         "occurrences": "occurrences"
       }
     },
+    "freeBusy": {
+      "unknown": "Statut inconnu",
+      "busy": "Cette personne est occupée",
+      "free": "L'utilisateur est disponible",
+      "loading": "Chargement du statut"
+    },
     "form": {
       "title": "Titre",
       "titlePlaceholder": "Ajouter un titre",
