@@ -132,7 +132,7 @@
     },
     "freeBusy": {
       "unknown": "Unknown status",
-      "busy": "User is busy",
+      "busy": "This person is busy",
       "free": "User is free",
       "loading": "Status is loading"
     },

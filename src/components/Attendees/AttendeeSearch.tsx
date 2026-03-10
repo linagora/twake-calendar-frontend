@@ -99,10 +99,7 @@ export default function AttendeeSearch({
       getChipIcon={
         start && end
           ? (user) => (
-              <FreeBusyIndicator
-                status={statusMap[user.email] ?? "unknown"}
-                size={16}
-              />
+              <FreeBusyIndicator status={statusMap[user.email] ?? "unknown"} />
             )
           : undefined
       }
