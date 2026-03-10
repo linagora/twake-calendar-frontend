@@ -133,6 +133,7 @@
     "freeBusy": {
       "unknown": "Unknown status",
       "busy": "User is busy",
+      "free": "User is free",
       "loading": "Status is loading"
     },
     "form": {

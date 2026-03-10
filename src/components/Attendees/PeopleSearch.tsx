@@ -33,6 +33,7 @@ export interface User {
   avatarUrl?: string;
   openpaasId?: string;
   color?: Record<string, string>;
+  objectType?: string;
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {

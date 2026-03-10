@@ -7,7 +7,7 @@ import {
   PeopleSearch,
   User,
 } from "./PeopleSearch";
-import { useAttendeesFreeBusy } from "./useFreeBusy";
+import { FreeBusyMap, useAttendeesFreeBusy } from "./useFreeBusy";
 
 const attendeeToUser = (a: userAttendee, openpaasId = ""): User => ({
   email: a.cal_address,
@@ -15,6 +15,8 @@ const attendeeToUser = (a: userAttendee, openpaasId = ""): User => ({
   avatarUrl: "",
   openpaasId,
 });
+
+const hasCalendar = (u: User) => u.objectType === "user" && !!u.openpaasId;
 
 export default function AttendeeSearch({
   attendees,
@@ -40,20 +42,20 @@ export default function AttendeeSearch({
   eventUid?: string | null;
 }) {
   const [userIdMap, setUserIdMap] = useState<Record<string, string>>({});
-
   const [addedUsers, setAddedUsers] = useState<User[]>([]);
-
-  const initialEmailsRef = useRef<Set<string>>(new Set<string>());
-  if (initialEmailsRef.current === null && attendees.length > 0) {
+  const initialEmailsRef = useRef<Set<string> | null>(null);
+  if (initialEmailsRef.current === null && !!eventUid && attendees.length > 0) {
     initialEmailsRef.current = new Set(attendees.map((a) => a.cal_address));
   }
-  const initialEmails = initialEmailsRef.current ?? new Set<string>();
+  const initialEmails = eventUid
+    ? (initialEmailsRef.current ?? new Set<string>())
+    : new Set<string>();
 
   const selectedUsers: User[] = [
-    ...attendees.map((a) => attendeeToUser(a, userIdMap[a.cal_address])),
-    ...addedUsers.filter(
-      (u) => !attendees.find((a) => a.cal_address === u.email)
-    ),
+    ...addedUsers,
+    ...attendees
+      .map((a) => attendeeToUser(a, userIdMap[a.cal_address]))
+      .filter((a) => !addedUsers.find((u) => a.email === u.email)),
   ];
 
   const toAttendee = (u: User) => ({
@@ -65,8 +67,15 @@ export default function AttendeeSearch({
     .filter((u) => initialEmails.has(u.email))
     .map(toAttendee);
   const newAttendees = selectedUsers
-    .filter((u) => !initialEmails.has(u.email))
+    .filter((u) => !initialEmails.has(u.email) && hasCalendar(u))
     .map(toAttendee);
+
+  // Contacts and freeSolo users get a static "contact" status — no API call needed
+  const contactMap: FreeBusyMap = Object.fromEntries(
+    selectedUsers
+      .filter((u) => !initialEmails.has(u.email) && !hasCalendar(u))
+      .map((u) => [u.email, "contact" as const])
+  );
 
   const freeBusyMap = useAttendeesFreeBusy({
     existingAttendees,
@@ -77,6 +86,8 @@ export default function AttendeeSearch({
     eventUid,
     enabled: !!(start && end && selectedUsers.length > 0),
   });
+
+  const statusMap = { ...freeBusyMap, ...contactMap };
 
   return (
     <PeopleSearch
@@ -89,7 +100,7 @@ export default function AttendeeSearch({
         start && end
           ? (user) => (
               <FreeBusyIndicator
-                status={freeBusyMap[user.email] ?? "unknown"}
+                status={statusMap[user.email] ?? "unknown"}
                 size={16}
               />
             )
@@ -103,14 +114,10 @@ export default function AttendeeSearch({
           }
           return next;
         });
-        // Track only users not in the original attendees prop
         setAddedUsers(value.filter((u) => !initialEmails.has(u.email)));
         setAttendees(
-          value.map((attendee: User) =>
-            createAttendee({
-              cal_address: attendee.email,
-              cn: attendee.displayName,
-            })
+          value.map((u) =>
+            createAttendee({ cal_address: u.email, cn: u.displayName })
           )
         );
       }}

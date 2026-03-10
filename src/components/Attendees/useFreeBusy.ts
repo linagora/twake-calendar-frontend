@@ -1,10 +1,15 @@
 import { getFreeBusyForAddedAttendeesREPORT } from "@/features/Events/api/getFreeBusyForAddedAttendeesREPORT";
 import { getFreeBusyForEventAttendeesPOST } from "@/features/Events/api/getFreeBusyForEventAttendeesPOST";
 import { getUserDataFromEmail } from "@/features/Events/api/getUserDataFromEmail";
-import moment from "moment";
+import moment from "moment-timezone";
 import { useEffect, useRef, useState } from "react";
 
-export type FreeBusyStatus = "free" | "busy" | "loading" | "unknown";
+export type FreeBusyStatus =
+  | "free"
+  | "busy"
+  | "loading"
+  | "contact"
+  | "unknown";
 export type FreeBusyMap = Record<string, FreeBusyStatus>;
 
 interface Attendee {
@@ -17,7 +22,10 @@ interface ResolvedAttendee {
   userId: string;
 }
 
+// ---------------------------------------------------------------------------
 // Helpers
+// ---------------------------------------------------------------------------
+
 async function resolveUserId(attendee: Attendee): Promise<string | null> {
   if (attendee.userId) return attendee.userId;
   return getUserDataFromEmail(attendee.email)
@@ -55,6 +63,10 @@ function isVFreeBusyWithConflict(component: unknown): boolean {
     Array.isArray(props) &&
     props.some((p) => Array.isArray(p) && p[0] === "freebusy")
   );
+}
+
+function toUtcIcal(datetime: string, timezone: string): string {
+  return moment.tz(datetime, timezone).utc().format("YYYYMMDDTHHmmss");
 }
 
 async function fetchFreeBusyMap(
@@ -104,12 +116,19 @@ function toFreeBusyMap(
     );
 }
 
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
 interface UseAttendeesFreeBusyOptions {
+  /** Attendees present when the form opened — queried via bulk POST. */
   existingAttendees: Attendee[];
+  /** Attendees added during this editing session — queried via per-user REPORT. */
   newAttendees: Attendee[];
   start: string;
   end: string;
   timezone: string;
+  /** UID of the event being edited — required for Flow A (bulk POST). */
   eventUid?: string | null;
   enabled?: boolean;
 }
@@ -129,11 +148,13 @@ export function useAttendeesFreeBusy({
   const existingKey = existingAttendees.map((a) => a.email).join(",");
   const newKey = newAttendees.map((a) => a.email).join(",");
 
+  // Invalidate all cached results when the time window or timezone changes
   useEffect(() => {
     fetchedNewEmailsRef.current = new Set();
     setStatusMap({});
   }, [start, end, timezone]);
 
+  // Flow A — existing attendees via bulk POST
   useEffect(() => {
     if (
       !enabled ||
@@ -150,8 +171,8 @@ export function useAttendeesFreeBusy({
     fetchFreeBusyMap(existingAttendees, (resolved) =>
       getFreeBusyForEventAttendeesPOST(
         resolved.map((r) => r.userId),
-        moment.tz(start, timezone).utc().format("YYYYMMDDTHHmmss"),
-        moment.tz(end, timezone).utc().format("YYYYMMDDTHHmmss"),
+        toUtcIcal(start, timezone),
+        toUtcIcal(end, timezone),
         eventUid!
       ).then(toFreeBusyMap(resolved))
     )
@@ -172,13 +193,11 @@ export function useAttendeesFreeBusy({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingKey, start, end, eventUid, enabled, timezone]);
 
+  // Flow B — newly added attendees via per-user REPORT
   useEffect(() => {
     if (!enabled || !start || !end) return;
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
-
+    // Remove departed attendees from the map
     const currentEmails = new Set(newAttendees.map((a) => a.email));
     const removedEmails = [...fetchedNewEmailsRef.current].filter(
       (e) => !currentEmails.has(e)
@@ -195,17 +214,23 @@ export function useAttendeesFreeBusy({
     const toFetch = newAttendees.filter(
       (a) => !fetchedNewEmailsRef.current.has(a.email)
     );
+    console.log("[FreeBusy Flow B]", {
+      newAttendees,
+      toFetch,
+      fetched: [...fetchedNewEmailsRef.current],
+    });
     if (toFetch.length === 0) return;
 
     let cancelled = false;
     setStatusMap((prev) => ({ ...prev, ...toLoadingMap(toFetch) }));
+
     fetchFreeBusyMap(toFetch, (resolved) =>
       Promise.all(
         resolved.map(async ({ email, userId }) => {
           const busy = await getFreeBusyForAddedAttendeesREPORT(
             userId,
-            moment.tz(start, timezone).utc().format("YYYYMMDDTHHmmss"),
-            moment.tz(end, timezone).utc().format("YYYYMMDDTHHmmss")
+            toUtcIcal(start, timezone),
+            toUtcIcal(end, timezone)
           );
           return [email, (busy ? "busy" : "free") as FreeBusyStatus] as const;
         })
