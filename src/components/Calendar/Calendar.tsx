@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
 import EventPopover from "@/features/Events/EventModal";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import ImportAlert from "@/features/Events/ImportAlert";
 import SearchResultsPage from "@/features/Search/SearchResultsPage";
@@ -24,6 +24,7 @@ import { Box, Button, radius, useTheme } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
+import { useCalendarDataLoader } from "../../features/Calendars/useCalendarLoader";
 import { User } from "../Attendees/PeopleSearch";
 import { EventErrorSnackbar } from "../Error/ErrorSnackbar";
 import { EventErrorHandler } from "../Error/EventErrorHandler";
@@ -37,12 +38,11 @@ import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
 import { MiniCalendar } from "./MiniCalendar";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import { TimezoneSelector } from "./TimezoneSelector";
-import { useCalendarDataLoader } from "../../features/Calendars/useCalendarLoader";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
 import {
-  eventToFullCalendarFormat,
-  extractEvents,
-  updateSlotLabelVisibility,
+    eventToFullCalendarFormat,
+    extractEvents,
+    updateSlotLabelVisibility
 } from "./utils/calendarUtils";
 
 const localeMap: Record<string, LocaleInput | undefined> = {
