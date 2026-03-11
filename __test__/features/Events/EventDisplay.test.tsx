@@ -7,7 +7,7 @@ import {
 } from "@/components/Event/utils/eventUtils";
 import { DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import * as eventThunks from "@/features/Calendars/services";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
