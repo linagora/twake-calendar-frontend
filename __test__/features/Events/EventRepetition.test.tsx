@@ -6,7 +6,7 @@ import {
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
 import * as eventThunks from "@/features/Calendars/services";
 import * as EventApi from "@/features/Events/EventApi";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import EventUpdateModal from "@/features/Events/EventUpdateModal";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import preview from "jest-preview";

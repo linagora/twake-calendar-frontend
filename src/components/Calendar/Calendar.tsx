@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { getCalendarDetailAsync } from "@/features/Calendars/services";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import EventPopover from "@/features/Events/EventModal";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import ImportAlert from "@/features/Events/ImportAlert";
