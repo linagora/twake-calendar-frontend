@@ -9,6 +9,7 @@ export interface OpenPaasUserData {
     modules?: ModuleConfiguration[];
   };
   emails: string[];
+  resource?: boolean;
 }
 
 export function ToUserData(
