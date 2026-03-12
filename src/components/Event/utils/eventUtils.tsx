@@ -18,7 +18,8 @@ export function renderAttendeeBadge(
   key: string,
   t: (key: string) => string,
   isFull?: boolean,
-  isOrganizer?: boolean
+  isOrganizer?: boolean,
+  caption?: string
 ) {
   const classIcon =
     a.partstat === "ACCEPTED" ? (
@@ -69,6 +70,11 @@ export function renderAttendeeBadge(
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
               {t("event.organizer")}
+            </Typography>
+          )}
+          {caption && (
+            <Typography variant="caption" color="text.secondary">
+              {caption}
             </Typography>
           )}
         </Box>

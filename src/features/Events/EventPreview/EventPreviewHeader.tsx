@@ -1,10 +1,10 @@
-import { dlEvent } from "../EventApi";
-import { CalendarEvent } from "../EventsTypes";
 import { Box, IconButton } from "@linagora/twake-mui";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { dlEvent } from "../EventApi";
+import { CalendarEvent } from "../EventsTypes";
 
 interface EventPreviewHeaderProps {
   event: CalendarEvent;
@@ -26,7 +26,6 @@ export function EventPreviewHeader({
   isOwn,
   isWriteDelegated,
   isNotPrivate,
-  isRecurring,
   onClose,
   onEdit,
   onMoreClick,

@@ -1,3 +1,4 @@
+import { useAttendeesFreeBusy } from "@/components/Attendees/useFreeBusy";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
 import { AvatarGroup, Box, Typography } from "@linagora/twake-mui";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
@@ -11,6 +12,10 @@ interface EventPreviewAttendeesProps {
   attendees: userAttendee[];
   organizer: userAttendee | undefined;
   allAttendees: userAttendee[];
+  start?: string;
+  end?: string;
+  timezone?: string;
+  eventUid?: string | null;
 }
 
 const ATTENDEE_DISPLAY_LIMIT = 3;
@@ -19,6 +24,10 @@ export function EventPreviewAttendees({
   attendees,
   organizer,
   allAttendees,
+  start,
+  end,
+  timezone,
+  eventUid,
 }: EventPreviewAttendeesProps) {
   const { t } = useI18n();
   const theme = useTheme();
@@ -28,6 +37,26 @@ export function EventPreviewAttendees({
   const [showAllAttendees, setShowAllAttendees] = useState(false);
 
   const attendeePreview = makeAttendeePreview(allAttendees, t);
+
+  const toFreeBusyAttendee = (a: userAttendee) => ({
+    email: a.cal_address,
+    userId: null,
+  });
+
+  const freeBusyMap = useAttendeesFreeBusy({
+    existingAttendees: allAttendees.map(toFreeBusyAttendee),
+    newAttendees: [],
+    start: start ?? "",
+    end: end ?? "",
+    timezone: timezone ?? "UTC",
+    eventUid,
+    enabled: !!(start && end && showAllAttendees),
+  });
+
+  const busyCaption = (a: userAttendee) =>
+    freeBusyMap[a.cal_address] === "busy"
+      ? t("event.freeBusy.busy")
+      : undefined;
 
   return (
     <>
@@ -78,10 +107,24 @@ export function EventPreviewAttendees({
 
       {showAllAttendees &&
         organizer &&
-        renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
+        renderAttendeeBadge(
+          organizer,
+          "org",
+          t,
+          showAllAttendees,
+          true,
+          busyCaption(organizer)
+        )}
       {showAllAttendees &&
         attendees.map((a, idx) =>
-          renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
+          renderAttendeeBadge(
+            a,
+            idx.toString(),
+            t,
+            showAllAttendees,
+            false,
+            busyCaption(a)
+          )
         )}
     </>
   );

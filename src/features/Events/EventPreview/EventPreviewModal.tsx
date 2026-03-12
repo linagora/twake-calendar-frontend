@@ -1,9 +1,8 @@
-import { useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
-import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
+import { getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import { Box, Chip, Tooltip, Typography } from "@linagora/twake-mui";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -12,13 +11,13 @@ import { useEffect } from "react";
 import { useI18n } from "twake-i18n";
 import { AttendanceValidation } from "../AttendanceValidation/AttendanceValidation";
 import EventPopover from "../EventModal";
-import EventUpdateModal from "../EventUpdateModal";
 import { EventPreviewActionMenu } from "../EventPreview/EventPreviewActionMenu";
 import { EventPreviewDetails } from "../EventPreview/EventPreviewDetails";
 import { EventPreviewHeader } from "../EventPreview/EventPreviewHeader";
 import { useEventPreviewState } from "../EventPreview/useEventPreviewState";
-import { formatEnd } from "./utils/formatEnd";
+import EventUpdateModal from "../EventUpdateModal";
 import { formatDate } from "./utils/formatDate";
+import { formatEnd } from "./utils/formatEnd";
 
 export default function EventPreviewModal({
   eventId,
@@ -57,7 +56,6 @@ export default function EventPreviewModal({
     setToggleActionMenu,
     openEditModePopup,
     setOpenEditModePopup,
-    typeOfAction,
     setTypeOfAction,
     afterChoiceFunc,
     setAfterChoiceFunc,
@@ -164,7 +162,6 @@ export default function EventPreviewModal({
           event={event}
           isOwn={isOwn}
           isNotPrivate={isNotPrivate}
-          userEmail={user.email}
         />
 
         {/* Calendar label */}
