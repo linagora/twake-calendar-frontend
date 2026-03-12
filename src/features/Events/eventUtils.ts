@@ -109,16 +109,23 @@ export function parseCalendarEvent(
       }
       case "attendee": {
         const paramsObj = params as Record<string, string>;
-        (event.attendee as userAttendee[]).push(
-          createAttendee({
-            cn: paramsObj?.cn,
-            cal_address: String(value).replace(/^mailto:/i, ""),
-            partstat: paramsObj?.partstat as userAttendee["partstat"],
-            rsvp: paramsObj?.rsvp as userAttendee["rsvp"],
-            role: paramsObj?.role as userAttendee["role"],
-            cutype: paramsObj?.cutype as userAttendee["cutype"],
-          })
-        );
+        if (
+          !event.attendee?.find(
+            (attendee) =>
+              attendee.cal_address === String(value).replace(/^mailto:/i, "")
+          )
+        ) {
+          (event.attendee as userAttendee[]).push(
+            createAttendee({
+              cn: paramsObj?.cn,
+              cal_address: String(value).replace(/^mailto:/i, ""),
+              partstat: paramsObj?.partstat as userAttendee["partstat"],
+              rsvp: paramsObj?.rsvp as userAttendee["rsvp"],
+              role: paramsObj?.role as userAttendee["role"],
+              cutype: paramsObj?.cutype as userAttendee["cutype"],
+            })
+          );
+        }
         break;
       }
       case "dtstamp":
