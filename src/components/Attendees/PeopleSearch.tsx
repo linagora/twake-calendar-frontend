@@ -1,6 +1,8 @@
 import { getAccessiblePair } from "@/components/Calendar/utils/calendarColorsUtils";
 import { stringAvatar } from "@/components/Event/utils/eventUtils";
 import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
+import CloseIcon from "@mui/icons-material/Close";
+
 import { searchUsers } from "@/features/User/userAPI";
 import {
   Autocomplete,
@@ -33,6 +35,7 @@ export interface User {
   avatarUrl?: string;
   openpaasId?: string;
   color?: Record<string, string>;
+  objectType?: string;
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
@@ -54,6 +57,7 @@ export function PeopleSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
+  getChipIcon,
 }: {
   selectedUsers: User[];
   onChange: (event: SyntheticEvent, users: User[]) => void;
@@ -75,6 +79,7 @@ export function PeopleSearch({
     paper?: Partial<PaperProps>;
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
   };
+  getChipIcon?: (user: User) => ReactNode;
 }) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
@@ -307,7 +312,6 @@ export function PeopleSearch({
             ...customSlotProps?.popper,
           },
         }}
-        // When render input is custom, the adornments should be handled by the custom component
         forcePopupIcon={false}
         disableClearable
         renderInput={(params) =>
@@ -341,14 +345,18 @@ export function PeopleSearch({
               ? option
               : option.displayName || option.email;
             const chipColor = isString
-              ? theme.palette.grey[300]
-              : (option.color?.light ?? theme.palette.grey[300]);
+              ? theme.palette.grey[200]
+              : (option.color?.light ?? theme.palette.grey[200]);
             const textColor = getAccessiblePair(chipColor, theme);
 
             return (
               <Chip
                 {...getTagProps({ index })}
                 key={label}
+                icon={
+                  !isString && getChipIcon ? getChipIcon(option) : undefined
+                }
+                deleteIcon={<CloseIcon />}
                 style={{
                   backgroundColor: chipColor,
                   color: textColor,

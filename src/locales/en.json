@@ -130,6 +130,12 @@
         "occurrences": "occurrences"
       }
     },
+    "freeBusy": {
+      "unknown": "Unknown status",
+      "busy": "This person is busy",
+      "free": "User is free",
+      "loading": "Status is loading"
+    },
     "form": {
       "title": "Title",
       "titlePlaceholder": "Add title",

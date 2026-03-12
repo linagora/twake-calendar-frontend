@@ -33,6 +33,7 @@ export interface SearchResponseItem {
   emailAddresses?: Array<{ value?: string }>;
   names?: Array<{ displayName?: string }>;
   photos?: Array<{ url?: string }>;
+  objectType?: string;
 }
 
 // Type for configuration item

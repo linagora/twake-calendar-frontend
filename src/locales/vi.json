@@ -129,6 +129,12 @@
         "occurrences": "lần"
       }
     },
+    "freeBusy": {
+      "unknown": "Trạng thái không rõ",
+      "busy": "Người này đang bận",
+      "free": "Người dùng đang rảnh",
+      "loading": "Đang tải trạng thái"
+    },
     "form": {
       "title": "Tiêu đề",
       "titlePlaceholder": "Thêm tiêu đề",

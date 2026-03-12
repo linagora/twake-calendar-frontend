@@ -1092,6 +1092,7 @@ function EventUpdateModal({
         setEventClass={setEventClass}
         timezone={timezone}
         setTimezone={setTimezone}
+        eventId={event.uid}
         calendarid={calendarid}
         setCalendarid={setCalendarid}
         hasVideoConference={hasVideoConference}

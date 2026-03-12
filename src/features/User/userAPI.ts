@@ -29,9 +29,10 @@ export async function searchUsers(
   return response.map((user) => ({
     email: user.emailAddresses?.[0]?.value || "",
     displayName:
-      user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value,
+      user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value || "",
     avatarUrl: user.photos?.[0]?.url || "",
     openpaasId: user.id || "",
+    objectType: user.objectType,
   }));
 }
 

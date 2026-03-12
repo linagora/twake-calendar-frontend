@@ -1,18 +1,33 @@
 import { userAttendee } from "@/features/User/models/attendee";
 import { createAttendee } from "@/features/User/models/attendee.mapper";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { FreeBusyIndicator } from "./FreeBusyIndicator";
 import {
   ExtendedAutocompleteRenderInputParams,
   PeopleSearch,
   User,
 } from "./PeopleSearch";
+import { FreeBusyMap, useAttendeesFreeBusy } from "./useFreeBusy";
 
-export default function UserSearch({
+const attendeeToUser = (a: userAttendee, openpaasId = ""): User => ({
+  email: a.cal_address,
+  displayName: a.cn ?? "",
+  avatarUrl: "",
+  openpaasId,
+});
+
+const hasCalendar = (u: User) => u.objectType === "user" && !!u.openpaasId;
+
+export default function AttendeeSearch({
   attendees,
   setAttendees,
   disabled,
   inputSlot,
   placeholder,
+  start,
+  end,
+  timezone,
+  eventUid,
 }: {
   attendees: userAttendee[];
   setAttendees: (attendees: userAttendee[]) => void;
@@ -21,25 +36,59 @@ export default function UserSearch({
     params: ExtendedAutocompleteRenderInputParams
   ) => React.ReactNode;
   placeholder?: string;
+  start?: string;
+  end?: string;
+  timezone?: string;
+  eventUid?: string | null;
 }) {
-  const [selectedUsers, setSelectedUsers] = useState<User[]>(
-    attendees.map((attendee) => ({
-      email: attendee.cal_address,
-      displayName: attendee.cn ?? "",
-      avatarUrl: "",
-      openpaasId: "",
-    })) ?? []
+  const [userIdMap, setUserIdMap] = useState<Record<string, string>>({});
+  const [addedUsers, setAddedUsers] = useState<User[]>([]);
+  const initialEmailsRef = useRef<Set<string> | null>(null);
+  if (initialEmailsRef.current === null && !!eventUid && attendees.length > 0) {
+    initialEmailsRef.current = new Set(attendees.map((a) => a.cal_address));
+  }
+  const initialEmails = eventUid
+    ? (initialEmailsRef.current ?? new Set<string>())
+    : new Set<string>();
+
+  const selectedUsers: User[] = [
+    ...addedUsers,
+    ...attendees
+      .map((a) => attendeeToUser(a, userIdMap[a.cal_address]))
+      .filter((a) => !addedUsers.find((u) => a.email === u.email)),
+  ];
+
+  const toAttendee = (u: User) => ({
+    email: u.email,
+    userId: u.openpaasId || userIdMap[u.email] || null,
+  });
+
+  const existingAttendees = selectedUsers
+    .filter((u) => initialEmails.has(u.email))
+    .map(toAttendee);
+  const newAttendees = selectedUsers
+    .filter((u) => !initialEmails.has(u.email) && hasCalendar(u))
+    .map(toAttendee);
+
+  // Contacts and freeSolo users get a static "contact" status — no API call needed
+  const contactMap: FreeBusyMap = Object.fromEntries(
+    selectedUsers
+      .filter((u) => !initialEmails.has(u.email) && !hasCalendar(u))
+      .map((u) => [u.email, "contact" as const])
   );
-  useEffect(() => {
-    setSelectedUsers(
-      attendees.map((attendee) => ({
-        email: attendee.cal_address,
-        displayName: attendee.cn ?? "",
-        avatarUrl: "",
-        openpaasId: "",
-      }))
-    );
-  }, [attendees]);
+
+  const freeBusyMap = useAttendeesFreeBusy({
+    existingAttendees,
+    newAttendees,
+    start: start ?? "",
+    end: end ?? "",
+    timezone: timezone ?? "",
+    eventUid,
+    enabled: !!(start && end && selectedUsers.length > 0),
+  });
+
+  const statusMap = { ...freeBusyMap, ...contactMap };
+
   return (
     <PeopleSearch
       selectedUsers={selectedUsers}
@@ -47,16 +96,27 @@ export default function UserSearch({
       disabled={disabled}
       inputSlot={inputSlot}
       placeholder={placeholder}
+      getChipIcon={
+        start && end
+          ? (user) => (
+              <FreeBusyIndicator status={statusMap[user.email] ?? "unknown"} />
+            )
+          : undefined
+      }
       onChange={(_event, value: User[]) => {
+        setUserIdMap((prev) => {
+          const next = { ...prev };
+          for (const u of value) {
+            if (u.openpaasId && u.email) next[u.email] = u.openpaasId;
+          }
+          return next;
+        });
+        setAddedUsers(value.filter((u) => !initialEmails.has(u.email)));
         setAttendees(
-          value.map((attendee: User) =>
-            createAttendee({
-              cal_address: attendee.email,
-              cn: attendee.displayName,
-            })
+          value.map((u) =>
+            createAttendee({ cal_address: u.email, cn: u.displayName })
           )
         );
-        setSelectedUsers(value);
       }}
       freeSolo
     />
