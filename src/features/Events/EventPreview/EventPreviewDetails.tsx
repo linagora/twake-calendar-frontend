@@ -1,17 +1,13 @@
 import { InfoRow } from "@/components/Event/InfoRow";
-import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
-import { AvatarGroup, Box, Button, Typography } from "@linagora/twake-mui";
+import { Box, Button, Typography } from "@linagora/twake-mui";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { alpha, useTheme } from "@mui/material/styles";
-import { useState } from "react";
 import { useI18n } from "twake-i18n";
-import { makeAttendeePreview } from ".";
 import { CalendarEvent } from "../EventsTypes";
 import { EventPreviewAttendees } from "./EventPreviewAttendees";
 import { makeRecurrenceString } from "./utils/makeRecurrenceString";
@@ -20,35 +16,26 @@ interface EventPreviewDetailsProps {
   event: CalendarEvent;
   isOwn: boolean;
   isNotPrivate: boolean;
-  userEmail: string;
 }
-
-const ATTENDEE_DISPLAY_LIMIT = 3;
 
 export function EventPreviewDetails({
   event,
   isOwn,
   isNotPrivate,
-  userEmail,
 }: EventPreviewDetailsProps) {
   const { t } = useI18n();
   const theme = useTheme();
   const infoIconColor = alpha(theme.palette.grey[900], 0.9);
   const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
 
-  const [showAllAttendees, setShowAllAttendees] = useState(false);
-
   const attendees =
     event.attendee?.filter(
       (a) => a.cal_address !== event.organizer?.cal_address
     ) || [];
-
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
-
-  const attendeePreview = makeAttendeePreview(event.attendee, t);
-  const showDetails = (isNotPrivate && !isOwn) || isOwn;
+  const showDetails = isNotPrivate || isOwn;
 
   if (!showDetails) {
     return (
@@ -84,7 +71,13 @@ export function EventPreviewDetails({
             <Button
               variant="contained"
               size="medium"
-              onClick={() => window.open(event.x_openpass_videoconference)}
+              onClick={() =>
+                window.open(
+                  event.x_openpass_videoconference,
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
               sx={{ borderRadius: "4px" }}
             >
               {t("eventPreview.joinVideo")}
@@ -98,7 +91,11 @@ export function EventPreviewDetails({
         <EventPreviewAttendees
           attendees={attendees}
           organizer={organizer}
-          allAttendees={event.attendee}
+          allAttendees={event.attendee ?? []}
+          start={event.start}
+          end={event.end}
+          timezone={event.timezone}
+          eventUid={event.uid}
         />
       )}
 

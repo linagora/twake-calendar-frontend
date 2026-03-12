@@ -1,10 +1,10 @@
-import { dlEvent } from "../EventApi";
-import { CalendarEvent } from "../EventsTypes";
 import { Box, IconButton } from "@linagora/twake-mui";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { dlEvent } from "../EventApi";
+import { CalendarEvent } from "../EventsTypes";
 
 interface EventPreviewHeaderProps {
   event: CalendarEvent;
@@ -13,7 +13,6 @@ interface EventPreviewHeaderProps {
   isOwn: boolean;
   isWriteDelegated: boolean;
   isNotPrivate: boolean;
-  isRecurring: boolean;
   onClose: () => void;
   onEdit: () => void;
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void;
@@ -26,13 +25,12 @@ export function EventPreviewHeader({
   isOwn,
   isWriteDelegated,
   isNotPrivate,
-  isRecurring,
   onClose,
   onEdit,
   onMoreClick,
 }: EventPreviewHeaderProps) {
   const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate));
-  const canSeeMore = (isNotPrivate && !isOwn) || isOwn;
+  const canSeeMore = isNotPrivate || isOwn;
 
   return (
     <Box

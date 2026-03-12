@@ -138,7 +138,7 @@ export function useEventPreviewState(
         const result = await dispatch(
           deleteEventAsync({ calId, eventId, eventURL: event.URL })
         );
-        assertThunkSuccess(result);
+        await assertThunkSuccess(result);
       } catch (error) {
         console.error("Failed to delete event:", error);
       }

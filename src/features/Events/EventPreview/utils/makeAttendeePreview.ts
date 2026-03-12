@@ -1,18 +1,27 @@
-import { userAttendee } from "@/src/features/User/models/attendee";
+import { userAttendee } from "@/features/User/models/attendee";
 
 export function makeAttendeePreview(
-  attendees: userAttendee[],
+  attendees: userAttendee[] | undefined,
   t: (k: string, p?: string | object) => string
 ) {
   const attendeePreview = [];
-  const yesCount = attendees?.filter((a) => a.partstat === "ACCEPTED").length;
-  const noCount = attendees?.filter((a) => a.partstat === "DECLINED").length;
-  const maybeCount = attendees?.filter(
-    (a) => a.partstat === "TENTATIVE"
-  ).length;
-  const needActionCount = attendees?.filter(
-    (a) => a.partstat === "NEEDS-ACTION"
-  ).length;
+  const counts = (attendees ?? []).reduce(
+    (acc, a) => {
+      if (a.partstat === "ACCEPTED") acc.yes++;
+      else if (a.partstat === "DECLINED") acc.no++;
+      else if (a.partstat === "TENTATIVE") acc.maybe++;
+      else if (a.partstat === "NEEDS-ACTION") acc.needAction++;
+      return acc;
+    },
+    { yes: 0, no: 0, maybe: 0, needAction: 0 }
+  );
+  const {
+    yes: yesCount,
+    no: noCount,
+    maybe: maybeCount,
+    needAction: needActionCount,
+  } = counts;
+
   if (yesCount) {
     attendeePreview.push(t("eventPreview.yesCount", { count: yesCount }));
   }

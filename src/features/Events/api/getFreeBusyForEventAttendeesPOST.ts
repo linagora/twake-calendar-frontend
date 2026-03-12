@@ -1,4 +1,21 @@
 import { api } from "@/utils/apiUtils";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
+
+interface BusySlot {
+  uid: string;
+  start: string;
+  end: string;
+}
+
+interface CalendarFreeBusy {
+  id: string;
+  busy: BusySlot[];
+}
+
+interface UserFreeBusy {
+  id: string;
+  calendars: CalendarFreeBusy[];
+}
 
 export async function getFreeBusyForEventAttendeesPOST(
   userIds: string[],
@@ -13,10 +30,16 @@ export async function getFreeBusyForEventAttendeesPOST(
   });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-  const { users } = (await r.json()) as {
-    users: { id: string; calendars: { busy: unknown[] }[] }[];
-  };
+  const { users } = (await r.json()) as { users: UserFreeBusy[] };
+
+  const eventUidBase = extractEventBaseUuid(eventUid);
+
   return Object.fromEntries(
-    users.map((u) => [u.id, u.calendars.some((cal) => cal.busy.length > 0)])
+    users.map((u) => {
+      const isBusy = u.calendars.some((cal) =>
+        cal.busy.some((slot) => extractEventBaseUuid(slot.uid) !== eventUidBase)
+      );
+      return [u.id, isBusy];
+    })
   );
 }

@@ -18,7 +18,8 @@ export function renderAttendeeBadge(
   key: string,
   t: (key: string) => string,
   isFull?: boolean,
-  isOrganizer?: boolean
+  isOrganizer?: boolean,
+  caption?: string
 ) {
   const classIcon =
     a.partstat === "ACCEPTED" ? (
@@ -65,10 +66,17 @@ export function renderAttendeeBadge(
           <Avatar {...stringAvatar(a.cn || a.cal_address)} />
         </Badge>
         <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <Typography noWrap>{a.cn || a.cal_address}</Typography>
+          <Typography variant="body2" noWrap>
+            {a.cn || a.cal_address}
+          </Typography>
           {isOrganizer && (
             <Typography variant="caption" color="text.secondary">
               {t("event.organizer")}
+            </Typography>
+          )}
+          {caption && (
+            <Typography variant="caption" color="text.secondary">
+              {caption}
             </Typography>
           )}
         </Box>

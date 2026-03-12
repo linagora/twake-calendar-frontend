@@ -1,9 +1,8 @@
-import { useAppSelector } from "@/app/hooks";
 import { CalendarName } from "@/components/Calendar/CalendarName";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
-import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
+import { getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import { Box, Chip, Tooltip, Typography } from "@linagora/twake-mui";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -12,13 +11,13 @@ import { useEffect } from "react";
 import { useI18n } from "twake-i18n";
 import { AttendanceValidation } from "../AttendanceValidation/AttendanceValidation";
 import EventPopover from "../EventModal";
-import EventUpdateModal from "../EventUpdateModal";
 import { EventPreviewActionMenu } from "../EventPreview/EventPreviewActionMenu";
 import { EventPreviewDetails } from "../EventPreview/EventPreviewDetails";
 import { EventPreviewHeader } from "../EventPreview/EventPreviewHeader";
 import { useEventPreviewState } from "../EventPreview/useEventPreviewState";
-import { formatEnd } from "./utils/formatEnd";
+import EventUpdateModal from "../EventUpdateModal";
 import { formatDate } from "./utils/formatDate";
+import { formatEnd } from "./utils/formatEnd";
 
 export default function EventPreviewModal({
   eventId,
@@ -42,7 +41,6 @@ export default function EventPreviewModal({
     timezone,
     contextualizedEvent,
     attendanceUser,
-    isRecurring,
     isOwn,
     isWriteDelegated,
     isOrganizer,
@@ -57,7 +55,6 @@ export default function EventPreviewModal({
     setToggleActionMenu,
     openEditModePopup,
     setOpenEditModePopup,
-    typeOfAction,
     setTypeOfAction,
     afterChoiceFunc,
     setAfterChoiceFunc,
@@ -67,11 +64,14 @@ export default function EventPreviewModal({
     handleDuplicateClick,
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose);
 
-  useEffect(() => {
-    if (!event || !calendar) {
-      onClose({}, "backdropClick");
-    }
-  }, [event, calendar, onClose]);
+  useEffect(
+    () => {
+      if (open && (!event || !calendar)) {
+        onClose({}, "backdropClick");
+      }
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [open, event, calendar]
+  );
 
   if (!user || !event || !calendar) return null;
 
@@ -94,7 +94,6 @@ export default function EventPreviewModal({
             isOwn={isOwn}
             isWriteDelegated={isWriteDelegated}
             isNotPrivate={isNotPrivate}
-            isRecurring={isRecurring}
             onClose={() => onClose({}, "backdropClick")}
             onEdit={handleEditClick}
             onMoreClick={(e) => setToggleActionMenu(e.currentTarget)}
@@ -164,7 +163,6 @@ export default function EventPreviewModal({
           event={event}
           isOwn={isOwn}
           isNotPrivate={isNotPrivate}
-          userEmail={user.email}
         />
 
         {/* Calendar label */}
@@ -219,8 +217,8 @@ export default function EventPreviewModal({
           {
             start: new Date(event.start),
             startStr: event.start,
-            end: new Date(event.end ?? ""),
-            endStr: event.end ?? "",
+            end: new Date(event.end ?? event.start),
+            endStr: event.end ?? event.start,
             allDay: event.allday ?? false,
           } as DateSelectArg
         }
