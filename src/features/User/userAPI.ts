@@ -6,6 +6,7 @@ import {
   ModuleConfiguration,
   SearchResponseItem,
 } from "./userDataTypes";
+import { ResourceData } from "./type/ResourceData";
 
 export async function getOpenPaasUser() {
   const user = await api.get(`api/user`);
@@ -38,6 +39,11 @@ export async function searchUsers(
 export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
   const user = await api.get(`api/users/${id}`).json();
   return user as OpenPaasUserData;
+}
+
+export async function getResourceDetails(id: string): Promise<ResourceData> {
+  const resource = await api.get(`linagora.esn.resource/api/resources/${id}`).json();
+  return resource as ResourceData;
 }
 
 export interface UserConfigurationUpdates {

@@ -25,7 +25,8 @@
       "title": "Xóa %{name}?",
       "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",
       "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
-    }
+    },
+    "resources": "Tài nguyên"
   },
   "actions": {
     "modify": "Chỉnh sửa",
