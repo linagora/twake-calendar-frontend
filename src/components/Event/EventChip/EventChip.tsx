@@ -117,11 +117,13 @@ export function EventChip({
     return (
       <Card
         variant="outlined"
-        style={
-          !isMoreThan15 || isMonthView
-            ? { ...cardStyle, height: "auto" }
-            : { ...cardStyle }
-        }
+        style={{
+          ...cardStyle,
+          ...(!isMoreThan15 || isMonthView ? { height: "auto" } : {}),
+          ...(!isMoreThan15 && !isMonthView
+            ? { transform: "translateY(2px)" }
+            : {}),
+        }}
         ref={cardRef}
         data-testid={`event-card-${event._def.extendedProps.uid}`}
       >
