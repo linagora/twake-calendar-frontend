@@ -652,7 +652,11 @@ describe("Event Preview Display", () => {
 
     const expectedUrl = `test/mailto/?uri=mailto%3Ajohn%40test.com&subject=Test%20Event`;
 
-    expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
+    expect(mockOpen).toHaveBeenCalledWith(
+      expectedUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
   });
 
   it("message button encodes special characters in event title correctly", () => {
@@ -723,7 +727,11 @@ describe("Event Preview Display", () => {
 
     const expectedUrl = `test/mailto/?uri=mailto%3Ajohn%40test.com&subject=Meeting%20%26%20Discussion%3F%20%23Important`;
 
-    expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
+    expect(mockOpen).toHaveBeenCalledWith(
+      expectedUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
   });
 
   describe("Owner Email Permissions", () => {

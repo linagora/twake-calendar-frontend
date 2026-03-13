@@ -40,9 +40,9 @@ import { TempCalendarsInput } from "./TempCalendarsInput";
 import { TimezoneSelector } from "./TimezoneSelector";
 import { updateDarkColor } from "./utils/calendarColorsUtils";
 import {
-    eventToFullCalendarFormat,
-    extractEvents,
-    updateSlotLabelVisibility
+  eventToFullCalendarFormat,
+  extractEvents,
+  updateSlotLabelVisibility,
 } from "./utils/calendarUtils";
 
 const localeMap: Record<string, LocaleInput | undefined> = {
