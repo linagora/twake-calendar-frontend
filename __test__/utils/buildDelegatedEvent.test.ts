@@ -1,5 +1,5 @@
 import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { buildDelegatedEventURL } from "@/features/Events/eventUtils";
+import { buildDelegatedEventURL } from "@/features/Events/utils";
 
 const makeCalendar = (link: string): Calendar =>
   ({

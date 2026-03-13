@@ -8,7 +8,7 @@ import {
   normalizeRepetition,
   normalizeTimezone,
   parseCalendarEvent,
-} from "@/features/Events/eventUtils";
+} from "@/features/Events/utils";
 
 describe("parseCalendarEvent", () => {
   const baseColor = { light: "#00FF00" };
