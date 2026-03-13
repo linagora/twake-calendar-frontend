@@ -26,7 +26,8 @@
       "personalWarning": "Vous allez perdre tous les événements de ce calendrier.",
       "sharedWarning": "Vous allez perdre l’accès à ses événements. Vous pourrez toujours le rajouter plus tard."
     },
-    "resources": "Ressources"
+    "resources": "Ressources",
+    "browseResources": "Parcourir les ressources"
   },
   "actions": {
     "modify": "Modifier",
@@ -54,7 +55,8 @@
     "you": "Vous",
     "select_timezone": "Sélectionner le fuseau horaire",
     "moreOptions": "Plus d'options",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "resource": "Ressources"
   },
   "search": {
     "searchIn": "Rechercher dans",
@@ -345,5 +347,14 @@
       "subtitle": "Veuillez ouvrir Twake Calendar sur un ordinateur pour profiter de toutes les fonctionnalités. Une version mobile optimisée arrive bientôt.",
       "title": "Version mobile bientôt disponible"
     }
+  },
+  "resourceSearch": {
+    "label": "Rechercher des ressources",
+    "placeholder": "Rechercher par nom",
+    "availabilityPlaceholder": "Vérifier la disponibilité",
+    "invalidEmail": "%{email} n'est pas une adresse e-mail valide",
+    "searchError": "Impossible de récupérer les contacts pour le moment. Veuillez réessayer.",
+    "noResults": "Aucun résultat",
+    "loading": "Chargement..."
   }
 }

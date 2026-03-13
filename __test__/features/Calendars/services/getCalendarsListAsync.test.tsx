@@ -11,7 +11,7 @@ jest.mock("@/features/Calendars/utils/normalizeCalendar");
 
 const mockedGetOpenPaasUser = getOpenPaasUser as jest.Mock;
 const mockedGetUserDetails = getUserDetails as jest.Mock;
-const mockedgetResourceDetails = getResourceDetails as jest.Mock;
+const mockedGetResourceDetails = getResourceDetails as jest.Mock;
 const mockedGetCalendars = getCalendars as jest.Mock;
 const mockedFormatReduxError = formatReduxError as jest.Mock;
 const mockedNormalizeCalendar = normalizeCalendar as jest.Mock;
@@ -155,7 +155,7 @@ describe("getCalendarsListAsync", () => {
     // getUserDetails fails with 404 for the resource ID
     mockedGetUserDetails.mockRejectedValueOnce({ response: { status: 404 } });
     // Then getResourceDetails is called and succeeds
-    mockedgetResourceDetails.mockResolvedValueOnce({ creator: "creator-456" });
+    mockedGetResourceDetails.mockResolvedValueOnce({ creator: "creator-456" });
     // Then getUserDetails is called for the creator and succeeds
     mockedGetUserDetails.mockResolvedValueOnce({ firstname: "Creator", lastname: "User", emails: [] });
 
@@ -163,7 +163,7 @@ describe("getCalendarsListAsync", () => {
     const result = await thunk(dispatch, getState, undefined);
 
     const payload = result.payload as any;
-    expect(mockedgetResourceDetails).toHaveBeenCalledWith("resource-123");
+    expect(mockedGetResourceDetails).toHaveBeenCalledWith("resource-123");
     expect(mockedGetUserDetails).toHaveBeenCalledWith("creator-456");
     expect(payload.importedCalendars["cal-1"].owner).toEqual({
       firstname: "Creator",
