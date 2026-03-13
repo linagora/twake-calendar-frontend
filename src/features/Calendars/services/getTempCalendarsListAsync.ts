@@ -1,11 +1,11 @@
 import { User } from "@/components/Attendees/PeopleSearch";
 import { getCalendarVisibility } from "@/components/Calendar/utils/calendarUtils";
-import { getUserDetails } from "@/features/User/userAPI";
 import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
 import { Calendar } from "../CalendarTypes";
 import { RejectedError } from "../types/RejectedError";
+import { fetchOwnerData } from "./helpers";
 
 export const getTempCalendarsListAsync = createAsyncThunk<
   Record<string, Calendar>,
@@ -49,7 +49,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
 
       const id = source.replace("/calendars/", "").replace(".json", "");
       const visibility = getCalendarVisibility(cal["acl"] ?? []);
-      const ownerData = await getUserDetails(id.split("/")[0]);
+      const ownerData = await fetchOwnerData(id.split("/")[0]);
 
       importedCalendars[id] = {
         id,

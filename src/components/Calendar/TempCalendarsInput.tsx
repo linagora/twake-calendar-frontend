@@ -81,7 +81,7 @@ export function TempCalendarsInput({
 
   return (
     <PeopleSearch
-      objectTypes={["user"]}
+      objectTypes={["user", "resource"]}
       selectedUsers={tempUsers}
       onChange={handleUserChange}
       onToggleEventPreview={handleToggleEventPreview}
