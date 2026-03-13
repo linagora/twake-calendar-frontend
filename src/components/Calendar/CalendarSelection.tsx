@@ -25,6 +25,7 @@ import CalendarPopover from "./CalendarModal";
 import CalendarSearch from "./CalendarSearch";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { OwnerCaption } from "./OwnerCaption";
+import CalendarResources from "./CalendarResources";
 
 function CalendarAccordion({
   title,
@@ -152,7 +153,7 @@ export default function CalendarSelection({
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
   const [anchorElCalOthers, setAnchorElCalOthers] =
     useState<HTMLElement | null>(null);
-  // const [anchorElCalResources, setAnchorElCalResources] = useState<HTMLElement | null>(null);
+  const [anchorElCalResources, setAnchorElCalResources] = useState<HTMLElement | null>(null);
 
   return (
     <>
@@ -203,9 +204,12 @@ export default function CalendarSelection({
           title={t("calendar.resources")}
           calendars={resourceCalendars}
           selectedCalendars={selectedCalendars}
-          showAddButton={false}
+          onAddClick={() => {
+            setAnchorElCalResources(document.body);
+          }}
+          showAddButton
           handleToggle={handleCalendarToggle}
-          setOpen={(id: string) => {
+          setOpen={(_) => {
             // TO DO: Implement open resource selection
           }}
           defaultExpanded
@@ -225,6 +229,17 @@ export default function CalendarSelection({
           setAnchorElCalOthers(null);
           if (newCalIds?.length) {
             newCalIds.forEach((id) => handleCalendarToggle(id));
+          }
+        }}
+      />
+      <CalendarResources
+        open={Boolean(anchorElCalResources)}
+        onClose={(newResourceIds?: string[]) => {
+          setAnchorElCalResources(null);
+          if (newResourceIds?.length) {
+            newResourceIds.forEach((id) => {
+              handleCalendarToggle(id);
+            });
           }
         }}
       />

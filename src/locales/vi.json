@@ -26,7 +26,8 @@
       "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",
       "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
     },
-    "resources": "Tài nguyên"
+    "resources": "Tài nguyên",
+    "browseResources": "Tìm kiếm tài nguyên"
   },
   "actions": {
     "modify": "Chỉnh sửa",
@@ -54,7 +55,8 @@
     "you": "Bạn",
     "select_timezone": "Chọn múi giờ",
     "moreOptions": "Thêm tùy chọn",
-    "search": "Tìm kiếm"
+    "search": "Tìm kiếm",
+    "resource": "Tài nguyên"
   },
   "search": {
     "searchIn": "Tìm kiếm trong",
@@ -337,5 +339,14 @@
       "subtitle": "Vui lòng mở Twake Calendar trên máy tính để sử dụng đầy đủ tính năng. Phiên bản di động được tối ưu hóa hoàn toàn sẽ sớm ra mắt.",
       "title": "Phiên bản di động sắp ra mắt"
     }
+  },
+  "resourceSearch": {
+    "label": "Tìm kiếm tài nguyên",
+    "placeholder": "Tìm kiếm theo tên",
+    "availabilityPlaceholder": "Kiểm tra tình trạng",
+    "invalidEmail": "%{email} không phải là địa chỉ email hợp lệ",
+    "searchError": "Unable to fetch contacts right now. Please try again.",
+    "noResults": "No results",
+    "loading": "Loading..."
   }
 }
