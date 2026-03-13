@@ -1,5 +1,6 @@
 import { useAttendeesFreeBusy } from "@/components/Attendees/useFreeBusy";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { AvatarGroup, Box, Typography } from "@linagora/twake-mui";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { alpha, useTheme } from "@mui/material/styles";
@@ -44,12 +45,17 @@ export function EventPreviewAttendees({
   });
 
   const freeBusyMap = useAttendeesFreeBusy({
-    existingAttendees: allAttendees.map(toFreeBusyAttendee),
+    existingAttendees: allAttendees
+      .filter(
+        (attendee) =>
+          attendee.partstat !== "ACCEPTED" && attendee.partstat !== "DECLINED"
+      )
+      .map(toFreeBusyAttendee),
     newAttendees: [],
     start: start ?? "",
     end: end ?? "",
     timezone: timezone ?? "UTC",
-    eventUid,
+    eventUid: extractEventBaseUuid(eventUid ?? ""),
     enabled: !!(start && end && showAllAttendees),
   });
 
@@ -107,14 +113,7 @@ export function EventPreviewAttendees({
 
       {showAllAttendees &&
         organizer &&
-        renderAttendeeBadge(
-          organizer,
-          "org",
-          t,
-          showAllAttendees,
-          true,
-          busyCaption(organizer)
-        )}
+        renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
       {showAllAttendees &&
         attendees.map((a, idx) =>
           renderAttendeeBadge(

@@ -38,7 +38,9 @@ export function EventPreviewActionMenu({
             window.open(
               `${mailSpaUrl}/mailto/?uri=${encodeURIComponent(
                 `mailto:${otherAttendees.map((a) => a.cal_address).join(",")}`
-              )}&subject=${encodeURIComponent(event.title ?? "")}`
+              )}&subject=${encodeURIComponent(event.title ?? "")}`,
+              "_blank",
+              "noopener,noreferrer"
             )
           }
         >

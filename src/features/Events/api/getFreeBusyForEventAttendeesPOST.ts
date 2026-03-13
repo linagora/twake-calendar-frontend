@@ -30,7 +30,10 @@ export async function getFreeBusyForEventAttendeesPOST(
   });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-  const { users } = (await r.json()) as { users: UserFreeBusy[] };
+  const payload: unknown = await r.json();
+  const users = Array.isArray((payload as { users?: unknown })?.users)
+    ? ((payload as { users: UserFreeBusy[] }).users ?? [])
+    : [];
 
   const eventUidBase = extractEventBaseUuid(eventUid);
 
