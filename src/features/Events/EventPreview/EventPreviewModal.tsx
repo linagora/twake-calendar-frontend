@@ -92,7 +92,6 @@ export default function EventPreviewModal({
             isOwn={isOwn}
             isWriteDelegated={isWriteDelegated}
             isNotPrivate={isNotPrivate}
-            isRecurring={isRecurring}
             onClose={() => onClose({}, "backdropClick")}
             onEdit={handleEditClick}
             onMoreClick={(e) => setToggleActionMenu(e.currentTarget)}
@@ -216,8 +215,8 @@ export default function EventPreviewModal({
           {
             start: new Date(event.start),
             startStr: event.start,
-            end: new Date(event.end ?? ""),
-            endStr: event.end ?? "",
+            end: new Date(event.end ?? event.start),
+            endStr: event.end ?? event.start,
             allDay: event.allday ?? false,
           } as DateSelectArg
         }

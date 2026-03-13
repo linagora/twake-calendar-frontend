@@ -13,7 +13,6 @@ interface EventPreviewHeaderProps {
   isOwn: boolean;
   isWriteDelegated: boolean;
   isNotPrivate: boolean;
-  isRecurring: boolean;
   onClose: () => void;
   onEdit: () => void;
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void;

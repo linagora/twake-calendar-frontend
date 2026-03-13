@@ -1,4 +1,4 @@
-import { userAttendee } from "@/src/features/User/models/attendee";
+import { userAttendee } from "@/features/User/models/attendee";
 
 export function makeAttendeePreview(
   attendees: userAttendee[],

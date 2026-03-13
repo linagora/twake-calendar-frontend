@@ -35,7 +35,7 @@ export function EventPreviewDetails({
   const organizer = event.attendee?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
-  const showDetails = (isNotPrivate && !isOwn) || isOwn;
+  const showDetails = isNotPrivate || isOwn;
 
   if (!showDetails) {
     return (
@@ -85,7 +85,7 @@ export function EventPreviewDetails({
         <EventPreviewAttendees
           attendees={attendees}
           organizer={organizer}
-          allAttendees={event.attendee}
+          allAttendees={event.attendee ?? []}
           start={event.start}
           end={event.end}
           timezone={event.timezone}

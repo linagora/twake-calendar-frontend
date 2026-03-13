@@ -1,4 +1,5 @@
 import { api } from "@/utils/apiUtils";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 
 interface BusySlot {
   uid: string;
@@ -31,12 +32,12 @@ export async function getFreeBusyForEventAttendeesPOST(
 
   const { users } = (await r.json()) as { users: UserFreeBusy[] };
 
-  const eventUidBase = eventUid.split("/")[0];
+  const eventUidBase = extractEventBaseUuid(eventUid);
 
   return Object.fromEntries(
     users.map((u) => {
       const isBusy = u.calendars.some((cal) =>
-        cal.busy.some((slot) => slot.uid !== eventUidBase)
+        cal.busy.some((slot) => extractEventBaseUuid(slot.uid) !== eventUidBase)
       );
       return [u.id, isBusy];
     })

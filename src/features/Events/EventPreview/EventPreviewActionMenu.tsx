@@ -36,9 +36,9 @@ export function EventPreviewActionMenu({
         <MenuItem
           onClick={() =>
             window.open(
-              `${mailSpaUrl}/mailto/?uri=mailto:${otherAttendees
-                .map((a) => a.cal_address)
-                .join(",")}&subject=${encodeURIComponent(event.title ?? "")}`
+              `${mailSpaUrl}/mailto/?uri=${encodeURIComponent(
+                `mailto:${otherAttendees.map((a) => a.cal_address).join(",")}`
+              )}&subject=${encodeURIComponent(event.title ?? "")}`
             )
           }
         >
