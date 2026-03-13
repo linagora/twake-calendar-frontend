@@ -7,7 +7,7 @@ import {
   searchEvent,
 } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { calendarEventToJCal } from "@/features/Events/eventUtils";
+import { calendarEventToJCal } from "@/features/Events/utils";
 import { clientConfig } from "@/features/User/oidcAuth";
 import { api } from "@/utils/apiUtils";
 

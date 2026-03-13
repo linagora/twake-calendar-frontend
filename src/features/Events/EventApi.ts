@@ -11,12 +11,10 @@ import {
 } from "../Calendars/types/CalendarData";
 import { SearchEventsResponse } from "../Search/types/SearchEventsResponse";
 import { CalendarEvent } from "./EventsTypes";
-import {
-  calendarEventToJCal,
-  makeTimezone,
-  makeVevent,
-  parseCalendarEvent,
-} from "./eventUtils";
+import { calendarEventToJCal } from "./utils/calendarEventToJCal";
+import { makeTimezone } from "./utils/makeTimezone";
+import { makeVevent } from "./utils/makeVevent";
+import { parseCalendarEvent } from "./utils/parseCalendarEvent";
 
 export async function reportEvent(
   event: CalendarEvent,

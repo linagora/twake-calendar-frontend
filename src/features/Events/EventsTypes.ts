@@ -1,4 +1,5 @@
 import { Calendar } from "../Calendars/CalendarTypes";
+import { VObjectProperty } from "../Calendars/types/CalendarData";
 import { userAttendee } from "../User/models/attendee";
 import { userOrganiser } from "../User/userDataTypes";
 
@@ -27,6 +28,7 @@ export interface CalendarEvent {
   repetition?: RepetitionObject;
   alarm?: AlarmObject;
   exdates?: string[];
+  passthroughProps?: VObjectProperty[];
 }
 
 export interface RepetitionObject {

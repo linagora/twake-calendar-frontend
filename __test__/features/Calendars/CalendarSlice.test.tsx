@@ -15,8 +15,6 @@ import {
   getEventAsync,
   getTempCalendarsListAsync,
   patchACLCalendarAsync,
-  patchCalendarAsync,
-  removeCalendarAsync,
 } from "@/features/Calendars/services";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import * as userAPI from "@/features/User/userAPI";
@@ -26,7 +24,7 @@ import { configureStore } from "@reduxjs/toolkit";
 jest.mock("@/features/Calendars/CalendarApi");
 jest.mock("@/features/User/userAPI");
 jest.mock("@/features/Events/EventApi");
-jest.mock("@/features/Events/eventUtils");
+jest.mock("@/features/Events/utils");
 jest.mock("@/utils/apiUtils");
 
 describe("CalendarSlice", () => {
