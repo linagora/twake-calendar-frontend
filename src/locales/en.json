@@ -25,7 +25,9 @@
       "title": "Remove %{name}?",
       "personalWarning": "You will lose all events in this calendar.",
       "sharedWarning": "You will lose access to its events. You will still be able to add it back later."
-    }
+    },
+    "resources": "Resources",
+    "browseResources": "Browse resources"
   },
   "actions": {
     "modify": "Modify",
@@ -53,7 +55,8 @@
     "you": "You",
     "select_timezone": "Select Timezone",
     "moreOptions": "More options",
-    "search": "Search"
+    "search": "Search",
+    "resource": "Resource"
   },
   "search": {
     "searchIn": "Search in",
@@ -343,5 +346,14 @@
       "subtitle": "Please open Twake Calendar on a desktop to enjoy all features. A fully optimized mobile version is coming soon.",
       "title": "Mobile version coming soon"
     }
+  },
+  "resourceSearch": {
+    "label": "Search for resources",
+    "placeholder": "Search by name",
+    "availabilityPlaceholder": "Check availability",
+    "invalidEmail": "%{email} is not a valid email address",
+    "searchError": "Unable to fetch contacts right now. Please try again.",
+    "noResults": "No results",
+    "loading": "Loading..."
   }
 }
