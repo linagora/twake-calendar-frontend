@@ -25,7 +25,8 @@
       "title": "Remove %{name}?",
       "personalWarning": "You will lose all events in this calendar.",
       "sharedWarning": "You will lose access to its events. You will still be able to add it back later."
-    }
+    },
+    "resources": "Resources"
   },
   "actions": {
     "modify": "Modify",
