@@ -66,11 +66,11 @@ export default function EventPreviewModal({
 
   useEffect(
     () => {
-      if (!event || !calendar) {
+      if (open && (!event || !calendar)) {
         onClose({}, "backdropClick");
       }
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [event, calendar]
+    [open, event, calendar]
   );
 
   if (!user || !event || !calendar) return null;
