@@ -7,7 +7,7 @@ export function calendarEventToJCal(
   event: CalendarEvent,
   calOwnerEmail?: string
 ) {
-  const tzid = event.timezone; // Fallback to UTC if no timezone provided
+  const tzid = event.timezone;
 
   const vevent = makeVevent(event, tzid, calOwnerEmail);
 

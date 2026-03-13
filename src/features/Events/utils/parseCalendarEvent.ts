@@ -87,7 +87,10 @@ export function parseCalendarEvent(
         break;
       }
       case "class":
-        event.class = String(value);
+        const classValue = String(value).toUpperCase();
+        if (["PRIVATE", "PUBLIC", "CONFIDENTIAL"].includes(classValue)) {
+          event.class = classValue as CalendarEvent["class"];
+        }
         break;
       case "x-openpaas-videoconference":
         event.x_openpass_videoconference = String(value);

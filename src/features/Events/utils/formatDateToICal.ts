@@ -15,9 +15,15 @@ export function formatDateToICal(
   }
 
   if (timezone) {
-    const momentDate = moment.utc(date).tz(timezone);
-    if (momentDate.isValid()) {
-      return momentDate.format("YYYY-MM-DDTHH:mm:ss");
+    if (!moment.tz.zone(timezone)) {
+      console.warn(
+        `[formatDateToICal] Unrecognized timezone: "${timezone}", falling back to UTC`
+      );
+    } else {
+      const momentDate = moment.utc(date).tz(timezone);
+      if (momentDate.isValid()) {
+        return momentDate.format("YYYY-MM-DDTHH:mm:ss");
+      }
     }
   }
 

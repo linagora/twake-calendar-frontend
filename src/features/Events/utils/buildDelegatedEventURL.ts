@@ -4,6 +4,9 @@ export function buildDelegatedEventURL(
   calendar: Calendar,
   eventURL: string
 ): string {
+  if (!calendar.link || !calendar.link.endsWith(".json")) {
+    throw new Error(`Invalid calendar link format: ${calendar.link}`);
+  }
   const calendarBasePath = calendar.link.replace(/\.json$/, "");
   const eventFilename = eventURL.split("/").pop();
   if (!eventFilename) {

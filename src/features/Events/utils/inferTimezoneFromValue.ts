@@ -7,8 +7,8 @@ export function inferTimezoneFromValue(
     return undefined;
   }
 
-  const tzParam =
-    params.tzid || params.TZID || params.Tzid || params.tZid || params.tzId;
+  const tzKey = Object.keys(params).find((k) => k.toLowerCase() === "tzid");
+  const tzParam = tzKey ? params[tzKey] : undefined;
 
   if (tzParam) {
     const resolved = resolveTimezoneId(tzParam);

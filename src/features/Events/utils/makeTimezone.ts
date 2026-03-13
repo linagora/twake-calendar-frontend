@@ -3,7 +3,9 @@ import ICAL from "ical.js";
 import { CalendarEvent } from "../EventsTypes";
 
 export function makeTimezone(
-  timezoneData: { ics: string; latitude: string; longitude: string },
+  timezoneData:
+    | { ics: string; latitude: string; longitude: string }
+    | undefined,
   event: CalendarEvent
 ) {
   if (!timezoneData) {
