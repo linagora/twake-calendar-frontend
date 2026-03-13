@@ -45,6 +45,7 @@ import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { detectRecurringEventChanges } from "./eventUtils";
 import { moveEventBetweenCalendars } from "./updateEventHelpers/moveEventBetweenCalendars";
+import { Resource } from "@/components/Attendees/ResourceSearch";
 
 function EventUpdateModal({
   eventId,
@@ -92,6 +93,15 @@ function EventUpdateModal({
     return { zones, browserTz, getTimezoneOffset };
   }, []);
 
+  const resources: Resource[] = useMemo(() => {
+    const resourcesInEvent = event?.attendee?.filter((attendee) => attendee.cutype === 'RESOURCE') ?? [];
+    return resourcesInEvent.map((resource) => ({
+      email: resource.cal_address,
+      displayName: resource.cn,
+      openpaasId: user.userData?.openpaasId,
+    }));
+  }, [event?.attendee, user.userData?.openpaasId])
+
   const [showMore, setShowMore] = useState(false);
   const [showDescription, setShowDescription] = useState(
     event?.description ? true : false
@@ -130,6 +140,7 @@ function EventUpdateModal({
   const [isFormValid, setIsFormValid] = useState(false);
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [hasEndDateChanged, setHasEndDateChanged] = useState(false);
+  const [selectedResources, setSelectedResources] = useState(resources ?? []);
 
   const resetAllStateToDefault = useCallback(() => {
     setShowMore(false);
@@ -152,6 +163,7 @@ function EventUpdateModal({
     setTimezone(resolveTimezone(browserDefaultTimeZone));
     setHasVideoConference(false);
     setMeetingLink(null);
+    setSelectedResources([]);
   }, [defaultCalendarId]);
 
   // Prevent repeated initialization loops
@@ -298,7 +310,7 @@ function EventUpdateModal({
         eventToDisplay.attendee
           ? eventToDisplay.attendee.filter(
               (a: userAttendee) =>
-                a.cal_address !== eventToDisplay.organizer?.cal_address
+                a.cal_address !== eventToDisplay.organizer?.cal_address && a.cutype !== 'RESOURCE'
             )
           : []
       );
@@ -336,6 +348,8 @@ function EventUpdateModal({
           setDescription(eventToDisplay.description);
         }
       }
+
+      setSelectedResources(resources)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -346,6 +360,7 @@ function EventUpdateModal({
     calList,
     masterEvent,
     isLoadingMasterEvent,
+    resources,
   ]);
 
   // Helper to close modal(s) - use onCloseAll if available to close preview modal too
@@ -388,6 +403,7 @@ function EventUpdateModal({
       showDescription,
       showRepeat,
       hasEndDateChanged,
+      selectedResources,
     };
     const context: EventFormContext = {
       eventId,
@@ -418,6 +434,7 @@ function EventUpdateModal({
     eventId,
     calId,
     typeOfAction,
+    selectedResources,
   ]);
 
   // Check for temp data when modal opens
@@ -455,6 +472,7 @@ function EventUpdateModal({
           setShowDescription,
           setShowRepeat,
           setHasEndDateChanged,
+          setSelectedResources
         });
         // Clear the error flag but keep data until successful save
         const updatedTempData = { ...tempData, fromError: false };
@@ -768,6 +786,20 @@ function EventUpdateModal({
         );
       }
       return;
+    }
+
+    // Map data of resources to attendee before creating event
+    if (selectedResources?.length) {
+      selectedResources.forEach((resource: Resource) => {
+        newEvent.attendee.push({
+          cn: resource?.displayName ?? "",
+          cal_address: resource?.email ?? "",
+          partstat: "NEEDS-ACTION",
+          rsvp: "TRUE",
+          role: "REQ-PARTICIPANT",
+          cutype: "RESOURCE",
+        })
+      })
     }
 
     // Save current form data to temp storage before closing
@@ -1115,6 +1147,8 @@ function EventUpdateModal({
         onValidationChange={setIsFormValid}
         showValidationErrors={showValidationErrors}
         onHasEndDateChangedChange={setHasEndDateChanged}
+        selectedResources={selectedResources}
+        setSelectedResources={setSelectedResources}
       />
     </ResponsiveDialog>
   );

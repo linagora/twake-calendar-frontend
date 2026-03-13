@@ -181,7 +181,9 @@
       "busy": "Занят",
       "visibleTo": "Видно для",
       "visibleAll": "Всех",
-      "visibleParticipants": "Участников"
+      "visibleParticipants": "Участников",
+      "resource": "Ресурс",
+      "select_resource_placeholder": "Добавить ресурс"
     },
     "validation": {
       "titleRequired": "Укажите название",

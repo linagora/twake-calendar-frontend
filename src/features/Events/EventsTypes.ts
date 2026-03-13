@@ -1,3 +1,4 @@
+import { Resource } from "@/components/Attendees/ResourceSearch";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { userOrganiser } from "../User/userDataTypes";
@@ -27,6 +28,7 @@ export interface CalendarEvent {
   repetition?: RepetitionObject;
   alarm?: AlarmObject;
   exdates?: string[];
+  selectedResources?: Resource[];
 }
 
 export interface RepetitionObject {

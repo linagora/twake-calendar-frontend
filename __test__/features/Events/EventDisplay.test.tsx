@@ -65,6 +65,14 @@ describe("Event Preview Display", () => {
                   role: "REQ-PARTICIPANT",
                   cutype: "INDIVIDUAL",
                 },
+                {
+                  cn: "Projector Room",
+                  cal_address: "room1@test.com",
+                  partstat: "ACCEPTED",
+                  rsvp: "TRUE",
+                  role: "REQ-PARTICIPANT",
+                  cutype: "RESOURCE",
+                },
               ],
             },
             event2: {
@@ -163,6 +171,8 @@ describe("Event Preview Display", () => {
     expect(screen.getByText(/– 10:00/)).toBeInTheDocument();
 
     expect(screen.getByText("Calendar")).toBeInTheDocument();
+    
+    expect(screen.getByText("Projector Room")).toBeInTheDocument();
   });
   it("calls onClose when Cancel clicked", () => {
     renderWithProviders(

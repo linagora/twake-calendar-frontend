@@ -179,7 +179,9 @@
       "busy": "Bận",
       "visibleTo": "Hiển thị với",
       "visibleAll": "Tất cả",
-      "visibleParticipants": "Người tham gia"
+      "visibleParticipants": "Người tham gia",
+      "resource": "Tài nguyên",
+      "select_resource_placeholder": "Thêm tài nguyên"
     },
     "validation": {
       "titleRequired": "Tiêu đề là bắt buộc",

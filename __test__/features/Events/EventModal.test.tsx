@@ -80,6 +80,22 @@ describe("EventPopover", () => {
         },
       ],
     },
+    {
+      id: "room1@example.com",
+      objectType: "resource",
+      emailAddresses: [
+        {
+          value: "room1@example.com",
+          type: "default",
+        },
+      ],
+      names: [
+        {
+          displayName: "Room 1",
+          type: "default",
+        },
+      ],
+    },
   ];
   (api.post as jest.Mock).mockReturnValue({
     json: jest.fn().mockResolvedValue(mockUsers),
@@ -272,6 +288,62 @@ describe("EventPopover", () => {
         cutype: "INDIVIDUAL",
       },
     ]);
+  });
+
+  it("adds a resource", async () => {
+    jest.useFakeTimers();
+    renderPopover();
+    fireEvent.change(screen.getByLabelText("event.form.title"), {
+      target: { value: "newEventWithResource" },
+    });
+    
+    fireEvent.click(screen.getByRole("button", { name: "common.moreOptions" }));
+
+    const resourceCombobox = screen.getByPlaceholderText("resourceSearch.placeholder");
+
+    act(() => {
+      resourceCombobox.focus();
+      fireEvent.mouseDown(resourceCombobox);
+      userEvent.type(resourceCombobox, "room");
+    });
+    
+    await act(async () => {
+      jest.advanceTimersByTime(400);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText("Room 1")).toBeInTheDocument();
+    });
+    
+    await act(async () => {
+      userEvent.click(screen.getByText("Room 1"));
+    });
+
+    const spy = jest
+      .spyOn(eventThunks, "putEventAsync")
+      .mockImplementation((payload) => {
+        const promise = Promise.resolve(payload);
+        (promise as any).unwrap = () => promise;
+        return () => promise as any;
+      });
+
+    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    const receivedPayload = spy.mock.calls[0][0];
+
+    expect(receivedPayload.newEvent.attendee).toHaveLength(2); // Organizer + 1 resource
+    expect(receivedPayload.newEvent.attendee[1]).toStrictEqual({
+      cn: "Room 1",
+      cal_address: "room1@example.com",
+      partstat: "NEEDS-ACTION",
+      rsvp: "TRUE",
+      role: "REQ-PARTICIPANT",
+      cutype: "RESOURCE",
+    });
   });
 
   it("dispatches putEventAsync and calls onClose when Save is clicked", async () => {

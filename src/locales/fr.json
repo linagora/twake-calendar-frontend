@@ -181,7 +181,9 @@
       "busy": "Occupé",
       "visibleTo": "Visible par",
       "visibleAll": "Tous",
-      "visibleParticipants": "Participants"
+      "visibleParticipants": "Participants",
+      "resource": "Ressource",
+      "select_resource_placeholder": "Ajouter une ressource"
     },
     "validation": {
       "titleRequired": "Le titre est obligatoire",

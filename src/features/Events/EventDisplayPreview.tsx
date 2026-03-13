@@ -24,6 +24,7 @@ import {
   Typography,
   useTheme,
 } from "@linagora/twake-mui";
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -38,7 +39,7 @@ import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { alpha } from "@mui/material/styles";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { deleteEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
@@ -94,6 +95,15 @@ export default function EventPreviewModal({
     : isOwn;
   const isNotPrivate =
     event.class !== "PRIVATE" && event.class !== "CONFIDENTIAL";
+  const resources = useMemo(() =>
+    event.attendee
+      ?.filter((attendee) => attendee.cutype === 'RESOURCE')
+      ?.map((attendee) => attendee.cn)
+      ?.join(','),
+    [event.attendee])
+  const eventAttendees = useMemo(() =>
+    event.attendee?.filter((attendee) => attendee.cutype !== 'RESOURCE') ?? [],
+  [event.attendee])
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false);
@@ -107,7 +117,7 @@ export default function EventPreviewModal({
   const [afterChoiceFunc, setAfterChoiceFunc] = useState<
     ((type: "solo" | "all" | undefined) => void) | undefined
   >();
-  const attendeePreview = makeAttendeePreview(event.attendee, t);
+  const attendeePreview = makeAttendeePreview(eventAttendees, t);
   const hasCheckedSessionStorageRef = useRef(false);
 
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(
@@ -277,16 +287,16 @@ export default function EventPreviewModal({
   const attendeeDisplayLimit = 3;
 
   const attendees =
-    event.attendee?.filter(
+    eventAttendees?.filter(
       (a) => a.cal_address !== event.organizer?.cal_address
     ) || [];
 
-  const currentUserAttendee = event.attendee?.find(
+  const currentUserAttendee = eventAttendees?.find(
     (person) => person.cal_address === user.email
   );
   const contextualizedEvent = createEventContext(event, calendar, user);
 
-  const organizer = event.attendee?.find(
+  const organizer = eventAttendees?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
 
@@ -371,7 +381,7 @@ export default function EventPreviewModal({
                 <MenuItem
                   onClick={() =>
                     window.open(
-                      `${mailSpaUrl}/mailto/?uri=mailto:${event.attendee
+                      `${mailSpaUrl}/mailto/?uri=mailto:${eventAttendees
                         .map((a) => a.cal_address)
                         .filter((mail) => mail !== user.email)
                         .join(
@@ -546,7 +556,7 @@ export default function EventPreviewModal({
                       <Box sx={{ marginRight: 2 }}>
                         <Typography>
                           {t("eventPreview.guests", {
-                            count: event.attendee.length,
+                            count: eventAttendees.length,
                           })}
                         </Typography>
                         <Typography
@@ -611,6 +621,22 @@ export default function EventPreviewModal({
                   </Box>
                 }
                 text={event.location}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              />
+            )}
+            {/* Resource */}
+            {resources && (
+              <InfoRow
+                alignItems="flex-start"
+                icon={
+                  <Box sx={infoIconSx}>
+                    <BusinessOutlinedIcon />
+                  </Box>
+                }
+                text={resources}
                 style={{
                   fontSize: "16px",
                   fontFamily: "'Inter', sans-serif",

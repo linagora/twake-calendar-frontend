@@ -43,6 +43,7 @@ import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { buildDelegatedEventURL } from "./eventUtils";
 import { useEventOrganizer } from "./useEventOrganizer";
+import { Resource } from "@/components/Attendees/ResourceSearch";
 
 function EventPopover({
   open,
@@ -86,6 +87,15 @@ function EventPopover({
     return resolveTimezone(tz);
   }, [calendarTimezone]);
 
+  const resources: Resource[] = useMemo(() => {
+    const resourcesInEvent = event?.attendee?.filter((attendee) => attendee.cutype === 'RESOURCE') ?? [];
+    return resourcesInEvent.map((resource) => ({
+      email: resource.cal_address,
+      displayName: resource.cn,
+      openpaasId: userId,
+    }));
+  }, [event?.attendee, userId]);
+
   const [showMore, setShowMore] = useState(false);
   const [showDescription, setShowDescription] = useState(
     event?.description ? true : false
@@ -127,6 +137,7 @@ function EventPopover({
   const [repetition, setRepetition] = useState<RepetitionObject>(
     event?.repetition ?? ({} as RepetitionObject)
   );
+  const [selectedResources, setSelectedResources] = useState(resources ?? [])
 
   // Derive the effective organizer based on the selected calendar.
   // When a delegated calendar is selected, the organizer must be the
@@ -139,7 +150,7 @@ function EventPopover({
 
   const [attendees, setAttendees] = useState<userAttendee[]>(
     event?.attendee
-      ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+      ? event.attendee.filter((a) => a.cal_address !== organizer?.cal_address && a.cutype !== 'RESOURCE')
       : []
   );
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
@@ -200,6 +211,7 @@ function EventPopover({
     setHasVideoConference(false);
     setMeetingLink(null);
     setHasEndDateChanged(false);
+    setSelectedResources([]);
   }, [resolvedCalendarTimezone, defaultCalendarId]);
 
   // Track if we should sync from selectedRange (only on initial selection, not on toggle)
@@ -466,7 +478,7 @@ function EventPopover({
       setAttendees(
         event.attendee
           ? event.attendee.filter(
-              (a) => a.cal_address !== organizer?.cal_address
+              (a) => a.cal_address !== organizer?.cal_address && a.cutype !== 'RESOURCE'
             )
           : []
       );
@@ -491,17 +503,20 @@ function EventPopover({
           setDescription(event.description);
         }
       }
+      setSelectedResources(resources ?? [])
     } else if (event && event.attendee && event.attendee.length > 0) {
       // Handle tempEvent case (no uid but has attendees from temp calendar search)
       setAttendees(
-        event.attendee.filter((a) => a.cal_address !== organizer?.cal_address)
+        event.attendee.filter((a) => a.cal_address !== organizer?.cal_address && a.cutype !== 'RESOURCE')
       );
+      setSelectedResources(resources ?? [])
     }
   }, [
     event,
     organizer?.cal_address,
     resolvedCalendarTimezone,
     defaultCalendarId,
+    resources,
   ]);
 
   // Reset state when creating new event (event is empty object or undefined)
@@ -535,6 +550,7 @@ function EventPopover({
       setHasVideoConference(false);
       setMeetingLink(null);
       setHasEndDateChanged(false);
+      setSelectedResources([]);
     }
 
     if (!isCreatingNew) {
@@ -640,6 +656,7 @@ function EventPopover({
     resetAllStateToDefault();
     setStart("");
     setEnd("");
+    setSelectedResources([]);
     shouldSyncFromRangeRef.current = true; // Reset for next time
     isCalendarIdUserSelectedRef.current = false; // Reset so next open gets fresh default
   };
@@ -666,6 +683,7 @@ function EventPopover({
       showDescription,
       showRepeat,
       hasEndDateChanged,
+      selectedResources,
     };
     return buildEventFormTempData(formState);
   }, [
@@ -688,6 +706,7 @@ function EventPopover({
     showDescription,
     showRepeat,
     hasEndDateChanged,
+    selectedResources
   ]);
 
   // Check for temp data when modal opens
@@ -722,6 +741,7 @@ function EventPopover({
           setShowDescription,
           setShowRepeat,
           setHasEndDateChanged,
+          setSelectedResources,
         });
         // Clear the error flag but keep data until successful save
         const updatedTempData = { ...tempData, fromError: false };
@@ -786,6 +806,20 @@ function EventPopover({
       alarm: { trigger: alarm, action: "EMAIL" },
       x_openpass_videoconference: meetingLink || undefined,
     };
+
+    // Map data of resources to attendee before creating event
+    if (selectedResources?.length) {
+      selectedResources.forEach((resource: Resource) => {
+        newEvent.attendee.push({
+          cn: resource?.displayName ?? "",
+          cal_address: resource?.email ?? "",
+          partstat: "NEEDS-ACTION",
+          rsvp: "TRUE",
+          role: "REQ-PARTICIPANT",
+          cutype: "RESOURCE",
+        })
+      })
+    }
 
     if (allday) {
       const startDateOnly = (start || "").split("T")[0];
@@ -972,6 +1006,8 @@ function EventPopover({
         onValidationChange={setIsFormValid}
         showValidationErrors={showValidationErrors}
         onHasEndDateChangedChange={setHasEndDateChanged}
+        setSelectedResources={setSelectedResources}
+        selectedResources={selectedResources}
       />
     </ResponsiveDialog>
   );

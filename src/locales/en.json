@@ -180,7 +180,9 @@
       "busy": "Busy",
       "visibleTo": "Visible to",
       "visibleAll": "All",
-      "visibleParticipants": "Participants"
+      "visibleParticipants": "Participants",
+      "resource": "Resource",
+      "select_resource_placeholder": "Add resource"
     },
     "validation": {
       "titleRequired": "Title is required",

@@ -1,3 +1,4 @@
+import { Resource } from "@/components/Attendees/ResourceSearch";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { userAttendee } from "@/features/User/models/attendee";
 
@@ -29,6 +30,7 @@ export interface EventFormTempData {
   typeOfAction?: "solo" | "all";
   // Flag to indicate this is from an error
   fromError?: boolean;
+  resources?: Resource[];
 }
 
 const STORAGE_KEY_PREFIX = "eventFormTempData_";
@@ -94,6 +96,7 @@ export interface EventFormState {
   showDescription?: boolean;
   showRepeat?: boolean;
   hasEndDateChanged?: boolean;
+  selectedResources: Resource[];
 }
 
 export interface EventFormContext {
@@ -133,6 +136,7 @@ export interface EventFormSetters {
   setShowDescription?: (value: boolean) => void;
   setShowRepeat?: (value: boolean) => void;
   setHasEndDateChanged?: (value: boolean) => void;
+  setSelectedResources?: (value: Resource[]) => void;
 }
 
 export function restoreFormDataFromTemp(
@@ -169,4 +173,5 @@ export function restoreFormDataFromTemp(
   ) {
     setters.setHasEndDateChanged(tempData.hasEndDateChanged);
   }
+  setters.setSelectedResources?.(tempData.resources ?? []);
 }
