@@ -30,7 +30,7 @@ export function EventPreviewHeader({
   onMoreClick,
 }: EventPreviewHeaderProps) {
   const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate));
-  const canSeeMore = (isNotPrivate && !isOwn) || isOwn;
+  const canSeeMore = isNotPrivate || isOwn;
 
   return (
     <Box

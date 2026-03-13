@@ -71,7 +71,13 @@ export function EventPreviewDetails({
             <Button
               variant="contained"
               size="medium"
-              onClick={() => window.open(event.x_openpass_videoconference)}
+              onClick={() =>
+                window.open(
+                  event.x_openpass_videoconference,
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
               sx={{ borderRadius: "4px" }}
             >
               {t("eventPreview.joinVideo")}

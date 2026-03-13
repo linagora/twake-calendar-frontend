@@ -41,7 +41,6 @@ export default function EventPreviewModal({
     timezone,
     contextualizedEvent,
     attendanceUser,
-    isRecurring,
     isOwn,
     isWriteDelegated,
     isOrganizer,
@@ -65,11 +64,14 @@ export default function EventPreviewModal({
     handleDuplicateClick,
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose);
 
-  useEffect(() => {
-    if (!event || !calendar) {
-      onClose({}, "backdropClick");
-    }
-  }, [event, calendar, onClose]);
+  useEffect(
+    () => {
+      if (!event || !calendar) {
+        onClose({}, "backdropClick");
+      }
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [event, calendar]
+  );
 
   if (!user || !event || !calendar) return null;
 
