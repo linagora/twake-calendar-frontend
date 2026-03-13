@@ -18,7 +18,7 @@ import { useState } from "react";
 import { useI18n } from "twake-i18n";
 import logo from "../../static/noResult-logo.svg";
 import { getEventAsync } from "../Calendars/services";
-import EventPreviewModal from "../Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import { CalendarEvent } from "../Events/EventsTypes";
 import { setView } from "../Settings/SettingsSlice";
 import "./searchResult.styl";

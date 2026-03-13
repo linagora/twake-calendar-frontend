@@ -7,7 +7,7 @@ import {
 } from "@/components/Event/utils/eventUtils";
 import { DelegationAccess } from "@/features/Calendars/CalendarTypes";
 import * as eventThunks from "@/features/Calendars/services";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
@@ -650,7 +650,7 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(emailButton);
 
-    const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Test%20Event`;
+    const expectedUrl = `test/mailto/?uri=mailto%3Ajohn%40test.com&subject=Test%20Event`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });
@@ -721,7 +721,7 @@ describe("Event Preview Display", () => {
 
     fireEvent.click(emailButton);
 
-    const expectedUrl = `test/mailto/?uri=mailto:john@test.com&subject=Meeting%20%26%20Discussion%3F%20%23Important`;
+    const expectedUrl = `test/mailto/?uri=mailto%3Ajohn%40test.com&subject=Meeting%20%26%20Discussion%3F%20%23Important`;
 
     expect(mockOpen).toHaveBeenCalledWith(expectedUrl);
   });

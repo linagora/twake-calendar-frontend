@@ -1,7 +1,7 @@
 import CalendarApp from "@/components/Calendar/Calendar";
 import * as calendarUtils from "@/components/Calendar/utils/calendarUtils";
 import { updateSlotLabelVisibility } from "@/components/Calendar/utils/calendarUtils";
-import EventPreviewModal from "@/features/Events/EventDisplayPreview";
+import EventPreviewModal from "@/features/Events/EventPreview";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import * as SettingsSlice from "@/features/Settings/SettingsSlice";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
