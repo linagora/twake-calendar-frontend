@@ -52,7 +52,7 @@ export function extractCalendarEvents(
     .filter(Boolean) as CalendarEvent[];
 }
 
-function extractValarm(vevent: VCalComponent[]) {
+function extractValarm(vevent: VCalComponent) {
   const subComponents = vevent[2];
   if (!Array.isArray(subComponents)) {
     return undefined;

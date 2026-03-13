@@ -7,6 +7,7 @@ import moment from "moment-timezone";
 import { Calendar } from "../Calendars/CalendarTypes";
 import {
   RepetitionRule,
+  VCalComponent,
   VObjectProperty,
 } from "../Calendars/types/CalendarData";
 import { userAttendee } from "../User/models/attendee";
@@ -37,7 +38,7 @@ export function parseCalendarEvent(
   color: Record<string, string>,
   calendar: Calendar,
   eventURL: string,
-  valarm?: VObjectProperty[]
+  valarm?: VCalComponent
 ): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] };
   let recurrenceId;

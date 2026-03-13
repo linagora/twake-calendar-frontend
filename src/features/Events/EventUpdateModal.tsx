@@ -1,5 +1,4 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { updateAttendeesAfterTimeChange } from "@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange";
 import { ResponsiveDialog } from "@/components/Dialog";
 import EventFormFields from "@/components/Event/EventFormFields";
 import { addDays } from "@/components/Event/utils/dateRules";
@@ -10,6 +9,7 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync,
 } from "@/features/Calendars/services";
+import { updateAttendeesAfterTimeChange } from "@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange";
 import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import {
   buildEventFormTempData,
@@ -39,7 +39,6 @@ import {
   updateEventLocal,
 } from "../Calendars/CalendarSlice";
 import { Calendar } from "../Calendars/CalendarTypes";
-import { AsyncThunkResult } from "../Calendars/types/AsyncThunkResult";
 import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
@@ -798,19 +797,7 @@ function EventUpdateModal({
           );
 
           // Handle result of updateEventInstanceAsync
-          const typedResult = result as AsyncThunkResult;
-          if (typedResult && typeof typedResult.unwrap === "function") {
-            await typedResult.unwrap();
-          } else {
-            // Check if result is rejected
-            if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-              throw new Error(
-                typedResult.error?.message ||
-                  typedResult.payload?.message ||
-                  "API call failed"
-              );
-            }
-          }
+          await assertThunkSuccess(result);
 
           // Clear temp data on successful save
           clearEventFormTempData("update");
@@ -871,22 +858,7 @@ function EventUpdateModal({
               );
 
               // Handle result of updateSeriesAsync
-              const typedResult = result as AsyncThunkResult;
-              if (typedResult && typeof typedResult.unwrap === "function") {
-                await typedResult.unwrap();
-              } else {
-                // Check if result is rejected
-                if (
-                  typedResult.type &&
-                  typedResult.type.endsWith("/rejected")
-                ) {
-                  throw new Error(
-                    typedResult.error?.message ||
-                      typedResult.payload?.message ||
-                      "API call failed"
-                  );
-                }
-              }
+              await assertThunkSuccess(result);
 
               // Clear cache after successful update
               dispatch(clearFetchCache(calId));

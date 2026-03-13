@@ -2,7 +2,7 @@ import { RootState } from "@/app/store";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
 import { defaultColors } from "@/utils/defaultColors";
-import { formatReduxError } from "@/utils/errorUtils";
+import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendars } from "../CalendarApi";
 import { Calendar, CalendarInvite } from "../CalendarTypes";
@@ -79,7 +79,7 @@ export const getCalendarsListAsync = createAsyncThunk<
         const color = cal["apple:color"]
           ? {
               light: cal["apple:color"],
-              dark: "#FFF",
+              dark: defaultColors[0].dark,
             }
           : defaultColors[0];
 
@@ -145,10 +145,6 @@ export const getCalendarsListAsync = createAsyncThunk<
       errors: errors.join("\n"),
     };
   } catch (err) {
-    const error = err as { response?: { status?: number } };
-    return rejectWithValue({
-      message: formatReduxError(err),
-      status: error.response?.status,
-    });
+    return rejectWithValue(toRejectedError(err));
   }
 });

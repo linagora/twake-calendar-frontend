@@ -7,6 +7,7 @@ import {
   formatLocalDateTime,
 } from "@/components/Event/utils/dateTimeFormatters";
 import { convertFormDateTimeToISO } from "@/components/Event/utils/dateTimeHelpers";
+import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import {
   buildEventFormTempData,
   clearEventFormTempData,
@@ -38,7 +39,6 @@ import React, {
 import { useI18n } from "twake-i18n";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { putEventAsync } from "../Calendars/services";
-import { AsyncThunkResult } from "../Calendars/types/AsyncThunkResult";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
 import { buildDelegatedEventURL } from "./eventUtils";
@@ -847,22 +847,7 @@ function EventPopover({
         })
       );
 
-      // Handle result of putEventAsync - check if rejected first
-      const typedResult = result as AsyncThunkResult;
-
-      // Check if result is a rejected action
-      if (typedResult.type && typedResult.type.endsWith("/rejected")) {
-        throw new Error(
-          typedResult.error?.message ||
-            typedResult.payload?.message ||
-            "API call failed"
-        );
-      }
-
-      // If result has unwrap, call it (it will throw if rejected)
-      if (typedResult && typeof typedResult.unwrap === "function") {
-        await typedResult.unwrap();
-      }
+      await assertThunkSuccess(result);
 
       // Clear temp data on successful save
       clearEventFormTempData("create");
