@@ -9,7 +9,11 @@ describe("MiniCalendar", () => {
   const day = new Date();
   beforeEach(() => {
     jest.clearAllMocks();
-    const dispatch = jest.fn() as AppDispatch;
+    const dispatch = jest.fn().mockReturnValue(
+      Object.assign(Promise.resolve({}), {
+        unwrap: () => Promise.resolve({}),
+      })
+    ) as unknown as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     jest.useFakeTimers().clearAllTimers();
   });

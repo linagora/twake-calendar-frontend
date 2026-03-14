@@ -1,11 +1,6 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { getCalendarDetailAsync } from "@/features/Calendars/services";
+import { useAppDispatch } from "@/app/hooks";
 import { setView } from "@/features/Settings/SettingsSlice";
-import {
-  computeStartOfTheWeek,
-  formatDateToYYYYMMDDTHHMMSS,
-  getCalendarRange,
-} from "@/utils/dateUtils";
+import { computeStartOfTheWeek } from "@/utils/dateUtils";
 import type { CalendarApi } from "@fullcalendar/core";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { DateCalendar } from "@mui/x-date-pickers";
@@ -25,7 +20,6 @@ export function MiniCalendar({
   setSelectedMiniDate: (d: Date) => void;
 }) {
   const dispatch = useAppDispatch();
-  const calendars = useAppSelector((state) => state.calendars);
   const [visibleDate, setVisibleDate] = useState(selectedDate);
   const { t } = useI18n();
 
@@ -48,19 +42,7 @@ export function MiniCalendar({
         }}
         showDaysOutsideCurrentMonth
         onMonthChange={(month) => {
-          const calendarRange = getCalendarRange(month.toDate());
           setVisibleDate(month.toDate());
-          Object.values(calendars.list || {}).forEach((cal) =>
-            dispatch(
-              getCalendarDetailAsync({
-                calId: cal.id,
-                match: {
-                  start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
-                  end: formatDateToYYYYMMDDTHHMMSS(calendarRange.end),
-                },
-              })
-            )
-          );
         }}
         views={["month", "day"]}
         slots={{
