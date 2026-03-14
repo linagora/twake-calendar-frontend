@@ -297,11 +297,16 @@ export function PeopleSearch({
             return;
           }
           setInputError(null);
-          const mapped = value.map((v: string | User) =>
-            typeof v === "string"
-              ? { email: v.trim(), displayName: v.trim() }
-              : v
-          );
+          const mapped = value
+            .map((v: string | User) =>
+              typeof v === "string"
+                ? { email: v.trim(), displayName: v.trim() }
+                : v
+            )
+            .filter(
+              (user, index, self) =>
+                self.findIndex((u) => u.email === user.email) === index
+            );
           onChange(event, mapped);
         }}
         slotProps={{
