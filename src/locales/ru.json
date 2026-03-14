@@ -258,7 +258,10 @@
     "calAndEvent": "Календарь и мероприятия",
     "showDeclinedEvent": "Показать отклонённые мероприятия",
     "hideDeclinedEventsUpdateError": "Не удалось обновить скрытие отклонённых событий.",
-    "back": "Вернуться к календарю"
+    "back": "Вернуться к календарю",
+    "chooseWorkingDays": "Выберите ваши рабочие дни",
+    "showOnlyWorkingDays": "Показывать только рабочие дни",
+    "workingDaysUpdateError": "Не удалось обновить настройку рабочих дней"
   },
   "eventPreview": {
     "emailAttendees": "Написать участникам",

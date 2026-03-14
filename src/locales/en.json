@@ -257,7 +257,10 @@
     "calAndEvent": "Calendar and events",
     "showDeclinedEvent": "Show declined events",
     "hideDeclinedEventsUpdateError": "Failed to update hide declined event.",
-    "back": "Back to calendar"
+    "back": "Back to calendar",
+    "chooseWorkingDays": "Choose your working days",
+    "showOnlyWorkingDays": "Show only working days",
+    "workingDaysUpdateError": "Failed to update working days setting"
   },
   "eventPreview": {
     "emailAttendees": "Email attendees",

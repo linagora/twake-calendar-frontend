@@ -78,9 +78,21 @@ export default function CalendarApp({
   const theme = useTheme();
   const view = useAppSelector((state) => state.settings.view);
   const userData = useAppSelector((state) => state.user.userData);
+  const workingDays = useAppSelector(
+    (state) => state.settings.businessHours?.daysOfWeek
+  );
+  const hideWorkingDays = useAppSelector((state) => state.settings.workingDays);
+
   const hideDeclinedEvents = useAppSelector(
     (state) => state.settings.hideDeclinedEvents
   );
+  const hiddenDays = useMemo(() => {
+    if (!hideWorkingDays || !workingDays || workingDays.length === 0) return [];
+    const validWorkingDays = workingDays.filter((d) => d >= 0 && d <= 6);
+    if (validWorkingDays.length === 0) return [];
+    return [0, 1, 2, 3, 4, 5, 6].filter((d) => !validWorkingDays.includes(d));
+  }, [hideWorkingDays, workingDays]);
+
   const calendars = useAppSelector((state) => state.calendars.list);
   const isPending = useAppSelector((state) => state.calendars.pending);
   const displayWeekNumbers = useAppSelector(
@@ -413,6 +425,7 @@ export default function CalendarApp({
         {menubarProps?.isIframe && <Menubar {...menubarProps} />}
         {view === "calendar" && (
           <FullCalendar
+            key={hiddenDays.join(",")}
             ref={(ref) => {
               if (ref) {
                 calendarRef.current = ref.getApi();
@@ -428,6 +441,7 @@ export default function CalendarApp({
             firstDay={1}
             editable={true}
             locale={localeMap[lang]}
+            hiddenDays={hiddenDays}
             selectable={true}
             timeZone={timezone}
             height={"100%"}

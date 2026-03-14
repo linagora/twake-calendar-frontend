@@ -256,7 +256,10 @@
     "calAndEvent": "Lịch và sự kiện",
     "showDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
     "hideDeclinedEventsUpdateError": "Không cập nhật được các sự kiện ẩn bị từ chối.",
-    "back": "Quay lại lịch"
+    "back": "Quay lại lịch",
+    "chooseWorkingDays": "Chọn ngày làm việc của bạn",
+    "showOnlyWorkingDays": "Chỉ hiển thị ngày làm việc",
+    "workingDaysUpdateError": "Không thể cập nhật cài đặt ngày làm việc"
   },
   "eventPreview": {
     "emailAttendees": "Gửi email cho người tham gia",

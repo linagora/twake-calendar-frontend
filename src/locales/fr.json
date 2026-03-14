@@ -258,7 +258,10 @@
     "calAndEvent": "Calendrier et événements",
     "showDeclinedEvent": "Afficher les événements déclinés",
     "hideDeclinedEventsUpdateError": "Échec de la mise à jour du masquage des événements déclinés.",
-    "back": "Retour au calendrier"
+    "back": "Retour au calendrier",
+    "chooseWorkingDays": "Choisissez vos jours ouvrés",
+    "showOnlyWorkingDays": "Afficher uniquement les jours sélectionnés",
+    "workingDaysUpdateError": "Échec de la mise à jour des jours ouvrés"
   },
   "eventPreview": {
     "emailAttendees": "Envoyer un e-mail aux participants",

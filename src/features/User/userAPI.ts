@@ -1,5 +1,6 @@
 import { User } from "@/components/Attendees/PeopleSearch";
 import { api } from "@/utils/apiUtils";
+import { BusinessHour } from "../Settings/SettingsSlice";
 import { OpenPaasUserData } from "./type/OpenPaasUserData";
 import {
   ConfigurationItem,
@@ -49,6 +50,8 @@ export interface UserConfigurationUpdates {
   previousConfig?: Record<string, unknown>;
   alarmEmails?: boolean;
   hideDeclinedEvents?: boolean;
+  workingDays?: boolean;
+  businessHours?: BusinessHour | null;
 }
 
 export async function updateUserConfigurations(
@@ -76,10 +79,22 @@ export async function updateUserConfigurations(
       },
     });
   }
+  if (updates.businessHours !== undefined) {
+    coreConfigs.push({
+      name: "businessHours",
+      value: updates.businessHours ? [updates.businessHours] : [],
+    });
+  }
   if (updates.alarmEmails !== undefined) {
     calendarConfigs.push({
       name: "alarmEmails",
       value: updates.alarmEmails,
+    });
+  }
+  if (updates.displayWeekNumbers !== undefined) {
+    calendarConfigs.push({
+      name: "displayWeekNumbers",
+      value: updates.displayWeekNumbers,
     });
   }
   if (updates.hideDeclinedEvents !== undefined) {
@@ -88,10 +103,10 @@ export async function updateUserConfigurations(
       value: updates.hideDeclinedEvents,
     });
   }
-  if (updates.displayWeekNumbers !== undefined) {
-    calendarConfigs.push({
-      name: "displayWeekNumbers",
-      value: updates.displayWeekNumbers,
+  if (updates.workingDays !== undefined) {
+    esnCalendarConfigs.push({
+      name: "workingDays",
+      value: updates.workingDays,
     });
   }
 

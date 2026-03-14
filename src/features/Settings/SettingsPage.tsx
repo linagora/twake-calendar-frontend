@@ -1,45 +1,24 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { useTimeZoneList } from "@/components/Calendar/TimezoneSelector";
-import { TimezoneAutocomplete } from "@/components/Timezone/TimezoneAutocomplete";
-import { browserDefaultTimeZone, getTimezoneOffset } from "@/utils/timezone";
+import { useAppDispatch } from "@/app/hooks";
 import {
   Box,
-  FormControl,
-  FormControlLabel,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
   Snackbar,
-  Switch,
   Tab,
   Tabs,
   Typography,
 } from "@linagora/twake-mui";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SettingsIcon from "@mui/icons-material/Settings";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useI18n } from "twake-i18n";
-import {
-  setAlarmEmails,
-  setLanguage as setUserLanguage,
-  setTimezone as setUserTimeZone,
-  updateUserConfigurationsAsync,
-} from "../User/userSlice";
-import { AVAILABLE_LANGUAGES } from "./constants";
+import { GeneralSettings } from "./GeneralSettings";
+import { NotificationsSettings } from "./NotificationSettings";
 import "./SettingsPage.styl";
-import {
-  setDisplayWeekNumbers,
-  setHideDeclinedEvents,
-  setIsBrowserDefaultTimeZone,
-  setLanguage as setSettingsLanguage,
-  setTimeZone as setSettingsTimeZone,
-  setView,
-} from "./SettingsSlice";
+import { setView } from "./SettingsSlice";
 
 type SidebarNavItem = "settings" | "sync";
 type SettingsSubTab = "settings" | "notifications";
@@ -47,39 +26,12 @@ type SettingsSubTab = "settings" | "notifications";
 export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  const previousConfig = useAppSelector((state) => state.user.coreConfig);
-  const userLanguage = useAppSelector(
-    (state) => state.user?.coreConfig.language
-  );
-  const settingsLanguage = useAppSelector((state) => state.settings?.language);
-  const currentLanguage = userLanguage || settingsLanguage || "en";
-
-  const timezoneList = useTimeZoneList();
-  const userTimeZone = useAppSelector(
-    (state) => state.user?.coreConfig?.datetime?.timeZone
-  );
-  const settingTimeZone = useAppSelector((state) => state.settings?.timeZone);
-  const currentTimeZone =
-    userTimeZone ?? settingTimeZone ?? browserDefaultTimeZone;
-  const isBrowserDefault = useAppSelector(
-    (state) => state.settings.isBrowserDefaultTimeZone
-  );
-  const alarmEmailsEnabled = useAppSelector(
-    (state) => state.user?.alarmEmailsEnabled ?? true
-  );
-
-  const hideDeclinedEvents = useAppSelector(
-    (state) => state.settings?.hideDeclinedEvents
-  );
-
-  const displayWeekNumbers = useAppSelector(
-    (state) => state.settings?.displayWeekNumbers
-  );
 
   const [activeNavItem, setActiveNavItem] =
     useState<SidebarNavItem>("settings");
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
     useState<SettingsSubTab>("settings");
+
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
@@ -87,6 +39,8 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
     useState(false);
   const [displayWeekNumbersErrorOpen, setDisplayWeekNumbersErrorOpen] =
     useState(false);
+  const [workingDaysErrorOpen, setWorkingDaysErrorOpen] = useState(false);
+
   const handleBackClick = () => {
     dispatch(setView("calendar"));
   };
@@ -104,142 +58,17 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
   ) => {
     setActiveSettingsSubTab(newValue);
   };
-
-  const handleLanguageChange = (event: SelectChangeEvent<string>) => {
-    const newLanguage = event.target.value;
-    const previousLanguage = currentLanguage;
-
-    // Optimistic update - update UI immediately
-    dispatch(setUserLanguage(newLanguage));
-    dispatch(setSettingsLanguage(newLanguage));
-
-    // Call API in background, don't wait for it
-    dispatch(updateUserConfigurationsAsync({ language: newLanguage }))
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to update language:", error);
-        // Rollback on error
-        dispatch(setUserLanguage(previousLanguage));
-        dispatch(setSettingsLanguage(previousLanguage));
-        setLanguageErrorOpen(true);
-      });
-  };
-
   const handleLanguageErrorClose = () => {
     setLanguageErrorOpen(false);
   };
-
-  const handleTimeZoneChange = (newTimeZone: string) => {
-    const previousTimeZone = currentTimeZone;
-
-    // Optimistic update - update UI immediately
-    dispatch(setUserTimeZone(newTimeZone));
-    dispatch(setSettingsTimeZone(newTimeZone));
-
-    // Call API in background, don't wait for it
-    dispatch(
-      updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
-    )
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to update TimeZone:", error);
-        // Rollback on error
-        dispatch(setUserTimeZone(previousTimeZone));
-        dispatch(setSettingsTimeZone(previousTimeZone));
-        setTimeZoneErrorOpen(true);
-      });
-  };
-
-  const handleTimeZoneDefaultChange = (isDefault: boolean) => {
-    const previousTimeZone = currentTimeZone;
-
-    // Optimistic update - update UI immediately
-    dispatch(setIsBrowserDefaultTimeZone(isDefault));
-    if (isDefault) {
-      dispatch(setUserTimeZone(null));
-      dispatch(setSettingsTimeZone(browserDefaultTimeZone));
-
-      // Call API in background, don't wait for it
-      dispatch(
-        updateUserConfigurationsAsync({ timezone: null, previousConfig })
-      )
-        .unwrap()
-        .catch((error) => {
-          console.error("Failed to update TimeZone:", error);
-          // Rollback on error
-          dispatch(setUserTimeZone(previousTimeZone));
-          dispatch(setSettingsTimeZone(previousTimeZone));
-          dispatch(setIsBrowserDefaultTimeZone(!isDefault));
-          setTimeZoneErrorOpen(true);
-        });
-    }
-  };
-
   const handleTimeZoneErrorClose = () => {
     setTimeZoneErrorOpen(false);
-  };
-
-  const handleHideDeclinedEvents = (doHideDeclinedEvents: boolean) => {
-    // Optimistic update - update UI immediately
-    dispatch(setHideDeclinedEvents(doHideDeclinedEvents));
-
-    // Call API in background, don't wait for it
-    dispatch(
-      updateUserConfigurationsAsync({
-        hideDeclinedEvents: doHideDeclinedEvents,
-      })
-    )
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to update hide declined event:", error);
-        dispatch(setHideDeclinedEvents(!doHideDeclinedEvents));
-        setHideDeclinedEventsErrorOpen(true);
-      });
   };
   const handleHideDeclinedEventsErrorClose = () => {
     setHideDeclinedEventsErrorOpen(false);
   };
-
-  const handleAlarmEmailsToggle = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newValue = event.target.checked;
-    const previousValue = alarmEmailsEnabled;
-
-    // Optimistic update - update UI immediately
-    dispatch(setAlarmEmails(newValue));
-
-    // Call API in background, don't wait for it
-    dispatch(updateUserConfigurationsAsync({ alarmEmails: newValue }))
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to update alarm emails:", error);
-        // Rollback on error
-        dispatch(setAlarmEmails(previousValue));
-        setAlarmEmailsErrorOpen(true);
-      });
-  };
-
   const handleAlarmEmailsErrorClose = () => {
     setAlarmEmailsErrorOpen(false);
-  };
-
-  const handleDisplayWeekNumbers = (doDisplayWeekNumbers: boolean) => {
-    // Optimistic update - update UI immediately
-    dispatch(setDisplayWeekNumbers(doDisplayWeekNumbers));
-
-    // Call API in background, don't wait for it
-    dispatch(
-      updateUserConfigurationsAsync({
-        displayWeekNumbers: doDisplayWeekNumbers,
-      })
-    )
-      .unwrap()
-      .catch((error) => {
-        console.error("Failed to update the week number setting:", error);
-        dispatch(setDisplayWeekNumbers(!doDisplayWeekNumbers));
-        setDisplayWeekNumbersErrorOpen(true);
-      });
   };
   const handleDisplayWeekNumbersErrorClose = () => {
     setDisplayWeekNumbersErrorOpen(false);
@@ -300,157 +129,33 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
           {activeNavItem === "settings" && (
             <>
               {activeSettingsSubTab === "settings" && (
-                <Box className="settings-tab-content">
-                  <Box sx={{ mb: 6 }}>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      {t("settings.language") || "Language"}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 3 }}
-                    >
-                      {t("settings.languageDescription") ||
-                        "This will be the language used in your Twake Calendar"}
-                    </Typography>
-                    <FormControl size="small" sx={{ minWidth: 500 }}>
-                      <Select
-                        value={currentLanguage}
-                        onChange={handleLanguageChange}
-                        variant="outlined"
-                        aria-label={
-                          t("settings.languageSelector") || "Language selector"
-                        }
-                      >
-                        {AVAILABLE_LANGUAGES.map(({ code, label }) => (
-                          <MenuItem key={code} value={code}>
-                            {label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      {t("settings.timeZone")}
-                    </Typography>
-                    <Box
-                      sx={{
-                        mb: 6,
-                      }}
-                    >
-                      <FormControl size="small" sx={{ minWidth: 500 }}>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={isBrowserDefault}
-                              onChange={() =>
-                                handleTimeZoneDefaultChange(!isBrowserDefault)
-                              }
-                              aria-label={t("settings.timeZoneBrowserDefault")}
-                            />
-                          }
-                          label={t("settings.timeZoneBrowserDefault")}
-                          labelPlacement="start"
-                          sx={{
-                            minWidth: 400,
-                            justifyContent: "space-between",
-                            marginLeft: 0,
-                            mb: 2,
-                          }}
-                        />
-                        {!isBrowserDefault && (
-                          <TimezoneAutocomplete
-                            value={currentTimeZone}
-                            zones={timezoneList.zones}
-                            getTimezoneOffset={getTimezoneOffset}
-                            onChange={handleTimeZoneChange}
-                          />
-                        )}
-                      </FormControl>
-                    </Box>
-                  </Box>
-                  <Box sx={{ mb: 6 }}>
-                    <Typography variant="h6" sx={{ mb: 1 }}>
-                      {t("settings.calAndEvent")}
-                    </Typography>
-                    <FormControl size="small" sx={{ minWidth: 500 }}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={Boolean(!hideDeclinedEvents)}
-                            onChange={() =>
-                              handleHideDeclinedEvents(!hideDeclinedEvents)
-                            }
-                            aria-label={t("settings.showDeclinedEvent")}
-                          />
-                        }
-                        label={t("settings.showDeclinedEvent")}
-                        labelPlacement="start"
-                        sx={{
-                          minWidth: 400,
-                          justifyContent: "space-between",
-                          marginLeft: 0,
-                        }}
-                      />
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={Boolean(displayWeekNumbers)}
-                            onChange={() =>
-                              handleDisplayWeekNumbers(!displayWeekNumbers)
-                            }
-                            aria-label={t("settings.displayWeekNumbers")}
-                          />
-                        }
-                        label={t("settings.displayWeekNumbers")}
-                        labelPlacement="start"
-                        sx={{
-                          minWidth: 400,
-                          justifyContent: "space-between",
-                          marginLeft: 0,
-                        }}
-                      />
-                    </FormControl>
-                  </Box>
-                </Box>
+                <GeneralSettings
+                  onLanguageError={() => setLanguageErrorOpen(true)}
+                  onTimeZoneError={() => setTimeZoneErrorOpen(true)}
+                  onHideDeclinedEventsError={() =>
+                    setHideDeclinedEventsErrorOpen(true)
+                  }
+                  onDisplayWeekNumbersError={() =>
+                    setDisplayWeekNumbersErrorOpen(true)
+                  }
+                  onWorkingDaysError={() => setWorkingDaysErrorOpen(true)}
+                />
               )}
               {activeSettingsSubTab === "notifications" && (
-                <Box className="settings-tab-content">
-                  <Typography variant="h6" sx={{ mb: 3 }}>
-                    {t("settings.notifications.deliveryMethod") ||
-                      "Delivery method"}
-                  </Typography>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={alarmEmailsEnabled}
-                        onChange={handleAlarmEmailsToggle}
-                        aria-label={
-                          t("settings.notifications.email") || "Email"
-                        }
-                      />
-                    }
-                    label={t("settings.notifications.email") || "Email"}
-                    labelPlacement="start"
-                    sx={{
-                      minWidth: 400,
-                      justifyContent: "space-between",
-                      marginLeft: 0,
-                    }}
-                  />
-                </Box>
+                <NotificationsSettings
+                  onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
+                />
               )}
             </>
           )}
-          {activeNavItem === "sync" && (
-            <Box className="settings-tab-content">
-              <Typography variant="body1" color="text.secondary">
-                {t("settings.sync.empty") || "Sync settings coming soon"}
-              </Typography>
-            </Box>
-          )}
         </Box>
+        {activeNavItem === "sync" && (
+          <Box className="settings-tab-content">
+            <Typography variant="body1" color="text.secondary">
+              {t("settings.sync.empty") || "Sync settings coming soon"}
+            </Typography>
+          </Box>
+        )}
       </Box>
       <Snackbar
         open={languageErrorOpen}
@@ -475,7 +180,6 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
           "Failed to update email notifications setting"
         }
       />
-
       <Snackbar
         open={hideDeclinedEventsErrorOpen}
         autoHideDuration={4000}
@@ -487,6 +191,12 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
         autoHideDuration={4000}
         onClose={handleDisplayWeekNumbersErrorClose}
         message={t("settings.displayWeekNumbersUpdateError")}
+      />
+      <Snackbar
+        open={workingDaysErrorOpen}
+        autoHideDuration={4000}
+        onClose={() => setWorkingDaysErrorOpen(false)}
+        message={t("settings.workingDaysUpdateError")}
       />
     </main>
   );
