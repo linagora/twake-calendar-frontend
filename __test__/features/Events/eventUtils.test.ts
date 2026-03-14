@@ -76,6 +76,80 @@ describe("parseCalendarEvent", () => {
     ]);
   });
 
+  it("dedupes attendees addresses correctly", () => {
+    const rawData = [
+      ["UID", {}, "text", "event-1"],
+      ["DTSTART", {}, "date-time", "2025-07-18T09:00:00Z"],
+      ["DTEND", {}, "date-time", "2025-07-18T10:00:00Z"],
+      ["SUMMARY", {}, "text", "Team Meeting"],
+      ["DESCRIPTION", {}, "text", "Discuss roadmap"],
+      ["LOCATION", {}, "text", "Zoom"],
+      ["ORGANIZER", { cn: "Alice" }, "cal-address", "alice@example.com"],
+      [
+        "ATTENDEE",
+        { cn: "Bob", partstat: "ACCEPTED" },
+        "cal-address",
+        "bob@example.com",
+      ],
+      [
+        "ATTENDEE",
+        { cn: "Bob", partstat: "ACCEPTED" },
+        "cal-address",
+        "bob@example.com",
+      ],
+      [
+        "ATTENDEE",
+        { cn: "Bob", partstat: "ACCEPTED" },
+        "cal-address",
+        "bob@example.com",
+      ],
+      ["X-OPENPAAS-VIDEOCONFERENCE", {}, "text", "https://meet.link"],
+      ["STATUS", {}, "text", "CONFIRMED"],
+      ["SEQUENCE", {}, "integer", "2"],
+      ["TRANSP", {}, "text", "OPAQUE"],
+      ["CLASS", {}, "text", "PUBLIC"],
+      ["DTSTAMP", {}, "date-time", "2025-07-18T08:00:00Z"],
+    ] as VObjectProperty[];
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendar,
+      "/calendars/test.ics"
+    );
+
+    expect(result.uid).toBe("event-1");
+    expect(result.title).toBe("Team Meeting");
+    expect(result.description).toBe("Discuss roadmap");
+    expect(result.location).toBe("Zoom");
+    expect(result.start).toBe("2025-07-18T09:00:00Z");
+    expect(result.end).toBe("2025-07-18T10:00:00Z");
+    expect(result.stamp).toBe("2025-07-18T08:00:00Z");
+    expect(result.sequence).toBe(2);
+    expect(result.color).toBe(baseColor);
+    expect(result.status).toBe("CONFIRMED");
+    expect(result.transp).toBe("OPAQUE");
+    expect(result.class).toBe("PUBLIC");
+    expect(result.x_openpass_videoconference).toBe("https://meet.link");
+    expect(result.timezone).not.toBeDefined();
+
+    expect(result.organizer).toEqual({
+      cn: "Alice",
+      cal_address: "alice@example.com",
+    });
+
+    expect(result.attendee).toEqual([
+      {
+        cn: "Bob",
+        cal_address: "bob@example.com",
+        partstat: "ACCEPTED",
+        cutype: "INDIVIDUAL",
+        role: "REQ-PARTICIPANT",
+        rsvp: "FALSE",
+      },
+    ]);
+  });
+
   it("parses a full event correctly", () => {
     const rawData = [
       ["UID", {}, "text", "event-1"],
