@@ -1,5 +1,9 @@
 import { getCalendarsListAsync } from "@/features/Calendars/services/getCalendarsListAsync";
-import { getOpenPaasUser, getResourceDetails, getUserDetails } from "@/features/User/userAPI";
+import {
+  getOpenPaasUser,
+  getResourceDetails,
+  getUserDetails,
+} from "@/features/User/userAPI";
 import { getCalendars } from "@/features/Calendars/CalendarApi";
 import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
 import { normalizeCalendar } from "@/features/Calendars/utils/normalizeCalendar";
@@ -40,22 +44,19 @@ describe("getCalendarsListAsync", () => {
           "cal-existing": {
             id: "cal-existing",
             color: { light: "red", dark: "#FFF" },
-            events: { "event-1": {} }
-          }
-        }
+            events: { "event-1": {} },
+          },
+        },
       },
       user: {
-        userData: { openpaasId: "user-123" }
-      }
+        userData: { openpaasId: "user-123" },
+      },
     });
 
     const mockCalendarsResponse = {
       _embedded: {
-        "dav:calendar": [
-          { id: "cal-existing" },
-          { id: "cal-new" }
-        ]
-      }
+        "dav:calendar": [{ id: "cal-existing" }, { id: "cal-new" }],
+      },
     };
     mockedGetCalendars.mockResolvedValue(mockCalendarsResponse);
 
@@ -79,18 +80,29 @@ describe("getCalendarsListAsync", () => {
         link: "/link/2",
         visibility: 2,
         access: 2,
-        invite: [{ href: "", principal: "", access: 3, inviteStatus: 1 }]
+        invite: [{ href: "", principal: "", access: 3, inviteStatus: 1 }],
       });
 
     mockedGetUserDetails
-      .mockResolvedValueOnce({ firstname: "John", lastname: "Doe", emails: ["john@example.com"] })
-      .mockResolvedValueOnce({ firstname: "Jane", lastname: "Smith", emails: ["jane@example.com"] });
+      .mockResolvedValueOnce({
+        firstname: "John",
+        lastname: "Doe",
+        emails: ["john@example.com"],
+      })
+      .mockResolvedValueOnce({
+        firstname: "Jane",
+        lastname: "Smith",
+        emails: ["jane@example.com"],
+      });
 
     const thunk = getCalendarsListAsync();
     const result = await thunk(dispatch, getState, undefined);
 
     expect(result.type).toBe("calendars/getCalendars/fulfilled");
-    const payload = result.payload as { importedCalendars: any, errors: string };
+    const payload = result.payload as {
+      importedCalendars: any;
+      errors: string;
+    };
 
     expect(payload.errors).toBe("");
     expect(Object.keys(payload.importedCalendars)).toHaveLength(2);
@@ -126,14 +138,14 @@ describe("getCalendarsListAsync", () => {
   it("should handle error when API call fails", async () => {
     getState.mockReturnValue({ calendars: {}, user: {} });
     mockedGetOpenPaasUser.mockResolvedValue({ id: "fetched-user-123" });
-    
+
     mockedGetCalendars.mockRejectedValue({
       response: { status: 500 },
-      message: "Server Error"
+      message: "Server Error",
     });
     mockedToRejectedError.mockReturnValueOnce({
       status: 500,
-      message: "Server Error"
+      message: "Server Error",
     });
 
     const thunk = getCalendarsListAsync();
@@ -142,14 +154,17 @@ describe("getCalendarsListAsync", () => {
     expect(result.type).toBe("calendars/getCalendars/rejected");
     expect(result.payload).toEqual({
       status: 500,
-      message: "Server Error"
+      message: "Server Error",
     });
   });
 
   it("should fetch resource detail as fallback when user not found", async () => {
-    getState.mockReturnValue({ calendars: {}, user: { userData: { openpaasId: "user-123" } } });
+    getState.mockReturnValue({
+      calendars: {},
+      user: { userData: { openpaasId: "user-123" } },
+    });
     mockedGetCalendars.mockResolvedValue({
-      _embedded: { "dav:calendar": [{ id: "cal-1" }] }
+      _embedded: { "dav:calendar": [{ id: "cal-1" }] },
     });
     mockedNormalizeCalendar.mockReturnValue({
       cal: { "dav:name": "Resource Cal" },
@@ -162,7 +177,11 @@ describe("getCalendarsListAsync", () => {
     // Then getResourceDetails is called and succeeds
     mockedgetResourceDetails.mockResolvedValueOnce({ creator: "creator-456" });
     // Then getUserDetails is called for the creator and succeeds
-    mockedGetUserDetails.mockResolvedValueOnce({ firstname: "Creator", lastname: "User", emails: [] });
+    mockedGetUserDetails.mockResolvedValueOnce({
+      firstname: "Creator",
+      lastname: "User",
+      emails: [],
+    });
 
     const thunk = getCalendarsListAsync();
     const result = await thunk(dispatch, getState, undefined);
@@ -174,7 +193,7 @@ describe("getCalendarsListAsync", () => {
       firstname: "Creator",
       lastname: "User",
       emails: [],
-      resource: true
+      resource: true,
     });
   });
 });

@@ -36,7 +36,9 @@ describe("getResourceDetails", () => {
 
     const result = await getResourceDetails(resourceId);
 
-    expect(api.get).toHaveBeenCalledWith(`linagora.esn.resource/api/resources/${resourceId}`);
+    expect(api.get).toHaveBeenCalledWith(
+      `linagora.esn.resource/api/resources/${resourceId}`
+    );
     expect(result).toEqual(mockResource);
   });
 });

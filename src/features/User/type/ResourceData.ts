@@ -15,5 +15,5 @@ export interface ResourceData {
     creation: string;
     updatedAt: string;
   };
-  resource?: boolean
+  resource?: boolean;
 }
