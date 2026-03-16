@@ -70,11 +70,12 @@ pipeline {
             sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
             sh 'echo $DOCKER_HUB_CREDENTIAL_PSW | docker login -u $DOCKER_HUB_CREDENTIAL_USR --password-stdin'
             sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+            def bt = '`'
             sh """
               HTTP_STATUS=\$(curl -s -o /tmp/gh_comment_response.json -w "%{http_code}" -X POST \\
                 -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \\
                 -H "Content-Type: application/json" \\
-                -d "{\\"body\\": \\"Docker image published for this PR: \`linagora/twake-calendar-web:${env.DOCKER_TAG}\`\\"}" \\
+                -d "{\\"body\\": \\"Docker image published for this PR: ${bt}linagora/twake-calendar-web:${env.DOCKER_TAG}${bt}\\"}" \\
                 "https://api.github.com/repos/linagora/twake-calendar-frontend/issues/\${CHANGE_ID}/comments")
               if [ "\$HTTP_STATUS" -lt 200 ] || [ "\$HTTP_STATUS" -ge 300 ]; then
                 echo "WARNING: GitHub API comment failed with HTTP \$HTTP_STATUS"
