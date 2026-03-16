@@ -136,6 +136,7 @@
     "freeBusy": {
       "unknown": "Unknown status",
       "busy": "This person is busy",
+      "busyCalOwner": "You have another event at this time",
       "free": "User is free",
       "loading": "Status is loading"
     },

@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/app/hooks";
 import { useAttendeesFreeBusy } from "@/components/Attendees/useFreeBusy";
 import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
@@ -34,7 +35,7 @@ export function EventPreviewAttendees({
   const theme = useTheme();
   const infoIconColor = alpha(theme.palette.grey[900], 0.9);
   const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
-
+  const userEmail = useAppSelector((state) => state.user.userData.email);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
 
   const attendeePreview = makeAttendeePreview(allAttendees, t);
@@ -61,7 +62,9 @@ export function EventPreviewAttendees({
 
   const busyCaption = (a: userAttendee) =>
     freeBusyMap[a.cal_address] === "busy"
-      ? t("event.freeBusy.busy")
+      ? a.cal_address === userEmail
+        ? t("event.freeBusy.busyCalOwner")
+        : t("event.freeBusy.busy")
       : undefined;
 
   return (

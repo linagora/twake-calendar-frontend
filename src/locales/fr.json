@@ -137,6 +137,7 @@
     "freeBusy": {
       "unknown": "Statut inconnu",
       "busy": "Cette personne est occupée",
+      "busyCalOwner": "Vous avez un autre événement à cette heure-ci",
       "free": "L'utilisateur est disponible",
       "loading": "Chargement du statut"
     },
