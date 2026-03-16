@@ -79,7 +79,7 @@ export const getCalendarsListAsync = createAsyncThunk<
         const color = cal["apple:color"]
           ? {
               light: cal["apple:color"],
-              dark: defaultColors[0].dark,
+              dark: "#fff",
             }
           : defaultColors[0];
 
