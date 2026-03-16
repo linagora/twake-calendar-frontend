@@ -43,6 +43,28 @@ pipeline {
           sh 'npx prettier --check .'
         }
       }
+      stage('Deploy docker image (PR)') {
+        when {
+          changeRequest()
+        }
+        steps {
+          script {
+            env.DOCKER_TAG = "pr-${env.CHANGE_ID}"
+            echo "Docker tag: ${env.DOCKER_TAG}"
+            sh 'npm run build'
+            sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
+            sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
+            sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+            sh """
+              curl -s -X POST \\
+                -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \\
+                -H "Content-Type: application/json" \\
+                -d "{\\"body\\": \\"Docker image published for this PR: \`linagora/twake-calendar-web:${env.DOCKER_TAG}\`\\"}" \\
+                "https://api.github.com/repos/linagora/twake-calendar-frontend/issues/\${CHANGE_ID}/comments"
+            """
+          }
+        }
+      }
       stage('Deploy docker images') {
         when {
           anyOf {
