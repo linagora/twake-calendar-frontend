@@ -58,10 +58,16 @@ pipeline {
                   "https://api.github.com/orgs/linagora/members/${forkOwner}" """,
                 returnStdout: true
               ).trim()
-              if (memberStatus != '204') {
+              echo "GitHub org membership check returned HTTP ${memberStatus} for '${forkOwner}'"
+              if (memberStatus == '204') {
+                echo "Fork owner '${forkOwner}' is a linagora org member, proceeding."
+              } else if (memberStatus == '404') {
                 error("Fork owner '${forkOwner}' is not a member of the linagora organization. Skipping deploy.")
+              } else if (memberStatus == '401' || memberStatus == '403') {
+                error("Authentication/permission error validating fork owner: ${memberStatus}")
+              } else {
+                error("GitHub API error ${memberStatus} while checking membership for '${forkOwner}'")
               }
-              echo "Fork owner '${forkOwner}' is a linagora org member, proceeding."
             }
 
             def dockerTag = "pr-${env.CHANGE_ID}"
