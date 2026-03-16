@@ -135,6 +135,7 @@
     "freeBusy": {
       "unknown": "Trạng thái không rõ",
       "busy": "Người này đang bận",
+      "busyCalOwner": "Bạn có một sự kiện khác vào thời gian này",
       "free": "Người dùng đang rảnh",
       "loading": "Đang tải trạng thái"
     },
