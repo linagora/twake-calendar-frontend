@@ -1,6 +1,10 @@
 import { RootState } from "@/app/store";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
-import { getOpenPaasUser, getUserDetails } from "@/features/User/userAPI";
+import {
+  getOpenPaasUser,
+  getResourceDetails,
+  getUserDetails,
+} from "@/features/User/userAPI";
 import { defaultColors } from "@/utils/defaultColors";
 import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -39,11 +43,42 @@ export const getCalendarsListAsync = createAsyncThunk<
     const ownerDataMap = new Map<string, OpenPaasUserData>();
     const OWNER_BATCH_SIZE = 20;
 
+    const fetchResourceData = async (ownerId: string) => {
+      try {
+        const data = await getResourceDetails(ownerId);
+        const ownerData = await getUserDetails(data.creator);
+        ownerDataMap.set(ownerId, {
+          ...ownerData,
+          resource: true,
+        });
+      } catch (error) {
+        console.error(
+          `Failed to fetch resource details for ${ownerId}:`,
+          error
+        );
+        ownerDataMap.set(ownerId, {
+          firstname: "",
+          lastname: "Unknown User",
+          emails: [],
+          resource: true,
+        });
+        errors.push(formatReduxError(error));
+      }
+    };
+
     const fetchOwnerData = async (ownerId: string) => {
       try {
         const data = await getUserDetails(ownerId);
         ownerDataMap.set(ownerId, data);
       } catch (error) {
+        const status = (error as { response?: { status?: number } }).response
+          ?.status;
+
+        if (status === 404) {
+          await fetchResourceData(ownerId);
+          return;
+        }
+
         console.error(`Failed to fetch user details for ${ownerId}:`, error);
         ownerDataMap.set(ownerId, {
           firstname: "",

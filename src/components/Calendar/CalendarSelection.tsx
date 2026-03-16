@@ -136,7 +136,16 @@ export default function CalendarSelection({
     (id) => extractEventBaseUuid(id) !== userId && calendars[id]?.delegated
   );
   const sharedCalendars = Object.keys(calendars || {}).filter(
-    (id) => extractEventBaseUuid(id) !== userId && !calendars?.[id]?.delegated
+    (id) =>
+      extractEventBaseUuid(id) !== userId &&
+      !calendars?.[id]?.delegated &&
+      !calendars?.[id]?.owner?.resource
+  );
+  const resourceCalendars = Object.keys(calendars || {}).filter(
+    (id) =>
+      extractEventBaseUuid(id) !== userId &&
+      !calendars?.[id]?.delegated &&
+      calendars?.[id]?.owner?.resource
   );
 
   const handleCalendarToggle = (name: string) => {
@@ -149,6 +158,7 @@ export default function CalendarSelection({
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
   const [anchorElCalOthers, setAnchorElCalOthers] =
     useState<HTMLElement | null>(null);
+  // const [anchorElCalResources, setAnchorElCalResources] = useState<HTMLElement | null>(null);
 
   return (
     <>
@@ -191,6 +201,18 @@ export default function CalendarSelection({
           setOpen={(id: string) => {
             setAnchorElCal(document.body);
             setSelectedCalId(id);
+          }}
+          defaultExpanded
+        />
+
+        <CalendarAccordion
+          title={t("calendar.resources")}
+          calendars={resourceCalendars}
+          selectedCalendars={selectedCalendars}
+          showAddButton={false}
+          handleToggle={handleCalendarToggle}
+          setOpen={(_) => {
+            // TO DO: Implement open resource selection
           }}
           defaultExpanded
         />

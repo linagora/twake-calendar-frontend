@@ -2,6 +2,7 @@ import { clientConfig } from "@/features/User/oidcAuth";
 import {
   getOpenPaasUser,
   updateUserConfigurations,
+  getResourceDetails,
 } from "@/features/User/userAPI";
 import { api } from "@/utils/apiUtils";
 
@@ -21,6 +22,24 @@ describe("getOpenPaasUser", () => {
 
     expect(api.get).toHaveBeenCalledWith("api/user");
     expect(result).toEqual(mockUser);
+  });
+});
+
+describe("getResourceDetails", () => {
+  it("should fetch and return resource details", async () => {
+    const mockResource = { _id: "res-123", name: "Meeting Room A" };
+    const resourceId = "res-123";
+
+    (api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockResource),
+    });
+
+    const result = await getResourceDetails(resourceId);
+
+    expect(api.get).toHaveBeenCalledWith(
+      `linagora.esn.resource/api/resources/${resourceId}`
+    );
+    expect(result).toEqual(mockResource);
   });
 });
 
