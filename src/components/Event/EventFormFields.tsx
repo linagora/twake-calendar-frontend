@@ -50,6 +50,7 @@ import RepeatEvent from "./EventRepeat";
 import { useAllDayToggle } from "./hooks/useAllDayToggle";
 import { combineDateTime, splitDateTime } from "./utils/dateTimeHelpers";
 import { validateEventForm } from "./utils/formValidation";
+import { Resource, ResourceSearch } from "../Attendees/ResourceSearch";
 
 interface EventFormFieldsProps {
   // Form state
@@ -84,6 +85,8 @@ interface EventFormFieldsProps {
   setHasVideoConference: (hasVideoConference: boolean) => void;
   meetingLink: string | null;
   setMeetingLink: (meetingLink: string | null) => void;
+  selectedResources: Resource[];
+  setSelectedResources: (resources: Resource[]) => void;
 
   // UI state
   showMore: boolean;
@@ -166,6 +169,8 @@ export default function EventFormFields({
   onValidationChange,
   showValidationErrors = false,
   onHasEndDateChangedChange,
+  selectedResources,
+  setSelectedResources,
 }: EventFormFieldsProps) {
   const { t } = useI18n();
 
@@ -476,6 +481,10 @@ export default function EventFormFields({
   const handleCalendarChange = (newCalendarId: string) => {
     setCalendarid(newCalendarId);
     onCalendarChange?.(newCalendarId);
+  };
+
+  const handleResourceChange = (resources: Resource[]) => {
+    setSelectedResources(resources);
   };
 
   return (
@@ -858,6 +867,26 @@ export default function EventFormFields({
 
       {showMore && (
         <>
+          <FieldWithLabel
+            label={t("event.form.resource")}
+            isExpanded={showMore}
+          >
+            <FormControl fullWidth margin="dense" size="small">
+              <ResourceSearch
+                objectTypes={["resource"]}
+                selectedResources={selectedResources}
+                inputSlot={(params) => <TextField {...params} size="small" />}
+                onChange={async (
+                  _event: React.SyntheticEvent,
+                  value: Resource[]
+                ) => {
+                  handleResourceChange(value);
+                }}
+                hideLabel={true}
+              />
+            </FormControl>
+          </FieldWithLabel>
+
           <FieldWithLabel
             label={t("event.form.notification")}
             isExpanded={showMore}

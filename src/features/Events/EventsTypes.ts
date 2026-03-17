@@ -1,3 +1,4 @@
+import { Resource } from "@/components/Attendees/ResourceSearch";
 import { Calendar } from "../Calendars/CalendarTypes";
 import { VObjectProperty } from "../Calendars/types/CalendarData";
 import { userAttendee } from "../User/models/attendee";
@@ -29,6 +30,7 @@ export interface CalendarEvent {
   alarm?: AlarmObject;
   exdates?: string[];
   passthroughProps?: VObjectProperty[];
+  selectedResources?: Resource[];
 }
 
 export interface RepetitionObject {

@@ -1,5 +1,5 @@
 export type AttendeeRole = "CHAIR" | "REQ-PARTICIPANT" | "OPT-PARTICIPANT";
-export type CuType = "INDIVIDUAL" | "GROUP";
+export type CuType = "INDIVIDUAL" | "GROUP" | "RESOURCE";
 export type PartStat = "ACCEPTED" | "DECLINED" | "TENTATIVE" | "NEEDS-ACTION";
 
 export interface userAttendee {

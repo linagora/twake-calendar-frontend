@@ -186,7 +186,9 @@
       "busy": "Bận",
       "visibleTo": "Hiển thị với",
       "visibleAll": "Tất cả",
-      "visibleParticipants": "Người tham gia"
+      "visibleParticipants": "Người tham gia",
+      "resource": "Tài nguyên",
+      "select_resource_placeholder": "Thêm tài nguyên"
     },
     "validation": {
       "titleRequired": "Tiêu đề là bắt buộc",
@@ -280,6 +282,7 @@
     "ACCEPTED": "Chấp nhận",
     "TENTATIVE": "Có thể",
     "DECLINED": "Từ chối",
+    "NEEDS-ACTION": "Đang chờ",
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "joinVideo": "Tham gia cuộc họp video",

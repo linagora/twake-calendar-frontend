@@ -5,7 +5,7 @@ import {
   getUserDetails,
 } from "@/features/User/userAPI";
 import { getCalendars } from "@/features/Calendars/CalendarApi";
-import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
+import { formatReduxError } from "@/utils/errorUtils";
 import { normalizeCalendar } from "@/features/Calendars/utils/normalizeCalendar";
 
 jest.mock("@/features/User/userAPI");
@@ -176,16 +176,20 @@ describe("getCalendarsListAsync", () => {
       ownerId: "resource-123",
     });
 
-    // getUserDetails fails with 404 for the resource ID
-    mockedGetUserDetails.mockRejectedValueOnce({ response: { status: 404 } });
+    // getUserDetails fails with 404 for the resource ID, succeeds for the creator
+    mockedGetUserDetails.mockImplementation((id: string) => {
+      if (id === "resource-123")
+        return Promise.reject({ response: { status: 404 } });
+      if (id === "creator-456")
+        return Promise.resolve({
+          firstname: "Creator",
+          lastname: "User",
+          emails: [],
+        });
+      return Promise.resolve({ firstname: "", lastname: "", emails: [] });
+    });
     // Then getResourceDetails is called and succeeds
     mockedGetResourceDetails.mockResolvedValueOnce({ creator: "creator-456" });
-    // Then getUserDetails is called for the creator and succeeds
-    mockedGetUserDetails.mockResolvedValueOnce({
-      firstname: "Creator",
-      lastname: "User",
-      emails: [],
-    });
 
     const thunk = getCalendarsListAsync();
     const result = await thunk(dispatch, getState, undefined);

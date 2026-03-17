@@ -291,7 +291,10 @@ export default function CalendarResources({
 
           const successfulCals = results
             .filter((result) => result.status === "fulfilled")
-            .map((result) => (result as PromiseFulfilledResult<unknown>).value)
+            .map(
+              (result) =>
+                (result as PromiseFulfilledResult<CalendarWithOwner[]>).value
+            )
             .flat()
             .filter(Boolean);
 

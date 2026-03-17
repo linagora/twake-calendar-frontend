@@ -28,7 +28,9 @@ export function EventPreviewActionMenu({
   const mailSpaUrl = window.MAIL_SPA_URL ?? null;
 
   const attendees = event.attendee ?? [];
-  const otherAttendees = attendees.filter((a) => a.cal_address !== userEmail);
+  const otherAttendees = attendees.filter(
+    (a) => a.cal_address !== userEmail && a.cutype !== "RESOURCE"
+  );
 
   return (
     <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
