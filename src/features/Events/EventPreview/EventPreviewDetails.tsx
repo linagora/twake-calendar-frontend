@@ -58,12 +58,18 @@ export function EventPreviewDetails({
           backgroundColor: "#F3F4F6",
           height: 48,
           borderRadius: "8px",
-          gap: "14px",
-          paddingTop: "14px",
-          paddingBottom: "14px",
+          gap: "16px",
+          paddingTop: "16px",
+          paddingBottom: "16px",
         }}
       >
-        <Typography variant="caption" textAlign="center">
+        <Typography
+          fontWeight={500}
+          fontSize={"12px"}
+          lineHeight={"16px"}
+          letterSpacing={"0.5px"}
+          textAlign={"center"}
+        >
           {t("eventPreview.privateEvent.hiddenDetails")}
         </Typography>
       </Box>
