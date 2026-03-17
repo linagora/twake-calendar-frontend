@@ -23,7 +23,17 @@ export function parseMessage(message: unknown) {
       case WS_INBOUND_EVENTS.CALENDAR_CLIENT_REGISTERED:
         break;
       case WS_INBOUND_EVENTS.CALENDAR_LIST:
-        shouldRefreshCalendarList = true;
+        Object.keys(value).forEach((key) => {
+          if (key === "subscribed") {
+            if (Array.isArray(value[key])) {
+              value[key].forEach((cal: string) => calendarsToRefresh.add(cal));
+            }
+          } else if (key === "deleted") {
+            shouldRefreshCalendarList = true;
+          } else {
+            shouldRefreshCalendarList = true;
+          }
+        });
         break;
       default: {
         calendarsToRefresh.add(key);
