@@ -10,6 +10,13 @@ jest.mock("@/features/Calendars/services/helpers");
 jest.mock("@/features/Calendars/CalendarApi");
 jest.mock("@/utils/errorUtils");
 jest.mock("@/features/Calendars/utils/normalizeCalendar");
+jest.mock("@/utils/getAccessiblePair", () => ({
+  getAccessiblePair: jest.fn().mockReturnValue("#FFF"),
+}));
+
+jest.mock("@mui/material/styles", () => ({
+  createTheme: jest.fn().mockReturnValue({}),
+}));
 
 const mockedGetOpenPaasUser = getOpenPaasUser as jest.Mock;
 const mockedFetchOwnerData = fetchOwnerData as jest.Mock;

@@ -20,7 +20,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { Box, Button, radius, useTheme } from "@linagora/twake-mui";
+import { Box, Button, radius } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
@@ -38,7 +38,6 @@ import { useCalendarViewHandlers } from "./hooks/useCalendarViewHandlers";
 import { MiniCalendar } from "./MiniCalendar";
 import { TempCalendarsInput } from "./TempCalendarsInput";
 import { TimezoneSelector } from "./TimezoneSelector";
-import { updateDarkColor } from "./utils/calendarColorsUtils";
 import {
   eventToFullCalendarFormat,
   extractEvents,
@@ -75,7 +74,6 @@ export default function CalendarApp({
   const userId =
     useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
   const dispatch = useAppDispatch();
-  const theme = useTheme();
   const view = useAppSelector((state) => state.settings.view);
   const userData = useAppSelector((state) => state.user.userData);
   const workingDays = useAppSelector(
@@ -102,13 +100,6 @@ export default function CalendarApp({
   const storedCalendars = useSelectedCalendars();
   const [selectedCalendars, setSelectedCalendars] =
     useState<string[]>(storedCalendars);
-
-  const calendarLightSignature = useMemo(() => {
-    return Object.values(calendars || {})
-      .map((cal) => `${cal.id}:${cal.color?.light ?? ""}`)
-      .sort()
-      .join("|");
-  }, [calendars]);
 
   const calendarIdsString = useMemo(
     () =>
@@ -166,22 +157,6 @@ export default function CalendarApp({
       setSelectedCalendarsToStorage(selectedCalendars);
     }
   }, [selectedCalendars, calendarIds.length]);
-
-  const prevCalendarLightSignature = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!calendarLightSignature) {
-      prevCalendarLightSignature.current = calendarLightSignature;
-      return;
-    }
-
-    if (prevCalendarLightSignature.current === calendarLightSignature) {
-      return;
-    }
-
-    prevCalendarLightSignature.current = calendarLightSignature;
-    updateDarkColor(calendars || {}, theme, dispatch);
-  }, [calendarLightSignature, calendars, theme, dispatch]);
 
   useEffect(() => {
     if (calendarIds.length === 0) return;

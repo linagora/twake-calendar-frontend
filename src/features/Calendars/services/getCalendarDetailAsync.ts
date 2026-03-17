@@ -8,7 +8,6 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getCalendar } from "../CalendarApi";
 import { RejectedError } from "../types/RejectedError";
 import { extractCalendarEvents } from "../utils/extractCalendarEvents";
-import { defaultColors } from "@/utils/defaultColors";
 import { type RootState } from "@/app/store";
 
 export const getCalendarDetailAsync = createAsyncThunk<
@@ -42,16 +41,15 @@ export const getCalendarDetailAsync = createAsyncThunk<
         match,
         signal
       )) as CalendarData;
-
-      const color = calendar["apple:color"]
-        ? { light: calendar["apple:color"], dark: calendar["apple:color"] }
-        : defaultColors[0];
       const syncToken = calendar._embedded?.["sync-token"];
 
       const items = calendar._embedded?.["dav:item"];
       const events: CalendarEvent[] = Array.isArray(items)
         ? items.flatMap((item: CalendarItem) =>
-            extractCalendarEvents(item, { cal: calendarStored, color })
+            extractCalendarEvents(item, {
+              cal: calendarStored,
+              color: calendarStored.color,
+            })
           )
         : [];
 

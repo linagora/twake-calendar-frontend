@@ -10,6 +10,10 @@ import { CalendarData } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 import { fetchOwnerData } from "./helpers";
+import { createTheme } from "@mui/material/styles";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
+
+const theme = createTheme();
 
 export const getCalendarsListAsync = createAsyncThunk<
   { importedCalendars: Record<string, Calendar>; errors: string },
@@ -77,10 +81,11 @@ export const getCalendarsListAsync = createAsyncThunk<
           emails: [],
         };
 
-        const color = cal["apple:color"]
+        const rawColor = cal["apple:color"];
+        const color = rawColor
           ? {
-              light: cal["apple:color"],
-              dark: "#fff",
+              light: rawColor,
+              dark: getAccessiblePair(rawColor, theme),
             }
           : defaultColors[0];
 
@@ -126,10 +131,6 @@ export const getCalendarsListAsync = createAsyncThunk<
         if (fetchedCal) {
           importedCalendars[id] = {
             ...fetchedCal,
-            color: {
-              ...existingCal.color,
-              light: fetchedCal.color?.light,
-            },
             events: existingCal.events || {},
           };
         }

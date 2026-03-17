@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useI18n } from "twake-i18n";
-import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 import { defaultColors } from "@/utils/defaultColors";
 
 export function ColorPicker({
