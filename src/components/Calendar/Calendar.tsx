@@ -144,7 +144,7 @@ export default function CalendarApp({
   };
 
   useEffect(() => {
-    if (initialLoadRef.current && calendarIds.length > 0 && userId) {
+    if (initialLoadRef.current && calendarIds.length > 0 && userId && !isPending) {
       const cached = localStorage.getItem("selectedCalendars");
       if (cached && cached.length > 0) {
         const parsed = JSON.parse(cached) as string[];
@@ -158,7 +158,7 @@ export default function CalendarApp({
       }
       initialLoadRef.current = false;
     }
-  }, [calendarIds, calendars, userId]);
+  }, [calendarIds, calendars, userId, isPending]);
 
   // Save selected cals to cache
   useEffect(() => {
