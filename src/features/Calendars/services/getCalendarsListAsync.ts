@@ -1,10 +1,6 @@
 import { RootState } from "@/app/store";
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
-import {
-  getOpenPaasUser,
-  getResourceDetails,
-  getUserDetails,
-} from "@/features/User/userAPI";
+import { getOpenPaasUser } from "@/features/User/userAPI";
 import { defaultColors } from "@/utils/defaultColors";
 import { formatReduxError, toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -13,6 +9,7 @@ import { Calendar, CalendarInvite } from "../CalendarTypes";
 import { CalendarData } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
+import { fetchOwnerData } from "./helpers";
 
 export const getCalendarsListAsync = createAsyncThunk<
   { importedCalendars: Record<string, Calendar>; errors: string },
@@ -43,42 +40,11 @@ export const getCalendarsListAsync = createAsyncThunk<
     const ownerDataMap = new Map<string, OpenPaasUserData>();
     const OWNER_BATCH_SIZE = 20;
 
-    const fetchResourceData = async (ownerId: string) => {
+    const mapOwnerData = async (ownerId: string) => {
       try {
-        const data = await getResourceDetails(ownerId);
-        const ownerData = await getUserDetails(data.creator);
-        ownerDataMap.set(ownerId, {
-          ...ownerData,
-          resource: true,
-        });
-      } catch (error) {
-        console.error(
-          `Failed to fetch resource details for ${ownerId}:`,
-          error
-        );
-        ownerDataMap.set(ownerId, {
-          firstname: "",
-          lastname: "Unknown User",
-          emails: [],
-          resource: true,
-        });
-        errors.push(formatReduxError(error));
-      }
-    };
-
-    const fetchOwnerData = async (ownerId: string) => {
-      try {
-        const data = await getUserDetails(ownerId);
+        const data = await fetchOwnerData(ownerId);
         ownerDataMap.set(ownerId, data);
       } catch (error) {
-        const status = (error as { response?: { status?: number } }).response
-          ?.status;
-
-        if (status === 404) {
-          await fetchResourceData(ownerId);
-          return;
-        }
-
         console.error(`Failed to fetch user details for ${ownerId}:`, error);
         ownerDataMap.set(ownerId, {
           firstname: "",
@@ -91,7 +57,7 @@ export const getCalendarsListAsync = createAsyncThunk<
 
     for (let i = 0; i < uniqueOwnerIds.length; i += OWNER_BATCH_SIZE) {
       const chunk = uniqueOwnerIds.slice(i, i + OWNER_BATCH_SIZE);
-      await Promise.all(chunk.map((ownerId) => fetchOwnerData(ownerId)));
+      await Promise.all(chunk.map((ownerId) => mapOwnerData(ownerId)));
     }
 
     normalizedCalendars.forEach(

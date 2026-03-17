@@ -283,7 +283,7 @@ export default function CalendarResources({
                       cal,
                       owner: user,
                     }))
-                  : { cal: undefined, owner: user };
+                  : [{ cal: undefined, owner: user }];
               }
               return null;
             })

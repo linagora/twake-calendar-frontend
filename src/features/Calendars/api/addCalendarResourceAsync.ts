@@ -32,6 +32,12 @@ export const addCalendarResourceAsync = createAsyncThunk<
       ?.replace(".json", "")
       ?.split("/")[0];
 
+    if (!resourceId) {
+      return rejectWithValue({
+        message: "Unable to extract resource ID from calendar link",
+      } as RejectedError);
+    }
+
     let owner: OpenPaasUserData = {
       firstname: "",
       lastname: cal.cal["dav:name"] ?? "",
