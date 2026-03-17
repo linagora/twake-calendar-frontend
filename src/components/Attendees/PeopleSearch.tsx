@@ -25,6 +25,7 @@ import {
   type SyntheticEvent,
 } from "react";
 import { useI18n } from "twake-i18n";
+import { ResourceIcon } from "./ResourceIcon";
 
 export interface User {
   email: string;
@@ -289,14 +290,21 @@ export function PeopleSearch({
         renderOption={(props, option) => {
           if (selectedUsers.find((u) => u.email === option.email)) return null;
           const { key, ...otherProps } = props;
+          const isResource = option.objectType === "resource";
           return (
             <ListItem key={key + option?.email} {...otherProps} disableGutters>
               <ListItemAvatar>
-                <Avatar {...stringAvatar(option.displayName || option.email)} />
+                {isResource ? (
+                  <ResourceIcon displayName={option.displayName} />
+                ) : (
+                  <Avatar
+                    {...stringAvatar(option.displayName || option.email)}
+                  />
+                )}
               </ListItemAvatar>
               <ListItemText
                 primary={option.displayName}
-                secondary={option.email}
+                secondary={isResource ? "" : option.email}
                 slotProps={{
                   primary: { variant: "body2" },
                   secondary: { variant: "caption" },

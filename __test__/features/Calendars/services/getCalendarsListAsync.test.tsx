@@ -1,21 +1,18 @@
 import { getCalendarsListAsync } from "@/features/Calendars/services/getCalendarsListAsync";
-import {
-  getOpenPaasUser,
-  getResourceDetails,
-  getUserDetails,
-} from "@/features/User/userAPI";
+import { getOpenPaasUser } from "@/features/User/userAPI";
+import { fetchOwnerData } from "@/features/Calendars/services/helpers";
 import { getCalendars } from "@/features/Calendars/CalendarApi";
 import { formatReduxError } from "@/utils/errorUtils";
 import { normalizeCalendar } from "@/features/Calendars/utils/normalizeCalendar";
 
 jest.mock("@/features/User/userAPI");
+jest.mock("@/features/Calendars/services/helpers");
 jest.mock("@/features/Calendars/CalendarApi");
 jest.mock("@/utils/errorUtils");
 jest.mock("@/features/Calendars/utils/normalizeCalendar");
 
 const mockedGetOpenPaasUser = getOpenPaasUser as jest.Mock;
-const mockedGetUserDetails = getUserDetails as jest.Mock;
-const mockedGetResourceDetails = getResourceDetails as jest.Mock;
+const mockedFetchOwnerData = fetchOwnerData as jest.Mock;
 const mockedGetCalendars = getCalendars as jest.Mock;
 const mockedFormatReduxError = formatReduxError as jest.Mock;
 const mockedNormalizeCalendar = normalizeCalendar as jest.Mock;
@@ -82,7 +79,7 @@ describe("getCalendarsListAsync", () => {
         invite: [{ href: "", principal: "", access: 3, inviteStatus: 1 }],
       });
 
-    mockedGetUserDetails
+    mockedFetchOwnerData
       .mockResolvedValueOnce({
         firstname: "John",
         lastname: "Doe",
@@ -162,7 +159,38 @@ describe("getCalendarsListAsync", () => {
     });
   });
 
-  it("should fetch resource detail as fallback when user not found", async () => {
+  it("should handle error when fetching owner data fails", async () => {
+    getState.mockReturnValue({
+      calendars: {},
+      user: { userData: { openpaasId: "user-123" } },
+    });
+    mockedGetCalendars.mockResolvedValue({
+      _embedded: { "dav:calendar": [{ id: "cal-1" }] },
+    });
+    mockedNormalizeCalendar.mockReturnValue({
+      cal: { "dav:name": "Error Cal" },
+      id: "cal-1",
+      ownerId: "error-123",
+    });
+
+    // fetchOwnerData fails
+    mockedFetchOwnerData.mockRejectedValueOnce(new Error("Network Error"));
+
+    const thunk = getCalendarsListAsync();
+    const result = await thunk(dispatch, getState, undefined);
+
+    const payload = result.payload as any;
+    expect(mockedFetchOwnerData).toHaveBeenCalledWith("error-123");
+    expect(payload.importedCalendars["cal-1"].owner).toEqual({
+      firstname: "",
+      lastname: "Unknown User",
+      emails: [],
+    });
+    // Errors array should contain the error
+    expect(payload.errors).toContain("Network Error");
+  });
+
+  it("should return owner data mapping properly (including resource: true)", async () => {
     getState.mockReturnValue({
       calendars: {},
       user: { userData: { openpaasId: "user-123" } },
@@ -176,27 +204,19 @@ describe("getCalendarsListAsync", () => {
       ownerId: "resource-123",
     });
 
-    // getUserDetails fails with 404 for the resource ID, succeeds for the creator
-    mockedGetUserDetails.mockImplementation((id: string) => {
-      if (id === "resource-123")
-        return Promise.reject({ response: { status: 404 } });
-      if (id === "creator-456")
-        return Promise.resolve({
-          firstname: "Creator",
-          lastname: "User",
-          emails: [],
-        });
-      return Promise.resolve({ firstname: "", lastname: "", emails: [] });
+    // fetchOwnerData succeeds and returns a resource config structure
+    mockedFetchOwnerData.mockResolvedValueOnce({
+      firstname: "Creator",
+      lastname: "User",
+      emails: [],
+      resource: true,
     });
-    // Then getResourceDetails is called and succeeds
-    mockedGetResourceDetails.mockResolvedValueOnce({ creator: "creator-456" });
 
     const thunk = getCalendarsListAsync();
     const result = await thunk(dispatch, getState, undefined);
 
     const payload = result.payload as any;
-    expect(mockedGetResourceDetails).toHaveBeenCalledWith("resource-123");
-    expect(mockedGetUserDetails).toHaveBeenCalledWith("creator-456");
+    expect(mockedFetchOwnerData).toHaveBeenCalledWith("resource-123");
     expect(payload.importedCalendars["cal-1"].owner).toEqual({
       firstname: "Creator",
       lastname: "User",
