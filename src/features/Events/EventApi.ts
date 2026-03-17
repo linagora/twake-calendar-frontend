@@ -16,7 +16,7 @@ import {
   makeTimezone,
   makeVevent,
   parseCalendarEvent,
-} from "./eventUtils";
+} from "./utils";
 
 export async function reportEvent(
   event: CalendarEvent,

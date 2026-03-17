@@ -6,7 +6,7 @@ import {
 } from "../../Calendars/types/CalendarData";
 import { getAllRecurrentEvent } from "../EventApi";
 import { CalendarEvent } from "../EventsTypes";
-import { makeTimezone, makeVevent } from "../eventUtils";
+import { makeTimezone, makeVevent } from "../utils";
 
 const METADATA_FIELDS = [
   "summary",

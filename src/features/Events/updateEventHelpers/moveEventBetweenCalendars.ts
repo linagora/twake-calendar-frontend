@@ -11,7 +11,7 @@ import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
 import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { makeDisplayName } from "@/utils/makeDisplayName";
 import { CalendarEvent } from "../EventsTypes";
-import { buildDelegatedEventURL } from "../eventUtils";
+import { buildDelegatedEventURL } from "../utils/buildDelegatedEventURL";
 
 export interface MoveEventBetweenCalendarsParams {
   dispatch: AppDispatch;
