@@ -2,6 +2,7 @@ import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { browserDefaultTimeZone } from "@/utils/timezone";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CalendarEvent } from "../Events/EventsTypes";
+import { addCalendarResourceAsync } from "./api/addCalendarResourceAsync";
 import { Calendar } from "./CalendarTypes";
 import {
   addSharedCalendarAsync,
@@ -272,6 +273,19 @@ const CalendarSlice = createSlice({
         } as Calendar;
         state.error = null;
       })
+      .addCase(addCalendarResourceAsync.fulfilled, (state, action) => {
+        state.pending = false;
+        state.list[action.payload.calId] = {
+          color: action.payload.color,
+          id: action.payload.calId,
+          link: action.payload.link,
+          description: action.payload.desc,
+          name: action.payload.name,
+          events: {},
+          owner: action.payload.owner,
+        } as Calendar;
+        state.error = null;
+      })
       .addCase(removeCalendarAsync.fulfilled, (state) => {
         state.pending = false;
         state.error = null;
@@ -360,6 +374,9 @@ const CalendarSlice = createSlice({
         state.pending = true;
       })
       .addCase(addSharedCalendarAsync.pending, (state) => {
+        state.pending = true;
+      })
+      .addCase(addCalendarResourceAsync.pending, (state) => {
         state.pending = true;
       })
       .addCase(removeCalendarAsync.pending, (state) => {
@@ -479,6 +496,13 @@ const CalendarSlice = createSlice({
           action.payload?.message ||
           action.error.message ||
           "Failed to add shared calendar";
+      })
+      .addCase(addCalendarResourceAsync.rejected, (state, action) => {
+        state.pending = false;
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          "Failed to add calendar resource";
       })
       .addCase(removeCalendarAsync.rejected, (state, action) => {
         state.pending = false;
