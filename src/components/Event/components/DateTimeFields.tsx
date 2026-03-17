@@ -89,7 +89,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onEndDateChange,
   onEndTimeChange,
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const initialDurationRef = React.useRef<number | null>(null);
   const isUserActionRef = React.useRef(false);
@@ -338,11 +338,14 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
       ...(testLabel ? { "aria-label": testLabel } : {}),
     },
   });
-
+  React.useEffect(() => {
+    dayjs.locale(lang ?? "en");
+  }, [lang]);
   return (
     <LocalizationProvider
+      key={lang}
       dateAdapter={AdapterDayjs}
-      adapterLocale={t("locale") ?? "en"}
+      adapterLocale={lang ?? "en"}
       localeText={{
         okButtonLabel: t("common.ok"),
         cancelButtonLabel: t("common.cancel"),

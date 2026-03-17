@@ -280,6 +280,11 @@
       "tooltip": "Others see you as available during the time range of this event."
     },
     "attendingQuestion": "Attending?",
+    "proposeNewTime": "Propose new time",
+    "currentEventTime": "Current event time",
+    "yourProposal": "Your proposal",
+    "optionalMessage": "Add optional message to the organizer",
+    "sendProposal": "Send proposal",
     "ACCEPTED": "Accept",
     "TENTATIVE": "Maybe",
     "DECLINED": "Decline",

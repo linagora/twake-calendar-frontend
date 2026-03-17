@@ -4,6 +4,7 @@ import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
+import { EventCounterModal } from "./EventCounterModal";
 import { RSVPButton } from "./RSVPButton";
 
 interface AttendanceValidationProps {
@@ -25,8 +26,8 @@ export function AttendanceValidation({
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingValue, setLoadingValue] = useState<PartStat | null>(null);
+  const [openCounterModal, setOpenCounterModal] = useState(false);
 
-  // Check if we should show RSVP buttons
   const hasNoAttendeesOrOrganizer =
     !(contextualizedEvent.event?.attendee?.length > 0) &&
     !contextualizedEvent.event?.organizer;
@@ -66,7 +67,20 @@ export function AttendanceValidation({
         <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
         <RSVPButton rsvpValue="TENTATIVE" {...commonButtonProps} />
         <RSVPButton rsvpValue="DECLINED" {...commonButtonProps} />
+        {(!contextualizedEvent.isOrganizer || !isOwn) && (
+          <Typography
+            onClick={() => setOpenCounterModal(!openCounterModal)}
+            sx={{ marginLeft: 2 }}
+          >
+            {t("eventPreview.proposeNewTime")}
+          </Typography>
+        )}
       </Box>
+      <EventCounterModal
+        open={openCounterModal}
+        setOpen={setOpenCounterModal}
+        contextualizedEvent={contextualizedEvent}
+      />
     </>
   );
 }
