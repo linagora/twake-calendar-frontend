@@ -1,4 +1,4 @@
-import { getAccessiblePair } from "@/components/Calendar/utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 import { stringAvatar } from "@/components/Event/utils/eventUtils";
 import { useUserSearch } from "./useUserSearch";
 import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";

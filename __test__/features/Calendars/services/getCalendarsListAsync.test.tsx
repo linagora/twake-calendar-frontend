@@ -100,7 +100,7 @@ describe("getCalendarsListAsync", () => {
 
     const thunk = getCalendarsListAsync();
     const result = await thunk(dispatch, getState, undefined);
-    console.log(result);
+
     expect(result.type).toBe("calendars/getCalendars/fulfilled");
     const payload = result.payload as {
       importedCalendars: any;

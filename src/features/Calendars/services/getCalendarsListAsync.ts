@@ -11,7 +11,7 @@ import { RejectedError } from "../types/RejectedError";
 import { normalizeCalendar } from "../utils/normalizeCalendar";
 import { fetchOwnerData } from "./helpers";
 import { createTheme } from "@mui/material/styles";
-import { getAccessiblePair } from "@/components/Calendar/utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 
 const theme = createTheme();
 

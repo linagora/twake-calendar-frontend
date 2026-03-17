@@ -7,7 +7,7 @@ import { TextField, useTheme } from "@linagora/twake-mui";
 import { useRef } from "react";
 import { useI18n } from "twake-i18n";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 
 const requestControllers = new Map<string, AbortController>();
 

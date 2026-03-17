@@ -20,7 +20,7 @@ import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { ResponsiveDialog } from "../Dialog";
 import { stringAvatar } from "../Event/utils/eventUtils";
 import { ColorPicker } from "./CalendarColorPicker";
-import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 import { defaultColors } from "@/utils/defaultColors";
 
 interface CalendarWithOwner {

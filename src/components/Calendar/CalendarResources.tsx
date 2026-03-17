@@ -16,7 +16,7 @@ import { useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ResponsiveDialog } from "../Dialog";
 import { ColorPicker } from "./CalendarColorPicker";
-import { getAccessiblePair } from "./utils/calendarColorsUtils";
+import { getAccessiblePair } from "@/utils/getAccessiblePair";
 import { defaultColors } from "@/utils/defaultColors";
 import { addCalendarResourceAsync } from "@/features/Calendars/api/addCalendarResourceAsync";
 import { Resource, ResourceSearch } from "../Attendees/ResourceSearch";
