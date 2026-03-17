@@ -86,7 +86,25 @@ export function TempCalendarsInput({
       onChange={handleUserChange}
       onToggleEventPreview={handleToggleEventPreview}
       placeholder={t("peopleSearch.availabilityPlaceholder")}
-      inputSlot={(params) => <TextField {...params} size="small" />}
+      inputSlot={(params) => (
+        <TextField
+          {...params}
+          size="small"
+          sx={
+            tempUsers.length > 0
+              ? {
+                  "& .MuiOutlinedInput-root": {
+                    flexDirection: "column",
+                    alignItems: "start",
+                    "& .MuiInputBase-input": {
+                      width: "100%",
+                    },
+                  },
+                }
+              : undefined
+          }
+        />
+      )}
     />
   );
 }
