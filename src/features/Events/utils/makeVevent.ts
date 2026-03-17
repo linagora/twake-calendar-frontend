@@ -121,5 +121,16 @@ export function makeVevent(
     });
   }
 
+  if (event.passthroughProps?.length) {
+    const existingKeys = new Set(
+      (vevent[1] as unknown[]).map((p) => (p as [string])[0].toLowerCase())
+    );
+    for (const prop of event.passthroughProps) {
+      if (!existingKeys.has(prop[0].toLowerCase())) {
+        vevent[1].push(prop);
+      }
+    }
+  }
+
   return vevent;
 }

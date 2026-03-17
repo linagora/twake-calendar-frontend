@@ -9,9 +9,30 @@ import {
 import { userAttendee } from "../../User/models/attendee";
 import { createAttendee } from "../../User/models/attendee.mapper";
 import { AlarmObject, CalendarEvent } from "../EventsTypes";
-import { inferTimezoneFromValue } from "./inferTimezoneFromValue";
 import { buildDelegatedEventURL } from "./buildDelegatedEventURL";
 import { formatDateToICal } from "./formatDateToICal";
+import { inferTimezoneFromValue } from "./inferTimezoneFromValue";
+
+const KNOWN_PROPS = new Set([
+  "uid",
+  "transp",
+  "dtstart",
+  "dtend",
+  "class",
+  "x-openpaas-videoconference",
+  "summary",
+  "description",
+  "location",
+  "organizer",
+  "attendee",
+  "dtstamp",
+  "sequence",
+  "recurrence-id",
+  "exdate",
+  "status",
+  "duration",
+  "rrule",
+]);
 
 export function parseCalendarEvent(
   data: VObjectProperty[],
@@ -211,6 +232,9 @@ export function parseCalendarEvent(
       event.end = endISO;
     }
   }
+  event.passthroughProps = data.filter(
+    ([key]) => !KNOWN_PROPS.has(key.toLowerCase())
+  );
 
   return event as CalendarEvent;
 }
