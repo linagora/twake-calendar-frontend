@@ -35,6 +35,7 @@ function CalendarAccordion({
   onAddClick,
   defaultExpanded = false,
   setOpen,
+  hideOwner,
 }: {
   title: string;
   calendars: string[];
@@ -44,6 +45,7 @@ function CalendarAccordion({
   onAddClick?: () => void;
   defaultExpanded?: boolean;
   setOpen: (id: string) => void;
+  hideOwner?: boolean;
 }) {
   const allCalendars = useAppSelector((state) => state.calendars.list);
   const { t } = useI18n();
@@ -110,6 +112,7 @@ function CalendarAccordion({
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
+            hideOwner={hideOwner}
           />
         ))}
       </AccordionDetails>
@@ -215,6 +218,7 @@ export default function CalendarSelection({
             // TO DO: Implement open resource selection
           }}
           defaultExpanded
+          hideOwner={true}
         />
       </div>
       <CalendarPopover
@@ -245,6 +249,7 @@ function CalendarSelector({
   selectedCalendars,
   handleCalendarToggle,
   setOpen,
+  hideOwner,
 }: {
   calendars: Record<string, Calendar>;
   id: string;
@@ -252,6 +257,7 @@ function CalendarSelector({
   selectedCalendars: string[];
   handleCalendarToggle: (name: string) => void;
   setOpen: () => void;
+  hideOwner?: boolean;
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
@@ -292,7 +298,10 @@ function CalendarSelector({
   );
 
   const showCaption =
-    !isPersonal && trimmedName !== "#default" && ownerDisplayName != null;
+    !isPersonal &&
+    trimmedName !== "#default" &&
+    ownerDisplayName != null &&
+    !hideOwner;
 
   return (
     <>
