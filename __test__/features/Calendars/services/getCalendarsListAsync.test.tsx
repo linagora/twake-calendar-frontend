@@ -10,7 +10,7 @@ jest.mock("@/features/Calendars/services/helpers");
 jest.mock("@/features/Calendars/CalendarApi");
 jest.mock("@/utils/errorUtils");
 jest.mock("@/features/Calendars/utils/normalizeCalendar");
-jest.mock("@/components/Calendar/utils/calendarColorsUtils", () => ({
+jest.mock("@/utils/getAccessiblePair", () => ({
   getAccessiblePair: jest.fn().mockReturnValue("#FFF"),
 }));
 
