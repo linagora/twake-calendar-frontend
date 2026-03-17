@@ -25,6 +25,7 @@ import CalendarPopover from "./CalendarModal";
 import CalendarSearch from "./CalendarSearch";
 import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
 import { OwnerCaption } from "./OwnerCaption";
+import CalendarResources from "./CalendarResources";
 
 function CalendarAccordion({
   title,
@@ -35,6 +36,7 @@ function CalendarAccordion({
   onAddClick,
   defaultExpanded = false,
   setOpen,
+  hideOwner,
 }: {
   title: string;
   calendars: string[];
@@ -44,6 +46,7 @@ function CalendarAccordion({
   onAddClick?: () => void;
   defaultExpanded?: boolean;
   setOpen: (id: string) => void;
+  hideOwner?: boolean;
 }) {
   const allCalendars = useAppSelector((state) => state.calendars.list);
   const { t } = useI18n();
@@ -110,6 +113,7 @@ function CalendarAccordion({
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
+            hideOwner={hideOwner}
           />
         ))}
       </AccordionDetails>
@@ -158,7 +162,8 @@ export default function CalendarSelection({
   const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
   const [anchorElCalOthers, setAnchorElCalOthers] =
     useState<HTMLElement | null>(null);
-  // const [anchorElCalResources, setAnchorElCalResources] = useState<HTMLElement | null>(null);
+  const [anchorElCalResources, setAnchorElCalResources] =
+    useState<HTMLElement | null>(null);
 
   return (
     <>
@@ -209,12 +214,16 @@ export default function CalendarSelection({
           title={t("calendar.resources")}
           calendars={resourceCalendars}
           selectedCalendars={selectedCalendars}
-          showAddButton={false}
+          onAddClick={() => {
+            setAnchorElCalResources(document.body);
+          }}
+          showAddButton
           handleToggle={handleCalendarToggle}
           setOpen={(_) => {
             // TO DO: Implement open resource selection
           }}
           defaultExpanded
+          hideOwner={true}
         />
       </div>
       <CalendarPopover
@@ -234,6 +243,17 @@ export default function CalendarSelection({
           }
         }}
       />
+      <CalendarResources
+        open={Boolean(anchorElCalResources)}
+        onClose={(newResourceIds?: string[]) => {
+          setAnchorElCalResources(null);
+          if (newResourceIds?.length) {
+            newResourceIds.forEach((id) => {
+              handleCalendarToggle(id);
+            });
+          }
+        }}
+      />
     </>
   );
 }
@@ -245,6 +265,7 @@ function CalendarSelector({
   selectedCalendars,
   handleCalendarToggle,
   setOpen,
+  hideOwner,
 }: {
   calendars: Record<string, Calendar>;
   id: string;
@@ -252,6 +273,7 @@ function CalendarSelector({
   selectedCalendars: string[];
   handleCalendarToggle: (name: string) => void;
   setOpen: () => void;
+  hideOwner?: boolean;
 }) {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
@@ -292,7 +314,10 @@ function CalendarSelector({
   );
 
   const showCaption =
-    !isPersonal && trimmedName !== "#default" && ownerDisplayName != null;
+    !isPersonal &&
+    trimmedName !== "#default" &&
+    ownerDisplayName != null &&
+    !hideOwner;
 
   return (
     <>

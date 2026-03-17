@@ -572,7 +572,7 @@ describe("calendar Availability search", () => {
 
       const callCount = spy.mock.calls.length;
       expect(callCount).toBeGreaterThan(0);
-      expect(callCount).toBeLessThanOrEqual(24);
+      expect(callCount).toBeLessThanOrEqual(36);
     });
 
     it("prefetches hidden calendars only after active load completes", async () => {

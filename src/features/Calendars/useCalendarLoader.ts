@@ -258,6 +258,19 @@ export function useCalendarDataLoader({
   );
 
   useEffect(() => {
+    const nonSelectedCalendars = Object.keys(
+      fetchedIntervalsRef.current
+    ).filter((calId) => !selectedCalendars.includes(calId));
+    if (nonSelectedCalendars?.length) {
+      nonSelectedCalendars.forEach((calId) => {
+        // Remove these non-selected calendar IDs to ensure these IDs will be fetched again on every subscribe / selection
+        delete fetchedIntervalsRef.current[calId];
+        delete inFlightRef.current[calId];
+      });
+    }
+  }, [selectedCalendars]);
+
+  useEffect(() => {
     const toApiDate = (ms: number) => formatDateToYYYYMMDDTHHMMSS(new Date(ms));
     calendarsWithClearedCache.forEach(({ id, cleared }) => {
       if (processedCacheClearRef.current[id] === cleared) return;

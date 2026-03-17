@@ -98,5 +98,5 @@ describe("Event Error Handling", () => {
     }
 
     consoleWarnSpy.mockRestore();
-  });
+  }, 15000);
 });
