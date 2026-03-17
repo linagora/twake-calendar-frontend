@@ -81,6 +81,22 @@ describe("EventPopover", () => {
         },
       ],
     },
+    {
+      id: "room1@example.com",
+      objectType: "resource",
+      emailAddresses: [
+        {
+          value: "room1@example.com",
+          type: "default",
+        },
+      ],
+      names: [
+        {
+          displayName: "Room 1",
+          type: "default",
+        },
+      ],
+    },
   ];
   (api.post as jest.Mock).mockReturnValue({
     json: jest.fn().mockResolvedValue(mockUsers),
@@ -211,71 +227,137 @@ describe("EventPopover", () => {
   });
   it("adds a attendee", async () => {
     jest.useFakeTimers();
-    jest
-      .spyOn(calendarsApi, "getCalendars")
-      .mockReturnValue({ json: jest.fn() });
-    renderPopover();
-    fireEvent.change(screen.getByLabelText("event.form.title"), {
-      target: { value: "newEvent" },
-    });
-    const select = screen.getByLabelText("peopleSearch.label");
+    try {
+      jest
+        .spyOn(calendarsApi, "getCalendars")
+        .mockReturnValue({ json: jest.fn() });
+      renderPopover();
+      fireEvent.change(screen.getByLabelText("event.form.title"), {
+        target: { value: "newEvent" },
+      });
+      const select = screen.getByLabelText("peopleSearch.label");
 
-    act(() => {
-      select.focus();
-      fireEvent.mouseDown(select);
-      userEvent.type(select, "john");
-    });
-    await act(async () => {
-      jest.advanceTimersByTime(400);
-    });
-    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+      act(() => {
+        select.focus();
+        fireEvent.mouseDown(select);
+        userEvent.type(select, "john");
+      });
+      await act(async () => {
+        jest.advanceTimersByTime(400);
+      });
+      await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
 
-    await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-    });
-    await act(async () => {
-      userEvent.click(screen.getByText("John Doe"));
-    });
-
-    const spy = jest
-      .spyOn(eventThunks, "putEventAsync")
-      .mockImplementation((payload) => {
-        const promise = Promise.resolve(payload);
-        (promise as any).unwrap = () => promise;
-        return () => promise as any;
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument();
+      });
+      await act(async () => {
+        userEvent.click(screen.getByText("John Doe"));
       });
 
-    fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
+      const spy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
+      fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
 
-    const receivedPayload = spy.mock.calls[0][0];
+      await waitFor(() => {
+        expect(spy).toHaveBeenCalled();
+      });
 
-    expect(receivedPayload.cal).toEqual(
-      preloadedState.calendars.list["667037022b752d0026472254/cal1"]
-    );
+      const receivedPayload = spy.mock.calls[0][0];
 
-    expect(receivedPayload.newEvent.attendee).toHaveLength(2);
-    expect(receivedPayload.newEvent.attendee).toStrictEqual([
-      {
-        cn: "test",
-        cal_address: "test@test.com",
-        partstat: "ACCEPTED",
-        rsvp: "FALSE",
-        role: "CHAIR",
-        cutype: "INDIVIDUAL",
-      },
-      {
-        cn: "John Doe",
-        cal_address: "john@example.com",
+      expect(receivedPayload.cal).toEqual(
+        preloadedState.calendars.list["667037022b752d0026472254/cal1"]
+      );
+
+      expect(receivedPayload.newEvent.attendee).toHaveLength(2);
+      expect(receivedPayload.newEvent.attendee).toStrictEqual([
+        {
+          cn: "test",
+          cal_address: "test@test.com",
+          partstat: "ACCEPTED",
+          rsvp: "FALSE",
+          role: "CHAIR",
+          cutype: "INDIVIDUAL",
+        },
+        {
+          cn: "John Doe",
+          cal_address: "john@example.com",
+          partstat: "NEEDS-ACTION",
+          rsvp: "FALSE",
+          role: "REQ-PARTICIPANT",
+          cutype: "INDIVIDUAL",
+        },
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("adds a resource", async () => {
+    jest.useFakeTimers();
+    try {
+      renderPopover();
+      fireEvent.change(screen.getByLabelText("event.form.title"), {
+        target: { value: "newEventWithResource" },
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "common.moreOptions" })
+      );
+
+      const resourceCombobox = screen.getByPlaceholderText(
+        "resourceSearch.placeholder"
+      );
+
+      act(() => {
+        resourceCombobox.focus();
+        fireEvent.mouseDown(resourceCombobox);
+      });
+      await userEvent.type(resourceCombobox, "room");
+
+      await act(async () => {
+        jest.advanceTimersByTime(400);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText("Room 1")).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByText("Room 1"));
+
+      const spy = jest
+        .spyOn(eventThunks, "putEventAsync")
+        .mockImplementation((payload) => {
+          const promise = Promise.resolve(payload);
+          (promise as any).unwrap = () => promise;
+          return () => promise as any;
+        });
+
+      fireEvent.click(screen.getByRole("button", { name: "actions.save" }));
+
+      await waitFor(() => {
+        expect(spy).toHaveBeenCalled();
+      });
+
+      const receivedPayload = spy.mock.calls[0][0];
+
+      expect(receivedPayload.newEvent.attendee).toHaveLength(2); // Organizer + 1 resource
+      expect(receivedPayload.newEvent.attendee[1]).toStrictEqual({
+        cn: "Room 1",
+        cal_address: "room1@example.com",
         partstat: "NEEDS-ACTION",
-        rsvp: "FALSE",
+        rsvp: "TRUE",
         role: "REQ-PARTICIPANT",
-        cutype: "INDIVIDUAL",
-      },
-    ]);
+        cutype: "RESOURCE",
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("dispatches putEventAsync and calls onClose when Save is clicked", async () => {

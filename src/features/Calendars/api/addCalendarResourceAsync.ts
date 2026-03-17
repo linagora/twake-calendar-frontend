@@ -1,5 +1,5 @@
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
-import { getResourceDetails } from "@/features/User/userAPI";
+import { getResourceDetails, getUserDetails } from "@/features/User/userAPI";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { addSharedCalendar } from "../CalendarApi";
@@ -27,14 +27,24 @@ export const addCalendarResourceAsync = createAsyncThunk<
 >(
   "calendars/addCalendarResource",
   async ({ userId, calId, cal }, { rejectWithValue }) => {
+    const resourceId = cal.cal._links.self?.href
+      ?.replace("/calendars/", "")
+      ?.replace(".json", "")
+      ?.split("/")[0];
+
+    let owner: OpenPaasUserData = {
+      firstname: "",
+      lastname: cal.cal["dav:name"] ?? "",
+      emails: [],
+      resource: true,
+    };
     try {
       await addSharedCalendar(userId, calId, cal);
-      const ownerData = await getResourceDetails(
-        cal.cal._links.self.href
-          .replace("/calendars/", "")
-          .replace(".json", "")
-          .split("/")[0]
-      );
+      const resource = await getResourceDetails(resourceId!);
+      owner = {
+        ...(await getUserDetails(resource.creator)),
+        resource: true,
+      };
 
       return {
         calId: cal.cal._links.self?.href
@@ -44,7 +54,7 @@ export const addCalendarResourceAsync = createAsyncThunk<
         link: `/calendars/${userId}/${calId}.json`,
         desc: cal.cal["caldav:description"] ?? "",
         name: cal.cal["dav:name"] ?? "",
-        owner: ownerData,
+        owner,
       };
     } catch (err) {
       return rejectWithValue(toRejectedError(err));

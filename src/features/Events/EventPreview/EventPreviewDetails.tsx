@@ -1,5 +1,6 @@
 import { InfoRow } from "@/components/Event/InfoRow";
 import { Box, Button, Typography } from "@linagora/twake-mui";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
@@ -11,6 +12,7 @@ import { useI18n } from "twake-i18n";
 import { CalendarEvent } from "../EventsTypes";
 import { EventPreviewAttendees } from "./EventPreviewAttendees";
 import { makeRecurrenceString } from "./utils/makeRecurrenceString";
+import { useMemo } from "react";
 
 interface EventPreviewDetailsProps {
   event: CalendarEvent;
@@ -28,13 +30,25 @@ export function EventPreviewDetails({
   const infoIconColor = alpha(theme.palette.grey[900], 0.9);
   const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
 
+  const resources = useMemo(
+    () => event?.attendee?.filter((attendee) => attendee.cutype === "RESOURCE"),
+    [event?.attendee]
+  );
+  const eventAttendees = useMemo(
+    () =>
+      event?.attendee?.filter((attendee) => attendee.cutype !== "RESOURCE") ??
+      [],
+    [event?.attendee]
+  );
+
   const attendees =
-    event.attendee?.filter(
+    eventAttendees?.filter(
       (a) => a.cal_address !== event.organizer?.cal_address
     ) || [];
-  const organizer = event.attendee?.find(
+  const organizer = eventAttendees?.find(
     (a) => a.cal_address === event.organizer?.cal_address
   );
+
   const showDetails = isNotPrivate || isOwn;
 
   if (!showDetails) {
@@ -91,7 +105,7 @@ export function EventPreviewDetails({
         <EventPreviewAttendees
           attendees={attendees}
           organizer={organizer}
-          allAttendees={event.attendee ?? []}
+          allAttendees={eventAttendees ?? []}
           start={event.start}
           end={event.end}
           timezone={event.timezone}
@@ -109,6 +123,56 @@ export function EventPreviewDetails({
             </Box>
           }
           text={event.location}
+        />
+      )}
+
+      {/* Resource */}
+      {resources && (
+        <InfoRow
+          alignItems="flex-start"
+          icon={
+            <Box sx={infoIconSx}>
+              <LayersOutlinedIcon />
+            </Box>
+          }
+          content={resources.map((resource, index) => (
+            <Box
+              sx={{
+                marginRight: "5px",
+              }}
+            >
+              <Typography
+                variant="body2"
+                color="textPrimary"
+                sx={{
+                  wordBreak: "break-word",
+                  whiteSpace: "pre-line",
+                  maxHeight: "33vh",
+                  overflowY: "auto",
+                  width: "100%",
+                }}
+              >
+                {resource.cn}
+                {index < resources.length - 1 ? "," : ""}
+              </Typography>
+              <Typography
+                sx={{
+                  wordBreak: "break-word",
+                  whiteSpace: "pre-line",
+                  overflowY: "auto",
+                  width: "100%",
+                  fontSize: "13px",
+                  color: "#717D96",
+                }}
+              >
+                {t(`eventPreview.${resource.partstat}`)}
+              </Typography>
+            </Box>
+          ))}
+          style={{
+            fontSize: "16px",
+            fontFamily: "'Inter', sans-serif",
+          }}
         />
       )}
 

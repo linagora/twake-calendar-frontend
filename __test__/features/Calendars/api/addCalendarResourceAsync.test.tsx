@@ -1,6 +1,6 @@
 import { addCalendarResourceAsync } from "@/features/Calendars/api/addCalendarResourceAsync";
 import { addSharedCalendar } from "@/features/Calendars/CalendarApi";
-import { getResourceDetails } from "@/features/User/userAPI";
+import { getResourceDetails, getUserDetails } from "@/features/User/userAPI";
 import { toRejectedError } from "@/utils/errorUtils";
 import { configureStore } from "@reduxjs/toolkit";
 
@@ -10,6 +10,7 @@ jest.mock("@/utils/errorUtils");
 
 const mockedAddSharedCalendar = addSharedCalendar as jest.Mock;
 const mockedGetResourceDetails = getResourceDetails as jest.Mock;
+const mockedGetUserDetails = getUserDetails as jest.Mock;
 const mockedToRejectedError = toRejectedError as jest.Mock;
 
 describe("addCalendarResourceAsync thunk", () => {
@@ -55,6 +56,11 @@ describe("addCalendarResourceAsync thunk", () => {
 
   it("should add shared calendar, fetch resource details, map userData", async () => {
     mockedGetResourceDetails.mockResolvedValueOnce(mockResolvedResourceData);
+    mockedGetUserDetails.mockResolvedValueOnce({
+      firstname: "Creator",
+      lastname: "User",
+      emails: ["creator@example.com"],
+    });
     mockedAddSharedCalendar.mockResolvedValueOnce({});
 
     const result = await addCalendarResourceAsync(
@@ -67,6 +73,7 @@ describe("addCalendarResourceAsync thunk", () => {
       mockPayload.cal
     );
     expect(mockedGetResourceDetails).toHaveBeenCalledWith("res-456");
+    expect(mockedGetUserDetails).toHaveBeenCalledWith("user-789");
 
     expect(result.type).toBe("calendars/addCalendarResource/fulfilled");
     expect(result.payload).toEqual({
@@ -75,7 +82,12 @@ describe("addCalendarResourceAsync thunk", () => {
       desc: "A meeting room",
       link: "/calendars/user-123/cal-123.json",
       name: "Resource Room A",
-      owner: mockResolvedResourceData,
+      owner: {
+        firstname: "Creator",
+        lastname: "User",
+        emails: ["creator@example.com"],
+        resource: true,
+      },
     });
   });
 

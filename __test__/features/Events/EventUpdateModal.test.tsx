@@ -157,6 +157,89 @@ describe("EventUpdateModal Timezone Handling", () => {
     // Verify the timezone is still preserved (should be Asia/Bangkok)
     expect(titleInput).toHaveValue("Updated Event");
   });
+
+  it("preserves resources when editing an event", async () => {
+    const eventDateUTC = new Date("2025-01-15T07:00:00.000Z");
+
+    const eventData = {
+      uid: "test-event-resource",
+      title: "Resource Event",
+      calId: "667037022b752d0026472254/cal1",
+      start: eventDateUTC.toISOString(),
+      end: new Date(eventDateUTC.getTime() + 3600000).toISOString(),
+      timezone: "Asia/Bangkok",
+      allday: false,
+      organizer: { cn: "test", cal_address: "test@test.com" },
+      attendee: [
+        { cn: "test", cal_address: "test@test.com" },
+        {
+          cn: "Conference Room",
+          cal_address: "room@test.com",
+          partstat: "ACCEPTED",
+          rsvp: "TRUE",
+          role: "REQ-PARTICIPANT",
+          cutype: "RESOURCE",
+        },
+      ],
+    };
+
+    const stateWithEvent = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          "667037022b752d0026472254/cal1": {
+            ...preloadedState.calendars.list["667037022b752d0026472254/cal1"],
+            events: {
+              "test-event-resource": eventData,
+            },
+          },
+        },
+      },
+    };
+
+    const mockPutEvent = jest.spyOn(EventApi, "putEvent").mockResolvedValue({
+      status: 201,
+      url: `/calendars/667037022b752d0026472254/cal1/test-event-resource.ics`,
+    } as any);
+
+    renderWithProviders(
+      <EventUpdateModal
+        open={true}
+        onClose={mockOnClose}
+        calId={"667037022b752d0026472254/cal1"}
+        eventId={"test-event-resource"}
+        eventData={eventData}
+      />,
+      stateWithEvent
+    );
+
+    // Edit the title
+    const titleInput = screen.getByDisplayValue("Resource Event");
+    fireEvent.change(titleInput, {
+      target: { value: "Updated Resource Event" },
+    });
+
+    // Click Save
+    const saveButton = screen.getByRole("button", { name: "actions.save" });
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    await waitFor(() => {
+      expect(mockPutEvent).toHaveBeenCalled();
+    });
+
+    const putEventCall = mockPutEvent.mock.calls[0][0];
+    expect(putEventCall.title).toBe("Updated Resource Event");
+
+    // Check that the resource is still in the attendee list!
+    const attendees = putEventCall.attendee;
+    const resource = attendees.find((a: any) => a.cutype === "RESOURCE");
+    expect(resource).toBeDefined();
+    expect(resource!.cn).toBe("Conference Room");
+    expect(resource!.cal_address).toBe("room@test.com");
+  });
 });
 
 describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {

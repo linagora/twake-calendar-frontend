@@ -72,6 +72,7 @@ export function InfoRow({
         alignItems,
         gap: 1,
         marginBottom: 1,
+        flexWrap: "wrap",
       }}
     >
       {icon}
