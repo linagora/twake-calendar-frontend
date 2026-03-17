@@ -1,5 +1,5 @@
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { buildDelegatedEventURL } from "@/features/Events/eventUtils";
+import { buildDelegatedEventURL } from "@/features/Events/utils";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import pMap from "p-map";

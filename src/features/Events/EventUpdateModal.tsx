@@ -42,8 +42,8 @@ import { Calendar } from "../Calendars/CalendarTypes";
 import { userAttendee } from "../User/models/attendee";
 import { deleteEvent, getEvent, putEvent } from "./EventApi";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { detectRecurringEventChanges } from "./eventUtils";
 import { moveEventBetweenCalendars } from "./updateEventHelpers/moveEventBetweenCalendars";
+import { detectRecurringEventChanges } from "./utils/detectRecurringEventChanges";
 
 function EventUpdateModal({
   eventId,

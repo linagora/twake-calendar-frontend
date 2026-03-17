@@ -41,8 +41,8 @@ import { Calendar } from "../Calendars/CalendarTypes";
 import { putEventAsync } from "../Calendars/services";
 import { userAttendee } from "../User/models/attendee";
 import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { buildDelegatedEventURL } from "./eventUtils";
 import { useEventOrganizer } from "./useEventOrganizer";
+import { buildDelegatedEventURL } from "./utils/buildDelegatedEventURL";
 
 function EventPopover({
   open,

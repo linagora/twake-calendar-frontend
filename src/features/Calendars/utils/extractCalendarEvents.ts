@@ -1,6 +1,6 @@
-import { defaultColors } from "@/utils/defaultColors";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { parseCalendarEvent } from "@/features/Events/eventUtils";
+import { parseCalendarEvent } from "@/features/Events/utils";
+import { defaultColors } from "@/utils/defaultColors";
 import { CalDavItem } from "../api/types";
 import { Calendar } from "../CalendarTypes";
 import { VCalComponent } from "../types/CalendarData";
