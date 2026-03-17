@@ -1,11 +1,9 @@
 import { getAccessiblePair } from "@/components/Calendar/utils/calendarColorsUtils";
-import { stringAvatar } from "@/components/Event/utils/eventUtils";
 import { useUserSearch } from "./useUserSearch";
+import { ResourceIcon } from "./ResourceIcon";
 import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   Autocomplete,
-  Avatar,
   Chip,
   CircularProgress,
   ListItem,
@@ -15,9 +13,10 @@ import {
   PopperProps,
   TextField,
   useTheme,
+  Typography,
   type AutocompleteRenderInputParams,
 } from "@linagora/twake-mui";
-import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   HTMLAttributes,
   useCallback,
@@ -26,13 +25,12 @@ import {
 } from "react";
 import { useI18n } from "twake-i18n";
 
-export interface User {
-  email: string;
+export interface Resource {
+  email?: string;
   displayName: string;
   avatarUrl?: string;
   openpaasId?: string;
   color?: Record<string, string>;
-  objectType?: string;
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
@@ -43,8 +41,8 @@ export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRende
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export function PeopleSearch({
-  selectedUsers,
+export function ResourceSearch({
+  selectedResources,
   onChange,
   objectTypes,
   disabled,
@@ -54,10 +52,10 @@ export function PeopleSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
-  getChipIcon,
+  hideLabel,
 }: {
-  selectedUsers: User[];
-  onChange: (event: SyntheticEvent, users: User[]) => void;
+  selectedResources: Resource[];
+  onChange: (event: SyntheticEvent, users: Resource[]) => void;
   objectTypes: string[];
   disabled?: boolean;
   freeSolo?: boolean;
@@ -76,11 +74,11 @@ export function PeopleSearch({
     paper?: Partial<PaperProps>;
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
   };
-  getChipIcon?: (user: User) => ReactNode;
+  hideLabel?: boolean;
 }) {
   const { t } = useI18n();
-  const searchPlaceholder = placeholder ?? t("peopleSearch.placeholder");
-  const errorMessage = t("peopleSearch.searchError");
+  const searchPlaceholder = placeholder ?? t("resourceSearch.placeholder");
+  const errorMessage = t("resourceSearch.searchError");
 
   const {
     query,
@@ -96,50 +94,45 @@ export function PeopleSearch({
     setSnackbarOpen,
     snackbarMessage,
     setSnackbarMessage,
-  } = useUserSearch<User>({ objectTypes, errorMessage });
+  } = useUserSearch<Resource>({ objectTypes, errorMessage });
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const theme = useTheme();
 
   const handleBlurCommit = useCallback(
     (event: React.SyntheticEvent) => {
       const trimmed = query.trim();
       if (!trimmed) return;
-      if (!isValidEmail(trimmed)) {
-        setInputError(
-          t("peopleSearch.invalidEmail").replace("%{email}", trimmed)
-        );
-        return;
-      }
-      if (selectedUsers.find((u) => u.email === trimmed)) {
+      if (selectedResources.find((u) => u.displayName === trimmed)) {
         setQuery("");
         return;
       }
       setInputError(null);
-      const newUser: User = { email: trimmed, displayName: trimmed };
-      onChange(event, [...selectedUsers, newUser]);
+      const newResource: Resource = { displayName: trimmed };
+      onChange(event, [...selectedResources, newResource]);
       setQuery("");
     },
-    [query, selectedUsers, onChange, t, setInputError, setQuery]
+    [query, selectedResources, onChange, setInputError, setQuery]
   );
 
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
       const inputProps = {
         ...params.InputProps,
-        startAdornment: params.InputProps.startAdornment ? (
-          params.InputProps.startAdornment
-        ) : (
-          <PeopleOutlineOutlinedIcon
-            fontSize="small"
-            sx={{ mr: 1, color: "action.active" }}
-          />
+        startAdornment: (
+          <>
+            {!selectedResources?.length ? (
+              <SearchIcon
+                fontSize="small"
+                sx={{ mr: 1, color: "action.active" }}
+              />
+            ) : null}
+            {params.InputProps.startAdornment}
+          </>
         ),
         endAdornment: (
           <>
             {loading ? <CircularProgress color="inherit" size={20} /> : null}
-            {params.InputProps.endAdornment}
+            {!selectedResources?.length ? params.InputProps.endAdornment : null}
           </>
         ),
       };
@@ -176,9 +169,11 @@ export function PeopleSearch({
       if (inputSlot) {
         return (
           <>
-            <label htmlFor={params.id} className="visually-hidden">
-              {t("peopleSearch.label")}
-            </label>
+            {!hideLabel && (
+              <Typography variant="h6" sx={{ marginBottom: "10px" }}>
+                {t("resourceSearch.label")}
+              </Typography>
+            )}
             {inputSlot({
               ...enhancedParams,
               error: !!inputError,
@@ -193,9 +188,11 @@ export function PeopleSearch({
 
       return (
         <>
-          <label htmlFor={params.id} className="visually-hidden">
-            {t("peopleSearch.label")}
-          </label>
+          {!hideLabel && (
+            <Typography variant="h6" sx={{ marginBottom: "10px" }}>
+              {t("resourceSearch.label")}
+            </Typography>
+          )}
           <TextField
             {...enhancedParams}
             {...defaultTextFieldProps}
@@ -206,7 +203,14 @@ export function PeopleSearch({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inputError, t, onToggleEventPreview, loading, searchPlaceholder]
+    [
+      inputError,
+      t,
+      onToggleEventPreview,
+      loading,
+      searchPlaceholder,
+      selectedResources?.length,
+    ]
   );
 
   return (
@@ -228,13 +232,13 @@ export function PeopleSearch({
         onClose={() => setIsOpen(false)}
         disabled={disabled}
         loading={loading}
-        filterOptions={(x) => x}
+        filterOptions={(options: Resource[]) => options}
         fullWidth
-        noOptionsText={t("peopleSearch.noResults")}
-        loadingText={t("peopleSearch.loading")}
-        getOptionLabel={(option) => {
+        noOptionsText={t("resourceSearch.noResults")}
+        loadingText={t("resourceSearch.loading")}
+        getOptionLabel={(option: Resource | string) => {
           if (typeof option === "object") {
-            return option.displayName || option.email;
+            return option.displayName;
           } else {
             return option;
           }
@@ -245,30 +249,16 @@ export function PeopleSearch({
           },
         }}
         filterSelectedOptions
-        value={selectedUsers}
+        value={selectedResources}
         inputValue={query}
-        onInputChange={(_event, value) => setQuery(value)}
-        onChange={(event, value) => {
-          const last = value[value.length - 1];
-          if (typeof last === "string" && !isValidEmail(last.trim())) {
-            const invalidEmailMessage = t("peopleSearch.invalidEmail").replace(
-              "%{email}",
-              last
-            );
-            setInputError(invalidEmailMessage);
-            return;
-          }
+        onInputChange={(_event, value: string) => setQuery(value)}
+        onChange={(event, value: string[] | Resource[]) => {
           setInputError(null);
           const mapped = value
-            .map((v: string | User) =>
-              typeof v === "string"
-                ? { email: v.trim(), displayName: v.trim() }
-                : v
+            .map((v: string | Resource) =>
+              typeof v === "string" ? { displayName: v.trim() } : v
             )
-            .filter(
-              (user, index, self) =>
-                self.findIndex((u) => u.email === user.email) === index
-            );
+            .filter((v) => v.displayName.trim().length > 0);
           onChange(event, mapped);
         }}
         slotProps={{
@@ -279,51 +269,46 @@ export function PeopleSearch({
             ...customSlotProps?.popper,
           },
         }}
-        forcePopupIcon={false}
-        disableClearable
+        // When render input is custom, the adornments should be handled by the custom component
+        forcePopupIcon={!customRenderInput}
+        disableClearable={!!customRenderInput}
         renderInput={(params) =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
             : defaultRenderInput(params)
         }
-        renderOption={(props, option) => {
-          if (selectedUsers.find((u) => u.email === option.email)) return null;
+        renderOption={(props, option: Resource) => {
+          if (
+            selectedResources.find((u) => u.displayName === option.displayName)
+          )
+            return null;
           const { key, ...otherProps } = props;
           return (
-            <ListItem key={key + option?.email} {...otherProps} disableGutters>
+            <ListItem
+              key={key + option?.displayName}
+              {...otherProps}
+              disableGutters
+            >
               <ListItemAvatar>
-                <Avatar {...stringAvatar(option.displayName || option.email)} />
+                <ResourceIcon displayName={option.displayName} />
               </ListItemAvatar>
-              <ListItemText
-                primary={option.displayName}
-                secondary={option.email}
-                slotProps={{
-                  primary: { variant: "body2" },
-                  secondary: { variant: "caption" },
-                }}
-              />
+              <ListItemText primary={option.displayName} />
             </ListItem>
           );
         }}
-        renderValue={(value, getTagProps) =>
-          value.map((option, index) => {
+        renderValue={(value: string[] | Resource[], getTagProps) =>
+          value.map((option: string | Resource, index) => {
             const isString = typeof option === "string";
-            const label = isString
-              ? option
-              : option.displayName || option.email;
+            const label = isString ? option : option.displayName;
             const chipColor = isString
-              ? theme.palette.grey[200]
-              : (option.color?.light ?? theme.palette.grey[200]);
+              ? theme.palette.grey[300]
+              : (option.color?.light ?? theme.palette.grey[300]);
             const textColor = getAccessiblePair(chipColor, theme);
 
             return (
               <Chip
                 {...getTagProps({ index })}
                 key={label}
-                icon={
-                  !isString && getChipIcon ? getChipIcon(option) : undefined
-                }
-                deleteIcon={<CloseIcon />}
                 style={{
                   backgroundColor: chipColor,
                   color: textColor,
