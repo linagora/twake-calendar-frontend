@@ -9,6 +9,7 @@ type InfoRowProps = {
   content?: React.ReactNode; // if provided, overrides text rendering
   style?: React.CSSProperties;
   alignItems?: React.CSSProperties["alignItems"];
+  flexWrap?: React.CSSProperties["flexWrap"];
 };
 
 function detectUrls(text: string) {
@@ -64,6 +65,7 @@ export function InfoRow({
   content,
   style,
   alignItems = "center",
+  flexWrap = "nowrap",
 }: InfoRowProps) {
   return (
     <Box
@@ -72,7 +74,7 @@ export function InfoRow({
         alignItems,
         gap: 1,
         marginBottom: 1,
-        flexWrap: "wrap",
+        flexWrap,
       }}
     >
       {icon}
