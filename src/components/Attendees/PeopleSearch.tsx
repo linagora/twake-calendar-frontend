@@ -295,7 +295,7 @@ export function PeopleSearch({
             <ListItem key={key + option?.email} {...otherProps} disableGutters>
               <ListItemAvatar>
                 {isResource ? (
-                  <ResourceIcon displayName={option.displayName} />
+                  <ResourceIcon avatarUrl={option.avatarUrl} />
                 ) : (
                   <Avatar
                     {...stringAvatar(option.displayName || option.email)}
