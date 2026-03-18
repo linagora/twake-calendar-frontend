@@ -45,7 +45,7 @@ export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
 
 export async function getResourceDetails(id: string): Promise<ResourceData> {
   const resource = await api
-    .get(`linagora.esn.resource/api/resources/${encodeURIComponent(id)}`)
+    .get(`api/resources/${encodeURIComponent(id)}`)
     .json();
   return resource as ResourceData;
 }
