@@ -1,10 +1,12 @@
 import * as appHooks from "@/app/hooks";
-import { AppDispatch } from "@/app/store";
+import { AppDispatch, setupStore } from "@/app/store";
 import HandleLogin from "@/features/User/HandleLogin";
 import * as oidcAuth from "@/features/User/oidcAuth";
 import { clientConfig } from "@/features/User/oidcAuth";
+import { useInitializeApp } from "@/features/User/useInitializeApp";
 import * as apiUtils from "@/utils/apiUtils";
-import { screen, waitFor } from "@testing-library/react";
+import { renderHook, screen, waitFor } from "@testing-library/react";
+import { Provider } from "react-redux";
 import { push } from "redux-first-history";
 import { renderWithProviders } from "../../utils/Renderwithproviders";
 
@@ -17,6 +19,17 @@ describe("HandleLogin", () => {
     const dispatch = jest.fn() as AppDispatch;
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
     sessionStorage.clear();
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
   });
 
   test("redirects and sets sessionStorage when no userData", async () => {
@@ -28,18 +41,23 @@ describe("HandleLogin", () => {
 
     jest.spyOn(oidcAuth, "Auth").mockResolvedValue(loginUrlMock);
 
-    renderWithProviders(<HandleLogin />, {
-      user: {
-        userData: null,
-        tokens: null,
-        loading: false,
-        error: null,
-      },
-      calendars: {
-        list: {},
-        pending: false,
-        error: null,
-      },
+    const { result } = renderHook(() => useInitializeApp(), {
+      wrapper: ({ children }) => (
+        <Provider
+          store={setupStore({
+            user: {
+              userData: null,
+              tokens: null,
+              loading: false,
+              error: null,
+              coreConfig: { language: "en" },
+            },
+            calendars: { list: {}, pending: false, error: null },
+          })}
+        >
+          {children}
+        </Provider>
+      ),
     });
 
     await waitFor(

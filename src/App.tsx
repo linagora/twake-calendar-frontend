@@ -13,6 +13,7 @@ import { Loading } from "./components/Loading/Loading";
 import { AVAILABLE_LANGUAGES } from "./features/Settings/constants";
 import HandleLogin from "./features/User/HandleLogin";
 import { CallbackResume } from "./features/User/LoginCallback";
+import { useInitializeApp } from "./features/User/useInitializeApp";
 import { ScreenTooSmall } from "./ScreenTooSmall";
 import { WebSocketGate } from "./websocket/WebSocketGate";
 
@@ -67,6 +68,8 @@ function App() {
   const [isTooSmall, setIsTooSmall] = useState(
     () => window.matchMedia(SMALL_SCREEN_QUERY).matches
   );
+
+  useInitializeApp();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(SMALL_SCREEN_QUERY);
