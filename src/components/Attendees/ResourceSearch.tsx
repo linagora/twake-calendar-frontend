@@ -290,7 +290,7 @@ export function ResourceSearch({
               disableGutters
             >
               <ListItemAvatar>
-                <ResourceIcon displayName={option.displayName} />
+                <ResourceIcon avatarUrl={option.avatarUrl} />
               </ListItemAvatar>
               <ListItemText primary={option.displayName} />
             </ListItem>

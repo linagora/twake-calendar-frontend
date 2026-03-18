@@ -46,7 +46,7 @@ function CalendarItem({
       gap={2}
     >
       <Box display="flex" alignItems="center" gap={1}>
-        <ResourceIcon displayName={cal.owner.displayName} />
+        <ResourceIcon avatarUrl={cal.owner.avatarUrl} />
         <Typography variant="body1">
           {renameDefault(cal.cal["dav:name"], cal.owner.displayName, t, false)}
         </Typography>
