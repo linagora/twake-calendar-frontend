@@ -15,7 +15,8 @@ export function CalendarName({ calendar }: { calendar: Calendar }) {
   const ownerId = calendar.id.split("/")[0];
   const ownerDisplayName = makeDisplayName(calendar) ?? "";
   const isOwnCalendar = userData.openpaasId === ownerId;
-  const showCaption = calendar.name !== "#default" && !isOwnCalendar;
+  const showCaption =
+    calendar.name !== "#default" && !isOwnCalendar && !calendar.owner?.resource;
 
   return (
     <Box
