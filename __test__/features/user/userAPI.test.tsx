@@ -3,6 +3,7 @@ import {
   getOpenPaasUser,
   updateUserConfigurations,
   getResourceDetails,
+  getUserDetails,
 } from "@/features/User/userAPI";
 import { api } from "@/utils/apiUtils";
 
@@ -21,6 +22,26 @@ describe("getOpenPaasUser", () => {
     const result = await getOpenPaasUser();
 
     expect(api.get).toHaveBeenCalledWith("api/user");
+    expect(result).toEqual(mockUser);
+  });
+});
+
+describe("getUserDetails", () => {
+  it("should fetch and return user details", async () => {
+    const mockUser = {
+      firstname: "John",
+      lastname: "Doe",
+      emails: ["john@test.com"],
+    };
+    const userId = "123";
+
+    (api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockUser),
+    });
+
+    const result = await getUserDetails(userId);
+
+    expect(api.get).toHaveBeenCalledWith(`api/users/${userId}`);
     expect(result).toEqual(mockUser);
   });
 });

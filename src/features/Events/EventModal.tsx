@@ -96,6 +96,12 @@ function EventPopover({
       displayName: resource.cn,
     }));
   }, [event?.attendee]);
+  const eventAttendees = useMemo(
+    () =>
+      event?.attendee?.filter((attendee) => attendee.cutype !== "RESOURCE") ??
+      [],
+    [event?.attendee]
+  );
 
   const [showMore, setShowMore] = useState(false);
   const [showDescription, setShowDescription] = useState(
@@ -150,11 +156,8 @@ function EventPopover({
   });
 
   const [attendees, setAttendees] = useState<userAttendee[]>(
-    event?.attendee
-      ? event.attendee.filter(
-          (a) =>
-            a.cal_address !== organizer?.cal_address && a.cutype !== "RESOURCE"
-        )
+    eventAttendees
+      ? eventAttendees.filter((a) => a.cal_address !== organizer?.cal_address)
       : []
   );
   const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? "");
@@ -482,11 +485,9 @@ function EventPopover({
       setRepetition(event.repetition ?? ({} as RepetitionObject));
       setShowRepeat(event.repetition?.freq ? true : false);
       setAttendees(
-        event.attendee
-          ? event.attendee.filter(
-              (a) =>
-                a.cal_address !== organizer?.cal_address &&
-                a.cutype !== "RESOURCE"
+        eventAttendees
+          ? eventAttendees.filter(
+              (a) => a.cal_address !== organizer?.cal_address
             )
           : []
       );
@@ -512,13 +513,10 @@ function EventPopover({
         }
       }
       setSelectedResources(resources ?? []);
-    } else if (event && event.attendee && event.attendee.length > 0) {
+    } else if (event && event.attendee && event.attendee?.length > 0) {
       // Handle tempEvent case (no uid but has attendees from temp calendar search)
       setAttendees(
-        event.attendee.filter(
-          (a) =>
-            a.cal_address !== organizer?.cal_address && a.cutype !== "RESOURCE"
-        )
+        eventAttendees.filter((a) => a.cal_address !== organizer?.cal_address)
       );
       setSelectedResources(resources ?? []);
     }
@@ -528,6 +526,7 @@ function EventPopover({
     resolvedCalendarTimezone,
     defaultCalendarId,
     resources,
+    eventAttendees,
   ]);
 
   // Reset state when creating new event (event is empty object or undefined)
@@ -667,7 +666,6 @@ function EventPopover({
     resetAllStateToDefault();
     setStart("");
     setEnd("");
-    setSelectedResources([]);
     shouldSyncFromRangeRef.current = true; // Reset for next time
     isCalendarIdUserSelectedRef.current = false; // Reset so next open gets fresh default
   };

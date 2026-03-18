@@ -32,12 +32,6 @@ export const addCalendarResourceAsync = createAsyncThunk<
       ?.replace(".json", "")
       ?.split("/")[0];
 
-    if (!resourceId) {
-      return rejectWithValue({
-        message: "Unable to extract resource ID from calendar link",
-      } as RejectedError);
-    }
-
     let owner: OpenPaasUserData = {
       firstname: "",
       lastname: cal.cal["dav:name"] ?? "",
@@ -46,11 +40,18 @@ export const addCalendarResourceAsync = createAsyncThunk<
     };
     try {
       await addSharedCalendar(userId, calId, cal);
-      const resource = await getResourceDetails(resourceId!);
-      owner = {
-        ...(await getUserDetails(resource.creator)),
-        resource: true,
-      };
+
+      if (resourceId) {
+        try {
+          const resource = await getResourceDetails(resourceId!);
+          owner = {
+            ...(await getUserDetails(resource.creator)),
+            resource: true,
+          };
+        } catch (e) {
+          toRejectedError(e);
+        }
+      }
 
       return {
         calId: cal.cal._links.self?.href

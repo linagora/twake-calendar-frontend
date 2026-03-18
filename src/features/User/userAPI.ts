@@ -44,9 +44,7 @@ export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
 }
 
 export async function getResourceDetails(id: string): Promise<ResourceData> {
-  const resource = await api
-    .get(`api/resources/${encodeURIComponent(id)}`)
-    .json();
+  const resource = await api.get(`api/resources/${id}`).json();
   return resource as ResourceData;
 }
 

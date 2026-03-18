@@ -1,13 +1,15 @@
 import { userAttendee } from "./attendee";
 
-export function createAttendee(options?: {
+export interface AttendeeOptions {
   cal_address?: string;
   cn?: string;
   role?: userAttendee["role"];
   partstat?: userAttendee["partstat"];
   rsvp?: userAttendee["rsvp"];
   cutype?: userAttendee["cutype"];
-}): userAttendee {
+}
+
+export function createAttendee(options?: AttendeeOptions): userAttendee {
   return {
     cal_address: options?.cal_address ?? "",
     cn: options?.cn ?? "",

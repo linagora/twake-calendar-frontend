@@ -173,5 +173,7 @@ export function restoreFormDataFromTemp(
   ) {
     setters.setHasEndDateChanged(tempData.hasEndDateChanged);
   }
-  setters.setSelectedResources?.(tempData.resources ?? []);
+  if (tempData.resources !== undefined) {
+    setters.setSelectedResources?.(tempData.resources);
+  }
 }
