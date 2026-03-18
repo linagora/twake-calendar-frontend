@@ -126,10 +126,25 @@ const CalendarSlice = createSlice({
           }>
         ) => {
           state.pending = false;
-          state.list = action.payload.importedCalendars;
           state.error = action.payload.errors.length
             ? action.payload.errors
             : null;
+
+          Object.entries(action.payload.importedCalendars).forEach(
+            ([id, cal]) => {
+              state.list[id] = {
+                ...cal,
+                events: state.list[id]?.events || {},
+              };
+            }
+          );
+
+          // Remove calendars that no longer exist
+          Object.keys(state.list).forEach((id) => {
+            if (!action.payload.importedCalendars[id]) {
+              delete state.list[id];
+            }
+          });
         }
       )
       .addCase(
