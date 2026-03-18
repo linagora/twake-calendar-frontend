@@ -11,7 +11,10 @@ import {
 import { getEvent } from "@/features/Events/EventApi";
 import { CalendarEvent } from "@/features/Events/EventsTypes";
 import { updateAttendeesAfterTimeChange } from "@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange";
-import { createAttendee } from "@/features/User/models/attendee.mapper";
+import {
+  AttendeeOptions,
+  createAttendee,
+} from "@/features/User/models/attendee.mapper";
 import { getDeltaInMilliseconds } from "@/utils/dateUtils";
 import {
   CalendarApi,
@@ -70,13 +73,18 @@ export const createEventHandlers = (props: EventHandlersProps) => {
         end: selectInfo?.end
           ? formatLocalDateTime(selectInfo?.end, timezone)
           : "",
-        attendee: tempUsers.map((user) =>
-          createAttendee({
+        attendee: tempUsers.map((user) => {
+          const attendeeOption: AttendeeOptions = {
             cal_address: user.email,
             cn: user.displayName,
             rsvp: "TRUE",
-          })
-        ),
+          };
+
+          if (user.objectType === "resource") {
+            attendeeOption.cutype = "RESOURCE";
+          }
+          return createAttendee(attendeeOption);
+        }),
       } as CalendarEvent;
 
       setTempEvent(newEvent);

@@ -111,8 +111,20 @@ describe("addCalendarResourceAsync thunk", () => {
 
     expect(mockedToRejectedError).toHaveBeenCalledWith(errorDetails);
 
-    expect(result.type).toBe("calendars/addCalendarResource/rejected");
-    expect(result.payload).toEqual(mockRejectedErrorResult);
+    expect(result.type).toBe("calendars/addCalendarResource/fulfilled");
+    expect(result.payload).toEqual({
+      calId: "res-456/cal-123",
+      color: { background: "#000000", foreground: "#FFFFFF" },
+      desc: "A meeting room",
+      link: "/calendars/user-123/cal-123.json",
+      name: "Resource Room A",
+      owner: {
+        firstname: "",
+        lastname: "Resource Room A",
+        emails: [],
+        resource: true,
+      },
+    });
   });
 
   it("should handle error if addSharedCalendar fails", async () => {
