@@ -83,7 +83,8 @@
       "import": "Nhập"
     },
     "settings": {
-      "calendarName": "Tên lịch"
+      "calendarName": "Tên lịch",
+      "resourceName": "Tên tài nguyên"
     },
     "access": {
       "grantAccessRights": "Cấp quyền truy cập",

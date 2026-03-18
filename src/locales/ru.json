@@ -85,7 +85,8 @@
       "import": "Импорт"
     },
     "settings": {
-      "calendarName": "Название календаря"
+      "calendarName": "Название календаря",
+      "resourceName": "Название ресурса"
     },
     "access": {
       "grantAccessRights": "Предоставить права доступа",

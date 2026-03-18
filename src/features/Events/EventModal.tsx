@@ -666,6 +666,7 @@ function EventPopover({
     resetAllStateToDefault();
     setStart("");
     setEnd("");
+    setSelectedResources([]);
     shouldSyncFromRangeRef.current = true; // Reset for next time
     isCalendarIdUserSelectedRef.current = false; // Reset so next open gets fresh default
   };

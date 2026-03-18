@@ -83,7 +83,8 @@
       "import": "Import"
     },
     "settings": {
-      "calendarName": "Calendar name"
+      "calendarName": "Calendar name",
+      "resourceName": "Resource name"
     },
     "access": {
       "grantAccessRights": "Grant Access rights",
