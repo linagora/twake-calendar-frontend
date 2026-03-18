@@ -19,6 +19,7 @@ export function useInitializeApp() {
   useEffect(() => {
     if (hasInitiatedRef.current) return;
     if (userData.userData && !calendars.pending) return;
+    if (window.location.pathname === "/callback") return;
     hasInitiatedRef.current = true;
 
     const initiateLogin = async () => {
@@ -33,12 +34,9 @@ export function useInitializeApp() {
         dispatch(setAppLoading(true));
         dispatch(setTokens(savedToken));
         dispatch(setUserData(savedUser));
-        try {
-          await dispatch(getOpenPaasUserDataAsync());
-          await dispatch(getCalendarsListAsync());
-        } finally {
-          dispatch(setAppLoading(false));
-        }
+        await dispatch(getOpenPaasUserDataAsync());
+        await dispatch(getCalendarsListAsync());
+
         return;
       }
 
