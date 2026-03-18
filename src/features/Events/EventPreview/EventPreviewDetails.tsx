@@ -133,9 +133,10 @@ export function EventPreviewDetails({
       )}
 
       {/* Resource */}
-      {resources && (
+      {resources?.length > 0 && (
         <InfoRow
           alignItems="flex-start"
+          flexWrap="wrap"
           icon={
             <Box sx={infoIconSx}>
               <LayersOutlinedIcon />
