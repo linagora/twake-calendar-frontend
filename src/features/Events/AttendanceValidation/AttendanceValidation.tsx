@@ -4,6 +4,7 @@ import { Box, Typography } from "@linagora/twake-mui";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ContextualizedEvent } from "../EventsTypes";
+import { EventCounterModal } from "./EventCounterModal";
 import { RSVPButton } from "./RSVPButton";
 
 interface AttendanceValidationProps {
@@ -25,6 +26,7 @@ export function AttendanceValidation({
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingValue, setLoadingValue] = useState<PartStat | null>(null);
+  const [openCounterModal, setOpenCounterModal] = useState(false);
 
   const hasNoAttendeesOrOrganizer =
     !(contextualizedEvent.event?.attendee?.length > 0) &&
@@ -75,6 +77,11 @@ export function AttendanceValidation({
           {t("eventPreview.proposeNewTime")}
         </Typography>
       )}
+      <EventCounterModal
+        open={openCounterModal}
+        setOpen={setOpenCounterModal}
+        contextualizedEvent={contextualizedEvent}
+      />
     </>
   );
 }
