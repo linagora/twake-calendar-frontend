@@ -88,20 +88,28 @@ export function EventPreviewDetails({
             </Box>
           }
           content={
-            <Button
-              variant="contained"
-              size="medium"
-              onClick={() =>
-                window.open(
-                  event.x_openpass_videoconference,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              sx={{ borderRadius: "4px" }}
+            <a
+              href={event.x_openpass_videoconference}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none" }}
+              onClick={(e) => e.preventDefault()}
             >
-              {t("eventPreview.joinVideo")}
-            </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                onClick={() =>
+                  window.open(
+                    event.x_openpass_videoconference,
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+                sx={{ borderRadius: "4px" }}
+              >
+                {t("eventPreview.joinVideo")}
+              </Button>
+            </a>
           }
         />
       )}
