@@ -43,7 +43,7 @@ export const addCalendarResourceAsync = createAsyncThunk<
 
       if (resourceId) {
         try {
-          const resource = await getResourceDetails(resourceId!);
+          const resource = await getResourceDetails(resourceId);
           owner = {
             ...(await getUserDetails(resource.creator)),
             resource: true,

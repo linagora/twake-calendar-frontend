@@ -14,7 +14,7 @@ import {
 } from "@linagora/twake-mui";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { ErrorSnackbar } from "../Error/ErrorSnackbar";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
@@ -37,6 +37,11 @@ export function AccessTab({
   const { t } = useI18n();
 
   const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
+
+  const isResource = useMemo(
+    () => calendar?.owner?.resource,
+    [calendar?.owner?.resource]
+  );
 
   const [secretLink, setSecretLink] = useState("");
   const [open, setOpen] = useState(false);
@@ -99,7 +104,7 @@ export function AccessTab({
         onInvitesLoaded={onInvitesLoaded}
       />
 
-      {!!window.DAV_BASE_URL && (
+      {!!window.DAV_BASE_URL && !isResource && (
         <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
           <Box mt={2}>
             <TextField

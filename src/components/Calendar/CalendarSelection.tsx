@@ -219,8 +219,9 @@ export default function CalendarSelection({
           }}
           showAddButton
           handleToggle={handleCalendarToggle}
-          setOpen={(_) => {
-            // TO DO: Implement open resource selection
+          setOpen={(id: string) => {
+            setAnchorElCal(document.body);
+            setSelectedCalId(id);
           }}
           defaultExpanded
           hideOwner={true}
