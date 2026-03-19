@@ -4,5 +4,4 @@ export const defaultColors = [
   { light: "#F5CFD0", dark: "#BE0103" },
   { light: "#AFCBEF", dark: "#0654B1" },
   { light: "#E8E4F8", dark: "#6B4ECC" },
-  { light: "#C8F0F0", dark: "#0A8F8F" },
 ];
