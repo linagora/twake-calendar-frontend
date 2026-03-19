@@ -72,6 +72,7 @@ export function TimezoneAutocomplete({
         <TextField
           {...params}
           placeholder={placeholder}
+          onFocus={(e) => e.target.select()}
           variant="outlined"
           autoComplete="off"
           inputRef={inputRef}
