@@ -22,6 +22,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Box, Button, radius } from "@linagora/twake-mui";
 import AddIcon from "@mui/icons-material/Add";
+import moment from "moment-timezone";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { useCalendarDataLoader } from "../../features/Calendars/useCalendarLoader";
@@ -467,6 +468,7 @@ export default function CalendarApp({
             dayCellContent={(arg) => {
               const month = arg.date.toLocaleDateString(t("locale"), {
                 month: "short",
+                timeZone: timezone,
               });
               if (arg.view.type === "dayGridMonth") {
                 return (
@@ -523,18 +525,23 @@ export default function CalendarApp({
               }, 100);
             }}
             dayHeaderContent={(arg) => {
-              const date = arg.date.getDate();
-              const weekDay = arg.date
-                .toLocaleDateString(t("locale"), { weekday: "short" })
+              const m = moment.tz(arg.date, timezone);
+
+              const date = m.date();
+              const weekDay = m
+                .toDate()
+                .toLocaleDateString(t("locale"), {
+                  weekday: "short",
+                  timeZone: timezone,
+                })
                 .toUpperCase();
+
               return (
                 <div className="fc-daygrid-day-top">
                   <small>{weekDay}</small>
                   {arg.view.type !== "dayGridMonth" && (
                     <span
-                      className={`fc-daygrid-day-number ${
-                        arg.isToday ? "current-date" : ""
-                      }`}
+                      className={`fc-daygrid-day-number ${arg.isToday ? "current-date" : ""}`}
                     >
                       {date}
                     </span>
