@@ -123,8 +123,7 @@ function CalendarPopover({
         })
       ).unwrap();
     }
-
-    if (visibility !== calendar?.visibility) {
+    if (canManageInvites && visibility !== calendar?.visibility) {
       await dispatch(
         patchACLCalendarAsync({
           calId,
