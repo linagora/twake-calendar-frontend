@@ -1,16 +1,15 @@
 import { addCalendarResourceAsync } from "@/features/Calendars/api/addCalendarResourceAsync";
 import { addSharedCalendar } from "@/features/Calendars/CalendarApi";
-import { getResourceDetails, getUserDetails } from "@/features/User/userAPI";
+import { fetchOwnerOfResource } from "@/features/Calendars/services/helpers";
 import { toRejectedError } from "@/utils/errorUtils";
 import { configureStore } from "@reduxjs/toolkit";
 
 jest.mock("@/features/Calendars/CalendarApi");
-jest.mock("@/features/User/userAPI");
+jest.mock("@/features/Calendars/services/helpers");
 jest.mock("@/utils/errorUtils");
 
 const mockedAddSharedCalendar = addSharedCalendar as jest.Mock;
-const mockedGetResourceDetails = getResourceDetails as jest.Mock;
-const mockedGetUserDetails = getUserDetails as jest.Mock;
+const mockedFetchOwnerOfResource = fetchOwnerOfResource as jest.Mock;
 const mockedToRejectedError = toRejectedError as jest.Mock;
 
 describe("addCalendarResourceAsync thunk", () => {
@@ -55,8 +54,7 @@ describe("addCalendarResourceAsync thunk", () => {
   };
 
   it("should add shared calendar, fetch resource details, map userData", async () => {
-    mockedGetResourceDetails.mockResolvedValueOnce(mockResolvedResourceData);
-    mockedGetUserDetails.mockResolvedValueOnce({
+    mockedFetchOwnerOfResource.mockResolvedValueOnce({
       firstname: "Creator",
       lastname: "User",
       emails: ["creator@example.com"],
@@ -72,8 +70,7 @@ describe("addCalendarResourceAsync thunk", () => {
       mockPayload.calId,
       mockPayload.cal
     );
-    expect(mockedGetResourceDetails).toHaveBeenCalledWith("res-456");
-    expect(mockedGetUserDetails).toHaveBeenCalledWith("user-789");
+    expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith("res-456");
 
     expect(result.type).toBe("calendars/addCalendarResource/fulfilled");
     expect(result.payload).toEqual({
@@ -94,9 +91,12 @@ describe("addCalendarResourceAsync thunk", () => {
   it("should fallback to name if resource details fetch fails", async () => {
     mockedAddSharedCalendar.mockResolvedValueOnce({});
     const errorDetails = new Error("Fetch failed");
-    mockedGetResourceDetails.mockRejectedValueOnce(errorDetails);
-    const mockRejectedErrorResult = { message: "Fetch failed" };
-    mockedToRejectedError.mockReturnValueOnce(mockRejectedErrorResult);
+    mockedFetchOwnerOfResource.mockRejectedValueOnce(errorDetails);
+
+    // Silence expected console error in tests
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const result = await addCalendarResourceAsync(
       mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
@@ -107,9 +107,9 @@ describe("addCalendarResourceAsync thunk", () => {
       mockPayload.calId,
       mockPayload.cal
     );
-    expect(mockedGetResourceDetails).toHaveBeenCalledWith("res-456");
+    expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith("res-456");
 
-    expect(mockedToRejectedError).toHaveBeenCalledWith(errorDetails);
+    consoleSpy.mockRestore();
 
     expect(result.type).toBe("calendars/addCalendarResource/fulfilled");
     expect(result.payload).toEqual({
@@ -142,7 +142,7 @@ describe("addCalendarResourceAsync thunk", () => {
       mockPayload.calId,
       mockPayload.cal
     );
-    expect(mockedGetResourceDetails).not.toHaveBeenCalled();
+    expect(mockedFetchOwnerOfResource).not.toHaveBeenCalled();
 
     expect(mockedToRejectedError).toHaveBeenCalledWith(errorAdd);
 

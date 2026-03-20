@@ -1,11 +1,11 @@
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
-import { getResourceDetails, getUserDetails } from "@/features/User/userAPI";
 import { toRejectedError } from "@/utils/errorUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { addSharedCalendar } from "../CalendarApi";
 import { CalendarInput } from "../types/CalendarData";
 import { RejectedError } from "../types/RejectedError";
 import { User } from "@/components/Attendees/PeopleSearch";
+import { fetchOwnerOfResource } from "../services/helpers";
 
 export const addCalendarResourceAsync = createAsyncThunk<
   {
@@ -43,13 +43,12 @@ export const addCalendarResourceAsync = createAsyncThunk<
 
       if (resourceId) {
         try {
-          const resource = await getResourceDetails(resourceId);
           owner = {
-            ...(await getUserDetails(resource.creator)),
+            ...(await fetchOwnerOfResource(resourceId)),
             resource: true,
           };
         } catch (e) {
-          toRejectedError(e);
+          console.error("Error while fetching owner of resource: ", e);
         }
       }
 

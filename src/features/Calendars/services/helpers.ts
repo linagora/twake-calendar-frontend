@@ -1,15 +1,18 @@
 import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
 import { getResourceDetails, getUserDetails } from "@/features/User/userAPI";
 
-const fetchOwnerOfResource = async (
-  ownerId: string
+export const fetchOwnerOfResource = async (
+  resourceId: string
 ): Promise<OpenPaasUserData> => {
   try {
-    const data = await getResourceDetails(ownerId);
+    const data = await getResourceDetails(resourceId);
     const ownerData = await getUserDetails(data.creator);
-    return ownerData;
+    return {
+      ...ownerData,
+      administrators: data.administrators,
+    };
   } catch (error) {
-    console.error(`Failed to fetch resource details for ${ownerId}:`, error);
+    console.error(`Failed to fetch resource details for ${resourceId}:`, error);
     throw error;
   }
 };

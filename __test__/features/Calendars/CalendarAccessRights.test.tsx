@@ -87,7 +87,7 @@ const baseCalendar: Calendar = {
   events: {},
   invite: [],
   owner: { emails: ["user1@example.com"] },
-  access: { write: true },
+  access: { write: true } as any,
   delegated: true,
 };
 
@@ -260,6 +260,82 @@ describe("CalendarAccessRights", () => {
     );
 
     expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument();
+  });
+
+  it("displays the calendar owner information", () => {
+    renderWithProviders(
+      <CalendarAccessRights
+        calendar={baseCalendar}
+        value={[]}
+        onChange={mockOnChange}
+        onInvitesLoaded={mockOnInvitesLoaded}
+      />,
+      { ...userState }
+    );
+
+    expect(screen.getAllByText("user1@example.com").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText("calendarPopover.access.owner")
+    ).toBeInTheDocument();
+  });
+
+  it("fetches and displays resource administrators for resource calendars", async () => {
+    const resourceCalendar: any = {
+      ...baseCalendar,
+      owner: {
+        _id: "resource1",
+        resource: true,
+        emails: ["resource1@example.com"],
+        administrators: [
+          { id: "admin1" },
+          { id: "admin2" },
+          { id: "resource1" }, // Owner shouldn't be loaded as an admin
+        ],
+      },
+    };
+
+    (getUserDetails as jest.Mock).mockImplementation((id: string) => {
+      if (id === "admin1") {
+        return Promise.resolve({
+          preferredEmail: "admin1@example.com",
+          firstname: "Admin",
+          lastname: "One",
+        });
+      }
+      if (id === "admin2") {
+        return Promise.resolve({
+          preferredEmail: "admin2@example.com",
+          firstname: "Admin",
+          lastname: "Two",
+        });
+      }
+      return Promise.resolve(null);
+    });
+
+    renderWithProviders(
+      <CalendarAccessRights
+        calendar={resourceCalendar}
+        value={[]}
+        onChange={mockOnChange}
+        onInvitesLoaded={mockOnInvitesLoaded}
+      />,
+      { ...userState }
+    );
+
+    await waitFor(() => {
+      expect(getUserDetails).toHaveBeenCalledWith("admin1");
+      expect(getUserDetails).toHaveBeenCalledWith("admin2");
+    });
+
+    expect(getUserDetails).not.toHaveBeenCalledWith("resource1");
+
+    expect(await screen.findByText("Admin One")).toBeInTheDocument();
+    expect(screen.getByText("admin1@example.com")).toBeInTheDocument();
+    expect(screen.getByText("Admin Two")).toBeInTheDocument();
+    expect(screen.getByText("admin2@example.com")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("calendarPopover.access.administrator")
+    ).toHaveLength(2);
   });
 });
 

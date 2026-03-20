@@ -4,12 +4,18 @@ export interface OpenPaasUserData {
   firstname?: string;
   lastname?: string;
   id?: string;
+  _id?: string;
   preferredEmail?: string;
   configurations?: {
     modules?: ModuleConfiguration[];
   };
   emails: string[];
   resource?: boolean;
+  administrators?: {
+    _id: string;
+    id: string;
+    objectType: string;
+  }[];
 }
 
 export function ToUserData(

@@ -17,11 +17,12 @@ import {
 } from "@linagora/twake-mui";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
 import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 import { stringAvatar } from "../Event/utils/eventUtils";
+import { ResourceAdmin } from "./ResourceAdmins";
 
 export interface UserWithAccess extends User {
   accessRight: AccessRight;
@@ -32,6 +33,11 @@ interface CalendarAccessRightsProps {
   value: UserWithAccess[];
   onChange: (users: UserWithAccess[]) => void;
   onInvitesLoaded: (users: UserWithAccess[]) => void;
+}
+
+interface UserInCalendar {
+  id: string;
+  access: AccessRight;
 }
 
 export function CalendarAccessRights({
@@ -57,6 +63,8 @@ export function CalendarAccessRights({
   const [searchWidth, setSearchWidth] = useState<number | undefined>(undefined);
   const [accessRight, setAccessRight] = useState<AccessRight>(2);
   const [inviteLoading, setInvitesLoading] = useState(false);
+  const [resourceAdmins, setResourceAdmins] = useState<UserWithAccess[]>([]);
+  const [adminLoading, setAdminLoading] = useState(false);
 
   const currentUsersRef = useRef<UserWithAccess[]>(usersWithAccess);
   useEffect(() => {
@@ -74,6 +82,39 @@ export function CalendarAccessRights({
     return () => observer.disconnect();
   }, []);
 
+  const handleLoadUsers = useCallback(
+    async (usersInCal: UserInCalendar[], cancelled: boolean) => {
+      const results = await Promise.allSettled(
+        usersInCal.map(async (user) => {
+          const details = await getUserDetails(user.id);
+          const email = details?.preferredEmail ?? details?.emails?.[0] ?? "";
+          return {
+            openpaasId: user.id,
+            displayName:
+              [details?.firstname, details?.lastname]
+                .filter(Boolean)
+                .join(" ")
+                .trim() || email,
+            email,
+            accessRight: user.access as AccessRight,
+          } satisfies UserWithAccess;
+        })
+      );
+
+      if (cancelled) {
+        return [] as UserWithAccess[];
+      }
+
+      const loaded: UserWithAccess[] = results
+        .filter((r) => r.status === "fulfilled")
+        .map((r) => (r as PromiseFulfilledResult<UserWithAccess>).value)
+        .filter(Boolean) as UserWithAccess[];
+
+      return loaded;
+    },
+    []
+  );
+
   useEffect(() => {
     if (!calendar.invite?.length) return;
 
@@ -82,33 +123,19 @@ export function CalendarAccessRights({
     async function loadInvitedUsers() {
       setInvitesLoading(true);
       try {
-        const loaded: UserWithAccess[] = (
-          await Promise.all(
-            calendar.invite.map(async (invite) => {
-              const principalId = invite.principal.split("/").pop();
-              if (!principalId) return null;
-              try {
-                const details = await getUserDetails(principalId);
-                const email =
-                  details?.preferredEmail ?? details?.emails?.[0] ?? "";
-                return {
-                  openpaasId: principalId,
-                  displayName:
-                    [details?.firstname, details?.lastname]
-                      .filter(Boolean)
-                      .join(" ")
-                      .trim() || email,
-                  email,
-                  accessRight: invite.access as AccessRight,
-                } satisfies UserWithAccess;
-              } catch {
-                return null;
-              }
-            })
-          )
-        ).filter((u) => u !== null && !!u.email);
+        const usersInCal = (calendar.invite
+          ?.map((invite) => {
+            const principalId = invite.principal.split("/").pop();
+            if (!principalId) return null;
 
-        if (cancelled) return;
+            return {
+              id: principalId,
+              access: invite.access,
+            };
+          })
+          ?.filter((invite) => !!invite) || []) satisfies UserInCalendar[];
+
+        const loaded = await handleLoadUsers(usersInCal, cancelled);
 
         const loadedIds = new Set(loaded.map((u) => normalizeEmail(u.email)));
         const manuallyAdded = currentUsersRef.current.filter(
@@ -127,7 +154,42 @@ export function CalendarAccessRights({
     return () => {
       cancelled = true;
     };
-  }, [calendar.invite, onChange, onInvitesLoaded]);
+  }, [calendar.invite, handleLoadUsers, onChange, onInvitesLoaded]);
+
+  useEffect(() => {
+    const isResource = calendar.owner.resource;
+    const resourceAdmins = calendar.owner.administrators || [];
+    if (!isResource || !resourceAdmins?.length) return;
+
+    let cancelled = false;
+
+    async function loadAdmins() {
+      try {
+        setAdminLoading(true);
+        const resourceAdminsWithoutOwner = resourceAdmins
+          .filter((admin) => admin.id !== calendar.owner._id)
+          .map((admin) => ({
+            id: admin.id,
+            access: 5, // ADMIN
+          })) satisfies UserInCalendar[];
+        const admins = await handleLoadUsers(
+          resourceAdminsWithoutOwner,
+          cancelled
+        );
+
+        setResourceAdmins(admins);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!cancelled) setAdminLoading(false);
+      }
+    }
+
+    loadAdmins();
+    return () => {
+      cancelled = true;
+    };
+  }, [calendar.owner, handleLoadUsers, setResourceAdmins]);
 
   const handleUserSelect = (_event: unknown, users: User[]) => {
     const updated: UserWithAccess[] = users.map((user) => {
@@ -309,6 +371,15 @@ export function CalendarAccessRights({
             </Typography>
           </Box>
         </Box>
+        {adminLoading ? (
+          <Box mt={2} display="flex" justifyContent="center">
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          resourceAdmins.map((admin) => (
+            <ResourceAdmin key={admin.email} admin={admin} />
+          ))
+        )}
         {inviteLoading ? (
           <Box mt={2} display="flex" justifyContent="center">
             <CircularProgress size={24} />
