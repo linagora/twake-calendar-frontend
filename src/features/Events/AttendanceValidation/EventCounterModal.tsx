@@ -123,7 +123,9 @@ export function EventCounterModal({
         proposedStart: contextualizedEvent.event.allday
           ? startDate
           : `${startDate}T${startTime}`,
-        proposedEnd: `${endDate}T${endTime}`,
+        proposedEnd: contextualizedEvent.event.allday
+          ? endDate
+          : `${endDate}T${endTime}`,
         message,
       });
       setOpen(false);
