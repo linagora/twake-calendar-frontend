@@ -13,12 +13,15 @@ export function EventTimeSubtitle({
   t: (k: string, p?: string | object | undefined) => string;
   timezone: string;
 }) {
+  const formattedEnd = event.end
+    ? formatEnd(event.start, event.end, t, timezone, event.allday)
+    : null;
+
   return (
     <Typography color="text.secondaryContainer">
       {formatDate(event.start, t, timezone, event.allday)}
-      {event.end &&
-        formatEnd(event.start, event.end, t, timezone, event.allday) &&
-        ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
+      {formattedEnd &&
+        ` – ${formattedEnd} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
     </Typography>
   );
 }

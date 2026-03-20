@@ -21,6 +21,7 @@ export function EventCounterModal({
   contextualizedEvent: ContextualizedEvent;
 }) {
   const { t } = useI18n();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allday = contextualizedEvent.event.allday ?? false;
 
@@ -80,18 +81,24 @@ export function EventCounterModal({
 
   const validate = (): boolean => {
     if (!startDate || !endDate) {
-      setValidation({ errors: { dateTime: t("validation.required") } });
+      setValidation({
+        errors: { dateTime: t("event.validation.startRequired") },
+      });
       return false;
     }
     if (!allday && (!startTime || !endTime)) {
-      setValidation({ errors: { dateTime: t("validation.required") } });
+      setValidation({
+        errors: { dateTime: t("event.validation.startRequired") },
+      });
       return false;
     }
     if (
       endDate < startDate ||
       (!allday && endDate === startDate && endTime <= startTime)
     ) {
-      setValidation({ errors: { dateTime: t("validation.endBeforeStart") } });
+      setValidation({
+        errors: { dateTime: t("event.validation.endAfterStart") },
+      });
       return false;
     }
     setValidation({ errors: { dateTime: "" } });
@@ -104,17 +111,27 @@ export function EventCounterModal({
       !contextualizedEvent.currentUserAttendee?.cal_address ||
       !contextualizedEvent.event.organizer?.cal_address
     ) {
-      throw new Error("Something went wrong with the emails");
+      setValidation({ errors: { dateTime: t("error.unknown") } });
+      return;
     }
-    await postCounterProposal({
-      event: contextualizedEvent.event,
-      senderEmail: contextualizedEvent.currentUserAttendee.cal_address,
-      recipientEmail: contextualizedEvent.event.organizer.cal_address,
-      proposedStart: `${startDate}T${startTime}`,
-      proposedEnd: `${endDate}T${endTime}`,
-      message,
-    });
-    setOpen(false);
+    setIsSubmitting(true);
+    try {
+      await postCounterProposal({
+        event: contextualizedEvent.event,
+        senderEmail: contextualizedEvent.currentUserAttendee.cal_address,
+        recipientEmail: contextualizedEvent.event.organizer.cal_address,
+        proposedStart: contextualizedEvent.event.allday
+          ? startDate
+          : `${startDate}T${startTime}`,
+        proposedEnd: `${endDate}T${endTime}`,
+        message,
+      });
+      setOpen(false);
+    } catch (error) {
+      setValidation({ errors: { dateTime: t("error.unknown") } });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -200,7 +217,12 @@ export function EventCounterModal({
         <Button variant="text" onClick={() => setOpen(false)}>
           {t("common.cancel")}
         </Button>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
           {t("eventPreview.sendProposal")}
         </Button>
       </Box>
