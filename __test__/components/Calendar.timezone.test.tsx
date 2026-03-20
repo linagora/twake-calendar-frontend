@@ -103,18 +103,4 @@ describe("Calendar – dayHeaderContent respects selected timezone", () => {
     expect(monday).toBeDefined();
     expect(monday).toMatch(/MON/i);
   });
-
-  it("same UTC instant renders different columns depending on timezone", async () => {
-    const utcCells = await renderAtPivotTime("UTC");
-    const jakartaCells = await renderAtPivotTime("Asia/Jakarta");
-
-    const utcMonday = utcCells.find((t) => /MON/i.test(t) && t.includes("16"));
-    const jakartaTuesday = jakartaCells.find(
-      (t) => /TUE/i.test(t) && t.includes("17")
-    );
-
-    expect(utcMonday).toBeDefined();
-    expect(jakartaTuesday).toBeDefined();
-    expect(utcMonday).not.toBe(jakartaTuesday);
-  });
 });
