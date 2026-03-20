@@ -282,6 +282,11 @@
       "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
+    "proposeNewTime": "Предложить новое время",
+    "currentEventTime": "Текущее время события",
+    "yourProposal": "Ваше предложение",
+    "optionalMessage": "Добавить необязательное сообщение организатору",
+    "sendProposal": "Отправить предложение",
     "ACCEPTED": "Да",
     "TENTATIVE": "Возможно",
     "DECLINED": "Нет",
