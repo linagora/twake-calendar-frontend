@@ -1,4 +1,5 @@
 import { api } from "@/utils/apiUtils";
+import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
 import { TIMEZONES } from "@/utils/timezone-data";
 import ICAL from "ical.js";
 import { CalendarEvent } from "../EventsTypes";
@@ -61,7 +62,7 @@ export async function postCounterProposal({
       ical: counterICS,
       sender: senderEmail,
       recipient: recipientEmail,
-      uid: event.uid,
+      uid: extractEventBaseUuid(event.uid),
       sequence: counterEvent.sequence,
       method: "COUNTER",
     }),
