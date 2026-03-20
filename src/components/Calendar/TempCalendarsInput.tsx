@@ -3,11 +3,11 @@ import { removeTempCal } from "@/features/Calendars/CalendarSlice";
 import { Calendar } from "@/features/Calendars/CalendarTypes";
 import { getTempCalendarsListAsync } from "@/features/Calendars/services";
 import { setView } from "@/features/Settings/SettingsSlice";
-import { TextField, useTheme } from "@linagora/twake-mui";
+import { defaultColors } from "@/utils/defaultColors";
+import { TextField } from "@linagora/twake-mui";
 import { useRef } from "react";
 import { useI18n } from "twake-i18n";
 import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { getAccessiblePair } from "@/utils/getAccessiblePair";
 
 const requestControllers = new Map<string, AbortController>();
 
@@ -23,11 +23,12 @@ export function TempCalendarsInput({
   const dispatch = useAppDispatch();
   const tempcalendars =
     useAppSelector((state) => state.calendars.templist) ?? {};
-  const theme = useTheme();
   const { t } = useI18n();
 
   const prevUsersRef = useRef<User[]>([]);
-  const userColorsRef = useRef(new Map<string, string>());
+  const userColorsRef = useRef(
+    new Map<string, { light: string; dark: string }>()
+  );
 
   const handleUserChange = async (_: React.SyntheticEvent, users: User[]) => {
     setTempUsers(users);
@@ -50,16 +51,14 @@ export function TempCalendarsInput({
         requestControllers.set(user.email, controller);
 
         if (!userColorsRef.current.has(user.email)) {
-          const existingColors = Array.from(userColorsRef.current.values());
-          const lightColor = generateDistinctColor(existingColors);
-          userColorsRef.current.set(user.email, lightColor);
+          const usedLights = Array.from(userColorsRef.current.values()).map(
+            (c) => c.light
+          );
+          const colorPair = generateDistinctColor(usedLights);
+          userColorsRef.current.set(user.email, colorPair);
         }
-        const lightColor = userColorsRef.current.get(user.email)!;
 
-        user.color = {
-          light: lightColor,
-          dark: getAccessiblePair(lightColor, theme),
-        };
+        user.color = userColorsRef.current.get(user.email)!;
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );
@@ -124,95 +123,34 @@ function buildEmailToCalendarMap(calRecord: Record<string, Calendar>) {
   return map;
 }
 
-function extractHSL(hslColor: string): { h: number; s: number; l: number } {
-  const match = hslColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-  if (!match) return { h: 0, s: 70, l: 50 };
+function shiftLightness(hex: string, amount: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  const clamp = (v: number) => Math.max(0, Math.min(255, v));
+  const toHex = (v: number) =>
+    clamp(v + amount)
+      .toString(16)
+      .padStart(2, "0");
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function generateDistinctColor(usedLights: string[]): {
+  light: string;
+  dark: string;
+} {
+  for (const color of defaultColors) {
+    if (!usedLights.includes(color.light)) return color;
+  }
+
+  const cycle = usedLights.length % defaultColors.length;
+  const round = Math.floor(usedLights.length / defaultColors.length);
+  const base = defaultColors[cycle];
+
   return {
-    h: parseInt(match[1], 10),
-    s: parseInt(match[2], 10),
-    l: parseInt(match[3], 10),
+    light: shiftLightness(base.light, round * 12),
+    dark: shiftLightness(base.dark, -(round * 10)),
   };
-}
-
-function getHueDistance(hue1: number, hue2: number): number {
-  const diff = Math.abs(hue1 - hue2);
-  return Math.min(diff, 360 - diff);
-}
-
-function getColorDistance(color1: string, color2: string): number {
-  const hsl1 = extractHSL(color1);
-  const hsl2 = extractHSL(color2);
-
-  const hueDist = getHueDistance(hsl1.h, hsl2.h) / 180;
-  const satDist = Math.abs(hsl1.s - hsl2.s) / 100;
-  const lightDist = Math.abs(hsl1.l - hsl2.l) / 100;
-
-  // Weighted distance: hue is most important, then saturation, then lightness
-  return Math.sqrt(
-    hueDist * hueDist * 4 + satDist * satDist * 1 + lightDist * lightDist * 1
-  );
-}
-
-function generateDistinctColor(
-  existingColors: string[],
-  minDistance: number = 0.35,
-  maxAttempts: number = 150
-): string {
-  // Predefined palette with good variety
-  const palette = [
-    { h: 0, s: 75, l: 50 }, // Red
-    { h: 30, s: 80, l: 50 }, // Orange
-    { h: 50, s: 85, l: 50 }, // Yellow-orange
-    { h: 120, s: 70, l: 45 }, // Green
-    { h: 180, s: 70, l: 45 }, // Cyan
-    { h: 210, s: 75, l: 50 }, // Blue
-    { h: 270, s: 70, l: 50 }, // Purple
-    { h: 320, s: 75, l: 50 }, // Magenta
-    { h: 90, s: 65, l: 55 }, // Lime
-    { h: 200, s: 80, l: 45 }, // Deep blue
-    { h: 290, s: 65, l: 55 }, // Light purple
-    { h: 340, s: 75, l: 50 }, // Pink-red
-  ];
-
-  // Try palette colors first
-  for (const color of palette) {
-    const colorStr = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
-    if (existingColors.length === 0) {
-      return colorStr;
-    }
-
-    const minDist = Math.min(
-      ...existingColors.map((c) => getColorDistance(colorStr, c))
-    );
-
-    if (minDist >= minDistance) {
-      return colorStr;
-    }
-  }
-
-  // If palette exhausted, generate random colors
-  let bestColor = `hsl(0, 70%, 50%)`;
-  let bestMinDistance = 0;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const h = Math.floor(Math.random() * 360);
-    const s = 65 + Math.floor(Math.random() * 20); // 65-85%
-    const l = 45 + Math.floor(Math.random() * 15); // 45-60%
-    const candidateColor = `hsl(${h}, ${s}%, ${l}%)`;
-
-    const minDist = Math.min(
-      ...existingColors.map((c) => getColorDistance(candidateColor, c))
-    );
-
-    if (minDist >= minDistance) {
-      return candidateColor;
-    }
-
-    if (minDist > bestMinDistance) {
-      bestMinDistance = minDist;
-      bestColor = candidateColor;
-    }
-  }
-
-  return bestColor;
 }
