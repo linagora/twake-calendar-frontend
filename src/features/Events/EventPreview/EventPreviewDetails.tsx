@@ -1,18 +1,18 @@
 import { InfoRow } from "@/components/Event/InfoRow";
-import { Box, Button, Typography } from "@linagora/twake-mui";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import { Box, Button, Link, Typography } from "@linagora/twake-mui";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SubjectIcon from "@mui/icons-material/Subject";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { alpha, useTheme } from "@mui/material/styles";
+import { useMemo } from "react";
 import { useI18n } from "twake-i18n";
 import { CalendarEvent } from "../EventsTypes";
 import { EventPreviewAttendees } from "./EventPreviewAttendees";
 import { makeRecurrenceString } from "./utils/makeRecurrenceString";
-import { useMemo } from "react";
 
 interface EventPreviewDetailsProps {
   event: CalendarEvent;
@@ -88,20 +88,20 @@ export function EventPreviewDetails({
             </Box>
           }
           content={
-            <Button
-              variant="contained"
-              size="medium"
-              onClick={() =>
-                window.open(
-                  event.x_openpass_videoconference,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-              sx={{ borderRadius: "4px" }}
+            <Link
+              href={event.x_openpass_videoconference}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ textDecoration: "none" }}
             >
-              {t("eventPreview.joinVideo")}
-            </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                sx={{ borderRadius: "4px" }}
+              >
+                {t("eventPreview.joinVideo")}
+              </Button>
+            </Link>
           }
         />
       )}
