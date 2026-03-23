@@ -338,9 +338,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
       ...(testLabel ? { "aria-label": testLabel } : {}),
     },
   });
-  React.useEffect(() => {
-    dayjs.locale(lang ?? "en");
-  }, [lang]);
+
   return (
     <LocalizationProvider
       key={lang}
