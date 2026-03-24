@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { selectCalendars } from "@/app/selectors/selectCalendars";
 import { searchEventsAsync } from "@/features/Search/SearchSlice";
 import { setView } from "@/features/Settings/SettingsSlice";
 import { userAttendee } from "@/features/User/models/attendee";
@@ -34,8 +35,7 @@ import { CalendarItemList } from "../Calendar/CalendarItemList";
 export default function SearchBar() {
   const { t } = useI18n();
   const dispatch = useAppDispatch();
-  const calendarList = useAppSelector((state) => state.calendars.list);
-  const calendars = Object.values(calendarList);
+  const calendars = useAppSelector(selectCalendars);
   const userId = useAppSelector((state) => state.user.userData?.openpaasId);
   const personnalCalendars = userId
     ? calendars.filter((c) => extractEventBaseUuid(c.id) === userId)

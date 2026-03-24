@@ -222,7 +222,9 @@ export function PeopleSearch({
         onBlur={freeSolo ? handleBlurCommit : undefined}
         open={
           customRenderInput
-            ? isOpen && !!query && (loading || options.length > 0)
+            ? isOpen &&
+              !!query &&
+              ((loading && hasSearched) || options.length > 0)
             : isOpen && !!query && (loading || hasSearched)
         }
         onOpen={() => setIsOpen(true)}
