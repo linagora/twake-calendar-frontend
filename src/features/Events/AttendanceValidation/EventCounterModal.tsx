@@ -5,7 +5,7 @@ import { FieldWithLabel } from "@/components/Event/components/FieldWithLabel";
 import { splitDateTime } from "@/components/Event/utils/dateTimeHelpers";
 import { Box, Button, TextField, Typography } from "@linagora/twake-mui";
 import moment from "moment-timezone";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
 import { postCounterProposal } from "../api/sendCounterProposal";
 import { EventTimeSubtitle } from "../EventPreview/EventTimeSubtitle";
@@ -136,6 +136,18 @@ export function EventCounterModal({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!open) return;
+    setStartDate(startSplit.date);
+    setStartTime(startSplit.time);
+    setEndDate(endSplit.date);
+    setEndTime(endSplit.time);
+    setShowMore(false);
+    setHasEndDateChanged(false);
+    setMessage("");
+    setValidation({ errors: { dateTime: "" } });
+  }, [open, startSplit.date, startSplit.time, endSplit.date, endSplit.time]);
 
   return (
     <ResponsiveDialog
