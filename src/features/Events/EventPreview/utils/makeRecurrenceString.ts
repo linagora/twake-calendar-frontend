@@ -1,17 +1,25 @@
-import { CalendarEvent } from "../../EventsTypes";
+import { RepetitionObject } from "../../EventsTypes";
 
-export function makeRecurrenceString(
-  event: CalendarEvent,
-  t: (k: string, p?: string | object) => string
-): string | undefined {
-  if (!event.repetition) return;
+const WEEK_DAYS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 
-  const recur: string[] = [
-    `${t("eventPreview.recurrentEvent")} · ${t(
-      `eventPreview.freq.${event.repetition.freq}`,
-      event.repetition.freq
-    )}`,
-  ];
+interface MakeRecurrenceStringParams {
+  repetition: RepetitionObject;
+  t: (k: string, p?: string | object) => string;
+  startText: string;
+  joinChar?: string;
+  enableStrForOneTimeInterval?: boolean;
+}
+
+export function makeRecurrenceString({
+  repetition,
+  t,
+  startText,
+  joinChar,
+  enableStrForOneTimeInterval,
+}: MakeRecurrenceStringParams): string | undefined {
+  if (!repetition) return;
+
+  const recur: string[] = [startText];
 
   const recurType: Record<string, string> = {
     daily: t("event.repeat.frequency.days"),
@@ -20,45 +28,51 @@ export function makeRecurrenceString(
     yearly: t("event.repeat.frequency.years"),
   };
 
-  if (event.repetition.interval && event.repetition.interval > 1) {
+  const interval = repetition.interval ?? 1;
+
+  if (interval === 1 && enableStrForOneTimeInterval) {
+    recur.push(recurType[repetition.freq]);
+  }
+
+  if (interval > 1) {
     recur.push(
       t("eventPreview.everyInterval", {
-        interval: event.repetition.interval,
-        unit: recurType[event.repetition.freq] ?? event.repetition.freq,
+        interval,
+        unit: recurType[repetition.freq] ?? repetition.freq,
       })
     );
   }
 
-  if (event.repetition.byday) {
+  if (repetition.byday) {
+    const weekDaysByOrder = WEEK_DAYS.filter((day) =>
+      repetition.byday?.includes(day)
+    );
     recur.push(
       t("eventPreview.recurrenceOnDays", {
-        days: event.repetition.byday
+        days: weekDaysByOrder
           .map((s) => t(`eventPreview.onDays.${s}`))
           .join(", "),
       })
     );
   }
 
-  if (event.repetition.occurrences) {
+  if (repetition.occurrences) {
     recur.push(
       t("eventPreview.forOccurrences", {
-        count: event.repetition.occurrences,
+        count: repetition.occurrences,
       })
     );
   }
-  if (event.repetition.endDate) {
+  if (repetition.endDate) {
     recur.push(
       t("eventPreview.until", {
-        date: new Date(event.repetition.endDate).toLocaleDateString(
-          t("locale"),
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }
-        ),
+        date: new Date(repetition.endDate).toLocaleDateString(t("locale"), {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
       })
     );
   }
-  return recur.join(", ");
+  return recur.filter(Boolean).join(`${joinChar ?? ","} `);
 }

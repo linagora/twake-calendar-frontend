@@ -244,7 +244,14 @@ export function EventPreviewDetails({
               <RepeatIcon />
             </Box>
           }
-          text={makeRecurrenceString(event, t)}
+          text={makeRecurrenceString({
+            repetition: event.repetition,
+            t,
+            startText: `${t("eventPreview.recurrentEvent")} · ${t(
+              `eventPreview.freq.${event.repetition.freq}`,
+              event.repetition.freq
+            )}`,
+          })}
         />
       )}
 

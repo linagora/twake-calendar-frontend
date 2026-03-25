@@ -318,7 +318,7 @@
       "SU": "sunday"
     },
     "recurrenceOnDays": "on %{days}",
-    "everyInterval": "every %{interval} %{unit}",
+    "everyInterval": "Every %{interval} %{unit}",
     "forOccurrences": "for %{count} occurrences",
     "until": "until %{date}",
     "days": "days",

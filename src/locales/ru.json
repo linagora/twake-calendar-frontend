@@ -319,7 +319,7 @@
       "SU": "ВС"
     },
     "recurrenceOnDays": "по %{days}",
-    "everyInterval": "каждые %{interval} %{unit}",
+    "everyInterval": "Каждые %{interval} %{unit}",
     "forOccurrences": "в течение %{count} повторений",
     "until": "до %{date}",
     "days": "дни",

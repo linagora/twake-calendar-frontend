@@ -317,7 +317,7 @@
       "SU": "chủ nhật"
     },
     "recurrenceOnDays": "vào %{days}",
-    "everyInterval": "mỗi %{interval} %{unit}",
+    "everyInterval": "Mỗi %{interval} %{unit}",
     "forOccurrences": "trong %{count} lần",
     "until": "đến %{date}",
     "days": "ngày",
