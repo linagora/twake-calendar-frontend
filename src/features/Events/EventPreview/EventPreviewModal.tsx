@@ -2,7 +2,6 @@ import { CalendarName } from "@/components/Calendar/CalendarName";
 import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
 import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
 import { EditModeDialog } from "@/components/Event/EditModeDialog";
-import { getTimezoneOffset } from "@/utils/timezone";
 import { DateSelectArg } from "@fullcalendar/core";
 import { Box, Chip, Tooltip, Typography } from "@linagora/twake-mui";
 import CircleIcon from "@mui/icons-material/Circle";
@@ -16,8 +15,7 @@ import { EventPreviewDetails } from "../EventPreview/EventPreviewDetails";
 import { EventPreviewHeader } from "../EventPreview/EventPreviewHeader";
 import { useEventPreviewState } from "../EventPreview/useEventPreviewState";
 import EventUpdateModal from "../EventUpdateModal";
-import { formatDate } from "./utils/formatDate";
-import { formatEnd } from "./utils/formatEnd";
+import { EventTimeSubtitle } from "./EventTimeSubtitle";
 
 export default function EventPreviewModal({
   eventId,
@@ -160,12 +158,7 @@ export default function EventPreviewModal({
               </Tooltip>
             )}
           </Box>
-          <Typography color="text.secondaryContainer">
-            {formatDate(event.start, t, timezone, event.allday)}
-            {event.end &&
-              formatEnd(event.start, event.end, t, timezone, event.allday) &&
-              ` – ${formatEnd(event.start, event.end, t, timezone, event.allday)} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
-          </Typography>
+          <EventTimeSubtitle event={event} t={t} timezone={timezone} />
         </Box>
 
         {/* Event details (attendees, location, description, etc.) */}

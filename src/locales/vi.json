@@ -279,11 +279,15 @@
       "label": "Rảnh",
       "tooltip": "Người khác sẽ thấy bạn rảnh trong khoảng thời gian này."
     },
-    "attendingQuestion": "Tham gia?",
+    "attendingQuestion": "Tham dự?",
     "authorizeQuestion": "Cho phép?",
-    "ACCEPTED": "Chấp nhận",
+    "proposeNewTime": "Hẹn lại",
+    "yourProposal": "Đề xuất của bạn",
+    "optionalMessage": "Thêm tin nhắn tùy chọn cho người tổ chức",
+    "sendProposal": "Gửi đề xuất",
+    "ACCEPTED": "Có",
     "TENTATIVE": "Có thể",
-    "DECLINED": "Từ chối",
+    "DECLINED": "Không",
     "NEEDS-ACTION": "Đang chờ",
     "attendingStatus": {
       "ACCEPTED": "Đã chấp nhận",

@@ -9,9 +9,6 @@ export function createEventContext(
 ): ContextualizedEvent {
   const isOwn = calendar.owner?.emails?.includes(user.email) ?? false;
   const isRecurring = event?.uid?.includes("/") ?? false;
-  const isOrganizer = event.organizer
-    ? user?.email === event.organizer.cal_address
-    : isOwn;
   const attendeeEmail = calendar.delegated
     ? calendar.owner?.emails?.[0]
     : user.email;
@@ -20,6 +17,10 @@ export function createEventContext(
         (person) => person.cutype === "RESOURCE" && person.cn === calendar.name
       )
     : event.attendee?.find((person) => person.cal_address === attendeeEmail);
+  const isOrganizer = event.organizer
+    ? attendeeEmail === event.organizer.cal_address
+    : isOwn;
+
   return {
     event,
     calendar,
