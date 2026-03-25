@@ -21,7 +21,7 @@ export function AttendanceValidation({
   setAfterChoiceFunc,
   setOpenEditModePopup,
 }: AttendanceValidationProps) {
-  const { currentUserAttendee, isOwn } = contextualizedEvent;
+  const { currentUserAttendee, isOwn, calendar } = contextualizedEvent;
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingValue, setLoadingValue] = useState<PartStat | null>(null);
@@ -38,7 +38,16 @@ export function AttendanceValidation({
     (!contextualizedEvent.event.class ||
       contextualizedEvent.event.class === "PUBLIC");
 
-  if (!(editRightInSelfCalendar || isDelegatedPublicEvent)) {
+  const { owner: resourceOwner } = calendar;
+  const isAdminOfResource =
+    resourceOwner?.resource &&
+    resourceOwner?.administrators?.some(
+      (admin) => admin.id === user?.openpaasId
+    );
+
+  if (
+    !(editRightInSelfCalendar || isDelegatedPublicEvent || isAdminOfResource)
+  ) {
     return null;
   }
 
@@ -60,7 +69,9 @@ export function AttendanceValidation({
   return (
     <>
       <Typography sx={{ marginRight: 2 }}>
-        {t("eventPreview.attendingQuestion")}
+        {calendar.owner?.resource
+          ? t("eventPreview.authorizeQuestion")
+          : t("eventPreview.attendingQuestion")}
       </Typography>
       <Box display="flex" gap="15px" alignItems="center">
         <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />

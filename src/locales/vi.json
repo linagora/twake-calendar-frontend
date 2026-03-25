@@ -280,10 +280,17 @@
       "tooltip": "Người khác sẽ thấy bạn rảnh trong khoảng thời gian này."
     },
     "attendingQuestion": "Tham gia?",
+    "authorizeQuestion": "Cho phép?",
     "ACCEPTED": "Chấp nhận",
     "TENTATIVE": "Có thể",
     "DECLINED": "Từ chối",
     "NEEDS-ACTION": "Đang chờ",
+    "attendingStatus": {
+      "ACCEPTED": "Đã chấp nhận",
+      "TENTATIVE": "Có thể",
+      "DECLINED": "Đã từ chối",
+      "NEEDS-ACTION": "Đang chờ"
+    },
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "joinVideo": "Tham gia cuộc họp video",

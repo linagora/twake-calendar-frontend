@@ -16,6 +16,7 @@ export interface OpenPaasUserData {
     id: string;
     objectType: string;
   }[];
+  resourceIcon?: string;
 }
 
 export function ToUserData(

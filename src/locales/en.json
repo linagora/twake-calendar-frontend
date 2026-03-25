@@ -281,10 +281,17 @@
       "tooltip": "Others see you as available during the time range of this event."
     },
     "attendingQuestion": "Attending?",
+    "authorizeQuestion": "Authorize?",
     "ACCEPTED": "Accept",
     "TENTATIVE": "Maybe",
     "DECLINED": "Decline",
     "NEEDS-ACTION": "Pending",
+    "attendingStatus": {
+      "ACCEPTED": "Accepted",
+      "TENTATIVE": "Maybe",
+      "DECLINED": "Declined",
+      "NEEDS-ACTION": "Pending"
+    },
     "showMore": "Show more",
     "showLess": "Show less",
     "joinVideo": "Join the video conference",

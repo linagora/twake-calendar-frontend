@@ -15,9 +15,11 @@ export function createEventContext(
   const attendeeEmail = calendar.delegated
     ? calendar.owner?.emails?.[0]
     : user.email;
-  const currentUserAttendee = event.attendee?.find(
-    (person) => person.cal_address === attendeeEmail
-  );
+  const currentUserAttendee = calendar.owner?.resource
+    ? event.attendee?.find(
+        (person) => person.cutype === "RESOURCE" && person.cn === calendar.name
+      )
+    : event.attendee?.find((person) => person.cal_address === attendeeEmail);
   return {
     event,
     calendar,

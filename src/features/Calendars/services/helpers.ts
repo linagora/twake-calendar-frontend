@@ -10,6 +10,11 @@ export const fetchOwnerOfResource = async (
     return {
       ...ownerData,
       administrators: data.administrators,
+      // The `icon` from resource detail contains the name only, so we must map with URL to have full URL of icon
+      resourceIcon:
+        window.CALENDAR_BASE_URL && data.icon
+          ? `${window.CALENDAR_BASE_URL}/images/icon/${data.icon}.svg`
+          : undefined,
     };
   } catch (error) {
     console.error(`Failed to fetch resource details for ${resourceId}:`, error);

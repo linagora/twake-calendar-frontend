@@ -282,10 +282,17 @@
       "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
+    "authorizeQuestion": "Авторизовать?",
     "ACCEPTED": "Да",
     "TENTATIVE": "Возможно",
     "DECLINED": "Нет",
     "NEEDS-ACTION": "В ожидании",
+    "attendingStatus": {
+      "ACCEPTED": "Принято",
+      "TENTATIVE": "Возможно",
+      "DECLINED": "Отклонено",
+      "NEEDS-ACTION": "В ожидании"
+    },
     "showMore": "Показать больше",
     "showLess": "Показать меньше",
     "joinVideo": "Присоединиться к видеоконференции",

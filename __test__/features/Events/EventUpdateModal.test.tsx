@@ -61,7 +61,8 @@ describe("EventUpdateModal Timezone Handling", () => {
       allday: false,
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
-    };
+      URL: "/calendars/667037022b752d0026472254/cal1/test-event-1.ics",
+    } as CalendarEvent;
 
     const stateWithEvent = {
       ...preloadedState,
@@ -122,7 +123,8 @@ describe("EventUpdateModal Timezone Handling", () => {
       allday: false,
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
-    };
+      URL: "/calendars/667037022b752d0026472254/cal1/test-event-2.ics",
+    } as CalendarEvent;
 
     const stateWithEvent = {
       ...preloadedState,
@@ -181,7 +183,8 @@ describe("EventUpdateModal Timezone Handling", () => {
           cutype: "RESOURCE",
         },
       ],
-    };
+      URL: "/calendars/667037022b752d0026472254/cal1/test-event-resource.ics",
+    } as CalendarEvent;
 
     const stateWithEvent = {
       ...preloadedState,
@@ -239,6 +242,10 @@ describe("EventUpdateModal Timezone Handling", () => {
     expect(resource).toBeDefined();
     expect(resource!.cn).toBe("Conference Room");
     expect(resource!.cal_address).toBe("room@test.com");
+    expect(resource!.partstat).toBe("ACCEPTED");
+    expect(resource!.rsvp).toBe("TRUE");
+    expect(resource!.role).toBe("REQ-PARTICIPANT");
+    expect(resource!.cutype).toBe("RESOURCE");
   });
 });
 
@@ -294,7 +301,8 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
       URL: `/calendars/${calId}/${baseUID}.ics`,
-    };
+      timezone: "UTC",
+    } as CalendarEvent;
 
     const instance1 = {
       ...masterEvent,
@@ -445,6 +453,7 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
       URL: `/calendars/${calId}/${baseUID}.ics`,
+      timezone: "UTC",
     } as CalendarEvent;
 
     const instance1 = {
@@ -582,7 +591,8 @@ describe("EventUpdateModal Recurring to Non-Recurring Conversion", () => {
       organizer: { cn: "test", cal_address: "test@test.com" },
       attendee: [{ cn: "test", cal_address: "test@test.com" }],
       URL: `/calendars/${calId}/${baseUID}.ics`,
-    };
+      timezone: "UTC",
+    } as CalendarEvent;
 
     const instance1 = {
       ...masterEvent,

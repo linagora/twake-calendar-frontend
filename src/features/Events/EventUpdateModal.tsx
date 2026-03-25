@@ -648,7 +648,10 @@ function EventUpdateModal({
         newEvent.attendee.push({
           cn: resource?.displayName ?? "",
           cal_address: resource?.email ?? "",
-          partstat: "NEEDS-ACTION",
+          partstat:
+            event.attendee?.find(
+              (a) => a.cutype === "RESOURCE" && a.cn === resource.displayName
+            )?.partstat || "NEEDS-ACTION",
           rsvp: "TRUE",
           role: "REQ-PARTICIPANT",
           cutype: "RESOURCE",

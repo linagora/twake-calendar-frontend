@@ -282,10 +282,17 @@
       "tooltip": "Les autres vous voient comme disponible pendant la plage horaire de cet événement."
     },
     "attendingQuestion": "Participer ?",
+    "authorizeQuestion": "Autoriser ?",
     "ACCEPTED": "Accepter",
     "TENTATIVE": "Peut-être",
     "DECLINED": "Décliner",
     "NEEDS-ACTION": "En attente",
+    "attendingStatus": {
+      "ACCEPTED": "Accepté",
+      "TENTATIVE": "Peut-être",
+      "DECLINED": "Refusé",
+      "NEEDS-ACTION": "En attente"
+    },
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "joinVideo": "Rejoindre la visioconférence",
