@@ -12,6 +12,7 @@ import { getTimezoneOffset } from "@/utils/timezone";
 import { RepetitionObject } from "@/features/Events/EventsTypes";
 import { LONG_DATE_FORMAT } from "../utils/dateTimeFormatters";
 import { SectionPreviewRow } from "./SectionPreviewRow";
+import { makeRecurrenceString } from "@/features/Events/EventPreview/utils/makeRecurrenceString";
 
 interface DateTimeSummaryProps {
   startDate: string;
@@ -99,21 +100,15 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
       return t("event.repeat.doesNotRepeat");
     }
 
-    const interval = rep.interval || 1;
-    const freqMap: { [key: string]: string } = {
-      daily: t("event.repeat.frequency.days"),
-      weekly: t("event.repeat.frequency.weeks"),
-      monthly: t("event.repeat.frequency.months"),
-      yearly: t("event.repeat.frequency.years"),
-    };
-
-    const freqText = freqMap[rep.freq] || rep.freq;
-
-    if (interval === 1) {
-      return `${t("event.repeat.every")} ${freqText}`;
-    }
-
-    return `${t("event.repeat.every")} ${interval} ${freqText}`;
+    return (
+      makeRecurrenceString({
+        repetition: rep,
+        t,
+        startText: rep.interval === 1 ? t("event.repeat.every") : "",
+        joinChar: "",
+        enableStrForOneTimeInterval: true,
+      }) || ""
+    );
   };
 
   // Format date text: show both start and end date if showEndDate is true

@@ -319,7 +319,7 @@
       "SU": "dimanche"
     },
     "recurrenceOnDays": "le %{days}",
-    "everyInterval": "tous les %{interval} %{unit}",
+    "everyInterval": "Tous les %{interval} %{unit}",
     "forOccurrences": "pour %{count} occurrences",
     "until": "jusqu'au %{date}",
     "days": "jours",
