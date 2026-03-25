@@ -154,100 +154,103 @@ export function EventCounterModal({
 
   return (
     <>
-    <SnackbarAlert
-      open={showSuccessToast}
-      setOpen={setShowSuccessToast}
-      message={t("eventPreview.proposalSubmitted")}
-    />
-    <ResponsiveDialog
-      open={open}
-      onClose={() => setOpen(false)}
-      title={t("eventPreview.proposeNewTime")}
-    >
-      {/* Event title */}
-      <Box display="flex" alignItems="center" gap={1} mb={2}>
-        <Typography
-          variant="h3"
-          sx={{
-            wordBreak: "break-word",
-          }}
-        >
-          {formatEventChipTitle(contextualizedEvent.event, t)}
-        </Typography>
-      </Box>
-
-      {/* Current event time */}
-
-      <EventTimeSubtitle
-        event={contextualizedEvent.event}
-        t={t}
-        timezone={contextualizedEvent.event.timezone}
+      <SnackbarAlert
+        open={showSuccessToast}
+        setOpen={setShowSuccessToast}
+        message={t("eventPreview.proposalSubmitted")}
       />
+      <ResponsiveDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t("eventPreview.proposeNewTime")}
+      >
+        {/* Event title */}
+        <Box display="flex" alignItems="center" gap={1} mb={2}>
+          <Typography
+            variant="h3"
+            sx={{
+              wordBreak: "break-word",
+            }}
+          >
+            {formatEventChipTitle(contextualizedEvent.event, t)}
+          </Typography>
+        </Box>
 
-      {/* Your proposal label */}
-      <FieldWithLabel label={t("eventPreview.yourProposal")} isExpanded={false}>
-        <DateTimeFields
-          startDate={startDate}
-          startTime={startTime}
-          endDate={endDate}
-          endTime={endTime}
-          allday={allday}
-          showMore={showMore}
-          hasEndDateChanged={hasEndDateChanged}
-          validation={validation}
-          onStartDateChange={handleStartDateChange}
-          onStartTimeChange={handleStartTimeChange}
-          onEndDateChange={handleEndDateChange}
-          onEndTimeChange={handleEndTimeChange}
-          showEndDate={
-            showMore ||
-            allday ||
-            (hasEndDateChanged && startDate !== endDate) ||
-            (!showMore && !allday && startDate !== endDate)
-          }
-          onToggleEndDate={() => setShowMore((prev) => !prev)}
-        />
-      </FieldWithLabel>
-      {/* Optional message */}
-      <Box mt={2}>
-        <TextField
-          margin="dense"
-          multiline
-          size="small"
-          minRows={2}
-          maxRows={10}
-          fullWidth
-          placeholder={t("eventPreview.optionalMessage")}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          sx={{
-            mt: 2,
-            "& .MuiInputBase-root": {
-              overflowY: "auto",
-              padding: 0,
-            },
-            "& textarea": {
-              resize: "vertical",
-            },
-          }}
-        />
-      </Box>
+        {/* Current event time */}
 
-      {/* Actions */}
-      <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
-        <Button variant="text" onClick={() => setOpen(false)}>
-          {t("common.cancel")}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
+        <EventTimeSubtitle
+          event={contextualizedEvent.event}
+          t={t}
+          timezone={contextualizedEvent.event.timezone}
+        />
+
+        {/* Your proposal label */}
+        <FieldWithLabel
+          label={t("eventPreview.yourProposal")}
+          isExpanded={false}
         >
-          {t("eventPreview.sendProposal")}
-        </Button>
-      </Box>
-    </ResponsiveDialog>
+          <DateTimeFields
+            startDate={startDate}
+            startTime={startTime}
+            endDate={endDate}
+            endTime={endTime}
+            allday={allday}
+            showMore={showMore}
+            hasEndDateChanged={hasEndDateChanged}
+            validation={validation}
+            onStartDateChange={handleStartDateChange}
+            onStartTimeChange={handleStartTimeChange}
+            onEndDateChange={handleEndDateChange}
+            onEndTimeChange={handleEndTimeChange}
+            showEndDate={
+              showMore ||
+              allday ||
+              (hasEndDateChanged && startDate !== endDate) ||
+              (!showMore && !allday && startDate !== endDate)
+            }
+            onToggleEndDate={() => setShowMore((prev) => !prev)}
+          />
+        </FieldWithLabel>
+        {/* Optional message */}
+        <Box mt={2}>
+          <TextField
+            margin="dense"
+            multiline
+            size="small"
+            minRows={2}
+            maxRows={10}
+            fullWidth
+            placeholder={t("eventPreview.optionalMessage")}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            sx={{
+              mt: 2,
+              "& .MuiInputBase-root": {
+                overflowY: "auto",
+                padding: 0,
+              },
+              "& textarea": {
+                resize: "vertical",
+              },
+            }}
+          />
+        </Box>
+
+        {/* Actions */}
+        <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+          <Button variant="text" onClick={() => setOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {t("eventPreview.sendProposal")}
+          </Button>
+        </Box>
+      </ResponsiveDialog>
     </>
   );
 }
