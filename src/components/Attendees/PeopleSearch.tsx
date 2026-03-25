@@ -26,6 +26,7 @@ import {
 } from "react";
 import { useI18n } from "twake-i18n";
 import { ResourceIcon } from "./ResourceIcon";
+import { isValidEmail } from "../../utils/isValidEmail";
 
 export interface User {
   email: string;
@@ -99,8 +100,6 @@ export function PeopleSearch({
     setSnackbarMessage,
   } = useUserSearch<User>({ objectTypes, errorMessage });
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const theme = useTheme();
 
   const handleBlurCommit = useCallback(
