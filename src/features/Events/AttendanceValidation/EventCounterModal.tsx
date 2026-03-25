@@ -4,6 +4,7 @@ import { DateTimeFields } from "@/components/Event/components/DateTimeFields";
 import { FieldWithLabel } from "@/components/Event/components/FieldWithLabel";
 import { splitDateTime } from "@/components/Event/utils/dateTimeHelpers";
 import { Box, Button, TextField, Typography } from "@linagora/twake-mui";
+import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
 import moment from "moment-timezone";
 import { useEffect, useState } from "react";
 import { useI18n } from "twake-i18n";
@@ -22,6 +23,7 @@ export function EventCounterModal({
 }) {
   const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const allday = contextualizedEvent.event.allday ?? false;
 
@@ -128,6 +130,7 @@ export function EventCounterModal({
           : `${endDate}T${endTime}`,
         message,
       });
+      setShowSuccessToast(true);
       setOpen(false);
     } catch (error) {
       console.error(error);
@@ -150,6 +153,12 @@ export function EventCounterModal({
   }, [open, startSplit.date, startSplit.time, endSplit.date, endSplit.time]);
 
   return (
+    <>
+    <SnackbarAlert
+      open={showSuccessToast}
+      setOpen={setShowSuccessToast}
+      message={t("eventPreview.proposalSubmitted")}
+    />
     <ResponsiveDialog
       open={open}
       onClose={() => setOpen(false)}
@@ -239,5 +248,6 @@ export function EventCounterModal({
         </Button>
       </Box>
     </ResponsiveDialog>
+    </>
   );
 }

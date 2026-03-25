@@ -286,6 +286,7 @@
     "yourProposal": "Your proposal",
     "optionalMessage": "Add optional message to the organizer",
     "sendProposal": "Send proposal",
+    "proposalSubmitted": "New time proposal submitted",
     "ACCEPTED": "Yes",
     "TENTATIVE": "Maybe",
     "DECLINED": "No",
