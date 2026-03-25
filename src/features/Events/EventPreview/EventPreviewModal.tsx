@@ -75,6 +75,14 @@ export default function EventPreviewModal({
 
   if (!user || !event || !calendar) return null;
 
+  const isAdminOfResource = Boolean(
+    calendar.owner?.resource &&
+    user.openpaasId &&
+    calendar.owner?.administrators?.some(
+      (admin) => admin.id === user.openpaasId
+    )
+  );
+
   return (
     <>
       <ResponsiveDialog
@@ -82,7 +90,9 @@ export default function EventPreviewModal({
         onClose={() => onClose({}, "backdropClick")}
         showHeaderActions={false}
         actionsBorderTop={
-          !!(event.attendee?.find((p) => p.cal_address === user.email) && isOwn)
+          !!(
+            event.attendee?.find((p) => p.cal_address === user.email) && isOwn
+          ) || isAdminOfResource
         }
         actionsJustifyContent="center"
         style={{ overflow: "auto" }}
@@ -163,6 +173,8 @@ export default function EventPreviewModal({
           event={event}
           isOwn={isOwn}
           isNotPrivate={isNotPrivate}
+          isResourceEventPreview={calendar.owner?.resource}
+          calendarName={calendar.name}
         />
 
         {/* Calendar label */}

@@ -15,10 +15,22 @@ import { buildFamilyName } from "@/utils/buildFamilyName";
 import { isEventOrganiser } from "@/utils/isEventOrganiser";
 
 function updateEventAttendees(
+  calendar: Calendar,
   event: CalendarEvent,
   user: userData | undefined,
   rsvp: PartStat
 ) {
+  if (calendar.owner?.resource) {
+    const updatedAttendees =
+      event.attendee?.map((attendeeData) =>
+        attendeeData.cutype === "RESOURCE" && attendeeData.cn === calendar.name
+          ? { ...attendeeData, partstat: rsvp }
+          : attendeeData
+      ) || [];
+
+    return { attendee: updatedAttendees };
+  }
+
   if (!user) {
     throw new Error("Cannot update attendees without user data");
   }
@@ -100,7 +112,7 @@ export async function handleRSVP(
 ) {
   const newEvent = {
     ...event,
-    ...updateEventAttendees(event, user, rsvp),
+    ...updateEventAttendees(calendar, event, user, rsvp),
   };
 
   if (typeOfAction === "solo") {

@@ -133,7 +133,13 @@ export function CalendarAccessRights({
               access: invite.access,
             };
           })
-          ?.filter((invite) => !!invite) || []) satisfies UserInCalendar[];
+          ?.filter(
+            (invite) =>
+              !!invite &&
+              !calendar.owner.administrators?.some(
+                (admin) => admin.id === invite.id
+              )
+          ) || []) as UserInCalendar[];
 
         const loaded = await handleLoadUsers(usersInCal, cancelled);
 
@@ -154,7 +160,13 @@ export function CalendarAccessRights({
     return () => {
       cancelled = true;
     };
-  }, [calendar.invite, handleLoadUsers, onChange, onInvitesLoaded]);
+  }, [
+    calendar.invite,
+    calendar.owner.administrators,
+    handleLoadUsers,
+    onChange,
+    onInvitesLoaded,
+  ]);
 
   useEffect(() => {
     const isResource = calendar.owner.resource;

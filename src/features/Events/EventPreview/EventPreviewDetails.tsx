@@ -13,17 +13,22 @@ import { useI18n } from "twake-i18n";
 import { CalendarEvent } from "../EventsTypes";
 import { EventPreviewAttendees } from "./EventPreviewAttendees";
 import { makeRecurrenceString } from "./utils/makeRecurrenceString";
+import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
 
 interface EventPreviewDetailsProps {
   event: CalendarEvent;
   isOwn: boolean;
   isNotPrivate: boolean;
+  isResourceEventPreview?: boolean;
+  calendarName?: string;
 }
 
 export function EventPreviewDetails({
   event,
   isOwn,
   isNotPrivate,
+  isResourceEventPreview,
+  calendarName,
 }: EventPreviewDetailsProps) {
   const { t } = useI18n();
   const theme = useTheme();
@@ -31,8 +36,14 @@ export function EventPreviewDetails({
   const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
 
   const resources = useMemo(
-    () => event?.attendee?.filter((attendee) => attendee.cutype === "RESOURCE"),
-    [event?.attendee]
+    () =>
+      event?.attendee?.filter(
+        (attendee) =>
+          attendee.cutype === "RESOURCE" &&
+          ((isResourceEventPreview && calendarName !== attendee.cn) ||
+            !isResourceEventPreview)
+      ),
+    [calendarName, event?.attendee, isResourceEventPreview]
   );
   const eventAttendees = useMemo(
     () =>
@@ -106,8 +117,12 @@ export function EventPreviewDetails({
         />
       )}
 
+      {isResourceEventPreview &&
+        organizer &&
+        renderAttendeeBadge(organizer, "org", t, true, true)}
+
       {/* Attendees */}
-      {attendees.length > 0 && (
+      {!isResourceEventPreview && attendees.length > 0 && (
         <EventPreviewAttendees
           attendees={attendees}
           organizer={organizer}
@@ -144,6 +159,7 @@ export function EventPreviewDetails({
           }
           content={resources.map((resource, index) => (
             <Box
+              key={resource.cn}
               sx={{
                 marginRight: "5px",
               }}
@@ -172,7 +188,7 @@ export function EventPreviewDetails({
                   color: "#717D96",
                 }}
               >
-                {t(`eventPreview.${resource.partstat}`)}
+                {t(`eventPreview.attendingStatus.${resource.partstat}`)}
               </Typography>
             </Box>
           ))}

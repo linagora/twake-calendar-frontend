@@ -25,6 +25,7 @@ const preloadedState = {
         id: "667037022b752d0026472254/cal1",
         name: "Calendar",
         color: "#FF0000",
+        owner: { emails: ["test@test.com"] },
         events: {
           event1: {
             uid: "event1",

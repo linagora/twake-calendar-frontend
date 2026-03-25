@@ -51,7 +51,12 @@ describe("helpers", () => {
       expect(mockedGetUserDetails).toHaveBeenNthCalledWith(1, "resource-123");
       expect(mockedGetResourceDetails).toHaveBeenCalledWith("resource-123");
       expect(mockedGetUserDetails).toHaveBeenNthCalledWith(2, "creator-456");
-      expect(result).toEqual({ ...mockCreator, resource: true });
+      expect(result).toEqual({
+        ...mockCreator,
+        resource: true,
+        administrators: undefined,
+        resourceIcon: undefined,
+      });
     });
 
     it("should throw error when getUserDetails fails with non-404 error", async () => {

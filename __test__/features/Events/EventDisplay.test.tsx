@@ -103,6 +103,7 @@ describe("Event Preview Display", () => {
           id: "otherCal/cal",
           name: "Calendar 1",
           color: "#FF0000",
+          owner: { emails: ["other@test.com"] },
           events: {
             event1: {
               uid: "event1",
@@ -901,7 +902,7 @@ describe("Event Preview Display", () => {
               name: "Calendar 1",
               id: "667037022b752d0026472254/cal1",
               color: "#FF0000",
-              // ownerEmails missing
+              owner: {},
               events: {
                 event1: {
                   calId: "667037022b752d0026472254/cal1",

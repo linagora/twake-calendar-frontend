@@ -137,7 +137,10 @@ export default function CalendarSelection({
     (id) => extractEventBaseUuid(id) === userId
   );
   const delegatedCalendars = Object.keys(calendars || {}).filter(
-    (id) => extractEventBaseUuid(id) !== userId && calendars[id]?.delegated
+    (id) =>
+      extractEventBaseUuid(id) !== userId &&
+      calendars[id]?.delegated &&
+      !calendars?.[id]?.owner?.resource
   );
   const sharedCalendars = Object.keys(calendars || {}).filter(
     (id) =>
@@ -147,9 +150,7 @@ export default function CalendarSelection({
   );
   const resourceCalendars = Object.keys(calendars || {}).filter(
     (id) =>
-      extractEventBaseUuid(id) !== userId &&
-      !calendars?.[id]?.delegated &&
-      calendars?.[id]?.owner?.resource
+      extractEventBaseUuid(id) !== userId && calendars?.[id]?.owner?.resource
   );
 
   const handleCalendarToggle = (name: string) => {

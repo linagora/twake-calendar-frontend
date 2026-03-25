@@ -129,4 +129,55 @@ describe("AttendanceValidation - delegation", () => {
       expect(container.firstChild).not.toBeNull();
     });
   });
+
+  describe("resource calendar", () => {
+    const resourceContext = makeContext({
+      isOwn: false,
+      calendar: {
+        id: "res1/cal1",
+        name: "Resource Cal",
+        delegated: false,
+        owner: {
+          emails: ["resource@example.com"],
+          resource: true,
+          administrators: [{ id: "admin1" }],
+        },
+        events: {},
+      } as Calendar,
+    });
+
+    it("renders when user is an administrator of the resource", () => {
+      const { getByText } = render(
+        <AttendanceValidation
+          contextualizedEvent={resourceContext}
+          user={
+            {
+              ...makeUser("admin@example.com"),
+              openpaasId: "admin1",
+            } as userData
+          }
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      );
+      expect(getByText("eventPreview.authorizeQuestion")).toBeTruthy();
+    });
+
+    it("returns null when user is not an administrator of the resource", () => {
+      const { container } = render(
+        <AttendanceValidation
+          contextualizedEvent={resourceContext}
+          user={
+            {
+              ...makeUser("other@example.com"),
+              openpaasId: "other1",
+            } as userData
+          }
+          setAfterChoiceFunc={noopSetFunc}
+          setOpenEditModePopup={noopSetFunc}
+        />
+      );
+      expect(container.firstChild).toBeNull();
+    });
+  });
 });
