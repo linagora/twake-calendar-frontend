@@ -374,5 +374,8 @@
     "searchError": "Unable to fetch resources right now. Please try again.",
     "noResults": "No results",
     "loading": "Loading..."
+  },
+  "sidebar": {
+    "displayMode": "Display mode"
   }
 }

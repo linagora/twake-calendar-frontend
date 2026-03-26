@@ -380,6 +380,7 @@ export default function CalendarApp({
               bottom: 24,
               right: 24,
               zIndex: 20,
+              borderRadius: "16px",
             }}
           >
             <AddIcon />

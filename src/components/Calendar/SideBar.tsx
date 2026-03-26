@@ -7,13 +7,15 @@ import { User } from "../Attendees/PeopleSearch";
 import CalendarSelection from "./CalendarSelection";
 import { MiniCalendar } from "./MiniCalendar";
 import { TempCalendarsInput } from "./TempCalendarsInput";
+import CalendarViewDayOutlinedIcon from "@mui/icons-material/CalendarViewDayOutlined";
+import CalendarViewWeekOutlinedIcon from "@mui/icons-material/CalendarViewWeekOutlined";
+import CalendarViewMonthOutlinedIcon from "@mui/icons-material/CalendarViewMonthOutlined";
+import { FieldWithLabel } from "../Event/components/FieldWithLabel";
 
 interface CalendarSidebarProps {
-  // Layout control — owned by CalendarLayout, passed down
   isTablet: boolean;
   open: boolean;
   onClose: () => void;
-  // Content
   calendarRef: MutableRefObject<CalendarApi | null>;
   isIframe?: boolean;
   onCreateEvent: () => void;
@@ -49,7 +51,7 @@ export default function Sidebar({
       className="sidebar"
       sx={{
         [`& .MuiDrawer-paper`]: {
-          paddingTop: 0,
+          paddingTop: isTablet ? 2 : 0,
           paddingBottom: 3,
           paddingLeft: 3,
           paddingRight: 2,
@@ -61,40 +63,67 @@ export default function Sidebar({
       slotProps={{ paper: { className: "sidebar" } }}
     >
       {!isTablet && (
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 10,
-            backgroundColor: "#fff",
-            paddingTop: isIframe ? "10px" : 3,
-          }}
-        >
-          <Button
-            size="medium"
-            variant="contained"
-            fullWidth
-            onClick={onCreateEvent}
+        <>
+          <Box
             sx={{
-              borderRadius: radius.lg,
-              fontSize: "16px",
-              fontWeight: 500,
-              lineHeight: "normal",
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              backgroundColor: "#fff",
+              paddingTop: isIframe ? "10px" : 3,
             }}
           >
-            <AddIcon sx={{ marginRight: 0.5, fontSize: "20px" }} />{" "}
-            {t("event.createEvent")}
-          </Button>
-        </Box>
+            <Button
+              size="medium"
+              variant="contained"
+              fullWidth
+              onClick={onCreateEvent}
+              sx={{
+                borderRadius: radius.lg,
+                fontSize: "16px",
+                fontWeight: 500,
+                lineHeight: "normal",
+              }}
+            >
+              <AddIcon sx={{ marginRight: 0.5, fontSize: "20px" }} />{" "}
+              {t("event.createEvent")}
+            </Button>
+          </Box>
+          <Box>
+            <MiniCalendar
+              calendarRef={calendarRef}
+              selectedDate={selectedMiniDate}
+              setSelectedMiniDate={setSelectedMiniDate}
+            />
+          </Box>
+        </>
       )}
 
-      <Box>
-        <MiniCalendar
-          calendarRef={calendarRef}
-          selectedDate={selectedMiniDate}
-          setSelectedMiniDate={setSelectedMiniDate}
-        />
-      </Box>
+      {isTablet && (
+        <FieldWithLabel label={t("sidebar.displayMode")} isExpanded={false}>
+          <Button
+            variant="text"
+            startIcon={<CalendarViewDayOutlinedIcon />}
+            value="dayGridMonth"
+          >
+            {t("menubar.views.month")}
+          </Button>
+          <Button
+            variant="text"
+            startIcon={<CalendarViewWeekOutlinedIcon />}
+            value="timeGridWeek"
+          >
+            {t("menubar.views.week")}
+          </Button>
+          <Button
+            variant="text"
+            startIcon={<CalendarViewMonthOutlinedIcon />}
+            value="timeGridDay"
+          >
+            {t("menubar.views.day")}
+          </Button>
+        </FieldWithLabel>
+      )}
 
       <Box sx={{ mb: 3, mt: 2 }}>
         <TempCalendarsInput
