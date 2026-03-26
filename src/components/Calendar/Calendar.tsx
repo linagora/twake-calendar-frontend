@@ -20,7 +20,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import momentTimezonePlugin from '@fullcalendar/moment-timezone'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { Box, Button, radius } from '@linagora/twake-mui'
+import { Fab } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
 import moment from 'moment-timezone'
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
@@ -32,12 +32,10 @@ import { EventErrorHandler } from '../Error/EventErrorHandler'
 import { EditModeDialog } from '../Event/EditModeDialog'
 import { Menubar, MenubarProps } from '../Menubar/Menubar'
 import './Calendar.styl'
-import CalendarSelection from './CalendarSelection'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
 import { useCalendarViewHandlers } from './hooks/useCalendarViewHandlers'
-import { MiniCalendar } from './MiniCalendar'
-import { TempCalendarsInput } from './TempCalendarsInput'
+import Sidebar from './SideBar'
 import { TimezoneSelector } from './TimezoneSelector'
 import {
   eventToFullCalendarFormat,
@@ -54,16 +52,22 @@ const localeMap: Record<string, LocaleInput | undefined> = {
 
 interface CalendarAppProps {
   calendarRef: MutableRefObject<CalendarApi | null>
+  isTablet: boolean
   onDateChange?: (date: Date) => void
   onViewChange?: (view: string) => void
   menubarProps?: MenubarProps
+  openSidebar: boolean
+  onCloseSidebar: () => void
 }
 
 export default function CalendarApp({
   calendarRef,
   onDateChange,
   onViewChange,
-  menubarProps
+  menubarProps,
+  isTablet,
+  openSidebar,
+  onCloseSidebar
 }: CalendarAppProps) {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [debouncedDate, setDebouncedDate] = useState(new Date())
@@ -297,6 +301,14 @@ export default function CalendarApp({
   const [tempUsers, setTempUsers] = useState<User[]>([])
   const [tempEvent, setTempEvent] = useState<CalendarEvent>({} as CalendarEvent)
 
+  useEffect(() => {
+    const view = isTablet ? 'timeGridDay' : 'timeGridWeek'
+    const id = requestAnimationFrame(() => {
+      calendarRef.current?.changeView(view)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [isTablet])
+
   // Event handlers
   const eventHandlers = useCalendarEventHandlers({
     setSelectedRange,
@@ -341,68 +353,42 @@ export default function CalendarApp({
     <main
       className={`main-layout calendar-layout ${menubarProps?.isIframe ? ' isInIframe' : ''}`}
     >
-      <Box
-        className="sidebar"
-        sx={{
-          paddingTop: 0,
-          paddingBottom: 3,
-          paddingLeft: 3,
-          paddingRight: 2,
-          width: '270px'
-        }}
-      >
-        <Box
-          sx={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-            backgroundColor: '#fff',
-            paddingTop: menubarProps?.isIframe ? '10px' : 3
-          }}
-        >
-          <Button
-            size="medium"
-            variant="contained"
-            fullWidth
+      <Sidebar
+        isTablet={isTablet} // prop, not hook
+        open={openSidebar}
+        onClose={onCloseSidebar}
+        calendarRef={calendarRef}
+        isIframe={menubarProps?.isIframe}
+        onCreateEvent={() =>
+          eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
+        }
+        selectedMiniDate={selectedMiniDate}
+        setSelectedMiniDate={setSelectedMiniDate}
+        selectedCalendars={selectedCalendars}
+        setSelectedCalendars={setSelectedCalendars}
+        tempUsers={tempUsers}
+        setTempUsers={setTempUsers}
+      />
+      <div className="calendar">
+        <ImportAlert />
+        {menubarProps?.isIframe && <Menubar {...menubarProps} />}
+        {isTablet && (
+          <Fab
+            color="primary"
+            aria-label={t('event.createEvent')}
             onClick={() =>
               eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
             }
             sx={{
-              borderRadius: radius.lg,
-              fontSize: '16px',
-              fontWeight: 500,
-              lineHeight: 'normal'
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              zIndex: 20
             }}
           >
-            <AddIcon sx={{ marginRight: 0.5, fontSize: '20px' }} />{' '}
-            {t('event.createEvent')}
-          </Button>
-        </Box>
-
-        <MiniCalendar
-          calendarRef={calendarRef}
-          selectedDate={selectedMiniDate}
-          setSelectedMiniDate={setSelectedMiniDate}
-        />
-        <Box sx={{ mb: 3, mt: 2 }}>
-          <TempCalendarsInput
-            tempUsers={tempUsers}
-            setTempUsers={setTempUsers}
-            handleToggleEventPreview={() => {
-              eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
-            }}
-          />
-        </Box>
-        <div className="calendarList">
-          <CalendarSelection
-            selectedCalendars={selectedCalendars}
-            setSelectedCalendars={setSelectedCalendars}
-          />
-        </div>
-      </Box>
-      <div className="calendar">
-        <ImportAlert />
-        {menubarProps?.isIframe && <Menubar {...menubarProps} />}
+            <AddIcon />
+          </Fab>
+        )}
         {view === 'calendar' && (
           <FullCalendar
             key={hiddenDays.join(',')}

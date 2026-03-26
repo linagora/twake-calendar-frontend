@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import SettingsPage from '@/features/Settings/SettingsPage'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { getViewRange } from '@/utils/dateUtils'
 import type { CalendarApi } from '@fullcalendar/core'
 import CozyBridge from 'cozy-external-bridge'
@@ -16,8 +17,19 @@ export default function CalendarLayout() {
   const selectedCalendars = useAppSelector(state => state.calendars.list)
   const tempcalendars = useAppSelector(state => state.calendars.templist)
   const view = useAppSelector(state => state.settings.view)
+
+  const { isTablet } = useScreenSizeDetection()
+
+  const [openSidebar, setOpenSideBar] = useState(false)
+
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
-  const [currentView, setCurrentView] = useState<string>('timeGridWeek')
+  const [currentView, setCurrentView] = useState<string>(
+    isTablet ? 'timeGridDay' : 'timeGridWeek'
+  )
+
+  useEffect(() => {
+    setCurrentView(isTablet ? 'timeGridDay' : 'timeGridWeek')
+  }, [isTablet])
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
   const handleRefresh = async () => {
@@ -72,7 +84,9 @@ export default function CalendarLayout() {
     onDateChange: handleDateChange,
     currentView,
     onViewChange: handleViewChange,
-    isIframe: isInIframe
+    isIframe: isInIframe,
+    isTablet,
+    onToggleSidebar: () => setOpenSideBar(prev => !prev)
   }
 
   return (
@@ -80,10 +94,13 @@ export default function CalendarLayout() {
       {!isInIframe && <Menubar {...menubarProps} />}
       {(view === 'calendar' || view === 'search') && (
         <CalendarApp
+          isTablet={isTablet}
           calendarRef={calendarRef}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}
           menubarProps={menubarProps}
+          openSidebar={openSidebar}
+          onCloseSidebar={() => setOpenSideBar(false)}
         />
       )}
       {view === 'settings' && <SettingsPage isInIframe={isInIframe} />}
