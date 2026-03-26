@@ -19,6 +19,7 @@ interface CalendarSidebarProps {
   calendarRef: MutableRefObject<CalendarApi | null>;
   isIframe?: boolean;
   onCreateEvent: () => void;
+  onViewChange: (view: string) => void;
   selectedMiniDate: Date;
   setSelectedMiniDate: (date: Date) => void;
   selectedCalendars: string[];
@@ -34,6 +35,7 @@ export default function Sidebar({
   calendarRef,
   isIframe,
   onCreateEvent,
+  onViewChange,
   selectedMiniDate,
   setSelectedMiniDate,
   selectedCalendars,
@@ -103,24 +105,26 @@ export default function Sidebar({
         <FieldWithLabel label={t("sidebar.displayMode")} isExpanded={false}>
           <Button
             variant="text"
+            onClick={() => onViewChange("timeGridDay")}
             startIcon={<CalendarViewDayOutlinedIcon />}
-            value="dayGridMonth"
           >
-            {t("menubar.views.month")}
+            {t("menubar.views.day")}
           </Button>
           <Button
             variant="text"
+            onClick={() => {
+              onViewChange("timeGridWeek");
+            }}
             startIcon={<CalendarViewWeekOutlinedIcon />}
-            value="timeGridWeek"
           >
             {t("menubar.views.week")}
           </Button>
           <Button
             variant="text"
+            onClick={() => onViewChange("dayGridMonth")}
             startIcon={<CalendarViewMonthOutlinedIcon />}
-            value="timeGridDay"
           >
-            {t("menubar.views.day")}
+            {t("menubar.views.month")}
           </Button>
         </FieldWithLabel>
       )}

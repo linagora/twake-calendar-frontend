@@ -227,6 +227,7 @@
     "duplicateEvent": "Duplicate event"
   },
   "menubar": {
+    "toggleSidebar": "Toggle sidebar",
     "today": "Today",
     "refresh": "Refresh",
     "viewSelector": "Select view",
