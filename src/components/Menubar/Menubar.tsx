@@ -166,7 +166,11 @@ export function Menubar({
       <header className="menubar">
         <div className="left-menu">
           {isTablet && (
-            <IconButton onClick={onToggleSidebar} size="medium">
+            <IconButton
+              onClick={onToggleSidebar}
+              aria-label={t('menubar.toggleSidebar')}
+              title={t('menubar.toggleSidebar')}
+            >
               <MenuIcon />
             </IconButton>
           )}
@@ -187,7 +191,6 @@ export function Menubar({
             <div className="navigation-controls">
               {isTablet ? (
                 <ButtonGroup
-                  variant="text"
                   size="medium"
                   sx={{
                     '& button:first-of-type': {

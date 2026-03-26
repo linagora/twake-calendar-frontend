@@ -28,7 +28,9 @@ export default function CalendarLayout() {
   )
 
   useEffect(() => {
-    setCurrentView(isTablet ? 'timeGridDay' : 'timeGridWeek')
+    const setView = () =>
+      setCurrentView(isTablet ? 'timeGridDay' : 'timeGridWeek')
+    setView()
   }, [isTablet])
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 

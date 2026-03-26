@@ -362,6 +362,7 @@ export default function CalendarApp({
         onCreateEvent={() =>
           eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
         }
+        onViewChange={(view: string) => setCurrentView(view)}
         selectedMiniDate={selectedMiniDate}
         setSelectedMiniDate={setSelectedMiniDate}
         selectedCalendars={selectedCalendars}
@@ -383,7 +384,8 @@ export default function CalendarApp({
               position: 'fixed',
               bottom: 24,
               right: 24,
-              zIndex: 20
+              zIndex: 20,
+              borderRadius: '16px'
             }}
           >
             <AddIcon />
