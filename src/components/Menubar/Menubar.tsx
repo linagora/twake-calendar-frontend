@@ -3,8 +3,8 @@ import { setView } from "@/features/Settings/SettingsSlice";
 import { Logout } from "@/features/User/oidcAuth";
 import logo from "@/static/header-logo.svg";
 import { getInitials, stringToGradient } from "@/utils/avatarUtils";
-import { getUserDisplayName } from "@/utils/userUtils";
 import { redirectTo } from "@/utils/navigation";
+import { getUserDisplayName } from "@/utils/userUtils";
 import { CalendarApi } from "@fullcalendar/core";
 import {
   Avatar,
@@ -20,13 +20,15 @@ import {
   Select,
   Typography,
 } from "@linagora/twake-mui";
-import WidgetsOutlinedIcon from "@mui/icons-material/WidgetsOutlined";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import WidgetsOutlinedIcon from "@mui/icons-material/WidgetsOutlined";
+import TodayIcon from "@mui/icons-material/Today";
 import React, { useEffect, useState } from "react";
 import { push } from "redux-first-history";
 import { useI18n } from "twake-i18n";
@@ -47,6 +49,8 @@ export type MenubarProps = {
   currentView: string;
   onViewChange?: (view: string) => void;
   isIframe?: boolean;
+  isTablet: boolean;
+  onToggleSidebar: () => void;
 };
 
 export function Menubar({
@@ -57,8 +61,11 @@ export function Menubar({
   currentView,
   onViewChange,
   isIframe,
+  isTablet,
+  onToggleSidebar,
 }: MenubarProps) {
   const { t } = useI18n(); // deliberately NOT using f()
+
   const user = useAppSelector((state) => state.user.userData);
   const applist: AppIconProps[] = window.appList ?? [];
   const supportLink = window.SUPPORT_URL;
@@ -158,6 +165,11 @@ export function Menubar({
     <>
       <header className="menubar">
         <div className="left-menu">
+          {isTablet && (
+            <IconButton onClick={onToggleSidebar} size="medium">
+              <MenuIcon />
+            </IconButton>
+          )}
           {!isIframe && (
             <div className="menu-items">
               <MainTitle
@@ -168,36 +180,73 @@ export function Menubar({
               />
             </div>
           )}
-          <div className="menu-items">
+          <div
+            className="menu-items"
+            style={{ marginLeft: isTablet ? "0" : "65px" }}
+          >
             <div className="navigation-controls">
-              <ButtonGroup
-                variant="outlined"
-                size="medium"
-                sx={{
-                  "& button:first-of-type": {
-                    borderRadius: "12px 0 0 12px",
-                  },
-                  "& button:last-of-type": {
-                    borderRadius: "0 12px 12px 0",
-                  },
-                }}
-              >
-                <Button
-                  sx={{ width: 20 }}
-                  onClick={() => handleNavigation("prev")}
+              {isTablet ? (
+                <ButtonGroup
+                  variant="text"
+                  size="medium"
+                  sx={{
+                    "& button:first-of-type": {
+                      borderRadius: "12px 0 0 12px",
+                    },
+                    "& button:last-of-type": {
+                      borderRadius: "0 12px 12px 0",
+                    },
+                  }}
                 >
-                  <ChevronLeftIcon sx={{ height: 20 }} />
-                </Button>
-                <Button onClick={() => handleNavigation("today")}>
-                  {t("menubar.today")}
-                </Button>
-                <Button
-                  sx={{ width: 20 }}
-                  onClick={() => handleNavigation("next")}
+                  <Button
+                    sx={{ width: 20 }}
+                    onClick={() => handleNavigation("prev")}
+                  >
+                    <ChevronLeftIcon sx={{ height: 20 }} />
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleNavigation("today")}
+                  >
+                    <TodayIcon />
+                  </Button>
+                  <Button
+                    sx={{ width: 20 }}
+                    onClick={() => handleNavigation("next")}
+                  >
+                    <ChevronRightIcon sx={{ height: 20 }} />
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <ButtonGroup
+                  variant="outlined"
+                  size="medium"
+                  sx={{
+                    "& button:first-of-type": {
+                      borderRadius: "12px 0 0 12px",
+                    },
+                    "& button:last-of-type": {
+                      borderRadius: "0 12px 12px 0",
+                    },
+                  }}
                 >
-                  <ChevronRightIcon sx={{ height: 20 }} />
-                </Button>
-              </ButtonGroup>
+                  <Button
+                    sx={{ width: 20 }}
+                    onClick={() => handleNavigation("prev")}
+                  >
+                    <ChevronLeftIcon sx={{ height: 20 }} />
+                  </Button>
+                  <Button onClick={() => handleNavigation("today")}>
+                    {t("menubar.today")}
+                  </Button>
+                  <Button
+                    sx={{ width: 20 }}
+                    onClick={() => handleNavigation("next")}
+                  >
+                    <ChevronRightIcon sx={{ height: 20 }} />
+                  </Button>
+                </ButtonGroup>
+              )}
             </div>
           </div>
           <div className="menu-items">
@@ -221,35 +270,37 @@ export function Menubar({
               <RefreshIcon />
             </IconButton>
           </div>
-          <div className="menu-items">
-            <FormControl
-              size="small"
-              style={{ minWidth: 120, marginRight: 16 }}
-              className="select-display"
-            >
-              <Select
-                value={currentView}
-                onChange={(e) => handleViewChange(e.target.value)}
-                variant="outlined"
-                aria-label={t("menubar.viewSelector")}
-                sx={{
-                  borderRadius: "12px",
-                  marginLeft: 1,
-                  "& fieldset": { borderRadius: "12px" },
-                }}
+          {!isTablet && (
+            <div className="menu-items">
+              <FormControl
+                size="small"
+                style={{ minWidth: 120, marginRight: 16 }}
+                className="select-display"
               >
-                <MenuItem value="dayGridMonth">
-                  {t("menubar.views.month")}
-                </MenuItem>
-                <MenuItem value="timeGridWeek">
-                  {t("menubar.views.week")}
-                </MenuItem>
-                <MenuItem value="timeGridDay">
-                  {t("menubar.views.day")}
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </div>
+                <Select
+                  value={currentView}
+                  onChange={(e) => handleViewChange(e.target.value)}
+                  variant="outlined"
+                  aria-label={t("menubar.viewSelector")}
+                  sx={{
+                    borderRadius: "12px",
+                    marginLeft: 1,
+                    "& fieldset": { borderRadius: "12px" },
+                  }}
+                >
+                  <MenuItem value="dayGridMonth">
+                    {t("menubar.views.month")}
+                  </MenuItem>
+                  <MenuItem value="timeGridWeek">
+                    {t("menubar.views.week")}
+                  </MenuItem>
+                  <MenuItem value="timeGridDay">
+                    {t("menubar.views.day")}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          )}
           {!isIframe && (
             <>
               {supportLink && (
