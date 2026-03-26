@@ -138,14 +138,26 @@ function CalendarPopover({
     const normaliseEmail = (u: UserWithAccess) =>
       u.email?.trim().toLowerCase() ?? "";
 
+    const initialMap = new Map(
+      initialUsersRef.current
+        .filter((u) => !!normaliseEmail(u))
+        .map((u) => [normaliseEmail(u), u])
+    );
+
     const currentMap = new Map(
       usersWithAccess
         .filter((u) => !!normaliseEmail(u))
         .map((u) => [normaliseEmail(u), u])
     );
 
+    // Only send users that were added or whose rights changed
     const set = usersWithAccess
-      .filter((u) => !!normaliseEmail(u))
+      .filter((u) => {
+        const email = normaliseEmail(u);
+        if (!email) return false;
+        const initial = initialMap.get(email);
+        return !initial || initial.accessRight !== u.accessRight;
+      })
       .map((u) => ({
         "dav:href": `mailto:${normaliseEmail(u)}`,
         [accessRightToDavProp(u.accessRight)]: true,
