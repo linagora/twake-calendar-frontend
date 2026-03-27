@@ -47,7 +47,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getFormattedValue = useCallback(() => {
-    if (pickerContext.value == null) return "";
+    if (!pickerContext.value) return "";
     if (!pickerContext.value.isValid()) return "";
     return pickerContext.value.format(TIME_DISPLAY_FORMAT);
   }, [pickerContext.value]);

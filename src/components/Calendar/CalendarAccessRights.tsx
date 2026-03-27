@@ -50,10 +50,12 @@ export function CalendarAccessRights({
   const userData = useAppSelector((state) => state.user.userData);
   const isPersonalCalendar = userData?.openpaasId === calendar.id.split("/")[0];
   const currentUserEmail = normalizeEmail(userData?.email);
-  const isDelegatedWithAdministration = !!calendar.invite?.some((invite) => {
-    const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ""));
-    return invitedEmail === currentUserEmail && invite.access === 5;
-  });
+  const isDelegatedWithAdministration = Boolean(
+    calendar.invite?.some((invite) => {
+      const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ""));
+      return invitedEmail === currentUserEmail && invite.access === 5;
+    })
+  );
 
   const ownerEmail =
     calendar.owner?.preferredEmail ?? calendar.owner?.emails?.[0] ?? "";
@@ -135,7 +137,7 @@ export function CalendarAccessRights({
           })
           ?.filter(
             (invite) =>
-              !!invite &&
+              Boolean(invite) &&
               !calendar.owner.administrators?.some(
                 (admin) => admin.id === invite.id
               )
@@ -246,7 +248,7 @@ export function CalendarAccessRights({
       }
       isExpanded={false}
     >
-      {(isPersonalCalendar || isDelegatedWithAdministration) && (
+      {isPersonalCalendar || isDelegatedWithAdministration ? (
         <Box ref={containerRef}>
           <PeopleSearch
             selectedUsers={usersWithAccess}
@@ -349,7 +351,7 @@ export function CalendarAccessRights({
             )}
           />
         </Box>
-      )}
+      ) : null}
 
       <Box mt={2} display="flex" flexDirection="column" gap={1}>
         <Box
@@ -458,7 +460,7 @@ export function CalendarAccessRights({
                     </MenuItem>
                   ))}
                 </Select>
-                {(isPersonalCalendar || isDelegatedWithAdministration) && (
+                {isPersonalCalendar || isDelegatedWithAdministration ? (
                   <IconButton
                     size="small"
                     aria-label={t("actions.remove")}
@@ -467,7 +469,7 @@ export function CalendarAccessRights({
                   >
                     <HighlightOffIcon fontSize="small" />
                   </IconButton>
-                )}
+                ) : null}
               </Box>
             </Box>
           ))

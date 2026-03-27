@@ -88,6 +88,7 @@
     "eslint-plugin-jest": "^29.13.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-func": "^0.1.18",
     "eslint-plugin-react-hooks": "^7.0.1",
     "history": "^5.3.0",
     "i18next-resources-for-ts": "1.4.0",

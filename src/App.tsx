@@ -39,7 +39,9 @@ type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 const isValidLanguage = (
   lang: string | null | undefined
 ): lang is SupportedLanguage => {
-  return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
+  return (
+    Boolean(lang) && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage)
+  );
 };
 
 function App() {
@@ -54,7 +56,7 @@ function App() {
 
   const lang =
     [userLanguage, settingsLanguage, savedLang, defaultLang].find(
-      (l) => !!l && isValidLanguage(l)
+      (l) => Boolean(l) && isValidLanguage(l)
     ) || "en";
 
   const dispatch = useAppDispatch();
@@ -103,7 +105,7 @@ function App() {
               </Router>
               <ErrorSnackbar error={error} type="user" />
             </Suspense>
-            {appLoading && <Loading />}
+            {Boolean(appLoading) && <Loading />}
           </>
         )}
       </I18n>

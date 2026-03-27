@@ -20,8 +20,9 @@ export function EventTimeSubtitle({
   return (
     <Typography color="text.secondaryContainer">
       {formatDate(event.start, t, timezone, event.allday)}
-      {formattedEnd &&
-        ` – ${formattedEnd} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`}
+      {formattedEnd
+        ? ` – ${formattedEnd} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ""}`
+        : null}
     </Typography>
   );
 }

@@ -55,7 +55,7 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
   const nowIndicator = document.querySelector(
     ".fc-timegrid-now-indicator-arrow"
   );
-  return !!nowIndicator;
+  return Boolean(nowIndicator);
 };
 
 export function formatEventChipTitle(

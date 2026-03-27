@@ -57,7 +57,7 @@ export function EventPreviewAttendees({
     end: end ?? "",
     timezone: timezone ?? "UTC",
     eventUid: extractEventBaseUuid(eventUid ?? ""),
-    enabled: !!(start && end && showAllAttendees),
+    enabled: Boolean(start && end && showAllAttendees),
   });
 
   const busyCaption = (a: userAttendee) =>
@@ -84,14 +84,15 @@ export function EventPreviewAttendees({
           </Box>
           {!showAllAttendees && (
             <AvatarGroup max={ATTENDEE_DISPLAY_LIMIT}>
-              {organizer &&
-                renderAttendeeBadge(
-                  organizer,
-                  "org",
-                  t,
-                  showAllAttendees,
-                  true
-                )}
+              {organizer
+                ? renderAttendeeBadge(
+                    organizer,
+                    "org",
+                    t,
+                    showAllAttendees,
+                    true
+                  )
+                : null}
               {attendees.map((a, idx) =>
                 renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
               )}
@@ -114,20 +115,21 @@ export function EventPreviewAttendees({
         </Box>
       </Box>
 
-      {showAllAttendees &&
-        organizer &&
-        renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
-      {showAllAttendees &&
-        attendees.map((a, idx) =>
-          renderAttendeeBadge(
-            a,
-            idx.toString(),
-            t,
-            showAllAttendees,
-            false,
-            busyCaption(a)
+      {showAllAttendees && organizer
+        ? renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)
+        : null}
+      {showAllAttendees
+        ? attendees.map((a, idx) =>
+            renderAttendeeBadge(
+              a,
+              idx.toString(),
+              t,
+              showAllAttendees,
+              false,
+              busyCaption(a)
+            )
           )
-        )}
+        : null}
     </>
   );
 }

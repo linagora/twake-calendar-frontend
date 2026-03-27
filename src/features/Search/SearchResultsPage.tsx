@@ -14,7 +14,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import VideocamIcon from "@mui/icons-material/Videocam";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useI18n } from "twake-i18n";
 import logo from "../../static/noResult-logo.svg";
 import { getEventAsync } from "../Calendars/services";
@@ -114,6 +114,7 @@ export default function SearchResultsPage() {
         <Stack sx={{ mt: 2 }}>
           {results.map((r: SearchEventResult, idx: number) => (
             <ResultItem
+              // eslint-disable-next-line react/no-array-index-key
               key={`row-${idx}-event-${r.data.uid}`}
               eventData={r}
               dispatch={dispatch}
@@ -250,9 +251,9 @@ function ResultItem({
           <Typography sx={styles.M3BodyLarge}>
             {eventData.data.summary || t("event.untitled")}
           </Typography>
-          {eventData.data.isRecurrentMaster && <RepeatIcon />}
+          {eventData.data.isRecurrentMaster ? <RepeatIcon /> : null}
         </Box>
-        {(eventData.data.organizer?.cn || eventData.data.organizer?.email) && (
+        {eventData.data.organizer?.cn || eventData.data.organizer?.email ? (
           <Typography
             sx={{
               ...styles.M3BodyMedium1,
@@ -265,8 +266,8 @@ function ResultItem({
           >
             {eventData.data.organizer.cn || eventData.data.organizer.email}
           </Typography>
-        )}
-        {eventData.data?.location && (
+        ) : null}
+        {eventData.data?.location ? (
           <Typography
             sx={{
               ...styles.M3BodyMedium,
@@ -279,8 +280,8 @@ function ResultItem({
           >
             {eventData.data.location}
           </Typography>
-        )}
-        {eventData.data?.description && (
+        ) : null}
+        {eventData.data?.description ? (
           <Typography
             sx={{
               ...styles.M3BodyMedium3,
@@ -293,12 +294,12 @@ function ResultItem({
           >
             {eventData.data.description.replace(/\n/g, " ")}
           </Typography>
-        )}
-        {eventData.data["x-openpaas-videoconference"] && (
+        ) : null}
+        {eventData.data["x-openpaas-videoconference"] ? (
           <Button
             startIcon={<VideocamIcon />}
             sx={{ flexShrink: 0, ml: "auto" }}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               window.open(
                 eventData.data["x-openpaas-videoconference"],
@@ -309,16 +310,16 @@ function ResultItem({
           >
             {t("eventPreview.joinVideoShort")}
           </Button>
-        )}
+        ) : null}
       </Box>
-      {calendar && calendar.events[eventData.data.uid] && (
+      {calendar && calendar.events[eventData.data.uid] ? (
         <EventPreviewModal
           eventId={eventData.data.uid}
           calId={calendar.id}
           open={openPreview}
           onClose={() => setOpenPreview(false)}
         />
-      )}
+      ) : null}
     </>
   );
 }

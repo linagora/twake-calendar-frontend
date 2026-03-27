@@ -203,7 +203,7 @@ function ResponsiveDialog({
           >
             <Box>{title}</Box>
             <Box>
-              {onExpandToggle && (
+              {onExpandToggle ? (
                 <IconButton
                   onClick={onExpandToggle}
                   aria-label="expand"
@@ -212,7 +212,7 @@ function ResponsiveDialog({
                 >
                   <OpenInFullIcon sx={{ padding: "2px" }} />
                 </IconButton>
-              )}
+              ) : null}
               <IconButton onClick={onClose} aria-label="close" size="small">
                 <CloseIcon />
               </IconButton>
@@ -238,7 +238,7 @@ function ResponsiveDialog({
           <Stack spacing={currentSpacing}>{children}</Stack>
         )}
       </DialogContent>
-      {actions && (
+      {actions ? (
         <DialogActions
           sx={{
             borderTop: actionsBorderTop
@@ -249,7 +249,7 @@ function ResponsiveDialog({
         >
           {actions}
         </DialogActions>
-      )}
+      ) : null}
     </Dialog>
   );
 }

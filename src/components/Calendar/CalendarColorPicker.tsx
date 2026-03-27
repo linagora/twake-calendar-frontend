@@ -47,13 +47,13 @@ export function ColorPicker({
           selectedColor={selectedColor}
         />
       ))}
-      {customColor && (
+      {customColor ? (
         <ColorBox
           color={customColor ?? {}}
           onChange={onChange}
           selectedColor={selectedColor}
         />
-      )}
+      ) : null}
 
       <ColorPickerBox
         onChange={(c) => {

@@ -100,9 +100,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 
     if (allday) {
       return Math.max(end.startOf("day").diff(start.startOf("day"), "day"), 0);
-    } else {
-      return Math.max(end.diff(start, "minute"), 0);
     }
+    return Math.max(end.diff(start, "minute"), 0);
   }, [startDate, startTime, endDate, endTime, allday]);
 
   React.useEffect(() => {
@@ -382,7 +381,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   }}
                 />
               </Box>
-              {shouldShowTimeFields && (
+              {shouldShowTimeFields ? (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     ampm={false}
@@ -405,7 +404,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                     }}
                   />
                 </Box>
-              )}
+              ) : null}
             </Box>
             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
               <Box sx={{ maxWidth: "300px", width: "48%" }}>
@@ -417,19 +416,19 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   slotProps={{
                     ...getSlotProps(
                       "end-date-input",
-                      !!validation.errors.dateTime,
+                      Boolean(validation.errors.dateTime),
                       t("dateTimeFields.endDate")
                     ),
                     field: getFieldSlotProps(
                       "end-date-input",
-                      !!validation.errors.dateTime,
+                      Boolean(validation.errors.dateTime),
                       t("dateTimeFields.endDate")
                     ),
                     layout: { sx: dateCalendarLayoutSx },
                   }}
                 />
               </Box>
-              {shouldShowTimeFields && (
+              {shouldShowTimeFields ? (
                 <Box sx={{ width: "110px" }}>
                   <TimePicker
                     ampm={false}
@@ -446,13 +445,13 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                       popper: { sx: timePickerPopperSx },
                       field: getTimeFieldSlotProps(
                         "end-time-input",
-                        !!validation.errors.dateTime,
+                        Boolean(validation.errors.dateTime),
                         t("dateTimeFields.endTime")
                       ),
                     }}
                   />
                 </Box>
-              )}
+              ) : null}
             </Box>
           </>
         ) : shouldShowEndDateNormal ? (
@@ -487,12 +486,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 slotProps={{
                   ...getSlotProps(
                     "end-date-input",
-                    !!validation.errors.dateTime,
+                    Boolean(validation.errors.dateTime),
                     t("dateTimeFields.endDate")
                   ),
                   field: getFieldSlotProps(
                     "end-date-input",
-                    !!validation.errors.dateTime,
+                    Boolean(validation.errors.dateTime),
                     t("dateTimeFields.endDate")
                   ),
                   layout: { sx: dateCalendarLayoutSx },
@@ -570,7 +569,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   popper: { sx: timePickerPopperSx },
                   field: getTimeFieldSlotProps(
                     "end-time-input",
-                    !!validation.errors.dateTime,
+                    Boolean(validation.errors.dateTime),
                     t("dateTimeFields.endTime")
                   ),
                 }}
@@ -580,7 +579,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         )}
 
         {/* Second row: Error message */}
-        {validation.errors.dateTime && (
+        {validation.errors.dateTime ? (
           <Box display="flex" gap={1} flexDirection="row">
             <Box
               sx={{
@@ -593,7 +592,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
               </Typography>
             </Box>
           </Box>
-        )}
+        ) : null}
       </Box>
     </LocalizationProvider>
   );

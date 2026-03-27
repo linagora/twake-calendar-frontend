@@ -40,7 +40,7 @@ export function EventPreviewHeader({
       gap={0.5}
       width="100%"
     >
-      {window.DEBUG && (
+      {window.DEBUG ? (
         <IconButton
           size="small"
           onClick={async () => {
@@ -64,17 +64,17 @@ export function EventPreviewHeader({
         >
           <FileDownloadOutlinedIcon />
         </IconButton>
-      )}
-      {canEdit && (
+      ) : null}
+      {canEdit ? (
         <IconButton size="small" onClick={onEdit}>
           <EditIcon />
         </IconButton>
-      )}
-      {canSeeMore && (
+      ) : null}
+      {canSeeMore ? (
         <IconButton size="small" onClick={onMoreClick}>
           <MoreVertIcon />
         </IconButton>
-      )}
+      ) : null}
       <IconButton size="small" onClick={onClose}>
         <CloseIcon />
       </IconButton>

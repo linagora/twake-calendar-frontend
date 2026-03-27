@@ -153,23 +153,23 @@ export function EventChip({
                   sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
                 >
                   {(!isMoreThan30 || isMonthView) &&
-                    !event._def.extendedProps.allday && (
-                      <Typography
-                        variant="body2"
-                        className="compactStartTime"
-                        style={{
-                          ...titleStyle,
-                          textDecoration: "none",
-                          overflow: "visible",
-                          opacity: "70%",
-                          letterSpacing: "0%",
-                          fontSize: "10px",
-                          marginRight: "4px",
-                        }}
-                      >
-                        {startTime}
-                      </Typography>
-                    )}
+                  !event._def.extendedProps.allday ? (
+                    <Typography
+                      variant="body2"
+                      className="compactStartTime"
+                      style={{
+                        ...titleStyle,
+                        textDecoration: "none",
+                        overflow: "visible",
+                        opacity: "70%",
+                        letterSpacing: "0%",
+                        fontSize: "10px",
+                        marginRight: "4px",
+                      }}
+                    >
+                      {startTime}
+                    </Typography>
+                  ) : null}
                   {DisplayedIcons(IconDisplayed, titleStyle.color)}
                   <Typography variant="body2" noWrap style={titleStyle}>
                     {event.title}
@@ -179,9 +179,7 @@ export function EventChip({
             )
           }
           subheader={
-            isMoreThan30 &&
-            !isMonthView &&
-            !event._def.extendedProps.allday && (
+            isMoreThan30 && !isMonthView && !event._def.extendedProps.allday ? (
               <Typography
                 style={{
                   color: titleStyle.color,
@@ -196,87 +194,87 @@ export function EventChip({
               >
                 {startTime} {!showCompact && ` - ${endTime}`}
               </Typography>
-            )
+            ) : null
           }
         />
         {isMoreThan60 &&
-          !showCompact &&
-          !isMonthView &&
-          !event._def.extendedProps.allday && (
-            <CardContent
-              sx={{
-                p: 0,
-                "& .MuiCardContent-content": {
+        !showCompact &&
+        !isMonthView &&
+        !event._def.extendedProps.allday ? (
+          <CardContent
+            sx={{
+              p: 0,
+              "& .MuiCardContent-content": {
+                overflow: "hidden",
+              },
+            }}
+          >
+            {event._def.extendedProps.location ? (
+              <Typography
+                style={{
+                  marginRight: 2,
+                  fontFamily: "Roboto",
+                  fontWeight: "500",
+                  fontSize: "12px",
+                  lineHeight: "16px",
+                  letterSpacing: "0%",
+                  verticalAlign: "middle",
+                  color: titleStyle.color,
+                  textOverflow: "ellipsis",
                   overflow: "hidden",
-                },
-              }}
-            >
-              {event._def.extendedProps.location && (
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {event._def.extendedProps.location}
+              </Typography>
+            ) : null}
+            <Box sx={{ display: "flex", alignItems: "flex-start", mt: 0.5 }}>
+              {event._def.extendedProps.description ? (
                 <Typography
-                  style={{
-                    marginRight: 2,
+                  sx={{
                     fontFamily: "Roboto",
-                    fontWeight: "500",
-                    fontStyle: "Medium",
-                    fontSize: "12px",
+                    fontWeight: 500,
+                    fontSize: "10px",
                     lineHeight: "16px",
                     letterSpacing: "0%",
-                    verticalAlign: "middle",
-                    color: titleStyle.color,
-                    textOverflow: "ellipsis",
+                    opacity: 0.8,
                     overflow: "hidden",
-                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    whiteSpace: "normal",
+                    flex: 1,
+                    maxWidth: "75%",
+                    color: titleStyle.color,
                   }}
                 >
-                  {event._def.extendedProps.location}
+                  {event._def.extendedProps.description}
                 </Typography>
-              )}
-              <Box sx={{ display: "flex", alignItems: "flex-start", mt: 0.5 }}>
-                {event._def.extendedProps.description && (
-                  <Typography
-                    sx={{
-                      fontFamily: "Roboto",
-                      fontWeight: 500,
-                      fontSize: "10px",
-                      lineHeight: "16px",
-                      letterSpacing: "0%",
-                      opacity: 0.8,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      whiteSpace: "normal",
-                      flex: 1,
-                      maxWidth: "75%",
-                      color: titleStyle.color,
-                    }}
-                  >
-                    {event._def.extendedProps.description}
-                  </Typography>
-                )}
-              </Box>
-            </CardContent>
-          )}
+              ) : null}
+            </Box>
+          </CardContent>
+        ) : null}
         {(isMoreThan60 || eventLength === 60) &&
-          !isMonthView &&
-          !event._def.extendedProps.allday &&
-          event._def.extendedProps.organizer &&
-          !showCompact &&
-          window.displayOrgAvatar && (
-            <Avatar
-              children={OrganizerAvatar.children}
-              color={OrganizerAvatar.color}
-              size="xs"
-              sx={{
-                bottom: 0,
-                right: 0,
-                margin: "8px",
-                position: "absolute",
-                border: "2px solid white",
-              }}
-            />
-          )}
+        !isMonthView &&
+        !event._def.extendedProps.allday &&
+        event._def.extendedProps.organizer &&
+        !showCompact &&
+        window.displayOrgAvatar ? (
+          <Avatar
+            color={OrganizerAvatar.color}
+            size="xs"
+            sx={{
+              bottom: 0,
+              right: 0,
+              margin: "8px",
+              position: "absolute",
+              border: "2px solid white",
+            }}
+          >
+            {OrganizerAvatar.children}
+          </Avatar>
+        ) : null}
       </Card>
     );
   } catch (e) {

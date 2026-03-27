@@ -17,7 +17,7 @@ export function OwnerCaption({
         wordBreak: "break-word",
       }}
     >
-      {showCaption && ownerDisplayName}
+      {showCaption ? ownerDisplayName : null}
     </Typography>
   );
 }

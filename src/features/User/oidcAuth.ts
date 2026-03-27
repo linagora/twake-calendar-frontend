@@ -25,7 +25,7 @@ export async function Auth() {
   const state = client.randomState();
   const parameters: Record<string, string> = {
     redirect_uri: clientConfig.redirect_uri,
-    scope: clientConfig.scope!,
+    scope: clientConfig.scope ?? "",
     code_challenge,
     code_challenge_method: clientConfig.code_challenge_method,
     state,
@@ -67,8 +67,11 @@ export async function Callback(
     );
 
     const { access_token } = tokenSet;
-    const claims = tokenSet.claims()!;
+    const claims = tokenSet.claims() as { sub: string };
     const { sub } = claims;
+    if (!sub || typeof sub !== "string") {
+      throw new Error("Invalid token claims: sub is missing or invalid");
+    }
 
     const userinfo = await client.fetchUserInfo(
       openIdClientConfig,

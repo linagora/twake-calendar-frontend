@@ -199,10 +199,10 @@ export function DisplayedIcons(
         letterSpacing: "inherit",
       }}
     >
-      {IconDisplayed.needAction && <HelpOutlineIcon style={iconStyle} />}
-      {IconDisplayed.declined && <CancelIcon style={iconStyle} />}
-      {IconDisplayed.tentative && <HelpOutlineIcon style={iconStyle} />}
-      {IconDisplayed.private && <LockOutlineIcon style={iconStyle} />}
+      {IconDisplayed.needAction ? <HelpOutlineIcon style={iconStyle} /> : null}
+      {IconDisplayed.declined ? <CancelIcon style={iconStyle} /> : null}
+      {IconDisplayed.tentative ? <HelpOutlineIcon style={iconStyle} /> : null}
+      {IconDisplayed.private ? <LockOutlineIcon style={iconStyle} /> : null}
     </span>
   );
 }

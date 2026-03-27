@@ -66,7 +66,7 @@ export function AddDescButton({
 
   return (
     <>
-      {!showDescription && (
+      {showDescription ? null : (
         <FieldWithLabel label="" isExpanded={showMore}>
           <SectionPreviewRow
             icon={<NotesIcon />}
@@ -76,7 +76,7 @@ export function AddDescButton({
           </SectionPreviewRow>
         </FieldWithLabel>
       )}
-      {showDescription && descriptionField}
+      {showDescription ? descriptionField : null}
     </>
   );
 }

@@ -26,15 +26,12 @@ export function CallbackResume() {
     hasRun.current = true;
 
     const runCallback = async () => {
-      // Read redirectState inside useEffect to avoid stale closures
-      const saved = sessionStorage.getItem("redirectState")
-        ? JSON.parse(sessionStorage.getItem("redirectState")!)
-        : null;
+      const redirectStateStr = sessionStorage.getItem("redirectState");
+      const saved = redirectStateStr ? JSON.parse(redirectStateStr) : null;
 
       // Check if we have saved tokens (already logged in)
-      const savedToken = sessionStorage.getItem("tokenSet")
-        ? JSON.parse(sessionStorage.getItem("tokenSet")!)
-        : null;
+      const tokenSetStr = sessionStorage.getItem("tokenSet");
+      const savedToken = tokenSetStr ? JSON.parse(tokenSetStr) : null;
 
       // If no redirectState but we have saved session, just go home
       // This can happen if user refreshes callback page or gets redirected here after already logged in

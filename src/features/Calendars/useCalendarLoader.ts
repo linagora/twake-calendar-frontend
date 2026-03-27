@@ -63,6 +63,8 @@ interface UseCalendarDataLoaderParams {
   tempCalendarIds: string[];
 }
 
+// TO DO: Needs to be refactored to resolve max-lines-per-function
+// eslint-disable-next-line max-lines-per-function
 export function useCalendarDataLoader({
   selectedDate,
   currentView,
@@ -200,7 +202,8 @@ export function useCalendarDataLoader({
       });
 
       prefetchUnits.forEach(({ id }, index) => {
-        const originalGap = savedGaps.get(index)!;
+        const originalGap = savedGaps.get(index);
+        if (!originalGap) return;
         void dispatch(
           getCalendarDetailAsync({
             calId: id,

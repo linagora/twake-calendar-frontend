@@ -69,7 +69,7 @@ export function ImportTab({
               onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
             />
           </Button>
-          {importFile && (
+          {importFile ? (
             <Typography
               variant="body2"
               color="text.secondary"
@@ -77,7 +77,7 @@ export function ImportTab({
             >
               {importFile.name}
             </Typography>
-          )}
+          ) : null}
           <Typography
             variant="caption"
             color="text.secondary"

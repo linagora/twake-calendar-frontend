@@ -398,7 +398,7 @@ export default function CalendarApp({
       </Box>
       <div className="calendar">
         <ImportAlert />
-        {menubarProps?.isIframe && <Menubar {...menubarProps} />}
+        {Boolean(menubarProps?.isIframe) && <Menubar {...menubarProps} />}
         {view === "calendar" && (
           <FullCalendar
             key={hiddenDays.join(",")}
@@ -450,11 +450,11 @@ export default function CalendarApp({
             weekNumberContent={(arg) => {
               return (
                 <div className="weekSelector">
-                  {displayWeekNumbers && (
+                  {displayWeekNumbers ? (
                     <div>
                       {t("menubar.views.week")} {arg.num}
                     </div>
-                  )}
+                  ) : null}
                   <TimezoneSelector
                     value={timezone}
                     referenceDate={calendarRef.current?.getDate() ?? new Date()}
@@ -581,7 +581,7 @@ export default function CalendarApp({
             }
           }}
         />
-        {openEventDisplay && eventDisplayedId && eventDisplayedCalId && (
+        {openEventDisplay && eventDisplayedId && eventDisplayedCalId ? (
           <EventPreviewModal
             eventId={eventDisplayedId}
             calId={eventDisplayedCalId}
@@ -589,7 +589,7 @@ export default function CalendarApp({
             open={openEventDisplay}
             onClose={eventHandlers.handleCloseEventDisplay}
           />
-        )}
+        ) : null}
         <EventErrorSnackbar messages={eventErrors} onClose={handleErrorClose} />
       </div>
     </main>

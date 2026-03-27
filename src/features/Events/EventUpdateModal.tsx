@@ -182,7 +182,7 @@ function EventUpdateModal({
       return;
     }
 
-    const isRecurringEvent = !!event.repetition?.freq;
+    const isRecurringEvent = Boolean(event.repetition?.freq);
     if (!isRecurringEvent) {
       setMasterEvent(null);
       return;
@@ -495,6 +495,8 @@ function EventUpdateModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, eventId, calId, typeOfAction]);
 
+  // TO DO: Needs to be refactored to resolve max-lines-per-function
+  // eslint-disable-next-line react-func/max-lines-per-function
   const handleSave = async () => {
     // Show validation errors when Save is clicked
     setShowValidationErrors(true);
@@ -523,7 +525,7 @@ function EventUpdateModal({
     const [baseUID, recurrenceId] = event.uid.split("/");
 
     // Check if this is a recurring event
-    const isRecurringEvent = !!event.repetition?.freq;
+    const isRecurringEvent = Boolean(event.repetition?.freq);
 
     const getSeriesInstances = (): Record<string, CalendarEvent> => {
       const instances: Record<string, CalendarEvent> = {};
@@ -629,8 +631,8 @@ function EventUpdateModal({
       description,
       location,
       repetition,
-      class: eventClass,
-      organizer: organizer,
+      class: eventClass as "PUBLIC" | "PRIVATE" | "CONFIDENTIAL",
+      organizer,
       timezone,
       transp: busy,
       sequence: (event.sequence ?? 1) + 1,
@@ -716,7 +718,7 @@ function EventUpdateModal({
           if (!instancesByURL.has(instance.URL)) {
             instancesByURL.set(instance.URL, []);
           }
-          instancesByURL.get(instance.URL)!.push(instance);
+          (instancesByURL.get(instance.URL) as CalendarEvent[]).push(instance);
           uniqueURLs.add(instance.URL);
         });
 

@@ -30,59 +30,58 @@ export function renderAttendeeBadge(
 
   if (!isFull) {
     return <Avatar key={key} {...stringAvatar(a.cn || a.cal_address)} />;
-  } else {
-    return (
-      <Box
-        key={key}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          marginBottom: 0.5,
-          padding: 0.5,
-          borderRadius: 1,
-        }}
-      >
-        <Badge
-          overlap="circular"
-          sx={{ marginRight: 2 }}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          badgeContent={
-            classIcon && (
-              <Box
-                style={{
-                  fontSize: 14,
-                  lineHeight: 0,
-                  backgroundColor: "white",
-                  borderRadius: "50%",
-                  padding: "1px",
-                }}
-              >
-                {classIcon}
-              </Box>
-            )
-          }
-        >
-          <Avatar {...stringAvatar(a.cn || a.cal_address)} />
-        </Badge>
-        <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <Typography variant="body2" noWrap>
-            {a.cn || a.cal_address}
-          </Typography>
-          {isOrganizer && (
-            <Typography variant="caption" color="text.secondary">
-              {t("event.organizer")}
-            </Typography>
-          )}
-          {caption && (
-            <Typography variant="caption" color="text.secondary">
-              {caption}
-            </Typography>
-          )}
-        </Box>
-      </Box>
-    );
   }
+  return (
+    <Box
+      key={key}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        marginBottom: 0.5,
+        padding: 0.5,
+        borderRadius: 1,
+      }}
+    >
+      <Badge
+        overlap="circular"
+        sx={{ marginRight: 2 }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        badgeContent={
+          classIcon ? (
+            <Box
+              style={{
+                fontSize: 14,
+                lineHeight: 0,
+                backgroundColor: "white",
+                borderRadius: "50%",
+                padding: "1px",
+              }}
+            >
+              {classIcon}
+            </Box>
+          ) : null
+        }
+      >
+        <Avatar {...stringAvatar(a.cn || a.cal_address)} />
+      </Badge>
+      <Box style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <Typography variant="body2" noWrap>
+          {a.cn || a.cal_address}
+        </Typography>
+        {isOrganizer ? (
+          <Typography variant="caption" color="text.secondary">
+            {t("event.organizer")}
+          </Typography>
+        ) : null}
+        {caption ? (
+          <Typography variant="caption" color="text.secondary">
+            {caption}
+          </Typography>
+        ) : null}
+      </Box>
+    </Box>
+  );
 }
 
 export function stringToColor(string: string) {

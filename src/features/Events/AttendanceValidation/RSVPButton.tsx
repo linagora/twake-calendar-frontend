@@ -124,7 +124,7 @@ export function RSVPButton({
       disabled={isLoading || isReadDelegated}
     >
       <Box display="flex" alignItems="center" gap={1}>
-        {showLoading && <CircularProgress size={20} color="inherit" />}
+        {showLoading ? <CircularProgress size={20} color="inherit" /> : null}
         {t(`eventPreview.${rsvpValue}`)}
       </Box>
     </Button>

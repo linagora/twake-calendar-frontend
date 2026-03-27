@@ -222,7 +222,7 @@ export default function SearchBar() {
           </IconButton>
         )}
 
-        {extended && (
+        {extended ? (
           <PeopleSearch
             selectedUsers={selectedContacts}
             onChange={(_event, users) => {
@@ -310,7 +310,7 @@ export default function SearchBar() {
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      {(query || selectedContacts.length > 0) && (
+                      {query || selectedContacts.length > 0 ? (
                         <IconButton
                           aria-label={t("common.clear")}
                           onClick={() => {
@@ -322,7 +322,7 @@ export default function SearchBar() {
                         >
                           <HighlightOffIcon />
                         </IconButton>
-                      )}
+                      ) : null}
                       <IconButton
                         aria-label={t("search.filter.filters")}
                         onMouseDown={(e) => e.preventDefault()}
@@ -348,7 +348,7 @@ export default function SearchBar() {
               />
             )}
           />
-        )}
+        ) : null}
       </Box>
 
       <Popover

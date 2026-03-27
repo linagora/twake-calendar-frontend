@@ -41,14 +41,16 @@ function CalendarPopover({
     : true;
   const canManageInvites =
     isOwn ||
-    !!calendar?.invite?.some((invite) => {
-      const inviteEmail = invite.href
-        .replace(/^mailto:/i, "")
-        .trim()
-        .toLowerCase();
-      const currentEmail = userData.email?.trim().toLowerCase();
-      return inviteEmail === currentEmail && invite.access === 5;
-    });
+    Boolean(
+      calendar?.invite?.some((invite) => {
+        const inviteEmail = invite.href
+          .replace(/^mailto:/i, "")
+          .trim()
+          .toLowerCase();
+        const currentEmail = userData.email?.trim().toLowerCase();
+        return inviteEmail === currentEmail && invite.access === 5;
+      })
+    );
 
   // existing calendar params
   const [name, setName] = useState("");
@@ -143,13 +145,13 @@ function CalendarPopover({
 
     const initialMap = new Map(
       initialUsers
-        .filter((u) => !!normaliseEmail(u))
+        .filter((u) => Boolean(normaliseEmail(u)))
         .map((u) => [normaliseEmail(u), u])
     );
 
     const currentMap = new Map(
       usersWithAccess
-        .filter((u) => !!normaliseEmail(u))
+        .filter((u) => Boolean(normaliseEmail(u)))
         .map((u) => [normaliseEmail(u), u])
     );
 
@@ -161,26 +163,28 @@ function CalendarPopover({
         return !initial || initial.accessRight !== u.accessRight;
       }) ||
       initialUsers.some(
-        (u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u))
+        (u) => Boolean(normaliseEmail(u)) && !currentMap.has(normaliseEmail(u))
       );
 
     if (!hasChanges || !canManageInvites) return;
 
     // Send all remaining users in `set`: the server treats it as the full list
     const set = usersWithAccess
-      .filter((u) => !!normaliseEmail(u))
+      .filter((u) => Boolean(normaliseEmail(u)))
       .map((u) => ({
         "dav:href": `mailto:${normaliseEmail(u)}`,
         [accessRightToDavProp(u.accessRight)]: true,
       }));
 
     const remove = initialUsers
-      .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
+      .filter(
+        (u) => Boolean(normaliseEmail(u)) && !currentMap.has(normaliseEmail(u))
+      )
       .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
 
     await dispatch(
       updateDelegationCalendarAsync({
-        calId: calendar?.id,
+        calId: calendar?.id as string,
         calLink,
         share: { set, remove },
       })
@@ -198,7 +202,7 @@ function CalendarPopover({
       createCalendarAsync({
         name: name.trim(),
         desc: desc.trim(),
-        color: color,
+        color,
         userData,
         calId,
       })
@@ -303,12 +307,12 @@ function CalendarPopover({
                 : t("calendarPopover.tabs.addNew")
             }
           />
-          {calendar && (
+          {calendar ? (
             <Tab value="access" label={t("calendarPopover.tabs.access")} />
-          )}
-          {isOwn && (
+          ) : null}
+          {isOwn ? (
             <Tab value="import" label={t("calendarPopover.tabs.import")} />
-          )}
+          ) : null}
         </Tabs>
       }
       actions={
@@ -365,14 +369,14 @@ function CalendarPopover({
           calendar={calendar}
         />
       )}
-      {tab === "access" && calendar && (
+      {tab === "access" && calendar ? (
         <AccessTab
           calendar={calendar}
           usersWithAccess={usersWithAccess}
           onUsersWithAccessChange={handleUsersWithAccessChange}
           onInvitesLoaded={handleInvitesLoaded}
         />
-      )}
+      ) : null}
       <ErrorSnackbar error={saveError} type="calendar" />
     </ResponsiveDialog>
   );

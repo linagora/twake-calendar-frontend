@@ -127,7 +127,7 @@ function EventPopover({
       );
 
     if (selectedAndWritable.length > 0) {
-      return selectedAndWritable[0].id!;
+      return selectedAndWritable[0].id ?? "";
     }
 
     const firstPersonal = Object.values(calList ?? {}).find(
@@ -931,11 +931,11 @@ function EventPopover({
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? "auto" : 0}>
-        {showMore && (
+        {showMore ? (
           <Button variant="outlined" onClick={handleClose}>
             {t("common.cancel")}
           </Button>
-        )}
+        ) : null}
         <Button variant="contained" onClick={handleSave}>
           {t("actions.save")}
         </Button>

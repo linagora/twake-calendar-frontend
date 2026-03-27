@@ -297,7 +297,7 @@ export const updateSeriesPartstat = async (
         // Check if this is the target attendee
         if (calAddress.toLowerCase().includes(attendeeEmail.toLowerCase())) {
           // Update PARTSTAT parameter
-          const params = { ...prop[1], partstat: partstat };
+          const params = { ...prop[1], partstat };
           return [prop[0], params, prop[2], prop[3]];
         }
       }

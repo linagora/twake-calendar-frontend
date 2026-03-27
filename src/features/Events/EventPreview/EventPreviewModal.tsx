@@ -84,11 +84,11 @@ export default function EventPreviewModal({
   return (
     <>
       <ResponsiveDialog
-        open={open && !hidePreview}
+        open={Boolean(open && !hidePreview)}
         onClose={() => onClose({}, "backdropClick")}
         showHeaderActions={false}
         actionsBorderTop={
-          !!(
+          Boolean(
             event.attendee?.find((p) => p.cal_address === user.email) && isOwn
           ) || isAdminOfResource
         }
@@ -108,14 +108,14 @@ export default function EventPreviewModal({
           />
         }
         actions={
-          contextualizedEvent && (
+          contextualizedEvent ? (
             <AttendanceValidation
               contextualizedEvent={contextualizedEvent}
               user={attendanceUser}
               setAfterChoiceFunc={setAfterChoiceFunc}
               setOpenEditModePopup={setOpenEditModePopup}
             />
-          )
+          ) : null
         }
       >
         {/* Title & date row */}
