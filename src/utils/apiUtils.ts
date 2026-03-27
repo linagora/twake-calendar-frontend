@@ -25,9 +25,13 @@ export const api = ky.extend({
   hooks: {
     beforeRequest: [
       async (request) => {
-        const saved = sessionStorage.getItem("tokenSet")
-          ? JSON.parse(sessionStorage.getItem("tokenSet")!)
-          : null;
+        const tokenSetStr = sessionStorage.getItem("tokenSet");
+        let saved = null;
+        try {
+          saved = tokenSetStr ? JSON.parse(tokenSetStr) : null;
+        } catch {
+          sessionStorage.removeItem("tokenSet");
+        }
         const access_token = saved?.access_token;
         if (access_token) {
           request.headers.set("Authorization", `Bearer ${access_token}`);

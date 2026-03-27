@@ -113,6 +113,8 @@ const CalendarSlice = createSlice({
       state.list[action.payload.id].color = action.payload.color;
     },
   },
+  // TO DO: Needs to be refactored to resolve max-lines-per-function
+  // eslint-disable-next-line react-func/max-lines-per-function, max-lines-per-function
   extraReducers: (builder) => {
     builder
       // Fulfilled cases

@@ -46,12 +46,11 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
     props: internalProps,
   });
 
-  const valueToDisplay =
-    pickerContext.value == null
-      ? ""
-      : pickerContext.value.isValid()
-        ? pickerContext.value.format(pickerContext.fieldFormat)
-        : "";
+  const valueToDisplay = !pickerContext.value
+    ? ""
+    : pickerContext.value.isValid()
+      ? pickerContext.value.format(pickerContext.fieldFormat)
+      : "";
 
   const mergedInputProps = {
     ...forwardedProps.InputProps,

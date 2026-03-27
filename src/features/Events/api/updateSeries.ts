@@ -226,7 +226,7 @@ export const updateSeries = async (
   ) as VCalComponent;
   const newRrule = findFieldValue(updatedMaster[1], "rrule");
   if (!newRrule && rrule) {
-    updatedMaster[1].push(rrule!);
+    updatedMaster[1].push(rrule as VObjectProperty);
   }
 
   const timezoneData = TIMEZONES.zones[event.timezone];

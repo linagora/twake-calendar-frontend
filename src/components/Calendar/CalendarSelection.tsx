@@ -87,7 +87,7 @@ function CalendarAccordion({
         }}
       >
         <span>{title}</span>
-        {showAddButton && (
+        {showAddButton ? (
           <IconButton
             component="span"
             onClick={(e) => {
@@ -101,7 +101,7 @@ function CalendarAccordion({
           >
             <AddIcon />
           </IconButton>
-        )}
+        ) : null}
       </AccordionSummary>
       <AccordionDetails style={{ textAlign: "left", padding: 0 }}>
         {calendars.map((id) => (
@@ -318,7 +318,7 @@ function CalendarSelector({
   const showCaption =
     !isPersonal &&
     trimmedName !== "#default" &&
-    ownerDisplayName != null &&
+    Boolean(ownerDisplayName) &&
     !hideOwner;
 
   return (

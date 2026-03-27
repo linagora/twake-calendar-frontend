@@ -34,7 +34,7 @@ export function EventPreviewActionMenu({
 
   return (
     <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
-      {mailSpaUrl && otherAttendees.length > 0 && (
+      {mailSpaUrl && otherAttendees.length > 0 ? (
         <MenuItem
           onClick={() =>
             window.open(
@@ -48,16 +48,16 @@ export function EventPreviewActionMenu({
         >
           {t("eventPreview.emailAttendees")}
         </MenuItem>
-      )}
+      ) : null}
       <EventDuplication
         onOpenDuplicate={() => {
           onClose();
           onDuplicate();
         }}
       />
-      {(isOwn || isWriteDelegated) && (
+      {isOwn || isWriteDelegated ? (
         <MenuItem onClick={onDelete}>{t("eventPreview.deleteEvent")}</MenuItem>
-      )}
+      ) : null}
     </Menu>
   );
 }

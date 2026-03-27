@@ -58,7 +58,10 @@ export function TempCalendarsInput({
           userColorsRef.current.set(user.email, colorPair);
         }
 
-        user.color = userColorsRef.current.get(user.email)!;
+        user.color = userColorsRef.current.get(user.email) as {
+          light: string;
+          dark: string;
+        };
         dispatch(
           getTempCalendarsListAsync(user, { signal: controller.signal })
         );

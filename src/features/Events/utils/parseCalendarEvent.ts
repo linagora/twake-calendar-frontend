@@ -176,6 +176,8 @@ export function parseCalendarEvent(
         }
         break;
       }
+      default:
+        break;
     }
   }
   if (recurrenceId && event.uid) {
@@ -192,6 +194,8 @@ export function parseCalendarEvent(
           break;
         case "trigger":
           event.alarm.trigger = String(value);
+          break;
+        default:
           break;
       }
     }

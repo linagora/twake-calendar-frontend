@@ -13,7 +13,7 @@ export function WebSocketStatusSnackbar({
   const { t } = useI18n();
   return (
     <Snackbar
-      open={!!message}
+      open={Boolean(message)}
       onClose={onClose}
       autoHideDuration={
         severity === "warning" || severity === "error" ? null : 6000

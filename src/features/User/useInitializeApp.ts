@@ -23,12 +23,20 @@ export function useInitializeApp() {
     hasInitiatedRef.current = true;
 
     const initiateLogin = async () => {
-      const savedToken = sessionStorage.getItem("tokenSet")
-        ? JSON.parse(sessionStorage.getItem("tokenSet")!)
-        : null;
-      const savedUser = sessionStorage.getItem("userData")
-        ? JSON.parse(sessionStorage.getItem("userData")!)
-        : null;
+      const tokenSetString = sessionStorage.getItem("tokenSet");
+      let savedToken = null;
+      try {
+        savedToken = tokenSetString ? JSON.parse(tokenSetString) : null;
+      } catch {
+        sessionStorage.removeItem("tokenSet");
+      }
+      const userDataString = sessionStorage.getItem("userData");
+      let savedUser = null;
+      try {
+        savedUser = userDataString ? JSON.parse(userDataString) : null;
+      } catch {
+        sessionStorage.removeItem("userData");
+      }
 
       if (savedToken && savedUser) {
         dispatch(setAppLoading(true));

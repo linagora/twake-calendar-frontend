@@ -90,7 +90,7 @@ export function EventPreviewDetails({
   return (
     <>
       {/* Video */}
-      {event.x_openpass_videoconference && (
+      {event.x_openpass_videoconference ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -115,11 +115,11 @@ export function EventPreviewDetails({
             </Link>
           }
         />
-      )}
+      ) : null}
 
-      {isResourceEventPreview &&
-        organizer &&
-        renderAttendeeBadge(organizer, "org", t, true, true)}
+      {isResourceEventPreview && organizer
+        ? renderAttendeeBadge(organizer, "org", t, true, true)
+        : null}
 
       {/* Attendees */}
       {!isResourceEventPreview && attendees.length > 0 && (
@@ -135,7 +135,7 @@ export function EventPreviewDetails({
       )}
 
       {/* Location */}
-      {event.location && (
+      {event.location ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -145,7 +145,7 @@ export function EventPreviewDetails({
           }
           text={event.location}
         />
-      )}
+      ) : null}
 
       {/* Resource */}
       {resources?.length > 0 && (
@@ -200,7 +200,7 @@ export function EventPreviewDetails({
       )}
 
       {/* Description */}
-      {event.description && (
+      {event.description ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -210,10 +210,10 @@ export function EventPreviewDetails({
           }
           text={event.description}
         />
-      )}
+      ) : null}
 
       {/* Alarm */}
-      {event.alarm && (
+      {event.alarm ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -233,10 +233,10 @@ export function EventPreviewDetails({
             })(),
           })}
         />
-      )}
+      ) : null}
 
       {/* Repetition */}
-      {event.repetition && (
+      {event.repetition ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -253,10 +253,10 @@ export function EventPreviewDetails({
             )}`,
           })}
         />
-      )}
+      ) : null}
 
       {/* Error */}
-      {event.error && (
+      {event.error ? (
         <InfoRow
           alignItems="flex-start"
           icon={
@@ -267,7 +267,7 @@ export function EventPreviewDetails({
           text={event.error}
           error
         />
-      )}
+      ) : null}
     </>
   );
 }

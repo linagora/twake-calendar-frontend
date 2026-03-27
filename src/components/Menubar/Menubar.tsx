@@ -98,6 +98,8 @@ export function Menubar({
       case "today":
         calendarRef.current.today();
         break;
+      default:
+        break;
     }
 
     // Notify parent about date change after navigation
@@ -252,7 +254,7 @@ export function Menubar({
           </div>
           {!isIframe && (
             <>
-              {supportLink && (
+              {supportLink ? (
                 <div className="menu-items">
                   <IconButton
                     component="a"
@@ -266,7 +268,7 @@ export function Menubar({
                     <HelpOutlineIcon />
                   </IconButton>
                 </div>
-              )}
+              ) : null}
 
               <div className="menu-items">
                 {applist.length > 0 && (

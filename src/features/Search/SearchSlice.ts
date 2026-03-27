@@ -2,9 +2,11 @@ import { formatReduxError } from "@/utils/errorUtils";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { searchEvent } from "../Events/EventApi";
 
+import { SearchEventResult } from "./types/SearchEventResult";
+
 export interface SearchResultsState {
   hits: number;
-  results: Record<string, unknown>[];
+  results: SearchEventResult[];
   error: string | null;
   loading: boolean;
 }
@@ -17,7 +19,7 @@ const initialState: SearchResultsState = {
 };
 
 export const searchEventsAsync = createAsyncThunk<
-  { hits: number; events: Record<string, unknown>[] },
+  { hits: number; events: SearchEventResult[] },
   {
     search: string;
     filters: {
@@ -49,7 +51,7 @@ export const searchResultsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
-    setResults: (state, action: PayloadAction<[]>) => {
+    setResults: (state, action: PayloadAction<SearchEventResult[]>) => {
       state.results = action.payload;
     },
     setHits: (state, action: PayloadAction<number>) => {

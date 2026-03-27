@@ -23,24 +23,23 @@ export function formatEnd(
           day: "numeric",
           timeZone,
         });
-  } else {
-    const sameDay = formatDatePart(startDate) === formatDatePart(endDate);
-    if (sameDay) {
-      return endDate.toLocaleTimeString(t("locale"), {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone,
-      });
-    }
-    return endDate.toLocaleString(t("locale"), {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  }
+  const sameDay = formatDatePart(startDate) === formatDatePart(endDate);
+  if (sameDay) {
+    return endDate.toLocaleTimeString(t("locale"), {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
       timeZone,
     });
   }
+  return endDate.toLocaleString(t("locale"), {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone,
+  });
 }

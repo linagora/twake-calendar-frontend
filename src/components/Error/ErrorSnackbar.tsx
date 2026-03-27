@@ -50,7 +50,7 @@ export function ErrorSnackbar({
 
   return (
     <Snackbar
-      open={!!error}
+      open={Boolean(error)}
       onClose={handleCloseSnackbar}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >

@@ -134,7 +134,7 @@ export function SettingsTab({
       </Box>
 
       {/* Form group 4: New events visibility */}
-      {isOwn && (
+      {isOwn ? (
         <Box mt={2}>
           <Typography variant="h6" sx={{ margin: 0 }}>
             {t("calendar.newEventsVisibility")}
@@ -159,7 +159,7 @@ export function SettingsTab({
             </ToggleButtonGroup>
           </Box>
         </Box>
-      )}
+      ) : null}
     </>
   );
 }

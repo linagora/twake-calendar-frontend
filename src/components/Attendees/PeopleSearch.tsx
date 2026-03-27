@@ -161,7 +161,7 @@ export function PeopleSearch({
       };
 
       const defaultTextFieldProps = {
-        error: !!inputError,
+        error: Boolean(inputError),
         helperText: inputError,
         placeholder: searchPlaceholder,
         label: "",
@@ -181,7 +181,7 @@ export function PeopleSearch({
             </label>
             {inputSlot({
               ...enhancedParams,
-              error: !!inputError,
+              error: Boolean(inputError),
               helperText: inputError,
               placeholder: searchPlaceholder,
               label: "",
@@ -221,8 +221,8 @@ export function PeopleSearch({
         onBlur={freeSolo ? handleBlurCommit : undefined}
         open={
           customRenderInput
-            ? isOpen && !!query && (loading || options.length > 0)
-            : isOpen && !!query && (loading || hasSearched)
+            ? isOpen && Boolean(query) && (loading || options.length > 0)
+            : isOpen && Boolean(query) && (loading || hasSearched)
         }
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
@@ -235,9 +235,8 @@ export function PeopleSearch({
         getOptionLabel={(option) => {
           if (typeof option === "object") {
             return option.displayName || option.email;
-          } else {
-            return option;
           }
+          return option;
         }}
         sx={{
           "& .MuiAutocomplete-inputRoot": {

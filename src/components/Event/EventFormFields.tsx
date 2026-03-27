@@ -211,7 +211,7 @@ export default function EventFormFields({
   const selectedOwnerDisplayName = selectedCalendar
     ? (makeDisplayName(selectedCalendar) ?? "")
     : "";
-  const isSelectedDelegated = !!selectedCalendar?.delegated;
+  const isSelectedDelegated = Boolean(selectedCalendar?.delegated);
 
   // Reset all click-tracking state when modal closes
   React.useEffect(() => {
@@ -573,7 +573,7 @@ export default function EventFormFields({
                 <Checkbox
                   checked={
                     showRepeat ||
-                    (typeOfAction === "solo" && !!repetition?.freq)
+                    (typeOfAction === "solo" && Boolean(repetition?.freq))
                   }
                   disabled={typeOfAction === "solo"}
                   onChange={() => {
@@ -626,16 +626,16 @@ export default function EventFormFields({
       )}
 
       {!(!showMore && !hasClickedDateTimeSection) &&
-        (showRepeat || (typeOfAction === "solo" && repetition?.freq)) && (
-          <FieldWithLabel label=" " isExpanded={showMore}>
-            <RepeatEvent
-              repetition={repetition}
-              eventStart={new Date(start)}
-              setRepetition={setRepetition}
-              isOwn={typeOfAction !== "solo"}
-            />
-          </FieldWithLabel>
-        )}
+      (showRepeat || (typeOfAction === "solo" && repetition?.freq)) ? (
+        <FieldWithLabel label=" " isExpanded={showMore}>
+          <RepeatEvent
+            repetition={repetition}
+            eventStart={new Date(start)}
+            setRepetition={setRepetition}
+            isOwn={typeOfAction !== "solo"}
+          />
+        </FieldWithLabel>
+      ) : null}
 
       <FieldWithLabel
         label={showMore ? t("event.form.participants") : ""}
@@ -721,7 +721,7 @@ export default function EventFormFields({
               {t("event.form.addVisioConference")}
             </Button>
 
-            {hasVideoConference && meetingLink && (
+            {hasVideoConference && meetingLink ? (
               <>
                 <Button
                   startIcon={
@@ -759,7 +759,7 @@ export default function EventFormFields({
                   <DeleteIcon />
                 </IconButton>
               </>
-            )}
+            ) : null}
           </Box>
         )}
       </FieldWithLabel>
@@ -833,7 +833,8 @@ export default function EventFormFields({
                 </Typography>
                 <OwnerCaption
                   showCaption={
-                    isSelectedDelegated && selectedCalendar.name !== "#default"
+                    Boolean(isSelectedDelegated) &&
+                    selectedCalendar.name !== "#default"
                   }
                   ownerDisplayName={selectedOwnerDisplayName}
                 />
@@ -865,7 +866,7 @@ export default function EventFormFields({
         )}
       </FieldWithLabel>
 
-      {showMore && (
+      {showMore ? (
         <>
           <FieldWithLabel
             label={t("event.form.resource")}
@@ -982,7 +983,7 @@ export default function EventFormFields({
             </ToggleButtonGroup>
           </FieldWithLabel>
         </>
-      )}
+      ) : null}
       <SnackbarAlert
         setOpen={setOpenToast}
         open={openToast}

@@ -104,7 +104,7 @@ export function AccessTab({
         onInvitesLoaded={onInvitesLoaded}
       />
 
-      {!!window.DAV_BASE_URL && !isResource && (
+      {Boolean(window.DAV_BASE_URL) && !isResource && (
         <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
           <Box mt={2}>
             <TextField

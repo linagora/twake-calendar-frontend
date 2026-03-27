@@ -161,7 +161,7 @@ export function useAttendeesFreeBusy({
         resolved.map((r) => r.userId),
         toUtcIcal(start, timezone),
         toUtcIcal(end, timezone),
-        eventUid!
+        eventUid as string
       ).then(toFreeBusyMap(resolved))
     )
       .then((updates) => {

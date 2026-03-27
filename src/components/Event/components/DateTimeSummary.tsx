@@ -145,12 +145,12 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
       <Box>
         <Typography component="p" sx={primaryStyle}>
           {dateText}
-          {showEndDate && <br />}
-          {timeText && (
+          {showEndDate ? <br /> : null}
+          {timeText ? (
             <Box component="span" sx={{ ml: showEndDate ? 0 : 2 }}>
               {timeText}
             </Box>
-          )}
+          ) : null}
         </Typography>
         <Box display="flex" gap={2} alignItems="center" mt={0.5}>
           <Typography variant="caption" sx={{ color: "#444746" }}>

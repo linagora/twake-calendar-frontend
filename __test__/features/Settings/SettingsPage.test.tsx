@@ -54,7 +54,6 @@ describe("SettingsPage", () => {
     const { container } = renderWithProviders(<SettingsPage />, preloadedState);
 
     // Check sidebar navigation items
-    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const sidebar = container.querySelector(".settings-sidebar");
     expect(sidebar).toBeInTheDocument();
     expect(screen.getAllByText(/settings.title/i).length).toBeGreaterThan(0);
@@ -64,7 +63,6 @@ describe("SettingsPage", () => {
   it("highlights active navigation item", () => {
     const { container } = renderWithProviders(<SettingsPage />, preloadedState);
 
-    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     const settingsNavItem = container.querySelector(
       ".settings-nav-item.active"
     );
@@ -136,7 +134,6 @@ describe("SettingsPage", () => {
     expect(languageSelect).toBeInTheDocument();
 
     // Verify that the underlying native input reflects the user language ("fr")
-    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement | null;
@@ -152,7 +149,6 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;
@@ -201,7 +197,6 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;
@@ -228,7 +223,6 @@ describe("SettingsPage", () => {
     const languageSelect = screen.getByLabelText("settings.languageSelector");
 
     // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
     const nativeInput = languageSelect.querySelector(
       'input[aria-hidden="true"]'
     ) as HTMLInputElement;

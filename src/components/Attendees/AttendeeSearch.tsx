@@ -16,7 +16,8 @@ const attendeeToUser = (a: userAttendee, openpaasId = ""): User => ({
   openpaasId,
 });
 
-const hasCalendar = (u: User) => u.objectType === "user" && !!u.openpaasId;
+const hasCalendar = (u: User) =>
+  u.objectType === "user" && Boolean(u.openpaasId);
 
 export default function AttendeeSearch({
   attendees,
@@ -44,7 +45,11 @@ export default function AttendeeSearch({
   const [userIdMap, setUserIdMap] = useState<Record<string, string>>({});
   const [addedUsers, setAddedUsers] = useState<User[]>([]);
   const initialEmailsRef = useRef<Set<string> | null>(null);
-  if (initialEmailsRef.current === null && !!eventUid && attendees.length > 0) {
+  if (
+    initialEmailsRef.current === null &&
+    Boolean(eventUid) &&
+    attendees.length > 0
+  ) {
     initialEmailsRef.current = new Set(attendees.map((a) => a.cal_address));
   }
   const initialEmails = eventUid
@@ -84,7 +89,7 @@ export default function AttendeeSearch({
     end: end ?? "",
     timezone: timezone ?? "",
     eventUid,
-    enabled: !!(start && end && selectedUsers.length > 0),
+    enabled: Boolean(start && end && selectedUsers.length > 0),
   });
 
   const statusMap = { ...freeBusyMap, ...contactMap };

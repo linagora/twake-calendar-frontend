@@ -154,7 +154,7 @@ export function ResourceSearch({
       };
 
       const defaultTextFieldProps = {
-        error: !!inputError,
+        error: Boolean(inputError),
         helperText: inputError,
         placeholder: searchPlaceholder,
         label: "",
@@ -176,7 +176,7 @@ export function ResourceSearch({
             )}
             {inputSlot({
               ...enhancedParams,
-              error: !!inputError,
+              error: Boolean(inputError),
               helperText: inputError,
               placeholder: searchPlaceholder,
               label: "",
@@ -225,8 +225,8 @@ export function ResourceSearch({
         onBlur={freeSolo ? handleBlurCommit : undefined}
         open={
           customRenderInput
-            ? isOpen && !!query && (loading || options.length > 0)
-            : isOpen && !!query && (loading || hasSearched)
+            ? isOpen && Boolean(query) && (loading || options.length > 0)
+            : isOpen && Boolean(query) && (loading || hasSearched)
         }
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
@@ -239,9 +239,8 @@ export function ResourceSearch({
         getOptionLabel={(option: Resource | string) => {
           if (typeof option === "object") {
             return option.displayName;
-          } else {
-            return option;
           }
+          return option;
         }}
         sx={{
           "& .MuiAutocomplete-inputRoot": {
@@ -252,7 +251,7 @@ export function ResourceSearch({
         value={selectedResources}
         inputValue={query}
         onInputChange={(_event, value: string) => setQuery(value)}
-        onChange={(event, value: string[] | Resource[]) => {
+        onChange={(event, value: (string | Resource)[]) => {
           setInputError(null);
           const mapped = value
             .map((v: string | Resource) =>
@@ -271,7 +270,7 @@ export function ResourceSearch({
         }}
         // When render input is custom, the adornments should be handled by the custom component
         forcePopupIcon={!customRenderInput}
-        disableClearable={!!customRenderInput}
+        disableClearable={Boolean(customRenderInput)}
         renderInput={(params) =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
@@ -296,7 +295,7 @@ export function ResourceSearch({
             </ListItem>
           );
         }}
-        renderValue={(value: string[] | Resource[], getTagProps) =>
+        renderValue={(value: (string | Resource)[], getTagProps) =>
           value.map((option: string | Resource, index) => {
             const isString = typeof option === "string";
             const label = isString ? option : option.displayName;
