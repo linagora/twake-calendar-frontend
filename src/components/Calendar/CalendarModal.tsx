@@ -134,9 +134,18 @@ function CalendarPopover({
     }
   };
 
-  async function updateCalendarInvites(calLink: string) {
+  async function updateCalendarInvites(
+    calLink: string,
+    initialUsers: UserWithAccess[]
+  ) {
     const normaliseEmail = (u: UserWithAccess) =>
       u.email?.trim().toLowerCase() ?? "";
+
+    const initialMap = new Map(
+      initialUsers
+        .filter((u) => !!normaliseEmail(u))
+        .map((u) => [normaliseEmail(u), u])
+    );
 
     const currentMap = new Map(
       usersWithAccess
@@ -144,6 +153,20 @@ function CalendarPopover({
         .map((u) => [normaliseEmail(u), u])
     );
 
+    const hasChanges =
+      usersWithAccess.some((u) => {
+        const email = normaliseEmail(u);
+        if (!email) return false;
+        const initial = initialMap.get(email);
+        return !initial || initial.accessRight !== u.accessRight;
+      }) ||
+      initialUsers.some(
+        (u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u))
+      );
+
+    if (!hasChanges || !canManageInvites) return;
+
+    // Send all remaining users in `set`: the server treats it as the full list
     const set = usersWithAccess
       .filter((u) => !!normaliseEmail(u))
       .map((u) => ({
@@ -151,11 +174,9 @@ function CalendarPopover({
         [accessRightToDavProp(u.accessRight)]: true,
       }));
 
-    const remove = initialUsersRef.current
+    const remove = initialUsers
       .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
       .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
-
-    if ((set.length === 0 && remove.length === 0) || !canManageInvites) return;
 
     await dispatch(
       updateDelegationCalendarAsync({
@@ -194,9 +215,12 @@ function CalendarPopover({
   const handleSave = async () => {
     if (!name.trim()) return;
     if (calendar) {
+      // Snapshot before any await: handleClose resets the ref immediately after
+      // calling handleSave(), so we must read it synchronously here.
+      const initialUsersSnapshot = [...initialUsersRef.current];
       try {
         await updateCalendar(calendar.id, calendar.link);
-        await updateCalendarInvites(calendar.link);
+        await updateCalendarInvites(calendar.link, initialUsersSnapshot);
       } catch {
         setSaveError(t("error.title"));
         return;
