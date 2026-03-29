@@ -214,6 +214,171 @@ describe("PeopleSearch", () => {
     });
   });
 
+  describe("paste multiple attendees", () => {
+    function setupFreeSolo(selectedUsers: User[] = []) {
+      const onChange = jest.fn();
+      renderWithProviders(
+        <PeopleSearch
+          objectTypes={["user"]}
+          selectedUsers={selectedUsers}
+          onChange={onChange}
+          freeSolo
+        />
+      );
+      return { onChange };
+    }
+
+    it("splits pasted comma-separated emails into individual attendees", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com, bob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: "alice@example.com" }),
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+      });
+    });
+
+    it("splits pasted semicolon-separated emails", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com;bob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: "alice@example.com" }),
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+      });
+    });
+
+    it("splits pasted newline-separated emails", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com\nbob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: "alice@example.com" }),
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+      });
+    });
+
+    it("splits pasted space-separated emails", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com bob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: "alice@example.com" }),
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+      });
+    });
+
+    it("skips duplicate emails already in selectedUsers", async () => {
+      const existing: User = {
+        email: "alice@example.com",
+        displayName: "Alice",
+      };
+      const { onChange } = setupFreeSolo([existing]);
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com, bob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            existing,
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+        // Should NOT have alice duplicated
+        const call = onChange.mock.calls[0][1];
+        const aliceCount = call.filter(
+          (u: User) => u.email === "alice@example.com"
+        ).length;
+        expect(aliceCount).toBe(1);
+      });
+    });
+
+    it("leaves invalid text in input when some emails are invalid", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com, not-an-email, bob@example.com",
+        },
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: "alice@example.com" }),
+            expect.objectContaining({ email: "bob@example.com" }),
+          ])
+        );
+      });
+    });
+
+    it("does not intercept paste of a single email", async () => {
+      const { onChange } = setupFreeSolo();
+      const input = screen.getByRole("combobox");
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => "alice@example.com",
+        },
+      });
+
+      // Single email should NOT trigger multi-paste handler
+      expect(onChange).not.toHaveBeenCalled();
+    });
+  });
+
   it("retains input value when field loses focus (blur)", async () => {
     let resolveSearch: (value: User[]) => void;
     const searchPromise = new Promise<User[]>((resolve) => {
