@@ -178,8 +178,11 @@
         "-PT5H": "5 heures avant",
         "-PT12H": "12 heures avant",
         "-PT1D": "1 jour avant",
+        "-P1D": "1 jour avant",
         "-PT2D": "2 jours avant",
+        "-P2D": "2 jours avant",
         "-PT1W": "1 semaine avant",
+        "-P1W": "1 semaine avant",
         "EMAIL": "e-mail",
         "DISPLAY": "affichage",
         "AUDIO": "audio"

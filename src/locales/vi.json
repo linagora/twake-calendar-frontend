@@ -176,8 +176,11 @@
         "-PT5H": "5 giờ trước",
         "-PT12H": "12 giờ trước",
         "-PT1D": "1 ngày trước",
+        "-P1D": "1 ngày trước",
         "-PT2D": "2 ngày trước",
+        "-P2D": "2 ngày trước",
         "-PT1W": "1 tuần trước",
+        "-P1W": "1 tuần trước",
         "EMAIL": "email",
         "DISPLAY": "hiển thị",
         "AUDIO": "âm thanh"
