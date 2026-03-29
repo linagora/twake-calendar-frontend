@@ -23,7 +23,7 @@ describe("Calendar App Component Display Tests", () => {
     },
   };
   test("renders the Menubar component", () => {
-    (window as any).appList = [
+    window.appList = [
       { name: "Twake", link: "/twake", icon: "twake.svg" },
       { name: "Calendar", link: "/calendar", icon: "calendar.svg" },
     ];
@@ -44,7 +44,7 @@ describe("Calendar App Component Display Tests", () => {
     expect(logoElement).toBeInTheDocument();
   });
   it("renders the main title", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
@@ -62,7 +62,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("shows avatar with user initials", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
@@ -80,7 +80,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("shows avatar with email initials when no user name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -110,7 +110,7 @@ describe("Calendar App Component Display Tests", () => {
 
   // Edge cases for avatar display logic
   it("handles user with only family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -140,7 +140,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with only name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -170,7 +170,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with both name and family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -200,7 +200,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with no name and family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -230,7 +230,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with empty email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -262,7 +262,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with null email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -294,7 +294,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("handles user with undefined email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const preloadedState = {
       user: {
         userData: {
@@ -326,7 +326,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("shows apps button when applist is not empty", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
@@ -344,7 +344,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("opens popover when clicking apps button", () => {
-    (window as any).appList = [
+    window.appList = [
       { name: "Twake", icon: "twake.svg", link: "/twake" },
       { name: "Calendar", icon: "calendar.svg", link: "/calendar" },
     ];
@@ -368,7 +368,7 @@ describe("Calendar App Component Display Tests", () => {
   });
 
   it("renders app icons as links", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+    window.appList = [{ name: "test", icon: "test", link: "test" }];
     const mockCalendarRef = { current: null };
     const mockOnRefresh = jest.fn();
     const mockCurrentDate = new Date("2024-04-15");
@@ -408,7 +408,7 @@ describe("Menubar interaction with expanded Dialog", () => {
   };
 
   beforeEach(() => {
-    (window as any).appList = [
+    window.appList = [
       { name: "Twake", link: "/twake", icon: "twake.svg" },
       { name: "Calendar", link: "/calendar", icon: "calendar.svg" },
     ];
@@ -793,7 +793,7 @@ describe("Logo click navigation to current week", () => {
   };
 
   beforeEach(() => {
-    (window as any).appList = [];
+    window.appList = [];
   });
 
   it("navigates to week view and current week when clicking logo from month view", async () => {

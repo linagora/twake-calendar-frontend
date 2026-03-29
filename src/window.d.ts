@@ -28,6 +28,8 @@ declare global {
     WS_PING_PERIOD_MS: number;
     WS_PING_TIMEOUT_PERIOD_MS: number;
 
+    displayOrgAvatar: boolean;
+
     appList: AppIconProps[];
 
     __calendarRef: MutableRefObject<CalendarApi | null>;
