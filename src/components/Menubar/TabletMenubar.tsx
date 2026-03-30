@@ -1,6 +1,6 @@
 import { getInitials, stringToGradient } from '@/utils/avatarUtils'
 import { getUserDisplayName } from '@/utils/userUtils'
-import { Avatar, Button, ButtonGroup, IconButton } from '@linagora/twake-mui'
+import { Avatar, IconButton, Stack } from '@linagora/twake-mui'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MenuIcon from '@mui/icons-material/Menu'
@@ -56,23 +56,24 @@ export function TabletMenubar({
 
         <div className="menu-items" style={{ marginLeft: 0 }}>
           <div className="navigation-controls">
-            <ButtonGroup
-              size="medium"
-              sx={{
-                '& button:first-of-type': { borderRadius: '12px 0 0 12px' },
-                '& button:last-of-type': { borderRadius: '0 12px 12px 0' }
-              }}
-            >
-              <Button sx={{ width: 20 }} onClick={() => onNavigate('prev')}>
+            <Stack direction="row">
+              <IconButton onClick={() => onNavigate('prev')}>
                 <ChevronLeftIcon sx={{ height: 20 }} />
-              </Button>
-              <Button variant="outlined" onClick={() => onNavigate('today')}>
+              </IconButton>
+              <IconButton
+                color="primary"
+                sx={{
+                  border: '1px solid',
+                  borderRadius: '12px'
+                }}
+                onClick={() => onNavigate('today')}
+              >
                 <TodayIcon />
-              </Button>
-              <Button sx={{ width: 20 }} onClick={() => onNavigate('next')}>
+              </IconButton>
+              <IconButton onClick={() => onNavigate('next')}>
                 <ChevronRightIcon sx={{ height: 20 }} />
-              </Button>
-            </ButtonGroup>
+              </IconButton>
+            </Stack>
           </div>
         </div>
 
