@@ -62,7 +62,36 @@ pipeline {
               if (memberStatus == '204') {
                 echo "Fork owner '${forkOwner}' is a linagora org member, proceeding."
               } else if (memberStatus == '404') {
-                error("Fork owner '${forkOwner}' is not a member of the linagora organization. Skipping deploy.")
+                echo "Fork owner '${forkOwner}' is not a member of the linagora organization."
+                // Check if a linagora member has approved the build via comment
+                def approvedByMember = false
+                def commentsJson = sh(
+                  script: """curl -s \
+                    -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \
+                    "https://api.github.com/repos/linagora/twake-calendar-frontend/issues/\${CHANGE_ID}/comments" """,
+                  returnStdout: true
+                ).trim()
+                def comments = readJSON text: commentsJson
+                for (comment in comments) {
+                  if (comment.body.trim() == 'Build this please') {
+                    def commenter = comment.user.login
+                    def commenterStatus = sh(
+                      script: """curl -s -o /dev/null -w "%{http_code}" \
+                        -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \
+                        "https://api.github.com/orgs/linagora/members/${commenter}" """,
+                      returnStdout: true
+                    ).trim()
+                    if (commenterStatus == '204') {
+                      echo "Build approved by linagora member '${commenter}', proceeding."
+                      approvedByMember = true
+                      break
+                    }
+                  }
+                }
+                if (!approvedByMember) {
+                  echo "No linagora member approval found. Skipping deploy."
+                  return
+                }
               } else if (memberStatus == '401' || memberStatus == '403') {
                 error("Authentication/permission error validating fork owner: ${memberStatus}")
               } else {
