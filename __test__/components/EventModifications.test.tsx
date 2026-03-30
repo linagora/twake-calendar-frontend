@@ -95,8 +95,8 @@ describe("CalendarApp integration", () => {
     jest.spyOn(appHooks, "useAppDispatch").mockReturnValue(dispatch);
 
     renderCalendar();
-    const calendarRef: React.RefObject<CalendarApi | null> = (window as any)
-      .__calendarRef;
+    const calendarRef: React.RefObject<CalendarApi | null> =
+      window.__calendarRef;
 
     const calendarApi = calendarRef.current;
 
