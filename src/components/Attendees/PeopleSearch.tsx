@@ -257,7 +257,14 @@ export function PeopleSearch({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inputError, t, onToggleEventPreview, loading, searchPlaceholder, handlePaste]
+    [
+      inputError,
+      t,
+      onToggleEventPreview,
+      loading,
+      searchPlaceholder,
+      handlePaste,
+    ]
   );
 
   return (
