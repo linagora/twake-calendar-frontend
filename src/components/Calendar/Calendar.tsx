@@ -54,7 +54,6 @@ const localeMap: Record<string, LocaleInput | undefined> = {
 
 interface CalendarAppProps {
   calendarRef: MutableRefObject<CalendarApi | null>
-  isTablet: boolean
   onDateChange?: (date: Date) => void
   onViewChange?: (view: string) => void
   menubarProps?: MenubarProps
@@ -69,7 +68,7 @@ export default function CalendarApp({
   menubarProps,
   openSidebar,
   onCloseSidebar
-}: CalendarAppProps) {
+}: CalendarAppProps): JSX.Element {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [debouncedDate, setDebouncedDate] = useState(new Date())
   useEffect(() => {

@@ -1,11 +1,8 @@
-import { getInitials, stringToGradient } from '@/utils/avatarUtils'
-import { getUserDisplayName } from '@/utils/userUtils'
-import { Avatar, IconButton, Stack } from '@linagora/twake-mui'
+import { IconButton, Stack } from '@linagora/twake-mui'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MenuIcon from '@mui/icons-material/Menu'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import TodayIcon from '@mui/icons-material/Today'
 import { useI18n } from 'twake-i18n'
 import SearchBar from './EventSearchBar'
@@ -111,35 +108,17 @@ export function TabletMenubar({
         </div>
 
         <div className="menu-items">
-          <IconButton
-            onClick={!isIframe ? onUserMenuOpen : onSettingsClick}
-            aria-label={
-              isIframe ? t('menubar.settings') : t('menubar.userProfile')
-            }
-            title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
-          >
-            {!isIframe ? (
-              <Avatar
-                color={stringToGradient(getUserDisplayName(user))}
-                size="m"
-              >
-                {getInitials(getUserDisplayName(user))}
-              </Avatar>
-            ) : (
-              <SettingsOutlinedIcon />
-            )}
-          </IconButton>
+          <UserMenu
+            anchorEl={userMenuAnchorEl}
+            onClose={onUserMenuClose}
+            onSettingsClick={onSettingsClick}
+            onLogoutClick={onLogoutClick}
+            onUserMenuOpen={onUserMenuOpen}
+            isIframe={isIframe}
+            user={user}
+          />
         </div>
       </div>
-
-      <UserMenu
-        open={Boolean(userMenuAnchorEl)}
-        anchorEl={userMenuAnchorEl}
-        onClose={onUserMenuClose}
-        onSettingsClick={onSettingsClick}
-        onLogoutClick={onLogoutClick}
-        user={user}
-      />
     </header>
   )
 }

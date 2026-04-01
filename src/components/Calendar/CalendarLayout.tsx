@@ -28,9 +28,11 @@ export default function CalendarLayout() {
   )
 
   useEffect(() => {
-    setCurrentView(
-      isTablet ? CALENDAR_VIEWS.timeGridDay : CALENDAR_VIEWS.timeGridWeek
-    )
+    const setView = () =>
+      setCurrentView(
+        isTablet ? CALENDAR_VIEWS.timeGridDay : CALENDAR_VIEWS.timeGridWeek
+      )
+    setView()
   }, [isTablet])
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
@@ -95,7 +97,6 @@ export default function CalendarLayout() {
       {!isInIframe && <Menubar {...menubarProps} />}
       {(view === 'calendar' || view === 'search') && (
         <CalendarApp
-          isTablet={isTablet}
           calendarRef={calendarRef}
           onDateChange={handleDateChange}
           onViewChange={handleViewChange}

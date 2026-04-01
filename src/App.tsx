@@ -43,7 +43,7 @@ const isValidLanguage = (
   return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage)
 }
 
-function App() {
+function App(): JSX.Element {
   const error = useAppSelector(state => state.user.error)
   const appLoading = useAppSelector(state => state.loading.isLoading)
   const userLanguage = useAppSelector(state => state.user.coreConfig.language)

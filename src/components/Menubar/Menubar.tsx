@@ -8,7 +8,6 @@ import { CalendarApi } from '@fullcalendar/core'
 import React, { useEffect, useState } from 'react'
 import { push } from 'redux-first-history'
 import { useI18n } from 'twake-i18n'
-import { AppIconProps } from './AppIcon'
 import { DesktopMenubar } from './DesktopMenubar'
 import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
@@ -26,7 +25,6 @@ export type MenubarProps = {
 
 export type SharedMenubarProps = MenubarProps & {
   dateLabel: string
-  applist: AppIconProps[]
   supportLink: string | undefined
   anchorEl: HTMLElement | null
   onAppMenuOpen: (event: React.MouseEvent<HTMLElement>) => void
@@ -50,11 +48,10 @@ export function Menubar({
   onViewChange,
   isIframe,
   onToggleSidebar
-}: MenubarProps) {
+}: MenubarProps): JSX.Element {
   const { t } = useI18n() // deliberately NOT using f()
 
   const user = useAppSelector(state => state.user.userData)
-  const applist: AppIconProps[] = window.appList ?? []
   const supportLink = window.SUPPORT_URL
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
@@ -153,7 +150,6 @@ export function Menubar({
     isIframe,
     onToggleSidebar,
     dateLabel,
-    applist,
     supportLink,
     anchorEl,
     onAppMenuOpen: handleAppMenuOpen,
