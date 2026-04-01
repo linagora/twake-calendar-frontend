@@ -200,7 +200,7 @@ export function useCalendarDataLoader({
       })
 
       prefetchUnits.forEach(({ id }, index) => {
-        const originalGap = savedGaps.get(index)!
+        const originalGap = savedGaps.get(index) as Interval
         void dispatch(
           getCalendarDetailAsync({
             calId: id,

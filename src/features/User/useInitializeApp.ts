@@ -24,10 +24,10 @@ export function useInitializeApp() {
 
     const initiateLogin = async () => {
       const savedToken = sessionStorage.getItem('tokenSet')
-        ? JSON.parse(sessionStorage.getItem('tokenSet')!)
+        ? JSON.parse(sessionStorage.getItem('tokenSet') ?? '{}')
         : null
       const savedUser = sessionStorage.getItem('userData')
-        ? JSON.parse(sessionStorage.getItem('userData')!)
+        ? JSON.parse(sessionStorage.getItem('userData') ?? '{}')
         : null
 
       if (savedToken && savedUser) {

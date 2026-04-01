@@ -715,7 +715,7 @@ function EventUpdateModal({
           if (!instancesByURL.has(instance.URL)) {
             instancesByURL.set(instance.URL, [])
           }
-          instancesByURL.get(instance.URL)!.push(instance)
+          instancesByURL.get(instance.URL)?.push?.(instance)
           uniqueURLs.add(instance.URL)
         })
 

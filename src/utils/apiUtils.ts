@@ -26,7 +26,7 @@ export const api = ky.extend({
     beforeRequest: [
       async request => {
         const saved = sessionStorage.getItem('tokenSet')
-          ? JSON.parse(sessionStorage.getItem('tokenSet')!)
+          ? JSON.parse(sessionStorage.getItem('tokenSet') ?? '{}')
           : null
         const access_token = saved?.access_token
         if (access_token) {

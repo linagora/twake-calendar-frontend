@@ -67,7 +67,7 @@ export async function Callback(
     )
 
     const { access_token } = tokenSet
-    const claims = tokenSet.claims()!
+    const claims = tokenSet.claims() as client.IDToken
     const { sub } = claims
 
     const userinfo = await client.fetchUserInfo(
