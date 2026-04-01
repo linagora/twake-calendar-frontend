@@ -19,6 +19,7 @@
     "@mui/x-date-pickers": "^8.14.0",
     "@reduxjs/toolkit": "^2.8.2",
     "cozy-external-bridge": "^1.2.1",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
     "i18next": "^23.7.9",
     "ical.js": "^2.2.0",

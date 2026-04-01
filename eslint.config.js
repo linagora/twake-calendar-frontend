@@ -66,8 +66,6 @@ export default [
 
       /* Imports */
       'import/order': 'off',
-      // TO DO: Remove this exception in the commit to fix extraneous dependencies
-      'import/no-extraneous-dependencies': 'off',
 
       /* TS */
       '@typescript-eslint/no-unused-vars': [
