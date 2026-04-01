@@ -1,113 +1,113 @@
-import { Auth } from "@/features/User/oidcAuth";
-import { assertWebSocketAlive } from "@/websocket/connection/lifecycle/assertWebSocketAlive";
-import ky from "ky";
-import { getRetryDelay } from "./getRetryDelay";
+import { Auth } from '@/features/User/oidcAuth'
+import { assertWebSocketAlive } from '@/websocket/connection/lifecycle/assertWebSocketAlive'
+import ky from 'ky'
+import { getRetryDelay } from './getRetryDelay'
 
-const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
 const RETRY_CONFIG = {
   maxRetries: 10,
   initialDelay: 1000,
-  maxDelay: 120000,
-};
+  maxDelay: 120000
+}
 
 export const api = ky.extend({
   prefixUrl: window.CALENDAR_BASE_URL,
   retry: {
     limit: RETRY_CONFIG.maxRetries,
     backoffLimit: RETRY_CONFIG.maxDelay,
-    delay: (attemptCount) =>
+    delay: attemptCount =>
       getRetryDelay(attemptCount - 1, {
         initialDelay: RETRY_CONFIG.initialDelay,
-        maxDelay: RETRY_CONFIG.maxDelay,
-      }),
+        maxDelay: RETRY_CONFIG.maxDelay
+      })
   },
   hooks: {
     beforeRequest: [
-      async (request) => {
-        const saved = sessionStorage.getItem("tokenSet")
-          ? JSON.parse(sessionStorage.getItem("tokenSet")!)
-          : null;
-        const access_token = saved?.access_token;
+      async request => {
+        const saved = sessionStorage.getItem('tokenSet')
+          ? JSON.parse(sessionStorage.getItem('tokenSet') ?? '{}')
+          : null
+        const access_token = saved?.access_token
         if (access_token) {
-          request.headers.set("Authorization", `Bearer ${access_token}`);
+          request.headers.set('Authorization', `Bearer ${access_token}`)
         }
 
         if (MUTATING_METHODS.has(request.method)) {
-          await assertWebSocketAlive();
+          await assertWebSocketAlive()
         }
-        return request;
-      },
+        return request
+      }
     ],
 
     beforeRetry: [
-      async ({ request, error, retryCount }) => {
+      ({ request, error, retryCount }) => {
         console.warn(
           `[API Retry] Attempt ${retryCount}/${RETRY_CONFIG.maxRetries}`,
           {
             url: request.url,
-            error: error?.message,
+            error: error?.message
           }
-        );
-      },
+        )
+      }
     ],
 
     afterResponse: [
       async (request, options, response) => {
         if (response.status === 401) {
           // Check if we're already on login flow to prevent redirect loop
-          const currentPath = window.location.pathname;
-          if (currentPath === "/callback") {
-            return response;
+          const currentPath = window.location.pathname
+          if (currentPath === '/callback') {
+            return response
           }
 
           // Check if we have a token in the request
-          const hasAuthHeader = request.headers.has("Authorization");
+          const hasAuthHeader = request.headers.has('Authorization')
           if (!hasAuthHeader) {
-            return response;
+            return response
           }
 
           // Only redirect to SSO if we're sure token is invalid (not just missing)
-          const loginurl = await Auth();
+          const loginurl = await Auth()
 
           sessionStorage.setItem(
-            "redirectState",
+            'redirectState',
             JSON.stringify({
               code_verifier: loginurl.code_verifier,
-              state: loginurl.state,
+              state: loginurl.state
             })
-          );
-          redirectTo(loginurl.redirectTo);
+          )
+          redirectTo(loginurl.redirectTo)
         }
-        return response;
-      },
-    ],
-  },
-});
+        return response
+      }
+    ]
+  }
+})
 
 export function redirectTo(url: URL) {
-  window.location.assign(url);
+  window.location.assign(url)
 }
 
 export function getLocation() {
-  return window.location.href;
+  return window.location.href
 }
 
 export function isValidUrl(string?: string) {
-  let url;
+  let url
 
   try {
-    url = new URL(string ?? "");
+    url = new URL(string ?? '')
   } catch {
-    return false;
+    return false
   }
-  return url;
+  return url
 }
 
 export async function importFile(file: File) {
   const response = await api.post(
     `api/files?mimetype=${file.type}&name=${file.name}&size=${file.size}`,
     { body: await file.text() }
-  );
-  return await response.json();
+  )
+  return await response.json()
 }

@@ -18,12 +18,12 @@ A highly reusable dialog component that supports both normal and expanded (fulls
 ## Basic Usage
 
 ```tsx
-import { ResponsiveDialog } from "@/components/Dialog";
-import { useState } from "react";
+import { ResponsiveDialog } from '@/components/Dialog'
+import { useState } from 'react'
 
 function MyComponent() {
-  const [open, setOpen] = useState(false);
-  const [showMore, setShowMore] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   const actions = (
     <>
@@ -32,7 +32,7 @@ function MyComponent() {
       )}
       <Button onClick={() => setOpen(false)}>Close</Button>
     </>
-  );
+  )
 
   return (
     <ResponsiveDialog
@@ -47,7 +47,7 @@ function MyComponent() {
       <TextField label="Email" fullWidth />
       {/* Wrapped in Stack with spacing={2} for both normal and expanded modes */}
     </ResponsiveDialog>
-  );
+  )
 }
 ```
 
@@ -84,12 +84,12 @@ function MyComponent() {
   title="Custom Styled Dialog"
   isExpanded={showMore}
   contentSx={{
-    backgroundColor: "#f5f5f5",
-    padding: 4,
+    backgroundColor: '#f5f5f5',
+    padding: 4
   }}
   titleSx={{
-    backgroundColor: "primary.main",
-    color: "white",
+    backgroundColor: 'primary.main',
+    color: 'white'
   }}
 >
   <TextField label="Field" />

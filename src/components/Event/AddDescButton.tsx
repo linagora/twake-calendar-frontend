@@ -1,35 +1,35 @@
-import { TextField } from "@linagora/twake-mui";
-import { Notes as NotesIcon } from "@mui/icons-material";
-import React from "react";
-import { useI18n } from "twake-i18n";
-import { FieldWithLabel } from "./components/FieldWithLabel";
-import { SectionPreviewRow } from "./components/SectionPreviewRow";
+import { TextField } from '@linagora/twake-mui'
+import { Notes as NotesIcon } from '@mui/icons-material'
+import React from 'react'
+import { useI18n } from 'twake-i18n'
+import { FieldWithLabel } from './components/FieldWithLabel'
+import { SectionPreviewRow } from './components/SectionPreviewRow'
 
 export function AddDescButton({
   showDescription,
   setShowDescription,
   showMore,
   description,
-  setDescription,
+  setDescription
 }: {
-  showDescription: boolean;
-  setShowDescription: (b: boolean) => void;
-  showMore: boolean;
-  description: string;
-  setDescription: (d: string) => void;
+  showDescription: boolean
+  setShowDescription: (b: boolean) => void
+  showMore: boolean
+  description: string
+  setDescription: (d: string) => void
 }) {
-  const { t } = useI18n();
-  const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null);
+  const { t } = useI18n()
+  const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null)
 
   React.useEffect(() => {
     if (showDescription) {
-      descriptionInputRef.current?.focus();
+      descriptionInputRef.current?.focus()
     }
-  }, [showDescription]);
+  }, [showDescription])
 
   const descriptionField = (
     <FieldWithLabel
-      label={t("event.form.description")}
+      label={t('event.form.description')}
       isExpanded={showMore}
       sx={{ padding: 0, margin: 0 }}
     >
@@ -37,31 +37,31 @@ export function AddDescButton({
         fullWidth
         label=""
         inputRef={descriptionInputRef}
-        inputProps={{ "aria-label": t("event.form.description") }}
-        placeholder={t("event.form.descriptionPlaceholder")}
+        inputProps={{ 'aria-label': t('event.form.description') }}
+        placeholder={t('event.form.descriptionPlaceholder')}
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={e => setDescription(e.target.value)}
         size="small"
         margin="dense"
         multiline
         minRows={2}
         maxRows={10}
         sx={{
-          "& .MuiInputBase-root": {
-            maxHeight: "33%",
-            overflowY: "auto",
-            padding: 0,
+          '& .MuiInputBase-root': {
+            maxHeight: '33%',
+            overflowY: 'auto',
+            padding: 0
           },
-          "& textarea": {
-            resize: "vertical",
-          },
+          '& textarea': {
+            resize: 'vertical'
+          }
         }}
       />
     </FieldWithLabel>
-  );
+  )
 
   if (showMore) {
-    return descriptionField;
+    return descriptionField
   }
 
   return (
@@ -72,11 +72,11 @@ export function AddDescButton({
             icon={<NotesIcon />}
             onClick={() => setShowDescription(true)}
           >
-            {t("event.form.addDescription")}
+            {t('event.form.addDescription')}
           </SectionPreviewRow>
         </FieldWithLabel>
       )}
       {showDescription && descriptionField}
     </>
-  );
+  )
 }

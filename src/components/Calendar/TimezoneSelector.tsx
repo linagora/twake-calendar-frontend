@@ -1,45 +1,45 @@
 import {
   browserDefaultTimeZone,
   getTimezoneOffset,
-  resolveTimezone,
-} from "@/utils/timezone";
-import { TIMEZONES } from "@/utils/timezone-data";
-import { Button, Popover } from "@linagora/twake-mui";
-import { MouseEvent, useMemo, useRef, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { TimezoneAutocomplete } from "../Timezone/TimezoneAutocomplete";
+  resolveTimezone
+} from '@/utils/timezone'
+import { TIMEZONES } from '@/utils/timezone-data'
+import { Button, Popover } from '@linagora/twake-mui'
+import { MouseEvent, useMemo, useRef, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { TimezoneAutocomplete } from '../Timezone/TimezoneAutocomplete'
 
 interface TimezoneSelectProps {
-  value: string;
-  onChange: (value: string) => void;
-  referenceDate: Date;
+  value: string
+  onChange: (value: string) => void
+  referenceDate: Date
 }
 
 export function TimezoneSelector({
   value,
   onChange,
-  referenceDate,
+  referenceDate
 }: TimezoneSelectProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const timezoneList = useTimeZoneList();
+  const timezoneList = useTimeZoneList()
 
   const effectiveTimezone = value
     ? resolveTimezone(value)
-    : timezoneList.browserTz;
-  const selectedOffset = getTimezoneOffset(effectiveTimezone, referenceDate);
+    : timezoneList.browserTz
+  const selectedOffset = getTimezoneOffset(effectiveTimezone, referenceDate)
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
-  const open = Boolean(anchorEl);
-  const { t } = useI18n();
+  const open = Boolean(anchorEl)
+  const { t } = useI18n()
   return (
     <>
       <Button
@@ -47,14 +47,14 @@ export function TimezoneSelector({
         size="small"
         onClick={handleOpen}
         sx={{
-          textTransform: "none",
-          minWidth: "auto",
-          padding: "2px 4px",
+          textTransform: 'none',
+          minWidth: 'auto',
+          padding: '2px 4px',
           margin: 0,
-          lineHeight: 1.2,
+          lineHeight: 1.2
         }}
       >
-        {selectedOffset || t("common.select_timezone")}
+        {selectedOffset || t('common.select_timezone')}
       </Button>
 
       <Popover
@@ -62,22 +62,22 @@ export function TimezoneSelector({
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: 'bottom',
+          horizontal: 'left'
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
+          vertical: 'top',
+          horizontal: 'left'
         }}
         slotProps={{
           paper: {
-            sx: { width: 280, maxHeight: 400, overflow: "hidden", p: 0 },
+            sx: { width: 280, maxHeight: 400, overflow: 'hidden', p: 0 }
           },
           transition: {
             onEntered: () => {
-              inputRef.current?.focus();
-            },
-          },
+              inputRef.current?.focus()
+            }
+          }
         }}
       >
         <TimezoneAutocomplete
@@ -98,14 +98,14 @@ export function TimezoneSelector({
         />
       </Popover>
     </>
-  );
+  )
 }
 
 export function useTimeZoneList() {
   return useMemo(() => {
-    const zones = Object.keys(TIMEZONES.zones).sort();
-    const browserTz = resolveTimezone(browserDefaultTimeZone);
+    const zones = Object.keys(TIMEZONES.zones).sort()
+    const browserTz = resolveTimezone(browserDefaultTimeZone)
 
-    return { zones, browserTz, getTimezoneOffset };
-  }, []);
+    return { zones, browserTz, getTimezoneOffset }
+  }, [])
 }

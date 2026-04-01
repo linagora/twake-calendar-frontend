@@ -1,46 +1,46 @@
-import { OpenPaasUserData } from "@/features/User/type/OpenPaasUserData";
-import { getUserDetails } from "@/features/User/userAPI";
-import { toRejectedError } from "@/utils/errorUtils";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { addSharedCalendar } from "../CalendarApi";
-import { CalendarInput } from "../types/CalendarData";
-import { RejectedError } from "../types/RejectedError";
+import { OpenPaasUserData } from '@/features/User/type/OpenPaasUserData'
+import { getUserDetails } from '@/features/User/userAPI'
+import { toRejectedError } from '@/utils/errorUtils'
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { addSharedCalendar } from '../CalendarApi'
+import { CalendarInput } from '../types/CalendarData'
+import { RejectedError } from '../types/RejectedError'
 
 export const addSharedCalendarAsync = createAsyncThunk<
   {
-    calId: string;
-    color: Record<string, string>;
-    link: string;
-    name: string;
-    desc: string;
-    owner: OpenPaasUserData;
+    calId: string
+    color: Record<string, string>
+    link: string
+    name: string
+    desc: string
+    owner: OpenPaasUserData
   },
   { userId: string; calId: string; cal: CalendarInput },
   { rejectValue: RejectedError }
 >(
-  "calendars/addSharedCalendar",
+  'calendars/addSharedCalendar',
   async ({ userId, calId, cal }, { rejectWithValue }) => {
     try {
-      await addSharedCalendar(userId, calId, cal);
+      await addSharedCalendar(userId, calId, cal)
       const ownerData = await getUserDetails(
         cal.cal._links.self.href
-          .replace("/calendars/", "")
-          .replace(".json", "")
-          .split("/")[0]
-      );
+          .replace('/calendars/', '')
+          .replace('.json', '')
+          .split('/')[0]
+      )
 
       return {
         calId: cal.cal._links.self?.href
-          ?.replace("/calendars/", "")
-          .replace(".json", ""),
+          ?.replace('/calendars/', '')
+          .replace('.json', ''),
         color: cal.color,
         link: `/calendars/${userId}/${calId}.json`,
-        desc: cal.cal["caldav:description"] ?? "",
-        name: cal.cal["dav:name"] ?? "",
-        owner: ownerData,
-      };
+        desc: cal.cal['caldav:description'] ?? '',
+        name: cal.cal['dav:name'] ?? '',
+        owner: ownerData
+      }
     } catch (err) {
-      return rejectWithValue(toRejectedError(err));
+      return rejectWithValue(toRejectedError(err))
     }
   }
-);
+)

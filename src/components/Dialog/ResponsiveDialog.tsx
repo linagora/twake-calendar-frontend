@@ -10,13 +10,13 @@ import {
   IconButton,
   Stack,
   SxProps,
-  Theme,
-} from "@linagora/twake-mui";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CloseIcon from "@mui/icons-material/Close";
-import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import CozyBridge from "cozy-external-bridge";
-import React, { ReactNode, useMemo } from "react";
+  Theme
+} from '@linagora/twake-mui'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CloseIcon from '@mui/icons-material/Close'
+import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import CozyBridge from 'cozy-external-bridge'
+import React, { ReactNode, useMemo } from 'react'
 
 /**
  * ResponsiveDialog - A reusable dialog component that can switch between normal and expanded modes
@@ -43,52 +43,48 @@ import React, { ReactNode, useMemo } from "react";
  */
 interface ResponsiveDialogProps extends Omit<
   DialogProps,
-  "maxWidth" | "title"
+  'maxWidth' | 'title'
 > {
   /** Whether the dialog is open */
-  open: boolean;
+  open: boolean
   /** Callback fired when the dialog should be closed */
-  onClose: () => void;
+  onClose: () => void
   /** Dialog title - can be string or custom ReactNode */
-  title: string | ReactNode;
+  title: string | ReactNode
   /** Dialog content - form fields, text, etc. */
-  children: ReactNode;
+  children: ReactNode
   /** Optional actions rendered in DialogActions (buttons, etc.) */
-  actions?: ReactNode;
+  actions?: ReactNode
   /** Toggle between normal and expanded (fullscreen) mode */
-  isExpanded?: boolean;
+  isExpanded?: boolean
   /** Callback when expand/collapse button is clicked (required if using isExpanded) */
-  onExpandToggle?: () => void;
+  onExpandToggle?: () => void
   /** Max width in normal mode (default: "570px") */
-  normalMaxWidth?: string;
+  normalMaxWidth?: string
   /** Max width of content container in expanded mode (default: "990px") */
-  expandedContentMaxWidth?: string;
+  expandedContentMaxWidth?: string
   /** Height of app header to preserve visibility (default: "90px") */
-  headerHeight?: string;
+  headerHeight?: string
   /** Spacing between children in normal mode (default: 2 = 16px) */
-  normalSpacing?: number;
+  normalSpacing?: number
   /** Spacing between children in expanded mode (default: 2 = 16px) */
-  expandedSpacing?: number;
+  expandedSpacing?: number
   /** Custom styles for DialogContent - merged with base styles */
-  contentSx?: SxProps<Theme>;
+  contentSx?: SxProps<Theme>
   /** Custom styles for DialogTitle */
-  titleSx?: SxProps<Theme>;
+  titleSx?: SxProps<Theme>
   /** Additional props for DialogContent (excluding sx) */
-  dialogContentProps?: Omit<DialogContentProps, "sx">;
+  dialogContentProps?: Omit<DialogContentProps, 'sx'>
   /** Additional props for DialogTitle (excluding sx) */
-  dialogTitleProps?: Omit<DialogTitleProps, "sx">;
+  dialogTitleProps?: Omit<DialogTitleProps, 'sx'>
   /** Whether to display dividers between title/content/actions */
-  dividers?: boolean;
+  dividers?: boolean
   /** Whether to show header action icons (expand/close) in normal mode (default: true) */
-  showHeaderActions?: boolean;
+  showHeaderActions?: boolean
   /** Whether to add border-top to DialogActions */
-  actionsBorderTop?: boolean;
+  actionsBorderTop?: boolean
   /** Justify content alignment for DialogActions */
-  actionsJustifyContent?:
-    | "flex-start"
-    | "center"
-    | "flex-end"
-    | "space-between";
+  actionsJustifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between'
 }
 
 function ResponsiveDialog({
@@ -99,9 +95,9 @@ function ResponsiveDialog({
   actions,
   isExpanded = false,
   onExpandToggle,
-  normalMaxWidth = "570px",
-  expandedContentMaxWidth = "990px",
-  headerHeight = "70px",
+  normalMaxWidth = '570px',
+  expandedContentMaxWidth = '990px',
+  headerHeight = '70px',
   normalSpacing = 2,
   expandedSpacing = 2,
   contentSx,
@@ -111,68 +107,68 @@ function ResponsiveDialog({
   dividers = false,
   showHeaderActions = true,
   actionsBorderTop = false,
-  actionsJustifyContent = "flex-end",
+  actionsJustifyContent = 'flex-end',
   sx,
   ...otherDialogProps
 }: ResponsiveDialogProps) {
-  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), []);
+  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
   const baseSx: SxProps<Theme> = {
-    "& .MuiBackdrop-root": {
-      backgroundColor: "rgba(0, 0, 0, 0.1)",
-      opacity: isExpanded ? "0 !important" : undefined,
-      transition: isExpanded ? "none !important" : undefined,
-      pointerEvents: isExpanded ? "none" : undefined,
+    '& .MuiBackdrop-root': {
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      opacity: isExpanded ? '0 !important' : undefined,
+      transition: isExpanded ? 'none !important' : undefined,
+      pointerEvents: isExpanded ? 'none' : undefined
     },
-    "& .MuiDialog-paper": {
-      maxWidth: isExpanded ? "100%" : normalMaxWidth,
-      width: "100%",
+    '& .MuiDialog-paper': {
+      maxWidth: isExpanded ? '100%' : normalMaxWidth,
+      width: '100%',
       height: isExpanded
-        ? `calc(100vh - ${isInIframe ? "0px" : headerHeight})`
+        ? `calc(100vh - ${isInIframe ? '0px' : headerHeight})`
         : undefined,
-      maxHeight: isExpanded && isInIframe ? "100%" : undefined,
-      margin: isExpanded ? `${isInIframe ? 0 : headerHeight} 0 0 0` : "32px",
-      boxShadow: isExpanded ? "none !important" : undefined,
-      transition: isExpanded ? "none !important" : undefined,
-      zIndex: isExpanded ? 1200 : 1300,
+      maxHeight: isExpanded && isInIframe ? '100%' : undefined,
+      margin: isExpanded ? `${isInIframe ? 0 : headerHeight} 0 0 0` : '32px',
+      boxShadow: isExpanded ? 'none !important' : undefined,
+      transition: isExpanded ? 'none !important' : undefined,
+      zIndex: isExpanded ? 1200 : 1300
     },
-    "& .MuiDialogActions-root .MuiBox-root": {
+    '& .MuiDialogActions-root .MuiBox-root': {
       maxWidth: isExpanded ? expandedContentMaxWidth : undefined,
-      margin: isExpanded ? "0 auto" : undefined,
-      padding: "0",
-      width: isExpanded ? "100%" : undefined,
-      justifyContent: isExpanded ? "flex-end" : undefined,
-    },
-  };
+      margin: isExpanded ? '0 auto' : undefined,
+      padding: '0',
+      width: isExpanded ? '100%' : undefined,
+      justifyContent: isExpanded ? 'flex-end' : undefined
+    }
+  }
 
   const baseContentSx: SxProps<Theme> = {
-    width: "100%",
-  };
+    width: '100%'
+  }
 
   const contentWrapperSx: SxProps<Theme> = {
-    maxWidth: isExpanded ? expandedContentMaxWidth : "100%",
-    margin: isExpanded ? "0 auto" : "0",
-    width: "100%",
-  };
+    maxWidth: isExpanded ? expandedContentMaxWidth : '100%',
+    margin: isExpanded ? '0 auto' : '0',
+    width: '100%'
+  }
 
   React.useEffect(() => {
     if (isExpanded) {
-      document.body.classList.add("fullscreen-view");
+      document.body.classList.add('fullscreen-view')
     } else {
-      document.body.classList.remove("fullscreen-view");
+      document.body.classList.remove('fullscreen-view')
     }
-  }, [isExpanded]);
+  }, [isExpanded])
 
   const handleClose = (
     event: unknown,
-    reason: "backdropClick" | "escapeKeyDown"
+    reason: 'backdropClick' | 'escapeKeyDown'
   ) => {
-    if (isExpanded && reason === "backdropClick") {
-      return;
+    if (isExpanded && reason === 'backdropClick') {
+      return
     }
-    onClose();
-  };
+    onClose()
+  }
 
-  const currentSpacing = isExpanded ? expandedSpacing : normalSpacing;
+  const currentSpacing = isExpanded ? expandedSpacing : normalSpacing
 
   return (
     <Dialog
@@ -190,9 +186,9 @@ function ResponsiveDialog({
           <IconButton
             onClick={onExpandToggle}
             aria-label="show less"
-            sx={{ marginLeft: "-8px" }}
+            sx={{ marginLeft: '-8px' }}
           >
-            <ArrowBackIcon sx={{ color: "#605D62", fontSize: 30 }} />
+            <ArrowBackIcon sx={{ color: '#605D62', fontSize: 30 }} />
           </IconButton>
         ) : showHeaderActions ? (
           <Box
@@ -210,7 +206,7 @@ function ResponsiveDialog({
                   size="small"
                   sx={{ marginRight: 1 }}
                 >
-                  <OpenInFullIcon sx={{ padding: "2px" }} />
+                  <OpenInFullIcon sx={{ padding: '2px' }} />
                 </IconButton>
               )}
               <IconButton onClick={onClose} aria-label="close" size="small">
@@ -226,7 +222,7 @@ function ResponsiveDialog({
         dividers={dividers}
         sx={[
           baseContentSx,
-          ...(Array.isArray(contentSx) ? contentSx : [contentSx]),
+          ...(Array.isArray(contentSx) ? contentSx : [contentSx])
         ]}
         {...dialogContentProps}
       >
@@ -242,16 +238,16 @@ function ResponsiveDialog({
         <DialogActions
           sx={{
             borderTop: actionsBorderTop
-              ? (theme) => `1px solid ${theme.palette.divider}`
+              ? theme => `1px solid ${theme.palette.divider}`
               : undefined,
-            justifyContent: actionsJustifyContent,
+            justifyContent: actionsJustifyContent
           }}
         >
           {actions}
         </DialogActions>
       )}
     </Dialog>
-  );
+  )
 }
 
-export default ResponsiveDialog;
+export default ResponsiveDialog

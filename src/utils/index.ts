@@ -2,7 +2,7 @@ export {
   getDisplayedDate,
   setDisplayedDateAndRange,
   getDisplayedCalendarRange,
-  calendarRangeManager,
-} from "./CalendarRangeManager";
+  calendarRangeManager
+} from './CalendarRangeManager'
 
-export { findCalendarById } from "./findCalendarById";
+export { findCalendarById } from './findCalendarById'

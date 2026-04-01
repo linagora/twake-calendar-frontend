@@ -1,19 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback } from "react";
-import {
-  createViewHandlers,
-  ViewHandlersProps,
-} from "../handlers/viewHandlers";
+import { useCallback } from 'react'
+import { createViewHandlers, ViewHandlersProps } from '../handlers/viewHandlers'
 
 export const useCalendarViewHandlers = (props: ViewHandlersProps) => {
-  const viewHandlers = createViewHandlers(props);
+  const viewHandlers = createViewHandlers(props)
 
   return {
     handleDayHeaderDidMount: useCallback(viewHandlers.handleDayHeaderDidMount, [
       props.calendarRef,
       props.setSelectedDate,
       props.setSelectedMiniDate,
-      props.onViewChange,
+      props.onViewChange
     ]),
     handleDayHeaderWillUnmount: useCallback(
       viewHandlers.handleDayHeaderWillUnmount,
@@ -23,14 +20,14 @@ export const useCalendarViewHandlers = (props: ViewHandlersProps) => {
     handleViewWillUnmount: useCallback(viewHandlers.handleViewWillUnmount, []),
     handleEventContent: useCallback(viewHandlers.handleEventContent, [
       props.calendars,
-      props.tempcalendars,
+      props.tempcalendars
     ]),
     handleEventDidMount: useCallback(viewHandlers.handleEventDidMount, [
-      props.calendars,
+      props.calendars
     ]),
     handleNowIndicatorContent: useCallback(
       viewHandlers.handleNowIndicatorContent,
       []
-    ),
-  };
-};
+    )
+  }
+}

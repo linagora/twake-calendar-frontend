@@ -1,69 +1,69 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import SettingsPage from "@/features/Settings/SettingsPage";
-import { getViewRange } from "@/utils/dateUtils";
-import type { CalendarApi } from "@fullcalendar/core";
-import CozyBridge from "cozy-external-bridge";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ErrorSnackbar } from "../Error/ErrorSnackbar";
-import { refreshCalendars } from "../Event/utils/eventUtils";
-import { Menubar, MenubarProps } from "../Menubar/Menubar";
-import CalendarApp from "./Calendar";
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import SettingsPage from '@/features/Settings/SettingsPage'
+import { getViewRange } from '@/utils/dateUtils'
+import type { CalendarApi } from '@fullcalendar/core'
+import CozyBridge from 'cozy-external-bridge'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ErrorSnackbar } from '../Error/ErrorSnackbar'
+import { refreshCalendars } from '../Event/utils/eventUtils'
+import { Menubar, MenubarProps } from '../Menubar/Menubar'
+import CalendarApp from './Calendar'
 
 export default function CalendarLayout() {
-  const calendarRef = useRef<CalendarApi | null>(null);
-  const dispatch = useAppDispatch();
-  const error = useAppSelector((state) => state.calendars.error);
-  const selectedCalendars = useAppSelector((state) => state.calendars.list);
-  const tempcalendars = useAppSelector((state) => state.calendars.templist);
-  const view = useAppSelector((state) => state.settings.view);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [currentView, setCurrentView] = useState<string>("timeGridWeek");
-  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), []);
+  const calendarRef = useRef<CalendarApi | null>(null)
+  const dispatch = useAppDispatch()
+  const error = useAppSelector(state => state.calendars.error)
+  const selectedCalendars = useAppSelector(state => state.calendars.list)
+  const tempcalendars = useAppSelector(state => state.calendars.templist)
+  const view = useAppSelector(state => state.settings.view)
+  const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [currentView, setCurrentView] = useState<string>('timeGridWeek')
+  const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
   const handleRefresh = async () => {
     // Get current calendar range
     if (calendarRef.current) {
-      const view = calendarRef.current.view;
-      const calendarRange = getViewRange(view.activeStart, view.type);
+      const view = calendarRef.current.view
+      const calendarRange = getViewRange(view.activeStart, view.type)
 
       // Refresh events for selected calendars
       await refreshCalendars(
         dispatch,
         Object.values(selectedCalendars),
         calendarRange
-      );
+      )
       if (tempcalendars) {
         await refreshCalendars(
           dispatch,
           Object.values(tempcalendars),
           calendarRange,
-          "temp"
-        );
+          'temp'
+        )
       }
     }
-  };
+  }
 
   const handleDateChange = (date: Date) => {
-    setCurrentDate(date);
-  };
+    setCurrentDate(date)
+  }
 
   const handleViewChange = (view: string) => {
-    setCurrentView(view);
-  };
+    setCurrentView(view)
+  }
 
   // Hide topbar navigation elements when in settings view (same as fullscreen dialog mode)
   useEffect(() => {
-    if (view === "settings") {
-      document.body.classList.add("fullscreen-view");
+    if (view === 'settings') {
+      document.body.classList.add('fullscreen-view')
     } else {
-      document.body.classList.remove("fullscreen-view");
+      document.body.classList.remove('fullscreen-view')
     }
 
     // Cleanup on unmount
     return () => {
-      document.body.classList.remove("fullscreen-view");
-    };
-  }, [view]);
+      document.body.classList.remove('fullscreen-view')
+    }
+  }, [view])
 
   const menubarProps: MenubarProps = {
     calendarRef,
@@ -72,13 +72,13 @@ export default function CalendarLayout() {
     onDateChange: handleDateChange,
     currentView,
     onViewChange: handleViewChange,
-    isIframe: isInIframe,
-  };
+    isIframe: isInIframe
+  }
 
   return (
     <div className="App">
       {!isInIframe && <Menubar {...menubarProps} />}
-      {(view === "calendar" || view === "search") && (
+      {(view === 'calendar' || view === 'search') && (
         <CalendarApp
           calendarRef={calendarRef}
           onDateChange={handleDateChange}
@@ -86,8 +86,8 @@ export default function CalendarLayout() {
           menubarProps={menubarProps}
         />
       )}
-      {view === "settings" && <SettingsPage isInIframe={isInIframe} />}
+      {view === 'settings' && <SettingsPage isInIframe={isInIframe} />}
       <ErrorSnackbar error={error} type="calendar" />
     </div>
-  );
+  )
 }

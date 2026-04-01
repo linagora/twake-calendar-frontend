@@ -3,14 +3,14 @@ export function unregisterToCalendars(
   calendarURIList: string[]
 ): void {
   if (socket.readyState !== WebSocket.OPEN) {
-    throw new Error("Cannot unregister: WebSocket is not open");
+    throw new Error('Cannot unregister: WebSocket is not open')
   }
 
   socket.send(
     JSON.stringify({
-      unregister: calendarURIList,
+      unregister: calendarURIList
     })
-  );
+  )
 
-  console.info("Unregistered to calendars", calendarURIList);
+  console.info('Unregistered to calendars', calendarURIList)
 }

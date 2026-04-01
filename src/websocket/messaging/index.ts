@@ -1,3 +1,3 @@
-export { parseMessage } from "./parseMessage";
-export { updateCalendars } from "./updateCalendars";
-export { parseCalendarPath } from "./parseCalendarPath";
+export { parseMessage } from './parseMessage'
+export { updateCalendars } from './updateCalendars'
+export { parseCalendarPath } from './parseCalendarPath'

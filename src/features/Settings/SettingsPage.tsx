@@ -1,4 +1,4 @@
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch } from '@/app/hooks'
 import {
   Box,
   IconButton,
@@ -9,86 +9,85 @@ import {
   Snackbar,
   Tab,
   Tabs,
-  Typography,
-} from "@linagora/twake-mui";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SettingsIcon from "@mui/icons-material/Settings";
-import { useState } from "react";
-import { useI18n } from "twake-i18n";
-import { GeneralSettings } from "./GeneralSettings";
-import { NotificationsSettings } from "./NotificationSettings";
-import "./SettingsPage.styl";
-import { setView } from "./SettingsSlice";
+  Typography
+} from '@linagora/twake-mui'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { GeneralSettings } from './GeneralSettings'
+import { NotificationsSettings } from './NotificationSettings'
+import './SettingsPage.styl'
+import { setView } from './SettingsSlice'
 
-type SidebarNavItem = "settings" | "sync";
-type SettingsSubTab = "settings" | "notifications";
+type SidebarNavItem = 'settings' | 'sync'
+type SettingsSubTab = 'settings' | 'notifications'
 
 export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
-  const dispatch = useAppDispatch();
-  const { t } = useI18n();
+  const dispatch = useAppDispatch()
+  const { t } = useI18n()
 
-  const [activeNavItem, setActiveNavItem] =
-    useState<SidebarNavItem>("settings");
+  const [activeNavItem, setActiveNavItem] = useState<SidebarNavItem>('settings')
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
-    useState<SettingsSubTab>("settings");
+    useState<SettingsSubTab>('settings')
 
-  const [languageErrorOpen, setLanguageErrorOpen] = useState(false);
-  const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false);
-  const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false);
+  const [languageErrorOpen, setLanguageErrorOpen] = useState(false)
+  const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false)
+  const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false)
   const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
-    useState(false);
+    useState(false)
   const [displayWeekNumbersErrorOpen, setDisplayWeekNumbersErrorOpen] =
-    useState(false);
-  const [workingDaysErrorOpen, setWorkingDaysErrorOpen] = useState(false);
+    useState(false)
+  const [workingDaysErrorOpen, setWorkingDaysErrorOpen] = useState(false)
 
   const handleBackClick = () => {
-    dispatch(setView("calendar"));
-  };
+    dispatch(setView('calendar'))
+  }
 
   const handleNavItemClick = (item: SidebarNavItem) => {
-    setActiveNavItem(item);
-    if (item === "settings") {
-      setActiveSettingsSubTab("settings");
+    setActiveNavItem(item)
+    if (item === 'settings') {
+      setActiveSettingsSubTab('settings')
     }
-  };
+  }
 
   const handleSettingsSubTabChange = (
     _event: React.SyntheticEvent,
     newValue: SettingsSubTab
   ) => {
-    setActiveSettingsSubTab(newValue);
-  };
+    setActiveSettingsSubTab(newValue)
+  }
   const handleLanguageErrorClose = () => {
-    setLanguageErrorOpen(false);
-  };
+    setLanguageErrorOpen(false)
+  }
   const handleTimeZoneErrorClose = () => {
-    setTimeZoneErrorOpen(false);
-  };
+    setTimeZoneErrorOpen(false)
+  }
   const handleHideDeclinedEventsErrorClose = () => {
-    setHideDeclinedEventsErrorOpen(false);
-  };
+    setHideDeclinedEventsErrorOpen(false)
+  }
   const handleAlarmEmailsErrorClose = () => {
-    setAlarmEmailsErrorOpen(false);
-  };
+    setAlarmEmailsErrorOpen(false)
+  }
   const handleDisplayWeekNumbersErrorClose = () => {
-    setDisplayWeekNumbersErrorOpen(false);
-  };
+    setDisplayWeekNumbersErrorOpen(false)
+  }
 
   return (
     <main
-      className={`main-layout settings-layout${isInIframe ? " isInIframe" : ""}`}
+      className={`main-layout settings-layout${isInIframe ? ' isInIframe' : ''}`}
     >
       <Box className="settings-sidebar">
         <List>
           <ListItem
-            className={`settings-nav-item ${activeNavItem === "settings" ? "active" : ""}`}
-            onClick={() => handleNavItemClick("settings")}
-            sx={{ cursor: "pointer" }}
+            className={`settings-nav-item ${activeNavItem === 'settings' ? 'active' : ''}`}
+            onClick={() => handleNavItemClick('settings')}
+            sx={{ cursor: 'pointer' }}
           >
             <ListItemIcon>
               <SettingsIcon />
             </ListItemIcon>
-            <ListItemText primary={t("settings.title") || "Settings"} />
+            <ListItemText primary={t('settings.title') || 'Settings'} />
           </ListItem>
           {/* <ListItem
             className={`settings-nav-item ${activeNavItem === "sync" ? "active" : ""}`}
@@ -106,29 +105,29 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
         <Box className="settings-content-header">
           <IconButton
             onClick={handleBackClick}
-            aria-label={t("settings.back") || "Back to calendar"}
+            aria-label={t('settings.back') || 'Back to calendar'}
             className="back-button"
           >
-            <ArrowBackIcon sx={{ color: "#605D62", fontSize: 30 }} />
+            <ArrowBackIcon sx={{ color: '#605D62', fontSize: 30 }} />
           </IconButton>
-          {activeNavItem === "settings" && (
+          {activeNavItem === 'settings' && (
             <Tabs
               value={activeSettingsSubTab}
               onChange={handleSettingsSubTabChange}
               className="settings-content-tabs"
             >
-              <Tab value="settings" label={t("settings.title") || "Settings"} />
+              <Tab value="settings" label={t('settings.title') || 'Settings'} />
               <Tab
                 value="notifications"
-                label={t("settings.notifications") || "Notifications"}
+                label={t('settings.notifications') || 'Notifications'}
               />
             </Tabs>
           )}
         </Box>
         <Box className="settings-content-body">
-          {activeNavItem === "settings" && (
+          {activeNavItem === 'settings' && (
             <>
-              {activeSettingsSubTab === "settings" && (
+              {activeSettingsSubTab === 'settings' && (
                 <GeneralSettings
                   onLanguageError={() => setLanguageErrorOpen(true)}
                   onTimeZoneError={() => setTimeZoneErrorOpen(true)}
@@ -141,7 +140,7 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
                   onWorkingDaysError={() => setWorkingDaysErrorOpen(true)}
                 />
               )}
-              {activeSettingsSubTab === "notifications" && (
+              {activeSettingsSubTab === 'notifications' && (
                 <NotificationsSettings
                   onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
                 />
@@ -149,10 +148,10 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
             </>
           )}
         </Box>
-        {activeNavItem === "sync" && (
+        {activeNavItem === 'sync' && (
           <Box className="settings-tab-content">
             <Typography variant="body1" color="text.secondary">
-              {t("settings.sync.empty") || "Sync settings coming soon"}
+              {t('settings.sync.empty') || 'Sync settings coming soon'}
             </Typography>
           </Box>
         )}
@@ -162,42 +161,42 @@ export default function SettingsPage({ isInIframe }: { isInIframe?: boolean }) {
         autoHideDuration={4000}
         onClose={handleLanguageErrorClose}
         message={
-          t("settings.languageUpdateError") || "Failed to update language"
+          t('settings.languageUpdateError') || 'Failed to update language'
         }
       />
       <Snackbar
         open={timeZoneErrorOpen}
         autoHideDuration={4000}
         onClose={handleTimeZoneErrorClose}
-        message={t("settings.timeZoneUpdateError")}
+        message={t('settings.timeZoneUpdateError')}
       />
       <Snackbar
         open={alarmEmailsErrorOpen}
         autoHideDuration={4000}
         onClose={handleAlarmEmailsErrorClose}
         message={
-          t("settings.alarmEmailsUpdateError") ||
-          "Failed to update email notifications setting"
+          t('settings.alarmEmailsUpdateError') ||
+          'Failed to update email notifications setting'
         }
       />
       <Snackbar
         open={hideDeclinedEventsErrorOpen}
         autoHideDuration={4000}
         onClose={handleHideDeclinedEventsErrorClose}
-        message={t("settings.hideDeclinedEventsUpdateError")}
+        message={t('settings.hideDeclinedEventsUpdateError')}
       />
       <Snackbar
         open={displayWeekNumbersErrorOpen}
         autoHideDuration={4000}
         onClose={handleDisplayWeekNumbersErrorClose}
-        message={t("settings.displayWeekNumbersUpdateError")}
+        message={t('settings.displayWeekNumbersUpdateError')}
       />
       <Snackbar
         open={workingDaysErrorOpen}
         autoHideDuration={4000}
         onClose={() => setWorkingDaysErrorOpen(false)}
-        message={t("settings.workingDaysUpdateError")}
+        message={t('settings.workingDaysUpdateError')}
       />
     </main>
-  );
+  )
 }

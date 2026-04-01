@@ -1,8 +1,8 @@
-import { getAccessiblePair } from "@/utils/getAccessiblePair";
-import { stringAvatar } from "@/components/Event/utils/eventUtils";
-import { useUserSearch } from "./useUserSearch";
-import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
-import CloseIcon from "@mui/icons-material/Close";
+import { getAccessiblePair } from '@/utils/getAccessiblePair'
+import { stringAvatar } from '@/components/Event/utils/eventUtils'
+import { useUserSearch } from './useUserSearch'
+import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
+import CloseIcon from '@mui/icons-material/Close'
 import {
   Autocomplete,
   Avatar,
@@ -15,35 +15,35 @@ import {
   PopperProps,
   TextField,
   useTheme,
-  type AutocompleteRenderInputParams,
-} from "@linagora/twake-mui";
-import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+  type AutocompleteRenderInputParams
+} from '@linagora/twake-mui'
+import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import {
   HTMLAttributes,
   useCallback,
   type ReactNode,
-  type SyntheticEvent,
-} from "react";
-import { useI18n } from "twake-i18n";
-import { ResourceIcon } from "./ResourceIcon";
-import { isValidEmail } from "../../utils/isValidEmail";
-import { usePasteHandler } from "./usePasteHandler";
+  type SyntheticEvent
+} from 'react'
+import { useI18n } from 'twake-i18n'
+import { ResourceIcon } from './ResourceIcon'
+import { isValidEmail } from '../../utils/isValidEmail'
+import { usePasteHandler } from './usePasteHandler'
 
 export interface User {
-  email: string;
-  displayName: string;
-  avatarUrl?: string;
-  openpaasId?: string;
-  color?: Record<string, string>;
-  objectType?: string;
+  email: string
+  displayName: string
+  avatarUrl?: string
+  openpaasId?: string
+  color?: Record<string, string>
+  objectType?: string
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
-  error?: boolean;
-  helperText?: string | null;
-  placeholder?: string;
-  label?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  error?: boolean
+  helperText?: string | null
+  placeholder?: string
+  label?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 export function PeopleSearch({
@@ -57,33 +57,31 @@ export function PeopleSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
-  getChipIcon,
+  getChipIcon
 }: {
-  selectedUsers: User[];
-  onChange: (event: SyntheticEvent, users: User[]) => void;
-  objectTypes: string[];
-  disabled?: boolean;
-  freeSolo?: boolean;
-  onToggleEventPreview?: () => void;
-  placeholder?: string;
-  inputSlot?: (
-    params: ExtendedAutocompleteRenderInputParams
-  ) => React.ReactNode;
+  selectedUsers: User[]
+  onChange: (event: SyntheticEvent, users: User[]) => void
+  objectTypes: string[]
+  disabled?: boolean
+  freeSolo?: boolean
+  onToggleEventPreview?: () => void
+  placeholder?: string
+  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => React.ReactNode
   customRenderInput?: (
     params: AutocompleteRenderInputParams,
     query: string,
     setQuery: (value: string) => void
-  ) => ReactNode;
+  ) => ReactNode
   customSlotProps?: {
-    popper?: Partial<PopperProps>;
-    paper?: Partial<PaperProps>;
-    listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
-  };
-  getChipIcon?: (user: User) => ReactNode;
+    popper?: Partial<PopperProps>
+    paper?: Partial<PaperProps>
+    listbox?: Partial<HTMLAttributes<HTMLUListElement>>
+  }
+  getChipIcon?: (user: User) => ReactNode
 }) {
-  const { t } = useI18n();
-  const searchPlaceholder = placeholder ?? t("peopleSearch.placeholder");
-  const errorMessage = t("peopleSearch.searchError");
+  const { t } = useI18n()
+  const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
+  const errorMessage = t('peopleSearch.searchError')
 
   const {
     query,
@@ -98,32 +96,32 @@ export function PeopleSearch({
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
-    setSnackbarMessage,
-  } = useUserSearch<User>({ objectTypes, errorMessage });
+    setSnackbarMessage
+  } = useUserSearch<User>({ objectTypes, errorMessage })
 
-  const theme = useTheme();
+  const theme = useTheme()
 
   const handleBlurCommit = useCallback(
     (event: React.SyntheticEvent) => {
-      const trimmed = query.trim();
-      if (!trimmed) return;
+      const trimmed = query.trim()
+      if (!trimmed) return
       if (!isValidEmail(trimmed)) {
         setInputError(
-          t("peopleSearch.invalidEmail").replace("%{email}", trimmed)
-        );
-        return;
+          t('peopleSearch.invalidEmail').replace('%{email}', trimmed)
+        )
+        return
       }
-      if (selectedUsers.find((u) => u.email === trimmed)) {
-        setQuery("");
-        return;
+      if (selectedUsers.find(u => u.email === trimmed)) {
+        setQuery('')
+        return
       }
-      setInputError(null);
-      const newUser: User = { email: trimmed, displayName: trimmed };
-      onChange(event, [...selectedUsers, newUser]);
-      setQuery("");
+      setInputError(null)
+      const newUser: User = { email: trimmed, displayName: trimmed }
+      onChange(event, [...selectedUsers, newUser])
+      setQuery('')
     },
     [query, selectedUsers, onChange, t, setInputError, setQuery]
-  );
+  )
 
   const handlePaste = usePasteHandler({
     freeSolo,
@@ -131,8 +129,8 @@ export function PeopleSearch({
     onChange,
     setQuery,
     setInputError,
-    t,
-  });
+    t
+  })
 
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
@@ -143,7 +141,7 @@ export function PeopleSearch({
         ) : (
           <PeopleOutlineOutlinedIcon
             fontSize="small"
-            sx={{ mr: 1, color: "action.active" }}
+            sx={{ mr: 1, color: 'action.active' }}
           />
         ),
         endAdornment: (
@@ -151,61 +149,61 @@ export function PeopleSearch({
             {loading ? <CircularProgress color="inherit" size={20} /> : null}
             {params.InputProps.endAdornment}
           </>
-        ),
-      };
+        )
+      }
 
       const enhancedParams = {
         ...params,
         InputProps: inputProps,
         inputProps: {
           ...params.inputProps,
-          autoComplete: "off",
-          onPaste: handlePaste,
-        },
-      };
+          autoComplete: 'off',
+          onPaste: handlePaste
+        }
+      }
 
       const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && onToggleEventPreview) {
-          e.preventDefault();
-          onToggleEventPreview();
+        if (e.key === 'Enter' && onToggleEventPreview) {
+          e.preventDefault()
+          onToggleEventPreview()
         }
-      };
+      }
 
       const defaultTextFieldProps = {
         error: !!inputError,
         helperText: inputError,
         placeholder: searchPlaceholder,
-        label: "",
+        label: '',
         onKeyDown: handleEnterKey,
         slotProps: {
           input: {
-            ...inputProps,
-          },
-        },
-      };
+            ...inputProps
+          }
+        }
+      }
 
       if (inputSlot) {
         return (
           <>
             <label htmlFor={params.id} className="visually-hidden">
-              {t("peopleSearch.label")}
+              {t('peopleSearch.label')}
             </label>
             {inputSlot({
               ...enhancedParams,
               error: !!inputError,
               helperText: inputError,
               placeholder: searchPlaceholder,
-              label: "",
-              onKeyDown: handleEnterKey,
+              label: '',
+              onKeyDown: handleEnterKey
             })}
           </>
-        );
+        )
       }
 
       return (
         <>
           <label htmlFor={params.id} className="visually-hidden">
-            {t("peopleSearch.label")}
+            {t('peopleSearch.label')}
           </label>
           <TextField
             {...enhancedParams}
@@ -214,7 +212,7 @@ export function PeopleSearch({
             size="medium"
           />
         </>
-      );
+      )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -223,9 +221,9 @@ export function PeopleSearch({
       onToggleEventPreview,
       loading,
       searchPlaceholder,
-      handlePaste,
+      handlePaste
     ]
-  );
+  )
 
   return (
     <>
@@ -246,68 +244,68 @@ export function PeopleSearch({
         onClose={() => setIsOpen(false)}
         disabled={disabled}
         loading={loading}
-        filterOptions={(x) => x}
+        filterOptions={x => x}
         fullWidth
-        noOptionsText={t("peopleSearch.noResults")}
-        loadingText={t("peopleSearch.loading")}
-        getOptionLabel={(option) => {
-          if (typeof option === "object") {
-            return option.displayName || option.email;
+        noOptionsText={t('peopleSearch.noResults')}
+        loadingText={t('peopleSearch.loading')}
+        getOptionLabel={option => {
+          if (typeof option === 'object') {
+            return option.displayName || option.email
           } else {
-            return option;
+            return option
           }
         }}
         sx={{
-          "& .MuiAutocomplete-inputRoot": {
-            py: 0,
-          },
+          '& .MuiAutocomplete-inputRoot': {
+            py: 0
+          }
         }}
         filterSelectedOptions
         value={selectedUsers}
         inputValue={query}
         onInputChange={(_event, value) => setQuery(value)}
         onChange={(event, value) => {
-          const last = value[value.length - 1];
-          if (typeof last === "string" && !isValidEmail(last.trim())) {
-            const invalidEmailMessage = t("peopleSearch.invalidEmail").replace(
-              "%{email}",
+          const last = value[value.length - 1]
+          if (typeof last === 'string' && !isValidEmail(last.trim())) {
+            const invalidEmailMessage = t('peopleSearch.invalidEmail').replace(
+              '%{email}',
               last
-            );
-            setInputError(invalidEmailMessage);
-            return;
+            )
+            setInputError(invalidEmailMessage)
+            return
           }
-          setInputError(null);
+          setInputError(null)
           const mapped = value
             .map((v: string | User) =>
-              typeof v === "string"
+              typeof v === 'string'
                 ? { email: v.trim(), displayName: v.trim() }
                 : v
             )
             .filter(
               (user, index, self) =>
-                self.findIndex((u) => u.email === user.email) === index
-            );
-          onChange(event, mapped);
+                self.findIndex(u => u.email === user.email) === index
+            )
+          onChange(event, mapped)
         }}
         slotProps={{
           ...customSlotProps,
           popper: {
-            placement: "bottom-start",
-            sx: { minWidth: "300px", ...customSlotProps?.popper?.sx },
-            ...customSlotProps?.popper,
-          },
+            placement: 'bottom-start',
+            sx: { minWidth: '300px', ...customSlotProps?.popper?.sx },
+            ...customSlotProps?.popper
+          }
         }}
         forcePopupIcon={false}
         disableClearable
-        renderInput={(params) =>
+        renderInput={params =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
             : defaultRenderInput(params)
         }
         renderOption={(props, option) => {
-          if (selectedUsers.find((u) => u.email === option.email)) return null;
-          const { key, ...otherProps } = props;
-          const isResource = option.objectType === "resource";
+          if (selectedUsers.find(u => u.email === option.email)) return null
+          const { key, ...otherProps } = props
+          const isResource = option.objectType === 'resource'
           return (
             <ListItem key={key + option?.email} {...otherProps} disableGutters>
               <ListItemAvatar>
@@ -321,25 +319,23 @@ export function PeopleSearch({
               </ListItemAvatar>
               <ListItemText
                 primary={option.displayName}
-                secondary={isResource ? "" : option.email}
+                secondary={isResource ? '' : option.email}
                 slotProps={{
-                  primary: { variant: "body2" },
-                  secondary: { variant: "caption" },
+                  primary: { variant: 'body2' },
+                  secondary: { variant: 'caption' }
                 }}
               />
             </ListItem>
-          );
+          )
         }}
         renderValue={(value, getTagProps) =>
           value.map((option, index) => {
-            const isString = typeof option === "string";
-            const label = isString
-              ? option
-              : option.displayName || option.email;
+            const isString = typeof option === 'string'
+            const label = isString ? option : option.displayName || option.email
             const chipColor = isString
               ? theme.palette.grey[200]
-              : (option.color?.light ?? theme.palette.grey[200]);
-            const textColor = getAccessiblePair(chipColor, theme);
+              : (option.color?.light ?? theme.palette.grey[200])
+            const textColor = getAccessiblePair(chipColor, theme)
 
             return (
               <Chip
@@ -351,25 +347,25 @@ export function PeopleSearch({
                 deleteIcon={<CloseIcon />}
                 style={{
                   backgroundColor: chipColor,
-                  color: textColor,
+                  color: textColor
                 }}
                 label={label}
               />
-            );
+            )
           })
         }
       />
       <SnackbarAlert
         open={snackbarOpen}
         setOpen={(open: boolean) => {
-          setSnackbarOpen(open);
+          setSnackbarOpen(open)
           if (!open) {
-            setSnackbarMessage("");
+            setSnackbarMessage('')
           }
         }}
         message={snackbarMessage}
         severity="error"
       />
     </>
-  );
+  )
 }

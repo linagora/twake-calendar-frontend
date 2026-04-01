@@ -103,21 +103,21 @@ Example:
 ```js
 var appList = [
   {
-    name: "Chat",
-    link: "/twake",
-    icon: "/assets/images/svg/app-chat.svg",
+    name: 'Chat',
+    link: '/twake',
+    icon: '/assets/images/svg/app-chat.svg'
   },
   {
-    name: "Drive",
-    link: "/drive",
-    icon: "/assets/images/svg/app-drive.svg",
+    name: 'Drive',
+    link: '/drive',
+    icon: '/assets/images/svg/app-drive.svg'
   },
   {
-    name: "Mail",
-    link: "/mail",
-    icon: "/assets/images/svg/app-mail.svg",
-  },
-];
+    name: 'Mail',
+    link: '/mail',
+    icon: '/assets/images/svg/app-mail.svg'
+  }
+]
 ```
 
 **Note**: `appList.js` is gitignored, so each environment can have its own configuration. The icon files in `public/assets/images/svg/` should be committed to the repository.

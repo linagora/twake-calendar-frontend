@@ -1,71 +1,71 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { AppDispatch } from "@/app/store";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { useSelectedCalendars } from "@/utils/storage/useSelectedCalendars";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useI18n } from "twake-i18n";
-import type { WebSocketWithCleanup } from "./connection";
-import { closeWebSocketConnection } from "./connection/lifecycle/closeWebSocketConnection";
-import { establishWebSocketConnection } from "./connection/lifecycle/establishWebSocketConnection";
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { AppDispatch } from '@/app/store'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { useSelectedCalendars } from '@/utils/storage/useSelectedCalendars'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import type { WebSocketWithCleanup } from './connection'
+import { closeWebSocketConnection } from './connection/lifecycle/closeWebSocketConnection'
+import { establishWebSocketConnection } from './connection/lifecycle/establishWebSocketConnection'
 import {
   setupWebSocketPing,
-  type PingCleanup,
-} from "./connection/lifecycle/pingWebSocket";
-import { useWebSocketReconnect } from "./connection/lifecycle/useWebSocketReconnect";
+  type PingCleanup
+} from './connection/lifecycle/pingWebSocket'
+import { useWebSocketReconnect } from './connection/lifecycle/useWebSocketReconnect'
 import {
   registerWebSocketState,
-  setWebSocketConnecting,
-} from "./connection/webSocketState";
-import { updateCalendars } from "./messaging/updateCalendars";
-import { syncCalendarRegistrations } from "./operations";
-import { WebSocketStatusSnackbar } from "./WebSocketStatusSnackbar";
+  setWebSocketConnecting
+} from './connection/webSocketState'
+import { updateCalendars } from './messaging/updateCalendars'
+import { syncCalendarRegistrations } from './operations'
+import { WebSocketStatusSnackbar } from './WebSocketStatusSnackbar'
 
 export function WebSocketGate() {
-  const socketRef = useRef<WebSocketWithCleanup | null>(null);
-  const previousCalendarListRef = useRef<string[]>([]);
-  const previousTempCalendarListRef = useRef<string[]>([]);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const isConnectingRef = useRef(false);
-  const pingCleanupRef = useRef<PingCleanup | null>(null);
+  const socketRef = useRef<WebSocketWithCleanup | null>(null)
+  const previousCalendarListRef = useRef<string[]>([])
+  const previousTempCalendarListRef = useRef<string[]>([])
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const isConnectingRef = useRef(false)
+  const pingCleanupRef = useRef<PingCleanup | null>(null)
 
-  const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const didConnectTimeoutRef = useRef(false);
-  const CONNECT_TIMEOUT_MS = 10_000;
+  const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const didConnectTimeoutRef = useRef(false)
+  const CONNECT_TIMEOUT_MS = 10_000
 
-  const hadSocketBeforeRef = useRef(false);
-  const justReconnectedRef = useRef(false);
-  const [websocketStatus, setWebSocketStatus] = useState("");
+  const hadSocketBeforeRef = useRef(false)
+  const justReconnectedRef = useRef(false)
+  const [websocketStatus, setWebSocketStatus] = useState('')
   const [websocketStatusSerity, setWebSocketStatusSerity] = useState<
-    "success" | "info" | "warning" | "error" | undefined
-  >();
+    'success' | 'info' | 'warning' | 'error' | undefined
+  >()
 
-  const { t } = useI18n();
+  const { t } = useI18n()
 
-  const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((state) =>
+  const dispatch = useAppDispatch()
+  const isAuthenticated = useAppSelector(state =>
     Boolean(state.user.userData && state.user.tokens)
-  );
-  const isAuthenticatedRef = useRef(isAuthenticated);
+  )
+  const isAuthenticatedRef = useRef(isAuthenticated)
 
-  const [isSocketOpen, setIsSocketOpen] = useState(false);
-  const isPending = useAppSelector((state) => state.calendars.pending);
-  const [shouldConnect, setShouldConnect] = useState(false);
+  const [isSocketOpen, setIsSocketOpen] = useState(false)
+  const isPending = useAppSelector(state => state.calendars.pending)
+  const [shouldConnect, setShouldConnect] = useState(false)
 
-  const calendarList = useSelectedCalendars();
+  const calendarList = useSelectedCalendars()
   const tempCalendarList = Object.keys(
-    useAppSelector((state) => state?.calendars?.templist) ?? {}
-  );
+    useAppSelector(state => state?.calendars?.templist) ?? {}
+  )
 
   const calendarsToRefreshRef = useRef<
-    Map<string, { calendar: Calendar; type?: "temp" }>
-  >(new Map());
-  const calendarsToHideRef = useRef<Set<string>>(new Set());
-  const shouldRefreshCalendarListRef = useRef<boolean>(false);
+    Map<string, { calendar: Calendar; type?: 'temp' }>
+  >(new Map())
+  const calendarsToHideRef = useRef<Set<string>>(new Set())
+  const shouldRefreshCalendarListRef = useRef<boolean>(false)
   const debouncedUpdateFnRef = useRef<
     ((dispatch: AppDispatch) => void) | undefined
-  >();
-  const currentDebouncePeriodRef = useRef<number | undefined>();
+  >()
+  const currentDebouncePeriodRef = useRef<number | undefined>()
 
   const onMessage = useCallback(
     (message: unknown) => {
@@ -74,133 +74,133 @@ export function WebSocketGate() {
         calendarsToHide: calendarsToHideRef.current,
         shouldRefreshCalendarListRef,
         debouncedUpdateFn: debouncedUpdateFnRef.current,
-        currentDebouncePeriod: currentDebouncePeriodRef.current,
-      };
-      updateCalendars(message, dispatch, accumulators);
+        currentDebouncePeriod: currentDebouncePeriodRef.current
+      }
+      updateCalendars(message, dispatch, accumulators)
       // Persist any mutations back to refs
-      debouncedUpdateFnRef.current = accumulators.debouncedUpdateFn;
-      currentDebouncePeriodRef.current = accumulators.currentDebouncePeriod;
+      debouncedUpdateFnRef.current = accumulators.debouncedUpdateFn
+      currentDebouncePeriodRef.current = accumulators.currentDebouncePeriod
     },
     [dispatch]
-  );
+  )
 
   const { scheduleReconnect, clearReconnectTimeout } = useWebSocketReconnect(
     reconnectTimeoutRef,
     isAuthenticatedRef,
     reconnectAttemptsRef,
     setShouldConnect
-  );
+  )
 
   const onClose = useCallback(
     (event: CloseEvent) => {
       // Socket already cleaned up by internal handler before this callback fires
-      socketRef.current = null;
-      setIsSocketOpen(false);
+      socketRef.current = null
+      setIsSocketOpen(false)
 
       // Only attempt reconnection if it wasn't a normal closure
       // Code 1000 = normal closure, 1001 = going away (e.g., page unload)
       if (event.code !== 1000 && event.code !== 1001) {
         console.warn(
-          `WebSocket closed unexpectedly (code: ${event.code}, reason: ${event.reason || "none"}). ` +
+          `WebSocket closed unexpectedly (code: ${event.code}, reason: ${event.reason || 'none'}). ` +
             `Attempting to reconnect...`
-        );
-        setWebSocketStatus(t("websocket.closedUnexpectedly"));
-        setWebSocketStatusSerity("warning");
-        scheduleReconnect();
+        )
+        setWebSocketStatus(t('websocket.closedUnexpectedly'))
+        setWebSocketStatusSerity('warning')
+        scheduleReconnect()
       } else {
-        reconnectAttemptsRef.current = 0;
-        clearReconnectTimeout();
+        reconnectAttemptsRef.current = 0
+        clearReconnectTimeout()
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [scheduleReconnect, clearReconnectTimeout]
-  );
+  )
 
   const onError = useCallback((error: Event) => {
-    console.error("WebSocket error:", error);
+    console.error('WebSocket error:', error)
     const errorMessage =
-      (error as ErrorEvent)?.message ?? error.type ?? "unknown";
-    setWebSocketStatus(t("websocket.error", { error: errorMessage }));
-    setWebSocketStatusSerity("error");
+      (error as ErrorEvent)?.message ?? error.type ?? 'unknown'
+    setWebSocketStatus(t('websocket.error', { error: errorMessage }))
+    setWebSocketStatusSerity('error')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   const callBacks = useMemo(
     () => ({
       onMessage,
       onClose,
-      onError,
+      onError
     }),
     [onMessage, onClose, onError]
-  );
+  )
 
   useEffect(() => {
-    isAuthenticatedRef.current = isAuthenticated;
-  }, [isAuthenticated]);
+    isAuthenticatedRef.current = isAuthenticated
+  }, [isAuthenticated])
 
   // Reset reconnection state on successful connection and mark for calendar re-sync
   useEffect(() => {
     if (isSocketOpen) {
       if (connectTimeoutRef.current) {
-        clearTimeout(connectTimeoutRef.current);
-        connectTimeoutRef.current = null;
+        clearTimeout(connectTimeoutRef.current)
+        connectTimeoutRef.current = null
       }
 
       // Reset timeout marker on successful connection
-      didConnectTimeoutRef.current = false;
+      didConnectTimeoutRef.current = false
 
       if (hadSocketBeforeRef.current) {
-        justReconnectedRef.current = true;
-        setWebSocketStatus(t("websocket.reconnected"));
-        setWebSocketStatusSerity("success");
+        justReconnectedRef.current = true
+        setWebSocketStatus(t('websocket.reconnected'))
+        setWebSocketStatusSerity('success')
       }
 
-      hadSocketBeforeRef.current = true;
-      reconnectAttemptsRef.current = 0;
+      hadSocketBeforeRef.current = true
+      reconnectAttemptsRef.current = 0
 
-      clearReconnectTimeout();
+      clearReconnectTimeout()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSocketOpen, clearReconnectTimeout]);
+  }, [isSocketOpen, clearReconnectTimeout])
 
   // Manage WebSocket connection
   useEffect(() => {
-    const abortController = new AbortController();
+    const abortController = new AbortController()
 
     const cleanup = () => {
       if (connectTimeoutRef.current) {
-        clearTimeout(connectTimeoutRef.current);
-        connectTimeoutRef.current = null;
+        clearTimeout(connectTimeoutRef.current)
+        connectTimeoutRef.current = null
       }
-      closeWebSocketConnection(socketRef, setIsSocketOpen);
-      clearReconnectTimeout();
-    };
+      closeWebSocketConnection(socketRef, setIsSocketOpen)
+      clearReconnectTimeout()
+    }
 
     if (!isAuthenticated) {
-      cleanup();
-      reconnectAttemptsRef.current = 0;
+      cleanup()
+      reconnectAttemptsRef.current = 0
 
-      hadSocketBeforeRef.current = false;
-      return;
+      hadSocketBeforeRef.current = false
+      return
     }
 
     const connect = async () => {
-      if (isConnectingRef.current || isSocketOpen) return;
-      isConnectingRef.current = true;
-      setWebSocketConnecting(true);
-      didConnectTimeoutRef.current = false;
+      if (isConnectingRef.current || isSocketOpen) return
+      isConnectingRef.current = true
+      setWebSocketConnecting(true)
+      didConnectTimeoutRef.current = false
       connectTimeoutRef.current = setTimeout(() => {
-        console.warn("WebSocket connection attempt timed out");
+        console.warn('WebSocket connection attempt timed out')
 
-        didConnectTimeoutRef.current = true;
-        abortController.abort();
-        connectTimeoutRef.current = null;
-        isConnectingRef.current = false;
-        setWebSocketConnecting(false);
-        cleanup();
+        didConnectTimeoutRef.current = true
+        abortController.abort()
+        connectTimeoutRef.current = null
+        isConnectingRef.current = false
+        setWebSocketConnecting(false)
+        cleanup()
 
-        scheduleReconnect();
-      }, CONNECT_TIMEOUT_MS);
+        scheduleReconnect()
+      }, CONNECT_TIMEOUT_MS)
 
       try {
         await establishWebSocketConnection(
@@ -208,50 +208,50 @@ export function WebSocketGate() {
           socketRef,
           setIsSocketOpen,
           abortController.signal
-        );
+        )
       } catch (err) {
-        console.warn("WebSocket establishment failed:", err);
+        console.warn('WebSocket establishment failed:', err)
 
         if (connectTimeoutRef.current) {
-          clearTimeout(connectTimeoutRef.current);
-          connectTimeoutRef.current = null;
+          clearTimeout(connectTimeoutRef.current)
+          connectTimeoutRef.current = null
         }
 
         // Only schedule reconnect if the timeout handler hasn't already done so
         if (!didConnectTimeoutRef.current) {
-          scheduleReconnect();
+          scheduleReconnect()
         }
       } finally {
-        isConnectingRef.current = false;
-        setWebSocketConnecting(false);
+        isConnectingRef.current = false
+        setWebSocketConnecting(false)
       }
-    };
+    }
 
-    connect();
+    connect()
 
     return () => {
-      abortController.abort();
-      cleanup();
-    };
+      abortController.abort()
+      cleanup()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isAuthenticated,
     callBacks,
     clearReconnectTimeout,
     shouldConnect,
-    scheduleReconnect,
-  ]);
+    scheduleReconnect
+  ])
 
   // Register using a diff with previous calendars
   useEffect(() => {
-    if (isPending) return;
+    if (isPending) return
 
     // If we just reconnected, force a re-sync
     if (justReconnectedRef.current && isSocketOpen) {
-      console.info("Re-syncing calendars after reconnection");
-      previousCalendarListRef.current = [];
-      previousTempCalendarListRef.current = [];
-      justReconnectedRef.current = false;
+      console.info('Re-syncing calendars after reconnection')
+      previousCalendarListRef.current = []
+      previousTempCalendarListRef.current = []
+      justReconnectedRef.current = false
     }
 
     syncCalendarRegistrations(
@@ -259,8 +259,8 @@ export function WebSocketGate() {
       socketRef,
       calendarList,
       previousCalendarListRef
-    );
-  }, [isSocketOpen, calendarList, isPending]);
+    )
+  }, [isSocketOpen, calendarList, isPending])
 
   useEffect(() => {
     syncCalendarRegistrations(
@@ -268,103 +268,103 @@ export function WebSocketGate() {
       socketRef,
       tempCalendarList,
       previousTempCalendarListRef
-    );
-  }, [isSocketOpen, tempCalendarList]);
+    )
+  }, [isSocketOpen, tempCalendarList])
 
   // Handle browser online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      setWebSocketStatus(t("websocket.browserOnline"));
-      setWebSocketStatusSerity("success");
+      setWebSocketStatus(t('websocket.browserOnline'))
+      setWebSocketStatusSerity('success')
       if (!isSocketOpen && isAuthenticatedRef.current) {
-        reconnectAttemptsRef.current = 0;
-        clearReconnectTimeout();
-        setShouldConnect((prev) => !prev);
+        reconnectAttemptsRef.current = 0
+        clearReconnectTimeout()
+        setShouldConnect(prev => !prev)
       }
-    };
+    }
 
     const handleOffline = () => {
-      setWebSocketStatus(t("websocket.browserOffline"));
-      setWebSocketStatusSerity("warning");
-      cleanupConnection();
-    };
+      setWebSocketStatus(t('websocket.browserOffline'))
+      setWebSocketStatusSerity('warning')
+      cleanupConnection()
+    }
 
     const cleanupConnection = () => {
-      closeWebSocketConnection(socketRef, setIsSocketOpen);
-      clearReconnectTimeout();
+      closeWebSocketConnection(socketRef, setIsSocketOpen)
+      clearReconnectTimeout()
       if (connectTimeoutRef.current) {
-        clearTimeout(connectTimeoutRef.current);
-        connectTimeoutRef.current = null;
+        clearTimeout(connectTimeoutRef.current)
+        connectTimeoutRef.current = null
       }
-    };
+    }
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSocketOpen, isAuthenticated, clearReconnectTimeout]);
+  }, [isSocketOpen, isAuthenticated, clearReconnectTimeout])
 
   useEffect(() => {
     // Only set up ping if socket is open
     if (!isSocketOpen || !socketRef.current) {
       // Clean up existing ping if socket closed
       if (pingCleanupRef.current) {
-        pingCleanupRef.current.stop();
-        pingCleanupRef.current = null;
+        pingCleanupRef.current.stop()
+        pingCleanupRef.current = null
       }
-      return;
+      return
     }
 
     // Set up ping monitoring
     const pingCleanup = setupWebSocketPing(socketRef.current, {
       onConnectionDead: () => {
-        console.warn("WebSocket connection appears dead (no pong received)");
-        setWebSocketStatus(t("websocket.browserOffline"));
-        setWebSocketStatusSerity("warning");
+        console.warn('WebSocket connection appears dead (no pong received)')
+        setWebSocketStatus(t('websocket.browserOffline'))
+        setWebSocketStatusSerity('warning')
 
         // Trigger reconnection
         if (socketRef.current) {
-          socketRef.current.close();
+          socketRef.current.close()
         }
       },
       onPingFail: () => {
-        console.warn("Failed to send ping");
-      },
-    });
+        console.warn('Failed to send ping')
+      }
+    })
 
-    pingCleanupRef.current = pingCleanup;
+    pingCleanupRef.current = pingCleanup
 
     return () => {
       if (pingCleanupRef.current) {
-        pingCleanupRef.current.stop();
-        pingCleanupRef.current = null;
+        pingCleanupRef.current.stop()
+        pingCleanupRef.current = null
       }
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSocketOpen]);
+  }, [isSocketOpen])
 
   const triggerReconnect = useCallback(() => {
-    reconnectAttemptsRef.current = 0;
-    clearReconnectTimeout();
-    setShouldConnect((prev) => !prev);
-  }, [clearReconnectTimeout]);
+    reconnectAttemptsRef.current = 0
+    clearReconnectTimeout()
+    setShouldConnect(prev => !prev)
+  }, [clearReconnectTimeout])
 
   useEffect(() => {
-    registerWebSocketState(socketRef, triggerReconnect);
-  }, [triggerReconnect]);
+    registerWebSocketState(socketRef, triggerReconnect)
+  }, [triggerReconnect])
 
   return websocketStatus ? (
     <WebSocketStatusSnackbar
       message={websocketStatus}
       severity={websocketStatusSerity}
       onClose={() => {
-        setWebSocketStatus("");
-        setWebSocketStatusSerity(undefined);
+        setWebSocketStatus('')
+        setWebSocketStatusSerity(undefined)
       }}
     />
-  ) : null;
+  ) : null
 }

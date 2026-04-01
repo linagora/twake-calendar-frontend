@@ -1,45 +1,45 @@
-import { WS_INBOUND_EVENTS } from "../protocols";
+import { WS_INBOUND_EVENTS } from '../protocols'
 
 export function parseMessage(message: unknown) {
-  const calendarsToRefresh = new Set<string>();
-  const calendarsToHide = new Set<string>();
-  let shouldRefreshCalendarList = false;
-  if (typeof message !== "object" || message === null) {
-    return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList };
+  const calendarsToRefresh = new Set<string>()
+  const calendarsToHide = new Set<string>()
+  let shouldRefreshCalendarList = false
+  if (typeof message !== 'object' || message === null) {
+    return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList }
   }
 
   for (const [key, value] of Object.entries(message)) {
     switch (key) {
       case WS_INBOUND_EVENTS.CLIENT_REGISTERED:
         if (Array.isArray(value)) {
-          value.forEach((cal: string) => calendarsToRefresh.add(cal));
+          value.forEach((cal: string) => calendarsToRefresh.add(cal))
         }
-        break;
+        break
       case WS_INBOUND_EVENTS.CLIENT_UNREGISTERED:
         if (Array.isArray(value)) {
-          value.forEach((cal: string) => calendarsToHide.add(cal));
+          value.forEach((cal: string) => calendarsToHide.add(cal))
         }
-        break;
+        break
       case WS_INBOUND_EVENTS.CALENDAR_CLIENT_REGISTERED:
-        break;
+        break
       case WS_INBOUND_EVENTS.CALENDAR_LIST:
-        Object.keys(value).forEach((key) => {
-          if (key === "subscribed") {
+        Object.keys(value).forEach(key => {
+          if (key === 'subscribed') {
             if (Array.isArray(value[key])) {
-              value[key].forEach((cal: string) => calendarsToRefresh.add(cal));
+              value[key].forEach((cal: string) => calendarsToRefresh.add(cal))
             }
-          } else if (key === "deleted") {
-            shouldRefreshCalendarList = true;
+          } else if (key === 'deleted') {
+            shouldRefreshCalendarList = true
           } else {
-            shouldRefreshCalendarList = true;
+            shouldRefreshCalendarList = true
           }
-        });
-        break;
+        })
+        break
       default: {
-        calendarsToRefresh.add(key);
+        calendarsToRefresh.add(key)
       }
     }
   }
 
-  return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList };
+  return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList }
 }

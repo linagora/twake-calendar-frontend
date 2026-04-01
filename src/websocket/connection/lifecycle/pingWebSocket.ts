@@ -1,26 +1,26 @@
-import { WebSocketWithCleanup } from "../types";
+import { WebSocketWithCleanup } from '../types'
 
 export interface PingConfig {
   /** Interval between ping attempts in milliseconds */
-  pingInterval?: number;
+  pingInterval?: number
   /** Timeout for pong response in milliseconds */
-  pongTimeout?: number;
+  pongTimeout?: number
   /** Callback when connection is deemed dead */
-  onConnectionDead?: () => void;
+  onConnectionDead?: () => void
   /** Callback when ping fails */
-  onPingFail?: () => void;
+  onPingFail?: () => void
   /** Callback when pong is received successfully */
-  onPongReceived?: () => void;
+  onPongReceived?: () => void
 }
 
 export interface PingCleanup {
-  stop: () => void;
+  stop: () => void
   /** Force send a ping immediately */
-  sendPing: () => void;
+  sendPing: () => void
 }
 
-const DEFAULT_PING_INTERVAL = window.WS_PING_PERIOD_MS ?? 30000;
-const DEFAULT_PONG_TIMEOUT = window.WS_PING_TIMEOUT_PERIOD_MS ?? 35000;
+const DEFAULT_PING_INTERVAL = window.WS_PING_PERIOD_MS ?? 30000
+const DEFAULT_PONG_TIMEOUT = window.WS_PING_TIMEOUT_PERIOD_MS ?? 35000
 
 /**
  * Sets up a ping/pong mechanism to monitor WebSocket connection health
@@ -51,130 +51,130 @@ export function setupWebSocketPing(
     pongTimeout = DEFAULT_PONG_TIMEOUT,
     onConnectionDead,
     onPingFail,
-    onPongReceived,
-  } = config;
+    onPongReceived
+  } = config
 
-  let pingIntervalId: NodeJS.Timeout | null = null;
-  let pongTimeoutId: NodeJS.Timeout | null = null;
-  let isWaitingForPong = false;
-  let isStopped = false;
+  let pingIntervalId: NodeJS.Timeout | null = null
+  let pongTimeoutId: NodeJS.Timeout | null = null
+  let isWaitingForPong = false
+  let isStopped = false
 
   const cleanup = () => {
     if (pingIntervalId) {
-      clearInterval(pingIntervalId);
-      pingIntervalId = null;
+      clearInterval(pingIntervalId)
+      pingIntervalId = null
     }
     if (pongTimeoutId) {
-      clearTimeout(pongTimeoutId);
-      pongTimeoutId = null;
+      clearTimeout(pongTimeoutId)
+      pongTimeoutId = null
     }
-    isWaitingForPong = false;
-  };
+    isWaitingForPong = false
+  }
 
   const sendPing = () => {
     if (isStopped || !socket || socket.readyState !== WebSocket.OPEN) {
-      return;
+      return
     }
 
     // If we're still waiting for a previous pong, connection might be dead
     if (isWaitingForPong) {
       console.warn(
-        "Pong not received for previous ping. Connection may be dead."
-      );
-      onPingFail?.();
-      onConnectionDead?.();
-      isStopped = true;
-      cleanup();
-      return;
+        'Pong not received for previous ping. Connection may be dead.'
+      )
+      onPingFail?.()
+      onConnectionDead?.()
+      isStopped = true
+      cleanup()
+      return
     }
 
     try {
-      socket.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
+      socket.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }))
 
-      isWaitingForPong = true;
+      isWaitingForPong = true
 
       // Set timeout for pong response
       pongTimeoutId = setTimeout(() => {
         if (isWaitingForPong) {
-          console.warn("Pong timeout exceeded. Connection may be dead.");
-          onPingFail?.();
-          onConnectionDead?.();
-          cleanup();
+          console.warn('Pong timeout exceeded. Connection may be dead.')
+          onPingFail?.()
+          onConnectionDead?.()
+          cleanup()
         }
-      }, pongTimeout);
+      }, pongTimeout)
     } catch (error) {
-      console.error("Failed to send ping:", error);
-      onPingFail?.();
-      cleanup();
+      console.error('Failed to send ping:', error)
+      onPingFail?.()
+      cleanup()
     }
-  };
+  }
 
   const handlePong = () => {
     if (pongTimeoutId) {
-      clearTimeout(pongTimeoutId);
-      pongTimeoutId = null;
+      clearTimeout(pongTimeoutId)
+      pongTimeoutId = null
     }
-    isWaitingForPong = false;
-    onPongReceived?.();
-  };
+    isWaitingForPong = false
+    onPongReceived?.()
+  }
 
   // Start ping interval
   const startPinging = () => {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.warn("Cannot start pinging: socket is not open");
-      return;
+      console.warn('Cannot start pinging: socket is not open')
+      return
     }
 
     // Send first ping immediately
-    sendPing();
+    sendPing()
 
     // Set up recurring pings
     pingIntervalId = setInterval(() => {
-      sendPing();
-    }, pingInterval);
-  };
+      sendPing()
+    }, pingInterval)
+  }
 
   // Set up message listener for pong responses
-  const originalOnMessage = socket?.onmessage;
+  const originalOnMessage = socket?.onmessage
   if (socket) {
-    socket.onmessage = (event) => {
-      let isPong = false;
-      if (typeof event.data === "string") {
+    socket.onmessage = event => {
+      let isPong = false
+      if (typeof event.data === 'string') {
         try {
-          const payload = JSON.parse(event.data);
+          const payload = JSON.parse(event.data)
           // Check if it's an empty object {}
           isPong =
-            typeof payload === "object" &&
+            typeof payload === 'object' &&
             payload !== null &&
-            Object.keys(payload).length === 0;
+            Object.keys(payload).length === 0
         } catch {
           // Non-JSON payload
         }
       }
       if (isPong) {
-        handlePong();
+        handlePong()
       }
       // Call original handler
-      originalOnMessage?.call(socket, event);
-    };
+      originalOnMessage?.call(socket, event)
+    }
   }
 
   // Start the ping mechanism
-  startPinging();
+  startPinging()
 
   return {
     stop: () => {
-      isStopped = true;
-      cleanup();
+      isStopped = true
+      cleanup()
       // Restore original onmessage handler
       if (socket) {
-        socket.onmessage = originalOnMessage ?? null;
+        socket.onmessage = originalOnMessage ?? null
       }
     },
     sendPing: () => {
       if (!isStopped) {
-        sendPing();
+        sendPing()
       }
-    },
-  };
+    }
+  }
 }

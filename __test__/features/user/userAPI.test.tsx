@@ -1,114 +1,114 @@
-import { clientConfig } from "@/features/User/oidcAuth";
+import { clientConfig } from '@/features/User/oidcAuth'
 import {
   getOpenPaasUser,
   updateUserConfigurations,
   getResourceDetails,
-  getUserDetails,
-} from "@/features/User/userAPI";
-import { api } from "@/utils/apiUtils";
+  getUserDetails
+} from '@/features/User/userAPI'
+import { api } from '@/utils/apiUtils'
 
-jest.mock("@/utils/apiUtils");
+jest.mock('@/utils/apiUtils')
 
-clientConfig.url = "https://example.com";
+clientConfig.url = 'https://example.com'
 
-describe("getOpenPaasUser", () => {
-  it("should fetch and return user data", async () => {
-    const mockUser = { id: "123", name: "OpenPaas User" };
+describe('getOpenPaasUser', () => {
+  it('should fetch and return user data', async () => {
+    const mockUser = { id: '123', name: 'OpenPaas User' }
 
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockUser),
-    });
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockUser)
+    })
 
-    const result = await getOpenPaasUser();
+    const result = await getOpenPaasUser()
 
-    expect(api.get).toHaveBeenCalledWith("api/user");
-    expect(result).toEqual(mockUser);
-  });
-});
+    expect(api.get).toHaveBeenCalledWith('api/user')
+    expect(result).toEqual(mockUser)
+  })
+})
 
-describe("getUserDetails", () => {
-  it("should fetch and return user details", async () => {
+describe('getUserDetails', () => {
+  it('should fetch and return user details', async () => {
     const mockUser = {
-      firstname: "John",
-      lastname: "Doe",
-      emails: ["john@test.com"],
-    };
-    const userId = "123";
+      firstname: 'John',
+      lastname: 'Doe',
+      emails: ['john@test.com']
+    }
+    const userId = '123'
 
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockUser),
-    });
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockUser)
+    })
 
-    const result = await getUserDetails(userId);
+    const result = await getUserDetails(userId)
 
-    expect(api.get).toHaveBeenCalledWith(`api/users/${userId}`);
-    expect(result).toEqual(mockUser);
-  });
-});
+    expect(api.get).toHaveBeenCalledWith(`api/users/${userId}`)
+    expect(result).toEqual(mockUser)
+  })
+})
 
-describe("getResourceDetails", () => {
-  it("should fetch and return resource details", async () => {
-    const mockResource = { _id: "res-123", name: "Meeting Room A" };
-    const resourceId = "res-123";
+describe('getResourceDetails', () => {
+  it('should fetch and return resource details', async () => {
+    const mockResource = { _id: 'res-123', name: 'Meeting Room A' }
+    const resourceId = 'res-123'
 
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResource),
-    });
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockResource)
+    })
 
-    const result = await getResourceDetails(resourceId);
+    const result = await getResourceDetails(resourceId)
 
-    expect(api.get).toHaveBeenCalledWith(`api/resources/${resourceId}`);
-    expect(result).toEqual(mockResource);
-  });
-});
+    expect(api.get).toHaveBeenCalledWith(`api/resources/${resourceId}`)
+    expect(result).toEqual(mockResource)
+  })
+})
 
-describe("updateUserConfigurations", () => {
+describe('updateUserConfigurations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
-  it("should PATCH configurations with language update", async () => {
-    const mockResponse = { status: 204 };
-    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
+  it('should PATCH configurations with language update', async () => {
+    const mockResponse = { status: 204 }
+    ;(api.patch as jest.Mock).mockResolvedValue(mockResponse)
 
-    await updateUserConfigurations({ language: "vi" });
+    await updateUserConfigurations({ language: 'vi' })
 
-    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
+    expect(api.patch).toHaveBeenCalledWith('api/configurations?scope=user', {
       json: [
         {
-          name: "core",
-          configurations: [{ name: "language", value: "vi" }],
-        },
-      ],
-    });
-  });
+          name: 'core',
+          configurations: [{ name: 'language', value: 'vi' }]
+        }
+      ]
+    })
+  })
 
-  it("should PATCH configurations with multiple updates", async () => {
-    const mockResponse = { status: 204 };
-    (api.patch as jest.Mock).mockResolvedValue(mockResponse);
+  it('should PATCH configurations with multiple updates', async () => {
+    const mockResponse = { status: 204 }
+    ;(api.patch as jest.Mock).mockResolvedValue(mockResponse)
 
     await updateUserConfigurations({
-      language: "fr",
-      timezone: "Europe/Paris",
-    });
+      language: 'fr',
+      timezone: 'Europe/Paris'
+    })
 
-    expect(api.patch).toHaveBeenCalledWith("api/configurations?scope=user", {
+    expect(api.patch).toHaveBeenCalledWith('api/configurations?scope=user', {
       json: [
         {
-          name: "core",
+          name: 'core',
           configurations: [
-            { name: "language", value: "fr" },
-            { name: "datetime", value: { timeZone: "Europe/Paris" } },
-          ],
-        },
-      ],
-    });
-  });
+            { name: 'language', value: 'fr' },
+            { name: 'datetime', value: { timeZone: 'Europe/Paris' } }
+          ]
+        }
+      ]
+    })
+  })
 
-  it("should handle empty updates without calling API", async () => {
-    const result = await updateUserConfigurations({});
+  it('should handle empty updates without calling API', async () => {
+    const result = await updateUserConfigurations({})
 
-    expect(api.patch).not.toHaveBeenCalled();
-    expect(result).toEqual({ status: 204 });
-  });
-});
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(result).toEqual({ status: 204 })
+  })
+})

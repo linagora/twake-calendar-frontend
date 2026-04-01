@@ -1,4 +1,4 @@
-import { userData } from "@/features/User/userDataTypes";
+import { userData } from '@/features/User/userDataTypes'
 
 /**
  * Get user display name for UI display
@@ -8,12 +8,12 @@ import { userData } from "@/features/User/userDataTypes";
  */
 export function getUserDisplayName(user: userData | null | undefined): string {
   if (!user) {
-    return "";
+    return ''
   }
 
   if (user.name && user.family_name) {
-    return `${user.name} ${user.family_name}`;
+    return `${user.name} ${user.family_name}`
   }
 
-  return user.email || "";
+  return user.email || ''
 }

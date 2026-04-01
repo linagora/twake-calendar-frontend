@@ -1,9 +1,9 @@
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { browserDefaultTimeZone } from "@/utils/timezone";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CalendarEvent } from "../Events/EventsTypes";
-import { addCalendarResourceAsync } from "./api/addCalendarResourceAsync";
-import { Calendar } from "./CalendarTypes";
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { browserDefaultTimeZone } from '@/utils/timezone'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { CalendarEvent } from '../Events/EventsTypes'
+import { addCalendarResourceAsync } from './api/addCalendarResourceAsync'
+import { Calendar } from './CalendarTypes'
 import {
   addSharedCalendarAsync,
   createCalendarAsync,
@@ -21,48 +21,48 @@ import {
   refreshCalendarWithSyncToken,
   removeCalendarAsync,
   updateEventInstanceAsync,
-  updateSeriesAsync,
-} from "./services";
+  updateSeriesAsync
+} from './services'
 
 const CalendarSlice = createSlice({
-  name: "calendars",
+  name: 'calendars',
   initialState: {
     list: {} as Record<string, Calendar>,
     templist: {} as Record<string, Calendar>,
     pending: true,
-    error: null as string | null,
+    error: null as string | null
   } as {
-    list: Record<string, Calendar>;
-    templist: Record<string, Calendar>;
-    pending: boolean;
-    error: string | null;
+    list: Record<string, Calendar>
+    templist: Record<string, Calendar>
+    pending: boolean
+    error: string | null
   },
   reducers: {
     createCalendar: (
       state,
       action: PayloadAction<Record<string, string | Record<string, string>>>
     ) => {
-      const id = Date.now().toString(36);
-      state.list[id] = {} as Calendar;
-      state.list[id].name = action.payload.name as string;
-      state.list[id].color = action.payload.color as Record<string, string>;
-      state.list[id].description = action.payload.description as string;
-      state.list[id].events = {};
+      const id = Date.now().toString(36)
+      state.list[id] = {} as Calendar
+      state.list[id].name = action.payload.name as string
+      state.list[id].color = action.payload.color as Record<string, string>
+      state.list[id].description = action.payload.description as string
+      state.list[id].events = {}
     },
     addEvent: (
       state,
       action: PayloadAction<{ calendarUid: string; event: CalendarEvent }>
     ) => {
       if (!state.list[action.payload.calendarUid].events) {
-        state.list[action.payload.calendarUid].events = {};
+        state.list[action.payload.calendarUid].events = {}
       }
       state.list[action.payload.calendarUid].events[action.payload.event.uid] =
-        action.payload.event;
+        action.payload.event
       state.list[action.payload.calendarUid].events[
         action.payload.event.uid
       ].URL = `/calendars/${action.payload.calendarUid}/${extractEventBaseUuid(
         action.payload.event.uid
-      )}.ics`;
+      )}.ics`
     },
     removeEvent: (
       state,
@@ -70,50 +70,48 @@ const CalendarSlice = createSlice({
     ) => {
       delete state.list[action.payload.calendarUid].events[
         action.payload.eventUid
-      ];
+      ]
     },
     removeTempCal: (state, action: PayloadAction<string>) => {
-      delete state.templist[action.payload];
+      delete state.templist[action.payload]
     },
     emptyEventsCal: (
       state,
-      action: PayloadAction<{ calId?: string; calType?: "temp" }>
+      action: PayloadAction<{ calId?: string; calType?: 'temp' }>
     ) => {
       const cals =
-        action.payload.calType === "temp" ? state.templist : state.list;
+        action.payload.calType === 'temp' ? state.templist : state.list
       if (action.payload.calId) {
-        cals[action.payload.calId].events = {};
+        cals[action.payload.calId].events = {}
       } else {
-        Object.keys(state.templist).forEach(
-          (calId) => (cals[calId].events = {})
-        );
+        Object.keys(state.templist).forEach(calId => (cals[calId].events = {}))
       }
     },
     updateEventLocal: (
       state,
       action: PayloadAction<{ calId: string; event: CalendarEvent }>
     ) => {
-      const { calId, event } = action.payload;
-      state.list[calId].events[event.uid] = event;
+      const { calId, event } = action.payload
+      state.list[calId].events[event.uid] = event
     },
     clearFetchCache: (state, action: PayloadAction<string>) => {
-      if (!state.list[action.payload]) return;
-      state.list[action.payload].lastCacheCleared = Date.now();
+      if (!state.list[action.payload]) return
+      state.list[action.payload].lastCacheCleared = Date.now()
     },
-    clearError: (state) => {
-      state.error = null;
+    clearError: state => {
+      state.error = null
     },
     updateCalColor: (
       state,
       action: PayloadAction<{
-        id: string;
-        color: { light: string; dark: string };
+        id: string
+        color: { light: string; dark: string }
       }>
     ) => {
-      state.list[action.payload.id].color = action.payload.color;
-    },
+      state.list[action.payload.id].color = action.payload.color
+    }
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       // Fulfilled cases
       .addCase(
@@ -121,39 +119,39 @@ const CalendarSlice = createSlice({
         (
           state,
           action: PayloadAction<{
-            importedCalendars: Record<string, Calendar>;
-            errors: string;
+            importedCalendars: Record<string, Calendar>
+            errors: string
           }>
         ) => {
-          state.pending = false;
+          state.pending = false
           state.error = action.payload.errors.length
             ? action.payload.errors
-            : null;
+            : null
 
           Object.entries(action.payload.importedCalendars).forEach(
             ([id, cal]) => {
               state.list[id] = {
                 ...cal,
-                events: state.list[id]?.events || {},
-              };
+                events: state.list[id]?.events || {}
+              }
             }
-          );
+          )
 
           // Remove calendars that no longer exist
-          Object.keys(state.list).forEach((id) => {
+          Object.keys(state.list).forEach(id => {
             if (!action.payload.importedCalendars[id]) {
-              delete state.list[id];
+              delete state.list[id]
             }
-          });
+          })
         }
       )
       .addCase(
         getTempCalendarsListAsync.fulfilled,
         (state, action: PayloadAction<Record<string, Calendar>>) => {
-          state.pending = false;
+          state.pending = false
           Object.keys(action.payload).forEach(
-            (id) => (state.templist[id] = action.payload[id])
-          );
+            id => (state.templist[id] = action.payload[id])
+          )
         }
       )
       .addCase(
@@ -161,40 +159,37 @@ const CalendarSlice = createSlice({
         (
           state,
           action: PayloadAction<{
-            calId: string;
-            events: CalendarEvent[];
-            calType?: string;
-            syncToken?: string;
+            calId: string
+            events: CalendarEvent[]
+            calType?: string
+            syncToken?: string
           }>
         ) => {
-          state.pending = false;
-          const type = action.payload.calType === "temp" ? "templist" : "list";
+          state.pending = false
+          const type = action.payload.calType === 'temp' ? 'templist' : 'list'
 
           if (!state[type][action.payload.calId]) {
-            return;
+            return
           }
-          state[type][action.payload.calId].syncToken =
-            action.payload.syncToken;
-          action.payload.events.forEach((event) => {
-            state[type][action.payload.calId].events[event.uid] = event;
-          });
-          Object.keys(state[type][action.payload.calId].events).forEach(
-            (id) => {
-              state[type][action.payload.calId].events[id].color =
-                state[type][action.payload.calId].color;
-              state[type][action.payload.calId].events[id].calId =
-                action.payload.calId;
-              if (!state[type][action.payload.calId].events[id].timezone) {
-                state[type][action.payload.calId].events[id].timezone =
-                  browserDefaultTimeZone;
-              }
+          state[type][action.payload.calId].syncToken = action.payload.syncToken
+          action.payload.events.forEach(event => {
+            state[type][action.payload.calId].events[event.uid] = event
+          })
+          Object.keys(state[type][action.payload.calId].events).forEach(id => {
+            state[type][action.payload.calId].events[id].color =
+              state[type][action.payload.calId].color
+            state[type][action.payload.calId].events[id].calId =
+              action.payload.calId
+            if (!state[type][action.payload.calId].events[id].timezone) {
+              state[type][action.payload.calId].events[id].timezone =
+                browserDefaultTimeZone
             }
-          );
+          })
         }
       )
-      .addCase(putEventAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(putEventAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(
         getEventAsync.fulfilled,
@@ -202,64 +197,64 @@ const CalendarSlice = createSlice({
           state,
           action: PayloadAction<{ calId: string; event: CalendarEvent }>
         ) => {
-          state.pending = false;
+          state.pending = false
           if (!state.list[action.payload.calId]) {
             state.list[action.payload.calId] = {
               id: action.payload.calId,
-              events: {},
-            } as Calendar;
+              events: {}
+            } as Calendar
           }
           if (
             Object.keys(state.list[action.payload.calId].events).find(
               (eventId: string) => {
-                const eventIdBase = extractEventBaseUuid(eventId);
-                return eventIdBase === action.payload.event.uid;
+                const eventIdBase = extractEventBaseUuid(eventId)
+                return eventIdBase === action.payload.event.uid
               }
             )
           ) {
             Object.keys(state.list[action.payload.calId].events)
-              .filter((eventKey) => {
-                const baseUid = extractEventBaseUuid(eventKey);
-                return baseUid === action.payload.event.uid;
+              .filter(eventKey => {
+                const baseUid = extractEventBaseUuid(eventKey)
+                return baseUid === action.payload.event.uid
               })
-              .forEach((eventKey) => {
+              .forEach(eventKey => {
                 state.list[action.payload.calId].events[eventKey] = {
                   ...state.list[action.payload.calId].events[eventKey],
                   repetition: action.payload.event.repetition,
-                  timezone: action.payload.event.timezone,
-                };
-              });
+                  timezone: action.payload.event.timezone
+                }
+              })
           } else {
             state.list[action.payload.calId].events[action.payload.event.uid] =
-              action.payload.event;
+              action.payload.event
           }
         }
       )
-      .addCase(moveEventAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(moveEventAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
-      .addCase(deleteEventAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(deleteEventAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(deleteEventInstanceAsync.fulfilled, (state, action) => {
-        state.pending = false;
-        delete state.list[action.payload.calId].events[action.payload.eventId];
-        state.error = null;
+        state.pending = false
+        delete state.list[action.payload.calId].events[action.payload.eventId]
+        state.error = null
       })
       .addCase(updateEventInstanceAsync.fulfilled, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.list[action.payload.calId].events[action.payload.event.uid] =
-          action.payload.event;
-        state.error = null;
+          action.payload.event
+        state.error = null
       })
-      .addCase(updateSeriesAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(updateSeriesAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(createCalendarAsync.fulfilled, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.list[`${action.payload.userId}/${action.payload.calId}`] = {
           color: action.payload.color,
           id: `${action.payload.userId}/${action.payload.calId}`,
@@ -267,16 +262,16 @@ const CalendarSlice = createSlice({
           description: action.payload.desc,
           name: action.payload.name,
           owner: action.payload.owner,
-          events: {},
-        } as Calendar;
-        state.error = null;
+          events: {}
+        } as Calendar
+        state.error = null
       })
-      .addCase(patchCalendarAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(patchCalendarAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(addSharedCalendarAsync.fulfilled, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
@@ -284,12 +279,12 @@ const CalendarSlice = createSlice({
           description: action.payload.desc,
           name: action.payload.name,
           events: {},
-          owner: action.payload.owner,
-        } as Calendar;
-        state.error = null;
+          owner: action.payload.owner
+        } as Calendar
+        state.error = null
       })
       .addCase(addCalendarResourceAsync.fulfilled, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
@@ -297,27 +292,27 @@ const CalendarSlice = createSlice({
           description: action.payload.desc,
           name: action.payload.name,
           events: {},
-          owner: action.payload.owner,
-        } as Calendar;
-        state.error = null;
+          owner: action.payload.owner
+        } as Calendar
+        state.error = null
       })
-      .addCase(removeCalendarAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(removeCalendarAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(patchACLCalendarAsync.fulfilled, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.list[action.payload.calId].visibility =
-          action.payload.request !== "" ? "public" : "private";
-        state.error = null;
+          action.payload.request !== '' ? 'public' : 'private'
+        state.error = null
       })
-      .addCase(importEventFromFileAsync.fulfilled, (state) => {
-        state.pending = false;
-        state.error = null;
+      .addCase(importEventFromFileAsync.fulfilled, state => {
+        state.pending = false
+        state.error = null
       })
       .addCase(refreshCalendarWithSyncToken.fulfilled, (state, action) => {
-        state.pending = false;
-        state.error = null;
+        state.pending = false
+        state.error = null
 
         const {
           calId,
@@ -325,230 +320,230 @@ const CalendarSlice = createSlice({
           createdOrUpdatedEvents,
           calType,
           syncToken,
-          syncStatus,
-        } = action.payload;
+          syncStatus
+        } = action.payload
 
         const target =
-          calType === "temp" ? state.templist[calId] : state.list[calId];
+          calType === 'temp' ? state.templist[calId] : state.list[calId]
 
         if (!target) {
-          return;
+          return
         }
 
-        if (syncStatus === "SUCCESS") {
-          const deletedSet = new Set(deletedEvents); // working with a Set for deletion avoids O(nxm) complexity
+        if (syncStatus === 'SUCCESS') {
+          const deletedSet = new Set(deletedEvents) // working with a Set for deletion avoids O(nxm) complexity
           Object.values(target.events)
-            .filter((event) => {
-              return deletedSet.has(event.URL);
+            .filter(event => {
+              return deletedSet.has(event.URL)
             })
-            .forEach((event) => {
-              delete target.events[event.uid];
-            });
+            .forEach(event => {
+              delete target.events[event.uid]
+            })
 
           for (const event of createdOrUpdatedEvents) {
-            target.events[event.uid] = event;
+            target.events[event.uid] = event
           }
-          target.syncToken = syncToken;
+          target.syncToken = syncToken
         }
       })
       // Pending cases
-      .addCase(getCalendarDetailAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(getCalendarDetailAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(getEventAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(getEventAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(getCalendarsListAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(getCalendarsListAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(putEventAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(putEventAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(moveEventAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(moveEventAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(deleteEventAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(deleteEventAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(deleteEventInstanceAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(deleteEventInstanceAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(updateEventInstanceAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(updateEventInstanceAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(updateSeriesAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(updateSeriesAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(patchCalendarAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(patchCalendarAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(createCalendarAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(createCalendarAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(getTempCalendarsListAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(getTempCalendarsListAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(addSharedCalendarAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(addSharedCalendarAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(addCalendarResourceAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(addCalendarResourceAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(removeCalendarAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(removeCalendarAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(patchACLCalendarAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(patchACLCalendarAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(importEventFromFileAsync.pending, (state) => {
-        state.pending = true;
+      .addCase(importEventFromFileAsync.pending, state => {
+        state.pending = true
       })
-      .addCase(refreshCalendarWithSyncToken.pending, (state) => {
-        state.pending = true;
+      .addCase(refreshCalendarWithSyncToken.pending, state => {
+        state.pending = true
       })
       // Rejected cases
       .addCase(getCalendarsListAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         if (action.payload?.status !== 401) {
           state.error =
             action.payload?.message ||
             action.error.message ||
-            "Failed to load calendars";
+            'Failed to load calendars'
         }
       })
       .addCase(getTempCalendarsListAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         if (
-          action.payload?.message.includes("aborted") ||
-          action.error.name === "AbortError"
+          action.payload?.message.includes('aborted') ||
+          action.error.name === 'AbortError'
         ) {
-          return;
+          return
         }
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to load temporary calendars";
+          'Failed to load temporary calendars'
       })
       .addCase(getCalendarDetailAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         if (
-          action.payload?.message.includes("aborted") ||
-          action.error.name === "AbortError"
+          action.payload?.message.includes('aborted') ||
+          action.error.name === 'AbortError'
         ) {
-          return;
+          return
         }
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to load calendar details";
+          'Failed to load calendar details'
       })
       .addCase(putEventAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to create event";
+          'Failed to create event'
       })
       .addCase(getEventAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to load event";
+          'Failed to load event'
       })
       .addCase(moveEventAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to move event";
+          'Failed to move event'
       })
       .addCase(deleteEventAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to delete event";
+          'Failed to delete event'
       })
       .addCase(deleteEventInstanceAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to delete event instance";
+          'Failed to delete event instance'
       })
       .addCase(updateEventInstanceAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to update event instance";
+          'Failed to update event instance'
       })
       .addCase(updateSeriesAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to update event series";
+          'Failed to update event series'
       })
       .addCase(patchCalendarAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to update calendar";
+          'Failed to update calendar'
       })
       .addCase(createCalendarAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to create calendar";
+          'Failed to create calendar'
       })
       .addCase(addSharedCalendarAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to add shared calendar";
+          'Failed to add shared calendar'
       })
       .addCase(addCalendarResourceAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to add calendar resource";
+          'Failed to add calendar resource'
       })
       .addCase(removeCalendarAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to remove calendar";
+          'Failed to remove calendar'
       })
       .addCase(patchACLCalendarAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to update calendar permissions";
+          'Failed to update calendar permissions'
       })
       .addCase(importEventFromFileAsync.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to import event from file";
+          'Failed to import event from file'
       })
       .addCase(refreshCalendarWithSyncToken.rejected, (state, action) => {
-        state.pending = false;
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||
-          "Failed to refresh calendar";
-      });
-  },
-});
+          'Failed to refresh calendar'
+      })
+  }
+})
 
 export const {
   addEvent,
@@ -559,6 +554,6 @@ export const {
   emptyEventsCal,
   clearFetchCache,
   clearError,
-  updateCalColor,
-} = CalendarSlice.actions;
-export default CalendarSlice.reducer;
+  updateCalColor
+} = CalendarSlice.actions
+export default CalendarSlice.reducer

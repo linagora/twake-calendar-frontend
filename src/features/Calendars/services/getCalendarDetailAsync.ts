@@ -1,61 +1,57 @@
-import { CalendarEvent } from "@/features/Events/EventsTypes";
+import { CalendarEvent } from '@/features/Events/EventsTypes'
 import {
   CalendarData,
-  CalendarItem,
-} from "@/features/Calendars/types/CalendarData";
-import { toRejectedError } from "@/utils/errorUtils";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getCalendar } from "../CalendarApi";
-import { RejectedError } from "../types/RejectedError";
-import { extractCalendarEvents } from "../utils/extractCalendarEvents";
-import { type RootState } from "@/app/store";
+  CalendarItem
+} from '@/features/Calendars/types/CalendarData'
+import { toRejectedError } from '@/utils/errorUtils'
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { getCalendar } from '../CalendarApi'
+import { RejectedError } from '../types/RejectedError'
+import { extractCalendarEvents } from '../utils/extractCalendarEvents'
+import { type RootState } from '@/app/store'
 
 export const getCalendarDetailAsync = createAsyncThunk<
   {
-    calId: string;
-    events: CalendarEvent[];
-    calType?: string;
-    syncToken?: string;
+    calId: string
+    events: CalendarEvent[]
+    calType?: string
+    syncToken?: string
   },
   {
-    calId: string;
-    match: { start: string; end: string };
-    calType?: string;
-    signal?: AbortSignal;
+    calId: string
+    match: { start: string; end: string }
+    calType?: string
+    signal?: AbortSignal
   },
   { rejectValue: RejectedError }
 >(
-  "calendars/getCalendarDetails",
+  'calendars/getCalendarDetails',
   async ({ calId, match, calType, signal }, { rejectWithValue, getState }) => {
     try {
-      const state = getState() as RootState;
+      const state = getState() as RootState
       const calendarStored =
-        state.calendars[calType === "temp" ? "templist" : "list"][calId];
+        state.calendars[calType === 'temp' ? 'templist' : 'list'][calId]
       if (!calendarStored) {
         return rejectWithValue(
           toRejectedError(new Error(`Calendar ${calId} not found in store`))
-        );
+        )
       }
-      const calendar = (await getCalendar(
-        calId,
-        match,
-        signal
-      )) as CalendarData;
-      const syncToken = calendar._embedded?.["sync-token"];
+      const calendar = (await getCalendar(calId, match, signal)) as CalendarData
+      const syncToken = calendar._embedded?.['sync-token']
 
-      const items = calendar._embedded?.["dav:item"];
+      const items = calendar._embedded?.['dav:item']
       const events: CalendarEvent[] = Array.isArray(items)
         ? items.flatMap((item: CalendarItem) =>
             extractCalendarEvents(item, {
               cal: calendarStored,
-              color: calendarStored.color,
+              color: calendarStored.color
             })
           )
-        : [];
+        : []
 
-      return { calId, events, calType, syncToken };
+      return { calId, events, calType, syncToken }
     } catch (err) {
-      return rejectWithValue(toRejectedError(err));
+      return rejectWithValue(toRejectedError(err))
     }
   }
-);
+)

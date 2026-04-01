@@ -1,21 +1,21 @@
-import { Box, IconButton } from "@linagora/twake-mui";
-import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { dlEvent } from "../EventApi";
-import { CalendarEvent } from "../EventsTypes";
+import { Box, IconButton } from '@linagora/twake-mui'
+import CloseIcon from '@mui/icons-material/Close'
+import EditIcon from '@mui/icons-material/Edit'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { dlEvent } from '../EventApi'
+import { CalendarEvent } from '../EventsTypes'
 
 interface EventPreviewHeaderProps {
-  event: CalendarEvent;
-  eventId: string;
-  isOrganizer: boolean;
-  isOwn: boolean;
-  isWriteDelegated: boolean;
-  isNotPrivate: boolean;
-  onClose: () => void;
-  onEdit: () => void;
-  onMoreClick: (e: React.MouseEvent<HTMLElement>) => void;
+  event: CalendarEvent
+  eventId: string
+  isOrganizer: boolean
+  isOwn: boolean
+  isWriteDelegated: boolean
+  isNotPrivate: boolean
+  onClose: () => void
+  onEdit: () => void
+  onMoreClick: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 export function EventPreviewHeader({
@@ -27,10 +27,10 @@ export function EventPreviewHeader({
   isNotPrivate,
   onClose,
   onEdit,
-  onMoreClick,
+  onMoreClick
 }: EventPreviewHeaderProps) {
-  const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate));
-  const canSeeMore = isNotPrivate || isOwn;
+  const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate))
+  const canSeeMore = isNotPrivate || isOwn
 
   return (
     <Box
@@ -44,21 +44,21 @@ export function EventPreviewHeader({
         <IconButton
           size="small"
           onClick={async () => {
-            let url: string | null = null;
+            let url: string | null = null
             try {
-              const icsContent = await dlEvent(event);
-              const blob = new Blob([icsContent], { type: "text/calendar" });
-              url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = `${eventId}.ics`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+              const icsContent = await dlEvent(event)
+              const blob = new Blob([icsContent], { type: 'text/calendar' })
+              url = URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              link.download = `${eventId}.ics`
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
             } catch (error) {
-              console.error("Failed to download ICS file:", error);
+              console.error('Failed to download ICS file:', error)
             } finally {
-              if (url) URL.revokeObjectURL(url);
+              if (url) URL.revokeObjectURL(url)
             }
           }}
         >
@@ -79,5 +79,5 @@ export function EventPreviewHeader({
         <CloseIcon />
       </IconButton>
     </Box>
-  );
+  )
 }

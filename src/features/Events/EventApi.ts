@@ -1,106 +1,106 @@
-import { api } from "@/utils/apiUtils";
-import { convertEventDateTimeToISO, resolveTimezoneId } from "@/utils/timezone";
-import { TIMEZONES } from "@/utils/timezone-data";
-import ICAL from "ical.js";
-import { CalDavItem } from "../Calendars/api/types";
-import { Calendar } from "../Calendars/CalendarTypes";
+import { api } from '@/utils/apiUtils'
+import { convertEventDateTimeToISO, resolveTimezoneId } from '@/utils/timezone'
+import { TIMEZONES } from '@/utils/timezone-data'
+import ICAL from 'ical.js'
+import { CalDavItem } from '../Calendars/api/types'
+import { Calendar } from '../Calendars/CalendarTypes'
 import {
   VCalComponent,
   VObjectProperty,
-  VObjectValue,
-} from "../Calendars/types/CalendarData";
-import { SearchEventsResponse } from "../Search/types/SearchEventsResponse";
-import { CalendarEvent } from "./EventsTypes";
+  VObjectValue
+} from '../Calendars/types/CalendarData'
+import { SearchEventsResponse } from '../Search/types/SearchEventsResponse'
+import { CalendarEvent } from './EventsTypes'
 import {
   calendarEventToJCal,
   makeTimezone,
   makeVevent,
-  parseCalendarEvent,
-} from "./utils";
+  parseCalendarEvent
+} from './utils'
 
 export async function reportEvent(
   event: CalendarEvent,
   match: { start: string; end: string }
 ): Promise<CalDavItem> {
   const response = await api(`dav${event.URL}`, {
-    method: "REPORT",
+    method: 'REPORT',
     body: JSON.stringify({ match }),
-    headers: { Accept: "application/json" },
-  });
+    headers: { Accept: 'application/json' }
+  })
   if (!response.ok) {
-    throw new Error(`REPORT request failed with status ${response.status}`);
+    throw new Error(`REPORT request failed with status ${response.status}`)
   }
-  const eventData: CalDavItem = await response.json();
-  return eventData;
+  const eventData: CalDavItem = await response.json()
+  return eventData
 }
 
 export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
-  const response = await api.get(`dav${event.URL}`);
-  const eventData = await response.text();
+  const response = await api.get(`dav${event.URL}`)
+  const eventData = await response.text()
 
-  const eventical = ICAL.parse(eventData);
+  const eventical = ICAL.parse(eventData)
   const vevents = (eventical[2] || []).filter(
-    ([name]: [string]) => name.toLowerCase() === "vevent"
-  );
+    ([name]: [string]) => name.toLowerCase() === 'vevent'
+  )
 
   const vtimezones = (eventical[2] || []).filter(
-    ([name]: [string]) => name.toLowerCase() === "vtimezone"
-  );
+    ([name]: [string]) => name.toLowerCase() === 'vtimezone'
+  )
 
-  let targetVevent;
+  let targetVevent
   if (isMaster) {
     targetVevent = vevents.find(
       ([, props]: VCalComponent) =>
-        !props.find(([k]) => k.toLowerCase() === "recurrence-id")
-    );
+        !props.find(([k]) => k.toLowerCase() === 'recurrence-id')
+    )
     if (!targetVevent) {
-      targetVevent = vevents[0];
+      targetVevent = vevents[0]
     }
   } else {
-    targetVevent = vevents[0];
+    targetVevent = vevents[0]
   }
 
-  let timezoneFromVTimezone: string | undefined;
+  let timezoneFromVTimezone: string | undefined
   if (vtimezones.length > 0) {
-    const vtimezone = vtimezones[0];
+    const vtimezone = vtimezones[0]
     const tzidProp = vtimezone[1]?.find(
-      ([k]: string[]) => k.toLowerCase() === "tzid"
-    );
+      ([k]: string[]) => k.toLowerCase() === 'tzid'
+    )
     if (tzidProp && tzidProp[3]) {
-      const resolvedTz = resolveTimezoneId(tzidProp[3]);
+      const resolvedTz = resolveTimezoneId(tzidProp[3])
       if (resolvedTz) {
-        timezoneFromVTimezone = resolvedTz;
+        timezoneFromVTimezone = resolvedTz
       }
     }
   }
 
-  let timezoneFromDTSTART: string | undefined;
+  let timezoneFromDTSTART: string | undefined
   const dtstartProp = targetVevent[1]?.find(
-    ([k]: string[]) => k.toLowerCase() === "dtstart"
-  );
+    ([k]: string[]) => k.toLowerCase() === 'dtstart'
+  )
   if (dtstartProp) {
-    const dtstartParams = dtstartProp[1];
-    const dtstartValue = dtstartProp[3];
+    const dtstartParams = dtstartProp[1]
+    const dtstartValue = dtstartProp[3]
     if (dtstartParams) {
       const tzParam =
         dtstartParams.tzid ||
         dtstartParams.TZID ||
         dtstartParams.Tzid ||
         dtstartParams.tZid ||
-        dtstartParams.tzId;
+        dtstartParams.tzId
       if (tzParam) {
-        const resolvedTz = resolveTimezoneId(tzParam);
+        const resolvedTz = resolveTimezoneId(tzParam)
         if (resolvedTz) {
-          timezoneFromDTSTART = resolvedTz;
+          timezoneFromDTSTART = resolvedTz
         }
       }
     }
     if (
       !timezoneFromDTSTART &&
-      typeof dtstartValue === "string" &&
-      dtstartValue.endsWith("Z")
+      typeof dtstartValue === 'string' &&
+      dtstartValue.endsWith('Z')
     ) {
-      timezoneFromDTSTART = "Etc/UTC";
+      timezoneFromDTSTART = 'Etc/UTC'
     }
   }
 
@@ -109,287 +109,287 @@ export async function getEvent(event: CalendarEvent, isMaster?: boolean) {
     event.color ?? {},
     { id: event?.calId } as Calendar,
     event.URL
-  );
+  )
 
   const finalTimezone =
     timezoneFromVTimezone ||
     timezoneFromDTSTART ||
     eventjson.timezone ||
-    "Etc/UTC";
-  eventjson.timezone = finalTimezone;
+    'Etc/UTC'
+  eventjson.timezone = finalTimezone
 
   if (!eventjson.allday && eventjson.start && finalTimezone) {
-    const startISO = convertEventDateTimeToISO(eventjson.start, finalTimezone);
+    const startISO = convertEventDateTimeToISO(eventjson.start, finalTimezone)
     if (startISO) {
-      eventjson.start = startISO;
+      eventjson.start = startISO
     }
   }
 
   if (!eventjson.allday && eventjson.end && finalTimezone) {
-    const endISO = convertEventDateTimeToISO(eventjson.end, finalTimezone);
+    const endISO = convertEventDateTimeToISO(eventjson.end, finalTimezone)
     if (endISO) {
-      eventjson.end = endISO;
+      eventjson.end = endISO
     }
   }
 
   if (isMaster) {
-    const merged = { ...event, ...eventjson };
-    merged.timezone = finalTimezone;
-    return merged;
+    const merged = { ...event, ...eventjson }
+    merged.timezone = finalTimezone
+    return merged
   }
-  const merged = { ...event, ...eventjson };
-  merged.timezone = finalTimezone;
-  return merged;
+  const merged = { ...event, ...eventjson }
+  merged.timezone = finalTimezone
+  return merged
 }
 
 export async function dlEvent(event: CalendarEvent) {
-  const response = await api.get(`dav${event.URL}?export=`);
-  const eventData = await response.text();
+  const response = await api.get(`dav${event.URL}?export=`)
+  const eventData = await response.text()
 
-  return eventData;
+  return eventData
 }
 
 export async function putEvent(event: CalendarEvent, calOwnerEmail?: string) {
   const response = await api(`dav${event.URL}`, {
-    method: "PUT",
+    method: 'PUT',
     body: JSON.stringify(calendarEventToJCal(event, calOwnerEmail)),
     headers: {
-      "content-type": "text/calendar; charset=utf-8",
-    },
-  });
+      'content-type': 'text/calendar; charset=utf-8'
+    }
+  })
 
   if (response.status === 201) {
-    console.info("Event created successfully:", response.url || event.URL);
+    console.info('Event created successfully:', response.url || event.URL)
   }
 
-  return response;
+  return response
 }
 
 export async function putEventWithOverrides(
   updatedEvent: CalendarEvent,
   calOwnerEmail?: string
 ) {
-  const vevents = await getAllRecurrentEvent(updatedEvent);
+  const vevents = await getAllRecurrentEvent(updatedEvent)
 
   const updatedVevent = makeVevent(
     updatedEvent,
     updatedEvent.timezone,
     calOwnerEmail,
     !updatedEvent.recurrenceId
-  );
-  let replaced = false;
+  )
+  let replaced = false
   for (let i = 0; i < vevents.length; i++) {
-    const ve = vevents[i];
-    const recurrenceId = ve[1].find(([k]: string[]) => k === "recurrence-id");
+    const ve = vevents[i]
+    const recurrenceId = ve[1].find(([k]: string[]) => k === 'recurrence-id')
     if (recurrenceId && recurrenceId[3] === updatedEvent.recurrenceId) {
-      vevents[i] = updatedVevent; // replace
-      replaced = true;
-      break;
+      vevents[i] = updatedVevent // replace
+      replaced = true
+      break
     }
   }
   if (!replaced && updatedEvent.recurrenceId) {
-    vevents.push(updatedVevent); // add new override
+    vevents.push(updatedVevent) // add new override
   }
 
-  const timezoneData = TIMEZONES.zones[updatedEvent.timezone];
-  const vtimezone = makeTimezone(timezoneData, updatedEvent);
+  const timezoneData = TIMEZONES.zones[updatedEvent.timezone]
+  const vtimezone = makeTimezone(timezoneData, updatedEvent)
 
-  const newJCal = ["vcalendar", [], [...vevents, vtimezone.component.jCal]];
+  const newJCal = ['vcalendar', [], [...vevents, vtimezone.component.jCal]]
 
   return api(`dav${updatedEvent.URL}`, {
-    method: "PUT",
+    method: 'PUT',
     body: JSON.stringify(newJCal),
     headers: {
-      "content-type": "text/calendar; charset=utf-8",
-    },
-  });
+      'content-type': 'text/calendar; charset=utf-8'
+    }
+  })
 }
 
 export const deleteEventInstance = async (event: CalendarEvent) => {
   // Get all VEVENTs (master + overrides) from the series
-  const vevents = await getAllRecurrentEvent(event);
+  const vevents = await getAllRecurrentEvent(event)
 
   // Find the master VEVENT
   const masterIndex = vevents.findIndex(
     ([, props]: VCalComponent) =>
-      !props.find(([k]) => k.toLowerCase() === "recurrence-id")
-  );
+      !props.find(([k]) => k.toLowerCase() === 'recurrence-id')
+  )
 
   if (masterIndex === -1) {
-    throw new Error("No master VEVENT found for this series");
+    throw new Error('No master VEVENT found for this series')
   }
 
-  const exdateValue = event.recurrenceId || event.start;
+  const exdateValue = event.recurrenceId || event.start
   const seriesEvent = parseCalendarEvent(
     vevents[masterIndex][1],
     {},
     { id: event.calId } as Calendar,
-    ""
-  );
-  const masterProps = vevents[masterIndex][1];
+    ''
+  )
+  const masterProps = vevents[masterIndex][1]
 
   // Check if this date is already in EXDATE (avoid duplicates)
   const normalizeRecurrenceId = (id: VObjectValue) =>
-    String(id ?? "").replace(/Z$/, "");
+    String(id ?? '').replace(/Z$/, '')
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
-    if (prop[0].toLowerCase() === "exdate" && prop[3]) {
+    if (prop[0].toLowerCase() === 'exdate' && prop[3]) {
       return (
         normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateValue)
-      );
+      )
     }
-    return false;
-  });
+    return false
+  })
 
   if (!isDuplicate) {
     // Add new EXDATE property as a separate entry
-    const valueType = seriesEvent.allday ? "date" : "date-time";
-    masterProps.push(["exdate", {}, valueType, exdateValue]);
+    const valueType = seriesEvent.allday ? 'date' : 'date-time'
+    masterProps.push(['exdate', {}, valueType, exdateValue])
   }
 
   // Update the master VEVENT with the new properties
-  vevents[masterIndex][1] = masterProps;
+  vevents[masterIndex][1] = masterProps
 
   // Remove the override instance if it exists (in case it was an override being deleted)
   const filteredVevents = vevents.filter(([, props]: VCalComponent) => {
     const recurrenceIdProp = props.find(
-      ([k]) => k.toLowerCase() === "recurrence-id"
-    );
-    if (!recurrenceIdProp) return true; // Keep master
+      ([k]) => k.toLowerCase() === 'recurrence-id'
+    )
+    if (!recurrenceIdProp) return true // Keep master
     return (
       normalizeRecurrenceId(recurrenceIdProp[3]) !==
-      normalizeRecurrenceId(event.recurrenceId ?? "")
-    ); // Remove matching override
-  });
+      normalizeRecurrenceId(event.recurrenceId ?? '')
+    ) // Remove matching override
+  })
 
   // Build the updated jCal with all VEVENTs and timezone
-  const timezoneData = TIMEZONES.zones[seriesEvent.timezone];
-  const vtimezone = makeTimezone(timezoneData, seriesEvent);
+  const timezoneData = TIMEZONES.zones[seriesEvent.timezone]
+  const vtimezone = makeTimezone(timezoneData, seriesEvent)
 
   const newJCal = [
-    "vcalendar",
+    'vcalendar',
     [],
-    [...filteredVevents, vtimezone.component.jCal],
-  ];
+    [...filteredVevents, vtimezone.component.jCal]
+  ]
 
   return api(`dav${event.URL}`, {
-    method: "PUT",
+    method: 'PUT',
     body: JSON.stringify(newJCal),
     headers: {
-      "content-type": "text/calendar; charset=utf-8",
-    },
-  });
-};
+      'content-type': 'text/calendar; charset=utf-8'
+    }
+  })
+}
 
 export const updateSeriesPartstat = async (
   event: CalendarEvent,
   attendeeEmail: string,
   partstat: string
 ) => {
-  const vevents = await getAllRecurrentEvent(event);
+  const vevents = await getAllRecurrentEvent(event)
 
   // Update PARTSTAT in ALL VEVENTs (master + exceptions)
   const updatedVevents = vevents.map((vevent: VCalComponent) => {
-    const properties = vevent[1];
+    const properties = vevent[1]
     const updatedProperties = properties.map((prop: VObjectProperty) => {
       // Find ATTENDEE properties
-      if (prop[0] === "attendee") {
-        const calAddress = prop[3] as string;
+      if (prop[0] === 'attendee') {
+        const calAddress = prop[3] as string
         // Check if this is the target attendee
         if (calAddress.toLowerCase().includes(attendeeEmail.toLowerCase())) {
           // Update PARTSTAT parameter
-          const params = { ...prop[1], partstat: partstat };
-          return [prop[0], params, prop[2], prop[3]];
+          const params = { ...prop[1], partstat: partstat }
+          return [prop[0], params, prop[2], prop[3]]
         }
       }
-      return prop;
-    });
-    return [vevent[0], updatedProperties, vevent[2]];
-  });
+      return prop
+    })
+    return [vevent[0], updatedProperties, vevent[2]]
+  })
 
-  const timezoneData = TIMEZONES.zones[event.timezone];
-  const vtimezone = makeTimezone(timezoneData, event);
+  const timezoneData = TIMEZONES.zones[event.timezone]
+  const vtimezone = makeTimezone(timezoneData, event)
 
   const newJCal = [
-    "vcalendar",
+    'vcalendar',
     [],
-    [...updatedVevents, vtimezone.component.jCal],
-  ];
+    [...updatedVevents, vtimezone.component.jCal]
+  ]
 
   return api(`dav${event.URL}`, {
-    method: "PUT",
+    method: 'PUT',
     body: JSON.stringify(newJCal),
     headers: {
-      "content-type": "text/calendar; charset=utf-8",
-    },
-  });
-};
+      'content-type': 'text/calendar; charset=utf-8'
+    }
+  })
+}
 
 export async function getAllRecurrentEvent(event: CalendarEvent) {
-  const response = await api.get(`dav${event.URL}`);
-  const eventData = await response.text();
-  const jcal = ICAL.parse(eventData);
-  const vevents = jcal[2].filter(([name]: string[]) => name === "vevent");
-  return vevents;
+  const response = await api.get(`dav${event.URL}`)
+  const eventData = await response.text()
+  const jcal = ICAL.parse(eventData)
+  const vevents = jcal[2].filter(([name]: string[]) => name === 'vevent')
+  return vevents
 }
 
 export async function moveEvent(event: CalendarEvent, newUrl: string) {
   const response = await api(`dav${event.URL}`, {
-    method: "MOVE",
+    method: 'MOVE',
     headers: {
-      destination: newUrl,
-    },
-  });
-  return response;
+      destination: newUrl
+    }
+  })
+  return response
 }
 
 export async function deleteEvent(eventURL: string) {
   const response = await api(`dav${eventURL}`, {
-    method: "DELETE",
-  });
-  return response;
+    method: 'DELETE'
+  })
+  return response
 }
 
 export async function importEventFromFile(id: string, calLink: string) {
   const response = await api.post(`api/import`, {
-    body: JSON.stringify({ fileId: id, target: calLink }),
-  });
-  return response;
+    body: JSON.stringify({ fileId: id, target: calLink })
+  })
+  return response
 }
 
 export async function searchEvent(
   query: string,
   filters: {
-    searchIn: string[];
-    keywords: string;
-    organizers: string[];
-    attendees: string[];
+    searchIn: string[]
+    keywords: string
+    organizers: string[]
+    attendees: string[]
   }
 ): Promise<SearchEventsResponse> {
-  const { keywords, searchIn, organizers, attendees } = filters;
+  const { keywords, searchIn, organizers, attendees } = filters
 
   const reqParam: {
-    query: string;
-    calendars: { calendarId: string; userId: string }[];
-    organizers?: string[];
-    attendees?: string[];
+    query: string
+    calendars: { calendarId: string; userId: string }[]
+    organizers?: string[]
+    attendees?: string[]
   } = {
     query: keywords || query,
-    calendars: searchIn.map((calId) => {
-      const [userId, calendarId] = calId.split("/");
-      return { calendarId, userId };
-    }),
-  };
+    calendars: searchIn.map(calId => {
+      const [userId, calendarId] = calId.split('/')
+      return { calendarId, userId }
+    })
+  }
   if (organizers.length) {
-    reqParam.organizers = organizers;
+    reqParam.organizers = organizers
   }
   if (attendees.length) {
-    reqParam.attendees = attendees;
+    reqParam.attendees = attendees
   }
   const response = await api
-    .post("calendar/api/events/search?limit=30&offset=0", {
-      body: JSON.stringify(reqParam),
+    .post('calendar/api/events/search?limit=30&offset=0', {
+      body: JSON.stringify(reqParam)
     })
-    .json();
+    .json()
 
-  return response as SearchEventsResponse;
+  return response as SearchEventsResponse
 }

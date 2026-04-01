@@ -1,1 +1,1 @@
-export { default as ResponsiveDialog } from "./ResponsiveDialog";
+export { default as ResponsiveDialog } from './ResponsiveDialog'

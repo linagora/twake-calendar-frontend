@@ -1,27 +1,27 @@
 export class EventErrorHandler {
-  private errors = new Map<string, string>();
-  private reportedEvents = new Set<string>();
-  private onErrorCallback?: (messages: string[]) => void;
+  private errors = new Map<string, string>()
+  private reportedEvents = new Set<string>()
+  private onErrorCallback?: (messages: string[]) => void
 
   setErrorCallback(callback: (messages: string[]) => void) {
-    this.onErrorCallback = callback;
+    this.onErrorCallback = callback
   }
 
   reportError(eventId: string, message: string) {
     if (!this.reportedEvents.has(eventId)) {
-      this.reportedEvents.add(eventId);
-      this.errors.set(eventId, message);
-      console.warn(`[EventErrorHandler] ${eventId}: ${message}`);
-      this.emit();
+      this.reportedEvents.add(eventId)
+      this.errors.set(eventId, message)
+      console.warn(`[EventErrorHandler] ${eventId}: ${message}`)
+      this.emit()
     }
   }
 
   clearAll() {
-    this.errors.clear();
-    this.emit();
+    this.errors.clear()
+    this.emit()
   }
 
   private emit() {
-    this.onErrorCallback?.(Array.from(this.errors.values()));
+    this.onErrorCallback?.(Array.from(this.errors.values()))
   }
 }

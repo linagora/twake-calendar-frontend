@@ -1,40 +1,40 @@
-import { AppDispatch } from "@/app/store";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { AppDispatch } from '@/app/store'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   deleteEventAsync,
   moveEventAsync,
-  putEventAsync,
-} from "@/features/Calendars/services";
-import { userAttendee } from "@/features/User/models/attendee";
-import { userOrganiser } from "@/features/User/userDataTypes";
-import { assertThunkSuccess } from "@/utils/assertThunkSuccess";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { makeDisplayName } from "@/utils/makeDisplayName";
-import { CalendarEvent } from "../EventsTypes";
-import { buildDelegatedEventURL } from "../utils/buildDelegatedEventURL";
+  putEventAsync
+} from '@/features/Calendars/services'
+import { userAttendee } from '@/features/User/models/attendee'
+import { userOrganiser } from '@/features/User/userDataTypes'
+import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { makeDisplayName } from '@/utils/makeDisplayName'
+import { CalendarEvent } from '../EventsTypes'
+import { buildDelegatedEventURL } from '../utils/buildDelegatedEventURL'
 
 export interface MoveEventBetweenCalendarsParams {
-  dispatch: AppDispatch;
-  calList: Record<string, Calendar>;
-  newEvent: CalendarEvent;
-  oldCalId: string;
-  newCalId: string;
+  dispatch: AppDispatch
+  calList: Record<string, Calendar>
+  newEvent: CalendarEvent
+  oldCalId: string
+  newCalId: string
 }
 
 function resolveOrganizerForCalendar(
   calendar: Calendar,
-  originalOrganizer: CalendarEvent["organizer"]
-): CalendarEvent["organizer"] {
-  const ownerEmail = calendar.owner?.emails?.[0];
+  originalOrganizer: CalendarEvent['organizer']
+): CalendarEvent['organizer'] {
+  const ownerEmail = calendar.owner?.emails?.[0]
   if (!ownerEmail) {
-    return originalOrganizer;
+    return originalOrganizer
   }
 
   return {
     ...originalOrganizer,
     cal_address: ownerEmail,
-    cn: makeDisplayName(calendar) ?? originalOrganizer?.cn ?? "",
-  };
+    cn: makeDisplayName(calendar) ?? originalOrganizer?.cn ?? ''
+  }
 }
 
 function rewriteAttendeesForOrganizerChange(
@@ -43,34 +43,32 @@ function rewriteAttendeesForOrganizerChange(
   newOrganizer?: userOrganiser
 ): userAttendee[] {
   if (!newOrganizer) {
-    return attendees;
+    return attendees
   }
-  const normalise = (addr: string | undefined) => (addr ?? "").toLowerCase();
-  const oldAddr = normalise(oldOrganizer?.cal_address);
-  const newAddr = normalise(newOrganizer.cal_address);
+  const normalise = (addr: string | undefined) => (addr ?? '').toLowerCase()
+  const oldAddr = normalise(oldOrganizer?.cal_address)
+  const newAddr = normalise(newOrganizer.cal_address)
 
   // Remove the old organizer from the attendee list if there is one
-  const filtered = attendees.filter(
-    (a) => normalise(a.cal_address) !== oldAddr
-  );
+  const filtered = attendees.filter(a => normalise(a.cal_address) !== oldAddr)
 
   // Add the new organizer as CHAIR if they are not already listed
   const alreadyPresent = filtered.some(
-    (a) => normalise(a.cal_address) === newAddr
-  );
+    a => normalise(a.cal_address) === newAddr
+  )
 
   if (!alreadyPresent && newAddr) {
     filtered.push({
       cal_address: newOrganizer.cal_address,
-      partstat: "ACCEPTED",
-      role: "CHAIR",
-      rsvp: "FALSE",
+      partstat: 'ACCEPTED',
+      role: 'CHAIR',
+      rsvp: 'FALSE',
       cn: newOrganizer.cn || newOrganizer.cal_address,
-      cutype: "INDIVIDUAL",
-    });
+      cutype: 'INDIVIDUAL'
+    })
   }
 
-  return filtered;
+  return filtered
 }
 
 export async function moveEventBetweenCalendars({
@@ -78,98 +76,98 @@ export async function moveEventBetweenCalendars({
   calList,
   newEvent,
   oldCalId,
-  newCalId,
+  newCalId
 }: MoveEventBetweenCalendarsParams): Promise<void> {
-  const oldCalendar = calList[oldCalId];
+  const oldCalendar = calList[oldCalId]
   if (!oldCalendar) {
-    throw new Error(`Old calendar not found: ${oldCalId}`);
+    throw new Error(`Old calendar not found: ${oldCalId}`)
   }
 
-  const targetCalendar = calList[newCalId];
+  const targetCalendar = calList[newCalId]
   if (!targetCalendar) {
-    throw new Error(`Target calendar not found: ${newCalId}`);
+    throw new Error(`Target calendar not found: ${newCalId}`)
   }
 
-  const isDelegatedMove = oldCalendar.delegated || targetCalendar.delegated;
+  const isDelegatedMove = oldCalendar.delegated || targetCalendar.delegated
 
   if (isDelegatedMove) {
     await moveDelegatedEvent({
       dispatch,
       newEvent,
       oldCalendar,
-      targetCalendar,
-    });
+      targetCalendar
+    })
   } else {
     await moveStandardEvent({
       dispatch,
       newEvent,
       targetCalendar,
-      oldCalendar,
-    });
+      oldCalendar
+    })
   }
 }
 
 interface StandardMoveParams {
-  dispatch: AppDispatch;
-  newEvent: CalendarEvent;
-  targetCalendar: Calendar;
-  oldCalendar: Calendar;
+  dispatch: AppDispatch
+  newEvent: CalendarEvent
+  targetCalendar: Calendar
+  oldCalendar: Calendar
 }
 
 async function moveStandardEvent({
   dispatch,
   newEvent,
   targetCalendar,
-  oldCalendar,
+  oldCalendar
 }: StandardMoveParams): Promise<void> {
-  const newCalId = targetCalendar.id;
+  const newCalId = targetCalendar.id
 
   const putResult = await dispatch(
     putEventAsync({
       cal: oldCalendar,
-      newEvent: { ...newEvent, calId: oldCalendar.id },
+      newEvent: { ...newEvent, calId: oldCalendar.id }
     })
-  );
-  await assertThunkSuccess(putResult);
-  const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
+  )
+  await assertThunkSuccess(putResult)
+  const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`
 
   const moveResult = await dispatch(
     moveEventAsync({
       cal: targetCalendar,
       newEvent,
-      newURL,
+      newURL
     })
-  );
-  await assertThunkSuccess(moveResult);
+  )
+  await assertThunkSuccess(moveResult)
 }
 
 interface DelegatedMoveParams {
-  dispatch: AppDispatch;
-  newEvent: CalendarEvent;
-  oldCalendar: Calendar;
-  targetCalendar: Calendar;
+  dispatch: AppDispatch
+  newEvent: CalendarEvent
+  oldCalendar: Calendar
+  targetCalendar: Calendar
 }
 
 async function moveDelegatedEvent({
   dispatch,
   newEvent,
   oldCalendar,
-  targetCalendar,
+  targetCalendar
 }: DelegatedMoveParams): Promise<void> {
-  const newCalId = targetCalendar.id;
+  const newCalId = targetCalendar.id
 
   const newOrganizer = resolveOrganizerForCalendar(
     targetCalendar,
     newEvent.organizer
-  );
+  )
 
   const newAttendees = rewriteAttendeesForOrganizerChange(
     newEvent.attendee ?? [],
     newEvent.organizer,
     newOrganizer
-  );
+  )
 
-  const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`;
+  const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`
 
   const eventForTargetCalendar: CalendarEvent = {
     ...newEvent,
@@ -178,22 +176,22 @@ async function moveDelegatedEvent({
       ? buildDelegatedEventURL(targetCalendar, newURL)
       : newURL,
     organizer: newOrganizer,
-    attendee: newAttendees,
-  };
+    attendee: newAttendees
+  }
 
   const putResult = await dispatch(
     putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
-  );
+  )
 
-  await assertThunkSuccess(putResult);
+  await assertThunkSuccess(putResult)
 
   const deleteResult = await dispatch(
     deleteEventAsync({
       calId: oldCalendar.id,
       eventId: newEvent.uid,
-      eventURL: newEvent.URL,
+      eventURL: newEvent.URL
     })
-  );
+  )
 
-  await assertThunkSuccess(deleteResult);
+  await assertThunkSuccess(deleteResult)
 }

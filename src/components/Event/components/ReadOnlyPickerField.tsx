@@ -1,88 +1,98 @@
-import { TextField } from "@linagora/twake-mui";
-import { DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
+// ReadOnlyPickerField
+
+import { TextField } from '@linagora/twake-mui'
+import { DatePickerFieldProps } from '@mui/x-date-pickers/DatePicker'
 import {
   useParsedFormat,
   usePickerContext,
-  useSplitFieldProps,
-} from "@mui/x-date-pickers/hooks";
-import { PickerFieldProps } from "@mui/x-date-pickers/models";
+  useSplitFieldProps
+} from '@mui/x-date-pickers/hooks'
+import { PickerFieldProps } from '@mui/x-date-pickers/models'
 import {
   PickerFieldAdapter,
   PickerValidationScope,
   useValidation,
-  validateDate,
-} from "@mui/x-date-pickers/validation";
-import { Dayjs } from "dayjs";
+  validateDate
+} from '@mui/x-date-pickers/validation'
+import { Dayjs } from 'dayjs'
 
-type FieldType = "date" | "time" | "date-time";
+type FieldType = 'date' | 'time' | 'date-time'
 
 type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
-  fieldType: FieldType;
+  fieldType: FieldType
   validator: (
     value: Dayjs | null,
     context: PickerValidationScope,
     adapter: PickerFieldAdapter<Dayjs>
-  ) => string | null;
-};
+  ) => string | null
+}
 
 /**
  * Shared read-only field for date/time pickers. Disables typing, removes icon,
  * and opens the picker when clicking anywhere in the field.
  */
 function ReadOnlyPickerField(props: GenericPickerFieldProps) {
-  const { fieldType, validator, ...fieldProps } = props;
+  const { fieldType, validator, ...fieldProps } = props
   const { internalProps, forwardedProps } = useSplitFieldProps(
     fieldProps,
     fieldType
-  );
+  )
 
-  const pickerContext = usePickerContext();
-  const parsedFormat = useParsedFormat();
+  const {
+    value,
+    timezone,
+    fieldFormat,
+    open,
+    setOpen,
+    triggerRef,
+    rootClassName,
+    rootSx,
+    rootRef,
+    name: pickerName
+  } = usePickerContext()
+
+  const parsedFormat = useParsedFormat()
 
   const { hasValidationError } = useValidation({
     validator,
-    value: pickerContext.value,
-    timezone: pickerContext.timezone,
-    props: internalProps,
-  });
+    value: value,
+    timezone: timezone,
+    props: internalProps
+  })
 
   const valueToDisplay =
-    pickerContext.value == null
-      ? ""
-      : pickerContext.value.isValid()
-        ? pickerContext.value.format(pickerContext.fieldFormat)
-        : "";
+    value == null ? '' : value.isValid() ? value.format(fieldFormat) : ''
 
   const mergedInputProps = {
     ...forwardedProps.InputProps,
-    ref: pickerContext.triggerRef,
+    ref: triggerRef,
     readOnly: true,
     sx: {
-      cursor: "pointer",
-      "& *": { cursor: "inherit" },
-      ...forwardedProps.InputProps?.sx,
-    },
-  };
+      cursor: 'pointer',
+      '& *': { cursor: 'inherit' },
+      ...forwardedProps.InputProps?.sx
+    }
+  }
 
   return (
     <TextField
       {...forwardedProps}
       value={valueToDisplay}
-      placeholder={parsedFormat as string}
+      placeholder={parsedFormat}
       InputProps={mergedInputProps}
       error={hasValidationError}
-      focused={pickerContext.open}
-      onClick={() => pickerContext.setOpen((prev) => !prev)}
-      className={pickerContext.rootClassName}
-      sx={pickerContext.rootSx}
-      ref={pickerContext.rootRef}
-      name={pickerContext.name}
+      focused={open}
+      onClick={() => setOpen((prev: boolean) => !prev)}
+      className={rootClassName}
+      sx={rootSx}
+      ref={rootRef}
+      name={pickerName}
     />
-  );
+  )
 }
 
 export function ReadOnlyDateField(props: DatePickerFieldProps) {
   return (
     <ReadOnlyPickerField {...props} fieldType="date" validator={validateDate} />
-  );
+  )
 }

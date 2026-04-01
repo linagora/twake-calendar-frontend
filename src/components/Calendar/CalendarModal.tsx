@@ -1,190 +1,193 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   createCalendarAsync,
   importEventFromFileAsync,
   patchACLCalendarAsync,
-  patchCalendarAsync,
-} from "@/features/Calendars/services";
-import { updateDelegationCalendarAsync } from "@/features/Calendars/services/updateDelegationCalendarAsync";
-import { accessRightToDavProp } from "@/utils/accessRightToDavProp";
-import { defaultColors } from "@/utils/defaultColors";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { Button, Tab, Tabs } from "@linagora/twake-mui";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { ResponsiveDialog } from "../Dialog";
-import { ErrorSnackbar } from "../Error/ErrorSnackbar";
-import { AccessTab } from "./AccessTab";
-import { UserWithAccess } from "./CalendarAccessRights";
-import { ImportTab } from "./ImportTab";
-import { SettingsTab } from "./SettingsTab";
+  patchCalendarAsync
+} from '@/features/Calendars/services'
+import { updateDelegationCalendarAsync } from '@/features/Calendars/services/updateDelegationCalendarAsync'
+import { accessRightToDavProp } from '@/utils/accessRightToDavProp'
+import { defaultColors } from '@/utils/defaultColors'
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { Button, Tab, Tabs } from '@linagora/twake-mui'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { ResponsiveDialog } from '../Dialog'
+import { ErrorSnackbar } from '../Error/ErrorSnackbar'
+import { AccessTab } from './AccessTab'
+import { UserWithAccess } from './CalendarAccessRights'
+import { ImportTab } from './ImportTab'
+import { SettingsTab } from './SettingsTab'
 
 function CalendarPopover({
   open,
   onClose,
-  calendar,
+  calendar
 }: {
-  open: boolean;
+  open: boolean
   onClose: (
     event: object | null,
-    reason: "backdropClick" | "escapeKeyDown"
-  ) => void;
-  calendar?: Calendar;
+    reason: 'backdropClick' | 'escapeKeyDown'
+  ) => void
+  calendar?: Calendar
 }) {
-  const { t } = useI18n();
-  const dispatch = useAppDispatch();
-  const userData = useAppSelector((state) => state.user.userData) ?? {};
-  const calendars = useAppSelector((state) => state.calendars.list);
+  const { t } = useI18n()
+  const dispatch = useAppDispatch()
+  const userData = useAppSelector(state => state.user.userData) ?? {}
+  const calendars = useAppSelector(state => state.calendars.list)
   const isOwn = calendar?.id
     ? extractEventBaseUuid(calendar.id) === userData.openpaasId
-    : true;
+    : true
   const canManageInvites =
     isOwn ||
-    !!calendar?.invite?.some((invite) => {
+    !!calendar?.invite?.some(invite => {
       const inviteEmail = invite.href
-        .replace(/^mailto:/i, "")
+        .replace(/^mailto:/i, '')
         .trim()
-        .toLowerCase();
-      const currentEmail = userData.email?.trim().toLowerCase();
-      return inviteEmail === currentEmail && invite.access === 5;
-    });
+        .toLowerCase()
+      const currentEmail = userData.email?.trim().toLowerCase()
+      return inviteEmail === currentEmail && invite.access === 5
+    })
 
   // existing calendar params
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [color, setColor] = useState<Record<string, string>>(defaultColors[0]);
-  const [visibility, setVisibility] = useState<"private" | "public">("public");
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [color, setColor] = useState<Record<string, string>>(defaultColors[0])
+  const [visibility, setVisibility] = useState<'private' | 'public'>('public')
 
   // access tab state
-  const [usersWithAccess, setUsersWithAccess] = useState<UserWithAccess[]>([]);
+  const [usersWithAccess, setUsersWithAccess] = useState<UserWithAccess[]>([])
 
   // Snapshot of the invitee list as loaded from calendar.invite on open.
   // Used to diff on save: what changed vs what was removed.
-  const initialUsersRef = useRef<UserWithAccess[]>([]);
+  const initialUsersRef = useRef<UserWithAccess[]>([])
 
   // import tab state
-  const [tab, setTab] = useState<"settings" | "access" | "import">("settings");
-  const [importedContent, setImportedContent] = useState<File | null>(null);
-  const [importTarget, setImportTarget] = useState("new");
+  const [tab, setTab] = useState<'settings' | 'access' | 'import'>('settings')
+  const [importedContent, setImportedContent] = useState<File | null>(null)
+  const [importTarget, setImportTarget] = useState('new')
 
   // new calendar params (for import new)
-  const [newCalName, setNewCalName] = useState("");
-  const [newCalDescription, setNewCalDescription] = useState("");
-  const [newCalColor, setNewCalColor] = useState(defaultColors[0]);
+  const [newCalName, setNewCalName] = useState('')
+  const [newCalDescription, setNewCalDescription] = useState('')
+  const [newCalColor, setNewCalColor] = useState(defaultColors[0])
   const [newCalVisibility, setNewCalVisibility] = useState<
-    "public" | "private"
-  >("public");
+    'public' | 'private'
+  >('public')
 
   useEffect(() => {
-    if (!open) return;
-    if (calendar) {
-      setName(calendar.name);
-      setDescription(calendar.description ?? "");
-      setColor(calendar.color ?? defaultColors[0]);
-      setVisibility(calendar.visibility ?? "public");
-      setImportTarget(calendar.id ?? "new");
-    } else {
-      setName("");
-      setDescription("");
-      setColor(defaultColors[0]);
-      setVisibility("public");
-      setImportTarget("new");
+    if (!open) return
+    const fillCalendarData = () => {
+      if (calendar) {
+        setName(calendar.name)
+        setDescription(calendar.description ?? '')
+        setColor(calendar.color ?? defaultColors[0])
+        setVisibility(calendar.visibility ?? 'public')
+        setImportTarget(calendar.id ?? 'new')
+      } else {
+        setName('')
+        setDescription('')
+        setColor(defaultColors[0])
+        setVisibility('public')
+        setImportTarget('new')
+      }
+      setUsersWithAccess([])
+      initialUsersRef.current = []
     }
-    setUsersWithAccess([]);
-    initialUsersRef.current = [];
-  }, [calendar, open]);
+    fillCalendarData()
+  }, [calendar, open])
 
   const handleUsersWithAccessChange = useCallback((users: UserWithAccess[]) => {
-    setUsersWithAccess(users);
-  }, []);
+    setUsersWithAccess(users)
+  }, [])
 
   const handleInvitesLoaded = useCallback((users: UserWithAccess[]) => {
     if (initialUsersRef.current.length === 0) {
-      initialUsersRef.current = users;
+      initialUsersRef.current = users
     }
-  }, []);
+  }, [])
 
-  const [saveError, setSaveError] = useState("");
+  const [saveError, setSaveError] = useState('')
 
   const updateCalendar = async (calId: string, calLink: string) => {
-    const nameChanged = name.trim() !== calendar?.name;
-    const descChanged = description.trim() !== (calendar?.description ?? "");
+    const nameChanged = name.trim() !== calendar?.name
+    const descChanged = description.trim() !== (calendar?.description ?? '')
     const colorChanged =
       JSON.stringify(color) !==
-      JSON.stringify(calendar?.color ?? defaultColors[0]);
+      JSON.stringify(calendar?.color ?? defaultColors[0])
 
     if (nameChanged || descChanged || colorChanged) {
       await dispatch(
         patchCalendarAsync({
           calId,
           calLink,
-          patch: { name: name.trim(), desc: description.trim(), color },
+          patch: { name: name.trim(), desc: description.trim(), color }
         })
-      ).unwrap();
+      ).unwrap()
     }
     if (canManageInvites && visibility !== calendar?.visibility) {
       await dispatch(
         patchACLCalendarAsync({
           calId,
           calLink,
-          request: visibility === "public" ? "{DAV:}read" : "",
+          request: visibility === 'public' ? '{DAV:}read' : ''
         })
-      ).unwrap();
+      ).unwrap()
     }
-  };
+  }
 
   async function updateCalendarInvites(
     calLink: string,
     initialUsers: UserWithAccess[]
   ) {
     const normaliseEmail = (u: UserWithAccess) =>
-      u.email?.trim().toLowerCase() ?? "";
+      u.email?.trim().toLowerCase() ?? ''
 
     const initialMap = new Map(
       initialUsers
-        .filter((u) => !!normaliseEmail(u))
-        .map((u) => [normaliseEmail(u), u])
-    );
+        .filter(u => !!normaliseEmail(u))
+        .map(u => [normaliseEmail(u), u])
+    )
 
     const currentMap = new Map(
       usersWithAccess
-        .filter((u) => !!normaliseEmail(u))
-        .map((u) => [normaliseEmail(u), u])
-    );
+        .filter(u => !!normaliseEmail(u))
+        .map(u => [normaliseEmail(u), u])
+    )
 
     const hasChanges =
-      usersWithAccess.some((u) => {
-        const email = normaliseEmail(u);
-        if (!email) return false;
-        const initial = initialMap.get(email);
-        return !initial || initial.accessRight !== u.accessRight;
+      usersWithAccess.some(u => {
+        const email = normaliseEmail(u)
+        if (!email) return false
+        const initial = initialMap.get(email)
+        return !initial || initial.accessRight !== u.accessRight
       }) ||
       initialUsers.some(
-        (u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u))
-      );
+        u => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u))
+      )
 
-    if (!hasChanges || !canManageInvites) return;
+    if (!hasChanges || !canManageInvites) return
 
     // Send all remaining users in `set`: the server treats it as the full list
     const set = usersWithAccess
-      .filter((u) => !!normaliseEmail(u))
-      .map((u) => ({
-        "dav:href": `mailto:${normaliseEmail(u)}`,
-        [accessRightToDavProp(u.accessRight)]: true,
-      }));
+      .filter(u => !!normaliseEmail(u))
+      .map(u => ({
+        'dav:href': `mailto:${normaliseEmail(u)}`,
+        [accessRightToDavProp(u.accessRight)]: true
+      }))
 
     const remove = initialUsers
-      .filter((u) => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
-      .map((u) => ({ "dav:href": `mailto:${normaliseEmail(u)}` }));
+      .filter(u => !!normaliseEmail(u) && !currentMap.has(normaliseEmail(u)))
+      .map(u => ({ 'dav:href': `mailto:${normaliseEmail(u)}` }))
 
     await dispatch(
       updateDelegationCalendarAsync({
-        calId: calendar?.id,
+        calId: calendar?.id ?? '',
         calLink,
-        share: { set, remove },
+        share: { set, remove }
       })
-    ).unwrap();
+    ).unwrap()
   }
 
   const createCalendar = async (
@@ -200,39 +203,39 @@ function CalendarPopover({
         desc: desc.trim(),
         color: color,
         userData,
-        calId,
+        calId
       })
-    );
+    )
     dispatch(
       patchACLCalendarAsync({
         calId: `${userData.openpaasId}/${calId}`,
         calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
-        request: visibility === "public" ? "{DAV:}read" : "",
+        request: visibility === 'public' ? '{DAV:}read' : ''
       })
-    );
-  };
+    )
+  }
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) return
     if (calendar) {
       // Snapshot before any await: handleClose resets the ref immediately after
       // calling handleSave(), so we must read it synchronously here.
-      const initialUsersSnapshot = [...initialUsersRef.current];
+      const initialUsersSnapshot = [...initialUsersRef.current]
       try {
-        await updateCalendar(calendar.id, calendar.link);
-        await updateCalendarInvites(calendar.link, initialUsersSnapshot);
+        await updateCalendar(calendar.id, calendar.link)
+        await updateCalendarInvites(calendar.link, initialUsersSnapshot)
       } catch {
-        setSaveError(t("error.title"));
-        return;
+        setSaveError(t('error.title'))
+        return
       }
     } else {
-      createCalendar(crypto.randomUUID(), name, description, color, visibility);
+      createCalendar(crypto.randomUUID(), name, description, color, visibility)
     }
-  };
+  }
 
   const handleImport = async () => {
-    if (importTarget === "new") {
-      const calId = crypto.randomUUID();
+    if (importTarget === 'new') {
+      const calId = crypto.randomUUID()
       if (newCalName.trim()) {
         await createCalendar(
           calId,
@@ -240,14 +243,14 @@ function CalendarPopover({
           newCalDescription,
           newCalColor,
           newCalVisibility
-        );
+        )
         if (importedContent) {
           dispatch(
             importEventFromFileAsync({
               calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
-              file: importedContent,
+              file: importedContent
             })
-          );
+          )
         }
       }
     } else {
@@ -255,91 +258,91 @@ function CalendarPopover({
         dispatch(
           importEventFromFileAsync({
             calLink: calendars[importTarget].link,
-            file: importedContent,
+            file: importedContent
           })
-        );
+        )
       }
     }
-    handleClose({}, "backdropClick");
-  };
+    handleClose({}, 'backdropClick')
+  }
 
   const handleClose = (
     e: object | null,
-    reason: "backdropClick" | "escapeKeyDown" | "cancel"
+    reason: 'backdropClick' | 'escapeKeyDown' | 'cancel'
   ): void => {
-    if (reason !== "cancel") {
-      handleSave();
-      onClose(e, reason);
+    if (reason !== 'cancel') {
+      handleSave()
+      onClose(e, reason)
     } else {
-      onClose(e, "backdropClick");
+      onClose(e, 'backdropClick')
     }
-    setName("");
-    setDescription("");
-    setColor(defaultColors[0]);
-    setTab("settings");
-    setVisibility("public");
-    setImportTarget("new");
-    setImportedContent(null);
-    setUsersWithAccess([]);
-    initialUsersRef.current = [];
-    setSaveError("");
-    setNewCalName("");
-    setNewCalDescription("");
-    setNewCalColor(defaultColors[0]);
-    setNewCalVisibility("public");
-  };
+    setName('')
+    setDescription('')
+    setColor(defaultColors[0])
+    setTab('settings')
+    setVisibility('public')
+    setImportTarget('new')
+    setImportedContent(null)
+    setUsersWithAccess([])
+    initialUsersRef.current = []
+    setSaveError('')
+    setNewCalName('')
+    setNewCalDescription('')
+    setNewCalColor(defaultColors[0])
+    setNewCalVisibility('public')
+  }
 
   return (
     <ResponsiveDialog
       open={open}
-      onClose={() => handleClose({}, "backdropClick")}
+      onClose={() => handleClose({}, 'backdropClick')}
       title={
         <Tabs value={tab} onChange={(_e, v) => setTab(v)}>
           <Tab
             value="settings"
             label={
               calendar
-                ? t("calendarPopover.tabs.settings")
-                : t("calendarPopover.tabs.addNew")
+                ? t('calendarPopover.tabs.settings')
+                : t('calendarPopover.tabs.addNew')
             }
           />
           {calendar && (
-            <Tab value="access" label={t("calendarPopover.tabs.access")} />
+            <Tab value="access" label={t('calendarPopover.tabs.access')} />
           )}
           {isOwn && (
-            <Tab value="import" label={t("calendarPopover.tabs.import")} />
+            <Tab value="import" label={t('calendarPopover.tabs.import')} />
           )}
         </Tabs>
       }
       actions={
         <>
-          <Button variant="outlined" onClick={() => handleClose({}, "cancel")}>
-            {t("common.cancel")}
+          <Button variant="outlined" onClick={() => handleClose({}, 'cancel')}>
+            {t('common.cancel')}
           </Button>
           <Button
-            disabled={tab === "import" ? !importedContent : !name.trim()}
+            disabled={tab === 'import' ? !importedContent : !name.trim()}
             variant="contained"
             onClick={
-              tab === "import"
+              tab === 'import'
                 ? handleImport
-                : () => handleClose({}, "backdropClick")
+                : () => handleClose({}, 'backdropClick')
             }
           >
-            {tab === "import"
-              ? t("actions.import")
+            {tab === 'import'
+              ? t('actions.import')
               : calendar
-                ? t("actions.save")
-                : t("actions.create")}
+                ? t('actions.save')
+                : t('actions.create')}
           </Button>
         </>
       }
     >
-      {tab === "import" && (
+      {tab === 'import' && (
         <ImportTab
           importTarget={importTarget}
           setImportTarget={setImportTarget}
           setImportedContent={setImportedContent}
-          userId={userData.openpaasId ?? ""}
+          userId={userData.openpaasId ?? ''}
           newCalParams={{
             name: newCalName,
             setName: setNewCalName,
@@ -348,11 +351,11 @@ function CalendarPopover({
             color: newCalColor,
             setColor: setNewCalColor,
             visibility: newCalVisibility,
-            setVisibility: setNewCalVisibility,
+            setVisibility: setNewCalVisibility
           }}
         />
       )}
-      {tab === "settings" && (
+      {tab === 'settings' && (
         <SettingsTab
           name={name}
           setName={setName}
@@ -365,7 +368,7 @@ function CalendarPopover({
           calendar={calendar}
         />
       )}
-      {tab === "access" && calendar && (
+      {tab === 'access' && calendar && (
         <AccessTab
           calendar={calendar}
           usersWithAccess={usersWithAccess}
@@ -375,7 +378,7 @@ function CalendarPopover({
       )}
       <ErrorSnackbar error={saveError} type="calendar" />
     </ResponsiveDialog>
-  );
+  )
 }
 
-export default CalendarPopover;
+export default CalendarPopover

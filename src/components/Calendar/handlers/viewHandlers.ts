@@ -1,26 +1,26 @@
-import { EventErrorHandler } from "@/components/Error/EventErrorHandler";
-import { EventChip } from "@/components/Event/EventChip/EventChip";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { userAttendee } from "@/features/User/models/attendee";
+import { EventErrorHandler } from '@/components/Error/EventErrorHandler'
+import { EventChip } from '@/components/Event/EventChip/EventChip'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { userAttendee } from '@/features/User/models/attendee'
 import {
   CalendarApi,
   DayHeaderMountArg,
   EventContentArg,
   EventMountArg,
   NowIndicatorContentArg,
-  ViewMountArg,
-} from "@fullcalendar/core";
-import React from "react";
-import { createMouseHandlers } from "./mouseHandlers";
+  ViewMountArg
+} from '@fullcalendar/core'
+import React from 'react'
+import { createMouseHandlers } from './mouseHandlers'
 
 export interface ViewHandlersProps {
-  calendarRef: React.RefObject<CalendarApi | null>;
-  setSelectedDate: (date: Date) => void;
-  setSelectedMiniDate: (date: Date) => void;
-  onViewChange?: (view: string) => void;
-  calendars: Record<string, Calendar>;
-  tempcalendars: Record<string, Calendar>;
-  errorHandler: EventErrorHandler;
+  calendarRef: React.RefObject<CalendarApi | null>
+  setSelectedDate: (date: Date) => void
+  setSelectedMiniDate: (date: Date) => void
+  onViewChange?: (view: string) => void
+  calendars: Record<string, Calendar>
+  tempcalendars: Record<string, Calendar>
+  errorHandler: EventErrorHandler
 }
 
 export const createViewHandlers = (props: ViewHandlersProps) => {
@@ -31,126 +31,126 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     onViewChange,
     calendars,
     tempcalendars,
-    errorHandler,
-  } = props;
+    errorHandler
+  } = props
 
   const handleNowIndicatorContent = (arg: NowIndicatorContentArg) => {
     if (arg.isAxis) {
       return React.createElement(
-        "div",
-        { style: { display: "flex", alignItems: "center" } },
+        'div',
+        { style: { display: 'flex', alignItems: 'center' } },
         React.createElement(
-          "div",
-          { className: "now-time-label" },
+          'div',
+          { className: 'now-time-label' },
           new Date().toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
+            hour: '2-digit',
+            minute: '2-digit',
             hour12: false,
-            timeZone: arg.view.dateEnv.timeZone,
+            timeZone: arg.view.dateEnv.timeZone
           })
         )
-      );
+      )
     }
-  };
+  }
 
   const handleDayHeaderDidMount = (arg: DayHeaderMountArg) => {
-    if (arg.view.type === "timeGridWeek") {
-      const headerEl = arg.el;
+    if (arg.view.type === 'timeGridWeek') {
+      const headerEl = arg.el
 
       const handleDayHeaderClick = () => {
-        calendarRef.current?.changeView("timeGridDay", arg.date);
-        setSelectedDate(new Date(arg.date));
-        setSelectedMiniDate(new Date(arg.date));
+        calendarRef.current?.changeView('timeGridDay', arg.date)
+        setSelectedDate(new Date(arg.date))
+        setSelectedMiniDate(new Date(arg.date))
 
         if (onViewChange) {
-          onViewChange("timeGridDay");
+          onViewChange('timeGridDay')
         }
-      };
+      }
 
-      headerEl.addEventListener("click", handleDayHeaderClick);
-      headerEl.__dayHeaderClickHandler = handleDayHeaderClick;
+      headerEl.addEventListener('click', handleDayHeaderClick)
+      headerEl.__dayHeaderClickHandler = handleDayHeaderClick
     }
-  };
+  }
 
   const handleDayHeaderWillUnmount = (arg: DayHeaderMountArg) => {
-    const headerEl = arg.el;
+    const headerEl = arg.el
     if (headerEl.__dayHeaderClickHandler) {
-      headerEl.removeEventListener("click", headerEl.__dayHeaderClickHandler);
-      delete headerEl.__dayHeaderClickHandler;
+      headerEl.removeEventListener('click', headerEl.__dayHeaderClickHandler)
+      delete headerEl.__dayHeaderClickHandler
     }
-  };
+  }
 
   const handleViewDidMount = (arg: ViewMountArg) => {
-    if (arg.view.type === "timeGridWeek" || arg.view.type === "timeGridDay") {
-      const calendarEl = document.querySelector(".fc") as HTMLElement;
+    if (arg.view.type === 'timeGridWeek' || arg.view.type === 'timeGridDay') {
+      const calendarEl = document.querySelector('.fc') as HTMLElement
       if (calendarEl) {
-        const mouseHandlers = createMouseHandlers({ calendarEl });
-        mouseHandlers.addMouseEventListeners();
+        const mouseHandlers = createMouseHandlers({ calendarEl })
+        mouseHandlers.addMouseEventListeners()
       }
     }
-  };
+  }
 
   const handleViewWillUnmount = (arg: ViewMountArg) => {
     if (arg.el.__timeInterval) {
-      clearInterval(arg.el.__timeInterval);
-      delete arg.el.__timeInterval;
+      clearInterval(arg.el.__timeInterval)
+      delete arg.el.__timeInterval
     }
 
     if (arg.el.__timeObserver) {
-      arg.el.__timeObserver.disconnect();
-      delete arg.el.__timeObserver;
+      arg.el.__timeObserver.disconnect()
+      delete arg.el.__timeObserver
     }
 
-    const calendarEl = document.querySelector(".fc") as HTMLElement;
+    const calendarEl = document.querySelector('.fc') as HTMLElement
     if (calendarEl) {
-      const mouseHandlers = createMouseHandlers({ calendarEl });
-      mouseHandlers.removeMouseEventListeners();
+      const mouseHandlers = createMouseHandlers({ calendarEl })
+      mouseHandlers.removeMouseEventListeners()
     }
-  };
+  }
 
   const handleEventContent = (arg: EventContentArg) => {
     return React.createElement(EventChip, {
       arg,
       calendars,
       tempcalendars,
-      errorHandler,
-    });
-  };
+      errorHandler
+    })
+  }
 
   const handleEventDidMount = (arg: EventMountArg) => {
-    const attendees = arg.event._def.extendedProps.attendee || [];
-    if (!calendars[arg.event._def.extendedProps.calId]) return;
+    const attendees = arg.event._def.extendedProps.attendee || []
+    if (!calendars[arg.event._def.extendedProps.calId]) return
     const ownerEmails = new Set(
-      calendars[arg.event._def.extendedProps.calId].owner?.emails?.map(
-        (email) => email.toLowerCase()
+      calendars[arg.event._def.extendedProps.calId].owner?.emails?.map(email =>
+        email.toLowerCase()
       )
-    );
+    )
     const showSpecialDisplay = attendees.filter((att: userAttendee) =>
       ownerEmails.has(att.cal_address.toLowerCase())
-    );
+    )
 
-    if (!showSpecialDisplay[0]) return;
+    if (!showSpecialDisplay[0]) return
 
     arg.el.classList.remove(
-      "declined-event",
-      "tentative-event",
-      "needs-action-event"
-    );
+      'declined-event',
+      'tentative-event',
+      'needs-action-event'
+    )
 
     switch (showSpecialDisplay[0].partstat) {
-      case "DECLINED":
-        arg.el.classList.add("declined-event");
-        break;
-      case "TENTATIVE":
-        arg.el.classList.add("tentative-event");
-        break;
-      case "NEEDS-ACTION":
-        arg.el.classList.add("needs-action-event");
-        break;
+      case 'DECLINED':
+        arg.el.classList.add('declined-event')
+        break
+      case 'TENTATIVE':
+        arg.el.classList.add('tentative-event')
+        break
+      case 'NEEDS-ACTION':
+        arg.el.classList.add('needs-action-event')
+        break
       default:
-        break;
+        break
     }
-  };
+  }
 
   return {
     handleNowIndicatorContent,
@@ -159,6 +159,6 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     handleViewDidMount,
     handleViewWillUnmount,
     handleEventContent,
-    handleEventDidMount,
-  };
-};
+    handleEventDidMount
+  }
+}

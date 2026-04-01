@@ -4,11 +4,11 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Typography,
-} from "@linagora/twake-mui";
-import { useRef } from "react";
-import { stringAvatar } from "../utils/eventUtils";
-import { ErrorEventChip } from "./ErrorEventChip";
+  Typography
+} from '@linagora/twake-mui'
+import { useRef } from 'react'
+import { stringAvatar } from '../utils/eventUtils'
+import { ErrorEventChip } from './ErrorEventChip'
 import {
   DisplayedIcons,
   EventChipProps,
@@ -19,76 +19,71 @@ import {
   getOwnerAttendee,
   getTitleStyle,
   IconDisplayConfig,
-  useCompactMode,
-} from "./EventChipUtils";
+  useCompactMode
+} from './EventChipUtils'
 
-const PRIVATE_CLASSIFICATIONS = ["PRIVATE", "CONFIDENTIAL"];
+const PRIVATE_CLASSIFICATIONS = ['PRIVATE', 'CONFIDENTIAL']
 
 export const EVENT_DURATION = {
   SHORT: 15,
   MEDIUM: 30,
-  LONG: 60,
-} as const;
+  LONG: 60
+} as const
 
 export function EventChip({
   arg,
   calendars,
   tempcalendars,
-  errorHandler,
+  errorHandler
 }: EventChipProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const showCompact = useCompactMode(cardRef);
+  const cardRef = useRef<HTMLDivElement>(null)
+  const showCompact = useCompactMode(cardRef)
 
-  const event = arg.event;
-  const props = event._def.extendedProps;
-  const {
-    calId,
-    temp,
-    attendee: attendees = [],
-    class: classification,
-  } = props;
+  const event = arg.event
+  const props = event._def.extendedProps
+  const { calId, temp, attendee: attendees = [], class: classification } = props
 
   try {
     // Calendar validation
-    const calendarsSource = temp ? tempcalendars : calendars;
-    const calendar = calendarsSource[calId];
-    if (!calendar) return null;
+    const calendarsSource = temp ? tempcalendars : calendars
+    const calendar = calendarsSource[calId]
+    if (!calendar) return null
 
     // Event properties
-    const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification);
+    const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification)
     const ownerEmails = new Set(
-      calendar.owner?.emails?.map((e) => e.toLowerCase())
-    );
+      calendar.owner?.emails?.map(e => e.toLowerCase())
+    )
     // const delegated = calendar.delegated;
 
     // Determine owner attendee
-    const ownerAttendee = getOwnerAttendee(attendees, ownerEmails);
+    const ownerAttendee = getOwnerAttendee(attendees, ownerEmails)
 
     // Color and contrast logic
     const bestColor = getBestColor(
       (calendar.color as { light: string; dark: string }) ?? {
-        light: "#fff",
-        dark: "#000",
+        light: '#fff',
+        dark: '#000'
       }
-    );
+    )
 
     // Icon display configuration
     const IconDisplayed: IconDisplayConfig = {
-      declined: ownerAttendee?.partstat === "DECLINED",
-      tentative: ownerAttendee?.partstat === "TENTATIVE",
-      needAction: ownerAttendee?.partstat === "NEEDS-ACTION",
-      private: isPrivate,
-    };
+      declined: ownerAttendee?.partstat === 'DECLINED',
+      tentative: ownerAttendee?.partstat === 'TENTATIVE',
+      needAction: ownerAttendee?.partstat === 'NEEDS-ACTION',
+      private: isPrivate
+    }
 
     // View and time calculations
-    const isMonthView = arg.view.type === "dayGridMonth";
-    const timeZone = arg.view.calendar?.getOption("timeZone") || "UTC";
-    const { startTime, endTime } = getEventTimes(event, timeZone);
-    const eventLength = getEventDuration(event);
+    const isMonthView = arg.view.type === 'dayGridMonth'
+    const timeZone = arg.view.calendar?.getOption('timeZone') || 'UTC'
+    const { startTime, endTime } = getEventTimes(event, timeZone)
+    const eventLength = getEventDuration(event)
 
-    const isMoreThan15 = eventLength > EVENT_DURATION.SHORT;
-    const isMoreThan30 = eventLength > EVENT_DURATION.MEDIUM;
-    const isMoreThan60 = eventLength > EVENT_DURATION.LONG;
+    const isMoreThan15 = eventLength > EVENT_DURATION.SHORT
+    const isMoreThan30 = eventLength > EVENT_DURATION.MEDIUM
+    const isMoreThan60 = eventLength > EVENT_DURATION.LONG
 
     // Style calculation
     const titleStyle = getTitleStyle(
@@ -96,7 +91,7 @@ export function EventChip({
       ownerAttendee?.partstat,
       calendar,
       isPrivate
-    );
+    )
 
     const cardStyle = getCardStyle(
       bestColor,
@@ -104,7 +99,7 @@ export function EventChip({
       ownerAttendee?.partstat,
       calendar,
       isPrivate
-    );
+    )
 
     // Organizer avatar
     const OrganizerAvatar = event._def.extendedProps.organizer
@@ -112,28 +107,28 @@ export function EventChip({
           event._def.extendedProps.organizer?.cn ??
             event._def.extendedProps.organizer?.cal_address
         )
-      : { color: undefined, children: null };
+      : { color: undefined, children: null }
 
     return (
       <Card
         variant="outlined"
         style={{
           ...cardStyle,
-          ...(!isMoreThan15 || isMonthView ? { height: "auto" } : {}),
+          ...(!isMoreThan15 || isMonthView ? { height: 'auto' } : {}),
           ...(!isMoreThan15 && !isMonthView
-            ? { transform: "translateY(2px)" }
-            : {}),
+            ? { transform: 'translateY(2px)' }
+            : {})
         }}
         ref={cardRef}
         data-testid={`event-card-${event._def.extendedProps.uid}`}
       >
         <CardHeader
           sx={{
-            py: "0px",
-            px: "0px",
-            "& .MuiCardHeader-content": {
-              overflow: "hidden",
-            },
+            py: '0px',
+            px: '0px',
+            '& .MuiCardHeader-content': {
+              overflow: 'hidden'
+            }
           }}
           title={
             showCompact ? (
@@ -143,14 +138,14 @@ export function EventChip({
             ) : (
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%'
                 }}
               >
                 <Box
-                  sx={{ display: "flex", alignItems: "center", minWidth: 0 }}
+                  sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}
                 >
                   {(!isMoreThan30 || isMonthView) &&
                     !event._def.extendedProps.allday && (
@@ -159,12 +154,12 @@ export function EventChip({
                         className="compactStartTime"
                         style={{
                           ...titleStyle,
-                          textDecoration: "none",
-                          overflow: "visible",
-                          opacity: "70%",
-                          letterSpacing: "0%",
-                          fontSize: "10px",
-                          marginRight: "4px",
+                          textDecoration: 'none',
+                          overflow: 'visible',
+                          opacity: '70%',
+                          letterSpacing: '0%',
+                          fontSize: '10px',
+                          marginRight: '4px'
                         }}
                       >
                         {startTime}
@@ -185,13 +180,13 @@ export function EventChip({
               <Typography
                 style={{
                   color: titleStyle.color,
-                  opacity: "70%",
-                  fontFamily: "Inter",
-                  fontWeight: "500",
-                  fontSize: "10px",
-                  lineHeight: "16px",
-                  letterSpacing: "0%",
-                  verticalAlign: "middle",
+                  opacity: '70%',
+                  fontFamily: 'Inter',
+                  fontWeight: '500',
+                  fontSize: '10px',
+                  lineHeight: '16px',
+                  letterSpacing: '0%',
+                  verticalAlign: 'middle'
                 }}
               >
                 {startTime} {!showCompact && ` - ${endTime}`}
@@ -206,50 +201,50 @@ export function EventChip({
             <CardContent
               sx={{
                 p: 0,
-                "& .MuiCardContent-content": {
-                  overflow: "hidden",
-                },
+                '& .MuiCardContent-content': {
+                  overflow: 'hidden'
+                }
               }}
             >
               {event._def.extendedProps.location && (
                 <Typography
                   style={{
                     marginRight: 2,
-                    fontFamily: "Roboto",
-                    fontWeight: "500",
-                    fontStyle: "Medium",
-                    fontSize: "12px",
-                    lineHeight: "16px",
-                    letterSpacing: "0%",
-                    verticalAlign: "middle",
+                    fontFamily: 'Roboto',
+                    fontWeight: '500',
+                    fontStyle: 'Medium',
+                    fontSize: '12px',
+                    lineHeight: '16px',
+                    letterSpacing: '0%',
+                    verticalAlign: 'middle',
                     color: titleStyle.color,
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {event._def.extendedProps.location}
                 </Typography>
               )}
-              <Box sx={{ display: "flex", alignItems: "flex-start", mt: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', mt: 0.5 }}>
                 {event._def.extendedProps.description && (
                   <Typography
                     sx={{
-                      fontFamily: "Roboto",
+                      fontFamily: 'Roboto',
                       fontWeight: 500,
-                      fontSize: "10px",
-                      lineHeight: "16px",
-                      letterSpacing: "0%",
+                      fontSize: '10px',
+                      lineHeight: '16px',
+                      letterSpacing: '0%',
                       opacity: 0.8,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
                       WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      whiteSpace: "normal",
+                      WebkitBoxOrient: 'vertical',
+                      whiteSpace: 'normal',
                       flex: 1,
-                      maxWidth: "75%",
-                      color: titleStyle.color,
+                      maxWidth: '75%',
+                      color: titleStyle.color
                     }}
                   >
                     {event._def.extendedProps.description}
@@ -265,23 +260,24 @@ export function EventChip({
           !showCompact &&
           window.displayOrgAvatar && (
             <Avatar
-              children={OrganizerAvatar.children}
               color={OrganizerAvatar.color}
               size="xs"
               sx={{
                 bottom: 0,
                 right: 0,
-                margin: "8px",
-                position: "absolute",
-                border: "2px solid white",
+                margin: '8px',
+                position: 'absolute',
+                border: '2px solid white'
               }}
-            />
+            >
+              {OrganizerAvatar.children}
+            </Avatar>
           )}
       </Card>
-    );
+    )
   } catch (e) {
     return (
       <ErrorEventChip event={event} errorHandler={errorHandler} error={e} />
-    );
+    )
   }
 }

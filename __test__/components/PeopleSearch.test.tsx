@@ -1,412 +1,410 @@
-import { PeopleSearch, User } from "@/components/Attendees/PeopleSearch";
-import { searchUsers } from "@/features/User/userAPI";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { renderWithProviders } from "../utils/Renderwithproviders";
+import { PeopleSearch, User } from '@/components/Attendees/PeopleSearch'
+import { searchUsers } from '@/features/User/userAPI'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock("@/features/User/userAPI");
-const mockedSearchUsers = searchUsers as jest.MockedFunction<
-  typeof searchUsers
->;
+jest.mock('@/features/User/userAPI')
+const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
 
-describe("PeopleSearch", () => {
+describe('PeopleSearch', () => {
   const baseUser: User = {
-    email: "test@example.com",
-    displayName: "Test User",
-    avatarUrl: "https://example.com/avatar.png",
-    openpaasId: "1234567890",
-  };
+    email: 'test@example.com',
+    displayName: 'Test User',
+    avatarUrl: 'https://example.com/avatar.png',
+    openpaasId: '1234567890'
+  }
 
   function setup(
     selectedUsers: User[] = [],
     props?: Partial<React.ComponentProps<typeof PeopleSearch>>
   ) {
-    const onChange = jest.fn();
+    const onChange = jest.fn()
     renderWithProviders(
       <PeopleSearch
-        objectTypes={["user"]}
+        objectTypes={['user']}
         selectedUsers={selectedUsers}
         onChange={onChange}
         {...props}
       />
-    );
-    return { onChange };
+    )
+    return { onChange }
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockedSearchUsers.mockReset();
-  });
+    jest.useFakeTimers()
+    mockedSearchUsers.mockReset()
+  })
 
   afterEach(() => {
-    jest.useRealTimers();
-  });
+    jest.useRealTimers()
+  })
 
-  it("calls searchUsers after debounce when typing", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    setup();
+  it('calls searchUsers after debounce when typing', async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    setup()
 
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
+      jest.advanceTimersByTime(300)
+    })
 
     await waitFor(() => {
-      expect(mockedSearchUsers).toHaveBeenCalledWith("Test", ["user"]);
-    });
-  });
+      expect(mockedSearchUsers).toHaveBeenCalledWith('Test', ['user'])
+    })
+  })
 
-  it("renders search results and allows selection", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    const { onChange } = setup();
+  it('renders search results and allows selection', async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    const { onChange } = setup()
 
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
+      jest.advanceTimersByTime(300)
+    })
 
-    const option = await screen.findByText("Test User");
-    await userEvent.click(option);
+    const option = await screen.findByText('Test User')
+    await userEvent.click(option)
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalled();
-    });
-  });
+      expect(onChange).toHaveBeenCalled()
+    })
+  })
 
-  it("does not show already selected users in options", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    setup([baseUser]);
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+  it('does not show already selected users in options', async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    setup([baseUser])
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
+      jest.advanceTimersByTime(300)
+    })
 
     await waitFor(() => {
-      expect(screen.queryByText("test@example.com")).not.toBeInTheDocument();
-    });
-  });
+      expect(screen.queryByText('test@example.com')).not.toBeInTheDocument()
+    })
+  })
 
-  it("triggers onToggleEventPreview on Enter key press", () => {
-    const onToggleEventPreview = jest.fn();
-    setup([], { onToggleEventPreview });
+  it('triggers onToggleEventPreview on Enter key press', () => {
+    const onToggleEventPreview = jest.fn()
+    setup([], { onToggleEventPreview })
 
-    const input = screen.getByRole("combobox");
-    fireEvent.keyDown(input, { key: "Enter" });
+    const input = screen.getByRole('combobox')
+    fireEvent.keyDown(input, { key: 'Enter' })
 
-    expect(onToggleEventPreview).toHaveBeenCalled();
-  });
+    expect(onToggleEventPreview).toHaveBeenCalled()
+  })
 
-  it("respects disabled state", () => {
-    setup([], { disabled: true });
-    expect(screen.getByRole("combobox")).toBeDisabled();
-  });
+  it('respects disabled state', () => {
+    setup([], { disabled: true })
+    expect(screen.getByRole('combobox')).toBeDisabled()
+  })
 
   it("no options doesn't show dropdown when input is empty", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    setup();
-    const input = screen.getByRole("combobox");
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    setup()
+    const input = screen.getByRole('combobox')
 
-    userEvent.type(input, "Test");
+    userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
+      jest.advanceTimersByTime(300)
+    })
 
     await waitFor(() => {
-      expect(screen.getByRole("listbox")).toBeInTheDocument();
-    });
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+    })
 
-    userEvent.clear(input);
+    userEvent.clear(input)
 
     await waitFor(() => {
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    });
-  });
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+  })
 
   it("shows 'No results' when search succeeds but returns empty array", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([]);
-    setup();
+    mockedSearchUsers.mockResolvedValueOnce([])
+    setup()
 
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
 
     await act(async () => {
-      jest.advanceTimersByTime(300);
-      await Promise.resolve();
-      await Promise.resolve();
-    });
+      jest.advanceTimersByTime(300)
+      await Promise.resolve()
+      await Promise.resolve()
+    })
 
     const noResults = await screen.findByText(
-      "peopleSearch.noResults",
+      'peopleSearch.noResults',
       {},
       { timeout: 5000 }
-    );
-    expect(noResults).toBeInTheDocument();
-  });
+    )
+    expect(noResults).toBeInTheDocument()
+  })
 
-  it("does not clear options when search fails and shows error snackbar", async () => {
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    setup();
+  it('does not clear options when search fails and shows error snackbar', async () => {
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    setup()
 
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-      await Promise.resolve();
-    });
+      jest.advanceTimersByTime(300)
+      await Promise.resolve()
+    })
 
     await waitFor(() => {
-      expect(screen.getByText("Test User")).toBeInTheDocument();
-    });
+      expect(screen.getByText('Test User')).toBeInTheDocument()
+    })
 
-    mockedSearchUsers.mockRejectedValueOnce(new Error("Network error"));
-    await userEvent.clear(input);
-    await userEvent.type(input, "Error");
+    mockedSearchUsers.mockRejectedValueOnce(new Error('Network error'))
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Error')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-      await Promise.resolve();
-    });
+      jest.advanceTimersByTime(300)
+      await Promise.resolve()
+    })
 
-    const errorMessage = await screen.findByText("peopleSearch.searchError");
-    expect(errorMessage).toBeInTheDocument();
+    const errorMessage = await screen.findByText('peopleSearch.searchError')
+    expect(errorMessage).toBeInTheDocument()
 
-    expect(screen.queryByText("Test User")).not.toBeInTheDocument();
+    expect(screen.queryByText('Test User')).not.toBeInTheDocument()
 
-    mockedSearchUsers.mockResolvedValueOnce([baseUser]);
-    await userEvent.clear(input);
-    await userEvent.type(input, "Test");
+    mockedSearchUsers.mockResolvedValueOnce([baseUser])
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-      await Promise.resolve();
-    });
+      jest.advanceTimersByTime(300)
+      await Promise.resolve()
+    })
 
     await waitFor(() => {
-      expect(screen.getByText("Test User")).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('Test User')).toBeInTheDocument()
+    })
+  })
 
-  it("shows loading text when searching", async () => {
-    let resolveSearch: (value: User[]) => void;
-    const searchPromise = new Promise<User[]>((resolve) => {
-      resolveSearch = resolve;
-    });
-    mockedSearchUsers.mockReturnValueOnce(searchPromise);
-    setup();
+  it('shows loading text when searching', async () => {
+    let resolveSearch: (value: User[]) => void
+    const searchPromise = new Promise<User[]>(resolve => {
+      resolveSearch = resolve
+    })
+    mockedSearchUsers.mockReturnValueOnce(searchPromise)
+    setup()
 
-    const input = screen.getByRole("combobox");
-    await userEvent.type(input, "Test");
+    const input = screen.getByRole('combobox')
+    await userEvent.type(input, 'Test')
     await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
+      jest.advanceTimersByTime(300)
+    })
 
     const loadingText = await screen.findByText(
-      "peopleSearch.loading",
+      'peopleSearch.loading',
       {},
       { timeout: 5000 }
-    );
-    expect(loadingText).toBeInTheDocument();
+    )
+    expect(loadingText).toBeInTheDocument()
 
     await act(async () => {
-      resolveSearch!([baseUser]);
-      await searchPromise;
-    });
-  });
+      resolveSearch!([baseUser])
+      await searchPromise
+    })
+  })
 
-  describe("paste multiple attendees", () => {
+  describe('paste multiple attendees', () => {
     function setupFreeSolo(selectedUsers: User[] = []) {
-      const onChange = jest.fn();
+      const onChange = jest.fn()
       renderWithProviders(
         <PeopleSearch
-          objectTypes={["user"]}
+          objectTypes={['user']}
           selectedUsers={selectedUsers}
           onChange={onChange}
           freeSolo
         />
-      );
-      return { onChange };
+      )
+      return { onChange }
     }
 
-    it("splits pasted comma-separated emails into individual attendees", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('splits pasted comma-separated emails into individual attendees', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com, bob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com, bob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
-            expect.objectContaining({ email: "alice@example.com" }),
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'alice@example.com' }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
-      });
-    });
+        )
+      })
+    })
 
-    it("splits pasted semicolon-separated emails", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('splits pasted semicolon-separated emails', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com;bob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com;bob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
-            expect.objectContaining({ email: "alice@example.com" }),
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'alice@example.com' }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
-      });
-    });
+        )
+      })
+    })
 
-    it("splits pasted newline-separated emails", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('splits pasted newline-separated emails', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com\nbob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com\nbob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
-            expect.objectContaining({ email: "alice@example.com" }),
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'alice@example.com' }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
-      });
-    });
+        )
+      })
+    })
 
-    it("splits pasted space-separated emails", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('splits pasted space-separated emails', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com bob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com bob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
-            expect.objectContaining({ email: "alice@example.com" }),
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'alice@example.com' }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
-      });
-    });
+        )
+      })
+    })
 
-    it("skips duplicate emails already in selectedUsers", async () => {
+    it('skips duplicate emails already in selectedUsers', async () => {
       const existing: User = {
-        email: "alice@example.com",
-        displayName: "Alice",
-      };
-      const { onChange } = setupFreeSolo([existing]);
-      const input = screen.getByRole("combobox");
+        email: 'alice@example.com',
+        displayName: 'Alice'
+      }
+      const { onChange } = setupFreeSolo([existing])
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com, bob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com, bob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
             existing,
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
+        )
         // Should NOT have alice duplicated
-        const call = onChange.mock.calls[0][1];
+        const call = onChange.mock.calls[0][1]
         const aliceCount = call.filter(
-          (u: User) => u.email === "alice@example.com"
-        ).length;
-        expect(aliceCount).toBe(1);
-      });
-    });
+          (u: User) => u.email === 'alice@example.com'
+        ).length
+        expect(aliceCount).toBe(1)
+      })
+    })
 
-    it("leaves invalid text in input when some emails are invalid", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('leaves invalid text in input when some emails are invalid', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com, not-an-email, bob@example.com",
-        },
-      });
+          getData: () => 'alice@example.com, not-an-email, bob@example.com'
+        }
+      })
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(
           expect.anything(),
           expect.arrayContaining([
-            expect.objectContaining({ email: "alice@example.com" }),
-            expect.objectContaining({ email: "bob@example.com" }),
+            expect.objectContaining({ email: 'alice@example.com' }),
+            expect.objectContaining({ email: 'bob@example.com' })
           ])
-        );
-      });
-    });
+        )
+      })
+    })
 
-    it("does not intercept paste of a single email", async () => {
-      const { onChange } = setupFreeSolo();
-      const input = screen.getByRole("combobox");
+    it('does not intercept paste of a single email', async () => {
+      const { onChange } = setupFreeSolo()
+      const input = screen.getByRole('combobox')
 
       fireEvent.paste(input, {
         clipboardData: {
-          getData: () => "alice@example.com",
-        },
-      });
+          getData: () => 'alice@example.com'
+        }
+      })
 
       // Single email should NOT trigger multi-paste handler
-      expect(onChange).not.toHaveBeenCalled();
-    });
-  });
+      expect(onChange).not.toHaveBeenCalled()
+    })
+  })
 
-  it("retains input value when field loses focus (blur)", async () => {
-    let resolveSearch: (value: User[]) => void;
-    const searchPromise = new Promise<User[]>((resolve) => {
-      resolveSearch = resolve;
-    });
-    mockedSearchUsers.mockReturnValueOnce(searchPromise);
+  it('retains input value when field loses focus (blur)', async () => {
+    let resolveSearch: (value: User[]) => void
+    const searchPromise = new Promise<User[]>(resolve => {
+      resolveSearch = resolve
+    })
+    mockedSearchUsers.mockReturnValueOnce(searchPromise)
     await act(async () => {
-      setup();
-    });
+      setup()
+    })
 
-    const input = screen.getByRole("combobox");
+    const input = screen.getByRole('combobox')
 
     await act(async () => {
-      userEvent.type(input, "Test");
-    });
+      userEvent.type(input, 'Test')
+    })
 
     await waitFor(() => {
-      expect(mockedSearchUsers).toHaveBeenCalledWith("Test", ["user"]);
-    });
+      expect(mockedSearchUsers).toHaveBeenCalledWith('Test', ['user'])
+    })
 
-    expect(input).toHaveValue("Test");
+    expect(input).toHaveValue('Test')
 
     await act(async () => {
-      input.blur();
-    });
+      input.blur()
+    })
 
     await waitFor(() => {
-      expect(input).toHaveValue("Test");
-    });
-  });
-});
+      expect(input).toHaveValue('Test')
+    })
+  })
+})

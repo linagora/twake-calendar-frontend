@@ -1,148 +1,148 @@
-import { User } from "@/components/Attendees/PeopleSearch";
-import { api } from "@/utils/apiUtils";
-import { BusinessHour } from "../Settings/SettingsSlice";
-import { OpenPaasUserData } from "./type/OpenPaasUserData";
+import { User } from '@/components/Attendees/PeopleSearch'
+import { api } from '@/utils/apiUtils'
+import { BusinessHour } from '../Settings/SettingsSlice'
+import { OpenPaasUserData } from './type/OpenPaasUserData'
 import {
   ConfigurationItem,
   ModuleConfiguration,
-  SearchResponseItem,
-} from "./userDataTypes";
-import { ResourceData } from "./type/ResourceData";
+  SearchResponseItem
+} from './userDataTypes'
+import { ResourceData } from './type/ResourceData'
 
 export async function getOpenPaasUser() {
-  const user = await api.get(`api/user`);
-  return user.json();
+  const user = await api.get(`api/user`)
+  return user.json()
 }
 
 export async function searchUsers(
   query: string,
-  objectTypes: string[] = ["user", "contact"]
+  objectTypes: string[] = ['user', 'contact']
 ): Promise<User[]> {
   const response: SearchResponseItem[] = await api
     .post(`api/people/search`, {
       body: JSON.stringify({
         limit: 10,
         objectTypes,
-        q: query,
-      }),
+        q: query
+      })
     })
-    .json();
+    .json()
 
-  return response.map((user) => ({
-    email: user.emailAddresses?.[0]?.value || "",
+  return response.map(user => ({
+    email: user.emailAddresses?.[0]?.value || '',
     displayName:
-      user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value || "",
-    avatarUrl: user.photos?.[0]?.url || "",
-    openpaasId: user.id || "",
-    objectType: user.objectType,
-  }));
+      user.names?.[0]?.displayName || user.emailAddresses?.[0]?.value || '',
+    avatarUrl: user.photos?.[0]?.url || '',
+    openpaasId: user.id || '',
+    objectType: user.objectType
+  }))
 }
 
 export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
-  const user = await api.get(`api/users/${id}`).json();
-  return user as OpenPaasUserData;
+  const user = await api.get(`api/users/${id}`).json()
+  return user as OpenPaasUserData
 }
 
 export async function getResourceDetails(id: string): Promise<ResourceData> {
-  const resource = await api.get(`api/resources/${id}`).json();
-  return resource as ResourceData;
+  const resource = await api.get(`api/resources/${id}`).json()
+  return resource as ResourceData
 }
 
 export interface UserConfigurationUpdates {
-  language?: string;
-  notifications?: Record<string, unknown>;
-  timezone?: string | null;
-  displayWeekNumbers?: boolean;
-  previousConfig?: Record<string, unknown>;
-  alarmEmails?: boolean;
-  hideDeclinedEvents?: boolean;
-  workingDays?: boolean;
-  businessHours?: BusinessHour | null;
+  language?: string
+  notifications?: Record<string, unknown>
+  timezone?: string | null
+  displayWeekNumbers?: boolean
+  previousConfig?: Record<string, unknown>
+  alarmEmails?: boolean
+  hideDeclinedEvents?: boolean
+  workingDays?: boolean
+  businessHours?: BusinessHour | null
 }
 
 export async function updateUserConfigurations(
   updates: UserConfigurationUpdates
 ): Promise<Response | { status: number }> {
-  const coreConfigs: ConfigurationItem[] = [];
-  const calendarConfigs: ConfigurationItem[] = [];
-  const esnCalendarConfigs: ConfigurationItem[] = [];
+  const coreConfigs: ConfigurationItem[] = []
+  const calendarConfigs: ConfigurationItem[] = []
+  const esnCalendarConfigs: ConfigurationItem[] = []
 
   if (updates.language !== undefined) {
-    coreConfigs.push({ name: "language", value: updates.language });
+    coreConfigs.push({ name: 'language', value: updates.language })
   }
   if (updates.notifications !== undefined) {
-    coreConfigs.push({ name: "notifications", value: updates.notifications });
+    coreConfigs.push({ name: 'notifications', value: updates.notifications })
   }
   if (updates.timezone !== undefined) {
     const previousDatetime = updates.previousConfig?.datetime as
       | { timeZone?: string }
-      | undefined;
+      | undefined
     coreConfigs.push({
-      name: "datetime",
+      name: 'datetime',
       value: {
         ...previousDatetime,
-        timeZone: updates.timezone,
-      },
-    });
+        timeZone: updates.timezone
+      }
+    })
   }
   if (updates.businessHours !== undefined) {
     coreConfigs.push({
-      name: "businessHours",
-      value: updates.businessHours ? [updates.businessHours] : [],
-    });
+      name: 'businessHours',
+      value: updates.businessHours ? [updates.businessHours] : []
+    })
   }
   if (updates.alarmEmails !== undefined) {
     calendarConfigs.push({
-      name: "alarmEmails",
-      value: updates.alarmEmails,
-    });
+      name: 'alarmEmails',
+      value: updates.alarmEmails
+    })
   }
   if (updates.displayWeekNumbers !== undefined) {
     calendarConfigs.push({
-      name: "displayWeekNumbers",
-      value: updates.displayWeekNumbers,
-    });
+      name: 'displayWeekNumbers',
+      value: updates.displayWeekNumbers
+    })
   }
   if (updates.hideDeclinedEvents !== undefined) {
     esnCalendarConfigs.push({
-      name: "hideDeclinedEvents",
-      value: updates.hideDeclinedEvents,
-    });
+      name: 'hideDeclinedEvents',
+      value: updates.hideDeclinedEvents
+    })
   }
   if (updates.workingDays !== undefined) {
     esnCalendarConfigs.push({
-      name: "workingDays",
-      value: updates.workingDays,
-    });
+      name: 'workingDays',
+      value: updates.workingDays
+    })
   }
 
-  const modules: ModuleConfiguration[] = [];
+  const modules: ModuleConfiguration[] = []
 
   if (coreConfigs.length > 0) {
     modules.push({
-      name: "core",
-      configurations: coreConfigs,
-    });
+      name: 'core',
+      configurations: coreConfigs
+    })
   }
 
   if (calendarConfigs.length > 0) {
     modules.push({
-      name: "calendar",
-      configurations: calendarConfigs,
-    });
+      name: 'calendar',
+      configurations: calendarConfigs
+    })
   }
   if (esnCalendarConfigs.length > 0) {
     modules.push({
-      name: "linagora.esn.calendar",
-      configurations: esnCalendarConfigs,
-    });
+      name: 'linagora.esn.calendar',
+      configurations: esnCalendarConfigs
+    })
   }
 
   if (modules.length === 0) {
-    return Promise.resolve({ status: 204 });
+    return Promise.resolve({ status: 204 })
   }
 
   return await api.patch(`api/configurations?scope=user`, {
-    json: modules,
-  });
+    json: modules
+  })
 }

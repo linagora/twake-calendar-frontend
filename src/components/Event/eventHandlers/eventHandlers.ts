@@ -1,18 +1,18 @@
-import { AppDispatch } from "@/app/store";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { AppDispatch } from '@/app/store'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   deleteEventAsync,
   deleteEventInstanceAsync,
   putEventAsync,
-  updateEventInstanceAsync,
-} from "@/features/Calendars/services";
-import { updateSeriesPartstat } from "@/features/Events/EventApi";
-import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { PartStat } from "@/features/User/models/attendee";
-import { createAttendee } from "@/features/User/models/attendee.mapper";
-import { userData } from "@/features/User/userDataTypes";
-import { buildFamilyName } from "@/utils/buildFamilyName";
-import { isEventOrganiser } from "@/utils/isEventOrganiser";
+  updateEventInstanceAsync
+} from '@/features/Calendars/services'
+import { updateSeriesPartstat } from '@/features/Events/EventApi'
+import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { PartStat } from '@/features/User/models/attendee'
+import { createAttendee } from '@/features/User/models/attendee.mapper'
+import { userData } from '@/features/User/userDataTypes'
+import { buildFamilyName } from '@/utils/buildFamilyName'
+import { isEventOrganiser } from '@/utils/isEventOrganiser'
 
 function updateEventAttendees(
   calendar: Calendar,
@@ -22,60 +22,60 @@ function updateEventAttendees(
 ) {
   if (calendar.owner?.resource) {
     const updatedAttendees =
-      event.attendee?.map((attendeeData) =>
-        attendeeData.cutype === "RESOURCE" && attendeeData.cn === calendar.name
+      event.attendee?.map(attendeeData =>
+        attendeeData.cutype === 'RESOURCE' && attendeeData.cn === calendar.name
           ? { ...attendeeData, partstat: rsvp }
           : attendeeData
-      ) || [];
+      ) || []
 
-    return { attendee: updatedAttendees };
+    return { attendee: updatedAttendees }
   }
 
   if (!user) {
-    throw new Error("Cannot update attendees without user data");
+    throw new Error('Cannot update attendees without user data')
   }
 
-  const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0;
-  const isOrganizer = isEventOrganiser(event, user.email);
+  const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0
+  const isOrganizer = isEventOrganiser(event, user.email)
   if (eventHasNoAttendees) {
     const userdata = createAttendee({
       cal_address: user.email,
       cn: buildFamilyName(user.given_name, user.family_name, user.email),
-      role: isOrganizer ? "CHAIR" : "REQ-PARTICIPANT",
-      partstat: rsvp,
-    });
+      role: isOrganizer ? 'CHAIR' : 'REQ-PARTICIPANT',
+      partstat: rsvp
+    })
     return {
       organizer: isOrganizer ? userdata : event.organizer,
-      attendee: [userdata],
-    };
+      attendee: [userdata]
+    }
   }
 
   return {
     attendee: (() => {
-      const userEmailLower = user.email?.toLowerCase();
+      const userEmailLower = user.email?.toLowerCase()
       const userExists = event.attendee.some(
-        (attendee) => attendee.cal_address?.toLowerCase() === userEmailLower
-      );
+        attendee => attendee.cal_address?.toLowerCase() === userEmailLower
+      )
 
-      const updatedAttendees = event.attendee.map((attendeeData) =>
+      const updatedAttendees = event.attendee.map(attendeeData =>
         attendeeData.cal_address?.toLowerCase() === userEmailLower
           ? { ...attendeeData, partstat: rsvp }
           : attendeeData
-      );
+      )
 
       if (!userExists) {
         const newUserAttendee = createAttendee({
           cal_address: user.email,
           cn: buildFamilyName(user.given_name, user.family_name, user.email),
-          role: "REQ-PARTICIPANT",
-          partstat: rsvp,
-        });
-        return [...updatedAttendees, newUserAttendee];
+          role: 'REQ-PARTICIPANT',
+          partstat: rsvp
+        })
+        return [...updatedAttendees, newUserAttendee]
       }
 
-      return updatedAttendees;
-    })(),
-  };
+      return updatedAttendees
+    })()
+  }
 }
 
 async function handleSoloRSVP(
@@ -83,7 +83,7 @@ async function handleSoloRSVP(
   calendar: Calendar,
   event: CalendarEvent
 ) {
-  dispatch(updateEventInstanceAsync({ cal: calendar, event }));
+  await dispatch(updateEventInstanceAsync({ cal: calendar, event }))
 }
 
 async function handleAllRSVP(
@@ -91,7 +91,7 @@ async function handleAllRSVP(
   userEmail: string,
   rsvp: PartStat
 ) {
-  await updateSeriesPartstat(event, userEmail, rsvp);
+  await updateSeriesPartstat(event, userEmail, rsvp)
 }
 
 async function handleDefaultRSVP(
@@ -99,7 +99,7 @@ async function handleDefaultRSVP(
   calendar: Calendar,
   newEvent: CalendarEvent
 ) {
-  dispatch(putEventAsync({ cal: calendar, newEvent }));
+  await dispatch(putEventAsync({ cal: calendar, newEvent }))
 }
 
 export async function handleRSVP(
@@ -112,42 +112,42 @@ export async function handleRSVP(
 ) {
   const newEvent = {
     ...event,
-    ...updateEventAttendees(calendar, event, user, rsvp),
-  };
+    ...updateEventAttendees(calendar, event, user, rsvp)
+  }
 
-  if (typeOfAction === "solo") {
-    await handleSoloRSVP(dispatch, calendar, newEvent);
-  } else if (typeOfAction === "all") {
+  if (typeOfAction === 'solo') {
+    await handleSoloRSVP(dispatch, calendar, newEvent)
+  } else if (typeOfAction === 'all') {
     if (!user?.email) {
-      throw new Error("Cannot update all occurrences without user email");
+      throw new Error('Cannot update all occurrences without user email')
     }
-    await handleAllRSVP(event, user.email, rsvp);
+    await handleAllRSVP(event, user.email, rsvp)
   } else {
-    await handleDefaultRSVP(dispatch, calendar, newEvent);
+    await handleDefaultRSVP(dispatch, calendar, newEvent)
   }
 }
 
 export function handleDelete(
   isRecurring: boolean,
-  typeOfAction: "solo" | "all" | undefined,
-  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void,
+  typeOfAction: 'solo' | 'all' | undefined,
+  onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void,
   dispatch: AppDispatch,
   calendar: Calendar,
   event: CalendarEvent,
   calId: string,
   eventId: string
 ) {
-  onClose({}, "backdropClick");
+  onClose({}, 'backdropClick')
 
-  if (isRecurring && typeOfAction === "solo") {
-    dispatch(deleteEventInstanceAsync({ cal: calendar, event }));
+  if (isRecurring && typeOfAction === 'solo') {
+    dispatch(deleteEventInstanceAsync({ cal: calendar, event }))
   } else {
     dispatch(
       deleteEventAsync({
         calId,
         eventId,
-        eventURL: event.URL,
+        eventURL: event.URL
       })
-    );
+    )
   }
 }

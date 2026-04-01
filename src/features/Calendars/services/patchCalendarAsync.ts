@@ -1,32 +1,32 @@
-import { toRejectedError } from "@/utils/errorUtils";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { proppatchCalendar } from "../CalendarApi";
-import { RejectedError } from "../types/RejectedError";
+import { toRejectedError } from '@/utils/errorUtils'
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { proppatchCalendar } from '../CalendarApi'
+import { RejectedError } from '../types/RejectedError'
 
 export const patchCalendarAsync = createAsyncThunk<
   {
-    calId: string;
-    calLink: string;
-    patch: { name: string; desc: string; color: Record<string, string> };
+    calId: string
+    calLink: string
+    patch: { name: string; desc: string; color: Record<string, string> }
   },
   {
-    calId: string;
-    calLink: string;
-    patch: { name: string; desc: string; color: Record<string, string> };
+    calId: string
+    calLink: string
+    patch: { name: string; desc: string; color: Record<string, string> }
   },
   { rejectValue: RejectedError }
 >(
-  "calendars/patchCalendar",
+  'calendars/patchCalendar',
   async ({ calId, calLink, patch }, { rejectWithValue }) => {
     try {
-      await proppatchCalendar(calLink, patch);
+      await proppatchCalendar(calLink, patch)
       return {
         calId,
         calLink,
-        patch,
-      };
+        patch
+      }
     } catch (err) {
-      return rejectWithValue(toRejectedError(err));
+      return rejectWithValue(toRejectedError(err))
     }
   }
-);
+)

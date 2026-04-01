@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback } from "react";
+import { useCallback } from 'react'
 import {
   createEventHandlers,
-  EventHandlersProps,
-} from "../handlers/eventHandlers";
+  EventHandlersProps
+} from '../handlers/eventHandlers'
 
 export const useCalendarEventHandlers = (props: EventHandlersProps) => {
-  const eventHandlers = createEventHandlers(props);
+  const eventHandlers = createEventHandlers(props)
 
   return {
     handleDateSelect: useCallback(eventHandlers.handleDateSelect, [
@@ -14,13 +14,13 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setAnchorEl,
       props.setTempEvent,
       props.tempUsers,
-      props.timezone,
+      props.timezone
     ]),
     handleClosePopover: useCallback(eventHandlers.handleClosePopover, [
       props.calendarRef,
       props.setAnchorEl,
       props.setSelectedRange,
-      props.dispatch,
+      props.dispatch
     ]),
     handleCloseEventDisplay: useCallback(
       eventHandlers.handleCloseEventDisplay,
@@ -32,7 +32,7 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.setEventDisplayedCalId,
       props.setEventDisplayedTemp,
       props.calendars,
-      props.dispatch,
+      props.dispatch
     ]),
     handleEventAllow: useCallback(eventHandlers.handleEventAllow, []),
     handleEventDrop: useCallback(eventHandlers.handleEventDrop, [
@@ -40,11 +40,11 @@ export const useCalendarEventHandlers = (props: EventHandlersProps) => {
       props.dispatch,
       props.setSelectedEvent,
       props.setOpenEditModePopup,
-      props.setAfterChoiceFunc,
+      props.setAfterChoiceFunc
     ]),
     handleEventResize: useCallback(eventHandlers.handleEventResize, [
       props.calendars,
-      props.dispatch,
-    ]),
-  };
-};
+      props.dispatch
+    ])
+  }
+}

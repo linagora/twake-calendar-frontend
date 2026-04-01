@@ -1,46 +1,46 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
 export function useSelectedCalendars(): string[] {
   const [calendars, setCalendars] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
+    if (typeof window === 'undefined') return []
     try {
-      return JSON.parse(localStorage.getItem("selectedCalendars") ?? "[]");
+      return JSON.parse(localStorage.getItem('selectedCalendars') ?? '[]')
     } catch {
-      return [];
+      return []
     }
-  });
+  })
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "selectedCalendars") {
+      if (e.key === 'selectedCalendars') {
         try {
-          setCalendars(JSON.parse(e.newValue ?? "[]"));
+          setCalendars(JSON.parse(e.newValue ?? '[]'))
         } catch {
-          setCalendars([]);
+          setCalendars([])
         }
       }
-    };
+    }
 
     const onLocalChange = (e: CustomEvent<string[]>) => {
-      setCalendars(e.detail);
-    };
+      setCalendars(e.detail)
+    }
 
-    window.addEventListener("storage", onStorage);
+    window.addEventListener('storage', onStorage)
     window.addEventListener(
-      "selectedCalendarsChanged",
+      'selectedCalendarsChanged',
       onLocalChange as EventListener
-    );
+    )
 
     return () => {
-      window.removeEventListener("storage", onStorage);
+      window.removeEventListener('storage', onStorage)
       window.removeEventListener(
-        "selectedCalendarsChanged",
+        'selectedCalendarsChanged',
         onLocalChange as EventListener
-      );
-    };
-  }, []);
+      )
+    }
+  }, [])
 
-  return calendars;
+  return calendars
 }

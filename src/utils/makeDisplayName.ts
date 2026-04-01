@@ -1,4 +1,4 @@
-import { Calendar } from "../features/Calendars/CalendarTypes";
+import { Calendar } from '../features/Calendars/CalendarTypes'
 
 export function makeDisplayName(
   selectedCalendar: Calendar
@@ -7,8 +7,8 @@ export function makeDisplayName(
     !selectedCalendar ||
     (!selectedCalendar.owner?.lastname && !selectedCalendar.owner?.firstname)
   )
-    return;
+    return
   return [selectedCalendar.owner?.firstname, selectedCalendar.owner?.lastname]
     .filter(Boolean)
-    .join(" ");
+    .join(' ')
 }

@@ -1,12 +1,12 @@
 // Date rules helpers to normalize end date/time behavior
 
-import { combineDateTime } from "./dateTimeHelpers";
+import { combineDateTime } from './dateTimeHelpers'
 
 /** Adds a number of days to a YYYY-MM-DD string and returns YYYY-MM-DD */
 export function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().split('T')[0]
 }
 
 /**
@@ -18,8 +18,8 @@ export function getEndDateForStartChange(
   startDate: string,
   isAllDay: boolean
 ): string {
-  if (!startDate) return "";
-  return isAllDay ? addDays(startDate, 1) : startDate;
+  if (!startDate) return ''
+  return isAllDay ? addDays(startDate, 1) : startDate
 }
 
 /**
@@ -32,23 +32,23 @@ export function getEndDateForStartChange(
  *   - end restored from originalEndDate if any, else previousEndDate, else start
  */
 export function getEndDateForToggle(params: {
-  nextAllDay: boolean;
-  fromAllDaySlot?: boolean;
-  startDate: string;
-  previousEndDate: string;
-  originalEndDate?: string;
+  nextAllDay: boolean
+  fromAllDaySlot?: boolean
+  startDate: string
+  previousEndDate: string
+  originalEndDate?: string
 }): string {
   const {
     nextAllDay,
     fromAllDaySlot,
     startDate,
     previousEndDate,
-    originalEndDate,
-  } = params;
+    originalEndDate
+  } = params
   if (nextAllDay) {
-    return fromAllDaySlot ? startDate : addDays(startDate, 1);
+    return fromAllDaySlot ? startDate : addDays(startDate, 1)
   }
-  return originalEndDate || previousEndDate || startDate;
+  return originalEndDate || previousEndDate || startDate
 }
 
 /** Utility to combine date with a fallback time (HH:mm) safely */
@@ -57,6 +57,6 @@ export function combineWithFallback(
   timeHHmm: string | undefined,
   fallbackTime: string
 ): string {
-  const time = timeHHmm && timeHHmm.trim() ? timeHHmm : fallbackTime;
-  return combineDateTime(dateStr, time);
+  const time = timeHHmm && timeHHmm.trim() ? timeHHmm : fallbackTime
+  return combineDateTime(dateStr, time)
 }

@@ -1,8 +1,5 @@
-import {
-  exportCalendar,
-  getSecretLink,
-} from "@/features/Calendars/CalendarApi";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { exportCalendar, getSecretLink } from '@/features/Calendars/CalendarApi'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   Box,
   Button,
@@ -10,90 +7,90 @@ import {
   IconButton,
   InputAdornment,
   TextField,
-  Typography,
-} from "@linagora/twake-mui";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { useEffect, useMemo, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { ErrorSnackbar } from "../Error/ErrorSnackbar";
-import { FieldWithLabel } from "../Event/components/FieldWithLabel";
-import { SnackbarAlert } from "../Loading/SnackBarAlert";
-import { CalendarAccessRights, UserWithAccess } from "./CalendarAccessRights";
+  Typography
+} from '@linagora/twake-mui'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import { useEffect, useMemo, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { ErrorSnackbar } from '../Error/ErrorSnackbar'
+import { FieldWithLabel } from '../Event/components/FieldWithLabel'
+import { SnackbarAlert } from '../Loading/SnackBarAlert'
+import { CalendarAccessRights, UserWithAccess } from './CalendarAccessRights'
 
 interface AccessTabProps {
-  calendar: Calendar;
-  usersWithAccess: UserWithAccess[];
-  onUsersWithAccessChange: (users: UserWithAccess[]) => void;
-  onInvitesLoaded: (users: UserWithAccess[]) => void;
+  calendar: Calendar
+  usersWithAccess: UserWithAccess[]
+  onUsersWithAccessChange: (users: UserWithAccess[]) => void
+  onInvitesLoaded: (users: UserWithAccess[]) => void
 }
 
 export function AccessTab({
   calendar,
   usersWithAccess,
   onUsersWithAccessChange,
-  onInvitesLoaded,
+  onInvitesLoaded
 }: AccessTabProps) {
-  const { t } = useI18n();
+  const { t } = useI18n()
 
-  const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace(".json", "")}`;
+  const calDAVLink = `${window.DAV_BASE_URL}${calendar.link.replace('.json', '')}`
 
   const isResource = useMemo(
     () => calendar?.owner?.resource,
     [calendar?.owner?.resource]
-  );
+  )
 
-  const [secretLink, setSecretLink] = useState("");
-  const [open, setOpen] = useState(false);
+  const [secretLink, setSecretLink] = useState('')
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     async function fetchSecret() {
       const existing = await getSecretLink(
-        calendar.link.replace(".json", ""),
+        calendar.link.replace('.json', ''),
         false
-      );
-      setSecretLink(existing.secretLink);
+      )
+      setSecretLink(existing.secretLink)
     }
-    fetchSecret();
-  }, [calendar.link]);
+    fetchSecret()
+  }, [calendar.link])
 
   const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content);
-    setOpen(true);
-  };
+    navigator.clipboard.writeText(content)
+    setOpen(true)
+  }
 
   const handleResetSecretLink = async () => {
     const newSecret = await getSecretLink(
-      calendar.link.replace(".json", ""),
+      calendar.link.replace('.json', ''),
       true
-    );
-    setSecretLink(newSecret.secretLink);
-  };
+    )
+    setSecretLink(newSecret.secretLink)
+  }
 
-  const [exportLoading, setExportLoading] = useState(false);
-  const [exportError, setExportError] = useState("");
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = useState('')
 
   const handleExport = async () => {
     try {
-      setExportLoading(true);
+      setExportLoading(true)
       const exportedData = await exportCalendar(
-        calendar.link.replace(".json", "")
-      );
-      const blob = new Blob([exportedData], { type: "text/calendar" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${calendar.id.split("/")[1]}.ics`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+        calendar.link.replace('.json', '')
+      )
+      const blob = new Blob([exportedData], { type: 'text/calendar' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${calendar.id.split('/')[1]}.ics`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
     } catch (e) {
-      setExportError((e as Error).message);
+      setExportError((e as Error).message)
     } finally {
-      setExportLoading(false);
+      setExportLoading(false)
     }
-  };
+  }
 
   return (
     <>
@@ -105,13 +102,13 @@ export function AccessTab({
       />
 
       {!!window.DAV_BASE_URL && !isResource && (
-        <FieldWithLabel label={t("calendar.caldav_access")} isExpanded={false}>
+        <FieldWithLabel label={t('calendar.caldav_access')} isExpanded={false}>
           <Box mt={2}>
             <TextField
               disabled
               fullWidth
               label=""
-              inputProps={{ "aria-label": t("calendar.caldav_access") }}
+              inputProps={{ 'aria-label': t('calendar.caldav_access') }}
               value={calDAVLink}
               size="small"
               InputProps={{
@@ -124,20 +121,20 @@ export function AccessTab({
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
-                ),
+                )
               }}
             />
           </Box>
         </FieldWithLabel>
       )}
 
-      <FieldWithLabel label={t("calendar.secretUrl")} isExpanded={false}>
+      <FieldWithLabel label={t('calendar.secretUrl')} isExpanded={false}>
         <Box mt={3} display="flex" alignItems="center" gap={1}>
           <TextField
             disabled
             fullWidth
             label=""
-            inputProps={{ "aria-label": t("calendar.secretUrl") }}
+            inputProps={{ 'aria-label': t('calendar.secretUrl') }}
             value={secretLink}
             size="small"
             InputProps={{
@@ -147,32 +144,32 @@ export function AccessTab({
                     <ContentCopyIcon fontSize="small" />
                   </IconButton>
                 </InputAdornment>
-              ),
+              )
             }}
           />
           <Button
             variant="contained"
             color="secondary"
             onClick={handleResetSecretLink}
-            sx={{ borderRadius: "4px" }}
+            sx={{ borderRadius: '4px' }}
           >
-            {t("actions.reset")}
+            {t('actions.reset')}
           </Button>
         </Box>
         <Typography
           variant="body2"
-          sx={{ color: "text.secondary", mt: 1, lineHeight: 1.5 }}
+          sx={{ color: 'text.secondary', mt: 1, lineHeight: 1.5 }}
         >
-          {t("calendar.secretUrlDesc")}
+          {t('calendar.secretUrlDesc')}
         </Typography>
       </FieldWithLabel>
 
-      <FieldWithLabel label={t("calendar.exportCalendar")} isExpanded={false}>
+      <FieldWithLabel label={t('calendar.exportCalendar')} isExpanded={false}>
         <Typography
           variant="body2"
-          sx={{ color: "text.secondary", my: 1, lineHeight: 1.5 }}
+          sx={{ color: 'text.secondary', my: 1, lineHeight: 1.5 }}
         >
-          {t("calendar.exportDesc")}
+          {t('calendar.exportDesc')}
         </Typography>
         <Button
           variant="contained"
@@ -180,15 +177,15 @@ export function AccessTab({
           onClick={handleExport}
           startIcon={!exportLoading && <FileDownloadOutlinedIcon />}
           disabled={exportLoading}
-          sx={{ borderRadius: "4px" }}
+          sx={{ borderRadius: '4px' }}
         >
           {exportLoading ? (
             <Box display="flex" alignItems="center" gap={1}>
               <CircularProgress size={18} />
-              {t("actions.exporting")}
+              {t('actions.exporting')}
             </Box>
           ) : (
-            t("actions.export")
+            t('actions.export')
           )}
         </Button>
       </FieldWithLabel>
@@ -196,9 +193,9 @@ export function AccessTab({
       <SnackbarAlert
         setOpen={setOpen}
         open={open}
-        message={t("common.link_copied")}
+        message={t('common.link_copied')}
       />
       <ErrorSnackbar error={exportError} type="calendar" />
     </>
-  );
+  )
 }

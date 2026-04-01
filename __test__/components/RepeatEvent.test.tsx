@@ -1,69 +1,69 @@
-import { RootState } from "@/app/store";
-import RepeatEvent from "@/components/Event/EventRepeat";
-import * as eventThunks from "@/features/Calendars/services";
-import EventPopover from "@/features/Events/EventModal";
-import { RepetitionObject } from "@/features/Events/EventsTypes";
-import { CalendarApi, DateSelectArg } from "@fullcalendar/core";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "../utils/Renderwithproviders";
+import { RootState } from '@/app/store'
+import RepeatEvent from '@/components/Event/EventRepeat'
+import * as eventThunks from '@/features/Calendars/services'
+import EventPopover from '@/features/Events/EventModal'
+import { RepetitionObject } from '@/features/Events/EventsTypes'
+import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { renderWithProviders } from '../utils/Renderwithproviders'
 
 const baseRepetition: RepetitionObject = {
-  freq: "",
+  freq: '',
   interval: 1,
   occurrences: 0,
-  endDate: "",
-};
+  endDate: ''
+}
 
-const mockOnClose = jest.fn();
-const mockSetSelectedRange = jest.fn();
+const mockOnClose = jest.fn()
+const mockSetSelectedRange = jest.fn()
 const mockCalendarRef = {
-  current: { select: jest.fn() } as unknown as CalendarApi,
-};
+  current: { select: jest.fn() } as unknown as CalendarApi
+}
 
 const preloadedState = {
   user: {
     userData: {
-      sub: "test",
-      email: "test@test.com",
-      sid: "aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro",
-      openpaasId: "667037022b752d0026472254",
+      sub: 'test',
+      email: 'test@test.com',
+      sid: 'aiYbWZSk2g0F+LrQeD7Dg4QcUMR8R/zTZdZBiA7N6Ro',
+      openpaasId: '667037022b752d0026472254'
     },
     organiserData: {
-      cn: "test",
-      cal_address: "test@test.com",
-    },
+      cn: 'test',
+      cal_address: 'test@test.com'
+    }
   },
   calendars: {
     list: {
-      "667037022b752d0026472254/cal1": {
-        id: "667037022b752d0026472254/cal1",
-        name: "Calendar 1",
-        color: "#FF0000",
+      '667037022b752d0026472254/cal1': {
+        id: '667037022b752d0026472254/cal1',
+        name: 'Calendar 1',
+        color: '#FF0000'
       },
-      "667037022b752d0026472254/cal2": {
-        id: "667037022b752d0026472254/cal2",
-        name: "Calendar 2",
-        color: "#00FF00",
-      },
+      '667037022b752d0026472254/cal2': {
+        id: '667037022b752d0026472254/cal2',
+        name: 'Calendar 2',
+        color: '#00FF00'
+      }
     },
-    pending: false,
-  },
-};
+    pending: false
+  }
+}
 
 const defaultSelectedRange = {
-  startStr: "2025-07-18T09:00",
-  endStr: "2025-07-18T10:00",
-  start: new Date("2025-07-18T09:00"),
-  end: new Date("2025-07-18T10:00"),
+  startStr: '2025-07-18T09:00',
+  endStr: '2025-07-18T10:00',
+  start: new Date('2025-07-18T09:00'),
+  end: new Date('2025-07-18T10:00'),
   allDay: false,
-  resource: undefined,
-} as unknown as DateSelectArg;
+  resource: undefined
+} as unknown as DateSelectArg
 
 function setupRepeatEvent(
   props?: Partial<RepetitionObject>,
   state?: RootState
 ) {
-  const setRepetition = jest.fn();
+  const setRepetition = jest.fn()
   renderWithProviders(
     <RepeatEvent
       repetition={{ ...baseRepetition, ...props }}
@@ -72,20 +72,20 @@ function setupRepeatEvent(
       isOwn={true}
     />,
     state
-  );
-  return { setRepetition };
+  )
+  return { setRepetition }
 }
 
 async function setupEventPopover() {
   jest
-    .spyOn(crypto, "randomUUID")
-    .mockReturnValue("fixed-uuid-with-correct-format");
+    .spyOn(crypto, 'randomUUID')
+    .mockReturnValue('fixed-uuid-with-correct-format')
   const originalDateResolvedOptions =
-    new Intl.DateTimeFormat().resolvedOptions();
-  jest.spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions").mockReturnValue({
+    new Intl.DateTimeFormat().resolvedOptions()
+  jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
     ...originalDateResolvedOptions,
-    timeZone: "UTC",
-  });
+    timeZone: 'UTC'
+  })
 
   renderWithProviders(
     <EventPopover
@@ -97,324 +97,320 @@ async function setupEventPopover() {
       calendarRef={mockCalendarRef}
     />,
     preloadedState
-  );
+  )
 
   // Fill in title
-  const titleInput = screen.getByLabelText("event.form.title");
-  fireEvent.change(titleInput, { target: { value: "Meeting" } });
+  const titleInput = screen.getByLabelText('event.form.title')
+  fireEvent.change(titleInput, { target: { value: 'Meeting' } })
 
   // Click More options to expand the dialog
-  const showMoreButton = screen.getByRole("button", {
-    name: "common.moreOptions",
-  });
-  fireEvent.click(showMoreButton);
+  const showMoreButton = screen.getByRole('button', {
+    name: 'common.moreOptions'
+  })
+  fireEvent.click(showMoreButton)
 
   // Check Repeat checkbox to show repeat options
-  const repeatCheckbox = screen.getByLabelText("event.form.repeat");
-  fireEvent.click(repeatCheckbox);
+  const repeatCheckbox = screen.getByLabelText('event.form.repeat')
+  fireEvent.click(repeatCheckbox)
 
   // Wait for RepeatEvent component to be rendered
   await waitFor(() => {
-    expect(
-      screen.getByText("event.repeat.frequency.weeks")
-    ).toBeInTheDocument();
-  });
+    expect(screen.getByText('event.repeat.frequency.weeks')).toBeInTheDocument()
+  })
 }
 
 async function expectRRule(expected: Partial<RepetitionObject>) {
   const spy = jest
-    .spyOn(eventThunks, "putEventAsync")
-    .mockImplementation((payload) => {
-      const promise = Promise.resolve(payload);
-      (promise as any).unwrap = () => promise;
-      return () => promise as any;
-    });
-  const saveButton = screen.getByRole("button", { name: /save/i });
-  act(() => fireEvent.click(saveButton));
-  await waitFor(() => expect(spy).toHaveBeenCalled());
+    .spyOn(eventThunks, 'putEventAsync')
+    .mockImplementation(payload => {
+      const promise = Promise.resolve(payload)
+      ;(promise as any).unwrap = () => promise
+      return () => promise as any
+    })
+  const saveButton = screen.getByRole('button', { name: /save/i })
+  act(() => fireEvent.click(saveButton))
+  await waitFor(() => expect(spy).toHaveBeenCalled())
 
-  const received = spy.mock.calls[0][0];
-  expect(received.newEvent.repetition).toMatchObject(expected);
+  const received = spy.mock.calls[0][0]
+  expect(received.newEvent.repetition).toMatchObject(expected)
 }
 
-describe("RepeatEvent Component", () => {
+describe('RepeatEvent Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+  })
 
-  it("renders with no repetition by default", () => {
-    setupRepeatEvent();
+  it('renders with no repetition by default', () => {
+    setupRepeatEvent()
 
     // Check that interval input shows default value
-    const intervalInput = screen.getByTestId("repeat-interval");
-    expect(intervalInput).toBeInTheDocument();
+    const intervalInput = screen.getByTestId('repeat-interval')
+    expect(intervalInput).toBeInTheDocument()
 
     // Check that frequency dropdown shows default value
-    const frequencySelect = screen.getByRole("combobox");
-    expect(frequencySelect).toBeInTheDocument();
-  });
+    const frequencySelect = screen.getByRole('combobox')
+    expect(frequencySelect).toBeInTheDocument()
+  })
 
-  it("allows selecting repetition frequency", () => {
-    const { setRepetition } = setupRepeatEvent();
+  it('allows selecting repetition frequency', () => {
+    const { setRepetition } = setupRepeatEvent()
 
     // Click on frequency dropdown
-    const frequencySelect = screen.getByRole("combobox");
-    fireEvent.mouseDown(frequencySelect);
+    const frequencySelect = screen.getByRole('combobox')
+    fireEvent.mouseDown(frequencySelect)
 
     // Select Week(s)
-    const weeklyOption = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.click(weeklyOption);
+    const weeklyOption = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.click(weeklyOption)
 
     expect(setRepetition).toHaveBeenCalledWith(
-      expect.objectContaining({ freq: "weekly" })
-    );
-  });
+      expect.objectContaining({ freq: 'weekly' })
+    )
+  })
 
-  it("renders interval input when frequency is selected", () => {
-    setupRepeatEvent({ freq: "daily" });
+  it('renders interval input when frequency is selected', () => {
+    setupRepeatEvent({ freq: 'daily' })
 
-    const intervalInput = screen.getByTestId("repeat-interval");
-    expect(intervalInput).toBeInTheDocument();
-  });
+    const intervalInput = screen.getByTestId('repeat-interval')
+    expect(intervalInput).toBeInTheDocument()
+  })
 
-  it("updates interval value", () => {
-    const { setRepetition } = setupRepeatEvent();
+  it('updates interval value', () => {
+    const { setRepetition } = setupRepeatEvent()
 
-    const intervalInput = screen.getByTestId("repeat-interval");
-    fireEvent.change(intervalInput, { target: { value: "3" } });
+    const intervalInput = screen.getByTestId('repeat-interval')
+    fireEvent.change(intervalInput, { target: { value: '3' } })
 
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ interval: 3 })
-    );
-  });
+    )
+  })
 
-  it("toggles day selection for weekly frequency", () => {
-    const { setRepetition } = setupRepeatEvent({ freq: "weekly" });
+  it('toggles day selection for weekly frequency', () => {
+    const { setRepetition } = setupRepeatEvent({ freq: 'weekly' })
 
-    const mondayChip = screen.getByLabelText("event.repeat.days.monday");
-    fireEvent.click(mondayChip);
+    const mondayChip = screen.getByLabelText('event.repeat.days.monday')
+    fireEvent.click(mondayChip)
 
     expect(setRepetition).toHaveBeenCalledWith(
-      expect.objectContaining({ byday: ["MO"] })
-    );
-  });
-});
+      expect.objectContaining({ byday: ['MO'] })
+    )
+  })
+})
 
-describe("Repeat Event Integration Tests", () => {
+describe('Repeat Event Integration Tests', () => {
   // Increase timeout for all tests in this describe block
-  jest.setTimeout(30000);
+  jest.setTimeout(30000)
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
+  })
 
-  it("sends correct CalendarEvent payload for daily repeat", async () => {
-    await setupEventPopover();
+  it('sends correct CalendarEvent payload for daily repeat', async () => {
+    await setupEventPopover()
 
     // When Repeat checkbox is checked, repetition is set to empty object
     // We need to set the frequency manually
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const dailyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.days",
-    });
-    fireEvent.click(dailyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const dailyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.days'
+    })
+    fireEvent.click(dailyOption)
 
-    await expectRRule({ freq: "daily", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+    await expectRRule({ freq: 'daily', interval: 1 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat daily with 2 day interval", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat daily with 2 day interval', async () => {
+    await setupEventPopover()
 
     // Ensure frequency is daily
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const dailyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.days",
-    });
-    fireEvent.click(dailyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const dailyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.days'
+    })
+    fireEvent.click(dailyOption)
 
     // Set interval to 2
-    const intervalInput = screen.getByTestId("repeat-interval");
-    fireEvent.change(intervalInput, { target: { value: "2" } });
+    const intervalInput = screen.getByTestId('repeat-interval')
+    fireEvent.change(intervalInput, { target: { value: '2' } })
 
-    await expectRRule({ freq: "daily", interval: 2 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+    await expectRRule({ freq: 'daily', interval: 2 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat daily for 5 repetitions", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat daily for 5 repetitions', async () => {
+    await setupEventPopover()
 
     // Ensure frequency is daily
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const dailyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.days",
-    });
-    fireEvent.click(dailyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const dailyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.days'
+    })
+    fireEvent.click(dailyOption)
 
     // Select "After" end option
-    const afterRadio = screen.getByLabelText(/after/i);
-    fireEvent.click(afterRadio);
+    const afterRadio = screen.getByLabelText(/after/i)
+    fireEvent.click(afterRadio)
 
     // Set occurrences to 5
-    const occurrencesInput = screen.getByTestId("occurrences-input");
-    fireEvent.change(occurrencesInput, { target: { value: "5" } });
+    const occurrencesInput = screen.getByTestId('occurrences-input')
+    fireEvent.change(occurrencesInput, { target: { value: '5' } })
 
-    await expectRRule({ freq: "daily", interval: 1, occurrences: 5 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+    await expectRRule({ freq: 'daily', interval: 1, occurrences: 5 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat daily until specific date", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat daily until specific date', async () => {
+    await setupEventPopover()
 
     // Ensure frequency is daily
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const dailyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.days",
-    });
-    fireEvent.click(dailyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const dailyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.days'
+    })
+    fireEvent.click(dailyOption)
 
     // Select "On" end option
     const onRadio = screen
       .getAllByLabelText(/on/i)
-      .find((el) => el.type === "radio");
-    fireEvent.click(onRadio!);
+      .find(el => el.type === 'radio')
+    fireEvent.click(onRadio!)
 
     // End date is set by UI to some valid date string (YYYY-MM-DD)
     await expectRRule({
-      freq: "daily",
+      freq: 'daily',
       interval: 1,
-      endDate: expect.any(String),
-    });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+      endDate: expect.any(String)
+    })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat weekly on specific days", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat weekly on specific days', async () => {
+    await setupEventPopover()
 
     // Select Week(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const weeklyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.weeks",
-    });
-    fireEvent.click(weeklyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const weeklyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.weeks'
+    })
+    fireEvent.click(weeklyOption)
 
     // Select Thursday
-    const thursdayCheckbox = screen.getByLabelText(
-      "event.repeat.days.thursday"
-    );
-    fireEvent.click(thursdayCheckbox);
+    const thursdayCheckbox = screen.getByLabelText('event.repeat.days.thursday')
+    fireEvent.click(thursdayCheckbox)
 
     await expectRRule({
-      freq: "weekly",
+      freq: 'weekly',
       interval: 1,
-      byday: ["FR", "TH"],
-    });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+      byday: ['FR', 'TH']
+    })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat weekly with 3 week interval", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat weekly with 3 week interval', async () => {
+    await setupEventPopover()
 
     // Select Week(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const weeklyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.weeks",
-    });
-    fireEvent.click(weeklyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const weeklyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.weeks'
+    })
+    fireEvent.click(weeklyOption)
 
     // Set interval to 3
-    const intervalInput = screen.getByTestId("repeat-interval");
-    fireEvent.change(intervalInput, { target: { value: "3" } });
+    const intervalInput = screen.getByTestId('repeat-interval')
+    fireEvent.change(intervalInput, { target: { value: '3' } })
 
-    await expectRRule({ freq: "weekly", interval: 3 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+    await expectRRule({ freq: 'weekly', interval: 3 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat monthly", async () => {
-    await setupEventPopover();
-
-    // Select Month(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const monthlyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.months",
-    });
-    fireEvent.click(monthlyOption);
-
-    await expectRRule({ freq: "monthly", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
-
-  it("sends correct API payload for repeat monthly and end after 5 occurrences", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat monthly', async () => {
+    await setupEventPopover()
 
     // Select Month(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const monthlyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.months",
-    });
-    fireEvent.click(monthlyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const monthlyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.months'
+    })
+    fireEvent.click(monthlyOption)
+
+    await expectRRule({ freq: 'monthly', interval: 1 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
+
+  it('sends correct API payload for repeat monthly and end after 5 occurrences', async () => {
+    await setupEventPopover()
+
+    // Select Month(s) frequency
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const monthlyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.months'
+    })
+    fireEvent.click(monthlyOption)
 
     // Select "After" end option
-    const afterRadio = screen.getByLabelText(/after/i);
-    fireEvent.click(afterRadio);
+    const afterRadio = screen.getByLabelText(/after/i)
+    fireEvent.click(afterRadio)
 
     // Set occurrences to 5
-    const occurrencesInput = screen.getByTestId("occurrences-input");
-    fireEvent.change(occurrencesInput, { target: { value: "5" } });
+    const occurrencesInput = screen.getByTestId('occurrences-input')
+    fireEvent.change(occurrencesInput, { target: { value: '5' } })
 
-    await expectRRule({ freq: "monthly", interval: 1, occurrences: 5 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
+    await expectRRule({ freq: 'monthly', interval: 1, occurrences: 5 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
 
-  it("sends correct API payload for repeat yearly", async () => {
-    await setupEventPopover();
-
-    // Select Year(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const yearlyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.years",
-    });
-    fireEvent.click(yearlyOption);
-
-    await expectRRule({ freq: "yearly", interval: 1 });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
-
-  it("sends correct API payload for repeat yearly with end option changes", async () => {
-    await setupEventPopover();
+  it('sends correct API payload for repeat yearly', async () => {
+    await setupEventPopover()
 
     // Select Year(s) frequency
-    const frequencySelect = screen.getByText("event.repeat.frequency.weeks");
-    fireEvent.mouseDown(frequencySelect);
-    const yearlyOption = screen.getByRole("option", {
-      name: "event.repeat.frequency.years",
-    });
-    fireEvent.click(yearlyOption);
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const yearlyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.years'
+    })
+    fireEvent.click(yearlyOption)
+
+    await expectRRule({ freq: 'yearly', interval: 1 })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
+
+  it('sends correct API payload for repeat yearly with end option changes', async () => {
+    await setupEventPopover()
+
+    // Select Year(s) frequency
+    const frequencySelect = screen.getByText('event.repeat.frequency.weeks')
+    fireEvent.mouseDown(frequencySelect)
+    const yearlyOption = screen.getByRole('option', {
+      name: 'event.repeat.frequency.years'
+    })
+    fireEvent.click(yearlyOption)
 
     // First choose "After" with 5 occurrences
-    const afterRadio = screen.getByLabelText(/after/i);
-    fireEvent.click(afterRadio);
-    const occurrencesInput = screen.getByTestId("occurrences-input");
-    fireEvent.change(occurrencesInput, { target: { value: "5" } });
+    const afterRadio = screen.getByLabelText(/after/i)
+    fireEvent.click(afterRadio)
+    const occurrencesInput = screen.getByTestId('occurrences-input')
+    fireEvent.change(occurrencesInput, { target: { value: '5' } })
 
     // Then change mind and choose "Never"
-    const neverRadio = screen.getByLabelText(/never/i);
-    fireEvent.click(neverRadio);
+    const neverRadio = screen.getByLabelText(/never/i)
+    fireEvent.click(neverRadio)
 
     await expectRRule({
-      freq: "yearly",
-      interval: 1,
-    });
-    expect(mockOnClose).toHaveBeenCalledWith(true);
-  });
-});
+      freq: 'yearly',
+      interval: 1
+    })
+    expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
+})

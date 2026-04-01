@@ -5,16 +5,16 @@ export function renameDefault(
   isOwnCalendar?: boolean
 ) {
   if (!ownerName) {
-    if (davName && davName !== "#default") return davName;
+    if (davName && davName !== '#default') return davName
   }
   if (!davName) {
-    return t("calendar.defaultCalendarName", { name: ownerName });
+    return t('calendar.defaultCalendarName', { name: ownerName })
   }
-  if (davName !== "#default") {
-    return davName;
+  if (davName !== '#default') {
+    return davName
   }
   if (isOwnCalendar) {
-    return t("calendar.defaultPersonalCalendarName");
+    return t('calendar.defaultPersonalCalendarName')
   }
-  return t("calendar.defaultCalendarName", { name: ownerName });
+  return t('calendar.defaultCalendarName', { name: ownerName })
 }

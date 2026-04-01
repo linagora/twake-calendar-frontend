@@ -1,66 +1,66 @@
-import { resolveTimezone } from "@/utils/timezone";
-import { formatDateTimeInTimezone } from "@/components/Event/utils/dateTimeFormatters";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { browserDefaultTimeZone } from "@/utils/timezone";
-import { TIMEZONES } from "@/utils/timezone-data";
-import { addVideoConferenceToDescription } from "@/utils/videoConferenceUtils";
-import { userAttendee } from "../User/models/attendee";
-import { CalendarEvent, RepetitionObject } from "./EventsTypes";
-import { Calendar } from "../Calendars/CalendarTypes";
+import { resolveTimezone } from '@/utils/timezone'
+import { formatDateTimeInTimezone } from '@/components/Event/utils/dateTimeFormatters'
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { browserDefaultTimeZone } from '@/utils/timezone'
+import { TIMEZONES } from '@/utils/timezone-data'
+import { addVideoConferenceToDescription } from '@/utils/videoConferenceUtils'
+import { userAttendee } from '../User/models/attendee'
+import { CalendarEvent, RepetitionObject } from './EventsTypes'
+import { Calendar } from '../Calendars/CalendarTypes'
 
 export interface TimezoneListResult {
-  zones: string[];
-  browserTz: string;
-  getTimezoneOffset: (tzName: string) => string;
+  zones: string[]
+  browserTz: string
+  getTimezoneOffset: (tzName: string) => string
 }
 
 export function createTimezoneList(): TimezoneListResult {
-  const zones = Object.keys(TIMEZONES.zones).sort();
-  const browserTz = resolveTimezone(browserDefaultTimeZone);
+  const zones = Object.keys(TIMEZONES.zones).sort()
+  const browserTz = resolveTimezone(browserDefaultTimeZone)
 
   const getTimezoneOffset = (tzName: string): string => {
-    const resolvedTz = resolveTimezone(tzName);
-    const tzData = TIMEZONES.zones[resolvedTz];
-    if (!tzData) return "";
+    const resolvedTz = resolveTimezone(tzName)
+    const tzData = TIMEZONES.zones[resolvedTz]
+    if (!tzData) return ''
 
-    const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/);
-    if (!icsMatch) return "";
+    const icsMatch = tzData.ics.match(/TZOFFSETTO:([+-]\d{4})/)
+    if (!icsMatch) return ''
 
-    const offset = icsMatch[1];
-    const hours = parseInt(offset.slice(0, 3));
-    const minutes = parseInt(offset.slice(3));
+    const offset = icsMatch[1]
+    const hours = parseInt(offset.slice(0, 3))
+    const minutes = parseInt(offset.slice(3))
 
     if (minutes === 0) {
-      return `UTC${hours >= 0 ? "+" : ""}${hours}`;
+      return `UTC${hours >= 0 ? '+' : ''}${hours}`
     }
-    return `UTC${hours >= 0 ? "+" : ""}${hours}:${Math.abs(minutes).toString().padStart(2, "0")}`;
-  };
+    return `UTC${hours >= 0 ? '+' : ''}${hours}:${Math.abs(minutes).toString().padStart(2, '0')}`
+  }
 
-  return { zones, browserTz, getTimezoneOffset };
+  return { zones, browserTz, getTimezoneOffset }
 }
 
 export interface PopulateFormFromEventParams {
-  event: CalendarEvent;
-  calendarTimezone?: string;
-  organizerEmail?: string;
-  setTitle: (value: string) => void;
-  setDescription: (value: string) => void;
-  setLocation: (value: string) => void;
-  setStart: (value: string) => void;
-  setEnd: (value: string) => void;
-  setAllDay: (value: boolean) => void;
-  setRepetition: (value: RepetitionObject) => void;
-  setShowRepeat: (value: boolean) => void;
-  setAttendees: (value: userAttendee[]) => void;
-  setAlarm: (value: string) => void;
-  setEventClass: (value: string) => void;
-  setBusy: (value: string) => void;
-  setTimezone: (value: string) => void;
-  setHasVideoConference: (value: boolean) => void;
-  setMeetingLink: (value: string | null) => void;
-  setCalendarid?: (value: string) => void;
-  calendarsList?: Record<string, Calendar>;
-  calId?: string;
+  event: CalendarEvent
+  calendarTimezone?: string
+  organizerEmail?: string
+  setTitle: (value: string) => void
+  setDescription: (value: string) => void
+  setLocation: (value: string) => void
+  setStart: (value: string) => void
+  setEnd: (value: string) => void
+  setAllDay: (value: boolean) => void
+  setRepetition: (value: RepetitionObject) => void
+  setShowRepeat: (value: boolean) => void
+  setAttendees: (value: userAttendee[]) => void
+  setAlarm: (value: string) => void
+  setEventClass: (value: string) => void
+  setBusy: (value: string) => void
+  setTimezone: (value: string) => void
+  setHasVideoConference: (value: boolean) => void
+  setMeetingLink: (value: string | null) => void
+  setCalendarid?: (value: string) => void
+  calendarsList?: Record<string, Calendar>
+  calId?: string
 }
 
 export function populateFormFromEvent(
@@ -87,58 +87,58 @@ export function populateFormFromEvent(
     setMeetingLink,
     setCalendarid,
     calendarsList,
-    calId,
-  } = params;
+    calId
+  } = params
 
   // Basic fields
-  setTitle(event.title ?? "");
-  setDescription(event.description ?? "");
-  setLocation(event.location ?? "");
+  setTitle(event.title ?? '')
+  setDescription(event.description ?? '')
+  setLocation(event.location ?? '')
 
   // Handle all-day events
-  const isAllDay = event.allday ?? false;
-  setAllDay(isAllDay);
+  const isAllDay = event.allday ?? false
+  setAllDay(isAllDay)
 
   // Get event's timezone for formatting
   const eventTimezone = event.timezone
     ? resolveTimezone(event.timezone)
-    : calendarTimezone || resolveTimezone(browserDefaultTimeZone);
+    : calendarTimezone || resolveTimezone(browserDefaultTimeZone)
 
   // Format dates based on all-day status and timezone
   if (event.start) {
     if (isAllDay) {
-      const startDate = new Date(event.start);
-      setStart(startDate.toISOString().split("T")[0]);
+      const startDate = new Date(event.start)
+      setStart(startDate.toISOString().split('T')[0])
     } else {
-      setStart(formatDateTimeInTimezone(event.start, eventTimezone));
+      setStart(formatDateTimeInTimezone(event.start, eventTimezone))
     }
   } else {
-    setStart("");
+    setStart('')
   }
 
   if (event.end) {
     if (isAllDay) {
-      const endDate = new Date(event.end);
-      setEnd(endDate.toISOString().split("T")[0]);
+      const endDate = new Date(event.end)
+      setEnd(endDate.toISOString().split('T')[0])
     } else {
-      setEnd(formatDateTimeInTimezone(event.end, eventTimezone));
+      setEnd(formatDateTimeInTimezone(event.end, eventTimezone))
     }
   } else {
-    setEnd("");
+    setEnd('')
   }
 
   // Calendar
   if (setCalendarid && calId) {
-    setCalendarid(calId);
+    setCalendarid(calId)
   }
 
   // Handle repetition - check both current event and base event (for update modal)
-  let repetitionSource = event.repetition;
+  let repetitionSource = event.repetition
   if (calendarsList && calId && event.uid) {
-    const baseEventId = extractEventBaseUuid(event.uid);
-    const baseEvent = calendarsList[calId]?.events[baseEventId];
+    const baseEventId = extractEventBaseUuid(event.uid)
+    const baseEvent = calendarsList[calId]?.events[baseEventId]
     if (baseEvent?.repetition) {
-      repetitionSource = baseEvent.repetition;
+      repetitionSource = baseEvent.repetition
     }
   }
 
@@ -148,45 +148,45 @@ export function populateFormFromEvent(
       interval: repetitionSource.interval || 1,
       occurrences: repetitionSource.occurrences,
       endDate: repetitionSource.endDate,
-      byday: repetitionSource.byday || null,
-    };
-    setRepetition(repetitionData);
-    setShowRepeat(true);
+      byday: repetitionSource.byday || null
+    }
+    setRepetition(repetitionData)
+    setShowRepeat(true)
   } else {
-    setRepetition({} as RepetitionObject);
-    setShowRepeat(false);
+    setRepetition({} as RepetitionObject)
+    setShowRepeat(false)
   }
 
   // Attendees - filter out organizer
-  const organizerAddress = organizerEmail || event.organizer?.cal_address;
+  const organizerAddress = organizerEmail || event.organizer?.cal_address
   setAttendees(
     event.attendee
       ? event.attendee.filter(
           (a: userAttendee) => a.cal_address !== organizerAddress
         )
       : []
-  );
+  )
 
   // Other fields
-  setAlarm(event.alarm?.trigger ?? "");
-  setEventClass(event.class ?? "PUBLIC");
-  setBusy(event.transp ?? "OPAQUE");
-  setTimezone(eventTimezone);
-  setHasVideoConference(event.x_openpass_videoconference ? true : false);
-  setMeetingLink(event.x_openpass_videoconference || null);
+  setAlarm(event.alarm?.trigger ?? '')
+  setEventClass(event.class ?? 'PUBLIC')
+  setBusy(event.transp ?? 'OPAQUE')
+  setTimezone(eventTimezone)
+  setHasVideoConference(event.x_openpass_videoconference ? true : false)
+  setMeetingLink(event.x_openpass_videoconference || null)
 
   // Update description to include video conference footer if exists
   if (event.x_openpass_videoconference && event.description) {
-    const hasVideoFooter = event.description.includes("Visio:");
+    const hasVideoFooter = event.description.includes('Visio:')
     if (!hasVideoFooter) {
       setDescription(
         addVideoConferenceToDescription(
           event.description,
           event.x_openpass_videoconference
         )
-      );
+      )
     } else {
-      setDescription(event.description);
+      setDescription(event.description)
     }
   }
 }

@@ -1,17 +1,17 @@
-import EventDuplication from "@/components/Event/EventDuplicate";
-import { Menu, MenuItem } from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
-import { CalendarEvent } from "../EventsTypes";
+import EventDuplication from '@/components/Event/EventDuplicate'
+import { Menu, MenuItem } from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
+import { CalendarEvent } from '../EventsTypes'
 
 interface EventPreviewActionMenuProps {
-  anchorEl: Element | null;
-  event: CalendarEvent;
-  userEmail: string;
-  isOwn: boolean;
-  isWriteDelegated: boolean;
-  onClose: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
+  anchorEl: Element | null
+  event: CalendarEvent
+  userEmail: string
+  isOwn: boolean
+  isWriteDelegated: boolean
+  onClose: () => void
+  onDuplicate: () => void
+  onDelete: () => void
 }
 
 export function EventPreviewActionMenu({
@@ -22,15 +22,15 @@ export function EventPreviewActionMenu({
   isWriteDelegated,
   onClose,
   onDuplicate,
-  onDelete,
+  onDelete
 }: EventPreviewActionMenuProps) {
-  const { t } = useI18n();
-  const mailSpaUrl = window.MAIL_SPA_URL ?? null;
+  const { t } = useI18n()
+  const mailSpaUrl = window.MAIL_SPA_URL ?? null
 
-  const attendees = event.attendee ?? [];
+  const attendees = event.attendee ?? []
   const otherAttendees = attendees.filter(
-    (a) => a.cal_address !== userEmail && a.cutype !== "RESOURCE"
-  );
+    a => a.cal_address !== userEmail && a.cutype !== 'RESOURCE'
+  )
 
   return (
     <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
@@ -39,25 +39,25 @@ export function EventPreviewActionMenu({
           onClick={() =>
             window.open(
               `${mailSpaUrl}/mailto/?uri=${encodeURIComponent(
-                `mailto:${otherAttendees.map((a) => a.cal_address).join(",")}`
-              )}&subject=${encodeURIComponent(event.title ?? "")}`,
-              "_blank",
-              "noopener,noreferrer"
+                `mailto:${otherAttendees.map(a => a.cal_address).join(',')}`
+              )}&subject=${encodeURIComponent(event.title ?? '')}`,
+              '_blank',
+              'noopener,noreferrer'
             )
           }
         >
-          {t("eventPreview.emailAttendees")}
+          {t('eventPreview.emailAttendees')}
         </MenuItem>
       )}
       <EventDuplication
         onOpenDuplicate={() => {
-          onClose();
-          onDuplicate();
+          onClose()
+          onDuplicate()
         }}
       />
       {(isOwn || isWriteDelegated) && (
-        <MenuItem onClick={onDelete}>{t("eventPreview.deleteEvent")}</MenuItem>
+        <MenuItem onClick={onDelete}>{t('eventPreview.deleteEvent')}</MenuItem>
       )}
     </Menu>
-  );
+  )
 }

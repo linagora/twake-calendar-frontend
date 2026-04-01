@@ -1,35 +1,35 @@
-import { Menubar } from "@/components/Menubar/Menubar";
-import * as oidcAuth from "@/features/User/oidcAuth";
-import { redirectTo } from "@/utils/navigation";
-import "@testing-library/jest-dom";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "../utils/Renderwithproviders";
+import { Menubar } from '@/components/Menubar/Menubar'
+import * as oidcAuth from '@/features/User/oidcAuth'
+import { redirectTo } from '@/utils/navigation'
+import '@testing-library/jest-dom'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock("@/utils/navigation", () => ({
-  redirectTo: jest.fn(),
-}));
+jest.mock('@/utils/navigation', () => ({
+  redirectTo: jest.fn()
+}))
 
-describe("Calendar App Component Display Tests", () => {
+describe('Calendar App Component Display Tests', () => {
   const preloadedState = {
     user: {
       userData: {
-        sub: "test",
-        email: "test@test.com",
-        family_name: "Doe",
-        name: "John",
-        sid: "mockSid",
-        openpaasId: "667037022b752d0026472254",
-      },
-    },
-  };
-  test("renders the Menubar component", () => {
-    (window as any).appList = [
-      { name: "Twake", link: "/twake", icon: "twake.svg" },
-      { name: "Calendar", link: "/calendar", icon: "calendar.svg" },
-    ];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+        sub: 'test',
+        email: 'test@test.com',
+        family_name: 'Doe',
+        name: 'John',
+        sid: 'mockSid',
+        openpaasId: '667037022b752d0026472254'
+      }
+    }
+  }
+  test('renders the Menubar component', () => {
+    ;(window as any).appList = [
+      { name: 'Twake', link: '/twake', icon: 'twake.svg' },
+      { name: 'Calendar', link: '/calendar', icon: 'calendar.svg' }
+    ]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -39,15 +39,15 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    const logoElement = screen.getByAltText("menubar.logoAlt");
-    expect(logoElement).toBeInTheDocument();
-  });
-  it("renders the main title", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+    )
+    const logoElement = screen.getByAltText('menubar.logoAlt')
+    expect(logoElement).toBeInTheDocument()
+  })
+  it('renders the main title', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -57,15 +57,15 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByAltText("menubar.logoAlt")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByAltText('menubar.logoAlt')).toBeInTheDocument()
+  })
 
-  it("shows avatar with user initials", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('shows avatar with user initials', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -75,26 +75,26 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByText("JD")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByText('JD')).toBeInTheDocument()
+  })
 
-  it("shows avatar with email initials when no user name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('shows avatar with email initials when no user name', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
-          email: "test@test.com",
-          family_name: "Doe",
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sub: 'test',
+          email: 'test@test.com',
+          family_name: 'Doe',
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -104,28 +104,28 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByText("T")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByText('T')).toBeInTheDocument()
+  })
 
   // Edge cases for avatar display logic
-  it("handles user with only family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with only family_name', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
-          email: "test@test.com",
-          family_name: "Smith",
+          sub: 'test',
+          email: 'test@test.com',
+          family_name: 'Smith',
           name: null,
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -135,27 +135,27 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByText("T")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByText('T')).toBeInTheDocument()
+  })
 
-  it("handles user with only name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with only name', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
-          email: "test@test.com",
+          sub: 'test',
+          email: 'test@test.com',
           family_name: null,
-          name: "John",
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          name: 'John',
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -165,27 +165,27 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByText("T")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByText('T')).toBeInTheDocument()
+  })
 
-  it("handles user with both name and family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with both name and family_name', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
-          email: "test@test.com",
-          family_name: "Doe",
-          name: "John",
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sub: 'test',
+          email: 'test@test.com',
+          family_name: 'Doe',
+          name: 'John',
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -195,57 +195,27 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    expect(screen.getByText("JD")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByText('JD')).toBeInTheDocument()
+  })
 
-  it("handles user with no name and family_name", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with no name and family_name', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
-          email: "test@test.com",
-          family_name: null,
-          name: null,
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
-
-    renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-    expect(screen.getByText("T")).toBeInTheDocument();
-  });
-
-  it("handles user with empty email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
-    const preloadedState = {
-      user: {
-        userData: {
-          sub: "test",
-          email: "",
+          sub: 'test',
+          email: 'test@test.com',
           family_name: null,
           name: null,
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -255,29 +225,59 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
+    expect(screen.getByText('T')).toBeInTheDocument()
+  })
+
+  it('handles user with empty email', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
+    const preloadedState = {
+      user: {
+        userData: {
+          sub: 'test',
+          email: '',
+          family_name: null,
+          name: null,
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
+
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    )
     // Should not crash and show empty string
-    const avatar = screen.getByRole("img", { hidden: true });
-    expect(avatar).toBeInTheDocument();
-  });
+    const avatar = screen.getByRole('img', { hidden: true })
+    expect(avatar).toBeInTheDocument()
+  })
 
-  it("handles user with null email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with null email', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
+          sub: 'test',
           email: null,
           family_name: null,
           name: null,
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -287,29 +287,29 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
     // Should not crash and show empty string
-    const avatar = screen.getByRole("img", { hidden: true });
-    expect(avatar).toBeInTheDocument();
-  });
+    const avatar = screen.getByRole('img', { hidden: true })
+    expect(avatar).toBeInTheDocument()
+  })
 
-  it("handles user with undefined email", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
+  it('handles user with undefined email', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
     const preloadedState = {
       user: {
         userData: {
-          sub: "test",
+          sub: 'test',
           email: undefined,
           family_name: null,
           name: null,
-          sid: "mockSid",
-          openpaasId: "667037022b752d0026472254",
-        },
-      },
-    };
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+          sid: 'mockSid',
+          openpaasId: '667037022b752d0026472254'
+        }
+      }
+    }
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -319,38 +319,17 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
     // Should not crash and show empty string
-    const avatar = screen.getByRole("img", { hidden: true });
-    expect(avatar).toBeInTheDocument();
-  });
+    const avatar = screen.getByRole('img', { hidden: true })
+    expect(avatar).toBeInTheDocument()
+  })
 
-  it("shows apps button when applist is not empty", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
-
-    renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-    expect(screen.getByLabelText("menubar.apps")).toBeInTheDocument();
-  });
-
-  it("opens popover when clicking apps button", () => {
-    (window as any).appList = [
-      { name: "Twake", icon: "twake.svg", link: "/twake" },
-      { name: "Calendar", icon: "calendar.svg", link: "/calendar" },
-    ];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('shows apps button when applist is not empty', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -360,18 +339,18 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    const appsButton = screen.getByLabelText("menubar.apps");
-    fireEvent.click(appsButton);
-    expect(screen.getByText("Twake")).toBeInTheDocument();
-    expect(screen.getByText("Calendar")).toBeInTheDocument();
-  });
+    )
+    expect(screen.getByLabelText('menubar.apps')).toBeInTheDocument()
+  })
 
-  it("renders app icons as links", () => {
-    (window as any).appList = [{ name: "test", icon: "test", link: "test" }];
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('opens popover when clicking apps button', () => {
+    ;(window as any).appList = [
+      { name: 'Twake', icon: 'twake.svg', link: '/twake' },
+      { name: 'Calendar', icon: 'calendar.svg', link: '/calendar' }
+    ]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -381,67 +360,68 @@ describe("Calendar App Component Display Tests", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
-    const appsButton = screen.getByLabelText("menubar.apps");
-    fireEvent.click(appsButton);
+    )
+    const appsButton = screen.getByLabelText('menubar.apps')
+    fireEvent.click(appsButton)
+    expect(screen.getByText('Twake')).toBeInTheDocument()
+    expect(screen.getByText('Calendar')).toBeInTheDocument()
+  })
 
-    const testLink = screen.getByRole("link", { name: /test/i });
-    expect(testLink).toHaveAttribute("href", "test");
-  });
-});
+  it('renders app icons as links', () => {
+    ;(window as any).appList = [{ name: 'test', icon: 'test', link: 'test' }]
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
-describe("Menubar interaction with expanded Dialog", () => {
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    )
+    const appsButton = screen.getByLabelText('menubar.apps')
+    fireEvent.click(appsButton)
+
+    const testLink = screen.getByRole('link', { name: /test/i })
+    expect(testLink).toHaveAttribute('href', 'test')
+  })
+})
+
+describe('Menubar interaction with expanded Dialog', () => {
   const preloadedState = {
     user: {
       userData: {
-        sub: "test",
-        email: "test@test.com",
-        family_name: "Doe",
-        name: "John",
-        sid: "mockSid",
-        openpaasId: "667037022b752d0026472254",
-      },
+        sub: 'test',
+        email: 'test@test.com',
+        family_name: 'Doe',
+        name: 'John',
+        sid: 'mockSid',
+        openpaasId: '667037022b752d0026472254'
+      }
     },
     settings: {
-      language: "en",
-    },
-  };
+      language: 'en'
+    }
+  }
 
   beforeEach(() => {
-    (window as any).appList = [
-      { name: "Twake", link: "/twake", icon: "twake.svg" },
-      { name: "Calendar", link: "/calendar", icon: "calendar.svg" },
-    ];
-  });
+    ;(window as any).appList = [
+      { name: 'Twake', link: '/twake', icon: 'twake.svg' },
+      { name: 'Calendar', link: '/calendar', icon: 'calendar.svg' }
+    ]
+  })
 
   afterEach(() => {
-    document.body.classList.remove("fullscreen-view");
-  });
+    document.body.classList.remove('fullscreen-view')
+  })
 
-  it("has navigation controls element with correct class", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
-
-    const { container } = renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-
-    const navigationControls = container.querySelector(".navigation-controls");
-    expect(navigationControls).toBeInTheDocument();
-    expect(navigationControls).toHaveClass("navigation-controls");
-  });
-
-  it("has current date time element with correct class", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('has navigation controls element with correct class', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
       <Menubar
@@ -451,37 +431,17 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const dateTimeDisplay = container.querySelector(".current-date-time");
-    expect(dateTimeDisplay).toBeInTheDocument();
-    expect(dateTimeDisplay).toHaveClass("current-date-time");
-  });
+    const navigationControls = container.querySelector('.navigation-controls')
+    expect(navigationControls).toBeInTheDocument()
+    expect(navigationControls).toHaveClass('navigation-controls')
+  })
 
-  it("has refresh button element with correct class", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
-
-    const { container } = renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-
-    const refreshButton = container.querySelector(".refresh-button");
-    expect(refreshButton).toBeInTheDocument();
-    expect(refreshButton).toHaveClass("refresh-button");
-  });
-
-  it("has view selector element with correct class", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('has current date time element with correct class', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
       <Menubar
@@ -491,19 +451,59 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const selectDisplay = container.querySelector(".select-display");
-    expect(selectDisplay).toBeInTheDocument();
-    expect(selectDisplay).toHaveClass("select-display");
-  });
+    const dateTimeDisplay = container.querySelector('.current-date-time')
+    expect(dateTimeDisplay).toBeInTheDocument()
+    expect(dateTimeDisplay).toHaveClass('current-date-time')
+  })
 
-  it("keeps logo visible when dialog is expanded", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('has refresh button element with correct class', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
-    document.body.classList.add("fullscreen-view");
+    const { container } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    )
+
+    const refreshButton = container.querySelector('.refresh-button')
+    expect(refreshButton).toBeInTheDocument()
+    expect(refreshButton).toHaveClass('refresh-button')
+  })
+
+  it('has view selector element with correct class', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
+
+    const { container } = renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    )
+
+    const selectDisplay = container.querySelector('.select-display')
+    expect(selectDisplay).toBeInTheDocument()
+    expect(selectDisplay).toHaveClass('select-display')
+  })
+
+  it('keeps logo visible when dialog is expanded', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
+
+    document.body.classList.add('fullscreen-view')
 
     renderWithProviders(
       <Menubar
@@ -513,41 +513,19 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
-    expect(logoElement).toBeInTheDocument();
-    expect(logoElement).toBeVisible();
-  });
+    const logoElement = screen.getByAltText('menubar.logoAlt')
+    expect(logoElement).toBeInTheDocument()
+    expect(logoElement).toBeVisible()
+  })
 
-  it("keeps apps icon clickable when dialog is expanded", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('keeps apps icon clickable when dialog is expanded', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
-    document.body.classList.add("fullscreen-view");
-
-    renderWithProviders(
-      <Menubar
-        calendarRef={mockCalendarRef}
-        onRefresh={mockOnRefresh}
-        currentDate={mockCurrentDate}
-        currentView="dayGridMonth"
-      />,
-      preloadedState
-    );
-
-    const appsButton = screen.getByLabelText("menubar.apps");
-    expect(appsButton).toBeVisible();
-
-    fireEvent.click(appsButton);
-    expect(screen.getByText("Twake")).toBeInTheDocument();
-  });
-
-  it("opens user dropdown menu when clicking avatar", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+    document.body.classList.add('fullscreen-view')
 
     renderWithProviders(
       <Menubar
@@ -557,23 +535,45 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const avatar = screen.getByText("JD");
-    expect(avatar).toBeVisible();
+    const appsButton = screen.getByLabelText('menubar.apps')
+    expect(appsButton).toBeVisible()
 
-    fireEvent.click(avatar.closest("button")!);
+    fireEvent.click(appsButton)
+    expect(screen.getByText('Twake')).toBeInTheDocument()
+  })
+
+  it('opens user dropdown menu when clicking avatar', async () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
+
+    renderWithProviders(
+      <Menubar
+        calendarRef={mockCalendarRef}
+        onRefresh={mockOnRefresh}
+        currentDate={mockCurrentDate}
+        currentView="dayGridMonth"
+      />,
+      preloadedState
+    )
+
+    const avatar = screen.getByText('JD')
+    expect(avatar).toBeVisible()
+
+    fireEvent.click(avatar.closest('button')!)
 
     await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-      expect(screen.getByText("test@test.com")).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('test@test.com')).toBeInTheDocument()
+    })
+  })
 
-  it("closes user dropdown menu when clicking outside", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('closes user dropdown menu when clicking outside', async () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -583,36 +583,36 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const avatar = screen.getByText("JD");
-    fireEvent.click(avatar.closest("button")!);
+    const avatar = screen.getByText('JD')
+    fireEvent.click(avatar.closest('button')!)
 
     await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-    });
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
 
     // Click outside the menu - MUI Menu closes on backdrop click
-    const backdrop = document.querySelector(".MuiBackdrop-root");
+    const backdrop = document.querySelector('.MuiBackdrop-root')
     if (backdrop) {
-      fireEvent.click(backdrop);
+      fireEvent.click(backdrop)
     } else {
       // Fallback: click on body
-      fireEvent.mouseDown(document.body);
+      fireEvent.mouseDown(document.body)
     }
 
     await waitFor(
       () => {
-        expect(screen.queryByText("John Doe")).not.toBeInTheDocument();
+        expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
       },
       { timeout: 2000 }
-    );
-  });
+    )
+  })
 
-  it("displays user name and email in dropdown menu", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('displays user name and email in dropdown menu', async () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     renderWithProviders(
       <Menubar
@@ -622,29 +622,29 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const avatar = screen.getByText("JD");
-    fireEvent.click(avatar.closest("button")!);
+    const avatar = screen.getByText('JD')
+    fireEvent.click(avatar.closest('button')!)
 
     await waitFor(() => {
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
-      expect(screen.getByText("test@test.com")).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('test@test.com')).toBeInTheDocument()
+    })
+  })
 
-  it("navigates to settings page when clicking Settings in dropdown", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('navigates to settings page when clicking Settings in dropdown', async () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const preloadedStateWithSettings = {
       ...preloadedState,
       settings: {
-        language: "en",
-        view: "calendar",
-      },
-    };
+        language: 'en',
+        view: 'calendar'
+      }
+    }
 
     const { store } = renderWithProviders(
       <Menubar
@@ -654,28 +654,28 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedStateWithSettings
-    );
+    )
 
-    const avatar = screen.getByText("JD");
-    fireEvent.click(avatar.closest("button")!);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Settings/i)).toBeInTheDocument();
-    });
-
-    const settingsButton = screen.getByText(/Settings/i);
-    fireEvent.click(settingsButton);
+    const avatar = screen.getByText('JD')
+    fireEvent.click(avatar.closest('button')!)
 
     await waitFor(() => {
-      const state = store.getState();
-      expect(state.settings.view).toBe("settings");
-    });
-  });
+      expect(screen.getByText(/Settings/i)).toBeInTheDocument()
+    })
 
-  it("shows all elements in normal mode (not expanded)", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+    const settingsButton = screen.getByText(/Settings/i)
+    fireEvent.click(settingsButton)
+
+    await waitFor(() => {
+      const state = store.getState()
+      expect(state.settings.view).toBe('settings')
+    })
+  })
+
+  it('shows all elements in normal mode (not expanded)', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
       <Menubar
@@ -685,23 +685,23 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const navigationControls = container.querySelector(".navigation-controls");
-    const dateTimeDisplay = container.querySelector(".current-date-time");
-    const refreshButton = container.querySelector(".refresh-button");
-    const selectDisplay = container.querySelector(".select-display");
+    const navigationControls = container.querySelector('.navigation-controls')
+    const dateTimeDisplay = container.querySelector('.current-date-time')
+    const refreshButton = container.querySelector('.refresh-button')
+    const selectDisplay = container.querySelector('.select-display')
 
-    expect(navigationControls).toBeVisible();
-    expect(dateTimeDisplay).toBeVisible();
-    expect(refreshButton).toBeVisible();
-    expect(selectDisplay).toBeVisible();
-  });
+    expect(navigationControls).toBeVisible()
+    expect(dateTimeDisplay).toBeVisible()
+    expect(refreshButton).toBeVisible()
+    expect(selectDisplay).toBeVisible()
+  })
 
-  it("verifies CSS classes are correctly applied to elements", () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('verifies CSS classes are correctly applied to elements', () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { container } = renderWithProviders(
       <Menubar
@@ -711,35 +711,35 @@ describe("Menubar interaction with expanded Dialog", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    expect(container.querySelector(".menubar")).toBeInTheDocument();
-    expect(container.querySelector(".navigation-controls")).toBeInTheDocument();
-    expect(container.querySelector(".current-date-time")).toBeInTheDocument();
-    expect(container.querySelector(".refresh-button")).toBeInTheDocument();
-    expect(container.querySelector(".select-display")).toBeInTheDocument();
-  });
-});
+    expect(container.querySelector('.menubar')).toBeInTheDocument()
+    expect(container.querySelector('.navigation-controls')).toBeInTheDocument()
+    expect(container.querySelector('.current-date-time')).toBeInTheDocument()
+    expect(container.querySelector('.refresh-button')).toBeInTheDocument()
+    expect(container.querySelector('.select-display')).toBeInTheDocument()
+  })
+})
 
-describe("Menubar logout flow", () => {
-  const redirectToMock = redirectTo as jest.Mock;
+describe('Menubar logout flow', () => {
+  const redirectToMock = redirectTo as jest.Mock
 
   beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-    jest.clearAllMocks();
-    redirectToMock.mockReset();
-  });
+    localStorage.clear()
+    sessionStorage.clear()
+    jest.clearAllMocks()
+    redirectToMock.mockReset()
+  })
 
   afterEach(() => {
-    redirectToMock.mockReset();
-  });
+    redirectToMock.mockReset()
+  })
 
-  function renderMenubar(user = { name: "John", email: "test@example.com" }) {
+  function renderMenubar(user = { name: 'John', email: 'test@example.com' }) {
     const preloadedState = {
       user: { userData: user },
-      settings: { view: "calendar" },
-    };
+      settings: { view: 'calendar' }
+    }
 
     return renderWithProviders(
       <Menubar
@@ -749,67 +749,67 @@ describe("Menubar logout flow", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
   }
 
-  it("clears storage before redirecting", async () => {
-    sessionStorage.setItem("tokenSet", "dummy");
+  it('clears storage before redirecting', async () => {
+    sessionStorage.setItem('tokenSet', 'dummy')
     const logoutSpy = jest
-      .spyOn(oidcAuth, "Logout")
-      .mockResolvedValue(new URL("https://logout.url"));
+      .spyOn(oidcAuth, 'Logout')
+      .mockResolvedValue(new URL('https://logout.url'))
 
     await act(async () => {
-      renderMenubar();
-    });
+      renderMenubar()
+    })
     await act(async () => {
-      fireEvent.click(screen.getByLabelText("menubar.userProfile"));
-    });
+      fireEvent.click(screen.getByLabelText('menubar.userProfile'))
+    })
     await act(async () => {
-      fireEvent.click(screen.getByText("menubar.logout"));
-    });
-    expect(logoutSpy).toHaveBeenCalled();
-    expect(redirectToMock).toHaveBeenCalledWith("https://logout.url/");
+      fireEvent.click(screen.getByText('menubar.logout'))
+    })
+    expect(logoutSpy).toHaveBeenCalled()
+    expect(redirectToMock).toHaveBeenCalledWith('https://logout.url/')
 
-    expect(sessionStorage.length).toBe(0);
-  });
-});
+    expect(sessionStorage.length).toBe(0)
+  })
+})
 
-describe("Logo click navigation to current week", () => {
+describe('Logo click navigation to current week', () => {
   const preloadedState = {
     user: {
       userData: {
-        sub: "test",
-        email: "test@test.com",
-        family_name: "Doe",
-        name: "John",
-        sid: "mockSid",
-        openpaasId: "667037022b752d0026472254",
-      },
+        sub: 'test',
+        email: 'test@test.com',
+        family_name: 'Doe',
+        name: 'John',
+        sid: 'mockSid',
+        openpaasId: '667037022b752d0026472254'
+      }
     },
     settings: {
-      view: "calendar",
-      language: "en",
-    },
-  };
+      view: 'calendar',
+      language: 'en'
+    }
+  }
 
   beforeEach(() => {
-    (window as any).appList = [];
-  });
+    ;(window as any).appList = []
+  })
 
-  it("navigates to week view and current week when clicking logo from month view", async () => {
-    const mockChangeView = jest.fn();
-    const mockToday = jest.fn();
-    const mockGetDate = jest.fn(() => new Date());
+  it('navigates to week view and current week when clicking logo from month view', async () => {
+    const mockChangeView = jest.fn()
+    const mockToday = jest.fn()
+    const mockGetDate = jest.fn(() => new Date())
     const mockCalendarApi = {
       changeView: mockChangeView,
       today: mockToday,
-      getDate: mockGetDate,
-    };
-    const mockCalendarRef = { current: mockCalendarApi as any };
-    const mockOnRefresh = jest.fn();
-    const mockOnViewChange = jest.fn();
-    const mockOnDateChange = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+      getDate: mockGetDate
+    }
+    const mockCalendarRef = { current: mockCalendarApi as any }
+    const mockOnRefresh = jest.fn()
+    const mockOnViewChange = jest.fn()
+    const mockOnDateChange = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { store } = renderWithProviders(
       <Menubar
@@ -821,37 +821,37 @@ describe("Logo click navigation to current week", () => {
         onDateChange={mockOnDateChange}
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
+    const logoElement = screen.getByAltText('menubar.logoAlt')
     await act(async () => {
-      fireEvent.click(logoElement);
-    });
+      fireEvent.click(logoElement)
+    })
 
     await waitFor(() => {
-      expect(store.getState().settings.view).toBe("calendar");
-    });
+      expect(store.getState().settings.view).toBe('calendar')
+    })
 
-    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
-    expect(mockToday).toHaveBeenCalled();
-    expect(mockOnViewChange).toHaveBeenCalledWith("timeGridWeek");
-    expect(mockOnDateChange).toHaveBeenCalled();
-  });
+    expect(mockChangeView).toHaveBeenCalledWith('timeGridWeek')
+    expect(mockToday).toHaveBeenCalled()
+    expect(mockOnViewChange).toHaveBeenCalledWith('timeGridWeek')
+    expect(mockOnDateChange).toHaveBeenCalled()
+  })
 
-  it("navigates to week view and current week when clicking logo from day view", async () => {
-    const mockChangeView = jest.fn();
-    const mockToday = jest.fn();
-    const mockGetDate = jest.fn(() => new Date());
+  it('navigates to week view and current week when clicking logo from day view', async () => {
+    const mockChangeView = jest.fn()
+    const mockToday = jest.fn()
+    const mockGetDate = jest.fn(() => new Date())
     const mockCalendarApi = {
       changeView: mockChangeView,
       today: mockToday,
-      getDate: mockGetDate,
-    };
-    const mockCalendarRef = { current: mockCalendarApi as any };
-    const mockOnRefresh = jest.fn();
-    const mockOnViewChange = jest.fn();
-    const mockOnDateChange = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+      getDate: mockGetDate
+    }
+    const mockCalendarRef = { current: mockCalendarApi as any }
+    const mockOnRefresh = jest.fn()
+    const mockOnViewChange = jest.fn()
+    const mockOnDateChange = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { store } = renderWithProviders(
       <Menubar
@@ -863,37 +863,37 @@ describe("Logo click navigation to current week", () => {
         onDateChange={mockOnDateChange}
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
+    const logoElement = screen.getByAltText('menubar.logoAlt')
     await act(async () => {
-      fireEvent.click(logoElement);
-    });
+      fireEvent.click(logoElement)
+    })
 
     await waitFor(() => {
-      expect(store.getState().settings.view).toBe("calendar");
-    });
+      expect(store.getState().settings.view).toBe('calendar')
+    })
 
-    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
-    expect(mockToday).toHaveBeenCalled();
-    expect(mockOnViewChange).toHaveBeenCalledWith("timeGridWeek");
-    expect(mockOnDateChange).toHaveBeenCalled();
-  });
+    expect(mockChangeView).toHaveBeenCalledWith('timeGridWeek')
+    expect(mockToday).toHaveBeenCalled()
+    expect(mockOnViewChange).toHaveBeenCalledWith('timeGridWeek')
+    expect(mockOnDateChange).toHaveBeenCalled()
+  })
 
-  it("navigates to current week when clicking logo from week view (not current week)", async () => {
-    const mockChangeView = jest.fn();
-    const mockToday = jest.fn();
-    const mockGetDate = jest.fn(() => new Date());
+  it('navigates to current week when clicking logo from week view (not current week)', async () => {
+    const mockChangeView = jest.fn()
+    const mockToday = jest.fn()
+    const mockGetDate = jest.fn(() => new Date())
     const mockCalendarApi = {
       changeView: mockChangeView,
       today: mockToday,
-      getDate: mockGetDate,
-    };
-    const mockCalendarRef = { current: mockCalendarApi as any };
-    const mockOnRefresh = jest.fn();
-    const mockOnViewChange = jest.fn();
-    const mockOnDateChange = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+      getDate: mockGetDate
+    }
+    const mockCalendarRef = { current: mockCalendarApi as any }
+    const mockOnRefresh = jest.fn()
+    const mockOnViewChange = jest.fn()
+    const mockOnDateChange = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { store } = renderWithProviders(
       <Menubar
@@ -905,28 +905,28 @@ describe("Logo click navigation to current week", () => {
         onDateChange={mockOnDateChange}
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
+    const logoElement = screen.getByAltText('menubar.logoAlt')
     await act(async () => {
-      fireEvent.click(logoElement);
-    });
+      fireEvent.click(logoElement)
+    })
 
     await waitFor(() => {
-      expect(store.getState().settings.view).toBe("calendar");
-    });
+      expect(store.getState().settings.view).toBe('calendar')
+    })
 
-    expect(mockChangeView).not.toHaveBeenCalled();
-    expect(mockToday).toHaveBeenCalled();
-    expect(mockOnDateChange).toHaveBeenCalled();
-  });
+    expect(mockChangeView).not.toHaveBeenCalled()
+    expect(mockToday).toHaveBeenCalled()
+    expect(mockOnDateChange).toHaveBeenCalled()
+  })
 
-  it("does not crash when calendarRef.current is null", async () => {
-    const mockCalendarRef = { current: null };
-    const mockOnRefresh = jest.fn();
-    const mockOnViewChange = jest.fn();
-    const mockOnDateChange = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+  it('does not crash when calendarRef.current is null', async () => {
+    const mockCalendarRef = { current: null }
+    const mockOnRefresh = jest.fn()
+    const mockOnViewChange = jest.fn()
+    const mockOnDateChange = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { store } = renderWithProviders(
       <Menubar
@@ -938,33 +938,33 @@ describe("Logo click navigation to current week", () => {
         onDateChange={mockOnDateChange}
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
+    const logoElement = screen.getByAltText('menubar.logoAlt')
     await act(async () => {
-      fireEvent.click(logoElement);
-    });
+      fireEvent.click(logoElement)
+    })
 
     await waitFor(() => {
-      expect(store.getState().settings.view).toBe("calendar");
-    });
+      expect(store.getState().settings.view).toBe('calendar')
+    })
 
-    expect(mockOnViewChange).not.toHaveBeenCalled();
-    expect(mockOnDateChange).not.toHaveBeenCalled();
-  });
+    expect(mockOnViewChange).not.toHaveBeenCalled()
+    expect(mockOnDateChange).not.toHaveBeenCalled()
+  })
 
-  it("handles missing onViewChange and onDateChange callbacks", async () => {
-    const mockChangeView = jest.fn();
-    const mockToday = jest.fn();
-    const mockGetDate = jest.fn(() => new Date());
+  it('handles missing onViewChange and onDateChange callbacks', async () => {
+    const mockChangeView = jest.fn()
+    const mockToday = jest.fn()
+    const mockGetDate = jest.fn(() => new Date())
     const mockCalendarApi = {
       changeView: mockChangeView,
       today: mockToday,
-      getDate: mockGetDate,
-    };
-    const mockCalendarRef = { current: mockCalendarApi as any };
-    const mockOnRefresh = jest.fn();
-    const mockCurrentDate = new Date("2024-04-15");
+      getDate: mockGetDate
+    }
+    const mockCalendarRef = { current: mockCalendarApi as any }
+    const mockOnRefresh = jest.fn()
+    const mockCurrentDate = new Date('2024-04-15')
 
     const { store } = renderWithProviders(
       <Menubar
@@ -974,18 +974,18 @@ describe("Logo click navigation to current week", () => {
         currentView="dayGridMonth"
       />,
       preloadedState
-    );
+    )
 
-    const logoElement = screen.getByAltText("menubar.logoAlt");
+    const logoElement = screen.getByAltText('menubar.logoAlt')
     await act(async () => {
-      fireEvent.click(logoElement);
-    });
+      fireEvent.click(logoElement)
+    })
 
     await waitFor(() => {
-      expect(store.getState().settings.view).toBe("calendar");
-    });
+      expect(store.getState().settings.view).toBe('calendar')
+    })
 
-    expect(mockChangeView).toHaveBeenCalledWith("timeGridWeek");
-    expect(mockToday).toHaveBeenCalled();
-  });
-});
+    expect(mockChangeView).toHaveBeenCalledWith('timeGridWeek')
+    expect(mockToday).toHaveBeenCalled()
+  })
+})

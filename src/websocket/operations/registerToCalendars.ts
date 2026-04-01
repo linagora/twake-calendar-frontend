@@ -3,14 +3,14 @@ export function registerToCalendars(
   calendarURIList: string[]
 ): void {
   if (socket.readyState !== WebSocket.OPEN) {
-    throw new Error("Cannot register: WebSocket is not open");
+    throw new Error('Cannot register: WebSocket is not open')
   }
 
   socket.send(
     JSON.stringify({
-      register: calendarURIList,
+      register: calendarURIList
     })
-  );
+  )
 
-  console.info("Registered to calendars", calendarURIList);
+  console.info('Registered to calendars', calendarURIList)
 }

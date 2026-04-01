@@ -7,64 +7,64 @@ import {
   DialogTitle,
   FormControlLabel,
   Radio,
-  RadioGroup,
-} from "@linagora/twake-mui";
-import { useState } from "react";
-import { useI18n } from "twake-i18n";
+  RadioGroup
+} from '@linagora/twake-mui'
+import { useState } from 'react'
+import { useI18n } from 'twake-i18n'
 
 export function EditModeDialog({
   type,
   setOpen,
-  eventAction,
+  eventAction
 }: {
-  type: string | null;
-  setOpen: (e: string | null) => void;
-  eventAction: (type: "solo" | "all" | undefined) => void;
+  type: string | null
+  setOpen: (e: string | null) => void
+  eventAction: (type: 'solo' | 'all' | undefined) => void
 }) {
-  const { t } = useI18n();
-  const [typeOfAction, setTypeOfAction] = useState<"solo" | "all" | undefined>(
-    "solo"
-  );
-  const handleEvent = async () => {
-    eventAction(typeOfAction);
-    handleClose();
-  };
+  const { t } = useI18n()
+  const [typeOfAction, setTypeOfAction] = useState<'solo' | 'all' | undefined>(
+    'solo'
+  )
+  const handleEvent = () => {
+    eventAction(typeOfAction)
+    handleClose()
+  }
   const handleClose = () => {
-    setOpen(null);
-    setTypeOfAction("solo");
-  };
+    setOpen(null)
+    setTypeOfAction('solo')
+  }
   return (
     <Dialog open={Boolean(type)} onClose={handleClose}>
       <DialogTitle>
-        {type === "edit" && t("editModeDialog.updateRecurrentEvent")}
-        {type === "delete" && t("editModeDialog.deleteRecurrentEvent")}
-        {type === "attendance" && t("editModeDialog.updateParticipationStatus")}
+        {type === 'edit' && t('editModeDialog.updateRecurrentEvent')}
+        {type === 'delete' && t('editModeDialog.deleteRecurrentEvent')}
+        {type === 'attendance' && t('editModeDialog.updateParticipationStatus')}
       </DialogTitle>
       <DialogContent>
         <RadioGroup
           value={typeOfAction}
-          onChange={(e) =>
-            setTypeOfAction(e.target.value as "solo" | "all" | undefined)
+          onChange={e =>
+            setTypeOfAction(e.target.value as 'solo' | 'all' | undefined)
           }
         >
           <FormControlLabel
             value="solo"
             control={<Radio />}
-            label={t("editModeDialog.thisEvent")}
+            label={t('editModeDialog.thisEvent')}
           />
           <FormControlLabel
             value="all"
             control={<Radio />}
-            label={t("editModeDialog.allEvents")}
+            label={t('editModeDialog.allEvents')}
           />
         </RadioGroup>
       </DialogContent>
       <DialogActions>
         <ButtonGroup>
-          <Button onClick={handleClose}>{t("common.cancel")}</Button>
-          <Button onClick={handleEvent}>{t("common.ok")}</Button>
+          <Button onClick={handleClose}>{t('common.cancel')}</Button>
+          <Button onClick={handleEvent}>{t('common.ok')}</Button>
         </ButtonGroup>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

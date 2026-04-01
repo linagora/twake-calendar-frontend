@@ -1,26 +1,26 @@
-import { useAppSelector } from "@/app/hooks";
-import { useAttendeesFreeBusy } from "@/components/Attendees/useFreeBusy";
-import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { AvatarGroup, Box, Typography } from "@linagora/twake-mui";
-import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-import { alpha, useTheme } from "@mui/material/styles";
-import { useState } from "react";
-import { useI18n } from "twake-i18n";
-import { makeAttendeePreview } from ".";
-import { userAttendee } from "../../User/models/attendee";
+import { useAppSelector } from '@/app/hooks'
+import { useAttendeesFreeBusy } from '@/components/Attendees/useFreeBusy'
+import { renderAttendeeBadge } from '@/components/Event/utils/eventUtils'
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { AvatarGroup, Box, Typography } from '@linagora/twake-mui'
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
+import { alpha, useTheme } from '@mui/material/styles'
+import { useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { makeAttendeePreview } from '.'
+import { userAttendee } from '../../User/models/attendee'
 
 interface EventPreviewAttendeesProps {
-  attendees: userAttendee[];
-  organizer: userAttendee | undefined;
-  allAttendees: userAttendee[];
-  start?: string;
-  end?: string;
-  timezone?: string;
-  eventUid?: string | null;
+  attendees: userAttendee[]
+  organizer: userAttendee | undefined
+  allAttendees: userAttendee[]
+  start?: string
+  end?: string
+  timezone?: string
+  eventUid?: string | null
 }
 
-const ATTENDEE_DISPLAY_LIMIT = 3;
+const ATTENDEE_DISPLAY_LIMIT = 3
 
 export function EventPreviewAttendees({
   attendees,
@@ -29,43 +29,43 @@ export function EventPreviewAttendees({
   start,
   end,
   timezone,
-  eventUid,
+  eventUid
 }: EventPreviewAttendeesProps) {
-  const { t } = useI18n();
-  const theme = useTheme();
-  const infoIconColor = alpha(theme.palette.grey[900], 0.9);
-  const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
-  const userEmail = useAppSelector((state) => state.user.userData.email);
-  const [showAllAttendees, setShowAllAttendees] = useState(false);
+  const { t } = useI18n()
+  const theme = useTheme()
+  const infoIconColor = alpha(theme.palette.grey[900], 0.9)
+  const infoIconSx = { minWidth: '25px', marginRight: 2, color: infoIconColor }
+  const userEmail = useAppSelector(state => state.user.userData.email)
+  const [showAllAttendees, setShowAllAttendees] = useState(false)
 
-  const attendeePreview = makeAttendeePreview(allAttendees, t);
+  const attendeePreview = makeAttendeePreview(allAttendees, t)
 
   const toFreeBusyAttendee = (a: userAttendee) => ({
     email: a.cal_address,
-    userId: null,
-  });
+    userId: null
+  })
 
   const freeBusyMap = useAttendeesFreeBusy({
     existingAttendees: allAttendees
       .filter(
-        (attendee) =>
-          attendee.partstat !== "ACCEPTED" && attendee.partstat !== "DECLINED"
+        attendee =>
+          attendee.partstat !== 'ACCEPTED' && attendee.partstat !== 'DECLINED'
       )
       .map(toFreeBusyAttendee),
     newAttendees: [],
-    start: start ?? "",
-    end: end ?? "",
-    timezone: timezone ?? "UTC",
-    eventUid: extractEventBaseUuid(eventUid ?? ""),
-    enabled: !!(start && end && showAllAttendees),
-  });
+    start: start ?? '',
+    end: end ?? '',
+    timezone: timezone ?? 'UTC',
+    eventUid: extractEventBaseUuid(eventUid ?? ''),
+    enabled: !!(start && end && showAllAttendees)
+  })
 
   const busyCaption = (a: userAttendee) =>
-    freeBusyMap[a.cal_address] === "busy"
+    freeBusyMap[a.cal_address] === 'busy'
       ? a.cal_address === userEmail
-        ? t("event.freeBusy.busyCalOwner")
-        : t("event.freeBusy.busy")
-      : undefined;
+        ? t('event.freeBusy.busyCalOwner')
+        : t('event.freeBusy.busy')
+      : undefined
 
   return (
     <>
@@ -73,12 +73,12 @@ export function EventPreviewAttendees({
         <Box sx={{ ...infoIconSx, mt: 1 }}>
           <PeopleAltOutlinedIcon />
         </Box>
-        <Box style={{ marginBottom: 1, display: "flex", flexDirection: "row" }}>
+        <Box style={{ marginBottom: 1, display: 'flex', flexDirection: 'row' }}>
           <Box sx={{ marginRight: 2 }}>
             <Typography>
-              {t("eventPreview.guests", { count: allAttendees.length })}
+              {t('eventPreview.guests', { count: allAttendees.length })}
             </Typography>
-            <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
+            <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
               {attendeePreview}
             </Typography>
           </Box>
@@ -87,7 +87,7 @@ export function EventPreviewAttendees({
               {organizer &&
                 renderAttendeeBadge(
                   organizer,
-                  "org",
+                  'org',
                   t,
                   showAllAttendees,
                   true
@@ -99,24 +99,24 @@ export function EventPreviewAttendees({
           )}
           <Typography
             sx={{
-              cursor: "pointer",
+              cursor: 'pointer',
               marginLeft: 2,
-              fontSize: "14px",
-              color: "text.secondary",
-              alignSelf: "center",
+              fontSize: '14px',
+              color: 'text.secondary',
+              alignSelf: 'center'
             }}
-            onClick={() => setShowAllAttendees((prev) => !prev)}
+            onClick={() => setShowAllAttendees(prev => !prev)}
           >
             {showAllAttendees
-              ? t("eventPreview.showLess")
-              : t("eventPreview.showMore")}
+              ? t('eventPreview.showLess')
+              : t('eventPreview.showMore')}
           </Typography>
         </Box>
       </Box>
 
       {showAllAttendees &&
         organizer &&
-        renderAttendeeBadge(organizer, "org", t, showAllAttendees, true)}
+        renderAttendeeBadge(organizer, 'org', t, showAllAttendees, true)}
       {showAllAttendees &&
         attendees.map((a, idx) =>
           renderAttendeeBadge(
@@ -129,5 +129,5 @@ export function EventPreviewAttendees({
           )
         )}
     </>
-  );
+  )
 }

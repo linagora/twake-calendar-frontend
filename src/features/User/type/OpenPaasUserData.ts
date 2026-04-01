@@ -1,40 +1,40 @@
-import { ModuleConfiguration, userData } from "../userDataTypes";
+import { ModuleConfiguration, userData } from '../userDataTypes'
 
 export interface OpenPaasUserData {
-  firstname?: string;
-  lastname?: string;
-  id?: string;
-  _id?: string;
-  preferredEmail?: string;
+  firstname?: string
+  lastname?: string
+  id?: string
+  _id?: string
+  preferredEmail?: string
   configurations?: {
-    modules?: ModuleConfiguration[];
-  };
-  emails: string[];
-  resource?: boolean;
+    modules?: ModuleConfiguration[]
+  }
+  emails: string[]
+  resource?: boolean
   administrators?: {
-    _id: string;
-    id: string;
-    objectType: string;
-  }[];
-  resourceIcon?: string;
+    _id: string
+    id: string
+    objectType: string
+  }[]
+  resourceIcon?: string
 }
 
 export function ToUserData(
   openpaas: OpenPaasUserData | undefined
 ): userData | undefined {
-  if (!openpaas) return undefined;
-  const email = openpaas.preferredEmail ?? openpaas.emails?.[0] ?? "";
+  if (!openpaas) return undefined
+  const email = openpaas.preferredEmail ?? openpaas.emails?.[0] ?? ''
 
-  const given_name = openpaas.firstname ?? "";
-  const family_name = openpaas.lastname ?? "";
+  const given_name = openpaas.firstname ?? ''
+  const family_name = openpaas.lastname ?? ''
 
   return {
     email,
     given_name,
     family_name,
-    name: [given_name, family_name].filter(Boolean).join(" "),
-    sid: openpaas.id ?? "",
-    sub: openpaas.id ?? "",
-    openpaasId: openpaas.id,
-  };
+    name: [given_name, family_name].filter(Boolean).join(' '),
+    sid: openpaas.id ?? '',
+    sub: openpaas.id ?? '',
+    openpaasId: openpaas.id
+  }
 }

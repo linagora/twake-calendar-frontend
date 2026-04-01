@@ -7,15 +7,15 @@
  * @returns {string} Random meeting ID
  */
 export function generateMeetingId(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const chars = 'abcdefghijklmnopqrstuvwxyz'
   const generateSegment = (length: number): string => {
     return Array.from(
       { length },
       () => chars[Math.floor(Math.random() * chars.length)]
-    ).join("");
-  };
+    ).join('')
+  }
 
-  return `${generateSegment(3)}-${generateSegment(4)}-${generateSegment(3)}`;
+  return `${generateSegment(3)}-${generateSegment(4)}-${generateSegment(3)}`
 }
 
 /**
@@ -25,9 +25,9 @@ export function generateMeetingId(): string {
  */
 export function generateMeetingLink(baseUrl?: string): string {
   const base =
-    baseUrl || window.VIDEO_CONFERENCE_BASE_URL || "https://meet.linagora.com";
-  const meetingId = generateMeetingId();
-  return `${base}/${meetingId}`;
+    baseUrl || window.VIDEO_CONFERENCE_BASE_URL || 'https://meet.linagora.com'
+  const meetingId = generateMeetingId()
+  return `${base}/${meetingId}`
 }
 
 /**
@@ -41,9 +41,9 @@ export function addVideoConferenceToDescription(
   description: string,
   meetingLink: string
 ): string {
-  const line = `Visio: ${meetingLink}`;
-  const trimmed = description.trimEnd();
-  return trimmed ? `${trimmed}\n${line}` : line;
+  const line = `Visio: ${meetingLink}`
+  const trimmed = description.trimEnd()
+  return trimmed ? `${trimmed}\n${line}` : line
 }
 
 /**
@@ -54,11 +54,11 @@ export function addVideoConferenceToDescription(
 export function extractVideoConferenceFromDescription(
   description: string
 ): string | null {
-  const match = description.match(/Visio:\s*(https?:\/\/[^\s]+)/);
-  return match ? match[1] : null;
+  const match = description.match(/Visio:\s*(https?:\/\/[^\s]+)/)
+  return match ? match[1] : null
 }
 
-const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/;
+const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/
 
 /**
  * Remove the Visio video conference line from description.
@@ -69,7 +69,7 @@ const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/;
 export function removeVideoConferenceFromDescription(
   description: string
 ): string {
-  const lines = description.split("\n");
-  const filtered = lines.filter((line) => !VISIO_LINE_REGEX.test(line.trim()));
-  return filtered.join("\n").trimEnd();
+  const lines = description.split('\n')
+  const filtered = lines.filter(line => !VISIO_LINE_REGEX.test(line.trim()))
+  return filtered.join('\n').trimEnd()
 }

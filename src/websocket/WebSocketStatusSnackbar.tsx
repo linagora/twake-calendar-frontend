@@ -1,37 +1,37 @@
-import { Alert, Button, Snackbar } from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
+import { Alert, Button, Snackbar } from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
 
 export function WebSocketStatusSnackbar({
   message,
   severity,
-  onClose,
+  onClose
 }: {
-  message: string;
-  severity: "success" | "info" | "warning" | "error" | undefined;
-  onClose: () => void;
+  message: string
+  severity: 'success' | 'info' | 'warning' | 'error' | undefined
+  onClose: () => void
 }) {
-  const { t } = useI18n();
+  const { t } = useI18n()
   return (
     <Snackbar
       open={!!message}
       onClose={onClose}
       autoHideDuration={
-        severity === "warning" || severity === "error" ? null : 6000
+        severity === 'warning' || severity === 'error' ? null : 6000
       }
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
         severity={severity}
         onClose={onClose}
-        sx={{ width: "100%" }}
+        sx={{ width: '100%' }}
         action={
           <Button color="inherit" size="small" onClick={onClose}>
-            {t("common.ok")}
+            {t('common.ok')}
           </Button>
         }
       >
         {message}
       </Alert>
     </Snackbar>
-  );
+  )
 }

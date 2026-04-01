@@ -1,4 +1,4 @@
 export function extractEventBaseUuid(eventKey: string) {
-  if (!eventKey) return "";
-  return eventKey.split("/")[0];
+  if (!eventKey) return ''
+  return eventKey.split('/')[0]
 }

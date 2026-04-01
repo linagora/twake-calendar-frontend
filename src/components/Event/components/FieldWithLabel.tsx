@@ -1,5 +1,5 @@
-import { Box, SxProps, Theme, Typography } from "@linagora/twake-mui";
-import React from "react";
+import { Box, SxProps, Theme, Typography } from '@linagora/twake-mui'
+import React from 'react'
 
 /**
  * Helper component for field with label
@@ -10,64 +10,64 @@ export const FieldWithLabel = React.memo(
     label,
     isExpanded,
     children,
-    sx,
+    sx
   }: {
-    label: string | React.ReactNode;
-    isExpanded: boolean;
-    children: React.ReactNode;
-    sx?: SxProps<Theme>;
+    label: string | React.ReactNode
+    isExpanded: boolean
+    children: React.ReactNode
+    sx?: SxProps<Theme>
   }) => {
     if (!isExpanded) {
       // Normal mode: label on top
       const isEmptyLabel =
         label === null ||
         label === undefined ||
-        (typeof label === "string" && label.trim() === "");
+        (typeof label === 'string' && label.trim() === '')
 
       return (
         <Box
           sx={[
             {
-              "& > *:not(:first-of-type)": {
-                marginTop: isEmptyLabel ? 0 : "6px",
+              '& > *:not(:first-of-type)': {
+                marginTop: isEmptyLabel ? 0 : '6px'
               },
               // Only apply margin to direct child MuiTextField-root
-              "& > .MuiFormControl-root": {
-                marginTop: "6px",
-                marginBottom: 0,
+              '& > .MuiFormControl-root': {
+                marginTop: '6px',
+                marginBottom: 0
               },
-              "& > .MuiTextField-root": {
-                marginTop: "6px",
-                marginBottom: 0,
+              '& > .MuiTextField-root': {
+                marginTop: '6px',
+                marginBottom: 0
               },
               // Reset margin for nested MuiTextField-root
-              "& .MuiFormControl-root .MuiTextField-root": {
+              '& .MuiFormControl-root .MuiTextField-root': {
                 marginTop: 0,
-                marginBottom: 0,
+                marginBottom: 0
               },
-              "& .MuiTextField-root .MuiTextField-root": {
+              '& .MuiTextField-root .MuiTextField-root': {
                 marginTop: 0,
-                marginBottom: 0,
+                marginBottom: 0
               },
               // Reset margin for nested Box children (DateTimeFields structure)
-              "& > .MuiBox-root > .MuiBox-root": {
-                marginTop: 0,
+              '& > .MuiBox-root > .MuiBox-root': {
+                marginTop: 0
               },
-              "& > .MuiBox-root > .MuiBox-root > .MuiBox-root": {
-                marginTop: 0,
-              },
+              '& > .MuiBox-root > .MuiBox-root > .MuiBox-root': {
+                marginTop: 0
+              }
             },
-            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : [])
           ]}
         >
           {!isEmptyLabel && (
-            <Typography component="div" variant="h6" sx={{ display: "block" }}>
+            <Typography component="div" variant="h6" sx={{ display: 'block' }}>
               {label}
             </Typography>
           )}
           {children}
         </Box>
-      );
+      )
     }
 
     // Extended mode: label on left
@@ -77,9 +77,9 @@ export const FieldWithLabel = React.memo(
           component="div"
           variant="h6"
           sx={{
-            minWidth: "115px",
-            marginRight: "12px",
-            flexShrink: 0,
+            minWidth: '115px',
+            marginRight: '12px',
+            flexShrink: 0
           }}
         >
           {label}
@@ -88,23 +88,25 @@ export const FieldWithLabel = React.memo(
           flexGrow={1}
           sx={{
             // Set margin-top: 8px for second row in DateTimeFields (4 fields layout)
-            "& > .MuiBox-root > .MuiBox-root:nth-of-type(2)": {
-              marginTop: "8px",
+            '& > .MuiBox-root > .MuiBox-root:nth-of-type(2)': {
+              marginTop: '8px'
             },
             // Remove margin from MuiFormControl-root MuiFormControl-marginDense in extended mode
-            "& .MuiFormControl-root.MuiFormControl-marginDense": {
+            '& .MuiFormControl-root.MuiFormControl-marginDense': {
               marginTop: 0,
-              marginBottom: 0,
+              marginBottom: 0
             },
-            "& .MuiTextField-root.MuiFormControl-marginDense": {
+            '& .MuiTextField-root.MuiFormControl-marginDense': {
               marginTop: 0,
-              marginBottom: 0,
-            },
+              marginBottom: 0
+            }
           }}
         >
           {children}
         </Box>
       </Box>
-    );
+    )
   }
-);
+)
+
+FieldWithLabel.displayName = 'FieldWithLabel'

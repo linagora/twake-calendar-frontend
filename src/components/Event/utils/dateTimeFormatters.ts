@@ -11,27 +11,27 @@
 export function formatLocalDateTime(date: Date, timeZone?: string): string {
   // Guard against invalid or undefined dates
   if (!date || isNaN(date.getTime())) {
-    return "";
+    return ''
   }
 
   if (timeZone) {
-    const formatter = new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
-      timeZone,
-    });
-    const formatted = formatter.format(date);
-    return formatted.replace(", ", "T");
+      timeZone
+    })
+    const formatted = formatter.format(date)
+    return formatted.replace(', ', 'T')
   }
 
-  const pad = (n: number) => n.toString().padStart(2, "0");
+  const pad = (n: number) => n.toString().padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 /**
@@ -45,24 +45,24 @@ export function formatDateTimeInTimezone(
   timezone: string
 ): string {
   // Parse the ISO string as UTC
-  const utcDate = new Date(isoString);
+  const utcDate = new Date(isoString)
 
   // Format the date in the target timezone
-  const formatter = new Intl.DateTimeFormat("en-CA", {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 
-  const parts = formatter.formatToParts(utcDate);
+  const parts = formatter.formatToParts(utcDate)
   const getValue = (type: string) =>
-    parts.find((p) => p.type === type)?.value || "";
+    parts.find(p => p.type === type)?.value || ''
 
-  return `${getValue("year")}-${getValue("month")}-${getValue("day")}T${getValue("hour")}:${getValue("minute")}`;
+  return `${getValue('year')}-${getValue('month')}-${getValue('day')}T${getValue('hour')}:${getValue('minute')}`
 }
 
 /**
@@ -70,14 +70,14 @@ export function formatDateTimeInTimezone(
  * @returns Rounded Date object
  */
 export function getRoundedCurrentTime(): Date {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const roundedMinutes = minutes < 30 ? 0 : 30;
-  now.setMinutes(roundedMinutes);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
-  return now;
+  const now = new Date()
+  const minutes = now.getMinutes()
+  const roundedMinutes = minutes < 30 ? 0 : 30
+  now.setMinutes(roundedMinutes)
+  now.setSeconds(0)
+  now.setMilliseconds(0)
+  return now
 }
 
 /** Long date display format for date pickers */
-export const LONG_DATE_FORMAT = "dddd, MMMM D, YYYY";
+export const LONG_DATE_FORMAT = 'dddd, MMMM D, YYYY'

@@ -1,21 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react'
 
 interface UseEventUpdateModalReopenProps {
-  open: boolean;
-  eventId: string;
-  calId: string;
-  typeOfAction: "solo" | "all" | undefined;
-  setTypeOfAction: (type: "solo" | "all" | undefined) => void;
-  setOpenUpdateModal: (open: boolean) => void;
-  setHidePreview: (hide: boolean) => void;
+  open: boolean
+  eventId: string
+  calId: string
+  typeOfAction: 'solo' | 'all' | undefined
+  setTypeOfAction: (type: 'solo' | 'all' | undefined) => void
+  setOpenUpdateModal: (open: boolean) => void
+  setHidePreview: (hide: boolean) => void
 }
 
 function applyReopenData(
-  data: { typeOfAction?: "solo" | "all"; eventId: string; calId: string },
+  data: { typeOfAction?: 'solo' | 'all'; eventId: string; calId: string },
   eventId: string,
   calId: string,
-  typeOfAction: "solo" | "all" | undefined,
-  setTypeOfAction: (type: "solo" | "all" | undefined) => void,
+  typeOfAction: 'solo' | 'all' | undefined,
+  setTypeOfAction: (type: 'solo' | 'all' | undefined) => void,
   setOpenUpdateModal: (open: boolean) => void,
   setHidePreview: (hide: boolean) => void,
   delayMs = 100,
@@ -24,48 +24,46 @@ function applyReopenData(
   const typeOfActionMatch =
     data.typeOfAction === typeOfAction ||
     data.typeOfAction === undefined ||
-    typeOfAction === undefined;
+    typeOfAction === undefined
 
   if (data.eventId !== eventId || data.calId !== calId || !typeOfActionMatch) {
-    return false;
+    return false
   }
 
   const delay =
-    data.typeOfAction !== undefined && typeOfAction === undefined
-      ? 50
-      : delayMs;
+    data.typeOfAction !== undefined && typeOfAction === undefined ? 50 : delayMs
 
   if (data.typeOfAction !== undefined && typeOfAction === undefined) {
-    setTypeOfAction(data.typeOfAction);
+    setTypeOfAction(data.typeOfAction)
   }
 
   setTimeout(() => {
-    setOpenUpdateModal(true);
-    setHidePreview(true);
+    setOpenUpdateModal(true)
+    setHidePreview(true)
     if (clearSessionStorage) {
       try {
-        sessionStorage.removeItem("eventUpdateModalReopen");
+        sessionStorage.removeItem('eventUpdateModalReopen')
       } catch {
         // Ignore sessionStorage errors
       }
     }
-  }, delay);
+  }, delay)
 
-  return true;
+  return true
 }
 
 function readSessionStorage(): {
-  typeOfAction?: "solo" | "all";
-  eventId: string;
-  calId: string;
+  typeOfAction?: 'solo' | 'all'
+  eventId: string
+  calId: string
 } | null {
   try {
-    const stored = sessionStorage.getItem("eventUpdateModalReopen");
-    if (stored) return JSON.parse(stored);
+    const stored = sessionStorage.getItem('eventUpdateModalReopen')
+    if (stored) return JSON.parse(stored)
   } catch {
     // Ignore
   }
-  return null;
+  return null
 }
 
 /**
@@ -80,21 +78,21 @@ export function useEventUpdateModalReopen({
   typeOfAction,
   setTypeOfAction,
   setOpenUpdateModal,
-  setHidePreview,
+  setHidePreview
 }: UseEventUpdateModalReopenProps) {
-  const hasCheckedSessionStorageRef = useRef(false);
+  const hasCheckedSessionStorageRef = useRef(false)
 
   // Check sessionStorage once when the preview opens
   useEffect(() => {
     if (!open) {
-      hasCheckedSessionStorageRef.current = false;
-      return;
+      hasCheckedSessionStorageRef.current = false
+      return
     }
 
-    if (hasCheckedSessionStorageRef.current) return;
-    hasCheckedSessionStorageRef.current = true;
+    if (hasCheckedSessionStorageRef.current) return
+    hasCheckedSessionStorageRef.current = true
 
-    const data = readSessionStorage();
+    const data = readSessionStorage()
     if (data) {
       applyReopenData(
         data,
@@ -106,16 +104,16 @@ export function useEventUpdateModalReopen({
         setHidePreview,
         100,
         true
-      );
+      )
     }
     // typeOfAction intentionally omitted — we only want to run this once per open
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, eventId, calId]);
+  }, [open, eventId, calId])
 
   // Listen for the custom event dispatched on API failure
   useEffect(() => {
     const handleUpdateModalReopen = (e: CustomEvent) => {
-      const detail = e.detail;
+      const detail = e.detail
       const matched = applyReopenData(
         detail,
         eventId,
@@ -126,18 +124,18 @@ export function useEventUpdateModalReopen({
         setHidePreview,
         50,
         true
-      );
+      )
       if (matched) {
         try {
-          sessionStorage.removeItem("eventUpdateModalReopen");
+          sessionStorage.removeItem('eventUpdateModalReopen')
         } catch {
           // Ignore
         }
       }
-    };
+    }
 
     // Also check sessionStorage whenever eventId/calId/typeOfAction change
-    const data = readSessionStorage();
+    const data = readSessionStorage()
     if (data) {
       applyReopenData(
         data,
@@ -149,25 +147,25 @@ export function useEventUpdateModalReopen({
         setHidePreview,
         100,
         true
-      );
+      )
     }
 
     window.addEventListener(
-      "eventUpdateModalReopen",
+      'eventUpdateModalReopen',
       handleUpdateModalReopen as EventListener
-    );
+    )
     return () => {
       window.removeEventListener(
-        "eventUpdateModalReopen",
+        'eventUpdateModalReopen',
         handleUpdateModalReopen as EventListener
-      );
-    };
+      )
+    }
   }, [
     eventId,
     calId,
     typeOfAction,
     setTypeOfAction,
     setOpenUpdateModal,
-    setHidePreview,
-  ]);
+    setHidePreview
+  ])
 }

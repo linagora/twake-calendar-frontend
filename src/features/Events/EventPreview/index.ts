@@ -1,2 +1,2 @@
-export { default } from "./EventPreviewModal";
-export { makeAttendeePreview } from "./utils/makeAttendeePreview";
+export { default } from './EventPreviewModal'
+export { makeAttendeePreview } from './utils/makeAttendeePreview'

@@ -1,7 +1,7 @@
-import { getAccessiblePair } from "@/utils/getAccessiblePair";
-import { useUserSearch } from "./useUserSearch";
-import { ResourceIcon } from "./ResourceIcon";
-import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
+import { getAccessiblePair } from '@/utils/getAccessiblePair'
+import { useUserSearch } from './useUserSearch'
+import { ResourceIcon } from './ResourceIcon'
+import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
 import {
   Autocomplete,
   Chip,
@@ -14,31 +14,31 @@ import {
   TextField,
   useTheme,
   Typography,
-  type AutocompleteRenderInputParams,
-} from "@linagora/twake-mui";
-import SearchIcon from "@mui/icons-material/Search";
+  type AutocompleteRenderInputParams
+} from '@linagora/twake-mui'
+import SearchIcon from '@mui/icons-material/Search'
 import {
   HTMLAttributes,
   useCallback,
   type ReactNode,
-  type SyntheticEvent,
-} from "react";
-import { useI18n } from "twake-i18n";
+  type SyntheticEvent
+} from 'react'
+import { useI18n } from 'twake-i18n'
 
 export interface Resource {
-  email?: string;
-  displayName: string;
-  avatarUrl?: string;
-  openpaasId?: string;
-  color?: Record<string, string>;
+  email?: string
+  displayName: string
+  avatarUrl?: string
+  openpaasId?: string
+  color?: Record<string, string>
 }
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
-  error?: boolean;
-  helperText?: string | null;
-  placeholder?: string;
-  label?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  error?: boolean
+  helperText?: string | null
+  placeholder?: string
+  label?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 export function ResourceSearch({
@@ -52,33 +52,31 @@ export function ResourceSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
-  hideLabel,
+  hideLabel
 }: {
-  selectedResources: Resource[];
-  onChange: (event: SyntheticEvent, users: Resource[]) => void;
-  objectTypes: string[];
-  disabled?: boolean;
-  freeSolo?: boolean;
-  onToggleEventPreview?: () => void;
-  placeholder?: string;
-  inputSlot?: (
-    params: ExtendedAutocompleteRenderInputParams
-  ) => React.ReactNode;
+  selectedResources: Resource[]
+  onChange: (event: SyntheticEvent, users: Resource[]) => void
+  objectTypes: string[]
+  disabled?: boolean
+  freeSolo?: boolean
+  onToggleEventPreview?: () => void
+  placeholder?: string
+  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => React.ReactNode
   customRenderInput?: (
     params: AutocompleteRenderInputParams,
     query: string,
     setQuery: (value: string) => void
-  ) => ReactNode;
+  ) => ReactNode
   customSlotProps?: {
-    popper?: Partial<PopperProps>;
-    paper?: Partial<PaperProps>;
-    listbox?: Partial<HTMLAttributes<HTMLUListElement>>;
-  };
-  hideLabel?: boolean;
+    popper?: Partial<PopperProps>
+    paper?: Partial<PaperProps>
+    listbox?: Partial<HTMLAttributes<HTMLUListElement>>
+  }
+  hideLabel?: boolean
 }) {
-  const { t } = useI18n();
-  const searchPlaceholder = placeholder ?? t("resourceSearch.placeholder");
-  const errorMessage = t("resourceSearch.searchError");
+  const { t } = useI18n()
+  const searchPlaceholder = placeholder ?? t('resourceSearch.placeholder')
+  const errorMessage = t('resourceSearch.searchError')
 
   const {
     query,
@@ -93,26 +91,26 @@ export function ResourceSearch({
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
-    setSnackbarMessage,
-  } = useUserSearch<Resource>({ objectTypes, errorMessage });
+    setSnackbarMessage
+  } = useUserSearch<Resource>({ objectTypes, errorMessage })
 
-  const theme = useTheme();
+  const theme = useTheme()
 
   const handleBlurCommit = useCallback(
     (event: React.SyntheticEvent) => {
-      const trimmed = query.trim();
-      if (!trimmed) return;
-      if (selectedResources.find((u) => u.displayName === trimmed)) {
-        setQuery("");
-        return;
+      const trimmed = query.trim()
+      if (!trimmed) return
+      if (selectedResources.find(u => u.displayName === trimmed)) {
+        setQuery('')
+        return
       }
-      setInputError(null);
-      const newResource: Resource = { displayName: trimmed };
-      onChange(event, [...selectedResources, newResource]);
-      setQuery("");
+      setInputError(null)
+      const newResource: Resource = { displayName: trimmed }
+      onChange(event, [...selectedResources, newResource])
+      setQuery('')
     },
     [query, selectedResources, onChange, setInputError, setQuery]
-  );
+  )
 
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
@@ -123,7 +121,7 @@ export function ResourceSearch({
             {!selectedResources?.length ? (
               <SearchIcon
                 fontSize="small"
-                sx={{ mr: 1, color: "action.active" }}
+                sx={{ mr: 1, color: 'action.active' }}
               />
             ) : null}
             {params.InputProps.startAdornment}
@@ -134,44 +132,44 @@ export function ResourceSearch({
             {loading ? <CircularProgress color="inherit" size={20} /> : null}
             {!selectedResources?.length ? params.InputProps.endAdornment : null}
           </>
-        ),
-      };
+        )
+      }
 
       const enhancedParams = {
         ...params,
         InputProps: inputProps,
         inputProps: {
           ...params.inputProps,
-          autoComplete: "off",
-        },
-      };
+          autoComplete: 'off'
+        }
+      }
 
       const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && onToggleEventPreview) {
-          e.preventDefault();
-          onToggleEventPreview();
+        if (e.key === 'Enter' && onToggleEventPreview) {
+          e.preventDefault()
+          onToggleEventPreview()
         }
-      };
+      }
 
       const defaultTextFieldProps = {
         error: !!inputError,
         helperText: inputError,
         placeholder: searchPlaceholder,
-        label: "",
+        label: '',
         onKeyDown: handleEnterKey,
         slotProps: {
           input: {
-            ...inputProps,
-          },
-        },
-      };
+            ...inputProps
+          }
+        }
+      }
 
       if (inputSlot) {
         return (
           <>
             {!hideLabel && (
-              <Typography variant="h6" sx={{ marginBottom: "10px" }}>
-                {t("resourceSearch.label")}
+              <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+                {t('resourceSearch.label')}
               </Typography>
             )}
             {inputSlot({
@@ -179,18 +177,18 @@ export function ResourceSearch({
               error: !!inputError,
               helperText: inputError,
               placeholder: searchPlaceholder,
-              label: "",
-              onKeyDown: handleEnterKey,
+              label: '',
+              onKeyDown: handleEnterKey
             })}
           </>
-        );
+        )
       }
 
       return (
         <>
           {!hideLabel && (
-            <Typography variant="h6" sx={{ marginBottom: "10px" }}>
-              {t("resourceSearch.label")}
+            <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+              {t('resourceSearch.label')}
             </Typography>
           )}
           <TextField
@@ -200,7 +198,7 @@ export function ResourceSearch({
             size="medium"
           />
         </>
-      );
+      )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -209,9 +207,9 @@ export function ResourceSearch({
       onToggleEventPreview,
       loading,
       searchPlaceholder,
-      selectedResources?.length,
+      selectedResources?.length
     ]
-  );
+  )
 
   return (
     <>
@@ -234,55 +232,53 @@ export function ResourceSearch({
         loading={loading}
         filterOptions={(options: Resource[]) => options}
         fullWidth
-        noOptionsText={t("resourceSearch.noResults")}
-        loadingText={t("resourceSearch.loading")}
+        noOptionsText={t('resourceSearch.noResults')}
+        loadingText={t('resourceSearch.loading')}
         getOptionLabel={(option: Resource | string) => {
-          if (typeof option === "object") {
-            return option.displayName;
+          if (typeof option === 'object') {
+            return option.displayName
           } else {
-            return option;
+            return option
           }
         }}
         sx={{
-          "& .MuiAutocomplete-inputRoot": {
-            py: 0,
-          },
+          '& .MuiAutocomplete-inputRoot': {
+            py: 0
+          }
         }}
         filterSelectedOptions
         value={selectedResources}
         inputValue={query}
         onInputChange={(_event, value: string) => setQuery(value)}
         onChange={(event, value: string[] | Resource[]) => {
-          setInputError(null);
+          setInputError(null)
           const mapped = value
             .map((v: string | Resource) =>
-              typeof v === "string" ? { displayName: v.trim() } : v
+              typeof v === 'string' ? { displayName: v.trim() } : v
             )
-            .filter((v) => v.displayName.trim().length > 0);
-          onChange(event, mapped);
+            .filter(v => v.displayName.trim().length > 0)
+          onChange(event, mapped)
         }}
         slotProps={{
           ...customSlotProps,
           popper: {
-            placement: "bottom-start",
-            sx: { minWidth: "300px", ...customSlotProps?.popper?.sx },
-            ...customSlotProps?.popper,
-          },
+            placement: 'bottom-start',
+            sx: { minWidth: '300px', ...customSlotProps?.popper?.sx },
+            ...customSlotProps?.popper
+          }
         }}
         // When render input is custom, the adornments should be handled by the custom component
         forcePopupIcon={!customRenderInput}
         disableClearable={!!customRenderInput}
-        renderInput={(params) =>
+        renderInput={params =>
           customRenderInput
             ? customRenderInput(params, query, setQuery)
             : defaultRenderInput(params)
         }
         renderOption={(props, option: Resource) => {
-          if (
-            selectedResources.find((u) => u.displayName === option.displayName)
-          )
-            return null;
-          const { key, ...otherProps } = props;
+          if (selectedResources.find(u => u.displayName === option.displayName))
+            return null
+          const { key, ...otherProps } = props
           return (
             <ListItem
               key={key + option?.displayName}
@@ -294,16 +290,16 @@ export function ResourceSearch({
               </ListItemAvatar>
               <ListItemText primary={option.displayName} />
             </ListItem>
-          );
+          )
         }}
         renderValue={(value: string[] | Resource[], getTagProps) =>
           value.map((option: string | Resource, index) => {
-            const isString = typeof option === "string";
-            const label = isString ? option : option.displayName;
+            const isString = typeof option === 'string'
+            const label = isString ? option : option.displayName
             const chipColor = isString
               ? theme.palette.grey[300]
-              : (option.color?.light ?? theme.palette.grey[300]);
-            const textColor = getAccessiblePair(chipColor, theme);
+              : (option.color?.light ?? theme.palette.grey[300])
+            const textColor = getAccessiblePair(chipColor, theme)
 
             return (
               <Chip
@@ -311,25 +307,25 @@ export function ResourceSearch({
                 key={label}
                 style={{
                   backgroundColor: chipColor,
-                  color: textColor,
+                  color: textColor
                 }}
                 label={label}
               />
-            );
+            )
           })
         }
       />
       <SnackbarAlert
         open={snackbarOpen}
         setOpen={(open: boolean) => {
-          setSnackbarOpen(open);
+          setSnackbarOpen(open)
           if (!open) {
-            setSnackbarMessage("");
+            setSnackbarMessage('')
           }
         }}
         message={snackbarMessage}
         severity="error"
       />
     </>
-  );
+  )
 }

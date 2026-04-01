@@ -1,344 +1,344 @@
-import SearchBar from "@/components/Menubar/EventSearchBar";
-import * as searchThunk from "@/features/Search/SearchSlice";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
+import SearchBar from '@/components/Menubar/EventSearchBar'
+import * as searchThunk from '@/features/Search/SearchSlice'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-describe("EventSearchBar", () => {
-  const today = new Date();
-  const start = new Date(today);
-  start.setHours(10, 0, 0, 0);
-  const end = new Date(today);
-  end.setHours(11, 0, 0, 0);
+describe('EventSearchBar', () => {
+  const today = new Date()
+  const start = new Date(today)
+  start.setHours(10, 0, 0, 0)
+  const end = new Date(today)
+  end.setHours(11, 0, 0, 0)
   const preloadedState = {
     user: {
       userData: {
-        sub: "test",
-        email: "test@test.com",
-        sid: "mockSid",
-        openpaasId: "user1",
+        sub: 'test',
+        email: 'test@test.com',
+        sid: 'mockSid',
+        openpaasId: 'user1'
       },
-      tokens: { accessToken: "token" },
+      tokens: { accessToken: 'token' }
     },
     calendars: {
       list: {
-        "user1/cal1": {
-          name: "Calendar personal",
-          id: "user1/cal1",
-          color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+        'user1/cal1': {
+          name: 'Calendar personal',
+          id: 'user1/cal1',
+          color: { light: '#FF0000', dark: '#000' },
+          owner: { emails: ['alice@example.com'] },
           events: {
             event1: {
-              id: "event1",
-              calId: "user1/cal1",
-              uid: "event1",
-              title: "Test Event",
+              id: 'event1',
+              calId: 'user1/cal1',
+              uid: 'event1',
+              title: 'Test Event',
               start: start.toISOString(),
               end: end.toISOString(),
-              partstat: "ACCEPTED",
+              partstat: 'ACCEPTED',
               organizer: {
-                cn: "Alice",
-                cal_address: "alice@example.com",
+                cn: 'Alice',
+                cal_address: 'alice@example.com'
               },
               attendee: [
                 {
-                  cn: "Alice",
-                  partstat: "ACCEPTED",
-                  rsvp: "TRUE",
-                  role: "REQ-PARTICIPANT",
-                  cutype: "INDIVIDUAL",
-                  cal_address: "alice@example.com",
-                },
-              ],
-            },
-          },
+                  cn: 'Alice',
+                  partstat: 'ACCEPTED',
+                  rsvp: 'TRUE',
+                  role: 'REQ-PARTICIPANT',
+                  cutype: 'INDIVIDUAL',
+                  cal_address: 'alice@example.com'
+                }
+              ]
+            }
+          }
         },
-        "user2/cal1": {
-          name: "Calendar delegated",
+        'user2/cal1': {
+          name: 'Calendar delegated',
           delegated: true,
-          id: "user2/cal1",
-          color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+          id: 'user2/cal1',
+          color: { light: '#FF0000', dark: '#000' },
+          owner: { emails: ['alice@example.com'] },
           events: {
             event1: {
-              id: "event1",
-              calId: "user2/cal1",
-              uid: "event1",
-              title: "Test Event",
+              id: 'event1',
+              calId: 'user2/cal1',
+              uid: 'event1',
+              title: 'Test Event',
               start: start.toISOString(),
               end: end.toISOString(),
-              partstat: "ACCEPTED",
+              partstat: 'ACCEPTED',
               organizer: {
-                cn: "Alice",
-                cal_address: "alice@example.com",
+                cn: 'Alice',
+                cal_address: 'alice@example.com'
               },
               attendee: [
                 {
-                  cn: "Alice",
-                  partstat: "ACCEPTED",
-                  rsvp: "TRUE",
-                  role: "REQ-PARTICIPANT",
-                  cutype: "INDIVIDUAL",
-                  cal_address: "alice@example.com",
-                },
-              ],
-            },
-          },
+                  cn: 'Alice',
+                  partstat: 'ACCEPTED',
+                  rsvp: 'TRUE',
+                  role: 'REQ-PARTICIPANT',
+                  cutype: 'INDIVIDUAL',
+                  cal_address: 'alice@example.com'
+                }
+              ]
+            }
+          }
         },
-        "user3/cal1": {
-          name: "Calendar shared",
-          id: "user3/cal1",
-          color: { light: "#FF0000", dark: "#000" },
-          owner: { emails: ["alice@example.com"] },
+        'user3/cal1': {
+          name: 'Calendar shared',
+          id: 'user3/cal1',
+          color: { light: '#FF0000', dark: '#000' },
+          owner: { emails: ['alice@example.com'] },
           events: {
             event1: {
-              id: "event1",
-              calId: "user3/cal1",
-              uid: "event1",
-              title: "Test Event",
+              id: 'event1',
+              calId: 'user3/cal1',
+              uid: 'event1',
+              title: 'Test Event',
               start: start.toISOString(),
               end: end.toISOString(),
-              partstat: "ACCEPTED",
+              partstat: 'ACCEPTED',
               organizer: {
-                cn: "Alice",
-                cal_address: "alice@example.com",
+                cn: 'Alice',
+                cal_address: 'alice@example.com'
               },
               attendee: [
                 {
-                  cn: "Alice",
-                  partstat: "ACCEPTED",
-                  rsvp: "TRUE",
-                  role: "REQ-PARTICIPANT",
-                  cutype: "INDIVIDUAL",
-                  cal_address: "alice@example.com",
-                },
-              ],
-            },
-          },
-        },
+                  cn: 'Alice',
+                  partstat: 'ACCEPTED',
+                  rsvp: 'TRUE',
+                  role: 'REQ-PARTICIPANT',
+                  cutype: 'INDIVIDUAL',
+                  cal_address: 'alice@example.com'
+                }
+              ]
+            }
+          }
+        }
       },
-      pending: false,
-    },
-  };
+      pending: false
+    }
+  }
 
-  it("should render search icon button initially", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should render search icon button initially', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    expect(searchButton).toBeInTheDocument();
-  });
+    const searchButton = screen.getByRole('button')
+    expect(searchButton).toBeInTheDocument()
+  })
 
-  it("should expand search bar when icon is clicked", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should expand search bar when icon is clicked', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    expect(searchInput).toBeInTheDocument();
-  });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    expect(searchInput).toBeInTheDocument()
+  })
 
-  it("should unexpand search bar when field is unfocused and empty", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should unexpand search bar when field is unfocused and empty', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.mouseDown(document.body);
-    expect(searchInput).not.toBeInTheDocument();
-  });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    fireEvent.mouseDown(document.body)
+    expect(searchInput).not.toBeInTheDocument()
+  })
 
-  it("should not unexpand search bar when field is unfocused but not empty", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should not unexpand search bar when field is unfocused but not empty', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    userEvent.type(searchInput, "test");
-    fireEvent.blur(searchInput);
-    expect(searchInput).toBeInTheDocument();
-    expect(searchInput).toHaveValue("test");
-  });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    userEvent.type(searchInput, 'test')
+    fireEvent.blur(searchInput)
+    expect(searchInput).toBeInTheDocument()
+    expect(searchInput).toHaveValue('test')
+  })
 
-  it("should update search value on input", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should update search value on input', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.change(searchInput, { target: { value: "meeting" } });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    fireEvent.change(searchInput, { target: { value: 'meeting' } })
 
-    expect(searchInput).toHaveValue("meeting");
-  });
+    expect(searchInput).toHaveValue('meeting')
+  })
 
-  it("should open filter popover when tune icon is clicked", async () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should open filter popover when tune icon is clicked', async () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
     // Expand search bar
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
     // Click tune icon
-    const tuneButton = screen.getByTestId("TuneIcon");
-    if (tuneButton) fireEvent.click(tuneButton);
+    const tuneButton = screen.getByTestId('TuneIcon')
+    if (tuneButton) fireEvent.click(tuneButton)
 
     await waitFor(() => {
-      expect(screen.getByText("search.searchIn")).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText('search.searchIn')).toBeInTheDocument()
+    })
+  })
 
-  it("should clear search value when clear button is clicked", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('should clear search value when clear button is clicked', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.change(searchInput, { target: { value: "meeting" } });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    fireEvent.change(searchInput, { target: { value: 'meeting' } })
 
-    const clearButton = screen.getByTestId("HighlightOffIcon");
-    fireEvent.click(clearButton);
+    const clearButton = screen.getByTestId('HighlightOffIcon')
+    fireEvent.click(clearButton)
 
-    expect(searchInput).toHaveValue("");
-  });
+    expect(searchInput).toHaveValue('')
+  })
 
-  it("should trigger search on Enter key", async () => {
-    const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
+  it('should trigger search on Enter key', async () => {
+    const searchSpy = jest.spyOn(searchThunk, 'searchEventsAsync')
 
-    renderWithProviders(<SearchBar />, preloadedState);
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.change(searchInput, { target: { value: "test" } });
-    fireEvent.keyDown(searchInput, { key: "Enter" });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    fireEvent.change(searchInput, { target: { value: 'test' } })
+    fireEvent.keyDown(searchInput, { key: 'Enter' })
 
     await waitFor(() => {
       expect(searchSpy).toHaveBeenCalledWith({
         filters: {
-          keywords: "",
+          keywords: '',
           organizers: [],
           attendees: [],
-          searchIn: ["user1/cal1"],
+          searchIn: ['user1/cal1']
         },
-        search: "test",
-      });
-    });
-  });
-  it("should not trigger search on Enter key when search is empty", async () => {
-    const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
+        search: 'test'
+      })
+    })
+  })
+  it('should not trigger search on Enter key when search is empty', async () => {
+    const searchSpy = jest.spyOn(searchThunk, 'searchEventsAsync')
 
-    renderWithProviders(<SearchBar />, preloadedState);
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
-    const searchInput = screen.getByPlaceholderText("common.search");
-    fireEvent.keyDown(searchInput, { key: "Enter" });
+    const searchInput = screen.getByPlaceholderText('common.search')
+    fireEvent.keyDown(searchInput, { key: 'Enter' })
 
     await waitFor(() => {
-      expect(searchSpy).not.toHaveBeenCalled();
-    });
-  });
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+  })
 
-  it("should not trigger search when filter keywords is empty", async () => {
-    const searchSpy = jest.spyOn(searchThunk, "searchEventsAsync");
+  it('should not trigger search when filter keywords is empty', async () => {
+    const searchSpy = jest.spyOn(searchThunk, 'searchEventsAsync')
 
-    renderWithProviders(<SearchBar />, preloadedState);
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
+    const searchButton = screen.getByRole('button')
+    fireEvent.click(searchButton)
 
     // Click tune icon
-    const tuneButton = screen.getByTestId("TuneIcon");
-    if (tuneButton) fireEvent.click(tuneButton);
+    const tuneButton = screen.getByTestId('TuneIcon')
+    if (tuneButton) fireEvent.click(tuneButton)
 
-    fireEvent.click(screen.getByText("common.search"));
+    fireEvent.click(screen.getByText('common.search'))
 
     await waitFor(() => {
-      expect(searchSpy).not.toHaveBeenCalled();
-    });
-  });
-  it("keeps search bar expanded when popover opens", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+      expect(searchSpy).not.toHaveBeenCalled()
+    })
+  })
+  it('keeps search bar expanded when popover opens', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole('button'))
     const tuneBtn = screen
-      .getAllByRole("button")
-      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+      .getAllByRole('button')
+      .find(b => b.querySelector('[data-testid="TuneIcon"]'))
 
-    fireEvent.click(tuneBtn!);
+    fireEvent.click(tuneBtn!)
 
-    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
-  });
+    expect(screen.getByPlaceholderText('common.search')).toBeInTheDocument()
+  })
 
-  it("does NOT collapse search when clicking inside popover", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('does NOT collapse search when clicking inside popover', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole('button'))
     const tuneBtn = screen
-      .getAllByRole("button")
-      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+      .getAllByRole('button')
+      .find(b => b.querySelector('[data-testid="TuneIcon"]'))
 
-    fireEvent.click(tuneBtn!);
+    fireEvent.click(tuneBtn!)
 
-    fireEvent.mouseDown(screen.getByText("search.searchIn"));
+    fireEvent.mouseDown(screen.getByText('search.searchIn'))
 
-    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
-  });
+    expect(screen.getByPlaceholderText('common.search')).toBeInTheDocument()
+  })
 
-  it("clicking Cancel closes popover and search collapses if empty", async () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('clicking Cancel closes popover and search collapses if empty', async () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole('button'))
     const tuneBtn = screen
-      .getAllByRole("button")
-      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+      .getAllByRole('button')
+      .find(b => b.querySelector('[data-testid="TuneIcon"]'))
 
-    fireEvent.click(tuneBtn!);
+    fireEvent.click(tuneBtn!)
 
-    fireEvent.click(screen.getByText("common.cancel"));
+    fireEvent.click(screen.getByText('common.cancel'))
 
     await waitFor(() =>
-      expect(screen.queryByText("search.searchIn")).not.toBeInTheDocument()
-    );
-    expect(screen.queryByPlaceholderText("common.search")).toBeNull();
-  });
+      expect(screen.queryByText('search.searchIn')).not.toBeInTheDocument()
+    )
+    expect(screen.queryByPlaceholderText('common.search')).toBeNull()
+  })
 
-  it("does not collapse when selecting a filter value", async () => {
-    renderWithProviders(<SearchBar />, preloadedState);
+  it('does not collapse when selecting a filter value', async () => {
+    renderWithProviders(<SearchBar />, preloadedState)
 
-    fireEvent.click(screen.getByRole("button"));
-
-    const tuneBtn = screen
-      .getAllByRole("button")
-      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
-
-    fireEvent.click(tuneBtn!);
-
-    fireEvent.mouseDown(screen.getByText("search.searchIn")); // simulate interaction inside menu
-
-    expect(screen.getByPlaceholderText("common.search")).toBeInTheDocument();
-  });
-
-  it("keeps input value after popover closes if not empty", () => {
-    renderWithProviders(<SearchBar />, preloadedState);
-
-    fireEvent.click(screen.getByRole("button"));
-    userEvent.type(screen.getByPlaceholderText("common.search"), "hello");
+    fireEvent.click(screen.getByRole('button'))
 
     const tuneBtn = screen
-      .getAllByRole("button")
-      .find((b) => b.querySelector('[data-testid="TuneIcon"]'));
+      .getAllByRole('button')
+      .find(b => b.querySelector('[data-testid="TuneIcon"]'))
 
-    fireEvent.click(tuneBtn!);
-    fireEvent.click(document.body);
+    fireEvent.click(tuneBtn!)
 
-    const inputAfter = screen.getByPlaceholderText("common.search");
-    expect(inputAfter).toHaveValue("hello");
-  });
-});
+    fireEvent.mouseDown(screen.getByText('search.searchIn')) // simulate interaction inside menu
+
+    expect(screen.getByPlaceholderText('common.search')).toBeInTheDocument()
+  })
+
+  it('keeps input value after popover closes if not empty', () => {
+    renderWithProviders(<SearchBar />, preloadedState)
+
+    fireEvent.click(screen.getByRole('button'))
+    userEvent.type(screen.getByPlaceholderText('common.search'), 'hello')
+
+    const tuneBtn = screen
+      .getAllByRole('button')
+      .find(b => b.querySelector('[data-testid="TuneIcon"]'))
+
+    fireEvent.click(tuneBtn!)
+    fireEvent.click(document.body)
+
+    const inputAfter = screen.getByPlaceholderText('common.search')
+    expect(inputAfter).toHaveValue('hello')
+  })
+})

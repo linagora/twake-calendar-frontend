@@ -1,19 +1,19 @@
-import { MenuItem } from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
+import { MenuItem } from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
 
 export default function EventDuplication({
-  onOpenDuplicate,
+  onOpenDuplicate
 }: {
-  onOpenDuplicate?: () => void;
+  onOpenDuplicate?: () => void
 }) {
-  const { t } = useI18n();
+  const { t } = useI18n()
   return (
     <MenuItem
       onClick={() => {
-        onOpenDuplicate?.();
+        onOpenDuplicate?.()
       }}
     >
-      {t("eventDuplication.duplicateEvent")}
+      {t('eventDuplication.duplicateEvent')}
     </MenuItem>
-  );
+  )
 }

@@ -1,23 +1,23 @@
-import { Typography } from "@linagora/twake-mui";
+import { Typography } from '@linagora/twake-mui'
 
 export function OwnerCaption({
   showCaption,
-  ownerDisplayName,
+  ownerDisplayName
 }: {
-  showCaption: boolean;
-  ownerDisplayName: string;
+  showCaption: boolean
+  ownerDisplayName: string
 }) {
   return (
     <Typography
       variant="caption"
       color="text.secondary"
       style={{
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        wordBreak: "break-word",
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        wordBreak: 'break-word'
       }}
     >
       {showCaption && ownerDisplayName}
     </Typography>
-  );
+  )
 }

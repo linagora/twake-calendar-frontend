@@ -1,33 +1,33 @@
-import { ResponsiveDialog } from "@/components/Dialog";
-import { Button, TextField, TwakeMuiThemeProvider } from "@linagora/twake-mui";
-import { fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
+import { ResponsiveDialog } from '@/components/Dialog'
+import { Button, TextField, TwakeMuiThemeProvider } from '@linagora/twake-mui'
+import { fireEvent, render, screen } from '@testing-library/react'
+import React from 'react'
 
-describe("ResponsiveDialog", () => {
-  const mockOnClose = jest.fn();
-  const mockOnExpandToggle = jest.fn();
+describe('ResponsiveDialog', () => {
+  const mockOnClose = jest.fn()
+  const mockOnExpandToggle = jest.fn()
 
   const renderWithTheme = (ui: React.ReactElement) => {
-    return render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>);
-  };
+    return render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>)
+  }
 
   beforeEach(() => {
-    mockOnClose.mockClear();
-    mockOnExpandToggle.mockClear();
-  });
+    mockOnClose.mockClear()
+    mockOnExpandToggle.mockClear()
+  })
 
-  it("renders in normal mode by default", () => {
+  it('renders in normal mode by default', () => {
     renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test Dialog">
         <TextField label="Name" />
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Test Dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-  });
+    expect(screen.getByText('Test Dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
+  })
 
-  it("renders title in normal mode", () => {
+  it('renders title in normal mode', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -37,13 +37,13 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("My Title")).toBeInTheDocument();
-    expect(screen.queryByLabelText("show less")).not.toBeInTheDocument();
-  });
+    expect(screen.getByText('My Title')).toBeInTheDocument()
+    expect(screen.queryByLabelText('show less')).not.toBeInTheDocument()
+  })
 
-  it("renders back arrow in extended mode", () => {
+  it('renders back arrow in extended mode', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -54,13 +54,13 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.queryByText("My Title")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("show less")).toBeInTheDocument();
-  });
+    expect(screen.queryByText('My Title')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('show less')).toBeInTheDocument()
+  })
 
-  it("calls onExpandToggle when back arrow is clicked", () => {
+  it('calls onExpandToggle when back arrow is clicked', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -71,15 +71,15 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const backButton = screen.getByLabelText("show less");
-    fireEvent.click(backButton);
+    const backButton = screen.getByLabelText('show less')
+    fireEvent.click(backButton)
 
-    expect(mockOnExpandToggle).toHaveBeenCalledTimes(1);
-  });
+    expect(mockOnExpandToggle).toHaveBeenCalledTimes(1)
+  })
 
-  it("renders actions when provided", () => {
+  it('renders actions when provided', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -89,38 +89,38 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Custom Action")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Custom Action')).toBeInTheDocument()
+  })
 
-  it("does not render actions when not provided", () => {
+  it('does not render actions when not provided', () => {
     const { container } = renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const dialogActions = container.querySelector(".MuiDialogActions-root");
-    expect(dialogActions).not.toBeInTheDocument();
-  });
+    const dialogActions = container.querySelector('.MuiDialogActions-root')
+    expect(dialogActions).not.toBeInTheDocument()
+  })
 
-  it("calls onClose when backdrop is clicked", () => {
+  it('calls onClose when backdrop is clicked', () => {
     renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const backdrop = document.querySelector(".MuiBackdrop-root");
+    const backdrop = document.querySelector('.MuiBackdrop-root')
     if (backdrop) {
-      fireEvent.click(backdrop);
+      fireEvent.click(backdrop)
     }
 
-    expect(mockOnClose).toHaveBeenCalled();
-  });
+    expect(mockOnClose).toHaveBeenCalled()
+  })
 
-  it("applies custom normalMaxWidth", () => {
+  it('applies custom normalMaxWidth', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -130,24 +130,24 @@ describe("ResponsiveDialog", () => {
       >
         <div>Normal Width Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Normal Width Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Normal Width Content')).toBeInTheDocument()
+  })
 
-  it("wraps children in Stack component", () => {
+  it('wraps children in Stack component', () => {
     renderWithTheme(
       <ResponsiveDialog open={true} onClose={mockOnClose} title="Test">
         <TextField label="Field 1" />
         <TextField label="Field 2" />
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByLabelText("Field 1")).toBeInTheDocument();
-    expect(screen.getByLabelText("Field 2")).toBeInTheDocument();
-  });
+    expect(screen.getByLabelText('Field 1')).toBeInTheDocument()
+    expect(screen.getByLabelText('Field 2')).toBeInTheDocument()
+  })
 
-  it("uses correct spacing in normal mode", () => {
+  it('uses correct spacing in normal mode', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -158,12 +158,12 @@ describe("ResponsiveDialog", () => {
       >
         <div>Normal Spacing Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Normal Spacing Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Normal Spacing Content')).toBeInTheDocument()
+  })
 
-  it("uses correct spacing in extended mode", () => {
+  it('uses correct spacing in extended mode', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -174,12 +174,12 @@ describe("ResponsiveDialog", () => {
       >
         <div>Extended Spacing Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Extended Spacing Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Extended Spacing Content')).toBeInTheDocument()
+  })
 
-  it("applies contentSx custom styles", () => {
+  it('applies contentSx custom styles', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -189,28 +189,28 @@ describe("ResponsiveDialog", () => {
       >
         <div>Custom Styled Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Custom Styled Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Custom Styled Content')).toBeInTheDocument()
+  })
 
-  it("applies titleSx custom styles", () => {
+  it('applies titleSx custom styles', () => {
     const { container } = renderWithTheme(
       <ResponsiveDialog
         open={true}
         onClose={mockOnClose}
         title="Test"
-        titleSx={{ color: "red" }}
+        titleSx={{ color: 'red' }}
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const title = screen.getByText("Test");
-    expect(title).toBeInTheDocument();
-  });
+    const title = screen.getByText('Test')
+    expect(title).toBeInTheDocument()
+  })
 
-  it("shows dividers when dividers prop is true", () => {
+  it('shows dividers when dividers prop is true', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -220,12 +220,12 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content with Dividers</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Content with Dividers")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Content with Dividers')).toBeInTheDocument()
+  })
 
-  it("does not show back arrow when onExpandToggle is not provided", () => {
+  it('does not show back arrow when onExpandToggle is not provided', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -235,13 +235,13 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.queryByLabelText("show less")).not.toBeInTheDocument();
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
-  });
+    expect(screen.queryByLabelText('show less')).not.toBeInTheDocument()
+    expect(screen.getByText('Test Title')).toBeInTheDocument()
+  })
 
-  it("accepts custom headerHeight", () => {
+  it('accepts custom headerHeight', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -252,12 +252,12 @@ describe("ResponsiveDialog", () => {
       >
         <div>Custom Header Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Custom Header Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Custom Header Content')).toBeInTheDocument()
+  })
 
-  it("renders with custom expandedContentMaxWidth", () => {
+  it('renders with custom expandedContentMaxWidth', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -268,22 +268,22 @@ describe("ResponsiveDialog", () => {
       >
         <div>Wide Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Wide Content")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Wide Content')).toBeInTheDocument()
+  })
 
-  it("does not render dialog content when open is false", () => {
+  it('does not render dialog content when open is false', () => {
     renderWithTheme(
       <ResponsiveDialog open={false} onClose={mockOnClose} title="Test">
         <div>Test Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.queryByText("Test Content")).not.toBeInTheDocument();
-  });
+    expect(screen.queryByText('Test Content')).not.toBeInTheDocument()
+  })
 
-  it("renders correctly in extended mode", () => {
+  it('renders correctly in extended mode', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -294,13 +294,13 @@ describe("ResponsiveDialog", () => {
       >
         <div>Extended Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByText("Extended Content")).toBeInTheDocument();
-    expect(screen.getByLabelText("show less")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Extended Content')).toBeInTheDocument()
+    expect(screen.getByLabelText('show less')).toBeInTheDocument()
+  })
 
-  it("renders expand and close icons in normal mode when showHeaderActions is true", () => {
+  it('renders expand and close icons in normal mode when showHeaderActions is true', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -312,13 +312,13 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.getByLabelText("expand")).toBeInTheDocument();
-    expect(screen.getByLabelText("close")).toBeInTheDocument();
-  });
+    expect(screen.getByLabelText('expand')).toBeInTheDocument()
+    expect(screen.getByLabelText('close')).toBeInTheDocument()
+  })
 
-  it("does not render header icons when showHeaderActions is false", () => {
+  it('does not render header icons when showHeaderActions is false', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -330,14 +330,14 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    expect(screen.queryByLabelText("expand")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("close")).not.toBeInTheDocument();
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
-  });
+    expect(screen.queryByLabelText('expand')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('close')).not.toBeInTheDocument()
+    expect(screen.getByText('Test Title')).toBeInTheDocument()
+  })
 
-  it("calls onClose when close icon is clicked", () => {
+  it('calls onClose when close icon is clicked', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -348,15 +348,15 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const closeButton = screen.getByLabelText("close");
-    fireEvent.click(closeButton);
+    const closeButton = screen.getByLabelText('close')
+    fireEvent.click(closeButton)
 
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
-  });
+    expect(mockOnClose).toHaveBeenCalledTimes(1)
+  })
 
-  it("calls onExpandToggle when expand icon is clicked", () => {
+  it('calls onExpandToggle when expand icon is clicked', () => {
     renderWithTheme(
       <ResponsiveDialog
         open={true}
@@ -368,11 +368,11 @@ describe("ResponsiveDialog", () => {
       >
         <div>Content</div>
       </ResponsiveDialog>
-    );
+    )
 
-    const expandButton = screen.getByLabelText("expand");
-    fireEvent.click(expandButton);
+    const expandButton = screen.getByLabelText('expand')
+    fireEvent.click(expandButton)
 
-    expect(mockOnExpandToggle).toHaveBeenCalledTimes(1);
-  });
-});
+    expect(mockOnExpandToggle).toHaveBeenCalledTimes(1)
+  })
+})

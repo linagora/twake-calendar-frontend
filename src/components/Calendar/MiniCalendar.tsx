@@ -1,121 +1,126 @@
-import { useAppDispatch } from "@/app/hooks";
-import { setView } from "@/features/Settings/SettingsSlice";
-import { computeStartOfTheWeek } from "@/utils/dateUtils";
-import type { CalendarApi } from "@fullcalendar/core";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { DateCalendar } from "@mui/x-date-pickers";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import moment from "moment";
-import { useEffect, useState } from "react";
-import { useI18n } from "twake-i18n";
+import { useAppDispatch } from '@/app/hooks'
+import { setView } from '@/features/Settings/SettingsSlice'
+import { computeStartOfTheWeek } from '@/utils/dateUtils'
+import type { CalendarApi } from '@fullcalendar/core'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { DateCalendar } from '@mui/x-date-pickers'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import moment from 'moment'
+import { useEffect, useState } from 'react'
+import { useI18n } from 'twake-i18n'
 
 export function MiniCalendar({
   calendarRef,
   selectedDate,
-  setSelectedMiniDate,
+  setSelectedMiniDate
 }: {
-  calendarRef: React.MutableRefObject<CalendarApi | null>;
-  selectedDate: Date;
-  setSelectedMiniDate: (d: Date) => void;
+  calendarRef: React.MutableRefObject<CalendarApi | null>
+  selectedDate: Date
+  setSelectedMiniDate: (d: Date) => void
 }) {
-  const dispatch = useAppDispatch();
-  const [visibleDate, setVisibleDate] = useState(selectedDate);
-  const { t } = useI18n();
+  const dispatch = useAppDispatch()
+  const [visibleDate, setVisibleDate] = useState(selectedDate)
+  const { t } = useI18n()
 
-  useEffect(() => setVisibleDate(selectedDate), [selectedDate]);
+  useEffect(() => {
+    const handleVisibleDateChange = () => {
+      setVisibleDate(selectedDate)
+    }
+    handleVisibleDateChange()
+  }, [selectedDate])
   return (
     <LocalizationProvider
       dateAdapter={AdapterMoment}
-      adapterLocale={t("locale") ?? "en-gb"}
+      adapterLocale={t('locale') ?? 'en-gb'}
     >
       <DateCalendar
         value={moment(visibleDate)}
         onChange={async (dateMoment, selectionState) => {
-          if (!dateMoment) return;
-          const date = dateMoment.toDate();
-          if (selectionState === "finish") {
-            await dispatch(setView("calendar"));
-            setSelectedMiniDate(date);
-            calendarRef.current?.gotoDate(date);
+          if (!dateMoment) return
+          const date = dateMoment.toDate()
+          if (selectionState === 'finish') {
+            await dispatch(setView('calendar'))
+            setSelectedMiniDate(date)
+            calendarRef.current?.gotoDate(date)
           }
         }}
         showDaysOutsideCurrentMonth
-        onMonthChange={(month) => {
-          setVisibleDate(month.toDate());
+        onMonthChange={month => {
+          setVisibleDate(month.toDate())
         }}
-        views={["month", "day"]}
+        views={['month', 'day']}
         slots={{
-          switchViewIcon: KeyboardArrowDownIcon,
+          switchViewIcon: KeyboardArrowDownIcon
         }}
         sx={{
-          width: "100%",
-          height: "300px",
-          "& .MuiPickersCalendarHeader-root": {
-            marginTop: 3,
-          },
+          width: '100%',
+          height: '300px',
+          '& .MuiPickersCalendarHeader-root': {
+            marginTop: 3
+          }
         }}
         slotProps={{
-          day: (ownerState) => {
-            const date = ownerState.day.toDate();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const selected = new Date(selectedDate);
-            selected.setHours(0, 0, 0, 0);
+          day: ownerState => {
+            const date = ownerState.day.toDate()
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const selected = new Date(selectedDate)
+            selected.setHours(0, 0, 0, 0)
 
-            const isToday = date.getTime() === today.getTime();
+            const isToday = date.getTime() === today.getTime()
             const isSelectedDay =
-              calendarRef.current?.view.type === "timeGridDay" &&
-              date.getTime() === selected.getTime();
+              calendarRef.current?.view.type === 'timeGridDay' &&
+              date.getTime() === selected.getTime()
 
             const isInSelectedWeek =
-              calendarRef.current?.view.type === "timeGridWeek" ||
+              calendarRef.current?.view.type === 'timeGridWeek' ||
               calendarRef.current?.view.type === undefined
                 ? (() => {
-                    const startOfWeek = computeStartOfTheWeek(selected);
-                    const endOfWeek = new Date(startOfWeek);
-                    endOfWeek.setDate(startOfWeek.getDate() + 6);
-                    endOfWeek.setHours(23, 59, 59, 999);
-                    return date >= startOfWeek && date <= endOfWeek;
+                    const startOfWeek = computeStartOfTheWeek(selected)
+                    const endOfWeek = new Date(startOfWeek)
+                    endOfWeek.setDate(startOfWeek.getDate() + 6)
+                    endOfWeek.setHours(23, 59, 59, 999)
+                    return date >= startOfWeek && date <= endOfWeek
                   })()
-                : false;
+                : false
 
             const classNames = [
-              isToday ? "today" : "",
-              isSelectedDay ? "selectedDay" : "",
-              isInSelectedWeek ? "selectedWeek" : "",
-            ].join(" ");
+              isToday ? 'today' : '',
+              isSelectedDay ? 'selectedDay' : '',
+              isInSelectedWeek ? 'selectedWeek' : ''
+            ].join(' ')
 
             return {
               className: classNames,
-              selected: classNames.includes("selectedWeek"),
+              selected: classNames.includes('selectedWeek'),
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
               disableMargin: false,
               style: {
-                backgroundColor: "transparent",
-                position: "relative",
-                flexDirection: "column",
-                border: 0,
+                backgroundColor: 'transparent',
+                position: 'relative',
+                flexDirection: 'column',
+                border: 0
               },
               sx: {
-                "&.Mui-selected": {
-                  color: "inherit !important",
-                  fontWeight: "inherit !important",
+                '&.Mui-selected': {
+                  color: 'inherit !important',
+                  fontWeight: 'inherit !important'
                 },
-                "&.selectedDay": {
-                  backgroundColor: "lightgray !important",
+                '&.selectedDay': {
+                  backgroundColor: 'lightgray !important'
                 },
-                "&.today": {
-                  background: "orange !important",
-                  color: "white !important",
-                },
+                '&.today': {
+                  background: 'orange !important',
+                  color: 'white !important'
+                }
               },
-              "data-testid": `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-              children: <>{ownerState.day.date()}</>,
-            };
-          },
+              'data-testid': `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
+              children: <>{ownerState.day.date()}</>
+            }
+          }
         }}
       />
     </LocalizationProvider>
-  );
+  )
 }

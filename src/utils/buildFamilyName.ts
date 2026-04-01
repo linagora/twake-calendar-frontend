@@ -3,10 +3,8 @@ export function buildFamilyName(
   lastName: string | undefined,
   email: string
 ): string {
-  const trimmedFirstName = firstName?.trim() || "";
-  const trimmedLastName = lastName?.trim() || "";
-  const fullName = [trimmedFirstName, trimmedLastName]
-    .filter(Boolean)
-    .join(" ");
-  return fullName || email;
+  const trimmedFirstName = firstName?.trim() || ''
+  const trimmedLastName = lastName?.trim() || ''
+  const fullName = [trimmedFirstName, trimmedLastName].filter(Boolean).join(' ')
+  return fullName || email
 }

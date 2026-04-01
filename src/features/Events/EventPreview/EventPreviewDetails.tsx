@@ -1,26 +1,26 @@
-import { InfoRow } from "@/components/Event/InfoRow";
-import { Box, Button, Link, Typography } from "@linagora/twake-mui";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import RepeatIcon from "@mui/icons-material/Repeat";
-import SubjectIcon from "@mui/icons-material/Subject";
-import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import { alpha, useTheme } from "@mui/material/styles";
-import { useMemo } from "react";
-import { useI18n } from "twake-i18n";
-import { CalendarEvent } from "../EventsTypes";
-import { EventPreviewAttendees } from "./EventPreviewAttendees";
-import { makeRecurrenceString } from "./utils/makeRecurrenceString";
-import { renderAttendeeBadge } from "@/components/Event/utils/eventUtils";
+import { InfoRow } from '@/components/Event/InfoRow'
+import { Box, Button, Link, Typography } from '@linagora/twake-mui'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
+import RepeatIcon from '@mui/icons-material/Repeat'
+import SubjectIcon from '@mui/icons-material/Subject'
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
+import { alpha, useTheme } from '@mui/material/styles'
+import { useMemo } from 'react'
+import { useI18n } from 'twake-i18n'
+import { CalendarEvent } from '../EventsTypes'
+import { EventPreviewAttendees } from './EventPreviewAttendees'
+import { makeRecurrenceString } from './utils/makeRecurrenceString'
+import { renderAttendeeBadge } from '@/components/Event/utils/eventUtils'
 
 interface EventPreviewDetailsProps {
-  event: CalendarEvent;
-  isOwn: boolean;
-  isNotPrivate: boolean;
-  isResourceEventPreview?: boolean;
-  calendarName?: string;
+  event: CalendarEvent
+  isOwn: boolean
+  isNotPrivate: boolean
+  isResourceEventPreview?: boolean
+  calendarName?: string
 }
 
 export function EventPreviewDetails({
@@ -28,63 +28,62 @@ export function EventPreviewDetails({
   isOwn,
   isNotPrivate,
   isResourceEventPreview,
-  calendarName,
+  calendarName
 }: EventPreviewDetailsProps) {
-  const { t } = useI18n();
-  const theme = useTheme();
-  const infoIconColor = alpha(theme.palette.grey[900], 0.9);
-  const infoIconSx = { minWidth: "25px", marginRight: 2, color: infoIconColor };
+  const { t } = useI18n()
+  const theme = useTheme()
+  const infoIconColor = alpha(theme.palette.grey[900], 0.9)
+  const infoIconSx = { minWidth: '25px', marginRight: 2, color: infoIconColor }
 
   const resources = useMemo(
     () =>
       event?.attendee?.filter(
-        (attendee) =>
-          attendee.cutype === "RESOURCE" &&
+        attendee =>
+          attendee.cutype === 'RESOURCE' &&
           ((isResourceEventPreview && calendarName !== attendee.cn) ||
             !isResourceEventPreview)
       ),
     [calendarName, event?.attendee, isResourceEventPreview]
-  );
+  )
   const eventAttendees = useMemo(
     () =>
-      event?.attendee?.filter((attendee) => attendee.cutype !== "RESOURCE") ??
-      [],
+      event?.attendee?.filter(attendee => attendee.cutype !== 'RESOURCE') ?? [],
     [event?.attendee]
-  );
+  )
 
   const attendees =
     eventAttendees?.filter(
-      (a) => a.cal_address !== event.organizer?.cal_address
-    ) || [];
+      a => a.cal_address !== event.organizer?.cal_address
+    ) || []
   const organizer = eventAttendees?.find(
-    (a) => a.cal_address === event.organizer?.cal_address
-  );
+    a => a.cal_address === event.organizer?.cal_address
+  )
 
-  const showDetails = isNotPrivate || isOwn;
+  const showDetails = isNotPrivate || isOwn
 
   if (!showDetails) {
     return (
       <Box
         sx={{
-          backgroundColor: "#F3F4F6",
+          backgroundColor: '#F3F4F6',
           height: 48,
-          borderRadius: "8px",
-          gap: "16px",
-          paddingTop: "16px",
-          paddingBottom: "16px",
+          borderRadius: '8px',
+          gap: '16px',
+          paddingTop: '16px',
+          paddingBottom: '16px'
         }}
       >
         <Typography
           fontWeight={500}
-          fontSize={"12px"}
-          lineHeight={"16px"}
-          letterSpacing={"0.5px"}
-          textAlign={"center"}
+          fontSize="12px"
+          lineHeight="16px"
+          letterSpacing="0.5px"
+          textAlign="center"
         >
-          {t("eventPreview.privateEvent.hiddenDetails")}
+          {t('eventPreview.privateEvent.hiddenDetails')}
         </Typography>
       </Box>
-    );
+    )
   }
 
   return (
@@ -103,14 +102,14 @@ export function EventPreviewDetails({
               href={event.x_openpass_videoconference}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ textDecoration: "none" }}
+              sx={{ textDecoration: 'none' }}
             >
               <Button
                 variant="contained"
                 size="medium"
-                sx={{ borderRadius: "4px" }}
+                sx={{ borderRadius: '4px' }}
               >
-                {t("eventPreview.joinVideo")}
+                {t('eventPreview.joinVideo')}
               </Button>
             </Link>
           }
@@ -119,7 +118,7 @@ export function EventPreviewDetails({
 
       {isResourceEventPreview &&
         organizer &&
-        renderAttendeeBadge(organizer, "org", t, true, true)}
+        renderAttendeeBadge(organizer, 'org', t, true, true)}
 
       {/* Attendees */}
       {!isResourceEventPreview && attendees.length > 0 && (
@@ -161,31 +160,31 @@ export function EventPreviewDetails({
             <Box
               key={resource.cn}
               sx={{
-                marginRight: "5px",
+                marginRight: '5px'
               }}
             >
               <Typography
                 variant="body2"
                 color="textPrimary"
                 sx={{
-                  wordBreak: "break-word",
-                  whiteSpace: "pre-line",
-                  maxHeight: "33vh",
-                  overflowY: "auto",
-                  width: "100%",
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-line',
+                  maxHeight: '33vh',
+                  overflowY: 'auto',
+                  width: '100%'
                 }}
               >
                 {resource.cn}
-                {index < resources.length - 1 ? "," : ""}
+                {index < resources.length - 1 ? ',' : ''}
               </Typography>
               <Typography
                 sx={{
-                  wordBreak: "break-word",
-                  whiteSpace: "pre-line",
-                  overflowY: "auto",
-                  width: "100%",
-                  fontSize: "13px",
-                  color: "#717D96",
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-line',
+                  overflowY: 'auto',
+                  width: '100%',
+                  fontSize: '13px',
+                  color: '#717D96'
                 }}
               >
                 {t(`eventPreview.attendingStatus.${resource.partstat}`)}
@@ -193,8 +192,8 @@ export function EventPreviewDetails({
             </Box>
           ))}
           style={{
-            fontSize: "16px",
-            fontFamily: "'Inter', sans-serif",
+            fontSize: '16px',
+            fontFamily: "'Inter', sans-serif"
           }}
         />
       )}
@@ -221,16 +220,16 @@ export function EventPreviewDetails({
               <NotificationsNoneIcon />
             </Box>
           }
-          text={t("eventPreview.alarmText", {
+          text={t('eventPreview.alarmText', {
             trigger: t(`event.form.notifications.${event.alarm.trigger}`),
             action: (() => {
-              if (!event.alarm.action) return "";
-              const translationKey = `event.form.notifications.${event.alarm.action}`;
-              const translated = t(translationKey);
+              if (!event.alarm.action) return ''
+              const translationKey = `event.form.notifications.${event.alarm.action}`
+              const translated = t(translationKey)
               return translated === translationKey
                 ? event.alarm.action
-                : translated;
-            })(),
+                : translated
+            })()
           })}
         />
       )}
@@ -247,10 +246,10 @@ export function EventPreviewDetails({
           text={makeRecurrenceString({
             repetition: event.repetition,
             t,
-            startText: `${t("eventPreview.recurrentEvent")} · ${t(
+            startText: `${t('eventPreview.recurrentEvent')} · ${t(
               `eventPreview.freq.${event.repetition.freq}`,
               event.repetition.freq
-            )}`,
+            )}`
           })}
         />
       )}
@@ -269,5 +268,5 @@ export function EventPreviewDetails({
         />
       )}
     </>
-  );
+  )
 }

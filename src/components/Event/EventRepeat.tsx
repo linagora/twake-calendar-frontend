@@ -1,4 +1,4 @@
-import { RepetitionObject } from "@/features/Events/EventsTypes";
+import { RepetitionObject } from '@/features/Events/EventsTypes'
 import {
   Box,
   FormControl,
@@ -10,134 +10,134 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
-  Typography,
-} from "@linagora/twake-mui";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import dayjs from "dayjs";
-import "dayjs/locale/en";
-import "dayjs/locale/fr";
-import "dayjs/locale/ru";
-import "dayjs/locale/vi";
-import { useI18n } from "twake-i18n";
-import { ReadOnlyDateField } from "./components/ReadOnlyPickerField";
-import { LONG_DATE_FORMAT } from "./utils/dateTimeFormatters";
-import { FC_DAYS, WeekDaySelector } from "./WeekDaySelector";
+  Typography
+} from '@linagora/twake-mui'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import dayjs from 'dayjs'
+import 'dayjs/locale/en'
+import 'dayjs/locale/fr'
+import 'dayjs/locale/ru'
+import 'dayjs/locale/vi'
+import { useI18n } from 'twake-i18n'
+import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
+import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
+import { FC_DAYS, WeekDaySelector } from './WeekDaySelector'
 
 export default function RepeatEvent({
   repetition,
   eventStart,
   setRepetition,
-  isOwn = true,
+  isOwn = true
 }: {
-  repetition: RepetitionObject;
-  eventStart: Date;
-  setRepetition: (repetition: RepetitionObject) => void;
-  isOwn?: boolean;
+  repetition: RepetitionObject
+  eventStart: Date
+  setRepetition: (repetition: RepetitionObject) => void
+  isOwn?: boolean
 }) {
-  const { t } = useI18n();
-  const days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
-  const day = new Date(eventStart);
+  const { t } = useI18n()
+  const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+  const day = new Date(eventStart)
   const dateCalendarLayoutSx = {
-    "& .MuiDateCalendar-root.MuiDateCalendar-root": {
-      width: "260px",
-      maxWidth: "260px",
-      padding: "0 15px",
-    },
-  };
+    '& .MuiDateCalendar-root.MuiDateCalendar-root': {
+      width: '260px',
+      maxWidth: '260px',
+      padding: '0 15px'
+    }
+  }
 
   // Fully derived — occurrences takes priority over endDate
   const getEndOption = () => {
-    if (repetition.occurrences) return "after";
-    if (repetition.endDate) return "on";
-    return "never";
-  };
+    if (repetition.occurrences) return 'after'
+    if (repetition.endDate) return 'on'
+    return 'never'
+  }
 
-  const endOption = getEndOption();
+  const endOption = getEndOption()
 
-  const defaultEndDate = dayjs(eventStart).add(1, "day").format("YYYY-MM-DD");
+  const defaultEndDate = dayjs(eventStart).add(1, 'day').format('YYYY-MM-DD')
 
   return (
     <Box>
       <Stack>
         {/* Interval */}
         <Box display="flex" alignItems="center" gap={2} mb={1}>
-          <Typography variant="h6">{t("event.repeat.every")}</Typography>
+          <Typography variant="h6">{t('event.repeat.every')}</Typography>
           <TextField
             type="number"
             value={repetition.interval ?? 1}
             disabled={!isOwn}
-            onChange={(e) =>
+            onChange={e =>
               setRepetition({
                 ...repetition,
-                interval: Number(e.target.value),
+                interval: Number(e.target.value)
               })
             }
             size="small"
             style={{ width: 80 }}
             inputProps={{
               min: 1,
-              "data-testid": "repeat-interval",
+              'data-testid': 'repeat-interval',
               style: {
-                textAlign: "center",
-                paddingRight: 5,
-              },
+                textAlign: 'center',
+                paddingRight: 5
+              }
             }}
           />
           <FormControl size="small" style={{ minWidth: 120 }}>
             <Select
-              value={repetition.freq ?? "daily"}
+              value={repetition.freq ?? 'daily'}
               disabled={!isOwn}
               onChange={(e: SelectChangeEvent) => {
-                if (e.target.value === "weekly") {
-                  const jsDay = day.getDay();
-                  const icsDay = days[(jsDay + 6) % 7];
+                if (e.target.value === 'weekly') {
+                  const jsDay = day.getDay()
+                  const icsDay = days[(jsDay + 6) % 7]
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
-                    byday: [icsDay],
-                  });
+                    byday: [icsDay]
+                  })
                 } else {
                   setRepetition({
                     ...repetition,
                     freq: e.target.value,
-                    byday: null,
-                  });
+                    byday: null
+                  })
                 }
               }}
             >
-              <MenuItem value={"daily"}>
-                {t("event.repeat.frequency.days")}
+              <MenuItem value="daily">
+                {t('event.repeat.frequency.days')}
               </MenuItem>
-              <MenuItem value={"weekly"}>
-                {t("event.repeat.frequency.weeks")}
+              <MenuItem value="weekly">
+                {t('event.repeat.frequency.weeks')}
               </MenuItem>
-              <MenuItem value={"monthly"}>
-                {t("event.repeat.frequency.months")}
+              <MenuItem value="monthly">
+                {t('event.repeat.frequency.months')}
               </MenuItem>
-              <MenuItem value={"yearly"}>
-                {t("event.repeat.frequency.years")}
+              <MenuItem value="yearly">
+                {t('event.repeat.frequency.years')}
               </MenuItem>
             </Select>
           </FormControl>
         </Box>
 
         {/* Weekly selection */}
-        {repetition.freq === "weekly" && (
+        {repetition.freq === 'weekly' && (
           <Box mb={2}>
             <WeekDaySelector
               selectedDays={(repetition.byday ?? [])
-                .map((ics) => FC_DAYS.find((d) => d.ics === ics)?.fc ?? -1)
-                .filter((d) => d !== -1)}
-              onChange={(fcDays) => {
+                .map(ics => FC_DAYS.find(d => d.ics === ics)?.fc ?? -1)
+                .filter(d => d !== -1)}
+              onChange={fcDays => {
                 const icsDays = fcDays
-                  .map((fc) => FC_DAYS.find((d) => d.fc === fc)?.ics ?? "")
-                  .filter(Boolean);
+                  .map(fc => FC_DAYS.find(d => d.fc === fc)?.ics ?? '')
+                  .filter(Boolean)
                 setRepetition({
                   ...repetition,
-                  byday: icsDays.length > 0 ? icsDays : null,
-                });
+                  byday: icsDays.length > 0 ? icsDays : null
+                })
               }}
               disabled={!isOwn}
             />
@@ -147,37 +147,37 @@ export default function RepeatEvent({
         {/* End options */}
         <Box>
           <Typography variant="h6" gutterBottom>
-            {t("event.repeat.end.label")}
+            {t('event.repeat.end.label')}
           </Typography>
           <RadioGroup
             value={endOption}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === endOption) return;
+            onChange={e => {
+              const value = e.target.value
+              if (value === endOption) return
 
-              if (value === "never") {
+              if (value === 'never') {
                 setRepetition({
                   ...repetition,
                   occurrences: null,
-                  endDate: null,
-                });
+                  endDate: null
+                })
               }
-              if (value === "after") {
+              if (value === 'after') {
                 setRepetition({
                   ...repetition,
                   occurrences:
                     repetition.occurrences && repetition.occurrences > 0
                       ? repetition.occurrences
                       : 1,
-                  endDate: null,
-                });
+                  endDate: null
+                })
               }
-              if (value === "on") {
+              if (value === 'on') {
                 setRepetition({
                   ...repetition,
                   occurrences: null,
-                  endDate: repetition.endDate || defaultEndDate,
-                });
+                  endDate: repetition.endDate || defaultEndDate
+                })
               }
             }}
           >
@@ -187,7 +187,7 @@ export default function RepeatEvent({
               control={<Radio />}
               label={
                 <Typography variant="h6">
-                  {t("event.repeat.end.never")}
+                  {t('event.repeat.end.never')}
                 </Typography>
               }
             />
@@ -200,21 +200,21 @@ export default function RepeatEvent({
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography variant="h6">
-                    {t("event.repeat.end.on")}
+                    {t('event.repeat.end.on')}
                   </Typography>
                   <LocalizationProvider
                     dateAdapter={AdapterDayjs}
-                    adapterLocale={t("locale") ?? "en"}
+                    adapterLocale={t('locale') ?? 'en'}
                   >
                     <Box
                       sx={{
                         width: 220,
-                        "& .MuiInputBase-root": { fontSize: 14 },
-                        "& .MuiInputBase-input": { fontSize: 14 },
+                        '& .MuiInputBase-root': { fontSize: 14 },
+                        '& .MuiInputBase-input': { fontSize: 14 }
                       }}
                     >
                       <DatePicker
-                        sx={{ width: "100%" }}
+                        sx={{ width: '100%' }}
                         format={LONG_DATE_FORMAT}
                         minDate={dayjs(eventStart)}
                         value={
@@ -222,27 +222,27 @@ export default function RepeatEvent({
                             ? dayjs(repetition.endDate)
                             : dayjs(defaultEndDate)
                         }
-                        onChange={(value) => {
-                          if (!value || !value.isValid()) return;
-                          const newDateStr = value.format("YYYY-MM-DD");
+                        onChange={value => {
+                          if (!value || !value.isValid()) return
+                          const newDateStr = value.format('YYYY-MM-DD')
                           setRepetition({
                             ...repetition,
                             occurrences: null,
-                            endDate: newDateStr,
-                          });
+                            endDate: newDateStr
+                          })
                         }}
                         onOpen={() => {
-                          if (!isOwn || endOption === "on") return;
+                          if (!isOwn || endOption === 'on') return
                           setRepetition({
                             ...repetition,
                             occurrences: null,
-                            endDate: repetition.endDate || defaultEndDate,
-                          });
+                            endDate: repetition.endDate || defaultEndDate
+                          })
                         }}
                         slots={{ field: ReadOnlyDateField }}
                         slotProps={{
                           field: {},
-                          layout: { sx: dateCalendarLayoutSx },
+                          layout: { sx: dateCalendarLayoutSx }
                         }}
                         disabled={!isOwn}
                       />
@@ -263,38 +263,38 @@ export default function RepeatEvent({
                   alignItems="center"
                   gap={1}
                   onClick={() => {
-                    if (!isOwn || endOption === "after") return;
+                    if (!isOwn || endOption === 'after') return
                     setRepetition({
                       ...repetition,
                       endDate: null,
                       occurrences:
                         repetition.occurrences && repetition.occurrences > 0
                           ? repetition.occurrences
-                          : 1,
-                    });
+                          : 1
+                    })
                   }}
                 >
                   <Typography variant="h6">
-                    {t("event.repeat.end.after")}
+                    {t('event.repeat.end.after')}
                   </Typography>
                   <TextField
                     type="number"
-                    inputProps={{ min: 1, "data-testid": "occurrences-input" }}
+                    inputProps={{ min: 1, 'data-testid': 'occurrences-input' }}
                     size="small"
                     value={repetition.occurrences || 1}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
+                    onChange={e => {
+                      const value = Number(e.target.value)
                       setRepetition({
                         ...repetition,
                         endDate: null,
-                        occurrences: value > 0 ? value : 1,
-                      });
+                        occurrences: value > 0 ? value : 1
+                      })
                     }}
                     style={{ width: 100 }}
                     disabled={!isOwn}
                   />
                   <Typography variant="h6">
-                    {t("event.repeat.end.occurrences")}
+                    {t('event.repeat.end.occurrences')}
                   </Typography>
                 </Box>
               }
@@ -303,5 +303,5 @@ export default function RepeatEvent({
         </Box>
       </Stack>
     </Box>
-  );
+  )
 }

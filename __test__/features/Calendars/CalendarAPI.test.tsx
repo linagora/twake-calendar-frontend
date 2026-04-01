@@ -6,197 +6,197 @@ import {
   getSecretLink,
   postCalendar,
   proppatchCalendar,
-  removeCalendar,
-} from "@/features/Calendars/CalendarApi";
-import { clientConfig } from "@/features/User/oidcAuth";
-import { api } from "@/utils/apiUtils";
-clientConfig.url = "https://example.com";
+  removeCalendar
+} from '@/features/Calendars/CalendarApi'
+import { clientConfig } from '@/features/User/oidcAuth'
+import { api } from '@/utils/apiUtils'
+clientConfig.url = 'https://example.com'
 
-jest.mock("@/utils/apiUtils");
+jest.mock('@/utils/apiUtils')
 
-describe("Calendar API", () => {
+describe('Calendar API', () => {
   afterEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
-  it("fetches calendar list for a user", async () => {
-    const mockUserId = "user123";
-    const mockResponse = [{ id: "calendar1" }, { id: "calendar2" }];
+  it('fetches calendar list for a user', async () => {
+    const mockUserId = 'user123'
+    const mockResponse = [{ id: 'calendar1' }, { id: 'calendar2' }]
 
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockResponse),
-    });
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockResponse)
+    })
 
-    const calendars = await getCalendars(mockUserId);
+    const calendars = await getCalendars(mockUserId)
 
     expect(api.get).toHaveBeenCalledWith(
       `dav/calendars/${mockUserId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
       {
-        headers: { Accept: "application/calendar+json" },
+        headers: { Accept: 'application/calendar+json' }
       }
-    );
-    expect(calendars).toEqual(mockResponse);
-  });
+    )
+    expect(calendars).toEqual(mockResponse)
+  })
 
-  it("fetches calendar events for a given ID and match window", async () => {
-    const calendarId = "calendar1";
-    const match = { start: "2025-07-01", end: "2025-07-31" };
-    const mockCalendarData = { events: ["event1", "event2"] };
+  it('fetches calendar events for a given ID and match window', async () => {
+    const calendarId = 'calendar1'
+    const match = { start: '2025-07-01', end: '2025-07-31' }
+    const mockCalendarData = { events: ['event1', 'event2'] }
 
-    (api as unknown as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue(mockCalendarData),
-    });
+    ;(api as unknown as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockCalendarData)
+    })
 
-    const result = await getCalendar(calendarId, match);
+    const result = await getCalendar(calendarId, match)
 
     expect(api).toHaveBeenCalledWith(`dav/calendars/${calendarId}.json`, {
-      method: "REPORT",
+      method: 'REPORT',
       headers: {
-        Accept: "application/json, text/plain, */*",
+        Accept: 'application/json, text/plain, */*'
       },
-      body: JSON.stringify({ match }),
-    });
+      body: JSON.stringify({ match })
+    })
 
-    expect(result).toEqual(mockCalendarData);
-  });
-  it("postCalendar", async () => {
-    const calId = "calId";
-    const userId = "userId";
-    const color = { light: "calId" };
-    const name = "new cal";
-    const desc = "desc";
+    expect(result).toEqual(mockCalendarData)
+  })
+  it('postCalendar', async () => {
+    const calId = 'calId'
+    const userId = 'userId'
+    const color = { light: 'calId' }
+    const name = 'new cal'
+    const desc = 'desc'
 
-    const result = await postCalendar(userId, calId, color, name, desc);
+    const result = await postCalendar(userId, calId, color, name, desc)
 
     expect(api.post).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
       headers: {
-        Accept: "application/json, text/plain, */*",
+        Accept: 'application/json, text/plain, */*'
       },
       body: JSON.stringify({
-        id: "calId",
-        "dav:name": "new cal",
-        "apple:color": "calId",
-        "caldav:description": "desc",
-      }),
-    });
-  });
-  it("patch Calendar", async () => {
-    const calId = "calId";
-    const calLink = "/calendars/calId.json";
-    const color = { light: "calIdLight", dark: "calIdDark" };
-    const name = "new cal";
-    const desc = "desc";
+        id: 'calId',
+        'dav:name': 'new cal',
+        'apple:color': 'calId',
+        'caldav:description': 'desc'
+      })
+    })
+  })
+  it('patch Calendar', async () => {
+    const calId = 'calId'
+    const calLink = '/calendars/calId.json'
+    const color = { light: 'calIdLight', dark: 'calIdDark' }
+    const name = 'new cal'
+    const desc = 'desc'
 
-    const result = await proppatchCalendar(calLink, { color, name, desc });
+    const result = await proppatchCalendar(calLink, { color, name, desc })
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
-      method: "PROPPATCH",
+      method: 'PROPPATCH',
       headers: {
-        Accept: "application/json, text/plain, */*",
+        Accept: 'application/json, text/plain, */*'
       },
       body: JSON.stringify({
-        "dav:name": "new cal",
-        "caldav:description": "desc",
-        "apple:color": "calIdLight",
-      }),
-    });
-  });
+        'dav:name': 'new cal',
+        'caldav:description': 'desc',
+        'apple:color': 'calIdLight'
+      })
+    })
+  })
 
-  it("remove Calendar", async () => {
-    const calLink = "/calendars/calId.json";
-    const result = await removeCalendar(calLink);
+  it('remove Calendar', async () => {
+    const calLink = '/calendars/calId.json'
+    const result = await removeCalendar(calLink)
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
-      method: "DELETE",
+      method: 'DELETE',
       headers: {
-        Accept: "application/json, text/plain, */*",
-      },
-    });
-  });
+        Accept: 'application/json, text/plain, */*'
+      }
+    })
+  })
 
-  it("get secret link without reset", async () => {
-    const calLink = "/calendars/calId.json";
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue("link"),
-    });
+  it('get secret link without reset', async () => {
+    const calLink = '/calendars/calId.json'
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue('link')
+    })
 
-    const noreset = await getSecretLink(calLink, false);
+    const noreset = await getSecretLink(calLink, false)
 
     expect(api.get).toHaveBeenCalledWith(
       `calendar/api${calLink}/secret-link?shouldResetLink=false`,
       {
         headers: {
-          Accept: "application/json, text/plain, */*",
-        },
+          Accept: 'application/json, text/plain, */*'
+        }
       }
-    );
-  });
-  it("get secret link with reset", async () => {
-    const calLink = "/calendars/calId.json";
-    (api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue("link"),
-    });
-    const reset = await getSecretLink(calLink, true);
+    )
+  })
+  it('get secret link with reset', async () => {
+    const calLink = '/calendars/calId.json'
+    ;(api.get as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue('link')
+    })
+    const reset = await getSecretLink(calLink, true)
 
     expect(api.get).toHaveBeenCalledWith(
       `calendar/api${calLink}/secret-link?shouldResetLink=true`,
       {
         headers: {
-          Accept: "application/json, text/plain, */*",
-        },
+          Accept: 'application/json, text/plain, */*'
+        }
       }
-    );
-  });
+    )
+  })
 
-  it("get export data ", async () => {
-    const calLink = "/calendars/calId.json";
-    (api.get as jest.Mock).mockReturnValue({
-      text: jest.fn().mockResolvedValue("data"),
-    });
-    const data = await exportCalendar(calLink);
+  it('get export data ', async () => {
+    const calLink = '/calendars/calId.json'
+    ;(api.get as jest.Mock).mockReturnValue({
+      text: jest.fn().mockResolvedValue('data')
+    })
+    const data = await exportCalendar(calLink)
 
     expect(api.get).toHaveBeenCalledWith(`dav${calLink}?export`, {
       headers: {
-        Accept: "application/calendar",
-      },
-    });
-  });
+        Accept: 'application/calendar'
+      }
+    })
+  })
 
-  it("When adding a sharedCal with #default #default is preserved", async () => {
-    const mockApiPost = jest.spyOn(api, "post");
+  it('When adding a sharedCal with #default #default is preserved', async () => {
+    const mockApiPost = jest.spyOn(api, 'post')
 
     const calData = {
       cal: {
-        id: "cal123",
-        "dav:name": "#default",
-        "apple:color": "#FF5733",
-        "caldav:description": "Default calendar",
+        id: 'cal123',
+        'dav:name': '#default',
+        'apple:color': '#FF5733',
+        'caldav:description': 'Default calendar',
         acl: [],
         invite: [],
         _links: {
           self: {
-            href: "/calendars/owner123/cal123.json",
-          },
-        },
+            href: '/calendars/owner123/cal123.json'
+          }
+        }
       },
       owner: {
-        displayName: "John Doe",
-        email: "john.doe@example.com",
-        openpaasId: "owner123",
+        displayName: 'John Doe',
+        email: 'john.doe@example.com',
+        openpaasId: 'owner123'
       },
-      color: "#FF5733",
-    };
+      color: '#FF5733'
+    }
 
-    await addSharedCalendar("currentUserId", "newCalId123", calData);
+    await addSharedCalendar('currentUserId', 'newCalId123', calData)
 
     expect(mockApiPost).toHaveBeenCalledWith(
-      "dav/calendars/currentUserId.json",
+      'dav/calendars/currentUserId.json',
       expect.objectContaining({
-        body: expect.stringContaining('"dav:name":"#default"'),
+        body: expect.stringContaining('"dav:name":"#default"')
       })
-    );
+    )
 
-    const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body));
-    expect(callBody["dav:name"]).toBe("#default");
-  });
-});
+    const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body))
+    expect(callBody['dav:name']).toBe('#default')
+  })
+})

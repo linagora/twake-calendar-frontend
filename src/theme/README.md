@@ -36,10 +36,10 @@ src/theme/
 Import and use `CustomThemeProvider` to wrap your application:
 
 ```tsx
-import { CustomThemeProvider } from "./theme/ThemeProvider";
+import { CustomThemeProvider } from './theme/ThemeProvider'
 
 function App() {
-  return <CustomThemeProvider>{/* Your application */}</CustomThemeProvider>;
+  return <CustomThemeProvider>{/* Your application */}</CustomThemeProvider>
 }
 ```
 
@@ -48,11 +48,11 @@ function App() {
 Use `useTheme` to access theme variables:
 
 ```tsx
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from '@mui/material/styles'
 
 function MyComponent() {
-  const theme = useTheme();
-  const textColor = theme.palette.text.secondary;
+  const theme = useTheme()
+  const textColor = theme.palette.text.secondary
 }
 ```
 
@@ -61,7 +61,7 @@ function MyComponent() {
 Use theme variables directly in CSS:
 
 ```tsx
-<Typography sx={{ color: "text.secondary" }}>
+<Typography sx={{ color: 'text.secondary' }}>
   Text with secondary color
 </Typography>
 ```
@@ -104,9 +104,8 @@ npm install cozy-ui
 In your main file, replace `CustomThemeProvider` with `MuiCozyTheme`:
 
 ```tsx
-import { MuiCozyTheme } from "cozy-ui/React/MuiCozyTheme";
-
-<MuiCozyTheme>{children}</MuiCozyTheme>;
+import { MuiCozyTheme } from 'cozy-ui/React/MuiCozyTheme'
+;<MuiCozyTheme>{children}</MuiCozyTheme>
 ```
 
 ### Updating Palette

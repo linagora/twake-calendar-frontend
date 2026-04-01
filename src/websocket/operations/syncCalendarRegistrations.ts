@@ -1,6 +1,6 @@
-import { WebSocketWithCleanup } from "../connection";
-import { registerToCalendars } from "./registerToCalendars";
-import { unregisterToCalendars } from "./unregisterToCalendars";
+import { WebSocketWithCleanup } from '../connection'
+import { registerToCalendars } from './registerToCalendars'
+import { unregisterToCalendars } from './unregisterToCalendars'
 
 export function syncCalendarRegistrations(
   isSocketOpen: boolean,
@@ -13,36 +13,34 @@ export function syncCalendarRegistrations(
     !socketRef.current ||
     socketRef.current.readyState !== WebSocket.OPEN
   ) {
-    return;
+    return
   }
 
-  const currentPaths = calendarList.map((cal) => `/calendars/${cal}`);
+  const currentPaths = calendarList.map(cal => `/calendars/${cal}`)
   const previousPaths = previousCalendarListRef.current.map(
-    (cal) => `/calendars/${cal}`
-  );
+    cal => `/calendars/${cal}`
+  )
 
-  const toRegister = currentPaths.filter(
-    (path) => !previousPaths.includes(path)
-  );
+  const toRegister = currentPaths.filter(path => !previousPaths.includes(path))
   const toUnregister = previousPaths.filter(
-    (path) => !currentPaths.includes(path)
-  );
+    path => !currentPaths.includes(path)
+  )
 
   try {
     if (toRegister.length > 0) {
-      registerToCalendars(socketRef.current, toRegister);
+      registerToCalendars(socketRef.current, toRegister)
     }
   } catch (error) {
-    console.error("Failed to register calendar:", error);
-    return;
+    console.error('Failed to register calendar:', error)
+    return
   }
   try {
     if (toUnregister.length > 0) {
-      unregisterToCalendars(socketRef.current, toUnregister);
+      unregisterToCalendars(socketRef.current, toUnregister)
     }
   } catch (error) {
-    console.error("Failed to unregister calendar:", error);
-    return;
+    console.error('Failed to unregister calendar:', error)
+    return
   }
-  previousCalendarListRef.current = calendarList;
+  previousCalendarListRef.current = calendarList
 }

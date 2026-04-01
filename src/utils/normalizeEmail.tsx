@@ -1,3 +1,3 @@
 export function normalizeEmail(email?: string) {
-  return email?.trim().toLowerCase() ?? "";
+  return email?.trim().toLowerCase() ?? ''
 }

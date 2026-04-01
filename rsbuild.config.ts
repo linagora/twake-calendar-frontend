@@ -1,32 +1,32 @@
-import { defineConfig } from "@rsbuild/core";
-import { pluginReact } from "@rsbuild/plugin-react";
-import { pluginStylus } from "@rsbuild/plugin-stylus";
-import { pluginSvgr } from "@rsbuild/plugin-svgr";
+import { defineConfig } from '@rsbuild/core'
+import { pluginReact } from '@rsbuild/plugin-react'
+import { pluginStylus } from '@rsbuild/plugin-stylus'
+import { pluginSvgr } from '@rsbuild/plugin-svgr'
 
 export default defineConfig({
   plugins: [pluginReact(), pluginStylus(), pluginSvgr()],
   html: {
-    template: "./public/index.html",
+    template: './public/index.html'
   },
   server: {
     port: 5000,
-    historyApiFallback: true,
+    historyApiFallback: true
   },
   source: {
     entry: {
-      index: "./src/index.tsx",
-    },
+      index: './src/index.tsx'
+    }
   },
   output: {
     distPath: {
-      root: "dist",
+      root: 'dist'
     },
-    minify: false,
+    minify: false
   },
   resolve: {
     alias: {
-      react: require.resolve("react"),
-      "react-dom": require.resolve("react-dom"),
-    },
-  },
-});
+      react: require.resolve('react'),
+      'react-dom': require.resolve('react-dom')
+    }
+  }
+})

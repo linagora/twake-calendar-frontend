@@ -1,122 +1,122 @@
-import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
-import { ResponsiveDialog } from "@/components/Dialog";
-import { DateTimeFields } from "@/components/Event/components/DateTimeFields";
-import { FieldWithLabel } from "@/components/Event/components/FieldWithLabel";
-import { splitDateTime } from "@/components/Event/utils/dateTimeHelpers";
-import { Box, Button, TextField, Typography } from "@linagora/twake-mui";
-import { SnackbarAlert } from "@/components/Loading/SnackBarAlert";
-import moment from "moment-timezone";
-import { useEffect, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { postCounterProposal } from "../api/sendCounterProposal";
-import { EventTimeSubtitle } from "../EventPreview/EventTimeSubtitle";
-import { ContextualizedEvent } from "../EventsTypes";
+import { formatEventChipTitle } from '@/components/Calendar/utils/calendarUtils'
+import { ResponsiveDialog } from '@/components/Dialog'
+import { DateTimeFields } from '@/components/Event/components/DateTimeFields'
+import { FieldWithLabel } from '@/components/Event/components/FieldWithLabel'
+import { splitDateTime } from '@/components/Event/utils/dateTimeHelpers'
+import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
+import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
+import moment from 'moment-timezone'
+import { useEffect, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { postCounterProposal } from '../api/sendCounterProposal'
+import { EventTimeSubtitle } from '../EventPreview/EventTimeSubtitle'
+import { ContextualizedEvent } from '../EventsTypes'
 
 export function EventCounterModal({
   open,
   setOpen,
-  contextualizedEvent,
+  contextualizedEvent
 }: {
-  open: boolean;
-  setOpen: (b: boolean) => void;
-  contextualizedEvent: ContextualizedEvent;
+  open: boolean
+  setOpen: (b: boolean) => void
+  contextualizedEvent: ContextualizedEvent
 }) {
-  const { t } = useI18n();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const { t } = useI18n()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessToast, setShowSuccessToast] = useState(false)
 
-  const allday = contextualizedEvent.event.allday ?? false;
+  const allday = contextualizedEvent.event.allday ?? false
 
-  const timezone = contextualizedEvent.event.timezone;
+  const timezone = contextualizedEvent.event.timezone
 
   const startSplit = splitDateTime(
     moment
       .tz(contextualizedEvent.event.start, timezone)
-      .format("YYYY-MM-DDTHH:mm")
-  );
+      .format('YYYY-MM-DDTHH:mm')
+  )
   const endSplit = splitDateTime(
     moment
       .tz(
         contextualizedEvent.event.end ?? contextualizedEvent.event.start,
         timezone
       )
-      .format("YYYY-MM-DDTHH:mm")
-  );
+      .format('YYYY-MM-DDTHH:mm')
+  )
 
-  const [startDate, setStartDate] = useState(startSplit.date);
-  const [startTime, setStartTime] = useState(startSplit.time);
-  const [endDate, setEndDate] = useState(endSplit.date);
-  const [endTime, setEndTime] = useState(endSplit.time);
-  const [showMore, setShowMore] = useState(false);
-  const [hasEndDateChanged, setHasEndDateChanged] = useState(false);
-  const [message, setMessage] = useState("");
+  const [startDate, setStartDate] = useState(startSplit.date)
+  const [startTime, setStartTime] = useState(startSplit.time)
+  const [endDate, setEndDate] = useState(endSplit.date)
+  const [endTime, setEndTime] = useState(endSplit.time)
+  const [showMore, setShowMore] = useState(false)
+  const [hasEndDateChanged, setHasEndDateChanged] = useState(false)
+  const [message, setMessage] = useState('')
   const [validation, setValidation] = useState<{
-    errors: { dateTime: string };
+    errors: { dateTime: string }
   }>({
-    errors: { dateTime: "" },
-  });
+    errors: { dateTime: '' }
+  })
 
   const handleStartDateChange = (value: string) => {
-    setStartDate(value);
+    setStartDate(value)
     if (value > endDate) {
-      setEndDate(value);
-      setHasEndDateChanged(true);
+      setEndDate(value)
+      setHasEndDateChanged(true)
     }
-    setValidation({ errors: { dateTime: "" } });
-  };
+    setValidation({ errors: { dateTime: '' } })
+  }
 
   const handleStartTimeChange = (value: string) => {
-    setStartTime(value);
-    setValidation({ errors: { dateTime: "" } });
-  };
+    setStartTime(value)
+    setValidation({ errors: { dateTime: '' } })
+  }
 
   const handleEndDateChange = (value: string) => {
-    setEndDate(value);
-    setHasEndDateChanged(true);
-    setValidation({ errors: { dateTime: "" } });
-  };
+    setEndDate(value)
+    setHasEndDateChanged(true)
+    setValidation({ errors: { dateTime: '' } })
+  }
 
   const handleEndTimeChange = (value: string) => {
-    setEndTime(value);
-    setValidation({ errors: { dateTime: "" } });
-  };
+    setEndTime(value)
+    setValidation({ errors: { dateTime: '' } })
+  }
 
   const validate = (): boolean => {
     if (!startDate || !endDate) {
       setValidation({
-        errors: { dateTime: t("event.validation.startRequired") },
-      });
-      return false;
+        errors: { dateTime: t('event.validation.startRequired') }
+      })
+      return false
     }
     if (!allday && (!startTime || !endTime)) {
       setValidation({
-        errors: { dateTime: t("event.validation.startRequired") },
-      });
-      return false;
+        errors: { dateTime: t('event.validation.startRequired') }
+      })
+      return false
     }
     if (
       endDate < startDate ||
       (!allday && endDate === startDate && endTime <= startTime)
     ) {
       setValidation({
-        errors: { dateTime: t("event.validation.endAfterStart") },
-      });
-      return false;
+        errors: { dateTime: t('event.validation.endAfterStart') }
+      })
+      return false
     }
-    setValidation({ errors: { dateTime: "" } });
-    return true;
-  };
+    setValidation({ errors: { dateTime: '' } })
+    return true
+  }
 
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!validate()) return
     if (
       !contextualizedEvent.currentUserAttendee?.cal_address ||
       !contextualizedEvent.event.organizer?.cal_address
     ) {
-      setValidation({ errors: { dateTime: t("error.unknown") } });
-      return;
+      setValidation({ errors: { dateTime: t('error.unknown') } })
+      return
     }
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       await postCounterProposal({
         event: contextualizedEvent.event,
@@ -128,48 +128,48 @@ export function EventCounterModal({
         proposedEnd: contextualizedEvent.event.allday
           ? endDate
           : `${endDate}T${endTime}`,
-        message,
-      });
-      setShowSuccessToast(true);
-      setOpen(false);
+        message
+      })
+      setShowSuccessToast(true)
+      setOpen(false)
     } catch (error) {
-      console.error(error);
-      setValidation({ errors: { dateTime: t("error.unknown") } });
+      console.error(error)
+      setValidation({ errors: { dateTime: t('error.unknown') } })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   useEffect(() => {
-    if (!open) return;
-    setStartDate(startSplit.date);
-    setStartTime(startSplit.time);
-    setEndDate(endSplit.date);
-    setEndTime(endSplit.time);
-    setShowMore(false);
-    setHasEndDateChanged(false);
-    setMessage("");
-    setValidation({ errors: { dateTime: "" } });
-  }, [open, startSplit.date, startSplit.time, endSplit.date, endSplit.time]);
+    if (!open) return
+    setStartDate(startSplit.date)
+    setStartTime(startSplit.time)
+    setEndDate(endSplit.date)
+    setEndTime(endSplit.time)
+    setShowMore(false)
+    setHasEndDateChanged(false)
+    setMessage('')
+    setValidation({ errors: { dateTime: '' } })
+  }, [open, startSplit.date, startSplit.time, endSplit.date, endSplit.time])
 
   return (
     <>
       <SnackbarAlert
         open={showSuccessToast}
         setOpen={setShowSuccessToast}
-        message={t("eventPreview.proposalSubmitted")}
+        message={t('eventPreview.proposalSubmitted')}
       />
       <ResponsiveDialog
         open={open}
         onClose={() => setOpen(false)}
-        title={t("eventPreview.proposeNewTime")}
+        title={t('eventPreview.proposeNewTime')}
       >
         {/* Event title */}
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <Typography
             variant="h3"
             sx={{
-              wordBreak: "break-word",
+              wordBreak: 'break-word'
             }}
           >
             {formatEventChipTitle(contextualizedEvent.event, t)}
@@ -186,7 +186,7 @@ export function EventCounterModal({
 
         {/* Your proposal label */}
         <FieldWithLabel
-          label={t("eventPreview.yourProposal")}
+          label={t('eventPreview.yourProposal')}
           isExpanded={false}
         >
           <DateTimeFields
@@ -208,7 +208,7 @@ export function EventCounterModal({
               (hasEndDateChanged && startDate !== endDate) ||
               (!showMore && !allday && startDate !== endDate)
             }
-            onToggleEndDate={() => setShowMore((prev) => !prev)}
+            onToggleEndDate={() => setShowMore(prev => !prev)}
           />
         </FieldWithLabel>
         {/* Optional message */}
@@ -220,18 +220,18 @@ export function EventCounterModal({
             minRows={2}
             maxRows={10}
             fullWidth
-            placeholder={t("eventPreview.optionalMessage")}
+            placeholder={t('eventPreview.optionalMessage')}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={e => setMessage(e.target.value)}
             sx={{
               mt: 2,
-              "& .MuiInputBase-root": {
-                overflowY: "auto",
-                padding: 0,
+              '& .MuiInputBase-root': {
+                overflowY: 'auto',
+                padding: 0
               },
-              "& textarea": {
-                resize: "vertical",
-              },
+              '& textarea': {
+                resize: 'vertical'
+              }
             }}
           />
         </Box>
@@ -239,7 +239,7 @@ export function EventCounterModal({
         {/* Actions */}
         <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
           <Button variant="text" onClick={() => setOpen(false)}>
-            {t("common.cancel")}
+            {t('common.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -247,10 +247,10 @@ export function EventCounterModal({
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {t("eventPreview.sendProposal")}
+            {t('eventPreview.sendProposal')}
           </Button>
         </Box>
       </ResponsiveDialog>
     </>
-  );
+  )
 }

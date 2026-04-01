@@ -1,8 +1,8 @@
-import { useAppSelector } from "@/app/hooks";
-import { AccessRight, Calendar } from "@/features/Calendars/CalendarTypes";
-import { getUserDetails } from "@/features/User/userAPI";
-import { makeDisplayName } from "@/utils/makeDisplayName";
-import { normalizeEmail } from "@/utils/normalizeEmail";
+import { useAppSelector } from '@/app/hooks'
+import { AccessRight, Calendar } from '@/features/Calendars/CalendarTypes'
+import { getUserDetails } from '@/features/User/userAPI'
+import { makeDisplayName } from '@/utils/makeDisplayName'
+import { normalizeEmail } from '@/utils/normalizeEmail'
 import {
   AutocompleteRenderInputParams,
   Avatar,
@@ -13,236 +13,236 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography,
-} from "@linagora/twake-mui";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { PeopleSearch, User } from "../Attendees/PeopleSearch";
-import { FieldWithLabel } from "../Event/components/FieldWithLabel";
-import { stringAvatar } from "../Event/utils/eventUtils";
-import { ResourceAdmin } from "./ResourceAdmins";
+  Typography
+} from '@linagora/twake-mui'
+import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { PeopleSearch, User } from '../Attendees/PeopleSearch'
+import { FieldWithLabel } from '../Event/components/FieldWithLabel'
+import { stringAvatar } from '../Event/utils/eventUtils'
+import { ResourceAdmin } from './ResourceAdmins'
 
 export interface UserWithAccess extends User {
-  accessRight: AccessRight;
+  accessRight: AccessRight
 }
 
 interface CalendarAccessRightsProps {
-  calendar: Calendar;
-  value: UserWithAccess[];
-  onChange: (users: UserWithAccess[]) => void;
-  onInvitesLoaded: (users: UserWithAccess[]) => void;
+  calendar: Calendar
+  value: UserWithAccess[]
+  onChange: (users: UserWithAccess[]) => void
+  onInvitesLoaded: (users: UserWithAccess[]) => void
 }
 
 interface UserInCalendar {
-  id: string;
-  access: AccessRight;
+  id: string
+  access: AccessRight
 }
 
 export function CalendarAccessRights({
   calendar,
   value: usersWithAccess,
   onChange,
-  onInvitesLoaded,
+  onInvitesLoaded
 }: CalendarAccessRightsProps) {
-  const { t } = useI18n();
-  const userData = useAppSelector((state) => state.user.userData);
-  const isPersonalCalendar = userData?.openpaasId === calendar.id.split("/")[0];
-  const currentUserEmail = normalizeEmail(userData?.email);
-  const isDelegatedWithAdministration = !!calendar.invite?.some((invite) => {
-    const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ""));
-    return invitedEmail === currentUserEmail && invite.access === 5;
-  });
+  const { t } = useI18n()
+  const userData = useAppSelector(state => state.user.userData)
+  const isPersonalCalendar = userData?.openpaasId === calendar.id.split('/')[0]
+  const currentUserEmail = normalizeEmail(userData?.email)
+  const isDelegatedWithAdministration = !!calendar.invite?.some(invite => {
+    const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ''))
+    return invitedEmail === currentUserEmail && invite.access === 5
+  })
 
   const ownerEmail =
-    calendar.owner?.preferredEmail ?? calendar.owner?.emails?.[0] ?? "";
-  const ownerName = makeDisplayName(calendar) ?? ownerEmail;
+    calendar.owner?.preferredEmail ?? calendar.owner?.emails?.[0] ?? ''
+  const ownerName = makeDisplayName(calendar) ?? ownerEmail
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [searchWidth, setSearchWidth] = useState<number | undefined>(undefined);
-  const [accessRight, setAccessRight] = useState<AccessRight>(2);
-  const [inviteLoading, setInvitesLoading] = useState(false);
-  const [resourceAdmins, setResourceAdmins] = useState<UserWithAccess[]>([]);
-  const [adminLoading, setAdminLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [searchWidth, setSearchWidth] = useState<number | undefined>(undefined)
+  const [accessRight, setAccessRight] = useState<AccessRight>(2)
+  const [inviteLoading, setInvitesLoading] = useState(false)
+  const [resourceAdmins, setResourceAdmins] = useState<UserWithAccess[]>([])
+  const [adminLoading, setAdminLoading] = useState(false)
 
-  const currentUsersRef = useRef<UserWithAccess[]>(usersWithAccess);
+  const currentUsersRef = useRef<UserWithAccess[]>(usersWithAccess)
   useEffect(() => {
-    currentUsersRef.current = usersWithAccess;
-  }, [usersWithAccess]);
+    currentUsersRef.current = usersWithAccess
+  }, [usersWithAccess])
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
+    if (!containerRef.current) return
+    const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
-        setSearchWidth(entry.contentRect.width);
+        setSearchWidth(entry.contentRect.width)
       }
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
+    })
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   const handleLoadUsers = useCallback(
     async (usersInCal: UserInCalendar[], cancelled: boolean) => {
       const results = await Promise.allSettled(
-        usersInCal.map(async (user) => {
-          const details = await getUserDetails(user.id);
-          const email = details?.preferredEmail ?? details?.emails?.[0] ?? "";
+        usersInCal.map(async user => {
+          const details = await getUserDetails(user.id)
+          const email = details?.preferredEmail ?? details?.emails?.[0] ?? ''
           return {
             openpaasId: user.id,
             displayName:
               [details?.firstname, details?.lastname]
                 .filter(Boolean)
-                .join(" ")
+                .join(' ')
                 .trim() || email,
             email,
-            accessRight: user.access as AccessRight,
-          } satisfies UserWithAccess;
+            accessRight: user.access
+          } satisfies UserWithAccess
         })
-      );
+      )
 
       if (cancelled) {
-        return [] as UserWithAccess[];
+        return [] as UserWithAccess[]
       }
 
       const loaded: UserWithAccess[] = results
-        .filter((r) => r.status === "fulfilled")
-        .map((r) => (r as PromiseFulfilledResult<UserWithAccess>).value)
-        .filter(Boolean) as UserWithAccess[];
+        .filter(r => r.status === 'fulfilled')
+        .map(r => (r as PromiseFulfilledResult<UserWithAccess>).value)
+        .filter(Boolean)
 
-      return loaded;
+      return loaded
     },
     []
-  );
+  )
 
   useEffect(() => {
-    if (!calendar.invite?.length) return;
+    if (!calendar.invite?.length) return
 
-    let cancelled = false;
+    let cancelled = false
 
     async function loadInvitedUsers() {
-      setInvitesLoading(true);
+      setInvitesLoading(true)
       try {
         const usersInCal = (calendar.invite
-          ?.map((invite) => {
-            const principalId = invite.principal.split("/").pop();
-            if (!principalId) return null;
+          ?.map(invite => {
+            const principalId = invite.principal.split('/').pop()
+            if (!principalId) return null
 
             return {
               id: principalId,
-              access: invite.access,
-            };
+              access: invite.access
+            }
           })
           ?.filter(
-            (invite) =>
+            invite =>
               !!invite &&
               !calendar.owner.administrators?.some(
-                (admin) => admin.id === invite.id
+                admin => admin.id === invite.id
               )
-          ) || []) as UserInCalendar[];
+          ) || []) as UserInCalendar[]
 
-        const loaded = await handleLoadUsers(usersInCal, cancelled);
+        const loaded = await handleLoadUsers(usersInCal, cancelled)
 
-        const loadedIds = new Set(loaded.map((u) => normalizeEmail(u.email)));
+        const loadedIds = new Set(loaded.map(u => normalizeEmail(u.email)))
         const manuallyAdded = currentUsersRef.current.filter(
-          (u) => !loadedIds.has(normalizeEmail(u.email))
-        );
-        const merged = [...loaded, ...manuallyAdded];
+          u => !loadedIds.has(normalizeEmail(u.email))
+        )
+        const merged = [...loaded, ...manuallyAdded]
 
-        onInvitesLoaded(loaded);
-        onChange(merged);
+        onInvitesLoaded(loaded)
+        onChange(merged)
       } finally {
-        if (!cancelled) setInvitesLoading(false);
+        if (!cancelled) setInvitesLoading(false)
       }
     }
 
-    loadInvitedUsers();
+    loadInvitedUsers()
     return () => {
-      cancelled = true;
-    };
+      cancelled = true
+    }
   }, [
     calendar.invite,
     calendar.owner.administrators,
     handleLoadUsers,
     onChange,
-    onInvitesLoaded,
-  ]);
+    onInvitesLoaded
+  ])
 
   useEffect(() => {
-    const isResource = calendar.owner.resource;
-    const resourceAdmins = calendar.owner.administrators || [];
-    if (!isResource || !resourceAdmins?.length) return;
+    const isResource = calendar.owner.resource
+    const resourceAdmins = calendar.owner.administrators || []
+    if (!isResource || !resourceAdmins?.length) return
 
-    let cancelled = false;
+    let cancelled = false
 
     async function loadAdmins() {
       try {
-        setAdminLoading(true);
+        setAdminLoading(true)
         const resourceAdminsWithoutOwner = resourceAdmins
-          .filter((admin) => admin.id !== calendar.owner._id)
-          .map((admin) => ({
+          .filter(admin => admin.id !== calendar.owner._id)
+          .map(admin => ({
             id: admin.id,
-            access: 5, // ADMIN
-          })) satisfies UserInCalendar[];
+            access: 5 // ADMIN
+          })) satisfies UserInCalendar[]
         const admins = await handleLoadUsers(
           resourceAdminsWithoutOwner,
           cancelled
-        );
+        )
 
-        setResourceAdmins(admins);
+        setResourceAdmins(admins)
       } catch (error) {
-        console.error(error);
+        console.error(error)
       } finally {
-        if (!cancelled) setAdminLoading(false);
+        if (!cancelled) setAdminLoading(false)
       }
     }
 
-    loadAdmins();
+    loadAdmins()
     return () => {
-      cancelled = true;
-    };
-  }, [calendar.owner, handleLoadUsers, setResourceAdmins]);
+      cancelled = true
+    }
+  }, [calendar.owner, handleLoadUsers, setResourceAdmins])
 
   const handleUserSelect = (_event: unknown, users: User[]) => {
-    const updated: UserWithAccess[] = users.map((user) => {
+    const updated: UserWithAccess[] = users.map(user => {
       const existing = usersWithAccess.find(
-        (u) => normalizeEmail(u.email) === normalizeEmail(user.email)
-      );
-      return existing ?? { ...user, accessRight };
-    });
-    onChange(updated);
-  };
+        u => normalizeEmail(u.email) === normalizeEmail(user.email)
+      )
+      return existing ?? { ...user, accessRight }
+    })
+    onChange(updated)
+  }
 
   const handleRemoveUser = (email: string) => {
     onChange(
       usersWithAccess.filter(
-        (u) => normalizeEmail(u.email) !== normalizeEmail(email)
+        u => normalizeEmail(u.email) !== normalizeEmail(email)
       )
-    );
-  };
+    )
+  }
 
   const handleChangeUserRight = (email: string, right: AccessRight) => {
     onChange(
-      usersWithAccess.map((u) =>
+      usersWithAccess.map(u =>
         normalizeEmail(u.email) === normalizeEmail(email)
           ? { ...u, accessRight: right }
           : u
       )
-    );
-  };
+    )
+  }
 
   const accessRightOptions: { value: AccessRight; label: string }[] = [
-    { value: 2, label: t("calendarPopover.access.viewAllEvents") },
-    { value: 3, label: t("calendarPopover.access.editor") },
-    { value: 5, label: t("calendarPopover.access.administrator") },
-  ];
+    { value: 2, label: t('calendarPopover.access.viewAllEvents') },
+    { value: 3, label: t('calendarPopover.access.editor') },
+    { value: 5, label: t('calendarPopover.access.administrator') }
+  ]
 
   return (
     <FieldWithLabel
       label={
         isPersonalCalendar || isDelegatedWithAdministration
-          ? t("calendarPopover.access.grantAccessRights")
-          : t("calendarPopover.access.accessRights")
+          ? t('calendarPopover.access.grantAccessRights')
+          : t('calendarPopover.access.accessRights')
       }
       isExpanded={false}
     >
@@ -251,27 +251,27 @@ export function CalendarAccessRights({
           <PeopleSearch
             selectedUsers={usersWithAccess}
             onChange={handleUserSelect}
-            objectTypes={["user"]}
+            objectTypes={['user']}
             onToggleEventPreview={() => {}}
             customSlotProps={{
               popper: {
                 anchorEl: containerRef.current,
-                placement: "bottom-start",
+                placement: 'bottom-start',
                 sx: {
                   minWidth: searchWidth,
-                  "& .MuiPaper-root": {
-                    width: "100%",
-                  },
+                  '& .MuiPaper-root': {
+                    width: '100%'
+                  }
                 },
                 modifiers: [
                   {
-                    name: "offset",
+                    name: 'offset',
                     options: {
-                      offset: [0, 8],
-                    },
-                  },
-                ],
-              },
+                      offset: [0, 8]
+                    }
+                  }
+                ]
+              }
             }}
             customRenderInput={(
               params: AutocompleteRenderInputParams,
@@ -282,33 +282,33 @@ export function CalendarAccessRights({
                 {...params}
                 fullWidth
                 autoFocus
-                placeholder={t("peopleSearch.label")}
+                placeholder={t('peopleSearch.label')}
                 value={query}
-                inputRef={(el) => {
-                  const ref = params.InputProps.ref;
-                  if (typeof ref === "function") {
-                    ref(el);
-                  } else if (ref && "current" in ref) {
-                    (
+                inputRef={el => {
+                  const ref = params.InputProps.ref
+                  if (typeof ref === 'function') {
+                    ref(el)
+                  } else if (ref && 'current' in ref) {
+                    ;(
                       ref as React.MutableRefObject<HTMLInputElement | null>
-                    ).current = el;
+                    ).current = el
                   }
                 }}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={e => setQuery(e.target.value)}
                 variant="outlined"
                 inputProps={{
                   ...params.inputProps,
                   sx: {
-                    fontSize: "14px",
-                    "&::placeholder": { fontSize: "14px" },
-                  },
+                    fontSize: '14px',
+                    '&::placeholder': { fontSize: '14px' }
+                  }
                 }}
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: (
                     <InputAdornment position="start">
                       <PeopleOutlineOutlinedIcon
-                        sx={{ color: "text.secondary" }}
+                        sx={{ color: 'text.secondary' }}
                       />
                     </InputAdornment>
                   ),
@@ -316,34 +316,34 @@ export function CalendarAccessRights({
                     <InputAdornment position="end">
                       <Select
                         value={accessRight}
-                        onChange={(e) =>
+                        onChange={e =>
                           setAccessRight(e.target.value as AccessRight)
                         }
                         variant="standard"
                         disableUnderline
                         sx={{
-                          fontSize: "0.875rem",
-                          color: "text.secondary",
-                          "& .MuiSelect-select": {
-                            paddingRight: "24px !important",
-                            paddingY: 0,
+                          fontSize: '0.875rem',
+                          color: 'text.secondary',
+                          '& .MuiSelect-select': {
+                            paddingRight: '24px !important',
+                            paddingY: 0
                           },
-                          "& .MuiSelect-icon": { fontSize: "1rem" },
-                          "&:before, &:after": { display: "none" },
+                          '& .MuiSelect-icon': { fontSize: '1rem' },
+                          '&:before, &:after': { display: 'none' }
                         }}
                       >
-                        {accessRightOptions.map((opt) => (
+                        {accessRightOptions.map(opt => (
                           <MenuItem
                             key={opt.value}
                             value={opt.value}
-                            sx={{ color: "text.secondary" }}
+                            sx={{ color: 'text.secondary' }}
                           >
                             {opt.label}
                           </MenuItem>
                         ))}
                       </Select>
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
             )}
@@ -360,14 +360,14 @@ export function CalendarAccessRights({
           px={1}
           py={0.5}
           sx={{
-            borderRadius: "8px",
-            "&:hover": { backgroundColor: "action.hover" },
+            borderRadius: '8px',
+            '&:hover': { backgroundColor: 'action.hover' }
           }}
         >
           <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
             <Avatar
               {...stringAvatar(ownerName)}
-              sx={{ width: 28, height: 28, fontSize: "0.875rem" }}
+              sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
             />
             <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
               <Typography noWrap>{ownerName}</Typography>
@@ -379,7 +379,7 @@ export function CalendarAccessRights({
 
           <Box display="flex" alignItems="center" gap={0.5} flexShrink={0}>
             <Typography variant="caption">
-              {t("calendarPopover.access.owner")}
+              {t('calendarPopover.access.owner')}
             </Typography>
           </Box>
         </Box>
@@ -388,7 +388,7 @@ export function CalendarAccessRights({
             <CircularProgress size={24} />
           </Box>
         ) : (
-          resourceAdmins.map((admin) => (
+          resourceAdmins.map(admin => (
             <ResourceAdmin key={admin.email} admin={admin} />
           ))
         )}
@@ -398,7 +398,7 @@ export function CalendarAccessRights({
           </Box>
         ) : (
           usersWithAccess.length > 0 &&
-          usersWithAccess.map((user) => (
+          usersWithAccess.map(user => (
             <Box
               key={user.email}
               display="flex"
@@ -407,14 +407,14 @@ export function CalendarAccessRights({
               px={1}
               py={0.5}
               sx={{
-                borderRadius: "8px",
-                "&:hover": { backgroundColor: "action.hover" },
+                borderRadius: '8px',
+                '&:hover': { backgroundColor: 'action.hover' }
               }}
             >
               <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
                 <Avatar
                   {...stringAvatar(user.displayName)}
-                  sx={{ width: 28, height: 28, fontSize: "0.875rem" }}
+                  sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
                 />
                 <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
                   <Typography noWrap>{user.displayName}</Typography>
@@ -427,7 +427,7 @@ export function CalendarAccessRights({
               <Box display="flex" alignItems="center" gap={0.5} flexShrink={0}>
                 <Select
                   value={user.accessRight}
-                  onChange={(e) =>
+                  onChange={e =>
                     handleChangeUserRight(
                       user.email,
                       e.target.value as AccessRight
@@ -439,20 +439,20 @@ export function CalendarAccessRights({
                     !(isPersonalCalendar || isDelegatedWithAdministration)
                   }
                   sx={{
-                    fontSize: "0.875rem",
-                    color: "text.secondary",
-                    "& .MuiSelect-select": {
-                      paddingRight: "24px !important",
-                      paddingY: 0,
+                    fontSize: '0.875rem',
+                    color: 'text.secondary',
+                    '& .MuiSelect-select': {
+                      paddingRight: '24px !important',
+                      paddingY: 0
                     },
-                    "& .MuiSelect-icon": { fontSize: "1rem" },
+                    '& .MuiSelect-icon': { fontSize: '1rem' }
                   }}
                 >
-                  {accessRightOptions.map((opt) => (
+                  {accessRightOptions.map(opt => (
                     <MenuItem
                       key={opt.value}
                       value={opt.value}
-                      sx={{ color: "text.secondary" }}
+                      sx={{ color: 'text.secondary' }}
                     >
                       {opt.label}
                     </MenuItem>
@@ -461,9 +461,9 @@ export function CalendarAccessRights({
                 {(isPersonalCalendar || isDelegatedWithAdministration) && (
                   <IconButton
                     size="small"
-                    aria-label={t("actions.remove")}
+                    aria-label={t('actions.remove')}
                     onClick={() => handleRemoveUser(user.email)}
-                    sx={{ color: "text.secondary" }}
+                    sx={{ color: 'text.secondary' }}
                   >
                     <HighlightOffIcon fontSize="small" />
                   </IconButton>
@@ -474,5 +474,5 @@ export function CalendarAccessRights({
         )}
       </Box>
     </FieldWithLabel>
-  );
+  )
 }

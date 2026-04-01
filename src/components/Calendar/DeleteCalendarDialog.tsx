@@ -1,13 +1,13 @@
-import { Calendar } from "@/features/Calendars/CalendarTypes";
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
-} from "@linagora/twake-mui";
-import { useI18n } from "twake-i18n";
+  DialogTitle
+} from '@linagora/twake-mui'
+import { useI18n } from 'twake-i18n'
 
 export function DeleteCalendarDialog({
   deletePopupOpen,
@@ -15,39 +15,39 @@ export function DeleteCalendarDialog({
   calendars,
   id,
   isPersonal,
-  handleDeleteConfirm,
+  handleDeleteConfirm
 }: {
-  deletePopupOpen: boolean;
-  setDeletePopupOpen: (e: boolean) => void;
-  calendars: Record<string, Calendar>;
-  id: string;
-  isPersonal: boolean;
-  handleDeleteConfirm: () => void;
+  deletePopupOpen: boolean
+  setDeletePopupOpen: (e: boolean) => void
+  calendars: Record<string, Calendar>
+  id: string
+  isPersonal: boolean
+  handleDeleteConfirm: () => void
 }) {
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   return (
     <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
       <DialogTitle>
-        {t("calendar.delete.title", { name: calendars[id].name })}
+        {t('calendar.delete.title', { name: calendars[id].name })}
       </DialogTitle>
 
       <DialogContent>
         <DialogContentText>
           {isPersonal
-            ? t("calendar.delete.personalWarning")
-            : t("calendar.delete.sharedWarning")}
+            ? t('calendar.delete.personalWarning')
+            : t('calendar.delete.sharedWarning')}
         </DialogContentText>
       </DialogContent>
 
       <DialogActions>
         <Button onClick={() => setDeletePopupOpen(false)}>
-          {t("common.cancel")}
+          {t('common.cancel')}
         </Button>
         <Button onClick={handleDeleteConfirm} variant="contained">
-          {isPersonal ? t("actions.delete") : t("actions.remove")}
+          {isPersonal ? t('actions.delete') : t('actions.remove')}
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

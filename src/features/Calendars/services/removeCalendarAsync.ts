@@ -1,27 +1,27 @@
-import { toRejectedError } from "@/utils/errorUtils";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { removeCalendar } from "../CalendarApi";
-import { RejectedError } from "../types/RejectedError";
+import { toRejectedError } from '@/utils/errorUtils'
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { removeCalendar } from '../CalendarApi'
+import { RejectedError } from '../types/RejectedError'
 
 export const removeCalendarAsync = createAsyncThunk<
   {
-    calId: string;
+    calId: string
   },
   {
-    calId: string;
-    calLink: string;
+    calId: string
+    calLink: string
   },
   { rejectValue: RejectedError }
 >(
-  "calendars/removeCalendar",
+  'calendars/removeCalendar',
   async ({ calId, calLink }, { rejectWithValue }) => {
     try {
-      await removeCalendar(calLink);
+      await removeCalendar(calLink)
       return {
-        calId,
-      };
+        calId
+      }
     } catch (err) {
-      return rejectWithValue(toRejectedError(err));
+      return rejectWithValue(toRejectedError(err))
     }
   }
-);
+)

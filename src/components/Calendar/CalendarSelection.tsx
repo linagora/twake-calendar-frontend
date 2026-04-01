@@ -1,10 +1,10 @@
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { Calendar } from "@/features/Calendars/CalendarTypes";
-import { removeCalendarAsync } from "@/features/Calendars/services";
-import { extractEventBaseUuid } from "@/utils/extractEventBaseUuid";
-import { makeDisplayName } from "@/utils/makeDisplayName";
-import { renameDefault } from "@/utils/renameDefault";
-import { trimLongTextWithoutSpace } from "@/utils/textUtils";
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { removeCalendarAsync } from '@/features/Calendars/services'
+import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import { makeDisplayName } from '@/utils/makeDisplayName'
+import { renameDefault } from '@/utils/renameDefault'
+import { trimLongTextWithoutSpace } from '@/utils/textUtils'
 import {
   Accordion,
   AccordionDetails,
@@ -14,18 +14,18 @@ import {
   IconButton,
   ListItem,
   Menu,
-  MenuItem,
-} from "@linagora/twake-mui";
-import AddIcon from "@mui/icons-material/Add";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { SetStateAction, useEffect, useMemo, useState } from "react";
-import { useI18n } from "twake-i18n";
-import CalendarPopover from "./CalendarModal";
-import CalendarSearch from "./CalendarSearch";
-import { DeleteCalendarDialog } from "./DeleteCalendarDialog";
-import { OwnerCaption } from "./OwnerCaption";
-import CalendarResources from "./CalendarResources";
+  MenuItem
+} from '@linagora/twake-mui'
+import AddIcon from '@mui/icons-material/Add'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import { SetStateAction, useEffect, useMemo, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import CalendarPopover from './CalendarModal'
+import CalendarSearch from './CalendarSearch'
+import { DeleteCalendarDialog } from './DeleteCalendarDialog'
+import { OwnerCaption } from './OwnerCaption'
+import CalendarResources from './CalendarResources'
 
 function CalendarAccordion({
   title,
@@ -36,40 +36,46 @@ function CalendarAccordion({
   onAddClick,
   defaultExpanded = false,
   setOpen,
-  hideOwner,
+  hideOwner
 }: {
-  title: string;
-  calendars: string[];
-  selectedCalendars: string[];
-  handleToggle: (id: string) => void;
-  showAddButton?: boolean;
-  onAddClick?: () => void;
-  defaultExpanded?: boolean;
-  setOpen: (id: string) => void;
-  hideOwner?: boolean;
+  title: string
+  calendars: string[]
+  selectedCalendars: string[]
+  handleToggle: (id: string) => void
+  showAddButton?: boolean
+  onAddClick?: () => void
+  defaultExpanded?: boolean
+  setOpen: (id: string) => void
+  hideOwner?: boolean
 }) {
-  const allCalendars = useAppSelector((state) => state.calendars.list);
-  const { t } = useI18n();
+  const allCalendars = useAppSelector(state => state.calendars.list)
+  const { t } = useI18n()
 
-  const [expended, setExpended] = useState(defaultExpanded);
-  useEffect(() => setExpended(defaultExpanded), [defaultExpanded]);
+  const [expended, setExpended] = useState(defaultExpanded)
 
-  if (calendars.length === 0 && !showAddButton) return null;
+  useEffect(() => {
+    const handleExpendedChange = () => {
+      setExpended(defaultExpanded)
+    }
+    handleExpendedChange()
+  }, [defaultExpanded])
+
+  if (calendars.length === 0 && !showAddButton) return null
   return (
     <Accordion
       defaultExpanded={defaultExpanded}
       expanded={expended}
       style={{
-        width: "100%",
+        width: '100%',
         padding: 0,
         margin: 0,
-        marginBottom: "12px",
-        boxShadow: "none",
+        marginBottom: '12px',
+        boxShadow: 'none'
       }}
       sx={{
-        "&::before": {
-          display: "none",
-        },
+        '&::before': {
+          display: 'none'
+        }
       }}
     >
       <AccordionSummary
@@ -79,23 +85,23 @@ function CalendarAccordion({
         className="calendarListHeader"
         onClick={() => setExpended(!expended)}
         sx={{
-          "& .MuiAccordionSummary-content": {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          },
+          '& .MuiAccordionSummary-content': {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }
         }}
       >
         <span>{title}</span>
         {showAddButton && (
           <IconButton
             component="span"
-            onClick={(e) => {
+            onClick={e => {
               if (expended) {
-                e.stopPropagation();
+                e.stopPropagation()
               }
               if (onAddClick) {
-                onAddClick();
+                onAddClick()
               }
             }}
           >
@@ -103,13 +109,13 @@ function CalendarAccordion({
           </IconButton>
         )}
       </AccordionSummary>
-      <AccordionDetails style={{ textAlign: "left", padding: 0 }}>
-        {calendars.map((id) => (
+      <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
+        {calendars.map(id => (
           <CalendarSelector
             key={id}
             calendars={allCalendars}
             id={id}
-            isPersonal={title === t("calendar.personal")}
+            isPersonal={title === t('calendar.personal')}
             selectedCalendars={selectedCalendars}
             handleCalendarToggle={handleToggle}
             setOpen={() => setOpen(id)}
@@ -118,111 +124,110 @@ function CalendarAccordion({
         ))}
       </AccordionDetails>
     </Accordion>
-  );
+  )
 }
 
 export default function CalendarSelection({
   selectedCalendars,
-  setSelectedCalendars,
+  setSelectedCalendars
 }: {
-  selectedCalendars: string[];
-  setSelectedCalendars: (value: SetStateAction<string[]>) => void;
+  selectedCalendars: string[]
+  setSelectedCalendars: (value: SetStateAction<string[]>) => void
 }) {
-  const { t } = useI18n();
-  const userId =
-    useAppSelector((state) => state.user.userData?.openpaasId) ?? "";
-  const calendars = useAppSelector((state) => state.calendars.list);
+  const { t } = useI18n()
+  const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
+  const calendars = useAppSelector(state => state.calendars.list)
 
   const personalCalendars = Object.keys(calendars || {}).filter(
-    (id) => extractEventBaseUuid(id) === userId
-  );
+    id => extractEventBaseUuid(id) === userId
+  )
   const delegatedCalendars = Object.keys(calendars || {}).filter(
-    (id) =>
+    id =>
       extractEventBaseUuid(id) !== userId &&
       calendars[id]?.delegated &&
       !calendars?.[id]?.owner?.resource
-  );
+  )
   const sharedCalendars = Object.keys(calendars || {}).filter(
-    (id) =>
+    id =>
       extractEventBaseUuid(id) !== userId &&
       !calendars?.[id]?.delegated &&
       !calendars?.[id]?.owner?.resource
-  );
+  )
   const resourceCalendars = Object.keys(calendars || {}).filter(
-    (id) =>
+    id =>
       extractEventBaseUuid(id) !== userId && calendars?.[id]?.owner?.resource
-  );
+  )
 
   const handleCalendarToggle = (name: string) => {
     setSelectedCalendars((prev: string[]) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    );
-  };
-  const [selectedCalId, setSelectedCalId] = useState("");
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    )
+  }
+  const [selectedCalId, setSelectedCalId] = useState('')
 
-  const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null);
+  const [anchorElCal, setAnchorElCal] = useState<HTMLElement | null>(null)
   const [anchorElCalOthers, setAnchorElCalOthers] =
-    useState<HTMLElement | null>(null);
+    useState<HTMLElement | null>(null)
   const [anchorElCalResources, setAnchorElCalResources] =
-    useState<HTMLElement | null>(null);
+    useState<HTMLElement | null>(null)
 
   return (
     <>
       <div>
         <CalendarAccordion
-          title={t("calendar.personal")}
+          title={t('calendar.personal')}
           calendars={personalCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
           showAddButton
           onAddClick={() => setAnchorElCal(document.body)}
           setOpen={(id: string) => {
-            setAnchorElCal(document.body);
-            setSelectedCalId(id);
+            setAnchorElCal(document.body)
+            setSelectedCalId(id)
           }}
           defaultExpanded
         />
 
         <CalendarAccordion
-          title={t("calendar.delegated")}
+          title={t('calendar.delegated')}
           calendars={delegatedCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
-            setAnchorElCal(document.body);
-            setSelectedCalId(id);
+            setAnchorElCal(document.body)
+            setSelectedCalId(id)
           }}
           defaultExpanded
         />
 
         <CalendarAccordion
-          title={t("calendar.other")}
+          title={t('calendar.other')}
           calendars={sharedCalendars}
           selectedCalendars={selectedCalendars}
           showAddButton
           onAddClick={() => {
-            setAnchorElCalOthers(document.body);
+            setAnchorElCalOthers(document.body)
           }}
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
-            setAnchorElCal(document.body);
-            setSelectedCalId(id);
+            setAnchorElCal(document.body)
+            setSelectedCalId(id)
           }}
           defaultExpanded
         />
 
         <CalendarAccordion
-          title={t("calendar.resources")}
+          title={t('calendar.resources')}
           calendars={resourceCalendars}
           selectedCalendars={selectedCalendars}
           onAddClick={() => {
-            setAnchorElCalResources(document.body);
+            setAnchorElCalResources(document.body)
           }}
           showAddButton
           handleToggle={handleCalendarToggle}
           setOpen={(id: string) => {
-            setAnchorElCal(document.body);
-            setSelectedCalId(id);
+            setAnchorElCal(document.body)
+            setSelectedCalId(id)
           }}
           defaultExpanded
           hideOwner={true}
@@ -232,32 +237,32 @@ export default function CalendarSelection({
         open={Boolean(anchorElCal)}
         calendar={calendars?.[selectedCalId] ?? undefined}
         onClose={() => {
-          setSelectedCalId("");
-          setAnchorElCal(null);
+          setSelectedCalId('')
+          setAnchorElCal(null)
         }}
       />
       <CalendarSearch
         open={Boolean(anchorElCalOthers)}
         onClose={(newCalIds?: string[]) => {
-          setAnchorElCalOthers(null);
+          setAnchorElCalOthers(null)
           if (newCalIds?.length) {
-            newCalIds.forEach((id) => handleCalendarToggle(id));
+            newCalIds.forEach(id => handleCalendarToggle(id))
           }
         }}
       />
       <CalendarResources
         open={Boolean(anchorElCalResources)}
         onClose={(newResourceIds?: string[]) => {
-          setAnchorElCalResources(null);
+          setAnchorElCalResources(null)
           if (newResourceIds?.length) {
-            newResourceIds.forEach((id) => {
-              handleCalendarToggle(id);
-            });
+            newResourceIds.forEach(id => {
+              handleCalendarToggle(id)
+            })
           }
         }}
       />
     </>
-  );
+  )
 }
 
 function CalendarSelector({
@@ -267,113 +272,112 @@ function CalendarSelector({
   selectedCalendars,
   handleCalendarToggle,
   setOpen,
-  hideOwner,
+  hideOwner
 }: {
-  calendars: Record<string, Calendar>;
-  id: string;
-  isPersonal: boolean;
-  selectedCalendars: string[];
-  handleCalendarToggle: (name: string) => void;
-  setOpen: () => void;
-  hideOwner?: boolean;
+  calendars: Record<string, Calendar>
+  id: string
+  isPersonal: boolean
+  selectedCalendars: string[]
+  handleCalendarToggle: (name: string) => void
+  setOpen: () => void
+  hideOwner?: boolean
 }) {
-  const { t } = useI18n();
-  const dispatch = useAppDispatch();
-  const calLink =
-    useAppSelector((state) => state.calendars.list[id].link) ?? "";
+  const { t } = useI18n()
+  const dispatch = useAppDispatch()
+  const calLink = useAppSelector(state => state.calendars.list[id].link) ?? ''
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
   const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const [userId, calId] = id.split("/");
-  const isDefault = isPersonal && userId === calId;
+    setAnchorEl(null)
+  }
+  const [userId, calId] = id.split('/')
+  const isDefault = isPersonal && userId === calId
 
-  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+  const [deletePopupOpen, setDeletePopupOpen] = useState(false)
   const handleDeleteConfirm = () => {
-    dispatch(removeCalendarAsync({ calId: id, calLink }));
-    setDeletePopupOpen(false);
-    handleClose();
-  };
+    dispatch(removeCalendarAsync({ calId: id, calLink }))
+    setDeletePopupOpen(false)
+    handleClose()
+  }
 
   const trimmedName = useMemo(
     () => trimLongTextWithoutSpace(calendars[id].name),
     [calendars, id]
-  );
+  )
 
   const ownerDisplayName = useMemo(
     () => makeDisplayName(calendars[id]),
     [calendars, id]
-  );
+  )
 
   const displayName = useMemo(
-    () => renameDefault(trimmedName, ownerDisplayName ?? "", t, isPersonal),
+    () => renameDefault(trimmedName, ownerDisplayName ?? '', t, isPersonal),
     [trimmedName, ownerDisplayName, t, isPersonal]
-  );
+  )
 
   const showCaption =
     !isPersonal &&
-    trimmedName !== "#default" &&
+    trimmedName !== '#default' &&
     ownerDisplayName != null &&
-    !hideOwner;
+    !hideOwner
 
   return (
     <>
       <ListItem
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          transition: "background-color 0.2s ease",
-          "& .MoreBtn": { opacity: 0 },
-          "&:hover": {
-            backgroundColor: "#F3F3F6",
-            "& .MoreBtn": { opacity: 1 },
-          },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          transition: 'background-color 0.2s ease',
+          '& .MoreBtn': { opacity: 0 },
+          '&:hover': {
+            backgroundColor: '#F3F3F6',
+            '& .MoreBtn': { opacity: 1 }
+          }
         }}
       >
         <label
           style={{
-            display: "flex",
-            alignItems: "center",
-            maxWidth: "calc(100% - 40px)",
-            overflow: "hidden",
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: 'calc(100% - 40px)',
+            overflow: 'hidden'
           }}
         >
           <Checkbox
             sx={{
               color: calendars[id].color?.light,
-              "&.Mui-checked": { color: calendars[id].color?.light },
+              '&.Mui-checked': { color: calendars[id].color?.light }
             }}
             size="small"
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
-            inputProps={{ "aria-label": displayName }}
+            inputProps={{ 'aria-label': displayName }}
           />
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              padding: showCaption ? "6px" : undefined,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              padding: showCaption ? '6px' : undefined
             }}
           >
             <span
               style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                wordBreak: "break-word",
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                wordBreak: 'break-word'
               }}
             >
               {displayName}
             </span>
             <OwnerCaption
               showCaption={showCaption}
-              ownerDisplayName={ownerDisplayName ?? ""}
+              ownerDisplayName={ownerDisplayName ?? ''}
             />
           </div>
         </label>
@@ -384,16 +388,16 @@ function CalendarSelector({
       <Menu id={id} anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem
           onClick={() => {
-            setOpen();
-            handleClose();
+            setOpen()
+            handleClose()
           }}
         >
-          {t("actions.modify")}
+          {t('actions.modify')}
         </MenuItem>
         {!isDefault && <Divider />}
         {!isDefault && (
           <MenuItem onClick={() => setDeletePopupOpen(!deletePopupOpen)}>
-            {isPersonal ? t("actions.delete") : t("actions.remove")}
+            {isPersonal ? t('actions.delete') : t('actions.remove')}
           </MenuItem>
         )}
       </Menu>
@@ -407,5 +411,5 @@ function CalendarSelector({
         handleDeleteConfirm={handleDeleteConfirm}
       />
     </>
-  );
+  )
 }

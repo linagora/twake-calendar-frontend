@@ -1,45 +1,45 @@
-import { CalendarEvent } from "@/features/Events/EventsTypes";
-import { parseCalendarEvent } from "@/features/Events/utils";
-import { defaultColors } from "@/utils/defaultColors";
-import { CalDavItem } from "../api/types";
-import { Calendar } from "../CalendarTypes";
-import { VCalComponent } from "../types/CalendarData";
+import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { parseCalendarEvent } from '@/features/Events/utils'
+import { defaultColors } from '@/utils/defaultColors'
+import { CalDavItem } from '../api/types'
+import { Calendar } from '../CalendarTypes'
+import { VCalComponent } from '../types/CalendarData'
 
 export function extractCalendarEvents(
   item: CalDavItem,
   options: {
-    cal: Calendar;
-    color?: Record<string, string>;
+    cal: Calendar
+    color?: Record<string, string>
   }
 ): CalendarEvent[] {
-  const data = item.data;
+  const data = item.data
   if (!Array.isArray(data)) {
-    return [];
+    return []
   }
 
   // VEVENTS are at index 2
-  const vevents = data[2];
+  const vevents = data[2]
   if (!Array.isArray(vevents)) {
-    return [];
+    return []
   }
 
-  const eventURL = item._links?.self?.href;
+  const eventURL = item._links?.self?.href
   if (!eventURL) {
-    return [];
+    return []
   }
 
   return vevents
-    .map((vevent) => {
+    .map(vevent => {
       if (!Array.isArray(vevent)) {
-        return null;
+        return null
       }
 
-      const eventProps = vevent[1];
+      const eventProps = vevent[1]
       if (!Array.isArray(eventProps)) {
-        return null;
+        return null
       }
 
-      const valarm = extractValarm(vevent);
+      const valarm = extractValarm(vevent)
 
       return parseCalendarEvent(
         eventProps,
@@ -47,20 +47,20 @@ export function extractCalendarEvents(
         options.cal,
         eventURL,
         valarm
-      );
+      )
     })
-    .filter(Boolean) as CalendarEvent[];
+    .filter(Boolean) as CalendarEvent[]
 }
 
 function extractValarm(vevent: VCalComponent) {
-  const subComponents = vevent[2];
+  const subComponents = vevent[2]
   if (!Array.isArray(subComponents)) {
-    return undefined;
+    return undefined
   }
 
   const valarmComponent = subComponents.find(
-    (component) => Array.isArray(component) && component[0] === "valarm"
-  );
+    component => Array.isArray(component) && component[0] === 'valarm'
+  )
 
-  return valarmComponent;
+  return valarmComponent
 }

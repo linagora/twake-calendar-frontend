@@ -1,6 +1,6 @@
-import { fetchWebSocketTicket } from "../api/fetchWebSocketTicket";
-import { WS_INBOUND_EVENTS } from "../protocols";
-import { WebSocketCallbacks, WebSocketWithCleanup } from "./types";
+import { fetchWebSocketTicket } from '../api/fetchWebSocketTicket'
+import { WS_INBOUND_EVENTS } from '../protocols'
+import { WebSocketCallbacks, WebSocketWithCleanup } from './types'
 
 export async function createWebSocketConnection(
   callbacks: WebSocketCallbacks
@@ -9,97 +9,97 @@ export async function createWebSocketConnection(
     window.WEBSOCKET_URL ??
     window.CALENDAR_BASE_URL?.replace(
       /^http(s)?:/,
-      (_: string, s: string | undefined) => (s ? "wss:" : "ws:")
+      (_: string, s: string | undefined) => (s ? 'wss:' : 'ws:')
     ) ??
-    "";
+    ''
 
   if (!wsBaseUrl) {
-    throw new Error("WEBSOCKET_URL is not defined");
+    throw new Error('WEBSOCKET_URL is not defined')
   }
 
-  const ticket = await fetchWebSocketTicket();
+  const ticket = await fetchWebSocketTicket()
 
   const socket = new WebSocket(
     `${wsBaseUrl}/ws?ticket=${encodeURIComponent(ticket.value)}`
-  );
+  )
 
-  const CONNECTION_TIMEOUT_MS = 10_000;
+  const CONNECTION_TIMEOUT_MS = 10_000
 
   await new Promise<void>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
         openHandler
-      );
-      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
-      socket.close();
-      reject(new Error("WebSocket connection timed out"));
-    }, CONNECTION_TIMEOUT_MS);
+      )
+      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
+      socket.close()
+      reject(new Error('WebSocket connection timed out'))
+    }, CONNECTION_TIMEOUT_MS)
 
     const openHandler = () => {
-      console.info("WebSocket connection opened");
-      clearTimeout(timeoutId);
+      console.info('WebSocket connection opened')
+      clearTimeout(timeoutId)
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
         openHandler
-      );
-      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
-      resolve();
-    };
+      )
+      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
+      resolve()
+    }
 
     const errorHandler = (error: Event) => {
-      console.error("WebSocket connection failed:", error);
-      clearTimeout(timeoutId);
+      console.error('WebSocket connection failed:', error)
+      clearTimeout(timeoutId)
       socket.removeEventListener(
         WS_INBOUND_EVENTS.CONNECTION_OPENED,
         openHandler
-      );
-      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
-      reject(new Error("WebSocket connection failed"));
-    };
+      )
+      socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
+      reject(new Error('WebSocket connection failed'))
+    }
 
-    socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_OPENED, openHandler);
-    socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
-  });
+    socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_OPENED, openHandler)
+    socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
+  })
 
   // Store references to event handlers so they can be cleaned up later
   const messageHandler = (event: MessageEvent) => {
     try {
-      const message = JSON.parse(event.data);
-      callbacks.onMessage(message);
+      const message = JSON.parse(event.data)
+      callbacks.onMessage(message)
     } catch (error) {
-      console.error("Failed to parse WebSocket message:", error);
+      console.error('Failed to parse WebSocket message:', error)
     }
-  };
+  }
 
   const closeHandler = (event: CloseEvent) => {
-    console.info("WebSocket closed:", event.code, event.reason);
-    cleanup();
-    callbacks.onClose?.(event);
-  };
+    console.info('WebSocket closed:', event.code, event.reason)
+    cleanup()
+    callbacks.onClose?.(event)
+  }
 
   const errorHandler = (error: Event) => {
-    console.error("WebSocket error:", error);
-    callbacks.onError?.(error);
-  };
+    console.error('WebSocket error:', error)
+    callbacks.onError?.(error)
+  }
 
   // Cleanup function to remove all event listeners
   const cleanup = () => {
-    socket.removeEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler);
+    socket.removeEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler)
     socket.removeEventListener(
       WS_INBOUND_EVENTS.CONNECTION_CLOSED,
       closeHandler
-    );
-    socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
-  };
+    )
+    socket.removeEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
+  }
 
-  socket.addEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler);
-  socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_CLOSED, closeHandler);
-  socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler);
+  socket.addEventListener(WS_INBOUND_EVENTS.MESSAGE, messageHandler)
+  socket.addEventListener(WS_INBOUND_EVENTS.CONNECTION_CLOSED, closeHandler)
+  socket.addEventListener(WS_INBOUND_EVENTS.ERROR, errorHandler)
 
   // Attach cleanup method to socket
-  const socketWithCleanup = socket as WebSocketWithCleanup;
-  socketWithCleanup.cleanup = cleanup;
+  const socketWithCleanup = socket as WebSocketWithCleanup
+  socketWithCleanup.cleanup = cleanup
 
-  return socketWithCleanup;
+  return socketWithCleanup
 }

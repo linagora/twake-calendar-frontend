@@ -1,36 +1,36 @@
-import { CalendarName } from "@/components/Calendar/CalendarName";
-import { formatEventChipTitle } from "@/components/Calendar/utils/calendarUtils";
-import ResponsiveDialog from "@/components/Dialog/ResponsiveDialog";
-import { EditModeDialog } from "@/components/Event/EditModeDialog";
-import { DateSelectArg } from "@fullcalendar/core";
-import { Box, Chip, Tooltip, Typography } from "@linagora/twake-mui";
-import CircleIcon from "@mui/icons-material/Circle";
-import LockOutlineIcon from "@mui/icons-material/LockOutline";
-import { useEffect } from "react";
-import { useI18n } from "twake-i18n";
-import { AttendanceValidation } from "../AttendanceValidation/AttendanceValidation";
-import EventPopover from "../EventModal";
-import { EventPreviewActionMenu } from "../EventPreview/EventPreviewActionMenu";
-import { EventPreviewDetails } from "../EventPreview/EventPreviewDetails";
-import { EventPreviewHeader } from "../EventPreview/EventPreviewHeader";
-import { useEventPreviewState } from "../EventPreview/useEventPreviewState";
-import EventUpdateModal from "../EventUpdateModal";
-import { EventTimeSubtitle } from "./EventTimeSubtitle";
+import { CalendarName } from '@/components/Calendar/CalendarName'
+import { formatEventChipTitle } from '@/components/Calendar/utils/calendarUtils'
+import ResponsiveDialog from '@/components/Dialog/ResponsiveDialog'
+import { EditModeDialog } from '@/components/Event/EditModeDialog'
+import { DateSelectArg } from '@fullcalendar/core'
+import { Box, Chip, Tooltip, Typography } from '@linagora/twake-mui'
+import CircleIcon from '@mui/icons-material/Circle'
+import LockOutlineIcon from '@mui/icons-material/LockOutline'
+import { useEffect } from 'react'
+import { useI18n } from 'twake-i18n'
+import { AttendanceValidation } from '../AttendanceValidation/AttendanceValidation'
+import EventPopover from '../EventModal'
+import { EventPreviewActionMenu } from '../EventPreview/EventPreviewActionMenu'
+import { EventPreviewDetails } from '../EventPreview/EventPreviewDetails'
+import { EventPreviewHeader } from '../EventPreview/EventPreviewHeader'
+import { useEventPreviewState } from '../EventPreview/useEventPreviewState'
+import EventUpdateModal from '../EventUpdateModal'
+import { EventTimeSubtitle } from './EventTimeSubtitle'
 
 export default function EventPreviewModal({
   eventId,
   calId,
   tempEvent,
   open,
-  onClose,
+  onClose
 }: {
-  eventId: string;
-  calId: string;
-  tempEvent?: boolean;
-  open: boolean;
-  onClose: (event: unknown, reason: "backdropClick" | "escapeKeyDown") => void;
+  eventId: string
+  calId: string
+  tempEvent?: boolean
+  open: boolean
+  onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void
 }) {
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   const {
     event,
@@ -59,41 +59,39 @@ export default function EventPreviewModal({
     resolvedTypeOfAction,
     handleEditClick,
     handleDeleteClick,
-    handleDuplicateClick,
-  } = useEventPreviewState(eventId, calId, tempEvent, open, onClose);
+    handleDuplicateClick
+  } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
 
   useEffect(
     () => {
       if (open && (!event || !calendar)) {
-        onClose({}, "backdropClick");
+        onClose({}, 'backdropClick')
       }
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
     [open, event, calendar]
-  );
+  )
 
-  if (!user || !event || !calendar) return null;
+  if (!user || !event || !calendar) return null
 
   const isAdminOfResource = Boolean(
     calendar.owner?.resource &&
     user.openpaasId &&
-    calendar.owner?.administrators?.some(
-      (admin) => admin.id === user.openpaasId
-    )
-  );
+    calendar.owner?.administrators?.some(admin => admin.id === user.openpaasId)
+  )
 
   return (
     <>
       <ResponsiveDialog
         open={open && !hidePreview}
-        onClose={() => onClose({}, "backdropClick")}
+        onClose={() => onClose({}, 'backdropClick')}
         showHeaderActions={false}
         actionsBorderTop={
           !!(
-            event.attendee?.find((p) => p.cal_address === user.email) && isOwn
+            event.attendee?.find(p => p.cal_address === user.email) && isOwn
           ) || isAdminOfResource
         }
         actionsJustifyContent="center"
-        style={{ overflow: "auto" }}
+        style={{ overflow: 'auto' }}
         title={
           <EventPreviewHeader
             event={event}
@@ -102,9 +100,9 @@ export default function EventPreviewModal({
             isOwn={isOwn}
             isWriteDelegated={isWriteDelegated}
             isNotPrivate={isNotPrivate}
-            onClose={() => onClose({}, "backdropClick")}
+            onClose={() => onClose({}, 'backdropClick')}
             onEdit={handleEditClick}
-            onMoreClick={(e) => setToggleActionMenu(e.currentTarget)}
+            onMoreClick={e => setToggleActionMenu(e.currentTarget)}
           />
         }
         actions={
@@ -127,10 +125,10 @@ export default function EventPreviewModal({
             gap={1}
             mb={1}
           >
-            {event.class === "PRIVATE" &&
+            {event.class === 'PRIVATE' &&
               (isOwn ? (
                 <Tooltip
-                  title={t("eventPreview.privateEvent.tooltipOwn")}
+                  title={t('eventPreview.privateEvent.tooltipOwn')}
                   placement="top"
                 >
                   <LockOutlineIcon />
@@ -141,19 +139,19 @@ export default function EventPreviewModal({
             <Typography
               variant="h5"
               sx={{
-                fontSize: "24px",
+                fontSize: '24px',
                 fontWeight: 600,
-                wordBreak: "break-word",
-                fontFamily: "Inter, sans-serif",
+                wordBreak: 'break-word',
+                fontFamily: 'Inter, sans-serif'
               }}
             >
               {formatEventChipTitle(event, t)}
             </Typography>
-            {event.transp === "TRANSPARENT" && (
-              <Tooltip title={t("eventPreview.free.tooltip")} placement="top">
+            {event.transp === 'TRANSPARENT' && (
+              <Tooltip title={t('eventPreview.free.tooltip')} placement="top">
                 <Chip
                   icon={<CircleIcon color="success" fontSize="small" />}
-                  label={t("eventPreview.free.label")}
+                  label={t('eventPreview.free.label')}
                 />
               </Tooltip>
             )}
@@ -171,7 +169,7 @@ export default function EventPreviewModal({
         />
 
         {/* Calendar label */}
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
           <CalendarName calendar={calendar} />
         </Box>
       </ResponsiveDialog>
@@ -192,9 +190,9 @@ export default function EventPreviewModal({
       <EditModeDialog
         type={openEditModePopup}
         setOpen={setOpenEditModePopup}
-        eventAction={(type: "solo" | "all" | undefined) => {
-          setTypeOfAction(type);
-          afterChoiceFunc?.(type);
+        eventAction={(type: 'solo' | 'all' | undefined) => {
+          setTypeOfAction(type)
+          afterChoiceFunc?.(type)
         }}
       />
 
@@ -202,12 +200,12 @@ export default function EventPreviewModal({
       <EventUpdateModal
         open={openUpdateModal}
         onClose={() => {
-          setOpenUpdateModal(false);
-          setHidePreview(false);
+          setOpenUpdateModal(false)
+          setHidePreview(false)
         }}
         onCloseAll={() => {
-          setOpenUpdateModal(false);
-          onClose({}, "backdropClick");
+          setOpenUpdateModal(false)
+          onClose({}, 'backdropClick')
         }}
         eventId={eventId}
         calId={calId}
@@ -224,17 +222,17 @@ export default function EventPreviewModal({
             startStr: event.start,
             end: new Date(event.end ?? event.start),
             endStr: event.end ?? event.start,
-            allDay: event.allday ?? false,
+            allDay: event.allday ?? false
           } as DateSelectArg
         }
         setSelectedRange={() => {}}
         calendarRef={{ current: null }}
         onClose={() => {
-          setOpenDuplicateModal(false);
-          onClose({}, "backdropClick");
+          setOpenDuplicateModal(false)
+          onClose({}, 'backdropClick')
         }}
         event={event}
       />
     </>
-  );
+  )
 }

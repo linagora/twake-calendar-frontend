@@ -1,103 +1,103 @@
-import { AccessTab } from "@/components/Calendar/AccessTab";
+import { AccessTab } from '@/components/Calendar/AccessTab'
 import {
   CalendarAccessRights,
-  UserWithAccess,
-} from "@/components/Calendar/CalendarAccessRights";
-import CalendarPopover from "@/components/Calendar/CalendarModal";
-import { updateDelegationCalendar } from "@/features/Calendars/api/updateDelegationCalendar";
-import { AccessRight, Calendar } from "@/features/Calendars/CalendarTypes";
-import * as eventThunks from "@/features/Calendars/services";
-import * as delegationThunks from "@/features/Calendars/services/updateDelegationCalendarAsync";
-import { getUserDetails } from "@/features/User/userAPI";
-import { accessRightToDavProp } from "@/utils/accessRightToDavProp";
-import { api } from "@/utils/apiUtils";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithProviders } from "../../utils/Renderwithproviders";
+  UserWithAccess
+} from '@/components/Calendar/CalendarAccessRights'
+import CalendarPopover from '@/components/Calendar/CalendarModal'
+import { updateDelegationCalendar } from '@/features/Calendars/api/updateDelegationCalendar'
+import { AccessRight, Calendar } from '@/features/Calendars/CalendarTypes'
+import * as eventThunks from '@/features/Calendars/services'
+import * as delegationThunks from '@/features/Calendars/services/updateDelegationCalendarAsync'
+import { getUserDetails } from '@/features/User/userAPI'
+import { accessRightToDavProp } from '@/utils/accessRightToDavProp'
+import { api } from '@/utils/apiUtils'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock("@/utils/apiUtils", () => ({
-  api: { post: jest.fn() },
-}));
+jest.mock('@/utils/apiUtils', () => ({
+  api: { post: jest.fn() }
+}))
 
-jest.mock("@/features/User/userAPI", () => ({
-  getUserDetails: jest.fn(),
-}));
+jest.mock('@/features/User/userAPI', () => ({
+  getUserDetails: jest.fn()
+}))
 
-jest.mock("@/features/Calendars/CalendarApi", () => ({
-  getSecretLink: jest.fn().mockReturnValue(""),
-  exportCalendar: jest.fn(),
-}));
+jest.mock('@/features/Calendars/CalendarApi', () => ({
+  getSecretLink: jest.fn().mockReturnValue(''),
+  exportCalendar: jest.fn()
+}))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
   jest.fn().mockImplementation(() => {
     const result = Object.assign(Promise.resolve(resolvedValue), {
-      unwrap: () => Promise.resolve(resolvedValue),
-    });
-    return jest.fn().mockReturnValue(result);
-  });
+      unwrap: () => Promise.resolve(resolvedValue)
+    })
+    return jest.fn().mockReturnValue(result)
+  })
 
-describe("accessRightToDavProp", () => {
-  it("maps 5 (ADMIN) → dav:administration", () => {
-    expect(accessRightToDavProp(5)).toBe("dav:administration");
-  });
+describe('accessRightToDavProp', () => {
+  it('maps 5 (ADMIN) → dav:administration', () => {
+    expect(accessRightToDavProp(5)).toBe('dav:administration')
+  })
 
-  it("maps 3 (EDITOR) → dav:read-write", () => {
-    expect(accessRightToDavProp(3)).toBe("dav:read-write");
-  });
+  it('maps 3 (EDITOR) → dav:read-write', () => {
+    expect(accessRightToDavProp(3)).toBe('dav:read-write')
+  })
 
-  it("maps 2 (VIEW) → dav:read", () => {
-    expect(accessRightToDavProp(2)).toBe("dav:read");
-  });
+  it('maps 2 (VIEW) → dav:read', () => {
+    expect(accessRightToDavProp(2)).toBe('dav:read')
+  })
 
-  it("defaults to dav:read for unknown values (covered by default case)", () => {
-    expect(accessRightToDavProp(999 as AccessRight)).toBe("dav:read");
-  });
-});
+  it('defaults to dav:read for unknown values (covered by default case)', () => {
+    expect(accessRightToDavProp(999 as AccessRight)).toBe('dav:read')
+  })
+})
 
-describe("updateDelegationCalendar", () => {
-  beforeEach(() => jest.clearAllMocks());
+describe('updateDelegationCalendar', () => {
+  beforeEach(() => jest.clearAllMocks())
 
-  it("posts to the correct DAV endpoint with the share body", async () => {
-    (api.post as jest.Mock).mockResolvedValue({ ok: true });
+  it('posts to the correct DAV endpoint with the share body', async () => {
+    ;(api.post as jest.Mock).mockResolvedValue({ ok: true })
 
     const share = {
-      set: [{ "dav:href": "mailto:alice@example.com", "dav:read": true }],
-      remove: [],
-    };
+      set: [{ 'dav:href': 'mailto:alice@example.com', 'dav:read': true }],
+      remove: []
+    }
 
-    await updateDelegationCalendar("/calendars/user/cal1.json", share);
+    await updateDelegationCalendar('/calendars/user/cal1.json', share)
 
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
-        "dav/calendars/user/cal1.json",
+        'dav/calendars/user/cal1.json',
         expect.objectContaining({
-          body: JSON.stringify({ share }),
+          body: JSON.stringify({ share })
         })
       )
-    );
-  });
-});
+    )
+  })
+})
 
 const baseCalendar: Calendar = {
-  id: "user1/cal1",
-  name: "My Calendar",
-  description: "",
-  color: { color: "#0062FF", dark: "#FFF" },
-  link: "/calendars/user1/cal1.json",
-  visibility: "public",
+  id: 'user1/cal1',
+  name: 'My Calendar',
+  description: '',
+  color: { color: '#0062FF', dark: '#FFF' },
+  link: '/calendars/user1/cal1.json',
+  visibility: 'public',
   events: {},
   invite: [],
-  owner: { emails: ["user1@example.com"] },
+  owner: { emails: ['user1@example.com'] },
   access: { write: true } as any,
-  delegated: true,
-};
+  delegated: true
+}
 
-describe("CalendarAccessRights", () => {
-  const mockOnChange = jest.fn();
-  const mockOnInvitesLoaded = jest.fn();
+describe('CalendarAccessRights', () => {
+  const mockOnChange = jest.fn()
+  const mockOnInvitesLoaded = jest.fn()
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => jest.clearAllMocks())
 
-  it("renders the grant access rights section", () => {
+  it('renders the grant access rights section', () => {
     renderWithProviders(
       <CalendarAccessRights
         calendar={baseCalendar}
@@ -106,22 +106,22 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
     expect(
-      screen.getByText("calendarPopover.access.grantAccessRights")
-    ).toBeInTheDocument();
-  });
+      screen.getByText('calendarPopover.access.grantAccessRights')
+    ).toBeInTheDocument()
+  })
 
-  it("shows a list of users already passed in via value prop", () => {
+  it('shows a list of users already passed in via value prop', () => {
     const users: UserWithAccess[] = [
       {
-        openpaasId: "user1",
-        displayName: "Alice",
-        email: "alice@example.com",
-        accessRight: 2,
-      },
-    ];
+        openpaasId: 'user1',
+        displayName: 'Alice',
+        email: 'alice@example.com',
+        accessRight: 2
+      }
+    ]
 
     renderWithProviders(
       <CalendarAccessRights
@@ -130,21 +130,21 @@ describe("CalendarAccessRights", () => {
         onChange={mockOnChange}
         onInvitesLoaded={mockOnInvitesLoaded}
       />
-    );
+    )
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
-  });
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText('alice@example.com')).toBeInTheDocument()
+  })
 
-  it("calls onChange with user removed when remove button is clicked", () => {
+  it('calls onChange with user removed when remove button is clicked', () => {
     const users: UserWithAccess[] = [
       {
-        openpaasId: "user1",
-        displayName: "Alice",
-        email: "alice@example.com",
-        accessRight: 5,
-      },
-    ];
+        openpaasId: 'user1',
+        displayName: 'Alice',
+        email: 'alice@example.com',
+        accessRight: 5
+      }
+    ]
 
     renderWithProviders(
       <CalendarAccessRights
@@ -154,31 +154,31 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
-    fireEvent.click(screen.getByLabelText(/remove/i));
-    expect(mockOnChange).toHaveBeenCalledWith([]);
-  });
+    fireEvent.click(screen.getByLabelText(/remove/i))
+    expect(mockOnChange).toHaveBeenCalledWith([])
+  })
 
-  it("loads invited users from calendar.invite on mount", async () => {
+  it('loads invited users from calendar.invite on mount', async () => {
     const calendarWithInvite: Calendar = {
       ...baseCalendar,
       invite: [
         {
-          href: "mailto:bob@example.com",
-          principal: "/principals/users/bob123",
+          href: 'mailto:bob@example.com',
+          principal: '/principals/users/bob123',
           access: 3,
-          inviteStatus: 1,
-        },
-      ],
-    };
+          inviteStatus: 1
+        }
+      ]
+    }
 
-    (getUserDetails as jest.Mock).mockResolvedValue({
-      preferredEmail: "bob@example.com",
-      firstname: "Bob",
-      lastname: "Smith",
-      emails: ["bob@example.com"],
-    });
+    ;(getUserDetails as jest.Mock).mockResolvedValue({
+      preferredEmail: 'bob@example.com',
+      firstname: 'Bob',
+      lastname: 'Smith',
+      emails: ['bob@example.com']
+    })
 
     renderWithProviders(
       <CalendarAccessRights
@@ -188,35 +188,35 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
-    await waitFor(() => expect(getUserDetails).toHaveBeenCalledWith("bob123"));
+    await waitFor(() => expect(getUserDetails).toHaveBeenCalledWith('bob123'))
     await waitFor(() =>
       expect(mockOnInvitesLoaded).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            email: "bob@example.com",
-            accessRight: 3,
-          }),
+            email: 'bob@example.com',
+            accessRight: 3
+          })
         ])
       )
-    );
-  });
+    )
+  })
 
-  it("skips invite entries where getUserDetails throws", async () => {
+  it('skips invite entries where getUserDetails throws', async () => {
     const calendarWithInvite: Calendar = {
       ...baseCalendar,
       invite: [
         {
-          href: "mailto:ghost@example.com",
-          principal: "/principals/users/ghost",
+          href: 'mailto:ghost@example.com',
+          principal: '/principals/users/ghost',
           access: 2,
-          inviteStatus: 1,
-        },
-      ],
-    };
+          inviteStatus: 1
+        }
+      ]
+    }
 
-    (getUserDetails as jest.Mock).mockRejectedValue(new Error("Not found"));
+    ;(getUserDetails as jest.Mock).mockRejectedValue(new Error('Not found'))
 
     renderWithProviders(
       <CalendarAccessRights
@@ -226,28 +226,28 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
-    await waitFor(() => expect(mockOnInvitesLoaded).toHaveBeenCalledWith([]));
-  });
+    await waitFor(() => expect(mockOnInvitesLoaded).toHaveBeenCalledWith([]))
+  })
 
-  it("shows a loading spinner while invite users are being fetched", async () => {
+  it('shows a loading spinner while invite users are being fetched', async () => {
     const calendarWithInvite: Calendar = {
       ...baseCalendar,
       invite: [
         {
-          href: "mailto:carol@example.com",
-          principal: "/principals/users/carol",
+          href: 'mailto:carol@example.com',
+          principal: '/principals/users/carol',
           access: 2,
-          inviteStatus: 1,
-        },
-      ],
-    };
+          inviteStatus: 1
+        }
+      ]
+    }
 
     // Never resolves during the assertion window
-    (getUserDetails as jest.Mock).mockImplementation(
+    ;(getUserDetails as jest.Mock).mockImplementation(
       () => new Promise(() => {})
-    );
+    )
 
     renderWithProviders(
       <CalendarAccessRights
@@ -257,12 +257,12 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
-    expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument();
-  });
+    expect(document.querySelector('[role="progressbar"]')).toBeInTheDocument()
+  })
 
-  it("displays the calendar owner information", () => {
+  it('displays the calendar owner information', () => {
     renderWithProviders(
       <CalendarAccessRights
         calendar={baseCalendar}
@@ -271,46 +271,44 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
-    expect(screen.getAllByText("user1@example.com").length).toBeGreaterThan(0);
-    expect(
-      screen.getByText("calendarPopover.access.owner")
-    ).toBeInTheDocument();
-  });
+    expect(screen.getAllByText('user1@example.com').length).toBeGreaterThan(0)
+    expect(screen.getByText('calendarPopover.access.owner')).toBeInTheDocument()
+  })
 
-  it("fetches and displays resource administrators for resource calendars", async () => {
+  it('fetches and displays resource administrators for resource calendars', async () => {
     const resourceCalendar: any = {
       ...baseCalendar,
       owner: {
-        _id: "resource1",
+        _id: 'resource1',
         resource: true,
-        emails: ["resource1@example.com"],
+        emails: ['resource1@example.com'],
         administrators: [
-          { id: "admin1" },
-          { id: "admin2" },
-          { id: "resource1" }, // Owner shouldn't be loaded as an admin
-        ],
-      },
-    };
+          { id: 'admin1' },
+          { id: 'admin2' },
+          { id: 'resource1' } // Owner shouldn't be loaded as an admin
+        ]
+      }
+    }
 
-    (getUserDetails as jest.Mock).mockImplementation((id: string) => {
-      if (id === "admin1") {
+    ;(getUserDetails as jest.Mock).mockImplementation((id: string) => {
+      if (id === 'admin1') {
         return Promise.resolve({
-          preferredEmail: "admin1@example.com",
-          firstname: "Admin",
-          lastname: "One",
-        });
+          preferredEmail: 'admin1@example.com',
+          firstname: 'Admin',
+          lastname: 'One'
+        })
       }
-      if (id === "admin2") {
+      if (id === 'admin2') {
         return Promise.resolve({
-          preferredEmail: "admin2@example.com",
-          firstname: "Admin",
-          lastname: "Two",
-        });
+          preferredEmail: 'admin2@example.com',
+          firstname: 'Admin',
+          lastname: 'Two'
+        })
       }
-      return Promise.resolve(null);
-    });
+      return Promise.resolve(null)
+    })
 
     renderWithProviders(
       <CalendarAccessRights
@@ -320,37 +318,37 @@ describe("CalendarAccessRights", () => {
         onInvitesLoaded={mockOnInvitesLoaded}
       />,
       { ...userState }
-    );
+    )
 
     await waitFor(() => {
-      expect(getUserDetails).toHaveBeenCalledWith("admin1");
-      expect(getUserDetails).toHaveBeenCalledWith("admin2");
-    });
+      expect(getUserDetails).toHaveBeenCalledWith('admin1')
+      expect(getUserDetails).toHaveBeenCalledWith('admin2')
+    })
 
-    expect(getUserDetails).not.toHaveBeenCalledWith("resource1");
+    expect(getUserDetails).not.toHaveBeenCalledWith('resource1')
 
-    expect(await screen.findByText("Admin One")).toBeInTheDocument();
-    expect(screen.getByText("admin1@example.com")).toBeInTheDocument();
-    expect(screen.getByText("Admin Two")).toBeInTheDocument();
-    expect(screen.getByText("admin2@example.com")).toBeInTheDocument();
+    expect(await screen.findByText('Admin One')).toBeInTheDocument()
+    expect(screen.getByText('admin1@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Admin Two')).toBeInTheDocument()
+    expect(screen.getByText('admin2@example.com')).toBeInTheDocument()
     expect(
-      screen.getAllByText("calendarPopover.access.administrator")
-    ).toHaveLength(2);
-  });
-});
+      screen.getAllByText('calendarPopover.access.administrator')
+    ).toHaveLength(2)
+  })
+})
 
 const userState = {
   user: {
-    userData: { openpaasId: "user1", email: "user1@example.com" },
-  },
-};
+    userData: { openpaasId: 'user1', email: 'user1@example.com' }
+  }
+}
 
-describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
-  const noop = jest.fn();
+describe('AccessTab – conditional rendering of CalendarAccessRights', () => {
+  const noop = jest.fn()
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => jest.clearAllMocks())
 
-  it("shows CalendarAccessRights when the current user owns the calendar", () => {
+  it('shows CalendarAccessRights when the current user owns the calendar', () => {
     renderWithProviders(
       <AccessTab
         calendar={baseCalendar}
@@ -360,21 +358,21 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
       />,
       {
         ...userState,
-        calendars: { list: { "user1/cal1": baseCalendar } },
+        calendars: { list: { 'user1/cal1': baseCalendar } }
       }
-    );
+    )
 
     expect(
-      screen.getByText("calendarPopover.access.grantAccessRights")
-    ).toBeInTheDocument();
-  });
+      screen.getByText('calendarPopover.access.grantAccessRights')
+    ).toBeInTheDocument()
+  })
 
-  it("hides CalendarAccessRights textfield for a non-owner without admin delegation", () => {
+  it('hides CalendarAccessRights textfield for a non-owner without admin delegation', () => {
     const foreignCalendar: Calendar = {
       ...baseCalendar,
-      id: "otherUser/cal1",
-      invite: [],
-    };
+      id: 'otherUser/cal1',
+      invite: []
+    }
 
     renderWithProviders(
       <AccessTab
@@ -385,29 +383,29 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
       />,
       {
         ...userState,
-        calendars: { list: { "otherUser/cal1": foreignCalendar } },
+        calendars: { list: { 'otherUser/cal1': foreignCalendar } }
       }
-    );
+    )
 
-    expect(screen.queryByText("peopleSearch.label")).not.toBeInTheDocument();
+    expect(screen.queryByText('peopleSearch.label')).not.toBeInTheDocument()
     expect(
-      screen.getByText("calendarPopover.access.accessRights")
-    ).toBeInTheDocument();
-  });
+      screen.getByText('calendarPopover.access.accessRights')
+    ).toBeInTheDocument()
+  })
 
-  it("shows CalendarAccessRights when the user has access=5 (admin) delegation", () => {
+  it('shows CalendarAccessRights when the user has access=5 (admin) delegation', () => {
     const delegatedCalendar: Calendar = {
       ...baseCalendar,
-      id: "otherUser/cal1",
+      id: 'otherUser/cal1',
       invite: [
         {
-          href: "mailto:user1@example.com",
-          principal: "/principals/users/user1",
+          href: 'mailto:user1@example.com',
+          principal: '/principals/users/user1',
           access: 5,
-          inviteStatus: 1,
-        },
-      ],
-    };
+          inviteStatus: 1
+        }
+      ]
+    }
 
     renderWithProviders(
       <AccessTab
@@ -418,78 +416,78 @@ describe("AccessTab – conditional rendering of CalendarAccessRights", () => {
       />,
       {
         ...userState,
-        calendars: { list: { "otherUser/cal1": delegatedCalendar } },
+        calendars: { list: { 'otherUser/cal1': delegatedCalendar } }
       }
-    );
+    )
 
     expect(
-      screen.getByText("calendarPopover.access.grantAccessRights")
-    ).toBeInTheDocument();
-  });
-});
+      screen.getByText('calendarPopover.access.grantAccessRights')
+    ).toBeInTheDocument()
+  })
+})
 
 const existingCalendar: Calendar = {
-  id: "user1/cal1",
-  name: "Existing Cal",
-  description: "Desc",
-  color: { color: "#0062FF", dark: "#FFF" },
-  link: "/calendars/user/cal1",
-  visibility: "public",
+  id: 'user1/cal1',
+  name: 'Existing Cal',
+  description: 'Desc',
+  color: { color: '#0062FF', dark: '#FFF' },
+  link: '/calendars/user/cal1',
+  visibility: 'public',
   events: {},
   invite: [],
-  owner: { emails: ["user1@example.com"] },
-};
+  owner: { emails: ['user1@example.com'] }
+}
 
-describe("CalendarModal – updateDelegationCalendarAsync integration", () => {
-  const mockOnClose = jest.fn();
+describe('CalendarModal – updateDelegationCalendarAsync integration', () => {
+  const mockOnClose = jest.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
     jest
-      .spyOn(eventThunks, "patchCalendarAsync")
-      .mockImplementation(mockThunkWithUnwrap());
+      .spyOn(eventThunks, 'patchCalendarAsync')
+      .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(eventThunks, "patchACLCalendarAsync")
-      .mockImplementation(mockThunkWithUnwrap());
+      .spyOn(eventThunks, 'patchACLCalendarAsync')
+      .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(delegationThunks, "updateDelegationCalendarAsync")
-      .mockImplementation(mockThunkWithUnwrap());
-  });
+      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .mockImplementation(mockThunkWithUnwrap())
+  })
 
-  it("does NOT call updateDelegationCalendarAsync when no users are added or removed", async () => {
+  it('does NOT call updateDelegationCalendarAsync when no users are added or removed', async () => {
     renderWithProviders(
       <CalendarPopover
         open={true}
         onClose={mockOnClose}
         calendar={existingCalendar}
       />,
-      { ...userState, calendars: { list: { "user1/cal1": existingCalendar } } }
-    );
+      { ...userState, calendars: { list: { 'user1/cal1': existingCalendar } } }
+    )
 
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    await waitFor(() => expect(mockOnClose).toHaveBeenCalled());
+    await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
 
     expect(
       delegationThunks.updateDelegationCalendarAsync
-    ).not.toHaveBeenCalled();
-  });
-});
+    ).not.toHaveBeenCalled()
+  })
+})
 
-describe("CalendarModal – cancel button", () => {
-  const mockOnClose = jest.fn();
+describe('CalendarModal – cancel button', () => {
+  const mockOnClose = jest.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
     jest
-      .spyOn(delegationThunks, "updateDelegationCalendarAsync")
-      .mockImplementation(mockThunkWithUnwrap());
+      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(eventThunks, "patchCalendarAsync")
-      .mockImplementation(mockThunkWithUnwrap());
-  });
+      .spyOn(eventThunks, 'patchCalendarAsync')
+      .mockImplementation(mockThunkWithUnwrap())
+  })
 
-  it("calls onClose without saving when Cancel is clicked", async () => {
+  it('calls onClose without saving when Cancel is clicked', async () => {
     renderWithProviders(
       <CalendarPopover
         open={true}
@@ -497,14 +495,14 @@ describe("CalendarModal – cancel button", () => {
         calendar={existingCalendar}
       />,
       { ...userState }
-    );
+    )
 
-    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
 
-    await waitFor(() => expect(mockOnClose).toHaveBeenCalled());
+    await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
     expect(
       delegationThunks.updateDelegationCalendarAsync
-    ).not.toHaveBeenCalled();
-    expect(eventThunks.patchCalendarAsync).not.toHaveBeenCalled();
-  });
-});
+    ).not.toHaveBeenCalled()
+    expect(eventThunks.patchCalendarAsync).not.toHaveBeenCalled()
+  })
+})

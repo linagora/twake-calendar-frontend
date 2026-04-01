@@ -1,2 +1,2 @@
-export { WebSocketGate } from "./WebSocketGate";
-export type { WebSocketWithCleanup, WebSocketCallbacks } from "./connection";
+export { WebSocketGate } from './WebSocketGate'
+export type { WebSocketWithCleanup, WebSocketCallbacks } from './connection'

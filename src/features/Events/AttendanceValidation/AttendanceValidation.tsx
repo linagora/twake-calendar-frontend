@@ -1,61 +1,59 @@
-import { PartStat } from "@/features/User/models/attendee";
-import { userData } from "@/features/User/userDataTypes";
-import { Box, Typography } from "@linagora/twake-mui";
-import { Dispatch, SetStateAction, useState } from "react";
-import { useI18n } from "twake-i18n";
-import { ContextualizedEvent } from "../EventsTypes";
-import { EventCounterModal } from "./EventCounterModal";
-import { RSVPButton } from "./RSVPButton";
+import { PartStat } from '@/features/User/models/attendee'
+import { userData } from '@/features/User/userDataTypes'
+import { Box, Typography } from '@linagora/twake-mui'
+import { Dispatch, SetStateAction, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { ContextualizedEvent } from '../EventsTypes'
+import { EventCounterModal } from './EventCounterModal'
+import { RSVPButton } from './RSVPButton'
 
 interface AttendanceValidationProps {
-  contextualizedEvent: ContextualizedEvent;
-  user: userData | undefined;
+  contextualizedEvent: ContextualizedEvent
+  user: userData | undefined
   setAfterChoiceFunc: (
-    func: ((type: "solo" | "all" | undefined) => void) | undefined
-  ) => void;
-  setOpenEditModePopup: Dispatch<SetStateAction<string | null>>;
+    func: ((type: 'solo' | 'all' | undefined) => void) | undefined
+  ) => void
+  setOpenEditModePopup: Dispatch<SetStateAction<string | null>>
 }
 
 export function AttendanceValidation({
   contextualizedEvent,
   user,
   setAfterChoiceFunc,
-  setOpenEditModePopup,
+  setOpenEditModePopup
 }: AttendanceValidationProps) {
-  const { currentUserAttendee, isOwn, calendar } = contextualizedEvent;
-  const { t } = useI18n();
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingValue, setLoadingValue] = useState<PartStat | null>(null);
-  const [openCounterModal, setOpenCounterModal] = useState(false);
+  const { currentUserAttendee, isOwn, calendar } = contextualizedEvent
+  const { t } = useI18n()
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingValue, setLoadingValue] = useState<PartStat | null>(null)
+  const [openCounterModal, setOpenCounterModal] = useState(false)
 
   const hasNoAttendeesOrOrganizer =
     !(contextualizedEvent.event?.attendee?.length > 0) &&
-    !contextualizedEvent.event?.organizer;
+    !contextualizedEvent.event?.organizer
 
-  const createByTheUser = currentUserAttendee || hasNoAttendeesOrOrganizer;
-  const editRightInSelfCalendar = createByTheUser && isOwn;
+  const createByTheUser = currentUserAttendee || hasNoAttendeesOrOrganizer
+  const editRightInSelfCalendar = createByTheUser && isOwn
   const isDelegatedPublicEvent =
     contextualizedEvent.calendar.delegated &&
     (!contextualizedEvent.event.class ||
-      contextualizedEvent.event.class === "PUBLIC");
+      contextualizedEvent.event.class === 'PUBLIC')
 
-  const { owner: resourceOwner } = calendar;
+  const { owner: resourceOwner } = calendar
   const isAdminOfResource =
     resourceOwner?.resource &&
-    resourceOwner?.administrators?.some(
-      (admin) => admin.id === user?.openpaasId
-    );
+    resourceOwner?.administrators?.some(admin => admin.id === user?.openpaasId)
 
   if (
     !(editRightInSelfCalendar || isDelegatedPublicEvent || isAdminOfResource)
   ) {
-    return null;
+    return null
   }
 
   const handleLoadingChange = (loading: boolean, value?: PartStat) => {
-    setIsLoading(loading);
-    setLoadingValue(loading && value ? value : null);
-  };
+    setIsLoading(loading)
+    setLoadingValue(loading && value ? value : null)
+  }
 
   const commonButtonProps = {
     contextualizedEvent,
@@ -64,15 +62,15 @@ export function AttendanceValidation({
     setOpenEditModePopup,
     isLoading,
     onLoadingChange: handleLoadingChange,
-    loadingValue,
-  };
+    loadingValue
+  }
 
   return (
     <>
       <Typography variant="body2" sx={{ marginRight: 1 }}>
         {calendar.owner?.resource
-          ? t("eventPreview.authorizeQuestion")
-          : t("eventPreview.attendingQuestion")}
+          ? t('eventPreview.authorizeQuestion')
+          : t('eventPreview.attendingQuestion')}
       </Typography>
       <Box display="flex" gap={1} mx={1} alignItems="center">
         <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
@@ -83,9 +81,9 @@ export function AttendanceValidation({
         <Typography
           variant="body2"
           onClick={() => setOpenCounterModal(!openCounterModal)}
-          sx={{ marginLeft: 1, cursor: "pointer" }}
+          sx={{ marginLeft: 1, cursor: 'pointer' }}
         >
-          {t("eventPreview.proposeNewTime")}
+          {t('eventPreview.proposeNewTime')}
         </Typography>
       )}
       <EventCounterModal
@@ -94,5 +92,5 @@ export function AttendanceValidation({
         contextualizedEvent={contextualizedEvent}
       />
     </>
-  );
+  )
 }
