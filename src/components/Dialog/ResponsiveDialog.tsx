@@ -10,7 +10,9 @@ import {
   IconButton,
   Stack,
   SxProps,
-  Theme
+  Theme,
+  useMediaQuery,
+  useTheme
 } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
@@ -110,8 +112,12 @@ function ResponsiveDialog({
   actionsJustifyContent = 'flex-end',
   sx,
   ...otherDialogProps
-}: ResponsiveDialogProps) {
+}: ResponsiveDialogProps): JSX.Element {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
+
   const baseSx: SxProps<Theme> = {
     '& .MuiBackdrop-root': {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -161,7 +167,7 @@ function ResponsiveDialog({
   const handleClose = (
     event: unknown,
     reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
+  ): void => {
     if (isExpanded && reason === 'backdropClick') {
       return
     }
@@ -175,9 +181,14 @@ function ResponsiveDialog({
       open={open}
       onClose={handleClose}
       maxWidth={false}
+      fullScreen={isMobile && open}
       fullWidth
       transitionDuration={isExpanded ? 0 : 300}
-      sx={[baseSx, ...(Array.isArray(sx) ? sx : [sx])]}
+      sx={
+        isMobile && open
+          ? undefined
+          : [baseSx, ...(Array.isArray(sx) ? sx : [sx])]
+      }
       style={isExpanded ? { zIndex: 1200 } : undefined}
       {...otherDialogProps}
     >
@@ -238,7 +249,7 @@ function ResponsiveDialog({
         <DialogActions
           sx={{
             borderTop: actionsBorderTop
-              ? theme => `1px solid ${theme.palette.divider}`
+              ? (theme: Theme): string => `1px solid ${theme.palette.divider}`
               : undefined,
             justifyContent: actionsJustifyContent
           }}

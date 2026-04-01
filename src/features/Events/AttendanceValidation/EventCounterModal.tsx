@@ -20,7 +20,7 @@ export function EventCounterModal({
   open: boolean
   setOpen: (b: boolean) => void
   contextualizedEvent: ContextualizedEvent
-}) {
+}): JSX.Element {
   const { t } = useI18n()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
@@ -56,7 +56,7 @@ export function EventCounterModal({
     errors: { dateTime: '' }
   })
 
-  const handleStartDateChange = (value: string) => {
+  const handleStartDateChange = (value: string): void => {
     setStartDate(value)
     if (value > endDate) {
       setEndDate(value)
@@ -65,18 +65,18 @@ export function EventCounterModal({
     setValidation({ errors: { dateTime: '' } })
   }
 
-  const handleStartTimeChange = (value: string) => {
+  const handleStartTimeChange = (value: string): void => {
     setStartTime(value)
     setValidation({ errors: { dateTime: '' } })
   }
 
-  const handleEndDateChange = (value: string) => {
+  const handleEndDateChange = (value: string): void => {
     setEndDate(value)
     setHasEndDateChanged(true)
     setValidation({ errors: { dateTime: '' } })
   }
 
-  const handleEndTimeChange = (value: string) => {
+  const handleEndTimeChange = (value: string): void => {
     setEndTime(value)
     setValidation({ errors: { dateTime: '' } })
   }
@@ -107,7 +107,7 @@ export function EventCounterModal({
     return true
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (!validate()) return
     if (
       !contextualizedEvent.currentUserAttendee?.cal_address ||
@@ -163,6 +163,21 @@ export function EventCounterModal({
         open={open}
         onClose={() => setOpen(false)}
         title={t('eventPreview.proposeNewTime')}
+        actions={
+          <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+            <Button variant="text" onClick={() => setOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => void handleSubmit()}
+              disabled={isSubmitting}
+            >
+              {t('eventPreview.sendProposal')}
+            </Button>
+          </Box>
+        }
       >
         {/* Event title */}
         <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -234,21 +249,6 @@ export function EventCounterModal({
               }
             }}
           />
-        </Box>
-
-        {/* Actions */}
-        <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
-          <Button variant="text" onClick={() => setOpen(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {t('eventPreview.sendProposal')}
-          </Button>
         </Box>
       </ResponsiveDialog>
     </>

@@ -1,4 +1,10 @@
-import { Box, Link, Typography } from '@linagora/twake-mui'
+import {
+  Box,
+  Link,
+  Typography,
+  useTheme,
+  useMediaQuery
+} from '@linagora/twake-mui'
 import React from 'react'
 
 type InfoRowProps = {
@@ -12,14 +18,14 @@ type InfoRowProps = {
   flexWrap?: React.CSSProperties['flexWrap']
 }
 
-function detectUrls(text: string) {
+function detectUrls(text: string): JSX.Element[] {
   // Simple regex that captures whole URLs without splitting them apart
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi
 
   const parts = []
   let lastIndex = 0
 
-  text.replace(urlRegex, (match, _, offset) => {
+  text.replace(urlRegex, (match, _, offset: number) => {
     // Push the text before the match
     if (lastIndex < offset) {
       parts.push(
@@ -66,7 +72,9 @@ export function InfoRow({
   style,
   alignItems = 'center',
   flexWrap = 'nowrap'
-}: InfoRowProps) {
+}: InfoRowProps): JSX.Element {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   return (
     <Box
       style={{
@@ -87,8 +95,8 @@ export function InfoRow({
           sx={{
             wordBreak: 'break-word',
             whiteSpace: 'pre-line',
-            maxHeight: '33vh',
-            overflowY: 'auto',
+            maxHeight: isMobile ? undefined : '33vh',
+            overflowY: isMobile ? undefined : 'auto',
             width: '100%',
             ...style
           }}
