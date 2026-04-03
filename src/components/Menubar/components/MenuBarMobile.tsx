@@ -4,6 +4,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import MenuIcon from '@mui/icons-material/Menu'
 import TodayIcon from '@mui/icons-material/Today'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -17,13 +18,15 @@ export type MenubarMobileProps = {
   currentDate: Date
   onDateChange?: (date: Date) => void
   handleNavigation: (action: 'prev' | 'next' | 'today') => void
+  onOpenSidebar: () => void
 }
 
 export const MenubarMobile: React.FC<MenubarMobileProps> = ({
   calendarRef,
   currentDate,
   onDateChange,
-  handleNavigation
+  handleNavigation,
+  onOpenSidebar
 }) => {
   const { t } = useI18n()
 
@@ -39,6 +42,9 @@ export const MenubarMobile: React.FC<MenubarMobileProps> = ({
     <>
       <header className="menubar">
         <div className="left-menu">
+          <IconButton onClick={onOpenSidebar}>
+            <MenuIcon />
+          </IconButton>
           <div className="menu-items">
             <div className="navigation-controls">
               <Stack direction="row">

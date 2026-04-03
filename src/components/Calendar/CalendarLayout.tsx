@@ -20,7 +20,7 @@ export default function CalendarLayout(): JSX.Element {
   const tempcalendars = useAppSelector(state => state.calendars.templist)
   const view = useAppSelector(state => state.settings.view)
 
-  const { isTablet } = useScreenSizeDetection()
+  const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
   const [openSidebar, setOpenSideBar] = useState(false)
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
@@ -38,12 +38,13 @@ export default function CalendarLayout(): JSX.Element {
           return prev
         }
 
-        return isTablet
+        return isTablet || isMobile
           ? CALENDAR_VIEWS.timeGridDay
           : CALENDAR_VIEWS.timeGridWeek
       })
     setView()
-  }, [isTablet])
+  }, [isTablet, isMobile])
+
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
   const handleRefresh = async (): Promise<void> => {
@@ -76,8 +77,6 @@ export default function CalendarLayout(): JSX.Element {
   const handleViewChange = (view: string): void => {
     if (!calendarRef.current) return
     dispatch(setView('calendar'))
-
-    calendarRef.current.changeView(view)
 
     // Notify parent about view change
     setCurrentView(view)

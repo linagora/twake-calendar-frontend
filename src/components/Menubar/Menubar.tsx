@@ -174,6 +174,7 @@ export const Menubar: React.FC<MenubarProps> = ({
         currentDate={currentDate}
         onDateChange={onDateChange}
         handleNavigation={handleNavigation}
+        onOpenSidebar={onToggleSidebar}
       />
     )
   }

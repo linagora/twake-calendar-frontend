@@ -26,9 +26,7 @@ const Sidebar: React.FC<CalendarSidebarProps> = (
 ) => {
   const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
 
-  if (isMobile) return
-
-  return isTablet ? (
+  return isTablet || isMobile ? (
     <TabletSidebar {...sharedProps} />
   ) : (
     <DesktopSidebar {...sharedProps} />
