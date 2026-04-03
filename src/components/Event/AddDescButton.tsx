@@ -10,14 +10,16 @@ export function AddDescButton({
   setShowDescription,
   showMore,
   description,
-  setDescription
+  setDescription,
+  isMobile
 }: {
   showDescription: boolean
   setShowDescription: (b: boolean) => void
   showMore: boolean
   description: string
   setDescription: (d: string) => void
-}) {
+  isMobile?: boolean
+}): JSX.Element {
   const { t } = useI18n()
   const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null)
 
@@ -30,7 +32,7 @@ export function AddDescButton({
   const descriptionField = (
     <FieldWithLabel
       label={t('event.form.description')}
-      isExpanded={showMore}
+      isExpanded={showMore && !isMobile}
       sx={{ padding: 0, margin: 0 }}
     >
       <TextField

@@ -51,6 +51,7 @@ import { useAllDayToggle } from './hooks/useAllDayToggle'
 import { combineDateTime, splitDateTime } from './utils/dateTimeHelpers'
 import { validateEventForm } from './utils/formValidation'
 import { Resource, ResourceSearch } from '../Attendees/ResourceSearch'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 interface EventFormFieldsProps {
   // Form state
@@ -171,8 +172,10 @@ export default function EventFormFields({
   onHasEndDateChangedChange,
   selectedResources,
   setSelectedResources
-}: EventFormFieldsProps) {
+}: EventFormFieldsProps): JSX.Element {
   const { t } = useI18n()
+
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState('')
@@ -284,7 +287,7 @@ export default function EventFormFields({
         const timer = setTimeout(() => {
           titleInputRef.current?.focus()
         }, 100)
-        return () => clearTimeout(timer)
+        return (): void => clearTimeout(timer)
       }
     }
   }, [isOpen])
@@ -309,7 +312,7 @@ export default function EventFormFields({
 
         // Update previous value before returning cleanup
         prevShowMoreRef.current = showMore
-        return () => clearTimeout(timer)
+        return (): void => clearTimeout(timer)
       }
     }
 
@@ -441,7 +444,7 @@ export default function EventFormFields({
 
   const validation = validateForm()
 
-  const handleAddVideoConference = () => {
+  const handleAddVideoConference = (): void => {
     const newMeetingLink = generateMeetingLink()
     const updatedDescription = addVideoConferenceToDescription(
       description,
@@ -457,7 +460,7 @@ export default function EventFormFields({
 
   const [openToast, setOpenToast] = React.useState(false)
 
-  const handleCopyMeetingLink = async () => {
+  const handleCopyMeetingLink = async (): Promise<void> => {
     if (meetingLink) {
       try {
         await navigator.clipboard.writeText(meetingLink)
@@ -468,18 +471,18 @@ export default function EventFormFields({
     }
   }
 
-  const handleDeleteVideoConference = () => {
+  const handleDeleteVideoConference = (): void => {
     setDescription(removeVideoConferenceFromDescription(description))
     setHasVideoConference(false)
     setMeetingLink(null)
   }
 
-  const handleCalendarChange = (newCalendarId: string) => {
+  const handleCalendarChange = (newCalendarId: string): void => {
     setCalendarid(newCalendarId)
     onCalendarChange?.(newCalendarId)
   }
 
-  const handleResourceChange = (resources: Resource[]) => {
+  const handleResourceChange = (resources: Resource[]): void => {
     setSelectedResources(resources)
   }
 
@@ -487,7 +490,7 @@ export default function EventFormFields({
     <>
       <FieldWithLabel
         label={showMore ? t('event.form.title') : ''}
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         <TextField
           fullWidth
@@ -510,7 +513,7 @@ export default function EventFormFields({
             ? ''
             : t('event.form.dateTime')
         }
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         {!showMore && !hasClickedDateTimeSection ? (
           <DateTimeSummary
@@ -554,55 +557,62 @@ export default function EventFormFields({
       </FieldWithLabel>
 
       {!(!showMore && !hasClickedDateTimeSection) && (
-        <FieldWithLabel label=" " isExpanded={showMore}>
-          <Box display="flex" gap={2} alignItems="center">
-            <FormControlLabel
-              control={
-                <Checkbox checked={allday} onChange={handleAllDayToggle} />
-              }
-              label={
-                <Typography variant="h6">{t('event.form.allDay')}</Typography>
-              }
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={
-                    showRepeat ||
-                    (typeOfAction === 'solo' && !!repetition?.freq)
-                  }
-                  disabled={typeOfAction === 'solo'}
-                  onChange={() => {
-                    const newShowRepeat = !showRepeat
-                    setShowRepeat(newShowRepeat)
-                    if (newShowRepeat) {
-                      const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
-                      const eventStartDate = new Date(start)
-                      const jsDay = eventStartDate.getDay()
-                      const icsDay = days[(jsDay + 6) % 7]
-                      setRepetition({
-                        freq: 'weekly',
-                        interval: 1,
-                        occurrences: 0,
-                        endDate: '',
-                        byday: [icsDay]
-                      } as RepetitionObject)
-                    } else {
-                      setRepetition({
-                        freq: '',
-                        interval: 1,
-                        occurrences: 0,
-                        endDate: '',
-                        byday: null
-                      } as RepetitionObject)
+        <FieldWithLabel label=" " isExpanded={showMore && !isMobile}>
+          <Box
+            display="flex"
+            gap={2}
+            alignItems={isMobile ? 'start' : 'center'}
+            flexDirection={isMobile ? 'column' : 'row'}
+          >
+            <Box>
+              <FormControlLabel
+                control={
+                  <Checkbox checked={allday} onChange={handleAllDayToggle} />
+                }
+                label={
+                  <Typography variant="h6">{t('event.form.allDay')}</Typography>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={
+                      showRepeat ||
+                      (typeOfAction === 'solo' && !!repetition?.freq)
                     }
-                  }}
-                />
-              }
-              label={
-                <Typography variant="h6">{t('event.form.repeat')}</Typography>
-              }
-            />
+                    disabled={typeOfAction === 'solo'}
+                    onChange={() => {
+                      const newShowRepeat = !showRepeat
+                      setShowRepeat(newShowRepeat)
+                      if (newShowRepeat) {
+                        const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+                        const eventStartDate = new Date(start)
+                        const jsDay = eventStartDate.getDay()
+                        const icsDay = days[(jsDay + 6) % 7]
+                        setRepetition({
+                          freq: 'weekly',
+                          interval: 1,
+                          occurrences: 0,
+                          endDate: '',
+                          byday: [icsDay]
+                        } as RepetitionObject)
+                      } else {
+                        setRepetition({
+                          freq: '',
+                          interval: 1,
+                          occurrences: 0,
+                          endDate: '',
+                          byday: null
+                        } as RepetitionObject)
+                      }
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="h6">{t('event.form.repeat')}</Typography>
+                }
+              />
+            </Box>
             <TimezoneAutocomplete
               value={timezone}
               onChange={setTimezone}
@@ -623,7 +633,7 @@ export default function EventFormFields({
 
       {!(!showMore && !hasClickedDateTimeSection) &&
         (showRepeat || (typeOfAction === 'solo' && repetition?.freq)) && (
-          <FieldWithLabel label=" " isExpanded={showMore}>
+          <FieldWithLabel label=" " isExpanded={showMore && !isMobile}>
             <RepeatEvent
               repetition={repetition}
               eventStart={new Date(start)}
@@ -635,7 +645,7 @@ export default function EventFormFields({
 
       <FieldWithLabel
         label={showMore ? t('event.form.participants') : ''}
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         <AttendeeSelector
           attendees={attendees}
@@ -651,7 +661,7 @@ export default function EventFormFields({
 
       <FieldWithLabel
         label={showMore ? t('event.form.videoMeeting') : ''}
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         {!showMore ? (
           hasVideoConference && meetingLink ? (
@@ -671,7 +681,7 @@ export default function EventFormFields({
                 {t('event.form.joinVisioConference')}
               </Button>
               <IconButton
-                onClick={handleCopyMeetingLink}
+                onClick={() => void handleCopyMeetingLink()}
                 size="small"
                 sx={{ color: 'primary.main' }}
                 aria-label={t('event.form.copyMeetingLink')}
@@ -737,7 +747,7 @@ export default function EventFormFields({
                   {t('event.form.joinVisioConference')}
                 </Button>
                 <IconButton
-                  onClick={handleCopyMeetingLink}
+                  onClick={() => void handleCopyMeetingLink()}
                   size="small"
                   sx={{ color: 'primary.main' }}
                   aria-label={t('event.form.copyMeetingLink')}
@@ -766,13 +776,14 @@ export default function EventFormFields({
         showMore={showMore}
         description={description}
         setDescription={setDescription}
+        isMobile={isMobile}
       />
 
       <FieldWithLabel
         label={
           showMore || hasClickedLocationSection ? t('event.form.location') : ''
         }
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         {!showMore && !hasClickedLocationSection ? (
           <SectionPreviewRow
@@ -800,7 +811,7 @@ export default function EventFormFields({
         label={
           showMore || hasClickedCalendarSection ? t('event.form.calendar') : ''
         }
-        isExpanded={showMore}
+        isExpanded={showMore && !isMobile}
       >
         {!showMore && !hasClickedCalendarSection ? (
           <SectionPreviewRow
@@ -865,7 +876,7 @@ export default function EventFormFields({
         <>
           <FieldWithLabel
             label={t('event.form.resource')}
-            isExpanded={showMore}
+            isExpanded={showMore && !isMobile}
           >
             <FormControl fullWidth margin="dense" size="small">
               <ResourceSearch
@@ -882,7 +893,7 @@ export default function EventFormFields({
 
           <FieldWithLabel
             label={t('event.form.notification')}
-            isExpanded={showMore}
+            isExpanded={showMore && !isMobile}
           >
             <FormControl fullWidth margin="dense" size="small">
               <Select
@@ -934,7 +945,7 @@ export default function EventFormFields({
 
           <FieldWithLabel
             label={t('event.form.showMeAs')}
-            isExpanded={showMore}
+            isExpanded={showMore && !isMobile}
           >
             <FormControl fullWidth margin="dense" size="small">
               <Select
@@ -950,12 +961,12 @@ export default function EventFormFields({
 
           <FieldWithLabel
             label={t('event.form.visibleTo')}
-            isExpanded={showMore}
+            isExpanded={showMore && !isMobile}
           >
             <ToggleButtonGroup
               value={eventClass}
               exclusive
-              onChange={(e, newValue) => {
+              onChange={(_e, newValue: string) => {
                 if (newValue !== null) {
                   setEventClass(newValue)
                 }

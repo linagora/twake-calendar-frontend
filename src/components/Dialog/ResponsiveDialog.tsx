@@ -192,7 +192,7 @@ function ResponsiveDialog({
       {...otherDialogProps}
     >
       <DialogTitle sx={titleSx} {...dialogTitleProps}>
-        {isExpanded && onExpandToggle ? (
+        {isExpanded && onExpandToggle && !isMobile ? (
           <IconButton
             onClick={onExpandToggle}
             aria-label="show less"
@@ -209,7 +209,7 @@ function ResponsiveDialog({
           >
             <Box>{title}</Box>
             <Box>
-              {onExpandToggle && (
+              {onExpandToggle && !isMobile && (
                 <IconButton
                   onClick={onExpandToggle}
                   aria-label="expand"

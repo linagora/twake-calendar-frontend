@@ -365,17 +365,22 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         className={`date-time-group ${
           isExpanded || shouldShowFullFieldsInNormal ? 'show-full-field' : ''
         }`.trim()}
-        sx={{ maxWidth: showMore ? 'calc(100% - 145px)' : '100%' }}
+        sx={{ maxWidth: showMore && !isMobile ? 'calc(100% - 145px)' : '100%' }}
       >
         {isExpanded || shouldShowFullFieldsInNormal ? (
           <>
             <Box
               display="flex"
               gap={1}
-              flexDirection={isMobile ? 'column' : 'row'}
-              alignItems="center"
+              flexDirection={isMobile && !isExpanded ? 'column' : 'row'}
+              alignItems={isMobile ? 'stretch' : 'center'}
             >
-              <Box sx={{ maxWidth: '300px', width: '48%' }}>
+              <Box
+                sx={{
+                  width: isMobile ? '100%' : '48%',
+                  maxWidth: isMobile ? '100%' : '300px'
+                }}
+              >
                 <DatePicker
                   format={LONG_DATE_FORMAT}
                   value={startDateValue}
@@ -397,7 +402,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 />
               </Box>
               {shouldShowTimeFields && (
-                <Box sx={{ width: '110px' }}>
+                <Box sx={{ width: isMobile && !isExpanded ? '100%' : '110px' }}>
                   <TimePicker
                     ampm={false}
                     value={startTimeValue}
@@ -424,10 +429,15 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             <Box
               display="flex"
               gap={1}
-              flexDirection={isMobile ? 'column' : 'row'}
+              flexDirection={isMobile && !isExpanded ? 'column' : 'row'}
               alignItems={isMobile ? 'stretch' : 'center'}
             >
-              <Box sx={{ maxWidth: '300px', width: '48%' }}>
+              <Box
+                sx={{
+                  width: isMobile ? '100%' : '48%',
+                  maxWidth: isMobile ? '100%' : '300px'
+                }}
+              >
                 <DatePicker
                   format={LONG_DATE_FORMAT}
                   value={endDateValue}
@@ -449,7 +459,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 />
               </Box>
               {shouldShowTimeFields && (
-                <Box sx={{ width: '110px' }}>
+                <Box sx={{ width: isMobile && !isExpanded ? '100%' : '110px' }}>
                   <TimePicker
                     ampm={false}
                     value={endTimeValue}
@@ -481,7 +491,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             flexDirection={isMobile ? 'column' : 'row'}
             alignItems={isMobile ? 'stretch' : 'center'}
           >
-            <Box sx={{ maxWidth: '300px', width: '48%' }}>
+            <Box
+              sx={{
+                width: isMobile ? '100%' : '48%',
+                maxWidth: isMobile ? '100%' : '300px'
+              }}
+            >
               <DatePicker
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
@@ -502,7 +517,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
-            <Box sx={{ maxWidth: '300px', width: '48%' }}>
+            <Box
+              sx={{
+                width: isMobile ? '100%' : '48%',
+                maxWidth: isMobile ? '100%' : '300px'
+              }}
+            >
               <DatePicker
                 format={LONG_DATE_FORMAT}
                 value={endDateValue}
@@ -532,7 +552,11 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             alignItems={isMobile ? 'stretch' : 'center'}
           >
             <Box
-              sx={isMobile ? undefined : { maxWidth: '300px', width: '48%' }}
+              sx={
+                isMobile
+                  ? { width: '100%' }
+                  : { maxWidth: '300px', width: '48%' }
+              }
             >
               <DatePicker
                 format={LONG_DATE_FORMAT}
@@ -550,8 +574,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
-            <Box display="flex" gap={1} flexDirection="row">
-              <Box sx={{ width: isMobile ? '100%' : '110px' }}>
+            <Box
+              display="flex"
+              gap={1}
+              flexDirection="row"
+              sx={isMobile ? { width: '100%' } : undefined}
+            >
+              <Box
+                sx={{
+                  flex: isMobile ? 1 : undefined,
+                  width: isMobile ? undefined : '110px'
+                }}
+              >
                 <TimePicker
                   ampm={false}
                   value={startTimeValue}
@@ -585,7 +619,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                   -
                 </Typography>
               )}
-              <Box sx={{ width: isMobile ? '100%' : '110px' }}>
+              <Box
+                sx={{
+                  flex: isMobile ? 1 : undefined,
+                  width: isMobile ? undefined : '110px'
+                }}
+              >
                 <TimePicker
                   ampm={false}
                   value={endTimeValue}
