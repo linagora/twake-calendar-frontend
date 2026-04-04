@@ -1,8 +1,15 @@
-import { Box, TextFieldProps, Typography } from '@linagora/twake-mui'
+import {
+  Box,
+  TextFieldProps,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@linagora/twake-mui'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import {
   DatePicker,
-  DatePickerFieldProps
+  DatePickerFieldProps,
+  DatePickerSlotProps
 } from '@mui/x-date-pickers/DatePicker'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -88,8 +95,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onStartTimeChange,
   onEndDateChange,
   onEndTimeChange
-}) => {
+}): JSX.Element => {
   const { t, lang } = useI18n()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const initialDurationRef = React.useRef<number | null>(null)
   const isUserActionRef = React.useRef(false)
@@ -139,7 +148,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     ? t('dateTimeFields.date')
     : t('dateTimeFields.startDate')
 
-  const handleStartDateChange = (value: PickerValue) => {
+  const handleStartDateChange = (value: PickerValue): void => {
     if (!value || !value.isValid()) return
 
     isUserActionRef.current = true
@@ -169,7 +178,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     }
   }
 
-  const handleStartTimeChange = (value: PickerValue) => {
+  const handleStartTimeChange = (value: PickerValue): void => {
     if (!value || !value.isValid()) return
 
     isUserActionRef.current = true
@@ -196,7 +205,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     }
   }
 
-  const handleEndDateChange = (value: PickerValue) => {
+  const handleEndDateChange = (value: PickerValue): void => {
     if (!value || !value.isValid()) return
 
     isUserActionRef.current = true
@@ -233,7 +242,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     onEndDateChange(newDateStr)
   }
 
-  const handleEndTimeChange = (value: PickerValue) => {
+  const handleEndTimeChange = (value: PickerValue): void => {
     if (!value || !value.isValid()) return
 
     isUserActionRef.current = true
@@ -270,7 +279,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     testId: string,
     hasError = false,
     testLabel?: string
-  ) => ({
+  ): Partial<DatePickerSlotProps<true>> => ({
     textField: {
       size: 'small' as const,
       margin: 'dense' as const,
@@ -356,12 +365,22 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         className={`date-time-group ${
           isExpanded || shouldShowFullFieldsInNormal ? 'show-full-field' : ''
         }`.trim()}
-        sx={{ maxWidth: showMore ? 'calc(100% - 145px)' : '100%' }}
+        sx={{ maxWidth: showMore && !isMobile ? 'calc(100% - 145px)' : '100%' }}
       >
         {isExpanded || shouldShowFullFieldsInNormal ? (
           <>
-            <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-              <Box sx={{ maxWidth: '300px', width: '48%' }}>
+            <Box
+              display="flex"
+              gap={1}
+              flexDirection={isMobile && !isExpanded ? 'column' : 'row'}
+              alignItems={isMobile ? 'stretch' : 'center'}
+            >
+              <Box
+                sx={{
+                  width: isMobile ? '100%' : '48%',
+                  maxWidth: isMobile ? '100%' : '300px'
+                }}
+              >
                 <DatePicker
                   format={LONG_DATE_FORMAT}
                   value={startDateValue}
@@ -383,7 +402,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 />
               </Box>
               {shouldShowTimeFields && (
-                <Box sx={{ width: '110px' }}>
+                <Box sx={{ width: isMobile && !isExpanded ? '100%' : '110px' }}>
                   <TimePicker
                     ampm={false}
                     value={startTimeValue}
@@ -407,8 +426,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 </Box>
               )}
             </Box>
-            <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-              <Box sx={{ maxWidth: '300px', width: '48%' }}>
+            <Box
+              display="flex"
+              gap={1}
+              flexDirection={isMobile && !isExpanded ? 'column' : 'row'}
+              alignItems={isMobile ? 'stretch' : 'center'}
+            >
+              <Box
+                sx={{
+                  width: isMobile ? '100%' : '48%',
+                  maxWidth: isMobile ? '100%' : '300px'
+                }}
+              >
                 <DatePicker
                   format={LONG_DATE_FORMAT}
                   value={endDateValue}
@@ -430,7 +459,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 />
               </Box>
               {shouldShowTimeFields && (
-                <Box sx={{ width: '110px' }}>
+                <Box sx={{ width: isMobile && !isExpanded ? '100%' : '110px' }}>
                   <TimePicker
                     ampm={false}
                     value={endTimeValue}
@@ -456,8 +485,18 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             </Box>
           </>
         ) : shouldShowEndDateNormal ? (
-          <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-            <Box sx={{ maxWidth: '300px', width: '48%' }}>
+          <Box
+            display="flex"
+            gap={1}
+            flexDirection={isMobile ? 'column' : 'row'}
+            alignItems={isMobile ? 'stretch' : 'center'}
+          >
+            <Box
+              sx={{
+                width: isMobile ? '100%' : '48%',
+                maxWidth: isMobile ? '100%' : '300px'
+              }}
+            >
               <DatePicker
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
@@ -478,7 +517,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
-            <Box sx={{ maxWidth: '300px', width: '48%' }}>
+            <Box
+              sx={{
+                width: isMobile ? '100%' : '48%',
+                maxWidth: isMobile ? '100%' : '300px'
+              }}
+            >
               <DatePicker
                 format={LONG_DATE_FORMAT}
                 value={endDateValue}
@@ -501,8 +545,19 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
             </Box>
           </Box>
         ) : (
-          <Box display="flex" gap={1} flexDirection="row" alignItems="center">
-            <Box sx={{ maxWidth: '300px', width: '48%' }}>
+          <Box
+            display="flex"
+            gap={1}
+            flexDirection={isMobile ? 'column' : 'row'}
+            alignItems={isMobile ? 'stretch' : 'center'}
+          >
+            <Box
+              sx={
+                isMobile
+                  ? { width: '100%' }
+                  : { maxWidth: '300px', width: '48%' }
+              }
+            >
               <DatePicker
                 format={LONG_DATE_FORMAT}
                 value={startDateValue}
@@ -519,62 +574,79 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
                 }}
               />
             </Box>
-            <Box sx={{ maxWidth: '110px' }}>
-              <TimePicker
-                ampm={false}
-                value={startTimeValue}
-                onChange={handleStartTimeChange}
-                disabled={allday}
-                thresholdToRenderTimeInASingleColumn={48}
-                timeSteps={{ minutes: 30 }}
-                slots={{
-                  field: EditableTimeField,
-                  actionBar: () => null
-                }}
-                slotProps={{
-                  openPickerButton: { sx: { display: 'none' } },
-                  popper: { sx: timePickerPopperSx },
-                  field: getTimeFieldSlotProps(
-                    'start-time-input',
-                    false,
-                    t('dateTimeFields.startTime')
-                  )
-                }}
-              />
-            </Box>
-            {!allday && (
-              <Typography
+            <Box
+              display="flex"
+              gap={1}
+              flexDirection="row"
+              sx={isMobile ? { width: '100%' } : undefined}
+            >
+              <Box
                 sx={{
-                  alignSelf: 'center',
-                  mx: 0.5,
-                  mt: 0.5
+                  flex: isMobile ? 1 : undefined,
+                  width: isMobile ? undefined : '110px'
                 }}
               >
-                -
-              </Typography>
-            )}
-            <Box sx={{ maxWidth: '110px' }}>
-              <TimePicker
-                ampm={false}
-                value={endTimeValue}
-                onChange={handleEndTimeChange}
-                disabled={allday}
-                thresholdToRenderTimeInASingleColumn={48}
-                timeSteps={{ minutes: 30 }}
-                slots={{
-                  field: EditableTimeField,
-                  actionBar: () => null
+                <TimePicker
+                  ampm={false}
+                  value={startTimeValue}
+                  onChange={handleStartTimeChange}
+                  disabled={allday}
+                  thresholdToRenderTimeInASingleColumn={48}
+                  timeSteps={{ minutes: 30 }}
+                  slots={{
+                    field: EditableTimeField,
+                    actionBar: () => null
+                  }}
+                  slotProps={{
+                    openPickerButton: { sx: { display: 'none' } },
+                    popper: { sx: timePickerPopperSx },
+                    field: getTimeFieldSlotProps(
+                      'start-time-input',
+                      false,
+                      t('dateTimeFields.startTime')
+                    )
+                  }}
+                />
+              </Box>
+              {!allday && (
+                <Typography
+                  sx={{
+                    alignSelf: 'center',
+                    mx: 0.5,
+                    mt: 0.5
+                  }}
+                >
+                  -
+                </Typography>
+              )}
+              <Box
+                sx={{
+                  flex: isMobile ? 1 : undefined,
+                  width: isMobile ? undefined : '110px'
                 }}
-                slotProps={{
-                  openPickerButton: { sx: { display: 'none' } },
-                  popper: { sx: timePickerPopperSx },
-                  field: getTimeFieldSlotProps(
-                    'end-time-input',
-                    !!validation.errors.dateTime,
-                    t('dateTimeFields.endTime')
-                  )
-                }}
-              />
+              >
+                <TimePicker
+                  ampm={false}
+                  value={endTimeValue}
+                  onChange={handleEndTimeChange}
+                  disabled={allday}
+                  thresholdToRenderTimeInASingleColumn={48}
+                  timeSteps={{ minutes: 30 }}
+                  slots={{
+                    field: EditableTimeField,
+                    actionBar: () => null
+                  }}
+                  slotProps={{
+                    openPickerButton: { sx: { display: 'none' } },
+                    popper: { sx: timePickerPopperSx },
+                    field: getTimeFieldSlotProps(
+                      'end-time-input',
+                      !!validation.errors.dateTime,
+                      t('dateTimeFields.endTime')
+                    )
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
         )}

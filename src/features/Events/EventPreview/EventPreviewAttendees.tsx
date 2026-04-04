@@ -2,7 +2,12 @@ import { useAppSelector } from '@/app/hooks'
 import { useAttendeesFreeBusy } from '@/components/Attendees/useFreeBusy'
 import { renderAttendeeBadge } from '@/components/Event/utils/eventUtils'
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
-import { AvatarGroup, Box, Typography } from '@linagora/twake-mui'
+import {
+  AvatarGroup,
+  Box,
+  Typography,
+  useMediaQuery
+} from '@linagora/twake-mui'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import { alpha, useTheme } from '@mui/material/styles'
 import { useState } from 'react'
@@ -30,9 +35,10 @@ export function EventPreviewAttendees({
   end,
   timezone,
   eventUid
-}: EventPreviewAttendeesProps) {
+}: EventPreviewAttendeesProps): JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const infoIconColor = alpha(theme.palette.grey[900], 0.9)
   const infoIconSx = { minWidth: '25px', marginRight: 2, color: infoIconColor }
   const userEmail = useAppSelector(state => state.user.userData.email)
@@ -40,7 +46,9 @@ export function EventPreviewAttendees({
 
   const attendeePreview = makeAttendeePreview(allAttendees, t)
 
-  const toFreeBusyAttendee = (a: userAttendee) => ({
+  const toFreeBusyAttendee = (
+    a: userAttendee
+  ): { email: string; userId: null } => ({
     email: a.cal_address,
     userId: null
   })
@@ -60,7 +68,7 @@ export function EventPreviewAttendees({
     enabled: !!(start && end && showAllAttendees)
   })
 
-  const busyCaption = (a: userAttendee) =>
+  const busyCaption = (a: userAttendee): string | undefined =>
     freeBusyMap[a.cal_address] === 'busy'
       ? a.cal_address === userEmail
         ? t('event.freeBusy.busyCalOwner')
@@ -73,44 +81,97 @@ export function EventPreviewAttendees({
         <Box sx={{ ...infoIconSx, mt: 1 }}>
           <PeopleAltOutlinedIcon />
         </Box>
-        <Box style={{ marginBottom: 1, display: 'flex', flexDirection: 'row' }}>
-          <Box sx={{ marginRight: 2 }}>
-            <Typography>
-              {t('eventPreview.guests', { count: allAttendees.length })}
-            </Typography>
-            <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
-              {attendeePreview}
-            </Typography>
-          </Box>
-          {!showAllAttendees && (
-            <AvatarGroup max={ATTENDEE_DISPLAY_LIMIT}>
-              {organizer &&
-                renderAttendeeBadge(
-                  organizer,
-                  'org',
-                  t,
-                  showAllAttendees,
-                  true
-                )}
-              {attendees.map((a, idx) =>
-                renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
-              )}
-            </AvatarGroup>
-          )}
-          <Typography
+        <Box
+          style={{
+            marginBottom: 1,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '16px' : undefined
+          }}
+        >
+          <Box
             sx={{
-              cursor: 'pointer',
-              marginLeft: 2,
-              fontSize: '14px',
-              color: 'text.secondary',
-              alignSelf: 'center'
+              marginRight: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}
-            onClick={() => setShowAllAttendees(prev => !prev)}
           >
-            {showAllAttendees
-              ? t('eventPreview.showLess')
-              : t('eventPreview.showMore')}
-          </Typography>
+            <Box>
+              <Typography>
+                {t('eventPreview.guests', { count: allAttendees.length })}
+              </Typography>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
+                {attendeePreview}
+              </Typography>
+            </Box>
+            {isMobile && showAllAttendees && (
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  marginLeft: 2,
+                  fontSize: '14px',
+                  color: 'text.secondary',
+                  alignSelf: 'center'
+                }}
+                onClick={() => setShowAllAttendees(false)}
+              >
+                {t('eventPreview.showLess')}
+              </Typography>
+            )}
+          </Box>
+
+          {!showAllAttendees && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                ml: isMobile ? '-42px' : undefined
+              }}
+            >
+              <AvatarGroup max={ATTENDEE_DISPLAY_LIMIT}>
+                {organizer &&
+                  renderAttendeeBadge(
+                    organizer,
+                    'org',
+                    t,
+                    showAllAttendees,
+                    true
+                  )}
+                {attendees.map((a, idx) =>
+                  renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
+                )}
+              </AvatarGroup>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  marginLeft: 2,
+                  fontSize: '14px',
+                  color: 'text.secondary',
+                  alignSelf: 'center'
+                }}
+                onClick={() => setShowAllAttendees(true)}
+              >
+                {t('eventPreview.showMore')}
+              </Typography>
+            </Box>
+          )}
+
+          {!isMobile && showAllAttendees && (
+            <Typography
+              sx={{
+                cursor: 'pointer',
+                marginLeft: 2,
+                fontSize: '14px',
+                color: 'text.secondary',
+                alignSelf: 'center'
+              }}
+              onClick={() => setShowAllAttendees(false)}
+            >
+              {t('eventPreview.showLess')}
+            </Typography>
+          )}
         </Box>
       </Box>
 
