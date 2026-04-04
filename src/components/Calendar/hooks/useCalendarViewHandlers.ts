@@ -2,7 +2,9 @@
 import { useCallback } from 'react'
 import { createViewHandlers, ViewHandlersProps } from '../handlers/viewHandlers'
 
-export const useCalendarViewHandlers = (props: ViewHandlersProps) => {
+export const useCalendarViewHandlers = (
+  props: ViewHandlersProps
+): ReturnType<typeof createViewHandlers> => {
   const viewHandlers = createViewHandlers(props)
 
   return {

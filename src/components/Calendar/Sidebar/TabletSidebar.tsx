@@ -33,7 +33,7 @@ const VIEW_OPTIONS = [
   }
 ]
 
-export function TabletSidebar({
+export const TabletSidebar: React.FC<CalendarSidebarProps> = ({
   open,
   onClose,
   onViewChange,
@@ -43,7 +43,7 @@ export function TabletSidebar({
   selectedCalendars,
   setSelectedCalendars,
   currentView
-}: CalendarSidebarProps) {
+}) => {
   const { t } = useI18n()
   const theme = useTheme()
 

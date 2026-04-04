@@ -12,7 +12,7 @@ import CalendarApp from './Calendar'
 import { CALENDAR_VIEWS } from './utils/constants'
 import { setView } from '@/features/Settings/SettingsSlice'
 
-export default function CalendarLayout() {
+export default function CalendarLayout(): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
   const dispatch = useAppDispatch()
   const error = useAppSelector(state => state.calendars.error)
@@ -20,7 +20,7 @@ export default function CalendarLayout() {
   const tempcalendars = useAppSelector(state => state.calendars.templist)
   const view = useAppSelector(state => state.settings.view)
 
-  const { isTablet } = useScreenSizeDetection()
+  const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
   const [openSidebar, setOpenSideBar] = useState(false)
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
@@ -29,7 +29,7 @@ export default function CalendarLayout() {
   )
 
   useEffect(() => {
-    const setView = () =>
+    const setView = (): void =>
       setCurrentView(prev => {
         if (
           prev !== CALENDAR_VIEWS.timeGridDay &&
@@ -38,15 +38,16 @@ export default function CalendarLayout() {
           return prev
         }
 
-        return isTablet
+        return isTablet || isMobile
           ? CALENDAR_VIEWS.timeGridDay
           : CALENDAR_VIEWS.timeGridWeek
       })
     setView()
-  }, [isTablet])
+  }, [isTablet, isMobile])
+
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     // Get current calendar range
     if (calendarRef.current) {
       const view = calendarRef.current.view
@@ -69,15 +70,13 @@ export default function CalendarLayout() {
     }
   }
 
-  const handleDateChange = (date: Date) => {
+  const handleDateChange = (date: Date): void => {
     setCurrentDate(date)
   }
 
   const handleViewChange = (view: string): void => {
     if (!calendarRef.current) return
     dispatch(setView('calendar'))
-
-    calendarRef.current.changeView(view)
 
     // Notify parent about view change
     setCurrentView(view)
@@ -96,14 +95,14 @@ export default function CalendarLayout() {
     }
 
     // Cleanup on unmount
-    return () => {
+    return (): void => {
       document.body.classList.remove('fullscreen-view')
     }
   }, [view])
 
   const menubarProps: MenubarProps = {
     calendarRef,
-    onRefresh: handleRefresh,
+    onRefresh: () => void handleRefresh(),
     currentDate,
     onDateChange: handleDateChange,
     currentView,
