@@ -1,16 +1,14 @@
-import { IconButton, Stack } from '@linagora/twake-mui'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { IconButton } from '@linagora/twake-mui'
 import MenuIcon from '@mui/icons-material/Menu'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import TodayIcon from '@mui/icons-material/Today'
 import { useI18n } from 'twake-i18n'
 import SearchBar from './EventSearchBar'
 import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
 import { UserMenu } from './UserMenu'
+import { SmallNavigationControls } from './components/SmallNavigationControls'
 
-export function TabletMenubar({
+export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
   currentView,
   isIframe,
@@ -26,7 +24,7 @@ export function TabletMenubar({
   onUserMenuClose,
   onViewChange,
   onDateChange
-}: SharedMenubarProps) {
+}: SharedMenubarProps) => {
   const { t } = useI18n()
 
   return (
@@ -52,36 +50,7 @@ export function TabletMenubar({
         )}
 
         <div className="menu-items" style={{ marginLeft: 0 }}>
-          <div className="navigation-controls">
-            <Stack direction="row">
-              <IconButton
-                onClick={() => onNavigate('prev')}
-                aria-label={t('menubar.prev')}
-                title={t('menubar.prev')}
-              >
-                <ChevronLeftIcon sx={{ height: 20 }} />
-              </IconButton>
-              <IconButton
-                color="primary"
-                sx={{
-                  border: '1px solid',
-                  borderRadius: '12px'
-                }}
-                onClick={() => onNavigate('today')}
-                aria-label={t('menubar.today')}
-                title={t('menubar.today')}
-              >
-                <TodayIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => onNavigate('next')}
-                aria-label={t('menubar.next')}
-                title={t('menubar.next')}
-              >
-                <ChevronRightIcon sx={{ height: 20 }} />
-              </IconButton>
-            </Stack>
-          </div>
+          <SmallNavigationControls onNavigate={onNavigate} />
         </div>
 
         <div className="menu-items">

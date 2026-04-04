@@ -3,11 +3,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useI18n } from 'twake-i18n'
 
-export function NavigationControls({
-  onNavigate
-}: {
+export const NavigationControls: React.FC<{
   onNavigate: (action: 'today' | 'next' | 'prev') => void
-}) {
+}> = ({ onNavigate }) => {
   const { t } = useI18n()
   return (
     <div className="navigation-controls">
