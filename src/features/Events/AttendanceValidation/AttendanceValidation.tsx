@@ -1,6 +1,6 @@
 import { PartStat } from '@/features/User/models/attendee'
 import { userData } from '@/features/User/userDataTypes'
-import { Box, Typography } from '@linagora/twake-mui'
+import { Box, Typography, useTheme, useMediaQuery } from '@linagora/twake-mui'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ContextualizedEvent } from '../EventsTypes'
@@ -21,8 +21,10 @@ export function AttendanceValidation({
   user,
   setAfterChoiceFunc,
   setOpenEditModePopup
-}: AttendanceValidationProps) {
+}: AttendanceValidationProps): JSX.Element | null {
   const { currentUserAttendee, isOwn, calendar } = contextualizedEvent
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { t } = useI18n()
   const [isLoading, setIsLoading] = useState(false)
   const [loadingValue, setLoadingValue] = useState<PartStat | null>(null)
@@ -50,7 +52,7 @@ export function AttendanceValidation({
     return null
   }
 
-  const handleLoadingChange = (loading: boolean, value?: PartStat) => {
+  const handleLoadingChange = (loading: boolean, value?: PartStat): void => {
     setIsLoading(loading)
     setLoadingValue(loading && value ? value : null)
   }
@@ -66,16 +68,25 @@ export function AttendanceValidation({
   }
 
   return (
-    <>
-      <Typography variant="body2" sx={{ marginRight: 1 }}>
-        {calendar.owner?.resource
-          ? t('eventPreview.authorizeQuestion')
-          : t('eventPreview.attendingQuestion')}
-      </Typography>
-      <Box display="flex" gap={1} mx={1} alignItems="center">
-        <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
-        <RSVPButton rsvpValue="DECLINED" {...commonButtonProps} />
-        <RSVPButton rsvpValue="TENTATIVE" {...commonButtonProps} />
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '16px' : undefined,
+        alignItems: 'center'
+      }}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <Typography variant="body2" sx={{ marginRight: 1 }}>
+          {calendar.owner?.resource
+            ? t('eventPreview.authorizeQuestion')
+            : t('eventPreview.attendingQuestion')}
+        </Typography>
+        <Box display="flex" gap={1} mx={1} alignItems="center">
+          <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
+          <RSVPButton rsvpValue="DECLINED" {...commonButtonProps} />
+          <RSVPButton rsvpValue="TENTATIVE" {...commonButtonProps} />
+        </Box>
       </Box>
       {!contextualizedEvent.isOrganizer && (
         <Typography
@@ -91,6 +102,6 @@ export function AttendanceValidation({
         setOpen={setOpenCounterModal}
         contextualizedEvent={contextualizedEvent}
       />
-    </>
+    </Box>
   )
 }

@@ -63,7 +63,7 @@ interface CalendarAppProps {
   currentView: string
 }
 
-export default function CalendarApp({
+const CalendarApp: React.FC<CalendarAppProps> = ({
   calendarRef,
   onDateChange,
   onViewChange,
@@ -72,12 +72,12 @@ export default function CalendarApp({
   onCloseSidebar,
   setCurrentView,
   currentView
-}: CalendarAppProps): JSX.Element {
+}: CalendarAppProps) => {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [debouncedDate, setDebouncedDate] = useState(new Date())
   useEffect(() => {
     const t = setTimeout(() => setDebouncedDate(selectedDate), 300)
-    return () => clearTimeout(t)
+    return (): void => clearTimeout(t)
   }, [selectedDate])
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date())
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
@@ -93,7 +93,7 @@ export default function CalendarApp({
     state => state.settings.hideDeclinedEvents
   )
 
-  const { isTablet } = useScreenSizeDetection()
+  const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
 
   const hiddenDays = useMemo(() => {
     if (!hideWorkingDays || !workingDays || workingDays.length === 0) return []
@@ -135,16 +135,16 @@ export default function CalendarApp({
   useEffect(() => {
     const handler = errorHandler.current
     handler.setErrorCallback(setEventErrors)
-    return () => handler.setErrorCallback(() => {})
+    return (): void => handler.setErrorCallback(() => {})
   }, [])
 
-  const handleErrorClose = () => {
+  const handleErrorClose = (): void => {
     setEventErrors([])
     errorHandler.current.clearAll()
   }
 
   useEffect(() => {
-    const updateSelectedCalendars = () => {
+    const updateSelectedCalendars = (): void => {
       if (initialLoadRef.current && calendarIds.length > 0 && userId) {
         const cached = localStorage.getItem('selectedCalendars')
         if (cached && cached.length > 0) {
@@ -171,7 +171,7 @@ export default function CalendarApp({
   }, [selectedCalendars, calendarIds.length])
 
   useEffect(() => {
-    const updateSelectedCalendarsOnCalendarChange = () => {
+    const updateSelectedCalendarsOnCalendarChange = (): void => {
       if (calendarIds.length === 0) return
       const validCalendarIds = new Set(calendarIds)
       setSelectedCalendars(prev => {
@@ -237,7 +237,13 @@ export default function CalendarApp({
 
   // Listen for eventModalError event to reopen modal on API failure
   useEffect(() => {
-    const handleEventModalError = (event: CustomEvent) => {
+    const handleEventModalError = (e: Event): void => {
+      const event = e as CustomEvent<{
+        type: 'create' | 'update'
+        eventId: string
+        calId: string
+        typeOfAction: string
+      }>
       if (event.detail?.type === 'create') {
         // Reopen create event modal
         setAnchorEl(document.body)
@@ -286,7 +292,7 @@ export default function CalendarApp({
       'eventModalError',
       handleEventModalError as EventListener
     )
-    return () => {
+    return (): void => {
       window.removeEventListener(
         'eventModalError',
         handleEventModalError as EventListener
@@ -319,7 +325,7 @@ export default function CalendarApp({
         calendarRef.current?.changeView(targetView)
       }
     })
-    return () => cancelAnimationFrame(id)
+    return (): void => cancelAnimationFrame(id)
   }, [view, isTablet, currentView, calendarRef])
   // Event handlers
   const eventHandlers = useCalendarEventHandlers({
@@ -541,7 +547,9 @@ export default function CalendarApp({
                 .toUpperCase()
 
               return (
-                <div className="fc-daygrid-day-top">
+                <div
+                  className={`fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`}
+                >
                   <small>{weekDay}</small>
                   {arg.view.type !== CALENDAR_VIEWS.dayGridMonth && (
                     <span
@@ -559,8 +567,12 @@ export default function CalendarApp({
             viewWillUnmount={viewHandlers.handleViewWillUnmount}
             eventClick={eventHandlers.handleEventClick}
             eventAllow={eventHandlers.handleEventAllow}
-            eventDrop={eventHandlers.handleEventDrop}
-            eventResize={eventHandlers.handleEventResize}
+            eventDrop={arg => {
+              void eventHandlers.handleEventDrop(arg)
+            }}
+            eventResize={arg => {
+              void eventHandlers.handleEventResize(arg)
+            }}
             eventContent={viewHandlers.handleEventContent}
             eventDidMount={viewHandlers.handleEventDidMount}
           />
@@ -599,3 +611,5 @@ export default function CalendarApp({
     </main>
   )
 }
+
+export default CalendarApp
