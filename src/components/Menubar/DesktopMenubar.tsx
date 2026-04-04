@@ -6,11 +6,11 @@ import { AppListMenu } from './AppListMenu'
 import SearchBar from './EventSearchBar'
 import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
-import { NavigationControls } from './NavigationControls'
+import { NavigationControls } from './components/NavigationControls'
 import { SelectView } from './SelectView'
 import { UserMenu } from './UserMenu'
 
-export function DesktopMenubar({
+export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
   currentView,
   isIframe,
@@ -29,7 +29,7 @@ export function DesktopMenubar({
   user,
   userMenuAnchorEl,
   onUserMenuClose
-}: SharedMenubarProps) {
+}) => {
   const { t } = useI18n()
 
   return (

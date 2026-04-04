@@ -14,8 +14,6 @@ import { AVAILABLE_LANGUAGES } from './features/Settings/constants'
 import { default as HandleLogin } from './features/User/HandleLogin'
 import { CallbackResume } from './features/User/LoginCallback'
 import { useInitializeApp } from './features/User/useInitializeApp'
-import { ScreenTooSmall } from './ScreenTooSmall'
-import { useScreenSizeDetection } from './useScreenSizeDetection'
 import { WebSocketGate } from './websocket/WebSocketGate'
 
 import {
@@ -65,8 +63,6 @@ function App(): JSX.Element {
 
   useInitializeApp()
 
-  const { isTooSmall } = useScreenSizeDetection()
-
   return (
     <TwakeMuiThemeProvider>
       <I18n
@@ -74,25 +70,19 @@ function App(): JSX.Element {
         lang={lang}
         locales={dateLocales}
       >
-        {isTooSmall ? (
-          <ScreenTooSmall />
-        ) : (
-          <>
-            <Suspense fallback={<Loading />}>
-              <WebSocketGate />
-              <Router history={history}>
-                <Routes>
-                  <Route path="/" element={<HandleLogin />} />
-                  <Route path="/calendar" element={<CalendarLayout />} />
-                  <Route path="/callback" element={<CallbackResume />} />
-                  <Route path="/error" element={<ErrorPage />} />
-                </Routes>
-              </Router>
-              <ErrorSnackbar error={error} type="user" />
-            </Suspense>
-            {appLoading && <Loading />}
-          </>
-        )}
+        <Suspense fallback={<Loading />}>
+          <WebSocketGate />
+          <Router history={history}>
+            <Routes>
+              <Route path="/" element={<HandleLogin />} />
+              <Route path="/calendar" element={<CalendarLayout />} />
+              <Route path="/callback" element={<CallbackResume />} />
+              <Route path="/error" element={<ErrorPage />} />
+            </Routes>
+          </Router>
+          <ErrorSnackbar error={error} type="user" />
+        </Suspense>
+        {appLoading && <Loading />}
       </I18n>
     </TwakeMuiThemeProvider>
   )

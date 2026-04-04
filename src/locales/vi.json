@@ -246,7 +246,9 @@
     "settings": "Cài đặt",
     "help": "Giúp đỡ",
     "logout": "Đăng xuất",
-    "toggleSidebar": "Ẩn/hiện thanh bên"
+    "toggleSidebar": "Ẩn/hiện thanh bên",
+    "hideDatePicker": "Ẩn chọn ngày",
+    "showDatePicker": "Hiện chọn ngày"
   },
   "settings": {
     "title": "Cài đặt",
@@ -364,6 +366,20 @@
       "9": "Tháng 10",
       "10": "Tháng 11",
       "11": "Tháng 12"
+    },
+    "short": {
+      "0": "Th1",
+      "1": "Th2",
+      "2": "Th3",
+      "3": "Th4",
+      "4": "Th5",
+      "5": "Th6",
+      "6": "Th7",
+      "7": "Th8",
+      "8": "Th9",
+      "9": "Th10",
+      "10": "Th11",
+      "11": "Th12"
     }
   },
   "mobile": {

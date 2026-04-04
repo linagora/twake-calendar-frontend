@@ -21,8 +21,12 @@ export interface CalendarSidebarProps {
   currentView: string
 }
 
-export default function Sidebar(sharedProps: CalendarSidebarProps) {
-  const { isTablet } = useScreenSizeDetection()
+const Sidebar: React.FC<CalendarSidebarProps> = (
+  sharedProps: CalendarSidebarProps
+) => {
+  const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
+
+  if (isMobile) return null
 
   return isTablet ? (
     <TabletSidebar {...sharedProps} />
@@ -30,3 +34,5 @@ export default function Sidebar(sharedProps: CalendarSidebarProps) {
     <DesktopSidebar {...sharedProps} />
   )
 }
+
+export default Sidebar

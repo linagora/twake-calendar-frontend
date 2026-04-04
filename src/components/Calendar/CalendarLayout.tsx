@@ -12,7 +12,7 @@ import CalendarApp from './Calendar'
 import { CALENDAR_VIEWS } from './utils/constants'
 import { setView } from '@/features/Settings/SettingsSlice'
 
-export default function CalendarLayout() {
+export default function CalendarLayout(): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
   const dispatch = useAppDispatch()
   const error = useAppSelector(state => state.calendars.error)
@@ -29,7 +29,7 @@ export default function CalendarLayout() {
   )
 
   useEffect(() => {
-    const setView = () =>
+    const setView = (): void =>
       setCurrentView(prev => {
         if (
           prev !== CALENDAR_VIEWS.timeGridDay &&
@@ -46,7 +46,7 @@ export default function CalendarLayout() {
   }, [isTablet])
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     // Get current calendar range
     if (calendarRef.current) {
       const view = calendarRef.current.view
@@ -69,7 +69,7 @@ export default function CalendarLayout() {
     }
   }
 
-  const handleDateChange = (date: Date) => {
+  const handleDateChange = (date: Date): void => {
     setCurrentDate(date)
   }
 
@@ -96,14 +96,14 @@ export default function CalendarLayout() {
     }
 
     // Cleanup on unmount
-    return () => {
+    return (): void => {
       document.body.classList.remove('fullscreen-view')
     }
   }, [view])
 
   const menubarProps: MenubarProps = {
     calendarRef,
-    onRefresh: handleRefresh,
+    onRefresh: () => void handleRefresh(),
     currentDate,
     onDateChange: handleDateChange,
     currentView,
