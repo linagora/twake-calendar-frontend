@@ -11,6 +11,7 @@ import { useI18n } from 'twake-i18n'
 import { DesktopMenubar } from './DesktopMenubar'
 import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
+import { MobileMenubar } from './MobileMenuBar'
 
 export type AppIconProps = {
   name: string
@@ -64,7 +65,7 @@ export const Menubar: React.FC<MenubarProps> = ({
     null
   )
   const dispatch = useAppDispatch()
-  const { isTablet } = useScreenSizeDetection()
+  const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
 
   useEffect(() => {
     const resetMenuAnchorsOnResize = (): void => {
@@ -84,9 +85,9 @@ export const Menubar: React.FC<MenubarProps> = ({
     return null
   }
 
-  const handleNavigation = async (action: 'prev' | 'next' | 'today') => {
+  const handleNavigation = (action: 'prev' | 'next' | 'today'): void => {
     if (!calendarRef.current) return
-    await dispatch(setView('calendar'))
+    dispatch(setView('calendar'))
     switch (action) {
       case 'prev':
         calendarRef.current.prev()
@@ -106,31 +107,31 @@ export const Menubar: React.FC<MenubarProps> = ({
     }
   }
 
-  const handleViewChange = async (view: string) => {
+  const handleViewChange = (view: string): void => {
     // Notify parent about view change
     if (onViewChange) {
       onViewChange(view)
     }
   }
 
-  const handleAppMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
+  const handleAppMenuOpen = (event: React.MouseEvent<HTMLElement>): void =>
     setAnchorEl(event.currentTarget)
 
-  const handleAppMenuClose = () => setAnchorEl(null)
+  const handleAppMenuClose = (): void => setAnchorEl(null)
 
-  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>): void =>
     setUserMenuAnchorEl(event.currentTarget)
 
-  const handleUserMenuClose = () => {
+  const handleUserMenuClose = (): void => {
     setUserMenuAnchorEl(null)
   }
 
-  const handleSettingsClick = () => {
+  const handleSettingsClick = (): void => {
     dispatch(setView('settings'))
     handleUserMenuClose()
   }
 
-  const handleLogoutClick = async () => {
+  const handleLogoutClick = async (): Promise<void> => {
     const logoutUrl = await Logout()
     sessionStorage.removeItem('tokenSet')
     redirectTo(logoutUrl.href)
@@ -161,9 +162,20 @@ export const Menubar: React.FC<MenubarProps> = ({
     onUserMenuOpen: handleUserMenuOpen,
     onUserMenuClose: handleUserMenuClose,
     onSettingsClick: handleSettingsClick,
-    onLogoutClick: handleLogoutClick,
+    onLogoutClick: () => void handleLogoutClick(),
     onNavigate: handleNavigation,
     user
+  }
+
+  if (isMobile) {
+    return (
+      <MobileMenubar
+        calendarRef={calendarRef}
+        currentDate={currentDate}
+        onDateChange={onDateChange}
+        handleNavigation={handleNavigation}
+      />
+    )
   }
 
   return isTablet ? (

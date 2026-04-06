@@ -248,7 +248,9 @@
     "settings": "Paramètres",
     "help": "Aide",
     "logout": "Déconnexion",
-    "toggleSidebar": "Afficher/masquer la barre latérale"
+    "toggleSidebar": "Afficher/masquer la barre latérale",
+    "hideDatePicker": "Masquer le sélecteur de date",
+    "showDatePicker": "Afficher le sélecteur de date"
   },
   "settings": {
     "title": "Paramètres",
@@ -366,6 +368,20 @@
       "9": "Octobre",
       "10": "Novembre",
       "11": "Décembre"
+    },
+    "short": {
+      "0": "Jan",
+      "1": "Fév",
+      "2": "Mar",
+      "3": "Avr",
+      "4": "Mai",
+      "5": "Juin",
+      "6": "Juil",
+      "7": "Aoû",
+      "8": "Sep",
+      "9": "Oct",
+      "10": "Nov",
+      "11": "Déc"
     }
   },
   "mobile": {
