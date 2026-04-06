@@ -20,8 +20,10 @@ declare global {
     VIDEO_CONFERENCE_BASE_URL: string
     SUPPORT_URL: string
 
-    DEBUG: boolean
-    LANG: string
+    SENTRY_DSN: string | undefined;
+
+    DEBUG: boolean;
+    LANG: string;
 
     WEBSOCKET_URL: string
     WS_DEBOUNCE_PERIOD_MS: number

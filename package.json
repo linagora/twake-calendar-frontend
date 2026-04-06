@@ -18,6 +18,7 @@
     "@mui/material": "^7.1.2",
     "@mui/x-date-pickers": "^8.14.0",
     "@reduxjs/toolkit": "^2.8.2",
+    "@sentry/react": "^8.55.1",
     "cozy-external-bridge": "^1.2.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
