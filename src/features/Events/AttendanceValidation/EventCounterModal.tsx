@@ -1,6 +1,6 @@
 import { formatEventChipTitle } from '@/components/Calendar/utils/calendarUtils'
 import { ResponsiveDialog } from '@/components/Dialog'
-import { DateTimeFields } from '@/components/Event/components/DateTimeFields'
+import { DateTimeFields } from '@/components/Event/components/DateTimeFields/DateTimeFields'
 import { FieldWithLabel } from '@/components/Event/components/FieldWithLabel'
 import { splitDateTime } from '@/components/Event/utils/dateTimeHelpers'
 import { Box, Button, TextField, Typography } from '@linagora/twake-mui'

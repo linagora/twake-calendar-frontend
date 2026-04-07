@@ -1,7 +1,7 @@
 import {
   DateTimeFields,
   DateTimeFieldsProps
-} from '@/components/Event/components/DateTimeFields'
+} from '@/components/Event/components/DateTimeFields/DateTimeFields'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
