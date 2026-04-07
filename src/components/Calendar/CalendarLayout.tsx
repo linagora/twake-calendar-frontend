@@ -72,8 +72,6 @@ export default function CalendarLayout(): JSX.Element {
     if (!calendarRef.current) return
     dispatch(setView('calendar'))
 
-    calendarRef.current.changeView(view)
-
     // Notify parent about view change
     setCurrentView(view)
 

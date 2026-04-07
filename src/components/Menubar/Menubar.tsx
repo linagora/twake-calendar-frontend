@@ -1,17 +1,16 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { setView } from '@/features/Settings/SettingsSlice'
-import { Logout } from '@/features/User/oidcAuth'
 import { userData } from '@/features/User/userDataTypes'
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
-import { redirectTo } from '@/utils/navigation'
 import { CalendarApi } from '@fullcalendar/core'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { push } from 'redux-first-history'
 import { useI18n } from 'twake-i18n'
 import { DesktopMenubar } from './DesktopMenubar'
 import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
 import { MobileMenubar } from './MobileMenuBar'
+import { useUtilMenus } from '../Calendar/hooks/useUtilMenus'
 
 export type AppIconProps = {
   name: string
@@ -59,21 +58,21 @@ export const Menubar: React.FC<MenubarProps> = ({
   const { t } = useI18n() // deliberately NOT using f()
 
   const user = useAppSelector(state => state.user.userData)
-  const supportLink = window.SUPPORT_URL
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
-    null
-  )
+
+  const {
+    anchorEl,
+    userMenuAnchorEl,
+    supportLink,
+    handleAppMenuOpen,
+    handleAppMenuClose,
+    handleUserMenuOpen,
+    handleUserMenuClose,
+    handleSettingsClick,
+    handleLogoutClick
+  } = useUtilMenus()
+
   const dispatch = useAppDispatch()
   const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
-
-  useEffect(() => {
-    const resetMenuAnchorsOnResize = (): void => {
-      setAnchorEl(null)
-      setUserMenuAnchorEl(null)
-    }
-    resetMenuAnchorsOnResize()
-  }, [isTablet])
 
   useEffect(() => {
     if (!user) {
@@ -114,30 +113,6 @@ export const Menubar: React.FC<MenubarProps> = ({
     }
   }
 
-  const handleAppMenuOpen = (event: React.MouseEvent<HTMLElement>): void =>
-    setAnchorEl(event.currentTarget)
-
-  const handleAppMenuClose = (): void => setAnchorEl(null)
-
-  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>): void =>
-    setUserMenuAnchorEl(event.currentTarget)
-
-  const handleUserMenuClose = (): void => {
-    setUserMenuAnchorEl(null)
-  }
-
-  const handleSettingsClick = (): void => {
-    dispatch(setView('settings'))
-    handleUserMenuClose()
-  }
-
-  const handleLogoutClick = async (): Promise<void> => {
-    const logoutUrl = await Logout()
-    sessionStorage.removeItem('tokenSet')
-    redirectTo(logoutUrl.href)
-    handleUserMenuClose()
-  }
-
   // Use i18n for month names instead of date-fns
   const monthIndex = currentDate.getMonth()
   const year = currentDate.getFullYear()
@@ -174,6 +149,7 @@ export const Menubar: React.FC<MenubarProps> = ({
         currentDate={currentDate}
         onDateChange={onDateChange}
         handleNavigation={handleNavigation}
+        onOpenSidebar={onToggleSidebar}
       />
     )
   }

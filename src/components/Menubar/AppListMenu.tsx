@@ -3,15 +3,12 @@ import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined'
 import { useI18n } from 'twake-i18n'
 import { AppIcon, AppIconProps } from './AppIcon'
 
-export function AppListMenu({
-  anchorEl,
-  onAppMenuOpen,
-  onAppMenuClose
-}: {
+export const AppListMenu: React.FC<{
   anchorEl: HTMLElement | null
   onAppMenuOpen: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void
   onAppMenuClose: () => void
-}) {
+  iconSize?: 'inherit' | 'small' | 'medium' | 'large'
+}> = ({ anchorEl, onAppMenuOpen, onAppMenuClose, iconSize = 'inherit' }) => {
   const { t } = useI18n()
 
   const applist: AppIconProps[] = window.appList ?? []
@@ -27,7 +24,7 @@ export function AppListMenu({
         aria-label={t('menubar.apps')}
         title={t('menubar.apps')}
       >
-        <WidgetsOutlinedIcon />
+        <WidgetsOutlinedIcon fontSize={iconSize} />
       </IconButton>
 
       <Popover

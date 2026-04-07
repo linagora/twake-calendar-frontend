@@ -385,6 +385,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
         tempUsers={tempUsers}
         setTempUsers={setTempUsers}
         currentView={currentView}
+        onDateChange={onDateChange}
       />
       <div className="calendar">
         <ImportAlert />
@@ -505,7 +506,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
               hour12: false
             }}
             datesSet={arg => {
-              setCurrentView(arg.view.type)
+              onViewChange?.(arg.view.type)
               const calendarCurrentDate =
                 calendarRef.current?.getDate() || new Date(arg.start)
               setDisplayedDateAndRange(calendarCurrentDate)

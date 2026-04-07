@@ -25,6 +25,7 @@ export type UserMenuProps = {
   onUserMenuOpen: (event: MouseEvent<HTMLElement>) => void
   user: userData | null
   isIframe?: boolean
+  size?: 's' | 'm' | 'l'
 }
 
 export function UserMenu({
@@ -34,7 +35,8 @@ export function UserMenu({
   onLogoutClick,
   onUserMenuOpen,
   user,
-  isIframe = false
+  isIframe = false,
+  size = 'm'
 }: UserMenuProps): JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
@@ -50,7 +52,7 @@ export function UserMenu({
         title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
       >
         {!isIframe ? (
-          <Avatar color={stringToGradient(displayName)} size="m">
+          <Avatar color={stringToGradient(displayName)} size={size}>
             {getInitials(displayName)}
           </Avatar>
         ) : (

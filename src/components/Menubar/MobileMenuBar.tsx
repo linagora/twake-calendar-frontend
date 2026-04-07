@@ -2,6 +2,7 @@ import { CalendarApi } from '@fullcalendar/core'
 import { IconButton, Stack } from '@linagora/twake-mui'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import MenuIcon from '@mui/icons-material/Menu'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import SearchBar from './EventSearchBar'
@@ -15,13 +16,15 @@ export type MobileMenubarProps = {
   currentDate: Date
   onDateChange?: (date: Date) => void
   handleNavigation: (action: 'prev' | 'next' | 'today') => void
+  onOpenSidebar: () => void
 }
 
 export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   calendarRef,
   currentDate,
   onDateChange,
-  handleNavigation
+  handleNavigation,
+  onOpenSidebar
 }) => {
   const { t } = useI18n()
 
@@ -37,6 +40,9 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
     <>
       <header className="menubar">
         <div className="left-menu">
+          <IconButton onClick={onOpenSidebar}>
+            <MenuIcon />
+          </IconButton>
           <div className="menu-items">
             <SmallNavigationControls onNavigate={handleNavigation} />
           </div>
