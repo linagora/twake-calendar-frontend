@@ -27,7 +27,7 @@ import moment from 'moment-timezone'
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useCalendarDataLoader } from '../../features/Calendars/useCalendarLoader'
-import { User } from '../Attendees/PeopleSearch'
+import { User } from '../Attendees/types'
 import { EventErrorSnackbar } from '../Error/ErrorSnackbar'
 import { EventErrorHandler } from '../Error/EventErrorHandler'
 import { EditModeDialog } from '../Event/EditModeDialog'
@@ -36,7 +36,6 @@ import './Calendar.styl'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
 import { useCalendarViewHandlers } from './hooks/useCalendarViewHandlers'
-import Sidebar from './Sidebar/SideBar'
 import { TimezoneSelector } from './TimezoneSelector'
 import {
   eventToFullCalendarFormat,
@@ -44,6 +43,9 @@ import {
   updateSlotLabelVisibility
 } from './utils/calendarUtils'
 import { CALENDAR_VIEWS } from './utils/constants'
+import Sidebar from './Sidebar/SideBar'
+import TempSearchDialog from './TempSearchDialog'
+import { setIsMobileSearchOpen } from '@/features/Calendars/CalendarSlice'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
@@ -609,6 +611,20 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
         )}
         <EventErrorSnackbar messages={eventErrors} onClose={handleErrorClose} />
       </div>
+
+      {isMobile && (
+        <TempSearchDialog
+          tempUsers={tempUsers}
+          setTempUsers={setTempUsers}
+          onClose={() => {
+            dispatch(setIsMobileSearchOpen(false))
+            onCloseSidebar()
+          }}
+          handleToggleEventPreview={() =>
+            eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
+          }
+        />
+      )}
     </main>
   )
 }

@@ -56,7 +56,9 @@
     "select_timezone": "Sélectionner le fuseau horaire",
     "moreOptions": "Plus d'options",
     "search": "Rechercher",
-    "resource": "Ressource"
+    "resource": "Ressource",
+    "back": "Retour",
+    "show": "Afficher"
   },
   "search": {
     "searchIn": "Rechercher dans",

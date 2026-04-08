@@ -29,7 +29,8 @@ import TuneIcon from '@mui/icons-material/Tune'
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import UserSearch from '../Attendees/AttendeeSearch'
-import { PeopleSearch, User } from '../Attendees/PeopleSearch'
+import { PeopleSearch } from '../Attendees/PeopleSearch'
+import { User } from '../Attendees/types'
 import { CalendarItemList } from '../Calendar/CalendarItemList'
 
 const SEARCH_OBJECT_TYPES = ['user', 'contact']

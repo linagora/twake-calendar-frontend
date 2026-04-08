@@ -56,7 +56,9 @@
     "select_timezone": "Chọn múi giờ",
     "moreOptions": "Thêm tùy chọn",
     "search": "Tìm kiếm",
-    "resource": "Tài nguyên"
+    "resource": "Tài nguyên",
+    "back": "Quay lại",
+    "show": "Hiển thị"
   },
   "search": {
     "searchIn": "Tìm kiếm trong",

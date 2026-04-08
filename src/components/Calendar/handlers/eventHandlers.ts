@@ -1,5 +1,5 @@
 import { AppDispatch } from '@/app/store'
-import { User } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { formatLocalDateTime } from '@/components/Event/utils/dateTimeFormatters'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {

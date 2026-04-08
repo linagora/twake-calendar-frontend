@@ -4,7 +4,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { addSharedCalendar } from '../CalendarApi'
 import { CalendarInput } from '../types/CalendarData'
 import { RejectedError } from '../types/RejectedError'
-import { User } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { fetchOwnerOfResource } from '../services/helpers'
 
 export const addCalendarResourceAsync = createAsyncThunk<

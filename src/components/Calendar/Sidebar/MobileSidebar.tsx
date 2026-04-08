@@ -7,8 +7,9 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import { useI18n } from 'twake-i18n'
 import { AppListMenu } from '@/components/Menubar/AppListMenu'
 import { UserMenu } from '@/components/Menubar/UserMenu'
-import { useAppSelector } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { useUtilMenus } from '../hooks/useUtilMenus'
+import { setIsMobileSearchOpen } from '@/features/Calendars/CalendarSlice'
 
 export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
   open,
@@ -26,6 +27,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
 }) => {
   const { t } = useI18n()
   const user = useAppSelector(state => state.user.userData)
+  const dispatch = useAppDispatch()
 
   const {
     anchorEl,
@@ -38,6 +40,10 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
     handleSettingsClick,
     handleLogoutClick
   } = useUtilMenus()
+
+  const openSearch = (): void => {
+    dispatch(setIsMobileSearchOpen(true))
+  }
 
   return (
     <Drawer
@@ -119,6 +125,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
         setTempUsers={setTempUsers}
         selectedCalendars={selectedCalendars}
         setSelectedCalendars={setSelectedCalendars}
+        openSearchOnMobile={openSearch}
       />
     </Drawer>
   )

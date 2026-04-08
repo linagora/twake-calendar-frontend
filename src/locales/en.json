@@ -56,7 +56,9 @@
     "select_timezone": "Select Timezone",
     "moreOptions": "More options",
     "search": "Search",
-    "resource": "Resource"
+    "resource": "Resource",
+    "back": "Back",
+    "show": "Show"
   },
   "search": {
     "searchIn": "Search in",

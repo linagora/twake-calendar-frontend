@@ -1,4 +1,4 @@
-import { User } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { api } from '@/utils/apiUtils'
 import { BusinessHour } from '../Settings/SettingsSlice'
 import { OpenPaasUserData } from './type/OpenPaasUserData'

@@ -1,4 +1,5 @@
-import { PeopleSearch, User } from '@/components/Attendees/PeopleSearch'
+import { PeopleSearch } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { searchUsers } from '@/features/User/userAPI'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'

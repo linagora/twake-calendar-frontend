@@ -56,7 +56,9 @@
     "select_timezone": "Выберите часовой пояс",
     "moreOptions": "Больше параметров",
     "search": "Поиск",
-    "resource": "Ресурсы"
+    "resource": "Ресурсы",
+    "back": "Назад",
+    "show": "Показать"
   },
   "search": {
     "searchIn": "Поиск в",

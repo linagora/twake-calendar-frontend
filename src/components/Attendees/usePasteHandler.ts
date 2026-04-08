@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
 import { isValidEmail } from '../../utils/isValidEmail'
-import type { User } from './PeopleSearch'
+import type { User } from './types'
 
 export function usePasteHandler({
   freeSolo,

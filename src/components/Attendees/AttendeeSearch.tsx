@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { FreeBusyIndicator } from './FreeBusyIndicator'
 import {
   ExtendedAutocompleteRenderInputParams,
-  PeopleSearch,
-  User
+  PeopleSearch
 } from './PeopleSearch'
+import { User } from './types'
 import { FreeBusyMap, useAttendeesFreeBusy } from './useFreeBusy'
 
 const attendeeToUser = (a: userAttendee, openpaasId = ''): User => ({

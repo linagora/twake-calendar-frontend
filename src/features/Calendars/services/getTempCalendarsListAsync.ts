@@ -1,4 +1,4 @@
-import { User } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { getCalendarVisibility } from '@/components/Calendar/utils/calendarUtils'
 import { formatReduxError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'

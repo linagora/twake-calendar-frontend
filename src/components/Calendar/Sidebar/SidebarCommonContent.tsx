@@ -3,20 +3,23 @@ import CalendarSelection from '../CalendarSelection'
 import { TempCalendarsInput } from '../TempCalendarsInput'
 import { CalendarSidebarProps } from './SideBar'
 
-export function SidebarCommonContent({
+export const SidebarCommonContent: React.FC<
+  Pick<
+    CalendarSidebarProps,
+    | 'onCreateEvent'
+    | 'tempUsers'
+    | 'setTempUsers'
+    | 'selectedCalendars'
+    | 'setSelectedCalendars'
+  > & { openSearchOnMobile?: () => void }
+> = ({
   onCreateEvent,
   tempUsers,
   setTempUsers,
   selectedCalendars,
-  setSelectedCalendars
-}: Pick<
-  CalendarSidebarProps,
-  | 'onCreateEvent'
-  | 'tempUsers'
-  | 'setTempUsers'
-  | 'selectedCalendars'
-  | 'setSelectedCalendars'
->) {
+  setSelectedCalendars,
+  openSearchOnMobile
+}) => {
   return (
     <>
       <Box sx={{ mb: 3, mt: 2 }}>
@@ -24,6 +27,7 @@ export function SidebarCommonContent({
           tempUsers={tempUsers}
           setTempUsers={setTempUsers}
           handleToggleEventPreview={onCreateEvent}
+          onOpenSearchOnMobile={openSearchOnMobile}
         />
       </Box>
       <Box className="calendarList">

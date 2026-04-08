@@ -1,42 +1,32 @@
-import { getAccessiblePair } from '@/utils/getAccessiblePair'
-import { stringAvatar } from '@/components/Event/utils/eventUtils'
 import { useUserSearch } from './useUserSearch'
 import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
-import CloseIcon from '@mui/icons-material/Close'
 import {
   Autocomplete,
-  Avatar,
-  Chip,
   CircularProgress,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   PaperProps,
   PopperProps,
   TextField,
-  useTheme,
-  type AutocompleteRenderInputParams
+  type AutocompleteRenderInputParams,
+  Box
 } from '@linagora/twake-mui'
+import { AttendeeOptionsList } from './AttendeeOptionsList'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import {
   HTMLAttributes,
+  ReactElement,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
   type ReactNode,
   type SyntheticEvent
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import { ResourceIcon } from './ResourceIcon'
 import { isValidEmail } from '../../utils/isValidEmail'
 import { usePasteHandler } from './usePasteHandler'
-
-export interface User {
-  email: string
-  displayName: string
-  avatarUrl?: string
-  openpaasId?: string
-  color?: Record<string, string>
-  objectType?: string
-}
+import { User } from './types'
+import { AttendeeChip } from './AttendeeChip'
+import { SearchState } from '../Calendar/utils/tempSearchUtil'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -46,19 +36,7 @@ export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRende
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-export function PeopleSearch({
-  selectedUsers,
-  onChange,
-  objectTypes,
-  disabled,
-  freeSolo,
-  onToggleEventPreview,
-  placeholder,
-  inputSlot,
-  customRenderInput,
-  customSlotProps,
-  getChipIcon
-}: {
+export interface PeopleSearchProps {
   selectedUsers: User[]
   onChange: (event: SyntheticEvent, users: User[]) => void
   objectTypes: string[]
@@ -66,7 +44,7 @@ export function PeopleSearch({
   freeSolo?: boolean
   onToggleEventPreview?: () => void
   placeholder?: string
-  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => React.ReactNode
+  inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => ReactNode
   customRenderInput?: (
     params: AutocompleteRenderInputParams,
     query: string,
@@ -77,11 +55,33 @@ export function PeopleSearch({
     paper?: Partial<PaperProps>
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>
   }
-  getChipIcon?: (user: User) => ReactNode
-}) {
+  getChipIcon?: (user: User) => ReactElement
+  hideOptions?: boolean
+  onSearchStateChange?: (state: SearchState) => void
+  inputValue?: string
+}
+
+export const PeopleSearch: React.FC<PeopleSearchProps> = ({
+  selectedUsers,
+  onChange,
+  objectTypes,
+  disabled,
+  freeSolo,
+  onToggleEventPreview,
+  placeholder,
+  inputSlot,
+  customRenderInput,
+  customSlotProps,
+  getChipIcon,
+  hideOptions,
+  onSearchStateChange,
+  inputValue
+}) => {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
   const errorMessage = t('peopleSearch.searchError')
+
+  const lastQueryTimeRef = useRef(0)
 
   const {
     query,
@@ -96,10 +96,28 @@ export function PeopleSearch({
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
-    setSnackbarMessage
+    setSnackbarMessage,
+    queryTime
   } = useUserSearch<User>({ objectTypes, errorMessage })
 
-  const theme = useTheme()
+  const onSearchStateChangeRef = useRef(onSearchStateChange)
+  useEffect(() => {
+    onSearchStateChangeRef.current = onSearchStateChange
+  }, [onSearchStateChange])
+
+  useEffect(() => {
+    if (!hideOptions) return
+    if (queryTime !== lastQueryTimeRef.current) {
+      lastQueryTimeRef.current = queryTime
+      onSearchStateChangeRef.current?.({ query, options, loading })
+    }
+  }, [queryTime, query, options, loading, hideOptions])
+
+  useEffect(() => {
+    if (inputValue !== undefined) {
+      setQuery(inputValue)
+    }
+  }, [inputValue, setQuery])
 
   const handleBlurCommit = useCallback(
     (event: React.SyntheticEvent) => {
@@ -162,7 +180,9 @@ export function PeopleSearch({
         }
       }
 
-      const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      const handleEnterKey = (
+        e: React.KeyboardEvent<HTMLInputElement>
+      ): void => {
         if (e.key === 'Enter' && onToggleEventPreview) {
           e.preventDefault()
           onToggleEventPreview()
@@ -210,6 +230,11 @@ export function PeopleSearch({
             {...defaultTextFieldProps}
             InputProps={inputProps}
             size="medium"
+            sx={{
+              '& .MuiInputBase-input': {
+                maxWidth: '90%'
+              }
+            }}
           />
         </>
       )
@@ -225,6 +250,24 @@ export function PeopleSearch({
     ]
   )
 
+  const isOpenOptions = useMemo(() => {
+    if (hideOptions) return false
+    if (customRenderInput) {
+      return (
+        isOpen && !!query && ((loading && hasSearched) || options.length > 0)
+      )
+    }
+    return isOpen && !!query && (loading || hasSearched)
+  }, [
+    customRenderInput,
+    hasSearched,
+    hideOptions,
+    isOpen,
+    loading,
+    options.length,
+    query
+  ])
+
   return (
     <>
       <Autocomplete
@@ -235,11 +278,7 @@ export function PeopleSearch({
         autoComplete={false}
         clearOnBlur={false}
         onBlur={freeSolo ? handleBlurCommit : undefined}
-        open={
-          customRenderInput
-            ? isOpen && !!query && (loading || options.length > 0)
-            : isOpen && !!query && (loading || hasSearched)
-        }
+        open={isOpenOptions}
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
         disabled={disabled}
@@ -256,8 +295,15 @@ export function PeopleSearch({
           }
         }}
         sx={{
-          '& .MuiAutocomplete-inputRoot': {
-            py: 0
+          '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
+            py: 0,
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            flexDirection: 'row'
+          },
+          '& .MuiInputBase-input': {
+            maxWidth: '80%'
           }
         }}
         filterSelectedOptions
@@ -302,58 +348,26 @@ export function PeopleSearch({
             ? customRenderInput(params, query, setQuery)
             : defaultRenderInput(params)
         }
-        renderOption={(props, option) => {
-          if (selectedUsers.find(u => u.email === option.email)) return null
-          const { key, ...otherProps } = props
-          const isResource = option.objectType === 'resource'
-          return (
-            <ListItem key={key + option?.email} {...otherProps} disableGutters>
-              <ListItemAvatar>
-                {isResource ? (
-                  <ResourceIcon avatarUrl={option.avatarUrl} />
-                ) : (
-                  <Avatar
-                    {...stringAvatar(option.displayName || option.email)}
-                  />
-                )}
-              </ListItemAvatar>
-              <ListItemText
-                primary={option.displayName}
-                secondary={isResource ? '' : option.email}
-                slotProps={{
-                  primary: { variant: 'body2' },
-                  secondary: { variant: 'caption' }
-                }}
+        renderOption={(props, option) => (
+          <AttendeeOptionsList
+            options={[option]}
+            selectedUsers={selectedUsers}
+            {...props}
+          />
+        )}
+        renderValue={(value, getTagProps) => (
+          <Box display="flex" flexWrap="wrap">
+            {value.map((option, index) => (
+              <AttendeeChip
+                key={index}
+                option={option}
+                getTagProps={getTagProps}
+                index={index}
+                getChipIcon={getChipIcon}
               />
-            </ListItem>
-          )
-        }}
-        renderValue={(value, getTagProps) =>
-          value.map((option, index) => {
-            const isString = typeof option === 'string'
-            const label = isString ? option : option.displayName || option.email
-            const chipColor = isString
-              ? theme.palette.grey[200]
-              : (option.color?.light ?? theme.palette.grey[200])
-            const textColor = getAccessiblePair(chipColor, theme)
-
-            return (
-              <Chip
-                {...getTagProps({ index })}
-                key={label}
-                icon={
-                  !isString && getChipIcon ? getChipIcon(option) : undefined
-                }
-                deleteIcon={<CloseIcon />}
-                style={{
-                  backgroundColor: chipColor,
-                  color: textColor
-                }}
-                label={label}
-              />
-            )
-          })
-        }
+            ))}
+          </Box>
+        )}
       />
       <SnackbarAlert
         open={snackbarOpen}

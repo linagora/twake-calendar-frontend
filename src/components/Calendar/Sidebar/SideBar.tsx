@@ -1,7 +1,7 @@
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { CalendarApi } from '@fullcalendar/core'
 import { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { User } from '../../Attendees/PeopleSearch'
+import { User } from '../../Attendees/types'
 import { DesktopSidebar } from './DesktopSidebar'
 import { TabletSidebar } from './TabletSidebar'
 import { MobileSidebar } from './MobileSidebar'
@@ -32,7 +32,7 @@ const Sidebar: React.FC<CalendarSidebarProps> = (
     return <MobileSidebar {...sharedProps} />
   }
 
-  return isTablet || isMobile ? (
+  return isTablet ? (
     <TabletSidebar {...sharedProps} />
   ) : (
     <DesktopSidebar {...sharedProps} />

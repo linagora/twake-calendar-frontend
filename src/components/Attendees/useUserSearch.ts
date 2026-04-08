@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { searchUsers } from '@/features/User/userAPI'
 
 export interface UseUserSearchProps {
@@ -9,7 +9,22 @@ export interface UseUserSearchProps {
 export function useUserSearch<T>({
   objectTypes,
   errorMessage
-}: UseUserSearchProps) {
+}: UseUserSearchProps): {
+  query: string
+  setQuery: (query: string) => void
+  loading: boolean
+  options: T[]
+  hasSearched: boolean
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  inputError: string | null
+  setInputError: (error: string | null) => void
+  snackbarOpen: boolean
+  setSnackbarOpen: (open: boolean) => void
+  snackbarMessage: string
+  setSnackbarMessage: (message: string) => void
+  queryTime: number
+} {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<T[]>([])
@@ -20,10 +35,18 @@ export function useUserSearch<T>({
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
 
+  const [queryTime, setQueryTime] = useState(0)
+
+  const objectTypesRef = useRef(objectTypes)
+
+  useEffect(() => {
+    objectTypesRef.current = objectTypes
+  }, [objectTypes])
+
   useEffect(() => {
     let cancelled = false
 
-    const delayDebounceFn = setTimeout(async () => {
+    const handleQueryChange = async (): Promise<void> => {
       if (!query.trim()) {
         if (!cancelled) {
           setOptions([])
@@ -33,35 +56,36 @@ export function useUserSearch<T>({
         return
       }
 
-      if (!cancelled) {
-        setLoading(true)
-        setHasSearched(false)
-      }
+      if (cancelled) return
+
+      setLoading(true)
+      setHasSearched(false)
 
       try {
-        const res = await searchUsers(query, objectTypes)
-        if (!cancelled) {
-          setOptions(res as unknown as T[])
-          setHasSearched(true)
-        }
+        const res = await searchUsers(query, objectTypesRef.current)
+        setOptions(res as unknown as T[])
+        setHasSearched(true)
       } catch {
-        if (!cancelled) {
-          setHasSearched(false)
-          setSnackbarMessage(errorMessage)
-          setSnackbarOpen(true)
-        }
+        setHasSearched(false)
+        setSnackbarMessage(errorMessage)
+        setSnackbarOpen(true)
       } finally {
         if (!cancelled) {
           setLoading(false)
+          setQueryTime(Date.now())
         }
       }
+    }
+
+    const delayDebounceFn = setTimeout(() => {
+      void handleQueryChange()
     }, 300)
 
-    return () => {
+    return (): void => {
       cancelled = true
       clearTimeout(delayDebounceFn)
     }
-  }, [objectTypes, query, errorMessage])
+  }, [objectTypesRef, query, errorMessage])
 
   return {
     query,
@@ -76,6 +100,7 @@ export function useUserSearch<T>({
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
-    setSnackbarMessage
+    setSnackbarMessage,
+    queryTime
   }
 }

@@ -40,7 +40,10 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
     <>
       <header className="menubar">
         <div className="left-menu">
-          <IconButton onClick={onOpenSidebar}>
+          <IconButton
+            onClick={onOpenSidebar}
+            aria-label={t('menubar.toggleSidebar')}
+          >
             <MenuIcon />
           </IconButton>
           <div className="menu-items">

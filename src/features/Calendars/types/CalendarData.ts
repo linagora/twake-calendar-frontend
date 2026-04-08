@@ -1,4 +1,4 @@
-import { User } from '@/components/Attendees/PeopleSearch'
+import { User } from '@/components/Attendees/types'
 import { CalDavLink } from '../api/types'
 
 // Access control entry

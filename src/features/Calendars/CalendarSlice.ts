@@ -30,12 +30,14 @@ const CalendarSlice = createSlice({
     list: {} as Record<string, Calendar>,
     templist: {} as Record<string, Calendar>,
     pending: true,
-    error: null as string | null
+    error: null as string | null,
+    isMobileSearchOpen: false
   } as {
     list: Record<string, Calendar>
     templist: Record<string, Calendar>
     pending: boolean
     error: string | null
+    isMobileSearchOpen: boolean
   },
   reducers: {
     createCalendar: (
@@ -109,6 +111,9 @@ const CalendarSlice = createSlice({
       }>
     ) => {
       state.list[action.payload.id].color = action.payload.color
+    },
+    setIsMobileSearchOpen: (state, action: PayloadAction<boolean>) => {
+      state.isMobileSearchOpen = action.payload
     }
   },
   extraReducers: builder => {
@@ -554,6 +559,7 @@ export const {
   emptyEventsCal,
   clearFetchCache,
   clearError,
-  updateCalColor
+  updateCalColor,
+  setIsMobileSearchOpen
 } = CalendarSlice.actions
 export default CalendarSlice.reducer
