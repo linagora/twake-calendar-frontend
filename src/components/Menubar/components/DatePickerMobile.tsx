@@ -13,12 +13,14 @@ export type DatePickerMobileProps = {
   calendarRef: React.RefObject<CalendarApi | null>
   currentDate: Date
   onDateChange?: (date: Date) => void
+  onCloseDatePicker: () => void
 }
 
 export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
   calendarRef,
   currentDate,
-  onDateChange
+  onDateChange,
+  onCloseDatePicker
 }) => {
   const { t, lang } = useI18n()
   const theme = useTheme()
@@ -40,6 +42,12 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
     onChangeDate(dayjs(new Date(year, monthIndex, clampedDay)))
   }
 
+  const handlePickDate = (newDate: PickerValue): void => {
+    onChangeDate(newDate)
+    onCloseDatePicker()
+    calendarRef.current?.updateSize?.()
+  }
+
   return (
     <LocalizationProvider
       key={lang}
@@ -53,10 +61,13 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
     >
       <StaticDatePicker
         value={dayjs(currentDate)}
-        onChange={onChangeDate}
+        onChange={handlePickDate}
         showDaysOutsideCurrentMonth
         slots={{ calendarHeader: () => null, actionBar: () => null }}
-        sx={{ width: '100%', marginTop: '10px' }}
+        sx={{
+          width: '100%',
+          marginTop: '10px'
+        }}
         slotProps={{
           toolbar: { hidden: true },
           layout: {

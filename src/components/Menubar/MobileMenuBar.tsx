@@ -36,6 +36,16 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   const monthName = t(`months.standalone.${monthIndex}`)
   const dateLabel = `${monthName} ${year}`
 
+  const onToggleDatePicker = (): void => {
+    setOpenDatePicker(prev => {
+      const newState = !prev
+      setTimeout(() => {
+        calendarRef.current?.updateSize?.()
+      }, 0)
+      return newState
+    })
+  }
+
   return (
     <>
       <header className="menubar">
@@ -53,13 +63,13 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
             <Stack direction="row" className="current-date-time">
               <Typography
                 sx={{ lineHeight: 'unset' }}
-                onClick={() => setOpenDatePicker(prev => !prev)}
+                onClick={onToggleDatePicker}
               >
                 {dateLabel}
               </Typography>
               <IconButton
                 size="small"
-                onClick={() => setOpenDatePicker(prev => !prev)}
+                onClick={onToggleDatePicker}
                 aria-label={
                   openDatePicker
                     ? t('menubar.hideDatePicker')
@@ -89,6 +99,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
           calendarRef={calendarRef}
           currentDate={currentDate}
           onDateChange={onDateChange}
+          onCloseDatePicker={() => setOpenDatePicker(false)}
         />
       ) : null}
     </>

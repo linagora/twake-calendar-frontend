@@ -30,6 +30,7 @@ jest.mock('@linagora/twake-mui', () => {
 })
 
 const scrollIntoViewMock = jest.fn()
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView
 
 beforeAll(() => {
@@ -63,20 +64,27 @@ describe('DatePickerMobile', () => {
   const setup = async (
     initialDate: Date
   ): Promise<
-    RenderResult & { calendarApi: CalendarApi; onDateChange: jest.Mock }
+    RenderResult & {
+      calendarApi: CalendarApi
+      onDateChange: jest.Mock
+      onCloseDatePicker: jest.Mock
+    }
   > => {
     const calendarApi = makeCalendarApi(initialDate)
     const onDateChange = jest.fn()
+    const onCloseDatePicker = jest.fn()
+
     const renderResult = await act(() =>
       render(
         <DatePickerMobile
           calendarRef={{ current: calendarApi }}
           currentDate={initialDate}
           onDateChange={onDateChange}
+          onCloseDatePicker={onCloseDatePicker}
         />
       )
     )
-    return { ...renderResult, calendarApi, onDateChange }
+    return { ...renderResult, calendarApi, onDateChange, onCloseDatePicker }
   }
 
   const expectNavigatedDate = (
@@ -160,6 +168,7 @@ describe('DatePickerMobile', () => {
           calendarRef={{ current: calendarApi }}
           currentDate={newDate}
           onDateChange={onDateChange}
+          onCloseDatePicker={jest.fn()} // Need to pass dummy fn for required prop
         />
       )
     })
