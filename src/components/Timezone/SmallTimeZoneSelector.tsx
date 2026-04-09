@@ -77,6 +77,7 @@ export const SmallTimezoneSelector: React.FC<
           sx: { height: '90%' }
         }
       }}
+      sx={{ zIndex: 1300 }}
     >
       <Box sx={{ px: 2 }}>
         <TextField

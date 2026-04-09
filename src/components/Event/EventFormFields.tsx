@@ -52,6 +52,9 @@ import { combineDateTime, splitDateTime } from './utils/dateTimeHelpers'
 import { validateEventForm } from './utils/formValidation'
 import { Resource, ResourceSearch } from '../Attendees/ResourceSearch'
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { SmallTimezoneSelector } from '../Timezone/SmallTimeZoneSelector'
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
+import { getTimezoneOffset } from '@/utils/timezone'
 
 interface EventFormFieldsProps {
   // Form state
@@ -176,6 +179,7 @@ export default function EventFormFields({
   const { t } = useI18n()
 
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const [timezoneDrawerOpen, setTimezoneDrawerOpen] = React.useState(false)
 
   // Internal state for 4 separate fields
   const [startDate, setStartDate] = React.useState('')
@@ -281,7 +285,7 @@ export default function EventFormFields({
 
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && title === '') {
       if (titleInputRef.current && process.env.NODE_ENV !== 'test') {
         // Use setTimeout to ensure the dialog is fully rendered
         const timer = setTimeout(() => {
@@ -486,6 +490,14 @@ export default function EventFormFields({
     setSelectedResources(resources)
   }
 
+  const offset = getTimezoneOffset(
+    timezone ? timezone : timezoneList.browserTz,
+    new Date(start)
+  )
+  const tzLabel = timezone
+    ? timezone.split('/').pop()?.replace(/_/g, ' ')
+    : timezoneList.browserTz
+
   return (
     <>
       <FieldWithLabel
@@ -613,20 +625,46 @@ export default function EventFormFields({
                 }
               />
             </Box>
-            <TimezoneAutocomplete
-              value={timezone}
-              onChange={setTimezone}
-              zones={timezoneList.zones}
-              getTimezoneOffset={(tzName: string) =>
-                timezoneList.getTimezoneOffset(tzName, new Date(start))
-              }
-              showIcon={false}
-              width={220}
-              size="small"
-              placeholder={t('event.form.timezonePlaceholder')}
-              hideBorder
-              inputPadding="8px 65px 8px 0px"
-            />
+            {isMobile ? (
+              <>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => setTimezoneDrawerOpen(true)}
+                  sx={{ textTransform: 'none', px: 0, color: 'text.secondary' }}
+                >
+                  <Typography variant="h6">
+                    ({offset}) {tzLabel}
+                  </Typography>
+                  <ArrowDropDown />
+                </Button>
+                <SmallTimezoneSelector
+                  open={timezoneDrawerOpen}
+                  onClose={() => setTimezoneDrawerOpen(false)}
+                  value={timezone}
+                  onChange={tz => {
+                    setTimezone(tz)
+                    setTimezoneDrawerOpen(false)
+                  }}
+                  referenceDate={new Date(start)}
+                />
+              </>
+            ) : (
+              <TimezoneAutocomplete
+                value={timezone}
+                onChange={setTimezone}
+                zones={timezoneList.zones}
+                getTimezoneOffset={(tzName: string) =>
+                  timezoneList.getTimezoneOffset(tzName, new Date(start))
+                }
+                showIcon={false}
+                width={220}
+                size="small"
+                placeholder={t('event.form.timezonePlaceholder')}
+                hideBorder
+                inputPadding="8px 65px 8px 0px"
+              />
+            )}
           </Box>
         </FieldWithLabel>
       )}
