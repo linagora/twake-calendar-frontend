@@ -1,15 +1,15 @@
 import { Box, Typography } from '@linagora/twake-mui'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import dayjs from 'dayjs'
+import { Dayjs } from 'dayjs'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { DatePickerField } from './DatePickerField'
 import { TimePickerField } from './TimePickerField'
 
 export interface CompactDateTimeLayoutProps {
-  startDateValue: ReturnType<typeof dayjs> | null
-  startTimeValue: ReturnType<typeof dayjs> | null
-  endTimeValue: ReturnType<typeof dayjs> | null
+  startDateValue: Dayjs | null
+  startTimeValue: Dayjs | null
+  endTimeValue: Dayjs | null
   hasError: boolean
   isMobile: boolean
   allday: boolean
