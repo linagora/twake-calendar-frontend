@@ -11,7 +11,7 @@ import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { setSelectedCalendars as setSelectedCalendarsToStorage } from '@/utils/storage/setSelectedCalendars'
 import { useSelectedCalendars } from '@/utils/storage/useSelectedCalendars'
 import { browserDefaultTimeZone } from '@/utils/timezone'
-import type { EventApi, LocaleInput } from '@fullcalendar/core'
+import type { EventApi, LocaleInput, MoreLinkArg } from '@fullcalendar/core'
 import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
 import frLocale from '@fullcalendar/core/locales/fr'
 import ruLocale from '@fullcalendar/core/locales/ru'
@@ -46,6 +46,7 @@ import { CALENDAR_VIEWS } from './utils/constants'
 import Sidebar from './Sidebar/SideBar'
 import TempSearchDialog from './TempSearchDialog'
 import { setIsMobileSearchOpen } from '@/features/Calendars/CalendarSlice'
+import ViewMoreEvents from './ViewMoreEvents'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
@@ -315,6 +316,18 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
   const [tempUsers, setTempUsers] = useState<User[]>([])
   const [tempEvent, setTempEvent] = useState<CalendarEvent>({} as CalendarEvent)
 
+  const [isMoreEventsDrawerOpen, setIsMoreEventsDrawerOpen] = useState(false)
+  const [moreEvents, setMoreEvents] = useState<EventApi[]>([])
+
+  const handleMoreLinkClick = (arg: MoreLinkArg): string | void => {
+    if (!isMobile) return
+
+    setMoreEvents(arg.hiddenSegs.map(seg => seg.event))
+    setIsMoreEventsDrawerOpen(true)
+
+    return 'none'
+  }
+
   useEffect(() => {
     if (view !== 'calendar') return
     const targetView =
@@ -447,6 +460,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
               timeGridWeek: { titleFormat: { month: 'long', year: 'numeric' } }
             }}
             dayMaxEvents={true}
+            moreLinkClick={handleMoreLinkClick}
             events={eventToFullCalendarFormat(
               filteredEvents,
               filteredTempEvents,
@@ -614,17 +628,26 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
       </div>
 
       {isMobile && (
-        <TempSearchDialog
-          tempUsers={tempUsers}
-          setTempUsers={setTempUsers}
-          onClose={() => {
-            dispatch(setIsMobileSearchOpen(false))
-            onCloseSidebar()
-          }}
-          handleToggleEventPreview={() =>
-            eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
-          }
-        />
+        <>
+          <TempSearchDialog
+            tempUsers={tempUsers}
+            setTempUsers={setTempUsers}
+            onClose={() => {
+              dispatch(setIsMobileSearchOpen(false))
+              onCloseSidebar()
+            }}
+            handleToggleEventPreview={() =>
+              eventHandlers.handleDateSelect(null as unknown as DateSelectArg)
+            }
+          />
+          <ViewMoreEvents
+            isOpen={isMoreEventsDrawerOpen}
+            onOpen={() => setIsMoreEventsDrawerOpen(true)}
+            onClose={() => setIsMoreEventsDrawerOpen(false)}
+            moreEvents={moreEvents}
+            handleEventClick={eventHandlers.handleEventClick}
+          />
+        </>
       )}
     </main>
   )
