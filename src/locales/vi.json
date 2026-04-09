@@ -27,7 +27,8 @@
       "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
     },
     "resources": "Tài nguyên",
-    "browseResources": "Tìm kiếm tài nguyên"
+    "browseResources": "Tìm kiếm tài nguyên",
+    "searchTimezone": "Tìm kiếm múi giờ..."
   },
   "actions": {
     "modify": "Chỉnh sửa",

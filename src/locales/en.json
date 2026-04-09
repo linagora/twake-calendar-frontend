@@ -27,7 +27,8 @@
       "sharedWarning": "You will lose access to its events. You will still be able to add it back later."
     },
     "resources": "Resources",
-    "browseResources": "Browse resources"
+    "browseResources": "Browse resources",
+    "searchTimezone": "Search timezone..."
   },
   "actions": {
     "modify": "Modify",

@@ -27,7 +27,8 @@
       "sharedWarning": "Vous allez perdre l’accès à ses événements. Vous pourrez toujours le rajouter plus tard."
     },
     "resources": "Ressources",
-    "browseResources": "Parcourir les ressources"
+    "browseResources": "Parcourir les ressources",
+    "searchTimezone": "Rechercher un fuseau horaire..."
   },
   "actions": {
     "modify": "Modifier",

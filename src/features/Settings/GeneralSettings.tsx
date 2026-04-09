@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { useTimeZoneList } from '@/components/Calendar/TimezoneSelector'
+import { useTimeZoneList } from '@/components/Timezone/hooks/useTimeZoneList'
 import { WeekDaySelector } from '@/components/Event/WeekDaySelector'
 import { TimezoneAutocomplete } from '@/components/Timezone/TimezoneAutocomplete'
 import { browserDefaultTimeZone, getTimezoneOffset } from '@/utils/timezone'
@@ -9,7 +9,6 @@ import {
   FormControlLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Switch,
   Typography
 } from '@linagora/twake-mui'
@@ -40,13 +39,13 @@ interface GeneralSettingsProps {
   onWorkingDaysError: () => void
 }
 
-export function GeneralSettings({
+export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
   onLanguageError,
   onTimeZoneError,
   onHideDeclinedEventsError,
   onDisplayWeekNumbersError,
   onWorkingDaysError
-}: GeneralSettingsProps) {
+}) => {
   const dispatch = useAppDispatch()
   const { t } = useI18n()
 
@@ -79,7 +78,20 @@ export function GeneralSettings({
     null
   )
 
-  const handleLanguageChange = (event: SelectChangeEvent<string>) => {
+  const handleLanguageChange = (
+    event:
+      | React.ChangeEvent<
+          Omit<HTMLInputElement, 'value'> & {
+            value: string
+          }
+        >
+      | (Event & {
+          target: {
+            value: string
+            name: string
+          }
+        })
+  ): void => {
     const newLanguage = event.target.value
     const previousLanguage = currentLanguage
     dispatch(setUserLanguage(newLanguage))
@@ -93,7 +105,7 @@ export function GeneralSettings({
       })
   }
 
-  const handleTimeZoneChange = (newTimeZone: string) => {
+  const handleTimeZoneChange = (newTimeZone: string): void => {
     const previousTimeZone = currentTimeZone
     dispatch(setUserTimeZone(newTimeZone))
     dispatch(setSettingsTimeZone(newTimeZone))
@@ -108,7 +120,7 @@ export function GeneralSettings({
       })
   }
 
-  const handleTimeZoneDefaultChange = (isDefault: boolean) => {
+  const handleTimeZoneDefaultChange = (isDefault: boolean): void => {
     const previousTimeZone = currentTimeZone
     dispatch(setIsBrowserDefaultTimeZone(isDefault))
     if (isDefault) {
@@ -127,7 +139,7 @@ export function GeneralSettings({
     }
   }
 
-  const handleHideDeclinedEvents = (value: boolean) => {
+  const handleHideDeclinedEvents = (value: boolean): void => {
     dispatch(setHideDeclinedEvents(value))
     dispatch(updateUserConfigurationsAsync({ hideDeclinedEvents: value }))
       .unwrap()
@@ -137,7 +149,7 @@ export function GeneralSettings({
       })
   }
 
-  const handleDisplayWeekNumbers = (value: boolean) => {
+  const handleDisplayWeekNumbers = (value: boolean): void => {
     dispatch(setDisplayWeekNumbers(value))
     dispatch(updateUserConfigurationsAsync({ displayWeekNumbers: value }))
       .unwrap()
@@ -178,14 +190,14 @@ export function GeneralSettings({
   )
 
   useEffect(() => {
-    return () => {
+    return (): void => {
       if (businessHoursTimeoutRef.current) {
         clearTimeout(businessHoursTimeoutRef.current)
       }
     }
   }, [])
 
-  const handleWorkingDays = (value: boolean) => {
+  const handleWorkingDays = (value: boolean): void => {
     dispatch(setWorkingDays(value))
     dispatch(updateUserConfigurationsAsync({ workingDays: value }))
       .unwrap()

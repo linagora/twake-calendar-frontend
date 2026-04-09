@@ -27,7 +27,8 @@
       "sharedWarning": "Вы потеряете доступ. Позже можно добавить снова."
     },
     "resources": "Ресурсы",
-    "browseResources": "Просмотреть ресурсы"
+    "browseResources": "Просмотреть ресурсы",
+    "searchTimezone": "Поиск часового пояса..."
   },
   "actions": {
     "modify": "Изменить",

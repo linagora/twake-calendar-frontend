@@ -36,7 +36,7 @@ import './Calendar.styl'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
 import { useCalendarViewHandlers } from './hooks/useCalendarViewHandlers'
-import { TimezoneSelector } from './TimezoneSelector'
+import { TimezoneSelector } from '../Timezone/TimezoneSelector'
 import {
   eventToFullCalendarFormat,
   extractEvents,

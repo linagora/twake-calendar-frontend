@@ -1,6 +1,9 @@
 import { useMediaQuery, useTheme } from '@linagora/twake-mui'
 
-export function useScreenSizeDetection() {
+export function useScreenSizeDetection(): {
+  isTooSmall: boolean
+  isTablet: boolean
+} {
   const theme = useTheme()
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))

@@ -1,11 +1,17 @@
+declare module '*.styl'
+
 declare module '@linagora/twake-mui' {
   export * from '@mui/material'
-  import type { AvatarProps as MuiAvatarProps } from '@mui/material'
+
+  export function useTheme<T = import('@mui/material').Theme>(): T
 
   export type AvatarSize = 'xs' | 's' | 'm' | 'l' | 'xl'
   export type AvatarDisplay = 'initial' | 'inline'
 
-  export interface AvatarProps extends Omit<MuiAvatarProps, 'color'> {
+  export interface AvatarProps extends Omit<
+    import('@mui/material').AvatarProps,
+    'color'
+  > {
     color?: string
     size?: AvatarSize | number
     border?: boolean
@@ -14,7 +20,7 @@ declare module '@linagora/twake-mui' {
     display?: AvatarDisplay
   }
 
-  export const Avatar: React.FC<AvatarProps>
+  export const Avatar: import('react').FC<AvatarProps>
 
   export const radius: Record<string, string | number>
 }
