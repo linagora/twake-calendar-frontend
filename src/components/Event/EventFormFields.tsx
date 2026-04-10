@@ -285,7 +285,7 @@ export default function EventFormFields({
 
   // Auto-focus title field when modal opens (skip in test environment)
   React.useEffect(() => {
-    if (isOpen && title === '') {
+    if (isOpen && !eventId) {
       if (titleInputRef.current && process.env.NODE_ENV !== 'test') {
         // Use setTimeout to ensure the dialog is fully rendered
         const timer = setTimeout(() => {
@@ -294,7 +294,7 @@ export default function EventFormFields({
         return (): void => clearTimeout(timer)
       }
     }
-  }, [isOpen])
+  }, [isOpen, eventId])
 
   // Auto-focus title field when toggling between normal and extended mode
   React.useEffect(() => {
