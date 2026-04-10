@@ -22,21 +22,33 @@ export function useDisplayFlags({
   showSingleDateField: boolean
   shouldShowTimeFields: boolean
 } {
-  return useMemo(() => {
-    const spansMultipleDays = startDate !== endDate
-    const isTimedEvent = !allday
-    const shouldShowEndDateNormal = allday || showEndDate
-    const shouldShowFullFieldsInNormal =
-      hasEndDateChanged || (spansMultipleDays && isTimedEvent)
-    const showSingleDateField =
-      !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal
-    const shouldShowTimeFields = isTimedEvent || shouldShowFullFieldsInNormal
+  const spansMultipleDays = useMemo(
+    () => startDate !== endDate,
+    [startDate, endDate]
+  )
+  const isTimedEvent = useMemo(() => !allday, [allday])
+  const shouldShowEndDateNormal = useMemo(
+    () => allday || showEndDate,
+    [allday, showEndDate]
+  )
+  const shouldShowFullFieldsInNormal = useMemo(
+    () => hasEndDateChanged || (spansMultipleDays && isTimedEvent),
+    [hasEndDateChanged, spansMultipleDays, isTimedEvent]
+  )
+  const showSingleDateField = useMemo(
+    () =>
+      !isExpanded && !shouldShowEndDateNormal && !shouldShowFullFieldsInNormal,
+    [isExpanded, shouldShowEndDateNormal, shouldShowFullFieldsInNormal]
+  )
+  const shouldShowTimeFields = useMemo(
+    () => isTimedEvent || shouldShowFullFieldsInNormal,
+    [isTimedEvent, shouldShowFullFieldsInNormal]
+  )
 
-    return {
-      spansMultipleDays,
-      shouldShowFullFieldsInNormal,
-      showSingleDateField,
-      shouldShowTimeFields
-    }
-  }, [allday, hasEndDateChanged, startDate, endDate, showEndDate, isExpanded])
+  return {
+    spansMultipleDays,
+    shouldShowFullFieldsInNormal,
+    showSingleDateField,
+    shouldShowTimeFields
+  }
 }

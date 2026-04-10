@@ -1,6 +1,8 @@
-import { Box, useMediaQuery, useTheme } from '@linagora/twake-mui'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { Box } from '@linagora/twake-mui'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import classNames from 'classnames'
 import dayjs from 'dayjs'
 import 'dayjs/locale/en'
 import 'dayjs/locale/fr'
@@ -59,8 +61,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   onEndTimeChange
 }) => {
   const { t, lang } = useI18n()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const {
     spansMultipleDays,
@@ -125,12 +126,9 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   const hasError = !!validation.errors.dateTime
 
   const showFullField = showMore || shouldShowFullFieldsInNormal
-  const containerClassName = [
-    'date-time-group',
-    showFullField ? 'show-full-field' : ''
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const containerClassName = classNames('date-time-group', {
+    'show-full-field': showFullField
+  })
 
   return (
     <LocalizationProvider

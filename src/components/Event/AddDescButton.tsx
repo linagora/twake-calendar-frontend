@@ -1,3 +1,4 @@
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { TextField } from '@linagora/twake-mui'
 import { Notes as NotesIcon } from '@mui/icons-material'
 import React from 'react'
@@ -10,17 +11,16 @@ export function AddDescButton({
   setShowDescription,
   showMore,
   description,
-  setDescription,
-  isMobile
+  setDescription
 }: {
   showDescription: boolean
   setShowDescription: (b: boolean) => void
   showMore: boolean
   description: string
   setDescription: (d: string) => void
-  isMobile?: boolean
 }): JSX.Element {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null)
 
   React.useEffect(() => {
