@@ -1,14 +1,8 @@
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { useMediaQuery } from '@linagora/twake-mui'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { Dayjs } from 'dayjs'
-import React from 'react'
-import { LONG_DATE_FORMAT } from '../../utils/dateTimeFormatters'
-import { ReadOnlyDateField } from '../ReadOnlyPickerField'
-import {
-  dateCalendarLayoutSx,
-  getDateFieldSlotProps,
-  getDateSlotProps
-} from './dateTimePickerSlotProps'
+import { DesktopDatePickerField } from './DesktopDatePickerField'
+import { TouchDatePickerField } from './TouchDatePickerField'
 
 export interface DatePickerFieldProps {
   value: Dayjs | null
@@ -18,22 +12,11 @@ export interface DatePickerFieldProps {
   hasError?: boolean
 }
 
-export const DatePickerField: React.FC<DatePickerFieldProps> = ({
-  value,
-  onChange,
-  testId,
-  label,
-  hasError = false
-}) => (
-  <DatePicker
-    format={LONG_DATE_FORMAT}
-    value={value}
-    onChange={onChange}
-    slots={{ field: ReadOnlyDateField }}
-    slotProps={{
-      ...getDateSlotProps(testId, hasError, label),
-      field: getDateFieldSlotProps(testId, hasError, label),
-      layout: { sx: dateCalendarLayoutSx }
-    }}
-  />
-)
+export const DatePickerField: React.FC<DatePickerFieldProps> = props => {
+  const isTouch = useMediaQuery('(pointer: coarse)')
+  return isTouch ? (
+    <TouchDatePickerField {...props} />
+  ) : (
+    <DesktopDatePickerField {...props} />
+  )
+}
