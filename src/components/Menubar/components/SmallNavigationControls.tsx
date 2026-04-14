@@ -11,13 +11,13 @@ export const SmallNavigationControls: React.FC<{
 
   return (
     <div className="navigation-controls">
-      <Stack direction="row">
+      <Stack direction="row" spacing={1.25}>
         <IconButton
           onClick={() => onNavigate('prev')}
           aria-label={t('menubar.prev')}
           title={t('menubar.prev')}
         >
-          <ChevronLeftIcon sx={{ height: 20 }} />
+          <ChevronLeftIcon sx={{ height: 30 }} />
         </IconButton>
         <IconButton
           color="primary"
@@ -36,7 +36,7 @@ export const SmallNavigationControls: React.FC<{
           aria-label={t('menubar.next')}
           title={t('menubar.next')}
         >
-          <ChevronRightIcon sx={{ height: 20 }} />
+          <ChevronRightIcon sx={{ height: 30 }} />
         </IconButton>
       </Stack>
     </div>
