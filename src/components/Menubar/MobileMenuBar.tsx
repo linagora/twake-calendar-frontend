@@ -53,6 +53,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
           <IconButton
             onClick={onOpenSidebar}
             aria-label={t('menubar.toggleSidebar')}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
