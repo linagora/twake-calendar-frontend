@@ -449,7 +449,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
             timeZone={timezone}
             height="100%"
             select={eventHandlers.handleDateSelect}
-            longPressDelay={100}
+            selectLongPressDelay={0}
             nowIndicator
             slotLabelClassNames={arg => [
               updateSlotLabelVisibility(new Date(), arg, timezone)
