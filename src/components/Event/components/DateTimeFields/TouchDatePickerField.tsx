@@ -89,8 +89,9 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
           </Typography>
           <DateField
             fullWidth
+            inputMode="numeric"
             size="small"
-            value={value}
+            value={internalValue}
             onChange={handleCalendarChange}
             autoFocus
           />
