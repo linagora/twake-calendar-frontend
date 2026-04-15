@@ -348,7 +348,10 @@
     "startTime": "Start Time",
     "endDate": "End Date",
     "endTime": "End Time",
-    "pickADate": "Pick a date"
+    "pickADate": "Pick a date",
+    "switchToTextInput": "Switch to text input",
+    "switchToCalendar": "Switch to calendar view",
+    "switchToClockView": "Switch to clock view"
   },
   "websocket": {
     "browserOnline": "You’re back online. Reconnecting live updates…",

@@ -1,6 +1,12 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Dialog, IconButton, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Dialog,
+  IconButton,
+  Typography
+} from '@linagora/twake-mui'
 import { DateField, DatePicker } from '@mui/x-date-pickers'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { PickerValue } from '@mui/x-date-pickers/internals'
@@ -39,7 +45,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
 
   const [internalValue, setInternalValue] = useState<PickerValue>(value)
 
-  const handleCalendarChange = (newValue: PickerValue): void => {
+  const handleInternalChange = (newValue: PickerValue): void => {
     setInternalValue(newValue)
     onChange(newValue)
   }
@@ -66,7 +72,15 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
         <Typography variant="subtitle1" fontWeight={500}>
           {displayDate}
         </Typography>
-        <IconButton size="small" onClick={handleToggleView}>
+        <IconButton
+          size="small"
+          onClick={handleToggleView}
+          aria-label={
+            viewMode === 'calendar'
+              ? t('dateTimeFields.switchToTextInput')
+              : t('dateTimeFields.switchToCalendar')
+          }
+        >
           {viewMode === 'calendar' ? (
             <EditIcon fontSize="small" />
           ) : (
@@ -79,7 +93,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
       {viewMode === 'calendar' ? (
         <DateCalendar
           value={internalValue}
-          onChange={handleCalendarChange}
+          onChange={handleInternalChange}
           sx={{ m: 0, width: '100%' }}
         />
       ) : (
@@ -92,8 +106,13 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
             inputMode="numeric"
             size="small"
             value={internalValue}
-            onChange={handleCalendarChange}
+            onChange={handleInternalChange}
             autoFocus
+            slotProps={{
+              textField: {
+                inputProps: { inputMode: 'numeric', pattern: '[0-9]*' }
+              }
+            }}
           />
         </Box>
       )}

@@ -349,7 +349,10 @@
     "startTime": "Heure du début",
     "endDate": "Date de la fin",
     "endTime": "Heure de la fin",
-    "pickADate": "Choisissez une date"
+    "pickADate": "Choisissez une date",
+    "switchToTextInput": "Passer à la saisie de texte",
+    "switchToCalendar": "Passer à la vue calendrier",
+    "switchToClockView": "Passer à la vue horloge"
   },
   "websocket": {
     "browserOnline": "Vous êtes de nouveau en ligne. Reconnexion des mises à jour en temps réel…",

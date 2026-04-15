@@ -53,7 +53,8 @@ const STATIC_PICKER_SX: SxProps<Theme> = {
   '& .MuiTimePickerToolbar-hourMinuteLabel': {
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: '16px'
   },
   '& .MuiTimePickerToolbar-hourMinuteLabel .MuiPickersToolbarText-root[data-selected]':
     { color: 'primary.main' },
@@ -144,7 +145,6 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
           >
             <TimeField
               ampm={false}
-              inputMode="numeric"
               value={internalValue}
               onChange={setInternalValue}
               autoFocus
@@ -152,7 +152,8 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
               slotProps={{
                 textField: {
                   variant: 'filled',
-                  InputLabelProps: { shrink: false }
+                  InputLabelProps: { shrink: false },
+                  inputProps: { inputMode: 'numeric', pattern: '[0-9]*' }
                 }
               }}
             />
@@ -164,7 +165,14 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
         <DialogActions
           sx={{ display: 'flex', justifyContent: 'space-between' }}
         >
-          <IconButton onClick={toggleView}>
+          <IconButton
+            onClick={toggleView}
+            aria-label={
+              view === 'clock'
+                ? t('dateTimeFields.switchToTextInput')
+                : t('dateTimeFields.switchToClockView')
+            }
+          >
             {view === 'clock' ? <KeyboardAltOutlined /> : <AccessTime />}
           </IconButton>
           <Box>
