@@ -144,6 +144,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
           >
             <TimeField
               ampm={false}
+              inputMode="numeric"
               value={internalValue}
               onChange={setInternalValue}
               autoFocus

@@ -1,4 +1,4 @@
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { useMediaQuery } from '@linagora/twake-mui'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { Dayjs } from 'dayjs'
 import React from 'react'
