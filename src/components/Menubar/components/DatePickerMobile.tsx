@@ -128,7 +128,8 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
         sx={{
           width: '100%',
           marginTop: '10px',
-          minHeight: `${rootMinHeight}px`
+          minHeight: `${rootMinHeight}px`,
+          maxHeight: '300px'
         }}
         slotProps={{
           toolbar: { hidden: true },
@@ -138,7 +139,7 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
                 width: '100%',
                 margin: 0,
                 maxWidth: 'none',
-                maxHeight: 'none',
+                maxHeight: '400px',
                 height: `${calendarHeight}px`
               },
               '.MuiDayCalendar-header': {
@@ -150,7 +151,8 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
                 justifyContent: 'space-around'
               },
               '.MuiDateCalendar-root .MuiDayCalendar-slideTransition': {
-                minHeight: `${slideTransitionMinHeight}px`
+                minHeight: `${slideTransitionMinHeight}px`,
+                maxHeight: '300px'
               }
             }
           },
