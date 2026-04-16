@@ -5,7 +5,7 @@ import {
   TextField,
   List,
   InputAdornment,
-  useTheme
+  styled
 } from '@linagora/twake-mui'
 import { Search as SearchIcon } from '@mui/icons-material'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
@@ -13,6 +13,10 @@ import { useTimeZoneList } from './hooks/useTimeZoneList'
 import { TimezoneSelectProps } from './TimezoneSelector'
 import { useI18n } from 'twake-i18n'
 import { TimezoneListItem } from './TimezoneListItem'
+
+const StyledSwipeableDrawer = styled(SwipeableDrawer)(({ theme }) => ({
+  zIndex: theme.zIndex.modal + 100
+}))
 
 const filterTimezones = (
   zones: string[],
@@ -34,8 +38,6 @@ export const SmallTimezoneSelector: React.FC<
   }
 > = ({ value, onChange, referenceDate, onClose, open }) => {
   const { t } = useI18n()
-
-  const theme = useTheme()
 
   const [searchQuery, setSearchQuery] = useState('')
   const timezoneList = useTimeZoneList()
@@ -84,7 +86,7 @@ export const SmallTimezoneSelector: React.FC<
         window.innerHeight - viewport.offsetTop - viewport.height
       )
       paper.style.bottom = `${bottom}px`
-      paper.style.height = `${viewport.height}px`
+      paper.style.height = `${viewport.height - 70}px`
     }
 
     if (viewport) {
@@ -94,7 +96,7 @@ export const SmallTimezoneSelector: React.FC<
     }
 
     inputRef.current?.focus()
-    selectedRef.current?.scrollIntoView({ behavior: 'auto', block: 'center' })
+    selectedRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' })
 
     return (): void => {
       if (viewport) {
@@ -109,7 +111,7 @@ export const SmallTimezoneSelector: React.FC<
   }, [open])
 
   return (
-    <SwipeableDrawer
+    <StyledSwipeableDrawer
       anchor="bottom"
       open={open}
       onClose={onClose}
@@ -121,7 +123,6 @@ export const SmallTimezoneSelector: React.FC<
           sx: { height: '90%', maxHeight: '90dvh' }
         }
       }}
-      sx={{ zIndex: theme.zIndex.modal + 100 }}
     >
       <Box sx={{ px: 2 }}>
         <TextField
@@ -169,6 +170,6 @@ export const SmallTimezoneSelector: React.FC<
           />
         ))}
       </List>
-    </SwipeableDrawer>
+    </StyledSwipeableDrawer>
   )
 }
