@@ -45,16 +45,9 @@ import { CalendarEvent, RepetitionObject } from './EventsTypes'
 import { moveEventBetweenCalendars } from './updateEventHelpers/moveEventBetweenCalendars'
 import { detectRecurringEventChanges } from './utils/detectRecurringEventChanges'
 import { Resource } from '@/components/Attendees/ResourceSearch'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
-function EventUpdateModal({
-  eventId,
-  calId,
-  open,
-  onClose,
-  onCloseAll,
-  eventData,
-  typeOfAction
-}: {
+const EventUpdateModal: React.FC<{
   eventId: string
   calId: string
   open: boolean
@@ -62,8 +55,17 @@ function EventUpdateModal({
   onCloseAll?: () => void
   eventData?: CalendarEvent | null
   typeOfAction?: 'solo' | 'all'
-}) {
+}> = ({
+  eventId,
+  calId,
+  open,
+  onClose,
+  onCloseAll,
+  eventData,
+  typeOfAction
+}) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const dispatch = useAppDispatch()
   const calList = useAppSelector(state => state.calendars.list)
   // Get event from Redux store (cached data) as fallback
@@ -121,7 +123,9 @@ function EventUpdateModal({
   )
   const [alarm, setAlarm] = useState('')
   const [busy, setBusy] = useState('OPAQUE')
-  const [eventClass, setEventClass] = useState('PUBLIC')
+  const [eventClass, setEventClass] = useState<
+    'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
+  >('PUBLIC')
   const [timezone, setTimezone] = useState(
     resolveTimezone(browserDefaultTimeZone)
   )
@@ -196,7 +200,7 @@ function EventUpdateModal({
     }
 
     // Fetch the master event
-    const fetchMasterEvent = async () => {
+    const fetchMasterEvent = async (): Promise<void> => {
       setIsLoadingMasterEvent(true)
       try {
         const masterEventToFetch = {
@@ -214,7 +218,7 @@ function EventUpdateModal({
       }
     }
 
-    fetchMasterEvent()
+    void fetchMasterEvent()
   }, [event, open, typeOfAction])
 
   // Initialize form state when event data is available
@@ -371,7 +375,7 @@ function EventUpdateModal({
   ])
 
   // Helper to close modal(s) - use onCloseAll if available to close preview modal too
-  const closeModal = () => {
+  const closeModal = (): void => {
     if (onCloseAll) {
       onCloseAll()
     } else {
@@ -379,7 +383,7 @@ function EventUpdateModal({
     }
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     // Clear temp data when user manually closes modal
     clearEventFormTempData('update')
     closeModal()
@@ -494,7 +498,7 @@ function EventUpdateModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, eventId, calId, typeOfAction])
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     // Show validation errors when Save is clicked
     setShowValidationErrors(true)
 
@@ -678,7 +682,7 @@ function EventUpdateModal({
       let hasRemovedSeriesInstances = false
       let createdSingleEventUid: string | null = null
 
-      const removeSeriesInstancesFromUI = () => {
+      const removeSeriesInstancesFromUI = (): void => {
         if (!seriesInstancesSnapshot) return
         Object.keys(seriesInstancesSnapshot).forEach(eventId => {
           dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }))
@@ -686,7 +690,7 @@ function EventUpdateModal({
         hasRemovedSeriesInstances = true
       }
 
-      const restoreSeriesInstancesToUI = () => {
+      const restoreSeriesInstancesToUI = (): void => {
         if (!seriesInstancesSnapshot) return
         Object.values(seriesInstancesSnapshot).forEach(instance => {
           dispatch(
@@ -864,13 +868,13 @@ function EventUpdateModal({
 
             const seriesInstancesSnapshot = getSeriesInstances()
 
-            const removeSeriesInstancesFromUI = () => {
+            const removeSeriesInstancesFromUI = (): void => {
               Object.keys(seriesInstancesSnapshot).forEach(eventId => {
                 dispatch(removeEvent({ calendarUid: calId, eventUid: eventId }))
               })
             }
 
-            const restoreSeriesInstancesFromSnapshot = () => {
+            const restoreSeriesInstancesFromSnapshot = (): void => {
               Object.values(seriesInstancesSnapshot).forEach(instance => {
                 dispatch(
                   updateEventLocal({
@@ -1054,17 +1058,34 @@ function EventUpdateModal({
   }
 
   const dialogActions = (
-    <Box display="flex" justifyContent="space-between" width="100%" px={2}>
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      width="100%"
+      px={isMobile ? 0 : 2}
+    >
       {!showMore && (
-        <Button startIcon={<AddIcon />} onClick={() => setShowMore(!showMore)}>
+        <Button
+          size={isMobile ? 'small' : 'medium'}
+          startIcon={<AddIcon />}
+          onClick={() => setShowMore(!showMore)}
+        >
           {t('common.moreOptions')}
         </Button>
       )}
       <Box display="flex" gap={1} ml={showMore ? 'auto' : 0}>
-        <Button variant="outlined" onClick={handleClose}>
+        <Button
+          size={isMobile ? 'small' : 'medium'}
+          variant="outlined"
+          onClick={handleClose}
+        >
           {t('common.cancel')}
         </Button>
-        <Button variant="contained" onClick={handleSave}>
+        <Button
+          size={isMobile ? 'small' : 'medium'}
+          variant="contained"
+          onClick={() => void handleSave()}
+        >
           {t('actions.save')}
         </Button>
       </Box>
@@ -1081,6 +1102,12 @@ function EventUpdateModal({
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(!showMore)}
       actions={dialogActions}
+      sx={{
+        '& .MuiDialogActions-root': {
+          paddingLeft: isMobile ? 2 : 4,
+          paddingRight: isMobile ? 2 : 4
+        }
+      }}
     >
       <EventFormFields
         title={title}
