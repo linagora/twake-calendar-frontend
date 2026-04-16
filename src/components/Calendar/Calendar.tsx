@@ -48,6 +48,7 @@ import {
 } from './utils/calendarUtils'
 import { CALENDAR_VIEWS } from './utils/constants'
 import ViewMoreEvents from './ViewMoreEvents'
+import { useSwipeCalendar } from './hooks/useSwipeCalendar'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
@@ -84,6 +85,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     return (): void => clearTimeout(t)
   }, [selectedDate])
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date())
+  const calendarWrapperRef = useRef<HTMLDivElement>(null)
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const dispatch = useAppDispatch()
   const view = useAppSelector(state => state.settings.view)
@@ -375,6 +377,13 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     errorHandler: errorHandler.current
   })
 
+  const { offsetX, isAnimating, onTouchStart, onTouchMove, onTouchEnd } =
+    useSwipeCalendar({
+      calendarRef,
+      containerRef: calendarWrapperRef,
+      isMobile
+    })
+
   useEffect(() => {
     if (process.env.NODE_ENV === 'test') {
       window.__calendarRef = calendarRef
@@ -382,7 +391,6 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
   }, [calendarRef])
 
   const { t, lang } = useI18n()
-  const calendarWrapperRef = useRef<HTMLDivElement>(null)
 
   useTouchListener(
     eventHandlers.handleDateSelect,
@@ -430,183 +438,204 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
           </Fab>
         )}
         {view === 'calendar' && (
-          <div ref={calendarWrapperRef} style={{ height: '100%' }}>
-            <FullCalendar
-              key={hiddenDays.join(',')}
-              ref={ref => {
-                if (ref) {
-                  calendarRef.current = ref.getApi()
-                }
+          <div
+            ref={calendarWrapperRef}
+            className="calendar-viewport"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            style={{ height: '100%' }}
+          >
+            <div
+              className={`calendar-track ${isAnimating ? 'calendar-track--animate' : ''}`}
+              style={{
+                transform: `translateX(${offsetX}px)`,
+                transition: isAnimating
+                  ? 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                  : 'none'
               }}
-              plugins={[
-                dayGridPlugin,
-                timeGridPlugin,
-                interactionPlugin,
-                momentTimezonePlugin
-              ]}
-              initialView={
-                currentView ||
-                (isTablet
-                  ? CALENDAR_VIEWS.timeGridDay
-                  : CALENDAR_VIEWS.timeGridWeek)
-              }
-              firstDay={1}
-              editable={true}
-              locale={localeMap[lang]}
-              hiddenDays={hiddenDays}
-              selectable={true}
-              timeZone={timezone}
-              height="100%"
-              select={eventHandlers.handleDateSelect}
-              nowIndicator
-              slotLabelClassNames={arg => [
-                updateSlotLabelVisibility(new Date(), arg, timezone)
-              ]}
-              nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
-              headerToolbar={false}
-              views={{
-                timeGridWeek: {
-                  titleFormat: { month: 'long', year: 'numeric' }
-                }
-              }}
-              dayMaxEvents={true}
-              moreLinkClick={handleMoreLinkClick}
-              events={eventToFullCalendarFormat(
-                filteredEvents,
-                filteredTempEvents,
-                userId,
-                userData?.email,
-                isPending,
-                calendars
-              )}
-              eventOrder={(a: EventApi, b: EventApi) =>
-                a.extendedProps.priority - b.extendedProps.priority
-              }
-              weekNumbers={
-                currentView === CALENDAR_VIEWS.timeGridWeek ||
-                currentView === CALENDAR_VIEWS.timeGridDay
-              }
-              weekNumberFormat={{ week: 'long' }}
-              weekNumberContent={arg => {
-                return (
-                  <div className="weekSelector">
-                    {displayWeekNumbers && (
-                      <div>
-                        {t('menubar.views.week')} {arg.num}
+            >
+              <div className="calendar-page" />
+              <div className="calendar-page">
+                <FullCalendar
+                  key={hiddenDays.join(',')}
+                  ref={ref => {
+                    if (ref) {
+                      calendarRef.current = ref.getApi()
+                    }
+                  }}
+                  plugins={[
+                    dayGridPlugin,
+                    timeGridPlugin,
+                    interactionPlugin,
+                    momentTimezonePlugin
+                  ]}
+                  initialView={
+                    currentView ||
+                    (isTablet
+                      ? CALENDAR_VIEWS.timeGridDay
+                      : CALENDAR_VIEWS.timeGridWeek)
+                  }
+                  firstDay={1}
+                  editable={true}
+                  locale={localeMap[lang]}
+                  hiddenDays={hiddenDays}
+                  selectable={true}
+                  timeZone={timezone}
+                  height="100%"
+                  select={eventHandlers.handleDateSelect}
+                  nowIndicator
+                  slotLabelClassNames={arg => [
+                    updateSlotLabelVisibility(new Date(), arg, timezone)
+                  ]}
+                  nowIndicatorContent={viewHandlers.handleNowIndicatorContent}
+                  headerToolbar={false}
+                  views={{
+                    timeGridWeek: {
+                      titleFormat: { month: 'long', year: 'numeric' }
+                    }
+                  }}
+                  dayMaxEvents={true}
+                  moreLinkClick={handleMoreLinkClick}
+                  events={eventToFullCalendarFormat(
+                    filteredEvents,
+                    filteredTempEvents,
+                    userId,
+                    userData?.email,
+                    isPending,
+                    calendars
+                  )}
+                  eventOrder={(a: EventApi, b: EventApi) =>
+                    a.extendedProps.priority - b.extendedProps.priority
+                  }
+                  weekNumbers={
+                    currentView === CALENDAR_VIEWS.timeGridWeek ||
+                    currentView === CALENDAR_VIEWS.timeGridDay
+                  }
+                  weekNumberFormat={{ week: 'long' }}
+                  weekNumberContent={arg => {
+                    return (
+                      <div className="weekSelector">
+                        {displayWeekNumbers && (
+                          <div>
+                            {t('menubar.views.week')} {arg.num}
+                          </div>
+                        )}
+                        <TimezoneSelector
+                          value={timezone}
+                          referenceDate={
+                            calendarRef.current?.getDate() ?? new Date()
+                          }
+                          onChange={(newTimezone: string) =>
+                            dispatch(setTimeZone(newTimezone))
+                          }
+                        />
                       </div>
-                    )}
-                    <TimezoneSelector
-                      value={timezone}
-                      referenceDate={
-                        calendarRef.current?.getDate() ?? new Date()
-                      }
-                      onChange={(newTimezone: string) =>
-                        dispatch(setTimeZone(newTimezone))
-                      }
-                    />
-                  </div>
-                )
-              }}
-              dayCellContent={arg => {
-                const month = arg.date.toLocaleDateString(t('locale'), {
-                  month: 'short',
-                  timeZone: timezone
-                })
-                if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
-                  return (
-                    <span
-                      className={`fc-daygrid-day-number ${
-                        arg.isToday ? 'current-date' : ''
-                      }`}
-                    >
-                      {arg.dayNumberText === '1' ? month : ''}{' '}
-                      {arg.dayNumberText}
-                    </span>
-                  )
-                }
-              }}
-              slotDuration="00:30:00"
-              slotLabelInterval="01:00:00"
-              scrollTime="12:00:00"
-              unselectAuto={false}
-              allDayText=""
-              slotLabelFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-              }}
-              datesSet={arg => {
-                onViewChange?.(arg.view.type)
-                const calendarCurrentDate =
-                  calendarRef.current?.getDate() || new Date(arg.start)
-                setDisplayedDateAndRange(calendarCurrentDate)
+                    )
+                  }}
+                  dayCellContent={arg => {
+                    const month = arg.date.toLocaleDateString(t('locale'), {
+                      month: 'short',
+                      timeZone: timezone
+                    })
+                    if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
+                      return (
+                        <span
+                          className={`fc-daygrid-day-number ${
+                            arg.isToday ? 'current-date' : ''
+                          }`}
+                        >
+                          {arg.dayNumberText === '1' ? month : ''}{' '}
+                          {arg.dayNumberText}
+                        </span>
+                      )
+                    }
+                  }}
+                  slotDuration="00:30:00"
+                  slotLabelInterval="01:00:00"
+                  scrollTime="12:00:00"
+                  unselectAuto={false}
+                  allDayText=""
+                  slotLabelFormat={{
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                  }}
+                  datesSet={arg => {
+                    onViewChange?.(arg.view.type)
+                    const calendarCurrentDate =
+                      calendarRef.current?.getDate() || new Date(arg.start)
+                    setDisplayedDateAndRange(calendarCurrentDate)
 
-                if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
-                  const start = new Date(arg.start).getTime()
-                  const end = new Date(arg.end).getTime()
-                  const middle = start + (end - start) / 2
-                  setSelectedDate(new Date(middle))
-                  setSelectedMiniDate(calendarCurrentDate)
-                } else {
-                  setSelectedDate(calendarCurrentDate)
-                  setSelectedMiniDate(calendarCurrentDate)
-                }
+                    if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
+                      const start = new Date(arg.start).getTime()
+                      const end = new Date(arg.end).getTime()
+                      const middle = start + (end - start) / 2
+                      setSelectedDate(new Date(middle))
+                      setSelectedMiniDate(calendarCurrentDate)
+                    } else {
+                      setSelectedDate(calendarCurrentDate)
+                      setSelectedMiniDate(calendarCurrentDate)
+                    }
 
-                // Always use the calendar's current date for consistency
-                if (onDateChange) {
-                  onDateChange(calendarCurrentDate)
-                }
+                    // Always use the calendar's current date for consistency
+                    if (onDateChange) {
+                      onDateChange(calendarCurrentDate)
+                    }
 
-                // Notify parent about view change
-                setCurrentView(arg.view.type)
+                    // Notify parent about view change
+                    setCurrentView(arg.view.type)
 
-                // Update slot label visibility when view changes
-                setTimeout(() => {
-                  updateSlotLabelVisibility(new Date())
-                }, 100)
-              }}
-              dayHeaderContent={arg => {
-                const m = moment.tz(arg.date, timezone)
+                    // Update slot label visibility when view changes
+                    setTimeout(() => {
+                      updateSlotLabelVisibility(new Date())
+                    }, 100)
+                  }}
+                  dayHeaderContent={arg => {
+                    const m = moment.tz(arg.date, timezone)
 
-                const date = m.date()
-                const weekDay = m
-                  .toDate()
-                  .toLocaleDateString(t('locale'), {
-                    weekday: 'short',
-                    timeZone: timezone
-                  })
-                  .toUpperCase()
+                    const date = m.date()
+                    const weekDay = m
+                      .toDate()
+                      .toLocaleDateString(t('locale'), {
+                        weekday: 'short',
+                        timeZone: timezone
+                      })
+                      .toUpperCase()
 
-                return (
-                  <div
-                    className={`fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`}
-                  >
-                    <small>{weekDay}</small>
-                    {arg.view.type !== CALENDAR_VIEWS.dayGridMonth && (
-                      <span
-                        className={`fc-daygrid-day-number ${arg.isToday ? 'current-date' : ''}`}
+                    return (
+                      <div
+                        className={`fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`}
                       >
-                        {date}
-                      </span>
-                    )}
-                  </div>
-                )
-              }}
-              dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
-              dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
-              viewDidMount={viewHandlers.handleViewDidMount}
-              viewWillUnmount={viewHandlers.handleViewWillUnmount}
-              eventClick={eventHandlers.handleEventClick}
-              eventAllow={eventHandlers.handleEventAllow}
-              eventDrop={arg => {
-                void eventHandlers.handleEventDrop(arg)
-              }}
-              eventResize={arg => {
-                void eventHandlers.handleEventResize(arg)
-              }}
-              eventContent={viewHandlers.handleEventContent}
-              eventDidMount={viewHandlers.handleEventDidMount}
-            />
+                        <small>{weekDay}</small>
+                        {arg.view.type !== CALENDAR_VIEWS.dayGridMonth && (
+                          <span
+                            className={`fc-daygrid-day-number ${arg.isToday ? 'current-date' : ''}`}
+                          >
+                            {date}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  }}
+                  dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
+                  dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
+                  viewDidMount={viewHandlers.handleViewDidMount}
+                  viewWillUnmount={viewHandlers.handleViewWillUnmount}
+                  eventClick={eventHandlers.handleEventClick}
+                  eventAllow={eventHandlers.handleEventAllow}
+                  eventDrop={arg => {
+                    void eventHandlers.handleEventDrop(arg)
+                  }}
+                  eventResize={arg => {
+                    void eventHandlers.handleEventResize(arg)
+                  }}
+                  eventContent={viewHandlers.handleEventContent}
+                  eventDidMount={viewHandlers.handleEventDidMount}
+                />
+              </div>
+              <div className="calendar-page" />
+            </div>
           </div>
         )}
         {view === 'search' && <SearchResultsPage />}

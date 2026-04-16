@@ -134,3 +134,40 @@
   display flex
   flex-direction column
   align-items center
+.calendar-viewport
+  width 100%
+  height 100%
+  overflow hidden
+  position relative
+
+.calendar-track
+  display flex
+  width 300%
+  height 100%
+  margin-left -100%
+  will-change transform
+
+.calendar-track--animate
+  transition transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+.calendar-page
+  flex 0 0 33.333%
+  width 33.333%
+  height 100%
+  overflow hidden
+  position relative
+  background-color inherit
+
+.calendar-page-placeholder
+  width 100%
+  height 100%
+  display flex
+  align-items center
+  justify-content center
+  background-color #f8f9fa
+  
+  .placeholder-content
+    text-align center
+    
+[data-theme="dark"] .calendar-page-placeholder
+  background-color #1e1e1e
