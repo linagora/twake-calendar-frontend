@@ -5,7 +5,7 @@ import { MiniCalendar } from '../MiniCalendar'
 import { CalendarSidebarProps } from './SideBar'
 import { SidebarCommonContent } from './SidebarCommonContent'
 
-export function DesktopSidebar({
+export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
   calendarRef,
   isIframe,
   onCreateEvent,
@@ -15,7 +15,7 @@ export function DesktopSidebar({
   setTempUsers,
   selectedCalendars,
   setSelectedCalendars
-}: CalendarSidebarProps) {
+}) => {
   const { t } = useI18n()
 
   return (
@@ -30,7 +30,7 @@ export function DesktopSidebar({
           paddingLeft: 3,
           paddingRight: 2,
           width: '270px',
-          marginTop: '70px'
+          marginTop: isIframe ? 0 : '70px'
         },
         zIndex: 5
       }}
