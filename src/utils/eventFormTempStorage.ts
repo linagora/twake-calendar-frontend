@@ -14,7 +14,7 @@ export interface EventFormTempData {
   attendees: userAttendee[]
   alarm: string
   busy: string
-  eventClass: string
+  eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   timezone: string
   calendarid: string
   hasVideoConference: boolean
@@ -87,7 +87,7 @@ export interface EventFormState {
   attendees: userAttendee[]
   alarm: string
   busy: string
-  eventClass: string
+  eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   timezone: string
   calendarid: string
   hasVideoConference: boolean
@@ -127,7 +127,7 @@ export interface EventFormSetters {
   setAttendees: (value: userAttendee[]) => void
   setAlarm: (value: string) => void
   setBusy: (value: string) => void
-  setEventClass: (value: string) => void
+  setEventClass: (value: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL') => void
   setTimezone: (value: string) => void
   setCalendarid: (value: string) => void
   setHasVideoConference: (value: boolean) => void

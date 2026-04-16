@@ -79,8 +79,8 @@ interface EventFormFieldsProps {
   setAlarm: (alarm: string) => void
   busy: string
   setBusy: (busy: string) => void
-  eventClass: string
-  setEventClass: (eventClass: string) => void
+  eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
+  setEventClass: (eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL') => void
   timezone: string
   setTimezone: (timezone: string) => void
   calendarid: string
