@@ -53,7 +53,7 @@ export function makeVevent(
   if (event.organizer) {
     vevent[1].push([
       'organizer',
-      { cn: event.organizer.cn },
+      { cn: `\"${event.organizer.cn}\"` },
       'cal-address',
       `mailto:${event.organizer.cal_address}`
     ])
