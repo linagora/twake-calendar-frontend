@@ -24,8 +24,8 @@ export function useDateTimeLayout({
   showEndDate
 }: DateTimeLayoutProps): LayoutMode {
   return useMemo(() => {
-    const isSpecialRange = hasEndDateChanged || (!allday && spansMultipleDays)
-    if (showMore || isSpecialRange) {
+    const isSpecialRange = hasEndDateChanged || spansMultipleDays
+    if (!allday && (showMore || isSpecialRange)) {
       return LAYOUT_MODE.EXPANDED
     }
     if (allday || showEndDate) return LAYOUT_MODE.ALL_DAY
