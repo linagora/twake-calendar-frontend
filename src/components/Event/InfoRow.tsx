@@ -6,6 +6,7 @@ import {
   useMediaQuery
 } from '@linagora/twake-mui'
 import React from 'react'
+import { detectUrls } from './utils/detectUrls'
 
 type InfoRowProps = {
   icon: React.ReactNode
@@ -16,51 +17,6 @@ type InfoRowProps = {
   style?: React.CSSProperties
   alignItems?: React.CSSProperties['alignItems']
   flexWrap?: React.CSSProperties['flexWrap']
-}
-
-function detectUrls(text: string): JSX.Element[] {
-  // Simple regex that captures whole URLs without splitting them apart
-  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi
-
-  const parts = []
-  let lastIndex = 0
-
-  text.replace(urlRegex, (match, _, offset: number) => {
-    // Push the text before the match
-    if (lastIndex < offset) {
-      parts.push(
-        <React.Fragment key={lastIndex}>
-          {text.slice(lastIndex, offset)}
-        </React.Fragment>
-      )
-    }
-
-    // Normalize href
-    const href = match.startsWith('http') ? match : `https://${match}`
-    parts.push(
-      <Link
-        key={offset}
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="always"
-      >
-        {match}
-      </Link>
-    )
-
-    lastIndex = offset + match.length
-    return match
-  })
-
-  // Push remaining text after last URL
-  if (lastIndex < text.length) {
-    parts.push(
-      <React.Fragment key={lastIndex}>{text.slice(lastIndex)}</React.Fragment>
-    )
-  }
-
-  return parts
 }
 
 export function InfoRow({
