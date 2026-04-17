@@ -41,6 +41,7 @@
   height 60px
   min-height 60px
   background-color #fff
+  overflow hidden
 
   &--mobile
     position sticky
@@ -101,6 +102,9 @@
   display flex
   justify-content flex-end
   align-items center
+  flex 1
+  overflow hidden
+
 
 .current-date-time
   font-family Roboto
@@ -119,3 +123,6 @@ body.fullscreen-view .search-container
 
 .search-container
   width 100%
+  min-width 0
+  display flex
+  justify-content flex-end

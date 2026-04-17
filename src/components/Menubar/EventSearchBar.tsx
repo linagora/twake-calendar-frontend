@@ -66,7 +66,7 @@ const SearchBar: React.FC<{
     md: '35vw',
     xl: '35vw',
     '@media (min-width: 2000px)': {
-      width: '55vw'
+      maxWidth: '55vw'
     }
   }
 
@@ -230,9 +230,9 @@ const SearchBar: React.FC<{
       <Box
         ref={containerRef}
         sx={{
-          margin: '0 auto',
           position: 'relative',
-          width: extended ? searchWidth : 'auto',
+          width: extended ? '100%' : 'auto',
+          maxWidth: searchWidth,
           transition: 'width 0.25s ease-out'
         }}
       >

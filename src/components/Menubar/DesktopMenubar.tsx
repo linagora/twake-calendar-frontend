@@ -9,6 +9,7 @@ import { SharedMenubarProps } from './Menubar'
 import { NavigationControls } from './components/NavigationControls'
 import { SelectView } from './SelectView'
 import { UserMenu } from './UserMenu'
+import { useState } from 'react'
 
 export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
@@ -32,6 +33,8 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
 }) => {
   const { t } = useI18n()
 
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+
   return (
     <header className="menubar">
       <div className="left-menu">
@@ -50,16 +53,23 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
           <NavigationControls onNavigate={onNavigate} />
         </div>
 
-        <div className="menu-items">
-          <div className="current-date-time">
-            <p>{dateLabel}</p>
+        {!isSearchExpanded && (
+          <div className="menu-items">
+            <div className="current-date-time">
+              <p>{dateLabel}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="right-menu">
-        <div className="search-container">
-          <SearchBar />
+        <div
+          className="search-container"
+          style={{
+            minWidth: 0
+          }}
+        >
+          <SearchBar onToggleSearch={setIsSearchExpanded} />
         </div>
 
         <div className="menu-items">
