@@ -41,3 +41,10 @@ declare module '@linagora/twake-mui' {
 
   export const radius: Record<string, string | number>
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+declare const process: {
+  env: {
+    [key: string]: string | undefined
+  }
+}

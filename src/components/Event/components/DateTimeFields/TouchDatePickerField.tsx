@@ -104,7 +104,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
           <DateField
             fullWidth
             inputMode="numeric"
-            size="small"
+            size="medium"
             value={internalValue}
             onChange={handleInternalChange}
             autoFocus
@@ -171,8 +171,8 @@ export const TouchDatePickerField: React.FC<DatePickerFieldProps> = ({
         slots={{ field: ReadOnlyDateField }}
         slotProps={{
           openPickerButton: { sx: { display: 'none' } },
-          ...getDateSlotProps(testId, hasError, label),
-          field: getDateFieldSlotProps(testId, hasError, label),
+          ...getDateSlotProps(testId, hasError, label, true),
+          field: getDateFieldSlotProps(testId, hasError, label, true),
           layout: { sx: dateCalendarLayoutSx }
         }}
       />

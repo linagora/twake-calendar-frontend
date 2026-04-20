@@ -24,6 +24,7 @@ import { useI18n } from 'twake-i18n'
 import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
 import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
 import { FC_DAYS, WeekDaySelector } from './WeekDaySelector'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 const numericSlotProps = {
   htmlInput: {
@@ -36,18 +37,9 @@ export const RepeatEvent: React.FC<{
   eventStart: Date
   setRepetition: (repetition: RepetitionObject) => void
   isOwn?: boolean
-}> = ({
-  repetition,
-  eventStart,
-  setRepetition,
-  isOwn = true
-}: {
-  repetition: RepetitionObject
-  eventStart: Date
-  setRepetition: (repetition: RepetitionObject) => void
-  isOwn?: boolean
-}) => {
+}> = ({ repetition, eventStart, setRepetition, isOwn = true }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
   const day = new Date(eventStart)
   const dateCalendarLayoutSx = {
@@ -85,8 +77,8 @@ export const RepeatEvent: React.FC<{
                 interval: Number(e.target.value)
               })
             }
-            size="small"
-            sx={{ width: 80 }}
+            size={isMobile ? 'medium' : 'small'}
+            style={{ width: 80 }}
             slotProps={{
               htmlInput: {
                 ...numericSlotProps.htmlInput,
@@ -223,8 +215,12 @@ export const RepeatEvent: React.FC<{
                     <Box
                       sx={{
                         width: 220,
-                        '& .MuiInputBase-root': { fontSize: 14 },
-                        '& .MuiInputBase-input': { fontSize: 14 }
+                        '& .MuiInputBase-root': {
+                          fontSize: isMobile ? 16 : 14
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: isMobile ? 16 : 14
+                        }
                       }}
                     >
                       <DatePicker
@@ -278,7 +274,7 @@ export const RepeatEvent: React.FC<{
                   </Typography>
                   <TextField
                     type="number"
-                    size="small"
+                    size={isMobile ? 'medium' : 'small'}
                     value={repetition.occurrences || 1}
                     onChange={e => {
                       const value = Number(e.target.value)

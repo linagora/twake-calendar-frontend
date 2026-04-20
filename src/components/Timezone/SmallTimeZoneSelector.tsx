@@ -128,6 +128,7 @@ export const SmallTimezoneSelector: React.FC<
         <TextField
           inputRef={inputRef}
           fullWidth
+          size="medium"
           variant="standard"
           placeholder={t('calendar.searchTimezone')}
           value={searchQuery}
@@ -152,8 +153,7 @@ export const SmallTimezoneSelector: React.FC<
           }}
           sx={{
             '& .MuiInputBase-root': {
-              padding: '8px 0',
-              fontSize: '16px'
+              padding: '8px 0'
             }
           }}
         />

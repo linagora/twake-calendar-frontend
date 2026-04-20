@@ -177,8 +177,8 @@ export default function EventFormFields({
   setSelectedResources
 }: EventFormFieldsProps): JSX.Element {
   const { t } = useI18n()
-
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+
   const [timezoneDrawerOpen, setTimezoneDrawerOpen] = React.useState(false)
 
   // Internal state for 4 separate fields
@@ -514,7 +514,7 @@ export default function EventFormFields({
           onChange={e => {
             setTitle(e.target.value)
           }}
-          size="small"
+          size={isMobile ? 'medium' : 'small'}
           margin="dense"
           inputRef={titleInputRef}
         />
@@ -694,7 +694,9 @@ export default function EventFormFields({
           timezone={timezone}
           end={end}
           placeholder={t('event.form.addGuestsPlaceholder')}
-          inputSlot={params => <TextField {...params} size="small" />}
+          inputSlot={params => (
+            <TextField {...params} size={isMobile ? 'medium' : 'small'} />
+          )}
         />
       </FieldWithLabel>
 
@@ -815,7 +817,6 @@ export default function EventFormFields({
         showMore={showMore}
         description={description}
         setDescription={setDescription}
-        isMobile={isMobile}
       />
 
       <FieldWithLabel
@@ -841,7 +842,7 @@ export default function EventFormFields({
             placeholder={t('event.form.locationPlaceholder')}
             value={location}
             onChange={e => setLocation(e.target.value)}
-            size="small"
+            size={isMobile ? 'medium' : 'small'}
             margin="dense"
           />
         )}
@@ -922,7 +923,9 @@ export default function EventFormFields({
               <ResourceSearch
                 objectTypes={['resource']}
                 selectedResources={selectedResources}
-                inputSlot={params => <TextField {...params} size="small" />}
+                inputSlot={params => (
+                  <TextField {...params} size={isMobile ? 'medium' : 'small'} />
+                )}
                 onChange={(_event: React.SyntheticEvent, value: Resource[]) => {
                   handleResourceChange(value)
                 }}

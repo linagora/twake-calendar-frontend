@@ -5,6 +5,7 @@ import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from './components/FieldWithLabel'
 import { SectionPreviewRow } from './components/SectionPreviewRow'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export function AddDescButton({
   showDescription,
@@ -43,7 +44,7 @@ export function AddDescButton({
         placeholder={t('event.form.descriptionPlaceholder')}
         value={description}
         onChange={e => setDescription(e.target.value)}
-        size="small"
+        size={isMobile ? 'medium' : 'small'}
         margin="dense"
         multiline
         minRows={2}

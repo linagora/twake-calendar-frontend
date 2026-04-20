@@ -28,7 +28,8 @@ export const timePickerPopperSx = {
 const baseFieldProps = (
   testId: string,
   hasError = false,
-  label?: string
+  label?: string,
+  isMobile?: boolean
 ): Pick<
   TextFieldProps,
   | 'size'
@@ -39,7 +40,7 @@ const baseFieldProps = (
   | 'sx'
   | 'inputProps'
 > => ({
-  size: 'small' as const,
+  size: isMobile ? ('medium' as const) : ('small' as const),
   margin: 'dense' as const,
   fullWidth: true,
   InputLabelProps: { shrink: true },
@@ -54,17 +55,19 @@ const baseFieldProps = (
 export const getDateSlotProps = (
   testId: string,
   hasError = false,
-  label?: string
+  label?: string,
+  isMobile?: boolean
 ): Partial<DatePickerSlotProps<true>> => ({
   textField: {
-    ...baseFieldProps(testId, hasError, label)
+    ...baseFieldProps(testId, hasError, label, isMobile)
   }
 })
 
 export const getDateFieldSlotProps = (
   testId: string,
   hasError = false,
-  label?: string
+  label?: string,
+  isMobile?: boolean
 ): Partial<DatePickerFieldProps> &
   Pick<
     TextFieldProps,
@@ -75,12 +78,13 @@ export const getDateFieldSlotProps = (
     | 'error'
     | 'sx'
     | 'inputProps'
-  > => baseFieldProps(testId, hasError, label)
+  > => baseFieldProps(testId, hasError, label, isMobile)
 
 export const getTimeFieldSlotProps = (
   testId: string,
   hasError = false,
-  label?: string
+  label?: string,
+  isMobile?: boolean
 ): Partial<TimePickerFieldProps> &
   Pick<
     TextFieldProps,
@@ -91,4 +95,4 @@ export const getTimeFieldSlotProps = (
     | 'error'
     | 'sx'
     | 'inputProps'
-  > => baseFieldProps(testId, hasError, label)
+  > => baseFieldProps(testId, hasError, label, isMobile)
