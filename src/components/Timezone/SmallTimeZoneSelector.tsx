@@ -9,6 +9,7 @@ import {
 } from '@linagora/twake-mui'
 import { Search as SearchIcon } from '@mui/icons-material'
 import React, { useState, useMemo, useEffect, useRef } from 'react'
+import { Virtuoso } from 'react-virtuoso'
 import { useTimeZoneList } from './hooks/useTimeZoneList'
 import { TimezoneSelectProps } from './TimezoneSelector'
 import { useI18n } from 'twake-i18n'
@@ -30,6 +31,14 @@ const filterTimezones = (
     return label.includes(query) || offset.includes(query)
   })
 }
+
+const VirtuosoList = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>((props, ref) => (
+  <List component="div" {...props} ref={ref} sx={{ pt: 0, pb: 0 }} />
+))
+VirtuosoList.displayName = 'VirtuosoList'
 
 export const SmallTimezoneSelector: React.FC<
   TimezoneSelectProps & {
@@ -57,7 +66,6 @@ export const SmallTimezoneSelector: React.FC<
     onClose()
   }
 
-  const selectedRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const paperRef = useRef<HTMLDivElement>(null)
 
@@ -96,7 +104,6 @@ export const SmallTimezoneSelector: React.FC<
     }
 
     inputRef.current?.focus()
-    selectedRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' })
 
     return (): void => {
       if (viewport) {
@@ -158,18 +165,27 @@ export const SmallTimezoneSelector: React.FC<
           }}
         />
       </Box>
-      <List sx={{ overflow: 'auto', flex: 1, pt: 0 }}>
-        {filteredTimeZones.map(tz => (
-          <TimezoneListItem
-            key={tz}
-            tz={tz}
-            referenceDate={referenceDate}
-            isSelected={effectiveTimezone === tz}
-            onSelect={handleSelect}
-            selectedRef={selectedRef}
-          />
-        ))}
-      </List>
+      <Box sx={{ flex: 1, minHeight: 0 }}>
+        <Virtuoso
+          data={filteredTimeZones}
+          initialTopMostItemIndex={Math.max(
+            0,
+            filteredTimeZones.findIndex(tz => tz === effectiveTimezone)
+          )}
+          components={{
+            List: VirtuosoList
+          }}
+          itemContent={(_index, tz) => (
+            <TimezoneListItem
+              key={tz}
+              tz={tz}
+              referenceDate={referenceDate}
+              isSelected={effectiveTimezone === tz}
+              onSelect={handleSelect}
+            />
+          )}
+        />
+      </Box>
     </StyledSwipeableDrawer>
   )
 }

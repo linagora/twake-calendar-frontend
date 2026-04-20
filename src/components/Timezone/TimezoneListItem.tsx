@@ -15,15 +15,13 @@ interface TimezoneListItemProps {
   referenceDate: Date
   isSelected: boolean
   onSelect: (tz: string) => void
-  selectedRef: React.RefObject<HTMLDivElement> | null
 }
 
 export const TimezoneListItem: React.FC<TimezoneListItemProps> = ({
   tz,
   referenceDate,
   isSelected,
-  onSelect,
-  selectedRef
+  onSelect
 }) => {
   const theme = useTheme()
   const offset = getTimezoneOffset(tz, referenceDate)
@@ -34,7 +32,6 @@ export const TimezoneListItem: React.FC<TimezoneListItemProps> = ({
       <ListItemButton
         selected={isSelected}
         aria-selected={isSelected}
-        ref={isSelected ? selectedRef : null}
         onClick={() => onSelect(tz)}
         sx={{ py: 1 }}
       >

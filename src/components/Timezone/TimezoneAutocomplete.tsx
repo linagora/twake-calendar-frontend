@@ -42,7 +42,7 @@ export function TimezoneAutocomplete({
   disableClearable = false,
   hideBorder = false,
   openOnFocus = false
-}: TimezoneAutocompleteProps) {
+}: TimezoneAutocompleteProps): React.ReactElement {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map(tz => ({
       value: tz,
