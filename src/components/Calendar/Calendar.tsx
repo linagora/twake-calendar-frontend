@@ -38,6 +38,7 @@ import './Calendar.styl'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
 import { useCalendarViewHandlers } from './hooks/useCalendarViewHandlers'
+import { useSwipeNavigation } from './hooks/useSwipeNavigation'
 import Sidebar from './Sidebar/SideBar'
 import TempSearchDialog from './TempSearchDialog'
 import { useTouchListener } from './useTouchListener'
@@ -84,6 +85,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     return (): void => clearTimeout(t)
   }, [selectedDate])
   const [selectedMiniDate, setSelectedMiniDate] = useState(new Date())
+  const calendarWrapperRef = useRef<HTMLDivElement>(null)
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const dispatch = useAppDispatch()
   const view = useAppSelector(state => state.settings.view)
@@ -382,13 +384,14 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
   }, [calendarRef])
 
   const { t, lang } = useI18n()
-  const calendarWrapperRef = useRef<HTMLDivElement>(null)
 
   useTouchListener(
     eventHandlers.handleDateSelect,
     isTablet || isMobile,
     calendarWrapperRef
   )
+
+  const { handlers } = useSwipeNavigation(calendarRef, calendarWrapperRef)
 
   return (
     <main
@@ -430,7 +433,15 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
           </Fab>
         )}
         {view === 'calendar' && (
-          <div ref={calendarWrapperRef} style={{ height: '100%' }}>
+          <div
+            ref={calendarWrapperRef}
+            className={isTablet || isMobile ? 'calendar-swipe-container' : ''}
+            style={{
+              height: '100%',
+              ...(isTablet || isMobile ? { touchAction: 'pan-y' } : {})
+            }}
+            {...(isTablet || isMobile ? handlers : {})}
+          >
             <FullCalendar
               key={hiddenDays.join(',')}
               ref={ref => {
@@ -450,6 +461,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                   ? CALENDAR_VIEWS.timeGridDay
                   : CALENDAR_VIEWS.timeGridWeek)
               }
+              initialDate={selectedDate}
               firstDay={1}
               editable={true}
               locale={localeMap[lang]}
@@ -491,19 +503,21 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                 return (
                   <div className="weekSelector">
                     {displayWeekNumbers && (
-                      <div>
-                        {t('menubar.views.week')} {arg.num}
-                      </div>
+                      <>
+                        <div>
+                          {t('menubar.views.week')} {arg.num}
+                        </div>
+                        <TimezoneSelector
+                          value={timezone}
+                          referenceDate={
+                            calendarRef.current?.getDate() ?? new Date()
+                          }
+                          onChange={(newTimezone: string) =>
+                            dispatch(setTimeZone(newTimezone))
+                          }
+                        />
+                      </>
                     )}
-                    <TimezoneSelector
-                      value={timezone}
-                      referenceDate={
-                        calendarRef.current?.getDate() ?? new Date()
-                      }
-                      onChange={(newTimezone: string) =>
-                        dispatch(setTimeZone(newTimezone))
-                      }
-                    />
                   </div>
                 )
               }}

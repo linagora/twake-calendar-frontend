@@ -381,3 +381,15 @@ li.MuiButtonBase-root.MuiMenuItem-root
 
 hr.MuiDivider-root.MuiDivider-fullWidth
   margin 0
+
+.calendar-swipe-container
+  display grid
+  grid-template-areas "main"
+  height 100%
+  overflow hidden
+  touch-action pan-y
+
+.calendar-swipe-container > div
+  grid-area main
+  width 100%
+  height 100%
