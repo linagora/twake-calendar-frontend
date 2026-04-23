@@ -68,7 +68,7 @@ describe('websocket messages storm', () => {
 
     mockAccumulators.debouncedUpdateFn = undefined
   })
-  it('debounces calendar updates during message storm', async () => {
+  it('debounces calendar updates during message storm', () => {
     const mockMessage = {
       '/calendars/cal1/entry1': {
         syncToken: 'ldsk'
@@ -79,21 +79,17 @@ describe('websocket messages storm', () => {
       updateCalendars(mockMessage, mockDispatch, mockAccumulators)
     }
 
-    // Flush leading edge's inner skip-delay timer (0ms)
-    await jest.advanceTimersByTimeAsync(0)
-
     // Dispatch called once because of leading edge
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
 
-    // Trailing debounce fires + flush its inner skip-delay timer
-    await jest.advanceTimersByTimeAsync(500)
-    await jest.runAllTimersAsync()
+    // Trailing edge
+    jest.advanceTimersByTime(500)
 
     // only one call for the last message + leading edge message
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
   })
 
-  it('debounces calendar updates during message storm with multiple updates', async () => {
+  it('debounces calendar updates during message storm with multiple updates', () => {
     // Send a storm with mixed messages
     for (let i = 0; i < 50; i++) {
       if (i % 3 === 0)
@@ -116,21 +112,17 @@ describe('websocket messages storm', () => {
         )
     }
 
-    // Flush leading edge's inner skip-delay timer (0ms)
-    await jest.advanceTimersByTimeAsync(0)
-
     // Dispatch called once because of leading edge
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
 
-    // Trailing debounce fires + flush its inner skip-delay timer
-    await jest.advanceTimersByTimeAsync(500)
-    await jest.runAllTimersAsync()
+    // Trailing edge
+    jest.advanceTimersByTime(500)
 
     // Trailing edge updates once per calendar + the original leading edge
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(4)
   })
 
-  it('executes immediately when debounce is disabled', async () => {
+  it('executes immediately when debounce is disabled', () => {
     window.WS_DEBOUNCE_PERIOD_MS = 0
 
     updateCalendars(
@@ -138,9 +130,6 @@ describe('websocket messages storm', () => {
       mockDispatch,
       mockAccumulators
     )
-
-    // Flush the inner skip-delay timer (0ms)
-    await jest.advanceTimersByTimeAsync(0)
 
     expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(1)
   })

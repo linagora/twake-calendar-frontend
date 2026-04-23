@@ -26,7 +26,9 @@ function createDebouncedUpdate(
   resetShouldRefreshCalendarList: () => void
 ) {
   return debounce(
-    async (dispatch: AppDispatch) => {
+    (dispatch: AppDispatch) => {
+      const currentRange = getDisplayedCalendarRange()
+
       // Snapshot state
       const calendarsToProcess = new Map(getCalendarsToRefresh())
       const calendarsToHideSnapshot = new Set(getCalendarsToHide())
@@ -38,7 +40,7 @@ function createDebouncedUpdate(
       resetShouldRefreshCalendarList()
 
       try {
-        await processCalendarsToRefreshWithDelay(dispatch, calendarsToProcess)
+        scheduleCalendarsRefresh(dispatch, currentRange, calendarsToProcess)
         processCalendarsToHide(calendarsToHideSnapshot)
 
         if (shouldRefresh) {
@@ -96,6 +98,7 @@ export function updateCalendars(
   }
 
   // Immediate processing if debounce disabled
+  const currentRange = getDisplayedCalendarRange()
   const calendarsToProcess = new Map(accumulators.calendarsToRefresh)
   const calendarsToHideSnapshot = new Set(accumulators.calendarsToHide)
 
@@ -103,37 +106,57 @@ export function updateCalendars(
   accumulators.calendarsToHide.clear()
   accumulators.shouldRefreshCalendarListRef.current = false
 
-  void (async () => {
-    try {
-      await processCalendarsToRefreshWithDelay(dispatch, calendarsToProcess)
-      processCalendarsToHide(calendarsToHideSnapshot)
-      if (shouldRefreshCalendarList) {
-        dispatch(getCalendarsListAsync())
-      }
-    } catch (error) {
-      console.warn('Error processing calendar updates:', error)
+  try {
+    scheduleCalendarsRefresh(dispatch, currentRange, calendarsToProcess)
+    processCalendarsToHide(calendarsToHideSnapshot)
+    if (shouldRefreshCalendarList) {
+      dispatch(getCalendarsListAsync())
     }
-  })()
+  } catch (error) {
+    console.warn('Error processing calendar updates:', error)
+  }
 }
 
 // --- Helpers ---
-async function processCalendarsToRefreshWithDelay(
+
+function scheduleCalendarsRefresh(
   dispatch: AppDispatch,
+  currentRange: { start: Date; end: Date },
   calendarsMap: Map<string, { calendar: Calendar; type?: 'temp' }>
 ) {
   const skipDelayMs = window.WS_SKIP_DELAY_MS ?? DEFAULT_WS_SKIP_DELAY_MS
-  await new Promise<void>(resolve => setTimeout(resolve, skipDelayMs))
 
-  const currentState = store.getState()
-  const currentRange = getDisplayedCalendarRange()
+  if (skipDelayMs === 0) {
+    dispatchCalendarsRefresh(dispatch, currentRange, calendarsMap)
+    return
+  }
 
-  calendarsMap.forEach(({ calendar, type }, calId) => {
-    const current = findCalendarById(currentState, calId)
-    if (current && current.calendar.syncToken !== calendar.syncToken) return
+  setTimeout(() => {
+    const stateAfterDelay = store.getState()
+    const rangeAfterDelay = getDisplayedCalendarRange()
+    calendarsMap.forEach(({ calendar, type }, calId) => {
+      const current = findCalendarById(stateAfterDelay, calId)
+      if (current && current.calendar.syncToken !== calendar.syncToken) return
+      dispatch(
+        refreshCalendarWithSyncToken({
+          calendar: current?.calendar ?? calendar,
+          calType: type,
+          calendarRange: rangeAfterDelay
+        })
+      )
+    })
+  }, skipDelayMs)
+}
 
+function dispatchCalendarsRefresh(
+  dispatch: AppDispatch,
+  currentRange: { start: Date; end: Date },
+  calendarsMap: Map<string, { calendar: Calendar; type?: 'temp' }>
+) {
+  calendarsMap.forEach(({ calendar, type }) => {
     dispatch(
       refreshCalendarWithSyncToken({
-        calendar: current?.calendar ?? calendar,
+        calendar,
         calType: type,
         calendarRange: currentRange
       })
