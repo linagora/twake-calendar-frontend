@@ -53,6 +53,7 @@ describe('updateCalendars', () => {
     mockAccumulators.currentDebouncePeriod = 0
     mockAccumulators.shouldRefreshCalendarListRef.current = false
     mockAccumulators.debouncedUpdateFn = jest.fn()
+    window.WS_SKIP_DELAY_MS = 0
   })
 
   it('should not dispatch for non-object messages', () => {

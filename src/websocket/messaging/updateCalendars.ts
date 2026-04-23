@@ -13,6 +13,7 @@ import { parseMessage } from './parseMessage'
 import { UpdateCalendarsAccumulators } from './type/UpdateCalendarsAccumulators'
 
 const DEFAULT_DEBOUNCE_MS = 0
+const DEFAULT_WS_SKIP_DELAY_MS = 2000
 
 function createDebouncedUpdate(
   debouncePeriodMs: number,
@@ -25,9 +26,7 @@ function createDebouncedUpdate(
   resetShouldRefreshCalendarList: () => void
 ) {
   return debounce(
-    (dispatch: AppDispatch) => {
-      const currentRange = getDisplayedCalendarRange()
-
+    async (dispatch: AppDispatch) => {
       // Snapshot state
       const calendarsToProcess = new Map(getCalendarsToRefresh())
       const calendarsToHideSnapshot = new Set(getCalendarsToHide())
@@ -39,7 +38,7 @@ function createDebouncedUpdate(
       resetShouldRefreshCalendarList()
 
       try {
-        processCalendarsToRefresh(dispatch, currentRange, calendarsToProcess)
+        await processCalendarsToRefreshWithDelay(dispatch, calendarsToProcess)
         processCalendarsToHide(calendarsToHideSnapshot)
 
         if (shouldRefresh) {
@@ -97,7 +96,6 @@ export function updateCalendars(
   }
 
   // Immediate processing if debounce disabled
-  const currentRange = getDisplayedCalendarRange()
   const calendarsToProcess = new Map(accumulators.calendarsToRefresh)
   const calendarsToHideSnapshot = new Set(accumulators.calendarsToHide)
 
@@ -105,18 +103,44 @@ export function updateCalendars(
   accumulators.calendarsToHide.clear()
   accumulators.shouldRefreshCalendarListRef.current = false
 
-  try {
-    processCalendarsToRefresh(dispatch, currentRange, calendarsToProcess)
-    processCalendarsToHide(calendarsToHideSnapshot)
-    if (shouldRefreshCalendarList) {
-      dispatch(getCalendarsListAsync())
+  void (async () => {
+    try {
+      await processCalendarsToRefreshWithDelay(dispatch, calendarsToProcess)
+      processCalendarsToHide(calendarsToHideSnapshot)
+      if (shouldRefreshCalendarList) {
+        dispatch(getCalendarsListAsync())
+      }
+    } catch (error) {
+      console.warn('Error processing calendar updates:', error)
     }
-  } catch (error) {
-    console.warn('Error processing calendar updates:', error)
-  }
+  })()
 }
 
 // --- Helpers ---
+async function processCalendarsToRefreshWithDelay(
+  dispatch: AppDispatch,
+  calendarsMap: Map<string, { calendar: Calendar; type?: 'temp' }>
+) {
+  const skipDelayMs = window.WS_SKIP_DELAY_MS ?? DEFAULT_WS_SKIP_DELAY_MS
+  await new Promise<void>(resolve => setTimeout(resolve, skipDelayMs))
+
+  const currentState = store.getState()
+  const currentRange = getDisplayedCalendarRange()
+
+  calendarsMap.forEach(({ calendar, type }, calId) => {
+    const current = findCalendarById(currentState, calId)
+    if (current && current.calendar.syncToken !== calendar.syncToken) return
+
+    dispatch(
+      refreshCalendarWithSyncToken({
+        calendar: current?.calendar ?? calendar,
+        calType: type,
+        calendarRange: currentRange
+      })
+    )
+  })
+}
+
 function accumulateCalendarsToRefresh(
   state: ReturnType<typeof store.getState>,
   calendarPaths: Set<string>,
@@ -146,22 +170,6 @@ function accumulateCalendarsToHide(
     if (calendarId) {
       calendarsToHideSet.add(calendarId)
     }
-  })
-}
-
-function processCalendarsToRefresh(
-  dispatch: AppDispatch,
-  currentRange: { start: Date; end: Date },
-  calendarsMap: Map<string, { calendar: Calendar; type?: 'temp' }>
-) {
-  calendarsMap.forEach(calendar => {
-    dispatch(
-      refreshCalendarWithSyncToken({
-        calendar: calendar.calendar,
-        calType: calendar.type,
-        calendarRange: currentRange
-      })
-    )
   })
 }
 

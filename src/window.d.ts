@@ -27,6 +27,7 @@ declare global {
 
     WEBSOCKET_URL: string
     WS_DEBOUNCE_PERIOD_MS: number
+    WS_SKIP_DELAY_MS: number
     WS_PING_PERIOD_MS: number
     WS_PING_TIMEOUT_PERIOD_MS: number
 

@@ -1,4 +1,5 @@
 import eventsCalendar from '@/features/Calendars/CalendarSlice'
+import { postMutationRefreshMiddleware } from '@/features/Calendars/listeners/postMutationRefresh'
 import searchResultReducer from '@/features/Search/SearchSlice'
 import settingsReducer from '@/features/Settings/SettingsSlice'
 import userReducer from '@/features/User/userSlice'
@@ -24,7 +25,9 @@ export const setupStore = (preloadedState?: Partial<RootState>) => {
     reducer: rootReducer,
     preloadedState,
     middleware: getDefaultMiddleware =>
-      getDefaultMiddleware().concat(routerMiddleware)
+      getDefaultMiddleware()
+        .concat(routerMiddleware)
+        .prepend(postMutationRefreshMiddleware.middleware)
   })
 }
 
