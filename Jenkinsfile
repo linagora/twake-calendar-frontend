@@ -93,13 +93,13 @@ pipeline {
               }
             }
 
-            def dockerTag = "pr-${env.CHANGE_ID}"
+            def dockerTag = "${env.CHANGE_ID}"
             env.DOCKER_TAG = dockerTag
             echo "Docker tag: ${dockerTag}"
             sh 'npm run build'
-            sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
+            sh 'docker build -t linagora/twake-calendar-web-pr:$DOCKER_TAG .'
             sh 'echo $DOCKER_HUB_CREDENTIAL_PSW | docker login -u $DOCKER_HUB_CREDENTIAL_USR --password-stdin'
-            sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+            sh 'docker push linagora/twake-calendar-web-pr:$DOCKER_TAG'
             sh """
               HTTP_STATUS=\$(curl -s -o /tmp/gh_comment_response.json -w "%{http_code}" -X POST \\
                 -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \\
