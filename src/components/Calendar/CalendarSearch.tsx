@@ -283,7 +283,7 @@ export default function CalendarSearch({
       <PeopleSearch
         objectTypes={['user']}
         selectedUsers={selectedUsers}
-        inputSlot={params => <TextField {...params} size="small" />}
+        inputSlot={params => <TextField {...params} size="small" autoFocus />}
         onChange={async (_event: React.SyntheticEvent, value: User[]) => {
           setSelectedUsers(value)
 
