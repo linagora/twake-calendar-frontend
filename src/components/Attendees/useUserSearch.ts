@@ -63,6 +63,7 @@ export function useUserSearch<T>({
 
       try {
         const res = await searchUsers(query, objectTypesRef.current)
+        if (cancelled) return
         setOptions(res as unknown as T[])
         setHasSearched(true)
       } catch {
