@@ -28,7 +28,8 @@ export function SettingsTab({
   setColor,
   visibility,
   setVisibility,
-  calendar
+  calendar,
+  autoFocusName
 }: {
   name: string
   setName: (name: string) => void
@@ -39,6 +40,7 @@ export function SettingsTab({
   visibility: 'public' | 'private'
   setVisibility: (visibility: 'public' | 'private') => void
   calendar?: Calendar
+  autoFocusName?: boolean
 }) {
   const { t } = useI18n()
   const [toggleDesc, setToggleDesc] = useState(Boolean(description))
@@ -93,6 +95,7 @@ export function SettingsTab({
             <TextField
               fullWidth
               label=""
+              autoFocus={autoFocusName}
               inputProps={{ 'aria-label': t('common.name') }}
               placeholder={t('common.name')}
               value={name}

@@ -366,6 +366,7 @@ function CalendarPopover({
           visibility={visibility}
           setVisibility={setVisibility}
           calendar={calendar}
+          autoFocusName={!calendar}
         />
       )}
       {tab === 'access' && calendar && (

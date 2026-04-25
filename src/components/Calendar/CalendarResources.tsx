@@ -263,7 +263,7 @@ export default function CalendarResources({
       <ResourceSearch
         objectTypes={['resource']}
         selectedResources={selectedResources}
-        inputSlot={params => <TextField {...params} size="small" />}
+        inputSlot={params => <TextField {...params} size="small" autoFocus />}
         onChange={async (_event: React.SyntheticEvent, value: Resource[]) => {
           const requestSeq = ++fetchSeqRef.current
           setSelectedResources(value)
