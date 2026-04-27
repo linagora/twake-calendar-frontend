@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCalendars } from '@/app/selectors/selectCalendars'
+import { AppDispatch } from '@/app/store'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   clearFilters,
@@ -34,7 +35,19 @@ export interface UseFilterSearchResult {
   handleShow: () => void
 }
 
-function useFilterSearchState() {
+interface StateSetters {
+  setInputQuery: React.Dispatch<React.SetStateAction<string>>
+  setSelectedContacts: React.Dispatch<React.SetStateAction<User[]>>
+  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>
+}
+
+interface FilterSearchState extends StateSetters {
+  inputQuery: string
+  selectedContacts: User[]
+  searchState: SearchState
+}
+
+function useFilterSearchState(): FilterSearchState {
   const [inputQuery, setInputQuery] = useState('')
   const [selectedContacts, setSelectedContacts] = useState<User[]>([])
   const [searchState, setSearchState] = useState<SearchState>({
@@ -52,10 +65,12 @@ function useFilterSearchState() {
   }
 }
 
-function useCalendars(): {
+interface CalendarsResult {
   calendars: Calendar[]
   personalCalendars: Calendar[]
-} {
+}
+
+function useCalendars(): CalendarsResult {
   const calendars = useAppSelector(selectCalendars)
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
   const personalCalendars = useMemo(
@@ -69,11 +84,11 @@ function useCalendars(): {
 }
 
 function useSearchAction(
-  dispatch: ReturnType<typeof useAppDispatch>,
+  dispatch: AppDispatch,
   calendarIds: string[],
   personalCalendarIds: string[],
   setDialogOpen: (b: boolean) => void
-) {
+): (searchQuery: string, currentFilters: SearchFilters) => Promise<void> {
   return useCallback(
     async (
       searchQuery: string,
@@ -98,7 +113,7 @@ function useSearchAction(
 function useSearchChangeHandler(
   setDialogOpen: (b: boolean) => void,
   setSearchState: React.Dispatch<React.SetStateAction<SearchState>>
-) {
+): ({ query, options, loading }: SearchState) => void {
   return useCallback(
     ({ query, options, loading }: SearchState): void => {
       if (!query) {
@@ -120,12 +135,11 @@ function useSearchChangeHandler(
 function useContactSelectHandler(
   filterKey: FilterKey,
   filters: SearchFilters,
-  dispatch: ReturnType<typeof useAppDispatch>,
-  setSelectedContacts: React.Dispatch<React.SetStateAction<User[]>>,
-  setInputQuery: React.Dispatch<React.SetStateAction<string>>,
-  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>,
+  dispatch: AppDispatch,
+  setters: StateSetters,
   handleSearch: (q: string, f: SearchFilters) => Promise<void>
-) {
+): (contacts: User[]) => void {
+  const { setInputQuery, setSelectedContacts, setSearchState } = setters
   return useCallback(
     (contacts: User[]): void => {
       const mapped = contacts.map(c =>
@@ -143,20 +157,19 @@ function useContactSelectHandler(
       filterKey,
       handleSearch,
       dispatch,
-      setSelectedContacts,
       setInputQuery,
+      setSelectedContacts,
       setSearchState
     ]
   )
 }
 
 function useClearAll(
-  dispatch: ReturnType<typeof useAppDispatch>,
+  dispatch: AppDispatch,
   setDialogOpen: (b: boolean) => void,
-  setInputQuery: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedContacts: React.Dispatch<React.SetStateAction<User[]>>,
-  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>
-) {
+  setters: StateSetters
+): () => void {
+  const { setInputQuery, setSelectedContacts, setSearchState } = setters
   return useCallback((): void => {
     setInputQuery('')
     setSelectedContacts([])
@@ -190,6 +203,12 @@ export function useFilterSearch(
     setSearchState
   } = useFilterSearchState()
 
+  const setters: StateSetters = {
+    setInputQuery,
+    setSelectedContacts,
+    setSearchState
+  }
+
   const handleSearch = useSearchAction(
     dispatch,
     calendars.map(c => c.id),
@@ -204,18 +223,10 @@ export function useFilterSearch(
     filterKey,
     filters,
     dispatch,
-    setSelectedContacts,
-    setInputQuery,
-    setSearchState,
+    setters,
     handleSearch
   )
-  const clearAll = useClearAll(
-    dispatch,
-    setDialogOpen,
-    setInputQuery,
-    setSelectedContacts,
-    setSearchState
-  )
+  const clearAll = useClearAll(dispatch, setDialogOpen, setters)
   const handleShow = useCallback(
     () => void handleSearch(inputQuery, filters),
     [inputQuery, filters, handleSearch]
