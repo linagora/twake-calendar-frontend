@@ -183,7 +183,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
       const handleEnterKey = (
         e: React.KeyboardEvent<HTMLInputElement>
       ): void => {
-        if (e.key === 'Enter' && onToggleEventPreview) {
+        if (e.key === 'Enter' && onToggleEventPreview && !isOpen) {
           e.preventDefault()
           onToggleEventPreview()
         }
@@ -246,7 +246,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
       onToggleEventPreview,
       loading,
       searchPlaceholder,
-      handlePaste
+      handlePaste,
+      isOpen
     ]
   )
 
