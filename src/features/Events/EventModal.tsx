@@ -534,6 +534,8 @@ function EventPopover({
     organizer?.cal_address,
     resolvedCalendarTimezone,
     defaultCalendarId,
+    calList,
+    userId,
     resources,
     eventAttendees
   ])
