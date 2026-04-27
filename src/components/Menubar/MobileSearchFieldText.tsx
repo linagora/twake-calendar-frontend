@@ -1,12 +1,13 @@
 import {
-  InputAdornment,
   IconButton,
+  InputAdornment,
   TextField,
-  type AutocompleteRenderInputParams,
-  useTheme
+  useTheme,
+  type AutocompleteRenderInputParams
 } from '@linagora/twake-mui'
-import SearchIcon from '@mui/icons-material/Search'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import SearchIcon from '@mui/icons-material/Search'
+import { Ref } from 'react'
 import { useI18n } from 'twake-i18n'
 import { User } from '../Attendees/types'
 
@@ -18,6 +19,7 @@ interface SearchTextFieldProps {
   onQueryChange: (v: string) => void
   onEnter: () => void
   onClear: () => void
+  inputRef?: Ref<HTMLInputElement>
 }
 
 export const SearchTextField: React.FC<SearchTextFieldProps> = ({
@@ -27,6 +29,7 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
   selectedContacts,
   onQueryChange,
   onEnter,
+  inputRef,
   onClear
 }) => {
   const { t } = useI18n()
@@ -36,6 +39,7 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
       {...params}
       fullWidth
       autoFocus
+      inputRef={inputRef}
       placeholder={t('common.search')}
       onKeyDown={e => {
         if (e.key === 'Enter') onEnter()

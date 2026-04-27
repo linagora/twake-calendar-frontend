@@ -9,8 +9,12 @@ import {
   MobileSelectorHandle
 } from '@/components/MobileSelector'
 import { SearchFilters } from '@/features/Search/SearchSlice'
-import { AutocompleteRenderInputParams, Box } from '@linagora/twake-mui'
-import { useRef } from 'react'
+import {
+  AutocompleteRenderInputParams,
+  Box,
+  SwipeableDrawer
+} from '@linagora/twake-mui'
+import { useEffect, useRef } from 'react'
 
 interface MobileFilterPickerProps {
   displayText: string
@@ -40,57 +44,78 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
   objectTypes = ['user', 'resources']
 }) => {
   const selectorRef = useRef<MobileSelectorHandle>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   return (
     <MobileSelector
-      ref={selectorRef}
       displayText={selectedContacts[0]?.displayName ?? displayText}
       fullscreen
-    >
-      <Box sx={{ p: 2 }}>
-        <PeopleSearch
-          selectedUsers={selectedContacts}
-          onChange={(_event, users) => {
-            handleContactSelect(users)
-            selectorRef.current?.onClose()
-          }}
-          hideOptions
-          inputValue={inputQuery}
-          onSearchStateChange={handleSearchChange}
-          objectTypes={objectTypes}
-          onToggleEventPreview={() => {}}
-          customRenderInput={(
-            params: AutocompleteRenderInputParams,
-            query: string,
-            setQuery
-          ) => (
-            <SearchTextField
-              params={params}
-              query={query}
-              setQuery={setQuery}
-              selectedContacts={selectedContacts}
-              onQueryChange={setInputQuery}
-              onEnter={() => void handleSearch(query, filters)}
-              onClear={clearAll}
-            />
-          )}
-        />
-      </Box>
-      {searchState.options && searchState.options?.length > 0 && (
-        <Box sx={{ flex: 1, m: 1 }}>
-          <AttendeeOptionsList
-            options={searchState.options}
-            selectedUsers={selectedContacts}
-            onOptionClick={user => {
-              handleContactSelect([
-                ...selectedContacts,
-                { displayName: user.displayName, email: user.email }
-              ])
-              selectorRef.current?.onClose()
+      bottomSheetChildren={({ open, onClose }) => {
+        useEffect(() => {
+          if (open) {
+            inputRef.current?.focus()
+          }
+        }, [open])
+        return (
+          <SwipeableDrawer
+            anchor="bottom"
+            open={open}
+            onClose={onClose}
+            onOpen={(): void => {}}
+            slotProps={{
+              paper: {
+                sx: { height: '100dvh' }
+              }
             }}
-          />
-        </Box>
-      )}
-    </MobileSelector>
+          >
+            <Box sx={{ p: 2 }}>
+              <PeopleSearch
+                selectedUsers={selectedContacts}
+                onChange={(_event, users) => {
+                  handleContactSelect(users)
+                  selectorRef.current?.onClose()
+                }}
+                hideOptions
+                inputValue={inputQuery}
+                onSearchStateChange={handleSearchChange}
+                objectTypes={objectTypes}
+                onToggleEventPreview={() => {}}
+                customRenderInput={(
+                  params: AutocompleteRenderInputParams,
+                  query: string,
+                  setQuery
+                ) => (
+                  <SearchTextField
+                    params={{ ...params }}
+                    inputRef={inputRef}
+                    query={query}
+                    setQuery={setQuery}
+                    selectedContacts={selectedContacts}
+                    onQueryChange={setInputQuery}
+                    onEnter={() => void handleSearch(query, filters)}
+                    onClear={clearAll}
+                  />
+                )}
+              />
+            </Box>
+            {searchState.options && searchState.options?.length > 0 && (
+              <Box sx={{ flex: 1, m: 1 }}>
+                <AttendeeOptionsList
+                  options={searchState.options}
+                  selectedUsers={selectedContacts}
+                  onOptionClick={user => {
+                    handleContactSelect([
+                      ...selectedContacts,
+                      { displayName: user.displayName, email: user.email }
+                    ])
+                    selectorRef.current?.onClose()
+                  }}
+                />
+              </Box>
+            )}
+          </SwipeableDrawer>
+        )
+      }}
+    />
   )
 }
