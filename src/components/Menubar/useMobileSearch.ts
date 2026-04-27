@@ -34,17 +34,30 @@ export interface UseFilterSearchResult {
   handleShow: () => void
 }
 
-export function useFilterSearch(
-  filterKey: FilterKey,
-  setDialogOpen: (b: boolean) => void
-): UseFilterSearchResult {
-  const dispatch = useAppDispatch()
+function useFilterSearchState() {
+  const [inputQuery, setInputQuery] = useState('')
+  const [selectedContacts, setSelectedContacts] = useState<User[]>([])
+  const [searchState, setSearchState] = useState<SearchState>({
+    query: '',
+    options: [] as User[],
+    loading: false
+  })
+  return {
+    inputQuery,
+    setInputQuery,
+    selectedContacts,
+    setSelectedContacts,
+    searchState,
+    setSearchState
+  }
+}
+
+function useCalendars(): {
+  calendars: Calendar[]
+  personalCalendars: Calendar[]
+} {
   const calendars = useAppSelector(selectCalendars)
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
-  const filters = useAppSelector(
-    state => state.searchResult.searchParams.filters
-  )
-
   const personalCalendars = useMemo(
     (): Calendar[] =>
       userId
@@ -52,16 +65,16 @@ export function useFilterSearch(
         : [],
     [calendars, userId]
   )
+  return { calendars, personalCalendars }
+}
 
-  const [inputQuery, setInputQuery] = useState('')
-  const [searchState, setSearchState] = useState<SearchState>({
-    query: '',
-    options: [] as User[],
-    loading: false
-  })
-  const [selectedContacts, setSelectedContacts] = useState<User[]>([])
-
-  const handleSearch = useCallback(
+function useSearchAction(
+  dispatch: ReturnType<typeof useAppDispatch>,
+  calendarIds: string[],
+  personalCalendarIds: string[],
+  setDialogOpen: (b: boolean) => void
+) {
+  return useCallback(
     async (
       searchQuery: string,
       currentFilters: SearchFilters
@@ -69,19 +82,24 @@ export function useFilterSearch(
       const query = buildQuery(
         searchQuery,
         currentFilters,
-        calendars.map(c => c.id),
-        personalCalendars.map(c => c.id)
+        calendarIds,
+        personalCalendarIds
       )
       if (!query) return
-      dispatch(setSearchQuery(searchQuery))
+      dispatch(setSearchQuery(query.search))
       await dispatch(searchEventsAsync(query))
       dispatch(setView('search'))
       setDialogOpen(false)
     },
-    [dispatch, calendars, personalCalendars, setDialogOpen]
+    [dispatch, calendarIds, personalCalendarIds, setDialogOpen]
   )
+}
 
-  const handleSearchChange = useCallback(
+function useSearchChangeHandler(
+  setDialogOpen: (b: boolean) => void,
+  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>
+) {
+  return useCallback(
     ({ query, options, loading }: SearchState): void => {
       if (!query) {
         setDialogOpen(false)
@@ -95,10 +113,20 @@ export function useFilterSearch(
         loading: loading ?? prev.loading
       }))
     },
-    [setDialogOpen]
+    [setDialogOpen, setSearchState]
   )
+}
 
-  const handleContactSelect = useCallback(
+function useContactSelectHandler(
+  filterKey: FilterKey,
+  filters: SearchFilters,
+  dispatch: ReturnType<typeof useAppDispatch>,
+  setSelectedContacts: React.Dispatch<React.SetStateAction<User[]>>,
+  setInputQuery: React.Dispatch<React.SetStateAction<string>>,
+  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>,
+  handleSearch: (q: string, f: SearchFilters) => Promise<void>
+) {
+  return useCallback(
     (contacts: User[]): void => {
       const mapped = contacts.map(c =>
         createAttendee({ cal_address: c.email, cn: c.displayName })
@@ -108,24 +136,90 @@ export function useFilterSearch(
       dispatch(setFilters(nextFilters))
       setInputQuery('')
       setSearchState({ query: '', options: [], loading: false })
-      if (contacts.length > 0) {
-        void handleSearch('', nextFilters)
-      }
+      if (contacts.length > 0) void handleSearch('', nextFilters)
     },
-    [filters, filterKey, handleSearch, dispatch]
+    [
+      filters,
+      filterKey,
+      handleSearch,
+      dispatch,
+      setSelectedContacts,
+      setInputQuery,
+      setSearchState
+    ]
   )
+}
 
-  const clearAll = useCallback((): void => {
+function useClearAll(
+  dispatch: ReturnType<typeof useAppDispatch>,
+  setDialogOpen: (b: boolean) => void,
+  setInputQuery: React.Dispatch<React.SetStateAction<string>>,
+  setSelectedContacts: React.Dispatch<React.SetStateAction<User[]>>,
+  setSearchState: React.Dispatch<React.SetStateAction<SearchState>>
+) {
+  return useCallback((): void => {
     setInputQuery('')
     setSelectedContacts([])
     setSearchState({ query: '', options: [], loading: false })
     dispatch(clearFilters())
     setDialogOpen(false)
-  }, [setDialogOpen, dispatch])
+  }, [
+    dispatch,
+    setDialogOpen,
+    setInputQuery,
+    setSelectedContacts,
+    setSearchState
+  ])
+}
 
-  const handleShow = useCallback((): void => {
-    void handleSearch(inputQuery, filters)
-  }, [inputQuery, filters, handleSearch])
+export function useFilterSearch(
+  filterKey: FilterKey,
+  setDialogOpen: (b: boolean) => void
+): UseFilterSearchResult {
+  const dispatch = useAppDispatch()
+  const filters = useAppSelector(
+    state => state.searchResult.searchParams.filters
+  )
+  const { calendars, personalCalendars } = useCalendars()
+  const {
+    inputQuery,
+    setInputQuery,
+    selectedContacts,
+    setSelectedContacts,
+    searchState,
+    setSearchState
+  } = useFilterSearchState()
+
+  const handleSearch = useSearchAction(
+    dispatch,
+    calendars.map(c => c.id),
+    personalCalendars.map(c => c.id),
+    setDialogOpen
+  )
+  const handleSearchChange = useSearchChangeHandler(
+    setDialogOpen,
+    setSearchState
+  )
+  const handleContactSelect = useContactSelectHandler(
+    filterKey,
+    filters,
+    dispatch,
+    setSelectedContacts,
+    setInputQuery,
+    setSearchState,
+    handleSearch
+  )
+  const clearAll = useClearAll(
+    dispatch,
+    setDialogOpen,
+    setInputQuery,
+    setSelectedContacts,
+    setSearchState
+  )
+  const handleShow = useCallback(
+    () => void handleSearch(inputQuery, filters),
+    [inputQuery, filters, handleSearch]
+  )
 
   return {
     inputQuery,

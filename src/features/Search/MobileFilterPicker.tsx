@@ -72,10 +72,10 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
           )}
         />
       </Box>
-      {searchState.options && (
+      {searchState.options && searchState.options?.length > 0 && (
         <Box sx={{ flex: 1, m: 1, overflowY: 'auto' }}>
           <AttendeeOptionsList
-            options={searchState.options ?? []}
+            options={searchState.options}
             selectedUsers={selectedContacts}
             onOptionClick={user =>
               handleContactSelect([

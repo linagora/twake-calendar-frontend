@@ -9,6 +9,7 @@ import {
   searchEventsAsync,
   setFilters
 } from '@/features/Search/SearchSlice'
+import { buildQuery } from '@/features/Search/searchUtils'
 import { setView } from '@/features/Settings/SettingsSlice'
 import { userAttendee } from '@/features/User/models/attendee'
 import { createAttendee } from '@/features/User/models/attendee.mapper'
@@ -88,61 +89,6 @@ const SearchBar: React.FC<{
     }
   }
 
-  function buildQuery(
-    searchQuery: string,
-    filters: {
-      searchIn: string
-      keywords: string
-      organizers: userAttendee[]
-      attendees: userAttendee[]
-    }
-  ):
-    | {
-        search: string
-        filters: {
-          searchIn: string[]
-          keywords: string
-          organizers: string[]
-          attendees: string[]
-        }
-      }
-    | undefined {
-    const trimmedSearch = searchQuery.trim()
-    const trimmedKeywords = filters.keywords.trim()
-
-    // Block search if all search criteria are empty
-    const hasSearchCriteria =
-      trimmedSearch ||
-      trimmedKeywords ||
-      filters.organizers.length > 0 ||
-      filters.attendees.length > 0
-
-    if (!hasSearchCriteria) {
-      return
-    }
-
-    let searchInCalendars: string[]
-
-    if (filters.searchIn === '' || !filters.searchIn) {
-      searchInCalendars = calendars.map(c => c.id)
-    } else if (filters.searchIn === 'my-calendars') {
-      searchInCalendars = personnalCalendars.map(c => c.id)
-    } else {
-      searchInCalendars = [filters.searchIn]
-    }
-
-    const cleanedFilters = {
-      keywords: trimmedKeywords,
-      organizers: filters.organizers.map(u => u.cal_address),
-      attendees: filters.attendees.map(u => u.cal_address),
-      searchIn: searchInCalendars
-    }
-    return {
-      search: trimmedSearch,
-      filters: cleanedFilters
-    }
-  }
-
   const handleClearFilters = (): void => {
     dispatch(clearFilters())
     setAnchorEl(null)
@@ -174,7 +120,12 @@ const SearchBar: React.FC<{
       attendees: userAttendee[]
     }
   ): Promise<void> => {
-    const cleanedQuery = buildQuery(searchQuery, filters)
+    const cleanedQuery = buildQuery(
+      searchQuery,
+      filters,
+      calendars.map(calendar => calendar.id),
+      personnalCalendars.map(calendar => calendar.id)
+    )
     if (cleanedQuery) {
       await dispatch(searchEventsAsync(cleanedQuery))
       dispatch(setView('search'))
