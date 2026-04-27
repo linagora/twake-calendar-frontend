@@ -490,7 +490,9 @@ function EventPopover({
         setEnd('')
       }
 
-      setCalendarid(resolveSourceCalendarId(event.calId, calList, userId, defaultCalendarId))
+      setCalendarid(
+        resolveSourceCalendarId(event.calId, calList, userId, defaultCalendarId)
+      )
       setRepetition(event.repetition ?? ({} as RepetitionObject))
       setShowRepeat(event.repetition?.freq ? true : false)
       setAttendees(
