@@ -475,8 +475,15 @@ function EventPopover({
         setEnd('')
       }
 
-      if (defaultCalendarId) {
-        setCalendarid(defaultCalendarId)
+      const sourceCalendar = event.calId ? calList[event.calId] : undefined
+      const isSourceCalendarWritable =
+        sourceCalendar &&
+        (sourceCalendar.id?.split('/')[0] === userId ||
+          (sourceCalendar.delegated && sourceCalendar.access?.write))
+      const targetCalendarId =
+        isSourceCalendarWritable && event.calId ? event.calId : defaultCalendarId
+      if (targetCalendarId) {
+        setCalendarid(targetCalendarId)
       }
       setRepetition(event.repetition ?? ({} as RepetitionObject))
       setShowRepeat(event.repetition?.freq ? true : false)
