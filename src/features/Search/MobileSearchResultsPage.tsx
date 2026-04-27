@@ -33,7 +33,15 @@ const MobileSearchResultsPage: React.FC = () => {
     <>
       <FiltersButtons />
       {displaySearch && (
-        <Box className="search-layout" sx={{ m: 2 }}>
+        <Box
+          className="search-layout"
+          sx={{
+            m: 2,
+            flex: 1,
+            minHeight: 0,
+            overflow: 'auto'
+          }}
+        >
           <ResultsList
             loading={searchResults.loading}
             error={searchResults.error}
@@ -76,7 +84,9 @@ const FiltersButtons: React.FC = () => (
   </Box>
 )
 
-function MobileResultItem({ eventData }: { eventData: SearchEventResult }) {
+const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
+  eventData
+}) => {
   const { t } = useI18n()
 
   const rawCalendars = useAppSelector(state => state.calendars.list)
@@ -105,10 +115,9 @@ function MobileResultItem({ eventData }: { eventData: SearchEventResult }) {
           pt: 1,
           cursor: 'pointer',
           alignItems: 'center',
-          textAlign: 'left',
-          '&:hover': { backgroundColor: '#e7e7e7ff' }
+          textAlign: 'left'
         }}
-        onClick={handleOpen}
+        onClick={() => void handleOpen()}
       >
         <Box sx={{ width: '100%' }}>
           <Typography variant="h4" sx={{ fontWeight: 400 }}>

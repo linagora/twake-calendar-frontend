@@ -1,15 +1,20 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { browserDefaultTimeZone } from '@/utils/timezone'
+import { useState } from 'react'
 import { getEventAsync } from '../Calendars/services'
 import { CalendarEvent } from '../Events/EventsTypes'
-import { browserDefaultTimeZone } from '@/utils/timezone'
-import { Calendar } from '@/features/Calendars/CalendarTypes'
-import { useState } from 'react'
 import { SearchEventResult } from './types/SearchEventResult'
 
 export function useEventPreview(
   eventData: SearchEventResult,
   calendar: Calendar | undefined
-) {
+): {
+  openPreview: boolean
+  setOpenPreview: (b: boolean) => void
+  handleOpen: () => Promise<void>
+  timeZone: string
+} {
   const dispatch = useAppDispatch()
   const timeZone =
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone

@@ -15,7 +15,7 @@ interface ResultsListProps {
   stackSx?: SxProps
 }
 
-export function ResultsList({
+export const ResultsList: React.FC<ResultsListProps> = ({
   loading,
   error,
   hits,
@@ -24,7 +24,7 @@ export function ResultsList({
   noResultsTitleSx,
   noResultsSubtitleSx,
   stackSx
-}: ResultsListProps) {
+}) => {
   const { t } = useI18n()
 
   if (loading) {

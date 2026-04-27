@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import EventPreviewModal from '@/features/Events/EventPreview'
 import { defaultColors } from '@/utils/defaultColors'
+import { en } from '@fullcalendar/core/internal-common'
 import { Box, Button, IconButton, Typography } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import RepeatIcon from '@mui/icons-material/Repeat'
@@ -10,59 +11,17 @@ import { useI18n } from 'twake-i18n'
 import { setView } from '../Settings/SettingsSlice'
 import { ResultsList } from './ResultsList'
 import './searchResult.styl'
+import {
+  RenderDate,
+  RenderDescription,
+  RenderLocation,
+  RenderOrganizer,
+  RenderTime,
+  RenderTitle,
+  RenderVideoJoin
+} from './searchResultsComponents'
 import { SearchEventResult } from './types/SearchEventResult'
 import { useEventPreview } from './useEventPreview'
-
-const styles = {
-  M3BodyLarge: {
-    fontFamily: 'Roboto',
-    fontWeight: 400,
-    fontStyle: 'normal',
-    fontSize: '22px',
-    lineHeight: '28px',
-    letterSpacing: '0%',
-    color: '#243B55'
-  },
-  M3BodyMedium1: {
-    fontFamily: 'Inter',
-    fontWeight: 400,
-    fontStyle: 'normal',
-    fontSize: '16px',
-    lineHeight: '24px',
-    letterSpacing: '-0.15px',
-    color: '#243B55'
-  },
-  M3BodyMedium: {
-    fontFamily: 'Roboto',
-    fontWeight: 400,
-    fontStyle: 'normal',
-    fontSize: '14px',
-    lineHeight: '20px',
-    letterSpacing: '0.25px',
-    verticalAlign: 'middle',
-    color: '#8C9CAF'
-  },
-  M3BodyMedium3: {
-    fontFamily: 'Inter',
-    fontWeight: 400,
-    fontSize: '14px',
-    lineHeight: '20px',
-    letterSpacing: '0.25px',
-    verticalAlign: 'middle',
-    color: '#8C9CAF'
-  },
-  M3TitleMedium: {
-    fontFamily: 'Roboto',
-    fontWeight: 500,
-    fontStyle: 'medium',
-    fontSize: '16px',
-    lineHeight: '24px',
-    letterSpacing: '0.15px',
-    textAlign: 'center',
-    verticalAlign: 'middle',
-    color: '#243B55'
-  }
-}
 
 export default function DesktopSearchResultsPage(): JSX.Element {
   const { t } = useI18n()
@@ -96,8 +55,12 @@ export default function DesktopSearchResultsPage(): JSX.Element {
             eventData={result}
           />
         )}
-        noResultsTitleSx={styles.M3TitleMedium}
-        noResultsSubtitleSx={styles.M3BodyMedium}
+        noResultsTitleSx={{
+          fontWeight: 500,
+          textAlign: 'center',
+          color: '#243B55'
+        }}
+        noResultsSubtitleSx={{ color: 'text.secondary' }}
         stackSx={{ mt: 2 }}
       />
     </Box>
@@ -143,40 +106,19 @@ function DesktopResultItem({
         }}
         onClick={() => void handleOpen()}
       >
-        <Typography sx={{ ...styles.M3BodyLarge, minWidth: '90px' }}>
-          {startDate.toLocaleDateString(t('locale'), {
-            day: '2-digit',
-            month: 'short',
-            timeZone
-          })}
-          {startDate.toDateString() !== endDate.toDateString() && (
-            <>
-              {' - '}
-              {endDate.toLocaleDateString(t('locale'), {
-                day: '2-digit',
-                month: 'short',
-                timeZone
-              })}
-            </>
-          )}
-        </Typography>
-
-        {!eventData.data.allDay && (
-          <Typography sx={{ ...styles.M3BodyMedium1, minWidth: '120px' }}>
-            {startDate.toLocaleTimeString(t('locale'), {
-              hour: '2-digit',
-              minute: '2-digit',
-              timeZone
-            })}
-            -
-            {endDate.toLocaleTimeString(t('locale'), {
-              hour: '2-digit',
-              minute: '2-digit',
-              timeZone
-            })}
-          </Typography>
-        )}
-
+        <RenderDate
+          startDate={startDate}
+          endDate={endDate}
+          t={t}
+          timeZone={timeZone}
+        />
+        <RenderTime
+          startDate={startDate}
+          endDate={endDate}
+          allDay={!!eventData.data.allDay}
+          t={t}
+          timeZone={timeZone}
+        />
         <SquareRoundedIcon
           style={{
             color: calendarColor ?? defaultColors[0].light,
@@ -185,74 +127,19 @@ function DesktopResultItem({
             flexShrink: 0
           }}
         />
-        <Box display="flex" flexDirection="row" gap={1} sx={{ minWidth: 0 }}>
-          <Typography sx={styles.M3BodyLarge}>
-            {eventData.data.summary || t('event.untitled')}
-          </Typography>
-          {eventData.data.isRecurrentMaster && <RepeatIcon />}
-        </Box>
 
-        {(eventData.data.organizer?.cn || eventData.data.organizer?.email) && (
-          <Typography
-            sx={{
-              ...styles.M3BodyMedium1,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              minWidth: '150px',
-              maxWidth: '150px'
-            }}
-          >
-            {eventData.data.organizer.cn || eventData.data.organizer.email}
-          </Typography>
-        )}
-
-        {eventData.data?.location && (
-          <Typography
-            sx={{
-              ...styles.M3BodyMedium,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              minWidth: '150px',
-              maxWidth: '250px'
-            }}
-          >
-            {eventData.data.location}
-          </Typography>
-        )}
-
-        {eventData.data?.description && (
-          <Typography
-            sx={{
-              ...styles.M3BodyMedium3,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              flex: 1,
-              minWidth: 0
-            }}
-          >
-            {eventData.data.description.replace(/\n/g, ' ')}
-          </Typography>
-        )}
-
-        {eventData.data['x-openpaas-videoconference'] && (
-          <Button
-            startIcon={<VideocamIcon />}
-            sx={{ flexShrink: 0, ml: 'auto' }}
-            onClick={e => {
-              e.stopPropagation()
-              window.open(
-                eventData.data['x-openpaas-videoconference'],
-                '_blank',
-                'noopener,noreferrer'
-              )
-            }}
-          >
-            {t('eventPreview.joinVideoShort')}
-          </Button>
-        )}
+        <RenderTitle
+          summary={eventData.data.summary}
+          isRecurrent={!!eventData.data.isRecurrentMaster}
+          t={t}
+        />
+        <RenderOrganizer organizer={eventData.data.organizer} />
+        <RenderLocation location={eventData.data.location} />
+        <RenderDescription description={eventData.data.description} />
+        <RenderVideoJoin
+          t={t}
+          url={eventData.data['x-openpaas-videoconference']}
+        />
       </Box>
 
       {calendar?.events[eventData.data.uid] && (
