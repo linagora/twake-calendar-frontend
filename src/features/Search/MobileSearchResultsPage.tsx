@@ -1,30 +1,19 @@
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { AppDispatch } from '@/app/store'
+import { useAppSelector } from '@/app/hooks'
 import {
   getBestColor,
   getTitleStyle
 } from '@/components/Event/EventChip/EventChipUtils'
-import { Calendar } from '@/features/Calendars/CalendarTypes'
 import EventPreviewModal from '@/features/Events/EventPreview'
-import { browserDefaultTimeZone } from '@/utils/timezone'
-import {
-  Box,
-  Card,
-  CardHeader,
-  CircularProgress,
-  Stack,
-  Typography
-} from '@linagora/twake-mui'
-import { useState } from 'react'
+import { Box, Card, CardHeader, Typography } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
-import logo from '../../static/noResult-logo.svg'
-import { getEventAsync } from '../Calendars/services'
-import { CalendarEvent } from '../Events/EventsTypes'
 import { AttendeesFilter } from './AttendeesFilter'
+import { normalizeCalendars } from './calendarColorUtils'
 import { OrganizersFilter } from './OrganizersFilter'
+import { ResultsList } from './ResultsList'
 import { SearchInFilter } from './SearchInFilter'
 import './searchResult.styl'
 import { SearchEventResult } from './types/SearchEventResult'
+import { useEventPreview } from './useEventPreview'
 
 const MobileSearchResultsPage: React.FC = () => {
   const searchResults = useAppSelector(state => state.searchResult)
@@ -35,137 +24,60 @@ const MobileSearchResultsPage: React.FC = () => {
     searchResults.searchParams.filters.attendees.length > 0
 
   const displaySearch =
-    (!!searchResults.hits || !!searchResults.error || searchResults.loading) &&
+    !!searchResults.hits ||
+    !!searchResults.error ||
+    searchResults.loading ||
     hasSearchParams
 
   return (
     <>
       <FiltersButtons />
-      {displaySearch && <Results />}
+      {displaySearch && (
+        <Box className="search-layout" sx={{ m: 2 }}>
+          <ResultsList
+            loading={searchResults.loading}
+            error={searchResults.error}
+            hits={searchResults.hits}
+            results={searchResults.results}
+            renderItem={(result, idx) => (
+              <MobileResultItem
+                key={`row-${idx}-event-${result.data.uid}`}
+                eventData={result}
+              />
+            )}
+            noResultsTitleSx={{ variant: 'h5' }}
+            noResultsSubtitleSx={{ variant: 'subtitle1' }}
+          />
+        </Box>
+      )}
     </>
   )
 }
 
 export default MobileSearchResultsPage
 
-const FiltersButtons: React.FC = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        overflowX: 'auto',
-        gap: 2,
-        px: 2,
-        py: 1,
-        scrollbarWidth: 'none',
-        '&::-webkit-scrollbar': { display: 'none' },
-        backgroundColor: '#FFF',
-        minHeight: '48px'
-      }}
-    >
-      <SearchInFilter mode="mobile" />
-      <OrganizersFilter mode="mobile" />
-      <AttendeesFilter mode="mobile" />
-    </Box>
-  )
-}
+const FiltersButtons: React.FC = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      overflowX: 'auto',
+      gap: 2,
+      px: 2,
+      py: 1,
+      scrollbarWidth: 'none',
+      '&::-webkit-scrollbar': { display: 'none' },
+      backgroundColor: '#FFF',
+      minHeight: '48px'
+    }}
+  >
+    <SearchInFilter mode="mobile" />
+    <OrganizersFilter mode="mobile" />
+    <AttendeesFilter mode="mobile" />
+  </Box>
+)
 
-type NormalizedColor = { light: string; dark: string }
-
-type NormalizedCalendar = Omit<Calendar, 'color'> & { color: NormalizedColor }
-
-/**
- * EventChip expects calendar.color to be { light: string; dark: string }.
- * The Redux store may hold color as a plain string — normalize it here
- * so EventChip's getBestColor receives the right shape.
- */
-function normalizeCalendarColor(color: Calendar['color']): NormalizedColor {
-  if (
-    color &&
-    typeof color === 'object' &&
-    'light' in color &&
-    'dark' in color
-  ) {
-    return color as NormalizedColor
-  }
-  const hex = typeof color === 'string' ? color : '#ffffff'
-  return { light: hex, dark: hex }
-}
-
-/**
- * Returns a copy of the calendars map with every color normalized to
- * { light, dark } so EventChip never receives a raw string color.
- */
-function normalizeCalendars(
-  calendars: Record<string, Calendar>
-): Record<string, NormalizedCalendar> {
-  const result: Record<string, NormalizedCalendar> = {}
-  for (const [key, cal] of Object.entries(calendars)) {
-    result[key] = { ...cal, color: normalizeCalendarColor(cal.color) }
-  }
-  return result
-}
-
-function Results() {
+function MobileResultItem({ eventData }: { eventData: SearchEventResult }) {
   const { t } = useI18n()
-  const dispatch = useAppDispatch()
-  const { error, loading, hits, results } = useAppSelector(
-    state => state.searchResult
-  )
-
-  return (
-    <Box className="search-layout">
-      {loading && (
-        <Box className="loading">
-          <CircularProgress size={32} />
-        </Box>
-      )}
-
-      {!loading && error && (
-        <Box className="error">
-          <Typography className="error-text">{error}</Typography>
-        </Box>
-      )}
-
-      {!loading && !error && !hits && (
-        <Box className="noResults">
-          <img className="logo" src={logo} alt={t('search.noResults')} />
-          <Typography variant="h5">{t('search.noResults')}</Typography>
-          <Typography variant="subtitle1">
-            {t('search.noResultsSubtitle')}
-          </Typography>
-        </Box>
-      )}
-
-      {!loading && !error && !!hits && (
-        <Box className="search-result-content-body">
-          <Stack>
-            {results.map((result: SearchEventResult, idx: number) => (
-              <ResultItem
-                key={`row-${idx}-event-${result.data.uid}`}
-                eventData={result}
-                dispatch={dispatch}
-              />
-            ))}
-          </Stack>
-        </Box>
-      )}
-    </Box>
-  )
-}
-
-function ResultItem({
-  eventData,
-  dispatch
-}: {
-  eventData: SearchEventResult
-  dispatch: AppDispatch
-}) {
-  const { t } = useI18n()
-  const [openPreview, setOpenPreview] = useState(false)
-
-  const timeZone =
-    useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
 
   const rawCalendars = useAppSelector(state => state.calendars.list)
   const calendars = normalizeCalendars(rawCalendars)
@@ -173,32 +85,13 @@ function ResultItem({
   const calId = `${eventData.data.userId}/${eventData.data.calendarId}`
   const calendar = calendars[calId]
 
+  const { openPreview, setOpenPreview, handleOpen, timeZone } = useEventPreview(
+    eventData,
+    calendar
+  )
+
   const startDate = new Date(eventData.data.start)
-
-  const handleOpen = async (): Promise<void> => {
-    if (!calendar) return
-    const event: CalendarEvent = {
-      URL: eventData._links.self.href,
-      calId: calendar.id,
-      uid: eventData.data.uid,
-      start: eventData.data.start,
-      end: eventData.data.end,
-      allday: eventData.data.allDay,
-      attendee: eventData.data.attendees,
-      class: eventData.data.class,
-      description: eventData.data.description,
-      stamp: eventData.data.dtstamp,
-      location: eventData.data.location,
-      organizer: eventData.data.organizer,
-      title: eventData.data.summary,
-      timezone: timeZone
-    }
-    await dispatch(getEventAsync(event))
-    setOpenPreview(true)
-  }
-
-  const bestColor = getBestColor(calendar.color)
-
+  const bestColor = getBestColor(calendar?.color)
   const titleStyle = getTitleStyle(bestColor, 'ACCEPTED', calendar, false)
 
   return (
@@ -226,10 +119,7 @@ function ResultItem({
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {startDate
-              .toLocaleDateString(t('locale'), {
-                weekday: 'short',
-                timeZone
-              })
+              .toLocaleDateString(t('locale'), { weekday: 'short', timeZone })
               .toUpperCase()}
           </Typography>
         </Box>
@@ -242,8 +132,8 @@ function ResultItem({
             borderRadius: '8px',
             p: 1,
             boxShadow: 'none',
-            backgroundColor: calendar.color.light,
-            color: calendar.color.dark,
+            backgroundColor: calendar?.color.light,
+            color: calendar?.color.dark,
             border: '1px solid white',
             display: 'flex'
           }}
@@ -252,9 +142,7 @@ function ResultItem({
           <CardHeader
             sx={{
               p: '0px',
-              '& .MuiCardHeader-content': {
-                overflow: 'hidden'
-              }
+              '& .MuiCardHeader-content': { overflow: 'hidden' }
             }}
             title={
               <Box
@@ -304,7 +192,7 @@ function ResultItem({
         </Card>
       </Box>
 
-      {calendar && calendar.events?.[eventData.data.uid] && (
+      {calendar?.events?.[eventData.data.uid] && (
         <EventPreviewModal
           eventId={eventData.data.uid}
           calId={calendar.id}
