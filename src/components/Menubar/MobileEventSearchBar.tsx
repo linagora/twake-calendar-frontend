@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { PeopleSearch } from '../Attendees/PeopleSearch'
 import { MobileSearchDialog } from './MobileSearchDialog'
 import { SearchTextField } from './MobileSearchFieldText'
-import { useMobileSearch } from './useMobileSearch'
+import { useFilterSearch } from './useMobileSearch'
 
 const SEARCH_OBJECT_TYPES = ['user', 'contact']
 
@@ -21,7 +21,7 @@ const MobileSearchBar: React.FC = () => {
     handleContactSelect,
     clearAll,
     handleShow
-  } = useMobileSearch(setDialogOpen)
+  } = useFilterSearch('organizers', setDialogOpen)
 
   return (
     <>

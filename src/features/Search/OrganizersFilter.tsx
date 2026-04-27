@@ -1,9 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import UserSearch from '@/components/Attendees/AttendeeSearch'
-import { MobileSelector } from '@/components/MobileSelector'
+import { useFilterSearch } from '@/components/Menubar/useMobileSearch'
 import { Box, InputLabel } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { userAttendee } from '../User/models/attendee'
+import { MobileFilterPicker } from './MobileFilterPicker'
 import { setFilters } from './SearchSlice'
 
 interface Props {
@@ -18,21 +19,15 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
     state => state.searchResult.searchParams.filters
   )
 
-  const search = (
-    <UserSearch
-      attendees={filters.organizers}
-      setAttendees={(users: userAttendee[]) => {
-        dispatch(setFilters({ organizers: users }))
-        if (users.length > 0) onErrorClear?.()
-      }}
-    />
-  )
+  const mobileSearch = useFilterSearch('organizers', () => {})
 
   if (mode === 'mobile') {
     return (
-      <MobileSelector ref={null} displayText={t('search.organizers')}>
-        <Box sx={{ p: 2 }}>{search}</Box>
-      </MobileSelector>
+      <MobileFilterPicker
+        displayText={t('search.organizers')}
+        objectTypes={['user', 'resources']}
+        {...mobileSearch}
+      />
     )
   }
 
@@ -46,7 +41,13 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
       }}
     >
       <InputLabel sx={{ m: 0 }}>{t('search.organizers')}</InputLabel>
-      {search}
+      <UserSearch
+        attendees={filters.organizers}
+        setAttendees={(users: userAttendee[]) => {
+          dispatch(setFilters({ organizers: users }))
+          if (users.length > 0) onErrorClear?.()
+        }}
+      />
     </Box>
   )
 }

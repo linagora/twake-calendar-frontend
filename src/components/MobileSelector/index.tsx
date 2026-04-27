@@ -37,7 +37,7 @@ const SelectorButton = styled(ButtonBase)(({ theme }) => ({
 }))
 
 interface MobileSelectorProps {
-  displayText: string | React.ReactNode
+  displayText: React.ReactNode
   children?: React.ReactNode
   bottomSheetRef?: React.RefObject<HTMLDivElement>
   paperRef?: React.RefObject<HTMLDivElement>

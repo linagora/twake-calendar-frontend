@@ -16,7 +16,9 @@ import { useCallback, useMemo, useState } from 'react'
 import { User } from '../Attendees/types'
 import { SearchState } from '../Calendar/utils/tempSearchUtil'
 
-export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
+type FilterKey = 'organizers' | 'attendees'
+
+export interface UseFilterSearchResult {
   inputQuery: string
   setInputQuery: React.Dispatch<React.SetStateAction<string>>
   searchState: SearchState
@@ -30,7 +32,12 @@ export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
   handleContactSelect: (contacts: User[]) => void
   clearAll: () => void
   handleShow: () => void
-} {
+}
+
+export function useFilterSearch(
+  filterKey: FilterKey,
+  setDialogOpen: (b: boolean) => void
+): UseFilterSearchResult {
   const dispatch = useAppDispatch()
   const calendars = useAppSelector(selectCalendars)
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
@@ -53,6 +60,7 @@ export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
     loading: false
   })
   const [selectedContacts, setSelectedContacts] = useState<User[]>([])
+
   const handleSearch = useCallback(
     async (
       searchQuery: string,
@@ -92,10 +100,10 @@ export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
 
   const handleContactSelect = useCallback(
     (contacts: User[]): void => {
-      const organizers = contacts.map(c =>
+      const mapped = contacts.map(c =>
         createAttendee({ cal_address: c.email, cn: c.displayName })
       )
-      const nextFilters = { ...filters, organizers }
+      const nextFilters = { ...filters, [filterKey]: mapped }
       setSelectedContacts(contacts)
       dispatch(setFilters(nextFilters))
       setInputQuery('')
@@ -104,7 +112,7 @@ export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
         void handleSearch('', nextFilters)
       }
     },
-    [filters, handleSearch, dispatch]
+    [filters, filterKey, handleSearch, dispatch]
   )
 
   const clearAll = useCallback((): void => {
@@ -117,8 +125,7 @@ export function useMobileSearch(setDialogOpen: (b: boolean) => void): {
 
   const handleShow = useCallback((): void => {
     void handleSearch(inputQuery, filters)
-    setDialogOpen(false)
-  }, [inputQuery, filters, handleSearch, setDialogOpen])
+  }, [inputQuery, filters, handleSearch])
 
   return {
     inputQuery,

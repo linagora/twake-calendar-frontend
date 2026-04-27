@@ -87,7 +87,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
           {t('search.filter.myCalendar')}
         </MenuItem>
         {CalendarItemList(personalCalendars)}
-      </Select>{' '}
+      </Select>
     </Box>
   )
 }
@@ -105,16 +105,8 @@ const getDisplayLabel = (
     return t('search.filter.myCalendar')
   }
 
-  const selectedCalendar = (
-    <CalendarName
-      calendar={
-        personalCalendars.find(c => c.id === filters.searchIn) ??
-        ({} as Calendar)
-      }
-    />
-  )
-
-  return selectedCalendar ? selectedCalendar : t('search.searchIn')
+  const selected = personalCalendars.find(c => c.id === filters.searchIn)
+  return selected ? <CalendarName calendar={selected} /> : t('search.searchIn')
 }
 
 const CalendarMobileSelector: React.FC<{
