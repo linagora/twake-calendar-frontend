@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCalendars } from '@/app/selectors/selectCalendars'
 import { CalendarItemList } from '@/components/Calendar/CalendarItemList'
 import { CalendarName } from '@/components/Calendar/CalendarName'
+import { useFilterSearch } from '@/components/Menubar/useMobileSearch'
 import {
   MobileSelector,
   MobileSelectorHandle
@@ -30,9 +31,7 @@ interface Props {
 export const SearchInFilter: React.FC<Props> = ({ mode }) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
-  const filters = useAppSelector(
-    state => state.searchResult.searchParams.filters
-  )
+  const searchParams = useAppSelector(state => state.searchResult.searchParams)
   const calendars = useAppSelector(selectCalendars)
   const userId = useAppSelector(state => state.user.userData?.openpaasId)
   const personalCalendars = userId
@@ -40,9 +39,14 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
     : []
 
   const selectorRef = useRef<MobileSelectorHandle>(null)
+  const mobileSearch = useFilterSearch('organizers', () => {})
 
   const handleSelect = (value: string): void => {
     dispatch(setFilters({ searchIn: value }))
+    mobileSearch.handleSearch(searchParams.search, {
+      ...searchParams.filters,
+      searchIn: value
+    })
     selectorRef.current?.onClose()
   }
 
@@ -50,7 +54,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
     return (
       <CalendarMobileSelector
         selectorRef={selectorRef}
-        filters={filters}
+        filters={searchParams.filters}
         personalCalendars={personalCalendars}
         t={t}
         handleSelect={handleSelect}
@@ -70,7 +74,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
       <InputLabel sx={{ m: 0 }}>{t('search.searchIn')}</InputLabel>
       <Select
         displayEmpty
-        value={filters.searchIn}
+        value={searchParams.filters.searchIn}
         onChange={e => dispatch(setFilters({ searchIn: e.target.value }))}
         sx={{ height: '40px' }}
       >

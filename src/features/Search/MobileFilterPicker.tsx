@@ -45,11 +45,15 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
     <MobileSelector
       ref={selectorRef}
       displayText={selectedContacts[0]?.displayName ?? displayText}
+      fullscreen
     >
       <Box sx={{ p: 2 }}>
         <PeopleSearch
           selectedUsers={selectedContacts}
-          onChange={(_event, users) => handleContactSelect(users)}
+          onChange={(_event, users) => {
+            handleContactSelect(users)
+            selectorRef.current?.onClose()
+          }}
           hideOptions
           inputValue={inputQuery}
           onSearchStateChange={handleSearchChange}
@@ -73,16 +77,17 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
         />
       </Box>
       {searchState.options && searchState.options?.length > 0 && (
-        <Box sx={{ flex: 1, m: 1, overflowY: 'auto' }}>
+        <Box sx={{ flex: 1, m: 1 }}>
           <AttendeeOptionsList
             options={searchState.options}
             selectedUsers={selectedContacts}
-            onOptionClick={user =>
+            onOptionClick={user => {
               handleContactSelect([
                 ...selectedContacts,
                 { displayName: user.displayName, email: user.email }
               ])
-            }
+              selectorRef.current?.onClose()
+            }}
           />
         </Box>
       )}
