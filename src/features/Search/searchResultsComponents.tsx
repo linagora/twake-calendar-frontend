@@ -2,12 +2,13 @@ import {
   getBestColor,
   getTitleStyle
 } from '@/components/Event/EventChip/EventChipUtils'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { defaultColors } from '@/utils/defaultColors'
 import { Box, Button, Card, CardHeader, Typography } from '@linagora/twake-mui'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { SearchEventResult } from './types/SearchEventResult'
 
 interface DateProps {
@@ -60,25 +61,34 @@ export const RenderDate: React.FC<DateProps> = ({
   endDate,
   t,
   timeZone
-}) => (
-  <Typography variant="h4" sx={{ fontWeight: 400, minWidth: '90px' }}>
-    {startDate.toLocaleDateString(t('locale'), {
+}) => {
+  const dayKey = (d: Date): string =>
+    d.toLocaleDateString('en-CA', {
+      year: 'numeric',
+      month: '2-digit',
       day: '2-digit',
-      month: 'short',
       timeZone
-    })}
-    {startDate.toDateString() !== endDate.toDateString() && (
-      <>
-        {' - '}
-        {endDate.toLocaleDateString(t('locale'), {
-          day: '2-digit',
-          month: 'short',
-          timeZone
-        })}
-      </>
-    )}
-  </Typography>
-)
+    })
+  return (
+    <Typography variant="h4" sx={{ fontWeight: 400, minWidth: '90px' }}>
+      {startDate.toLocaleDateString(t('locale'), {
+        day: '2-digit',
+        month: 'short',
+        timeZone
+      })}
+      {dayKey(startDate) !== dayKey(endDate) && (
+        <>
+          {' - '}
+          {endDate.toLocaleDateString(t('locale'), {
+            day: '2-digit',
+            month: 'short',
+            timeZone
+          })}
+        </>
+      )}
+    </Typography>
+  )
+}
 
 export const RenderTime: React.FC<TimeProps> = ({
   startDate,
@@ -163,7 +173,14 @@ export const RenderVideoJoin: React.FC<VideoJoinProps> = ({ url, t }) => {
       sx={{ flexShrink: 0, ml: 'auto' }}
       onClick={e => {
         e.stopPropagation()
-        window.open(url, '_blank', 'noopener,noreferrer')
+        try {
+          const parsed = new URL(url)
+          if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')
+            return
+          window.open(parsed.toString(), '_blank', 'noopener,noreferrer')
+        } catch {
+          return
+        }
       }}
     >
       {t('eventPreview.joinVideoShort')}
@@ -194,10 +211,13 @@ export const RenderMobileEventCard: React.FC<MobileEventCardProps> = ({
   timeZone
 }) => {
   const { t } = useI18n()
+
+  if (!calendar) return null
+
   const startDate = new Date(eventData.data.start)
-  const bestColor = getBestColor(
-    calendar?.color as { light: string; dark: string }
-  )
+  const bestColor = calendar.color
+    ? getBestColor(calendar.color as { light: string; dark: string })
+    : defaultColors[0].dark
   const titleStyle = getTitleStyle(bestColor, 'ACCEPTED', calendar, false)
 
   return (

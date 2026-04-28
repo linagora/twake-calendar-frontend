@@ -448,9 +448,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
               <FullCalendar
                 key={hiddenDays.join(',')}
                 ref={ref => {
-                  if (ref) {
-                    calendarRef.current = ref.getApi()
-                  }
+                  calendarRef.current = ref ? ref.getApi() : null
                 }}
                 plugins={[
                   dayGridPlugin,

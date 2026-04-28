@@ -139,7 +139,7 @@ function DesktopResultItem({
         />
       </Box>
 
-      {calendar?.events[eventData.data.uid] && (
+      {calendar?.events?.[eventData.data.uid] && (
         <EventPreviewModal
           eventId={eventData.data.uid}
           calId={calendar.id}
