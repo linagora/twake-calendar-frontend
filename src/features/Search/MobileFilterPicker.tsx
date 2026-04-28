@@ -17,10 +17,8 @@ interface MobileFilterPickerProps {
   displayText: string
   searchState: SearchState
   selectedContacts: User[]
-  filters: SearchFilters
   inputQuery: string
   setInputQuery: React.Dispatch<React.SetStateAction<string>>
-  handleSearch: UseFilterSearchResult['handleSearch']
   handleSearchChange: UseFilterSearchResult['handleSearchChange']
   handleContactSelect: UseFilterSearchResult['handleContactSelect']
   clearAll: UseFilterSearchResult['clearAll']
@@ -32,10 +30,8 @@ interface FilterDrawerProps {
   onClose: () => void
   searchState: SearchState
   selectedContacts: User[]
-  filters: SearchFilters
   inputQuery: string
   setInputQuery: React.Dispatch<React.SetStateAction<string>>
-  handleSearch: UseFilterSearchResult['handleSearch']
   handleSearchChange: UseFilterSearchResult['handleSearchChange']
   handleContactSelect: UseFilterSearchResult['handleContactSelect']
   clearAll: UseFilterSearchResult['clearAll']
@@ -47,10 +43,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   onClose,
   searchState,
   selectedContacts,
-  filters,
   inputQuery,
   setInputQuery,
-  handleSearch,
   handleSearchChange,
   handleContactSelect,
   clearAll,
@@ -100,7 +94,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
               setQuery={setQuery}
               selectedContacts={selectedContacts}
               onQueryChange={setInputQuery}
-              onEnter={() => void handleSearch(query, filters)}
+              onEnter={() => {}}
               onClear={clearAll}
             />
           )}
@@ -129,10 +123,8 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
   displayText,
   searchState,
   selectedContacts,
-  filters,
   inputQuery,
   setInputQuery,
-  handleSearch,
   handleSearchChange,
   handleContactSelect,
   clearAll,
@@ -148,10 +140,8 @@ export const MobileFilterPicker: React.FC<MobileFilterPickerProps> = ({
           onClose={onClose}
           searchState={searchState}
           selectedContacts={selectedContacts}
-          filters={filters}
           inputQuery={inputQuery}
           setInputQuery={setInputQuery}
-          handleSearch={handleSearch}
           handleSearchChange={handleSearchChange}
           handleContactSelect={handleContactSelect}
           clearAll={clearAll}

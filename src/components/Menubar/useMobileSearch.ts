@@ -142,13 +142,13 @@ function useSearchChangeHandler(
 }
 
 function useContactSelectHandler(
-  filterKey: FilterKey,
-  filters: SearchFilters,
+  filterData: { filterKey: FilterKey; filters: SearchFilters },
   dispatch: AppDispatch,
   setters: StateSetters,
   handleSearch: (q: string, f: SearchFilters) => Promise<void>
 ): (contacts: User[]) => void {
   const { setInputQuery, setSelectedContacts, setSearchState } = setters
+  const { filters, filterKey } = filterData
   return useCallback(
     (contacts: User[]): void => {
       const mapped = contacts.map(c =>
@@ -229,8 +229,7 @@ export function useFilterSearch(
     setSearchState
   )
   const handleContactSelect = useContactSelectHandler(
-    filterKey,
-    filters,
+    { filterKey, filters },
     dispatch,
     setters,
     handleSearch
