@@ -37,7 +37,7 @@ export function makeVevent(
       ['action', {}, 'text', event.alarm.action],
       ['attendee', {}, 'cal-address', `mailto:${calOwnerEmail}`],
       ['summary', {}, 'text', event.title],
-      ['description', {}, 'text', 'This is an automatic alarm sent by OpenPaas']
+      ['description', {}, 'text', 'This is an automatic alarm sent by Twake Calendar']
     ]
     vevent.push([['valarm', valarm]])
   }
