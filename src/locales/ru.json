@@ -320,6 +320,7 @@
     },
     "showMore": "Показать больше",
     "showLess": "Показать меньше",
+    "editInOrganizerCalendar": "Редактировать в %{calendarName}",
     "joinVideo": "Присоединиться к видеоконференции",
     "joinVideoShort": "Присоединиться",
     "guests": "%{count} гостей",

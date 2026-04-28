@@ -320,6 +320,7 @@
     },
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
+    "editInOrganizerCalendar": "Modifier dans %{calendarName}",
     "joinVideo": "Rejoindre la visioconférence",
     "joinVideoShort": "Rejoindre",
     "guests": "%{count} participants",

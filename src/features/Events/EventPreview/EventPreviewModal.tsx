@@ -43,6 +43,8 @@ export default function EventPreviewModal({
     isWriteDelegated,
     isOrganizer,
     isNotPrivate,
+    canEdit,
+    organizerWritableCalendar,
     openUpdateModal,
     setOpenUpdateModal,
     openDuplicateModal,
@@ -51,6 +53,7 @@ export default function EventPreviewModal({
     setHidePreview,
     toggleActionMenu,
     setToggleActionMenu,
+    updateModalCalId,
     openEditModePopup,
     setOpenEditModePopup,
     setTypeOfAction,
@@ -58,6 +61,7 @@ export default function EventPreviewModal({
     setAfterChoiceFunc,
     resolvedTypeOfAction,
     handleEditClick,
+    handleEditInOrganizerCalendar,
     handleDeleteClick,
     handleDuplicateClick
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
@@ -101,9 +105,23 @@ export default function EventPreviewModal({
             isOwn={isOwn}
             isWriteDelegated={isWriteDelegated}
             isNotPrivate={isNotPrivate}
+            canEdit={canEdit}
             onClose={() => onClose({}, 'backdropClick')}
             onEdit={handleEditClick}
             onMoreClick={e => setToggleActionMenu(e.currentTarget)}
+            onEditInOrganizerCalendar={
+              organizerWritableCalendar
+                ? handleEditInOrganizerCalendar
+                : undefined
+            }
+            editInOrganizerCalendarTooltip={
+              organizerWritableCalendar
+                ? t('eventPreview.editInOrganizerCalendar').replace(
+                    '%{calendarName}',
+                    organizerWritableCalendar.name
+                  )
+                : undefined
+            }
           />
         }
         actions={
@@ -209,7 +227,7 @@ export default function EventPreviewModal({
           onClose({}, 'backdropClick')
         }}
         eventId={eventId}
-        calId={calId}
+        calId={updateModalCalId}
         typeOfAction={resolvedTypeOfAction}
       />
 

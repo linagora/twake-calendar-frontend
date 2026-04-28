@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@linagora/twake-mui'
+import { Box, IconButton, Tooltip } from '@linagora/twake-mui'
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
@@ -13,23 +13,26 @@ interface EventPreviewHeaderProps {
   isOwn: boolean
   isWriteDelegated: boolean
   isNotPrivate: boolean
+  canEdit: boolean
   onClose: () => void
   onEdit: () => void
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void
+  onEditInOrganizerCalendar?: () => void
+  editInOrganizerCalendarTooltip?: string
 }
 
 export function EventPreviewHeader({
   event,
   eventId,
-  isOrganizer,
   isOwn,
-  isWriteDelegated,
   isNotPrivate,
+  canEdit,
   onClose,
   onEdit,
-  onMoreClick
+  onMoreClick,
+  onEditInOrganizerCalendar,
+  editInOrganizerCalendarTooltip
 }: EventPreviewHeaderProps) {
-  const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate))
   const canSeeMore = isNotPrivate || isOwn
 
   return (
@@ -69,6 +72,13 @@ export function EventPreviewHeader({
         <IconButton size="small" onClick={onEdit}>
           <EditIcon />
         </IconButton>
+      )}
+      {!canEdit && onEditInOrganizerCalendar && (
+        <Tooltip title={editInOrganizerCalendarTooltip} placement="top">
+          <IconButton size="small" onClick={onEditInOrganizerCalendar}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
       )}
       {canSeeMore && (
         <IconButton size="small" onClick={onMoreClick}>

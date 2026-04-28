@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
 import { getEffectiveEmail } from '@/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@/utils/isEventOrganiser'
@@ -31,6 +32,7 @@ export function useEventPreviewState(
   const [openDuplicateModal, setOpenDuplicateModal] = useState(false)
   const [hidePreview, setHidePreview] = useState(false)
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(null)
+  const [updateModalCalId, setUpdateModalCalId] = useState(calId)
 
   // Recurring event handling
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
@@ -68,6 +70,22 @@ export function useEventPreviewState(
   const isNotPrivate =
     event?.class !== 'PRIVATE' && event?.class !== 'CONFIDENTIAL'
 
+  const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate))
+
+  // If the user cannot edit here but has write access to the organizer's delegated
+  // calendar, surface a shortcut so they don't have to hunt for the source event.
+  const organizerEmail = event?.organizer?.cal_address?.toLowerCase()
+  const organizerWritableCalendar: Calendar | undefined =
+    !canEdit && organizerEmail
+      ? Object.values(calendars.list).find(
+          cal =>
+            cal.delegated &&
+            cal.access?.write &&
+            cal.owner?.emails?.some(e => e.toLowerCase() === organizerEmail) &&
+            cal.events[eventId] !== undefined
+        )
+      : undefined
+
   const contextualizedEvent =
     event && calendar && user ? createEventContext(event, calendar, user) : null
 
@@ -97,6 +115,22 @@ export function useEventPreviewState(
 
   // Action handlers
   const handleEditClick = () => {
+    setUpdateModalCalId(calId)
+    if (isRecurring) {
+      setAfterChoiceFunc(() => () => {
+        setHidePreview(true)
+        setOpenUpdateModal(true)
+      })
+      setOpenEditModePopup('edit')
+    } else {
+      setHidePreview(true)
+      setOpenUpdateModal(true)
+    }
+  }
+
+  const handleEditInOrganizerCalendar = () => {
+    if (!organizerWritableCalendar) return
+    setUpdateModalCalId(organizerWritableCalendar.id)
     if (isRecurring) {
       setAfterChoiceFunc(() => () => {
         setHidePreview(true)
@@ -158,6 +192,8 @@ export function useEventPreviewState(
     isWriteDelegated,
     isOrganizer,
     isNotPrivate,
+    canEdit,
+    organizerWritableCalendar,
 
     // Modal state
     openUpdateModal,
@@ -168,6 +204,7 @@ export function useEventPreviewState(
     setHidePreview,
     toggleActionMenu,
     setToggleActionMenu,
+    updateModalCalId,
 
     // Recurring state
     openEditModePopup,
@@ -180,6 +217,7 @@ export function useEventPreviewState(
 
     // Handlers
     handleEditClick,
+    handleEditInOrganizerCalendar,
     handleDeleteClick,
     handleDuplicateClick,
 

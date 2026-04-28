@@ -319,6 +319,7 @@
     },
     "showMore": "Show more",
     "showLess": "Show less",
+    "editInOrganizerCalendar": "Edit in %{calendarName}",
     "joinVideo": "Join the video conference",
     "joinVideoShort": "Join",
     "guests": "%{count} guests",

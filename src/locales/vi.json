@@ -318,6 +318,7 @@
     },
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
+    "editInOrganizerCalendar": "Chỉnh sửa trong %{calendarName}",
     "joinVideo": "Tham gia cuộc họp video",
     "joinVideoShort": "Tham gia",
     "guests": "%{count} khách",
