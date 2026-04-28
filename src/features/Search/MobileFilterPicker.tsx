@@ -5,7 +5,6 @@ import { SearchState } from '@/components/Calendar/utils/tempSearchUtil'
 import { SearchTextField } from '@/components/Menubar/MobileSearchFieldText'
 import { UseFilterSearchResult } from '@/components/Menubar/useMobileSearch'
 import { MobileSelector } from '@/components/MobileSelector'
-import { SearchFilters } from '@/features/Search/SearchSlice'
 import {
   AutocompleteRenderInputParams,
   Box,
