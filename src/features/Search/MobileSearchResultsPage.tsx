@@ -30,18 +30,17 @@ const MobileSearchResultsPage: React.FC = () => {
     hasSearchParams
 
   return (
-    <>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        overflow: 'hidden'
+      }}
+    >
       <FiltersButtons />
       {displaySearch && (
-        <Box
-          className="search-layout"
-          sx={{
-            m: 2,
-            flex: 1,
-            minHeight: 0,
-            overflow: 'auto'
-          }}
-        >
+        <Box sx={{ m: 2, flex: 1, minHeight: 0, overflow: 'auto' }}>
           <ResultsList
             loading={searchResults.loading}
             error={searchResults.error}
@@ -58,7 +57,7 @@ const MobileSearchResultsPage: React.FC = () => {
           />
         </Box>
       )}
-    </>
+    </Box>
   )
 }
 
