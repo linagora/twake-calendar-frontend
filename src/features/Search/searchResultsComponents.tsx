@@ -31,14 +31,6 @@ interface OrganizerProps {
   }
 }
 
-interface LocationProps {
-  location?: string
-}
-
-interface DescriptionProps {
-  description?: string
-}
-
 interface VideoJoinProps {
   url?: string
   t: (key: string) => string
@@ -125,8 +117,8 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
   )
 }
 
-export const RenderLocation: React.FC<LocationProps> = ({ location }) => {
-  if (!location) return null
+export const RenderText: React.FC<{ text?: string }> = ({ text }) => {
+  if (!text) return null
   return (
     <Typography
       variant="body2"
@@ -139,28 +131,7 @@ export const RenderLocation: React.FC<LocationProps> = ({ location }) => {
         maxWidth: '250px'
       }}
     >
-      {location}
-    </Typography>
-  )
-}
-
-export const RenderDescription: React.FC<DescriptionProps> = ({
-  description
-}) => {
-  if (!description) return null
-  return (
-    <Typography
-      variant="body2"
-      sx={{
-        color: 'text.secondary',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        flex: 1,
-        minWidth: 0
-      }}
-    >
-      {description.replace(/\n/g, ' ')}
+      {text.replace(/\n/g, ' ')}
     </Typography>
   )
 }

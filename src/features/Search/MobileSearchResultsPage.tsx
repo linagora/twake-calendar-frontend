@@ -12,6 +12,7 @@ import { OrganizersFilter } from './OrganizersFilter'
 import { ResultsList } from './ResultsList'
 import { SearchInFilter } from './SearchInFilter'
 import './searchResult.styl'
+import { RenderDate, RenderTime } from './searchResultsComponents'
 import { SearchEventResult } from './types/SearchEventResult'
 import { useEventPreview } from './useEventPreview'
 
@@ -101,6 +102,7 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
   )
 
   const startDate = new Date(eventData.data.start)
+  const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate
   const bestColor = getBestColor(calendar?.color)
   const titleStyle = getTitleStyle(bestColor, 'ACCEPTED', calendar, false)
 
@@ -119,19 +121,12 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
         }}
         onClick={() => void handleOpen()}
       >
-        <Box sx={{ width: '100%' }}>
-          <Typography variant="h4" sx={{ fontWeight: 400 }}>
-            {startDate.toLocaleDateString(t('locale'), {
-              day: '2-digit',
-              timeZone
-            })}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {startDate
-              .toLocaleDateString(t('locale'), { weekday: 'short', timeZone })
-              .toUpperCase()}
-          </Typography>
-        </Box>
+        <RenderDate
+          startDate={startDate}
+          endDate={endDate}
+          t={t}
+          timeZone={timeZone}
+        />
 
         <Card
           variant="outlined"
@@ -176,26 +171,13 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
               </Box>
             }
             subheader={
-              !eventData.data.allDay && (
-                <Typography
-                  style={{
-                    color: titleStyle.color,
-                    opacity: '70%',
-                    fontFamily: 'Inter',
-                    fontWeight: '500',
-                    fontSize: '10px',
-                    lineHeight: '16px',
-                    letterSpacing: '0%',
-                    verticalAlign: 'middle'
-                  }}
-                >
-                  {startDate.toLocaleTimeString(t('locale'), {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone
-                  })}
-                </Typography>
-              )
+              <RenderTime
+                startDate={startDate}
+                endDate={endDate}
+                allDay={!!eventData.data.allDay}
+                t={t}
+                timeZone={timeZone}
+              />
             }
           />
         </Card>

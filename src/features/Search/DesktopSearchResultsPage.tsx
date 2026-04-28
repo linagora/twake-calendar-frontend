@@ -10,8 +10,7 @@ import { ResultsList } from './ResultsList'
 import './searchResult.styl'
 import {
   RenderDate,
-  RenderDescription,
-  RenderLocation,
+  RenderText,
   RenderOrganizer,
   RenderTime,
   RenderTitle,
@@ -131,8 +130,8 @@ function DesktopResultItem({
           t={t}
         />
         <RenderOrganizer organizer={eventData.data.organizer} />
-        <RenderLocation location={eventData.data.location} />
-        <RenderDescription description={eventData.data.description} />
+        <RenderText text={eventData.data.location} />
+        <RenderText text={eventData.data.description} />
         <RenderVideoJoin
           t={t}
           url={eventData.data['x-openpaas-videoconference']}
