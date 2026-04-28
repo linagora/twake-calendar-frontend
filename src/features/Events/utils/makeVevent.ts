@@ -8,7 +8,7 @@ export function makeVevent(
   tzid: string,
   calOwnerEmail: string | undefined,
   isMasterEvent?: boolean
-) {
+): [string, unknown[]] {
   const vevent: [string, unknown[]] = [
     'vevent',
     [
@@ -37,7 +37,12 @@ export function makeVevent(
       ['action', {}, 'text', event.alarm.action],
       ['attendee', {}, 'cal-address', `mailto:${calOwnerEmail}`],
       ['summary', {}, 'text', event.title],
-      ['description', {}, 'text', 'This is an automatic alarm sent by Twake Calendar']
+      [
+        'description',
+        {},
+        'text',
+        'This is an automatic alarm sent by Twake Calendar'
+      ]
     ]
     vevent.push([['valarm', valarm]])
   }
