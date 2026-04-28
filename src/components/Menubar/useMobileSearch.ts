@@ -47,9 +47,18 @@ interface FilterSearchState extends StateSetters {
   searchState: SearchState
 }
 
-function useFilterSearchState(): FilterSearchState {
+function useFilterSearchState(
+  filters: SearchFilters,
+  filterKey: FilterKey
+): FilterSearchState {
   const [inputQuery, setInputQuery] = useState('')
-  const [selectedContacts, setSelectedContacts] = useState<User[]>([])
+
+  const [selectedContacts, setSelectedContacts] = useState<User[]>(
+    filters[filterKey].map(user => ({
+      email: user.cal_address,
+      displayName: user.cn
+    }))
+  )
   const [searchState, setSearchState] = useState<SearchState>({
     query: '',
     options: [] as User[],
@@ -201,7 +210,7 @@ export function useFilterSearch(
     setSelectedContacts,
     searchState,
     setSearchState
-  } = useFilterSearchState()
+  } = useFilterSearchState(filters, filterKey)
 
   const setters: StateSetters = {
     setInputQuery,

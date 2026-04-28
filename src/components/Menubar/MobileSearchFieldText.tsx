@@ -49,21 +49,6 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
         onQueryChange(e.target.value)
       }}
       variant="outlined"
-      sx={{
-        borderRadius: theme.shape.borderRadius,
-        '& .MuiInputBase-input': { padding: '12px 10px' },
-        animation: 'scaleIn 0.25s ease-out',
-        '@keyframes scaleIn': {
-          from: { transform: 'scaleX(0)', opacity: 0 },
-          to: { transform: 'scaleX(1)', opacity: 1 }
-        },
-        transformOrigin: 'right',
-        '& .MuiOutlinedInput-root': {
-          borderRadius: theme.shape.borderRadius,
-          height: 40,
-          padding: '0 10px'
-        }
-      }}
       InputProps={{
         ...params.InputProps,
         startAdornment: (

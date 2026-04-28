@@ -41,9 +41,9 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
   const selectorRef = useRef<MobileSelectorHandle>(null)
   const mobileSearch = useFilterSearch('organizers', () => {})
 
-  const handleSelect = (value: string): void => {
+  const handleSelect = async (value: string): Promise<void> => {
     dispatch(setFilters({ searchIn: value }))
-    mobileSearch.handleSearch(searchParams.search, {
+    await mobileSearch.handleSearch(searchParams.search, {
       ...searchParams.filters,
       searchIn: value
     })
@@ -57,7 +57,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
         filters={searchParams.filters}
         personalCalendars={personalCalendars}
         t={t}
-        handleSelect={handleSelect}
+        handleSelect={v => void handleSelect(v)}
       />
     )
   }

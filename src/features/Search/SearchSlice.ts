@@ -19,7 +19,7 @@ export interface SearchParams {
 export interface SearchResultsState {
   searchParams: SearchParams
   hits: number
-  results: Record<string, SearchEventResult>[]
+  results: SearchEventResult[]
   error: string | null
   loading: boolean
 }
@@ -35,7 +35,7 @@ export const defaultSearchParams: SearchParams = {
 }
 
 export const searchEventsAsync = createAsyncThunk<
-  { hits: number; events: Record<string, SearchEventResult>[] },
+  { hits: number; events: SearchEventResult[] },
   {
     search: string
     filters: {
@@ -52,10 +52,7 @@ export const searchEventsAsync = createAsyncThunk<
 
     return {
       hits: Number(response._total_hits),
-      events: (response._embedded?.events ?? []) as Record<
-        string,
-        SearchEventResult
-      >[]
+      events: (response._embedded?.events ?? []) as SearchEventResult[]
     }
   } catch (err) {
     const error = err as { response?: { status?: number } }
@@ -78,7 +75,7 @@ export const searchResultsSlice = createSlice({
   name: 'searchResult',
   initialState,
   reducers: {
-    setResults: (state, action: PayloadAction<[]>) => {
+    setResults: (state, action: PayloadAction<SearchEventResult[]>) => {
       state.results = action.payload
     },
     setHits: (state, action: PayloadAction<number>) => {
