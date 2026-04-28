@@ -15,9 +15,7 @@ interface Props {
 export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
-  const filters = useAppSelector(
-    state => state.searchResult.searchParams.filters
-  )
+  const searchParams = useAppSelector(state => state.searchResult.searchParams)
 
   const mobileSearch = useFilterSearch('organizers', () => {})
 
@@ -26,7 +24,18 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
       <MobileFilterPicker
         displayText={t('search.organizers')}
         objectTypes={['user', 'resources']}
-        {...mobileSearch}
+        {...{
+          ...mobileSearch,
+          handleContactSelect: contact => {
+            mobileSearch.handleContactSelect(contact)
+            dispatch(
+              setFilters({
+                ...searchParams.filters,
+                keywords: searchParams.search
+              })
+            )
+          }
+        }}
       />
     )
   }
@@ -42,7 +51,7 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
     >
       <InputLabel sx={{ m: 0 }}>{t('search.organizers')}</InputLabel>
       <UserSearch
-        attendees={filters.organizers}
+        attendees={searchParams.filters.organizers}
         setAttendees={(users: userAttendee[]) => {
           dispatch(setFilters({ organizers: users }))
           if (users.length > 0) onErrorClear?.()

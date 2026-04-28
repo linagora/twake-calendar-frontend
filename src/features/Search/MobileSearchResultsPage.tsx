@@ -10,6 +10,7 @@ const MobileSearchResultsPage: React.FC = () => {
   const searchResults = useAppSelector(state => state.searchResult)
   const hasSearchParams =
     searchResults.searchParams.search !== '' ||
+    searchResults.searchParams.filters.keywords !== '' ||
     searchResults.searchParams.filters.organizers.length > 0 ||
     searchResults.searchParams.filters.attendees.length > 0
 
