@@ -54,7 +54,7 @@ export default function DesktopSearchResultsPage(): JSX.Element {
         noResultsTitleSx={{
           fontWeight: 500,
           textAlign: 'center',
-          color: '#243B55'
+          color: 'text.primary'
         }}
         noResultsSubtitleSx={{ color: 'text.secondary' }}
         stackSx={{ mt: 2 }}
@@ -93,9 +93,10 @@ function DesktopResultItem({
           flexDirection: 'row',
           gap: 2,
           p: 3,
-          borderTop: '1px solid #F3F6F9',
+          borderTop: '1px solid',
+          borderColor: 'divider',
           cursor: 'pointer',
-          '&:hover': { backgroundColor: '#e7e7e7ff' },
+          '&:hover': { backgroundColor: 'action.hover' },
           alignItems: 'center',
           textAlign: 'left',
           maxWidth: '80vw'
