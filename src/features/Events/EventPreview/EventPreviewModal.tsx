@@ -116,10 +116,9 @@ export default function EventPreviewModal({
             }
             editInOrganizerCalendarTooltip={
               organizerWritableCalendar
-                ? t('eventPreview.editInOrganizerCalendar').replace(
-                    '%{calendarName}',
-                    organizerWritableCalendar.name
-                  )
+                ? t('eventPreview.editInOrganizerCalendar', {
+                    calendarName: organizerWritableCalendar.name
+                  })
                 : undefined
             }
           />
