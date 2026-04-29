@@ -24,7 +24,6 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { Fab } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
-import moment from 'moment-timezone'
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useCalendarDataLoader } from '../../features/Calendars/useCalendarLoader'
@@ -78,6 +77,8 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
   setCurrentView,
   currentView
 }: CalendarAppProps) => {
+  const { t, lang } = useI18n()
+
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [debouncedDate, setDebouncedDate] = useState(new Date())
   useEffect(() => {
@@ -374,7 +375,11 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     tempcalendars,
     // Note: To preserve current logic, this will temporarily disable eslint for react-hooks/refs
     // eslint-disable-next-line react-hooks/refs
-    errorHandler: errorHandler.current
+    errorHandler: errorHandler.current,
+    timezone,
+    isTablet,
+    isMobile,
+    t
   })
 
   useEffect(() => {
@@ -382,8 +387,6 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
       window.__calendarRef = calendarRef
     }
   }, [calendarRef])
-
-  const { t, lang } = useI18n()
 
   useTouchListener(
     eventHandlers.handleDateSelect,
@@ -419,7 +422,6 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
 
         {view === 'calendar' && (
           <>
-            {' '}
             {(isTablet || isMobile) && (
               <Fab
                 color="primary"
@@ -580,33 +582,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                     updateSlotLabelVisibility(new Date())
                   }, 100)
                 }}
-                dayHeaderContent={arg => {
-                  const m = moment.tz(arg.date, timezone)
-
-                  const date = m.date()
-                  const weekDay = m
-                    .toDate()
-                    .toLocaleDateString(t('locale'), {
-                      weekday: 'short',
-                      timeZone: timezone
-                    })
-                    .toUpperCase()
-
-                  return (
-                    <div
-                      className={`fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`}
-                    >
-                      <small>{weekDay}</small>
-                      {arg.view.type !== CALENDAR_VIEWS.dayGridMonth && (
-                        <span
-                          className={`fc-daygrid-day-number ${arg.isToday ? 'current-date' : ''}`}
-                        >
-                          {date}
-                        </span>
-                      )}
-                    </div>
-                  )
-                }}
+                dayHeaderContent={viewHandlers.handleDayHeaderContent}
                 dayHeaderDidMount={viewHandlers.handleDayHeaderDidMount}
                 dayHeaderWillUnmount={viewHandlers.handleDayHeaderWillUnmount}
                 viewDidMount={viewHandlers.handleViewDidMount}

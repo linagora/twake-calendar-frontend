@@ -118,7 +118,6 @@ th.fc-timegrid-axis.fc-scrollgrid-shrink
 
 th.fc-col-header-cell.fc-day
   border-right 0
-  border-bottom 0
 
 .fc .fc-scrollgrid
   border 0
@@ -146,9 +145,6 @@ th.fc-col-header-cell.fc-day
 .fc .fc-timegrid-col.fc-day-today,
 .fc .fc-daygrid-day.fc-day-today
   background-color #fff
-
-.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events
-  min-height 36px
 
 .fc .fc-daygrid-body-natural .fc-daygrid-day-events
   margin-bottom 0
@@ -254,7 +250,7 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
 .navigation-controls
   margin-right 16px
 
-.fc .fc-timegrid-slot-minor 
+.fc .fc-timegrid-slot-minor
   border-top-style: none
 
 /* FullCalendar "more" popover restyle */
@@ -337,12 +333,12 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
       padding 0 !important
 
 // Custom event chips
-.fc-event 
+.fc-event
   background-color transparent
   border none
   width 95%
   height 100%
-  align-content left 
+  align-content left
   .fc-event-main
     display flex
     flex-direction row
@@ -369,7 +365,7 @@ tbody > tr.fc-scrollgrid-section:first-of-type .fc-scroller
   whiteSpace nowrap
 .date-time-group .MuiFormControl-root
   margin: 0
-.date-time-group.show-full-field > .MuiBox-root:first-of-type 
+.date-time-group.show-full-field > .MuiBox-root:first-of-type
   margin-bottom: 8px
 
 li.MuiButtonBase-root.MuiMenuItem-root
@@ -393,3 +389,8 @@ hr.MuiDivider-root.MuiDivider-fullWidth
   grid-area main
   width 100%
   height 100%
+
+// Match all-day row height to a 30-minute slot
+.fc-timeGridWeek-view .fc-daygrid-body .fc-daygrid-day-top,
+.fc-timeGridDay-view .fc-daygrid-body .fc-daygrid-day-top
+  display none

@@ -4,12 +4,14 @@ import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { userAttendee } from '@/features/User/models/attendee'
 import {
   CalendarApi,
+  DayHeaderContentArg,
   DayHeaderMountArg,
   EventContentArg,
   EventMountArg,
   NowIndicatorContentArg,
   ViewMountArg
 } from '@fullcalendar/core'
+import moment from 'moment-timezone'
 import React from 'react'
 import { CALENDAR_VIEWS } from '../utils/constants'
 import { createMouseHandlers } from './mouseHandlers'
@@ -22,6 +24,10 @@ export interface ViewHandlersProps {
   calendars: Record<string, Calendar>
   tempcalendars: Record<string, Calendar>
   errorHandler: EventErrorHandler
+  timezone: string
+  isTablet: boolean
+  isMobile: boolean
+  t: (key: string) => string
 }
 
 export const createViewHandlers = (props: ViewHandlersProps) => {
@@ -32,10 +38,16 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     onViewChange,
     calendars,
     tempcalendars,
-    errorHandler
+    errorHandler,
+    timezone,
+    isTablet,
+    isMobile,
+    t
   } = props
 
-  const handleNowIndicatorContent = (arg: NowIndicatorContentArg) => {
+  const handleNowIndicatorContent = (
+    arg: NowIndicatorContentArg
+  ): React.ReactElement | undefined => {
     if (arg.isAxis) {
       return React.createElement(
         'div',
@@ -47,41 +59,95 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
-            timeZone: arg.view.dateEnv.timeZone
+            timeZone: (arg.view.dateEnv as unknown as { timeZone: string })
+              .timeZone
           })
         )
       )
     }
+    return undefined
   }
 
-  const handleDayHeaderDidMount = (arg: DayHeaderMountArg) => {
-    if (arg.view.type === CALENDAR_VIEWS.timeGridWeek) {
-      const headerEl = arg.el
+  const handleDayHeaderClick = (arg: DayHeaderContentArg): void => {
+    const startOfDay = new Date(arg.date)
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date(arg.date)
+    endOfDay.setHours(23, 59, 59, 999)
+    calendarRef.current?.select({
+      start: startOfDay,
+      end: endOfDay,
+      allDay: true
+    })
+  }
 
-      const handleDayHeaderClick = () => {
-        calendarRef.current?.changeView(CALENDAR_VIEWS.timeGridDay, arg.date)
-        setSelectedDate(new Date(arg.date))
-        setSelectedMiniDate(new Date(arg.date))
-
-        if (onViewChange) {
-          onViewChange(CALENDAR_VIEWS.timeGridDay)
-        }
-      }
-
-      headerEl.addEventListener('click', handleDayHeaderClick)
-      headerEl.__dayHeaderClickHandler = handleDayHeaderClick
+  const handleDayNumberClick = (
+    e: React.MouseEvent,
+    arg: DayHeaderContentArg
+  ): void => {
+    e.stopPropagation()
+    calendarRef.current?.changeView(CALENDAR_VIEWS.timeGridDay, arg.date)
+    setSelectedDate(new Date(arg.date))
+    setSelectedMiniDate(new Date(arg.date))
+    if (onViewChange) {
+      onViewChange(CALENDAR_VIEWS.timeGridDay)
     }
   }
 
-  const handleDayHeaderWillUnmount = (arg: DayHeaderMountArg) => {
+  const handleDayHeaderContent = (arg: DayHeaderContentArg): JSX.Element => {
+    const m = moment.tz(arg.date, timezone)
+    const date = m.date()
+    const weekDay = m
+      .toDate()
+      .toLocaleDateString(t('locale'), {
+        weekday: 'short',
+        timeZone: timezone
+      })
+      .toUpperCase()
+
+    return React.createElement(
+      'div',
+      {
+        className: `fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`
+      },
+      React.createElement('small', null, weekDay),
+      arg.view.type !== CALENDAR_VIEWS.dayGridMonth
+        ? React.createElement(
+            'span',
+            {
+              className: `fc-daygrid-day-number ${arg.isToday ? 'current-date' : ''}`,
+              onClick: (e: React.MouseEvent) => handleDayNumberClick(e, arg)
+            },
+            date
+          )
+        : null
+    )
+  }
+
+  const handleDayHeaderDidMount = (arg: DayHeaderMountArg): void => {
+    if (arg.view.type === CALENDAR_VIEWS.timeGridWeek) {
+      const headerEl = arg.el
+
+      const handleDayClick = (): void => {
+        handleDayHeaderClick(arg)
+      }
+
+      headerEl.addEventListener('click', handleDayClick)
+      headerEl.__dayHeaderClickHandler = handleDayClick
+    }
+  }
+
+  const handleDayHeaderWillUnmount = (arg: DayHeaderMountArg): void => {
     const headerEl = arg.el
     if (headerEl.__dayHeaderClickHandler) {
-      headerEl.removeEventListener('click', headerEl.__dayHeaderClickHandler)
+      headerEl.removeEventListener(
+        'click',
+        headerEl.__dayHeaderClickHandler as EventListener
+      )
       delete headerEl.__dayHeaderClickHandler
     }
   }
 
-  const handleViewDidMount = (arg: ViewMountArg) => {
+  const handleViewDidMount = (arg: ViewMountArg): void => {
     if (
       arg.view.type === CALENDAR_VIEWS.timeGridWeek ||
       arg.view.type === CALENDAR_VIEWS.timeGridDay
@@ -94,15 +160,20 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     }
   }
 
-  const handleViewWillUnmount = (arg: ViewMountArg) => {
-    if (arg.el.__timeInterval) {
-      clearInterval(arg.el.__timeInterval)
-      delete arg.el.__timeInterval
+  const handleViewWillUnmount = (arg: ViewMountArg): void => {
+    const el = arg.el as HTMLElement & {
+      __timeInterval?: ReturnType<typeof setInterval>
+      __timeObserver?: { disconnect: () => void }
     }
 
-    if (arg.el.__timeObserver) {
-      arg.el.__timeObserver.disconnect()
-      delete arg.el.__timeObserver
+    if (el.__timeInterval !== undefined) {
+      clearInterval(el.__timeInterval)
+      delete el.__timeInterval
+    }
+
+    if (el.__timeObserver !== undefined) {
+      el.__timeObserver.disconnect()
+      delete el.__timeObserver
     }
 
     const calendarEl = document.querySelector('.fc') as HTMLElement
@@ -112,7 +183,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     }
   }
 
-  const handleEventContent = (arg: EventContentArg) => {
+  const handleEventContent = (arg: EventContentArg): React.ReactElement => {
     return React.createElement(EventChip, {
       arg,
       calendars,
@@ -121,11 +192,16 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
     })
   }
 
-  const handleEventDidMount = (arg: EventMountArg) => {
-    const attendees = arg.event._def.extendedProps.attendee || []
-    if (!calendars[arg.event._def.extendedProps.calId]) return
+  const handleEventDidMount = (arg: EventMountArg): void => {
+    const extendedProps = arg.event._def.extendedProps as {
+      attendee?: userAttendee[]
+      calId: string
+    }
+    const attendees = extendedProps.attendee ?? []
+    if (!calendars[extendedProps.calId]) return
+
     const ownerEmails = new Set(
-      calendars[arg.event._def.extendedProps.calId].owner?.emails?.map(email =>
+      calendars[extendedProps.calId].owner?.emails?.map(email =>
         email.toLowerCase()
       )
     )
@@ -158,6 +234,7 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
 
   return {
     handleNowIndicatorContent,
+    handleDayHeaderContent,
     handleDayHeaderDidMount,
     handleDayHeaderWillUnmount,
     handleViewDidMount,
