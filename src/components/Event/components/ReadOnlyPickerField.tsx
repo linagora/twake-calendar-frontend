@@ -1,6 +1,7 @@
 // ReadOnlyPickerField
 
 import { TextField } from '@linagora/twake-mui'
+import { TimePickerFieldProps } from '@mui/x-date-pickers/TimePicker'
 import { DatePickerFieldProps } from '@mui/x-date-pickers/DatePicker'
 import {
   useParsedFormat,
@@ -12,7 +13,8 @@ import {
   PickerFieldAdapter,
   PickerValidationScope,
   useValidation,
-  validateDate
+  validateDate,
+  validateTime
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
 
@@ -94,5 +96,11 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
 export function ReadOnlyDateField(props: DatePickerFieldProps) {
   return (
     <ReadOnlyPickerField {...props} fieldType="date" validator={validateDate} />
+  )
+}
+
+export function ReadOnlyTimeField(props: TimePickerFieldProps) {
+  return (
+    <ReadOnlyPickerField {...props} fieldType="time" validator={validateTime} />
   )
 }

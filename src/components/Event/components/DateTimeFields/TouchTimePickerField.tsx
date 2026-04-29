@@ -19,7 +19,7 @@ import { PickerValue } from '@mui/x-date-pickers/internals'
 import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { EditableTimeField } from '../EditableTimeField'
+import { ReadOnlyTimeField } from '../ReadOnlyPickerField'
 import { getTimeFieldSlotProps } from './dateTimePickerSlotProps'
 import { TimePickerFieldProps } from './TimePickerField'
 
@@ -109,7 +109,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
           hours: renderTimeViewClock,
           minutes: renderTimeViewClock
         }}
-        slots={{ field: EditableTimeField }}
+        slots={{ field: ReadOnlyTimeField }}
         slotProps={{
           openPickerButton: { sx: { display: 'none' } },
           field: {
