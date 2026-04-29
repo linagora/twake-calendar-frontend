@@ -30,6 +30,13 @@ function buildSelectArg(date: string, time: string): DateSelectArg {
   return { start, end, allDay: false } as DateSelectArg
 }
 
+function isAllDayTap(x: number, y: number): string | null {
+  const el = document.elementFromPoint(x, y)
+  if (el?.closest('.fc-event')) return null
+  const dayCell = el?.closest('.fc-daygrid-body td.fc-daygrid-day[data-date]')
+  return dayCell?.getAttribute('data-date') ?? null
+}
+
 export function useTouchListener(
   handleDateSelect: (selectInfo: DateSelectArg | null) => void,
   isTouch: boolean,
@@ -61,6 +68,18 @@ export function useTouchListener(
 
       if (time && date) {
         handleDateSelect(buildSelectArg(date, time))
+        return
+      }
+
+      const allDayDate = isAllDayTap(touch.clientX, touch.clientY)
+      if (allDayDate) {
+        const startOfDay = new Date(`${allDayDate}T00:00:00`)
+        const endOfDay = new Date(`${allDayDate}T23:59:59`)
+        handleDateSelect({
+          start: startOfDay,
+          end: endOfDay,
+          allDay: true
+        } as DateSelectArg)
       }
     }
 

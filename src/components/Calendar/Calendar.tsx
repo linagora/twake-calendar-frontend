@@ -40,7 +40,7 @@ import { useCalendarViewHandlers } from './hooks/useCalendarViewHandlers'
 import { useSwipeNavigation } from './hooks/useSwipeNavigation'
 import Sidebar from './Sidebar/SideBar'
 import TempSearchDialog from './TempSearchDialog'
-import { useTouchListener } from './useTouchListener'
+import { useTouchListener } from './hooks/useTouchListener'
 import {
   eventToFullCalendarFormat,
   extractEvents,
