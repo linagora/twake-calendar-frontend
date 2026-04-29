@@ -32,7 +32,13 @@ function buildSelectArg(date: string, time: string): DateSelectArg {
 
 function isAllDayTap(x: number, y: number): string | null {
   const el = document.elementFromPoint(x, y)
-  if (el?.closest('.fc-event')) return null
+  if (
+    el?.closest(
+      '.fc-event, .fc-daygrid-more-link, a, button, [role="button"], [data-navlink]'
+    )
+  ) {
+    return null
+  }
   const dayCell = el?.closest('.fc-daygrid-body td.fc-daygrid-day[data-date]')
   return dayCell?.getAttribute('data-date') ?? null
 }
