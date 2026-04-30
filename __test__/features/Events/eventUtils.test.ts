@@ -591,8 +591,8 @@ describe('calendarEventToJCal', () => {
 
     expect(veventProps).toEqual(
       expect.arrayContaining([
-        ['dtstart', { tzid: 'Europe/Paris' }, 'date', '2025-07-21'],
-        ['dtend', { tzid: 'Europe/Paris' }, 'date', '2025-07-22']
+        ['dtstart', {}, 'date', '2025-07-21'],
+        ['dtend', {}, 'date', '2025-07-22']
       ])
     )
   })
@@ -640,8 +640,8 @@ describe('calendarEventToJCal', () => {
         ['uid', {}, 'text', 'event-123'],
         ['summary', {}, 'text', 'Team Meeting'],
         ['transp', {}, 'text', 'OPAQUE'],
-        ['dtstart', { tzid: 'Europe/Paris' }, 'date', '2025-07-23'],
-        ['dtend', { tzid: 'Europe/Paris' }, 'date', '2025-07-24'],
+        ['dtstart', {}, 'date', '2025-07-23'],
+        ['dtend', {}, 'date', '2025-07-24'],
         ['class', {}, 'text', 'PUBLIC'],
         ['location', {}, 'text', 'Room 101'],
         ['description', {}, 'text', 'Discuss project roadmap.'],
