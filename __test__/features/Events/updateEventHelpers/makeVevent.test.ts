@@ -520,3 +520,113 @@ describe('no duplicate core properties', () => {
     expect(getAllProps(vevent, name)).toHaveLength(1)
   })
 })
+
+describe('RFC 5545 §3.2.19 – TZID must not appear on DATE values', () => {
+  it('DTSTART has no tzid parameter for all-day events', () => {
+    const event = baseEvent({ allday: true, start: '2024-06-01' })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const params = getProp(vevent, 'dtstart')![1] as Record<string, unknown>
+    expect(params.tzid).toBeUndefined()
+  })
+
+  it('DTSTART carries tzid for timed events', () => {
+    const vevent = makeVevent(baseEvent({ allday: false }), TZID, OWNER)
+    const params = getProp(vevent, 'dtstart')![1] as Record<string, unknown>
+    expect(params.tzid).toBe(TZID)
+  })
+
+  it('DTEND has no tzid parameter for all-day events', () => {
+    const event = baseEvent({
+      allday: true,
+      start: '2024-06-01',
+      end: '2024-06-02'
+    })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const params = getProp(vevent, 'dtend')![1] as Record<string, unknown>
+    expect(params.tzid).toBeUndefined()
+  })
+
+  it('DTEND carries tzid for timed events', () => {
+    const vevent = makeVevent(baseEvent(), TZID, OWNER)
+    const params = getProp(vevent, 'dtend')![1] as Record<string, unknown>
+    expect(params.tzid).toBe(TZID)
+  })
+
+  it('RECURRENCE-ID has no tzid parameter for all-day exception events', () => {
+    const event = baseEvent({
+      allday: true,
+      start: '2024-06-01',
+      recurrenceId: '2024-06-08'
+    })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    const params = getProp(vevent, 'recurrence-id')![1] as Record<
+      string,
+      unknown
+    >
+    expect(params.tzid).toBeUndefined()
+  })
+
+  it('RECURRENCE-ID carries tzid for timed exception events', () => {
+    const event = baseEvent({ recurrenceId: '2024-06-08T10:00:00' })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    const params = getProp(vevent, 'recurrence-id')![1] as Record<
+      string,
+      unknown
+    >
+    expect(params.tzid).toBe(TZID)
+  })
+
+  it('EXDATE has no tzid parameter for all-day events', () => {
+    const event = baseEvent({
+      allday: true,
+      start: '2024-06-01',
+      exdates: ['2024-06-08']
+    })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const params = getProp(vevent, 'exdate')![1] as Record<string, unknown>
+    expect(params.tzid).toBeUndefined()
+  })
+
+  it('EXDATE carries tzid for timed events', () => {
+    const event = baseEvent({ exdates: ['2024-06-08T10:00:00'] })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const params = getProp(vevent, 'exdate')![1] as Record<string, unknown>
+    expect(params.tzid).toBe(TZID)
+  })
+})
+
+describe('RFC 5545 – RECURRENCE-ID all-day', () => {
+  it('uses "date" value type for all-day exception events', () => {
+    const event = baseEvent({
+      allday: true,
+      start: '2024-06-01',
+      recurrenceId: '2024-06-08'
+    })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    expect(getProp(vevent, 'recurrence-id')![2]).toBe('date')
+  })
+
+  it('uses "date-time" value type for timed exception events', () => {
+    const event = baseEvent({ recurrenceId: '2024-06-08T10:00:00' })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    expect(getProp(vevent, 'recurrence-id')![2]).toBe('date-time')
+  })
+})
+
+describe('RFC 5545 – EXDATE all-day', () => {
+  it('uses "date" value type for all-day events', () => {
+    const event = baseEvent({
+      allday: true,
+      start: '2024-06-01',
+      exdates: ['2024-06-08']
+    })
+    const vevent = makeVevent(event, TZID, OWNER)
+    expect(getProp(vevent, 'exdate')![2]).toBe('date')
+  })
+
+  it('uses "date-time" value type for timed events', () => {
+    const event = baseEvent({ exdates: ['2024-06-08T10:00:00'] })
+    const vevent = makeVevent(event, TZID, OWNER)
+    expect(getProp(vevent, 'exdate')![2]).toBe('date-time')
+  })
+})

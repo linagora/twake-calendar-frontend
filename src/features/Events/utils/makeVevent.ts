@@ -16,7 +16,7 @@ export function makeVevent(
       ['transp', {}, 'text', event.transp ?? 'OPAQUE'],
       [
         'dtstart',
-        { tzid },
+        event.allday ? {} : { tzid },
         event.allday ? 'date' : 'date-time',
         formatDateToICal(new Date(event.start), event.allday ?? false, tzid)
       ],
@@ -50,7 +50,7 @@ export function makeVevent(
   if (event.end) {
     vevent[1].push([
       'dtend',
-      { tzid },
+      event.allday ? {} : { tzid },
       event.allday ? 'date' : 'date-time',
       formatDateToICal(new Date(event.end), event.allday ?? false, tzid)
     ])
@@ -69,7 +69,7 @@ export function makeVevent(
   if (event.recurrenceId && !isMasterEvent) {
     vevent[1].push([
       'recurrence-id',
-      { tzid },
+      event.allday ? {} : { tzid },
       event.allday ? 'date' : 'date-time',
       formatDateToICal(
         new Date(event.recurrenceId),
@@ -123,9 +123,9 @@ export function makeVevent(
     event.exdates.forEach(ex => {
       vevent[1].push([
         'exdate',
-        { tzid },
-        'date-time',
-        formatDateToICal(new Date(ex), false, tzid)
+        event.allday ? {} : { tzid },
+        event.allday ? 'date' : 'date-time',
+        formatDateToICal(new Date(ex), event.allday ?? false, tzid)
       ])
     })
   }
