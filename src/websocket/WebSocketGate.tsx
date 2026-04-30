@@ -104,8 +104,6 @@ export function WebSocketGate() {
           `WebSocket closed unexpectedly (code: ${event.code}, reason: ${event.reason || 'none'}). ` +
             `Attempting to reconnect...`
         )
-        setWebSocketStatus(t('websocket.closedUnexpectedly'))
-        setWebSocketStatusSerity('warning')
         scheduleReconnect()
       } else {
         reconnectAttemptsRef.current = 0
@@ -151,8 +149,6 @@ export function WebSocketGate() {
 
       if (hadSocketBeforeRef.current) {
         justReconnectedRef.current = true
-        setWebSocketStatus(t('websocket.reconnected'))
-        setWebSocketStatusSerity('success')
       }
 
       hadSocketBeforeRef.current = true
@@ -274,8 +270,6 @@ export function WebSocketGate() {
   // Handle browser online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      setWebSocketStatus(t('websocket.browserOnline'))
-      setWebSocketStatusSerity('success')
       if (!isSocketOpen && isAuthenticatedRef.current) {
         reconnectAttemptsRef.current = 0
         clearReconnectTimeout()
@@ -284,8 +278,6 @@ export function WebSocketGate() {
     }
 
     const handleOffline = () => {
-      setWebSocketStatus(t('websocket.browserOffline'))
-      setWebSocketStatusSerity('warning')
       cleanupConnection()
     }
 
@@ -323,8 +315,6 @@ export function WebSocketGate() {
     const pingCleanup = setupWebSocketPing(socketRef.current, {
       onConnectionDead: () => {
         console.warn('WebSocket connection appears dead (no pong received)')
-        setWebSocketStatus(t('websocket.browserOffline'))
-        setWebSocketStatusSerity('warning')
 
         // Trigger reconnection
         if (socketRef.current) {
