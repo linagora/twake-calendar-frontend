@@ -67,7 +67,16 @@ export function makeVevent(
     vevent[1].push(['location', {}, 'text', event.location])
   }
   if (event.recurrenceId && !isMasterEvent) {
-    vevent[1].push(['recurrence-id', {}, 'date-time', event.recurrenceId])
+    vevent[1].push([
+      'recurrence-id',
+      { tzid },
+      event.allday ? 'date' : 'date-time',
+      formatDateToICal(
+        new Date(event.recurrenceId),
+        event.allday ?? false,
+        tzid
+      )
+    ])
   }
   if (event.description) {
     vevent[1].push(['description', {}, 'text', event.description])
