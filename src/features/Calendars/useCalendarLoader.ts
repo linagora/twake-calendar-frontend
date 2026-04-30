@@ -100,6 +100,9 @@ export function useCalendarDataLoader({
     const toApiDate = (ms: number) => formatDateToYYYYMMDDTHHMMSS(new Date(ms))
 
     const run = async () => {
+      // Guard: ensure all selected calendars are present in the store before fetching
+      const allReady = sortedSelectedCalendars.every(id => !!calendars[id])
+      if (!allReady) return
       // Active load: selected calendars, visible range, gaps only
       // Exclude intervals already fetched OR currently in-flight to avoid duplicates.
       const activeUnits = sortedSelectedCalendars.flatMap(id => {
@@ -238,6 +241,7 @@ export function useCalendarDataLoader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dispatch,
+    calendars,
     visibleStart,
     visibleEnd,
     sortedSelectedCalendars,
