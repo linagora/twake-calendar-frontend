@@ -25,11 +25,14 @@ export const SmallNavigationControls: React.FC<{
           title={t('menubar.today')}
           sx={{
             border: '1px solid',
-            borderRadius: '12px'
+            borderRadius: '12px',
+            width: '38px',
+            height: '38px'
           }}
+          size="small"
           onClick={() => onNavigate('today')}
         >
-          <TodayIcon />
+          <TodayIcon fontSize="inherit" />
         </IconButton>
         <IconButton
           onClick={() => onNavigate('next')}
