@@ -8,6 +8,16 @@ export const useCalendarViewHandlers = (
   const viewHandlers = createViewHandlers(props)
 
   return {
+    handleDayHeaderContent: useCallback(viewHandlers.handleDayHeaderContent, [
+      props.calendarRef,
+      props.timezone,
+      props.isTablet,
+      props.isMobile,
+      props.t,
+      props.setSelectedDate,
+      props.setSelectedMiniDate,
+      props.onViewChange
+    ]),
     handleDayHeaderDidMount: useCallback(viewHandlers.handleDayHeaderDidMount, [
       props.calendarRef,
       props.setSelectedDate,

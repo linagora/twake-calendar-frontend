@@ -1,4 +1,5 @@
 import { DateSelectArg } from '@fullcalendar/core'
+import { endOfDay } from 'date-fns'
 import { RefObject, useEffect } from 'react'
 
 const MOVE_THRESHOLD = 10
@@ -28,6 +29,19 @@ function buildSelectArg(date: string, time: string): DateSelectArg {
   const start = new Date(`${date}T${time}`)
   const end = new Date(start.getTime() + 30 * 60 * 1000)
   return { start, end, allDay: false } as DateSelectArg
+}
+
+function isAllDayTap(x: number, y: number): string | null {
+  const el = document.elementFromPoint(x, y)
+  if (
+    el?.closest(
+      '.fc-event, .fc-daygrid-more-link, a, button, [role="button"], [data-navlink]'
+    )
+  ) {
+    return null
+  }
+  const dayCell = el?.closest('.fc-daygrid-body td.fc-daygrid-day[data-date]')
+  return dayCell?.getAttribute('data-date') ?? null
 }
 
 export function useTouchListener(
@@ -61,6 +75,18 @@ export function useTouchListener(
 
       if (time && date) {
         handleDateSelect(buildSelectArg(date, time))
+        return
+      }
+
+      const allDayDate = isAllDayTap(touch.clientX, touch.clientY)
+      if (allDayDate) {
+        const startOfDay = new Date(`${allDayDate}T00:00:00`)
+        const endDate = endOfDay(new Date(allDayDate))
+        handleDateSelect({
+          start: startOfDay,
+          end: endDate,
+          allDay: true
+        } as DateSelectArg)
       }
     }
 
