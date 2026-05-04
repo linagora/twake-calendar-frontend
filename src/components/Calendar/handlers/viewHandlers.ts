@@ -11,6 +11,7 @@ import {
   NowIndicatorContentArg,
   ViewMountArg
 } from '@fullcalendar/core'
+import { endOfDay } from 'date-fns'
 import moment from 'moment-timezone'
 import React from 'react'
 import { CALENDAR_VIEWS } from '../utils/constants'
@@ -71,11 +72,11 @@ export const createViewHandlers = (props: ViewHandlersProps) => {
   const handleDayHeaderClick = (arg: DayHeaderContentArg): void => {
     const startOfDay = new Date(arg.date)
     startOfDay.setHours(0, 0, 0, 0)
-    const endOfDay = new Date(arg.date)
-    endOfDay.setHours(23, 59, 59, 999)
+    const endOfClickedDay = endOfDay(new Date(arg.date))
+
     calendarRef.current?.select({
       start: startOfDay,
-      end: endOfDay,
+      end: endOfClickedDay,
       allDay: true
     })
   }
