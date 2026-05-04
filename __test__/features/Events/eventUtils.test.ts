@@ -1421,6 +1421,62 @@ describe('detectRecurringEventChanges', () => {
   })
 })
 
+describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
+  const baseColor = { light: '#00FF00' }
+  const calendar = { id: 'calendar-123' } as Calendar
+  const baseProps: VObjectProperty[] = [
+    ['uid', {}, 'text', 'event-wkst-test'],
+    ['dtstart', {}, 'date-time', '20240101T100000Z'],
+    ['dtend', {}, 'date-time', '20240101T110000Z'],
+    ['summary', {}, 'text', 'Recurring Event']
+  ]
+
+  it('stores wkst when given as a weekday string', () => {
+    const data: VObjectProperty[] = [
+      ...baseProps,
+      ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 'MO' }]
+    ]
+    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    expect(result.repetition?.wkst).toBe('MO')
+  })
+
+  it('converts numeric wkst (ical.js internal format) to weekday string', () => {
+    // ical.js stores WKST=MO as 2 internally when parsing to jCal
+    const data: VObjectProperty[] = [
+      ...baseProps,
+      ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 2 }]
+    ]
+    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    expect(result.repetition?.wkst).toBe('MO')
+  })
+
+  it.each([
+    [1, 'SU'],
+    [2, 'MO'],
+    [3, 'TU'],
+    [4, 'WE'],
+    [5, 'TH'],
+    [6, 'FR'],
+    [7, 'SA']
+  ])('maps numeric wkst %i to weekday string "%s"', (num, expected) => {
+    const data: VObjectProperty[] = [
+      ...baseProps,
+      ['rrule', {}, 'recur', { freq: 'WEEKLY', wkst: num }]
+    ]
+    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    expect(result.repetition?.wkst).toBe(expected)
+  })
+
+  it('omits wkst from repetition when not present in rrule', () => {
+    const data: VObjectProperty[] = [
+      ...baseProps,
+      ['rrule', {}, 'recur', { freq: 'WEEKLY', byday: 'MO' }]
+    ]
+    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    expect(result.repetition?.wkst).toBeUndefined()
+  })
+})
+
 describe('parseCalendarEvent - delegated calendar URL handling', () => {
   const baseColor = { light: '#00FF00' }
   const rawData: VObjectProperty[] = [

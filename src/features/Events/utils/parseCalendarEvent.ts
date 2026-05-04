@@ -1,4 +1,15 @@
 import { convertEventDateTimeToISO } from '@/utils/timezone'
+
+// ical.js parses WKST as a number (1=SU, 2=MO, ..., 7=SA). Map it back to the RFC 5545 weekday string.
+const WKST_NUM_TO_DAY: Record<number, string> = {
+  1: 'SU',
+  2: 'MO',
+  3: 'TU',
+  4: 'WE',
+  5: 'TH',
+  6: 'FR',
+  7: 'SA'
+}
 import moment from 'moment-timezone'
 import { Calendar } from '../../Calendars/CalendarTypes'
 import {
@@ -173,6 +184,12 @@ export function parseCalendarEvent(
         }
         if (ruleValue.interval) {
           event.repetition.interval = ruleValue.interval
+        }
+        if (ruleValue.wkst != null) {
+          event.repetition.wkst =
+            typeof ruleValue.wkst === 'number'
+              ? WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst)
+              : ruleValue.wkst
         }
         break
       }

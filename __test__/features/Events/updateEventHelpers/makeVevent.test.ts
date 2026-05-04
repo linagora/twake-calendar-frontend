@@ -388,6 +388,22 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
     expect(rule.byday).toBeUndefined()
   })
 
+  it('preserves wkst as a weekday string (issue #860)', () => {
+    const event = baseEvent({
+      repetition: { freq: 'WEEKLY', interval: 1, byday: ['TH'], wkst: 'MO' }
+    })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
+    expect(rule.wkst).toBe('MO')
+  })
+
+  it('omits wkst when absent', () => {
+    const event = baseEvent({ repetition: { freq: 'WEEKLY', byday: ['MO'] } })
+    const vevent = makeVevent(event, TZID, OWNER)
+    const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
+    expect(rule.wkst).toBeUndefined()
+  })
+
   it('value type is "recur"', () => {
     const event = baseEvent({ repetition: { freq: 'MONTHLY' } })
     const vevent = makeVevent(event, TZID, OWNER)

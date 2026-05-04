@@ -77,4 +77,5 @@ export interface RepetitionRule {
   count?: number
   until?: string
   byday?: string | string[]
+  wkst?: string | number
 }

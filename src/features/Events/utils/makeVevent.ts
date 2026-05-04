@@ -98,6 +98,9 @@ export function makeVevent(
     ) {
       repetitionRule.byday = event.repetition.byday
     }
+    if (event.repetition.wkst) {
+      repetitionRule.wkst = event.repetition.wkst
+    }
     vevent[1].push(['rrule', {}, 'recur', repetitionRule])
   }
 

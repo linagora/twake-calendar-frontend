@@ -39,6 +39,7 @@ export interface RepetitionObject {
   byday?: string[] | null
   occurrences?: number | null
   endDate?: string | null
+  wkst?: string | null
 }
 
 export interface AlarmObject {
