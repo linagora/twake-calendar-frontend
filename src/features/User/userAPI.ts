@@ -1,34 +1,25 @@
 import { User } from '@/components/Attendees/types'
-import { api } from '@/utils/apiUtils'
 import { isValidEmail } from '@/utils/isValidEmail'
 import { BusinessHour } from '../Settings/SettingsSlice'
 import { OpenPaasUserData } from './type/OpenPaasUserData'
-import { ResourceData } from './type/ResourceData'
-import { fetchUserByEmail } from './UserDao'
 import {
-  ConfigurationItem,
-  ModuleConfiguration,
-  SearchResponseItem
-} from './userDataTypes'
+  fetchCurrentUser,
+  fetchUserByEmail,
+  fetchUserById,
+  patchConfigurations,
+  searchPeople
+} from './UserDao'
+import { ConfigurationItem, ModuleConfiguration } from './userDataTypes'
 
 export async function getOpenPaasUser() {
-  const user = await api.get(`api/user`)
-  return user.json()
+  return fetchCurrentUser()
 }
 
 export async function searchUsers(
   query: string,
   objectTypes: string[] = ['user', 'contact']
 ): Promise<User[]> {
-  const response: SearchResponseItem[] = await api
-    .post(`api/people/search`, {
-      body: JSON.stringify({
-        limit: 10,
-        objectTypes,
-        q: query
-      })
-    })
-    .json()
+  const response = await searchPeople(query, objectTypes)
 
   return response.map(user => ({
     email: user.emailAddresses?.[0]?.value || '',
@@ -41,13 +32,7 @@ export async function searchUsers(
 }
 
 export async function getUserDetails(id: string): Promise<OpenPaasUserData> {
-  const user = await api.get(`api/users/${id}`).json()
-  return user as OpenPaasUserData
-}
-
-export async function getResourceDetails(id: string): Promise<ResourceData> {
-  const resource = await api.get(`api/resources/${id}`).json()
-  return resource as ResourceData
+  return fetchUserById(id)
 }
 
 export interface UserConfigurationUpdates {
@@ -144,9 +129,7 @@ export async function updateUserConfigurations(
     return Promise.resolve({ status: 204 })
   }
 
-  return await api.patch(`api/configurations?scope=user`, {
-    json: modules
-  })
+  return await patchConfigurations(modules)
 }
 
 export async function getUserDataFromEmail(

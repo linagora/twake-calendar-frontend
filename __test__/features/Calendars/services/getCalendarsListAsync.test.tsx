@@ -1,11 +1,11 @@
-import { getCalendarsListAsync } from '@/features/Calendars/services/getCalendarsListAsync'
-import { getOpenPaasUser } from '@/features/User/userAPI'
-import { fetchOwnerData } from '@/features/Calendars/services/helpers'
 import { getCalendars } from '@/features/Calendars/CalendarApi'
-import { formatReduxError } from '@/utils/errorUtils'
+import { getCalendarsListAsync } from '@/features/Calendars/services/getCalendarsListAsync'
+import { fetchOwnerData } from '@/features/Calendars/services/helpers'
 import { normalizeCalendar } from '@/features/Calendars/utils/normalizeCalendar'
+import { fetchCurrentUser } from '@/features/User/UserDao'
+import { formatReduxError } from '@/utils/errorUtils'
 
-jest.mock('@/features/User/userAPI')
+jest.mock('@/features/User/UserDao')
 jest.mock('@/features/Calendars/services/helpers')
 jest.mock('@/features/Calendars/CalendarApi')
 jest.mock('@/utils/errorUtils')
@@ -18,7 +18,7 @@ jest.mock('@mui/material/styles', () => ({
   createTheme: jest.fn().mockReturnValue({})
 }))
 
-const mockedGetOpenPaasUser = getOpenPaasUser as jest.Mock
+const mockedFetchCurrentUser = fetchCurrentUser as jest.Mock
 const mockedFetchOwnerData = fetchOwnerData as jest.Mock
 const mockedGetCalendars = getCalendars as jest.Mock
 const mockedFormatReduxError = formatReduxError as jest.Mock
@@ -122,25 +122,25 @@ describe('getCalendarsListAsync', () => {
       owner: { firstname: 'Jane', lastname: 'Smith' }
     })
 
-    expect(mockedGetOpenPaasUser).not.toHaveBeenCalled() // User ID existed in state
+    expect(mockedFetchCurrentUser).not.toHaveBeenCalled() // User ID existed in state
     expect(mockedGetCalendars).toHaveBeenCalledWith('user-123')
   })
 
   it('should fetch user using getOpenPaasUser if openpaasId is not in state', async () => {
     getState.mockReturnValue({ calendars: {}, user: {} })
-    mockedGetOpenPaasUser.mockResolvedValue({ id: 'fetched-user-123' })
+    mockedFetchCurrentUser.mockResolvedValue({ id: 'fetched-user-123' })
     mockedGetCalendars.mockResolvedValue({ _embedded: { 'dav:calendar': [] } })
 
     const thunk = getCalendarsListAsync()
     await thunk(dispatch, getState, undefined)
 
-    expect(mockedGetOpenPaasUser).toHaveBeenCalled()
+    expect(mockedFetchCurrentUser).toHaveBeenCalled()
     expect(mockedGetCalendars).toHaveBeenCalledWith('fetched-user-123')
   })
 
   it('should handle error when API call fails', async () => {
     getState.mockReturnValue({ calendars: {}, user: {} })
-    mockedGetOpenPaasUser.mockResolvedValue({ id: 'fetched-user-123' })
+    mockedFetchCurrentUser.mockResolvedValue({ id: 'fetched-user-123' })
 
     mockedGetCalendars.mockRejectedValue({
       response: { status: 500 },

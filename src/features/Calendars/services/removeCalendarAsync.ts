@@ -1,6 +1,6 @@
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { removeCalendar } from '../CalendarApi'
+import { calendarAction } from '../CalendarDAO'
 import { RejectedError } from '../types/RejectedError'
 
 export const removeCalendarAsync = createAsyncThunk<
@@ -16,7 +16,7 @@ export const removeCalendarAsync = createAsyncThunk<
   'calendars/removeCalendar',
   async ({ calId, calLink }, { rejectWithValue }) => {
     try {
-      await removeCalendar(calLink)
+      await calendarAction('DELETE', calLink)
       return {
         calId
       }

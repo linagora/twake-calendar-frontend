@@ -1,13 +1,13 @@
 import CalendarPopover from '@/components/Calendar/CalendarModal'
-import { getSecretLink } from '@/features/Calendars/CalendarApi'
+import { fetchSecretLink } from '@/features/Calendars/CalendarDAO'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import * as eventThunks from '@/features/Calendars/services'
 import * as delegationThunks from '@/features/Calendars/services/updateDelegationCalendarAsync'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@/features/Calendars/CalendarApi', () => ({
-  getSecretLink: jest.fn()
+jest.mock('@/features/Calendars/CalendarDAO', () => ({
+  fetchSecretLink: jest.fn()
 }))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
@@ -331,7 +331,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     Object.assign(navigator, {
       clipboard: { writeText: jest.fn() }
     })
-    ;(getSecretLink as jest.Mock).mockResolvedValue({
+    ;(fetchSecretLink as jest.Mock).mockResolvedValue({
       secretLink: 'https://example.org/secret/initial'
     })
 
@@ -460,7 +460,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
   it('fetches and resets the secret link', async () => {
     window.DAV_BASE_URL = 'https://cal.example.org'
-    ;(getSecretLink as jest.Mock)
+    ;(fetchSecretLink as jest.Mock)
       .mockResolvedValueOnce({
         secretLink: 'https://example.org/secret/initial'
       })
@@ -493,7 +493,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
       ).toBeInTheDocument()
     )
 
-    expect(getSecretLink).toHaveBeenCalledWith(
+    expect(fetchSecretLink).toHaveBeenCalledWith(
       existingCalendar.link.replace('.json', ''),
       true
     )

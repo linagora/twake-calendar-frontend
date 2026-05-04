@@ -1,11 +1,12 @@
+import { fetchResourceById } from '@/features/User/ResourceDAO'
 import { OpenPaasUserData } from '@/features/User/type/OpenPaasUserData'
-import { getResourceDetails, getUserDetails } from '@/features/User/userAPI'
+import { getUserDetails } from '@/features/User/userAPI'
 
 export const fetchOwnerOfResource = async (
   resourceId: string
 ): Promise<OpenPaasUserData> => {
   try {
-    const data = await getResourceDetails(resourceId)
+    const data = await fetchResourceById(resourceId)
     const ownerData = await getUserDetails(data.creator)
     return {
       ...ownerData,

@@ -1,4 +1,7 @@
-import { exportCalendar, getSecretLink } from '@/features/Calendars/CalendarApi'
+import {
+  fetchCalendarExport,
+  fetchSecretLink
+} from '@/features/Calendars/CalendarDAO'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   Box,
@@ -45,7 +48,7 @@ export function AccessTab({
 
   useEffect(() => {
     async function fetchSecret() {
-      const existing = await getSecretLink(
+      const existing = await fetchSecretLink(
         calendar.link.replace('.json', ''),
         false
       )
@@ -60,7 +63,7 @@ export function AccessTab({
   }
 
   const handleResetSecretLink = async () => {
-    const newSecret = await getSecretLink(
+    const newSecret = await fetchSecretLink(
       calendar.link.replace('.json', ''),
       true
     )
@@ -73,7 +76,7 @@ export function AccessTab({
   const handleExport = async () => {
     try {
       setExportLoading(true)
-      const exportedData = await exportCalendar(
+      const exportedData = await fetchCalendarExport(
         calendar.link.replace('.json', '')
       )
       const blob = new Blob([exportedData], { type: 'text/calendar' })

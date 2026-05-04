@@ -110,7 +110,7 @@ export function WebSocketGate() {
         clearReconnectTimeout()
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [scheduleReconnect, clearReconnectTimeout]
   )
 
@@ -156,7 +156,6 @@ export function WebSocketGate() {
 
       clearReconnectTimeout()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen, clearReconnectTimeout])
 
   // Manage WebSocket connection
@@ -297,7 +296,6 @@ export function WebSocketGate() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen, isAuthenticated, clearReconnectTimeout])
 
   useEffect(() => {
@@ -334,7 +332,6 @@ export function WebSocketGate() {
         pingCleanupRef.current = null
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSocketOpen])
 
   const triggerReconnect = useCallback(() => {
