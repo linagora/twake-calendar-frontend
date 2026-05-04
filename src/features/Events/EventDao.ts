@@ -97,7 +97,12 @@ function normalizeVeventRrule(vevents: VCalComponent[]): VCalComponent[] {
         if (typeof rule.wkst === 'number') {
           const dayStr = WKST_NUM_TO_DAY[rule.wkst]
           if (dayStr) {
-            return [prop[0], prop[1], prop[2], { ...rule, wkst: dayStr }] as VObjectProperty
+            return [
+              prop[0],
+              prop[1],
+              prop[2],
+              { ...rule, wkst: dayStr }
+            ] as VObjectProperty
           }
         }
       }

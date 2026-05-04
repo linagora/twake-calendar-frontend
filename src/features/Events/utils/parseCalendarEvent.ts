@@ -188,7 +188,7 @@ export function parseCalendarEvent(
         if (ruleValue.wkst != null) {
           event.repetition.wkst =
             typeof ruleValue.wkst === 'number'
-              ? WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst)
+              ? (WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst))
               : ruleValue.wkst
         }
         break
