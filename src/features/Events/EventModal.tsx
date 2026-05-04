@@ -1,938 +1,86 @@
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { useAppSelector } from '@/app/hooks'
 import { ResponsiveDialog } from '@/components/Dialog'
 import EventFormFields from '@/components/Event/EventFormFields'
-import { addDays } from '@/components/Event/utils/dateRules'
-import {
-  formatDateTimeInTimezone,
-  formatLocalDateTime
-} from '@/components/Event/utils/dateTimeFormatters'
-import { convertFormDateTimeToISO } from '@/components/Event/utils/dateTimeHelpers'
-import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
-import {
-  buildEventFormTempData,
-  clearEventFormTempData,
-  EventFormState,
-  restoreEventFormDataFromTemp as restoreEventFormDataFromStorage,
-  restoreFormDataFromTemp,
-  saveEventFormDataToTemp,
-  showErrorNotification
-} from '@/utils/eventFormTempStorage'
-import { useSelectedCalendars } from '@/utils/storage/useSelectedCalendars'
-import {
-  browserDefaultTimeZone,
-  getTimezoneOffset,
-  resolveTimezone
-} from '@/utils/timezone'
-import { TIMEZONES } from '@/utils/timezone-data'
-import { addVideoConferenceToDescription } from '@/utils/videoConferenceUtils'
+import type { EventFormHandle } from '@/components/Event/EventFormFields.types'
+import { clearEventFormTempData } from '@/utils/eventFormTempStorage'
 import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
-import React, {
-  startTransition,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '../Calendars/CalendarTypes'
-import { putEventAsync } from '../Calendars/services'
-import { userAttendee } from '../User/models/attendee'
-import { CalendarEvent, RepetitionObject } from './EventsTypes'
+import { CalendarEvent } from './EventsTypes'
 import { useEventOrganizer } from './useEventOrganizer'
-import { buildDelegatedEventURL } from './utils/buildDelegatedEventURL'
-import { Resource } from '@/components/Attendees/ResourceSearch'
+import { useCalendarPreviewSync } from '@/components/Event/hooks/useCalendarPreviewSync'
 import { EventActions } from './EventActions'
+import { useBuildInitialValues } from '@/components/Event/hooks/useBuildInitialValues'
+import { useSubmitCreateEvent } from '@/features/Events/hooks/useSubmitCreateEvent'
 
-function resolveSourceCalendarId(
-  calId: string | undefined,
-  calList: Record<string, Calendar>,
-  userId: string,
-  defaultCalendarId: string
-): string {
-  if (!calId) return defaultCalendarId
-  const sourceCalendar = calList[calId]
-  if (!sourceCalendar) return defaultCalendarId
-  const isWritable =
-    sourceCalendar.id?.split('/')[0] === userId ||
-    (sourceCalendar.delegated && sourceCalendar.access?.write)
-  return isWritable ? calId : defaultCalendarId
-}
-
-function EventPopover({
-  open,
-  onClose,
-  selectedRange,
-  setSelectedRange,
-  calendarRef,
-  event
-}: {
-  anchorEl: HTMLElement | null
+const EventPopover: React.FC<{
   open: boolean
   onClose: (refresh?: boolean) => void
   selectedRange: DateSelectArg | null
   setSelectedRange: React.Dispatch<React.SetStateAction<DateSelectArg | null>>
   calendarRef: React.RefObject<CalendarApi | null>
   event?: CalendarEvent
-}) {
-  const dispatch = useAppDispatch()
+}> = ({
+  open,
+  onClose,
+  selectedRange,
+  setSelectedRange,
+  calendarRef,
+  event
+}) => {
   const { t } = useI18n()
-  const selectedCalendarIds = useSelectedCalendars()
 
-  const userOrganizer = useAppSelector(state => state.user.organiserData)
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const calList = useAppSelector(state => state.calendars.list)
+  const userOrganizer = useAppSelector(state => state.user.organiserData)
+
+  const [showMore, setShowMore] = useState(false)
+  const formRef = useRef<EventFormHandle>(null)
+
+  const initialValues = useBuildInitialValues({
+    event,
+    selectedRange: open ? selectedRange : null
+  })
+
+  const { organizer } = useEventOrganizer({
+    calendarid: initialValues.calendarid ?? '',
+    calList,
+    userOrganizer
+  })
+
   const userPersonalCalendars: Calendar[] = Object.values(calList || {}).filter(
     cal =>
       cal.id?.split('/')[0] === userId || (cal.delegated && cal.access?.write)
   )
 
-  const timezoneList = useMemo(() => {
-    const zones = Object.keys(TIMEZONES.zones).sort()
-    const browserTz = resolveTimezone(browserDefaultTimeZone)
-
-    return { zones, browserTz, getTimezoneOffset }
-  }, [])
-
-  const calendarTimezone = useAppSelector(state => state.settings.timeZone)
-  const resolvedCalendarTimezone = useMemo(() => {
-    const tz = calendarTimezone || browserDefaultTimeZone
-    return resolveTimezone(tz)
-  }, [calendarTimezone])
-
-  const resources: Resource[] = useMemo(() => {
-    const resourcesInEvent =
-      event?.attendee?.filter(attendee => attendee.cutype === 'RESOURCE') ?? []
-    return resourcesInEvent.map(resource => ({
-      email: resource.cal_address,
-      displayName: resource.cn
-    }))
-  }, [event?.attendee])
-  const eventAttendees = useMemo(
-    () =>
-      event?.attendee?.filter(attendee => attendee.cutype !== 'RESOURCE') ?? [],
-    [event?.attendee]
-  )
-
-  const [showMore, setShowMore] = useState(false)
-  const [showDescription, setShowDescription] = useState(
-    event?.description ? true : false
-  )
-  const [showRepeat, setShowRepeat] = useState(
-    event?.repetition?.freq ? true : false
-  )
-
-  const [title, setTitle] = useState(event?.title ?? '')
-
-  const [description, setDescription] = useState(event?.description ?? '')
-  const [location, setLocation] = useState(event?.location ?? '')
-  const [start, setStart] = useState(event?.start ? event.start : '')
-  const [end, setEnd] = useState(event?.end ? event.end : '')
-  const defaultCalendarId = useMemo(() => {
-    const selectedAndWritable = Object.values(calList ?? {})
-      .filter(cal => selectedCalendarIds.includes(cal.id))
-      .filter(
-        cal =>
-          (cal.delegated && cal.access?.write) ||
-          userId === cal.id?.split('/')[0]
-      )
-
-    if (selectedAndWritable.length > 0) {
-      return selectedAndWritable[0].id
+  useEffect(() => {
+    const resetShowMore = (): void => {
+      if (!open) setShowMore(false)
     }
+    resetShowMore()
+  }, [open])
 
-    const firstPersonal = Object.values(calList ?? {}).find(
-      cal =>
-        cal.id?.split('/')[0] === userId || (cal.delegated && cal.access?.write)
-    )
-    return firstPersonal?.id ?? ''
-  }, [selectedCalendarIds, calList, userId])
+  // Calendar preview sync
+  const { handleStartChange, handleEndChange, handleAllDayChange } =
+    useCalendarPreviewSync({
+      formRef,
+      setSelectedRange,
+      calendarRef
+    })
 
-  const [calendarid, setCalendarid] = useState(
-    event?.calId ?? defaultCalendarId
-  )
-  const [allday, setAllDay] = useState(event?.allday ?? false)
-  const [repetition, setRepetition] = useState<RepetitionObject>(
-    event?.repetition ?? ({} as RepetitionObject)
-  )
-  const [selectedResources, setSelectedResources] = useState(resources ?? [])
-
-  // Derive the effective organizer based on the selected calendar.
-  // When a delegated calendar is selected, the organizer must be the
-  // calendar owner, not the logged-in user.
-  const { organizer } = useEventOrganizer({
-    calendarid,
-    calList,
-    userOrganizer
+  const { handleSubmit } = useSubmitCreateEvent({
+    showMore,
+    onClose: () => onClose(true),
+    userPersonalCalendars,
+    organizer
   })
 
-  const [attendees, setAttendees] = useState<userAttendee[]>(
-    eventAttendees
-      ? eventAttendees.filter(a => a.cal_address !== organizer?.cal_address)
-      : []
-  )
-  const [alarm, setAlarm] = useState(event?.alarm?.trigger ?? '')
-  const [eventClass, setEventClass] = useState<
-    'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
-  >(event?.class ?? 'PUBLIC')
-  const [busy, setBusy] = useState(event?.transp ?? 'OPAQUE')
-  const [timezone, setTimezone] = useState(
-    event?.timezone ? resolveTimezone(event.timezone) : resolvedCalendarTimezone
-  )
-  const [hasVideoConference, setHasVideoConference] = useState(
-    event?.x_openpass_videoconference ? true : false
-  )
-  const [meetingLink, setMeetingLink] = useState<string | null>(
-    event?.x_openpass_videoconference || null
-  )
-  const [isFormValid, setIsFormValid] = useState(false)
-  const [showValidationErrors, setShowValidationErrors] = useState(false)
-  const [hasEndDateChanged, setHasEndDateChanged] = useState(false)
-
-  // Use ref to track if we've already initialized to avoid infinite loop
-  const isInitializedRef = useRef(false)
-  const userPersonalCalendarsRef = useRef(userPersonalCalendars)
-  // Track when restoring from error to prevent other useEffects from overriding restored data
-  const isRestoringFromErrorRef = useRef(false)
-  // Track whether the user has explicitly picked a calendar so we don't override their choice
-  const isCalendarIdUserSelectedRef = useRef(false)
-
-  // Update ref when userPersonalCalendars changes
-  useEffect(() => {
-    userPersonalCalendarsRef.current = userPersonalCalendars
-  }, [userPersonalCalendars])
-
-  // Sync calendarid whenever defaultCalendarId resolves, unless the user already picked one
-  useEffect(() => {
-    if (!isCalendarIdUserSelectedRef.current && defaultCalendarId) {
-      setCalendarid(defaultCalendarId)
-    }
-  }, [defaultCalendarId])
-
-  const resetAllStateToDefault = useCallback(() => {
-    setShowMore(false)
-    setShowDescription(false)
-    setShowRepeat(false)
-    setTitle('')
-    setDescription('')
-    setAttendees([])
-    setLocation('')
-    setStart('')
-    setEnd('')
-    if (defaultCalendarId) {
-      setCalendarid(defaultCalendarId)
-    }
-    setAllDay(false)
-    setRepetition({} as RepetitionObject)
-    setAlarm('')
-    setEventClass('PUBLIC')
-    setBusy('OPAQUE')
-    setTimezone(resolvedCalendarTimezone)
-    setHasVideoConference(false)
-    setMeetingLink(null)
-    setHasEndDateChanged(false)
-    setSelectedResources([])
-  }, [resolvedCalendarTimezone, defaultCalendarId])
-
-  // Track if we should sync from selectedRange (only on initial selection, not on toggle)
-  const shouldSyncFromRangeRef = useRef(true)
-  const prevOpenRef = useRef(false)
-
-  // Sync timezone when modal opens or calendarTimezone changes
-  useEffect(() => {
-    // Detect modal opening (transition from closed to open)
-    const isOpening = open && !prevOpenRef.current
-
-    if (isOpening) {
-      shouldSyncFromRangeRef.current = true
-      setShowValidationErrors(false)
-
-      // Set timezone to calendar timezone for new events when opening
-      const isNewEvent = !event || !event.uid
-      if (isNewEvent) {
-        setTimezone(resolvedCalendarTimezone)
-      }
-    }
-
-    // Update previous open state
-    prevOpenRef.current = open
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, event?.uid, resolvedCalendarTimezone])
-
-  // Separately sync timezone when calendarTimezone changes while modal is open for new events
-  useEffect(() => {
-    if (open && (!event || !event.uid)) {
-      setTimezone(resolvedCalendarTimezone)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedCalendarTimezone, open, event?.uid])
-
-  // Set start/end times when modal opens for new event creation
-  useEffect(() => {
-    // Skip if restoring from error - data already restored
-    if (isRestoringFromErrorRef.current) {
-      return
-    }
-    // Only run when modal opens and not duplicating an event
-    // Check if event has uid to determine if it's a valid event (not empty object)
-    if (!shouldSyncFromRangeRef.current || !open || (event && event.uid)) {
-      return
-    }
-
-    if (selectedRange && selectedRange.start && selectedRange.end) {
-      // Auto-check allday if selectedRange is all-day
-      if (selectedRange.allDay) {
-        setAllDay(true)
-      }
-
-      // selectedRange gives us the visual time displayed on calendar
-      // Use selectedRange.startStr and endStr if available (from FullCalendar)
-      if (selectedRange.startStr && selectedRange.endStr) {
-        // Check if they are strings (from FullCalendar) or need conversion
-        const startStr =
-          typeof selectedRange.startStr === 'string'
-            ? selectedRange.startStr
-            : formatLocalDateTime(selectedRange.start)
-        const endStr =
-          typeof selectedRange.endStr === 'string'
-            ? selectedRange.endStr
-            : formatLocalDateTime(selectedRange.end)
-
-        // Use the string values directly to preserve the displayed time
-        const startValue = selectedRange.allDay
-          ? startStr.split('T')[0]
-          : startStr.slice(0, 16) // YYYY-MM-DDTHH:mm
-        let endValue = selectedRange.allDay
-          ? endStr.split('T')[0]
-          : endStr.slice(0, 16)
-
-        // For all-day slots: detect single click vs drag multiple days
-        // FullCalendar uses exclusive end, so end date = actual end date + 1
-        // For UI display, we need to adjust:
-        // - Single click (end = start + 1): set end = start for UI
-        // - Drag multiple days (end = actual end + 1): set end = end - 1 for UI
-        if (selectedRange.allDay) {
-          const startDateOnly = startValue.slice(0, 10)
-          const endDateOnlyFromRange = endValue.slice(0, 10)
-
-          // Calculate days difference
-          const startDateObj = new Date(startDateOnly)
-          const endDateObj = new Date(endDateOnlyFromRange)
-          const daysDiff = Math.floor(
-            (endDateObj.getTime() - startDateObj.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-
-          if (daysDiff <= 1) {
-            // Single click: FullCalendar gives end = start + 1, set end = start for UI
-            endValue = startValue
-          } else {
-            // Drag multiple days: FullCalendar gives end = actual end + 1, subtract 1 for UI
-            const adjustedEndDate = new Date(endDateObj)
-            adjustedEndDate.setDate(adjustedEndDate.getDate() - 1)
-            endValue = adjustedEndDate.toISOString().split('T')[0]
-          }
-        }
-
-        setStart(startValue)
-        setEnd(endValue)
-
-        // Check if multiple days event
-        const startDateOnly = startValue.slice(0, 10)
-        const endDateOnly = endValue.slice(0, 10)
-        const isMultipleDays = startDateOnly !== endDateOnly
-
-        if (isMultipleDays) {
-          // Keep normal mode (showMore = false) for multiple days events
-          setShowMore(false)
-
-          if (selectedRange.allDay) {
-            // Dragged from allday slot: allday already set to true at line 234
-            // Will show start date and end date (handled by showEndDate logic)
-          } else {
-            // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
-            setHasEndDateChanged(true)
-          }
-        }
-      } else {
-        // Fallback: format Date objects using local time components
-        // Only set if both start and end are valid
-        const formattedStart = formatLocalDateTime(selectedRange.start)
-        let formattedEnd = formatLocalDateTime(selectedRange.end)
-
-        // For all-day slots: detect single click vs drag multiple days
-        // FullCalendar uses exclusive end, so end date = actual end date + 1
-        // For UI display, we need to adjust:
-        // - Single click (end = start + 1): set end = start for UI
-        // - Drag multiple days (end = actual end + 1): set end = end - 1 for UI
-        if (selectedRange.allDay && formattedStart && formattedEnd) {
-          const startDateOnly = formattedStart.slice(0, 10)
-          const endDateOnly = formattedEnd.slice(0, 10)
-
-          // Calculate days difference
-          const startDateObj = new Date(startDateOnly)
-          const endDateObj = new Date(endDateOnly)
-          const daysDiff = Math.floor(
-            (endDateObj.getTime() - startDateObj.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-
-          if (daysDiff <= 1) {
-            // Single click: FullCalendar gives end = start + 1, set end = start for UI
-            formattedEnd = formattedStart
-          } else {
-            // Drag multiple days: FullCalendar gives end = actual end + 1, subtract 1 for UI
-            const adjustedEndDate = new Date(endDateObj)
-            adjustedEndDate.setDate(adjustedEndDate.getDate() - 1)
-            const adjustedEndDateStr = adjustedEndDate
-              .toISOString()
-              .split('T')[0]
-            // Preserve time part if exists, otherwise use date only
-            formattedEnd = formattedEnd.includes('T')
-              ? `${adjustedEndDateStr}T${formattedEnd.split('T')[1]}`
-              : adjustedEndDateStr
-          }
-        }
-
-        if (formattedStart) setStart(formattedStart)
-        if (formattedEnd) setEnd(formattedEnd)
-        if (formattedStart && formattedEnd) {
-          const startDateOnly = formattedStart.slice(0, 10)
-          const endDateOnly = formattedEnd.slice(0, 10)
-          const isMultipleDays = startDateOnly !== endDateOnly
-
-          if (isMultipleDays) {
-            // Keep normal mode (showMore = false) for multiple days events
-            setShowMore(false)
-
-            if (selectedRange.allDay) {
-              // Dragged from allday slot: allday already set to true at line 234
-              // Will show start date and end date (handled by showEndDate logic)
-            } else {
-              // Dragged from week/month view grid: keep allday=false to show time fields, trigger 4 fields display
-              setHasEndDateChanged(true)
-            }
-          }
-        }
-      }
-    } else {
-      // No valid selectedRange - use default times
-      // Start time = current time + 1 hour (rounded up to the hour)
-      // End time = start time + 1 hour
-      const now = new Date()
-      const nextHour = new Date(now)
-      nextHour.setHours(now.getHours() + 1)
-      nextHour.setMinutes(0)
-      nextHour.setSeconds(0)
-      nextHour.setMilliseconds(0)
-
-      const endTime = new Date(nextHour)
-      endTime.setHours(nextHour.getHours() + 1)
-
-      // Format using local time (browser timezone)
-      const formattedStart = formatLocalDateTime(nextHour)
-      const formattedEnd = formatLocalDateTime(endTime)
-
-      if (formattedStart) setStart(formattedStart)
-      if (formattedEnd) setEnd(formattedEnd)
-
-      // Default to non-all-day when no selectedRange
-      setAllDay(false)
-    }
-
-    shouldSyncFromRangeRef.current = false
-  }, [selectedRange, open, event])
-
-  // Initialize state when event prop changes (duplicate event or tempEvent with attendees)
-  useEffect(() => {
-    if (event && event.uid) {
-      // Editing existing event - populate fields with event data
-      setTitle(event.title ?? '')
-      setDescription(event.description ?? '')
-      setLocation(event.location ?? '')
-
-      // Handle all-day events properly
-      const isAllDay = event.allday ?? false
-      setAllDay(isAllDay)
-
-      // Get event's timezone for formatting - prioritize event.timezone from server
-      let eventTimezone: string
-      if (event.timezone) {
-        eventTimezone = resolveTimezone(event.timezone)
-      } else {
-        eventTimezone = resolvedCalendarTimezone
-      }
-
-      // Format dates based on all-day status and timezone
-      if (event.start) {
-        if (isAllDay) {
-          // For all-day events, use date format (YYYY-MM-DD)
-          const startDate = new Date(event.start)
-          setStart(startDate.toISOString().split('T')[0])
-        } else {
-          // For timed events, format in the event's timezone
-          setStart(formatDateTimeInTimezone(event.start, eventTimezone))
-        }
-      } else {
-        setStart('')
-      }
-
-      if (event.end) {
-        if (isAllDay) {
-          // For all-day events, use date format (YYYY-MM-DD)
-          const endDate = new Date(event.end)
-          setEnd(endDate.toISOString().split('T')[0])
-        } else {
-          // For timed events, format in the event's timezone
-          setEnd(formatDateTimeInTimezone(event.end, eventTimezone))
-        }
-      } else {
-        setEnd('')
-      }
-
-      setCalendarid(
-        resolveSourceCalendarId(event.calId, calList, userId, defaultCalendarId)
-      )
-      setRepetition(event.repetition ?? ({} as RepetitionObject))
-      setShowRepeat(event.repetition?.freq ? true : false)
-      setAttendees(
-        eventAttendees
-          ? eventAttendees.filter(a => a.cal_address !== organizer?.cal_address)
-          : []
-      )
-      setAlarm(event.alarm?.trigger ?? '')
-      setEventClass(event.class ?? 'PUBLIC')
-      setBusy(event.transp ?? 'OPAQUE')
-      setTimezone(eventTimezone)
-      setHasVideoConference(event.x_openpass_videoconference ? true : false)
-      setMeetingLink(event.x_openpass_videoconference || null)
-
-      // Update description to include video conference footer if exists
-      if (event.x_openpass_videoconference && event.description) {
-        const hasVideoFooter = event.description.includes('Visio:')
-        if (!hasVideoFooter) {
-          setDescription(
-            addVideoConferenceToDescription(
-              event.description,
-              event.x_openpass_videoconference
-            )
-          )
-        } else {
-          setDescription(event.description)
-        }
-      }
-      setSelectedResources(resources ?? [])
-    } else if (event && event.attendee && event.attendee?.length > 0) {
-      // Handle tempEvent case (no uid but has attendees from temp calendar search)
-      setAttendees(
-        eventAttendees.filter(a => a.cal_address !== organizer?.cal_address)
-      )
-      setSelectedResources(resources ?? [])
-    }
-  }, [
-    event,
-    organizer?.cal_address,
-    resolvedCalendarTimezone,
-    defaultCalendarId,
-    calList,
-    userId,
-    resources,
-    eventAttendees
-  ])
-
-  // Reset state when creating new event (event is empty object or undefined)
-  useEffect(() => {
-    // Skip if restoring from error - data already restored
-    if (isRestoringFromErrorRef.current) {
-      return
-    }
-    const isCreatingNew = !event || !event.uid
-    const wasInitialized = isInitializedRef.current
-
-    if (isCreatingNew && wasInitialized) {
-      // Creating new event - reset all fields to default
-      // Note: start and end are handled by the selectedRange useEffect
-      // Note: timezone is handled by separate useEffect above
-      setShowMore(false)
-      setShowDescription(false)
-      setShowRepeat(false)
-      setTitle('')
-      setDescription('')
-      setAttendees([])
-      setLocation('')
-      if (defaultCalendarId) {
-        setCalendarid(defaultCalendarId)
-      }
-      setAllDay(false)
-      setRepetition({} as RepetitionObject)
-      setAlarm('')
-      setEventClass('PUBLIC')
-      setBusy('OPAQUE')
-      setHasVideoConference(false)
-      setMeetingLink(null)
-      setHasEndDateChanged(false)
-      setSelectedResources([])
-    }
-
-    if (!isCreatingNew) {
-      isInitializedRef.current = true
-    }
-  }, [event, defaultCalendarId])
-
-  const handleStartChange = useCallback(
-    (newStart: string) => {
-      setStart(newStart)
-
-      // Defer visual feedback (non-urgent)
-      startTransition(() => {
-        setSelectedRange((prev: DateSelectArg | null) => {
-          const newRange = {
-            ...prev,
-            start: new Date(newStart),
-            startStr: newStart,
-            allDay: allday
-          } as DateSelectArg
-          setTimeout(() => {
-            calendarRef.current?.select(newRange)
-          }, 0)
-          return newRange
-        })
-      })
-    },
-    // calendarRef and setSelectedRange are stable refs/setters from parent
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allday]
-  )
-
-  const handleEndChange = useCallback(
-    (newEnd: string) => {
-      setEnd(newEnd)
-
-      // Defer visual feedback (non-urgent)
-      startTransition(() => {
-        setSelectedRange((prev: DateSelectArg | null) => {
-          const newRange = {
-            ...prev,
-            end: new Date(newEnd),
-            endStr: newEnd,
-            allDay: allday
-          } as DateSelectArg
-          setTimeout(() => {
-            calendarRef.current?.select(newRange)
-          }, 0)
-          return newRange
-        })
-      })
-    },
-    // calendarRef and setSelectedRange are stable refs/setters from parent
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allday]
-  )
-
-  const handleAllDayChange = useCallback(
-    (newAllDay: boolean, newStart: string, newEnd: string) => {
-      // Update critical state immediately (checkbox response)
-      setAllDay(newAllDay)
-      setStart(newStart)
-      setEnd(newEnd)
-
-      // Defer visual feedback updates (non-urgent)
-      startTransition(() => {
-        setSelectedRange((prev: DateSelectArg | null) => {
-          const newRange = {
-            ...prev,
-            startStr: newAllDay ? newStart.split('T')[0] : newStart,
-            endStr: newAllDay ? newEnd.split('T')[0] : newEnd,
-            start: new Date(
-              newAllDay ? newStart.split('T')[0] + 'T00:00:00' : newStart
-            ),
-            end: new Date(
-              newAllDay ? newEnd.split('T')[0] + 'T00:00:00' : newEnd
-            ),
-            allDay: newAllDay
-          } as DateSelectArg
-          setTimeout(() => {
-            calendarRef.current?.select(newRange)
-          }, 0)
-          return newRange
-        })
-      })
-    },
-    // calendarRef and setSelectedRange are stable refs/setters from parent
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
-  // Wrap setCalendarid so we can track explicit user selections
-  const handleCalendaridChange = useCallback((id: string) => {
-    isCalendarIdUserSelectedRef.current = true
-    setCalendarid(id)
-  }, [])
-
-  const handleClose = () => {
-    // Clear temp data when user manually closes modal
+  const handleClose = useCallback(() => {
     clearEventFormTempData('create')
     onClose(false)
-    setShowValidationErrors(false)
-    resetAllStateToDefault()
-    setStart('')
-    setEnd('')
-    setSelectedResources([])
-    shouldSyncFromRangeRef.current = true // Reset for next time
-    isCalendarIdUserSelectedRef.current = false // Reset so next open gets fresh default
-  }
-
-  // Function to save current form data to temp storage
-  const saveCurrentFormData = useCallback(() => {
-    const formState: EventFormState = {
-      title,
-      description,
-      location,
-      start,
-      end,
-      allday,
-      repetition,
-      attendees,
-      alarm,
-      busy,
-      eventClass,
-      timezone,
-      calendarid,
-      hasVideoConference,
-      meetingLink,
-      showMore,
-      showDescription,
-      showRepeat,
-      hasEndDateChanged,
-      resources: selectedResources
-    }
-    return buildEventFormTempData(formState)
-  }, [
-    title,
-    description,
-    location,
-    start,
-    end,
-    allday,
-    repetition,
-    attendees,
-    alarm,
-    busy,
-    eventClass,
-    timezone,
-    calendarid,
-    hasVideoConference,
-    meetingLink,
-    showMore,
-    showDescription,
-    showRepeat,
-    hasEndDateChanged,
-    selectedResources
-  ])
-
-  // Check for temp data when modal opens
-  useEffect(() => {
-    if (open && !event?.uid) {
-      // Only restore for new events (not duplicating)
-      const tempData = restoreEventFormDataFromStorage('create')
-      if (tempData && tempData.fromError) {
-        // Mark that we're restoring from error to prevent other useEffects from overriding
-        isRestoringFromErrorRef.current = true
-        // Prevent selectedRange useEffect from running
-        shouldSyncFromRangeRef.current = false
-
-        // Restore form data from previous failed save
-        restoreFormDataFromTemp(tempData, {
-          setTitle,
-          setDescription,
-          setLocation,
-          setStart,
-          setEnd,
-          setAllDay,
-          setRepetition,
-          setAttendees,
-          setAlarm,
-          setBusy,
-          setEventClass,
-          setTimezone,
-          setCalendarid,
-          setHasVideoConference,
-          setMeetingLink,
-          setShowMore,
-          setShowDescription,
-          setShowRepeat,
-          setHasEndDateChanged,
-          setSelectedResources
-        })
-        // Clear the error flag but keep data until successful save
-        const updatedTempData = { ...tempData, fromError: false }
-        saveEventFormDataToTemp('create', updatedTempData)
-
-        // Reset flag after restore completes (use setTimeout to ensure other useEffects have checked the flag)
-        setTimeout(() => {
-          isRestoringFromErrorRef.current = false
-        }, 0)
-      }
-    }
-  }, [open, event?.uid])
-
-  const handleSave = async () => {
-    // Show validation errors when Save is clicked
-    setShowValidationErrors(true)
-
-    // Check if form is valid before saving
-    if (!isFormValid) {
-      return
-    }
-    const newEventUID = crypto.randomUUID()
-
-    // Resolve target calendar safely
-    const targetCalendar: Calendar | undefined =
-      calList[calendarid] ||
-      userPersonalCalendars[0] ||
-      (Object.values(calList)[0] as Calendar | undefined)
-    if (!targetCalendar || !targetCalendar.id) {
-      console.error('No target calendar available to save event')
-      return
-    }
-    const newEventURL = `/calendars/${targetCalendar.id}/${newEventUID}.ics`
-    const newEvent: CalendarEvent = {
-      calId: targetCalendar.id,
-      title,
-      URL: targetCalendar.delegated
-        ? buildDelegatedEventURL(targetCalendar, newEventURL)
-        : newEventURL,
-      start: '',
-      allday,
-      uid: newEventUID,
-      description,
-      location,
-      class: eventClass,
-      repetition,
-      organizer,
-      timezone,
-      attendee: [
-        {
-          cn: organizer?.cn ?? '',
-          cal_address: organizer?.cal_address ?? '',
-          partstat: 'ACCEPTED',
-          rsvp: 'FALSE',
-          role: 'CHAIR',
-          cutype: 'INDIVIDUAL'
-        }
-      ],
-      transp: busy,
-      sequence: 1,
-      color: targetCalendar?.color,
-      alarm: { trigger: alarm, action: 'EMAIL' },
-      x_openpass_videoconference: meetingLink || undefined
-    }
-
-    // Map data of resources to attendee before creating event
-    if (selectedResources?.length) {
-      selectedResources.forEach((resource: Resource) => {
-        newEvent.attendee.push({
-          cn: resource?.displayName ?? '',
-          cal_address: resource?.email ?? '',
-          partstat: 'NEEDS-ACTION',
-          rsvp: 'TRUE',
-          role: 'REQ-PARTICIPANT',
-          cutype: 'RESOURCE'
-        })
-      })
-    }
-
-    if (allday) {
-      const startDateOnly = (start || '').split('T')[0]
-      const endDateOnlyUI = (end || start || '').split('T')[0]
-      // For all-day events, API needs end date = UI end date + 1 day
-      const endDateOnlyAPI = addDays(endDateOnlyUI, 1)
-      // Parse date string and create Date at UTC midnight to avoid timezone offset issues
-      const [startYear, startMonth, startDay] = startDateOnly
-        .split('-')
-        .map(Number)
-      const [endYear, endMonth, endDay] = endDateOnlyAPI.split('-').map(Number)
-      const startDateObj = new Date(
-        Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0)
-      )
-      const endDateObj = new Date(
-        Date.UTC(endYear, endMonth - 1, endDay, 0, 0, 0, 0)
-      )
-      newEvent.start = startDateObj.toISOString()
-      newEvent.end = endDateObj.toISOString()
-    } else {
-      newEvent.start = convertFormDateTimeToISO(start, timezone)
-      if (end) {
-        // In normal mode, only override end date when the end date field is not shown and end date is same as start date
-        const startDateOnly = (start || '').split('T')[0]
-        const endDateOnly = (end || '').split('T')[0]
-        if (!showMore && !hasEndDateChanged && startDateOnly === endDateOnly) {
-          const endTimeOnly = end.includes('T')
-            ? end.split('T')[1]?.slice(0, 5) || '00:00'
-            : '00:00'
-          const endDateTime = `${startDateOnly}T${endTimeOnly}`
-          newEvent.end = convertFormDateTimeToISO(endDateTime, timezone)
-        } else {
-          // Extended mode or end date explicitly shown in normal mode or end date differs from start date: use actual end datetime
-          newEvent.end = convertFormDateTimeToISO(end, timezone)
-        }
-      }
-    }
-
-    if (attendees.length > 0) {
-      newEvent.attendee = newEvent.attendee.concat(attendees)
-    }
-
-    // Reset validation state when validation passes
-    setShowValidationErrors(false)
-
-    // Save current form data to temp storage before closing
-    const formDataToSave = saveCurrentFormData()
-    saveEventFormDataToTemp('create', formDataToSave)
-
-    // Close popup immediately
-    onClose(true)
-
-    // Save to API in background
-    try {
-      const result = await dispatch(
-        putEventAsync({
-          cal: targetCalendar,
-          newEvent
-        })
-      )
-
-      await assertThunkSuccess(result)
-
-      // Clear temp data on successful save
-      clearEventFormTempData('create')
-
-      // Reset all state to default values only on successful save
-      resetAllStateToDefault()
-    } catch (error) {
-      const errorObj = error as { message?: string }
-
-      // API failed - restore form data and mark as error
-      const errorFormData = {
-        ...formDataToSave,
-        fromError: true
-      }
-      saveEventFormDataToTemp('create', errorFormData)
-
-      // Show error notification
-      showErrorNotification(
-        errorObj.message || 'Failed to create event. Please try again.'
-      )
-
-      // Try to reopen modal by dispatching custom event
-      // Parent component should listen to this event and reopen modal
-      window.dispatchEvent(
-        new CustomEvent('eventModalError', {
-          detail: { type: 'create' }
-        })
-      )
-    }
-  }
+    setShowMore(false)
+  }, [onClose])
 
   return (
     <ResponsiveDialog
@@ -944,63 +92,32 @@ function EventPopover({
           : t('event.createEvent')
       }
       isExpanded={showMore}
-      onExpandToggle={() => setShowMore(!showMore)}
+      onExpandToggle={() => setShowMore(s => !s)}
       actions={
         <EventActions
           showExpandedBtn={!showMore}
           onClose={handleClose}
-          onSave={handleSave}
-          onExpanded={() => setShowMore(!showMore)}
+          onSave={async () => {
+            await formRef.current?.submit()
+          }}
+          onExpanded={() => setShowMore(s => !s)}
         />
       }
     >
       <EventFormFields
-        title={title}
-        setTitle={setTitle}
-        description={description}
-        setDescription={setDescription}
-        location={location}
-        setLocation={setLocation}
-        start={start}
-        setStart={setStart}
-        end={end}
-        setEnd={setEnd}
-        allday={allday}
-        setAllDay={setAllDay}
-        repetition={repetition}
-        setRepetition={setRepetition}
-        attendees={attendees}
-        setAttendees={setAttendees}
-        alarm={alarm}
-        setAlarm={setAlarm}
-        busy={busy}
-        setBusy={setBusy}
-        eventClass={eventClass}
-        setEventClass={setEventClass}
-        timezone={timezone}
-        setTimezone={setTimezone}
-        calendarid={calendarid}
-        setCalendarid={handleCalendaridChange}
-        hasVideoConference={hasVideoConference}
-        setHasVideoConference={setHasVideoConference}
-        meetingLink={meetingLink}
-        setMeetingLink={setMeetingLink}
+        ref={formRef}
+        initialValues={initialValues}
         showMore={showMore}
-        showDescription={showDescription}
-        setShowDescription={setShowDescription}
-        showRepeat={showRepeat}
-        setShowRepeat={setShowRepeat}
         isOpen={open}
+        typeOfAction={undefined}
+        eventId={event?.uid ?? null}
         userPersonalCalendars={userPersonalCalendars}
-        timezoneList={timezoneList}
+        onSubmit={handleSubmit}
+        onCancel={handleClose}
+        tempStorageKey="create"
         onStartChange={handleStartChange}
         onEndChange={handleEndChange}
         onAllDayChange={handleAllDayChange}
-        onValidationChange={setIsFormValid}
-        showValidationErrors={showValidationErrors}
-        onHasEndDateChangedChange={setHasEndDateChanged}
-        setSelectedResources={setSelectedResources}
-        selectedResources={selectedResources}
       />
     </ResponsiveDialog>
   )

@@ -280,10 +280,9 @@ export const DateTimeExpanded: React.FC<
     (newDate: string, newTime?: string) => {
       setStartDate(newDate)
       const newStart = combineDateTime(newDate, newTime ?? startTime)
+      setStart(newStart)
       if (onStartChange) {
         onStartChange(newStart)
-      } else {
-        setStart(newStart)
       }
     },
     [setStartDate, startTime, onStartChange, setStart]
@@ -293,10 +292,9 @@ export const DateTimeExpanded: React.FC<
     (newTime: string, newDate?: string) => {
       setStartTime(newTime)
       const newStart = combineDateTime(newDate ?? startDate, newTime)
+      setStart(newStart)
       if (onStartChange) {
         onStartChange(newStart)
-      } else {
-        setStart(newStart)
       }
     },
     [setStartTime, startDate, onStartChange, setStart]
@@ -307,10 +305,9 @@ export const DateTimeExpanded: React.FC<
       setEndDate(newDate)
       if (showMore) setHasEndDateChanged(true)
       const newEnd = combineDateTime(newDate, newTime ?? endTime)
+      setEnd(newEnd)
       if (onEndChange) {
         onEndChange(newEnd)
-      } else {
-        setEnd(newEnd)
       }
     },
     [setEndDate, showMore, setHasEndDateChanged, endTime, onEndChange, setEnd]
@@ -320,10 +317,9 @@ export const DateTimeExpanded: React.FC<
     (newTime: string, newDate?: string) => {
       setEndTime(newTime)
       const newEnd = combineDateTime(newDate ?? endDate, newTime)
+      setEnd(newEnd)
       if (onEndChange) {
         onEndChange(newEnd)
-      } else {
-        setEnd(newEnd)
       }
     },
     [endDate, onEndChange, setEnd, setEndTime]

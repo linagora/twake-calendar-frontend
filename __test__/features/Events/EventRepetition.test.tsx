@@ -765,11 +765,9 @@ describe('Event Drag and Drop - Recurring Events', () => {
 
     const mockArg = {
       event: {
-        _def: {
-          extendedProps: {
-            uid: 'recurring-base/20250315T100000',
-            calId: '667037022b752d0026472254/cal1'
-          }
+        extendedProps: {
+          uid: 'recurring-base/20250315T100000',
+          calId: '667037022b752d0026472254/cal1'
         }
       },
       delta: { years: 0, months: 0, days: 1, milliseconds: 0 }
@@ -811,11 +809,9 @@ describe('Event Resize - Recurring Events', () => {
 
     const mockArg = {
       event: {
-        _def: {
-          extendedProps: {
-            uid: 'recurring-base/20250315T100000',
-            calId: '667037022b752d0026472254/cal1'
-          }
+        extendedProps: {
+          uid: 'recurring-base/20250315T100000',
+          calId: '667037022b752d0026472254/cal1'
         }
       },
       startDelta: { years: 0, months: 0, days: 0, milliseconds: 0 },

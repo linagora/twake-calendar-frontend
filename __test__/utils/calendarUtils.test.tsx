@@ -108,7 +108,14 @@ const callFormat = (
   userAddress = 'alice@example.com',
   userId = 'user1'
 ) =>
-  eventToFullCalendarFormat([event], [], userId, userAddress, false, calendars)
+  eventToFullCalendarFormat({
+    filteredEvents: [event],
+    filteredTempEvents: [],
+    userId,
+    userAddress,
+    pending: false,
+    calendars
+  })
 
 describe('eventToFullCalendarFormat - editable flag', () => {
   describe('personal calendar (non-delegated)', () => {
@@ -137,14 +144,14 @@ describe('eventToFullCalendarFormat - editable flag', () => {
         ...baseEvent,
         organizer: { cal_address: 'alice@example.com' }
       } as CalendarEvent
-      const [result] = eventToFullCalendarFormat(
-        [event],
-        [],
-        'user1',
-        'alice@example.com',
-        true,
-        { 'user1/cal1': calendar }
-      )
+      const [result] = eventToFullCalendarFormat({
+        filteredEvents: [event],
+        filteredTempEvents: [],
+        userId: 'user1',
+        userAddress: 'alice@example.com',
+        pending: true,
+        calendars: { 'user1/cal1': calendar }
+      })
       expect(result.editable).toBe(false)
     })
   })
@@ -198,19 +205,19 @@ describe('eventToFullCalendarFormat - editable flag', () => {
     })
 
     it('is not editable when pending even if owner is organizer', () => {
-      const [result] = eventToFullCalendarFormat(
-        [
+      const [result] = eventToFullCalendarFormat({
+        filteredEvents: [
           {
             ...event,
             organizer: { cal_address: 'owner@example.com' }
           } as CalendarEvent
         ],
-        [],
-        'user1',
-        'alice@example.com',
-        true,
-        { 'user2/cal1': writeDelegatedCalendar }
-      )
+        filteredTempEvents: [],
+        userId: 'user1',
+        userAddress: 'alice@example.com',
+        pending: true,
+        calendars: { 'user2/cal1': writeDelegatedCalendar }
+      })
       expect(result.editable).toBe(false)
     })
 

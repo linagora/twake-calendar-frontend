@@ -34,10 +34,9 @@ export function useAutoEndTime({
     const calculatedEndTime = `${endHour.toString().padStart(2, '0')}:${minutes}`
     setEndTime(calculatedEndTime)
     const newEnd = combineDateTime(endDate || startDate, calculatedEndTime)
+    setEnd(newEnd)
     if (onEndChange) {
       onEndChange(newEnd)
-    } else {
-      setEnd(newEnd)
     }
   }, [
     startTime,

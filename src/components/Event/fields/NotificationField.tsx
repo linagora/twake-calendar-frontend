@@ -6,6 +6,7 @@ import {
 } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '../components/FieldWithLabel'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export interface NotificationFieldProps {
   alarm: string
@@ -20,11 +21,12 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
   showMore
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   if (!showMore) return null
 
   return (
-    <FieldWithLabel label={t('event.form.notification')} isExpanded>
+    <FieldWithLabel label={t('event.form.notification')} isExpanded={!isMobile}>
       <FormControl fullWidth margin="dense" size="small">
         <Select
           labelId="notification"

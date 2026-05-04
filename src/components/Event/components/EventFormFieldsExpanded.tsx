@@ -7,21 +7,21 @@ import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { FreeBusyField } from '../fields/FreeBusyField'
 import { NotificationField } from '../fields/NotificationField'
 import { VisibilityField } from '../fields/VisibilityField'
-import { EventFormFieldsProps } from '../EventFormFields.types'
+
+interface EventFormFieldsExpandedProps {
+  alarm: string
+  setAlarm: (v: string) => void
+  busy: string
+  setBusy: (v: string) => void
+  eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
+  setEventClass: (v: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL') => void
+  showMore: boolean
+  selectedResources: Resource[]
+  setSelectedResources: (resources: Resource[]) => void
+}
 
 export const EventFormFieldsExpanded: React.FC<
-  Pick<
-    EventFormFieldsProps,
-    | 'alarm'
-    | 'setAlarm'
-    | 'busy'
-    | 'setBusy'
-    | 'eventClass'
-    | 'setEventClass'
-    | 'showMore'
-    | 'selectedResources'
-    | 'setSelectedResources'
-  >
+  EventFormFieldsExpandedProps
 > = ({
   alarm,
   setAlarm,

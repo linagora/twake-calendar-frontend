@@ -532,11 +532,9 @@ describe('CalendarApp integration', () => {
 
       const mockArg = {
         event: {
-          _def: {
-            extendedProps: {
-              uid: 'event1',
-              calId: '667037022b752d0026472254/cal1'
-            }
+          extendedProps: {
+            uid: 'event1',
+            calId: '667037022b752d0026472254/cal1'
           }
         },
         // drag event → move by 1 day
@@ -610,11 +608,9 @@ describe('CalendarApp integration', () => {
 
       const mockArg = {
         event: {
-          _def: {
-            extendedProps: {
-              uid: 'event1',
-              calId: '667037022b752d0026472254/cal1'
-            }
+          extendedProps: {
+            uid: 'event1',
+            calId: '667037022b752d0026472254/cal1'
           }
         },
         startDelta: { years: 0, months: 0, days: 0, milliseconds: 0 },

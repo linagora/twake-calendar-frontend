@@ -4,9 +4,15 @@ import { useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { useEventLocation } from '../hooks/useEventLocation'
-import { EventFormFieldsProps } from '../EventFormFields.types'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { SectionPreviewRow } from '../components/SectionPreviewRow'
+
+interface LocationFieldProps {
+  location: string
+  setLocation: (v: string) => void
+  showMore: boolean
+  isOpen?: boolean
+}
 
 const showInputLabel = (showMore: boolean, label: string): string => {
   if (showMore) {
@@ -20,10 +26,7 @@ export default function LocationField({
   setLocation,
   showMore,
   isOpen = false
-}: Pick<
-  EventFormFieldsProps,
-  'location' | 'setLocation' | 'showMore' | 'isOpen'
->): JSX.Element {
+}: LocationFieldProps): JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 

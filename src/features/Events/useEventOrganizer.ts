@@ -1,6 +1,7 @@
 import { makeDisplayName } from '@/utils/makeDisplayName'
 import { useMemo } from 'react'
 import { Calendar } from '../Calendars/CalendarTypes'
+import { userOrganiser } from '../User/userDataTypes'
 
 // Update event organizer accordingly to selected calendar's delegated status
 export function useEventOrganizer({
@@ -10,8 +11,11 @@ export function useEventOrganizer({
 }: {
   calendarid: string
   calList: Record<string, Calendar>
-  userOrganizer?: { cn: string; cal_address: string }
-}) {
+  userOrganizer: userOrganiser
+}): {
+  organizer: userOrganiser
+  selectedCalendar: Calendar
+} {
   const selectedCalendar = useMemo(
     () => calList?.[calendarid],
     [calList, calendarid]

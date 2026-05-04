@@ -14,6 +14,7 @@ import { useI18n } from 'twake-i18n'
 import { SnackbarAlert } from '../../Loading/SnackBarAlert'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { SectionPreviewRow } from '../components/SectionPreviewRow'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export interface VideoConferenceFieldProps {
   hasVideoConference: boolean
@@ -170,6 +171,8 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
   setShowDescription
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
+
   const [openToast, setOpenToast] = React.useState(false)
 
   const handleAddVideoConference = (): void => {
@@ -210,7 +213,7 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
     <>
       <FieldWithLabel
         label={showMore ? t('event.form.videoMeeting') : ''}
-        isExpanded={showMore}
+        isExpanded={!isMobile && showMore}
       >
         {!showMore ? (
           <VideoConferenceFieldInShortMode

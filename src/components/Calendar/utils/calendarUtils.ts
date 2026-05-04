@@ -16,7 +16,7 @@ export const updateSlotLabelVisibility = (
   currentTime: Date,
   slotLabel: SlotLabelContentArg,
   timezone: string
-) => {
+): 'fc-timegrid-slot-label' | 'timegrid-slot-label-hidden' => {
   const isCurrentWeekOrDay = checkIfCurrentWeekOrDay()
 
   if (!isCurrentWeekOrDay) {
@@ -61,7 +61,7 @@ export const checkIfCurrentWeekOrDay = (): boolean => {
 export function formatEventChipTitle(
   e: CalendarEvent,
   t: (key: string) => string
-) {
+): string {
   if (!e.title) {
     return t('event.untitled')
   }
@@ -76,6 +76,38 @@ type ConvertedEvent = CalendarEvent & {
   priority: number
 }
 
+function applyAllDayTimezone(
+  event: CalendarEvent,
+  convertedEvent: ConvertedEvent
+): void {
+  if (event.start) {
+    convertedEvent.start = event.start.split('T')[0]
+  }
+  if (event.end) {
+    convertedEvent.end = event.end.split('T')[0]
+  }
+}
+
+function applyTimedTimezone(
+  event: CalendarEvent,
+  convertedEvent: ConvertedEvent,
+  tz: string
+): void {
+  if (event.start) {
+    const startISO = convertEventDateTimeToISO(event.start, tz, {
+      isAllDay: false
+    })
+    if (startISO) convertedEvent.start = startISO
+  }
+
+  if (event.end) {
+    const endISO = convertEventDateTimeToISO(event.end, tz, {
+      isAllDay: false
+    })
+    if (endISO) convertedEvent.end = endISO
+  }
+}
+
 function applyTimezoneToEvent(
   event: CalendarEvent,
   convertedEvent: ConvertedEvent
@@ -83,40 +115,54 @@ function applyTimezoneToEvent(
   const eventTimezone = event.timezone || 'Etc/UTC'
   const isAllDay = event.allday ?? false
 
-  if (!isAllDay && event.start) {
-    const startISO = convertEventDateTimeToISO(event.start, eventTimezone, {
-      isAllDay
-    })
-    if (startISO) convertedEvent.start = startISO
+  if (isAllDay) {
+    applyAllDayTimezone(event, convertedEvent)
+    return
   }
 
-  if (!isAllDay && event.end && eventTimezone) {
-    const endISO = convertEventDateTimeToISO(event.end, eventTimezone, {
-      isAllDay
-    })
-    if (endISO) convertedEvent.end = endISO
-  }
+  applyTimedTimezone(event, convertedEvent, eventTimezone)
 }
 
-function buildConvertedEvent(
-  event: CalendarEvent,
+function resolveWriteDelegation(
   calendar: Calendar | undefined,
-  userId: string | undefined,
-  userAddress: string | undefined,
-  pending: boolean,
-  t: (key: string) => string
-): ConvertedEvent {
-  const isWriteDelegated =
-    (calendar?.delegated &&
-      calendar.access?.write &&
-      (!event.class || event.class === 'PUBLIC')) ??
-    false
+  event: CalendarEvent
+): boolean {
+  if (!calendar?.delegated || !calendar.access?.write) return false
+  return !event.class || event.class === 'PUBLIC'
+}
 
+function isEventEditable(
+  isPersonal: boolean,
+  isDelegated: boolean,
+  isOrganiser: boolean,
+  pending: boolean
+): boolean {
+  if (pending || !isOrganiser) return false
+  return isPersonal || isDelegated
+}
+
+function buildConvertedEvent({
+  event,
+  calendar,
+  userId,
+  userAddress,
+  pending,
+  t
+}: {
+  event: CalendarEvent
+  calendar: Calendar | undefined
+  userId: string | undefined
+  userAddress: string | undefined
+  pending: boolean
+  t: (key: string) => string
+}): ConvertedEvent {
+  const isWriteDelegated = resolveWriteDelegation(calendar, event)
   const effectiveEmail = getEffectiveEmail(
     calendar,
     isWriteDelegated,
     userAddress
   )
+
   const isOrganiser = isEventOrganiser(event, effectiveEmail)
   const isPersonalEvent = extractEventBaseUuid(event.calId) === userId
 
@@ -124,7 +170,12 @@ function buildConvertedEvent(
     ...event,
     title: formatEventChipTitle(event, t),
     colors: event.color,
-    editable: (isPersonalEvent || isWriteDelegated) && isOrganiser && !pending,
+    editable: isEventEditable(
+      isPersonalEvent,
+      isWriteDelegated,
+      isOrganiser,
+      pending
+    ),
     priority: isPersonalEvent ? 1 : 0
   }
 
@@ -133,27 +184,36 @@ function buildConvertedEvent(
   return convertedEvent
 }
 
-export const eventToFullCalendarFormat = (
-  filteredEvents: CalendarEvent[],
-  filteredTempEvents: CalendarEvent[],
-  userId: string | undefined,
-  userAddress: string | undefined,
-  pending: boolean,
+export interface EventToFullCalendarFormatProps {
+  filteredEvents: CalendarEvent[]
+  filteredTempEvents: CalendarEvent[]
+  userId: string | undefined
+  userAddress: string | undefined
+  pending: boolean
   calendars: Record<string, Calendar>
-): EventInput[] => {
+}
+
+export const eventToFullCalendarFormat = ({
+  filteredEvents,
+  filteredTempEvents,
+  userId,
+  userAddress,
+  pending,
+  calendars
+}: EventToFullCalendarFormatProps): EventInput[] => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { t } = useI18n()
   return filteredEvents
     .concat(filteredTempEvents.map(event => ({ ...event, temp: true })))
     .map(event =>
-      buildConvertedEvent(
+      buildConvertedEvent({
         event,
-        calendars[event.calId],
+        calendar: calendars[event.calId],
         userId,
         userAddress,
         pending,
         t
-      )
+      })
     ) as EventInput[]
 }
 
@@ -162,7 +222,7 @@ export const extractEvents = (
   calendars: Record<string, Calendar>,
   userAddress?: string,
   hideDeclinedEvents?: boolean | null
-) => {
+): CalendarEvent[] => {
   const allEvents: CalendarEvent[] = []
 
   selectedCalendars.forEach(id => {
@@ -197,7 +257,7 @@ export const updateCalsDetails = (
   calendarRange: { start: Date; end: Date },
   calType?: 'temp',
   controllers?: Map<string, AbortController>
-) => {
+): void => {
   if (pending || !rangeKey) return
 
   const newCalendars = selectedCalendars.filter(
@@ -209,7 +269,7 @@ export const updateCalsDetails = (
       const controller = new AbortController()
       controllers.set(id, controller)
 
-      dispatch(
+      void dispatch(
         getCalendarDetailAsync({
           calId: id,
           match: {
@@ -221,7 +281,7 @@ export const updateCalsDetails = (
         })
       )
     } else {
-      dispatch(
+      void dispatch(
         getCalendarDetailAsync({
           calId: id,
           match: {
@@ -241,7 +301,7 @@ export const updateCalsDetails = (
           const controller = new AbortController()
           controllers.set(id, controller)
 
-          dispatch(
+          void dispatch(
             getCalendarDetailAsync({
               calId: id,
               match: {
@@ -253,7 +313,7 @@ export const updateCalsDetails = (
             })
           )
         } else {
-          dispatch(
+          void dispatch(
             getCalendarDetailAsync({
               calId: id,
               match: {
@@ -306,7 +366,10 @@ export function getCalendarDelegationAccess(
   return access
 }
 
-function privilegeToAccess(privilege: string, currentAccess: DelegationAccess) {
+function privilegeToAccess(
+  privilege: string,
+  currentAccess: DelegationAccess
+): void {
   switch (privilege) {
     case '{urn:ietf:params:xml:ns:caldav}read-free-busy':
       currentAccess['freebusy'] = true

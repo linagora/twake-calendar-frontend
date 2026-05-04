@@ -28,7 +28,7 @@ export function formatLocalDateTime(date: Date, timeZone?: string): string {
     return formatted.replace(', ', 'T')
   }
 
-  const pad = (n: number) => n.toString().padStart(2, '0')
+  const pad = (n: number): string => n.toString().padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`
@@ -59,7 +59,7 @@ export function formatDateTimeInTimezone(
   })
 
   const parts = formatter.formatToParts(utcDate)
-  const getValue = (type: string) =>
+  const getValue = (type: string): string =>
     parts.find(p => p.type === type)?.value || ''
 
   return `${getValue('year')}-${getValue('month')}-${getValue('day')}T${getValue('hour')}:${getValue('minute')}`

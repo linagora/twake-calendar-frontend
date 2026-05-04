@@ -7,7 +7,8 @@ import {
   PopperProps,
   TextField,
   type AutocompleteRenderInputParams,
-  Box
+  Box,
+  SxProps
 } from '@linagora/twake-mui'
 import { AttendeeOptionsList } from './AttendeeOptionsList'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
@@ -59,6 +60,7 @@ export interface PeopleSearchProps {
   hideOptions?: boolean
   onSearchStateChange?: (state: SearchState) => void
   inputValue?: string
+  inputStyles?: SxProps
 }
 
 export const PeopleSearch: React.FC<PeopleSearchProps> = ({
@@ -75,7 +77,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   getChipIcon,
   hideOptions,
   onSearchStateChange,
-  inputValue
+  inputValue,
+  inputStyles
 }) => {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
@@ -306,7 +309,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
           },
           '& .MuiInputBase-input': {
             maxWidth: '80%'
-          }
+          },
+          ...inputStyles
         }}
         filterSelectedOptions
         value={selectedUsers}

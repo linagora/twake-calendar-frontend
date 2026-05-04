@@ -45,7 +45,8 @@ function rewriteAttendeesForOrganizerChange(
   if (!newOrganizer) {
     return attendees
   }
-  const normalise = (addr: string | undefined) => (addr ?? '').toLowerCase()
+  const normalise = (addr: string | undefined): string =>
+    (addr ?? '').toLowerCase()
   const oldAddr = normalise(oldOrganizer?.cal_address)
   const newAddr = normalise(newOrganizer.cal_address)
 

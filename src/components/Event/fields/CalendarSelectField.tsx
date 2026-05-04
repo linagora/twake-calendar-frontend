@@ -17,6 +17,7 @@ import { CalendarItemList } from '../../Calendar/CalendarItemList'
 import { OwnerCaption } from '../../Calendar/OwnerCaption'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { SectionPreviewRow } from '../components/SectionPreviewRow'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export interface CalendarSelectFieldProps {
   calendarid: string
@@ -140,6 +141,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
   onCalendarChange
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   // Local UI state
   const [hasClickedCalendarSection, setHasClickedCalendarSection] =
@@ -170,7 +172,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
   return (
     <FieldWithLabel
       label={isCollapsed ? '' : t('event.form.calendar')}
-      isExpanded={showMore}
+      isExpanded={!isMobile && showMore}
     >
       {isCollapsed ? (
         <CalendarSelectFieldCollapsed

@@ -11,6 +11,7 @@ import {
 import { getEvent } from '@/features/Events/EventApi'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { updateAttendeesAfterTimeChange } from '@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
+import { userAttendee } from '@/features/User/models/attendee'
 import {
   AttendeeOptions,
   createAttendee
@@ -20,7 +21,8 @@ import {
   CalendarApi,
   DateSelectArg,
   EventClickArg,
-  EventDropArg
+  EventDropArg,
+  EventApi
 } from '@fullcalendar/core'
 import { EventResizeDoneArg } from '@fullcalendar/interaction'
 
@@ -44,7 +46,17 @@ export interface EventHandlersProps {
   timezone: string
 }
 
-export const createEventHandlers = (props: EventHandlersProps) => {
+export const createEventHandlers = (
+  props: EventHandlersProps
+): {
+  handleDateSelect: (selectInfo: DateSelectArg | null) => void
+  handleClosePopover: () => void
+  handleCloseEventDisplay: () => void
+  handleEventClick: (info: EventClickArg) => void
+  handleEventAllow: () => boolean
+  handleEventDrop: (arg: EventDropArg) => Promise<void>
+  handleEventResize: (arg: EventResizeDoneArg) => Promise<void>
+} => {
   const {
     setSelectedRange,
     setAnchorEl,
@@ -63,95 +75,118 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     timezone
   } = props
 
-  const handleDateSelect = (selectInfo: DateSelectArg | null) => {
+  const handleDateSelect = (selectInfo: DateSelectArg | null): void => {
     setSelectedRange(selectInfo)
     if (tempUsers) {
-      const newEvent: CalendarEvent = {
-        start: selectInfo?.start
-          ? formatLocalDateTime(selectInfo?.start, timezone)
-          : '',
-        end: selectInfo?.end
-          ? formatLocalDateTime(selectInfo?.end, timezone)
-          : '',
-        attendee: tempUsers.map(user => {
-          const attendeeOption: AttendeeOptions = {
-            cal_address: user.email,
-            cn: user.displayName,
-            rsvp: 'TRUE'
-          }
-
-          if (user.objectType === 'resource') {
-            attendeeOption.cutype = 'RESOURCE'
-          }
-          return createAttendee(attendeeOption)
-        })
-      } as CalendarEvent
-
-      setTempEvent(newEvent)
+      setTempEvent(buildInitialTempEvent(selectInfo, timezone, tempUsers))
     }
     setAnchorEl(document.body)
   }
 
-  const handleClosePopover = () => {
+  const handleClosePopover = (): void => {
     calendarRef.current?.unselect()
     setAnchorEl(null)
     setSelectedRange(null)
   }
 
-  const handleCloseEventDisplay = () => {
+  const handleCloseEventDisplay = (): void => {
     setOpenEventDisplay(false)
   }
 
-  const handleEventClick = (info: EventClickArg) => {
+  const openEventViaUrl = (urlStr: string): void => {
+    try {
+      const url = new URL(urlStr)
+      if (['http:', 'https:'].includes(url.protocol)) {
+        window.open(url)
+      }
+    } catch (error) {
+      console.error('Could not open event: ', error)
+    }
+  }
+
+  const handleEventClick = (info: EventClickArg): void => {
     info.jsEvent.preventDefault()
 
     if (info.event.url) {
-      window.open(info.event.url)
+      openEventViaUrl(info.event.url)
     } else {
       setOpenEventDisplay(true)
       if (
-        calendars[info.event.extendedProps.calId] &&
-        calendars[info.event.extendedProps.calId].events[
-          info.event.extendedProps.uid
+        calendars[info.event.extendedProps.calId as string] &&
+        calendars[info.event.extendedProps.calId as string].events[
+          info.event.extendedProps.uid as string
         ]
       ) {
-        dispatch(
+        void dispatch(
           getEventAsync(
-            calendars[info.event.extendedProps.calId].events[
-              info.event.extendedProps.uid
+            calendars[info.event.extendedProps.calId as string].events[
+              info.event.extendedProps.uid as string
             ]
           )
         )
       }
 
-      setEventDisplayedId(info.event.extendedProps.uid)
-      setEventDisplayedCalId(info.event.extendedProps.calId)
-      setEventDisplayedTemp(info.event._def.extendedProps.temp)
+      setEventDisplayedId(info.event.extendedProps.uid as string)
+      setEventDisplayedCalId(info.event.extendedProps.calId as string)
+      setEventDisplayedTemp(info.event._def.extendedProps.temp as boolean)
     }
   }
 
-  const handleEventAllow = () => {
+  const handleEventAllow = (): boolean => {
     return true
   }
 
-  const handleEventDrop = async (arg: EventDropArg) => {
-    if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
-      return
+  const mapTempUserToAttendee = (user: User): userAttendee => {
+    const attendeeOption: AttendeeOptions = {
+      cal_address: user.email,
+      cn: user.displayName,
+      rsvp: 'TRUE'
     }
 
-    const event =
-      calendars[arg.event._def.extendedProps.calId].events[
-        arg.event._def.extendedProps.uid
-      ]
-    const calendar = calendars[arg.event._def.extendedProps.calId]
+    if (user.objectType === 'resource') {
+      attendeeOption.cutype = 'RESOURCE'
+    }
+    return createAttendee(attendeeOption)
+  }
 
+  const buildInitialTempEvent = (
+    selectInfo: DateSelectArg | null,
+    tz: string,
+    users: User[]
+  ): CalendarEvent => {
+    return {
+      start: selectInfo?.start ? formatLocalDateTime(selectInfo.start, tz) : '',
+      end: selectInfo?.end ? formatLocalDateTime(selectInfo.end, tz) : '',
+      allday: selectInfo?.allDay ?? false,
+      attendee: users.map(mapTempUserToAttendee)
+    } as CalendarEvent
+  }
+
+  const getEventAndCalendar = (
+    eventApi: EventApi
+  ): { event: CalendarEvent; calendar: Calendar } | null => {
+    if (!eventApi || !eventApi.extendedProps) {
+      return null
+    }
+
+    const calId = eventApi.extendedProps.calId as string
+    const uid = eventApi.extendedProps.uid as string
+
+    const calendar = calendars[calId]
+    const event = calendar?.events[uid]
+
+    if (!event || !calendar) return null
+
+    return { event, calendar }
+  }
+
+  const processTimeChange = async (
+    event: CalendarEvent,
+    calendar: Calendar,
+    computedNewStart: Date,
+    computedNewEnd: Date
+  ): Promise<void> => {
     const isRecurring = event.uid.includes('/')
-    const totalDeltaMs = getDeltaInMilliseconds(arg.delta)
-
-    const originalStart = new Date(event.start)
-    const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs)
-    const originalEnd = new Date(event.end ?? '')
-    const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs)
     const newEvent = updateAttendeesAfterTimeChange(
       {
         ...event,
@@ -161,50 +196,57 @@ export const createEventHandlers = (props: EventHandlersProps) => {
       } as CalendarEvent,
       true
     )
+
     if (isRecurring) {
       setSelectedEvent(event)
       setOpenEditModePopup('edit')
       setAfterChoiceFunc(
-        () => async (typeOfAction: 'solo' | 'all' | undefined) => {
-          if (typeOfAction === 'solo') {
-            await dispatch(
-              updateEventInstanceAsync({ cal: calendar, event: newEvent })
-            )
-          } else if (typeOfAction === 'all') {
-            const master = await getEvent(newEvent, true)
-            await dispatch(
-              updateSeriesAsync({
-                cal: calendar,
-                event: {
-                  ...master,
-                  start: computedNewStart.toISOString(),
-                  end: computedNewEnd.toISOString(),
-                  sequence: (master.sequence ?? 1) + 1
-                }
-              })
-            )
+        () =>
+          async (typeOfAction: 'solo' | 'all' | undefined): Promise<void> => {
+            if (typeOfAction === 'solo') {
+              await dispatch(
+                updateEventInstanceAsync({ cal: calendar, event: newEvent })
+              )
+            } else if (typeOfAction === 'all') {
+              const master = await getEvent(newEvent, true)
+
+              await dispatch(
+                updateSeriesAsync({
+                  cal: calendar,
+                  event: {
+                    ...master,
+                    start: computedNewStart.toISOString(),
+                    end: computedNewEnd.toISOString(),
+                    sequence: (master.sequence ?? 1) + 1
+                  }
+                })
+              )
+            }
           }
-        }
       )
     } else {
-      await dispatch(
-        putEventAsync({ cal: calendars[newEvent.calId], newEvent })
-      )
+      await dispatch(putEventAsync({ cal: calendar, newEvent }))
     }
   }
 
-  const handleEventResize = async (arg: EventResizeDoneArg) => {
-    if (!arg.event || !arg.event._def || !arg.event._def.extendedProps) {
-      return
-    }
+  const handleEventDrop = async (arg: EventDropArg): Promise<void> => {
+    const data = getEventAndCalendar(arg.event)
+    if (!data) return
+    const { event, calendar } = data
 
-    const event =
-      calendars[arg.event._def.extendedProps.calId].events[
-        arg.event._def.extendedProps.uid
-      ]
-    const calendar = calendars[arg.event._def.extendedProps.calId]
+    const totalDeltaMs = getDeltaInMilliseconds(arg.delta)
+    const originalStart = new Date(event.start)
+    const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs)
+    const originalEnd = new Date(event.end ?? '')
+    const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs)
 
-    const isRecurring = event.uid.includes('/')
+    await processTimeChange(event, calendar, computedNewStart, computedNewEnd)
+  }
+
+  const handleEventResize = async (arg: EventResizeDoneArg): Promise<void> => {
+    const data = getEventAndCalendar(arg.event)
+    if (!data) return
+    const { event, calendar } = data
 
     const originalStart = new Date(event.start)
     const computedNewStart = new Date(
@@ -214,46 +256,8 @@ export const createEventHandlers = (props: EventHandlersProps) => {
     const computedNewEnd = new Date(
       originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
     )
-    const newEvent = updateAttendeesAfterTimeChange(
-      {
-        ...event,
-        start: computedNewStart.toISOString(),
-        end: computedNewEnd.toISOString(),
-        sequence: (event.sequence ?? 1) + 1
-      } as CalendarEvent,
-      true
-    )
-    if (isRecurring) {
-      setSelectedEvent(event)
-      setOpenEditModePopup('edit')
-      setAfterChoiceFunc(
-        () => async (typeOfAction: 'solo' | 'all' | undefined) => {
-          if (typeOfAction === 'solo') {
-            await dispatch(
-              updateEventInstanceAsync({ cal: calendar, event: newEvent })
-            )
-          } else if (typeOfAction === 'all') {
-            const master = await getEvent(newEvent, true)
 
-            await dispatch(
-              updateSeriesAsync({
-                cal: calendar,
-                event: {
-                  ...master,
-                  start: computedNewStart.toISOString(),
-                  end: computedNewEnd.toISOString(),
-                  sequence: (master.sequence ?? 1) + 1
-                }
-              })
-            )
-          }
-        }
-      )
-    } else {
-      await dispatch(
-        putEventAsync({ cal: calendars[newEvent.calId], newEvent })
-      )
-    }
+    await processTimeChange(event, calendar, computedNewStart, computedNewEnd)
   }
 
   return {

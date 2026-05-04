@@ -486,14 +486,14 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                 }}
                 dayMaxEvents={true}
                 moreLinkClick={handleMoreLinkClick}
-                events={eventToFullCalendarFormat(
+                events={eventToFullCalendarFormat({
                   filteredEvents,
                   filteredTempEvents,
                   userId,
-                  userData?.email,
-                  isPending,
+                  userAddress: userData?.email,
+                  pending: isPending,
                   calendars
-                )}
+                })}
                 eventOrder={(a: EventApi, b: EventApi) =>
                   a.extendedProps.priority - b.extendedProps.priority
                 }

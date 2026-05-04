@@ -1,4 +1,4 @@
-import { combineDateTime } from './dateTimeHelpers'
+import { combineDateTime, splitDateTime } from './dateTimeHelpers'
 
 /**
  * Validation parameters for event form
@@ -136,4 +136,31 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
       dateTime: showValidationErrors ? dateTimeError : ''
     }
   }
+}
+
+/**
+ * Convenience wrapper: validate an EventFormValues bag without needing to
+ * split the datetime strings manually. Used by EventFormFields.isValid().
+ */
+export function validateEventFormValues(
+  values: {
+    start: string
+    end: string
+    allday: boolean
+    hasEndDateChanged: boolean
+  },
+  showMore: boolean
+): boolean {
+  const { date: startDate, time: startTime } = splitDateTime(values.start)
+  const { date: endDate, time: endTime } = splitDateTime(values.end)
+  return validateEventForm({
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    allday: values.allday,
+    showValidationErrors: false,
+    hasEndDateChanged: values.hasEndDateChanged,
+    showMore
+  }).isValid
 }
