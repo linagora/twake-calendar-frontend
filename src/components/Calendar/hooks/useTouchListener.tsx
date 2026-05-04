@@ -1,4 +1,5 @@
 import { DateSelectArg } from '@fullcalendar/core'
+import { endOfDay } from 'date-fns'
 import { RefObject, useEffect } from 'react'
 
 const MOVE_THRESHOLD = 10
@@ -80,10 +81,10 @@ export function useTouchListener(
       const allDayDate = isAllDayTap(touch.clientX, touch.clientY)
       if (allDayDate) {
         const startOfDay = new Date(`${allDayDate}T00:00:00`)
-        const endOfDay = new Date(`${allDayDate}T23:59:59`)
+        const endDate = endOfDay(new Date(allDayDate))
         handleDateSelect({
           start: startOfDay,
-          end: endOfDay,
+          end: endDate,
           allDay: true
         } as DateSelectArg)
       }
