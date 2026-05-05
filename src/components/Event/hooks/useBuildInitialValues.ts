@@ -19,6 +19,18 @@ export interface UseBuildInitialValuesParams {
   calId?: string
 }
 
+const isValidToInitBySelectedRange = (
+  selectedRange: DateSelectArg | null | undefined,
+  event: CalendarEvent | null | undefined
+): boolean => {
+  if (!selectedRange) return false
+  if (!selectedRange.start || !selectedRange.end) return false
+
+  const isEventNew = !event?.start && !event?.end
+
+  return isEventNew || selectedRange.allDay
+}
+
 export const useBuildInitialValues = ({
   event,
   selectedRange,
@@ -47,28 +59,40 @@ export const useBuildInitialValues = ({
   })
 
   return useMemo(() => {
-    if (event) {
-      return buildFromExistingEvent({
-        event,
-        resolvedCalendarTimezone,
-        calList,
-        userId,
-        defaultCalendarId,
-        organizer,
-        calId
-      })
-    }
-
     const base: Partial<EventFormValues> = {
       timezone: resolvedCalendarTimezone,
       calendarid: defaultCalendarId
     }
 
-    if (selectedRange?.start && selectedRange?.end) {
-      return buildFromSelectedRange(selectedRange, base)
+    let defaultEvent = buildDefaultNewEvent(base)
+
+    if (event) {
+      defaultEvent = {
+        ...defaultEvent,
+        ...buildFromExistingEvent({
+          event,
+          resolvedCalendarTimezone,
+          calList,
+          userId,
+          defaultCalendarId,
+          organizer,
+          calId
+        })
+      }
     }
 
-    return buildDefaultNewEvent(base)
+    const isInitFromSelectedRange = isValidToInitBySelectedRange(
+      selectedRange,
+      event
+    )
+    if (isInitFromSelectedRange) {
+      return {
+        ...defaultEvent,
+        ...buildFromSelectedRange(selectedRange ?? ({} as DateSelectArg), base)
+      }
+    }
+
+    return defaultEvent
   }, [
     event,
     selectedRange,
