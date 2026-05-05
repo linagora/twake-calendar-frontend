@@ -4,6 +4,7 @@ import { CalDavItem } from '../Calendars/api/types'
 import { VCalComponent, VObjectProperty } from '../Calendars/types/CalendarData'
 import { SearchEventsResponse } from '../Search/types/SearchEventsResponse'
 import { CalendarEvent } from './EventsTypes'
+import { WKST_NUM_TO_DAY } from './utils/wkstUtils'
 
 export async function reportEventRaw(
   event: CalendarEvent,
@@ -75,18 +76,6 @@ export async function searchEventRaw(reqParam: {
       body: JSON.stringify(reqParam)
     })
     .json()
-}
-
-// ical.js encodes WKST as a number (1=SU … 7=SA) when parsing ICS to jCal.
-// jCal consumers (including our CalDAV backend) expect the weekday string (SU, MO, …).
-const WKST_NUM_TO_DAY: Record<number, string> = {
-  1: 'SU',
-  2: 'MO',
-  3: 'TU',
-  4: 'WE',
-  5: 'TH',
-  6: 'FR',
-  7: 'SA'
 }
 
 function normalizeVeventRrule(vevents: VCalComponent[]): VCalComponent[] {
