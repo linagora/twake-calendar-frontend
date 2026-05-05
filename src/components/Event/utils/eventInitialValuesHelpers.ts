@@ -80,12 +80,10 @@ export function buildFromExistingEvent({
     calId
   })
 
-  return {
+  const eventData: Partial<EventFormValues> = {
     title: event.title ?? '',
     description,
     location: event.location ?? '',
-    start,
-    end,
     allday: isAllDay,
     repetition,
     attendees,
@@ -100,4 +98,14 @@ export function buildFromExistingEvent({
     showDescription: !!event.description,
     showRepeat
   }
+
+  if (start) {
+    eventData.start = start
+  }
+
+  if (end) {
+    eventData.end = end
+  }
+
+  return eventData
 }
