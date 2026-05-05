@@ -1434,9 +1434,19 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
   it('stores wkst when given as a weekday string', () => {
     const data: VObjectProperty[] = [
       ...baseProps,
-      ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 'MO' }]
+      [
+        'rrule',
+        {},
+        'recur',
+        { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 'MO' }
+      ]
     ]
-    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    const result = parseCalendarEvent(
+      data,
+      baseColor,
+      calendar,
+      '/cal/event.ics'
+    )
     expect(result.repetition?.wkst).toBe('MO')
   })
 
@@ -1444,9 +1454,19 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
     // ical.js stores WKST=MO as 2 internally when parsing to jCal
     const data: VObjectProperty[] = [
       ...baseProps,
-      ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 2 }]
+      [
+        'rrule',
+        {},
+        'recur',
+        { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 2 }
+      ]
     ]
-    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    const result = parseCalendarEvent(
+      data,
+      baseColor,
+      calendar,
+      '/cal/event.ics'
+    )
     expect(result.repetition?.wkst).toBe('MO')
   })
 
@@ -1463,7 +1483,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
       ...baseProps,
       ['rrule', {}, 'recur', { freq: 'WEEKLY', wkst: num }]
     ]
-    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    const result = parseCalendarEvent(
+      data,
+      baseColor,
+      calendar,
+      '/cal/event.ics'
+    )
     expect(result.repetition?.wkst).toBe(expected)
   })
 
@@ -1472,7 +1497,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
       ...baseProps,
       ['rrule', {}, 'recur', { freq: 'WEEKLY', byday: 'MO' }]
     ]
-    const result = parseCalendarEvent(data, baseColor, calendar, '/cal/event.ics')
+    const result = parseCalendarEvent(
+      data,
+      baseColor,
+      calendar,
+      '/cal/event.ics'
+    )
     expect(result.repetition?.wkst).toBeUndefined()
   })
 })
