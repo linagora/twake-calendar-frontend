@@ -10,8 +10,6 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   TextField,
   Typography
 } from '@linagora/twake-mui'
@@ -19,11 +17,12 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { PeopleSearch } from '../Attendees/PeopleSearch'
-import { User } from '../Attendees/types'
-import { FieldWithLabel } from '../Event/components/FieldWithLabel'
-import { stringAvatar } from '../Event/utils/eventUtils'
-import { ResourceAdmin } from './ResourceAdmins'
+import { PeopleSearch } from '../../Attendees/PeopleSearch'
+import { User } from '../../Attendees/types'
+import { FieldWithLabel } from '../../Event/components/FieldWithLabel'
+import { stringAvatar } from '../../Event/utils/eventUtils'
+import { ResourceAdmin } from '../ResourceAdmins'
+import { AccessSelector } from './AccessSelector'
 
 export interface UserWithAccess extends User {
   accessRight: AccessRight
@@ -41,6 +40,74 @@ interface UserInCalendar {
   access: AccessRight
 }
 
+function UserAccessRow({
+  user,
+  canEdit,
+  accessRightOptions,
+  onRemove,
+  onChangeRight
+}: {
+  user: UserWithAccess
+  canEdit: boolean
+  accessRightOptions: { value: AccessRight; label: string }[]
+  onRemove: (email: string) => void
+  onChangeRight: (email: string, right: AccessRight) => void
+}) {
+  return (
+    <Box
+      key={user.email}
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      px={1}
+      py={0.5}
+      sx={{
+        borderRadius: '8px',
+        '&:hover': { backgroundColor: 'action.hover' }
+      }}
+    >
+      <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+        <Avatar
+          {...stringAvatar(user.displayName)}
+          sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
+        />
+        <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
+          <Typography noWrap>{user.displayName}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {user.email}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={0.5}
+        flexShrink={0}
+        sx={{ maxWidth: '50%' }}
+        justifyContent="flex-end"
+      >
+        <AccessSelector
+          accessRight={user.accessRight}
+          setAccessRight={right => onChangeRight(user.email, right)}
+          accessRightOptions={accessRightOptions}
+          disabled={!canEdit}
+        />
+        {canEdit && (
+          <IconButton
+            size="small"
+            aria-label="remove"
+            onClick={() => onRemove(user.email)}
+            sx={{ color: 'text.secondary' }}
+          >
+            <HighlightOffIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+    </Box>
+  )
+}
+
 export function CalendarAccessRights({
   calendar,
   value: usersWithAccess,
@@ -55,6 +122,8 @@ export function CalendarAccessRights({
     const invitedEmail = normalizeEmail(invite.href.replace(/^mailto:/i, ''))
     return invitedEmail === currentUserEmail && invite.access === 5
   })
+
+  const canEdit = isPersonalCalendar || isDelegatedWithAdministration
 
   const ownerEmail =
     calendar.owner?.preferredEmail ?? calendar.owner?.emails?.[0] ?? ''
@@ -241,13 +310,13 @@ export function CalendarAccessRights({
   return (
     <FieldWithLabel
       label={
-        isPersonalCalendar || isDelegatedWithAdministration
+        canEdit
           ? t('calendarPopover.access.grantAccessRights')
           : t('calendarPopover.access.accessRights')
       }
       isExpanded={false}
     >
-      {(isPersonalCalendar || isDelegatedWithAdministration) && (
+      {canEdit && (
         <Box ref={containerRef}>
           <PeopleSearch
             selectedUsers={usersWithAccess}
@@ -315,34 +384,11 @@ export function CalendarAccessRights({
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Select
-                        value={accessRight}
-                        onChange={e =>
-                          setAccessRight(e.target.value as AccessRight)
-                        }
-                        variant="standard"
-                        disableUnderline
-                        sx={{
-                          fontSize: '0.875rem',
-                          color: 'text.secondary',
-                          '& .MuiSelect-select': {
-                            paddingRight: '24px !important',
-                            paddingY: 0
-                          },
-                          '& .MuiSelect-icon': { fontSize: '1rem' },
-                          '&:before, &:after': { display: 'none' }
-                        }}
-                      >
-                        {accessRightOptions.map(opt => (
-                          <MenuItem
-                            key={opt.value}
-                            value={opt.value}
-                            sx={{ color: 'text.secondary' }}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      <AccessSelector
+                        accessRight={accessRight}
+                        setAccessRight={setAccessRight}
+                        accessRightOptions={accessRightOptions}
+                      />
                     </InputAdornment>
                   )
                 }}
@@ -384,6 +430,7 @@ export function CalendarAccessRights({
             </Typography>
           </Box>
         </Box>
+
         {adminLoading ? (
           <Box mt={2} display="flex" justifyContent="center">
             <CircularProgress size={24} />
@@ -393,6 +440,7 @@ export function CalendarAccessRights({
             <ResourceAdmin key={admin.email} admin={admin} />
           ))
         )}
+
         {inviteLoading ? (
           <Box mt={2} display="flex" justifyContent="center">
             <CircularProgress size={24} />
@@ -400,77 +448,14 @@ export function CalendarAccessRights({
         ) : (
           usersWithAccess.length > 0 &&
           usersWithAccess.map(user => (
-            <Box
+            <UserAccessRow
               key={user.email}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              px={1}
-              py={0.5}
-              sx={{
-                borderRadius: '8px',
-                '&:hover': { backgroundColor: 'action.hover' }
-              }}
-            >
-              <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
-                <Avatar
-                  {...stringAvatar(user.displayName)}
-                  sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
-                />
-                <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
-                  <Typography noWrap>{user.displayName}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {user.email}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box display="flex" alignItems="center" gap={0.5} flexShrink={0}>
-                <Select
-                  value={user.accessRight}
-                  onChange={e =>
-                    handleChangeUserRight(
-                      user.email,
-                      e.target.value as AccessRight
-                    )
-                  }
-                  variant="standard"
-                  disableUnderline
-                  disabled={
-                    !(isPersonalCalendar || isDelegatedWithAdministration)
-                  }
-                  sx={{
-                    fontSize: '0.875rem',
-                    color: 'text.secondary',
-                    '& .MuiSelect-select': {
-                      paddingRight: '24px !important',
-                      paddingY: 0
-                    },
-                    '& .MuiSelect-icon': { fontSize: '1rem' }
-                  }}
-                >
-                  {accessRightOptions.map(opt => (
-                    <MenuItem
-                      key={opt.value}
-                      value={opt.value}
-                      sx={{ color: 'text.secondary' }}
-                    >
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {(isPersonalCalendar || isDelegatedWithAdministration) && (
-                  <IconButton
-                    size="small"
-                    aria-label={t('actions.remove')}
-                    onClick={() => handleRemoveUser(user.email)}
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    <HighlightOffIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </Box>
-            </Box>
+              user={user}
+              canEdit={canEdit}
+              accessRightOptions={accessRightOptions}
+              onRemove={handleRemoveUser}
+              onChangeRight={handleChangeUserRight}
+            />
           ))
         )}
       </Box>
