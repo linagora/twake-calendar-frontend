@@ -1,13 +1,18 @@
-import { IconButton } from '@linagora/twake-mui'
+import { useAppDispatch } from '@/app/hooks'
+import { clearSearch } from '@/features/Search/SearchSlice'
+import { setView } from '@/features/Settings/SettingsSlice'
+import { IconButton, useTheme } from '@linagora/twake-mui'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import MenuIcon from '@mui/icons-material/Menu'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import SearchIcon from '@mui/icons-material/Search'
+import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import SearchBar from './EventSearchBar'
+import { SmallNavigationControls } from './components/SmallNavigationControls'
 import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
+import MobileSearchBar from './MobileEventSearchBar'
 import { UserMenu } from './UserMenu'
-import { SmallNavigationControls } from './components/SmallNavigationControls'
-import { useState } from 'react'
 
 export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
@@ -27,8 +32,33 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   onDateChange
 }: SharedMenubarProps) => {
   const { t } = useI18n()
+  const dispatch = useAppDispatch()
+  const theme = useTheme()
 
-  const [displayDateLabel, setDisplayDateLabel] = useState(true)
+  const [openEventSearch, setOpenEventSearch] = useState(false)
+  const handleBackClick = (event: React.MouseEvent): void => {
+    event.stopPropagation()
+    event.preventDefault()
+    dispatch(setView('calendar'))
+    dispatch(clearSearch())
+  }
+  if (openEventSearch) {
+    return (
+      <header className="menubar menubar--mobile">
+        <IconButton
+          onClick={e => {
+            setOpenEventSearch(false)
+            handleBackClick(e)
+          }}
+          aria-label={t('common.back')}
+          sx={{ mr: 1 }}
+        >
+          <ArrowBackIcon sx={{ color: theme.palette.text.secondary }} />
+        </IconButton>
+        <MobileSearchBar />
+      </header>
+    )
+  }
 
   return (
     <header className="menubar">
@@ -56,22 +86,25 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           <SmallNavigationControls onNavigate={onNavigate} />
         </div>
 
-        {displayDateLabel && (
-          <div className="menu-items">
-            <div className="current-date-time">
-              <p>{dateLabel}</p>
-            </div>
+        <div className="menu-items">
+          <div className="current-date-time">
+            <p>{dateLabel}</p>
           </div>
-        )}
+        </div>
       </div>
 
       <div className="right-menu">
         <div className="search-container">
-          <SearchBar
-            onToggleSearch={searchExtendedStatus =>
-              setDisplayDateLabel(!searchExtendedStatus)
-            }
-          />
+          <IconButton
+            sx={{ mr: 1 }}
+            onClick={() => {
+              dispatch(setView('search'))
+              setOpenEventSearch(true)
+            }}
+            aria-label={t('common.search')}
+          >
+            <SearchIcon />
+          </IconButton>
         </div>
         <div className="menu-items">
           <IconButton
