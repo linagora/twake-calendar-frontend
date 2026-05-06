@@ -89,7 +89,7 @@ const DateTimeControlsRow: React.FC<DateTimeControlsRowProps> = ({
   }
 
   return (
-    <FieldWithLabel label=" " isExpanded={showMore && !isMobile}>
+    <FieldWithLabel label="" isExpanded={showMore && !isMobile}>
       <Box
         display="flex"
         gap={2}
