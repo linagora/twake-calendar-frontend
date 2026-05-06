@@ -288,10 +288,7 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
       )
     )
 
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    fireEvent.click(
-      screen.getByRole('menuitem', { name: 'eventPreview.deleteEvent' })
-    )
+    fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
     await waitFor(() => {
       expect(
@@ -369,10 +366,7 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
       )
     )
 
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    fireEvent.click(
-      screen.getByRole('menuitem', { name: 'eventPreview.deleteEvent' })
-    )
+    fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled()
@@ -408,10 +402,7 @@ describe('Delete Recurring Event Instance', () => {
       )
     )
 
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    fireEvent.click(
-      screen.getByRole('menuitem', { name: 'eventPreview.deleteEvent' })
-    )
+    fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
     await waitFor(() => {
       expect(
@@ -455,10 +446,7 @@ describe('Delete Recurring Event Instance', () => {
       )
     )
 
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    fireEvent.click(
-      screen.getByRole('menuitem', { name: 'eventPreview.deleteEvent' })
-    )
+    fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
     await waitFor(() => {
       expect(

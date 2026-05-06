@@ -1,8 +1,10 @@
 import { Box, IconButton, Tooltip } from '@linagora/twake-mui'
+import { Delete } from '@mui/icons-material'
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { useI18n } from 'twake-i18n'
 import { dlEvent } from '../EventApi'
 import { CalendarEvent } from '../EventsTypes'
 
@@ -19,20 +21,24 @@ interface EventPreviewHeaderProps {
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void
   onEditInOrganizerCalendar?: () => void
   editInOrganizerCalendarTooltip?: string
+  onDelete: () => void
 }
 
 export function EventPreviewHeader({
   event,
   eventId,
   isOwn,
+  isWriteDelegated,
   isNotPrivate,
   canEdit,
   onClose,
   onEdit,
   onMoreClick,
   onEditInOrganizerCalendar,
-  editInOrganizerCalendarTooltip
+  editInOrganizerCalendarTooltip,
+  onDelete
 }: EventPreviewHeaderProps) {
+  const { t } = useI18n()
   const canSeeMore = isNotPrivate || isOwn
 
   return (
@@ -71,6 +77,15 @@ export function EventPreviewHeader({
       {canEdit && (
         <IconButton size="small" onClick={onEdit}>
           <EditIcon />
+        </IconButton>
+      )}
+      {(isOwn || isWriteDelegated) && (
+        <IconButton
+          size="small"
+          aria-label={t('eventPreview.deleteEvent')}
+          onClick={onDelete}
+        >
+          <Delete />
         </IconButton>
       )}
       {!canEdit && onEditInOrganizerCalendar && (

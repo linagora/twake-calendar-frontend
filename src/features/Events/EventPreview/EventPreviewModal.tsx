@@ -106,6 +106,7 @@ export default function EventPreviewModal({
             isWriteDelegated={isWriteDelegated}
             isNotPrivate={isNotPrivate}
             canEdit={canEdit}
+            onDelete={handleDeleteClick}
             onClose={() => onClose({}, 'backdropClick')}
             onEdit={handleEditClick}
             onMoreClick={e => setToggleActionMenu(e.currentTarget)}
@@ -197,11 +198,8 @@ export default function EventPreviewModal({
         anchorEl={toggleActionMenu}
         event={event}
         userEmail={user.email}
-        isOwn={isOwn}
-        isWriteDelegated={isWriteDelegated}
         onClose={() => setToggleActionMenu(null)}
         onDuplicate={handleDuplicateClick}
-        onDelete={handleDeleteClick}
       />
 
       {/* Recurring edit/delete mode picker */}
@@ -232,7 +230,6 @@ export default function EventPreviewModal({
 
       {/* Duplicate modal */}
       <EventPopover
-        anchorEl={null}
         open={openDuplicateModal}
         selectedRange={
           {

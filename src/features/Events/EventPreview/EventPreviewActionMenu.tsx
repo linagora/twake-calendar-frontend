@@ -7,22 +7,16 @@ interface EventPreviewActionMenuProps {
   anchorEl: Element | null
   event: CalendarEvent
   userEmail: string
-  isOwn: boolean
-  isWriteDelegated: boolean
   onClose: () => void
   onDuplicate: () => void
-  onDelete: () => void
 }
 
 export function EventPreviewActionMenu({
   anchorEl,
   event,
   userEmail,
-  isOwn,
-  isWriteDelegated,
   onClose,
-  onDuplicate,
-  onDelete
+  onDuplicate
 }: EventPreviewActionMenuProps) {
   const { t } = useI18n()
   const mailSpaUrl = window.MAIL_SPA_URL ?? null
@@ -55,9 +49,6 @@ export function EventPreviewActionMenu({
           onDuplicate()
         }}
       />
-      {(isOwn || isWriteDelegated) && (
-        <MenuItem onClick={onDelete}>{t('eventPreview.deleteEvent')}</MenuItem>
-      )}
     </Menu>
   )
 }

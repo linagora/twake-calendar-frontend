@@ -217,8 +217,9 @@ describe('Event Preview Display', () => {
       />,
       preloadedState
     )
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    expect(screen.queryByText('eventPreview.deleteEvent')).toBeInTheDocument()
+    expect(
+      screen.queryByLabelText('eventPreview.deleteEvent')
+    ).toBeInTheDocument()
   })
   it('calls delete when Delete clicked', async () => {
     renderWithProviders(
@@ -235,10 +236,7 @@ describe('Event Preview Display', () => {
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
-    fireEvent.click(screen.getByTestId('MoreVertIcon'))
-    fireEvent.click(
-      screen.getByRole('menuitem', { name: 'eventPreview.deleteEvent' })
-    )
+    fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled()
@@ -1683,8 +1681,9 @@ describe('Event Preview Display', () => {
           />,
           makeDelegatedState()
         )
-        fireEvent.click(screen.getByTestId('MoreVertIcon'))
-        expect(screen.getByText('eventPreview.deleteEvent')).toBeInTheDocument()
+        expect(
+          screen.getByLabelText('eventPreview.deleteEvent')
+        ).toBeInTheDocument()
       })
 
       it('does not show delete option when delegated with read-only access', () => {
