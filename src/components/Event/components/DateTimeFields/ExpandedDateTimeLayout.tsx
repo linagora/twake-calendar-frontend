@@ -3,6 +3,7 @@ import { PickerValue } from '@mui/x-date-pickers/internals'
 import dayjs from 'dayjs'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
+import { DateTimeErrors } from '../../utils/formValidation'
 import { DatePickerField } from './DatePickerField'
 import { TimePickerField } from './TimePickerField'
 
@@ -11,7 +12,7 @@ export interface ExpandedDateTimeLayoutProps {
   startTimeValue: ReturnType<typeof dayjs> | null
   endDateValue: ReturnType<typeof dayjs> | null
   endTimeValue: ReturnType<typeof dayjs> | null
-  hasError: boolean
+  errors: DateTimeErrors
   isMobile: boolean
   shouldShowTimeFields: boolean
   onStartDateChange: (value: PickerValue) => void
@@ -30,7 +31,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
   startTimeValue,
   endDateValue,
   endTimeValue,
-  hasError,
+  errors,
   isMobile,
   shouldShowTimeFields,
   onStartDateChange,
@@ -56,6 +57,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
             onChange={onStartDateChange}
             testId="start-date-input"
             label={t('dateTimeFields.startDate')}
+            hasError={!!errors.date}
           />
         </Box>
         {shouldShowTimeFields && (
@@ -77,7 +79,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
             onChange={onEndDateChange}
             testId="end-date-input"
             label={t('dateTimeFields.endDate')}
-            hasError={hasError}
+            hasError={!!errors.time}
           />
         </Box>
         {shouldShowTimeFields && (
@@ -87,7 +89,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
               onChange={onEndTimeChange}
               testId="end-time-input"
               label={t('dateTimeFields.endTime')}
-              hasError={hasError}
+              hasError={!!errors.time}
             />
           </Box>
         )}

@@ -19,9 +19,12 @@ export interface ValidationParams {
  */
 export interface ValidationResult {
   isValid: boolean
-  errors: {
-    dateTime: string
-  }
+  errors: DateTimeErrors
+}
+
+export interface DateTimeErrors {
+  time: string
+  date: string
 }
 
 /**
@@ -42,7 +45,8 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
   } = params
 
   let isDateTimeValid = true
-  let dateTimeError = ''
+  let timeError = ''
+  let dateError = ''
 
   // Determine which fields are visible based on UI mode
   const showFullFields =
@@ -55,22 +59,35 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
   // Validate start date
   if (!startDate || startDate.trim() === '') {
     isDateTimeValid = false
-    dateTimeError = 'Start date is required'
+    timeError = 'event.validation.startRequired'
+  }
+  // Validate start date is not before today's beginning
+  else if (
+    (() => {
+      const [y, m, d] = startDate.split('-').map(v => parseInt(v, 10))
+      const startDay = new Date(y, m - 1, d)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      return isNaN(startDay.getTime()) || startDay < today
+    })()
+  ) {
+    isDateTimeValid = false
+    dateError = 'event.validation.startDateInPast'
   }
   // Validate start time (if not all-day)
   else if (!allday && (!startTime || startTime.trim() === '')) {
     isDateTimeValid = false
-    dateTimeError = 'Start time is required'
+    timeError = 'event.validation.startRequired'
   }
   // Validate end fields based on UI mode
   else if (showFullFields) {
     // 4 fields mode: validate both end date and end time
     if (!endDate || endDate.trim() === '') {
       isDateTimeValid = false
-      dateTimeError = 'End date is required'
+      timeError = 'event.validation.endRequired'
     } else if (!allday && (!endTime || endTime.trim() === '')) {
       isDateTimeValid = false
-      dateTimeError = 'End time is required'
+      timeError = 'event.validation.endRequired'
     } else {
       // Validate total datetime
       if (allday) {
@@ -85,10 +102,10 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
 
         if (isNaN(startOnly.getTime()) || isNaN(endOnly.getTime())) {
           isDateTimeValid = false
-          dateTimeError = 'Invalid date'
+          timeError = 'event.validation.invalidDate'
         } else if (endOnly < startOnly) {
           isDateTimeValid = false
-          dateTimeError = 'End date must be on or after start date'
+          timeError = 'event.validation.endAfterStart'
         }
       } else {
         const startDateTime = new Date(combineDateTime(startDate, startTime))
@@ -96,10 +113,10 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
 
         if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
           isDateTimeValid = false
-          dateTimeError = 'Invalid date/time'
+          timeError = 'event.validation.invalidDateTime'
         } else if (endDateTime <= startDateTime) {
           isDateTimeValid = false
-          dateTimeError = 'End date/time must be after start date/time'
+          timeError = 'event.validation.endAfterStart'
         }
       }
     }
@@ -107,7 +124,7 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     // 3 fields mode: validate time only (end time > start time, same day)
     if (!endTime || endTime.trim() === '') {
       isDateTimeValid = false
-      dateTimeError = 'End time is required'
+      timeError = 'event.validation.endRequired'
     } else {
       // Compare times only (same day is assumed)
       const startTimeParts = startTime.split(':')
@@ -119,11 +136,11 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
           parseInt(endTimeParts[0]) * 60 + parseInt(endTimeParts[1])
         if (endMinutes <= startMinutes) {
           isDateTimeValid = false
-          dateTimeError = 'End time must be after start time'
+          timeError = 'event.validation.endAfterStart'
         }
       } else {
         isDateTimeValid = false
-        dateTimeError = 'Invalid time format'
+        timeError = 'event.validation.invalidTimeFormat'
       }
     }
   }
@@ -133,7 +150,8 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
   return {
     isValid,
     errors: {
-      dateTime: showValidationErrors ? dateTimeError : ''
+      time: showValidationErrors ? timeError : '',
+      date: showValidationErrors ? dateError : ''
     }
   }
 }

@@ -82,7 +82,7 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
       value={valueToDisplay}
       placeholder={parsedFormat}
       InputProps={mergedInputProps}
-      error={hasValidationError}
+      error={hasValidationError || forwardedProps.error}
       focused={open}
       onClick={() => setOpen((prev: boolean) => !prev)}
       className={rootClassName}

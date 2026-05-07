@@ -11,6 +11,7 @@ import 'dayjs/locale/vi'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import React, { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
+import { DateTimeErrors } from '../../utils/formValidation'
 import { DateTimeError } from './DateTimeError'
 import { DateTimeLayoutContent } from './DateTimeLayoutContent'
 import { useDateTimeHandlers } from './useDateTimeHandlers'
@@ -30,9 +31,7 @@ export interface DateTimeFieldsProps {
   showEndDate: boolean
   onToggleEndDate: () => void
   validation: {
-    errors: {
-      dateTime: string
-    }
+    errors: DateTimeErrors
   }
   onStartDateChange: (date: string) => void
   onStartTimeChange: (time: string) => void
@@ -123,8 +122,6 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
     [endTime]
   )
 
-  const hasError = !!validation.errors.dateTime
-
   const showFullField = showMore || shouldShowFullFieldsInNormal
   const containerClassName = classNames('date-time-group', {
     'show-full-field': showFullField
@@ -148,7 +145,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           startTimeValue={startTimeValue}
           endDateValue={endDateValue}
           endTimeValue={endTimeValue}
-          hasError={hasError}
+          errors={validation.errors}
           isMobile={isMobile}
           allday={allday}
           startDateLabel={startDateLabel}
@@ -158,7 +155,9 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
         />
-        <DateTimeError message={validation.errors.dateTime} />
+        <DateTimeError
+          message={validation.errors.date || validation.errors.time}
+        />
       </Box>
     </LocalizationProvider>
   )

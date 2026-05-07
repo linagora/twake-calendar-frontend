@@ -4,6 +4,7 @@ import { AllDayDateLayout } from './AllDayDateLayout'
 import { CompactDateTimeLayout } from './CompactDateTimeLayout'
 import { LayoutMode, LAYOUT_MODE } from './useDateTimeLayout'
 import { ExpandedDateTimeLayout } from './ExpandedDateTimeLayout'
+import { DateTimeErrors } from '../../utils/formValidation'
 
 interface StartDateTime {
   startDateValue: Dayjs | null
@@ -21,7 +22,7 @@ interface EndDateTime {
 
 export interface DateTimeLayoutContentProps extends StartDateTime, EndDateTime {
   layoutMode: LayoutMode
-  hasError: boolean
+  errors: DateTimeErrors
   isMobile: boolean
   allday: boolean
   startDateLabel: string
