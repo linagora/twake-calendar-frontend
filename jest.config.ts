@@ -49,8 +49,7 @@ const config: Config = {
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
         '^@/(.*)$': '<rootDir>/src/$1',
-        '^@linagora/twake-mui$':
-          '<rootDir>/node_modules/@linagora/twake-mui/dist/index.js'
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       },
       setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts']
     },
@@ -78,8 +77,7 @@ const config: Config = {
       setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
-        '^@linagora/twake-mui$':
-          '<rootDir>/node_modules/@linagora/twake-mui/dist/index.js'
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       }
     }
   ]

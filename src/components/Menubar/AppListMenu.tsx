@@ -7,8 +7,7 @@ import { AppIcon, AppIconProps } from './AppIcon'
 const sharedPaperSx = {
   minWidth: 230,
   mt: 2,
-  p: '14px 8px',
-  borderRadius: '14px'
+  p: '14px 8px'
 }
 
 const AppGrid: React.FC<{ applist: AppIconProps[] }> = ({ applist }) => (
