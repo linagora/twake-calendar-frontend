@@ -23,7 +23,7 @@ const mockFetchCurrentUser = fetchCurrentUser as jest.MockedFunction<
 const mockFetchUserById = fetchUserById as jest.MockedFunction<
   typeof fetchUserById
 >
-const mockFetchResourceById = api.get as jest.MockedFunction<typeof api.get>
+const mockedApiGet = api.get as jest.MockedFunction<typeof api.get>
 const mockPatchConfigurations = patchConfigurations as jest.MockedFunction<
   typeof patchConfigurations
 >
@@ -66,15 +66,13 @@ describe('getResourceDetails', () => {
     const mockResource = { _id: 'res-123', name: 'Meeting Room A' } as any
     const resourceId = 'res-123'
 
-    mockFetchResourceById.mockReturnValue({
+    mockedApiGet.mockReturnValue({
       json: () => Promise.resolve(mockResource)
     })
 
     const result = await fetchResourceById(resourceId)
 
-    expect(mockFetchResourceById).toHaveBeenCalledWith(
-      `api/resources/${resourceId}`
-    )
+    expect(mockedApiGet).toHaveBeenCalledWith(`api/resources/${resourceId}`)
     expect(result).toEqual(mockResource)
   })
 })

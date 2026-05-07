@@ -38,7 +38,9 @@ export async function searchPeople(
   return response
 }
 
-export async function patchConfigurations(modules: ModuleConfiguration[]) {
+export async function patchConfigurations(
+  modules: ModuleConfiguration[]
+): Promise<Response> {
   return await api.patch(`api/configurations?scope=user`, {
     json: modules
   })

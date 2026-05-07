@@ -47,7 +47,7 @@ export async function addSharedCalendar(
       calendarHomeId: cal.cal.id,
       color: cal.cal['apple:color'],
       description: cal.cal['caldav:description'],
-      href: cal.cal._links.self?.href,
+      href: cal.cal?._links?.self?.href,
       id: cal.cal.id,
       invite: cal.cal.invite,
       name: cal.cal['dav:name']

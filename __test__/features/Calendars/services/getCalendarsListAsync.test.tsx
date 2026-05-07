@@ -126,7 +126,7 @@ describe('getCalendarsListAsync', () => {
     expect(mockedGetCalendars).toHaveBeenCalledWith('user-123')
   })
 
-  it('should fetch user using getOpenPaasUser if openpaasId is not in state', async () => {
+  it('should fetch user if openpaasId is not in state', async () => {
     getState.mockReturnValue({ calendars: {}, user: {} })
     mockedFetchCurrentUser.mockResolvedValue({ id: 'fetched-user-123' })
     mockedGetCalendars.mockResolvedValue({ _embedded: { 'dav:calendar': [] } })

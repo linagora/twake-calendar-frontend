@@ -200,7 +200,9 @@ describe('Calendar API', () => {
       })
     )
 
-    const callBody = JSON.parse(String(api.mock.calls[0][1]?.body))
+    const callBody = JSON.parse(
+      String((api as unknown as jest.Mock).mock.calls[0][1]?.body)
+    )
     expect(callBody['dav:name']).toBe('#default')
   })
 })
