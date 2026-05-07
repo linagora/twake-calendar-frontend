@@ -217,22 +217,24 @@ const CalendarSelection: React.FC<{
           defaultExpanded
         />
 
-        <CalendarAccordion
-          title={t('calendar.resources')}
-          calendars={resourceCalendars}
-          selectedCalendars={selectedCalendars}
-          onAddClick={() => {
-            setAnchorElCalResources(document.body)
-          }}
-          showAddButton
-          handleToggle={handleCalendarToggle}
-          setOpen={(id: string) => {
-            setAnchorElCal(document.body)
-            setSelectedCalId(id)
-          }}
-          defaultExpanded
-          hideOwner={true}
-        />
+        {!window.HIDE_RESOURCES && (
+          <CalendarAccordion
+            title={t('calendar.resources')}
+            calendars={resourceCalendars}
+            selectedCalendars={selectedCalendars}
+            onAddClick={() => {
+              setAnchorElCalResources(document.body)
+            }}
+            showAddButton
+            handleToggle={handleCalendarToggle}
+            setOpen={(id: string) => {
+              setAnchorElCal(document.body)
+              setSelectedCalId(id)
+            }}
+            defaultExpanded
+            hideOwner={true}
+          />
+        )}
       </div>
       <CalendarPopover
         open={Boolean(anchorElCal)}
