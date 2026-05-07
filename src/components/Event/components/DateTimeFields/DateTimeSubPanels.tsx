@@ -64,7 +64,7 @@ export const DateTimeRepeatPanel: React.FC<DateTimeRepeatPanelProps> = ({
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   return (
-    <FieldWithLabel label=" " isExpanded={showMore && !isMobile}>
+    <FieldWithLabel label="" isExpanded={showMore && !isMobile}>
       <RepeatEvent
         repetition={repetition}
         eventStart={new Date(start)}
