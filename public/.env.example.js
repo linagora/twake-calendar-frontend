@@ -18,3 +18,4 @@ var WS_PING_PERIOD_MS = 30000
 var WS_PING_TIMEOUT_PERIOD_MS = 35000
 // var SENTRY_DSN = "https://...@sentry.io/..."; // optional, omit to disable Sentry
 // var HIDE_RESOURCES = true; // optional
+var DISABLE_PUBLIC_VISIBILITY = false

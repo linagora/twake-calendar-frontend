@@ -385,6 +385,8 @@ describe('Event Full Display', () => {
   })
 
   it('renders video conference info when x_openpass_videoconference exists', () => {
+    window.VIDEO_CONFERENCE_BASE_URL = 'https://meet.test'
+
     const videoState = {
       ...preloadedState,
       calendars: {
@@ -418,5 +420,7 @@ describe('Event Full Display', () => {
     expect(
       screen.getByText('event.form.joinVisioConference')
     ).toBeInTheDocument()
+
+    delete window.VIDEO_CONFERENCE_BASE_URL
   })
 })

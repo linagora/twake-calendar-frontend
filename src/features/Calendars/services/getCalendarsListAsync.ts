@@ -25,9 +25,7 @@ export const getCalendarsListAsync = createAsyncThunk<
   const existingUser = { id: state.user?.userData?.openpaasId || undefined }
   try {
     const fetchedCalendars: Record<string, Calendar> = {}
-    const user = existingUser.id
-      ? existingUser
-      : ((await getOpenPaasUser()) as OpenPaasUserData)
+    const user = existingUser.id ? existingUser : await getOpenPaasUser()
     const calendars = await getCalendars(user.id)
     const rawCalendars = calendars._embedded['dav:calendar']
 
@@ -44,7 +42,7 @@ export const getCalendarsListAsync = createAsyncThunk<
     const ownerDataMap = new Map<string, OpenPaasUserData>()
     const OWNER_BATCH_SIZE = 20
 
-    const mapOwnerData = async (ownerId: string) => {
+    const mapOwnerData = async (ownerId: string): Promise<void> => {
       try {
         const data = await fetchOwnerData(ownerId)
         ownerDataMap.set(ownerId, data)

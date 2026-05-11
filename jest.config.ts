@@ -6,6 +6,11 @@ process.env.TZ = 'UTC'
 const config: Config = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
 
   projects: [
     {
@@ -23,6 +28,7 @@ const config: Config = {
       ],
       testEnvironment: 'jsdom',
       testMatch: ['**/*.test.tsx'],
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
       testTimeout: 15000,
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
@@ -42,7 +48,8 @@ const config: Config = {
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       },
       setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts']
     },
@@ -69,7 +76,8 @@ const config: Config = {
       transformIgnorePatterns: ['/node_modules/(?!(ky|@linagora/twake-mui)/)'],
       setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       }
     }
   ]

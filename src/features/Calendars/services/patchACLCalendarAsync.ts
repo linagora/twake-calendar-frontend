@@ -1,6 +1,6 @@
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { updateAclCalendar } from '../CalendarApi'
+import { updateCalendarAcl } from '../CalendarDAO'
 import { RejectedError } from '../types/RejectedError'
 
 export const patchACLCalendarAsync = createAsyncThunk<
@@ -19,7 +19,7 @@ export const patchACLCalendarAsync = createAsyncThunk<
   'calendars/requestACLCalendar',
   async ({ calId, calLink, request }, { rejectWithValue }) => {
     try {
-      await updateAclCalendar(calLink, request)
+      await updateCalendarAcl(calLink, request)
       return {
         calId,
         calLink,

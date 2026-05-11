@@ -42,7 +42,7 @@ export const DEFAULT_FORM_VALUES: EventFormValues = {
   attendees: [],
   alarm: '',
   busy: 'OPAQUE',
-  eventClass: 'PUBLIC',
+  eventClass: window.DISABLE_PUBLIC_VISIBILITY ? 'PRIVATE' : 'PUBLIC',
   timezone: '',
   calendarid: '',
   hasVideoConference: false,

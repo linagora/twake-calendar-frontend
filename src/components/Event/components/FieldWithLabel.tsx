@@ -17,13 +17,13 @@ export const FieldWithLabel = React.memo(
     children: React.ReactNode
     sx?: SxProps<Theme>
   }) => {
+    const isEmptyLabel =
+      label === null ||
+      label === undefined ||
+      (typeof label === 'string' && label.trim() === '')
+
     if (!isExpanded) {
       // Normal mode: label on top
-      const isEmptyLabel =
-        label === null ||
-        label === undefined ||
-        (typeof label === 'string' && label.trim() === '')
-
       return (
         <Box
           sx={[
@@ -73,17 +73,19 @@ export const FieldWithLabel = React.memo(
     // Extended mode: label on left
     return (
       <Box display="flex" alignItems="center" sx={sx}>
-        <Typography
-          component="div"
-          variant="h6"
-          sx={{
-            minWidth: '115px',
-            marginRight: '12px',
-            flexShrink: 0
-          }}
-        >
-          {label}
-        </Typography>
+        {!isEmptyLabel && (
+          <Typography
+            component="div"
+            variant="h6"
+            sx={{
+              minWidth: '115px',
+              marginRight: '12px',
+              flexShrink: 0
+            }}
+          >
+            {label}
+          </Typography>
+        )}
         <Box
           flexGrow={1}
           sx={{

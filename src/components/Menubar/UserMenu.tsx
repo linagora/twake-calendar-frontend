@@ -1,10 +1,12 @@
 import { userData } from '@/features/User/userDataTypes'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { getInitials, stringToGradient } from '@/utils/avatarUtils'
 import { getUserDisplayName } from '@/utils/userUtils'
 import {
   alpha,
   Avatar,
   Box,
+  Dialog,
   Divider,
   IconButton,
   Menu,
@@ -28,6 +30,128 @@ export type UserMenuProps = {
   size?: 's' | 'm' | 'l'
 }
 
+const sharedPaperSx = {
+  minWidth: 280,
+  mt: 1,
+  padding: '0 !important',
+  borderRadius: '14px'
+}
+
+const UserMenuContent: React.FC<{
+  user: userData | null
+  displayName: string
+  onSettingsClick: () => void
+  onLogoutClick: () => void
+}> = ({ user, displayName, onSettingsClick, onLogoutClick }) => {
+  const { t } = useI18n()
+  const theme = useTheme()
+
+  return (
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '24px'
+        }}
+      >
+        <Avatar
+          color={stringToGradient(displayName)}
+          size="l"
+          sx={{ marginBottom: '8px' }}
+        >
+          {getInitials(displayName)}
+        </Avatar>
+        <Typography
+          sx={{
+            color: theme.palette.grey[900],
+            fontFamily: 'Inter',
+            fontSize: 22,
+            fontWeight: 600
+          }}
+        >
+          {displayName}
+        </Typography>
+        <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+          {user?.email}
+        </Typography>
+      </Box>
+      <MenuItem onClick={onSettingsClick} sx={{ py: 1.5 }}>
+        <SettingsOutlinedIcon
+          sx={{
+            mr: 2,
+            color: alpha(theme.palette.grey[900], 0.48),
+            fontSize: 20
+          }}
+        />
+        {t('menubar.settings') || 'Settings'}
+      </MenuItem>
+      <Divider />
+      <MenuItem onClick={onLogoutClick} sx={{ py: 1.5 }}>
+        <LogoutIcon
+          sx={{
+            mr: 2,
+            color: alpha(theme.palette.grey[900], 0.48),
+            fontSize: 20
+          }}
+        />
+        {t('menubar.logout') || 'Logout'}
+      </MenuItem>
+    </>
+  )
+}
+
+const UserMenuPopup: React.FC<{
+  anchorEl: HTMLElement | null
+  onClose: () => void
+  user: userData | null
+  displayName: string
+  onSettingsClick: () => void
+  onLogoutClick: () => void
+  isMobile: boolean
+}> = ({
+  anchorEl,
+  onClose,
+  user,
+  displayName,
+  onSettingsClick,
+  onLogoutClick,
+  isMobile
+}) => {
+  const open = Boolean(anchorEl)
+  const slotProps = { paper: { sx: sharedPaperSx } }
+  const content = (
+    <UserMenuContent
+      user={user}
+      displayName={displayName}
+      onSettingsClick={onSettingsClick}
+      onLogoutClick={onLogoutClick}
+    />
+  )
+
+  if (isMobile) {
+    return (
+      <Dialog open={open} onClose={onClose} slotProps={slotProps}>
+        {content}
+      </Dialog>
+    )
+  }
+
+  return (
+    <Menu
+      open={open}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      slotProps={slotProps}
+    >
+      {content}
+    </Menu>
+  )
+}
+
 export function UserMenu({
   anchorEl,
   onClose,
@@ -39,10 +163,8 @@ export function UserMenu({
   size = 'm'
 }: UserMenuProps): JSX.Element {
   const { t } = useI18n()
-  const theme = useTheme()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const displayName = getUserDisplayName(user)
-
-  const open = Boolean(anchorEl)
 
   return (
     <>
@@ -59,78 +181,15 @@ export function UserMenu({
           <SettingsOutlinedIcon />
         )}
       </IconButton>
-
-      <Menu
-        open={open}
+      <UserMenuPopup
         anchorEl={anchorEl}
         onClose={onClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 280,
-              mt: 1,
-              padding: '0 !important',
-              borderRadius: '14px'
-            }
-          }
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '24px'
-          }}
-        >
-          <Avatar
-            color={stringToGradient(displayName)}
-            size="l"
-            sx={{ marginBottom: '8px' }}
-          >
-            {getInitials(displayName)}
-          </Avatar>
-          <Typography
-            sx={{
-              color: theme.palette.grey[900],
-              fontFamily: 'Inter',
-              fontSize: 22,
-              fontWeight: 600
-            }}
-          >
-            {displayName}
-          </Typography>
-          <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-            {user?.email}
-          </Typography>
-        </Box>
-
-        <MenuItem onClick={onSettingsClick} sx={{ py: 1.5 }}>
-          <SettingsOutlinedIcon
-            sx={{
-              mr: 2,
-              color: alpha(theme.palette.grey.A900, 0.48),
-              fontSize: 20
-            }}
-          />
-          {t('menubar.settings') || 'Settings'}
-        </MenuItem>
-
-        <Divider />
-
-        <MenuItem onClick={onLogoutClick} sx={{ py: 1.5 }}>
-          <LogoutIcon
-            sx={{
-              mr: 2,
-              color: alpha(theme.palette.grey.A900, 0.48),
-              fontSize: 20
-            }}
-          />
-          {t('menubar.logout') || 'Logout'}
-        </MenuItem>
-      </Menu>
+        user={user}
+        displayName={displayName}
+        onSettingsClick={onSettingsClick}
+        onLogoutClick={onLogoutClick}
+        isMobile={isMobile}
+      />
     </>
   )
 }

@@ -4,9 +4,9 @@ import MobileSearchResultsPage from './MobileSearchResultsPage'
 import './searchResult.styl'
 
 const SearchResultsPage: React.FC = () => {
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const { isTooSmall: isMobile, isTablet } = useScreenSizeDetection()
 
-  if (isMobile) {
+  if (isMobile || isTablet) {
     return <MobileSearchResultsPage />
   } else {
     return <DesktopSearchResultsPage />

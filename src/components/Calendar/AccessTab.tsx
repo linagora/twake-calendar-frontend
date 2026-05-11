@@ -1,4 +1,7 @@
-import { exportCalendar, getSecretLink } from '@/features/Calendars/CalendarApi'
+import {
+  fetchCalendarExport,
+  fetchSecretLink
+} from '@/features/Calendars/CalendarDAO'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   Box,
@@ -43,13 +46,21 @@ export function AccessTab({
   const [secretLink, setSecretLink] = useState('')
   const [open, setOpen] = useState(false)
 
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = useState('')
+
   useEffect(() => {
     async function fetchSecret() {
-      const existing = await getSecretLink(
-        calendar.link.replace('.json', ''),
-        false
-      )
-      setSecretLink(existing.secretLink)
+      try {
+        const existing = await fetchSecretLink(
+          calendar.link.replace('.json', ''),
+          false
+        )
+        setSecretLink(existing.secretLink)
+      } catch (e) {
+        console.error(e)
+        setExportError((e as Error).message)
+      }
     }
     fetchSecret()
   }, [calendar.link])
@@ -60,20 +71,22 @@ export function AccessTab({
   }
 
   const handleResetSecretLink = async () => {
-    const newSecret = await getSecretLink(
-      calendar.link.replace('.json', ''),
-      true
-    )
-    setSecretLink(newSecret.secretLink)
+    try {
+      const newSecret = await fetchSecretLink(
+        calendar.link.replace('.json', ''),
+        true
+      )
+      setSecretLink(newSecret.secretLink)
+    } catch (e) {
+      console.error(e)
+      setExportError((e as Error).message)
+    }
   }
-
-  const [exportLoading, setExportLoading] = useState(false)
-  const [exportError, setExportError] = useState('')
 
   const handleExport = async () => {
     try {
       setExportLoading(true)
-      const exportedData = await exportCalendar(
+      const exportedData = await fetchCalendarExport(
         calendar.link.replace('.json', '')
       )
       const blob = new Blob([exportedData], { type: 'text/calendar' })

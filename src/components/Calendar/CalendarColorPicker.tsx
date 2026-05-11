@@ -3,14 +3,19 @@ import CheckIcon from '@mui/icons-material/Check'
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Popover,
   TextField,
   Typography,
   useTheme
 } from '@linagora/twake-mui'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useI18n } from 'twake-i18n'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { getAccessiblePair } from '@/utils/getAccessiblePair'
 import { defaultColors } from '@/utils/defaultColors'
 
@@ -22,7 +27,7 @@ export function ColorPicker({
   selectedColor: Record<string, string>
   colors?: Record<string, string>[]
   onChange: (color: Record<string, string>) => void
-}) {
+}): JSX.Element {
   const customColor = !colors.find(c => c.light === selectedColor?.light)
     ? selectedColor
     : undefined
@@ -63,7 +68,7 @@ function ColorBox({
   color: Record<string, string>
   onChange: (color: Record<string, string>) => void
   selectedColor: Record<string, string>
-}) {
+}): JSX.Element {
   return (
     <Box
       role="button"
@@ -101,13 +106,107 @@ function ColorBox({
   )
 }
 
+function ColorPickerHeader(): JSX.Element {
+  const { t } = useI18n()
+  return (
+    <>
+      <Typography variant="subtitle1" fontWeight="600">
+        {t('colorPicker.title')}
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+        {t('colorPicker.subtitle')}
+      </Typography>
+    </>
+  )
+}
+
+function ColorPickerFields({
+  color,
+  onColorChange,
+  fullWidth = false
+}: {
+  color: Record<string, string>
+  onColorChange: (c: string) => void
+  fullWidth?: boolean
+}): JSX.Element {
+  const { t } = useI18n()
+  const [draftLight, setDraftLight] = useState(color.light)
+
+  useEffect(() => {
+    const updateDraftColor = (): void => {
+      setDraftLight(color.light)
+    }
+    updateDraftColor()
+  }, [color.light])
+
+  const commitChange = (): void => {
+    onColorChange(draftLight)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      commitChange()
+    }
+  }
+
+  return (
+    <>
+      <Box sx={{ mb: 2 }}>
+        <HexColorPicker
+          color={color.light}
+          onChange={onColorChange}
+          style={{ width: '100%' }}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Typography variant="body2" sx={{ mr: 1 }}>
+          {t('colorPicker.hex')}
+        </Typography>
+        <TextField
+          value={draftLight?.toUpperCase()}
+          onChange={e => setDraftLight(e.target.value)}
+          onBlur={commitChange}
+          onKeyDown={handleKeyDown}
+          variant="standard"
+          size="small"
+          fullWidth={fullWidth}
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
+      </Box>
+    </>
+  )
+}
+
+function ColorPickerActions({
+  onCancel,
+  onSave
+}: {
+  onCancel: () => void
+  onSave: () => void
+}): JSX.Element {
+  const { t } = useI18n()
+  return (
+    <>
+      <Button onClick={onCancel}>{t('common.cancel')}</Button>
+      <Button
+        variant="contained"
+        onClick={onSave}
+        sx={{ textTransform: 'none' }}
+      >
+        {t('actions.save')}
+      </Button>
+    </>
+  )
+}
+
 function ColorPickerBox({
   onChange,
   selectedColor
 }: {
   onChange: (color: Record<string, string>) => void
   selectedColor: Record<string, string>
-}) {
+}): JSX.Element {
   const { t } = useI18n()
   const [oldColor] = useState(
     selectedColor ?? { light: '#ffffff', dark: '#808080' }
@@ -116,23 +215,26 @@ function ColorPickerBox({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
   const theme = useTheme()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>): void => {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onChange(oldColor)
     setAnchorEl(null)
   }
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     onChange(color)
     setAnchorEl(null)
   }
 
-  const handleColorChange = (c: string) => {
-    const newLight = c
+  const handleColorChange = (c: string): void => {
+    const newLight = c.trim().toUpperCase()
+    if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(newLight)) return
+
     const newColor = {
       light: newLight,
       dark: getAccessiblePair(newLight, theme)
@@ -170,74 +272,55 @@ function ColorPickerBox({
             backgroundColor: '#CBD2E0'
           }}
         ></Box>
-        <AddIcon
-          style={{
-            color: '#CBD2E0'
-          }}
-        />
+        <AddIcon style={{ color: '#CBD2E0' }} />
       </Box>
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'center',
-          horizontal: 'center'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left'
-        }}
-        slotProps={{
-          paper: {
-            style: {
-              padding: '24px',
-              width: '294px',
-              borderRadius: '8px',
-              boxShadow: '0px 1px 3px #3C404326'
+
+      {isMobile ? (
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+          <DialogTitle sx={{ pb: 1 }}>
+            <Typography variant="subtitle1" fontWeight="600">
+              {t('colorPicker.title')}
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {t('colorPicker.subtitle')}
+            </Typography>
+            <ColorPickerFields
+              color={color}
+              onColorChange={handleColorChange}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <ColorPickerActions onCancel={handleClose} onSave={handleSave} />
+          </DialogActions>
+        </Dialog>
+      ) : (
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'center', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          slotProps={{
+            paper: {
+              style: {
+                padding: '24px',
+                width: '294px',
+                borderRadius: '8px',
+                boxShadow: '0px 1px 3px #3C404326'
+              }
             }
-          }
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight="600">
-          {t('colorPicker.title')}
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-          {t('colorPicker.subtitle')}
-        </Typography>
-
-        <Box sx={{ mb: 2 }}>
-          <HexColorPicker
-            color={color.light}
-            onChange={handleColorChange}
-            style={{ width: '100%' }}
-          />
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography variant="body2" sx={{ mr: 1 }}>
-            {t('colorPicker.hex')}
-          </Typography>
-          <TextField
-            value={color.light?.toUpperCase()}
-            onChange={e => handleColorChange(e.target.value)}
-            variant="standard"
-            size="small"
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-          <Button onClick={handleClose}>{t('common.cancel')}</Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            sx={{ textTransform: 'none' }}
-          >
-            {t('actions.save')}
-          </Button>
-        </Box>
-      </Popover>
+          }}
+        >
+          <ColorPickerHeader />
+          <ColorPickerFields color={color} onColorChange={handleColorChange} />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+            <ColorPickerActions onCancel={handleClose} onSave={handleSave} />
+          </Box>
+        </Popover>
+      )}
     </>
   )
 }

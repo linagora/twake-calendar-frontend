@@ -1,15 +1,18 @@
 import {
   addSharedCalendar,
-  exportCalendar,
   getCalendar,
   getCalendars,
-  getSecretLink,
   postCalendar,
-  proppatchCalendar,
-  removeCalendar
+  proppatchCalendar
 } from '@/features/Calendars/CalendarApi'
+import {
+  calendarAction,
+  fetchCalendarExport,
+  fetchSecretLink
+} from '@/features/Calendars/CalendarDAO'
 import { clientConfig } from '@/features/User/oidcAuth'
 import { api } from '@/utils/apiUtils'
+import { waitFor } from '@testing-library/dom'
 clientConfig.url = 'https://example.com'
 
 jest.mock('@/utils/apiUtils')
@@ -68,10 +71,11 @@ describe('Calendar API', () => {
 
     const result = await postCalendar(userId, calId, color, name, desc)
 
-    expect(api.post).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
+    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
       headers: {
         Accept: 'application/json, text/plain, */*'
       },
+      method: 'POST',
       body: JSON.stringify({
         id: 'calId',
         'dav:name': 'new cal',
@@ -104,7 +108,7 @@ describe('Calendar API', () => {
 
   it('remove Calendar', async () => {
     const calLink = '/calendars/calId.json'
-    const result = await removeCalendar(calLink)
+    const result = await calendarAction('DELETE', calLink)
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
       method: 'DELETE',
@@ -117,10 +121,12 @@ describe('Calendar API', () => {
   it('get secret link without reset', async () => {
     const calLink = '/calendars/calId.json'
     ;(api.get as jest.Mock).mockReturnValue({
-      json: jest.fn().mockResolvedValue('link')
+      json: jest.fn().mockResolvedValue({ secretLink: 'link' })
     })
 
-    const noreset = await getSecretLink(calLink, false)
+    await expect(fetchSecretLink(calLink, false)).resolves.toEqual({
+      secretLink: 'link'
+    })
 
     expect(api.get).toHaveBeenCalledWith(
       `calendar/api${calLink}/secret-link?shouldResetLink=false`,
@@ -136,7 +142,7 @@ describe('Calendar API', () => {
     ;(api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue('link')
     })
-    const reset = await getSecretLink(calLink, true)
+    const reset = await fetchSecretLink(calLink, true)
 
     expect(api.get).toHaveBeenCalledWith(
       `calendar/api${calLink}/secret-link?shouldResetLink=true`,
@@ -153,7 +159,7 @@ describe('Calendar API', () => {
     ;(api.get as jest.Mock).mockReturnValue({
       text: jest.fn().mockResolvedValue('data')
     })
-    const data = await exportCalendar(calLink)
+    const data = await fetchCalendarExport(calLink)
 
     expect(api.get).toHaveBeenCalledWith(`dav${calLink}?export`, {
       headers: {
@@ -163,8 +169,6 @@ describe('Calendar API', () => {
   })
 
   it('When adding a sharedCal with #default #default is preserved', async () => {
-    const mockApiPost = jest.spyOn(api, 'post')
-
     const calData = {
       cal: {
         id: 'cal123',
@@ -189,14 +193,16 @@ describe('Calendar API', () => {
 
     await addSharedCalendar('currentUserId', 'newCalId123', calData)
 
-    expect(mockApiPost).toHaveBeenCalledWith(
+    expect(api).toHaveBeenCalledWith(
       'dav/calendars/currentUserId.json',
       expect.objectContaining({
         body: expect.stringContaining('"dav:name":"#default"')
       })
     )
 
-    const callBody = JSON.parse(String(mockApiPost.mock.calls[0][1]?.body))
+    const callBody = JSON.parse(
+      String((api as unknown as jest.Mock).mock.calls[0][1]?.body)
+    )
     expect(callBody['dav:name']).toBe('#default')
   })
 })

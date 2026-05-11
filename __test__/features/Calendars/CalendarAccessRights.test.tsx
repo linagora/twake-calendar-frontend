@@ -8,7 +8,7 @@ import { updateDelegationCalendar } from '@/features/Calendars/api/updateDelegat
 import { AccessRight, Calendar } from '@/features/Calendars/CalendarTypes'
 import * as eventThunks from '@/features/Calendars/services'
 import * as delegationThunks from '@/features/Calendars/services/updateDelegationCalendarAsync'
-import { getUserDetails } from '@/features/User/userAPI'
+import { fetchUserById } from '@/features/User/UserDao'
 import { accessRightToDavProp } from '@/utils/accessRightToDavProp'
 import { api } from '@/utils/apiUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
@@ -18,13 +18,13 @@ jest.mock('@/utils/apiUtils', () => ({
   api: { post: jest.fn() }
 }))
 
-jest.mock('@/features/User/userAPI', () => ({
-  getUserDetails: jest.fn()
+jest.mock('@/features/User/UserDao', () => ({
+  fetchUserById: jest.fn()
 }))
 
-jest.mock('@/features/Calendars/CalendarApi', () => ({
-  getSecretLink: jest.fn().mockReturnValue(''),
-  exportCalendar: jest.fn()
+jest.mock('@/features/Calendars/CalendarDAO', () => ({
+  fetchSecretLink: jest.fn().mockResolvedValue({ secretLink: '' }),
+  fetchCalendarExport: jest.fn()
 }))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
@@ -173,7 +173,7 @@ describe('CalendarAccessRights', () => {
       ]
     }
 
-    ;(getUserDetails as jest.Mock).mockResolvedValue({
+    ;(fetchUserById as jest.Mock).mockResolvedValue({
       preferredEmail: 'bob@example.com',
       firstname: 'Bob',
       lastname: 'Smith',
@@ -190,7 +190,7 @@ describe('CalendarAccessRights', () => {
       { ...userState }
     )
 
-    await waitFor(() => expect(getUserDetails).toHaveBeenCalledWith('bob123'))
+    await waitFor(() => expect(fetchUserById).toHaveBeenCalledWith('bob123'))
     await waitFor(() =>
       expect(mockOnInvitesLoaded).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -203,7 +203,7 @@ describe('CalendarAccessRights', () => {
     )
   })
 
-  it('skips invite entries where getUserDetails throws', async () => {
+  it('skips invite entries where fetchUserById throws', async () => {
     const calendarWithInvite: Calendar = {
       ...baseCalendar,
       invite: [
@@ -216,7 +216,7 @@ describe('CalendarAccessRights', () => {
       ]
     }
 
-    ;(getUserDetails as jest.Mock).mockRejectedValue(new Error('Not found'))
+    ;(fetchUserById as jest.Mock).mockRejectedValue(new Error('Not found'))
 
     renderWithProviders(
       <CalendarAccessRights
@@ -245,7 +245,7 @@ describe('CalendarAccessRights', () => {
     }
 
     // Never resolves during the assertion window
-    ;(getUserDetails as jest.Mock).mockImplementation(
+    ;(fetchUserById as jest.Mock).mockImplementation(
       () => new Promise(() => {})
     )
 
@@ -292,7 +292,7 @@ describe('CalendarAccessRights', () => {
       }
     }
 
-    ;(getUserDetails as jest.Mock).mockImplementation((id: string) => {
+    ;(fetchUserById as jest.Mock).mockImplementation((id: string) => {
       if (id === 'admin1') {
         return Promise.resolve({
           preferredEmail: 'admin1@example.com',
@@ -321,11 +321,11 @@ describe('CalendarAccessRights', () => {
     )
 
     await waitFor(() => {
-      expect(getUserDetails).toHaveBeenCalledWith('admin1')
-      expect(getUserDetails).toHaveBeenCalledWith('admin2')
+      expect(fetchUserById).toHaveBeenCalledWith('admin1')
+      expect(fetchUserById).toHaveBeenCalledWith('admin2')
     })
 
-    expect(getUserDetails).not.toHaveBeenCalledWith('resource1')
+    expect(fetchUserById).not.toHaveBeenCalledWith('resource1')
 
     expect(await screen.findByText('Admin One')).toBeInTheDocument()
     expect(screen.getByText('admin1@example.com')).toBeInTheDocument()

@@ -1,10 +1,16 @@
 import { fetchOwnerData } from '@/features/Calendars/services/helpers'
-import { getResourceDetails, getUserDetails } from '@/features/User/userAPI'
+import { fetchUserById } from '@/features/User/UserDao'
+import { fetchResourceById } from '@/features/User/ResourceDAO'
 
-jest.mock('@/features/User/userAPI')
+jest.mock('@/features/User/UserDao')
+jest.mock('@/features/User/ResourceDAO')
 
-const mockedGetUserDetails = getUserDetails as jest.Mock
-const mockedGetResourceDetails = getResourceDetails as jest.Mock
+const mockedFetchUserById = fetchUserById as jest.MockedFunction<
+  typeof fetchUserById
+>
+const mockedFetchResourceById = fetchResourceById as jest.MockedFunction<
+  typeof fetchResourceById
+>
 
 describe('helpers', () => {
   beforeEach(() => {
@@ -17,40 +23,33 @@ describe('helpers', () => {
         firstname: 'John',
         lastname: 'Doe',
         emails: ['john@example.com']
-      }
-      mockedGetUserDetails.mockResolvedValueOnce(mockUser)
+      } as any
+      mockedFetchUserById.mockResolvedValueOnce(mockUser)
 
       const result = await fetchOwnerData('user-123')
 
-      expect(mockedGetUserDetails).toHaveBeenCalledWith('user-123')
-      expect(mockedGetResourceDetails).not.toHaveBeenCalled()
+      expect(fetchUserById).toHaveBeenCalledWith('user-123')
+      expect(fetchResourceById).not.toHaveBeenCalled()
       expect(result).toEqual(mockUser)
     })
 
     it('should fetch resource details and its creator when user is not found', async () => {
-      const mockResource = { creator: 'creator-456' }
+      const mockResource = { creator: 'creator-456' } as any
       const mockCreator = {
         firstname: 'Creator',
         lastname: 'User',
         emails: ['creator@example.com']
-      }
+      } as any
 
-      // Mock getUserDetails to fail with 404 for the initial call
-      mockedGetUserDetails.mockRejectedValueOnce({
-        response: { status: 404 }
-      })
-
-      // Mock getResourceDetails to succeed and return a creator ID
-      mockedGetResourceDetails.mockResolvedValueOnce(mockResource)
-
-      // Mock getUserDetails to succeed when called for the creator
-      mockedGetUserDetails.mockResolvedValueOnce(mockCreator)
+      mockedFetchUserById.mockRejectedValueOnce({ response: { status: 404 } })
+      mockedFetchResourceById.mockResolvedValueOnce(mockResource)
+      mockedFetchUserById.mockResolvedValueOnce(mockCreator)
 
       const result = await fetchOwnerData('resource-123')
 
-      expect(mockedGetUserDetails).toHaveBeenNthCalledWith(1, 'resource-123')
-      expect(mockedGetResourceDetails).toHaveBeenCalledWith('resource-123')
-      expect(mockedGetUserDetails).toHaveBeenNthCalledWith(2, 'creator-456')
+      expect(fetchUserById).toHaveBeenNthCalledWith(1, 'resource-123')
+      expect(fetchResourceById).toHaveBeenCalledWith('resource-123')
+      expect(fetchUserById).toHaveBeenNthCalledWith(2, 'creator-456')
       expect(result).toEqual({
         ...mockCreator,
         resource: true,
@@ -59,32 +58,26 @@ describe('helpers', () => {
       })
     })
 
-    it('should throw error when getUserDetails fails with non-404 error', async () => {
+    it('should throw error when fetchUserById fails with non-404 error', async () => {
       const mockError = { response: { status: 500 } }
-      mockedGetUserDetails.mockRejectedValueOnce(mockError)
+      mockedFetchUserById.mockRejectedValueOnce(mockError)
 
       await expect(fetchOwnerData('user-123')).rejects.toEqual(mockError)
 
-      expect(mockedGetUserDetails).toHaveBeenCalledWith('user-123')
-      expect(mockedGetResourceDetails).not.toHaveBeenCalled()
+      expect(fetchUserById).toHaveBeenCalledWith('user-123')
+      expect(fetchResourceById).not.toHaveBeenCalled()
     })
 
-    it('should throw error when getResourceDetails fails', async () => {
+    it('should throw error when fetchResourceById fails', async () => {
       const mockError = new Error('Resource not found')
-
-      // Mock getUserDetails to fail with 404 for the initial call
-      mockedGetUserDetails.mockRejectedValueOnce({
-        response: { status: 404 }
-      })
-
-      // Mock getResourceDetails to fail
-      mockedGetResourceDetails.mockRejectedValueOnce(mockError)
+      mockedFetchUserById.mockRejectedValueOnce({ response: { status: 404 } })
+      mockedFetchResourceById.mockRejectedValueOnce(mockError)
 
       await expect(fetchOwnerData('resource-123')).rejects.toEqual(mockError)
 
-      expect(mockedGetUserDetails).toHaveBeenCalledWith('resource-123')
-      expect(mockedGetResourceDetails).toHaveBeenCalledWith('resource-123')
-      expect(mockedGetUserDetails).toHaveBeenCalledTimes(1) // Only called once
+      expect(fetchUserById).toHaveBeenCalledWith('resource-123')
+      expect(fetchResourceById).toHaveBeenCalledWith('resource-123')
+      expect(fetchUserById).toHaveBeenCalledTimes(1)
     })
   })
 })

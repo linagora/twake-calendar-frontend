@@ -1,9 +1,12 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { addCalendarResourceAsync } from '@/features/Calendars/api/addCalendarResourceAsync'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   addSharedCalendarAsync,
   removeCalendarAsync
 } from '@/features/Calendars/services'
+import { CalendarInput } from '@/features/Calendars/types/CalendarData'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@/utils/makeDisplayName'
 import { renameDefault } from '@/utils/renameDefault'
@@ -19,16 +22,13 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { SetStateAction, useEffect, useMemo, useState, useRef } from 'react'
+import { SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import CalendarPopover from './CalendarModal'
-import RegisterCalendars from './RegisterCalendars'
+import { CalendarSelectorMenu } from './CalendarSelectorMenu'
 import { DeleteCalendarDialog } from './DeleteCalendarDialog'
 import { OwnerCaption } from './OwnerCaption'
-import { CalendarSelectorMenu } from './CalendarSelectorMenu'
-import { CalendarInput } from '@/features/Calendars/types/CalendarData'
-import { addCalendarResourceAsync } from '@/features/Calendars/api/addCalendarResourceAsync'
+import RegisterCalendars from './RegisterCalendars'
 import type { ResourceCal } from './RegisterCalendars/index.types'
 
 const CalendarAccordion: React.FC<{

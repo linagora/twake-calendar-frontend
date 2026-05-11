@@ -1,27 +1,17 @@
-import { useAppSelector } from '@/app/hooks'
-import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import {
   Box,
   Button,
   FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography
 } from '@linagora/twake-mui'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { CalendarItemList } from './CalendarItemList'
 import { SettingsTab } from './SettingsTab'
+import { CalendarSelector } from './CalendarSelector'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
-export function ImportTab({
-  userId,
-  importTarget,
-  setImportTarget,
-  setImportedContent,
-  newCalParams
-}: {
+export const ImportTab: React.FC<{
   userId: string
   importTarget: string
   setImportTarget: (target: string) => void
@@ -36,15 +26,18 @@ export function ImportTab({
     visibility: 'public' | 'private'
     setVisibility: (visibility: 'public' | 'private') => void
   }
-}) {
+}> = ({
+  userId,
+  importTarget,
+  setImportTarget,
+  setImportedContent,
+  newCalParams
+}) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const [importMode] = useState<'file' | 'url'>('file')
   const [importFile, setImportFile] = useState<File | null>(null)
   const [importUrl, setImportUrl] = useState('')
-  const calendars = useAppSelector(state => state.calendars.list)
-  const personalCalendars = Object.values(calendars).filter(
-    cal => extractEventBaseUuid(cal.id) === userId
-  )
 
   useEffect(() => {
     setImportedContent(importMode === 'file' ? importFile : null)
@@ -97,7 +90,7 @@ export function ImportTab({
             label={t('calendar.ics_feed_url')}
             value={importUrl}
             onChange={e => setImportUrl(e.target.value)}
-            size="small"
+            size={isMobile ? 'medium' : 'small'}
             margin="dense"
             sx={{
               '&.MuiFormControl-root.MuiFormControl-marginDense': {
@@ -122,18 +115,11 @@ export function ImportTab({
             }
           }}
         >
-          <InputLabel id="import-to-label">
-            {t('calendar.import_to')}
-          </InputLabel>
-          <Select
-            labelId="import-to-label"
-            label={t('calendar.import_to')}
-            value={importTarget}
-            onChange={e => setImportTarget(e.target.value)}
-          >
-            <MenuItem value="new">{t('calendar.new_calendar')}</MenuItem>
-            {CalendarItemList(personalCalendars)}
-          </Select>
+          <CalendarSelector
+            userId={userId}
+            importTarget={importTarget}
+            setImportTarget={setImportTarget}
+          />
         </FormControl>
       </Box>
 

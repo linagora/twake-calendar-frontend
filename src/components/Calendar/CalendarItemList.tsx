@@ -4,10 +4,15 @@ import React from 'react'
 import { CalendarName } from './CalendarName'
 
 export function CalendarItemList(
-  userPersonalCalendars: Calendar[]
+  userPersonalCalendars: Calendar[],
+  onClick?: (calendarId: string) => void
 ): React.ReactNode {
   return Object.values(userPersonalCalendars).map(calendar => (
-    <MenuItem key={calendar.id} value={calendar.id}>
+    <MenuItem
+      key={calendar.id}
+      value={calendar.id}
+      onClick={() => onClick?.(calendar.id)}
+    >
       <CalendarName calendar={calendar} />
     </MenuItem>
   ))

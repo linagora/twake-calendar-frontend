@@ -33,7 +33,7 @@ export const getOpenPaasUserDataAsync = createAsyncThunk<
 >('user/getOpenPaasUserData', async (_, { rejectWithValue }) => {
   try {
     const user = await getOpenPaasUser()
-    return user as OpenPaasUserData
+    return user
   } catch (err) {
     const error = err as { response?: { status?: number } }
     return rejectWithValue({
