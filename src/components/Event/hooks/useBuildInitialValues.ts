@@ -28,7 +28,7 @@ const isValidToInitBySelectedRange = (
 
   const isEventNew = !event?.start && !event?.end
 
-  return isEventNew || selectedRange.allDay
+  return !isEventNew || selectedRange.allDay
 }
 
 export const useBuildInitialValues = ({

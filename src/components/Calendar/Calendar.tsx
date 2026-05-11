@@ -603,7 +603,6 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
         )}
         {view === 'search' && <SearchResultsPage />}
         <EventPopover
-          anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={eventHandlers.handleClosePopover}
           selectedRange={selectedRange}

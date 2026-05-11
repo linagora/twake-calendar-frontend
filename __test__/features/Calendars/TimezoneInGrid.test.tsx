@@ -4,7 +4,7 @@ import { updateSlotLabelVisibility } from '@/components/Calendar/utils/calendarU
 import EventPreviewModal from '@/features/Events/EventPreview'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import * as SettingsSlice from '@/features/Settings/SettingsSlice'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 describe('Calendar - Timezone Integration', () => {
@@ -88,6 +88,65 @@ describe('Calendar - Timezone Integration', () => {
     fireEvent.click(option)
 
     expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Tokyo')
+  })
+
+  it('bugfix : temp timezone opens event with the time offseted', async () => {
+    const setTimeZoneSpy = jest.spyOn(SettingsSlice, 'setTimeZone')
+
+    renderWithProviders(
+      <CalendarApp
+        setCurrentView={jest.fn()}
+        onViewChange={jest.fn()}
+        openSidebar={false}
+        onCloseSidebar={jest.fn()}
+        currentView="timeGridWeek"
+        calendarRef={mockCalendarRef}
+      />,
+      baseState
+    )
+
+    // Find and click timezone selector
+    await waitFor(() => {
+      const timezoneButton = screen.getByText(/UTC/i)
+      fireEvent.click(timezoneButton)
+
+      // Select a different timezone
+      const autocomplete = screen.getByRole('combobox')
+      fireEvent.change(autocomplete, { target: { value: 'Jakarta' } })
+    })
+    const option = await screen.findByText(/Jakarta/i)
+    fireEvent.click(option)
+
+    expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Jakarta')
+
+    const slot = document.querySelector('[data-time="14:00:00"]')
+
+    expect(slot).toBeInTheDocument()
+
+    fireEvent.mouseDown(slot!)
+    fireEvent.mouseMove(slot!)
+    fireEvent.mouseUp(slot!)
+
+    await waitFor(() => {
+      expect(window.__calendarRef?.current).toBeTruthy()
+    })
+
+    const calendarApi = window.__calendarRef.current
+
+    act(() => {
+      calendarApi?.select({
+        start: '2026-05-11T14:00:00',
+        end: '2026-05-11T14:30:00'
+      })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('14:00 - 14:30')).toBeInTheDocument()
+    })
   })
 })
 
