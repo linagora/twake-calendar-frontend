@@ -65,11 +65,13 @@ export const EventFormFieldsExpanded: React.FC<
 
       <FreeBusyField busy={busy} setBusy={setBusy} showMore={showMore} />
 
-      <VisibilityField
-        eventClass={eventClass}
-        setEventClass={setEventClass}
-        showMore={showMore}
-      />
+      {!window.DISABLE_PUBLIC_VISIBILITY && (
+        <VisibilityField
+          eventClass={eventClass}
+          setEventClass={setEventClass}
+          showMore={showMore}
+        />
+      )}
     </>
   )
 }

@@ -126,6 +126,7 @@ describe('EventPopover', () => {
   }
 
   it('renders correctly with inputs and calendar options', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = false
     renderPopover()
 
     // Check dialog title
@@ -162,6 +163,20 @@ describe('EventPopover', () => {
     expect(screen.getAllByText('event.form.notification')).toHaveLength(1)
     expect(screen.getAllByText('event.form.visibleTo')).toHaveLength(1)
     expect(screen.getAllByText('event.form.showMeAs')).toHaveLength(1)
+  })
+
+  it('hides visibleTo field when DISABLE_PUBLIC_VISIBILITY is true', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = true
+    renderPopover()
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    expect(screen.queryByText('event.form.visibleTo')).not.toBeInTheDocument()
+  })
+
+  it('shows visibleTo field when DISABLE_PUBLIC_VISIBILITY is false', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = false
+    renderPopover()
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    expect(screen.getByText('event.form.visibleTo')).toBeInTheDocument()
   })
 
   it('fills start from selectedRange', () => {

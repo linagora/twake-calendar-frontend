@@ -34,5 +34,7 @@ declare global {
     appList: AppIconProps[]
 
     __calendarRef: MutableRefObject<CalendarApi | null>
+
+    DISABLE_PUBLIC_VISIBILITY: boolean
   }
 }
