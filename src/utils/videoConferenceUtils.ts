@@ -25,6 +25,7 @@ export function generateMeetingId(): string {
  */
 export function generateMeetingLink(baseUrl?: string): string {
   const base = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
+  if (!base) return ''
   const meetingId = generateMeetingId()
   return `${base}/${meetingId}`
 }
