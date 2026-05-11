@@ -12,6 +12,12 @@ describe('Event Full Display', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const preloadedState = {
@@ -268,8 +274,7 @@ describe('Event Full Display', () => {
             color: '#00FF00',
             events: {}
           }
-        },
-        pending: false
+        }
       }
     }
 
@@ -340,8 +345,7 @@ describe('Event Full Display', () => {
               }
             }
           }
-        },
-        pending: false
+        }
       }
     }
 

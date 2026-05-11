@@ -18,6 +18,12 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
     jest.clearAllMocks()
     jest.restoreAllMocks()
     sessionStorage.clear()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const baseUID = 'recurring-event-base'
@@ -51,6 +57,14 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
   }
 
   describe('Master Event Display', () => {
+    beforeAll(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    })
+
+    afterAll(() => {
+      jest.useRealTimers()
+    })
     it("should fetch and display master event when editing 'all events' of a recurring series", async () => {
       // Given a recurring series with modified instances
       const masterEvent = {
@@ -250,6 +264,14 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
   })
 
   describe('Update All Events - Using Base UID', () => {
+    beforeAll(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    })
+
+    afterAll(() => {
+      jest.useRealTimers()
+    })
     it('should use base UID (not instance UID) when updating series with property changes', async () => {
       const masterEvent = {
         uid: baseUID,
@@ -421,7 +443,9 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
 
       await act(async () => {
         fireEvent.click(saveButton)
-        await new Promise(resolve => setTimeout(resolve, 100))
+      })
+      await act(async () => {
+        jest.advanceTimersByTime(100)
       })
 
       // Verify all old instances were removed from store
@@ -437,6 +461,14 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
   })
 
   describe('Master Event Date Preservation', () => {
+    beforeAll(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    })
+
+    afterAll(() => {
+      jest.useRealTimers()
+    })
     it("should preserve master event date when updating time in 'all events' mode", async () => {
       // Master event starts on Jan 15 at 10:00 AM
       const masterEvent = {
@@ -502,15 +534,17 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
       )
       const input = await waitFor(() => screen.getByTestId('start-time-input'))
       // Change time to 2:00 PM (14:00)
-      await userEvent.click(input)
-      await userEvent.clear(input)
-      await userEvent.type(input, '14:00{enter}')
+      userEvent.click(input)
+      userEvent.clear(input)
+      userEvent.type(input, '14:00{enter}')
 
       const saveButton = screen.getByRole('button', { name: 'actions.save' })
 
       await act(async () => {
         fireEvent.click(saveButton)
-        await new Promise(resolve => setTimeout(resolve, 100))
+      })
+      await act(async () => {
+        jest.advanceTimersByTime(100)
       })
 
       // Verify the API was called with master date (Jan 15) + new time (14:00)

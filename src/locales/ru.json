@@ -215,7 +215,10 @@
       "endRequired": "Укажите время окончания",
       "invalidEnd": "Неверное время окончания",
       "endAfterStart": "Окончание должно быть позже начала",
-      "startDateInPast": "Дата начала не может быть в прошлом"
+      "startDateInPast": "Дата начала не может быть в прошлом",
+      "invalidDate": "Неверная дата",
+      "invalidDateTime": "Неверная дата/время",
+      "invalidTimeFormat": "Неверный формат времени"
     }
   },
   "peopleSearch": {

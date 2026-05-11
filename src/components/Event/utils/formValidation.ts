@@ -23,8 +23,8 @@ export interface ValidationResult {
 }
 
 export interface DateTimeErrors {
-  time: string
-  date: string
+  date: { start: string; end: string }
+  time: { start: string; end: string }
 }
 
 /**
@@ -44,9 +44,13 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     showMore = false
   } = params
 
-  let isDateTimeValid = true
-  let timeError = ''
-  let dateError = ''
+  const state = {
+    isDateTimeValid: true,
+    timeStartError: '',
+    timeEndError: '',
+    dateStartError: '',
+    dateEndError: ''
+  }
 
   // Determine which fields are visible based on UI mode
   const showFullFields =
@@ -58,102 +62,67 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
 
   // Validate start date
   if (!startDate || startDate.trim() === '') {
-    isDateTimeValid = false
-    timeError = 'event.validation.startRequired'
+    state.isDateTimeValid = false
+    state.dateStartError = 'event.validation.startRequired'
   }
   // Validate start date is not before today's beginning
-  else if (
-    (() => {
-      const [y, m, d] = startDate.split('-').map(v => parseInt(v, 10))
-      const startDay = new Date(y, m - 1, d)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      return isNaN(startDay.getTime()) || startDay < today
-    })()
-  ) {
-    isDateTimeValid = false
-    dateError = 'event.validation.startDateInPast'
+  else if (isDateInPast(startDate)) {
+    state.isDateTimeValid = false
+    state.dateStartError = 'event.validation.startDateInPast'
   }
   // Validate start time (if not all-day)
   else if (!allday && (!startTime || startTime.trim() === '')) {
-    isDateTimeValid = false
-    timeError = 'event.validation.startRequired'
+    state.isDateTimeValid = false
+    state.timeStartError = 'event.validation.startRequired'
   }
   // Validate end fields based on UI mode
   else if (showFullFields) {
-    // 4 fields mode: validate both end date and end time
-    if (!endDate || endDate.trim() === '') {
-      isDateTimeValid = false
-      timeError = 'event.validation.endRequired'
-    } else if (!allday && (!endTime || endTime.trim() === '')) {
-      isDateTimeValid = false
-      timeError = 'event.validation.endRequired'
-    } else {
-      // Validate total datetime
-      if (allday) {
-        const toLocalDate = (ymd: string) => {
-          const [y, m, d] = ymd.split('-').map(v => parseInt(v, 10))
-          if (!y || !m || !d) return new Date(NaN)
-          return new Date(y, m - 1, d)
-        }
-
-        const startOnly = toLocalDate(startDate)
-        const endOnly = toLocalDate(endDate)
-
-        if (isNaN(startOnly.getTime()) || isNaN(endOnly.getTime())) {
-          isDateTimeValid = false
-          timeError = 'event.validation.invalidDate'
-        } else if (endOnly < startOnly) {
-          isDateTimeValid = false
-          timeError = 'event.validation.endAfterStart'
-        }
-      } else {
-        const startDateTime = new Date(combineDateTime(startDate, startTime))
-        const endDateTime = new Date(combineDateTime(endDate, endTime))
-
-        if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-          isDateTimeValid = false
-          timeError = 'event.validation.invalidDateTime'
-        } else if (endDateTime <= startDateTime) {
-          isDateTimeValid = false
-          timeError = 'event.validation.endAfterStart'
-        }
-      }
+    const { isValid, errors } = validateFullFields({
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      allday
+    })
+    if (!isValid) {
+      state.isDateTimeValid = false
+      state.timeStartError = errors.time?.start ?? ''
+      state.timeEndError = errors.time?.end ?? ''
+      state.dateStartError = errors.date?.start ?? ''
+      state.dateEndError = errors.date?.end ?? ''
     }
   } else if (showTimeOnly) {
-    // 3 fields mode: validate time only (end time > start time, same day)
-    if (!endTime || endTime.trim() === '') {
-      isDateTimeValid = false
-      timeError = 'event.validation.endRequired'
-    } else {
-      // Compare times only (same day is assumed)
-      const startTimeParts = startTime.split(':')
-      const endTimeParts = endTime.split(':')
-      if (startTimeParts.length === 2 && endTimeParts.length === 2) {
-        const startMinutes =
-          parseInt(startTimeParts[0]) * 60 + parseInt(startTimeParts[1])
-        const endMinutes =
-          parseInt(endTimeParts[0]) * 60 + parseInt(endTimeParts[1])
-        if (endMinutes <= startMinutes) {
-          isDateTimeValid = false
-          timeError = 'event.validation.endAfterStart'
-        }
-      } else {
-        isDateTimeValid = false
-        timeError = 'event.validation.invalidTimeFormat'
-      }
+    const { isValid, errors } = validateTimeOnlyFields(startTime, endTime)
+    if (!isValid) {
+      state.isDateTimeValid = false
+      state.timeStartError = errors.time?.start ?? ''
+      state.timeEndError = errors.time?.end ?? ''
     }
   }
-
-  const isValid = isDateTimeValid
+  const isValid = state.isDateTimeValid
 
   return {
     isValid,
     errors: {
-      time: showValidationErrors ? timeError : '',
-      date: showValidationErrors ? dateError : ''
+      time: {
+        start: showValidationErrors ? state.timeStartError : '',
+        end: showValidationErrors ? state.timeEndError : ''
+      },
+      date: {
+        start: showValidationErrors ? state.dateStartError : '',
+        end: showValidationErrors ? state.dateEndError : ''
+      }
     }
   }
+}
+
+export function isDateInPast(startDate: string): boolean {
+  if (!startDate) return false
+  const [y, m, d] = startDate.split('-').map(v => parseInt(v, 10))
+  const startDay = new Date(y, m - 1, d)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return !isNaN(startDay.getTime()) && startDay < today
 }
 
 /**
@@ -181,4 +150,148 @@ export function validateEventFormValues(
     hasEndDateChanged: values.hasEndDateChanged,
     showMore
   }).isValid
+}
+
+function validateAlldayRange(
+  startDate: string,
+  endDate: string
+): { valid: boolean; dateStartError: string; dateEndError: string } {
+  const toLocalDate = (ymd: string): Date => {
+    const [y, m, d] = ymd.split('-').map(v => parseInt(v, 10))
+    return y && m && d ? new Date(y, m - 1, d) : new Date(NaN)
+  }
+
+  const start = toLocalDate(startDate)
+  const end = toLocalDate(endDate)
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return {
+      valid: false,
+      dateStartError: 'event.validation.invalidDate',
+      dateEndError: 'event.validation.invalidDate'
+    }
+  }
+  if (end < start) {
+    return {
+      valid: false,
+      dateStartError: '',
+      dateEndError: 'event.validation.endAfterStart'
+    }
+  }
+  return { valid: true, dateStartError: '', dateEndError: '' }
+}
+
+function validateTimeOnlyRange(
+  startTime: string,
+  endTime: string
+): { valid: boolean; timeStartError: string; timeEndError: string } {
+  const parts = (t: string) => t.split(':').map(Number)
+  const [sh, sm] = parts(startTime)
+  const [eh, em] = parts(endTime)
+
+  if ([sh, sm, eh, em].some(isNaN)) {
+    return {
+      valid: false,
+      timeStartError: 'event.validation.invalidTimeFormat',
+      timeEndError: 'event.validation.invalidTimeFormat'
+    }
+  }
+  if (eh * 60 + em <= sh * 60 + sm) {
+    return {
+      valid: false,
+      timeStartError: '',
+      timeEndError: 'event.validation.endAfterStart'
+    }
+  }
+  return { valid: true, timeStartError: '', timeEndError: '' }
+}
+
+function validateDateTimeRange(
+  startDate: string,
+  startTime: string,
+  endDate: string,
+  endTime: string
+): { valid: boolean; timeStartError: string; timeEndError: string } {
+  const start = new Date(combineDateTime(startDate, startTime))
+  const end = new Date(combineDateTime(endDate, endTime))
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return {
+      valid: false,
+      timeStartError: 'event.validation.invalidDate',
+      timeEndError: 'event.validation.invalidDate'
+    }
+  }
+  if (end <= start) {
+    return {
+      valid: false,
+      timeStartError: '',
+      timeEndError: 'event.validation.endAfterStart'
+    }
+  }
+  return { valid: true, timeStartError: '', timeEndError: '' }
+}
+
+function validateFullFields(
+  params: Pick<
+    ValidationParams,
+    'startDate' | 'startTime' | 'endDate' | 'endTime' | 'allday'
+  >
+): { isValid: boolean; errors: Partial<DateTimeErrors> } {
+  const { startDate, startTime, endDate, endTime, allday } = params
+
+  if (!endDate?.trim()) {
+    return {
+      isValid: false,
+      errors: { time: { start: '', end: 'event.validation.endRequired' } }
+    }
+  }
+  if (!allday && !endTime?.trim()) {
+    return {
+      isValid: false,
+      errors: { time: { start: '', end: 'event.validation.endRequired' } }
+    }
+  }
+
+  if (allday) {
+    const { valid, dateStartError, dateEndError } = validateAlldayRange(
+      startDate,
+      endDate
+    )
+    return {
+      isValid: valid,
+      errors: { date: { start: dateStartError, end: dateEndError } }
+    }
+  }
+
+  const { valid, timeStartError, timeEndError } = validateDateTimeRange(
+    startDate,
+    startTime,
+    endDate,
+    endTime
+  )
+  return {
+    isValid: valid,
+    errors: { time: { start: timeStartError, end: timeEndError } }
+  }
+}
+
+function validateTimeOnlyFields(
+  startTime: string,
+  endTime: string
+): { isValid: boolean; errors: Partial<DateTimeErrors> } {
+  if (!endTime?.trim()) {
+    return {
+      isValid: false,
+      errors: { time: { start: '', end: 'event.validation.endRequired' } }
+    }
+  }
+  const { valid, timeStartError, timeEndError } = validateTimeOnlyRange(
+    startTime,
+    endTime
+  )
+  return {
+    isValid: valid,
+    errors: { time: { start: timeStartError, end: timeEndError } }
+  }
 }

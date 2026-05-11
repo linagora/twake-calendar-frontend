@@ -62,7 +62,7 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
           onChange={onStartDateChange}
           testId="start-date-input"
           label={startDateLabel}
-          hasError={!!errors.date}
+          hasError={!!errors.date?.start}
         />
       </Box>
 
@@ -74,6 +74,7 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
             testId="start-time-input"
             label={t('dateTimeFields.startTime')}
             disabled={allday}
+            hasError={!!errors.time?.start}
           />
         </Box>
 
@@ -89,7 +90,7 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
             onChange={onEndTimeChange}
             testId="end-time-input"
             label={t('dateTimeFields.endTime')}
-            hasError={!!errors.time}
+            hasError={!!errors.time?.end}
             disabled={allday}
           />
         </Box>

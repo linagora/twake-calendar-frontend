@@ -155,10 +155,24 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
         />
-        <DateTimeError
-          message={validation.errors.date || validation.errors.time}
-        />
+        <DateTimeError message={displayError(validation)} />
       </Box>
     </LocalizationProvider>
   )
+}
+
+function displayError(validation: { errors: DateTimeErrors }): string {
+  if (validation?.errors?.date?.start) {
+    return validation.errors.date.start
+  }
+  if (validation?.errors?.time?.end) {
+    return validation.errors.time.end
+  }
+  if (validation?.errors?.date?.end) {
+    return validation.errors.date.end
+  }
+  if (validation?.errors?.time?.start) {
+    return validation.errors.time.start
+  }
+  return ''
 }

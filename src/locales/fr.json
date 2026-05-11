@@ -215,7 +215,10 @@
       "endRequired": "La date/heure de fin est obligatoire",
       "invalidEnd": "Date/heure de fin invalide",
       "endAfterStart": "L'heure de fin doit être après l'heure de début",
-      "startDateInPast": "La date de début ne peut pas être dans le passé"
+      "startDateInPast": "La date de début ne peut pas être dans le passé",
+      "invalidDate": "Date invalide",
+      "invalidDateTime": "Date/heure invalide",
+      "invalidTimeFormat": "Format d'heure invalide"
     }
   },
   "peopleSearch": {

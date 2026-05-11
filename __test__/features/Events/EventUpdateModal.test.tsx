@@ -14,6 +14,12 @@ describe('EventUpdateModal Timezone Handling', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const preloadedState = {
@@ -255,6 +261,12 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.restoreAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const baseUID = 'recurring-event-base'

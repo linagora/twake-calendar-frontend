@@ -14,17 +14,22 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 describe('CalendarApp integration', () => {
-  const today = new Date()
-  const start = new Date(today)
-  start.setHours(10, 0, 0, 0)
-  const end = new Date(today)
-  end.setHours(11, 0, 0, 0)
-
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const renderCalendar = () => {
+    const today = new Date()
+    const start = new Date(today)
+    start.setHours(10, 0, 0, 0)
+    const end = new Date(today)
+    end.setHours(11, 0, 0, 0)
     const preloadedState = {
       user: {
         userData: {
@@ -108,7 +113,7 @@ describe('CalendarApp integration', () => {
       if (calendarApi) {
         const fcEvent = calendarApi.getEventById('event1')
         expect(fcEvent?.title).toBe('Test Event')
-        const oldEnd = new Date(today.getTime() + 3600000) // +1 hour
+        const oldEnd = new Date(new Date().getTime() + 3600000) // +1 hour
         const newEnd = new Date(oldEnd.getTime() + 1800000) // +30 min
 
         fcEvent?.setEnd(newEnd)
@@ -363,7 +368,14 @@ describe('CalendarApp integration', () => {
         pending: false
       }
     }
+    beforeAll(() => {
+      jest.useFakeTimers()
+      jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+    })
 
+    afterAll(() => {
+      jest.useRealTimers()
+    })
     it('keeps all attendees event participation on title update', async () => {
       const updateSpy = jest
         .spyOn(eventThunks, 'putEventAsync')
@@ -458,7 +470,7 @@ describe('CalendarApp integration', () => {
 
       // Wait for blur handler to complete
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 150))
+        jest.advanceTimersByTime(150)
       })
 
       const saveButton = screen.getByRole('button', { name: /save/i })

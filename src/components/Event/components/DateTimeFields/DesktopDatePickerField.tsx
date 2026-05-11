@@ -15,19 +15,16 @@ export const DesktopDatePickerField: React.FC<DatePickerFieldProps> = ({
   testId,
   label,
   hasError = false
-}) => {
-  console.log(hasError)
-  return (
-    <DatePicker
-      format={LONG_DATE_FORMAT}
-      value={value}
-      onChange={onChange}
-      slots={{ field: ReadOnlyDateField }}
-      slotProps={{
-        ...getDateSlotProps(testId, hasError, label),
-        field: getDateFieldSlotProps(testId, hasError, label),
-        layout: { sx: dateCalendarLayoutSx }
-      }}
-    />
-  )
-}
+}) => (
+  <DatePicker
+    format={LONG_DATE_FORMAT}
+    value={value}
+    onChange={onChange}
+    slots={{ field: ReadOnlyDateField }}
+    slotProps={{
+      ...getDateSlotProps(testId, hasError, label),
+      field: getDateFieldSlotProps(testId, hasError, label),
+      layout: { sx: dateCalendarLayoutSx }
+    }}
+  />
+)

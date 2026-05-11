@@ -9,7 +9,6 @@ import * as EventApi from '@/features/Events/EventApi'
 import EventPreviewModal from '@/features/Events/EventPreview'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
-import preview from 'jest-preview'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 jest.mock('@/components/Event/utils/eventUtils', () => {
@@ -106,6 +105,12 @@ const basePreloadedState = {
 describe('EditModeDialog Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it("renders dialog when type is 'edit'", async () => {
     const mockSetOpen = jest.fn()
@@ -243,6 +248,12 @@ describe('EditModeDialog Component', () => {
 describe('EventPreviewModal - Recurring Event Interactions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('shows EditModeDialog when editing a recurring event', async () => {
     jest.spyOn(eventThunks, 'getEventAsync').mockImplementation(payload => {
@@ -382,6 +393,12 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
 describe('Delete Recurring Event Instance', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('calls deleteEventInstanceAsync when deleting single instance', async () => {
     const spy = jest
@@ -469,6 +486,12 @@ describe('Delete Recurring Event Instance', () => {
 describe('RSVP to Recurring Event', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('calls updateEventInstanceAsync when accepting single instance', async () => {
     const spy = jest
@@ -556,6 +579,12 @@ describe('RSVP to Recurring Event', () => {
 describe('Edit Recurring Event in Full Display', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('renders event with recurrenceId in URL', async () => {
     await act(async () =>
@@ -728,6 +757,12 @@ describe('Edit Recurring Event in Full Display', () => {
 describe('Event Drag and Drop - Recurring Events', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('shows EditModeDialog when dragging recurring event', () => {
     const mockDispatch = jest.fn()
@@ -772,6 +807,12 @@ describe('Event Drag and Drop - Recurring Events', () => {
 describe('Event Resize - Recurring Events', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('shows EditModeDialog when resizing recurring event', () => {
     const mockDispatch = jest.fn()
@@ -817,6 +858,12 @@ describe('Event Resize - Recurring Events', () => {
 describe('RepeatEvent Component - Recurrence Editing', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('disables repetition fields when isOwn is false', async () => {
     await act(async () =>
@@ -864,6 +911,12 @@ describe('RepeatEvent Component - Recurrence Editing', () => {
 describe('handleRSVP function', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('calls putEventAsync for non-recurring events', async () => {
     const mockDispatch = jest.fn()
@@ -910,6 +963,12 @@ describe('handleRSVP function', () => {
 describe('handleDelete function', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('calls deleteEventAsync for non-recurring events', () => {
     const mockDispatch = jest.fn()
@@ -1009,6 +1068,12 @@ describe('handleDelete function', () => {
 describe('Calendar Integration - EditModeDialog Flow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
   it('passes correct eventId when editing all instances from preview', async () => {
     await act(async () =>
@@ -1046,6 +1111,12 @@ describe('Calendar Integration - EditModeDialog Flow', () => {
 describe('Event URL handling for recurring events', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
   it('uses base ID for event URL when moving recurring event', async () => {
     const moveEventSpy = jest
@@ -1165,8 +1236,11 @@ describe('Event URL handling for recurring events', () => {
 
     await act(async () => {
       fireEvent.click(saveButton)
-      // Wait for the 500ms delay in the code
-      await new Promise(resolve => setTimeout(resolve, 600))
+    })
+
+    // Advance past the 500ms delay in the source code
+    await act(async () => {
+      jest.advanceTimersByTime(600)
     })
 
     await waitFor(() => {

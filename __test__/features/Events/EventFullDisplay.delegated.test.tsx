@@ -8,6 +8,12 @@ describe('Event Full Display — delegated calendar move', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   const testDate = new Date('2025-01-15T10:00:00.000Z')

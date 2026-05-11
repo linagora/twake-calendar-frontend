@@ -213,7 +213,10 @@
       "endRequired": "Ngày/giờ kết thúc là bắt buộc",
       "invalidEnd": "Ngày/giờ kết thúc không hợp lệ",
       "endAfterStart": "Thời gian kết thúc phải sau thời gian bắt đầu",
-      "startDateInPast": "Ngày bắt đầu không thể là ngày trong quá khứ"
+      "startDateInPast": "Ngày bắt đầu không thể là ngày trong quá khứ",
+      "invalidDate": "Ngày không hợp lệ",
+      "invalidDateTime": "Ngày/giờ không hợp lệ",
+      "invalidTimeFormat": "Định dạng thời gian không hợp lệ"
     }
   },
   "peopleSearch": {

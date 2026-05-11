@@ -89,7 +89,6 @@ async function setupEventPopover() {
 
   renderWithProviders(
     <EventPopover
-      anchorEl={document.body}
       open={true}
       onClose={mockOnClose}
       selectedRange={defaultSelectedRange}
@@ -139,6 +138,12 @@ describe('RepeatEvent Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.restoreAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   it('renders with no repetition by default', () => {
@@ -205,6 +210,12 @@ describe('Repeat Event Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.restoreAllMocks()
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
   })
 
   it('sends correct CalendarEvent payload for daily repeat', async () => {

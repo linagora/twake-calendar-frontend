@@ -33,7 +33,7 @@ type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
  * Shared read-only field for date/time pickers. Disables typing, removes icon,
  * and opens the picker when clicking anywhere in the field.
  */
-function ReadOnlyPickerField(props: GenericPickerFieldProps) {
+const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
   const { fieldType, validator, ...fieldProps } = props
   const { internalProps, forwardedProps } = useSplitFieldProps(
     fieldProps,
@@ -93,13 +93,13 @@ function ReadOnlyPickerField(props: GenericPickerFieldProps) {
   )
 }
 
-export function ReadOnlyDateField(props: DatePickerFieldProps) {
+export const ReadOnlyDateField: React.FC<DatePickerFieldProps> = props => {
   return (
     <ReadOnlyPickerField {...props} fieldType="date" validator={validateDate} />
   )
 }
 
-export function ReadOnlyTimeField(props: TimePickerFieldProps) {
+export const ReadOnlyTimeField: React.FC<TimePickerFieldProps> = props => {
   return (
     <ReadOnlyPickerField {...props} fieldType="time" validator={validateTime} />
   )

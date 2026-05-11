@@ -57,7 +57,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
             onChange={onStartDateChange}
             testId="start-date-input"
             label={t('dateTimeFields.startDate')}
-            hasError={!!errors.date}
+            hasError={!!errors.date?.start}
           />
         </Box>
         {shouldShowTimeFields && (
@@ -67,6 +67,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
               onChange={onStartTimeChange}
               testId="start-time-input"
               label={t('dateTimeFields.startTime')}
+              hasError={!!errors.time?.start}
             />
           </Box>
         )}
@@ -79,7 +80,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
             onChange={onEndDateChange}
             testId="end-date-input"
             label={t('dateTimeFields.endDate')}
-            hasError={!!errors.time}
+            hasError={!!errors.date?.end}
           />
         </Box>
         {shouldShowTimeFields && (
@@ -89,7 +90,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
               onChange={onEndTimeChange}
               testId="end-time-input"
               label={t('dateTimeFields.endTime')}
-              hasError={!!errors.time}
+              hasError={!!errors.time?.end}
             />
           </Box>
         )}

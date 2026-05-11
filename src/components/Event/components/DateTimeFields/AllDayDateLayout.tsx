@@ -1,6 +1,5 @@
 import { Box } from '@linagora/twake-mui'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { error } from 'console'
 import dayjs from 'dayjs'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -47,7 +46,7 @@ export const AllDayDateLayout: React.FC<AllDayDateLayoutProps> = ({
           onChange={onStartDateChange}
           testId="start-date-input"
           label={t('dateTimeFields.startDate')}
-          hasError={!!errors.date}
+          hasError={!!errors.date?.start}
         />
       </Box>
       <Box sx={dateBoxSx}>
@@ -56,7 +55,7 @@ export const AllDayDateLayout: React.FC<AllDayDateLayoutProps> = ({
           onChange={onEndDateChange}
           testId="end-date-input"
           label={t('dateTimeFields.endDate')}
-          hasError={!!errors.time}
+          hasError={!!errors.date?.end}
         />
       </Box>
     </Box>
