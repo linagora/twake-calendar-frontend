@@ -6,8 +6,9 @@ import {
   putEventAsync,
   updateEventInstanceAsync
 } from '@/features/Calendars/services'
-import { updateSeriesPartstat } from '@/features/Events/EventApi'
+import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { updateSeriesPartstatJCal } from '@/features/Events/EventTransformers'
 import { PartStat } from '@/features/User/models/attendee'
 import { createAttendee } from '@/features/User/models/attendee.mapper'
 import { userData } from '@/features/User/userDataTypes'
@@ -91,7 +92,9 @@ async function handleAllRSVP(
   userEmail: string,
   rsvp: PartStat
 ) {
-  await updateSeriesPartstat(event, userEmail, rsvp)
+  const vevents = await fetchAllRecurrentVevents(event)
+  const jCal = updateSeriesPartstatJCal(vevents, event, userEmail, rsvp)
+  await putEvent(event, jCal)
 }
 
 async function handleDefaultRSVP(

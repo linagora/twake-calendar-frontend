@@ -3,14 +3,15 @@ import { ResponsiveDialog } from '@/components/Dialog'
 import { DateTimeFields } from '@/components/Event/components/DateTimeFields/DateTimeFields'
 import { FieldWithLabel } from '@/components/Event/components/FieldWithLabel'
 import { splitDateTime } from '@/components/Event/utils/dateTimeHelpers'
-import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
 import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
+import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
 import moment from 'moment-timezone'
 import { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { postCounterProposal } from '../EventApi'
+import { postCounterProposal } from '../EventDao'
 import { EventTimeSubtitle } from '../EventPreview/EventTimeSubtitle'
 import { ContextualizedEvent } from '../EventsTypes'
+import { makeCounterProposalPayload } from '../EventTransformers'
 
 export function EventCounterModal({
   open,
@@ -118,7 +119,7 @@ export function EventCounterModal({
     }
     setIsSubmitting(true)
     try {
-      await postCounterProposal({
+      const counterProposal = makeCounterProposalPayload({
         event: contextualizedEvent.event,
         senderEmail: contextualizedEvent.currentUserAttendee.cal_address,
         recipientEmail: contextualizedEvent.event.organizer.cal_address,
@@ -130,6 +131,7 @@ export function EventCounterModal({
           : `${endDate}T${endTime}`,
         message
       })
+      await postCounterProposal(contextualizedEvent.event, counterProposal)
       setShowSuccessToast(true)
       setOpen(false)
     } catch (error) {

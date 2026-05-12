@@ -1,4 +1,4 @@
-import { deleteEvent } from '@/features/Events/EventApi'
+import { deleteEvent } from '@/features/Events/EventDao'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { RejectedError } from '../types/RejectedError'
@@ -11,7 +11,7 @@ export const deleteEventAsync = createAsyncThunk<
   'calendars/delEvent',
   async ({ calId, eventId, eventURL }, { rejectWithValue }) => {
     try {
-      await deleteEvent(eventURL)
+      await deleteEvent({ URL: eventURL })
       return { calId, eventId }
     } catch (err) {
       return rejectWithValue(toRejectedError(err))

@@ -17,7 +17,6 @@ import {
   removeEvent,
   updateEventLocal
 } from '@/features/Calendars/CalendarSlice'
-import { deleteEvent, putEvent } from '@/features/Events/EventApi'
 import { detectRecurringEventChanges } from '@/features/Events/utils/detectRecurringEventChanges'
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { resolveTimezone } from '@/utils/timezone'
@@ -26,6 +25,8 @@ import {
   UpdateHelperContext,
   HandleUpdateErrorParams
 } from './types'
+import { deleteEvent, putEvent } from '../../EventDao'
+import { calendarEventToJCal } from '../../utils'
 
 export function handleUpdateError({
   error,
@@ -83,7 +84,11 @@ export async function handleConvertRecurringToSingle({
       recurrenceId: undefined
     }
 
-    await putEvent(finalNewEvent, targetCalendar.owner?.emails?.[0])
+    const jCal = calendarEventToJCal(
+      finalNewEvent,
+      targetCalendar.owner?.emails?.[0]
+    )
+    await putEvent(finalNewEvent, jCal)
     dispatch(updateEventLocal({ calId: targetCalId, event: finalNewEvent }))
     createdUID = finalNewEvent.uid
     dispatch(clearFetchCache(targetCalId))
@@ -203,7 +208,7 @@ async function deleteSeriesInstancesFromServer(
 
 async function safeDeleteEvent(url: string): Promise<void> {
   try {
-    await deleteEvent(url)
+    await deleteEvent({ URL: url })
   } catch (e) {
     const err = e as { response?: { status?: number }; message?: string }
     const is404 =

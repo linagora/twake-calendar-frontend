@@ -1,4 +1,4 @@
-import { reportEvent } from '@/features/Events/EventApi'
+import { reportEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { formatDateToYYYYMMDDTHHMMSS } from '@/utils/dateUtils'
 import { Calendar } from '../CalendarTypes'

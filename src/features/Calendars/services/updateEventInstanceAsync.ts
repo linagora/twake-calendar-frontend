@@ -1,9 +1,10 @@
-import { putEventWithOverrides } from '@/features/Events/EventApi'
+import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { makeEventWithOverrides } from '@/features/Events/EventTransformers'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { RejectedError } from '../types/RejectedError'
 import { Calendar } from '../CalendarTypes'
+import { RejectedError } from '../types/RejectedError'
 
 export const updateEventInstanceAsync = createAsyncThunk<
   { calId: string; event: CalendarEvent },
@@ -13,7 +14,14 @@ export const updateEventInstanceAsync = createAsyncThunk<
   'calendars/updateEventInstance',
   async ({ cal, event }, { rejectWithValue }) => {
     try {
-      await putEventWithOverrides(event, cal.owner?.emails?.[0])
+      const vevents = await fetchAllRecurrentVevents(event)
+      const jCal = makeEventWithOverrides(
+        event,
+        vevents,
+        cal.owner?.emails?.[0]
+      )
+      putEvent(event, jCal)
+
       return { calId: cal.id, event }
     } catch (err) {
       return rejectWithValue(toRejectedError(err))

@@ -6,7 +6,7 @@ import { SearchEventsResponse } from '../Search/types/SearchEventsResponse'
 import { CalendarEvent } from './EventsTypes'
 import { WKST_NUM_TO_DAY } from './utils/wkstUtils'
 
-export async function reportEventRaw(
+export async function reportEvent(
   event: CalendarEvent,
   match: { start: string; end: string }
 ): Promise<CalDavItem> {
@@ -21,7 +21,7 @@ export async function reportEventRaw(
   return response.json()
 }
 
-export async function fetchEventRaw(event: CalendarEvent): Promise<string> {
+export async function fetchEvent(event: CalendarEvent): Promise<string> {
   const response = await api.get(`dav${event.URL}`)
   return response.text()
 }
@@ -31,22 +31,27 @@ export async function fetchEventIcs(event: CalendarEvent): Promise<string> {
   return response.text()
 }
 
-export async function putEventRaw(
+export async function putEvent(
   event: CalendarEvent,
   jCal: unknown[]
 ): Promise<Response> {
-  return api(`dav${event.URL}`, {
+  const response = await api(`dav${event.URL}`, {
     method: 'PUT',
     body: JSON.stringify(jCal),
     headers: { 'content-type': 'text/calendar; charset=utf-8' }
   })
+
+  if (response.status === 201) {
+    console.info('Event created successfully:', response.url || event.URL)
+  }
+  return response
 }
 
-export async function deleteEventRaw(event: CalendarEvent): Promise<Response> {
+export async function deleteEvent(event: CalendarEvent): Promise<Response> {
   return api(`dav${event.URL}`, { method: 'DELETE' })
 }
 
-export async function moveEventRaw(
+export async function moveEvent(
   event: CalendarEvent,
   toURL: string
 ): Promise<Response> {
@@ -56,7 +61,7 @@ export async function moveEventRaw(
   })
 }
 
-export async function importEventRaw(
+export async function importEvent(
   id: string,
   calLink: string
 ): Promise<Response> {
@@ -65,7 +70,7 @@ export async function importEventRaw(
   })
 }
 
-export async function searchEventRaw(reqParam: {
+export async function searchEvent(reqParam: {
   query: string
   calendars: { calendarId: string; userId: string }[]
   organizers?: string[]
@@ -127,7 +132,7 @@ export interface CounterProposalPayload {
   sequence: number
   method: 'COUNTER'
 }
-export async function postCounterProposalRaw(
+export async function postCounterProposal(
   event: CalendarEvent,
   payload: CounterProposalPayload
 ): Promise<Response> {

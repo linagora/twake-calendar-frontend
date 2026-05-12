@@ -1,6 +1,7 @@
 import { formatReduxError } from '@/utils/errorUtils'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { searchEvent } from '../Events/EventApi'
+import { searchEvent } from '../Events/EventDao'
+import { makeSearchEventParam } from '../Events/EventTransformers'
 import { userAttendee } from '../User/models/attendee'
 import { SearchEventResult } from './types/SearchEventResult'
 
@@ -48,7 +49,8 @@ export const searchEventsAsync = createAsyncThunk<
   { rejectValue: { message: string; status?: number } }
 >('events/searchEvents', async ({ search, filters }, { rejectWithValue }) => {
   try {
-    const response = await searchEvent(search, filters)
+    const searchParams = makeSearchEventParam(search, filters)
+    const response = await searchEvent(searchParams)
 
     return {
       hits: Number(response._total_hits),

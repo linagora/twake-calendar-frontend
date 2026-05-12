@@ -1,4 +1,4 @@
-import { moveEvent } from '@/features/Events/EventApi'
+import { moveEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'

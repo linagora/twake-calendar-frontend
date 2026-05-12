@@ -3,7 +3,7 @@ import {
   VCalComponent,
   VObjectProperty
 } from '../../Calendars/types/CalendarData'
-import { fetchAllRecurrentVevents, putEventRaw } from '../EventDao'
+import { fetchAllRecurrentVevents, putEvent } from '../EventDao'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone, makeVevent } from '../utils'
 
@@ -243,5 +243,5 @@ export const updateSeries = async (
 
   const newJCal = ['vcalendar', [], [...finalVevents, vtimezone.component.jCal]]
 
-  return putEventRaw(event, newJCal)
+  return putEvent(event, newJCal)
 }

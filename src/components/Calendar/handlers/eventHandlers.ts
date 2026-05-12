@@ -8,8 +8,9 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync
 } from '@/features/Calendars/services'
-import { getEvent } from '@/features/Events/EventApi'
+import { fetchEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { parseFetchedEvent } from '@/features/Events/EventTransformers'
 import { updateAttendeesAfterTimeChange } from '@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@/features/User/models/attendee'
 import {
@@ -208,7 +209,8 @@ export const createEventHandlers = (
                 updateEventInstanceAsync({ cal: calendar, event: newEvent })
               )
             } else if (typeOfAction === 'all') {
-              const master = await getEvent(newEvent, true)
+              const response = await fetchEvent(event)
+              const master = parseFetchedEvent(event, response, true)
 
               await dispatch(
                 updateSeriesAsync({
