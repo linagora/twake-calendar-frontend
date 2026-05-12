@@ -62,7 +62,7 @@ export function buildFromExistingEvent({
     ? resolveTimezone(event.timezone)
     : resolvedCalendarTimezone
 
-  const { start, end } = formatEventDates(event, isAllDay, eventTimezone)
+  const { start, end } = formatEventDates(event, isAllDay)
   const description = resolveDescription(event)
   const { repetition, showRepeat } = resolveRepetition(event, calId, calList)
   const organizerEmail = resolveOrganizerEmail(event, organizer)

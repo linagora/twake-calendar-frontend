@@ -1,8 +1,5 @@
 import { CalendarEvent } from '@/features/Events/EventsTypes'
-import {
-  formatDateTimeInTimezone,
-  formatLocalDateTime
-} from '@/components/Event/utils/dateTimeFormatters'
+import { formatLocalDateTime } from '@/components/Event/utils/dateTimeFormatters'
 import { DateSelectArg } from '@fullcalendar/core'
 import { EventFormValues } from '@/components/Event/EventFormFields.types'
 
@@ -11,13 +8,12 @@ import { EventFormValues } from '@/components/Event/EventFormFields.types'
  */
 export function formatEventDates(
   event: CalendarEvent,
-  isAllDay: boolean,
-  eventTimezone: string
+  isAllDay: boolean
 ): { start: string; end: string } {
   const start = event.start
     ? isAllDay
       ? new Date(event.start).toISOString().split('T')[0]
-      : formatDateTimeInTimezone(event.start, eventTimezone)
+      : formatLocalDateTime(new Date(event.start), event.timezone)
     : ''
 
   if (!event.end) {
@@ -30,7 +26,10 @@ export function formatEventDates(
     return { start, end: endDate.toISOString().split('T')[0] }
   }
 
-  return { start, end: formatDateTimeInTimezone(event.end, eventTimezone) }
+  return {
+    start,
+    end: formatLocalDateTime(new Date(event.end), event.timezone)
+  }
 }
 
 /**
@@ -111,8 +110,8 @@ export function buildDefaultNewEvent(
 
   return {
     ...base,
-    start: formatLocalDateTime(nextHour) ?? '',
-    end: formatLocalDateTime(endTime) ?? '',
+    start: formatLocalDateTime(nextHour, base.timezone) ?? '',
+    end: formatLocalDateTime(endTime, base.timezone) ?? '',
     allday: false
   }
 }
