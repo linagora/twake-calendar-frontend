@@ -69,7 +69,7 @@ describe('AttendanceValidation - delegation', () => {
       expect(container.firstChild).not.toBeNull()
     })
 
-    it('renders when not isOwn but currentUserAttendee exists', () => {
+    it('returns null when not isOwn but currentUserAttendee exists', () => {
       const { container } = render(
         <AttendanceValidation
           contextualizedEvent={makeContext({ isOwn: false })}
@@ -78,7 +78,7 @@ describe('AttendanceValidation - delegation', () => {
           setOpenEditModePopup={noopSetFunc}
         />
       )
-      expect(container.firstChild).not.toBeNull()
+      expect(container.firstChild).toBeNull()
     })
 
     it('returns null when not isOwn, not delegated, and not an attendee', () => {

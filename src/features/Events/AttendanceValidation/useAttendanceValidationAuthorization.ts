@@ -38,7 +38,7 @@ export function useAttendanceValidationAuthorization(
   const createByTheUser = !!(currentUserAttendee || noAttendeesOrOrganizer)
 
   const isAuthorized =
-    createByTheUser ||
+    (createByTheUser && isOwn) ||
     isOwn ||
     checkIsDelegatedPublicEvent(calendar, event) ||
     checkIsAdminOfResource(calendar.owner, openpaasId)
