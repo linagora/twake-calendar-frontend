@@ -85,7 +85,6 @@ export const useBuildInitialValues = ({
       selectedRange,
       event
     )
-    console.log({ isInitFromSelectedRange })
     if (isInitFromSelectedRange) {
       return {
         ...defaultEvent,
