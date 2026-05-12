@@ -273,6 +273,10 @@
     "timeZone": "Múi giờ",
     "timeZoneBrowserDefault": "Tự động phát hiện múi giờ",
     "timeZoneUpdateError": "Không cập nhật được múi giờ",
+    "tzPrompt": {
+      "detected": "Chúng tôi phát hiện bạn đang ở múi giờ %{browserTZ} thay vì múi giờ %{configuredTZ} đã cấu hình",
+      "askSwitch": "Bạn có muốn chuyển ứng dụng sang múi giờ %{browserTZ} không?"
+    },
     "notifications.empty": "Cài đặt thông báo sắp có",
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Phương thức gửi",

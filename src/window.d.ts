@@ -38,5 +38,7 @@ declare global {
     __calendarRef: MutableRefObject<CalendarApi | null>
 
     DISABLE_PUBLIC_VISIBILITY: boolean
+
+    ASK_FOR_TZ_UPDATE: boolean
   }
 }
