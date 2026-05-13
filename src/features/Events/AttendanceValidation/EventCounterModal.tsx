@@ -11,7 +11,7 @@ import { useI18n } from 'twake-i18n'
 import { postCounterProposal } from '../EventDao'
 import { EventTimeSubtitle } from '../EventPreview/EventTimeSubtitle'
 import { ContextualizedEvent } from '../EventsTypes'
-import { makeCounterProposalPayload } from '../EventTransformers'
+import { makeCounterProposalPayload } from '../transformers/makeCounterProposalPayload'
 
 export function EventCounterModal({
   open,

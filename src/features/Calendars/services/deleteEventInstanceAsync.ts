@@ -4,7 +4,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { RejectedError } from '../types/RejectedError'
 import { Calendar } from '../CalendarTypes'
 import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
-import { makeDeleteEventInstanceJCal } from '@/features/Events/EventTransformers'
+import { makeDeleteEventInstanceJCal } from '@/features/Events/transformers/makeDeleteEventInstanceJCal'
 
 export const deleteEventInstanceAsync = createAsyncThunk<
   { calId: string; eventId: string },

@@ -1,4 +1,4 @@
-import * as EventApi from '@/features/Events/EventApi'
+import * as EventDao from '@/features/Events/EventDao'
 import searchResultReducer, {
   searchEventsAsync,
   setHits,
@@ -6,7 +6,7 @@ import searchResultReducer, {
 } from '@/features/Search/SearchSlice'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@/features/Events/EventApi')
+jest.mock('@/features/Events/EventDao')
 
 describe('SearchSlice', () => {
   let store: any
@@ -74,8 +74,7 @@ describe('SearchSlice', () => {
           ]
         }
       }
-
-      ;(EventApi.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+      ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
         searchEventsAsync({ search: 'test', filters: mockFilters })
@@ -88,13 +87,31 @@ describe('SearchSlice', () => {
       expect(state.error).toBeNull()
     })
 
+    it('should call searchEvent with transformed params from makeSearchEventParam', async () => {
+      const mockResponse = {
+        _total_hits: 1,
+        _embedded: { events: [] }
+      }
+      ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+
+      await store.dispatch(
+        searchEventsAsync({ search: 'test', filters: mockFilters })
+      )
+
+      expect(EventDao.searchEvent).toHaveBeenCalledWith({
+        query: 'meeting',
+        calendars: [{ calendarId: 'calendar1', userId: 'user1' }],
+        organizers: ['user@example.com'],
+        attendees: ['attendee@example.com']
+      })
+    })
+
     it('should handle search with no results', async () => {
       const mockResponse = {
         _total_hits: 0,
         _embedded: { events: [] }
       }
-
-      ;(EventApi.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
+      ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
         searchEventsAsync({ search: 'nonexistent', filters: mockFilters })
@@ -107,7 +124,7 @@ describe('SearchSlice', () => {
 
     it('should handle search error', async () => {
       const mockError = new Error('Network error')
-      ;(EventApi.searchEvent as jest.Mock).mockRejectedValue(mockError)
+      ;(EventDao.searchEvent as jest.Mock).mockRejectedValue(mockError)
 
       await store.dispatch(
         searchEventsAsync({ search: 'test', filters: mockFilters })
@@ -120,7 +137,7 @@ describe('SearchSlice', () => {
     })
 
     it('should set loading state during search', async () => {
-      ;(EventApi.searchEvent as jest.Mock).mockImplementation(
+      ;(EventDao.searchEvent as jest.Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 100))
       )
 

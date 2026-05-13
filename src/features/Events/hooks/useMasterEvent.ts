@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { fetchEvent } from '../EventDao'
 import { CalendarEvent } from '../EventsTypes'
-import { parseFetchedEvent } from '../EventTransformers'
+import { parseFetchedEvent } from '../transformers/parseFetchedEvent'
 
 export function useMasterEvent(
   event: CalendarEvent | null | undefined,

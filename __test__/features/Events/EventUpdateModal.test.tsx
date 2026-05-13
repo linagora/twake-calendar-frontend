@@ -1,11 +1,11 @@
 import * as CalendarApi from '@/features/Calendars/CalendarApi'
-import * as EventApi from '@/features/Events/EventApi'
+import * as EventDao from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@/features/Events/EventApi')
+jest.mock('@/features/Events/EventDao')
 jest.mock('@/features/Calendars/CalendarApi')
 
 describe('EventUpdateModal Timezone Handling', () => {
@@ -207,7 +207,7 @@ describe('EventUpdateModal Timezone Handling', () => {
       }
     }
 
-    const mockPutEvent = jest.spyOn(EventApi, 'putEvent').mockResolvedValue({
+    const mockPutEvent = jest.spyOn(EventDao, 'putEvent').mockResolvedValue({
       status: 201,
       url: `/calendars/667037022b752d0026472254/cal1/test-event-resource.ics`
     } as any)
@@ -239,11 +239,11 @@ describe('EventUpdateModal Timezone Handling', () => {
       expect(mockPutEvent).toHaveBeenCalled()
     })
 
-    const putEventCall = mockPutEvent.mock.calls[0][0]
-    expect(putEventCall.title).toBe('Updated Resource Event')
+    const [putEventArg] = mockPutEvent.mock.calls[0]
+    expect(putEventArg.title).toBe('Updated Resource Event')
 
     // Check that the resource is still in the attendee list!
-    const attendees = putEventCall.attendee
+    const attendees = putEventArg.attendee
     const resource = attendees.find((a: any) => a.cutype === 'RESOURCE')
     expect(resource).toBeDefined()
     expect(resource!.cn).toBe('Conference Room')
@@ -355,17 +355,31 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       }
     }
 
-    // Mock API calls
+    // Mock DAO calls
     const mockDeleteEvent = jest
-      .spyOn(EventApi, 'deleteEvent')
+      .spyOn(EventDao, 'deleteEvent')
       .mockResolvedValue({} as any)
-    const mockPutEvent = jest.spyOn(EventApi, 'putEvent').mockResolvedValue({
+    const mockPutEvent = jest.spyOn(EventDao, 'putEvent').mockResolvedValue({
       status: 201,
       url: `/calendars/${calId}/new-event.ics`
     } as any)
-    const mockGetMasterEvent = jest
-      .spyOn(EventApi, 'getEvent')
-      .mockResolvedValue(masterEvent)
+    // fetchEvent returns raw ICS string; parseFetchedEvent is called internally
+    jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=DAILY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
+      )
     jest.spyOn(CalendarApi, 'getCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []
@@ -385,7 +399,7 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
 
     // Wait for master event to be fetched AND form to be initialized
     await waitFor(() => {
-      expect(mockGetMasterEvent).toHaveBeenCalled()
+      expect(EventDao.fetchEvent).toHaveBeenCalled()
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
@@ -430,10 +444,10 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
 
     // Verify new event was created via putEvent
     expect(mockPutEvent).toHaveBeenCalled()
-    const putEventCall = mockPutEvent.mock.calls[0][0]
-    expect(putEventCall.title).toBe('Recurring Meeting')
-    expect(putEventCall.repetition?.freq).toBeFalsy()
-    expect(putEventCall.uid).not.toContain(baseUID)
+    const [putEventArg] = mockPutEvent.mock.calls[0]
+    expect(putEventArg.title).toBe('Recurring Meeting')
+    expect(putEventArg.repetition?.freq).toBeFalsy()
+    expect(putEventArg.uid).not.toContain(baseUID)
 
     // Verify Redux store state changes
     const finalState = store.getState()
@@ -491,15 +505,28 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
 
     // Mock deleteEvent to fail with a non-404 error
     const mockDeleteEvent = jest
-      .spyOn(EventApi, 'deleteEvent')
+      .spyOn(EventDao, 'deleteEvent')
       .mockRejectedValue(new Error('Network error'))
     const mockPutEvent = jest
-      .spyOn(EventApi, 'putEvent')
+      .spyOn(EventDao, 'putEvent')
       .mockResolvedValue({ status: 201 } as any)
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-    const mockGetMasterEvent = jest
-      .spyOn(EventApi, 'getEvent')
-      .mockResolvedValue(masterEvent)
+    jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=WEEKLY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
+      )
 
     const { store } = renderWithProviders(
       <EventUpdateModal
@@ -514,7 +541,7 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
 
     // Wait for master event to be fetched
     await waitFor(() => {
-      expect(mockGetMasterEvent).toHaveBeenCalled()
+      expect(EventDao.fetchEvent).toHaveBeenCalled()
     })
 
     // Wait for component to load
@@ -574,9 +601,9 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       { timeout: 3000 }
     )
 
-    const putEventCall = mockPutEvent.mock.calls[0][0]
-    expect(putEventCall.title).toBe('Recurring Meeting')
-    expect(putEventCall.repetition?.freq).toBeFalsy()
+    const [putEventArg] = mockPutEvent.mock.calls[0]
+    expect(putEventArg.title).toBe('Recurring Meeting')
+    expect(putEventArg.repetition?.freq).toBeFalsy()
 
     // Modal should close after operation completes
     await waitFor(
@@ -627,9 +654,24 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       }
     }
 
-    // Mock API calls
-    jest.spyOn(EventApi, 'deleteEvent').mockResolvedValue({} as any)
-    jest.spyOn(EventApi, 'putEvent').mockResolvedValue({ status: 201 } as any)
+    jest.spyOn(EventDao, 'deleteEvent').mockResolvedValue({} as any)
+    jest.spyOn(EventDao, 'putEvent').mockResolvedValue({ status: 201 } as any)
+    jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          `UID:${baseUID}`,
+          'SUMMARY:Recurring Meeting',
+          'DTSTART:20250115T100000Z',
+          'DTEND:20250115T110000Z',
+          'RRULE:FREQ=MONTHLY;INTERVAL=1',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
+      )
     jest.spyOn(CalendarApi, 'getCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []

@@ -3,7 +3,6 @@ import {
   VCalComponent,
   VObjectProperty
 } from '../../Calendars/types/CalendarData'
-import { fetchAllRecurrentVevents, putEvent } from '../EventDao'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone, makeVevent } from '../utils'
 
@@ -193,13 +192,12 @@ const updateVeventsPreservingOverrides = (
   )
 }
 
-export const updateSeries = async (
+export const makeSeriesJCal = (
+  vevents: VCalComponent[],
   event: CalendarEvent,
   calOwnerEmail?: string,
   removeOverrides: boolean = true
 ) => {
-  const vevents = await fetchAllRecurrentVevents(event)
-
   const masterIndex = vevents.findIndex(
     ([, props]) => !findFieldValue(props, 'recurrence-id')
   )
@@ -241,7 +239,5 @@ export const updateSeries = async (
     )
   }
 
-  const newJCal = ['vcalendar', [], [...finalVevents, vtimezone.component.jCal]]
-
-  return putEvent(event, newJCal)
+  return ['vcalendar', [], [...finalVevents, vtimezone.component.jCal]]
 }

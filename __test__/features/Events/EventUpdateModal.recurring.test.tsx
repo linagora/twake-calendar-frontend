@@ -1,15 +1,14 @@
 import * as CalendarApi from '@/features/Calendars/CalendarApi'
 import * as eventThunks from '@/features/Calendars/services'
-import * as EventApi from '@/features/Events/EventApi'
+import * as EventDao from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-jest.mock('@/features/Events/EventApi')
+jest.mock('@/features/Events/EventDao')
 jest.mock('@/features/Calendars/CalendarApi')
-jest.mock('@/features/Events/api/updateSeries')
 
 describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
   const mockOnClose = jest.fn()
@@ -107,10 +106,34 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      // Mock getEvent to return master event
-      const mockGetEvent = jest
-        .spyOn(EventApi, 'getEvent')
-        .mockResolvedValue(masterEvent)
+      // Mock fetchEvent to return raw ICS string for the master event
+      const mockFetchEvent = jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockResolvedValue(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Test//EN',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Master Event Title',
+            'DESCRIPTION:Master Description',
+            'DTSTART;TZID=America/New_York:20250115T100000',
+            'DTEND;TZID=America/New_York:20250115T110000',
+            'RRULE:FREQ=DAILY;INTERVAL=1',
+            'END:VEVENT',
+            'BEGIN:VTIMEZONE',
+            'TZID:America/New_York',
+            'BEGIN:STANDARD',
+            'TZOFFSETFROM:-0400',
+            'TZOFFSETTO:-0500',
+            'TZNAME:EST',
+            'DTSTART:19701101T020000',
+            'END:STANDARD',
+            'END:VTIMEZONE',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
 
       renderWithProviders(
         <EventUpdateModal
@@ -125,12 +148,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
 
       // Wait for master event to be fetched
       await waitFor(() => {
-        expect(mockGetEvent).toHaveBeenCalledWith(
-          expect.objectContaining({
-            uid: baseUID // Should fetch base UID, not instance
-          }),
-          true
-        )
+        expect(mockFetchEvent).toHaveBeenCalled()
       })
 
       // Should display master event data, NOT modified instance data
@@ -182,7 +200,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      const mockGetEvent = jest.spyOn(EventApi, 'getEvent')
+      const mockFetchEvent = jest.spyOn(EventDao, 'fetchEvent')
 
       renderWithProviders(
         <EventUpdateModal
@@ -200,7 +218,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
       })
 
       // Should NOT fetch from API since we already have master
-      expect(mockGetEvent).not.toHaveBeenCalled()
+      expect(mockFetchEvent).not.toHaveBeenCalled()
     })
 
     it('should fallback to instance data if master event fetch fails', async () => {
@@ -231,9 +249,9 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      // Mock getEvent to fail
+      // Mock fetchEvent to fail
       jest
-        .spyOn(EventApi, 'getEvent')
+        .spyOn(EventDao, 'fetchEvent')
         .mockRejectedValue(new Error('Network error'))
 
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
@@ -315,8 +333,24 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      // Mock getEvent to return master
-      jest.spyOn(EventApi, 'getEvent').mockResolvedValue(masterEvent)
+      // Mock fetchEvent to return raw ICS for the master
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockResolvedValue(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Weekly Meeting',
+            'DESCRIPTION:Original description',
+            'DTSTART:20250115T100000Z',
+            'DTEND:20250115T110000Z',
+            'RRULE:FREQ=WEEKLY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       const updateSeriesAsyncSpy = jest.spyOn(eventThunks, 'updateSeriesAsync')
 
       renderWithProviders(
@@ -369,6 +403,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         allday: false,
         timezone: 'America/New_York',
         organizer: { cn: 'test', cal_address: 'test@test.com' },
+        attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
         URL: `/calendars/${calId}/${baseUID}.ics`
       } as CalendarEvent
 
@@ -401,7 +436,103 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      jest.spyOn(EventApi, 'getEvent').mockResolvedValue(masterEvent)
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockResolvedValue(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Daily Standup',
+            'DTSTART:20250115T090000Z',
+            'DTEND:20250115T093000Z',
+            'RRULE:FREQ=DAILY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+
+      jest.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue([
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', baseUID],
+            [
+              'dtstart',
+              { tzid: 'America/New_York' },
+              'date-time',
+              '2025-01-15T09:00:00Z'
+            ],
+            [
+              'dtend',
+              { tzid: 'America/New_York' },
+              'date-time',
+              '2025-01-15T09:30:00Z'
+            ],
+            ['summary', {}, 'text', 'Daily Standup'],
+            ['sequence', {}, 'integer', 3],
+            ['transp', {}, 'text', 'OPAQUE'],
+            ['class', {}, 'text', 'PUBLIC'],
+            ['rrule', {}, 'recur', { freq: 'DAILY', interval: 1 }],
+            [
+              'organizer',
+              { cn: 'test' },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            [
+              'attendee',
+              {
+                partstat: 'ACCEPTED',
+                rsvp: 'FALSE',
+                role: 'CHAIR',
+                cutype: 'INDIVIDUAL',
+                cn: 'test'
+              },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            ['dtstamp', {}, 'date-time', '2025-01-15T08:00:00Z']
+          ],
+          []
+        ],
+
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', baseUID],
+            ['dtstart', {}, 'date-time', '2025-01-16T09:00:00Z'],
+            ['dtend', {}, 'date-time', '2025-01-16T09:30:00Z'],
+            ['summary', {}, 'text', 'Daily Standup'],
+            ['sequence', {}, 'integer', 4],
+            ['recurrence-id', {}, 'date-time', '2025-01-16T09:00:00Z'],
+            ['transp', {}, 'text', 'OPAQUE'],
+            ['class', {}, 'text', 'PUBLIC'],
+            [
+              'organizer',
+              { cn: 'test' },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            [
+              'attendee',
+              {
+                partstat: 'ACCEPTED',
+                rsvp: 'FALSE',
+                role: 'CHAIR',
+                cutype: 'INDIVIDUAL',
+                cn: 'test'
+              },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            ['dtstamp', {}, 'date-time', '2025-01-15T08:00:00Z']
+          ],
+          []
+        ]
+      ])
+
       jest.spyOn(CalendarApi, 'getCalendar').mockResolvedValue({
         _embedded: { 'dav:item': [] }
       } as any)
@@ -508,8 +639,23 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         }
       }
 
-      jest.spyOn(EventApi, 'getEvent').mockResolvedValue(masterEvent)
-      jest.spyOn(EventApi, 'putEvent').mockResolvedValue({ status: 201 } as any)
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockResolvedValue(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Daily Standup',
+            'DTSTART:20250115T100000Z',
+            'DTEND:20250115T103000Z',
+            'RRULE:FREQ=DAILY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+      jest.spyOn(EventDao, 'putEvent').mockResolvedValue({ status: 201 } as any)
 
       const updateSeriesAsyncSpy = jest.spyOn(eventThunks, 'updateSeriesAsync')
 

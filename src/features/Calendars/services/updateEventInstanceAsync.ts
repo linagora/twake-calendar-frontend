@@ -1,6 +1,6 @@
 import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
-import { makeEventWithOverrides } from '@/features/Events/EventTransformers'
+import { makeEventWithOverrides } from '@/features/Events/transformers/makeEventWithOverrides'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { Calendar } from '../CalendarTypes'

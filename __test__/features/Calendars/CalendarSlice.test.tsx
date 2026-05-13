@@ -23,7 +23,7 @@ import { configureStore } from '@reduxjs/toolkit'
 
 jest.mock('@/features/Calendars/CalendarApi')
 jest.mock('@/features/User/userAPI')
-jest.mock('@/features/Events/EventApi')
+jest.mock('@/features/Events/EventDao')
 jest.mock('@/features/Events/utils')
 jest.mock('@/utils/apiUtils')
 

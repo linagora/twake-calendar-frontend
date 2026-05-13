@@ -1,7 +1,7 @@
 import { formatReduxError } from '@/utils/errorUtils'
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { searchEvent } from '../Events/EventDao'
-import { makeSearchEventParam } from '../Events/EventTransformers'
+import { makeSearchEventParam } from '../Events/transformers/makeSearchEventParam'
 import { userAttendee } from '../User/models/attendee'
 import { SearchEventResult } from './types/SearchEventResult'
 

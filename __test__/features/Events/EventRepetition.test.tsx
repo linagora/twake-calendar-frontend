@@ -5,7 +5,7 @@ import {
 } from '@/components/Calendar/handlers/eventHandlers'
 import { EditModeDialog } from '@/components/Event/EditModeDialog'
 import * as eventThunks from '@/features/Calendars/services'
-import * as EventApi from '@/features/Events/EventApi'
+import * as EventDao from '@/features/Events/EventDao'
 import EventPreviewModal from '@/features/Events/EventPreview'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
@@ -120,10 +120,6 @@ describe('EditModeDialog Component', () => {
         <EditModeDialog
           type="edit"
           setOpen={mockSetOpen}
-          event={
-            basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-              .events['recurring-base/20250315T100000']
-          }
           eventAction={mockEventAction}
         />,
         basePreloadedState
@@ -145,10 +141,6 @@ describe('EditModeDialog Component', () => {
         <EditModeDialog
           type="attendance"
           setOpen={mockSetOpen}
-          event={
-            basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-              .events['recurring-base/20250315T100000']
-          }
           eventAction={mockEventAction}
         />,
         basePreloadedState
@@ -169,10 +161,6 @@ describe('EditModeDialog Component', () => {
         <EditModeDialog
           type="edit"
           setOpen={mockSetOpen}
-          event={
-            basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-              .events['recurring-base/20250315T100000']
-          }
           eventAction={mockEventAction}
         />,
         basePreloadedState
@@ -198,10 +186,6 @@ describe('EditModeDialog Component', () => {
         <EditModeDialog
           type="edit"
           setOpen={mockSetOpen}
-          event={
-            basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-              .events['recurring-base/20250315T100000']
-          }
           eventAction={mockEventAction}
         />,
         basePreloadedState
@@ -226,10 +210,6 @@ describe('EditModeDialog Component', () => {
         <EditModeDialog
           type="edit"
           setOpen={mockSetOpen}
-          event={
-            basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-              .events['recurring-base/20250315T100000']
-          }
           eventAction={mockEventAction}
         />,
         basePreloadedState
@@ -439,11 +419,17 @@ describe('Delete Recurring Event Instance', () => {
   })
 
   it('calls deleteEventAsync when deleting all instances', async () => {
-    jest.spyOn(EventApi, 'getEvent').mockResolvedValue({
-      ...basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-        .events['recurring-base/20250315T100000'],
-      uid: 'recurring-base'
-    } as any)
+    jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
+    BEGIN:VCALENDAR
+    VERSION:2.0
+    BEGIN:VEVENT
+    UID:recurring-base
+    SUMMARY:Recurring Event Instance
+    DTSTART:20250315T100000Z
+    DTEND:20250315T110000Z
+    END:VEVENT
+    END:VCALENDAR
+    `)
 
     const spy = jest
       .spyOn(eventThunks, 'deleteEventAsync')
@@ -536,9 +522,32 @@ describe('RSVP to Recurring Event', () => {
   })
 
   it('calls updateSeriesPartstat when accepting all instances', async () => {
-    const spy = jest
-      .spyOn(EventApi, 'updateSeriesPartstat')
-      .mockResolvedValue({} as any)
+    jest.spyOn(EventDao, 'fetchAllRecurrentVevents').mockResolvedValue([
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'recurring-base'],
+          ['summary', {}, 'text', 'Recurring Event Instance'],
+          ['dtstart', {}, 'date-time', '20250315T100000Z'],
+          ['dtend', {}, 'date-time', '20250315T110000Z'],
+          ['recurrence-id', {}, 'date-time', '20250315T100000Z'],
+          [
+            'attendee',
+            { cn: 'test', partstat: 'NEEDS-ACTION' },
+            'cal-address',
+            'mailto:test@test.com'
+          ],
+          [
+            'attendee',
+            { cn: 'John', partstat: 'NEEDS-ACTION' },
+            'cal-address',
+            'mailto:john@test.com'
+          ]
+        ],
+        []
+      ]
+    ] as any)
+    const spy = jest.spyOn(EventDao, 'putEvent').mockResolvedValue(undefined)
 
     await act(async () =>
       renderWithProviders(
@@ -570,9 +579,52 @@ describe('RSVP to Recurring Event', () => {
     })
 
     const callArgs = spy.mock.calls[0]
-    expect(callArgs[0].uid).toBe('recurring-base/20250315T100000')
-    expect(callArgs[1]).toBe('test@test.com')
-    expect(callArgs[2]).toBe('ACCEPTED')
+
+    expect(callArgs[1]).toStrictEqual([
+      'vcalendar',
+      [],
+      [
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'recurring-base'],
+            ['summary', {}, 'text', 'Recurring Event Instance'],
+            ['dtstart', {}, 'date-time', '20250315T100000Z'],
+            ['dtend', {}, 'date-time', '20250315T110000Z'],
+            ['recurrence-id', {}, 'date-time', '20250315T100000Z'],
+            [
+              'attendee',
+              { cn: 'test', partstat: 'ACCEPTED' },
+              'cal-address',
+              'mailto:test@test.com'
+            ],
+            [
+              'attendee',
+              { cn: 'John', partstat: 'NEEDS-ACTION' },
+              'cal-address',
+              'mailto:john@test.com'
+            ]
+          ],
+          []
+        ],
+        [
+          'vtimezone',
+          [['tzid', {}, 'text', 'UTC']],
+          [
+            [
+              'standard',
+              [
+                ['tzoffsetfrom', {}, 'utc-offset', '+00:00'],
+                ['tzoffsetto', {}, 'utc-offset', '+00:00'],
+                ['tzname', {}, 'text', 'UTC'],
+                ['dtstart', {}, 'date-time', '1970-01-01T00:00:00']
+              ],
+              []
+            ]
+          ]
+        ]
+      ]
+    ])
   })
 })
 
@@ -605,10 +657,18 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateEventInstanceAsync when saving single instance with typeOfAction='solo'", async () => {
-    jest.spyOn(EventApi, 'getEvent').mockResolvedValue({
-      ...basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-        .events['recurring-base/20250315T100000']
-    } as any)
+    jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
+    BEGIN:VCALENDAR
+    VERSION:2.0
+    BEGIN:VEVENT
+    UID:recurring-base
+    RECURRENCE-ID:20250315T100000Z
+    SUMMARY:Recurring Event Instance
+    DTSTART:20250315T100000Z
+    DTEND:20250315T110000Z
+    END:VEVENT
+    END:VCALENDAR
+    `)
     const spy = jest
       .spyOn(eventThunks, 'updateEventInstanceAsync')
       .mockImplementation(payload => {
@@ -650,10 +710,18 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateSeriesAsync when saving all instances with typeOfAction='all'", async () => {
-    const getEventSpy = jest.spyOn(EventApi, 'getEvent').mockResolvedValue({
-      ...basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-        .events['recurring-base/20250315T100000']
-    } as any)
+    const getEventSpy = jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
+    BEGIN:VCALENDAR
+    VERSION:2.0
+    BEGIN:VEVENT
+    UID:recurring-base
+    RECURRENCE-ID:20250315T100000Z
+    SUMMARY:Recurring Event Instance
+    DTSTART:20250315T100000Z
+    DTEND:20250315T110000Z
+    END:VEVENT
+    END:VCALENDAR
+    `)
 
     const spy = jest
       .spyOn(eventThunks, 'updateSeriesAsync')
@@ -726,13 +794,24 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("fetches master event data when typeOfAction='all'", async () => {
-    const getEventSpy = jest.spyOn(EventApi, 'getEvent').mockResolvedValue({
-      ...basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
-        .events['recurring-base/20250315T100000'],
-      uid: 'recurring-base',
-      title: 'Master Event Title',
-      description: 'Master Description'
-    } as any)
+    const getEventSpy = jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Test//EN',
+          'BEGIN:VEVENT',
+          'UID:recurring-base',
+          'SUMMARY:Master Event Title',
+          'DESCRIPTION:Master Description',
+          'DTSTART:20250315T100000Z',
+          'DTEND:20250315T110000Z',
+          'RRULE:FREQ=WEEKLY;COUNT=4',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
+      )
 
     await act(async () =>
       renderWithProviders(
@@ -920,7 +999,6 @@ describe('handleRSVP function', () => {
   })
   it('calls putEventAsync for non-recurring events', async () => {
     const mockDispatch = jest.fn()
-    const mockOnClose = jest.fn()
 
     const {
       handleRSVP

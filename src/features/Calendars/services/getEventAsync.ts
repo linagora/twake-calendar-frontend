@@ -1,6 +1,6 @@
 import { fetchEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
-import { parseFetchedEvent } from '@/features/Events/EventTransformers'
+import { parseFetchedEvent } from '@/features/Events/transformers/parseFetchedEvent'
 import { formatReduxError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { RejectedError } from '../types/RejectedError'

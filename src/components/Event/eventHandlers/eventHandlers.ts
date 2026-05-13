@@ -8,7 +8,7 @@ import {
 } from '@/features/Calendars/services'
 import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
-import { updateSeriesPartstatJCal } from '@/features/Events/EventTransformers'
+import { updateSeriesPartstatJCal } from '@/features/Events/transformers/updateSeriesPartstatJCal'
 import { PartStat } from '@/features/User/models/attendee'
 import { createAttendee } from '@/features/User/models/attendee.mapper'
 import { userData } from '@/features/User/userDataTypes'

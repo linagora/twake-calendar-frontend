@@ -1,15 +1,15 @@
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { VObjectProperty } from '@/features/Calendars/types/CalendarData'
-import { putEvent, putEventWithOverrides } from '@/features/Events/EventApi'
+import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { makeEventWithOverrides } from '@/features/Events/transformers/makeEventWithOverrides'
 import {
   calendarEventToJCal,
   makeVevent,
   parseCalendarEvent
 } from '@/features/Events/utils'
-import { api } from '@/utils/apiUtils'
 
-jest.mock('@/utils/apiUtils')
+jest.mock('@/features/Events/EventDao')
 
 const MOCK_CALENDAR: Calendar = {
   id: 'cal-1',
@@ -505,21 +505,15 @@ describe('putEvent - passthroughProps preservation', () => {
   })
 
   it('includes passthroughProps in the PUT body', async () => {
-    const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
-
     const eventWithPassthrough = {
       ...mockEvent,
       passthroughProps: [
         ['x-attachment', {}, 'text', 'data:application/pdf;base64,abc123==']
       ]
     } as CalendarEvent
+    const jCal = calendarEventToJCal(eventWithPassthrough)
 
-    await putEvent(eventWithPassthrough)
-
-    const callArgs = (api as unknown as jest.Mock).mock.calls[0][1]
-    const body = JSON.parse(callArgs.body)
-    const veventProps = body[2][0][1]
+    const veventProps = jCal[2][0][1]
 
     expect(veventProps).toContainEqual([
       'x-attachment',
@@ -530,14 +524,16 @@ describe('putEvent - passthroughProps preservation', () => {
   })
 
   it('sends clean body without passthroughProps when none exist', async () => {
-    const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    const jCal = calendarEventToJCal({
+      ...mockEvent,
+      passthroughProps: []
+    } as CalendarEvent)
+    await putEvent(
+      { ...mockEvent, passthroughProps: [] } as CalendarEvent,
+      jCal
+    )
 
-    await putEvent({ ...mockEvent, passthroughProps: [] } as CalendarEvent)
-
-    const callArgs = (api as unknown as jest.Mock).mock.calls[0][1]
-    const body = JSON.parse(callArgs.body)
-    const veventProps = body[2][0][1] as [string, ...unknown[]][]
+    const veventProps = jCal[2][0][1] as [string, ...unknown[]][]
 
     const xProps = veventProps.filter(([k]) => k.startsWith('x-attachment'))
     expect(xProps).toHaveLength(0)
@@ -545,35 +541,8 @@ describe('putEvent - passthroughProps preservation', () => {
 })
 
 describe('putEventWithOverrides - passthroughProps isolation', () => {
-  const icsWithPassthrough = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Test//EN
-BEGIN:VEVENT
-UID:event1
-DTSTART:20240201T100000Z
-DTEND:20240201T110000Z
-RRULE:FREQ=DAILY
-SUMMARY:Master
-SEQUENCE:1
-END:VEVENT
-BEGIN:VEVENT
-UID:event1
-RECURRENCE-ID:20240202T100000Z
-DTSTART:20240202T100000Z
-DTEND:20240202T110000Z
-SUMMARY:Override
-X-ATTACHMENT:data:application/pdf;base64,abc123==
-SEQUENCE:1
-END:VEVENT
-END:VCALENDAR
-`
-
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(api.get as jest.Mock).mockResolvedValue({
-      text: jest.fn().mockResolvedValue(icsWithPassthrough)
-    })
-    ;(api as jest.Mock).mockResolvedValue({ ok: true })
   })
 
   it('preserves X-ATTACHMENT on the updated instance in the PUT body', async () => {
@@ -588,11 +557,42 @@ END:VCALENDAR
       ] as VObjectProperty[]
     } as CalendarEvent
 
-    await putEventWithOverrides(updatedInstance)
+    const vevents = [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['dtstart', {}, 'date-time', '2024-02-01T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-01T11:00:00Z'],
+          ['rrule', {}, 'recur', { freq: 'DAILY' }],
+          ['summary', {}, 'text', 'Master'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240202T100000Z'],
+          ['dtstart', {}, 'date-time', '2024-02-02T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-02T11:00:00Z'],
+          ['summary', {}, 'text', 'Override'],
+          ['x-attachment', {}, 'text', 'data:application/pdf;base64,abc123=='],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ]
+    ] as any
 
-    const body = JSON.parse((api as jest.Mock).mock.calls[0][1].body)
-    const vevents = body[2].filter(([n]: any) => n === 'vevent')
-    const override = vevents.find(([, props]: any) =>
+    ;(fetchAllRecurrentVevents as jest.Mock).mockResolvedValue(vevents)
+    ;(putEvent as jest.Mock).mockResolvedValue({ ok: true })
+
+    const jCal = makeEventWithOverrides(updatedInstance, vevents)
+    const veventsResult = (jCal[2] as any[]).filter(
+      ([n]: any) => n === 'vevent'
+    )
+    const override = veventsResult.find(([, props]: any) =>
       props.some(([k]: any) => k === 'recurrence-id')
     )
 
@@ -613,11 +613,39 @@ END:VCALENDAR
       ] as VObjectProperty[]
     } as CalendarEvent
 
-    await putEventWithOverrides(updatedInstance)
+    const vevents = [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['dtstart', {}, 'date-time', '2024-02-01T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-01T11:00:00Z'],
+          ['rrule', {}, 'recur', { freq: 'DAILY' }],
+          ['summary', {}, 'text', 'Master'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240202T100000Z'],
+          ['dtstart', {}, 'date-time', '2024-02-02T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-02T11:00:00Z'],
+          ['summary', {}, 'text', 'Override'],
+          ['x-attachment', {}, 'text', 'data:application/pdf;base64,abc123=='],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ]
+    ] as any
 
-    const body = JSON.parse((api as jest.Mock).mock.calls[0][1].body)
-    const vevents = body[2].filter(([n]: any) => n === 'vevent')
-    const master = vevents.find(([, props]: any) =>
+    const jCal = makeEventWithOverrides(updatedInstance, vevents)
+    const veventsResult = (jCal[2] as any[]).filter(
+      ([n]: any) => n === 'vevent'
+    )
+    const master = veventsResult.find(([, props]: any) =>
       props.every(([k]: any) => k !== 'recurrence-id')
     )
 
@@ -626,42 +654,6 @@ END:VCALENDAR
   })
 
   it('preserves raw X-ATTACHMENT on untouched instances from the ICS', async () => {
-    const icsWithTwoOverrides = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-UID:event1
-DTSTART:20240201T100000Z
-DTEND:20240201T110000Z
-RRULE:FREQ=DAILY
-SUMMARY:Master
-SEQUENCE:1
-END:VEVENT
-BEGIN:VEVENT
-UID:event1
-RECURRENCE-ID:20240202T100000Z
-DTSTART:20240202T100000Z
-DTEND:20240202T110000Z
-SUMMARY:Override A
-X-ATTACHMENT:data:application/pdf;base64,aaa==
-SEQUENCE:1
-END:VEVENT
-BEGIN:VEVENT
-UID:event1
-RECURRENCE-ID:20240203T100000Z
-DTSTART:20240203T100000Z
-DTEND:20240203T110000Z
-SUMMARY:Override B
-X-ATTACHMENT:data:application/pdf;base64,bbb==
-SEQUENCE:1
-END:VEVENT
-END:VCALENDAR
-`
-
-    ;(api.get as jest.Mock).mockResolvedValueOnce({
-      text: jest.fn().mockResolvedValue(icsWithTwoOverrides)
-    })
-
-    // Only updating Override A — Override B should be untouched
     const updatedInstance = {
       ...mockEvent,
       title: 'Override A updated',
@@ -673,59 +665,63 @@ END:VCALENDAR
       ] as VObjectProperty[]
     } as CalendarEvent
 
-    await putEventWithOverrides(updatedInstance)
+    const vevents = [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['dtstart', {}, 'date-time', '2024-02-01T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-01T11:00:00Z'],
+          ['rrule', {}, 'recur', { freq: 'DAILY' }],
+          ['summary', {}, 'text', 'Master'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240202T100000Z'],
+          ['dtstart', {}, 'date-time', '2024-02-02T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-02T11:00:00Z'],
+          ['summary', {}, 'text', 'Override A'],
+          ['x-attachment', {}, 'text', 'data:application/pdf;base64,aaa=='],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240203T100000Z'],
+          ['dtstart', {}, 'date-time', '2024-02-03T10:00:00Z'],
+          ['dtend', {}, 'date-time', '2024-02-03T11:00:00Z'],
+          ['summary', {}, 'text', 'Override B'],
+          ['x-attachment', {}, 'text', 'data:application/pdf;base64,bbb=='],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ]
+    ] as any
 
-    const body = JSON.parse((api as jest.Mock).mock.calls[0][1].body)
-    const vevents = body[2].filter(([n]: any) => n === 'vevent')
-
-    const overrideB = vevents.find(([, props]: any) =>
+    const jCal = makeEventWithOverrides(updatedInstance, vevents)
+    const veventsResult = (jCal[2] as any[]).filter(
+      ([n]: any) => n === 'vevent'
+    )
+    const overrideB = veventsResult.find(([, props]: any) =>
       props.some(
-        ([k, , , v]: any) =>
-          k === 'recurrence-id' && v === '2024-02-03T10:00:00Z'
+        ([k, , , v]: any) => k === 'recurrence-id' && v === '20240203T100000Z'
       )
     )
 
-    // Override B was never touched — its raw jCal props come straight from the ICS
     const attachmentB = overrideB[1].find(([k]: any) => k === 'x-attachment')
     expect(attachmentB).toBeDefined()
     expect(attachmentB[3]).toBe('data:application/pdf;base64,bbb==')
   })
 
   it('does not bleed X-ATTACHMENT from one instance to another in the same PUT', async () => {
-    const icsWithTwoOverrides = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-UID:event1
-DTSTART:20240201T100000Z
-DTEND:20240201T110000Z
-RRULE:FREQ=DAILY
-SUMMARY:Master
-SEQUENCE:1
-END:VEVENT
-BEGIN:VEVENT
-UID:event1
-RECURRENCE-ID:20240202T100000Z
-DTSTART:20240202T100000Z
-DTEND:20240202T110000Z
-SUMMARY:Override A
-X-ATTACHMENT:data:application/pdf;base64,aaa==
-SEQUENCE:1
-END:VEVENT
-BEGIN:VEVENT
-UID:event1
-RECURRENCE-ID:20240203T100000Z
-DTSTART:20240203T100000Z
-DTEND:20240203T110000Z
-SUMMARY:Override B - no attachment
-SEQUENCE:1
-END:VEVENT
-END:VCALENDAR
-`
-
-    ;(api.get as jest.Mock).mockResolvedValueOnce({
-      text: jest.fn().mockResolvedValue(icsWithTwoOverrides)
-    })
-
     const updatedInstance = {
       ...mockEvent,
       title: 'Override A updated',
@@ -737,15 +733,52 @@ END:VCALENDAR
       ] as VObjectProperty[]
     } as CalendarEvent
 
-    await putEventWithOverrides(updatedInstance)
+    const veventsUpdated = [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['dtstart', {}, 'date-time', '20240201T100000Z'],
+          ['dtend', {}, 'date-time', '20240201T110000Z'],
+          ['rrule', {}, 'recur', { freq: 'DAILY' }],
+          ['summary', {}, 'text', 'Master'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240202T100000Z'],
+          ['dtstart', {}, 'date-time', '20240202T100000Z'],
+          ['dtend', {}, 'date-time', '20240202T110000Z'],
+          ['summary', {}, 'text', 'Override A'],
+          ['x-attachment', {}, 'text', 'data:application/pdf;base64,aaa=='],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          ['recurrence-id', {}, 'date-time', '20240203T100000Z'],
+          ['dtstart', {}, 'date-time', '20240203T100000Z'],
+          ['dtend', {}, 'date-time', '20240203T110000Z'],
+          ['summary', {}, 'text', 'Override B - no attachment'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ]
+    ] as any
 
-    const body = JSON.parse((api as jest.Mock).mock.calls[0][1].body)
-    const vevents = body[2].filter(([n]: any) => n === 'vevent')
+    const jCal = makeEventWithOverrides(updatedInstance, veventsUpdated)
+    const vevents = (jCal[2] as any[]).filter(([n]: any) => n === 'vevent')
 
     const overrideB = vevents.find(([, props]: any) =>
       props.some(
-        ([k, , , v]: any) =>
-          k === 'recurrence-id' && v === '2024-02-03T10:00:00Z'
+        ([k, , , v]: any) => k === 'recurrence-id' && v === '20240203T100000Z'
       )
     )
 

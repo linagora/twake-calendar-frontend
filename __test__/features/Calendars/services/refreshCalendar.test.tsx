@@ -5,12 +5,12 @@ import {
   refreshCalendarWithSyncToken,
   SyncTokenUpdates
 } from '@/features/Calendars/services/refreshCalendar'
-import * as EventApi from '@/features/Events/EventApi'
+import * as EventDao from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
 jest.mock('@/features/Calendars/api/fetchSyncTokenChanges')
-jest.mock('@/features/Events/EventApi')
+jest.mock('@/features/Events/EventDao')
 
 describe('refreshCalendarWithSyncToken', () => {
   const mockCalendar: Calendar = {
@@ -155,7 +155,7 @@ describe('refreshCalendarWithSyncToken', () => {
     ;(
       fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
     ).mockResolvedValue(mockSyncResponse)
-    ;(EventApi.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -221,7 +221,7 @@ describe('refreshCalendarWithSyncToken', () => {
     ;(
       fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
     ).mockResolvedValue(mockSyncResponse)
-    ;(EventApi.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -402,7 +402,7 @@ describe('refreshCalendarWithSyncToken', () => {
     ;(
       fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
     ).mockResolvedValue(mockSyncResponse)
-    ;(EventApi.reportEvent as jest.Mock)
+    ;(EventDao.reportEvent as jest.Mock)
       .mockRejectedValueOnce(new Error('Failed to fetch'))
       .mockResolvedValueOnce(mockEventData)
 
@@ -519,7 +519,7 @@ describe('refreshCalendarWithSyncToken', () => {
     ;(
       fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
     ).mockResolvedValue(mockSyncResponse)
-    ;(EventApi.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
+    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
     await store.dispatch(
@@ -650,7 +650,7 @@ describe('refreshCalendarWithSyncToken', () => {
     let concurrentCalls = 0
     let maxConcurrent = 0
 
-    ;(EventApi.reportEvent as jest.Mock).mockImplementation(async () => {
+    ;(EventDao.reportEvent as jest.Mock).mockImplementation(async () => {
       concurrentCalls++
       maxConcurrent = Math.max(maxConcurrent, concurrentCalls)
       await new Promise(resolve => setTimeout(resolve, 10))

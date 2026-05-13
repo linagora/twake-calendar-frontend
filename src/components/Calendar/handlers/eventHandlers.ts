@@ -10,7 +10,7 @@ import {
 } from '@/features/Calendars/services'
 import { fetchEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
-import { parseFetchedEvent } from '@/features/Events/EventTransformers'
+import { parseFetchedEvent } from '@/features/Events/transformers/parseFetchedEvent'
 import { updateAttendeesAfterTimeChange } from '@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@/features/User/models/attendee'
 import {
