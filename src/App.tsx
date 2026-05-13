@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { history } from './app/store'
 import { default as CalendarLayout } from './components/Calendar/CalendarLayout'
 import { Error as ErrorPage } from './components/Error/Error'
 import { ErrorSnackbar } from './components/Error/ErrorSnackbar'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from './components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from './features/Settings/constants'
 import { default as HandleLogin } from './features/User/HandleLogin'
@@ -70,19 +72,34 @@ function App(): JSX.Element {
         lang={lang}
         locales={dateLocales}
       >
-        <Suspense fallback={<Loading />}>
-          <WebSocketGate />
-          <Router history={history}>
-            <Routes>
-              <Route path="/" element={<HandleLogin />} />
-              <Route path="/calendar" element={<CalendarLayout />} />
-              <Route path="/callback" element={<CallbackResume />} />
-              <Route path="/error" element={<ErrorPage />} />
-            </Routes>
-          </Router>
-          <ErrorSnackbar error={error} type="user" />
-        </Suspense>
-        {appLoading && <Loading />}
+        <ErrorBoundary
+          FallbackComponent={({ error }) => (
+            <ErrorPage isCrashFallback errorBoundaryMessage={error as Error} />
+          )}
+          onError={(error, errorInfo) => {
+            Sentry.captureException(error, {
+              contexts: {
+                react: {
+                  componentStack: errorInfo.componentStack
+                }
+              }
+            })
+          }}
+        >
+          <Suspense fallback={<Loading />}>
+            <WebSocketGate />
+            <Router history={history}>
+              <Routes>
+                <Route path="/" element={<HandleLogin />} />
+                <Route path="/calendar" element={<CalendarLayout />} />
+                <Route path="/callback" element={<CallbackResume />} />
+                <Route path="/error" element={<ErrorPage />} />
+              </Routes>
+            </Router>
+            <ErrorSnackbar error={error} type="user" />
+          </Suspense>
+          {appLoading && <Loading />}
+        </ErrorBoundary>
       </I18n>
     </TwakeMuiThemeProvider>
   )
