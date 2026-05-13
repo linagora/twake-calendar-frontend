@@ -275,6 +275,10 @@
     "timeZone": "Часовой пояс",
     "timeZoneBrowserDefault": "Определять часовой пояс автоматически",
     "timeZoneUpdateError": "Не удалось обновить часовой пояс",
+    "tzPrompt": {
+      "detected": "Мы обнаружили, что вы находитесь в часовом поясе %{browserTZ} вместо вашего настроенного часового пояса %{configuredTZ}",
+      "askSwitch": "Хотите переключить приложение на часовой пояс %{browserTZ}?"
+    },
     "notifications.empty": "Настройки уведомлений скоро появятся",
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Способ доставки",
