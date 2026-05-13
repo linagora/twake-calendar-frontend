@@ -150,7 +150,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           fromError: false
         })
 
-        await onSubmit(values)
+        await onSubmit(values, organizerRef.current)
       },
       cancel: (): void => {
         onCancel()

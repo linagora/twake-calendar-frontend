@@ -87,7 +87,10 @@ export interface EventFormFieldsProps {
   userPersonalCalendars: Calendar[]
 
   // Save / cancel delegation
-  onSubmit: (values: EventFormValues) => Promise<void>
+  onSubmit: (
+    values: EventFormValues,
+    organizer?: { cn: string; cal_address: string }
+  ) => Promise<void>
   onCancel: () => void
 
   // Temp-storage context

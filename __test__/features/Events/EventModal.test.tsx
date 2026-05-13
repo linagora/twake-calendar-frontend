@@ -111,17 +111,22 @@ describe('EventPopover', () => {
     resource: undefined
   } as unknown as DateSelectArg
 
-  const renderPopover = (selectedRange = defaultSelectedRange) => {
+  const renderPopover = (
+    selectedRange = defaultSelectedRange,
+    state = preloadedState
+  ) => {
+    const el = document.createElement('div')
+    document.body.appendChild(el)
     renderWithProviders(
       <EventPopover
-        anchorEl={document.body}
+        anchorEl={el}
         open={true}
         onClose={mockOnClose}
         selectedRange={selectedRange}
         setSelectedRange={mockSetSelectedRange}
         calendarRef={mockCalendarRef}
       />,
-      preloadedState
+      state
     )
   }
 
@@ -240,6 +245,62 @@ describe('EventPopover', () => {
     const calendarSelect = screen.getByRole('combobox', { name: /Calendar/i })
     expect(calendarSelect).toHaveTextContent('Calendar 2')
   })
+
+  it('updates organizer to calendar owner when changing to a delegated calendar', async () => {
+    const customState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          'otherUser/cal3': {
+            id: 'otherUser/cal3',
+            name: 'Calendar 3',
+            color: '#0000FF',
+            delegated: true,
+            access: { write: true },
+            link: 'https://example.com/calendar.json',
+            owner: {
+              emails: ['owner@example.com'],
+              firstname: 'Owner',
+              lastname: 'User'
+            }
+          }
+        }
+      }
+    }
+
+    renderPopover(defaultSelectedRange, customState)
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    const select = screen.getByLabelText('event.form.calendar')
+    fireEvent.mouseDown(select)
+
+    const option = await screen.findByText('Calendar 3')
+    fireEvent.click(option)
+
+    const spy = jest
+      .spyOn(eventThunks, 'putEventAsync')
+      .mockImplementation(payload => {
+        const promise = Promise.resolve(payload)
+        ;(promise as any).unwrap = () => promise
+        return () => promise as any
+      })
+
+    fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled()
+    })
+
+    const receivedPayload = spy.mock.calls[0][0]
+
+    expect(receivedPayload.newEvent.organizer).toEqual({
+      cn: 'Owner User',
+      cal_address: 'owner@example.com'
+    })
+  })
+
   it('adds a attendee', async () => {
     jest.useFakeTimers()
     try {

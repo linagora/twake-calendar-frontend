@@ -8,22 +8,26 @@ export interface UseSubmitCreateEventProps {
   showMore: boolean
   onClose: (refresh?: boolean) => void
   userPersonalCalendars: Calendar[]
-  organizer?: { cn: string; cal_address: string }
 }
 
 export function useSubmitCreateEvent({
   showMore,
   onClose,
-  userPersonalCalendars,
-  organizer
+  userPersonalCalendars
 }: UseSubmitCreateEventProps): {
-  handleSubmit: (values: EventFormValues) => Promise<void>
+  handleSubmit: (
+    values: EventFormValues,
+    organizer?: { cn: string; cal_address: string }
+  ) => Promise<void>
 } {
   const dispatch = useAppDispatch()
   const calList = useAppSelector(state => state.calendars.list)
 
   const handleSubmit = useCallback(
-    async (values: EventFormValues): Promise<void> => {
+    async (
+      values: EventFormValues,
+      organizer?: { cn: string; cal_address: string }
+    ): Promise<void> => {
       const targetCalendar: Calendar | undefined =
         calList[values.calendarid] ||
         userPersonalCalendars[0] ||
@@ -43,7 +47,7 @@ export function useSubmitCreateEvent({
         onClose
       })
     },
-    [showMore, onClose, userPersonalCalendars, organizer, dispatch, calList]
+    [showMore, onClose, userPersonalCalendars, dispatch, calList]
   )
 
   return { handleSubmit }
