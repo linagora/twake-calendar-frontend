@@ -31,8 +31,14 @@ declare global {
     WS_PING_PERIOD_MS: number
     WS_PING_TIMEOUT_PERIOD_MS: number
 
+    HIDE_RESOURCES: boolean | undefined
+
     appList: AppIconProps[]
 
     __calendarRef: MutableRefObject<CalendarApi | null>
+
+    DISABLE_PUBLIC_VISIBILITY: boolean
+
+    ASK_FOR_TZ_UPDATE: boolean
   }
 }

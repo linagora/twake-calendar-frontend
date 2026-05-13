@@ -117,7 +117,10 @@ describe('EventPopover', () => {
     resource: undefined
   } as unknown as DateSelectArg
 
-  const renderPopover = (selectedRange = defaultSelectedRange) => {
+  const renderPopover = (
+    selectedRange = defaultSelectedRange,
+    state = preloadedState
+  ) => {
     renderWithProviders(
       <EventPopover
         open={true}
@@ -126,11 +129,12 @@ describe('EventPopover', () => {
         setSelectedRange={mockSetSelectedRange}
         calendarRef={mockCalendarRef}
       />,
-      preloadedState
+      state
     )
   }
 
   it('renders correctly with inputs and calendar options', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = false
     renderPopover()
 
     // Check dialog title
@@ -167,6 +171,20 @@ describe('EventPopover', () => {
     expect(screen.getAllByText('event.form.notification')).toHaveLength(1)
     expect(screen.getAllByText('event.form.visibleTo')).toHaveLength(1)
     expect(screen.getAllByText('event.form.showMeAs')).toHaveLength(1)
+  })
+
+  it('hides visibleTo field when DISABLE_PUBLIC_VISIBILITY is true', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = true
+    renderPopover()
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    expect(screen.queryByText('event.form.visibleTo')).not.toBeInTheDocument()
+  })
+
+  it('shows visibleTo field when DISABLE_PUBLIC_VISIBILITY is false', () => {
+    ;(window as any).DISABLE_PUBLIC_VISIBILITY = false
+    renderPopover()
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    expect(screen.getByText('event.form.visibleTo')).toBeInTheDocument()
   })
 
   it('fills start from selectedRange', () => {
@@ -230,6 +248,62 @@ describe('EventPopover', () => {
     const calendarSelect = screen.getByRole('combobox', { name: /Calendar/i })
     expect(calendarSelect).toHaveTextContent('Calendar 2')
   })
+
+  it('updates organizer to calendar owner when changing to a delegated calendar', async () => {
+    const customState = {
+      ...preloadedState,
+      calendars: {
+        ...preloadedState.calendars,
+        list: {
+          ...preloadedState.calendars.list,
+          'otherUser/cal3': {
+            id: 'otherUser/cal3',
+            name: 'Calendar 3',
+            color: '#0000FF',
+            delegated: true,
+            access: { write: true },
+            link: 'https://example.com/calendar.json',
+            owner: {
+              emails: ['owner@example.com'],
+              firstname: 'Owner',
+              lastname: 'User'
+            }
+          }
+        }
+      }
+    }
+
+    renderPopover(defaultSelectedRange, customState)
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.moreOptions' }))
+    const select = screen.getByLabelText('event.form.calendar')
+    fireEvent.mouseDown(select)
+
+    const option = await screen.findByText('Calendar 3')
+    fireEvent.click(option)
+
+    const spy = jest
+      .spyOn(eventThunks, 'putEventAsync')
+      .mockImplementation(payload => {
+        const promise = Promise.resolve(payload)
+        ;(promise as any).unwrap = () => promise
+        return () => promise as any
+      })
+
+    fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled()
+    })
+
+    const receivedPayload = spy.mock.calls[0][0]
+
+    expect(receivedPayload.newEvent.organizer).toEqual({
+      cn: 'Owner User',
+      cal_address: 'owner@example.com'
+    })
+  })
+
   it('adds a attendee', async () => {
     try {
       jest

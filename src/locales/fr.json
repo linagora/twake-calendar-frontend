@@ -279,6 +279,10 @@
     "timeZone": "Fuseau horaire",
     "timeZoneBrowserDefault": "Détection automatique du fuseau horaire",
     "timeZoneUpdateError": "Échec de la mise à jour du fuseau horaire",
+    "tzPrompt": {
+      "detected": "Nous avons détecté que vous êtes actuellement situé dans le fuseau horaire %{browserTZ} au lieu de votre fuseau horaire configuré %{configuredTZ}",
+      "askSwitch": "Voulez-vous basculer l'application vers le fuseau horaire %{browserTZ} ?"
+    },
     "notifications.empty": "Paramètres de notifications à venir",
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Mode de réception",

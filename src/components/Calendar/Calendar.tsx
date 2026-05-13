@@ -48,6 +48,7 @@ import {
 } from './utils/calendarUtils'
 import { CALENDAR_VIEWS } from './utils/constants'
 import ViewMoreEvents from './ViewMoreEvents'
+import { TimezoneChangeAlert } from '../Timezone/TimezoneChangeAlert'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
@@ -400,6 +401,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     <main
       className={`main-layout calendar-layout ${menubarProps?.isIframe ? ' isInIframe' : ''}`}
     >
+      <TimezoneChangeAlert />
       <Sidebar
         open={openSidebar}
         onClose={onCloseSidebar}
@@ -603,7 +605,6 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
         )}
         {view === 'search' && <SearchResultsPage />}
         <EventPopover
-          anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={eventHandlers.handleClosePopover}
           selectedRange={selectedRange}

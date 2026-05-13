@@ -150,7 +150,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           fromError: false
         })
 
-        await onSubmit(values)
+        await onSubmit(values, organizerRef.current)
       },
       cancel: (): void => {
         onCancel()
@@ -217,16 +217,18 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           />
         </FieldWithLabel>
 
-        <VideoConferenceField
-          hasVideoConference={v.hasVideoConference}
-          setHasVideoConference={setHasVideoConference}
-          meetingLink={v.meetingLink}
-          setMeetingLink={setMeetingLink}
-          description={v.description}
-          setDescription={setDescription}
-          showMore={showMore}
-          setShowDescription={setShowDescription}
-        />
+        {window.VIDEO_CONFERENCE_BASE_URL && (
+          <VideoConferenceField
+            hasVideoConference={v.hasVideoConference}
+            setHasVideoConference={setHasVideoConference}
+            meetingLink={v.meetingLink}
+            setMeetingLink={setMeetingLink}
+            description={v.description}
+            setDescription={setDescription}
+            showMore={showMore}
+            setShowDescription={setShowDescription}
+          />
+        )}
 
         <AddDescButton
           showDescription={v.showDescription}

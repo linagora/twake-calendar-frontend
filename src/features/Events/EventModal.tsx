@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '../Calendars/CalendarTypes'
 import { CalendarEvent } from './EventsTypes'
-import { useEventOrganizer } from './useEventOrganizer'
 import { useCalendarPreviewSync } from '@/components/Event/hooks/useCalendarPreviewSync'
 import { EventActions } from './EventActions'
 import { useBuildInitialValues } from '@/components/Event/hooks/useBuildInitialValues'
@@ -33,7 +32,6 @@ const EventPopover: React.FC<{
 
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const calList = useAppSelector(state => state.calendars.list)
-  const userOrganizer = useAppSelector(state => state.user.organiserData)
 
   const [showMore, setShowMore] = useState(false)
   const formRef = useRef<EventFormHandle>(null)
@@ -41,12 +39,6 @@ const EventPopover: React.FC<{
   const initialValues = useBuildInitialValues({
     event,
     selectedRange: open ? selectedRange : null
-  })
-
-  const { organizer } = useEventOrganizer({
-    calendarid: initialValues.calendarid ?? '',
-    calList,
-    userOrganizer
   })
 
   const userPersonalCalendars: Calendar[] = Object.values(calList || {}).filter(
@@ -72,8 +64,7 @@ const EventPopover: React.FC<{
   const { handleSubmit } = useSubmitCreateEvent({
     showMore,
     onClose: () => onClose(true),
-    userPersonalCalendars,
-    organizer
+    userPersonalCalendars
   })
 
   const handleClose = useCallback(() => {

@@ -12,19 +12,30 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import ReplayIcon from '@mui/icons-material/Replay'
 import { useI18n } from 'twake-i18n'
 
-export const Error: React.FC = () => {
+interface ErrorProps {
+  isCrashFallback?: boolean
+  errorBoundaryMessage?: Error
+}
+
+export const Error: React.FC<ErrorProps> = ({
+  isCrashFallback,
+  errorBoundaryMessage
+}) => {
   const { t } = useI18n()
   const userError = useAppSelector(state => state.user.error)
   const calendarError = useAppSelector(state => state.calendars.error)
   const initialError = useRef(userError || calendarError)
 
   useEffect(() => {
-    if (!initialError.current) {
+    if (!initialError.current && !isCrashFallback) {
       window.location.replace('/')
     }
-  }, [])
+  }, [isCrashFallback])
 
-  const errorMessage = userError || calendarError || t('error.unknown')
+  const errorMessage =
+    userError ||
+    calendarError ||
+    (isCrashFallback ? errorBoundaryMessage?.message : t('error.unknown'))
 
   return (
     <Fade in timeout={500}>

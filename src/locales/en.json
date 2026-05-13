@@ -278,6 +278,10 @@
     "timeZone": "Timezone",
     "timeZoneBrowserDefault": "Detect time zone automatically",
     "timeZoneUpdateError": "Failed to update time zone",
+    "tzPrompt": {
+      "detected": "We detected you are in %{browserTZ} instead of your %{configuredTZ} configured TZ",
+      "askSwitch": "Do you want to switch the app to %{browserTZ} TZ?"
+    },
     "notifications.empty": "Notifications settings coming soon",
     "notifications.email": "Email",
     "notifications.deliveryMethod": "Delivery method",

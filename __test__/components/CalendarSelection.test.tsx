@@ -7,7 +7,11 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 
 describe('CalendarSelection', () => {
   beforeEach(() => {
+    window.HIDE_RESOURCES = undefined
     localStorage.clear()
+  })
+  afterEach(() => {
+    window.HIDE_RESOURCES = undefined
   })
   const baseUser = {
     userData: {
@@ -71,6 +75,22 @@ describe('CalendarSelection', () => {
     expect(screen.getByLabelText('Calendar personal')).toBeChecked()
     expect(screen.getByLabelText('Calendar delegated')).not.toBeChecked()
     expect(screen.getByLabelText('Calendar shared')).not.toBeChecked()
+  })
+
+  it('does not render resources when HIDE_RESOURCES is true', () => {
+    window.HIDE_RESOURCES = true
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={['user1/cal1']}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false }
+      }
+    )
+
+    expect(screen.queryByText('calendar.resources')).not.toBeInTheDocument()
   })
 
   it('toggles a calendar selection on click', () => {

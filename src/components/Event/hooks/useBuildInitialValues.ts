@@ -26,7 +26,7 @@ const isValidToInitBySelectedRange = (
   if (!selectedRange) return false
   if (!selectedRange.start || !selectedRange.end) return false
 
-  const isEventNew = !event?.start && !event?.end
+  const isEventNew = !event?.uid
 
   return isEventNew || selectedRange.allDay
 }

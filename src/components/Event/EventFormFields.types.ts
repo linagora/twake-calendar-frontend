@@ -42,7 +42,7 @@ export const DEFAULT_FORM_VALUES: EventFormValues = {
   attendees: [],
   alarm: '',
   busy: 'OPAQUE',
-  eventClass: 'PUBLIC',
+  eventClass: window.DISABLE_PUBLIC_VISIBILITY ? 'PRIVATE' : 'PUBLIC',
   timezone: '',
   calendarid: '',
   hasVideoConference: false,
@@ -87,7 +87,10 @@ export interface EventFormFieldsProps {
   userPersonalCalendars: Calendar[]
 
   // Save / cancel delegation
-  onSubmit: (values: EventFormValues) => Promise<void>
+  onSubmit: (
+    values: EventFormValues,
+    organizer?: { cn: string; cal_address: string }
+  ) => Promise<void>
   onCancel: () => void
 
   // Temp-storage context
