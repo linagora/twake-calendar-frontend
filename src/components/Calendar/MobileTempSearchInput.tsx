@@ -1,5 +1,6 @@
 import React from 'react'
 import { TextField } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import { PeopleSearch } from '../Attendees/PeopleSearch'
 import { User } from '../Attendees/types'
 import { useI18n } from 'twake-i18n'
@@ -23,38 +24,42 @@ export const MobileTempSearchInput: React.FC<MobileTempSearchInputProps> = ({
   const { t } = useI18n()
 
   return (
-    <PeopleSearch
-      objectTypes={['user', 'resource']}
-      selectedUsers={tempUsers}
-      onChange={handleChange}
-      onToggleEventPreview={handleToggleEventPreview}
-      placeholder={t('peopleSearch.availabilityPlaceholder')}
-      hideOptions
-      onSearchStateChange={handleSearchChange}
-      inputValue={searchState.query}
-      inputSlot={params => (
-        <TextField
-          {...params}
-          autoFocus
-          size="medium"
-          sx={{
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none'
-            },
-            ...(tempUsers.length > 0
-              ? {
-                  '& .MuiOutlinedInput-root': {
-                    flexDirection: 'column',
-                    alignItems: 'start',
-                    '& .MuiInputBase-input': {
-                      width: '100%'
+    <Tooltip title={t('tooltip.availabilityPlaceholder')}>
+      <span style={{ display: 'block' }}>
+        <PeopleSearch
+          objectTypes={['user', 'resource']}
+          selectedUsers={tempUsers}
+          onChange={handleChange}
+          onToggleEventPreview={handleToggleEventPreview}
+          placeholder={t('peopleSearch.availabilityPlaceholder')}
+          hideOptions
+          onSearchStateChange={handleSearchChange}
+          inputValue={searchState.query}
+          inputSlot={params => (
+            <TextField
+              {...params}
+              autoFocus
+              size="medium"
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': {
+                  border: 'none'
+                },
+                ...(tempUsers.length > 0
+                  ? {
+                      '& .MuiOutlinedInput-root': {
+                        flexDirection: 'column',
+                        alignItems: 'start',
+                        '& .MuiInputBase-input': {
+                          width: '100%'
+                        }
+                      }
                     }
-                  }
-                }
-              : undefined)
-          }}
+                  : undefined)
+              }}
+            />
+          )}
         />
-      )}
-    />
+      </span>
+    </Tooltip>
   )
 }

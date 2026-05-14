@@ -3,18 +3,21 @@ import { Typography } from '@linagora/twake-mui'
 import { CalendarEvent } from '../EventsTypes'
 import { formatDate } from './utils/formatDate'
 import { formatEnd } from './utils/formatEnd'
+import { useI18n } from 'twake-i18n'
 
-export function EventTimeSubtitle({
-  event,
-  t,
-  timezone
-}: {
+export const EventTimeSubtitle: React.FC<{
   event: CalendarEvent
-  t: (k: string, p?: string | object) => string
   timezone: string
-}) {
+}> = ({ event, timezone }) => {
+  const { t } = useI18n()
   const formattedEnd = event.end
-    ? formatEnd(event.start, event.end, t, timezone, event.allday)
+    ? formatEnd({
+        start: event.start,
+        end: event.end,
+        t,
+        timeZone: timezone,
+        allday: event.allday
+      })
     : null
 
   return (

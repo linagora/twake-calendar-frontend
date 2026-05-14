@@ -94,6 +94,7 @@ const EventPopover: React.FC<{
           onExpanded={() => setShowMore(s => !s)}
         />
       }
+      expandText={t('tooltip.moreEventOptions')}
     >
       <EventFormFields
         ref={formRef}

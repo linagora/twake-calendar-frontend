@@ -34,8 +34,21 @@ import { useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { PeopleSearch } from '../Attendees/PeopleSearch'
 import { User } from '../Attendees/types'
+import { Tooltip } from '../Tooltip'
 
 const SEARCH_OBJECT_TYPES = ['user', 'contact']
+
+const isClickInsideSearch = (
+  target: Node,
+  container: HTMLElement | null,
+  input: HTMLElement | null
+): boolean => {
+  if (container?.contains(target)) return true
+  if (input?.contains(target)) return true
+  if (target instanceof Element && target.closest('.MuiAutocomplete-popper'))
+    return true
+  return false
+}
 
 const SearchBar: React.FC<{
   onToggleSearch?: (extendedStatus: boolean) => void
@@ -139,21 +152,14 @@ const SearchBar: React.FC<{
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
+      if (filterOpen) return
+
       const target = event.target as Node
-
-      if (filterOpen) {
+      if (isClickInsideSearch(target, containerRef.current, inputRef.current))
         return
-      }
 
-      if (
-        containerRef.current?.contains(target) ||
-        inputRef.current?.contains(target) ||
-        (target as HTMLElement).closest('.MuiAutocomplete-popper')
-      ) {
-        return
-      }
-
-      if (!search.trim() && selectedContacts.length === 0) {
+      const isSearchEmpty = !search.trim() && selectedContacts.length === 0
+      if (isSearchEmpty) {
         setExtended(false)
         onToggleSearch?.(false)
       }
@@ -186,9 +192,11 @@ const SearchBar: React.FC<{
         }}
       >
         {!extended && (
-          <IconButton sx={{ mr: 1 }} onClick={handleOpenSearch}>
-            <SearchIcon />
-          </IconButton>
+          <Tooltip title={t('tooltip.searchEventsOrCalendars')}>
+            <IconButton sx={{ mr: 1 }} onClick={handleOpenSearch}>
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
         )}
 
         {extended && (
@@ -332,11 +340,13 @@ const SearchBar: React.FC<{
           },
           transition: {
             onExited: () => {
-              if (
-                !search.trim() &&
-                selectedContacts.length === 0 &&
-                shouldCollapseRef.current
-              ) {
+              const isSearchEmpty = !search.trim()
+              const hasNoContacts = selectedContacts.length === 0
+              const shouldCollapse = shouldCollapseRef.current
+              const shouldPerformCollapse =
+                isSearchEmpty && hasNoContacts && shouldCollapse
+
+              if (shouldPerformCollapse) {
                 setExtended(false)
                 onToggleSearch?.(false)
               }

@@ -107,6 +107,7 @@ const EventUpdateModalInternal: React.FC<
         />
       }
       sx={dialogPaddingStyles(isMobile)}
+      expandText={t('tooltip.moreEventOptions')}
     >
       <EventFormFields
         key={effectiveEvent?.uid || 'no-event'}

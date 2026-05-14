@@ -23,6 +23,7 @@ import momentTimezonePlugin from '@fullcalendar/moment-timezone'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { Fab } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import AddIcon from '@mui/icons-material/Add'
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -425,20 +426,22 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
         {view === 'calendar' && (
           <>
             {(isTablet || isMobile) && (
-              <Fab
-                color="primary"
-                aria-label={t('event.createEvent')}
-                onClick={() => eventHandlers.handleDateSelect(null)}
-                sx={{
-                  position: 'fixed',
-                  bottom: 24,
-                  right: 24,
-                  zIndex: 20,
-                  borderRadius: '16px'
-                }}
-              >
-                <AddIcon />
-              </Fab>
+              <Tooltip title={t('tooltip.createEvent')}>
+                <Fab
+                  color="primary"
+                  aria-label={t('event.createEvent')}
+                  onClick={() => eventHandlers.handleDateSelect(null)}
+                  sx={{
+                    position: 'fixed',
+                    bottom: 24,
+                    right: 24,
+                    zIndex: 20,
+                    borderRadius: '16px'
+                  }}
+                >
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
             )}
             <div
               ref={calendarWrapperRef}

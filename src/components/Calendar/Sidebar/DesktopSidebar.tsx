@@ -4,6 +4,7 @@ import { useI18n } from 'twake-i18n'
 import { MiniCalendar } from '../MiniCalendar'
 import { CalendarSidebarProps } from './SideBar'
 import { SidebarCommonContent } from './SidebarCommonContent'
+import Tooltip from '@/components/Tooltip'
 
 export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
   calendarRef,
@@ -46,21 +47,23 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
           paddingTop: isIframe ? '10px' : 3
         }}
       >
-        <Button
-          size="medium"
-          variant="contained"
-          fullWidth
-          onClick={onCreateEvent}
-          sx={{
-            borderRadius: radius.lg,
-            fontSize: '16px',
-            fontWeight: 500,
-            lineHeight: 'normal'
-          }}
-        >
-          <AddIcon sx={{ marginRight: 0.5, fontSize: '20px' }} />{' '}
-          {t('event.createEvent')}
-        </Button>
+        <Tooltip title={t('tooltip.createEvent')}>
+          <Button
+            size="medium"
+            variant="contained"
+            fullWidth
+            onClick={onCreateEvent}
+            sx={{
+              borderRadius: radius.lg,
+              fontSize: '16px',
+              fontWeight: 500,
+              lineHeight: 'normal'
+            }}
+          >
+            <AddIcon sx={{ marginRight: 0.5, fontSize: '20px' }} />{' '}
+            {t('event.createEvent')}
+          </Button>
+        </Tooltip>
       </Box>
 
       <Box>

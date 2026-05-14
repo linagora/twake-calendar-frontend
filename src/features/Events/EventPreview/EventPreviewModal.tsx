@@ -3,7 +3,8 @@ import { formatEventChipTitle } from '@/components/Calendar/utils/calendarUtils'
 import ResponsiveDialog from '@/components/Dialog/ResponsiveDialog'
 import { EditModeDialog } from '@/components/Event/EditModeDialog'
 import { DateSelectArg } from '@fullcalendar/core'
-import { Box, Chip, Tooltip, Typography } from '@linagora/twake-mui'
+import { Box, Chip, Typography } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import CircleIcon from '@mui/icons-material/Circle'
 import LockOutlineIcon from '@mui/icons-material/LockOutline'
 import { useEffect } from 'react'
@@ -16,20 +17,73 @@ import { EventPreviewHeader } from '../EventPreview/EventPreviewHeader'
 import { useEventPreviewState } from '../EventPreview/useEventPreviewState'
 import EventUpdateModal from '../EventUpdateModal'
 import { EventTimeSubtitle } from './EventTimeSubtitle'
+import { CalendarEvent } from '../EventsTypes'
 
-export default function EventPreviewModal({
-  eventId,
-  calId,
-  tempEvent,
-  open,
-  onClose
-}: {
+interface EventPreviewTitleRowProps {
+  event: CalendarEvent
+  isOwn: boolean
+  timezone: string
+  t: (key: string, options?: Record<string, unknown>) => string
+}
+
+const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
+  event,
+  isOwn,
+  timezone,
+  t
+}) => {
+  return (
+    <Box mb={3}>
+      <Box
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        gap={1}
+        mb={1}
+      >
+        {event.class === 'PRIVATE' &&
+          (isOwn ? (
+            <Tooltip
+              title={t('eventPreview.privateEvent.tooltipOwn')}
+              placement="top"
+            >
+              <LockOutlineIcon />
+            </Tooltip>
+          ) : (
+            <LockOutlineIcon />
+          ))}
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: '24px',
+            fontWeight: 600,
+            wordBreak: 'break-word',
+            fontFamily: 'Inter, sans-serif'
+          }}
+        >
+          {formatEventChipTitle(event, t)}
+        </Typography>
+        {event.transp === 'TRANSPARENT' && (
+          <Tooltip title={t('eventPreview.free.tooltip')} placement="top">
+            <Chip
+              icon={<CircleIcon color="success" fontSize="small" />}
+              label={t('eventPreview.free.label')}
+            />
+          </Tooltip>
+        )}
+      </Box>
+      <EventTimeSubtitle event={event} timezone={timezone} />
+    </Box>
+  )
+}
+
+const EventPreviewModal: React.FC<{
   eventId: string
   calId: string
   tempEvent?: boolean
   open: boolean
   onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void
-}) {
+}> = ({ eventId, calId, tempEvent, open, onClose }) => {
   const { t } = useI18n()
 
   const {
@@ -83,100 +137,67 @@ export default function EventPreviewModal({
     calendar.owner?.administrators?.some(admin => admin.id === user.openpaasId)
   )
 
+  const isAttendee = Boolean(
+    event.attendee?.find(p => p.cal_address === user.email)
+  )
+
+  const hasActionsBorderTop = (isAttendee && isOwn) || isAdminOfResource
+
+  const editInOrganizerCalendarTooltip = organizerWritableCalendar
+    ? t('eventPreview.editInOrganizerCalendar', {
+        calendarName: organizerWritableCalendar.name
+      })
+    : undefined
+
+  const header = (
+    <EventPreviewHeader
+      event={event}
+      eventId={eventId}
+      isOrganizer={isOrganizer}
+      isOwn={isOwn}
+      isWriteDelegated={isWriteDelegated}
+      isNotPrivate={isNotPrivate}
+      canEdit={canEdit}
+      onDelete={() => void handleDeleteClick()}
+      onClose={() => onClose({}, 'backdropClick')}
+      onEdit={handleEditClick}
+      onMoreClick={e => setToggleActionMenu(e.currentTarget)}
+      onEditInOrganizerCalendar={
+        organizerWritableCalendar ? handleEditInOrganizerCalendar : undefined
+      }
+      editInOrganizerCalendarTooltip={editInOrganizerCalendarTooltip}
+    />
+  )
+
+  const actions = contextualizedEvent && (
+    <AttendanceValidation
+      contextualizedEvent={contextualizedEvent}
+      user={attendanceUser}
+      setAfterChoiceFunc={setAfterChoiceFunc}
+      setOpenEditModePopup={setOpenEditModePopup}
+    />
+  )
+
   return (
     <>
       <ResponsiveDialog
         open={open && !hidePreview}
         onClose={() => onClose({}, 'backdropClick')}
         showHeaderActions={false}
-        actionsBorderTop={
-          !!(
-            event.attendee?.find(p => p.cal_address === user.email) && isOwn
-          ) || isAdminOfResource
-        }
+        actionsBorderTop={hasActionsBorderTop}
         actionsJustifyContent="center"
         style={{ overflow: 'auto' }}
         titleSx={{ backgroundColor: '#FCFCFC' }}
-        title={
-          <EventPreviewHeader
-            event={event}
-            eventId={eventId}
-            isOrganizer={isOrganizer}
-            isOwn={isOwn}
-            isWriteDelegated={isWriteDelegated}
-            isNotPrivate={isNotPrivate}
-            canEdit={canEdit}
-            onDelete={handleDeleteClick}
-            onClose={() => onClose({}, 'backdropClick')}
-            onEdit={handleEditClick}
-            onMoreClick={e => setToggleActionMenu(e.currentTarget)}
-            onEditInOrganizerCalendar={
-              organizerWritableCalendar
-                ? handleEditInOrganizerCalendar
-                : undefined
-            }
-            editInOrganizerCalendarTooltip={
-              organizerWritableCalendar
-                ? t('eventPreview.editInOrganizerCalendar', {
-                    calendarName: organizerWritableCalendar.name
-                  })
-                : undefined
-            }
-          />
-        }
-        actions={
-          contextualizedEvent && (
-            <AttendanceValidation
-              contextualizedEvent={contextualizedEvent}
-              user={attendanceUser}
-              setAfterChoiceFunc={setAfterChoiceFunc}
-              setOpenEditModePopup={setOpenEditModePopup}
-            />
-          )
-        }
+        title={header}
+        actions={actions}
       >
         {/* Title & date row */}
-        <Box mb={3}>
-          <Box
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            gap={1}
-            mb={1}
-          >
-            {event.class === 'PRIVATE' &&
-              (isOwn ? (
-                <Tooltip
-                  title={t('eventPreview.privateEvent.tooltipOwn')}
-                  placement="top"
-                >
-                  <LockOutlineIcon />
-                </Tooltip>
-              ) : (
-                <LockOutlineIcon />
-              ))}
-            <Typography
-              variant="h5"
-              sx={{
-                fontSize: '24px',
-                fontWeight: 600,
-                wordBreak: 'break-word',
-                fontFamily: 'Inter, sans-serif'
-              }}
-            >
-              {formatEventChipTitle(event, t)}
-            </Typography>
-            {event.transp === 'TRANSPARENT' && (
-              <Tooltip title={t('eventPreview.free.tooltip')} placement="top">
-                <Chip
-                  icon={<CircleIcon color="success" fontSize="small" />}
-                  label={t('eventPreview.free.label')}
-                />
-              </Tooltip>
-            )}
-          </Box>
-          <EventTimeSubtitle event={event} t={t} timezone={timezone} />
-        </Box>
+        <EventPreviewTitleRow
+          event={event}
+          isOwn={isOwn}
+          timezone={timezone}
+          t={t}
+        />
 
         {/* Event details (attendees, location, description, etc.) */}
         <EventPreviewDetails
@@ -251,3 +272,5 @@ export default function EventPreviewModal({
     </>
   )
 }
+
+export default EventPreviewModal

@@ -2,6 +2,7 @@ import { useAppDispatch } from '@/app/hooks'
 import { PartStat } from '@/features/User/models/attendee'
 import { userData } from '@/features/User/userDataTypes'
 import { Box, Button, CircularProgress, Theme } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ContextualizedEvent } from '../EventsTypes'
@@ -104,29 +105,35 @@ export function RSVPButton({
   const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'primary'
 
   return (
-    <Button
-      variant={shouldShowActive ? 'contained' : 'outlined'}
-      color={buttonColor}
-      size="medium"
-      sx={{
-        borderRadius: '50px',
-        // Override MUI's default disabled styles to keep the color
-        '&.Mui-disabled': shouldShowActive
-          ? {
-              backgroundColor: (theme: Theme) =>
-                theme.palette[buttonColor].main,
-              color: (theme: Theme) => theme.palette[buttonColor].contrastText,
-              borderColor: (theme: Theme) => theme.palette[buttonColor].main
-            }
-          : {}
-      }}
-      onClick={handleClick}
-      disabled={isLoading || isReadDelegated}
-    >
-      <Box display="flex" alignItems="center" gap={1}>
-        {showLoading && <CircularProgress size={20} color="inherit" />}
-        {t(`eventPreview.${rsvpValue}`)}
-      </Box>
-    </Button>
+    <Tooltip title={t(`tooltip.${rsvpValue}`)}>
+      <span>
+        <Button
+          variant={shouldShowActive ? 'contained' : 'outlined'}
+          color={buttonColor}
+          size="medium"
+          sx={{
+            borderRadius: '50px',
+            // Override MUI's default disabled styles to keep the color
+            '&.Mui-disabled': shouldShowActive
+              ? {
+                  backgroundColor: (theme: Theme): string =>
+                    theme.palette[buttonColor].main,
+                  color: (theme: Theme): string =>
+                    theme.palette[buttonColor].contrastText,
+                  borderColor: (theme: Theme): string =>
+                    theme.palette[buttonColor].main
+                }
+              : {}
+          }}
+          onClick={() => void handleClick()}
+          disabled={isLoading || isReadDelegated}
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            {showLoading && <CircularProgress size={20} color="inherit" />}
+            {t(`eventPreview.${rsvpValue}`)}
+          </Box>
+        </Button>
+      </span>
+    </Tooltip>
   )
 }

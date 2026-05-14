@@ -1,4 +1,5 @@
 import { IconButton, useTheme } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { useI18n } from 'twake-i18n'
@@ -77,15 +78,16 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
         </div>
 
         <div className="menu-items">
-          <IconButton
-            className="refresh-button"
-            onClick={onRefresh}
-            aria-label={t('menubar.refresh')}
-            title={t('menubar.refresh')}
-            sx={{ mr: 1 }}
-          >
-            <RefreshIcon />
-          </IconButton>
+          <Tooltip title={t('tooltip.refreshCalendar')}>
+            <IconButton
+              className="refresh-button"
+              onClick={onRefresh}
+              aria-label={t('menubar.refresh')}
+              sx={{ mr: 1 }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
         </div>
 
         <div className="menu-items">

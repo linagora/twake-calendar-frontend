@@ -1,9 +1,9 @@
 export function formatDate(
   date: Date | string,
-  t: (k: string, p?: string | object) => string,
+  t: (k: string, p?: Record<string, unknown>) => string,
   timeZone: string,
   allday?: boolean
-) {
+): string {
   if (allday) {
     return new Date(date).toLocaleDateString(t('locale'), {
       year: 'numeric',

@@ -22,6 +22,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import Tooltip from '@/components/Tooltip'
 import { SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import CalendarPopover from './CalendarModal'
@@ -41,6 +42,7 @@ const CalendarAccordion: React.FC<{
   defaultExpanded?: boolean
   setOpen: (id: string) => void
   hideOwner?: boolean
+  addBtnTooltip?: string
 }> = ({
   title,
   calendars,
@@ -50,7 +52,8 @@ const CalendarAccordion: React.FC<{
   onAddClick,
   defaultExpanded = false,
   setOpen,
-  hideOwner
+  hideOwner,
+  addBtnTooltip
 }) => {
   const allCalendars = useAppSelector(state => state.calendars.list)
   const { t } = useI18n()
@@ -83,7 +86,13 @@ const CalendarAccordion: React.FC<{
       }}
     >
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
+        expandIcon={
+          <Tooltip
+            title={expended ? t('tooltip.collapse') : t('tooltip.expand')}
+          >
+            <ExpandMoreIcon />
+          </Tooltip>
+        }
         aria-controls={`${title}-content`}
         id={`${title}-header`}
         className="calendarListHeader"
@@ -98,19 +107,21 @@ const CalendarAccordion: React.FC<{
       >
         <span>{title}</span>
         {showAddButton && (
-          <IconButton
-            component="span"
-            onClick={e => {
-              if (expended) {
-                e.stopPropagation()
-              }
-              if (onAddClick) {
-                onAddClick()
-              }
-            }}
-          >
-            <AddIcon />
-          </IconButton>
+          <Tooltip title={addBtnTooltip}>
+            <IconButton
+              component="span"
+              onClick={e => {
+                if (expended) {
+                  e.stopPropagation()
+                }
+                if (onAddClick) {
+                  onAddClick()
+                }
+              }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </AccordionSummary>
       <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
@@ -187,6 +198,7 @@ const CalendarSelection: React.FC<{
             setSelectedCalId(id)
           }}
           defaultExpanded
+          addBtnTooltip={t('tooltip.addPersonalCalendar')}
         />
 
         <CalendarAccordion
@@ -215,6 +227,7 @@ const CalendarSelection: React.FC<{
             setSelectedCalId(id)
           }}
           defaultExpanded
+          addBtnTooltip={t('tooltip.registerOtherCalendars')}
         />
 
         {!window.HIDE_RESOURCES && (
@@ -233,6 +246,7 @@ const CalendarSelection: React.FC<{
             }}
             defaultExpanded
             hideOwner={true}
+            addBtnTooltip={t('tooltip.registerResources')}
           />
         )}
       </div>

@@ -426,5 +426,25 @@
   },
   "sidebar": {
     "displayMode": "Mode d'affichage"
+  },
+  "tooltip": {
+    "download": "Exporter les détails de l'événement vers un fichier .ics",
+    "createEvent": "Créer un nouvel événement",
+    "editEvent": "Modifier l'événement",
+    "deleteEvent": "Supprimer l'événement",
+    "ACCEPTED": "Accepter l'invitation",
+    "DECLINED": "Décliner l'invitation",
+    "TENTATIVE": "Accepter provisoirement l'invitation",
+    "NEEDS-ACTION": "En attente",
+    "proposeNewTime": "Proposer une nouvelle heure pour l'événement",
+    "refreshCalendar": "Actualiser le calendrier",
+    "availabilityPlaceholder": "Vérifier la disponibilité des utilisateurs et des ressources",
+    "moreEventOptions": "Afficher plus d'options",
+    "searchEventsOrCalendars": "Rechercher des événements ou des calendriers",
+    "addPersonalCalendar": "Ajouter un nouveau calendrier personnel",
+    "registerOtherCalendars": "Enregistrer des calendriers",
+    "registerResources": "Enregistrer des ressources",
+    "collapse": "Réduire",
+    "expand": "Développer"
   }
 }

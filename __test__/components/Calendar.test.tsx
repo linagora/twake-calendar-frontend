@@ -363,7 +363,9 @@ describe('calendar Availability search', () => {
     })
     expect(spy).toHaveBeenCalled()
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'event.createEvent' }))
+      fireEvent.click(
+        screen.getByRole('button', { name: 'tooltip.createEvent' })
+      )
     })
     await waitFor(
       () => {

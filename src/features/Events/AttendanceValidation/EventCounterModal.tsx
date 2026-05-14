@@ -195,7 +195,6 @@ export function EventCounterModal({
 
         <EventTimeSubtitle
           event={contextualizedEvent.event}
-          t={t}
           timezone={contextualizedEvent.event.timezone}
         />
 

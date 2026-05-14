@@ -4,6 +4,7 @@ import {
   useMediaQuery,
   InputAdornment
 } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import SearchIcon from '@mui/icons-material/Search'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -37,45 +38,49 @@ export const TempCalendarsInput: React.FC<{
   }
 
   return (
-    <PeopleSearch
-      objectTypes={['user', 'resource']}
-      selectedUsers={tempUsers}
-      onChange={handleUserChange}
-      onToggleEventPreview={handleToggleEventPreview}
-      placeholder={t('peopleSearch.availabilityPlaceholder')}
-      inputSlot={params => (
-        <TextField
-          {...params}
-          size="small"
-          onFocus={handleInputFocus}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {params.InputProps.endAdornment}
-                {isMobile && (
-                  <InputAdornment position="end">
-                    <SearchIcon sx={{ color: 'action.active' }} />
-                  </InputAdornment>
-                )}
-              </React.Fragment>
-            )
-          }}
-          sx={
-            tempUsers.length > 0
-              ? {
-                  '& .MuiOutlinedInput-root': {
-                    flexDirection: 'column',
-                    alignItems: 'start',
-                    '& .MuiInputBase-input': {
-                      width: '100%'
+    <Tooltip title={t('tooltip.availabilityPlaceholder')}>
+      <span style={{ display: 'block' }}>
+        <PeopleSearch
+          objectTypes={['user', 'resource']}
+          selectedUsers={tempUsers}
+          onChange={handleUserChange}
+          onToggleEventPreview={handleToggleEventPreview}
+          placeholder={t('peopleSearch.availabilityPlaceholder')}
+          inputSlot={params => (
+            <TextField
+              {...params}
+              size="small"
+              onFocus={handleInputFocus}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {params.InputProps.endAdornment}
+                    {isMobile && (
+                      <InputAdornment position="end">
+                        <SearchIcon sx={{ color: 'action.active' }} />
+                      </InputAdornment>
+                    )}
+                  </React.Fragment>
+                )
+              }}
+              sx={
+                tempUsers.length > 0
+                  ? {
+                      '& .MuiOutlinedInput-root': {
+                        flexDirection: 'column',
+                        alignItems: 'start',
+                        '& .MuiInputBase-input': {
+                          width: '100%'
+                        }
+                      }
                     }
-                  }
-                }
-              : undefined
-          }
+                  : undefined
+              }
+            />
+          )}
         />
-      )}
-    />
+      </span>
+    </Tooltip>
   )
 }

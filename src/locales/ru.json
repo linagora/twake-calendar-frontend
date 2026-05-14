@@ -426,5 +426,25 @@
   },
   "sidebar": {
     "displayMode": "Режим отображения"
+  },
+  "tooltip": {
+    "download": "Экспорт деталей события в файл .ics",
+    "createEvent": "Создать новое событие",
+    "editEvent": "Редактировать событие",
+    "deleteEvent": "Удалить событие",
+    "ACCEPTED": "Принять приглашение",
+    "DECLINED": "Отклонить приглашение",
+    "TENTATIVE": "Предварительно принять приглашение",
+    "NEEDS-ACTION": "В ожидании",
+    "proposeNewTime": "Предложить новое время для события",
+    "refreshCalendar": "Обновить календарь",
+    "availabilityPlaceholder": "Проверить доступность пользователей и ресурсов",
+    "moreEventOptions": "Показать больше опций",
+    "searchEventsOrCalendars": "Искать события или календари",
+    "addPersonalCalendar": "Добавить новый личный календарь",
+    "registerOtherCalendars": "Зарегистрировать календари",
+    "registerResources": "Зарегистрировать ресурсы",
+    "collapse": "Свернуть",
+    "expand": "Развернуть"
   }
 }

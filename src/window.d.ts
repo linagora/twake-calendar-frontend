@@ -40,5 +40,7 @@ declare global {
     DISABLE_PUBLIC_VISIBILITY: boolean
 
     ASK_FOR_TZ_UPDATE: boolean
+
+    TOOLTIP_DELAY_MS: number
   }
 }

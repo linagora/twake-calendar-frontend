@@ -1,14 +1,22 @@
-export function formatEnd(
-  start: Date | string,
-  end: Date | string,
-  t: (k: string, p?: string | object) => string,
-  timeZone: string,
+interface FormatEndParams {
+  start: Date | string
+  end: Date | string
+  t: (k: string, p?: Record<string, unknown>) => string
+  timeZone: string
   allday?: boolean
-) {
+}
+
+export function formatEnd({
+  start,
+  end,
+  t,
+  timeZone,
+  allday
+}: FormatEndParams): string | null {
   const startDate = new Date(start)
   const endDate = new Date(end)
 
-  const formatDatePart = (d: Date) =>
+  const formatDatePart = (d: Date): string =>
     d.toLocaleDateString('en-CA', { timeZone }) // YYYY-MM-DD format
   if (allday) {
     const inclusiveEndDate = new Date(endDate)

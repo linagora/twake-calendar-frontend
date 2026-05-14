@@ -424,5 +424,25 @@
   },
   "sidebar": {
     "displayMode": "Chế độ hiển thị"
+  },
+  "tooltip": {
+    "download": "Xuất chi tiết sự kiện sang file .ics",
+    "createEvent": "Tạo sự kiện mới",
+    "editEvent": "Chỉnh sửa sự kiện",
+    "deleteEvent": "Xóa sự kiện",
+    "ACCEPTED": "Chấp nhận lời mời",
+    "DECLINED": "Từ chối lời mời",
+    "TENTATIVE": "Tạm thời chấp nhận lời mời",
+    "NEEDS-ACTION": "Đang chờ",
+    "proposeNewTime": "Đề xuất thời gian khác",
+    "refreshCalendar": "Làm mới lịch",
+    "availabilityPlaceholder": "Kiểm tra tình trạng người dùng và tài nguyên",
+    "moreEventOptions": "Xem thêm tùy chọn",
+    "searchEventsOrCalendars": "Tìm kiếm sự kiện hoặc lịch",
+    "addPersonalCalendar": "Thêm lịch cá nhân mới",
+    "registerOtherCalendars": "Đăng ký lịch",
+    "registerResources": "Đăng ký tài nguyên",
+    "collapse": "Thu gọn",
+    "expand": "Mở rộng"
   }
 }

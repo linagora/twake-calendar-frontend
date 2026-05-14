@@ -277,7 +277,7 @@ describe('CalendarSelection', () => {
       }
     )
 
-    expect(screen.queryByLabelText(/Calendar/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 
   it('expands and collapses accordions when clicked', () => {

@@ -14,6 +14,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@linagora/twake-mui'
+import Tooltip from '@/components/Tooltip'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
@@ -87,6 +88,8 @@ interface ResponsiveDialogProps extends Omit<
   actionsBorderTop?: boolean
   /** Justify content alignment for DialogActions */
   actionsJustifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between'
+
+  expandText?: string
 }
 
 function ResponsiveDialog({
@@ -111,6 +114,7 @@ function ResponsiveDialog({
   actionsBorderTop = false,
   actionsJustifyContent = 'flex-end',
   sx,
+  expandText,
   ...otherDialogProps
 }: ResponsiveDialogProps): JSX.Element {
   const theme = useTheme()
@@ -118,7 +122,7 @@ function ResponsiveDialog({
 
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
-  const baseSx: SxProps<Theme> = isMobile
+  const baseSx: SxProps<Theme> | undefined = isMobile
     ? undefined
     : {
         '& .MuiBackdrop-root': {
@@ -210,14 +214,16 @@ function ResponsiveDialog({
             <Box>{title}</Box>
             <Box>
               {onExpandToggle && !isMobile && (
-                <IconButton
-                  onClick={onExpandToggle}
-                  aria-label="expand"
-                  size="small"
-                  sx={{ marginRight: 1 }}
-                >
-                  <OpenInFullIcon sx={{ padding: '2px' }} />
-                </IconButton>
+                <Tooltip title={expandText}>
+                  <IconButton
+                    onClick={onExpandToggle}
+                    aria-label="expand"
+                    size="small"
+                    sx={{ marginRight: 1 }}
+                  >
+                    <OpenInFullIcon sx={{ padding: '2px' }} />
+                  </IconButton>
+                </Tooltip>
               )}
               <IconButton onClick={onClose} aria-label="close" size="small">
                 <CloseIcon />

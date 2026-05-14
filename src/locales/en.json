@@ -425,5 +425,25 @@
   },
   "sidebar": {
     "displayMode": "Display mode"
+  },
+  "tooltip": {
+    "download": "Export event details to .ics file",
+    "createEvent": "Create a new event",
+    "editEvent": "Edit event",
+    "deleteEvent": "Delete event",
+    "ACCEPTED": "Accept invitation",
+    "DECLINED": "Decline invitation",
+    "TENTATIVE": "Tentatively accept invitation",
+    "NEEDS-ACTION": "Pending",
+    "proposeNewTime": "Propose a new time for the event",
+    "refreshCalendar": "Refresh calendar",
+    "availabilityPlaceholder": "Check availability of users and resources",
+    "moreEventOptions": "Show more options",
+    "searchEventsOrCalendars": "Search for events or calendars",
+    "addPersonalCalendar": "Add a new personal calendar",
+    "registerOtherCalendars": "Register calendars",
+    "registerResources": "Register resources",
+    "collapse": "Collapse",
+    "expand": "Expand"
   }
 }
