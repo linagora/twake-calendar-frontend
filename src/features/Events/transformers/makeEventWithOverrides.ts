@@ -47,4 +47,5 @@ export function makeEventWithOverrides(
   ]
 }
 
-const normalizeId = (id: unknown): string => String(id ?? '').replace(/Z$/, '')
+const normalizeId = (id: unknown): string =>
+  ((id ?? '') as string).replace(/Z$/, '')

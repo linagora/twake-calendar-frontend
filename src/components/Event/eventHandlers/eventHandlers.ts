@@ -9,9 +9,9 @@ import {
 import { fetchAllRecurrentVevents, putEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { updateSeriesPartstatJCal } from '@/features/Events/transformers/updateSeriesPartstatJCal'
-import { PartStat } from '@/features/User/models/attendee'
+import { PartStat, userAttendee } from '@/features/User/models/attendee'
 import { createAttendee } from '@/features/User/models/attendee.mapper'
-import { userData } from '@/features/User/userDataTypes'
+import { userData, userOrganiser } from '@/features/User/userDataTypes'
 import { buildFamilyName } from '@/utils/buildFamilyName'
 import { isEventOrganiser } from '@/utils/isEventOrganiser'
 
@@ -20,7 +20,7 @@ function updateEventAttendees(
   event: CalendarEvent,
   user: userData | undefined,
   rsvp: PartStat
-) {
+): { attendee: userAttendee[]; organizer?: userOrganiser } {
   if (calendar.owner?.resource) {
     const updatedAttendees =
       event.attendee?.map(attendeeData =>
@@ -52,7 +52,7 @@ function updateEventAttendees(
   }
 
   return {
-    attendee: (() => {
+    attendee: ((): userAttendee[] => {
       const userEmailLower = user.email?.toLowerCase()
       const userExists = event.attendee.some(
         attendee => attendee.cal_address?.toLowerCase() === userEmailLower
@@ -83,7 +83,7 @@ async function handleSoloRSVP(
   dispatch: AppDispatch,
   calendar: Calendar,
   event: CalendarEvent
-) {
+): Promise<void> {
   await dispatch(updateEventInstanceAsync({ cal: calendar, event }))
 }
 
@@ -91,7 +91,7 @@ async function handleAllRSVP(
   event: CalendarEvent,
   userEmail: string,
   rsvp: PartStat
-) {
+): Promise<void> {
   const vevents = await fetchAllRecurrentVevents(event)
   const jCal = updateSeriesPartstatJCal(vevents, event, userEmail, rsvp)
   await putEvent(event, jCal)
@@ -101,7 +101,7 @@ async function handleDefaultRSVP(
   dispatch: AppDispatch,
   calendar: Calendar,
   newEvent: CalendarEvent
-) {
+): Promise<void> {
   await dispatch(putEventAsync({ cal: calendar, newEvent }))
 }
 
@@ -112,7 +112,7 @@ export async function handleRSVP(
   event: CalendarEvent,
   rsvp: PartStat,
   typeOfAction?: string
-) {
+): Promise<void> {
   const newEvent = {
     ...event,
     ...updateEventAttendees(calendar, event, user, rsvp)
@@ -130,7 +130,7 @@ export async function handleRSVP(
   }
 }
 
-export function handleDelete(
+export async function handleDelete(
   isRecurring: boolean,
   typeOfAction: 'solo' | 'all' | undefined,
   onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void,
@@ -139,13 +139,13 @@ export function handleDelete(
   event: CalendarEvent,
   calId: string,
   eventId: string
-) {
+): Promise<void> {
   onClose({}, 'backdropClick')
 
   if (isRecurring && typeOfAction === 'solo') {
-    dispatch(deleteEventInstanceAsync({ cal: calendar, event }))
+    await dispatch(deleteEventInstanceAsync({ cal: calendar, event }))
   } else {
-    dispatch(
+    await dispatch(
       deleteEventAsync({
         calId,
         eventId,

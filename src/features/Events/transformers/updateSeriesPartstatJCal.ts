@@ -15,19 +15,21 @@ export function updateSeriesPartstatJCal(
   // Update PARTSTAT in ALL VEVENTs (master + exceptions)
   const updatedVevents = vevents.map((vevent: VCalComponent) => {
     const properties = vevent[1] as VObjectProperty[]
-    const updatedProperties = properties.map((prop: VObjectProperty) => {
-      const calAddress = prop[3] as string
-      // Find ATTENDEE properties & Check if this is the target attendee
-      if (
-        prop[0] === 'attendee' &&
-        normalizeEmail(calAddress) === normalizeEmail(attendeeEmail)
-      ) {
-        // Update PARTSTAT parameter
-        const params = { ...(prop[1] as Record<string, string>), partstat }
-        return [prop[0], params, prop[2], prop[3]] as VObjectProperty
+    const updatedProperties = properties.map(
+      (prop: VObjectProperty): VObjectProperty => {
+        const calAddress = prop[3] as string
+        // Find ATTENDEE properties & Check if this is the target attendee
+        if (
+          prop[0] === 'attendee' &&
+          normalizeEmail(calAddress) === normalizeEmail(attendeeEmail)
+        ) {
+          // Update PARTSTAT parameter
+          const params = { ...(prop[1] as Record<string, string>), partstat }
+          return [prop[0], params, prop[2], prop[3]] as VObjectProperty
+        }
+        return prop
       }
-      return prop
-    })
+    )
     return [vevent[0], updatedProperties, vevent[2]] as VCalComponent
   })
 
@@ -37,7 +39,7 @@ export function updateSeriesPartstatJCal(
   return ['vcalendar', [], [...updatedVevents, vtimezone.component.jCal]]
 }
 
-const normalizeEmail = (addr: string) =>
+const normalizeEmail = (addr: string): string =>
   addr
     .toLowerCase()
     .replace(/^mailto:/, '')

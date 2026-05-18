@@ -13,7 +13,7 @@ export const importEventFromFileAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >('calendars/importEvent', async ({ calLink, file }, { rejectWithValue }) => {
   try {
-    const response = await importFile(file)
+    const response = (await importFile(file)) as { _id?: string }
     const id = response?._id
     if (!id) {
       return rejectWithValue({
@@ -22,8 +22,8 @@ export const importEventFromFileAsync = createAsyncThunk<
       })
     }
     await importEvent(id, calLink)
-  } catch (err) {
-    const error = err as { response?: { status?: number } }
+  } catch (err: unknown) {
+    const error = err as { response?: { status?: number }; message?: string }
     return rejectWithValue({
       message: formatReduxError(err),
       status: error.response?.status

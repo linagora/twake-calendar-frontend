@@ -144,7 +144,7 @@ export function isValidUrl(string?: string): URL | boolean {
   return url
 }
 
-export async function importFile(file: File): Promise<KyResponse<unknown>> {
+export async function importFile(file: File): Promise<unknown> {
   const response = await api.post(
     `api/files?mimetype=${file.type}&name=${file.name}&size=${file.size}`,
     { body: await file.text() }

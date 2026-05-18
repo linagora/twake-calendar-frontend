@@ -147,7 +147,7 @@ export function useEventPreviewState(
     if (isRecurring) {
       setAfterChoiceFunc(
         () => (type?: 'solo' | 'all') =>
-          handleDelete(
+          void handleDelete(
             isRecurring,
             type,
             onClose,

@@ -25,7 +25,7 @@ interface EventPreviewHeaderProps {
   onDelete: () => void
 }
 
-export function EventPreviewHeader({
+export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
   event,
   eventId,
   isOwn,
@@ -38,7 +38,7 @@ export function EventPreviewHeader({
   onEditInOrganizerCalendar,
   editInOrganizerCalendarTooltip,
   onDelete
-}: EventPreviewHeaderProps) {
+}: EventPreviewHeaderProps) => {
   const { t } = useI18n()
   const canSeeMore = isNotPrivate || isOwn
 
