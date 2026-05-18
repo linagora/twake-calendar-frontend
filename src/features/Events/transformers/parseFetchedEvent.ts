@@ -57,12 +57,7 @@ function resolveTimezoneFromDtstart(
   const dtstartParams = dtstartProp?.[1] as Record<string, string> | undefined
   const dtstartValue = dtstartProp?.[3]
 
-  const tzParam =
-    dtstartParams?.['tzid'] ??
-    dtstartParams?.['TZID'] ??
-    dtstartParams?.['Tzid'] ??
-    dtstartParams?.['tZid'] ??
-    dtstartParams?.['tzId']
+  const tzParam = getTimeZone(dtstartParams)
 
   const resolved = resolveTimezoneId(tzParam)
   if (resolved) {
@@ -74,6 +69,18 @@ function resolveTimezoneFromDtstart(
   return undefined
 }
 
+function getTimeZone(
+  dtstartParams: Record<string, string> | undefined
+): string | undefined {
+  return (
+    dtstartParams?.['tzid'] ??
+    dtstartParams?.['TZID'] ??
+    dtstartParams?.['Tzid'] ??
+    dtstartParams?.['tZid'] ??
+    dtstartParams?.['tzId']
+  )
+}
+
 function applyTimezoneToDateFields(
   eventjson: CalendarEvent,
   timezone: string
@@ -81,17 +88,14 @@ function applyTimezoneToDateFields(
   if (eventjson.allday) {
     return
   }
-  if (eventjson.start) {
-    const startISO = convertEventDateTimeToISO(eventjson.start, timezone)
-    if (startISO) {
-      eventjson.start = startISO
-    }
+  const startISO = convertEventDateTimeToISO(eventjson.start, timezone)
+  const endISO = convertEventDateTimeToISO(eventjson.end, timezone)
+
+  if (startISO) {
+    eventjson.start = startISO
   }
-  if (eventjson.end) {
-    const endISO = convertEventDateTimeToISO(eventjson.end, timezone)
-    if (endISO) {
-      eventjson.end = endISO
-    }
+  if (endISO) {
+    eventjson.end = endISO
   }
 }
 

@@ -58,7 +58,7 @@ export function resolveTimezoneId(tzid?: string): string | undefined {
 }
 
 export function convertEventDateTimeToISO(
-  datetime: string,
+  datetime: string | undefined,
   timezone: string,
   options?: { isAllDay?: boolean }
 ): string | undefined {

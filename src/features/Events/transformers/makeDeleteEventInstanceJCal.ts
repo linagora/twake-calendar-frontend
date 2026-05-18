@@ -33,20 +33,13 @@ export function makeDeleteEventInstanceJCal(
   )
   const masterProps = vevents[masterIndex][1] as VObjectProperty[]
 
-  const normalizeRecurrenceId = (id: VObjectValue): string =>
-    (typeof id === 'string' || typeof id === 'number'
-      ? String(id)
-      : ''
-    ).replace(/Z$/, '')
-
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
-    if (prop[0].toLowerCase() === 'exdate' && prop[3]) {
-      return (
-        normalizeRecurrenceId(prop[3]) ===
+    return (
+      prop[0].toLowerCase() === 'exdate' &&
+      prop[3] &&
+      normalizeRecurrenceId(prop[3]) ===
         normalizeRecurrenceId(exdateValue as VObjectValue)
-      )
-    }
-    return false
+    )
   })
 
   if (!isDuplicate) {
@@ -76,3 +69,9 @@ export function makeDeleteEventInstanceJCal(
 
   return ['vcalendar', [], [...filteredVevents, vtimezone.component.jCal]]
 }
+
+const normalizeRecurrenceId = (id: VObjectValue): string =>
+  (typeof id === 'string' || typeof id === 'number' ? String(id) : '').replace(
+    /Z$/,
+    ''
+  )
