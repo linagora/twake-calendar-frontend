@@ -40,7 +40,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
         display: 'flex',
         alignItems: 'center',
         cursor: 'pointer',
-        padding: '8px 12px',
+        padding: '8px 0px',
         borderRadius: '4px',
         '&:hover': {
           backgroundColor: 'action.hover'

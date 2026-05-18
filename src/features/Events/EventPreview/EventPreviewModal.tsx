@@ -1,10 +1,10 @@
-import { CalendarName } from '@/components/Calendar/CalendarName'
 import { formatEventChipTitle } from '@/components/Calendar/utils/calendarUtils'
 import ResponsiveDialog from '@/components/Dialog/ResponsiveDialog'
 import { EditModeDialog } from '@/components/Event/EditModeDialog'
+import { CalendarSelectField } from '@/components/Event/fields/CalendarSelectField'
+import Tooltip from '@/components/Tooltip'
 import { DateSelectArg } from '@fullcalendar/core'
 import { Box, Chip, Typography } from '@linagora/twake-mui'
-import Tooltip from '@/components/Tooltip'
 import CircleIcon from '@mui/icons-material/Circle'
 import LockOutlineIcon from '@mui/icons-material/LockOutline'
 import { useEffect } from 'react'
@@ -15,9 +15,9 @@ import { EventPreviewActionMenu } from '../EventPreview/EventPreviewActionMenu'
 import { EventPreviewDetails } from '../EventPreview/EventPreviewDetails'
 import { EventPreviewHeader } from '../EventPreview/EventPreviewHeader'
 import { useEventPreviewState } from '../EventPreview/useEventPreviewState'
+import { CalendarEvent } from '../EventsTypes'
 import EventUpdateModal from '../EventUpdateModal'
 import { EventTimeSubtitle } from './EventTimeSubtitle'
-import { CalendarEvent } from '../EventsTypes'
 
 interface EventPreviewTitleRowProps {
   event: CalendarEvent
@@ -117,7 +117,10 @@ const EventPreviewModal: React.FC<{
     handleEditClick,
     handleEditInOrganizerCalendar,
     handleDeleteClick,
-    handleDuplicateClick
+    handleDuplicateClick,
+    calendarid,
+    handleCalendarMove,
+    userPersonalCalendars
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
 
   useEffect(
@@ -209,9 +212,12 @@ const EventPreviewModal: React.FC<{
         />
 
         {/* Calendar label */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
-          <CalendarName calendar={calendar} />
-        </Box>
+        <CalendarSelectField
+          calendarid={calendarid}
+          setCalendarid={handleCalendarMove}
+          userPersonalCalendars={userPersonalCalendars}
+          showMore={false}
+        />
       </ResponsiveDialog>
 
       {/* Action menu (more vert) */}
