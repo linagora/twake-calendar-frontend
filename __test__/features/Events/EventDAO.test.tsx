@@ -122,47 +122,19 @@ describe('eventDAO', () => {
     })
   })
 
-  it('putEvent handles byday field correctly', async () => {
+  test.each([
+    [
+      'weekly with byday',
+      { freq: 'weekly', interval: 1, byday: ['MO', 'WE', 'FR'] }
+    ],
+    ['daily with null byday', { freq: 'daily', interval: 1, byday: null }]
+  ])('putEvent handles repetition: %s', async (_, repetition) => {
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
     ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
 
-    const eventWithByday = {
-      ...mockEvent,
-      repetition: {
-        freq: 'weekly',
-        interval: 1,
-        byday: ['MO', 'WE', 'FR']
-      }
-    }
-
-    const jCal = calendarEventToJCal(eventWithByday)
-    await putEvent(eventWithByday, jCal)
-
-    expect(api).toHaveBeenCalledWith(
-      'dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics',
-      expect.objectContaining({
-        method: 'PUT',
-        headers: { 'content-type': 'text/calendar; charset=utf-8' },
-        body: JSON.stringify(jCal)
-      })
-    )
-  })
-
-  it('putEvent handles null byday field correctly', async () => {
-    const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
-    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
-
-    const eventWithNullByday = {
-      ...mockEvent,
-      repetition: {
-        freq: 'daily',
-        interval: 1,
-        byday: null
-      }
-    }
-
-    const jCal = calendarEventToJCal(eventWithNullByday)
-    await putEvent(eventWithNullByday, jCal)
+    const event = { ...mockEvent, repetition }
+    const jCal = calendarEventToJCal(event)
+    await putEvent(event, jCal)
 
     expect(api).toHaveBeenCalledWith(
       'dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics',

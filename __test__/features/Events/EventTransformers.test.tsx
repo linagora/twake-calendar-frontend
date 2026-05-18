@@ -65,6 +65,17 @@ const mockVevents: VCalComponent[] = [
   ]
 ]
 
+function getOverrideFromJCal(jCal: any) {
+  const vevents = jCal[2].filter(([n]: any) => n === 'vevent')
+  return vevents.find(([, props]: any) =>
+    props.some(([k]: any) => k === 'recurrence-id')
+  )
+}
+
+function getProp(override: any, key: string) {
+  return override[1].find(([k]: any) => k === key)
+}
+
 describe('makeSearchEventParam', () => {
   const mockFilters = {
     searchIn: ['user1/calendar1', 'user2/calendar2'],
@@ -127,24 +138,16 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
+    const override = getOverrideFromJCal(jCal)
 
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
-
-    const summary = override[1].find(([k]: any) => k === 'summary')
+    const summary = getProp(override, 'summary')
     expect(summary[3]).toBe('New title')
   })
 
   it('does not remove recurrence-id from overrides', async () => {
     const jCal = makeSeriesJCal(mockVevents, mockEvent as any, undefined, false)
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
     expect(override).toBeDefined()
   })
@@ -157,13 +160,8 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
-
-    const sequence = override[1].find(([k]: any) => k === 'sequence')
+    const override = getOverrideFromJCal(jCal)
+    const sequence = getProp(override, 'sequence')
     expect(sequence[3]).toBe(2)
   })
 
@@ -216,15 +214,12 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
-    const description = override[1].find(([k]: any) => k === 'description')
-    const location = override[1].find(([k]: any) => k === 'location')
-    const classField = override[1].find(([k]: any) => k === 'class')
-    const transp = override[1].find(([k]: any) => k === 'transp')
+    const description = getProp(override, 'description')
+    const location = getProp(override, 'location')
+    const classField = getProp(override, 'class')
+    const transp = getProp(override, 'transp')
 
     expect(description[3]).toBe('New description')
     expect(location[3]).toBe('New location')
@@ -279,12 +274,9 @@ describe('makeSeriesJCal', () => {
       undefined,
       false
     )
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
-    const organizer = override[1].find(([k]: any) => k === 'organizer')
+    const organizer = getProp(override, 'organizer')
     expect(organizer[3]).toBe('mailto:bob@example.com')
     expect(organizer[1].cn).toBe('Bob')
   })
@@ -354,10 +346,7 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
     const attendees = override[1].filter(([k]: any) => k === 'attendee')
     expect(attendees).toHaveLength(2)
@@ -403,14 +392,9 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
-    const videoconf = override[1].find(
-      ([k]: any) => k === 'x-openpaas-videoconference'
-    )
+    const videoconf = getProp(override, 'x-openpaas-videoconference')
     expect(videoconf[3]).toBe('https://meet.new.com')
   })
 
@@ -507,10 +491,7 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
     const sequence = override[1].find(([k]: any) => k === 'sequence')
     expect(sequence[3]).toBe(1)
@@ -550,16 +531,13 @@ describe('makeSeriesJCal', () => {
       undefined,
       false
     )
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
-    const summary = override[1].find(([k]: any) => k === 'summary')
-    const dtstart = override[1].find(([k]: any) => k === 'dtstart')
-    const dtend = override[1].find(([k]: any) => k === 'dtend')
-    const description = override[1].find(([k]: any) => k === 'description')
-    const recurrenceId = override[1].find(([k]: any) => k === 'recurrence-id')
+    const summary = getProp(override, 'summary')
+    const dtstart = getProp(override, 'dtstart')
+    const dtend = getProp(override, 'dtend')
+    const description = getProp(override, 'description')
+    const recurrenceId = getProp(override, 'recurrence-id')
     // Summary should be updated
     expect(summary[3]).toBe('New title')
     // Override-specific time should be preserved
@@ -620,11 +598,7 @@ describe('makeSeriesJCal', () => {
       false
     )
 
-    const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
-
-    const override = veventsResult.find(([, props]: any) =>
-      props.some(([k]: any) => k === 'recurrence-id')
-    )
+    const override = getOverrideFromJCal(jCal)
 
     const alarms = override[2].filter(([n]: any) => n === 'valarm')
 

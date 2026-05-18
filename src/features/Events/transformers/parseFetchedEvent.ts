@@ -8,54 +8,55 @@ import {
 import { CalendarEvent } from '../EventsTypes'
 import { parseCalendarEvent } from '../utils'
 
-export function parseFetchedEvent(
-  event: CalendarEvent,
-  eventData: string,
+function filterComponents(
+  eventical: VCalComponent,
+  componentName: string
+): VCalComponent[] {
+  return (eventical[2] ?? []).filter(
+    ([name]) => name.toLowerCase() === componentName
+  )
+}
+
+function selectTargetVevent(
+  vevents: VCalComponent[],
   isMaster?: boolean
-): CalendarEvent {
-  const eventical = ICAL.parse(eventData) as VCalComponent
-  const vevents = (eventical[2] ?? []).filter(
-    ([name]) => name.toLowerCase() === 'vevent'
-  )
-  const vtimezones = (eventical[2] ?? []).filter(
-    ([name]) => name.toLowerCase() === 'vtimezone'
-  )
-
-  let targetVevent: VCalComponent | undefined
-  if (isMaster) {
-    targetVevent = vevents.find(
-      ([, props]) =>
-        !(props as VObjectProperty[]).find(
-          ([k]) => k.toLowerCase() === 'recurrence-id'
-        )
-    )
-    if (!targetVevent) {
-      targetVevent = vevents[0]
-    }
-  } else {
-    targetVevent = vevents[0]
+): VCalComponent | undefined {
+  if (!isMaster) {
+    return vevents[0]
   }
+  const master = vevents.find(
+    ([, props]) =>
+      !(props as VObjectProperty[]).find(
+        ([k]) => k.toLowerCase() === 'recurrence-id'
+      )
+  )
+  return master ?? vevents[0]
+}
 
-  let timezoneFromVTimezone: string | undefined
-  if (vtimezones.length > 0) {
-    const vtimezone = vtimezones[0]
-    const tzidProp = (vtimezone[1] as VObjectProperty[]).find(
-      ([k]) => k.toLowerCase() === 'tzid'
-    )
-    if (tzidProp?.[3]) {
-      const resolvedTz = resolveTimezoneId(tzidProp[3] as string)
-      if (resolvedTz) {
-        timezoneFromVTimezone = resolvedTz
-      }
-    }
+function resolveTimezoneFromVTimezone(
+  vtimezones: VCalComponent[]
+): string | undefined {
+  if (vtimezones.length === 0) {
+    return undefined
   }
+  const tzidProp = (vtimezones[0][1] as VObjectProperty[]).find(
+    ([k]) => k.toLowerCase() === 'tzid'
+  )
+  if (!tzidProp?.[3]) {
+    return undefined
+  }
+  return resolveTimezoneId(tzidProp[3] as string) ?? undefined
+}
 
-  let timezoneFromDTSTART: string | undefined
-  const dtstartProp = (targetVevent?.[1] as VObjectProperty[])?.find(
+function resolveTimezoneFromDtstart(
+  targetVevent: VCalComponent
+): string | undefined {
+  const dtstartProp = (targetVevent[1] as VObjectProperty[]).find(
     ([k]) => k.toLowerCase() === 'dtstart'
   )
-  const dtstartParams = dtstartProp?.[1] as Record<string, string>
+  const dtstartParams = dtstartProp?.[1] as Record<string, string> | undefined
   const dtstartValue = dtstartProp?.[3]
+
   const tzParam =
     dtstartParams?.['tzid'] ??
     dtstartParams?.['TZID'] ??
@@ -63,15 +64,53 @@ export function parseFetchedEvent(
     dtstartParams?.['tZid'] ??
     dtstartParams?.['tzId']
 
-  timezoneFromDTSTART = resolveTimezoneId(tzParam)
-
-  if (
-    !timezoneFromDTSTART &&
-    typeof dtstartValue === 'string' &&
-    dtstartValue.endsWith('Z')
-  ) {
-    timezoneFromDTSTART = 'UTC'
+  const resolved = resolveTimezoneId(tzParam)
+  if (resolved) {
+    return resolved
   }
+  if (typeof dtstartValue === 'string' && dtstartValue.endsWith('Z')) {
+    return 'UTC'
+  }
+  return undefined
+}
+
+function applyTimezoneToDateFields(
+  eventjson: CalendarEvent,
+  timezone: string
+): void {
+  if (eventjson.allday) {
+    return
+  }
+  if (eventjson.start) {
+    const startISO = convertEventDateTimeToISO(eventjson.start, timezone)
+    if (startISO) {
+      eventjson.start = startISO
+    }
+  }
+  if (eventjson.end) {
+    const endISO = convertEventDateTimeToISO(eventjson.end, timezone)
+    if (endISO) {
+      eventjson.end = endISO
+    }
+  }
+}
+
+export function parseFetchedEvent(
+  event: CalendarEvent,
+  eventData: string,
+  isMaster?: boolean
+): CalendarEvent {
+  const eventical = ICAL.parse(eventData) as VCalComponent
+  const vevents = filterComponents(eventical, 'vevent')
+  const vtimezones = filterComponents(eventical, 'vtimezone')
+
+  const targetVevent = selectTargetVevent(vevents, isMaster)
+  if (!targetVevent) {
+    return event
+  }
+
+  const timezoneFromVTimezone = resolveTimezoneFromVTimezone(vtimezones)
+  const timezoneFromDtstart = resolveTimezoneFromDtstart(targetVevent)
 
   const eventjson = parseCalendarEvent(
     targetVevent[1] as VObjectProperty[],
@@ -81,25 +120,10 @@ export function parseFetchedEvent(
   )
 
   const finalTimezone =
-    timezoneFromVTimezone ?? timezoneFromDTSTART ?? eventjson.timezone ?? 'UTC'
+    timezoneFromVTimezone ?? timezoneFromDtstart ?? eventjson.timezone ?? 'UTC'
 
   eventjson.timezone = finalTimezone
+  applyTimezoneToDateFields(eventjson, finalTimezone)
 
-  if (!eventjson.allday && eventjson.start && finalTimezone) {
-    const startISO = convertEventDateTimeToISO(eventjson.start, finalTimezone)
-    if (startISO) {
-      eventjson.start = startISO
-    }
-  }
-
-  if (!eventjson.allday && eventjson.end && finalTimezone) {
-    const endISO = convertEventDateTimeToISO(eventjson.end, finalTimezone)
-    if (endISO) {
-      eventjson.end = endISO
-    }
-  }
-
-  const merged = { ...event, ...eventjson }
-  merged.timezone = finalTimezone
-  return merged
+  return { ...event, ...eventjson, timezone: finalTimezone }
 }
