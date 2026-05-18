@@ -324,6 +324,16 @@ const SearchBar: React.FC<{
                 }}
               />
             )}
+            inputStyles={{
+              '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
+                py: 0,
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                flexDirection: 'row',
+                justifyContent: 'space-between'
+              }
+            }}
           />
         )}
       </Box>

@@ -304,8 +304,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             display: 'flex',
             alignItems: 'center',
             flexWrap: 'wrap',
-            flexDirection: 'row',
-            justifyContent: 'space-between'
+            flexDirection: 'row'
           },
           '& .MuiInputBase-input': {
             maxWidth: '80%'

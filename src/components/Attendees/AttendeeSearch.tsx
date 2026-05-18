@@ -187,15 +187,6 @@ export const AttendeeSearch: React.FC<{
       }
       onChange={handleOnChange}
       freeSolo
-      inputStyles={{
-        '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
-          py: 0,
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          flexDirection: 'row'
-        }
-      }}
     />
   )
 }
