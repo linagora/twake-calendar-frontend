@@ -134,8 +134,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       mockVevents,
       { ...mockEvent, title: 'New title' } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -145,7 +144,9 @@ describe('makeSeriesJCal', () => {
   })
 
   it('does not remove recurrence-id from overrides', async () => {
-    const jCal = makeSeriesJCal(mockVevents, mockEvent as any, undefined, false)
+    const jCal = makeSeriesJCal(mockVevents, mockEvent as any, {
+      removeOverrides: false
+    })
 
     const override = getOverrideFromJCal(jCal)
 
@@ -156,8 +157,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       mockVevents,
       { ...mockEvent, title: 'Changed title' } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -210,8 +210,7 @@ describe('makeSeriesJCal', () => {
         class: 'PRIVATE',
         transp: 'TRANSPARENT'
       } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -271,8 +270,7 @@ describe('makeSeriesJCal', () => {
         ...mockEvent,
         organizer: { cn: 'Bob', cal_address: 'bob@example.com' }
       } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
     const override = getOverrideFromJCal(jCal)
 
@@ -342,8 +340,7 @@ describe('makeSeriesJCal', () => {
           }
         ]
       } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -388,8 +385,7 @@ describe('makeSeriesJCal', () => {
         ...mockEvent,
         x_openpass_videoconference: 'https://meet.new.com'
       } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -440,8 +436,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       veventsMultipleOverrides,
       { ...mockEvent, title: 'New title' } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const veventsResult = jCal[2].filter(([n]: any) => n === 'vevent')
@@ -487,8 +482,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       veventsNoSequence,
       { ...mockEvent, title: 'New title' } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -528,8 +522,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       veventsCustomFields,
       { ...mockEvent, title: 'New title' } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
     const override = getOverrideFromJCal(jCal)
 
@@ -594,8 +587,7 @@ describe('makeSeriesJCal', () => {
     const jCal = makeSeriesJCal(
       recurringWithAlarmVevents,
       { ...mockEvent, alarm: { action: 'EMAIL', trigger: '-PT30M' } } as any,
-      undefined,
-      false
+      { removeOverrides: false }
     )
 
     const override = getOverrideFromJCal(jCal)
@@ -607,5 +599,15 @@ describe('makeSeriesJCal', () => {
     const trigger = alarms[0][1].find(([k]: any) => k === 'trigger')
     expect(action[3]).toBe('EMAIL')
     expect(trigger[3]).toBe('-PT30M')
+  })
+
+  it('filters out source override when sourceRecurrenceId is passed', async () => {
+    const jCal = makeSeriesJCal(mockVevents, mockEvent as any, {
+      removeOverrides: false,
+      sourceRecurrenceId: '2024-02-02T10:00:00Z'
+    })
+
+    const override = getOverrideFromJCal(jCal)
+    expect(override).toBeUndefined()
   })
 })

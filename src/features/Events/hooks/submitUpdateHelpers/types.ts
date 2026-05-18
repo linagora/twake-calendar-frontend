@@ -20,6 +20,7 @@ export interface RecurringUpdateContext extends UpdateHelperContext {
   eventId: string
   masterEvent?: CalendarEvent | null
   getSeriesInstances: () => Record<string, CalendarEvent>
+  recurrenceId?: string
 }
 
 export interface PerformUpdateActionParams {

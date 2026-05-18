@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 import { TIMEZONES } from '@/utils/timezone-data'
 import {
   VCalComponent,
@@ -135,24 +136,53 @@ const updateValarmComponents = (
     .filter(([name]) => name.toLowerCase() !== 'valarm')
     .concat(newValarm)
 
-// Update a single vevent with metadata changes
-const updateVeventWithMetadataChanges = (
+// Helper to check if a vevent is the source override being dragged
+const isSourceOverride = (
   vevent: VCalComponent,
-  index: number,
-  masterIndex: number,
-  updatedMaster: VCalComponent,
-  changedFields: Map<string, VObjectProperty[]>,
-  valarmChanged: boolean,
+  sourceRecurrenceId?: string,
+  sourceTimezone?: string
+): boolean => {
+  if (!sourceRecurrenceId) return false
+  const rid = findFieldValue(vevent[1] as VObjectProperty[], 'recurrence-id')
+  if (!rid) return false
+
+  const ridValue = rid[3] as string
+  const tzid = (rid[1] as Record<string, string>)?.tzid || 'UTC'
+  const ridMs = ridValue.endsWith('Z')
+    ? moment.utc(ridValue).valueOf()
+    : moment.tz(ridValue, tzid).valueOf()
+  const srcTzid = sourceTimezone || 'UTC'
+  const srcMs = sourceRecurrenceId.endsWith('Z')
+    ? moment.utc(sourceRecurrenceId).valueOf()
+    : moment.tz(sourceRecurrenceId, srcTzid).valueOf()
+
+  return ridMs === srcMs
+}
+
+// Helper to update a single override with metadata changes
+type UpdateOverrideParams = {
+  vevent: VCalComponent
+  updatedMaster: VCalComponent
+  changedFields: Map<string, VObjectProperty[]>
+  valarmChanged: boolean
   newValarm: VCalComponent[]
+}
+
+const updateOverrideWithMetadata = (
+  params: UpdateOverrideParams
 ): VCalComponent => {
-  if (index === masterIndex) {
-    return updatedMaster
-  }
+  const { vevent, updatedMaster, changedFields, valarmChanged, newValarm } =
+    params
+  const isVeventMaster = !findFieldValue(
+    vevent[1] as VObjectProperty[],
+    'recurrence-id'
+  )
+  if (isVeventMaster) return updatedMaster
 
   const [veventType, props, components = []] = vevent
 
-  // Apply metadata changes
-  let newProps = applyMetadataChanges(props, changedFields)
+  // Apply metadata changes to remaining overrides
+  let newProps = applyMetadataChanges(props as VObjectProperty[], changedFields)
 
   // Increment sequence number if any changes were made
   if (changedFields.size > 0 || valarmChanged) {
@@ -164,16 +194,23 @@ const updateVeventWithMetadataChanges = (
     ? updateValarmComponents(components, newValarm)
     : components
 
-  return [veventType, newProps, updatedComponents]
+  return [veventType, newProps, updatedComponents] as VCalComponent
 }
 
 // Update all vevents with metadata changes while preserving overrides
-const updateVeventsPreservingOverrides = (
-  vevents: VCalComponent[],
-  oldMaster: VCalComponent,
-  updatedMaster: VCalComponent,
+type UpdateVeventsParams = {
+  vevents: VCalComponent[]
+  oldMaster: VCalComponent
+  updatedMaster: VCalComponent
   masterIndex: number
+  sourceRecurrenceId?: string
+}
+
+const updateVeventsPreservingOverrides = (
+  params: UpdateVeventsParams
 ): VCalComponent[] => {
+  const { vevents, oldMaster, updatedMaster, masterIndex, sourceRecurrenceId } =
+    params
   const oldMasterProps = oldMaster[1]
   const newMasterProps = updatedMaster[1]
 
@@ -189,27 +226,37 @@ const updateVeventsPreservingOverrides = (
     updatedMaster
   )
 
-  // Update all vevents
-  return vevents.map(
-    (vevent, index): VCalComponent =>
-      updateVeventWithMetadataChanges(
+  // Update all vevents, removing the source override if identified
+  return vevents
+    .filter((vevent, index) => {
+      if (index === masterIndex) return true
+      return !isSourceOverride(vevent, sourceRecurrenceId)
+    })
+    .map(vevent =>
+      updateOverrideWithMetadata({
         vevent,
-        index,
-        masterIndex,
         updatedMaster,
         changedFields,
         valarmChanged,
         newValarm
-      )
-  )
+      })
+    )
+}
+
+export interface MakeSeriesJCalOptions {
+  calOwnerEmail?: string
+  removeOverrides?: boolean
+  sourceRecurrenceId?: string
 }
 
 export const makeSeriesJCal = (
   vevents: VCalComponent[],
   event: CalendarEvent,
-  calOwnerEmail?: string,
-  removeOverrides: boolean = true
-): VCalComponent[] => {
+  options: MakeSeriesJCalOptions
+): VCalComponent => {
+  const calOwnerEmail = options.calOwnerEmail
+  const removeOverrides = options.removeOverrides ?? true
+  const sourceRecurrenceId = options.sourceRecurrenceId
   const masterIndex = vevents.findIndex(
     ([, props]) => !findFieldValue(props, 'recurrence-id')
   )
@@ -243,13 +290,18 @@ export const makeSeriesJCal = (
     finalVevents = [updatedMaster]
   } else {
     // When only properties changed, keep override instances and update their metadata
-    finalVevents = updateVeventsPreservingOverrides(
+    finalVevents = updateVeventsPreservingOverrides({
       vevents,
       oldMaster,
       updatedMaster,
-      masterIndex
-    )
+      masterIndex,
+      sourceRecurrenceId
+    })
   }
 
-  return ['vcalendar', [], [...finalVevents, vtimezone.component.jCal]]
+  return [
+    'vcalendar',
+    [],
+    [...finalVevents, vtimezone.component.jCal as VCalComponent]
+  ] as VCalComponent
 }

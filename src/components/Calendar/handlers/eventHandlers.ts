@@ -1,17 +1,19 @@
+import moment from 'moment-timezone'
 import { AppDispatch } from '@/app/store'
 import { User } from '@/components/Attendees/types'
 import { formatLocalDateTime } from '@/components/Event/utils/dateTimeFormatters'
+import { DEFAULT_FORM_VALUES } from '@/components/Event/EventFormFields.types'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   getEventAsync,
   putEventAsync,
-  updateEventInstanceAsync,
-  updateSeriesAsync
+  updateEventInstanceAsync
 } from '@/features/Calendars/services'
 import { fetchEvent } from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { parseFetchedEvent } from '@/features/Events/transformers/parseFetchedEvent'
 import { updateAttendeesAfterTimeChange } from '@/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
+import { handleUpdateRecurringSeries } from '@/features/Events/hooks/submitUpdateHelpers/updateActions'
 import { userAttendee } from '@/features/User/models/attendee'
 import {
   AttendeeOptions,
@@ -26,6 +28,7 @@ import {
   EventApi
 } from '@fullcalendar/core'
 import { EventResizeDoneArg } from '@fullcalendar/interaction'
+import { getSeriesInstances } from '@/features/Events/hooks/submitUpdateHelpers/utils'
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void
@@ -165,7 +168,7 @@ export const createEventHandlers = (
 
   const getEventAndCalendar = (
     eventApi: EventApi
-  ): { event: CalendarEvent; calendar: Calendar } | null => {
+  ): { event: CalendarEvent; calendar: Calendar; calId: string } | null => {
     if (!eventApi || !eventApi.extendedProps) {
       return null
     }
@@ -178,21 +181,95 @@ export const createEventHandlers = (
 
     if (!event || !calendar) return null
 
-    return { event, calendar }
+    return { event, calendar, calId }
   }
 
-  const processTimeChange = async (
-    event: CalendarEvent,
-    calendar: Calendar,
-    computedNewStart: Date,
+  const handleUpdateAllSeries = async ({
+    event,
+    calendar,
+    calId,
+    computedNewStart,
+    computedNewEnd
+  }: {
+    event: CalendarEvent
+    calendar: Calendar
+    calId: string
+    computedNewStart: Date
     computedNewEnd: Date
-  ): Promise<void> => {
+  }): Promise<void> => {
+    const masterEventToFetch = {
+      ...event,
+      uid: event.uid.split('/')[0]
+    }
+    const response = await fetchEvent(masterEventToFetch)
+    const master = parseFetchedEvent(masterEventToFetch, response, true)
+
+    const masterTz = master.timezone || timezone
+    const instanceDefaultStart = event.recurrenceId
+      ? moment.tz(event.recurrenceId, master.timezone || masterTz)
+      : moment.tz(event.start, master.timezone || masterTz)
+
+    const seriesDeltaMs =
+      moment(computedNewStart).valueOf() - instanceDefaultStart.valueOf()
+
+    const masterStart = moment
+      .tz(master.start, masterTz)
+      .add(seriesDeltaMs, 'ms')
+    const masterEnd = master.end
+      ? moment.tz(master.end, masterTz).add(seriesDeltaMs, 'ms')
+      : moment
+          .tz(master.start, masterTz)
+          .add(seriesDeltaMs, 'ms')
+          .add(moment(computedNewEnd).diff(moment(computedNewStart)))
+
+    const shiftedMasterEvent = {
+      ...master,
+      start: formatLocalDateTime(masterStart.toDate(), masterTz),
+      end: formatLocalDateTime(masterEnd.toDate(), masterTz)
+    }
+
+    await handleUpdateRecurringSeries({
+      dispatch,
+      calId,
+      newEvent: shiftedMasterEvent,
+      targetCalendar: calendar,
+      values: {
+        ...DEFAULT_FORM_VALUES,
+        start: masterStart.toISOString(),
+        end: masterEnd.toISOString(),
+        allday: master.allday ?? false,
+        timezone: masterTz,
+        repetition: master.repetition ?? DEFAULT_FORM_VALUES.repetition
+      },
+      tempContext: {},
+      event: master,
+      baseUID: master.uid,
+      eventId: event.uid,
+      getSeriesInstances: () => getSeriesInstances(calendar, master.uid),
+      recurrenceId: event.recurrenceId
+    })
+  }
+
+  const processTimeChange = async ({
+    event,
+    calendar,
+    calId,
+    computedNewStart,
+    computedNewEnd
+  }: {
+    event: CalendarEvent
+    calendar: Calendar
+    calId: string
+    computedNewStart: Date
+    computedNewEnd: Date
+  }): Promise<void> => {
     const isRecurring = event.uid.includes('/')
+
     const newEvent = updateAttendeesAfterTimeChange(
       {
         ...event,
-        start: computedNewStart.toISOString(),
-        end: computedNewEnd.toISOString(),
+        start: formatLocalDateTime(computedNewStart, event.timezone),
+        end: formatLocalDateTime(computedNewEnd, event.timezone),
         sequence: (event.sequence ?? 1) + 1
       } as CalendarEvent,
       true
@@ -209,20 +286,13 @@ export const createEventHandlers = (
                 updateEventInstanceAsync({ cal: calendar, event: newEvent })
               )
             } else if (typeOfAction === 'all') {
-              const response = await fetchEvent(event)
-              const master = parseFetchedEvent(event, response, true)
-
-              await dispatch(
-                updateSeriesAsync({
-                  cal: calendar,
-                  event: {
-                    ...master,
-                    start: computedNewStart.toISOString(),
-                    end: computedNewEnd.toISOString(),
-                    sequence: (master.sequence ?? 1) + 1
-                  }
-                })
-              )
+              await handleUpdateAllSeries({
+                event,
+                calendar,
+                calId,
+                computedNewStart,
+                computedNewEnd
+              })
             }
           }
       )
@@ -231,35 +301,48 @@ export const createEventHandlers = (
     }
   }
 
-  const handleEventDrop = async (arg: EventDropArg): Promise<void> => {
-    const data = getEventAndCalendar(arg.event)
+  const handleTimeChangeAction = async (
+    eventApi: EventApi,
+    getDeltas: () => { startDeltaMs: number; endDeltaMs: number }
+  ): Promise<void> => {
+    const data = getEventAndCalendar(eventApi)
     if (!data) return
-    const { event, calendar } = data
+    const { event, calendar, calId } = data
 
-    const totalDeltaMs = getDeltaInMilliseconds(arg.delta)
-    const originalStart = new Date(event.start)
-    const computedNewStart = new Date(originalStart.getTime() + totalDeltaMs)
-    const originalEnd = new Date(event.end ?? '')
-    const computedNewEnd = new Date(originalEnd.getTime() + totalDeltaMs)
+    const response = await fetchEvent(event)
+    const fullEvent = parseFetchedEvent(event, response)
+    const eventTz = fullEvent.timezone || timezone
 
-    await processTimeChange(event, calendar, computedNewStart, computedNewEnd)
+    const { startDeltaMs, endDeltaMs } = getDeltas()
+    const originalStart = moment.tz(event.start, eventTz)
+    const computedNewStart = new Date(originalStart.valueOf() + startDeltaMs)
+    const originalEnd = moment.tz(event.end ?? event.start, eventTz)
+    const computedNewEnd = new Date(originalEnd.valueOf() + endDeltaMs)
+
+    await processTimeChange({
+      event: {
+        ...event,
+        timezone: eventTz
+      },
+      calendar,
+      calId,
+      computedNewStart,
+      computedNewEnd
+    })
+  }
+
+  const handleEventDrop = async (arg: EventDropArg): Promise<void> => {
+    await handleTimeChangeAction(arg.event, () => {
+      const delta = getDeltaInMilliseconds(arg.delta)
+      return { startDeltaMs: delta, endDeltaMs: delta }
+    })
   }
 
   const handleEventResize = async (arg: EventResizeDoneArg): Promise<void> => {
-    const data = getEventAndCalendar(arg.event)
-    if (!data) return
-    const { event, calendar } = data
-
-    const originalStart = new Date(event.start)
-    const computedNewStart = new Date(
-      originalStart.getTime() + getDeltaInMilliseconds(arg.startDelta)
-    )
-    const originalEnd = new Date(event.end ?? '')
-    const computedNewEnd = new Date(
-      originalEnd.getTime() + getDeltaInMilliseconds(arg.endDelta)
-    )
-
-    await processTimeChange(event, calendar, computedNewStart, computedNewEnd)
+    await handleTimeChangeAction(arg.event, () => ({
+      startDeltaMs: getDeltaInMilliseconds(arg.startDelta),
+      endDeltaMs: getDeltaInMilliseconds(arg.endDelta)
+    }))
   }
 
   return {

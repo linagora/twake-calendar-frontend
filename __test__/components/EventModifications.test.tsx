@@ -1,4 +1,5 @@
 import * as appHooks from '@/app/hooks'
+import * as EventDao from '@/features/Events/EventDao'
 import { AppDispatch } from '@/app/store'
 import CalendarApp from '@/components/Calendar/Calendar'
 import {
@@ -526,6 +527,22 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockImplementation(async event =>
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            `SUMMARY:${event.title || 'Event'}`,
+            'DTSTART:20251114T103100Z',
+            'DTEND:20251114T113100Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+
       const eventHandlers = createEventHandlers({
         setSelectedRange: jest.fn(),
         setOpenEventModal: jest.fn(),
@@ -554,8 +571,7 @@ describe('CalendarApp integration', () => {
       }
 
       renderCalendar()
-      eventHandlers.handleEventDrop(mockArg)
-
+      await eventHandlers.handleEventDrop(mockArg)
       expect(updateSpy).toHaveBeenCalled()
 
       // Extract the dispatched update event
@@ -602,6 +618,22 @@ describe('CalendarApp integration', () => {
           return () => promise as any
         })
 
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockImplementation(async event =>
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${event.uid}`,
+            `SUMMARY:${event.title || 'Event'}`,
+            'DTSTART:20251114T103100Z',
+            'DTEND:20251114T113100Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+
       const eventHandlers = createEventHandlers({
         setSelectedRange: jest.fn(),
         setOpenEventModal: jest.fn(),
@@ -630,8 +662,7 @@ describe('CalendarApp integration', () => {
       }
 
       renderCalendar()
-      eventHandlers.handleEventResize(mockArg)
-
+      await eventHandlers.handleEventResize(mockArg)
       expect(updateSpy).toHaveBeenCalled()
 
       // Extract the dispatched update event

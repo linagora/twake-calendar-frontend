@@ -112,19 +112,26 @@ describe('EditModeDialog Component', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it("renders dialog when type is 'edit'", async () => {
-    const mockSetOpen = jest.fn()
-    const mockEventAction = jest.fn()
+  const renderDialog = async (
+    type: 'edit' | 'attendance' | 'delete',
+    mockSetOpen = jest.fn(),
+    mockEventAction = jest.fn()
+  ) => {
     await act(async () =>
       renderWithProviders(
         <EditModeDialog
-          type="edit"
+          type={type}
           setOpen={mockSetOpen}
           eventAction={mockEventAction}
         />,
         basePreloadedState
       )
     )
+    return { mockSetOpen, mockEventAction }
+  }
+
+  it("renders dialog when type is 'edit'", async () => {
+    await renderDialog('edit')
 
     expect(
       screen.getByText('editModeDialog.updateRecurrentEvent')
@@ -134,18 +141,7 @@ describe('EditModeDialog Component', () => {
   })
 
   it("renders dialog when type is 'attendance'", async () => {
-    const mockSetOpen = jest.fn()
-    const mockEventAction = jest.fn()
-    await act(async () =>
-      renderWithProviders(
-        <EditModeDialog
-          type="attendance"
-          setOpen={mockSetOpen}
-          eventAction={mockEventAction}
-        />,
-        basePreloadedState
-      )
-    )
+    await renderDialog('attendance')
 
     expect(
       screen.getByText('editModeDialog.updateParticipationStatus')
@@ -846,7 +842,7 @@ describe('Event Drag and Drop - Recurring Events', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('shows EditModeDialog when dragging recurring event', () => {
+  it('shows EditModeDialog when dragging recurring event', async () => {
     const mockDispatch = jest.fn()
     const mockSetSelectedEvent = jest.fn()
     const mockSetOpenEditModePopup = jest.fn()
@@ -880,9 +876,11 @@ describe('Event Drag and Drop - Recurring Events', () => {
 
     eventHandlers.handleEventDrop(mockArg)
 
-    expect(mockSetSelectedEvent).toHaveBeenCalled()
-    expect(mockSetOpenEditModePopup).toHaveBeenCalledWith('edit')
-    expect(mockSetAfterChoiceFunc).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSetSelectedEvent).toHaveBeenCalled()
+      expect(mockSetOpenEditModePopup).toHaveBeenCalledWith('edit')
+      expect(mockSetAfterChoiceFunc).toHaveBeenCalled()
+    })
   })
 })
 
@@ -896,7 +894,7 @@ describe('Event Resize - Recurring Events', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('shows EditModeDialog when resizing recurring event', () => {
+  it('shows EditModeDialog when resizing recurring event', async () => {
     const mockDispatch = jest.fn()
     const mockSetSelectedEvent = jest.fn()
     const mockSetOpenEditModePopup = jest.fn()
@@ -931,9 +929,11 @@ describe('Event Resize - Recurring Events', () => {
 
     eventHandlers.handleEventResize(mockArg)
 
-    expect(mockSetSelectedEvent).toHaveBeenCalled()
-    expect(mockSetOpenEditModePopup).toHaveBeenCalledWith('edit')
-    expect(mockSetAfterChoiceFunc).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSetSelectedEvent).toHaveBeenCalled()
+      expect(mockSetOpenEditModePopup).toHaveBeenCalledWith('edit')
+      expect(mockSetAfterChoiceFunc).toHaveBeenCalled()
+    })
   })
 })
 

@@ -7,15 +7,15 @@ export function makeTimezone(
     | { ics: string; latitude: string; longitude: string }
     | undefined,
   event: CalendarEvent
-) {
+): ICAL.Timezone {
   if (!timezoneData) {
-    return new ICAL.Timezone({
-      component: TIMEZONES.zones['Etc/UTC'].ics,
-      tzid: 'Etc/UTC'
-    })
+    const utcIcs = TIMEZONES.zones['Etc/UTC']?.ics
+    if (!utcIcs) {
+      throw new Error('Missing timezone ICS for Etc/UTC')
+    }
+    const component = new ICAL.Component(ICAL.parse(utcIcs))
+    return new ICAL.Timezone({ component, tzid: 'Etc/UTC' })
   }
-  return new ICAL.Timezone({
-    component: timezoneData.ics,
-    tzid: event.timezone
-  })
+  const component = new ICAL.Component(ICAL.parse(timezoneData.ics))
+  return new ICAL.Timezone({ component, tzid: event.timezone })
 }

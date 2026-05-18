@@ -1,6 +1,8 @@
 import { AppDispatch } from '@/app/store'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
+import { formatLocalDateTime } from '@/components/Event/utils/dateTimeFormatters'
+import moment from 'moment-timezone'
 import {
   clearEventFormTempData,
   saveEventFormDataToTemp,
@@ -135,6 +137,139 @@ export async function handleUpdateRecurringSolo({
   clearEventFormTempData('update')
 }
 
+function shiftInstance(params: {
+  inst: CalendarEvent
+  masterTz: string
+  seriesDeltaMs: number
+  newEvent: CalendarEvent
+}): CalendarEvent {
+  const { inst, masterTz, seriesDeltaMs, newEvent } = params
+  return {
+    ...inst,
+    title: newEvent.title,
+    description: newEvent.description,
+    location: newEvent.location,
+    class: newEvent.class,
+    transp: newEvent.transp,
+    attendee: newEvent.attendee,
+    alarm: newEvent.alarm,
+    x_openpass_videoconference: newEvent.x_openpass_videoconference,
+    recurrenceId: inst.recurrenceId
+      ? formatLocalDateTime(
+          moment
+            .tz(inst.recurrenceId, masterTz)
+            .add(seriesDeltaMs, 'ms')
+            .toDate(),
+          masterTz
+        )
+      : undefined,
+    start: formatLocalDateTime(
+      moment.tz(inst.start, masterTz).add(seriesDeltaMs, 'ms').toDate(),
+      masterTz
+    ),
+    end: inst.end
+      ? formatLocalDateTime(
+          moment.tz(inst.end, masterTz).add(seriesDeltaMs, 'ms').toDate(),
+          masterTz
+        )
+      : undefined
+  }
+}
+
+async function handleUpdateSeriesTimeChangeOnly(params: {
+  updateContext: RecurringUpdateContext
+  seriesDeltaMs: number
+  masterTz: string
+}): Promise<void> {
+  const { updateContext, seriesDeltaMs, masterTz } = params
+  const { event, values, dispatch, calId, targetCalendar, getSeriesInstances } =
+    updateContext
+
+  let updatedExdates = event.exdates
+  if (event.exdates) {
+    updatedExdates = event.exdates.map(exdate => {
+      const mExdate = moment.tz(exdate, masterTz)
+      return formatLocalDateTime(
+        mExdate.add(seriesDeltaMs, 'ms').toDate(),
+        masterTz
+      )
+    })
+  }
+
+  const shiftedMasterEvent = {
+    ...updateContext.newEvent,
+    start: values.start,
+    end: values.end,
+    uid: updateContext.baseUID,
+    recurrenceId: undefined,
+    exdates: updatedExdates
+  }
+
+  const seriesSnap = getSeriesInstances()
+  const shiftedInstances = Object.values(seriesSnap).map(inst =>
+    shiftInstance({
+      inst,
+      masterTz,
+      seriesDeltaMs,
+      newEvent: updateContext.newEvent
+    })
+  )
+
+  const result = await dispatch(
+    updateSeriesAsync({
+      cal: targetCalendar,
+      event: shiftedMasterEvent,
+      removeOverrides: false,
+      sourceRecurrenceId: updateContext.recurrenceId
+    })
+  )
+  await assertThunkSuccess(result)
+
+  const results = await Promise.allSettled(
+    shiftedInstances.map(inst =>
+      dispatch(updateEventInstanceAsync({ cal: targetCalendar, event: inst }))
+    )
+  )
+  const failures = results.filter(r => r.status === 'rejected')
+  if (failures.length > 0) {
+    console.error(`${failures.length} instance update(s) failed`)
+  }
+
+  dispatch(clearFetchCache(calId))
+  clearEventFormTempData('update')
+}
+
+async function handleUpdateSeriesRuleOrDateChange(params: {
+  updateContext: RecurringUpdateContext
+  isSameDay: boolean
+  changes: {
+    timeChanged: boolean
+    timezoneChanged: boolean
+    repetitionRulesChanged: boolean
+  }
+}): Promise<void> {
+  const { updateContext, isSameDay, changes } = params
+  const shouldClearExdates =
+    !isSameDay || changes.repetitionRulesChanged || changes.timezoneChanged
+
+  const modifiedNewEvent = {
+    ...updateContext.newEvent,
+    exdates: shouldClearExdates ? [] : updateContext.newEvent.exdates
+  }
+
+  if (changes.repetitionRulesChanged || !isSameDay) {
+    await handleUpdateRecurringSeriesWithRuleChange({
+      ...updateContext,
+      newEvent: modifiedNewEvent
+    })
+  } else {
+    await handleUpdateRecurringSeriesMetadataOnly({
+      ...updateContext,
+      newEvent: modifiedNewEvent
+    })
+  }
+}
+
 export async function handleUpdateRecurringSeries(
   params: RecurringUpdateContext
 ): Promise<void> {
@@ -152,10 +287,27 @@ export async function handleUpdateRecurringSeries(
     resolveTimezone
   )
 
-  if (changes.repetitionRulesChanged) {
-    await handleUpdateRecurringSeriesWithRuleChange(params)
+  const isSameDay = moment(values.start).isSame(moment(event.start), 'day')
+  const isTimeChangeOnly =
+    isSameDay && !changes.repetitionRulesChanged && !changes.timezoneChanged
+
+  if (isTimeChangeOnly) {
+    const masterTz =
+      event.timezone || resolveTimezone(masterEvent?.timezone || '')
+    const seriesDeltaMs =
+      moment(values.start).valueOf() - moment(event.start).valueOf()
+
+    await handleUpdateSeriesTimeChangeOnly({
+      updateContext: params,
+      seriesDeltaMs,
+      masterTz
+    })
   } else {
-    await handleUpdateRecurringSeriesMetadataOnly(params)
+    await handleUpdateSeriesRuleOrDateChange({
+      updateContext: params,
+      isSameDay,
+      changes
+    })
   }
 }
 
@@ -208,7 +360,9 @@ async function deleteSeriesInstancesFromServer(
 
 async function safeDeleteEvent(url: string): Promise<void> {
   try {
-    await deleteEvent({ URL: url })
+    await deleteEvent({
+      URL: url
+    } as CalendarEvent)
   } catch (e) {
     const err = e as { response?: { status?: number }; message?: string }
     const is404 =
@@ -302,7 +456,8 @@ async function handleUpdateRecurringSeriesMetadataOnly({
   newEvent,
   baseUID,
   targetCalendar,
-  getSeriesInstances
+  getSeriesInstances,
+  recurrenceId
 }: RecurringUpdateContext): Promise<void> {
   updateSeriesInstancesLocally(dispatch, calId, getSeriesInstances(), newEvent)
   const masterForUpdate = {
@@ -314,7 +469,8 @@ async function handleUpdateRecurringSeriesMetadataOnly({
     updateSeriesAsync({
       cal: targetCalendar,
       event: masterForUpdate,
-      removeOverrides: false
+      removeOverrides: false,
+      sourceRecurrenceId: recurrenceId
     })
   )
   await assertThunkSuccess(result)
