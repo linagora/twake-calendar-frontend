@@ -19,7 +19,6 @@ const MobileSearchBar: React.FC = () => {
     handleSearch,
     handleSearchChange,
     handleContactSelect,
-    clearAll,
     handleShow
   } = useFilterSearch('organizers', setDialogOpen, true)
 
@@ -52,7 +51,10 @@ const MobileSearchBar: React.FC = () => {
               selectedContacts={selectedContacts}
               onQueryChange={setInputQuery}
               onEnter={() => void handleSearch(query, filters)}
-              onClear={clearAll}
+              onClear={() => {
+                setQuery('')
+                void handleSearch('', filters)
+              }}
             />
           )}
         />
