@@ -51,7 +51,7 @@ export function parseFetchedEvent(
   }
 
   let timezoneFromDTSTART: string | undefined
-  const dtstartProp = (targetVevent[1] as VObjectProperty[]).find(
+  const dtstartProp = (targetVevent?.[1] as VObjectProperty[])?.find(
     ([k]) => k.toLowerCase() === 'dtstart'
   )
   const dtstartParams = dtstartProp?.[1] as Record<string, string>

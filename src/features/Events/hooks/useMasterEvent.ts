@@ -41,7 +41,7 @@ export function useMasterEvent(
       setIsLoadingMasterEvent(true)
       try {
         const masterEventToFetch = { ...event, uid: baseUID }
-        const response = await fetchEvent(event)
+        const response = await fetchEvent(masterEventToFetch)
         const fetched = parseFetchedEvent(masterEventToFetch, response, true)
 
         if (!cancelled) setMasterEvent(fetched)

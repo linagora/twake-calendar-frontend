@@ -17,24 +17,34 @@ export function makeEventWithOverrides(
     calOwnerEmail,
     !updatedEvent.recurrenceId
   )
+  const nextVevents = [...vevents]
   let replaced = false
-  for (let i = 0; i < vevents.length; i++) {
-    const ve = vevents[i]
+  for (let i = 0; i < nextVevents.length; i++) {
+    const ve = nextVevents[i]
     const recurrenceId = (ve[1] as VObjectProperty[]).find(
       ([k]) => k === 'recurrence-id'
     )
-    if (recurrenceId && recurrenceId[3] === updatedEvent.recurrenceId) {
-      vevents[i] = updatedVevent as VCalComponent // replace
+    if (
+      recurrenceId &&
+      normalizeId(recurrenceId[3]) === normalizeId(updatedEvent.recurrenceId)
+    ) {
+      nextVevents[i] = updatedVevent as VCalComponent // replace
       replaced = true
       break
     }
   }
   if (!replaced && updatedEvent.recurrenceId) {
-    vevents.push(updatedVevent as VCalComponent) // add new override
+    nextVevents.push(updatedVevent as VCalComponent)
   }
 
   const timezoneData = TIMEZONES.zones[updatedEvent.timezone]
   const vtimezone = makeTimezone(timezoneData, updatedEvent)
 
-  return ['vcalendar', [], [...vevents, vtimezone.component.jCal]]
+  return [
+    'vcalendar',
+    [],
+    [...nextVevents, vtimezone.component.jCal as VCalComponent]
+  ]
 }
+
+const normalizeId = (id: unknown): string => String(id ?? '').replace(/Z$/, '')

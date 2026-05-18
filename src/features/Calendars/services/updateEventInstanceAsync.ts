@@ -20,7 +20,7 @@ export const updateEventInstanceAsync = createAsyncThunk<
         vevents,
         cal.owner?.emails?.[0]
       )
-      putEvent(event, jCal)
+      await putEvent(event, jCal)
 
       return { calId: cal.id, event }
     } catch (err) {

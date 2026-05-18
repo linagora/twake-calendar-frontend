@@ -657,18 +657,21 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateEventInstanceAsync when saving single instance with typeOfAction='solo'", async () => {
-    jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
-    BEGIN:VCALENDAR
-    VERSION:2.0
-    BEGIN:VEVENT
-    UID:recurring-base
-    RECURRENCE-ID:20250315T100000Z
-    SUMMARY:Recurring Event Instance
-    DTSTART:20250315T100000Z
-    DTEND:20250315T110000Z
-    END:VEVENT
-    END:VCALENDAR
-    `)
+    jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'BEGIN:VEVENT',
+          'UID:recurring-base',
+          'SUMMARY:Recurring Event Instance',
+          'DTSTART:20250315T100000Z',
+          'DTEND:20250315T110000Z',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n')
+      )
     const spy = jest
       .spyOn(eventThunks, 'updateEventInstanceAsync')
       .mockImplementation(payload => {

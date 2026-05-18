@@ -20,7 +20,7 @@ export function updateSeriesPartstatJCal(
       // Find ATTENDEE properties & Check if this is the target attendee
       if (
         prop[0] === 'attendee' &&
-        calAddress.toLowerCase().includes(attendeeEmail.toLowerCase())
+        normalizeEmail(calAddress) === normalizeEmail(attendeeEmail)
       ) {
         // Update PARTSTAT parameter
         const params = { ...(prop[1] as Record<string, string>), partstat }
@@ -36,3 +36,9 @@ export function updateSeriesPartstatJCal(
 
   return ['vcalendar', [], [...updatedVevents, vtimezone.component.jCal]]
 }
+
+const normalizeEmail = (addr: string) =>
+  addr
+    .toLowerCase()
+    .replace(/^mailto:/, '')
+    .trim()
