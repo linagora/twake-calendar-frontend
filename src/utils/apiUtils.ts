@@ -29,7 +29,7 @@ const redirectSSO = async (
   options: NormalizedOptions
 ): Promise<void> => {
   if (isRedirectingToSso) {
-    return
+    throw new DOMException('SSO redirect in progress', 'AbortError')
   }
   isRedirectingToSso = true
   try {
