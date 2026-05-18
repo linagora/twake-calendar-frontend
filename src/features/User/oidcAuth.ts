@@ -11,10 +11,15 @@ export const clientConfig = {
   post_logout_redirect_uri: window.SSO_POST_LOGOUT_REDIRECT ?? ''
 }
 
+const DISCOVERY_TIMEOUT_MS = 10_000
+
 export async function getClientConfig() {
-  return await client.discovery(
+  return client.discovery(
     new URL(clientConfig.url),
-    clientConfig.client_id
+    clientConfig.client_id,
+    undefined,
+    undefined,
+    { signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS) }
   )
 }
 
