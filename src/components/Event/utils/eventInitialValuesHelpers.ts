@@ -88,8 +88,9 @@ export function buildFromExistingEvent({
     repetition,
     attendees,
     alarm: event.alarm?.trigger ?? '',
-    eventClass:
-      event.class ?? (window.DISABLE_PUBLIC_VISIBILITY ? 'PRIVATE' : 'PUBLIC'),
+    eventClass: window.DISABLE_PUBLIC_VISIBILITY
+      ? 'PRIVATE'
+      : (event.class ?? 'PUBLIC'),
     busy: event.transp ?? 'OPAQUE',
     timezone: eventTimezone,
     calendarid: formCalendarId,

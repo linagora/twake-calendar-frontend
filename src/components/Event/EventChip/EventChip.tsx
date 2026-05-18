@@ -22,6 +22,7 @@ import {
   IconDisplayConfig,
   useCompactMode
 } from './EventChipUtils'
+import { userAttendee } from '@/features/User/models/attendee'
 
 const PRIVATE_CLASSIFICATIONS = ['PRIVATE', 'CONFIDENTIAL']
 
@@ -31,12 +32,12 @@ export const EVENT_DURATION = {
   LONG: 60
 } as const
 
-export function EventChip({
+export const EventChip: React.FC<EventChipProps> = ({
   arg,
   calendars,
   tempcalendars,
   errorHandler
-}: EventChipProps) {
+}) => {
   const cardRef = useRef<HTMLDivElement>(null)
   const showCompact = useCompactMode(cardRef)
 
@@ -47,18 +48,25 @@ export function EventChip({
   try {
     // Calendar validation
     const calendarsSource = temp ? tempcalendars : calendars
-    const calendar = calendarsSource[calId]
+    const calendar = calendarsSource[calId as string]
     if (!calendar) return null
 
     // Event properties
-    const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification)
+    const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification as string)
     const ownerEmails = new Set(
       calendar.owner?.emails?.map(e => e.toLowerCase())
     )
     // const delegated = calendar.delegated;
 
     // Determine owner attendee
-    const ownerAttendee = getOwnerAttendee(attendees, ownerEmails)
+    const ownerAttendee = getOwnerAttendee(
+      attendees as userAttendee[],
+      ownerEmails
+    )
+
+    // Presentation trick: if owner is not an attendee (e.g. created from external app like Apple Calendar),
+    // treat them as ACCEPTED to show the event filled rather than blank.
+    const displayPartstat = ownerAttendee?.partstat || 'ACCEPTED'
 
     // Color and contrast logic
     const bestColor = getBestColor(
@@ -89,7 +97,7 @@ export function EventChip({
     // Style calculation
     const titleStyle = getTitleStyle(
       bestColor,
-      ownerAttendee?.partstat,
+      displayPartstat,
       calendar,
       isPrivate
     )
@@ -97,17 +105,18 @@ export function EventChip({
     const cardStyle = getCardStyle(
       bestColor,
       eventLength,
-      ownerAttendee?.partstat,
+      displayPartstat,
       calendar,
       isPrivate
     )
 
     // Organizer avatar
-    const OrganizerAvatar = event._def.extendedProps.organizer
-      ? stringAvatar(
-          event._def.extendedProps.organizer?.cn ??
-            event._def.extendedProps.organizer?.cal_address
-        )
+    const organizer = event._def.extendedProps.organizer as
+      | { cn?: string; cal_address?: string }
+      | undefined
+
+    const OrganizerAvatar = organizer
+      ? stringAvatar(organizer.cn ?? organizer.cal_address ?? '')
       : { color: undefined, children: null }
 
     return (

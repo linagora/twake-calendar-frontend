@@ -13,7 +13,7 @@ import { EVENT_DURATION } from './EventChip'
 const COMPACT_WIDTH_THRESHOLD = 100
 
 export interface EventChipProps {
-  arg: EventContentArg['event']
+  arg: EventContentArg
   calendars: Record<string, Calendar>
   tempcalendars: Record<string, Calendar>
   errorHandler: EventErrorHandler

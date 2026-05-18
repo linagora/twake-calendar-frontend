@@ -14,6 +14,7 @@ import { CalendarEvent } from '../EventsTypes'
 import { EventPreviewAttendees } from './EventPreviewAttendees'
 import { makeRecurrenceString } from './utils/makeRecurrenceString'
 import { renderAttendeeBadge } from '@/components/Event/utils/eventUtils'
+import { userAttendee } from '@/features/User/models/attendee'
 
 interface EventPreviewDetailsProps {
   event: CalendarEvent
@@ -62,11 +63,20 @@ export function EventPreviewDetails({
     eventAttendees?.filter(
       a => a.cal_address !== event.organizer?.cal_address
     ) || []
-  const organizer = eventAttendees?.find(
-    a => a.cal_address === event.organizer?.cal_address
-  )
+  const organizer =
+    eventAttendees?.find(a => a.cal_address === event.organizer?.cal_address) ||
+    ({
+      ...event.organizer,
+      partstat: 'ACCEPTED',
+      role: 'CHAIR',
+      cutype: 'INDIVIDUAL',
+      rsvp: 'FALSE'
+    } as userAttendee)
 
   const showDetails = isNotPrivate || isOwn
+
+  const shouldShowAttendeesSection =
+    attendees.length > 0 || Boolean(organizer?.cal_address || organizer?.cn)
 
   if (!showDetails) {
     return (
@@ -133,7 +143,7 @@ export function EventPreviewDetails({
         renderAttendeeBadge(organizer, 'org', t, true, true)}
 
       {/* Attendees */}
-      {!isResourceEventPreview && attendees.length > 0 && (
+      {!isResourceEventPreview && shouldShowAttendeesSection && (
         <EventPreviewAttendees
           attendees={attendees}
           organizer={organizer}
@@ -237,7 +247,7 @@ export function EventPreviewDetails({
           }
           text={t('eventPreview.alarmText', {
             trigger: t(`event.form.notifications.${event.alarm.trigger}`),
-            action: (() => {
+            action: ((): string => {
               if (!event.alarm.action) return ''
               const translationKey = `event.form.notifications.${event.alarm.action}`
               const translated = t(translationKey)
@@ -262,7 +272,7 @@ export function EventPreviewDetails({
             t,
             startText: `${t('eventPreview.recurrentEvent')} · ${t(
               `eventPreview.freq.${event.repetition.freq}`,
-              event.repetition.freq
+              { defaultValue: event.repetition.freq }
             )}`
           })}
         />

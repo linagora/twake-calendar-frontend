@@ -151,8 +151,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -180,8 +180,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -195,8 +195,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'otherCal/cal'}
-        eventId={'event1'}
+        calId="otherCal/cal"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -212,8 +212,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -226,8 +226,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -291,8 +291,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       rsvpStateIsOrga
     )
@@ -345,8 +345,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       rsvpStateIsOrga
     )
@@ -408,8 +408,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       rsvpState
     )
@@ -469,8 +469,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       rsvpState
     )
@@ -530,8 +530,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       rsvpState
     )
@@ -552,8 +552,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event4'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event4"
       />,
       preloadedState
     )
@@ -570,8 +570,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'otherCal/cal'}
-        eventId={'event2'}
+        calId="otherCal/cal"
+        eventId="event2"
       />,
       preloadedState
     )
@@ -585,8 +585,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -603,8 +603,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -617,8 +617,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event2'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event2"
       />,
       preloadedState
     )
@@ -629,8 +629,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -645,8 +645,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -720,8 +720,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'eventWithSpecialChars'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="eventWithSpecialChars"
       />,
       specialCharState
     )
@@ -939,8 +939,8 @@ describe('Event Preview Display', () => {
       <EventPreviewModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event3'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event3"
       />,
       preloadedState
     )
@@ -1033,8 +1033,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1078,8 +1078,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1123,8 +1123,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1184,8 +1184,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1229,8 +1229,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1251,14 +1251,17 @@ describe('Event Preview Display', () => {
     })
 
     describe('No display when count is 0', () => {
-      it('does not display attendee preview when no attendees', () => {
+      it('does not display attendee preview when no attendees and no organizer', () => {
         const state = createStateWithAttendees([])
+        delete state.calendars.list['667037022b752d0026472254/cal1'].events
+          .event1.organizer
+
         renderWithProviders(
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1320,8 +1323,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1389,8 +1392,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1450,8 +1453,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1495,8 +1498,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1537,8 +1540,8 @@ describe('Event Preview Display', () => {
           <EventPreviewModal
             open={true}
             onClose={mockOnClose}
-            calId={'667037022b752d0026472254/cal1'}
-            eventId={'event1'}
+            calId="667037022b752d0026472254/cal1"
+            eventId="event1"
           />,
           state
         )
@@ -1740,8 +1743,8 @@ describe('Event Preview Display', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'event1'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="event1"
         />,
         allDayState
       )

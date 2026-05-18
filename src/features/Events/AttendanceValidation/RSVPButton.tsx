@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/app/hooks'
-import { PartStat } from '@/features/User/models/attendee'
+import { PartStat, userAttendee } from '@/features/User/models/attendee'
 import { userData } from '@/features/User/userDataTypes'
 import { Box, Button, CircularProgress, Theme } from '@linagora/twake-mui'
 import Tooltip from '@/components/Tooltip'
@@ -29,7 +29,33 @@ interface RSVPButtonProps {
   loadingValue: PartStat | null
 }
 
-export function RSVPButton({
+function useClearLoadingOnStatusChange(
+  currentUserAttendee: userAttendee | undefined,
+  isLoading: boolean,
+  onLoadingChange: (loading: boolean, value?: PartStat) => void
+): React.MutableRefObject<PartStat | undefined> {
+  const previousPartstatRef = useRef<PartStat | undefined>(
+    currentUserAttendee?.partstat
+  )
+
+  useEffect(() => {
+    const currentPartstat = currentUserAttendee?.partstat
+
+    const statusChanged =
+      previousPartstatRef.current !== undefined &&
+      currentPartstat !== previousPartstatRef.current
+
+    if (isLoading && statusChanged) {
+      onLoadingChange(false)
+    }
+
+    previousPartstatRef.current = currentPartstat
+  }, [currentUserAttendee?.partstat, isLoading, onLoadingChange])
+
+  return previousPartstatRef
+}
+
+export const RSVPButton: React.FC<RSVPButtonProps> = ({
   rsvpValue,
   contextualizedEvent,
   user,
@@ -38,36 +64,28 @@ export function RSVPButton({
   isLoading,
   onLoadingChange,
   loadingValue
-}: RSVPButtonProps) {
+}) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
   const { currentUserAttendee, calendar } = contextualizedEvent
+
+  const effectivePartstat =
+    currentUserAttendee?.partstat ||
+    (contextualizedEvent.isOwn ? 'ACCEPTED' : undefined)
   const showLoading = isLoading && loadingValue === rsvpValue
   const isReadDelegated =
     calendar.delegated && calendar.access?.read && !calendar.access?.write
-  const previousPartstatRef = useRef<PartStat | undefined>(
-    currentUserAttendee?.partstat
+
+  const previousPartstatRef = useClearLoadingOnStatusChange(
+    currentUserAttendee,
+    isLoading,
+    onLoadingChange
   )
 
-  // Detect when attendee status changes (via WebSocket) and clear loading
-  useEffect(() => {
-    const currentPartstat = currentUserAttendee?.partstat
-
-    if (
-      isLoading &&
-      previousPartstatRef.current !== undefined &&
-      currentPartstat !== previousPartstatRef.current
-    ) {
-      onLoadingChange(false)
-    }
-
-    previousPartstatRef.current = currentPartstat
-  }, [currentUserAttendee?.partstat, isLoading, rsvpValue, onLoadingChange])
-
-  const handleClick = async () => {
+  const handleClick = async (): Promise<void> => {
     // Store current partstat before making changes
     previousPartstatRef.current = currentUserAttendee?.partstat
-    if (previousPartstatRef.current === rsvpValue) {
+    if (effectivePartstat === rsvpValue) {
       return
     }
     // For recurring events, don't set loading yet - wait for modal choice
@@ -95,7 +113,7 @@ export function RSVPButton({
     }
   }
 
-  const isCurrentlyActive = currentUserAttendee?.partstat === rsvpValue
+  const isCurrentlyActive = effectivePartstat === rsvpValue
 
   // Show as active (colored) if:
   // 1. This button is currently loading, OR
