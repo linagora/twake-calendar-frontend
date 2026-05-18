@@ -84,6 +84,15 @@
           showFallbackUI()
         }
       })
+
+      window.addEventListener('unhandledrejection', function (e) {
+        // AbortErrors are intentional (SSO redirect in progress, cancelled fetches)
+        if (e.reason && e.reason.name === 'AbortError') return
+        // Only intervene when React has not rendered anything — i.e. a true blank page
+        var root = document.getElementById('root')
+        if (root && root.children.length > 0) return
+        showFallbackUI()
+      })
     </script>
   </head>
   <body>
