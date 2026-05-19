@@ -23,7 +23,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
   const theme = useTheme()
   const color = iconColor ?? alpha(theme.palette.grey[900], 0.9)
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onClick()

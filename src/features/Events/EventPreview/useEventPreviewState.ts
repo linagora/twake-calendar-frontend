@@ -85,13 +85,6 @@ export function useEventPreviewState(
   const event = calendar?.events[eventId]
 
   const [calendarid, setCalendarid] = useState<string>(calendar?.id ?? '')
-  const userPersonalCalendars: Calendar[] = Object.values(
-    calendars.list || {}
-  ).filter(
-    (cal): boolean | undefined =>
-      cal.id?.split('/')[0] === user.openpaasId ||
-      (cal.delegated && cal.access?.write)
-  )
 
   // Modal visibility
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false)
@@ -179,6 +172,16 @@ export function useEventPreviewState(
     }
     return undefined
   })()
+
+  const userPersonalCalendars: Calendar[] = Object.values(
+    calendars.list || {}
+  ).filter(
+    (cal): boolean | undefined =>
+      cal.id?.split('/')[0] === user.openpaasId ||
+      (cal.delegated &&
+        cal.access?.write &&
+        isEventOrganiser(event, effectiveEmail))
+  )
 
   // Action handlers
   const handleEditClick = (): void => {
