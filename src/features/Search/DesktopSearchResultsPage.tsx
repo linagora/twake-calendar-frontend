@@ -1,23 +1,11 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import EventPreviewModal from '@/features/Events/EventPreview'
-import { defaultColors } from '@/utils/defaultColors'
 import { Box, IconButton, Typography } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import SquareRoundedIcon from '@mui/icons-material/SquareRounded'
 import { useI18n } from 'twake-i18n'
 import { setView } from '../Settings/SettingsSlice'
 import { ResultsList } from './ResultsList'
 import './searchResult.styl'
-import {
-  RenderDate,
-  RenderText,
-  RenderOrganizer,
-  RenderTime,
-  RenderTitle,
-  RenderVideoJoin
-} from './searchResultsComponents'
-import { SearchEventResult } from './types/SearchEventResult'
-import { useEventPreview } from './useEventPreview'
+import DesktopResultItem from './DesktopResultItem'
 
 export default function DesktopSearchResultsPage(): JSX.Element {
   const { t } = useI18n()
@@ -60,93 +48,5 @@ export default function DesktopSearchResultsPage(): JSX.Element {
         stackSx={{ mt: 2 }}
       />
     </Box>
-  )
-}
-
-function DesktopResultItem({
-  eventData
-}: {
-  eventData: SearchEventResult
-}): JSX.Element {
-  const { t } = useI18n()
-  const startDate = new Date(eventData.data.start)
-  const endDate = eventData.data.end ? new Date(eventData.data.end) : startDate
-
-  const calendar = useAppSelector(
-    state =>
-      state.calendars.list[
-        `${eventData.data.userId}/${eventData.data.calendarId}`
-      ]
-  )
-  const calendarColor = calendar?.color?.light
-
-  const { openPreview, setOpenPreview, handleOpen, timeZone } = useEventPreview(
-    eventData,
-    calendar
-  )
-
-  return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 2,
-          p: 3,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          cursor: 'pointer',
-          '&:hover': { backgroundColor: 'action.hover' },
-          alignItems: 'center',
-          textAlign: 'left',
-          maxWidth: '80vw'
-        }}
-        onClick={() => void handleOpen()}
-      >
-        <RenderDate
-          startDate={startDate}
-          endDate={endDate}
-          t={t}
-          timeZone={timeZone}
-        />
-        <RenderTime
-          startDate={startDate}
-          endDate={endDate}
-          allDay={!!eventData.data.allDay}
-          t={t}
-          timeZone={timeZone}
-        />
-        <SquareRoundedIcon
-          style={{
-            color: calendarColor ?? defaultColors[0].light,
-            width: 24,
-            height: 24,
-            flexShrink: 0
-          }}
-        />
-
-        <RenderTitle
-          summary={eventData.data.summary}
-          isRecurrent={!!eventData.data.isRecurrentMaster}
-          t={t}
-        />
-        <RenderOrganizer organizer={eventData.data.organizer} />
-        <RenderText text={eventData.data.location} />
-        <RenderText text={eventData.data.description} />
-        <RenderVideoJoin
-          t={t}
-          url={eventData.data['x-openpaas-videoconference']}
-        />
-      </Box>
-
-      {calendar?.events?.[eventData.data.uid] && (
-        <EventPreviewModal
-          eventId={eventData.data.uid}
-          calId={calendar.id}
-          open={openPreview}
-          onClose={() => setOpenPreview(false)}
-        />
-      )}
-    </>
   )
 }
