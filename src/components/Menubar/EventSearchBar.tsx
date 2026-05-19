@@ -202,6 +202,7 @@ const SearchBar: React.FC<{
         {extended && (
           <PeopleSearch
             selectedUsers={selectedContacts}
+            showCurrentUser
             onChange={(_event, users) => {
               handleContactSelect(users)
             }}

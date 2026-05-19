@@ -77,6 +77,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             onClose()
           }}
           hideOptions
+          showCurrentUser
           inputValue={inputQuery}
           onSearchStateChange={handleSearchChange}
           objectTypes={objectTypes}

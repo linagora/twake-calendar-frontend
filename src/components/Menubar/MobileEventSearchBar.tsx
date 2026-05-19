@@ -35,6 +35,7 @@ const MobileSearchBar: React.FC = () => {
           selectedUsers={selectedContacts}
           onChange={(_event, users) => handleContactSelect(users)}
           hideOptions
+          showCurrentUser
           inputValue={inputQuery}
           onSearchStateChange={handleSearchChange}
           objectTypes={SEARCH_OBJECT_TYPES}

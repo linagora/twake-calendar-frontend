@@ -1,14 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { searchUsers } from '@/features/User/userAPI'
+import { userData } from '@/features/User/userDataTypes'
 
 export interface UseUserSearchProps {
   objectTypes: string[]
   errorMessage: string
+  showCurrentUser?: boolean
+  currentUser?: userData
 }
 
 export function useUserSearch<T>({
   objectTypes,
-  errorMessage
+  errorMessage,
+  showCurrentUser,
+  currentUser
 }: UseUserSearchProps): {
   query: string
   setQuery: (query: string) => void
@@ -64,7 +69,11 @@ export function useUserSearch<T>({
       try {
         const res = await searchUsers(query, objectTypesRef.current)
         if (cancelled) return
-        setOptions(res as unknown as T[])
+        setOptions(
+          (showCurrentUser || !currentUser
+            ? res
+            : res.filter(o => o.email !== currentUser.email)) as unknown as T[]
+        )
         setHasSearched(true)
       } catch {
         setHasSearched(false)

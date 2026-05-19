@@ -28,6 +28,7 @@ import { usePasteHandler } from './usePasteHandler'
 import { User } from './types'
 import { AttendeeChip } from './AttendeeChip'
 import { SearchState } from '../Calendar/utils/tempSearchUtil'
+import { useAppSelector } from '@/app/hooks'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -58,6 +59,7 @@ export interface PeopleSearchProps {
   }
   getChipIcon?: (user: User) => ReactElement
   hideOptions?: boolean
+  showCurrentUser?: boolean
   onSearchStateChange?: (state: SearchState) => void
   inputValue?: string
   inputStyles?: SxProps
@@ -76,6 +78,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   customSlotProps,
   getChipIcon,
   hideOptions,
+  showCurrentUser,
   onSearchStateChange,
   inputValue,
   inputStyles
@@ -85,6 +88,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   const errorMessage = t('peopleSearch.searchError')
 
   const lastQueryTimeRef = useRef(0)
+  const currentUser = useAppSelector(state => state.user?.userData)
 
   const {
     query,
@@ -101,7 +105,12 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     snackbarMessage,
     setSnackbarMessage,
     queryTime
-  } = useUserSearch<User>({ objectTypes, errorMessage })
+  } = useUserSearch<User>({
+    objectTypes,
+    errorMessage,
+    showCurrentUser,
+    currentUser
+  })
 
   const onSearchStateChangeRef = useRef(onSearchStateChange)
   useEffect(() => {
@@ -336,6 +345,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
               (user, index, self) =>
                 self.findIndex(u => u.email === user.email) === index
             )
+
           onChange(event, mapped)
         }}
         slotProps={{
