@@ -7,7 +7,7 @@ export function useScreenSizeDetection(): {
   const theme = useTheme()
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   return {
     isTooSmall: isMobile,
