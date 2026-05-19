@@ -27,7 +27,10 @@ describe('OpenID Client Auth Module', () => {
 
       expect(discoveryMock).toHaveBeenCalledWith(
         new URL(clientConfig.url),
-        clientConfig.client_id
+        clientConfig.client_id,
+        undefined,
+        undefined,
+        { signal: AbortSignal.timeout(10_000) }
       )
       expect(result).toBe('discoveredClient')
     })
