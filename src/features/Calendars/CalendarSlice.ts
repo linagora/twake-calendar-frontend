@@ -100,6 +100,9 @@ const CalendarSlice = createSlice({
       if (!state.list[action.payload]) return
       state.list[action.payload].lastCacheCleared = Date.now()
     },
+    setCalendarError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload
+    },
     clearError: state => {
       state.error = null
     },
@@ -558,6 +561,7 @@ export const {
   removeTempCal,
   emptyEventsCal,
   clearFetchCache,
+  setCalendarError,
   clearError,
   updateCalColor,
   setIsMobileSearchOpen

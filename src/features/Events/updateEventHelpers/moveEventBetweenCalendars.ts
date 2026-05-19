@@ -210,7 +210,7 @@ async function moveDelegatedEvent({
     organizer: newOrganizer,
     attendee: newAttendees
   }
-  console.log(eventForTargetCalendar, targetCalendar)
+
   const putResult = await dispatch(
     putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
   )

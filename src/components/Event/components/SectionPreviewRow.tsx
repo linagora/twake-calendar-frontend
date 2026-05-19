@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
+import { Box, radius, Typography, useTheme } from '@linagora/twake-mui'
 import { alpha } from '@mui/material/styles'
 import React from 'react'
 
@@ -41,7 +41,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
         alignItems: 'center',
         cursor: 'pointer',
         padding: '8px 0px',
-        borderRadius: '4px',
+        borderRadius: radius.sm,
         '&:hover': {
           backgroundColor: 'action.hover'
         }

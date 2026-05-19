@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { AppDispatch } from '@/app/store'
 import { handleDelete } from '@/components/Event/eventHandlers/eventHandlers'
+import { setCalendarError } from '@/features/Calendars/CalendarSlice'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { userData } from '@/features/User/userDataTypes'
 import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
@@ -262,6 +263,7 @@ export function useEventPreviewState(
       .then(() => setCalendarid(calendarid))
       .catch(error => {
         console.error('Failed to move event:', error)
+        dispatch(setCalendarError(`Failed to move event: ${error}`))
         setCalendarid(calId)
       })
   }
