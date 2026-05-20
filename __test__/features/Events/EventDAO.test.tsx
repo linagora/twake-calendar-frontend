@@ -45,6 +45,7 @@ const mockEvent: CalendarEvent = {
 describe('eventDAO', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    delete window.CALDAV_PREFER_HANDLING
   })
 
   it('putEvent sends PUT request with JCal body', async () => {
@@ -62,6 +63,27 @@ describe('eventDAO', () => {
       })
     )
     expect(result).toBe(mockResponse)
+  })
+
+  it('putEvent sends strict Prefer header when configured', async () => {
+    window.CALDAV_PREFER_HANDLING = 'strict'
+    const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
+    ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
+    const jCal = calendarEventToJCal(mockEvent)
+
+    await putEvent(mockEvent, jCal)
+
+    expect(api).toHaveBeenCalledWith(
+      'dav/calendars/667037022b752d0026472254/667037022b752d0026472254/cal1.ics',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: {
+          'content-type': 'text/calendar; charset=utf-8',
+          Prefer: 'handling=strict'
+        },
+        body: JSON.stringify(jCal)
+      })
+    )
   })
 
   it('putEvent logs when status is 201', async () => {
