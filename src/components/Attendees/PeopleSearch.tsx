@@ -17,7 +17,6 @@ import {
   ReactElement,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   type ReactNode,
   type SyntheticEvent
@@ -162,13 +161,24 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     t
   })
 
+  const handleAutocompleteChange = useCallback(
+    (event: SyntheticEvent, value: (string | User)[]) => {
+      const last = value[value.length - 1]
+      if (typeof last === 'string' && !isValidEmail(last.trim())) {
+        setInputError(t('peopleSearch.invalidEmail').replace('%{email}', last))
+        return
+      }
+      setInputError(null)
+      onChange(event, dedupeByEmail(value.map(normaliseUser)))
+    },
+    [onChange, setInputError, t]
+  )
+
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
       const inputProps = {
         ...params.InputProps,
-        startAdornment: params.InputProps.startAdornment ? (
-          params.InputProps.startAdornment
-        ) : (
+        startAdornment: params.InputProps.startAdornment ?? (
           <PeopleOutlineOutlinedIcon
             fontSize="small"
             sx={{ mr: 1, color: 'action.active' }}
@@ -263,23 +273,15 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     ]
   )
 
-  const isOpenOptions = useMemo(() => {
-    if (hideOptions) return false
-    if (customRenderInput) {
-      return (
-        isOpen && !!query && ((loading && hasSearched) || options.length > 0)
-      )
-    }
-    return isOpen && !!query && (loading || hasSearched)
-  }, [
-    customRenderInput,
-    hasSearched,
+  const isOpenOptions = resolveIsOpen({
     hideOptions,
     isOpen,
+    query,
     loading,
-    options.length,
-    query
-  ])
+    hasSearched,
+    options,
+    hasCustomRenderInput: !!customRenderInput
+  })
 
   return (
     <>
@@ -300,13 +302,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         fullWidth
         noOptionsText={t('peopleSearch.noResults')}
         loadingText={t('peopleSearch.loading')}
-        getOptionLabel={option => {
-          if (typeof option === 'object') {
-            return option.displayName || option.email
-          } else {
-            return option
-          }
-        }}
+        getOptionLabel={getOptionLabel}
         sx={{
           '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
             py: 0,
@@ -324,30 +320,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         value={selectedUsers}
         inputValue={query}
         onInputChange={(_event, value) => setQuery(value)}
-        onChange={(event, value) => {
-          const last = value[value.length - 1]
-          if (typeof last === 'string' && !isValidEmail(last.trim())) {
-            const invalidEmailMessage = t('peopleSearch.invalidEmail').replace(
-              '%{email}',
-              last
-            )
-            setInputError(invalidEmailMessage)
-            return
-          }
-          setInputError(null)
-          const mapped = value
-            .map((v: string | User) =>
-              typeof v === 'string'
-                ? { email: v.trim(), displayName: v.trim() }
-                : v
-            )
-            .filter(
-              (user, index, self) =>
-                self.findIndex(u => u.email === user.email) === index
-            )
-
-          onChange(event, mapped)
-        }}
+        onChange={handleAutocompleteChange}
         slotProps={{
           ...customSlotProps,
           popper: {
@@ -397,4 +370,39 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
       />
     </>
   )
+}
+
+export const getOptionLabel = (option: User | string): string => {
+  if (typeof option === 'string') return option
+  return option.displayName || option.email
+}
+
+export const normaliseUser = (v: string | User): User =>
+  typeof v === 'string' ? { email: v.trim(), displayName: v.trim() } : v
+
+export const dedupeByEmail = (users: User[]): User[] =>
+  users.filter((u, i, arr) => arr.findIndex(x => x.email === u.email) === i)
+
+export const resolveIsOpen = ({
+  hideOptions,
+  isOpen,
+  query,
+  loading,
+  hasSearched,
+  options,
+  hasCustomRenderInput
+}: {
+  hideOptions?: boolean
+  isOpen: boolean
+  query: string
+  loading: boolean
+  hasSearched: boolean
+  options: unknown[]
+  hasCustomRenderInput: boolean
+}): boolean => {
+  if (hideOptions) return false
+  if (!isOpen || !query) return false
+  if (hasCustomRenderInput)
+    return (loading && hasSearched) || options.length > 0
+  return loading || hasSearched
 }

@@ -174,6 +174,7 @@ export const AttendeeSearch: React.FC<{
   return (
     <PeopleSearch
       selectedUsers={selectedUsers}
+      showCurrentUser
       objectTypes={['user', 'contact']}
       disabled={disabled}
       inputSlot={inputSlot}

@@ -95,7 +95,7 @@ export function useUserSearch<T>({
       cancelled = true
       clearTimeout(delayDebounceFn)
     }
-  }, [objectTypesRef, query, errorMessage])
+  }, [objectTypesRef, query, errorMessage, showCurrentUser, currentUser])
 
   return {
     query,
