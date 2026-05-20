@@ -4,9 +4,13 @@ import { useI18n } from 'twake-i18n'
 
 export interface DateTimeErrorProps {
   message: string
+  warning?: boolean
 }
 
-export const DateTimeError: React.FC<DateTimeErrorProps> = ({ message }) => {
+export const DateTimeError: React.FC<DateTimeErrorProps> = ({
+  message,
+  warning
+}) => {
   const { t } = useI18n()
   if (!message) {
     return null
@@ -15,7 +19,10 @@ export const DateTimeError: React.FC<DateTimeErrorProps> = ({ message }) => {
     <Box display="flex" gap={1} flexDirection="row">
       <Box sx={{ width: '1%' }} />
       <Box>
-        <Typography variant="caption" sx={{ color: 'error.main' }}>
+        <Typography
+          variant="caption"
+          sx={{ color: warning ? 'warning.dark' : 'error.main' }}
+        >
           {t(message)}
         </Typography>
       </Box>

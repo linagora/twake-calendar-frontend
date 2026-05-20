@@ -164,7 +164,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
         {startDateInPast && (
           <Typography
             variant="caption"
-            sx={{ color: 'error.main', display: 'block', mt: 0.5 }}
+            sx={{ color: 'warning.dark', display: 'block', mt: 0.5 }}
           >
             {t('event.validation.startDateInPast')}
           </Typography>

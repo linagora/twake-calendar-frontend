@@ -17,7 +17,6 @@ const baseParams = (
   endDate: TOMORROW,
   endTime: '11:00',
   allday: false,
-  showValidationErrors: true,
   hasEndDateChanged: false,
   showMore: false,
   ...overrides
@@ -77,12 +76,12 @@ describe('validateEventForm — start date', () => {
     expect(result.errors.date.start).toBe('event.validation.startRequired')
   })
 
-  it('is invalid when startDate is in the past', () => {
+  it('has warning when startDate is in the past', () => {
     const result = validateEventForm(
       baseParams({ startDate: YESTERDAY, endDate: YESTERDAY })
     )
-    expect(result.isValid).toBe(false)
-    expect(result.errors.date.start).toBe('event.validation.startDateInPast')
+    expect(result.isValid).toBe(true)
+    expect(result.warnings.date.start).toBe('event.validation.startDateInPast')
   })
 
   it('is valid when startDate is today', () => {
@@ -102,15 +101,6 @@ describe('validateEventForm — start date', () => {
     const result = validateEventForm(baseParams())
     expect(result.isValid).toBe(true)
     expect(result.errors.date.start).toBe('')
-  })
-
-  it('does not expose errors when showValidationErrors is false', () => {
-    const result = validateEventForm(
-      baseParams({ startDate: YESTERDAY, showValidationErrors: false })
-    )
-    expect(result.isValid).toBe(false)
-    expect(result.errors.date.start).toBe('')
-    expect(result.errors.time.start).toBe('')
   })
 })
 
@@ -320,35 +310,5 @@ describe('validateEventForm — all-day events', () => {
       alldayParams({ startDate: TOMORROW, endDate: '2025-06-20' })
     )
     expect(result.isValid).toBe(true)
-  })
-})
-
-describe('validateEventForm — error visibility', () => {
-  beforeEach(() => {
-    jest.useFakeTimers()
-    jest.setSystemTime(FROZEN_DATE)
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
-  it('hides all error strings when showValidationErrors=false even if invalid', () => {
-    const result = validateEventForm(
-      baseParams({
-        startDate: '',
-        showValidationErrors: false
-      })
-    )
-    expect(result.isValid).toBe(false)
-    expect(result.errors.date.start).toBe('')
-    expect(result.errors.time.start).toBe('')
-  })
-
-  it('exposes error strings when showValidationErrors=true', () => {
-    const result = validateEventForm(
-      baseParams({ startDate: '', showValidationErrors: true })
-    )
-    expect(result.errors.date.start).not.toBe('')
   })
 })

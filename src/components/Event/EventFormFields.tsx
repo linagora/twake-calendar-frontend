@@ -64,7 +64,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
     const calList = useAppSelector(state => state.calendars.list)
     const userOrganizer = useAppSelector(state => state.user.organiserData)
 
-    const [showValidationErrors, setShowValidationErrors] = useState(false)
     const [isFormValid, setIsFormValid] = useState(false)
 
     const timezoneList = useMemo(
@@ -136,9 +135,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
 
     useImperativeHandle(ref, () => ({
       submit: async (): Promise<void> => {
-        setShowValidationErrors(true)
         if (!isFormValid) return
-        setShowValidationErrors(false)
 
         const values = { ...latestValuesRef.current }
 
@@ -189,7 +186,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           showRepeat={v.showRepeat}
           setShowRepeat={setShowRepeat}
           showMore={showMore}
-          showValidationErrors={showValidationErrors}
           timezoneList={timezoneList}
           typeOfAction={typeOfAction}
           onStartChange={onStartChange}

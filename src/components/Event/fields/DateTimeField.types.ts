@@ -27,7 +27,6 @@ export interface EventDateTimeFieldProps {
   /** Whether the full (expanded) dialog mode is active */
   showMore: boolean
   /** show/hide validation error messages */
-  showValidationErrors: boolean
   timezoneList: TimezoneListResult
   typeOfAction?: 'solo' | 'all'
   /** Optional callbacks for calendar preview sync (EventModal only) */

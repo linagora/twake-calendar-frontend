@@ -183,7 +183,6 @@ export const DateTimeExpanded: React.FC<
     | 'showRepeat'
     | 'setShowRepeat'
     | 'showMore'
-    | 'showValidationErrors'
     | 'timezoneList'
     | 'typeOfAction'
     | 'onStartChange'
@@ -217,7 +216,6 @@ export const DateTimeExpanded: React.FC<
   showMore,
   hasEndDateChanged,
   setHasEndDateChanged,
-  showValidationErrors,
   timezoneList,
   typeOfAction,
   onStartChange,
@@ -254,7 +252,6 @@ export const DateTimeExpanded: React.FC<
     endDate,
     endTime,
     allday,
-    showValidationErrors,
     hasEndDateChanged,
     showMore
   })

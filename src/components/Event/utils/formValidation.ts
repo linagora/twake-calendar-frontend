@@ -9,7 +9,6 @@ export interface ValidationParams {
   endDate: string
   endTime: string
   allday: boolean
-  showValidationErrors: boolean
   hasEndDateChanged?: boolean
   showMore?: boolean
 }
@@ -20,6 +19,7 @@ export interface ValidationParams {
 export interface ValidationResult {
   isValid: boolean
   errors: DateTimeErrors
+  warnings: DateTimeWarnings
 }
 
 export interface DateTimeErrors {
@@ -27,32 +27,57 @@ export interface DateTimeErrors {
   time: { start: string; end: string }
 }
 
-/**
- * Validate event form fields
- * @param params - Validation parameters
- * @returns Validation result with errors
- */
-export function validateEventForm(params: ValidationParams): ValidationResult {
+export interface DateTimeWarnings {
+  date: { start: string; end?: string }
+}
+
+function validateStartDate(startDate: string): {
+  error: string
+  warning: string
+} {
+  if (!startDate || startDate.trim() === '') {
+    return { error: 'event.validation.startRequired', warning: '' }
+  }
+  if (isDateInPast(startDate)) {
+    return { error: '', warning: 'event.validation.startDateInPast' }
+  }
+  return { error: '', warning: '' }
+}
+
+function validateStartTime(
+  startTime: string,
+  allday: boolean
+): {
+  error: string
+} {
+  if (!allday && (!startTime || startTime.trim() === '')) {
+    return { error: 'event.validation.startRequired' }
+  }
+  return { error: '' }
+}
+
+function validateEndDateTime(
+  params: Pick<
+    ValidationParams,
+    | 'startDate'
+    | 'startTime'
+    | 'endDate'
+    | 'endTime'
+    | 'allday'
+    | 'hasEndDateChanged'
+    | 'showMore'
+  >
+): { errors: Partial<DateTimeErrors>; isValid: boolean } {
   const {
     startDate,
     startTime,
     endDate,
     endTime,
     allday,
-    showValidationErrors,
     hasEndDateChanged = false,
     showMore = false
   } = params
 
-  const state = {
-    isDateTimeValid: true,
-    timeStartError: '',
-    timeEndError: '',
-    dateStartError: '',
-    dateEndError: ''
-  }
-
-  // Determine which fields are visible based on UI mode
   const showFullFields =
     showMore ||
     allday ||
@@ -60,57 +85,64 @@ export function validateEventForm(params: ValidationParams): ValidationResult {
     (!showMore && !allday && startDate !== endDate)
   const showTimeOnly = !allday && !showFullFields
 
-  // Validate start date
-  if (!startDate || startDate.trim() === '') {
-    state.isDateTimeValid = false
-    state.dateStartError = 'event.validation.startRequired'
-  }
-  // Validate start date is not before today's beginning
-  else if (isDateInPast(startDate)) {
-    state.isDateTimeValid = false
-    state.dateStartError = 'event.validation.startDateInPast'
-  }
-  // Validate start time (if not all-day)
-  else if (!allday && (!startTime || startTime.trim() === '')) {
-    state.isDateTimeValid = false
-    state.timeStartError = 'event.validation.startRequired'
-  }
-  // Validate end fields based on UI mode
-  else if (showFullFields) {
-    const { isValid, errors } = validateFullFields({
+  if (showFullFields)
+    return validateFullFields({
       startDate,
       startTime,
       endDate,
       endTime,
       allday
     })
-    if (!isValid) {
-      state.isDateTimeValid = false
-      state.timeStartError = errors.time?.start ?? ''
-      state.timeEndError = errors.time?.end ?? ''
-      state.dateStartError = errors.date?.start ?? ''
-      state.dateEndError = errors.date?.end ?? ''
-    }
-  } else if (showTimeOnly) {
-    const { isValid, errors } = validateTimeOnlyFields(startTime, endTime)
-    if (!isValid) {
-      state.isDateTimeValid = false
-      state.timeStartError = errors.time?.start ?? ''
-      state.timeEndError = errors.time?.end ?? ''
-    }
+  if (showTimeOnly) return validateTimeOnlyFields(startTime, endTime)
+  return {
+    isValid: true,
+    errors: { date: { start: '', end: '' }, time: { start: '', end: '' } }
   }
-  const isValid = state.isDateTimeValid
+}
+
+export function validateEventForm(params: ValidationParams): ValidationResult {
+  const {
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    allday,
+    hasEndDateChanged,
+    showMore
+  } = params
+
+  const startDateResult = validateStartDate(startDate)
+  const startTimeResult = validateStartTime(startTime, allday)
+  const allFieldsResult = validateEndDateTime({
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    allday,
+    hasEndDateChanged,
+    showMore
+  })
+
+  const isValid =
+    !startDateResult.error && !startTimeResult.error && allFieldsResult.isValid
 
   return {
     isValid,
     errors: {
-      time: {
-        start: showValidationErrors ? state.timeStartError : '',
-        end: showValidationErrors ? state.timeEndError : ''
-      },
       date: {
-        start: showValidationErrors ? state.dateStartError : '',
-        end: showValidationErrors ? state.dateEndError : ''
+        start:
+          startDateResult.error || allFieldsResult.errors.date?.start || '',
+        end: allFieldsResult.errors.date?.end || ''
+      },
+      time: {
+        start:
+          startTimeResult.error || allFieldsResult.errors.time?.start || '',
+        end: allFieldsResult.errors.time?.end || ''
+      }
+    },
+    warnings: {
+      date: {
+        start: startDateResult.warning
       }
     }
   }
@@ -146,7 +178,6 @@ export function validateEventFormValues(
     endDate,
     endTime,
     allday: values.allday,
-    showValidationErrors: false,
     hasEndDateChanged: values.hasEndDateChanged,
     showMore
   }).isValid

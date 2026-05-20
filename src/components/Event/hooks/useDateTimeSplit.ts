@@ -10,7 +10,6 @@ interface UseDateTimeSplitParams {
   showMore: boolean
   hasEndDateChanged: boolean
   setHasEndDateChanged: (value: boolean) => void
-  showValidationErrors: boolean
   onEndChange?: (newEnd: string) => void
   setEnd: (value: string) => void
   onHasEndDateChangedChange?: (has: boolean) => void
@@ -47,7 +46,6 @@ export function useDateTimeSplit({
   showMore,
   hasEndDateChanged,
   setHasEndDateChanged,
-  showValidationErrors,
   onEndChange,
   setEnd,
   onHasEndDateChangedChange,
@@ -74,7 +72,6 @@ export function useDateTimeSplit({
     endDate,
     endTime,
     allday,
-    showValidationErrors,
     hasEndDateChanged,
     showMore
   }).isValid

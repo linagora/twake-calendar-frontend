@@ -21,7 +21,6 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
   showRepeat,
   setShowRepeat,
   showMore,
-  showValidationErrors,
   timezoneList,
   typeOfAction,
   onStartChange,
@@ -60,7 +59,6 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
     showMore,
     hasEndDateChanged,
     setHasEndDateChanged,
-    showValidationErrors,
     onEndChange,
     setEnd,
     onHasEndDateChangedChange,
@@ -104,7 +102,6 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
             showMore={showMore}
             hasEndDateChanged={hasEndDateChanged}
             setHasEndDateChanged={setHasEndDateChanged}
-            showValidationErrors={showValidationErrors}
             timezoneList={timezoneList}
             typeOfAction={typeOfAction}
             onStartChange={onStartChange}

@@ -11,7 +11,11 @@ import 'dayjs/locale/vi'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import React, { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
-import { DateTimeErrors } from '../../utils/formValidation'
+import {
+  DateTimeErrors,
+  DateTimeWarnings,
+  ValidationResult
+} from '../../utils/formValidation'
 import { DateTimeError } from './DateTimeError'
 import { DateTimeLayoutContent } from './DateTimeLayoutContent'
 import { useDateTimeHandlers } from './useDateTimeHandlers'
@@ -30,9 +34,7 @@ export interface DateTimeFieldsProps {
   hasEndDateChanged: boolean
   showEndDate: boolean
   onToggleEndDate: () => void
-  validation: {
-    errors: DateTimeErrors
-  }
+  validation: ValidationResult
   onStartDateChange: (date: string) => void
   onStartTimeChange: (time: string) => void
   onEndDateChange: (date: string, time?: string) => void
@@ -145,7 +147,21 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           startTimeValue={startTimeValue}
           endDateValue={endDateValue}
           endTimeValue={endTimeValue}
-          errors={validation.errors}
+          errors={{
+            date: {
+              start:
+                validation.errors?.date?.start ||
+                validation.warnings?.date?.start,
+              end:
+                validation.errors?.date?.end ||
+                validation.warnings?.date?.end ||
+                ''
+            },
+            time: {
+              start: validation.errors?.time?.start,
+              end: validation.errors?.time?.end
+            }
+          }}
           isMobile={isMobile}
           allday={allday}
           startDateLabel={startDateLabel}
@@ -155,13 +171,31 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           onEndDateChange={handleEndDateChange}
           onEndTimeChange={handleEndTimeChange}
         />
-        <DateTimeError message={displayError(validation)} />
+        <DateTimeError
+          message={displayError(validation)}
+          warning={displayAsWarning(validation)}
+        />
       </Box>
     </LocalizationProvider>
   )
 }
 
-function displayError(validation: { errors: DateTimeErrors }): string {
+function displayAsWarning(validation: ValidationResult): boolean | undefined {
+  if (
+    validation.errors.date?.start ||
+    validation.errors.date?.end ||
+    validation.errors.time?.start ||
+    validation.errors.time?.end
+  ) {
+    return false
+  }
+  return !!validation.warnings?.date?.start || !!validation.warnings?.date?.end
+}
+
+function displayError(validation: {
+  errors: DateTimeErrors
+  warnings: DateTimeWarnings
+}): string {
   if (validation?.errors?.date?.start) {
     return validation.errors.date.start
   }
@@ -173,6 +207,12 @@ function displayError(validation: { errors: DateTimeErrors }): string {
   }
   if (validation?.errors?.time?.start) {
     return validation.errors.time.start
+  }
+  if (validation?.warnings?.date?.start) {
+    return validation.warnings.date.start
+  }
+  if (validation?.warnings?.date?.end) {
+    return validation.warnings.date.end
   }
   return ''
 }
