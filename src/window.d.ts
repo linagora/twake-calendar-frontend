@@ -16,6 +16,7 @@ declare global {
 
     CALENDAR_BASE_URL: string
     DAV_BASE_URL: string
+    CALDAV_PREFER_HANDLING?: 'strict'
     MAIL_SPA_URL: string
     VIDEO_CONFERENCE_BASE_URL: string
     SUPPORT_URL: string
