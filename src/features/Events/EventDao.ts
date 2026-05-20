@@ -6,6 +6,14 @@ import { SearchEventsResponse } from '../Search/types/SearchEventsResponse'
 import { CalendarEvent } from './EventsTypes'
 import { WKST_NUM_TO_DAY } from './utils/wkstUtils'
 
+function getCalDavPreferHeader(): Record<string, string> {
+  if (window.CALDAV_PREFER_HANDLING !== 'strict') {
+    return {}
+  }
+
+  return { Prefer: 'handling=strict' }
+}
+
 export async function reportEvent(
   event: CalendarEvent,
   match: { start: string; end: string }
@@ -38,7 +46,10 @@ export async function putEvent(
   const response = await api(`dav${event.URL}`, {
     method: 'PUT',
     body: JSON.stringify(jCal),
-    headers: { 'content-type': 'text/calendar; charset=utf-8' }
+    headers: {
+      'content-type': 'text/calendar; charset=utf-8',
+      ...getCalDavPreferHeader()
+    }
   })
 
   if (response.status === 201) {
