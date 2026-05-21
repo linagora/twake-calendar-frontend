@@ -25,6 +25,7 @@ export interface CalendarSelectFieldProps {
   userPersonalCalendars: Calendar[]
   showMore: boolean
   disabled?: boolean
+  defaultExpanded?: boolean
   /** Optional callback for additional logic on change (e.g. UpdateModal tracks newCalId) */
   onCalendarChange?: (newCalendarId: string) => void
 }
@@ -144,6 +145,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
   setCalendarid,
   userPersonalCalendars,
   showMore,
+  defaultExpanded,
   onCalendarChange,
   disabled
 }) => {
@@ -164,7 +166,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
     }
 
     openSelectAfterClick()
-  }, [hasClickedCalendarSection])
+  }, [hasClickedCalendarSection, defaultExpanded])
 
   const selectedCalendar = userPersonalCalendars.find(
     cal => cal.id === calendarid
@@ -174,7 +176,8 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
     : ''
   const isSelectedDelegated = !!selectedCalendar?.delegated
 
-  const isCollapsed = !showMore && !hasClickedCalendarSection
+  const isCollapsed =
+    !showMore && !hasClickedCalendarSection && !defaultExpanded
 
   return (
     <FieldWithLabel

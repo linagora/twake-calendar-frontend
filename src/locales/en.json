@@ -305,6 +305,7 @@
   "eventPreview": {
     "emailAttendees": "Email attendees",
     "deleteEvent": "Delete event",
+    "editEventSpecificSettings": "Edit personal event settings",
     "privateEvent": {
       "tooltipOwn": "Only you and attendees can see the details of this event.",
       "hiddenDetails": "This is a private event. Details are hidden."

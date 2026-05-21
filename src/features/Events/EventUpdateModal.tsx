@@ -29,6 +29,7 @@ interface EventUpdateModalProps {
   calId: string
   open: boolean
   onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void
+  isSpecific?: boolean
   onCloseAll?: () => void
   eventData?: CalendarEvent | null
   typeOfAction?: 'solo' | 'all'
@@ -36,7 +37,16 @@ interface EventUpdateModalProps {
 
 const EventUpdateModalInternal: React.FC<
   EventUpdateModalProps & { event: CalendarEvent }
-> = ({ eventId, calId, open, onClose, onCloseAll, event, typeOfAction }) => {
+> = ({
+  eventId,
+  calId,
+  open,
+  onClose,
+  isSpecific,
+  onCloseAll,
+  event,
+  typeOfAction
+}) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const calList = useAppSelector(state => state.calendars.list)
@@ -115,6 +125,7 @@ const EventUpdateModalInternal: React.FC<
         initialValues={initialValues}
         showMore={showMore}
         isOpen={open}
+        isSpecific={isSpecific}
         typeOfAction={typeOfAction}
         eventId={event.uid}
         userPersonalCalendars={userPersonalCalendars}

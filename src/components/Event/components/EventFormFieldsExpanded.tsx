@@ -1,12 +1,10 @@
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { FormControl, TextField } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { FieldWithLabel } from './FieldWithLabel'
 import { Resource, ResourceSearch } from '../../Attendees/ResourceSearch'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
-import { FreeBusyField } from '../fields/FreeBusyField'
-import { NotificationField } from '../fields/NotificationField'
-import { VisibilityField } from '../fields/VisibilityField'
+import { EventFormFieldsSpecific } from './EventFormFieldsSpecific'
+import { FieldWithLabel } from './FieldWithLabel'
 
 interface EventFormFieldsExpandedProps {
   alarm: string
@@ -36,6 +34,8 @@ export const EventFormFieldsExpanded: React.FC<
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
+  if (!showMore) return null
+
   return (
     <>
       {showMore && !window.HIDE_RESOURCES && (
@@ -57,21 +57,15 @@ export const EventFormFieldsExpanded: React.FC<
         </FieldWithLabel>
       )}
 
-      <NotificationField
+      <EventFormFieldsSpecific
         alarm={alarm}
         setAlarm={setAlarm}
+        busy={busy}
+        setBusy={setBusy}
+        eventClass={eventClass}
+        setEventClass={setEventClass}
         showMore={showMore}
       />
-
-      <FreeBusyField busy={busy} setBusy={setBusy} showMore={showMore} />
-
-      {!window.DISABLE_PUBLIC_VISIBILITY && (
-        <VisibilityField
-          eventClass={eventClass}
-          setEventClass={setEventClass}
-          showMore={showMore}
-        />
-      )}
     </>
   )
 }
