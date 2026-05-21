@@ -5,12 +5,14 @@ import {
   moveEventAsync,
   putEventAsync
 } from '@/features/Calendars/services'
+import { fetchAllRecurrentVevents } from '@/features/Events/EventDao'
 import { userAttendee } from '@/features/User/models/attendee'
 import { userOrganiser } from '@/features/User/userDataTypes'
 import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@/utils/makeDisplayName'
 import { CalendarEvent } from '../EventsTypes'
+import { parseCalendarEvent } from '../utils'
 import { buildDelegatedEventURL } from '../utils/buildDelegatedEventURL'
 
 export interface MoveEventBetweenCalendarsParams {
@@ -19,6 +21,33 @@ export interface MoveEventBetweenCalendarsParams {
   newEvent: CalendarEvent
   oldCalId: string
   newCalId: string
+}
+
+/**
+ * If the event is a recurring instance (has a recurrenceId), fetch all
+ * VEVENTs for the series and return the master — the VEVENT that has no
+ * RECURRENCE-ID.  If the event is already the master (or is not recurring),
+ * it is returned as-is.
+ */
+async function resolveMasterEvent(
+  event: CalendarEvent,
+  calendar: Calendar
+): Promise<CalendarEvent> {
+  if (!event.recurrenceId) {
+    return event
+  }
+
+  const vevents = await fetchAllRecurrentVevents(event)
+  const masterVevent = vevents
+    .filter(([n]) => n === 'vevent')
+    .find(([, props]) => !props.some(([k]) => k === 'recurrence-id'))
+
+  if (!masterVevent) {
+    throw new Error(
+      `Could not find master event for recurring series: ${event.uid}`
+    )
+  }
+  return parseCalendarEvent(masterVevent[1], event.color, calendar, event.URL)
 }
 
 function resolveOrganizerForCalendar(
@@ -89,19 +118,22 @@ export async function moveEventBetweenCalendars({
     throw new Error(`Target calendar not found: ${newCalId}`)
   }
 
+  // Always operate on the master event — never on a recurring instance
+  const masterEvent = await resolveMasterEvent(newEvent, oldCalendar)
+
   const isDelegatedMove = oldCalendar.delegated || targetCalendar.delegated
 
   if (isDelegatedMove) {
     await moveDelegatedEvent({
       dispatch,
-      newEvent,
+      newEvent: masterEvent,
       oldCalendar,
       targetCalendar
     })
   } else {
     await moveStandardEvent({
       dispatch,
-      newEvent,
+      newEvent: masterEvent,
       targetCalendar,
       oldCalendar
     })
@@ -169,7 +201,6 @@ async function moveDelegatedEvent({
   )
 
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`
-
   const eventForTargetCalendar: CalendarEvent = {
     ...newEvent,
     calId: newCalId,

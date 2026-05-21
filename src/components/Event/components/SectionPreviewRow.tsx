@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
+import { Box, radius, Typography, useTheme } from '@linagora/twake-mui'
 import { alpha } from '@mui/material/styles'
 import React from 'react'
 
@@ -23,7 +23,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
   const theme = useTheme()
   const color = iconColor ?? alpha(theme.palette.grey[900], 0.9)
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onClick()
@@ -40,8 +40,8 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
         display: 'flex',
         alignItems: 'center',
         cursor: 'pointer',
-        padding: '8px 12px',
-        borderRadius: '4px',
+        padding: '8px 0px',
+        borderRadius: radius.sm,
         '&:hover': {
           backgroundColor: 'action.hover'
         }

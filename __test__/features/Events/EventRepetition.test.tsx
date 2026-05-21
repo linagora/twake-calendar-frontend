@@ -102,6 +102,21 @@ const basePreloadedState = {
   }
 } as unknown as RootState
 
+// Master VEVENT fixture (no recurrence-id = master event)
+const masterVeventFixture = [
+  [
+    'vevent',
+    [
+      ['uid', {}, 'text', 'recurring-base'],
+      ['summary', {}, 'text', 'Recurring Event Instance'],
+      ['dtstart', {}, 'date-time', '20250315T100000Z'],
+      ['dtend', {}, 'date-time', '20250315T110000Z']
+      // No recurrence-id — this marks it as the master
+    ],
+    []
+  ]
+] as any
+
 describe('EditModeDialog Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -670,7 +685,7 @@ describe('Edit Recurring Event in Full Display', () => {
       )
     const spy = jest
       .spyOn(eventThunks, 'updateEventInstanceAsync')
-      .mockImplementation(payload => {
+      .mockImplementation(() => {
         return () => {
           const promise = Promise.resolve()
           ;(promise as any).unwrap = () => promise
@@ -724,7 +739,7 @@ describe('Edit Recurring Event in Full Display', () => {
 
     const spy = jest
       .spyOn(eventThunks, 'updateSeriesAsync')
-      .mockImplementation(payload => {
+      .mockImplementation(() => {
         return () => {
           const promise = Promise.resolve()
           ;(promise as any).unwrap = () => promise
@@ -1208,6 +1223,15 @@ describe('Event URL handling for recurring events', () => {
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
+    jest.spyOn(eventThunks, 'putEventAsync').mockImplementation(payload => {
+      const result = { calId: payload.cal.id, events: [] }
+      const promise = Promise.resolve(result)
+      ;(promise as any).unwrap = () => promise
+      return () => promise as any
+    })
+    jest
+      .spyOn(EventDao, 'fetchAllRecurrentVevents')
+      .mockResolvedValue(masterVeventFixture)
 
     const twoCalState = {
       user: {

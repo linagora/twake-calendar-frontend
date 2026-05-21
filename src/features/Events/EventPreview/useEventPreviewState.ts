@@ -1,5 +1,9 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { AppDispatch } from '@/app/store'
+import { handleDelete } from '@/components/Event/eventHandlers/eventHandlers'
+import { setCalendarError } from '@/features/Calendars/CalendarSlice'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { userData } from '@/features/User/userDataTypes'
 import { assertThunkSuccess } from '@/utils/assertThunkSuccess'
 import { getEffectiveEmail } from '@/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@/utils/isEventOrganiser'
@@ -8,8 +12,61 @@ import { useState } from 'react'
 import { deleteEventAsync } from '../../Calendars/services'
 import { ToUserData } from '../../User/type/OpenPaasUserData'
 import { createEventContext } from '../createEventContext'
-import { handleDelete } from '@/components/Event/eventHandlers/eventHandlers'
+import { CalendarEvent, ContextualizedEvent } from '../EventsTypes'
+import { moveEventBetweenCalendars } from '../updateEventHelpers/moveEventBetweenCalendars'
 import { useEventUpdateModalReopen } from './useEventUpdateModalReopen'
+
+interface StoredEventReopenData {
+  eventId: string
+  calId: string
+  typeOfAction?: 'solo' | 'all'
+}
+
+interface UseEventPreviewStateReturn {
+  event: CalendarEvent
+  calendar: Calendar | undefined
+  user: userData
+  timezone: string
+  contextualizedEvent: ContextualizedEvent | null
+  attendanceUser: userData | undefined
+  isRecurring: boolean
+  isOwn: boolean
+  isWriteDelegated: boolean
+  isOrganizer: boolean
+  isNotPrivate: boolean
+  canEdit: boolean
+  organizerWritableCalendar: Calendar | undefined
+  openUpdateModal: boolean
+  setOpenUpdateModal: React.Dispatch<React.SetStateAction<boolean>>
+  openDuplicateModal: boolean
+  setOpenDuplicateModal: React.Dispatch<React.SetStateAction<boolean>>
+  hidePreview: boolean
+  setHidePreview: React.Dispatch<React.SetStateAction<boolean>>
+  toggleActionMenu: Element | null
+  setToggleActionMenu: React.Dispatch<React.SetStateAction<Element | null>>
+  updateModalCalId: string
+  openEditModePopup: string | null
+  setOpenEditModePopup: React.Dispatch<React.SetStateAction<string | null>>
+  typeOfAction: 'solo' | 'all' | undefined
+  setTypeOfAction: React.Dispatch<
+    React.SetStateAction<'solo' | 'all' | undefined>
+  >
+  afterChoiceFunc: ((type: 'solo' | 'all' | undefined) => void) | undefined
+  setAfterChoiceFunc: React.Dispatch<
+    React.SetStateAction<
+      ((type: 'solo' | 'all' | undefined) => void) | undefined
+    >
+  >
+  resolvedTypeOfAction: 'solo' | 'all' | undefined
+  handleEditClick: () => void
+  handleEditInOrganizerCalendar: () => void
+  handleDeleteClick: () => Promise<void>
+  handleDuplicateClick: () => void
+  calendarid: string
+  handleCalendarMove: (calendarid: string) => void
+  userPersonalCalendars: Calendar[]
+  dispatch: AppDispatch
+}
 
 export function useEventPreviewState(
   eventId: string,
@@ -17,9 +74,10 @@ export function useEventPreviewState(
   tempEvent: boolean | undefined,
   open: boolean,
   onClose: (event: unknown, reason: 'backdropClick' | 'escapeKeyDown') => void
-) {
+): UseEventPreviewStateReturn {
   const dispatch = useAppDispatch()
   const calendars = useAppSelector(state => state.calendars)
+
   const timezone =
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
   const user = useAppSelector(state => state.user.userData)
@@ -27,12 +85,14 @@ export function useEventPreviewState(
   const calendar = tempEvent ? calendars.templist[calId] : calendars.list[calId]
   const event = calendar?.events[eventId]
 
+  const [calendarid, setCalendarid] = useState<string>(calendar?.id ?? '')
+
   // Modal visibility
-  const [openUpdateModal, setOpenUpdateModal] = useState(false)
-  const [openDuplicateModal, setOpenDuplicateModal] = useState(false)
-  const [hidePreview, setHidePreview] = useState(false)
+  const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false)
+  const [openDuplicateModal, setOpenDuplicateModal] = useState<boolean>(false)
+  const [hidePreview, setHidePreview] = useState<boolean>(false)
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(null)
-  const [updateModalCalId, setUpdateModalCalId] = useState(calId)
+  const [updateModalCalId, setUpdateModalCalId] = useState<string>(calId)
 
   // Recurring event handling
   const [openEditModePopup, setOpenEditModePopup] = useState<string | null>(
@@ -78,7 +138,7 @@ export function useEventPreviewState(
   const organizerWritableCalendar: Calendar | undefined =
     !canEdit && organizerEmail
       ? Object.values(calendars.list).find(
-          cal =>
+          (cal): boolean | undefined =>
             cal.delegated &&
             cal.access?.write &&
             cal.owner?.emails?.some(e => e.toLowerCase() === organizerEmail) &&
@@ -93,18 +153,19 @@ export function useEventPreviewState(
     isWriteDelegated && calendar?.owner ? ToUserData(calendar.owner) : user
 
   // Resolve typeOfAction for EventUpdateModal (state or sessionStorage fallback)
-  const resolvedTypeOfAction = (() => {
+  const resolvedTypeOfAction = ((): 'solo' | 'all' | undefined => {
     if (typeOfAction) return typeOfAction
     try {
       const stored = sessionStorage.getItem('eventUpdateModalReopen')
       if (stored) {
-        const data = JSON.parse(stored)
+        const data = JSON.parse(stored) as StoredEventReopenData
         if (
+          data &&
           data.eventId === eventId &&
           data.calId === calId &&
           data.typeOfAction
         ) {
-          return data.typeOfAction as 'solo' | 'all'
+          return data.typeOfAction
         }
       }
     } catch {
@@ -113,11 +174,21 @@ export function useEventPreviewState(
     return undefined
   })()
 
+  const userPersonalCalendars: Calendar[] = Object.values(
+    calendars.list || {}
+  ).filter(
+    (cal): boolean | undefined =>
+      cal.id?.split('/')[0] === user.openpaasId ||
+      (cal.delegated &&
+        cal.access?.write &&
+        isEventOrganiser(event, effectiveEmail))
+  )
+
   // Action handlers
-  const handleEditClick = () => {
+  const handleEditClick = (): void => {
     setUpdateModalCalId(calId)
     if (isRecurring) {
-      setAfterChoiceFunc(() => () => {
+      setAfterChoiceFunc(() => (): void => {
         setHidePreview(true)
         setOpenUpdateModal(true)
       })
@@ -128,11 +199,11 @@ export function useEventPreviewState(
     }
   }
 
-  const handleEditInOrganizerCalendar = () => {
+  const handleEditInOrganizerCalendar = (): void => {
     if (!organizerWritableCalendar) return
     setUpdateModalCalId(organizerWritableCalendar.id)
     if (isRecurring) {
-      setAfterChoiceFunc(() => () => {
+      setAfterChoiceFunc(() => (): void => {
         setHidePreview(true)
         setOpenUpdateModal(true)
       })
@@ -143,20 +214,21 @@ export function useEventPreviewState(
     }
   }
 
-  const handleDeleteClick = async () => {
+  const handleDeleteClick = async (): Promise<void> => {
     if (isRecurring) {
       setAfterChoiceFunc(
-        () => (type?: 'solo' | 'all') =>
-          void handleDelete(
-            isRecurring,
-            type,
-            onClose,
-            dispatch,
-            calendar,
-            event,
-            calId,
-            eventId
-          )
+        () =>
+          (type?: 'solo' | 'all'): void =>
+            void handleDelete(
+              isRecurring,
+              type,
+              onClose,
+              dispatch,
+              calendar,
+              event,
+              calId,
+              eventId
+            )
       )
       setOpenEditModePopup('delete')
     } else {
@@ -172,9 +244,28 @@ export function useEventPreviewState(
     }
   }
 
-  const handleDuplicateClick = () => {
+  const handleDuplicateClick = (): void => {
     setHidePreview(true)
     setOpenDuplicateModal(true)
+  }
+
+  const handleCalendarMove = (calendarid: string): void => {
+    if (!event || calendarid === calId) return
+    void Promise.resolve(
+      moveEventBetweenCalendars({
+        dispatch,
+        calList: calendars.list,
+        newEvent: event,
+        oldCalId: calId,
+        newCalId: calendarid
+      })
+    )
+      .then(() => setCalendarid(calendarid))
+      .catch(error => {
+        console.error('Failed to move event:', error)
+        dispatch(setCalendarError(`Failed to move event: ${error}`))
+        setCalendarid(calId)
+      })
   }
 
   return {
@@ -220,6 +311,11 @@ export function useEventPreviewState(
     handleEditInOrganizerCalendar,
     handleDeleteClick,
     handleDuplicateClick,
+
+    // moving calendar
+    calendarid,
+    handleCalendarMove,
+    userPersonalCalendars,
 
     dispatch
   }
