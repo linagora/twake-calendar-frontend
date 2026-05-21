@@ -1,4 +1,5 @@
 import { Calendar } from '@/features/Calendars/CalendarTypes'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { defaultColors } from '@/utils/defaultColors'
 import { makeDisplayName } from '@/utils/makeDisplayName'
 import { renameDefault } from '@/utils/renameDefault'
@@ -17,13 +18,13 @@ import { CalendarItemList } from '../../Calendar/CalendarItemList'
 import { OwnerCaption } from '../../Calendar/OwnerCaption'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { SectionPreviewRow } from '../components/SectionPreviewRow'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export interface CalendarSelectFieldProps {
   calendarid: string
   setCalendarid: (value: string) => void
   userPersonalCalendars: Calendar[]
   showMore: boolean
+  disabled?: boolean
   /** Optional callback for additional logic on change (e.g. UpdateModal tracks newCalId) */
   onCalendarChange?: (newCalendarId: string) => void
 }
@@ -35,13 +36,15 @@ const CalendarSelectFieldCollapsed: React.FC<{
   selectedOwnerDisplayName: string
   isSelectedDelegated: boolean
   setHasClickedCalendarSection: (value: boolean) => void
+  disabled?: boolean
 }> = ({
   calendarid,
   userPersonalCalendars,
   selectedCalendar,
   selectedOwnerDisplayName,
   isSelectedDelegated,
-  setHasClickedCalendarSection
+  setHasClickedCalendarSection,
+  disabled
 }) => {
   const { t } = useI18n()
 
@@ -58,7 +61,7 @@ const CalendarSelectFieldCollapsed: React.FC<{
           }}
         />
       }
-      onClick={() => setHasClickedCalendarSection(true)}
+      onClick={() => !disabled && setHasClickedCalendarSection(true)}
     >
       {selectedCalendar?.name ? (
         <Box style={{ display: 'flex', flexDirection: 'column' }}>
@@ -91,13 +94,15 @@ const CalendarSelectFieldExpanded: React.FC<{
   calendarSelectOpen: boolean
   setCalendarSelectOpen: (value: boolean) => void
   onCalendarChange?: (newCalendarId: string) => void
+  disabled?: boolean
 }> = ({
   calendarid,
   setCalendarid,
   userPersonalCalendars,
   calendarSelectOpen,
   setCalendarSelectOpen,
-  onCalendarChange
+  onCalendarChange,
+  disabled
 }) => {
   const { t } = useI18n()
 
@@ -114,6 +119,7 @@ const CalendarSelectFieldExpanded: React.FC<{
       <Select
         value={calendarid ?? ''}
         label=""
+        disabled={disabled}
         SelectDisplayProps={{ 'aria-label': t('event.form.calendar') }}
         displayEmpty
         open={calendarSelectOpen}
@@ -138,7 +144,8 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
   setCalendarid,
   userPersonalCalendars,
   showMore,
-  onCalendarChange
+  onCalendarChange,
+  disabled
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -182,6 +189,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
           selectedCalendar={selectedCalendar}
           selectedOwnerDisplayName={selectedOwnerDisplayName}
           isSelectedDelegated={isSelectedDelegated}
+          disabled={disabled}
         />
       ) : (
         <CalendarSelectFieldExpanded
@@ -191,6 +199,7 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
           calendarSelectOpen={calendarSelectOpen}
           setCalendarSelectOpen={setCalendarSelectOpen}
           onCalendarChange={onCalendarChange}
+          disabled={disabled}
         />
       )}
     </FieldWithLabel>

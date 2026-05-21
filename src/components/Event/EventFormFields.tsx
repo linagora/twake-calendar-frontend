@@ -250,6 +250,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           setCalendarid={setCalendarid}
           userPersonalCalendars={userPersonalCalendars}
           showMore={showMore}
+          disabled={typeOfAction === 'solo'}
           onCalendarChange={setCalendarid}
         />
 
