@@ -226,7 +226,7 @@ const EventPreviewModal: React.FC<{
       {/* Action menu (more vert) */}
       <EventPreviewActionMenu
         anchorEl={toggleActionMenu}
-        isOwn={isOwn}
+        isEditable={isOwn || isWriteDelegated}
         event={event}
         userEmail={user.email}
         onClose={() => setToggleActionMenu(null)}

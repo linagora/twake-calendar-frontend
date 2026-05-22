@@ -5,7 +5,7 @@ import { CalendarEvent } from '../EventsTypes'
 
 interface EventPreviewActionMenuProps {
   anchorEl: Element | null
-  isOwn: boolean
+  isEditable: boolean
   event: CalendarEvent
   userEmail: string
   onClose: () => void
@@ -15,7 +15,7 @@ interface EventPreviewActionMenuProps {
 
 export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
   anchorEl,
-  isOwn,
+  isEditable,
   event,
   userEmail,
   onClose,
@@ -32,7 +32,7 @@ export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
 
   return (
     <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
-      {isOwn && (
+      {isEditable && (
         <MenuItem
           onClick={() => {
             onClose()
