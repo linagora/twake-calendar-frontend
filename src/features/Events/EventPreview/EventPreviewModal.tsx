@@ -217,6 +217,7 @@ const EventPreviewModal: React.FC<{
           setCalendarid={handleCalendarMove}
           userPersonalCalendars={userPersonalCalendars}
           showMore={false}
+          disabled={!isOwn && !isWriteDelegated}
         />
       </ResponsiveDialog>
 
