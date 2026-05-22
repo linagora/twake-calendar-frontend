@@ -98,24 +98,29 @@ const EventUpdateModalInternal: React.FC<
 
   const tempContext: EventFormContext = { eventId, calId, typeOfAction }
 
+  const handleExpandToggle = !isSpecific
+    ? (): void => setShowMore(s => !s)
+    : undefined
+
+  const actions = (
+    <EventActions
+      showExpandedBtn={!showMore && !isSpecific}
+      isEdit
+      onClose={handleClose}
+      onSave={async () => {
+        await formRef.current?.submit()
+      }}
+      onExpanded={() => setShowMore(s => !s)}
+    />
+  )
   return (
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
       title={t('event.updateEvent')}
       isExpanded={showMore}
-      onExpandToggle={!isSpecific ? () => setShowMore(s => !s) : undefined}
-      actions={
-        <EventActions
-          showExpandedBtn={!showMore && !isSpecific}
-          isEdit
-          onClose={handleClose}
-          onSave={async () => {
-            await formRef.current?.submit()
-          }}
-          onExpanded={() => setShowMore(s => !s)}
-        />
-      }
+      onExpandToggle={handleExpandToggle}
+      actions={actions}
       sx={dialogPaddingStyles(isMobile)}
       expandText={t('tooltip.moreEventOptions')}
     >
