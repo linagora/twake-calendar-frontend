@@ -215,7 +215,9 @@ const EventPreviewModal: React.FC<{
         <CalendarSelectField
           calendarid={calendarid}
           setCalendarid={handleCalendarMove}
-          userPersonalCalendars={userPersonalCalendars}
+          userPersonalCalendars={
+            !isOwn && !isWriteDelegated ? [calendar] : userPersonalCalendars
+          }
           showMore={false}
         />
       </ResponsiveDialog>
