@@ -11,6 +11,7 @@ interface EventFormFieldsSpecificProps {
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   setEventClass: (v: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL') => void
   showMore: boolean
+  isOrganizer?: boolean
 }
 
 export const EventFormFieldsSpecific: React.FC<
@@ -22,7 +23,8 @@ export const EventFormFieldsSpecific: React.FC<
   setBusy,
   eventClass,
   setEventClass,
-  showMore
+  showMore,
+  isOrganizer
 }) => {
   return (
     <>
@@ -31,15 +33,18 @@ export const EventFormFieldsSpecific: React.FC<
         setAlarm={setAlarm}
         showMore={showMore}
       />
+      {!isOrganizer && (
+        <>
+          <FreeBusyField busy={busy} setBusy={setBusy} showMore={showMore} />
 
-      <FreeBusyField busy={busy} setBusy={setBusy} showMore={showMore} />
-
-      {!window.DISABLE_PUBLIC_VISIBILITY && (
-        <VisibilityField
-          eventClass={eventClass}
-          setEventClass={setEventClass}
-          showMore={showMore}
-        />
+          {!window.DISABLE_PUBLIC_VISIBILITY && (
+            <VisibilityField
+              eventClass={eventClass}
+              setEventClass={setEventClass}
+              showMore={showMore}
+            />
+          )}
+        </>
       )}
     </>
   )

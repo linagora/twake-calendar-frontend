@@ -119,11 +119,13 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       [onValidationChange]
     )
 
-    const { organizer } = useEventOrganizer({
+    const { organizer, isOrganizer } = useEventOrganizer({
       calendarid: formValues.calendarid,
+      eventId,
       calList,
       userOrganizer
     })
+
     // Keep organizer in a ref so submit() can read it synchronously
     const organizerRef = useRef(organizer)
     useEffect(() => {
@@ -196,6 +198,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
             eventClass={v.eventClass}
             setEventClass={setEventClass}
             showMore={showMore}
+            isOrganizer={isOrganizer}
           />
         </React.Fragment>
       )

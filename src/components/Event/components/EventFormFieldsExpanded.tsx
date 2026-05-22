@@ -38,7 +38,7 @@ export const EventFormFieldsExpanded: React.FC<
 
   return (
     <>
-      {showMore && !window.HIDE_RESOURCES && (
+      {!window.HIDE_RESOURCES && (
         <FieldWithLabel
           label={t('event.form.resource')}
           isExpanded={showMore && !isMobile}
