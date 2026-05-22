@@ -1,3 +1,4 @@
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import {
   FormControl,
   MenuItem,
@@ -20,9 +21,13 @@ export const FreeBusyField: React.FC<FreeBusyFieldProps> = ({
   showMore
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   return (
-    <FieldWithLabel label={t('event.form.showMeAs')} isExpanded={showMore}>
+    <FieldWithLabel
+      label={t('event.form.showMeAs')}
+      isExpanded={showMore && !isMobile}
+    >
       <FormControl fullWidth margin="dense" size="small">
         <Select
           labelId="busy"

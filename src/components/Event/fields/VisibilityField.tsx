@@ -1,3 +1,4 @@
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { ToggleButton, ToggleButtonGroup } from '@linagora/twake-mui'
 import { Public as PublicIcon } from '@mui/icons-material'
 import LockOutlineIcon from '@mui/icons-material/LockOutline'
@@ -18,9 +19,13 @@ export const VisibilityField: React.FC<VisibilityFieldProps> = ({
   showMore
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   return (
-    <FieldWithLabel label={t('event.form.visibleTo')} isExpanded={showMore}>
+    <FieldWithLabel
+      label={t('event.form.visibleTo')}
+      isExpanded={showMore && !isMobile}
+    >
       <ToggleButtonGroup
         value={eventClass}
         exclusive

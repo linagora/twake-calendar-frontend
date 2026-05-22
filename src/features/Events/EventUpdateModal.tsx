@@ -104,10 +104,10 @@ const EventUpdateModalInternal: React.FC<
       onClose={handleClose}
       title={t('event.updateEvent')}
       isExpanded={showMore}
-      onExpandToggle={() => setShowMore(s => !s)}
+      onExpandToggle={!isSpecific ? () => setShowMore(s => !s) : undefined}
       actions={
         <EventActions
-          showExpandedBtn={!showMore}
+          showExpandedBtn={!showMore && !isSpecific}
           isEdit
           onClose={handleClose}
           onSave={async () => {
