@@ -1,4 +1,5 @@
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
+import moment from 'moment'
 import { RepetitionRule } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
@@ -92,7 +93,11 @@ export function makeVevent(
       repetitionRule.count = event.repetition.occurrences
     }
     if (event.repetition.endDate) {
-      repetitionRule.until = event.repetition.endDate
+      repetitionRule.until = formatUntilForRRule(
+        event.repetition.endDate,
+        event.allday ?? false,
+        tzid
+      )
     }
     if (
       event.repetition.byday !== null &&
@@ -149,4 +154,23 @@ export function makeVevent(
   }
 
   return vevent
+}
+
+function formatUntilForRRule(
+  endDate: string,
+  allday: boolean,
+  tzid: string
+): string {
+  if (allday) {
+    return endDate
+  }
+
+  // Take the date part of endDate, add end of day, convert to UTC
+  const datePart = endDate
+  const timePart = '23:59:59'
+
+  return moment
+    .tz(`${datePart}T${timePart}`, tzid)
+    .utc()
+    .format('YYYYMMDDTHHmmss[Z]')
 }

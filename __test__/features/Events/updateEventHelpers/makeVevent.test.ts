@@ -365,11 +365,11 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
 
   it('maps endDate to UNTIL', () => {
     const event = baseEvent({
-      repetition: { freq: 'WEEKLY', endDate: '20241231T000000Z' }
+      repetition: { freq: 'WEEKLY', endDate: '2024-12-31' }
     })
     const vevent = makeVevent(event, TZID, OWNER)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
-    expect(rule.until).toBe('20241231T000000Z')
+    expect(rule.until).toBe('20241231T235959Z')
   })
 
   it('maps byday correctly', () => {
