@@ -1,19 +1,12 @@
 import moment from 'moment-timezone'
 import ICAL from 'ical.js'
 
-export function formatDateToICal(
-  date: Date,
-  allday: boolean,
-  timezone?: string
-): string {
-  const pad = (n: number): string => n.toString().padStart(2, '0')
+export function formatDateToICal(date: Date): string {
+  return moment(date).format('YYYY-MM-DD')
+}
 
-  if (allday) {
-    const year = date.getUTCFullYear()
-    const month = pad(date.getUTCMonth() + 1)
-    const day = pad(date.getUTCDate())
-    return `${year}-${month}-${day}`
-  }
+export function formatDateTimeToICal(date: Date, timezone?: string): string {
+  const pad = (n: number): string => n.toString().padStart(2, '0')
 
   if (timezone) {
     // Try moment-timezone first (works for most IANA timezones)

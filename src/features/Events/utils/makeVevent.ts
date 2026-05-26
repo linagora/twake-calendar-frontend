@@ -1,7 +1,7 @@
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { RepetitionRule } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
-import { formatDateToICal } from './formatDateToICal'
+import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
 
 export function makeVevent(
   event: CalendarEvent,
@@ -18,7 +18,9 @@ export function makeVevent(
         'dtstart',
         event.allday ? {} : { tzid },
         event.allday ? 'date' : 'date-time',
-        formatDateToICal(new Date(event.start), event.allday ?? false, tzid)
+        event.allday
+          ? formatDateToICal(new Date(event.start))
+          : formatDateTimeToICal(new Date(event.start), tzid)
       ],
       ['class', {}, 'text', event.class ?? 'PUBLIC'],
       ['sequence', {}, 'integer', event.sequence ?? 1],
@@ -52,7 +54,9 @@ export function makeVevent(
       'dtend',
       event.allday ? {} : { tzid },
       event.allday ? 'date' : 'date-time',
-      formatDateToICal(new Date(event.end), event.allday ?? false, tzid)
+      event.allday
+        ? formatDateToICal(new Date(event.end))
+        : formatDateTimeToICal(new Date(event.end), tzid)
     ])
   }
   if (event.organizer) {
@@ -71,11 +75,9 @@ export function makeVevent(
       'recurrence-id',
       event.allday ? {} : { tzid },
       event.allday ? 'date' : 'date-time',
-      formatDateToICal(
-        new Date(event.recurrenceId),
-        event.allday ?? false,
-        tzid
-      )
+      event.allday
+        ? formatDateToICal(new Date(event.recurrenceId))
+        : formatDateTimeToICal(new Date(event.recurrenceId), tzid)
     ])
   }
   if (event.description) {
@@ -128,7 +130,9 @@ export function makeVevent(
         'exdate',
         event.allday ? {} : { tzid },
         event.allday ? 'date' : 'date-time',
-        formatDateToICal(new Date(ex), event.allday ?? false, tzid)
+        event.allday
+          ? formatDateToICal(new Date(ex))
+          : formatDateTimeToICal(new Date(ex), tzid)
       ])
     })
   }

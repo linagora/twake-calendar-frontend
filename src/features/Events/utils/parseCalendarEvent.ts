@@ -10,7 +10,7 @@ import { userAttendee } from '../../User/models/attendee'
 import { createAttendee } from '../../User/models/attendee.mapper'
 import { AlarmObject, CalendarEvent } from '../EventsTypes'
 import { buildDelegatedEventURL } from './buildDelegatedEventURL'
-import { formatDateToICal } from './formatDateToICal'
+import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'
 import { WKST_NUM_TO_DAY } from './wkstUtils'
 
@@ -223,7 +223,7 @@ export function parseCalendarEvent(
       ? moment.duration(duration).asMilliseconds()
       : moment.duration(30, 'minutes').asMilliseconds()
     const artificialEnd = new Date(start.getTime() + timeToAdd)
-    event.end = formatDateToICal(artificialEnd, false, eventTimezone)
+    event.end = formatDateTimeToICal(artificialEnd, eventTimezone)
   }
 
   if (!event.allday && event.start && eventTimezone) {
