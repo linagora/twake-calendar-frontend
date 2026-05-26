@@ -186,7 +186,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
               setCalendarid={setCalendarid}
               userPersonalCalendars={userPersonalCalendars}
               showMore={showMore}
-              onCalendarChange={setCalendarid}
               defaultExpanded
             />
           )}

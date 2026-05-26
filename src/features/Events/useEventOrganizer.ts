@@ -43,7 +43,7 @@ export function useEventOrganizer({
       selectedCalendar?.events[eventId]?.organizer?.cal_address ===
       organizer?.cal_address
     )
-  }, [selectedCalendar, eventId, userOrganizer])
+  }, [selectedCalendar, eventId, organizer?.cal_address])
 
   return { organizer, selectedCalendar, isOrganizer }
 }
