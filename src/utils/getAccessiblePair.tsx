@@ -1,6 +1,13 @@
 import { darken, getContrastRatio, lighten, Theme } from '@linagora/twake-mui'
+import { defaultColors } from './defaultColors'
 
 export function getAccessiblePair(baseColor: string, theme: Theme): string {
+  const isDefault = defaultColors.find(
+    c => c.light === baseColor || c.dark === baseColor
+  )
+
+  if (isDefault) return isDefault.dark
+
   if (typeof baseColor !== 'string') {
     return theme.palette.getContrastText('#000')
   }
