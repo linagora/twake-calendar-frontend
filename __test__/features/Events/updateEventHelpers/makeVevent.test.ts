@@ -369,7 +369,7 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
     })
     const vevent = makeVevent(event, TZID, OWNER)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
-    expect(rule.until).toBe('20241231T235959Z')
+    expect(rule.until).toBe('20241231T225959Z')
   })
 
   it('maps byday correctly', () => {

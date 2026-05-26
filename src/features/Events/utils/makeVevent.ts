@@ -162,7 +162,7 @@ function formatUntilForRRule(
   tzid: string
 ): string {
   if (allday) {
-    return endDate
+    return endDate.replace(/-/g, '')
   }
 
   // Take the date part of endDate, add end of day, convert to UTC
