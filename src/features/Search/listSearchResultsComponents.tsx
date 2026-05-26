@@ -7,31 +7,40 @@ interface DayIndicatorProps {
   isToday: boolean
   dayNum: string
   dayName: string
+  isMobile?: boolean
 }
 
 export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
   isFirstRow,
   isToday,
   dayNum,
-  dayName
+  dayName,
+  isMobile
 }) => {
   const theme = useTheme()
 
   if (!isFirstRow) {
-    return <Box sx={{ width: '80px', flexShrink: 0 }} />
+    return <Box sx={{ width: isMobile ? '60px' : '80px', flexShrink: 0 }} />
   }
 
   return (
     <Box
       sx={{
-        width: '80px',
+        width: isMobile ? '60px' : '80px',
         display: 'flex',
         alignItems: 'center',
         gap: 1,
         flexShrink: 0
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? 0 : 1,
+          flexDirection: isMobile ? 'column' : 'row'
+        }}
+      >
         {isToday ? (
           <Box
             sx={{
@@ -83,6 +92,7 @@ interface ListEventTimeProps {
   t: (key: string) => string
   isStart?: boolean
   isEnd?: boolean
+  styles?: React.CSSProperties
 }
 
 export const RenderListEventTime: React.FC<ListEventTimeProps> = ({
@@ -92,7 +102,8 @@ export const RenderListEventTime: React.FC<ListEventTimeProps> = ({
   timeZone,
   t,
   isStart = true,
-  isEnd = true
+  isEnd = true,
+  styles
 }) => {
   const timeOpts: Intl.DateTimeFormatOptions = {
     hour: '2-digit',
@@ -112,6 +123,7 @@ export const RenderListEventTime: React.FC<ListEventTimeProps> = ({
           allDay={false}
           t={t}
           timeZone={timeZone}
+          styles={styles}
         />
       </Box>
     )
@@ -129,7 +141,13 @@ export const RenderListEventTime: React.FC<ListEventTimeProps> = ({
 
   return (
     <Typography
-      sx={{ fontSize: '16px', fontWeight: 400, width: '120px', flexShrink: 0 }}
+      sx={{
+        fontSize: '16px',
+        fontWeight: 400,
+        width: '120px',
+        flexShrink: 0,
+        ...(styles || {})
+      }}
     >
       {timeText}
     </Typography>

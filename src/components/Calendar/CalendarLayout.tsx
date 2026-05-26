@@ -31,15 +31,22 @@ export default function CalendarLayout(): JSX.Element {
       : CALENDAR_VIEWS.timeGridWeek
   )
 
+  const currentViewModeRef = useRef<string>()
+
   useEffect(() => {
-    const setView = (): void =>
-      setCurrentView(
+    const setView = (): void => {
+      if (currentViewModeRef.current) return
+      const storedView =
         isTablet || isMobile
           ? CALENDAR_VIEWS.timeGridDay
           : CALENDAR_VIEWS.timeGridWeek
-      )
+      setCurrentView(storedView)
+      currentViewModeRef.current = storedView
+    }
+
     setView()
   }, [isTablet, isMobile])
+
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
 
   const handleRefresh = async (): Promise<void> => {

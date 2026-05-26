@@ -9,6 +9,7 @@ import {
 import CalendarViewDayOutlinedIcon from '@mui/icons-material/CalendarViewDayOutlined'
 import CalendarViewMonthOutlinedIcon from '@mui/icons-material/CalendarViewMonthOutlined'
 import CalendarViewWeekOutlinedIcon from '@mui/icons-material/CalendarViewWeekOutlined'
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '../../Event/components/FieldWithLabel'
 import { CALENDAR_VIEWS } from '../utils/constants'
@@ -29,6 +30,11 @@ const VIEW_OPTIONS = [
     label: 'menubar.views.month',
     value: CALENDAR_VIEWS.dayGridMonth,
     icon: <CalendarViewMonthOutlinedIcon />
+  },
+  {
+    label: 'menubar.views.schedule',
+    value: CALENDAR_VIEWS.listWeek,
+    icon: <ScheduleOutlinedIcon />
   }
 ]
 

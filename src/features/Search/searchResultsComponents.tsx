@@ -24,6 +24,7 @@ interface TimeProps {
   allDay: boolean
   t: (key: string) => string
   timeZone: string
+  styles?: React.CSSProperties
 }
 
 interface TitleProps {
@@ -83,11 +84,19 @@ export const RenderTime: React.FC<TimeProps> = ({
   endDate,
   allDay,
   t,
-  timeZone
+  timeZone,
+  styles
 }) => {
   if (allDay) return null
   return (
-    <Typography sx={{ minWidth: '120px', fontSize: '16px', fontWeight: 400 }}>
+    <Typography
+      sx={{
+        minWidth: '120px',
+        fontSize: '16px',
+        fontWeight: 400,
+        ...(styles || {})
+      }}
+    >
       {startDate.toLocaleTimeString(t('locale'), {
         hour: '2-digit',
         minute: '2-digit',

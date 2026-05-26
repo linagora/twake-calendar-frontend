@@ -19,6 +19,7 @@ interface MobileEventCardProps {
   eventData: SearchEventResult
   calendar: Calendar | undefined
   timeZone: string
+  customSubHeader?: (titleStyle: React.CSSProperties) => React.ReactNode
 }
 
 export const RenderMobileDate: React.FC<MobileDateProps> = ({
@@ -38,15 +39,50 @@ export const RenderMobileDate: React.FC<MobileDateProps> = ({
   </Box>
 )
 
+const getCardSx = (calendar: Calendar): React.CSSProperties => ({
+  height: 'stretch',
+  minHeight: '58px',
+  width: '100%',
+  borderRadius: '8px',
+  padding: 1,
+  boxShadow: 'none',
+  backgroundColor: calendar.color?.light,
+  color: calendar.color?.dark,
+  border: '1px solid',
+  borderColor: 'background.paper',
+  display: 'flex'
+})
+
+const headerSx = {
+  p: '0px',
+  '& .MuiCardHeader-content': { overflow: 'hidden' }
+}
+
+const getSubheaderStyle = (color?: string): React.CSSProperties => ({
+  color,
+  opacity: '70%',
+  fontFamily: 'Inter',
+  fontWeight: '500',
+  fontSize: '10px',
+  lineHeight: '16px',
+  letterSpacing: '0%',
+  verticalAlign: 'middle'
+})
+
 export const RenderMobileEventCard: React.FC<MobileEventCardProps> = ({
   eventData,
   calendar,
-  timeZone
+  timeZone,
+  customSubHeader
 }) => {
   const { t } = useI18n()
 
-  const startDate = new Date(eventData.data.start)
-  const bestColor = calendar?.color
+  if (!calendar) return null
+
+  const { start, allDay, summary, uid } = eventData.data
+  const startDate = new Date(start)
+
+  const bestColor = calendar.color
     ? getBestColor(calendar.color as { light: string; dark: string })
     : defaultColors[0].dark
   const titleStyle = getTitleStyle(
@@ -56,51 +92,31 @@ export const RenderMobileEventCard: React.FC<MobileEventCardProps> = ({
     false
   )
 
+  const defaultSubHeader = !allDay && (
+    <Typography style={getSubheaderStyle(titleStyle.color)}>
+      {startDate.toLocaleTimeString(t('locale'), {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone
+      })}
+    </Typography>
+  )
+
   return (
     <Card
       variant="outlined"
-      sx={{
-        height: 'stretch',
-        width: '100%',
-        borderRadius: '8px',
-        p: 1,
-        boxShadow: 'none',
-        backgroundColor: calendar?.color?.light,
-        color: calendar?.color?.dark,
-        border: '1px solid',
-        borderColor: 'background.paper',
-        display: 'flex'
-      }}
-      data-testid={`event-card-${eventData.data.uid}`}
+      sx={getCardSx(calendar)}
+      data-testid={`event-card-${uid}`}
     >
       <CardHeader
-        sx={{ p: '0px', '& .MuiCardHeader-content': { overflow: 'hidden' } }}
+        sx={headerSx}
         title={
           <Typography variant="body2" noWrap style={titleStyle}>
-            {eventData.data.summary || t('event.untitled')}
+            {summary || t('event.untitled')}
           </Typography>
         }
         subheader={
-          !eventData.data.allDay && (
-            <Typography
-              style={{
-                color: titleStyle.color,
-                opacity: '70%',
-                fontFamily: 'Inter',
-                fontWeight: '500',
-                fontSize: '10px',
-                lineHeight: '16px',
-                letterSpacing: '0%',
-                verticalAlign: 'middle'
-              }}
-            >
-              {startDate.toLocaleTimeString(t('locale'), {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZone: timeZone
-              })}
-            </Typography>
-          )
+          customSubHeader ? customSubHeader(titleStyle) : defaultSubHeader
         }
       />
     </Card>
