@@ -223,7 +223,7 @@ export const EventChip: React.FC<EventChipProps> = ({
                     fontFamily: 'Roboto',
                     fontWeight: '500',
                     fontStyle: 'Medium',
-                    fontSize: '12px',
+                    fontSize: '10px',
                     lineHeight: '16px',
                     letterSpacing: '0%',
                     verticalAlign: 'middle',
@@ -236,7 +236,7 @@ export const EventChip: React.FC<EventChipProps> = ({
                   {event._def.extendedProps.location}
                 </Typography>
               )}
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', mt: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 {event._def.extendedProps.description && (
                   <Typography
                     sx={{
@@ -249,11 +249,10 @@ export const EventChip: React.FC<EventChipProps> = ({
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
-                      WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
-                      whiteSpace: 'normal',
+                      whiteSpace: 'nowrap',
                       flex: 1,
-                      maxWidth: '75%',
+                      maxWidth: '100%',
                       color: titleStyle.color
                     }}
                   >
