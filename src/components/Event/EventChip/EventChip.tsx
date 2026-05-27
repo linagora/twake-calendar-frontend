@@ -142,9 +142,18 @@ export const EventChip: React.FC<EventChipProps> = ({
           }}
           title={
             showCompact ? (
-              <Typography variant="body2" style={titleStyle}>
-                {event.title}
-              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%'
+                }}
+              >
+                {DisplayedIcons(IconDisplayed, titleStyle.color)}
+                <Typography variant="body2" style={titleStyle}>
+                  {event.title}
+                </Typography>
+              </Box>
             ) : (
               <Box
                 sx={{
