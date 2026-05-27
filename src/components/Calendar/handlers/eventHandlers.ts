@@ -222,11 +222,14 @@ export const createEventHandlers = (
           .add(seriesDeltaMs, 'ms')
           .add(moment(computedNewEnd).diff(moment(computedNewStart)))
 
-    const shiftedMasterEvent = {
-      ...master,
-      start: formatLocalDateTime(masterStart.toDate(), masterTz),
-      end: formatLocalDateTime(masterEnd.toDate(), masterTz)
-    }
+    const shiftedMasterEvent = updateAttendeesAfterTimeChange(
+      {
+        ...master,
+        start: formatLocalDateTime(masterStart.toDate(), masterTz),
+        end: formatLocalDateTime(masterEnd.toDate(), masterTz)
+      },
+      true
+    )
 
     await handleUpdateRecurringSeries({
       dispatch,

@@ -7,7 +7,6 @@ import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { Resource } from '@/components/Attendees/ResourceSearch'
 import { userAttendee } from '@/features/User/models/attendee'
 import { PrepareUpdateDataResult, PrepareUpdateDataParams } from './types'
-
 export function getSeriesInstances(
   targetCalendar: Calendar,
   baseUID: string
@@ -108,8 +107,9 @@ export function prepareUpdateData({
   showMore,
   calId,
   eventId,
-  typeOfAction
-}: PrepareUpdateDataParams): PrepareUpdateDataResult | null {
+  typeOfAction,
+  masterEvent
+}: PrepareUpdateDataParams): Promise<PrepareUpdateDataResult | null> {
   const targetCalendar = calList[values.calendarid]
   if (!targetCalendar) return null
 
@@ -123,8 +123,10 @@ export function prepareUpdateData({
     showMore,
     hasEndDateChanged: values.hasEndDateChanged
   })
-
-  const timeChanged = hasEventTimeChanged(event, startISO, endISO)
+  console.log(masterEvent)
+  const referenceEvent =
+    typeOfAction === 'all' && masterEvent ? masterEvent : event
+  const timeChanged = hasEventTimeChanged(referenceEvent, startISO, endISO)
   const newCalId = values.calendarid
 
   const newEvent = prepareUpdatedEvent({
