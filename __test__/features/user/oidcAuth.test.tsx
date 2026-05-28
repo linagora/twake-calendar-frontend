@@ -21,7 +21,8 @@ describe('OpenID Client Auth Module', () => {
   describe('getClientConfig', () => {
     it('should call discovery with clientConfig.url', async () => {
       const discoveryMock = client.discovery as jest.Mock
-      discoveryMock.mockResolvedValue('discoveredClient')
+      const discoveredClient = {}
+      discoveryMock.mockResolvedValue(discoveredClient)
 
       const result = await getClientConfig()
 
@@ -32,7 +33,7 @@ describe('OpenID Client Auth Module', () => {
         undefined,
         { signal: AbortSignal.timeout(10_000) }
       )
-      expect(result).toBe('discoveredClient')
+      expect(result).toBe(discoveredClient)
     })
   })
 

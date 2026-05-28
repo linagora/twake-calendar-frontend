@@ -39,7 +39,8 @@ jest.mock('openid-client', () => ({
   buildAuthorizationUrl: jest.fn(),
   buildEndSessionUrl: jest.fn(),
   authorizationCodeGrant: jest.fn(),
-  fetchUserInfo: jest.fn()
+  fetchUserInfo: jest.fn(),
+  clockSkew: Symbol('clockSkew')
 }))
 const originalWarn = console.warn
 
