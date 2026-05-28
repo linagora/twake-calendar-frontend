@@ -61,7 +61,6 @@ const headerSx = {
 const getSubheaderStyle = (color?: string): React.CSSProperties => ({
   color,
   opacity: '70%',
-  fontFamily: 'Inter',
   fontWeight: '500',
   fontSize: '10px',
   lineHeight: '16px',

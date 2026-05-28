@@ -61,7 +61,6 @@ export function getTitleStyle(
   isPrivate?: boolean
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = {
-    fontFamily: 'Roboto',
     fontWeight: '500',
     fontStyle: 'Medium',
     fontSize: '12px',
@@ -70,7 +69,6 @@ export function getTitleStyle(
     verticalAlign: 'middle',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    font: 'Roboto',
     whiteSpace: 'nowrap',
     color: bestColor
   }
@@ -196,7 +194,6 @@ export function DisplayedIcons(
         color: iconColor || 'inherit',
         margin: 0,
         marginRight: '4px',
-        fontFamily: 'inherit',
         fontWeight: 'inherit',
         lineHeight: 'inherit',
         letterSpacing: 'inherit'

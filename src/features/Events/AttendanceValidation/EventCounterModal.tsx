@@ -186,7 +186,7 @@ export function EventCounterModal({
           <Typography
             variant="h3"
             sx={{
-              wordBreak: 'break-word'
+              overflowWrap: 'break-word'
             }}
           >
             {formatEventChipTitle(contextualizedEvent.event, t)}

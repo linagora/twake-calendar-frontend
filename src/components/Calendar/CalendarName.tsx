@@ -9,7 +9,9 @@ import { useI18n } from 'twake-i18n'
 import { OwnerCaption } from './OwnerCaption'
 import { ResourceIcon } from '../Attendees/ResourceIcon'
 
-export function CalendarName({ calendar }: { calendar: Calendar }) {
+export const CalendarName: React.FC<{ calendar: Calendar }> = ({
+  calendar
+}) => {
   const userData = useAppSelector(state => state.user.userData)
   const { t } = useI18n()
 
@@ -45,7 +47,7 @@ export function CalendarName({ calendar }: { calendar: Calendar }) {
         />
       )}
       <Box style={{ display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+        <Typography variant="body2" sx={{ overflowWrap: 'break-word' }}>
           {renameDefault(calendar.name, ownerDisplayName, t, isOwnCalendar)}
         </Typography>
         <OwnerCaption

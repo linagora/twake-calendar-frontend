@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/react'
+import './index.styl'
 import App from './App'
 import { store } from './app/store'
 

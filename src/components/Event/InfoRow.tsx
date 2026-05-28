@@ -49,11 +49,11 @@ export function InfoRow({
           variant="body2"
           color={error ? 'error' : 'textPrimary'}
           sx={{
-            wordBreak: 'break-word',
             whiteSpace: 'pre-line',
             maxHeight: isMobile ? 'none' : '33vh',
             overflowY: isMobile ? undefined : 'auto',
             width: '100%',
+            overflowWrap: 'break-word',
             ...style
           }}
         >

@@ -53,12 +53,9 @@ const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
             <LockOutlineIcon />
           ))}
         <Typography
-          variant="h5"
+          variant="h3"
           sx={{
-            fontSize: '24px',
-            fontWeight: 600,
-            wordBreak: 'break-word',
-            fontFamily: 'Inter, sans-serif'
+            overflowWrap: 'break-word'
           }}
         >
           {formatEventChipTitle(event, t)}

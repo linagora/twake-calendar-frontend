@@ -67,7 +67,6 @@ const UserMenuContent: React.FC<{
         <Typography
           sx={{
             color: theme.palette.grey[900],
-            fontFamily: 'Inter',
             fontSize: 22,
             fontWeight: 600
           }}

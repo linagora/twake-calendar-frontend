@@ -114,7 +114,6 @@ export const MobileEventChipSchedule: React.FC<
             styles={{
               color: titleStyle.color,
               opacity: '70%',
-              fontFamily: 'Inter',
               fontWeight: '500',
               fontSize: '10px',
               lineHeight: '16px',

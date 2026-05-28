@@ -58,7 +58,7 @@ export function SettingsTab({
   )
 
   useEffect(() => {
-    const handleToggleDesc = () => {
+    const handleToggleDesc = (): void => {
       if (description) setToggleDesc(true)
     }
     handleToggleDesc()
@@ -89,8 +89,7 @@ export function SettingsTab({
               }
               text={name}
               style={{
-                fontSize: '16px',
-                fontFamily: "'Inter', sans-serif"
+                fontSize: '16px'
               }}
             />
           ) : (

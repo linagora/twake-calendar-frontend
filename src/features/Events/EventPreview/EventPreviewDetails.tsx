@@ -150,11 +150,11 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
                 variant="body2"
                 color="textPrimary"
                 sx={{
-                  wordBreak: 'break-word',
                   whiteSpace: 'pre-line',
                   maxHeight: '33vh',
                   overflowY: 'auto',
-                  width: '100%'
+                  width: '100%',
+                  overflowWrap: 'break-word'
                 }}
               >
                 {resource.cn}
@@ -162,7 +162,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
               </Typography>
               <Typography
                 sx={{
-                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
                   whiteSpace: 'pre-line',
                   overflowY: 'auto',
                   width: '100%',
@@ -175,8 +175,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
             </Box>
           ))}
           style={{
-            fontSize: '16px',
-            fontFamily: "'Inter', sans-serif"
+            fontSize: '16px'
           }}
         />
       )}

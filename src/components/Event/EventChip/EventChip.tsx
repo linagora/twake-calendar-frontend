@@ -200,7 +200,6 @@ export const EventChip: React.FC<EventChipProps> = ({
                 style={{
                   color: titleStyle.color,
                   opacity: '70%',
-                  fontFamily: 'Inter',
                   fontWeight: '500',
                   fontSize: '10px',
                   lineHeight: '16px',
@@ -229,7 +228,6 @@ export const EventChip: React.FC<EventChipProps> = ({
                 <Typography
                   style={{
                     marginRight: 2,
-                    fontFamily: 'Roboto',
                     fontWeight: '500',
                     fontStyle: 'Medium',
                     fontSize: '10px',
@@ -249,7 +247,6 @@ export const EventChip: React.FC<EventChipProps> = ({
                 {event._def.extendedProps.description && (
                   <Typography
                     sx={{
-                      fontFamily: 'Roboto',
                       fontWeight: 500,
                       fontSize: '10px',
                       lineHeight: '16px',

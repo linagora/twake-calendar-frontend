@@ -65,7 +65,7 @@ const CalendarSelectFieldCollapsed: React.FC<{
     >
       {selectedCalendar?.name ? (
         <Box style={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+          <Typography variant="body2" sx={{ overflowWrap: 'break-word' }}>
             {renameDefault(
               selectedCalendar.name,
               selectedOwnerDisplayName,

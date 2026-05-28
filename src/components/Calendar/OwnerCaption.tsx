@@ -14,7 +14,7 @@ export function OwnerCaption({
       style={{
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        wordBreak: 'break-word'
+        overflowWrap: 'break-word'
       }}
     >
       {showCaption && ownerDisplayName}

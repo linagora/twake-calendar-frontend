@@ -17,7 +17,8 @@ import {
   AccordionSummary,
   Checkbox,
   IconButton,
-  ListItem
+  ListItem,
+  Typography
 } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -105,7 +106,7 @@ const CalendarAccordion: React.FC<{
           }
         }}
       >
-        <span>{title}</span>
+        <Typography variant="body2">{title}</Typography>
         {showAddButton && (
           <Tooltip title={addBtnTooltip}>
             <IconButton
@@ -441,7 +442,7 @@ const CalendarSelector: React.FC<{
               style={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                wordBreak: 'break-word'
+                overflowWrap: 'break-word'
               }}
             >
               {displayName}
