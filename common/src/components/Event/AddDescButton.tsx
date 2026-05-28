@@ -48,7 +48,6 @@ export function AddDescButton({
           fullWidth
           label=""
           inputRef={descriptionInputRef}
-          inputProps={{ 'aria-label': t('event.form.description') }}
           placeholder={t('event.form.descriptionPlaceholder')}
           value={description}
           onChange={e => setDescription(e.target.value)}
@@ -57,6 +56,11 @@ export function AddDescButton({
           multiline
           minRows={2}
           maxRows={10}
+          slotProps={{
+            input: {
+              'aria-label': t('event.form.description')
+            }
+          }}
           sx={{
             '& .MuiInputBase-root': {
               maxHeight: '33%',

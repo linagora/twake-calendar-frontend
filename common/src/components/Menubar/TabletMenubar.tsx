@@ -68,7 +68,6 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           <IconButton
             onClick={onToggleSidebar}
             aria-label={t('menubar.toggleSidebar')}
-            title={t('menubar.toggleSidebar')}
           >
             <MenuIcon />
           </IconButton>

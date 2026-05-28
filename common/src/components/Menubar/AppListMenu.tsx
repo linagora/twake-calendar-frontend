@@ -71,7 +71,6 @@ export const AppListMenu: React.FC<{
           onClick={onAppMenuOpen}
           style={{ marginRight: 8 }}
           aria-label={t('menubar.apps')}
-          title={t('menubar.apps')}
         >
           <WidgetsOutlinedIcon fontSize={iconSize} />
         </IconButton>

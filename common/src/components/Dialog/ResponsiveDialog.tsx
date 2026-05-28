@@ -211,10 +211,12 @@ function ResponsiveDialog({
           </IconButton>
         ) : showHeaderActions ? (
           <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            width="100%"
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%'
+            }}
           >
             <Box>{title}</Box>
             <Box>

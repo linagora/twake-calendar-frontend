@@ -31,7 +31,7 @@ export const RenderMobileDate: React.FC<MobileDateProps> = ({
     <Typography variant="h4" sx={{ fontWeight: 400 }}>
       {startDate.toLocaleDateString(t('locale'), { day: '2-digit', timeZone })}
     </Typography>
-    <Typography variant="caption" color="text.secondary">
+    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
       {startDate
         .toLocaleDateString(t('locale'), { weekday: 'short', timeZone })
         .toUpperCase()}

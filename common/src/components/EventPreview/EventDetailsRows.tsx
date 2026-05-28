@@ -4,7 +4,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { RepetitionObject } from '@common/types/EventsTypes'
 import { Attachment } from '@common/types/Attachment'
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
@@ -199,7 +199,7 @@ export const EventErrorRow: React.FC<{
   return (
     <BaseEventRow
       alignItems="flex-start"
-      icon={<ErrorOutlineIcon color="error" />}
+      icon={<ErrorOutlinedIcon sx={{ color: 'error.main' }} />}
       text={error}
       error
     />

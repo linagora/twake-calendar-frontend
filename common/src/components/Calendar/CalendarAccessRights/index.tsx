@@ -56,36 +56,42 @@ function UserAccessRow({
   return (
     <Box
       key={user.email}
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      px={1}
-      py={0.5}
       sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        px: 1,
+        py: 0.5,
         borderRadius: '8px',
         '&:hover': { backgroundColor: 'action.hover' }
       }}
     >
-      <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}
+      >
         <Avatar
           {...stringAvatar(user.displayName)}
           sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
         />
-        <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
+        <Box
+          sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 }}
+        >
           <Typography noWrap>{user.displayName}</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {user.email}
           </Typography>
         </Box>
       </Box>
 
       <Box
-        display="flex"
-        alignItems="center"
-        gap={0.5}
-        flexShrink={0}
-        sx={{ maxWidth: '50%' }}
-        justifyContent="flex-end"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          flexShrink: 0,
+          maxWidth: '50%',
+          justifyContent: 'flex-end'
+        }}
       >
         <AccessSelector
           accessRight={user.accessRight}
@@ -355,7 +361,7 @@ export function CalendarAccessRights({
                 placeholder={t('peopleSearch.label')}
                 value={query}
                 inputRef={el => {
-                  const ref = params.InputProps.ref
+                  const ref = params.slotProps.input?.ref
                   if (typeof ref === 'function') {
                     ref(el)
                   } else if (ref && 'current' in ref) {
@@ -366,31 +372,30 @@ export function CalendarAccessRights({
                 }}
                 onChange={e => setQuery(e.target.value)}
                 variant="outlined"
-                inputProps={{
-                  ...params.inputProps,
-                  sx: {
-                    fontSize: '14px',
-                    '&::placeholder': { fontSize: '14px' }
+                slotProps={{
+                  input: {
+                    ...params.slotProps.input,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PeopleOutlineOutlinedIcon
+                          sx={{ color: 'text.secondary' }}
+                        />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <AccessSelector
+                          accessRight={accessRight}
+                          setAccessRight={setAccessRight}
+                          accessRightOptions={accessRightOptions}
+                        />
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      fontSize: '14px',
+                      '&::placeholder': { fontSize: '14px' }
+                    }
                   }
-                }}
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PeopleOutlineOutlinedIcon
-                        sx={{ color: 'text.secondary' }}
-                      />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <AccessSelector
-                        accessRight={accessRight}
-                        setAccessRight={setAccessRight}
-                        accessRightOptions={accessRightOptions}
-                      />
-                    </InputAdornment>
-                  )
                 }}
               />
             )}
@@ -398,33 +403,54 @@ export function CalendarAccessRights({
         </Box>
       )}
 
-      <Box mt={2} display="flex" flexDirection="column" gap={1}>
+      <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Box
           key={ownerEmail}
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          px={1}
-          py={0.5}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1,
+            py: 0.5,
             borderRadius: '8px',
             '&:hover': { backgroundColor: 'action.hover' }
           }}
         >
-          <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              minWidth: 0
+            }}
+          >
             <Avatar
               {...stringAvatar(ownerName)}
               sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
             />
-            <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
+            <Box
+              sx={{
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0
+              }}
+            >
               <Typography noWrap>{ownerName}</Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {ownerEmail}
               </Typography>
             </Box>
           </Box>
 
-          <Box display="flex" alignItems="center" gap={0.5} flexShrink={0}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              flexShrink: 0
+            }}
+          >
             <Typography variant="caption">
               {t('calendarPopover.access.owner')}
             </Typography>
@@ -432,7 +458,7 @@ export function CalendarAccessRights({
         </Box>
 
         {adminLoading ? (
-          <Box mt={2} display="flex" justifyContent="center">
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Box>
         ) : (
@@ -442,7 +468,7 @@ export function CalendarAccessRights({
         )}
 
         {inviteLoading ? (
-          <Box mt={2} display="flex" justifyContent="center">
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Box>
         ) : (

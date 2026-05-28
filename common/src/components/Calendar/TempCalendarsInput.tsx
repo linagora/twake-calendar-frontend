@@ -51,18 +51,21 @@ export const TempCalendarsInput: React.FC<{
               {...params}
               size="small"
               onFocus={handleInputFocus}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {params.InputProps.endAdornment}
-                    {isMobile && (
-                      <InputAdornment position="end">
-                        <SearchIcon sx={{ color: 'action.active' }} />
-                      </InputAdornment>
-                    )}
-                  </React.Fragment>
-                )
+              slotProps={{
+                ...params.slotProps,
+                input: {
+                  ...params.slotProps?.input,
+                  endAdornment: (
+                    <React.Fragment>
+                      {params.slotProps?.input?.endAdornment}
+                      {isMobile && (
+                        <InputAdornment position="end">
+                          <SearchIcon sx={{ color: 'action.active' }} />
+                        </InputAdornment>
+                      )}
+                    </React.Fragment>
+                  )
+                }
               }}
               sx={
                 tempUsers.length > 0

@@ -35,7 +35,7 @@ const VideoConferenceHasLink: React.FC<{
   const theme = useTheme()
 
   return (
-    <Box display="flex" gap={1} alignItems="center">
+    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
       <VideoLink
         meetingLink={meetingLink}
         icon={cameraIcon}
@@ -104,7 +104,7 @@ const VideoConferenceFieldInExpandedMode: React.FC<{
   const { t } = useI18n()
 
   return (
-    <Box display="flex" gap={1} alignItems="center">
+    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
       <Button
         startIcon={cameraIcon}
         onClick={handleAddVideoConference}

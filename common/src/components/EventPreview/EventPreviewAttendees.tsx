@@ -75,7 +75,7 @@ export function EventPreviewAttendees({
 
   return (
     <>
-      <Box display="flex" alignItems="flex-start">
+      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
         <Box sx={{ ...infoIconSx, mt: 1 }}>
           <PeopleAltOutlinedIcon />
         </Box>

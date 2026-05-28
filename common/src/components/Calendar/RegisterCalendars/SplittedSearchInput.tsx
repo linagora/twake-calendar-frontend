@@ -27,7 +27,7 @@ export const SplittedSearchInput: React.FC<SplittedSearchInputProps> = ({
           autoFocus
           size="medium"
           sx={{
-            '& .MuiOutlinedInput-notchedOutline': {
+            '& .MuiOutlinedInput-notchedOutlined': {
               border: 'none'
             },
             ...(selectedUsers.length > 0

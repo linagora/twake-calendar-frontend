@@ -166,7 +166,7 @@ export function EventCounterModal({
         onClose={() => setOpen(false)}
         title={t('eventPreview.proposeNewTime')}
         actions={
-          <Box display="flex" justifyContent="flex-end">
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="text" onClick={() => setOpen(false)}>
               {t('common.cancel')}
             </Button>
@@ -182,7 +182,7 @@ export function EventCounterModal({
         }
       >
         {/* Event title */}
-        <Box display="flex" alignItems="center" gap={1} mb={2}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography
             variant="h3"
             sx={{
@@ -228,7 +228,7 @@ export function EventCounterModal({
           />
         </FieldWithLabel>
         {/* Optional message */}
-        <Box mt={2}>
+        <Box sx={{ mt: 2 }}>
           <TextField
             margin="dense"
             multiline

@@ -153,7 +153,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
             </Box>
           )}
         </Typography>
-        <Box display="flex" gap={2} alignItems="center" mt={0.5}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 0.5 }}>
           <Typography variant="caption" sx={{ color: '#444746' }}>
             {timezoneText}
           </Typography>

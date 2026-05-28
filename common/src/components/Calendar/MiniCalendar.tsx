@@ -28,7 +28,7 @@ const NextIconButton = forwardRef<
       <IconButton
         {...rest}
         ref={ref}
-        title=""
+        title={undefined}
         sx={{
           ...(propSx as SxProps),
           '&::after': {
@@ -57,7 +57,7 @@ const PreviousIconButton = forwardRef<
       <IconButton
         {...rest}
         ref={ref}
-        title=""
+        title={undefined}
         sx={{
           ...(propSx as SxProps),
           '&::after': {

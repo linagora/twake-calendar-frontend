@@ -8,7 +8,7 @@ import {
   Stack,
   Typography
 } from '@linagora/twake-mui'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import ReplayIcon from '@mui/icons-material/Replay'
 import { useI18n } from 'twake-i18n'
 
@@ -59,7 +59,7 @@ export const Error: React.FC<ErrorProps> = ({
             width: '100%'
           }}
         >
-          <Stack spacing={2} alignItems="center">
+          <Stack spacing={2} sx={{ alignItems: 'center' }}>
             <Box
               sx={{
                 color: 'error.main',
@@ -71,17 +71,21 @@ export const Error: React.FC<ErrorProps> = ({
                 justifyContent: 'center'
               }}
             >
-              <ErrorOutlineIcon sx={{ fontSize: 40 }} />
+              <ErrorOutlinedIcon sx={{ fontSize: 40 }} />
             </Box>
 
-            <Typography variant="h5" fontWeight={600}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
               {t('error.title')}
             </Typography>
 
             <Typography
               variant="body1"
-              color="text.secondary"
-              sx={{ mb: 2, width: '100%', wordBreak: 'break-all' }}
+              sx={{
+                color: 'text.secondary',
+                mb: 2,
+                width: '100%',
+                wordBreak: 'break-all'
+              }}
             >
               {errorMessage}
             </Typography>

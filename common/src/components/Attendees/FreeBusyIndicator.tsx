@@ -28,7 +28,7 @@ export const FreeBusyIndicator: React.FC<FreeBusyIndicatorProps> = ({
     >
       <AccessTimeFilledIcon
         aria-label={t('event.freeBusy.busy')}
-        color="warning"
+        sx={{ color: 'warning.main' }}
         style={{
           margin: '0 -6px 0 5px',
           flexShrink: 0

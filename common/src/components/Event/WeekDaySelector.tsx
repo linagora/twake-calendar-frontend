@@ -92,7 +92,13 @@ export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
   }
 
   return (
-    <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} gap={1}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: 1
+      }}
+    >
       {FC_DAYS.map(({ fc, ics }) => {
         const isSelected = selectedDays.includes(fc)
         const fullLabel = getDayLabel(ics, isMobile)

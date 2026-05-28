@@ -48,7 +48,7 @@ export const ImportTab: React.FC<{
     <>
       {/* Form group 1: Select file button - first group, margin top 0 */}
       {importMode === 'file' && (
-        <Box mt={0}>
+        <Box sx={{ mt: 0 }}>
           <Button
             variant="outlined"
             component="label"
@@ -66,17 +66,14 @@ export const ImportTab: React.FC<{
           {importFile && (
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ marginTop: '6px' }}
+              sx={{ color: 'text.secondary', marginTop: '6px' }}
             >
               {importFile.name}
             </Typography>
           )}
           <Typography
             variant="caption"
-            color="text.secondary"
-            display="block"
-            sx={{ marginTop: '6px' }}
+            sx={{ color: 'text.secondary', display: 'block', marginTop: '6px' }}
           >
             {t('calendar.import_file_description')}
           </Typography>
@@ -85,7 +82,7 @@ export const ImportTab: React.FC<{
 
       {/* Form group 2: URL field */}
       {importMode === 'url' && (
-        <Box mt={0}>
+        <Box sx={{ mt: 0 }}>
           <TextField
             fullWidth
             label={t('calendar.ics_feed_url')}
@@ -104,7 +101,7 @@ export const ImportTab: React.FC<{
       )}
 
       {/* Form group 3: Import to */}
-      <Box mt={2}>
+      <Box sx={{ mt: 2 }}>
         <FormControl
           fullWidth
           size="small"
@@ -126,7 +123,7 @@ export const ImportTab: React.FC<{
 
       {/* Form group 4: SettingsTab (when importing to new calendar) */}
       {importTarget === 'new' && (
-        <Box mt={2}>
+        <Box sx={{ mt: 2 }}>
           <SettingsTab {...newCalParams} />
         </Box>
       )}

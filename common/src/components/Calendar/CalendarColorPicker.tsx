@@ -33,7 +33,7 @@ export function ColorPicker({
     : undefined
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       {colors.map(c => (
         <ColorBox
           key={c.light}
@@ -110,7 +110,7 @@ function ColorPickerHeader(): JSX.Element {
   const { t } = useI18n()
   return (
     <>
-      <Typography variant="subtitle1" fontWeight="600">
+      <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>
         {t('colorPicker.title')}
       </Typography>
       <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
@@ -278,7 +278,7 @@ function ColorPickerBox({
       {isMobile ? (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
           <DialogTitle sx={{ pb: 1 }}>
-            <Typography variant="subtitle1" fontWeight="600">
+            <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>
               {t('colorPicker.title')}
             </Typography>
           </DialogTitle>

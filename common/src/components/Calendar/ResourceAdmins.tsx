@@ -12,30 +12,36 @@ export function ResourceAdmin({ admin }: ResourceAdminProps) {
 
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      px={1}
-      py={0.5}
       sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        px: 1,
+        py: 0.5,
         borderRadius: '8px',
         '&:hover': { backgroundColor: 'action.hover' }
       }}
     >
-      <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}
+      >
         <Avatar
           {...stringAvatar(admin.displayName)}
           sx={{ width: 28, height: 28, fontSize: '0.875rem' }}
         />
-        <Box minWidth={0} display="flex" flexDirection="column" gap={0}>
+        <Box
+          sx={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 }}
+        >
           <Typography noWrap>{admin.displayName}</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {admin.email}
           </Typography>
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" gap={0.5} flexShrink={0}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}
+      >
         <Typography variant="caption">
           {t('calendarPopover.access.administrator')}
         </Typography>

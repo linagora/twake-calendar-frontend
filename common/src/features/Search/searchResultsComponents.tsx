@@ -124,10 +124,14 @@ export const RenderTitle: React.FC<TitleProps> = ({
   return (
     <Tooltip title={summary || t('event.untitled')}>
       <Box
-        display="flex"
-        flexDirection="row"
-        gap={1}
-        sx={{ minWidth: 0, flex: '0 0 12%', alignItems: 'center' }}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1,
+          minWidth: 0,
+          flex: '0 0 12%',
+          alignItems: 'center'
+        }}
       >
         <Typography
           sx={{

@@ -1,7 +1,7 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { ToggleButton, ToggleButtonGroup } from '@linagora/twake-mui'
 import { Public as PublicIcon } from '@mui/icons-material'
-import LockOutlineIcon from '@mui/icons-material/LockOutline'
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
@@ -41,7 +41,7 @@ export const VisibilityField: React.FC<VisibilityFieldProps> = ({
           {t('event.form.visibleAll')}
         </ToggleButton>
         <ToggleButton value="PRIVATE" sx={{ minWidth: '160px' }}>
-          <LockOutlineIcon sx={{ mr: 1 }} />
+          <LockOutlinedIcon sx={{ mr: 1 }} />
           {t('event.form.visibleParticipants')}
         </ToggleButton>
       </ToggleButtonGroup>

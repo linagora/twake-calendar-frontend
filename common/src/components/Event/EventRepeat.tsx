@@ -71,7 +71,7 @@ export const RepeatEvent: React.FC<{
     <Box>
       <Stack>
         {/* Interval */}
-        <Box display="flex" alignItems="center" gap={2} mb={1}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <Typography variant="h6">{t('event.repeat.every')}</Typography>
           <TextField
             type="number"
@@ -139,7 +139,7 @@ export const RepeatEvent: React.FC<{
 
         {/* Weekly selection */}
         {repetition.freq === 'weekly' && (
-          <Box mb={2}>
+          <Box sx={{ mb: 2 }}>
             <WeekDaySelector
               selectedDays={(repetition.byday ?? [])
                 .map(ics => FC_DAYS.find(d => d.ics === ics)?.fc ?? -1)
@@ -212,7 +212,7 @@ export const RepeatEvent: React.FC<{
               sx={{ mt: 1 }}
               control={<Radio />}
               label={
-                <Box display="flex" alignItems="center" gap={1}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="h6">
                     {t('event.repeat.end.on')}
                   </Typography>
@@ -276,7 +276,7 @@ export const RepeatEvent: React.FC<{
               control={<Radio />}
               sx={{ mt: 1 }}
               label={
-                <Box display="flex" alignItems="center" gap={1}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="h6">
                     {t('event.repeat.end.after')}
                   </Typography>

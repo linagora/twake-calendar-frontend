@@ -39,6 +39,8 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
   const { t } = useI18n()
 
   const containerProps = {
+    display: 'flex',
+    gap: 1,
     flexDirection: isMobile ? 'column' : 'row',
     alignItems: isMobile ? 'stretch' : 'center'
   }
@@ -47,7 +49,12 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
     ? { width: '100%' }
     : { maxWidth: '300px', width: '48%' }
 
-  const timeRowSx = isMobile ? { width: '100%' } : undefined
+  const timeRowSx = {
+    display: 'flex',
+    gap: 1,
+    flexDirection: 'row',
+    ...(isMobile ? { width: '100%' } : {})
+  }
 
   const timeBoxSx = {
     flex: isMobile ? 1 : undefined,
@@ -55,7 +62,7 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
   }
 
   return (
-    <Box display="flex" gap={1} sx={containerProps}>
+    <Box sx={containerProps}>
       <Box sx={dateBoxSx}>
         <DatePickerField
           value={startDateValue}
@@ -66,7 +73,7 @@ export const CompactDateTimeLayout: React.FC<CompactDateTimeLayoutProps> = ({
         />
       </Box>
 
-      <Box display="flex" gap={1} flexDirection="row" sx={timeRowSx}>
+      <Box sx={timeRowSx}>
         <Box sx={timeBoxSx}>
           <TimePickerField
             value={startTimeValue}

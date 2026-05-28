@@ -72,7 +72,15 @@ export const FieldWithLabel = React.memo(
 
     // Extended mode: label on left
     return (
-      <Box display="flex" alignItems="center" sx={sx}>
+      <Box
+        sx={[
+          {
+            display: 'flex',
+            alignItems: 'center'
+          },
+          ...(Array.isArray(sx) ? sx : sx ? [sx] : [])
+        ]}
+      >
         {!isEmptyLabel && (
           <Typography
             component="div"
@@ -87,8 +95,8 @@ export const FieldWithLabel = React.memo(
           </Typography>
         )}
         <Box
-          flexGrow={1}
           sx={{
+            flexGrow: 1,
             // Set margin-top: 8px for second row in DateTimeFields (4 fields layout)
             '& > .MuiBox-root > .MuiBox-root:nth-of-type(2)': {
               marginTop: '8px'

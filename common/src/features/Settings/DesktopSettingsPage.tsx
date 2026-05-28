@@ -105,7 +105,7 @@ export const DesktopSettingsPage: React.FC<{
         </Box>
         {activeNavItem === 'sync' && (
           <Box className="settings-tab-content">
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{ color: 'text.secondary' }}>
               {t('settings.sync.empty') || 'Sync settings coming soon'}
             </Typography>
           </Box>

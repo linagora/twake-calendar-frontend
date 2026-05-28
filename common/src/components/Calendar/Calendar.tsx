@@ -593,7 +593,10 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                       {isPending ? (
                         <CircularProgress size={24} />
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          sx={{ color: 'text.secondary' }}
+                        >
                           {t('event.noEventsToDisplay')}
                         </Typography>
                       )}
