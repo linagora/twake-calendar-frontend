@@ -428,7 +428,7 @@ const CalendarSelector: React.FC<{
             size="small"
             checked={selectedCalendars.includes(id)}
             onChange={() => handleCalendarToggle(id)}
-            inputProps={{ 'aria-label': displayName }}
+            slotProps={{ input: { 'aria-label': displayName } }}
           />
           <div
             style={{

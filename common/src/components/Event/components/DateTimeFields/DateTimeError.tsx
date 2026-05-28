@@ -16,7 +16,7 @@ export const DateTimeError: React.FC<DateTimeErrorProps> = ({
     return null
   }
   return (
-    <Box display="flex" gap={1} flexDirection="row">
+    <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row' }}>
       <Box sx={{ width: '1%' }} />
       <Box>
         <Typography

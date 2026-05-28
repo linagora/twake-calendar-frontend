@@ -30,6 +30,8 @@ export const AllDayDateLayout: React.FC<AllDayDateLayoutProps> = ({
   const { t } = useI18n()
 
   const containerProps = {
+    display: 'flex',
+    gap: 1,
     flexDirection: isMobile ? 'column' : 'row',
     alignItems: isMobile ? 'stretch' : 'center'
   }
@@ -39,7 +41,7 @@ export const AllDayDateLayout: React.FC<AllDayDateLayoutProps> = ({
     : { maxWidth: '300px', width: '48%' }
 
   return (
-    <Box display="flex" gap={1} sx={containerProps}>
+    <Box sx={containerProps}>
       <Box sx={dateBoxSx}>
         <DatePickerField
           value={startDateValue}

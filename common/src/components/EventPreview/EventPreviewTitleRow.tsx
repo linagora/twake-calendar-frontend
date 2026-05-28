@@ -2,7 +2,7 @@ import { formatEventChipTitle } from '@common/components/Calendar/utils/calendar
 import Tooltip from '@common/components/Tooltip'
 import { Box, Chip, Typography } from '@linagora/twake-mui'
 import CircleIcon from '@mui/icons-material/Circle'
-import LockOutlineIcon from '@mui/icons-material/LockOutline'
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import React from 'react'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { EventTimeSubtitle } from './EventTimeSubtitle'
@@ -21,13 +21,15 @@ export const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
   t
 }) => {
   return (
-    <Box mb={3}>
+    <Box sx={{ mb: 3 }}>
       <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        gap={1}
-        mb={1}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 1,
+          mb: 1
+        }}
       >
         {event.class === 'PRIVATE' &&
           (isOwn ? (
@@ -35,10 +37,10 @@ export const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
               title={t('eventPreview.privateEvent.tooltipOwn')}
               placement="top"
             >
-              <LockOutlineIcon />
+              <LockOutlinedIcon />
             </Tooltip>
           ) : (
-            <LockOutlineIcon />
+            <LockOutlinedIcon />
           ))}
         <Typography
           variant="h3"
@@ -51,8 +53,13 @@ export const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
         {event.transp === 'TRANSPARENT' && (
           <Tooltip title={t('eventPreview.free.tooltip')} placement="top">
             <Chip
-              icon={<CircleIcon color="success" fontSize="small" />}
+              icon={<CircleIcon fontSize="small" />}
               label={t('eventPreview.free.label')}
+              sx={{
+                '& .MuiChip-icon': {
+                  color: 'success.main'
+                }
+              }}
             />
           </Tooltip>
         )}

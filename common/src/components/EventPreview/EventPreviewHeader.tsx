@@ -63,11 +63,13 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
 
   return (
     <Box
-      display="flex"
-      justifyContent="flex-end"
-      alignItems="center"
-      gap={2}
-      width="100%"
+      sx={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        gap: 2,
+        width: '100%'
+      }}
     >
       {window.DEBUG && (
         <Tooltip title={t('tooltip.download')}>

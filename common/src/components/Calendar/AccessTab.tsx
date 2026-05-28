@@ -116,25 +116,27 @@ export function AccessTab({
 
       {!!window.DAV_BASE_URL && !isResource && (
         <FieldWithLabel label={t('calendar.caldav_access')} isExpanded={false}>
-          <Box mt={2}>
+          <Box sx={{ mt: 2 }}>
             <TextField
               disabled
               fullWidth
               label=""
-              inputProps={{ 'aria-label': t('calendar.caldav_access') }}
               value={calDAVLink}
               size="small"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => handleCopy(calDAVLink)}
-                      edge="end"
-                    >
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                )
+              slotProps={{
+                input: {
+                  'aria-label': t('calendar.caldav_access'),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => handleCopy(calDAVLink)}
+                        edge="end"
+                      >
+                        <ContentCopyIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
               }}
             />
           </Box>
@@ -142,22 +144,27 @@ export function AccessTab({
       )}
 
       <FieldWithLabel label={t('calendar.secretUrl')} isExpanded={false}>
-        <Box mt={3} display="flex" alignItems="center" gap={1}>
+        <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
           <TextField
             disabled
             fullWidth
             label=""
-            inputProps={{ 'aria-label': t('calendar.secretUrl') }}
             value={secretLink}
             size="small"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => handleCopy(secretLink)} edge="end">
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              )
+            slotProps={{
+              input: {
+                'aria-label': t('calendar.secretUrl'),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => handleCopy(secretLink)}
+                      edge="end"
+                    >
+                      <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }
             }}
           />
           <Button
@@ -193,7 +200,7 @@ export function AccessTab({
           sx={{ borderRadius: '4px' }}
         >
           {exportLoading ? (
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CircularProgress size={18} />
               {t('actions.exporting')}
             </Box>

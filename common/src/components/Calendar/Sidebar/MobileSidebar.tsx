@@ -66,10 +66,12 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
     >
       {!isIframe && (
         <Box
-          display="flex"
-          flexDirection="row"
-          justifyContent="space-between"
-          sx={{ mb: 2 }}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            mb: 2
+          }}
         >
           <MainTitle
             calendarRef={calendarRef}

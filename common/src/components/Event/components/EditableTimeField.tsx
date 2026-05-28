@@ -289,7 +289,9 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
       value={inputValue}
       onChange={handleChange}
       placeholder={parsedFormat}
-      InputProps={mergedInputProps}
+      slotProps={{
+        input: mergedInputProps
+      }}
       inputRef={inputRef}
       error={hasValidationError || forwardedProps.error}
       focused={isFocused}

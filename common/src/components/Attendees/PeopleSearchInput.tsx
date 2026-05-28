@@ -46,8 +46,8 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
   const inputSize = useResponsiveInputSize()
 
   const inputProps = {
-    ...params.InputProps,
-    startAdornment: params.InputProps.startAdornment ?? (
+    ...params.slotProps?.input,
+    startAdornment: params.slotProps?.input?.startAdornment ?? (
       <PeopleOutlineOutlinedIcon
         fontSize="small"
         sx={{ mr: 1, color: 'action.active' }}
@@ -56,36 +56,39 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     endAdornment: (
       <>
         {loading ? <CircularProgress color="inherit" size={20} /> : null}
-        {params.InputProps.endAdornment}
+        {params.slotProps?.input?.endAdornment}{' '}
       </>
     )
   }
 
   const enhancedParams = {
     ...params,
-    InputProps: inputProps,
-    inputProps: {
-      ...params.inputProps,
-      autoComplete: 'off',
-      onPaste: handlePaste,
-      onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
-        onKeyDown?.(e)
-        if (e.defaultPrevented) return
-        params.inputProps.onKeyDown?.(e)
-        if (e.key === 'Enter') {
-          // First, try the autocomplete selection handler
-          onEnterKeyDown?.(e)
-          // If event was already handled, don't trigger event preview
+    slotProps: {
+      ...params.slotProps,
+      input: inputProps,
+      htmlInput: {
+        ...params.slotProps?.htmlInput,
+        autoComplete: 'off',
+        onPaste: handlePaste,
+        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
+          onKeyDown?.(e)
           if (e.defaultPrevented) return
+          params.slotProps?.htmlInput?.onKeyDown?.(e)
+          if (e.key === 'Enter') {
+            // First, try the autocomplete selection handler
+            onEnterKeyDown?.(e)
+            // If event was already handled, don't trigger event preview
+            if (e.defaultPrevented) return
 
-          if (onToggleEventPreview && !isOpen) {
-            e.preventDefault()
-            ;(
-              e as React.KeyboardEvent<HTMLInputElement> & {
-                defaultMuiPrevented?: boolean
-              }
-            ).defaultMuiPrevented = true
-            onToggleEventPreview()
+            if (onToggleEventPreview && !isOpen) {
+              e.preventDefault()
+              ;(
+                e as React.KeyboardEvent<HTMLInputElement> & {
+                  defaultMuiPrevented?: boolean
+                }
+              ).defaultMuiPrevented = true
+              onToggleEventPreview()
+            }
           }
         }
       }
@@ -129,7 +132,6 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
       <TextField
         {...enhancedParams}
         {...defaultTextFieldProps}
-        InputProps={inputProps}
         size={inputSize}
         sx={{
           '& .MuiInputBase-input': {

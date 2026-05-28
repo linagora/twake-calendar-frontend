@@ -41,7 +41,7 @@ export const MobileTempSearchInput: React.FC<MobileTempSearchInputProps> = ({
               autoFocus
               size="medium"
               sx={{
-                '& .MuiOutlinedInput-notchedOutline': {
+                '& .MuiOutlinedInput-notchedOutlined': {
                   border: 'none'
                 },
                 ...(tempUsers.length > 0

@@ -176,7 +176,6 @@ export function UserMenu({
           aria-label={
             isIframe ? t('menubar.settings') : t('menubar.userProfile')
           }
-          title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
         >
           {!isIframe ? (
             <Avatar color={stringToGradient(displayName)} size={size}>

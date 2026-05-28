@@ -81,7 +81,9 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
       {...forwardedProps}
       value={valueToDisplay}
       placeholder={parsedFormat}
-      InputProps={mergedInputProps}
+      slotProps={{
+        input: mergedInputProps
+      }}
       error={hasValidationError || forwardedProps.error}
       focused={open}
       onClick={() => setOpen((prev: boolean) => !prev)}

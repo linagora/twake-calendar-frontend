@@ -152,8 +152,10 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
               slotProps={{
                 textField: {
                   variant: 'filled',
-                  InputLabelProps: { shrink: false },
-                  inputProps: { inputMode: 'numeric', pattern: '[0-9]*' }
+                  slotProps: {
+                    inputLabel: { shrink: false },
+                    htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' }
+                  }
                 }
               }}
             />

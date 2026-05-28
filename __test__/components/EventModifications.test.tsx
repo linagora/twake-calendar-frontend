@@ -198,7 +198,7 @@ describe('CalendarApp integration', () => {
       preloadedState
     )
     const card = screen.getByTestId('event-card-event1')
-    const lockIcon = within(card).getByTestId('LockOutlineIcon')
+    const lockIcon = within(card).getByTestId('LockOutlinedIcon')
     expect(lockIcon).toBeInTheDocument()
   })
 
@@ -225,7 +225,7 @@ describe('CalendarApp integration', () => {
     )
 
     const card = screen.getByTestId('event-card-event1')
-    const lockIcon = within(card).getByTestId('LockOutlineIcon')
+    const lockIcon = within(card).getByTestId('LockOutlinedIcon')
     expect(lockIcon).toBeInTheDocument()
   })
 
@@ -252,7 +252,7 @@ describe('CalendarApp integration', () => {
     )
 
     const card = screen.getByTestId('event-card-event1')
-    const lockIcon = within(card).queryByTestId('LockOutlineIcon')
+    const lockIcon = within(card).queryByTestId('LockOutlinedIcon')
     expect(lockIcon).not.toBeInTheDocument()
   })
 

@@ -24,13 +24,20 @@ export const EventActions: React.FC<EventActionsProps> = ({
   const buttonSize = isMobile ? 'small' : 'medium'
 
   return (
-    <Box display="flex" justifyContent="space-between" width="100%" px={2}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        width: '100%',
+        px: 2
+      }}
+    >
       {showExpandedBtn && (
         <Button size={buttonSize} startIcon={<AddIcon />} onClick={onExpanded}>
           {t('common.moreOptions')}
         </Button>
       )}
-      <Box display="flex" gap={1} ml={!showExpandedBtn ? 'auto' : 0}>
+      <Box sx={{ display: 'flex', gap: 1, ml: !showExpandedBtn ? 'auto' : 0 }}>
         {(!showExpandedBtn || isEdit) && (
           <Button size={buttonSize} variant="outlined" onClick={onClose}>
             {t('common.cancel')}

@@ -20,11 +20,13 @@ export const PrivateEventPreview: React.FC = () => {
       }}
     >
       <Typography
-        fontWeight={500}
-        fontSize="12px"
-        lineHeight="16px"
-        letterSpacing="0.5px"
-        textAlign="center"
+        sx={{
+          fontWeight: 500,
+          fontSize: '12px',
+          lineHeight: '16px',
+          letterSpacing: '0.5px',
+          textAlign: 'center'
+        }}
       >
         {t('eventPreview.privateEvent.hiddenDetails')}
       </Typography>

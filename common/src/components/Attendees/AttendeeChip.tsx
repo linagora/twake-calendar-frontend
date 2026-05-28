@@ -7,7 +7,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 
 export interface AttendeeChipProps {
   option: string | User
-  getTagProps: (args: { index: number }) => {
+  getItemProps: (args: { index: number }) => {
     key: number
     className: string
     disabled: boolean
@@ -21,7 +21,7 @@ export interface AttendeeChipProps {
 
 export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   option,
-  getTagProps,
+  getItemProps,
   getChipIcon,
   index
 }) => {
@@ -65,7 +65,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
 
   return (
     <Chip
-      {...getTagProps({ index })}
+      {...getItemProps({ index })}
       key={label}
       variant="filled"
       color="secondary"

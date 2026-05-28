@@ -146,7 +146,7 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
           onClick={() => void handleClick()}
           disabled={isLoading || isReadDelegated}
         >
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {showLoading && <CircularProgress size={20} color="inherit" />}
             {t(`eventPreview.${rsvpValue}`)}
           </Box>

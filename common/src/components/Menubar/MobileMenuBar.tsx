@@ -130,7 +130,6 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
                       size="small"
                       onClick={onToggleDatePicker}
                       aria-label={toggleDatePickerTitle}
-                      title={toggleDatePickerTitle}
                       aria-expanded={openDatePicker}
                     >
                       {openDatePicker ? (

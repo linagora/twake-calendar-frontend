@@ -91,10 +91,12 @@ const DateTimeControlsRow: React.FC<DateTimeControlsRowProps> = ({
   return (
     <FieldWithLabel label="" isExpanded={showMore && !isMobile}>
       <Box
-        display="flex"
-        gap={2}
-        alignItems={isMobile ? 'start' : 'center'}
-        flexDirection={isMobile ? 'column' : 'row'}
+        sx={{
+          display: 'flex',
+          gap: 2,
+          alignItems: isMobile ? 'start' : 'center',
+          flexDirection: isMobile ? 'column' : 'row'
+        }}
       >
         <Box>
           <FormControlLabel

@@ -87,7 +87,7 @@ const getAutocompleteSlotProps = (
 
 interface PeopleSearchValueRendererProps {
   value: User[]
-  getTagProps: AttendeeChipProps['getTagProps']
+  getItemProps: AttendeeChipProps['getItemProps']
   getChipIcon?: (user: User) => ReactElement
 }
 
@@ -125,15 +125,15 @@ const resolveIsOpen = ({
 
 const PeopleSearchValueRenderer: React.FC<PeopleSearchValueRendererProps> = ({
   value,
-  getTagProps,
+  getItemProps,
   getChipIcon
 }) => (
-  <Box display="flex" flexWrap="wrap">
+  <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
     {value.map((option, index) => (
       <AttendeeChip
         key={index}
         option={option}
-        getTagProps={getTagProps}
+        getItemProps={getItemProps}
         index={index}
         getChipIcon={getChipIcon}
       />

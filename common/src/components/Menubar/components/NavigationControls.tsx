@@ -23,7 +23,6 @@ export const NavigationControls: React.FC<{
             sx={{ width: 20 }}
             onClick={() => onNavigate('prev')}
             aria-label={t('menubar.prev')}
-            title={t('menubar.prev')}
           >
             <ChevronLeftIcon sx={{ height: 20 }} />
           </Button>
@@ -38,7 +37,6 @@ export const NavigationControls: React.FC<{
             sx={{ width: 20 }}
             onClick={() => onNavigate('next')}
             aria-label={t('menubar.next')}
-            title={t('menubar.next')}
           >
             <ChevronRightIcon sx={{ height: 20 }} />
           </Button>

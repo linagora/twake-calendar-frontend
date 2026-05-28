@@ -24,9 +24,9 @@ export function renderAttendeeBadge(
 ) {
   const classIcon =
     a.partstat === 'ACCEPTED' ? (
-      <CheckCircleIcon fontSize="inherit" color="success" />
+      <CheckCircleIcon fontSize="inherit" sx={{ color: 'success.main' }} />
     ) : a.partstat === 'DECLINED' ? (
-      <CancelIcon fontSize="inherit" color="error" />
+      <CancelIcon fontSize="inherit" sx={{ color: 'error.main' }} />
     ) : null
 
   if (!isFull) {
@@ -78,12 +78,12 @@ export function renderAttendeeBadge(
             {a.cn || a.cal_address}
           </Typography>
           {isOrganizer && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {t('event.organizer')}
             </Typography>
           )}
           {caption && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {caption}
             </Typography>
           )}

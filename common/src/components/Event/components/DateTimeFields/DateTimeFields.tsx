@@ -140,7 +140,10 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         todayButtonLabel: t('menubar.today')
       }}
     >
-      <Box display="flex" flexDirection="column" className={containerClassName}>
+      <Box
+        sx={{ display: 'flex', flexDirection: 'column' }}
+        className={containerClassName}
+      >
         <DateTimeLayoutContent
           layoutMode={layoutMode}
           startDateValue={startDateValue}

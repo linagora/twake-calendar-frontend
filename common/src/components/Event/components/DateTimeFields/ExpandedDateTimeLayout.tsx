@@ -41,6 +41,8 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
 }) => {
   const { t } = useI18n()
   const containerProps = {
+    display: 'flex',
+    gap: 1,
     alignItems: isMobile ? 'stretch' : 'center'
   }
 
@@ -50,7 +52,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
 
   return (
     <>
-      <Box display="flex" gap={1} sx={containerProps}>
+      <Box sx={containerProps}>
         <Box sx={dateBoxSx}>
           <DatePickerField
             value={startDateValue}
@@ -61,7 +63,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
           />
         </Box>
         {shouldShowTimeFields && (
-          <Box width="110px">
+          <Box sx={{ width: '110px' }}>
             <TimePickerField
               value={startTimeValue}
               onChange={onStartTimeChange}
@@ -73,7 +75,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
         )}
       </Box>
 
-      <Box display="flex" gap={1} sx={containerProps}>
+      <Box sx={containerProps}>
         <Box sx={dateBoxSx}>
           <DatePickerField
             value={endDateValue}
@@ -84,7 +86,7 @@ export const ExpandedDateTimeLayout: React.FC<ExpandedDateTimeLayoutProps> = ({
           />
         </Box>
         {shouldShowTimeFields && (
-          <Box width="110px">
+          <Box sx={{ width: '110px' }}>
             <TimePickerField
               value={endTimeValue}
               onChange={onEndTimeChange}
