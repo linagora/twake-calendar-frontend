@@ -96,6 +96,7 @@
       "accessRights": "Права доступа",
       "viewAllEvents": "Просмотр всех событий",
       "editor": "Редактор",
+      "owner": "Владелец",
       "administrator": "Администратор"
     }
   },
@@ -306,6 +307,7 @@
   "eventPreview": {
     "emailAttendees": "Написать участникам",
     "deleteEvent": "Удалить",
+    "editEventSpecificSettings": "Редактировать персональные настройки события",
     "privateEvent": {
       "tooltipOwn": "Детали видны только вам и участникам",
       "hiddenDetails": "Это приватное событие. Подробности скрыты."

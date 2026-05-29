@@ -96,6 +96,7 @@
       "accessRights": "Droits d'accès",
       "viewAllEvents": "Voir tous les événements",
       "editor": "Éditeur",
+      "owner": "Propriétaire",
       "administrator": "Administrateur"
     }
   },
@@ -306,6 +307,7 @@
   "eventPreview": {
     "emailAttendees": "Envoyer un e-mail aux participants",
     "deleteEvent": "Supprimer l'événement",
+    "editEventSpecificSettings": "Modifier les paramètres personnels de l'événement",
     "privateEvent": {
       "tooltipOwn": "Seuls vous et les participants pouvez voir les détails de cet événement.",
       "hiddenDetails": "Ceci est un événement privé. Les détails sont masqués."

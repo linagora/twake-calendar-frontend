@@ -23,10 +23,11 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
-  if (!showMore) return null
-
   return (
-    <FieldWithLabel label={t('event.form.notification')} isExpanded={!isMobile}>
+    <FieldWithLabel
+      label={t('event.form.notification')}
+      isExpanded={showMore && !isMobile}
+    >
       <FormControl fullWidth margin="dense" size="small">
         <Select
           labelId="notification"

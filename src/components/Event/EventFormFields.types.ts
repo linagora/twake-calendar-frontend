@@ -81,6 +81,7 @@ export interface EventFormFieldsProps {
 
   isOpen?: boolean
   typeOfAction?: 'solo' | 'all'
+  isSpecific?: boolean
   eventId?: string | null
 
   // Data needed for rendering

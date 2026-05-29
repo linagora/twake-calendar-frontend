@@ -5,19 +5,23 @@ import { CalendarEvent } from '../EventsTypes'
 
 interface EventPreviewActionMenuProps {
   anchorEl: Element | null
+  isEditable: boolean
   event: CalendarEvent
   userEmail: string
   onClose: () => void
   onDuplicate: () => void
+  onEdit: () => void
 }
 
-export function EventPreviewActionMenu({
+export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
   anchorEl,
+  isEditable,
   event,
   userEmail,
   onClose,
-  onDuplicate
-}: EventPreviewActionMenuProps) {
+  onDuplicate,
+  onEdit
+}) => {
   const { t } = useI18n()
   const mailSpaUrl = window.MAIL_SPA_URL ?? null
 
@@ -28,6 +32,16 @@ export function EventPreviewActionMenu({
 
   return (
     <Menu open={Boolean(anchorEl)} onClose={onClose} anchorEl={anchorEl}>
+      {isEditable && (
+        <MenuItem
+          onClick={() => {
+            onClose()
+            onEdit()
+          }}
+        >
+          {t('eventPreview.editEventSpecificSettings')}
+        </MenuItem>
+      )}
       {mailSpaUrl && otherAttendees.length > 0 && (
         <MenuItem
           onClick={() =>

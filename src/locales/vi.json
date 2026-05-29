@@ -94,6 +94,7 @@
       "accessRights": "Quyền truy cập",
       "viewAllEvents": "Xem tất cả sự kiện",
       "editor": "Biên tập viên",
+      "owner": "Chủ sở hữu",
       "administrator": "Quản trị viên"
     }
   },
@@ -304,6 +305,7 @@
   "eventPreview": {
     "emailAttendees": "Gửi email cho người tham gia",
     "deleteEvent": "Xóa sự kiện",
+    "editEventSpecificSettings": "Chỉnh sửa cài đặt sự kiện cá nhân",
     "privateEvent": {
       "tooltipOwn": "Chỉ bạn và người tham gia có thể xem chi tiết của sự kiện này.",
       "hiddenDetails": "Đây là sự kiện riêng tư. Chi tiết bị ẩn."

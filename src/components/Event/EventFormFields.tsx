@@ -1,40 +1,43 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  useMemo
-} from 'react'
-import { useI18n } from 'twake-i18n'
 import { useAppSelector } from '@/app/hooks'
-import AttendeeSelector from '../Attendees/AttendeeSearch'
-import { FieldWithLabel } from './components/FieldWithLabel'
-import { AddDescButton } from './AddDescButton'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
-import { CalendarSelectField } from './fields/CalendarSelectField'
-import { EventDateTimeField } from './fields/EventDateTimeField'
-import { VideoConferenceField } from './fields/VideoConferenceField'
-import { EventFormFieldsExpanded } from './components/EventFormFieldsExpanded'
-import LocationField from './fields/LocationField'
-import { TitleField } from './fields/TitleField'
-import { saveEventFormDataToTemp } from '@/utils/eventFormTempStorage'
 import { useEventOrganizer } from '@/features/Events/useEventOrganizer'
-import { useEventFormValues } from './hooks/useEventFormValues'
-import { validateEventFormValues } from './utils/formValidation'
-import { TIMEZONES } from '@/utils/timezone-data'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { saveEventFormDataToTemp } from '@/utils/eventFormTempStorage'
 import {
   browserDefaultTimeZone,
   getTimezoneOffset,
   resolveTimezone
 } from '@/utils/timezone'
+import { TIMEZONES } from '@/utils/timezone-data'
+import { Box, TextField, Typography } from '@linagora/twake-mui'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import { useI18n } from 'twake-i18n'
+import AttendeeSelector from '../Attendees/AttendeeSearch'
+import { AddDescButton } from './AddDescButton'
+import { EventFormFieldsExpanded } from './components/EventFormFieldsExpanded'
+import { EventFormFieldsSpecific } from './components/EventFormFieldsSpecific'
+import { FieldWithLabel } from './components/FieldWithLabel'
 import {
   EventFormFieldsProps,
   EventFormHandle,
   EventFormValues
 } from './EventFormFields.types'
-import { TextField } from '@linagora/twake-mui'
+import { CalendarSelectField } from './fields/CalendarSelectField'
+import { EventDateTimeField } from './fields/EventDateTimeField'
+import LocationField from './fields/LocationField'
+import { TitleField } from './fields/TitleField'
+import { VideoConferenceField } from './fields/VideoConferenceField'
+import { useEventFormValues } from './hooks/useEventFormValues'
+import { validateEventFormValues } from './utils/formValidation'
+import { EventTimeSubtitle } from '@/features/Events/EventPreview/EventTimeSubtitle'
+import { formatEventChipTitle } from '../Calendar/utils/calendarUtils'
 
 const showInputLabel = (showMore: boolean, label: string): string =>
   showMore ? label : ''
@@ -46,6 +49,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       showMore,
       isOpen = false,
       typeOfAction,
+      isSpecific = false,
       eventId,
       userPersonalCalendars,
       onSubmit,
@@ -115,11 +119,13 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       [onValidationChange]
     )
 
-    const { organizer } = useEventOrganizer({
+    const { organizer, isOrganizer } = useEventOrganizer({
       calendarid: formValues.calendarid,
+      eventId,
       calList,
       userOrganizer
     })
+
     // Keep organizer in a ref so submit() can read it synchronously
     const organizerRef = useRef(organizer)
     useEffect(() => {
@@ -135,7 +141,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
 
     useImperativeHandle(ref, () => ({
       submit: async (): Promise<void> => {
-        if (!isFormValid) return
+        if (!isFormValid && !isSpecific) return
 
         const values = { ...latestValuesRef.current }
 
@@ -159,7 +165,43 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
 
     const v = formValues
     const isExpanded = showMore && !isMobile
+    if (isSpecific) {
+      return (
+        <React.Fragment>
+          <Box display="flex" alignItems="center" gap={1} mb={2}>
+            <Typography
+              variant="h3"
+              sx={{
+                wordBreak: 'break-word'
+              }}
+            >
+              {formatEventChipTitle(v, t)}
+            </Typography>
+          </Box>
+          <EventTimeSubtitle event={v} timezone={v.timezone} />
 
+          {typeOfAction !== 'solo' && (
+            <CalendarSelectField
+              calendarid={v.calendarid}
+              setCalendarid={setCalendarid}
+              userPersonalCalendars={userPersonalCalendars}
+              showMore={showMore}
+              defaultExpanded
+            />
+          )}
+          <EventFormFieldsSpecific
+            alarm={v.alarm}
+            setAlarm={setAlarm}
+            busy={v.busy}
+            setBusy={setBusy}
+            eventClass={v.eventClass}
+            setEventClass={setEventClass}
+            showMore={showMore}
+            isOrganizer={isOrganizer}
+          />
+        </React.Fragment>
+      )
+    }
     return (
       <React.Fragment>
         <TitleField

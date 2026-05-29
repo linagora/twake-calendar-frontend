@@ -7,7 +7,7 @@ import { DateSelectArg } from '@fullcalendar/core'
 import { Box, Chip, Typography } from '@linagora/twake-mui'
 import CircleIcon from '@mui/icons-material/Circle'
 import LockOutlineIcon from '@mui/icons-material/LockOutline'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { AttendanceValidation } from '../AttendanceValidation/AttendanceValidation'
 import EventPopover from '../EventModal'
@@ -119,7 +119,7 @@ const EventPreviewModal: React.FC<{
     handleCalendarMove,
     userPersonalCalendars
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
-
+  const isSpecificRef = useRef(false)
   useEffect(
     () => {
       if (open && (!event || !calendar)) {
@@ -223,10 +223,17 @@ const EventPreviewModal: React.FC<{
       {/* Action menu (more vert) */}
       <EventPreviewActionMenu
         anchorEl={toggleActionMenu}
+        isEditable={
+          (isOwn || isWriteDelegated) && (event?.attendee?.length ?? 0) > 1
+        }
         event={event}
         userEmail={user.email}
         onClose={() => setToggleActionMenu(null)}
         onDuplicate={handleDuplicateClick}
+        onEdit={() => {
+          isSpecificRef.current = true
+          handleEditClick()
+        }}
       />
 
       {/* Recurring edit/delete mode picker */}
@@ -242,6 +249,7 @@ const EventPreviewModal: React.FC<{
       {/* Edit modal */}
       <EventUpdateModal
         open={openUpdateModal}
+        isSpecific={isSpecificRef.current}
         onClose={() => {
           setOpenUpdateModal(false)
           setHidePreview(false)
