@@ -4,7 +4,8 @@ import { Calendar } from '../../Calendars/CalendarTypes'
 import {
   RepetitionRule,
   VCalComponent,
-  VObjectProperty
+  VObjectProperty,
+  VObjectValue
 } from '../../Calendars/types/CalendarData'
 import { userAttendee } from '../../User/models/attendee'
 import { createAttendee } from '../../User/models/attendee.mapper'
@@ -35,186 +36,245 @@ const KNOWN_PROPS = new Set([
   'rrule'
 ])
 
-export function parseCalendarEvent(
-  data: VObjectProperty[],
-  color: Record<string, string>,
-  calendar: Calendar,
-  eventURL: string,
-  valarm?: VCalComponent
-): CalendarEvent {
-  const event: Partial<CalendarEvent> = { color, attendee: [] }
-  let recurrenceId
-  let duration
-  const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
+const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
 
-  for (const [key, params, , value] of data) {
-    switch (key.toLowerCase()) {
-      case 'uid':
-        event.uid = String(value)
-        break
-      case 'transp':
-        event.transp = String(value)
-        break
-      case 'dtstart': {
-        event.start = String(value)
-        const detectedTz = inferTimezoneFromValue(
-          params as Record<string, string>
-        )
-        if (detectedTz) {
-          event.timezone = detectedTz
-        }
-        if (dateRegex.test(String(value))) {
-          event.allday = true
-        } else {
-          event.allday = false
-        }
-        break
-      }
-      case 'dtend': {
-        event.end = String(value)
-        if (!event.timezone) {
-          const detectedTz = inferTimezoneFromValue(
-            params as Record<string, string>
-          )
-          if (detectedTz) {
-            event.timezone = detectedTz
-          }
-        }
-        if (dateRegex.test(String(value))) {
-          event.allday = true
-        } else {
-          event.allday = false
-        }
-        break
-      }
-      case 'class':
-        if (
-          ['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(
-            String(value).toUpperCase()
-          )
-        ) {
-          event.class = String(value).toUpperCase() as CalendarEvent['class']
-        }
-        break
-      case 'x-openpaas-videoconference':
-        event.x_openpass_videoconference = String(value)
-        break
-      case 'summary':
-        event.title = String(value)
-        break
-      case 'description':
-        event.description = String(value)
-        break
-      case 'location':
-        event.location = String(value)
-        break
-      case 'organizer': {
-        const paramsObj = params as Record<string, string>
-        event.organizer = {
-          cn: paramsObj?.cn ?? '',
-          cal_address: String(value).replace(/^mailto:/i, '')
-        }
-        break
-      }
-      case 'attendee': {
-        const paramsObj = params as Record<string, string>
-        if (
-          !event.attendee?.find(
-            attendee =>
-              attendee.cal_address === String(value).replace(/^mailto:/i, '')
-          )
-        ) {
-          ;(event.attendee as userAttendee[]).push(
-            createAttendee({
-              cn: paramsObj?.cn,
-              cal_address: String(value).replace(/^mailto:/i, ''),
-              partstat: paramsObj?.partstat as userAttendee['partstat'],
-              rsvp: paramsObj?.rsvp as userAttendee['rsvp'],
-              role: paramsObj?.role as userAttendee['role'],
-              cutype: paramsObj?.cutype as userAttendee['cutype']
-            })
-          )
-        }
-        break
-      }
-      case 'dtstamp':
-        event.stamp = String(value)
-        break
-      case 'sequence':
-        event.sequence = Number(value)
-        break
-      case 'recurrence-id':
-        recurrenceId = String(value)
-        break
-      case 'exdate':
-        if (!event.exdates) event.exdates = []
-        event.exdates.push(String(value))
-        break
-      case 'status':
-        event.status = String(value)
-        break
-      case 'duration':
-        duration = String(value)
-        break
-      case 'rrule': {
-        const ruleValue = value as RepetitionRule
-        event.repetition = { freq: ruleValue.freq.toLowerCase() }
-        if (ruleValue.byday) {
-          if (typeof ruleValue.byday === 'string') {
-            event.repetition.byday = [ruleValue.byday]
-          } else {
-            event.repetition.byday = ruleValue.byday
-          }
-        }
-        if (ruleValue.until) {
-          event.repetition.endDate = ruleValue.until
-        }
-        if (ruleValue.count) {
-          event.repetition.occurrences = ruleValue.count
-        }
-        if (ruleValue.interval) {
-          event.repetition.interval = ruleValue.interval
-        }
-        if (ruleValue.wkst != null) {
-          event.repetition.wkst =
-            typeof ruleValue.wkst === 'number'
-              ? (WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst))
-              : ruleValue.wkst
-        }
-        break
-      }
+function safeString(value: VObjectValue): string {
+  if (value && typeof value === 'object') {
+    if (value instanceof Date) {
+      return value.toISOString()
+    }
+    return ''
+  }
+  return String(value)
+}
+
+interface PropertyContext {
+  recurrenceId?: string
+  duration?: string
+}
+
+function parseDateProperty(
+  params: unknown,
+  value: VObjectValue,
+  event: Partial<CalendarEvent>,
+  isStart: boolean
+): void {
+  const dateStr = safeString(value)
+  if (isStart) {
+    event.start = dateStr
+  } else {
+    event.end = dateStr
+  }
+
+  if (isStart || !event.timezone) {
+    const detectedTz = inferTimezoneFromValue(params as Record<string, string>)
+    if (detectedTz) {
+      event.timezone = detectedTz
     }
   }
-  if (recurrenceId && event.uid) {
+
+  event.allday = DATE_REGEX.test(dateStr)
+}
+
+function parseAttendeeProperty(
+  params: unknown,
+  value: VObjectValue,
+  event: Partial<CalendarEvent>
+): void {
+  const paramsObj = params as Record<string, string>
+  const calAddress = safeString(value).replace(/^mailto:/i, '')
+
+  if (!event.attendee) {
+    event.attendee = []
+  }
+
+  const alreadyExists = event.attendee.some(
+    attendee => attendee.cal_address === calAddress
+  )
+
+  if (!alreadyExists) {
+    event.attendee.push(
+      createAttendee({
+        cn: paramsObj?.cn,
+        cal_address: calAddress,
+        partstat: paramsObj?.partstat as userAttendee['partstat'],
+        rsvp: paramsObj?.rsvp as userAttendee['rsvp'],
+        role: paramsObj?.role as userAttendee['role'],
+        cutype: paramsObj?.cutype as userAttendee['cutype']
+      })
+    )
+  }
+}
+
+function parseRruleProperty(
+  value: VObjectValue,
+  event: Partial<CalendarEvent>
+): void {
+  const ruleValue = value as RepetitionRule
+  event.repetition = { freq: ruleValue.freq.toLowerCase() }
+
+  if (ruleValue.byday) {
+    event.repetition.byday =
+      typeof ruleValue.byday === 'string' ? [ruleValue.byday] : ruleValue.byday
+  }
+
+  if (ruleValue.until) {
+    event.repetition.endDate = ruleValue.until
+  }
+
+  if (ruleValue.count) {
+    event.repetition.occurrences = ruleValue.count
+  }
+
+  if (ruleValue.interval) {
+    event.repetition.interval = ruleValue.interval
+  }
+
+  if (ruleValue.wkst != null) {
+    event.repetition.wkst =
+      typeof ruleValue.wkst === 'number'
+        ? (WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst))
+        : ruleValue.wkst
+  }
+}
+
+const PROPERTY_PARSERS: Record<
+  string,
+  (
+    params: unknown,
+    value: VObjectValue,
+    event: Partial<CalendarEvent>,
+    context: PropertyContext
+  ) => void
+> = {
+  uid: (params, value, event) => {
+    event.uid = safeString(value)
+  },
+  transp: (params, value, event) => {
+    event.transp = safeString(value)
+  },
+  dtstart: (params, value, event) => {
+    parseDateProperty(params, value, event, true)
+  },
+  dtend: (params, value, event) => {
+    parseDateProperty(params, value, event, false)
+  },
+  class: (params, value, event) => {
+    const classVal = safeString(value).toUpperCase()
+    if (['PRIVATE', 'PUBLIC', 'CONFIDENTIAL'].includes(classVal)) {
+      event.class = classVal as CalendarEvent['class']
+    }
+  },
+  'x-openpaas-videoconference': (params, value, event) => {
+    event.x_openpass_videoconference = safeString(value)
+  },
+  summary: (params, value, event) => {
+    event.title = safeString(value)
+  },
+  description: (params, value, event) => {
+    event.description = safeString(value)
+  },
+  location: (params, value, event) => {
+    event.location = safeString(value)
+  },
+  organizer: (params, value, event) => {
+    const paramsObj = params as Record<string, string>
+    event.organizer = {
+      cn: paramsObj?.cn ?? '',
+      cal_address: safeString(value).replace(/^mailto:/i, '')
+    }
+  },
+  attendee: (params, value, event) => {
+    parseAttendeeProperty(params, value, event)
+  },
+  dtstamp: (params, value, event) => {
+    event.stamp = safeString(value)
+  },
+  sequence: (params, value, event) => {
+    event.sequence = Number(value)
+  },
+  'recurrence-id': (params, value, event, context) => {
+    context.recurrenceId = safeString(value)
+  },
+  exdate: (params, value, event) => {
+    if (!event.exdates) event.exdates = []
+    event.exdates.push(safeString(value))
+  },
+  status: (params, value, event) => {
+    event.status = safeString(value)
+  },
+  duration: (params, value, event, context) => {
+    context.duration = safeString(value)
+  },
+  rrule: (params, value, event) => {
+    parseRruleProperty(value, event)
+  }
+}
+
+function parseEventProperty(
+  prop: VObjectProperty,
+  event: Partial<CalendarEvent>,
+  context: PropertyContext
+): void {
+  const [key, params, , value] = prop
+  const parser = PROPERTY_PARSERS[key.toLowerCase()]
+  if (parser) {
+    parser(params, value, event, context)
+  }
+}
+
+/**
+ * Processes and unique-ifies the event UID for recurrent and private/confidential events.
+ *
+ * For private or confidential events, appending a unique suffix (either the recurrence-id
+ * or the start time) to the base UID is critical. This ensures that every instance of a
+ * private recurrent series is treated as a distinct event with a unique ID by the calendar
+ * rendering engine, preventing issues where instances clobber each other, duplicate
+ * requests are sent, or private recurrent events briefly appear and then disappear.
+ */
+function processEventUid(
+  event: Partial<CalendarEvent>,
+  recurrenceId?: string
+): void {
+  if (!event.uid) return
+  const isPrivateOrConfidential =
+    event.class === 'PRIVATE' || event.class === 'CONFIDENTIAL'
+
+  if (isPrivateOrConfidential) {
+    const uniqueSuffix = recurrenceId || event.start
+    if (!uniqueSuffix) return
+    event.uid = `${event.uid}/${uniqueSuffix}`
+
+    if (!recurrenceId) return
+    event.recurrenceId = recurrenceId
+  } else if (recurrenceId) {
     event.uid = `${event.uid}/${recurrenceId}`
     event.recurrenceId = recurrenceId
   }
+}
 
-  if (valarm) {
-    event.alarm = {} as AlarmObject
-    for (const [key, , , value] of valarm[1]) {
-      switch (key.toLowerCase()) {
-        case 'action':
-          event.alarm.action = String(value)
-          break
-        case 'trigger':
-          event.alarm.trigger = String(value)
-          break
-      }
+function parseAlarm(valarm?: VCalComponent): AlarmObject | undefined {
+  if (!valarm) {
+    return undefined
+  }
+  const alarm = {} as AlarmObject
+  for (const [key, , , value] of valarm[1]) {
+    switch (key.toLowerCase()) {
+      case 'action':
+        alarm.action = safeString(value)
+        break
+      case 'trigger':
+        alarm.trigger = safeString(value)
+        break
     }
   }
-  event.calId = calendar.id
-  event.URL = calendar.delegated
-    ? buildDelegatedEventURL(calendar, eventURL)
-    : eventURL
-  if (!event.uid || !event.start) {
-    console.error(
-      `missing crucial event param in calendar ${calendar.id} `,
-      data
-    )
-    event.error = `missing crucial event param in calendar ${calendar.id} `
-  }
+  return alarm
+}
 
+function processEventDates(
+  event: Partial<CalendarEvent>,
+  duration?: string
+): void {
   const eventTimezone = event.timezone
 
   if (!event.end) {
@@ -226,19 +286,55 @@ export function parseCalendarEvent(
     event.end = formatDateTimeToICal(artificialEnd, eventTimezone)
   }
 
-  if (!event.allday && event.start && eventTimezone) {
-    const startISO = convertEventDateTimeToISO(event.start, eventTimezone)
-    if (startISO) {
-      event.start = startISO
+  if (!event.allday && eventTimezone) {
+    if (event.start) {
+      event.start =
+        convertEventDateTimeToISO(event.start, eventTimezone) ?? event.start
     }
+
+    if (event.end) {
+      event.end =
+        convertEventDateTimeToISO(event.end, eventTimezone) ?? event.end
+    }
+  }
+}
+
+export function parseCalendarEvent(
+  data: VObjectProperty[],
+  color: Record<string, string>,
+  calendar: Calendar,
+  eventURL: string,
+  valarm?: VCalComponent
+): CalendarEvent {
+  const event: Partial<CalendarEvent> = { color, attendee: [] }
+  const context: PropertyContext = {}
+
+  for (const prop of data) {
+    parseEventProperty(prop, event, context)
   }
 
-  if (!event.allday && event.end && eventTimezone) {
-    const endISO = convertEventDateTimeToISO(event.end, eventTimezone)
-    if (endISO) {
-      event.end = endISO
-    }
+  processEventUid(event, context.recurrenceId)
+
+  const alarm = parseAlarm(valarm)
+  if (alarm) {
+    event.alarm = alarm
   }
+
+  event.calId = calendar.id
+  event.URL = calendar.delegated
+    ? buildDelegatedEventURL(calendar, eventURL)
+    : eventURL
+
+  if (!event.uid || !event.start) {
+    console.error(
+      `missing crucial event param in calendar ${calendar.id} `,
+      data
+    )
+    event.error = `missing crucial event param in calendar ${calendar.id} `
+  }
+
+  processEventDates(event, context.duration)
+
   event.passthroughProps = data.filter(
     ([key]) => !KNOWN_PROPS.has(key.toLowerCase())
   )

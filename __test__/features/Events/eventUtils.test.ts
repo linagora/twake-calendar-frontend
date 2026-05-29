@@ -428,6 +428,44 @@ describe('parseCalendarEvent', () => {
     expect(result.start).toBe('2025-07-18')
     expect(result.end).toBe('2025-07-19')
   })
+
+  it('appends start time to UID for PRIVATE events if recurrence-id is absent', () => {
+    const rawData = [
+      ['UID', {}, 'text', 'event-private'],
+      ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z'],
+      ['CLASS', {}, 'text', 'PRIVATE']
+    ] as VObjectProperty[]
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendar,
+      '/calendars/test.ics'
+    )
+
+    expect(result.uid).toBe('event-private/2025-07-18T09:00:00Z')
+    expect(result.class).toBe('PRIVATE')
+  })
+
+  it('prefers recurrence-id over start time for PRIVATE events if recurrence-id is present', () => {
+    const rawData = [
+      ['UID', {}, 'text', 'event-private'],
+      ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z'],
+      ['RECURRENCE-ID', {}, 'date-time', '2025-07-18T10:00:00Z'],
+      ['CLASS', {}, 'text', 'PRIVATE']
+    ] as VObjectProperty[]
+
+    const result = parseCalendarEvent(
+      rawData,
+      baseColor,
+      calendar,
+      '/calendars/test.ics'
+    )
+
+    expect(result.uid).toBe('event-private/2025-07-18T10:00:00Z')
+    expect(result.recurrenceId).toBe('2025-07-18T10:00:00Z')
+    expect(result.class).toBe('PRIVATE')
+  })
 })
 
 describe('calendarEventToJCal', () => {
