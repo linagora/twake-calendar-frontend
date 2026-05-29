@@ -7,6 +7,7 @@ import {
 } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone, parseCalendarEvent } from '../utils'
+import { VcalendarProperties } from '@/features/Calendars/types/VcalendarProperties'
 
 export function makeDeleteEventInstanceJCal(
   vevents: VCalComponent[],
@@ -67,7 +68,11 @@ export function makeDeleteEventInstanceJCal(
   const timezoneData = TIMEZONES.zones[seriesEvent.timezone]
   const vtimezone = makeTimezone(timezoneData, seriesEvent)
 
-  return ['vcalendar', [], [...filteredVevents, vtimezone.component.jCal]]
+  return [
+    'vcalendar',
+    VcalendarProperties,
+    [...filteredVevents, vtimezone.component.jCal]
+  ]
 }
 
 const normalizeRecurrenceId = (id: VObjectValue): string =>
