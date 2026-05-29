@@ -10,6 +10,7 @@ import EventPreviewModal from '@/features/Events/EventPreview'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { VcalendarProperties } from '@/features/Calendars/types/VcalendarProperties'
 
 jest.mock('@/components/Event/utils/eventUtils', () => {
   const actual = jest.requireActual('@/components/Event/utils/eventUtils')
@@ -593,7 +594,7 @@ describe('RSVP to Recurring Event', () => {
 
     expect(callArgs[1]).toStrictEqual([
       'vcalendar',
-      [],
+      VcalendarProperties,
       [
         [
           'vevent',
