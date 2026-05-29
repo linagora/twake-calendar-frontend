@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, Typography, radius } from '@linagora/twake-mui'
+import { Box, Button, Drawer, radius } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
 import { useI18n } from 'twake-i18n'
 import { MiniCalendar } from '../MiniCalendar'
@@ -81,12 +81,6 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
         selectedCalendars={selectedCalendars}
         setSelectedCalendars={setSelectedCalendars}
       />
-
-      <Box sx={{ mt: 'auto', pt: 2 }}>
-        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-          v{window.APP_VERSION ?? '2.0'}
-        </Typography>
-      </Box>
     </Drawer>
   )
 }
