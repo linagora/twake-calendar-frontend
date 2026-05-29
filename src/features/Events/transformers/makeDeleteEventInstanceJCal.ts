@@ -1,4 +1,5 @@
 import { TIMEZONES } from '@/utils/timezone-data'
+import moment from 'moment-timezone'
 import { Calendar } from '../../Calendars/CalendarTypes'
 import {
   VCalComponent,
@@ -59,7 +60,11 @@ export function makeDeleteEventInstanceJCal(
     if (!recurrenceIdProp) return true // Keep master
     return (
       normalizeRecurrenceId(recurrenceIdProp[3]) !==
-      normalizeRecurrenceId((event.recurrenceId ?? '') as VObjectValue)
+      normalizeRecurrenceId(
+        moment
+          .tz(exdateValue, seriesEvent.timezone)
+          .format('YYYY-MM-DDTHH:mm:ss') as VObjectValue
+      )
     ) // Remove matching override
   })
 
