@@ -69,7 +69,7 @@ export const DesktopSettingsPage: React.FC<{
         </List>
         <Box sx={{ mt: 'auto', px: 3, pb: 2 }}>
           <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-            v{window.APP_VERSION ?? '2.0'}
+            version {window.APP_VERSION ?? '2.0'}
           </Typography>
         </Box>
       </Box>
