@@ -25,6 +25,7 @@ import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
 import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
 import { FC_DAYS, WeekDaySelector } from './WeekDaySelector'
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { preventFloatNumber, toPositiveInt } from '@/utils/preventFloatNumber'
 
 const numericSlotProps = {
   htmlInput: {
@@ -70,11 +71,12 @@ export const RepeatEvent: React.FC<{
           <TextField
             type="number"
             value={repetition.interval ?? 1}
+            onKeyDown={preventFloatNumber}
             disabled={!isOwn}
             onChange={e =>
               setRepetition({
                 ...repetition,
-                interval: Number(e.target.value)
+                interval: toPositiveInt(e.target.value)
               })
             }
             size={isMobile ? 'medium' : 'small'}
@@ -83,6 +85,7 @@ export const RepeatEvent: React.FC<{
               htmlInput: {
                 ...numericSlotProps.htmlInput,
                 min: 1,
+                step: 1,
                 'data-testid': 'repeat-interval',
                 style: {
                   textAlign: 'center',
@@ -277,7 +280,7 @@ export const RepeatEvent: React.FC<{
                     size={isMobile ? 'medium' : 'small'}
                     value={repetition.occurrences || 1}
                     onChange={e => {
-                      const value = Number(e.target.value)
+                      const value = toPositiveInt(e.target.value)
                       setRepetition({
                         ...repetition,
                         endDate: null,
@@ -285,11 +288,13 @@ export const RepeatEvent: React.FC<{
                       })
                     }}
                     sx={{ width: 100 }}
+                    onKeyDown={preventFloatNumber}
                     disabled={!isOwn}
                     slotProps={{
                       htmlInput: {
                         ...numericSlotProps.htmlInput,
                         min: 1,
+                        step: 1,
                         'data-testid': 'occurrences-input'
                       }
                     }}
