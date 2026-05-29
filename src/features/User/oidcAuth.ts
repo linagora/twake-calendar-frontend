@@ -14,16 +14,13 @@ export const clientConfig = {
 const DISCOVERY_TIMEOUT_MS = 10_000
 
 export async function getClientConfig() {
-  const config = await client.discovery(
+  return client.discovery(
     new URL(clientConfig.url),
     clientConfig.client_id,
     undefined,
     undefined,
     { signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS) }
   )
-  // Tolerate up to 5 minutes of clock skew between browser and SSO server
-  config[client.clockSkew] = 300
-  return config
 }
 
 export async function Auth() {
