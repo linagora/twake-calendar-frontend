@@ -33,12 +33,24 @@ describe('TimezoneChangeAlert', () => {
   })
 
   const mockBrowserTZ = (tz: string) => {
-    jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(
-      () =>
-        ({
-          resolvedOptions: () => ({ timeZone: tz })
-        }) as any
-    )
+    jest
+      .spyOn(Intl, 'DateTimeFormat')
+      .mockImplementation((locales, options) => {
+        const timeZone = options?.timeZone || tz
+        let offset = 'UTC'
+        if (timeZone === 'Asia/Ho_Chi_Minh') {
+          offset = 'GMT+7'
+        } else if (
+          timeZone === 'Europe/Paris' ||
+          timeZone === 'Europe/Brussels'
+        ) {
+          offset = 'GMT+2'
+        }
+        return {
+          resolvedOptions: () => ({ timeZone }),
+          formatToParts: () => [{ type: 'timeZoneName', value: offset }]
+        } as any
+      })
   }
 
   const baseState = {
@@ -64,6 +76,15 @@ describe('TimezoneChangeAlert', () => {
     renderWithProviders(<TimezoneChangeAlert />, state)
 
     expect(screen.queryByText(/We detected you are in/)).not.toBeInTheDocument()
+  })
+
+  it('does not show snackbar when browser TZ has different name but same offset as configured TZ', () => {
+    mockBrowserTZ('Europe/Brussels')
+    const state = baseState
+    renderWithProviders(<TimezoneChangeAlert />, state)
+    expect(
+      screen.queryByText(/settings\.tzPrompt\.detected/)
+    ).not.toBeInTheDocument()
   })
 
   it('does not show snackbar when ASK_FOR_TZ_UPDATE is false', () => {

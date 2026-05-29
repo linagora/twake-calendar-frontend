@@ -7,6 +7,7 @@ import {
 import { Alert, Box, Button, Snackbar, Typography } from '@linagora/twake-mui'
 import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import { getTimezoneOffset } from '@/utils/timezone'
 
 export const TimezoneChangeAlert: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -30,8 +31,21 @@ export const TimezoneChangeAlert: React.FC = () => {
 
       const lastCheckedTZ = localStorage.getItem('lastCheckedTZ')
 
-      const hasTimezoneChanged = currentBrowserTZ !== lastCheckedTZ
-      const shouldPrompt = currentBrowserTZ !== configuredTZ
+      const getSafeTimezoneOffset = (tz: string | null | undefined): string => {
+        if (!tz) return ''
+        try {
+          return getTimezoneOffset(tz)
+        } catch {
+          return ''
+        }
+      }
+
+      const browserOffset = getSafeTimezoneOffset(currentBrowserTZ)
+      const lastCheckedOffset = getSafeTimezoneOffset(lastCheckedTZ)
+      const configuredOffset = getSafeTimezoneOffset(configuredTZ)
+
+      const hasTimezoneChanged = browserOffset !== lastCheckedOffset
+      const shouldPrompt = browserOffset !== configuredOffset
 
       if (hasTimezoneChanged && shouldPrompt) {
         setOpen(true)
