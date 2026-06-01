@@ -96,8 +96,9 @@ pipeline {
             def dockerTag = "${env.CHANGE_ID}"
             env.DOCKER_TAG = dockerTag
             echo "Docker tag: ${dockerTag}"
+            def shortSha = env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : 'dev'
             sh 'npm run build'
-            sh 'docker build -t linagora/twake-calendar-web-pr:$DOCKER_TAG .'
+            sh "docker build --build-arg BUILD_VERSION=${shortSha} -t linagora/twake-calendar-web-pr:\$DOCKER_TAG ."
             sh 'echo $DOCKER_HUB_CREDENTIAL_PSW | docker login -u $DOCKER_HUB_CREDENTIAL_USR --password-stdin'
             sh 'docker push linagora/twake-calendar-web-pr:$DOCKER_TAG'
             sh """
@@ -123,14 +124,17 @@ pipeline {
         }
         steps {
           script {
+            def shortSha = env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : 'dev'
             env.DOCKER_TAG = 'branch-master'
+            env.BUILD_VERSION = shortSha
             if (env.TAG_NAME) {
               env.DOCKER_TAG = env.TAG_NAME
+              env.BUILD_VERSION = env.TAG_NAME
             }
 
             echo "Docker tag: ${env.DOCKER_TAG}"
             sh 'npm run build'
-            sh 'docker build -t linagora/twake-calendar-web:$DOCKER_TAG .'
+            sh 'docker build --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-web:$DOCKER_TAG .'
             sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
             sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
           }

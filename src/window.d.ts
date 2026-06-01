@@ -23,6 +23,8 @@ declare global {
 
     SENTRY_DSN: string | undefined
 
+    APP_VERSION: string
+
     DEBUG: boolean
     LANG: string
 

@@ -52,7 +52,10 @@ export const DesktopSettingsPage: React.FC<{
 
   return (
     <>
-      <Box className="settings-sidebar">
+      <Box
+        className="settings-sidebar"
+        sx={{ display: 'flex', flexDirection: 'column' }}
+      >
         <List>
           <ListItemButton
             className={`settings-nav-item ${activeNavItem === 'settings' ? 'active' : ''}`}
@@ -64,6 +67,11 @@ export const DesktopSettingsPage: React.FC<{
             <ListItemText primary={t('settings.title') || 'Settings'} />
           </ListItemButton>
         </List>
+        <Box sx={{ mt: 'auto', px: 3, pb: 2 }}>
+          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+            version {window.APP_VERSION ?? '2.0'}
+          </Typography>
+        </Box>
       </Box>
       <Box className="settings-content">
         <SettingsHeader
