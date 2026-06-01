@@ -76,7 +76,12 @@ function baseCalendarEvent(
 describe('parseCalendarEvent — passthroughProps', () => {
   it('captures unknown X- properties into passthroughProps', () => {
     const props = baseVeventProps(CUSTOM_PROPS)
-    const event = parseCalendarEvent(props, {}, MOCK_CALENDAR, EVENT_URL)
+    const event = parseCalendarEvent({
+      data: props,
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
 
     expect(event.passthroughProps).toBeDefined()
     const keys = event.passthroughProps!.map(([k]) => k.toLowerCase())
@@ -87,7 +92,12 @@ describe('parseCalendarEvent — passthroughProps', () => {
 
   it('preserves the full tuple structure of passthrough props', () => {
     const props = baseVeventProps(CUSTOM_PROPS)
-    const event = parseCalendarEvent(props, {}, MOCK_CALENDAR, EVENT_URL)
+    const event = parseCalendarEvent({
+      data: props,
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
 
     const attachment = event.passthroughProps!.find(
       ([k]) => k === 'x-attachment'
@@ -102,7 +112,12 @@ describe('parseCalendarEvent — passthroughProps', () => {
 
   it('does NOT include known props in passthroughProps', () => {
     const props = baseVeventProps(CUSTOM_PROPS)
-    const event = parseCalendarEvent(props, {}, MOCK_CALENDAR, EVENT_URL)
+    const event = parseCalendarEvent({
+      data: props,
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
 
     const known = ['uid', 'summary', 'dtstart', 'dtend', 'dtstamp', 'sequence']
     const passthroughKeys = event.passthroughProps!.map(([k]) =>
@@ -114,18 +129,23 @@ describe('parseCalendarEvent — passthroughProps', () => {
   })
 
   it('sets passthroughProps to empty array when no unknown props exist', () => {
-    const event = parseCalendarEvent(
-      baseVeventProps(),
-      {},
-      MOCK_CALENDAR,
-      EVENT_URL
-    )
+    const event = parseCalendarEvent({
+      data: baseVeventProps(),
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
     expect(event.passthroughProps).toEqual([])
   })
 
   it('parses known fields correctly alongside custom props', () => {
     const props = baseVeventProps(CUSTOM_PROPS)
-    const event = parseCalendarEvent(props, {}, MOCK_CALENDAR, EVENT_URL)
+    const event = parseCalendarEvent({
+      data: props,
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
 
     expect(event.title).toBe('Team standup')
     expect(event.uid).toBe('event-abc-uid')
@@ -435,12 +455,12 @@ describe('Edge cases', () => {
       ['x-attachment', {}, 'text', 'file1=='],
       ['x-attachment', {}, 'text', 'file2==']
     ]
-    const event = parseCalendarEvent(
-      baseVeventProps(multiAttach),
-      {},
-      MOCK_CALENDAR,
-      EVENT_URL
-    )
+    const event = parseCalendarEvent({
+      data: baseVeventProps(multiAttach),
+      color: {},
+      calendar: MOCK_CALENDAR,
+      eventURL: EVENT_URL
+    })
     expect(
       event.passthroughProps?.filter(([k]) => k === 'x-attachment').length
     ).toBe(2)

@@ -47,7 +47,12 @@ async function resolveMasterEvent(
       `Could not find master event for recurring series: ${event.uid}`
     )
   }
-  return parseCalendarEvent(masterVevent[1], event.color, calendar, event.URL)
+  return parseCalendarEvent({
+    data: masterVevent[1],
+    color: event.color as Record<string, string>,
+    calendar,
+    eventURL: event.URL
+  })
 }
 
 function resolveOrganizerForCalendar(

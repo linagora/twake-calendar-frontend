@@ -37,12 +37,12 @@ describe('parseCalendarEvent', () => {
       ['DTSTAMP', {}, 'date-time', '2025-07-18T08:00:00Z']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.uid).toBe('event-1')
     expect(result.title).toBe('Team Meeting')
@@ -111,12 +111,12 @@ describe('parseCalendarEvent', () => {
       ['DTSTAMP', {}, 'date-time', '2025-07-18T08:00:00Z']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.uid).toBe('event-1')
     expect(result.title).toBe('Team Meeting')
@@ -173,12 +173,12 @@ describe('parseCalendarEvent', () => {
       ['DTSTAMP', {}, 'date-time', '2025-07-18T08:00:00Z']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.uid).toBe('event-1')
     expect(result.title).toBe('Team Meeting')
@@ -219,12 +219,12 @@ describe('parseCalendarEvent', () => {
       ['DTEND', {}, 'date', '2025-07-21']
     ]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.allday).toBe(true)
   })
@@ -236,12 +236,12 @@ describe('parseCalendarEvent', () => {
       ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z']
     ]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.uid).toBe('event-2/2025-07-18T09:00:00Z')
   })
@@ -251,24 +251,24 @@ describe('parseCalendarEvent', () => {
       ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z']
     ]
 
-    const result = parseCalendarEvent(
-      rawDataMissingUid,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawDataMissingUid,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
     expect(result.error).toMatch(/missing crucial event param/)
 
     const rawDataMissingStart: VObjectProperty[] = [
       ['UID', {}, 'text', 'event-3']
     ]
 
-    const result2 = parseCalendarEvent(
-      rawDataMissingStart,
-      baseColor,
+    const result2 = parseCalendarEvent({
+      data: rawDataMissingStart,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
     expect(result2.error).toMatch(/missing crucial event param/)
   })
 
@@ -281,12 +281,12 @@ describe('parseCalendarEvent', () => {
       ['duration', {}, 'duration', 'PT60M']
     ]
 
-    const result = parseCalendarEvent(
-      rawDataMissing,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawDataMissing,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
     expect(result.end).toBeDefined()
     const endDate = new Date(result.end ?? '')
     const startDate = new Date(result.start)
@@ -299,12 +299,12 @@ describe('parseCalendarEvent', () => {
       ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z']
     ]
 
-    const result = parseCalendarEvent(
-      rawDataMissing,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawDataMissing,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
     expect(result.end).toBeDefined()
     const endDate = new Date(result.end ?? '')
     const startDate = new Date(result.start)
@@ -325,13 +325,13 @@ describe('parseCalendarEvent', () => {
       ]
     ] as unknown as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics',
+      eventURL: '/calendars/test.ics',
       valarm
-    )
+    })
 
     expect(result.alarm?.action).toBe('DISPLAY')
     expect(result.alarm?.trigger).toBe('-PT15M')
@@ -346,12 +346,12 @@ describe('parseCalendarEvent', () => {
       ['ORGANIZER', {}, 'cal-address', 'jane@example.com']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.attendee).toEqual([
       {
@@ -377,12 +377,12 @@ describe('parseCalendarEvent', () => {
       ['DTEND', { tzid: 'Asia/Bangkok' }, 'date-time', '2025-07-18T10:00:00']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.timezone).toBeDefined()
     expect(result.start).toMatch(
@@ -399,12 +399,12 @@ describe('parseCalendarEvent', () => {
       ['DTEND', {}, 'date-time', '2025-07-18T10:00:00Z']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.start).toBe('2025-07-18T09:00:00Z')
     expect(result.end).toBe('2025-07-18T10:00:00Z')
@@ -417,12 +417,12 @@ describe('parseCalendarEvent', () => {
       ['DTEND', {}, 'date', '2025-07-19']
     ] as VObjectProperty[]
 
-    const result = parseCalendarEvent(
-      rawData,
-      baseColor,
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
       calendar,
-      '/calendars/test.ics'
-    )
+      eventURL: '/calendars/test.ics'
+    })
 
     expect(result.allday).toBe(true)
     expect(result.start).toBe('2025-07-18')
@@ -1441,12 +1441,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
         { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 'MO' }
       ]
     ]
-    const result = parseCalendarEvent(
+    const result = parseCalendarEvent({
       data,
-      baseColor,
+      color: baseColor,
       calendar,
-      '/cal/event.ics'
-    )
+      eventURL: '/cal/event.ics'
+    })
     expect(result.repetition?.wkst).toBe('MO')
   })
 
@@ -1461,12 +1461,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
         { freq: 'WEEKLY', interval: 1, byday: 'TH', wkst: 2 }
       ]
     ]
-    const result = parseCalendarEvent(
+    const result = parseCalendarEvent({
       data,
-      baseColor,
+      color: baseColor,
       calendar,
-      '/cal/event.ics'
-    )
+      eventURL: '/cal/event.ics'
+    })
     expect(result.repetition?.wkst).toBe('MO')
   })
 
@@ -1483,12 +1483,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
       ...baseProps,
       ['rrule', {}, 'recur', { freq: 'WEEKLY', wkst: num }]
     ]
-    const result = parseCalendarEvent(
+    const result = parseCalendarEvent({
       data,
-      baseColor,
+      color: baseColor,
       calendar,
-      '/cal/event.ics'
-    )
+      eventURL: '/cal/event.ics'
+    })
     expect(result.repetition?.wkst).toBe(expected)
   })
 
@@ -1497,12 +1497,12 @@ describe('parseCalendarEvent – RRULE WKST normalization (issue #860)', () => {
       ...baseProps,
       ['rrule', {}, 'recur', { freq: 'WEEKLY', byday: 'MO' }]
     ]
-    const result = parseCalendarEvent(
+    const result = parseCalendarEvent({
       data,
-      baseColor,
+      color: baseColor,
       calendar,
-      '/cal/event.ics'
-    )
+      eventURL: '/cal/event.ics'
+    })
     expect(result.repetition?.wkst).toBeUndefined()
   })
 })
@@ -1526,7 +1526,12 @@ describe('parseCalendarEvent - delegated calendar URL handling', () => {
     } as Calendar
 
     it('uses the raw eventURL as-is', () => {
-      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL)
+      const result = parseCalendarEvent({
+        data: rawData,
+        color: baseColor,
+        calendar,
+        eventURL
+      })
       expect(result.URL).toBe(eventURL)
     })
   })
@@ -1540,18 +1545,23 @@ describe('parseCalendarEvent - delegated calendar URL handling', () => {
     } as unknown as Calendar
 
     it('rewrites URL using calendar link base path', () => {
-      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL)
+      const result = parseCalendarEvent({
+        data: rawData,
+        color: baseColor,
+        calendar,
+        eventURL
+      })
       expect(result.URL).toBe('/calendars/user2/cal1/event-uid-123.ics')
     })
 
     it('preserves the event filename from the original URL', () => {
       const differentSourceURL = '/calendars/someother/path/event-uid-123.ics'
-      const result = parseCalendarEvent(
-        rawData,
-        baseColor,
+      const result = parseCalendarEvent({
+        data: rawData,
+        color: baseColor,
         calendar,
-        differentSourceURL
-      )
+        eventURL: differentSourceURL
+      })
       // filename is extracted and rebased onto calendar link
       expect(result.URL).toMatch(
         /\/calendars\/user2\/cal1\/event-uid-123\.ics$/
@@ -1559,14 +1569,24 @@ describe('parseCalendarEvent - delegated calendar URL handling', () => {
     })
 
     it('still sets calId from calendar.id', () => {
-      const result = parseCalendarEvent(rawData, baseColor, calendar, eventURL)
+      const result = parseCalendarEvent({
+        data: rawData,
+        color: baseColor,
+        calendar,
+        eventURL
+      })
       expect(result.calId).toBe('user2/cal1')
     })
   })
 
   describe('empty calendar object (used in deleteEventInstance)', () => {
     it('does not throw and sets URL to empty string', () => {
-      const result = parseCalendarEvent(rawData, baseColor, {} as Calendar, '')
+      const result = parseCalendarEvent({
+        data: rawData,
+        color: baseColor,
+        calendar: {} as Calendar,
+        eventURL: ''
+      })
       expect(result.URL).toBe('')
       expect(result.calId).toBeUndefined()
     })

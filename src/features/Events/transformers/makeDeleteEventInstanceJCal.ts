@@ -27,12 +27,12 @@ export function makeDeleteEventInstanceJCal(
   }
 
   const exdateValue = event.recurrenceId ?? event.start
-  const seriesEvent = parseCalendarEvent(
-    vevents[masterIndex][1] as VObjectProperty[],
-    {},
-    { id: event.calId } as Calendar,
-    ''
-  )
+  const seriesEvent = parseCalendarEvent({
+    data: vevents[masterIndex][1] as VObjectProperty[],
+    color: {},
+    calendar: { id: event.calId } as Calendar,
+    eventURL: ''
+  })
   const masterProps = vevents[masterIndex][1] as VObjectProperty[]
 
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
@@ -76,7 +76,7 @@ export function makeDeleteEventInstanceJCal(
   return [
     'vcalendar',
     VcalendarProperties,
-    [...filteredVevents, vtimezone.component.jCal]
+    [...filteredVevents, vtimezone.component.jCal as VCalComponent]
   ]
 }
 

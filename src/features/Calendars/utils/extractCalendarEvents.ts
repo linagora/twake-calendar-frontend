@@ -3,7 +3,7 @@ import { parseCalendarEvent } from '@/features/Events/utils'
 import { defaultColors } from '@/utils/defaultColors'
 import { CalDavItem } from '../api/types'
 import { Calendar } from '../CalendarTypes'
-import { VCalComponent } from '../types/CalendarData'
+import { VCalComponent, VObjectProperty } from '../types/CalendarData'
 
 export function extractCalendarEvents(
   item: CalDavItem,
@@ -34,20 +34,20 @@ export function extractCalendarEvents(
         return null
       }
 
-      const eventProps = vevent[1]
+      const eventProps = vevent[1] as VObjectProperty[]
       if (!Array.isArray(eventProps)) {
         return null
       }
 
-      const valarm = extractValarm(vevent)
+      const valarm = extractValarm(vevent as VCalComponent)
 
-      return parseCalendarEvent(
-        eventProps,
-        options?.color ?? defaultColors[0],
-        options.cal,
+      return parseCalendarEvent({
+        data: eventProps,
+        color: options?.color ?? defaultColors[0],
+        calendar: options.cal,
         eventURL,
         valarm
-      )
+      })
     })
     .filter(Boolean) as CalendarEvent[]
 }

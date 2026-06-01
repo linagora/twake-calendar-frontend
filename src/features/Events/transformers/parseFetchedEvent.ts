@@ -116,12 +116,12 @@ export function parseFetchedEvent(
   const timezoneFromVTimezone = resolveTimezoneFromVTimezone(vtimezones)
   const timezoneFromDtstart = resolveTimezoneFromDtstart(targetVevent)
 
-  const eventjson = parseCalendarEvent(
-    targetVevent[1] as VObjectProperty[],
-    event.color ?? {},
-    { id: event?.calId } as Calendar,
-    event.URL
-  )
+  const eventjson = parseCalendarEvent({
+    data: targetVevent[1] as VObjectProperty[],
+    color: event.color ?? {},
+    calendar: { id: event?.calId } as Calendar,
+    eventURL: event.URL
+  })
 
   const finalTimezone =
     timezoneFromVTimezone ?? timezoneFromDtstart ?? eventjson.timezone ?? 'UTC'
