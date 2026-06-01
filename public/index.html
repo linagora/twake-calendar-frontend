@@ -79,16 +79,26 @@
         document.body.innerHTML = errorUI
       }
 
-      window.addEventListener('error', function (e) {
-        var isUnexpectedToken =
-          e.message &&
-          (e.message.includes("Unexpected token '<'") ||
-            e.message.includes("expected expression, got '<'"))
-        var isScriptError = e.filename && e.filename.indexOf('.js') > -1
-        if (isUnexpectedToken && isScriptError) {
-          showFallbackUI()
-        }
-      })
+      window.addEventListener(
+        'error',
+        function (e) {
+          // Catch syntax errors (Unexpected token '<')
+          var isUnexpectedToken =
+            e.message &&
+            (e.message.includes("Unexpected token '<'") ||
+              e.message.includes("expected expression, got '<'"))
+          var isScriptError = e.filename && e.filename.indexOf('.js') > -1
+
+          // Catch asset loading network failures (404s)
+          var isNetworkError =
+            e.target &&
+            (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')
+          if ((isUnexpectedToken && isScriptError) || isNetworkError) {
+            showFallbackUI()
+          }
+        },
+        true
+      )
 
       window.addEventListener('unhandledrejection', function (e) {
         // AbortErrors are intentional (SSO redirect in progress, cancelled fetches)
