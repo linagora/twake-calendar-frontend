@@ -21,7 +21,10 @@ export default defineConfig({
     distPath: {
       root: 'dist'
     },
-    minify: true
+    minify: true,
+    sourceMap: {
+      js: 'source-map'
+    }
   },
   performance: {
     chunkSplit: {
