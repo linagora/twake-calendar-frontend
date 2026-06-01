@@ -23,7 +23,7 @@ export default defineConfig({
     },
     minify: true,
     sourceMap: {
-      js: process.env.NODE_ENV === 'production' ? 'hidden-source-map' : 'source-map'
+      js:   'source-map'
     }
   },
   performance: {
