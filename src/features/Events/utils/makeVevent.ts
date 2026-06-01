@@ -31,7 +31,8 @@ export function makeVevent(
         'unknown',
         event.x_openpass_videoconference ?? null
       ],
-      ['summary', {}, 'text', event.title ?? '']
+      ['summary', {}, 'text', event.title ?? ''],
+      ['dtstamp', {}, 'date-time', formatDateTimeToICal(new Date())]
     ]
   ]
   if (event.alarm?.trigger) {

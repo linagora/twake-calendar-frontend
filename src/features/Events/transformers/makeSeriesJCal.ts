@@ -6,6 +6,7 @@ import {
 } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone, makeVevent } from '../utils'
+import { VcalendarProperties } from '@/features/Calendars/types/VcalendarProperties'
 
 const METADATA_FIELDS = [
   'summary',
@@ -301,7 +302,7 @@ export const makeSeriesJCal = (
 
   return [
     'vcalendar',
-    [],
+    VcalendarProperties,
     [...finalVevents, vtimezone.component.jCal as VCalComponent]
   ] as VCalComponent
 }

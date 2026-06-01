@@ -5,6 +5,7 @@ import {
 } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone, makeVevent } from '../utils'
+import { VcalendarProperties } from '@/features/Calendars/types/VcalendarProperties'
 
 export function makeEventWithOverrides(
   updatedEvent: CalendarEvent,
@@ -42,7 +43,7 @@ export function makeEventWithOverrides(
 
   return [
     'vcalendar',
-    [],
+    VcalendarProperties,
     [...nextVevents, vtimezone.component.jCal as VCalComponent]
   ]
 }

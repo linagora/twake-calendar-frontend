@@ -5,6 +5,7 @@ import {
 } from '../../Calendars/types/CalendarData'
 import { CalendarEvent } from '../EventsTypes'
 import { makeTimezone } from '../utils'
+import { VcalendarProperties } from '@/features/Calendars/types/VcalendarProperties'
 
 export function updateSeriesPartstatJCal(
   vevents: VCalComponent[],
@@ -36,7 +37,11 @@ export function updateSeriesPartstatJCal(
   const timezoneData = TIMEZONES.zones[event.timezone]
   const vtimezone = makeTimezone(timezoneData, event)
 
-  return ['vcalendar', [], [...updatedVevents, vtimezone.component.jCal]]
+  return [
+    'vcalendar',
+    VcalendarProperties,
+    [...updatedVevents, vtimezone.component.jCal]
+  ]
 }
 
 const normalizeEmail = (addr: string): string =>
