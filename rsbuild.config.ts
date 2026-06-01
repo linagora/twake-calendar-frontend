@@ -23,7 +23,7 @@ export default defineConfig({
     },
     minify: true,
     sourceMap: {
-      js:   'source-map'
+      js: 'source-map'
     }
   },
   performance: {
