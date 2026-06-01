@@ -1,5 +1,5 @@
 import CalendarSelection from '@common/components/Calendar/CalendarSelection'
-import * as calendarThunks from '@common/features/Calendars/services'
+import * as calendarThunks from '@common/features/Calendars/CalendarSlice'
 import '@testing-library/jest-dom'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -161,7 +161,7 @@ describe('CalendarSelection', () => {
 
   it('Navigates to deletion dialog and deletes personal cal', async () => {
     const spy = jest
-      .spyOn(calendarThunks, 'removeCalendarAsync')
+      .spyOn(calendarThunks, 'removeCalendar')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -193,7 +193,7 @@ describe('CalendarSelection', () => {
 
   it('Navigates to deletion dialog and deletes other cal', async () => {
     const spy = jest
-      .spyOn(calendarThunks, 'removeCalendarAsync')
+      .spyOn(calendarThunks, 'removeCalendar')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })

@@ -1,66 +1,105 @@
-import { RootState } from '@common/app/store'
+import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
+import { CalendarData } from '@common/features/Calendars/types/CalendarData'
+import { RejectedError } from '@common/features/Calendars/types/RejectedError'
+import { normalizeCalendar } from '@common/features/Calendars/utils/normalizeCalendar'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
 import { getOpenPaasUser } from '@common/features/User/userAPI'
-import { defaultColors } from '@common/utils/defaultColors'
-import { formatReduxError, toRejectedError } from '@common/utils/errorUtils'
-import { createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import {
   Calendar,
   CalendarInvite,
   DelegationAccess
 } from '@common/types/CalendarTypes'
-import { CalendarData } from '@common/features/Calendars/types/CalendarData'
-import { RejectedError } from '@common/features/Calendars/types/RejectedError'
-import { normalizeCalendar } from '@common/features/Calendars/utils/normalizeCalendar'
-import { getOwnerOrResourceData, extractResourceOwnerIds } from './helpers'
-import { createTheme } from '@mui/material/styles'
+import { defaultColors } from '@common/utils/defaultColors'
+import { formatReduxError, toRejectedError } from '@common/utils/errorUtils'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
+import { createTheme } from '@mui/material/styles'
+import { ReducerCreators } from '@reduxjs/toolkit'
+import { CalendarState } from '../CalendarSlice'
+import { extractResourceOwnerIds, getOwnerOrResourceData } from './helpers'
 
 const theme = createTheme()
 
-export const getCalendarsListAsync = createAsyncThunk<
-  { importedCalendars: Record<string, Calendar>; errors: string },
-  void,
-  { rejectValue: RejectedError; state: RootState }
->('calendars/getCalendars', async (_, { rejectWithValue, getState }) => {
-  const state = getState()
-  const existingCalendars = state.calendars.list || {}
-  const existingUser = { id: state.user?.userData?.openpaasId || undefined }
-  try {
-    const user = existingUser.id ? existingUser : await getOpenPaasUser()
-    const calendars = await fetchCalendars(user.id as string)
-    const rawCalendars = calendars._embedded['dav:calendar']
+export const getCalendarsListThunk = (create: ReducerCreators<CalendarState>) =>
+  create.asyncThunk<
+    { importedCalendars: Record<string, Calendar>; errors: string },
+    void,
+    { rejectValue: RejectedError }
+  >(
+    async (_, { rejectWithValue, getState }) => {
+      const state = getState()
+      const existingCalendars = state.calendars.list || {}
+      const existingUser = { id: state.user?.userData?.openpaasId || undefined }
+      try {
+        const user = existingUser.id ? existingUser : await getOpenPaasUser()
+        const calendars = await fetchCalendars(user.id as string)
+        const rawCalendars = calendars._embedded['dav:calendar']
 
-    const errors: string[] = []
+        const errors: string[] = []
 
-    const normalizedCalendars = rawCalendars.map((cal: CalendarData) =>
-      normalizeCalendar(cal, user.id as string)
-    )
+        const normalizedCalendars = rawCalendars.map((cal: CalendarData) =>
+          normalizeCalendar(cal, user.id as string)
+        )
 
-    const ownerDataMap = await fetchCalendarsOwnerData(
-      normalizedCalendars,
-      errors
-    )
+        const ownerDataMap = await fetchCalendarsOwnerData(
+          normalizedCalendars,
+          errors
+        )
 
-    const fetchedCalendars = buildFetchedCalendars(
-      normalizedCalendars,
-      ownerDataMap
-    )
+        const fetchedCalendars = buildFetchedCalendars(
+          normalizedCalendars,
+          ownerDataMap
+        )
 
-    const importedCalendars = mergeCalendars(
-      fetchedCalendars,
-      existingCalendars
-    )
+        const importedCalendars = mergeCalendars(
+          fetchedCalendars,
+          existingCalendars
+        )
 
-    return {
-      importedCalendars,
-      errors: errors.join('\n')
+        return {
+          importedCalendars,
+          errors: errors.join('\n')
+        }
+      } catch (err) {
+        return rejectWithValue(toRejectedError(err))
+      }
+    },
+    {
+      pending: state => {
+        state.pending = true
+      },
+      settled: state => {
+        state.pending = false
+      },
+      fulfilled: (state, action) => {
+        state.error = action.payload.errors.length
+          ? action.payload.errors
+          : null
+
+        Object.entries(action.payload.importedCalendars).forEach(
+          ([id, cal]) => {
+            state.list[id] = {
+              ...cal,
+              events: state.list[id]?.events || {}
+            }
+          }
+        )
+        // Remove calendars that no longer exist
+        Object.keys(state.list).forEach(id => {
+          if (!action.payload.importedCalendars[id]) {
+            delete state.list[id]
+          }
+        })
+      },
+      rejected: (state, action) => {
+        if (action.payload?.status !== 401) {
+          state.error =
+            action.payload?.message ||
+            action.error.message ||
+            'Failed to load calendars'
+        }
+      }
     }
-  } catch (err) {
-    return rejectWithValue(toRejectedError(err))
-  }
-})
+  )
 
 async function fetchCalendarsOwnerData(
   normalizedCalendars: Array<{ cal: CalendarData; ownerId: string }>,

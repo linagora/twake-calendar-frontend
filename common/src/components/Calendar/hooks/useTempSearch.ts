@@ -1,14 +1,16 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { removeTempCal } from '@common/features/Calendars/CalendarSlice'
-import { getTempCalendarsListAsync } from '@common/features/Calendars/services'
-import { setView } from '@common/features/Settings/SettingsSlice'
-import { defaultColors } from '@common/utils/defaultColors'
-import { useEffect, useRef } from 'react'
+import { User } from '@common/components/Attendees/types'
 import {
   buildEmailToCalendarMap,
   generateDistinctColor
 } from '@common/components/Calendar/utils/tempSearchUtil'
-import { User } from '@common/components/Attendees/types'
+import {
+  getTempCalendarsList,
+  removeTempCal
+} from '@common/features/Calendars/CalendarSlice'
+import { setView } from '@common/features/Settings/SettingsSlice'
+import { defaultColors } from '@common/utils/defaultColors'
+import { useEffect, useRef } from 'react'
 
 const requestControllers = new Map<string, AbortController>()
 
@@ -56,9 +58,7 @@ export const useTempSearch = ({
     }
 
     user.color = userColorsRef.current.get(user.email) ?? defaultColors[0]
-    void dispatch(
-      getTempCalendarsListAsync(user, { signal: controller.signal })
-    )
+    void dispatch(getTempCalendarsList(user, { signal: controller.signal }))
   }
 
   const removeTempEvent = (user: User): void => {

@@ -1,34 +1,31 @@
 import { AppDispatch } from '@common/app/store'
+import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
+import {
+  clearFetchCache,
+  putEvent as putEventAsync,
+  removeEvent,
+  updateEventInstance,
+  updateEventLocal,
+  updateSeries
+} from '@common/features/Calendars/CalendarSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
-import moment from 'moment-timezone'
+import { calendarEventToJCal, detectRecurringEventChanges } from '../../utils'
+import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import {
   clearEventFormTempData,
   saveEventFormDataToTemp,
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
-import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
-import {
-  putEventAsync,
-  updateEventInstanceAsync,
-  updateSeriesAsync
-} from '@common/features/Calendars/services'
-import {
-  clearFetchCache,
-  removeEvent,
-  updateEventLocal
-} from '@common/features/Calendars/CalendarSlice'
-import { detectRecurringEventChanges } from '@common/features/Events/utils/detectRecurringEventChanges'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { resolveTimezone } from '@common/utils/timezone'
-import {
-  RecurringUpdateContext,
-  UpdateHelperContext,
-  HandleUpdateErrorParams
-} from './types'
+import moment from 'moment'
 import { deleteEvent, putEvent } from '@common/features/Events/EventDao'
-import { calendarEventToJCal } from '@common/features/Events/utils'
+import {
+  HandleUpdateErrorParams,
+  RecurringUpdateContext,
+  UpdateHelperContext
+} from './types'
 
 export function handleUpdateError({
   error,
@@ -128,7 +125,7 @@ export async function handleUpdateRecurringSolo({
 }: UpdateHelperContext & { recurrenceId: string }): Promise<void> {
   dispatch(updateEventLocal({ calId, event: { ...newEvent, recurrenceId } }))
   const result = await dispatch(
-    updateEventInstanceAsync({
+    updateEventInstance({
       cal: targetCalendar,
       event: { ...newEvent, recurrenceId }
     })
@@ -216,7 +213,7 @@ async function handleUpdateSeriesTimeChangeOnly(params: {
   )
 
   const result = await dispatch(
-    updateSeriesAsync({
+    updateSeries({
       cal: targetCalendar,
       event: shiftedMasterEvent,
       removeOverrides: false,
@@ -227,7 +224,7 @@ async function handleUpdateSeriesTimeChangeOnly(params: {
 
   const results = await Promise.allSettled(
     shiftedInstances.map(inst =>
-      dispatch(updateEventInstanceAsync({ cal: targetCalendar, event: inst }))
+      dispatch(updateEventInstance({ cal: targetCalendar, event: inst }))
     )
   )
   const failures = results.filter(r => r.status === 'rejected')
@@ -435,7 +432,7 @@ async function handleUpdateRecurringSeriesWithRuleChange({
       recurrenceId: undefined
     }
     const result = await dispatch(
-      updateSeriesAsync({
+      updateSeries({
         cal: targetCalendar,
         event: masterForUpdate,
         removeOverrides: true
@@ -466,7 +463,7 @@ async function handleUpdateRecurringSeriesMetadataOnly({
     recurrenceId: undefined
   }
   const result = await dispatch(
-    updateSeriesAsync({
+    updateSeries({
       cal: targetCalendar,
       event: masterForUpdate,
       removeOverrides: false,

@@ -5,9 +5,9 @@ import {
   stringAvatar,
   stringToColor
 } from '@common/components/Event/utils/eventUtils'
-import { DelegationAccess } from '@common/types/CalendarTypes'
-import * as eventThunks from '@common/features/Calendars/services'
 import EventPreviewModal from '@common/components/EventPreview'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
+import { DelegationAccess } from '@common/types/CalendarTypes'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -232,7 +232,7 @@ describe('Event Preview Display', () => {
       preloadedState
     )
     const spy = jest
-      .spyOn(eventThunks, 'deleteEventAsync')
+      .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -367,7 +367,7 @@ describe('Event Preview Display', () => {
 
   it('handles RSVP Accept click', async () => {
     const spy = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
@@ -428,7 +428,7 @@ describe('Event Preview Display', () => {
 
   it('handles RSVP Maybe click', async () => {
     const spy = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
@@ -489,7 +489,7 @@ describe('Event Preview Display', () => {
 
   it('handles RSVP Decline click', async () => {
     const spy = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise

@@ -1,12 +1,12 @@
 import { AppDispatch } from '@common/app/store'
-import { emptyEventsCal } from '@common/features/Calendars/CalendarSlice'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
+  emptyEventsCal,
+  getCalendarDetail,
+  getCalendarsList,
   refreshCalendarWithSyncToken
-} from '@common/features/Calendars/services'
+} from '@common/features/Calendars/CalendarSlice'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
 import { getInitials, stringToGradient } from '@common/utils/avatarUtils'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
@@ -127,7 +127,7 @@ export async function refreshCalendars(
   if (process.env.NODE_ENV === 'test') return
 
   if (!calType) {
-    await dispatch(getCalendarsListAsync())
+    await dispatch(getCalendarsList())
   }
 
   const results = await Promise.allSettled(
@@ -162,7 +162,7 @@ export async function refreshSingularCalendar(
   }
 
   await dispatch(
-    getCalendarDetailAsync({
+    getCalendarDetail({
       calId: calendar.id,
       match: {
         start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),

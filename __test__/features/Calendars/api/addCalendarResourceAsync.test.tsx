@@ -1,5 +1,5 @@
-import { addCalendarResourceAsync } from '@common/features/Calendars/services'
 import { calendarAction } from '@common/features/Calendars/CalendarDAO'
+import { addCalendarResource } from '@common/features/Calendars/CalendarSlice'
 import { fetchOwnerOfResource } from '@common/features/Calendars/services/helpers'
 import { toRejectedError } from '@common/utils/errorUtils'
 import { configureStore } from '@reduxjs/toolkit'
@@ -12,7 +12,7 @@ const mockedCalendarAction = calendarAction as jest.Mock
 const mockedFetchOwnerOfResource = fetchOwnerOfResource as jest.Mock
 const mockedToRejectedError = toRejectedError as jest.Mock
 
-describe('addCalendarResourceAsync thunk', () => {
+describe('addCalendarResource thunk', () => {
   let store: ReturnType<typeof configureStore>
   const dispatch = jest.fn()
 
@@ -61,8 +61,8 @@ describe('addCalendarResourceAsync thunk', () => {
     })
     mockedCalendarAction.mockResolvedValueOnce({ ok: true })
 
-    const result = await addCalendarResourceAsync(
-      mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
+    const result = await addCalendarResource(
+      mockPayload as unknown as Parameters<typeof addCalendarResource>[0]
     )(dispatch, store.getState, undefined)
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(
@@ -96,8 +96,8 @@ describe('addCalendarResourceAsync thunk', () => {
     // Silence expected console error in tests
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
-    const result = await addCalendarResourceAsync(
-      mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
+    const result = await addCalendarResource(
+      mockPayload as unknown as Parameters<typeof addCalendarResource>[0]
     )(dispatch, store.getState, undefined)
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(
@@ -131,8 +131,8 @@ describe('addCalendarResourceAsync thunk', () => {
     const mockRejectedErrorResult = { message: 'Add failed' }
     mockedToRejectedError.mockReturnValueOnce(mockRejectedErrorResult)
 
-    const result = await addCalendarResourceAsync(
-      mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
+    const result = await addCalendarResource(
+      mockPayload as unknown as Parameters<typeof addCalendarResource>[0]
     )(dispatch, store.getState, undefined)
 
     expect(mockedCalendarAction).toHaveBeenCalledWith(

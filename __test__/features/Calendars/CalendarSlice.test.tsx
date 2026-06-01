@@ -1,24 +1,22 @@
 import * as calDAO from '@common/features/Calendars/CalendarDAO'
 import reducer, {
   addEvent,
+  addSharedCalendar,
   createCalendar,
+  createCalendarAsync,
+  getCalendarDetail,
+  getCalendarsList,
+  getEvent,
+  getTempCalendarsList,
+  patchACLCalendar,
   removeEvent,
   removeTempCal,
   updateEventLocal
 } from '@common/features/Calendars/CalendarSlice'
-import { Calendar } from '@common/types/CalendarTypes'
-import {
-  addSharedCalendarAsync,
-  createCalendarAsync,
-  getCalendarDetailAsync,
-  getCalendarsListAsync,
-  getEventAsync,
-  getTempCalendarsListAsync,
-  patchACLCalendarAsync
-} from '@common/features/Calendars/services'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import * as userAPI from '@common/features/User/userAPI'
 import userReducer, { setUserData } from '@common/features/User/userSlice'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
 jest.mock('@common/features/Calendars/CalendarDAO')
@@ -122,7 +120,7 @@ describe('CalendarSlice', () => {
     beforeEach(() => {
       jest.resetAllMocks()
     })
-    it('getCalendarsListAsync.fulfilled replaces list', async () => {
+    it('getCalendarsList.fulfilled replaces list', async () => {
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': [] }
@@ -134,12 +132,12 @@ describe('CalendarSlice', () => {
       })
 
       const store = storeFactory()
-      await store.dispatch(getCalendarsListAsync() as any)
+      await store.dispatch(getCalendarsList() as any)
       const state = store.getState().calendars
       expect(state.list).toEqual({})
     })
 
-    it('getCalendarsListAsync loads user details in parallel for multiple owners', async () => {
+    it('getCalendarsList loads user details in parallel for multiple owners', async () => {
       const mockCalendars = [
         {
           _links: { self: { href: '/calendars/u1/cal1.json' } },
@@ -185,7 +183,7 @@ describe('CalendarSlice', () => {
         })
 
       const store = storeFactory()
-      await store.dispatch(getCalendarsListAsync() as any)
+      await store.dispatch(getCalendarsList() as any)
 
       expect(getUserDetailsMock).toHaveBeenCalledTimes(3)
       expect(getUserDetailsMock).toHaveBeenCalledWith('u1')
@@ -198,7 +196,7 @@ describe('CalendarSlice', () => {
       expect(state.list['u3/cal3'].owner.firstname).toContain('Charlie')
     })
 
-    it('getCalendarsListAsync deduplicates getUserDetails calls for same ownerId', async () => {
+    it('getCalendarsList deduplicates getUserDetails calls for same ownerId', async () => {
       const mockCalendars = [
         {
           _links: { self: { href: '/calendars/u1/cal1.json' } },
@@ -233,13 +231,13 @@ describe('CalendarSlice', () => {
       })
 
       const store = storeFactory()
-      await store.dispatch(getCalendarsListAsync() as any)
+      await store.dispatch(getCalendarsList() as any)
 
       expect(getUserDetailsMock).toHaveBeenCalledTimes(1)
       expect(getUserDetailsMock).toHaveBeenCalledWith('u1')
     })
 
-    it('getCalendarsListAsync processes owners in batches of 20', async () => {
+    it('getCalendarsList processes owners in batches of 20', async () => {
       const mockCalendars = Array.from({ length: 45 }, (_, i) => ({
         _links: { self: { href: `/calendars/u${i + 1}/cal${i + 1}.json` } },
         'dav:name': `Calendar ${i + 1}`,
@@ -262,14 +260,14 @@ describe('CalendarSlice', () => {
       )
 
       const store = storeFactory()
-      await store.dispatch(getCalendarsListAsync() as any)
+      await store.dispatch(getCalendarsList() as any)
 
       expect(getUserDetailsMock).toHaveBeenCalledTimes(45)
       const state = store.getState().calendars
       expect(Object.keys(state.list)).toHaveLength(45)
     })
 
-    it('getCalendarsListAsync doesnt call getUserDetails if userdata exist in store', async () => {
+    it('getCalendarsList doesnt call getUserDetails if userdata exist in store', async () => {
       const existingCalendars = {
         'u1/cal1': {
           id: 'u1/cal1',
@@ -280,13 +278,13 @@ describe('CalendarSlice', () => {
 
       const store = storeFactory()
       store.dispatch({
-        type: 'calendars/getCalendars/fulfilled',
+        type: 'calendars/getCalendarsList/fulfilled',
         payload: { importedCalendars: existingCalendars, errors: '' }
       })
       store.dispatch(setUserData({ openpaasId: 'bla' }))
       const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
 
-      await store.dispatch(getCalendarsListAsync() as any)
+      await store.dispatch(getCalendarsList())
 
       expect(getUserDetailsMock).not.toHaveBeenCalled()
 
@@ -294,7 +292,7 @@ describe('CalendarSlice', () => {
       expect(state.list).toEqual(existingCalendars)
     })
 
-    it('getCalendarsListAsync handles errors in getUserDetails gracefully', async () => {
+    it('getCalendarsList handles errors in getUserDetails gracefully', async () => {
       const mockCalendars = [
         {
           _links: { self: { href: '/calendars/u1/cal1.json' } },
@@ -325,7 +323,7 @@ describe('CalendarSlice', () => {
         .mockRejectedValueOnce(new Error('Failed to fetch user'))
 
       const store = storeFactory()
-      const result = await store.dispatch(getCalendarsListAsync() as any)
+      const result = await store.dispatch(getCalendarsList() as any)
 
       expect(getUserDetailsMock).toHaveBeenCalledTimes(2)
       const state = store.getState().calendars
@@ -334,14 +332,14 @@ describe('CalendarSlice', () => {
       expect(result.payload.errors).toBeTruthy()
     })
 
-    it('patchACLCalendarAsync.fulfilled sets visibility', () => {
+    it('patchACLCalendar.fulfilled sets visibility', () => {
       const prev = {
         ...initialState,
         list: { c1: { id: 'c1', visibility: 'public' } as any }
       }
       const state = reducer(
         prev,
-        patchACLCalendarAsync.fulfilled(
+        patchACLCalendar.fulfilled(
           { calId: 'c1', calLink: 'l', request: '' },
           'req3',
           { calId: 'c1', calLink: 'l', request: '' }
@@ -350,7 +348,7 @@ describe('CalendarSlice', () => {
       expect(state.list.c1.visibility).toBe('private')
     })
 
-    it('createCalendarAsync.fulfilled adds a new calendar', () => {
+    it('createCalendar.fulfilled adds a new calendar', () => {
       const payload = {
         userData: {
           openpaasId: 'u1',
@@ -383,7 +381,7 @@ describe('CalendarSlice', () => {
       expect(state.list['u1/cal1'].color?.['apple:color']).toBe('#f00')
     })
 
-    it('addSharedCalendarAsync.fulfilled adds shared calendar', () => {
+    it('addSharedCalendar.fulfilled adds shared calendar', () => {
       const payload = {
         calId: 'c1',
         color: { 'apple:color': '#0f0' },
@@ -402,7 +400,7 @@ describe('CalendarSlice', () => {
       }
       const state = reducer(
         initialState,
-        addSharedCalendarAsync.fulfilled(payload, 'req5', {
+        addSharedCalendar.fulfilled(payload, 'req5', {
           userId: 'u1',
           calId: 'c1',
           cal: mockCal
@@ -411,7 +409,7 @@ describe('CalendarSlice', () => {
       expect(state.list['c1'].name).toBe('Shared')
     })
 
-    it('getTempCalendarsListAsync.fulfilled updates templist', () => {
+    it('getTempCalendarsList.fulfilled updates templist', () => {
       const payload = {
         t1: {
           id: 't1',
@@ -426,7 +424,7 @@ describe('CalendarSlice', () => {
       }
       const state = reducer(
         initialState,
-        getTempCalendarsListAsync.fulfilled(payload, 'req7', {
+        getTempCalendarsList.fulfilled(payload, 'req7', {
           openpaasId: 'u1',
           color: { 'apple:color': '#aaa' },
           displayName: 'test',
@@ -437,16 +435,16 @@ describe('CalendarSlice', () => {
       expect(state.templist.t1.name).toBe('Temp')
     })
 
-    it('getEventAsync.fulfilled adds single event', () => {
+    it('getEvent.fulfilled adds single event', () => {
       const payload = { calId: 'c1', event: { uid: 'e1' } as any }
       const state = reducer(
         initialState,
-        getEventAsync.fulfilled(payload, 'req9', { uid: 'e1' } as any)
+        getEvent.fulfilled(payload, 'req9', { uid: 'e1' } as any)
       )
       expect(state.list.c1.events.e1.uid).toBe('e1')
     })
 
-    it('getCalendarDetailAsync.fulfilled adds calendar events', () => {
+    it('getCalendarDetail.fulfilled adds calendar events', () => {
       const payload = { calId: 'c1', events: [{ uid: 'e1' }] as any[] }
       const state = reducer(
         {
@@ -458,7 +456,7 @@ describe('CalendarSlice', () => {
             } as unknown as Calendar
           }
         },
-        getCalendarDetailAsync.fulfilled(payload, 'req11', {
+        getCalendarDetail.fulfilled(payload, 'req11', {
           calId: 'c1',
           match: { start: '', end: '' }
         })
@@ -466,7 +464,7 @@ describe('CalendarSlice', () => {
       expect(state.list.c1.events.e1.uid).toBe('e1')
     })
 
-    it('getEventAsync.fulfilled doesnt create new events when there are already event with base UID', () => {
+    it('getEvent.fulfilled doesnt create new events when there are already event with base UID', () => {
       const baseUid = 'recurring-event-base'
       const existingEvent = {
         uid: `${baseUid}/20240115`,
@@ -493,7 +491,7 @@ describe('CalendarSlice', () => {
       const payload = { calId: 'c1', event: newEventInstance }
       const state = reducer(
         stateWithEvent,
-        getEventAsync.fulfilled(payload, 'req', newEventInstance)
+        getEvent.fulfilled(payload, 'req', newEventInstance)
       )
 
       // Should still only have the base event, not the instance
@@ -502,7 +500,7 @@ describe('CalendarSlice', () => {
       expect(state.list.c1.events[baseUid]).toBeUndefined()
     })
 
-    it("getEventAsync.fulfilled create new event when there isn't any event with base UID", () => {
+    it("getEvent.fulfilled create new event when there isn't any event with base UID", () => {
       const eventUid = 'new-event-uid'
       const newEvent = {
         uid: eventUid,
@@ -523,7 +521,7 @@ describe('CalendarSlice', () => {
       const payload = { calId: 'c1', event: newEvent }
       const state = reducer(
         stateWithoutEvent,
-        getEventAsync.fulfilled(payload, 'req', newEvent)
+        getEvent.fulfilled(payload, 'req', newEvent)
       )
 
       // Should create the new event

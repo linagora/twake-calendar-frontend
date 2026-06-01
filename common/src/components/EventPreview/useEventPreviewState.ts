@@ -1,19 +1,21 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { AppDispatch } from '@common/app/store'
 import { handleDelete } from '@common/components/Event/eventHandlers/eventHandlers'
-import { setCalendarError } from '@common/features/Calendars/CalendarSlice'
-import { Calendar } from '@common/types/CalendarTypes'
+import {
+  deleteEvent,
+  setCalendarError
+} from '@common/features/Calendars/CalendarSlice'
+import { createEventContext } from '@common/features/Events/createEventContext'
+import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
+import { ToUserData } from '@common/features/User/type/OpenPaasUserData'
 import { userData } from '@common/features/User/userDataTypes'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent, ContextualizedEvent } from '@common/types/EventsTypes'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useState } from 'react'
-import { deleteEventAsync } from '@common/features/Calendars/services'
-import { ToUserData } from '@common/features/User/type/OpenPaasUserData'
-import { createEventContext } from '@common/features/Events/createEventContext'
-import { CalendarEvent, ContextualizedEvent } from '@common/types/EventsTypes'
-import { moveEventBetweenCalendars } from '@common/features/Events/updateEventHelpers/moveEventBetweenCalendars'
 import { useEventUpdateModalReopen } from './useEventUpdateModalReopen'
 
 interface StoredEventReopenData {
@@ -238,7 +240,7 @@ export function useEventPreviewState(
       onClose({}, 'backdropClick')
       try {
         const result = await dispatch(
-          deleteEventAsync({ calId, eventId, eventURL: event.URL })
+          deleteEvent({ calId, eventId, eventURL: event.URL })
         )
         await assertThunkSuccess(result)
       } catch (error) {

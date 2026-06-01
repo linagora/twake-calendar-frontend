@@ -1,8 +1,7 @@
 import CalendarPopover from '@common/components/Calendar/CalendarModal'
 import { fetchSecretLink } from '@common/features/Calendars/CalendarDAO'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { Calendar } from '@common/types/CalendarTypes'
-import * as eventThunks from '@common/features/Calendars/services'
-import * as delegationThunks from '@common/features/Calendars/services/updateDelegationCalendarAsync'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -24,7 +23,7 @@ describe('CalendarPopover', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest
-      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .spyOn(eventThunks, 'updateDelegationCalendar')
       .mockImplementation(mockThunkWithUnwrap())
   })
 
@@ -66,7 +65,7 @@ describe('CalendarPopover', () => {
     expect(descInput).toHaveValue('Test description')
   })
 
-  it('dispatches createCalendar and calls onClose when Save clicked', async () => {
+  it('dispatches createCalendarAsync and calls onClose when Save clicked', async () => {
     jest
       .spyOn(eventThunks, 'createCalendarAsync')
       .mockImplementation(mockThunkWithUnwrap())
@@ -131,7 +130,7 @@ describe('CalendarPopover (editing mode)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest
-      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .spyOn(eventThunks, 'updateDelegationCalendar')
       .mockImplementation(mockThunkWithUnwrap())
   })
 
@@ -169,7 +168,7 @@ describe('CalendarPopover (editing mode)', () => {
 
   it('allows modifying and saving existing calendar', async () => {
     jest
-      .spyOn(eventThunks, 'patchCalendarAsync')
+      .spyOn(eventThunks, 'patchCalendar')
       .mockImplementation(mockThunkWithUnwrap())
 
     renderWithProviders(
@@ -190,7 +189,7 @@ describe('CalendarPopover (editing mode)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
 
     await waitFor(() =>
-      expect(eventThunks.patchCalendarAsync).toHaveBeenCalledWith(
+      expect(eventThunks.patchCalendar).toHaveBeenCalledWith(
         expect.objectContaining({
           calId: 'user1/cal1',
           calLink: '/calendars/user/cal1',
@@ -236,7 +235,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest
-      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .spyOn(eventThunks, 'updateDelegationCalendar')
       .mockImplementation(mockThunkWithUnwrap())
   })
 
@@ -284,11 +283,11 @@ describe('CalendarPopover - Tabs Scenarios', () => {
 
   it('patches ACL when visibility changes', async () => {
     jest
-      .spyOn(eventThunks, 'patchCalendarAsync')
+      .spyOn(eventThunks, 'patchCalendar')
       .mockImplementation(mockThunkWithUnwrap())
 
     jest
-      .spyOn(eventThunks, 'patchACLCalendarAsync')
+      .spyOn(eventThunks, 'patchACLCalendar')
       .mockImplementation(mockThunkWithUnwrap())
 
     renderWithProviders(
@@ -317,7 +316,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
     fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
 
     await waitFor(() =>
-      expect(eventThunks.patchACLCalendarAsync).toHaveBeenCalledWith(
+      expect(eventThunks.patchACLCalendar).toHaveBeenCalledWith(
         expect.objectContaining({
           calId: 'user1/cal1',
           request: ''
@@ -376,7 +375,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
         .spyOn(eventThunks, 'createCalendarAsync')
         .mockImplementation(mockThunkWithUnwrap())
       jest
-        .spyOn(eventThunks, 'importEventFromFileAsync')
+        .spyOn(eventThunks, 'importEventFromFile')
         .mockImplementation(mockThunkWithUnwrap())
 
       renderWithProviders(
@@ -403,13 +402,13 @@ describe('CalendarPopover - Tabs Scenarios', () => {
         expect(eventThunks.createCalendarAsync).toHaveBeenCalled()
       )
       await waitFor(() =>
-        expect(eventThunks.importEventFromFileAsync).toHaveBeenCalled()
+        expect(eventThunks.importEventFromFile).toHaveBeenCalled()
       )
     })
 
     it('imports into an existing calendar when target is set', async () => {
       jest
-        .spyOn(eventThunks, 'importEventFromFileAsync')
+        .spyOn(eventThunks, 'importEventFromFile')
         .mockImplementation(mockThunkWithUnwrap())
 
       const calendars = {
@@ -432,7 +431,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
       fireEvent.click(screen.getByRole('button', { name: 'actions.import' }))
 
       await waitFor(() =>
-        expect(eventThunks.importEventFromFileAsync).toHaveBeenCalledWith(
+        expect(eventThunks.importEventFromFile).toHaveBeenCalledWith(
           expect.objectContaining({
             calLink: '/calendars/user1/cal1.json',
             file

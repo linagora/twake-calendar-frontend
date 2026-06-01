@@ -1,19 +1,19 @@
 import { AppDispatch } from '@common/app/store'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
-  deleteEventAsync,
-  moveEventAsync,
-  putEventAsync
-} from '@common/features/Calendars/services'
+  deleteEvent,
+  moveEvent,
+  putEvent
+} from '@common/features/Calendars/CalendarSlice'
 import { fetchAllRecurrentVevents } from '@common/features/Events/EventDao'
+import { parseCalendarEvent } from '@common/features/Events/utils'
+import { buildDelegatedEventURL } from '@common/features/Events/utils/buildDelegatedEventURL'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { parseCalendarEvent } from '@common/features/Events/utils'
-import { buildDelegatedEventURL } from '@common/features/Events/utils/buildDelegatedEventURL'
 
 export interface MoveEventBetweenCalendarsParams {
   dispatch: AppDispatch
@@ -161,7 +161,7 @@ async function moveStandardEvent({
   const newCalId = targetCalendar.id
 
   const putResult = await dispatch(
-    putEventAsync({
+    putEvent({
       cal: oldCalendar,
       newEvent: { ...newEvent, calId: oldCalendar.id }
     })
@@ -170,7 +170,7 @@ async function moveStandardEvent({
   const newURL = `/calendars/${newCalId}/${extractEventBaseUuid(newEvent.uid)}.ics`
 
   const moveResult = await dispatch(
-    moveEventAsync({
+    moveEvent({
       cal: targetCalendar,
       newEvent,
       newURL
@@ -217,13 +217,13 @@ async function moveDelegatedEvent({
   }
 
   const putResult = await dispatch(
-    putEventAsync({ cal: targetCalendar, newEvent: eventForTargetCalendar })
+    putEvent({ cal: targetCalendar, newEvent: eventForTargetCalendar })
   )
 
   await assertThunkSuccess(putResult)
 
   const deleteResult = await dispatch(
-    deleteEventAsync({
+    deleteEvent({
       calId: oldCalendar.id,
       eventId: newEvent.uid,
       eventURL: newEvent.URL

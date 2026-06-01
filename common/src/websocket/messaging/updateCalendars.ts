@@ -1,17 +1,16 @@
-import type { AppDispatch } from '@common/app/store'
-import { store } from '@common/app/store'
-import { Calendar } from '@common/types/CalendarTypes'
+import { AppDispatch, store } from '@common/app/store'
 import {
-  getCalendarsListAsync,
-  refreshCalendarWithSyncToken,
-  getCalendarDetailAsync
-} from '@common/features/Calendars/services'
-import { emptyEventsCal } from '@common/features/Calendars/CalendarSlice'
-import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
+  emptyEventsCal,
+  getCalendarDetail,
+  getCalendarsList
+} from '@common/features/Calendars/CalendarSlice'
+import { refreshCalendarWithSyncToken } from '@common/features/Calendars/CalendarSlice'
+import { Calendar } from '@common/types/CalendarTypes'
 import { findCalendarById, getDisplayedCalendarRange } from '@common/utils'
+import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { setSelectedCalendars } from '@common/utils/storage/setSelectedCalendars'
-import type { MutableRefObject } from 'react'
 import { debounce, DebouncedFunc } from 'lodash'
+import type { MutableRefObject } from 'react'
 import { parseCalendarPath } from './parseCalendarPath'
 import { parseMessage } from './parseMessage'
 import { UpdateCalendarsAccumulators } from './type/UpdateCalendarsAccumulators'
@@ -83,7 +82,7 @@ function createDebouncedListUpdate(
 
       try {
         if (shouldRefresh) {
-          void dispatch(getCalendarsListAsync())
+          void dispatch(getCalendarsList())
         }
       } catch (error) {
         console.warn(
@@ -180,7 +179,7 @@ function processImmediateUpdates(
     )
     processCalendarsToHide(calendarsToHideSnapshot)
     if (shouldRefreshCalendarList) {
-      void dispatch(getCalendarsListAsync())
+      void dispatch(getCalendarsList())
     }
   } catch (error) {
     console.warn('Error processing calendar updates:', error)
@@ -254,7 +253,7 @@ function triggerCalendarRefresh(
   } else {
     dispatch(emptyEventsCal({ calId: calendar.id, calType: type }))
     void dispatch(
-      getCalendarDetailAsync({
+      getCalendarDetail({
         calId: calendar.id,
         match: {
           start: formatDateToYYYYMMDDTHHMMSS(range.start),

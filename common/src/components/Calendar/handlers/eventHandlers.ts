@@ -1,34 +1,34 @@
-import moment from 'moment-timezone'
 import { AppDispatch } from '@common/app/store'
-import { User } from '@common/components/Attendees/types'
-import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
 import { DEFAULT_FORM_VALUES } from '@common/components/Event/EventFormFields.types'
-import { Calendar } from '@common/types/CalendarTypes'
+import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
 import {
-  getEventAsync,
-  putEventAsync,
-  updateEventInstanceAsync
-} from '@common/features/Calendars/services'
+  getEvent,
+  putEvent,
+  updateEventInstance
+} from '@common/features/Calendars/CalendarSlice'
 import { fetchEvent } from '@common/features/Events/EventDao'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
-import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { handleUpdateRecurringSeries } from '@common/features/Events/hooks/submitUpdateHelpers/updateActions'
+import { getSeriesInstances } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
+import { parseFetchedEvent } from '@common/features/Events/transformers'
+import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import {
   AttendeeOptions,
   createAttendee
 } from '@common/features/User/models/attendee.mapper'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
 import {
   CalendarApi,
   DateSelectArg,
+  EventApi,
   EventClickArg,
-  EventDropArg,
-  EventApi
+  EventDropArg
 } from '@fullcalendar/core'
 import { EventResizeDoneArg } from '@fullcalendar/interaction'
-import { getSeriesInstances } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
+import { User } from '@sentry/react'
+import moment from 'moment'
 
 export interface EventHandlersProps {
   setSelectedRange: (range: DateSelectArg | null) => void
@@ -122,7 +122,7 @@ export const createEventHandlers = (
         ]
       ) {
         void dispatch(
-          getEventAsync(
+          getEvent(
             calendars[info.event.extendedProps.calId as string].events[
               info.event.extendedProps.uid as string
             ]
@@ -286,7 +286,7 @@ export const createEventHandlers = (
           async (typeOfAction: 'solo' | 'all' | undefined): Promise<void> => {
             if (typeOfAction === 'solo') {
               await dispatch(
-                updateEventInstanceAsync({ cal: calendar, event: newEvent })
+                updateEventInstance({ cal: calendar, event: newEvent })
               )
             } else if (typeOfAction === 'all') {
               await handleUpdateAllSeries({
@@ -300,7 +300,7 @@ export const createEventHandlers = (
           }
       )
     } else {
-      await dispatch(putEventAsync({ cal: calendar, newEvent }))
+      await dispatch(putEvent({ cal: calendar, newEvent }))
     }
   }
 

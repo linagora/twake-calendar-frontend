@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { addCalendarResourceAsync } from '@common/features/Calendars/services'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
-  addSharedCalendarAsync,
-  removeCalendarAsync
-} from '@common/features/Calendars/services'
+  addCalendarResource,
+  addSharedCalendar,
+  removeCalendar
+} from '@common/features/Calendars/CalendarSlice'
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
+import { Calendar } from '@common/types/CalendarTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
@@ -18,12 +18,12 @@ import {
   Checkbox,
   IconButton,
   ListItem,
+  Tooltip,
   Typography
 } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import Tooltip from '@common/components/Tooltip'
 import { SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import CalendarPopover from './CalendarModal'
@@ -263,7 +263,7 @@ const CalendarSelection: React.FC<{
         open={Boolean(anchorElCalOthers)}
         objectTypes={['user']}
         onSave={({ userId, calId, cal }) =>
-          addSharedCalendarAsync({
+          addSharedCalendar({
             userId,
             calId,
             cal: cal as CalendarInput
@@ -280,7 +280,7 @@ const CalendarSelection: React.FC<{
         open={Boolean(anchorElCalResources)}
         objectTypes={['resource']}
         onSave={({ userId, calId, cal }) =>
-          addCalendarResourceAsync({
+          addCalendarResource({
             userId,
             calId,
             cal: cal as ResourceCal
@@ -362,7 +362,7 @@ const CalendarSelector: React.FC<{
 
   const [deletePopupOpen, setDeletePopupOpen] = useState(false)
   const handleDeleteConfirm = async (): Promise<void> => {
-    await dispatch(removeCalendarAsync({ calId: id, calLink }))
+    await dispatch(removeCalendar({ calId: id, calLink }))
     setDeletePopupOpen(false)
     handleClose()
   }

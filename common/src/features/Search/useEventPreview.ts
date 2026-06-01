@@ -1,9 +1,9 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useState } from 'react'
-import { getEventAsync } from '@common/features/Calendars/services'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { getEvent } from '../Calendars/CalendarSlice'
 import { SearchEventResult } from './types/SearchEventResult'
 
 export function useEventPreview(
@@ -38,7 +38,7 @@ export function useEventPreview(
       title: eventData.data.summary,
       timezone: timeZone
     }
-    await dispatch(getEventAsync(event))
+    await dispatch(getEvent(event))
     setOpenPreview(true)
   }
 
