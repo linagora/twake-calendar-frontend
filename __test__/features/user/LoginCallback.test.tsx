@@ -1,16 +1,16 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { getCalendarsListAsync } from '@common/features/Calendars/services/getCalendarsListAsync'
-import { CallbackResume } from '@private/features/User/LoginCallback'
+import { setAppLoading } from '@common/app/loadingSlice'
+import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import * as oidcAuth from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserDataAsync,
   setTokens,
   setUserData
 } from '@common/features/User/userSlice'
+import { CallbackResume } from '@private/features/User/LoginCallback'
 import { render, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
-import { setAppLoading } from '@common/app/loadingSlice'
 
 // Mocks
 jest.mock('@common/app/hooks', () => ({
@@ -51,7 +51,7 @@ jest.mock('@common/features/User/userSlice', () => {
   }
 })
 
-jest.mock('@common/features/Calendars/services/getCalendarsListAsync', () => {
+jest.mock('@common/features/Calendars/CalendarSlice', () => {
   const mockGetCalendars = Object.assign(
     jest.fn(() => ({ type: 'GET_CALENDARS' })),
     {
@@ -62,7 +62,8 @@ jest.mock('@common/features/Calendars/services/getCalendarsListAsync', () => {
   )
 
   return {
-    getCalendarsListAsync: mockGetCalendars
+    ...jest.requireActual('@common/features/Calendars/CalendarSlice'),
+    getCalendarsList: mockGetCalendars
   }
 })
 
@@ -130,7 +131,7 @@ describe('CallbackResume', () => {
       expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserDataAsync())
     })
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(getCalendarsListAsync())
+      expect(dispatch).toHaveBeenCalledWith(getCalendarsList())
     })
 
     // Simulate async actions completing by updating mock state

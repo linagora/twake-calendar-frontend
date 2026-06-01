@@ -1,5 +1,5 @@
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
-import { getCalendarsListAsync } from '@common/features/Calendars/services/getCalendarsListAsync'
+import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import { getOwnerOrResourceData } from '@common/features/Calendars/services/helpers'
 import { normalizeCalendar } from '@common/features/Calendars/utils/normalizeCalendar'
 import { fetchCurrentUser } from '@common/features/User/UserDao'
@@ -33,7 +33,7 @@ const mockedFetchCalendars = fetchCalendars as jest.Mock
 const mockedFormatReduxError = formatReduxError as jest.Mock
 const mockedNormalizeCalendar = normalizeCalendar as jest.Mock
 
-describe('getCalendarsListAsync', () => {
+describe('getCalendarsList', () => {
   let dispatch: jest.Mock
   let getState: jest.Mock
 
@@ -107,10 +107,10 @@ describe('getCalendarsListAsync', () => {
         emails: ['jane@example.com']
       })
 
-    const thunk = getCalendarsListAsync()
+    const thunk = getCalendarsList()
     const result = await thunk(dispatch, getState, undefined)
 
-    expect(result.type).toBe('calendars/getCalendars/fulfilled')
+    expect(result.type).toBe('calendars/getCalendarsList/fulfilled')
     const payload = result.payload as {
       importedCalendars: any
       errors: string
@@ -142,7 +142,7 @@ describe('getCalendarsListAsync', () => {
       _embedded: { 'dav:calendar': [] }
     })
 
-    const thunk = getCalendarsListAsync()
+    const thunk = getCalendarsList()
     await thunk(dispatch, getState, undefined)
 
     expect(mockedFetchCurrentUser).toHaveBeenCalled()
@@ -165,10 +165,10 @@ describe('getCalendarsListAsync', () => {
       message: 'Server Error'
     })
 
-    const thunk = getCalendarsListAsync()
+    const thunk = getCalendarsList()
     const result = await thunk(dispatch, getState, undefined)
 
-    expect(result.type).toBe('calendars/getCalendars/rejected')
+    expect(result.type).toBe('calendars/getCalendarsList/rejected')
     expect(result.payload).toEqual({
       status: 500,
       message: 'Server Error'
@@ -194,7 +194,7 @@ describe('getCalendarsListAsync', () => {
       new Error('Network Error')
     )
 
-    const thunk = getCalendarsListAsync()
+    const thunk = getCalendarsList()
     const result = await thunk(dispatch, getState, undefined)
 
     const payload = result.payload as any
@@ -236,7 +236,7 @@ describe('getCalendarsListAsync', () => {
       resource: true
     })
 
-    const thunk = getCalendarsListAsync()
+    const thunk = getCalendarsList()
     const result = await thunk(dispatch, getState, undefined)
 
     const payload = result.payload as any

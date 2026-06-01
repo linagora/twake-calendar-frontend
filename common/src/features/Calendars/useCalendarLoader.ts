@@ -1,12 +1,12 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
-import { getCalendarDetailAsync } from '@common/features/Calendars/services'
 import {
   formatDateToYYYYMMDDTHHMMSS,
   getAdjacentWeekRange,
   getViewRange
 } from '@common/utils/dateUtils'
 import { useEffect, useMemo, useRef } from 'react'
+import { getCalendarDetail } from './CalendarSlice'
 
 export interface Interval {
   start: number
@@ -131,7 +131,7 @@ export function useCalendarDataLoader({
           activeUnits.slice(i, i + BATCH_SIZE).map(async ({ id, gap }) => {
             try {
               await dispatch(
-                getCalendarDetailAsync({
+                getCalendarDetail({
                   calId: id,
                   match: {
                     start: toApiDate(gap.start),
@@ -206,7 +206,7 @@ export function useCalendarDataLoader({
       prefetchUnits.forEach(({ id }, index) => {
         const originalGap = savedGaps.get(index) as Interval
         void dispatch(
-          getCalendarDetailAsync({
+          getCalendarDetail({
             calId: id,
             match: {
               start: toApiDate(originalGap.start),
@@ -282,7 +282,7 @@ export function useCalendarDataLoader({
       delete fetchedIntervalsRef.current[id]
 
       void dispatch(
-        getCalendarDetailAsync({
+        getCalendarDetail({
           calId: id,
           match: {
             start: toApiDate(visibleStart),
@@ -336,7 +336,7 @@ export function useCalendarDataLoader({
           fetchUnits.slice(i, i + BATCH_SIZE).map(async ({ id, gap }) => {
             try {
               await dispatch(
-                getCalendarDetailAsync({
+                getCalendarDetail({
                   calId: id,
                   match: {
                     start: toApiDate(gap.start),

@@ -408,7 +408,7 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
   useAutoScrollToUpcommingEvent(upcommingEventId)
 
   // When the preview modal opens in the schedule view, FullCalendar
-  // re-renders event content because getEventAsync updates the calendars store.
+  // re-renders event content because getEvent updates the calendars store.
   // This re-render resets the list scroller to the top. We save the current
   // scroll position immediately and restore it after the re-render settles.
   usePreserveScrollPositionInScheduleView(openEventDisplay, currentView)

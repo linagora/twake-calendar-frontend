@@ -6,8 +6,8 @@ import {
 import CalendarPopover from '@common/components/Calendar/CalendarModal'
 import { updateDelegationCalendar } from '@common/features/Calendars/CalendarDAO'
 import { AccessRight, Calendar } from '@common/types/CalendarTypes'
-import * as eventThunks from '@common/features/Calendars/services'
-import * as delegationThunks from '@common/features/Calendars/services/updateDelegationCalendarAsync'
+import * as delegationThunks from '@common/features/Calendars/CalendarSlice'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
 import { api } from '@common/utils/apiUtils'
@@ -415,23 +415,23 @@ const existingCalendar: Calendar = {
   owner: { emails: ['user1@example.com'] }
 }
 
-describe('CalendarModal – updateDelegationCalendarAsync integration', () => {
+describe('CalendarModal – updateDelegationCalendar integration', () => {
   const mockOnClose = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
     jest
-      .spyOn(eventThunks, 'patchCalendarAsync')
+      .spyOn(eventThunks, 'patchCalendar')
       .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(eventThunks, 'patchACLCalendarAsync')
+      .spyOn(eventThunks, 'patchACLCalendar')
       .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .spyOn(delegationThunks, 'updateDelegationCalendar')
       .mockImplementation(mockThunkWithUnwrap())
   })
 
-  it('does NOT call updateDelegationCalendarAsync when no users are added or removed', async () => {
+  it('does NOT call updateDelegationCalendar when no users are added or removed', async () => {
     renderWithProviders(
       <CalendarPopover
         open={true}
@@ -445,9 +445,7 @@ describe('CalendarModal – updateDelegationCalendarAsync integration', () => {
 
     await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
 
-    expect(
-      delegationThunks.updateDelegationCalendarAsync
-    ).not.toHaveBeenCalled()
+    expect(delegationThunks.updateDelegationCalendar).not.toHaveBeenCalled()
   })
 })
 
@@ -457,10 +455,10 @@ describe('CalendarModal – cancel button', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest
-      .spyOn(delegationThunks, 'updateDelegationCalendarAsync')
+      .spyOn(delegationThunks, 'updateDelegationCalendar')
       .mockImplementation(mockThunkWithUnwrap())
     jest
-      .spyOn(eventThunks, 'patchCalendarAsync')
+      .spyOn(eventThunks, 'patchCalendar')
       .mockImplementation(mockThunkWithUnwrap())
   })
 
@@ -477,9 +475,7 @@ describe('CalendarModal – cancel button', () => {
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
 
     await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
-    expect(
-      delegationThunks.updateDelegationCalendarAsync
-    ).not.toHaveBeenCalled()
-    expect(eventThunks.patchCalendarAsync).not.toHaveBeenCalled()
+    expect(delegationThunks.updateDelegationCalendar).not.toHaveBeenCalled()
+    expect(eventThunks.patchCalendar).not.toHaveBeenCalled()
   })
 })

@@ -1,6 +1,6 @@
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
-import * as CalendarSlice from '@common/features/Calendars/services'
+import * as CalendarSlice from '@common/features/Calendars/CalendarSlice'
 import { searchUsers } from '@common/features/User/userAPI'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -75,7 +75,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -106,7 +106,7 @@ describe('RegisterCalendars', () => {
 
   it('adds selected calendars on save', async () => {
     const addSharedCalendarSpy = jest
-      .spyOn(CalendarSlice, 'addSharedCalendarAsync')
+      .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
       })
@@ -124,7 +124,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -155,7 +155,7 @@ describe('RegisterCalendars', () => {
 
   it('does not add calendars that already exist', async () => {
     const addSharedCalendarSpy = jest
-      .spyOn(CalendarSlice, 'addSharedCalendarAsync')
+      .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
       })
@@ -182,7 +182,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -222,7 +222,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -259,7 +259,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -313,7 +313,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -335,9 +335,9 @@ describe('RegisterCalendars', () => {
     })
   })
 
-  it('does not call addSharedCalendarAsync when no calendars are selected', async () => {
+  it('does not call addSharedCalendar when no calendars are selected', async () => {
     const addSharedCalendarSpy = jest
-      .spyOn(CalendarSlice, 'addSharedCalendarAsync')
+      .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
       })
@@ -348,7 +348,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )
@@ -363,7 +363,7 @@ describe('RegisterCalendars', () => {
   })
   it('BUGFIX : handles calendar with no apple:color', async () => {
     const addSharedCalendarSpy = jest
-      .spyOn(CalendarSlice, 'addSharedCalendarAsync')
+      .spyOn(CalendarSlice, 'addSharedCalendar')
       .mockImplementation(payload => {
         return (() => ({ unwrap: () => Promise.resolve(payload) })) as any
       })
@@ -388,7 +388,7 @@ describe('RegisterCalendars', () => {
           open={true}
           onClose={mockOnClose}
           objectTypes={['user']}
-          onSave={CalendarSlice.addSharedCalendarAsync as any}
+          onSave={CalendarSlice.addSharedCalendar as any}
         />,
         preloadedState
       )

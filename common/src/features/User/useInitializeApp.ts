@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
-import { getCalendarsListAsync } from '@common/features/Calendars/services'
 import { Auth } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserDataAsync,
@@ -9,6 +8,7 @@ import {
 } from '@common/features/User/userSlice'
 import { redirectTo } from '@common/utils/apiUtils'
 import { useEffect, useRef } from 'react'
+import { getCalendarsList } from '../Calendars/CalendarSlice'
 
 export function useInitializeApp() {
   const userData = useAppSelector(state => state.user)
@@ -36,7 +36,7 @@ export function useInitializeApp() {
         dispatch(setUserData(savedUser))
         try {
           await dispatch(getOpenPaasUserDataAsync())
-          await dispatch(getCalendarsListAsync())
+          await dispatch(getCalendarsList())
         } finally {
           dispatch(setAppLoading(false))
         }

@@ -1,8 +1,8 @@
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import * as EventDao from '@common/features/Events/EventDao'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -351,7 +351,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
             'END:VCALENDAR'
           ].join('\r\n')
         )
-      const updateSeriesAsyncSpy = jest.spyOn(eventThunks, 'updateSeriesAsync')
+      const updateSeriesSpy = jest.spyOn(eventThunks, 'updateSeries')
 
       renderWithProviders(
         <EventUpdateModal
@@ -378,9 +378,9 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         fireEvent.click(saveButton)
       })
 
-      // Verify updateSeriesAsync was dispatched with base UID
+      // Verify updateSeries was dispatched with base UID
       await waitFor(() => {
-        expect(updateSeriesAsyncSpy).toHaveBeenCalledWith(
+        expect(updateSeriesSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             event: expect.objectContaining({
               uid: 'recurring-event-base',
@@ -657,7 +657,7 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         )
       jest.spyOn(EventDao, 'putEvent').mockResolvedValue({ status: 201 } as any)
 
-      const updateSeriesAsyncSpy = jest.spyOn(eventThunks, 'updateSeriesAsync')
+      const updateSeriesSpy = jest.spyOn(eventThunks, 'updateSeries')
 
       renderWithProviders(
         <EventUpdateModal
@@ -695,8 +695,8 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
 
       // Verify the API was called with master date (Jan 15) + new time (14:00)
       await waitFor(() => {
-        expect(updateSeriesAsyncSpy).toHaveBeenCalled()
-        const callArgs = updateSeriesAsyncSpy.mock.calls[0][0]
+        expect(updateSeriesSpy).toHaveBeenCalled()
+        const callArgs = updateSeriesSpy.mock.calls[0][0]
         const updatedEvent = callArgs.event
 
         // Should preserve Jan 15 date (master), not Jan 17 (clicked instance)

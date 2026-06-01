@@ -1,20 +1,20 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { Calendar } from '@common/types/CalendarTypes'
+import { ResponsiveDialog } from '@common/components/Dialog'
+import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import {
   createCalendarAsync,
-  importEventFromFileAsync,
-  patchACLCalendarAsync,
-  patchCalendarAsync
-} from '@common/features/Calendars/services'
-import { updateDelegationCalendarAsync } from '@common/features/Calendars/services/updateDelegationCalendarAsync'
+  importEventFromFile,
+  patchACLCalendar,
+  patchCalendar,
+  updateDelegationCalendar
+} from '@common/features/Calendars/CalendarSlice'
+import { Calendar } from '@common/types/CalendarTypes'
 import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
 import { defaultColors } from '@common/utils/defaultColors'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { Button, Tab, Tabs } from '@linagora/twake-mui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { ResponsiveDialog } from '@common/components/Dialog'
-import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { AccessTab } from './AccessTab'
 import { UserWithAccess } from './CalendarAccessRights'
 import { ImportTab } from './ImportTab'
@@ -119,7 +119,7 @@ function CalendarPopover({
 
     if (nameChanged || descChanged || colorChanged) {
       await dispatch(
-        patchCalendarAsync({
+        patchCalendar({
           calId,
           calLink,
           patch: { name: name.trim(), desc: description.trim(), color }
@@ -128,7 +128,7 @@ function CalendarPopover({
     }
     if (canManageInvites && visibility !== calendar?.visibility) {
       await dispatch(
-        patchACLCalendarAsync({
+        patchACLCalendar({
           calId,
           calLink,
           request: visibility === 'public' ? '{DAV:}read' : ''
@@ -182,7 +182,7 @@ function CalendarPopover({
       .map(u => ({ 'dav:href': `mailto:${normaliseEmail(u)}` }))
 
     await dispatch(
-      updateDelegationCalendarAsync({
+      updateDelegationCalendar({
         calId: calendar?.id ?? '',
         calLink,
         share: { set, remove }
@@ -207,7 +207,7 @@ function CalendarPopover({
       })
     )
     dispatch(
-      patchACLCalendarAsync({
+      patchACLCalendar({
         calId: `${userData.openpaasId}/${calId}`,
         calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
         request: visibility === 'public' ? '{DAV:}read' : ''
@@ -246,7 +246,7 @@ function CalendarPopover({
         )
         if (importedContent) {
           dispatch(
-            importEventFromFileAsync({
+            importEventFromFile({
               calLink: `/calendars/${userData.openpaasId}/${calId}.json`,
               file: importedContent
             })
@@ -256,7 +256,7 @@ function CalendarPopover({
     } else {
       if (importedContent) {
         dispatch(
-          importEventFromFileAsync({
+          importEventFromFile({
             calLink: calendars[importTarget].link,
             file: importedContent
           })

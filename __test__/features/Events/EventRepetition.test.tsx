@@ -4,13 +4,13 @@ import {
   EventHandlersProps
 } from '@common/components/Calendar/handlers/eventHandlers'
 import { EditModeDialog } from '@common/components/Event/EditModeDialog'
-import * as eventThunks from '@common/features/Calendars/services'
-import * as EventDao from '@common/features/Events/EventDao'
 import EventPreviewModal from '@common/components/EventPreview'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
+import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
+import * as EventDao from '@common/features/Events/EventDao'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
-import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
 
 jest.mock('@common/components/Event/utils/eventUtils', () => {
   const actual = jest.requireActual('@common/components/Event/utils/eventUtils')
@@ -248,7 +248,7 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
     jest.useRealTimers()
   })
   it('shows EditModeDialog when editing a recurring event', async () => {
-    jest.spyOn(eventThunks, 'getEventAsync').mockImplementation(payload => {
+    jest.spyOn(eventThunks, 'getEvent').mockImplementation(payload => {
       return () =>
         Promise.resolve({
           calId: payload.calId,
@@ -353,7 +353,7 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
     }
 
     const spy = jest
-      .spyOn(eventThunks, 'deleteEventAsync')
+      .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -392,9 +392,9 @@ describe('Delete Recurring Event Instance', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('calls deleteEventInstanceAsync when deleting single instance', async () => {
+  it('calls deleteEventInstance when deleting single instance', async () => {
     const spy = jest
-      .spyOn(eventThunks, 'deleteEventInstanceAsync')
+      .spyOn(eventThunks, 'deleteEventInstance')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -430,7 +430,7 @@ describe('Delete Recurring Event Instance', () => {
     expect(receivedPayload.event.uid).toBe('recurring-base/20250315T100000')
   })
 
-  it('calls deleteEventAsync when deleting all instances', async () => {
+  it('calls deleteEvent when deleting all instances', async () => {
     jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
     BEGIN:VCALENDAR
     VERSION:2.0
@@ -444,7 +444,7 @@ describe('Delete Recurring Event Instance', () => {
     `)
 
     const spy = jest
-      .spyOn(eventThunks, 'deleteEventAsync')
+      .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -491,9 +491,9 @@ describe('RSVP to Recurring Event', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('calls updateEventInstanceAsync when accepting single instance', async () => {
+  it('calls updateEventInstance when accepting single instance', async () => {
     const spy = jest
-      .spyOn(eventThunks, 'updateEventInstanceAsync')
+      .spyOn(eventThunks, 'updateEventInstance')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
@@ -668,7 +668,7 @@ describe('Edit Recurring Event in Full Display', () => {
     ).toBeInTheDocument()
   })
 
-  it("calls updateEventInstanceAsync when saving single instance with typeOfAction='solo'", async () => {
+  it("calls updateEventInstance when saving single instance with typeOfAction='solo'", async () => {
     jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
@@ -685,7 +685,7 @@ describe('Edit Recurring Event in Full Display', () => {
         ].join('\r\n')
       )
     const spy = jest
-      .spyOn(eventThunks, 'updateEventInstanceAsync')
+      .spyOn(eventThunks, 'updateEventInstance')
       .mockImplementation(() => {
         return () => {
           const promise = Promise.resolve()
@@ -724,7 +724,7 @@ describe('Edit Recurring Event in Full Display', () => {
     expect(updatedEvent.recurrenceId).toBe('20250315T100000')
   })
 
-  it("calls updateSeriesAsync when saving all instances with typeOfAction='all'", async () => {
+  it("calls updateSeries when saving all instances with typeOfAction='all'", async () => {
     const getEventSpy = jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
     BEGIN:VCALENDAR
     VERSION:2.0
@@ -739,7 +739,7 @@ describe('Edit Recurring Event in Full Display', () => {
     `)
 
     const spy = jest
-      .spyOn(eventThunks, 'updateSeriesAsync')
+      .spyOn(eventThunks, 'updateSeries')
       .mockImplementation(() => {
         return () => {
           const promise = Promise.resolve()
@@ -1016,14 +1016,14 @@ describe('handleRSVP function', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('calls putEventAsync for non-recurring events', async () => {
+  it('calls putEvent for non-recurring events', async () => {
     const mockDispatch = jest.fn()
 
     const {
       handleRSVP
     } = require('@common/components/Event/eventHandlers/eventHandlers')
 
-    jest.spyOn(eventThunks, 'putEventAsync').mockImplementation(payload => {
+    jest.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
       const promise = Promise.resolve(payload)
       ;(promise as any).unwrap = () => promise
       return () => promise as any
@@ -1067,7 +1067,7 @@ describe('handleDelete function', () => {
   afterAll(() => {
     jest.useRealTimers()
   })
-  it('calls deleteEventAsync for non-recurring events', () => {
+  it('calls deleteEvent for non-recurring events', () => {
     const mockDispatch = jest.fn()
     const mockOnClose = jest.fn()
 
@@ -1075,7 +1075,7 @@ describe('handleDelete function', () => {
       handleDelete
     } = require('@common/components/Event/eventHandlers/eventHandlers')
 
-    jest.spyOn(eventThunks, 'deleteEventAsync').mockImplementation(payload => {
+    jest.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
       return () => Promise.resolve(payload) as any
     })
 
@@ -1101,7 +1101,7 @@ describe('handleDelete function', () => {
     expect(mockDispatch).toHaveBeenCalled()
   })
 
-  it('calls deleteEventInstanceAsync when deleting solo recurring event', () => {
+  it('calls deleteEventInstance when deleting solo recurring event', () => {
     const mockDispatch = jest.fn()
     const mockOnClose = jest.fn()
 
@@ -1110,7 +1110,7 @@ describe('handleDelete function', () => {
     } = require('@common/components/Event/eventHandlers/eventHandlers')
 
     jest
-      .spyOn(eventThunks, 'deleteEventInstanceAsync')
+      .spyOn(eventThunks, 'deleteEventInstance')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
       })
@@ -1132,7 +1132,7 @@ describe('handleDelete function', () => {
     expect(mockDispatch).toHaveBeenCalled()
   })
 
-  it('calls deleteEventAsync when deleting all recurring events', () => {
+  it('calls deleteEvent when deleting all recurring events', () => {
     const mockDispatch = jest.fn()
     const mockOnClose = jest.fn()
 
@@ -1140,7 +1140,7 @@ describe('handleDelete function', () => {
       handleDelete
     } = require('@common/components/Event/eventHandlers/eventHandlers')
 
-    jest.spyOn(eventThunks, 'deleteEventAsync').mockImplementation(payload => {
+    jest.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
       return () => Promise.resolve(payload) as any
     })
 
@@ -1217,14 +1217,14 @@ describe('Event URL handling for recurring events', () => {
   })
   it('uses base ID for event URL when moving recurring event', async () => {
     const moveEventSpy = jest
-      .spyOn(eventThunks, 'moveEventAsync')
+      .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const result = { calId: payload.cal.id, events: [] }
         const promise = Promise.resolve(result)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
-    jest.spyOn(eventThunks, 'putEventAsync').mockImplementation(payload => {
+    jest.spyOn(eventThunks, 'putEvent').mockImplementation(payload => {
       const result = { calId: payload.cal.id, events: [] }
       const promise = Promise.resolve(result)
       ;(promise as any).unwrap = () => promise

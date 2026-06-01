@@ -1,4 +1,4 @@
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -74,23 +74,23 @@ describe('Event Full Display — delegated calendar move', () => {
     }
   }
 
-  it('calls deleteEventAsync and putEventAsync — and NOT moveEventAsync — when moving to a delegated calendar', async () => {
+  it('calls deleteEvent and putEvent — and NOT moveEvent — when moving to a delegated calendar', async () => {
     const spyPut = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
     const spyDelete = jest
-      .spyOn(eventThunks, 'deleteEventAsync')
+      .spyOn(eventThunks, 'deleteEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
     const spyMove = jest
-      .spyOn(eventThunks, 'moveEventAsync')
+      .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise

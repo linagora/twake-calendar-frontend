@@ -1,6 +1,6 @@
 import { InfoRow } from '@common/components/Event/InfoRow'
 import { LONG_DATE_FORMAT } from '@common/components/Event/utils/dateTimeFormatters'
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import dayjs from 'dayjs'
@@ -231,14 +231,14 @@ describe('Event Full Display', () => {
 
   it('saves event and moves it when calendar is changed', async () => {
     const spyPut = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
         return () => promise as any
       })
     const spyMove = jest
-      .spyOn(eventThunks, 'moveEventAsync')
+      .spyOn(eventThunks, 'moveEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise

@@ -1,7 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { useEffect, useRef } from 'react'
-import { replace } from 'redux-first-history'
-import { getCalendarsListAsync } from '@common/features/Calendars/services'
+import { setAppLoading } from '@common/app/loadingSlice'
+import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import { Callback } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserDataAsync,
@@ -9,12 +8,13 @@ import {
   setUserData,
   setUserError
 } from '@common/features/User/userSlice'
-import { setAppLoading } from '@common/app/loadingSlice'
 import {
   TokenEndpointResponse,
   TokenEndpointResponseHelpers,
   UserInfoResponse
 } from 'openid-client'
+import { useEffect, useRef } from 'react'
+import { replace } from 'redux-first-history'
 
 interface RedirectState {
   code_verifier: string
@@ -101,7 +101,7 @@ export const CallbackResume: React.FC = () => {
         dispatch(setTokens(data.tokenSet))
 
         await dispatch(getOpenPaasUserDataAsync())
-        await dispatch(getCalendarsListAsync())
+        await dispatch(getCalendarsList())
 
         sessionStorage.removeItem('redirectState')
       } catch (e) {

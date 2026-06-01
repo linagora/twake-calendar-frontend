@@ -1,14 +1,18 @@
 import { AppDispatch } from '@common/app/store'
-import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
-import { getCalendarDetailAsync } from '@common/features/Calendars/services'
+import { getCalendarDetail } from '@common/features/Calendars/CalendarSlice'
 import { AclEntry } from '@common/features/Calendars/types/CalendarData'
+import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { getEffectiveEmail } from '@common/utils/getEffectiveEmail'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 import { convertEventDateTimeToISO } from '@common/utils/timezone'
-import { EventApi, EventInput, SlotLabelContentArg } from '@fullcalendar/core'
+import {
+  EventApi,
+  EventInput,
+  SlotLabelContentArg
+} from '@fullcalendar/core/index.js'
 import moment from 'moment-timezone'
 
 export const updateSlotLabelVisibility = (
@@ -278,7 +282,7 @@ export const updateCalsDetails = (
       controllers.set(id, controller)
 
       void dispatch(
-        getCalendarDetailAsync({
+        getCalendarDetail({
           calId: id,
           match: {
             start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
@@ -290,7 +294,7 @@ export const updateCalsDetails = (
       )
     } else {
       void dispatch(
-        getCalendarDetailAsync({
+        getCalendarDetail({
           calId: id,
           match: {
             start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
@@ -310,7 +314,7 @@ export const updateCalsDetails = (
           controllers.set(id, controller)
 
           void dispatch(
-            getCalendarDetailAsync({
+            getCalendarDetail({
               calId: id,
               match: {
                 start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),
@@ -322,7 +326,7 @@ export const updateCalsDetails = (
           )
         } else {
           void dispatch(
-            getCalendarDetailAsync({
+            getCalendarDetail({
               calId: id,
               match: {
                 start: formatDateToYYYYMMDDTHHMMSS(calendarRange.start),

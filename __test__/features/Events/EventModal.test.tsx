@@ -1,5 +1,5 @@
 import * as calDAO from '@common/features/Calendars/CalendarDAO'
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
 import { api } from '@common/utils/apiUtils'
 import { DateSelectArg } from '@fullcalendar/core'
@@ -283,7 +283,7 @@ describe('EventPopover', () => {
     fireEvent.click(option)
 
     const spy = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise
@@ -333,7 +333,7 @@ describe('EventPopover', () => {
       })
 
       const spy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
@@ -408,7 +408,7 @@ describe('EventPopover', () => {
       await userEvent.click(screen.getByText('Room 1'))
 
       const spy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
@@ -437,7 +437,7 @@ describe('EventPopover', () => {
     }
   })
 
-  it('dispatches putEventAsync and calls onClose when Save is clicked', async () => {
+  it('dispatches putEvent and calls onClose when Save is clicked', async () => {
     renderPopover()
     const newEvent = {
       title: 'Meeting',
@@ -468,7 +468,7 @@ describe('EventPopover', () => {
       target: { value: newEvent.location }
     })
     const spy = jest
-      .spyOn(eventThunks, 'putEventAsync')
+      .spyOn(eventThunks, 'putEvent')
       .mockImplementation(payload => {
         const promise = Promise.resolve(payload)
         ;(promise as any).unwrap = () => promise

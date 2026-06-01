@@ -1,6 +1,6 @@
 import { RootState } from '@common/app/store'
 import RepeatEvent from '@common/components/Event/EventRepeat'
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
 import { RepetitionObject } from '@common/types/EventsTypes'
 import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
@@ -120,7 +120,7 @@ async function setupEventPopover() {
 
 async function expectRRule(expected: Partial<RepetitionObject>) {
   const spy = jest
-    .spyOn(eventThunks, 'putEventAsync')
+    .spyOn(eventThunks, 'putEvent')
     .mockImplementation(payload => {
       const promise = Promise.resolve(payload)
       ;(promise as any).unwrap = () => promise

@@ -1,21 +1,17 @@
 import { AppDispatch, RootState, store } from '@common/app/store'
-import { refreshCalendarWithSyncToken } from '@common/features/Calendars/services/refreshCalendar'
-import { getDisplayedCalendarRange } from '@common/utils/CalendarRangeManager'
+import {
+  emptyEventsCal,
+  getCalendarDetail,
+  refreshCalendarWithSyncToken
+} from '@common/features/Calendars/CalendarSlice'
+import { getDisplayedCalendarRange } from '@common/utils'
+import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { updateCalendars } from '@common/websocket/messaging/updateCalendars'
 import { WS_INBOUND_EVENTS } from '@common/websocket/protocols'
 import { waitFor } from '@testing-library/dom'
-import { getCalendarDetailAsync } from '@common/features/Calendars/services/getCalendarDetailAsync'
-import { emptyEventsCal } from '@common/features/Calendars/CalendarSlice'
-import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 
-jest.mock('@common/features/Calendars/services/refreshCalendar')
 jest.mock('@common/utils/CalendarRangeManager')
-jest.mock('@common/features/Calendars/services/getCalendarDetailAsync', () => ({
-  getCalendarDetailAsync: jest.fn(args => ({
-    type: 'mock/getCalendarDetailAsync',
-    payload: args
-  }))
-}))
+
 jest.mock('@common/features/Calendars/CalendarSlice', () => {
   const original = jest.requireActual(
     '@common/features/Calendars/CalendarSlice'
@@ -25,9 +21,21 @@ jest.mock('@common/features/Calendars/CalendarSlice', () => {
     emptyEventsCal: jest.fn(args => ({
       type: 'mock/emptyEventsCal',
       payload: args
+    })),
+    getCalendarDetail: jest.fn(args => ({
+      type: 'mock/getCalendarDetail',
+      payload: args
+    })),
+    refreshCalendarWithSyncToken: jest.fn(args => ({
+      type: 'mock/refreshCalendarWithSyncToken',
+      payload: args
     }))
   }
 })
+
+const mockRefreshCalendarWithSyncToken =
+  refreshCalendarWithSyncToken as unknown as jest.Mock
+
 jest.mock('@common/app/store', () => ({
   store: {
     getState: jest.fn()
@@ -84,7 +92,7 @@ describe('updateCalendars', () => {
     updateCalendars('string', mockDispatch, mockAccumulators)
     updateCalendars(123, mockDispatch, mockAccumulators)
 
-    expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled()
+    expect(mockRefreshCalendarWithSyncToken).not.toHaveBeenCalled()
   })
 
   it('should dispatch for registered calendars', async () => {
@@ -98,7 +106,7 @@ describe('updateCalendars', () => {
     updateCalendars(message, mockDispatch, mockAccumulators)
 
     await waitFor(() =>
-      expect(refreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
+      expect(mockRefreshCalendarWithSyncToken).toHaveBeenCalledTimes(2)
     )
   })
 
@@ -108,8 +116,10 @@ describe('updateCalendars', () => {
     }
 
     updateCalendars(message, mockDispatch, mockAccumulators)
-    await waitFor(() => expect(refreshCalendarWithSyncToken).toHaveBeenCalled())
-    expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
+    await waitFor(() =>
+      expect(mockRefreshCalendarWithSyncToken).toHaveBeenCalled()
+    )
+    expect(mockRefreshCalendarWithSyncToken).toHaveBeenCalledWith({
       calendar: mockState.calendars.list['cal1/entry1'],
       calType: undefined,
       calendarRange: mockRange
@@ -148,7 +158,7 @@ describe('updateCalendars', () => {
     updateCalendars(message, mockDispatch, mockAccumulators)
 
     await waitFor(() =>
-      expect(refreshCalendarWithSyncToken).toHaveBeenCalledWith({
+      expect(mockRefreshCalendarWithSyncToken).toHaveBeenCalledWith({
         calendar: stateWithTemp.calendars.templist['temp1/entry1'],
         calType: 'temp',
         calendarRange: mockRange
@@ -164,10 +174,10 @@ describe('updateCalendars', () => {
 
     updateCalendars(message, mockDispatch, mockAccumulators)
 
-    expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled()
+    expect(mockRefreshCalendarWithSyncToken).not.toHaveBeenCalled()
   })
 
-  it('should fall back to getCalendarDetailAsync when calendar has no syncToken', async () => {
+  it('should fall back to getCalendarDetail when calendar has no syncToken', async () => {
     const stateWithoutSyncToken = {
       calendars: {
         list: {
@@ -190,7 +200,7 @@ describe('updateCalendars', () => {
         calId: 'cal1/entry1',
         calType: undefined
       })
-      expect(getCalendarDetailAsync).toHaveBeenCalledWith({
+      expect(getCalendarDetail).toHaveBeenCalledWith({
         calId: 'cal1/entry1',
         match: {
           start: formatDateToYYYYMMDDTHHMMSS(mockRange.start),
@@ -200,6 +210,6 @@ describe('updateCalendars', () => {
       })
     })
 
-    expect(refreshCalendarWithSyncToken).not.toHaveBeenCalled()
+    expect(mockRefreshCalendarWithSyncToken).not.toHaveBeenCalled()
   })
 })

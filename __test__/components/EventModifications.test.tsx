@@ -6,7 +6,7 @@ import {
   createEventHandlers,
   EventHandlersProps
 } from '@common/components/Calendar/handlers/eventHandlers'
-import * as eventThunks from '@common/features/Calendars/services'
+import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { CalendarApi } from '@fullcalendar/core'
 import { jest } from '@jest/globals'
@@ -381,7 +381,7 @@ describe('CalendarApp integration', () => {
     })
     it('keeps all attendees event participation on title update', async () => {
       const updateSpy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
@@ -440,7 +440,7 @@ describe('CalendarApp integration', () => {
 
     it('changes normal attendee to need action on time update and no organizer changes', async () => {
       const updateSpy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
@@ -522,7 +522,7 @@ describe('CalendarApp integration', () => {
         .mockReturnValue(mockDispatch as unknown as AppDispatch)
 
       const updateSpy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise
@@ -613,7 +613,7 @@ describe('CalendarApp integration', () => {
         .mockReturnValue(mockDispatch as unknown as AppDispatch)
 
       const updateSpy = jest
-        .spyOn(eventThunks, 'putEventAsync')
+        .spyOn(eventThunks, 'putEvent')
         .mockImplementation(payload => {
           const promise = Promise.resolve(payload)
           ;(promise as any).unwrap = () => promise

@@ -1,20 +1,20 @@
 import { AppDispatch } from '@common/app/store'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
-  deleteEventAsync,
-  deleteEventInstanceAsync,
-  putEventAsync,
-  updateEventInstanceAsync
-} from '@common/features/Calendars/services'
+  deleteEventInstance,
+  deleteEvent,
+  putEvent as putEventAsync,
+  updateEventInstance
+} from '@common/features/Calendars/CalendarSlice'
 import {
   fetchAllRecurrentVevents,
   putEvent
 } from '@common/features/Events/EventDao'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { updateSeriesPartstatJCal } from '@common/features/Events/transformers/updateSeriesPartstatJCal'
+import { updateSeriesPartstatJCal } from '@common/features/Events/transformers'
 import { PartStat, userAttendee } from '@common/features/User/models/attendee'
 import { createAttendee } from '@common/features/User/models/attendee.mapper'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 
@@ -87,7 +87,7 @@ async function handleSoloRSVP(
   calendar: Calendar,
   event: CalendarEvent
 ): Promise<void> {
-  await dispatch(updateEventInstanceAsync({ cal: calendar, event }))
+  await dispatch(updateEventInstance({ cal: calendar, event }))
 }
 
 async function handleAllRSVP(
@@ -146,10 +146,10 @@ export async function handleDelete(
   onClose({}, 'backdropClick')
 
   if (isRecurring && typeOfAction === 'solo') {
-    await dispatch(deleteEventInstanceAsync({ cal: calendar, event }))
+    await dispatch(deleteEventInstance({ cal: calendar, event }))
   } else {
     await dispatch(
-      deleteEventAsync({
+      deleteEvent({
         calId,
         eventId,
         eventURL: event.URL

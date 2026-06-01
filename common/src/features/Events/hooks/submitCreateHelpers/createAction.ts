@@ -10,7 +10,7 @@ import {
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
-import { putEventAsync } from '@common/features/Calendars/services'
+import { putEvent } from '@common/features/Calendars/CalendarSlice'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 
 export async function handleCreateEvent({
@@ -95,9 +95,7 @@ export async function handleCreateEvent({
   onClose(true)
 
   try {
-    const result = await dispatch(
-      putEventAsync({ cal: targetCalendar, newEvent })
-    )
+    const result = await dispatch(putEvent({ cal: targetCalendar, newEvent }))
     await assertThunkSuccess(result)
     clearEventFormTempData('create')
   } catch (error) {

@@ -1,25 +1,27 @@
 import { toRejectedError } from '@common/utils/errorUtils'
-import { createAsyncThunk } from '@reduxjs/toolkit'
 import { updateDelegationCalendar } from '@common/features/Calendars/CalendarDAO'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
+import { ReducerCreators } from '@reduxjs/toolkit'
+import { CalendarState } from '../CalendarSlice'
 
-export const updateDelegationCalendarAsync = createAsyncThunk<
-  {
-    calId: string
-    calLink: string
-  },
-  {
-    calId: string
-    calLink: string
-    share: {
-      set: { [x: string]: string | boolean; 'dav:href': string }[]
-      remove: { [x: string]: string | boolean; 'dav:href': string }[]
-    }
-  },
-  { rejectValue: RejectedError }
->(
-  'calendars/patchDelegationCalendar',
-  async ({ calId, calLink, share }, { rejectWithValue }) => {
+export const updateDelegationCalendarThunk = (
+  create: ReducerCreators<CalendarState>
+) =>
+  create.asyncThunk<
+    {
+      calId: string
+      calLink: string
+    },
+    {
+      calId: string
+      calLink: string
+      share: {
+        set: { [x: string]: string | boolean; 'dav:href': string }[]
+        remove: { [x: string]: string | boolean; 'dav:href': string }[]
+      }
+    },
+    { rejectValue: RejectedError }
+  >(async ({ calId, calLink, share }, { rejectWithValue }) => {
     try {
       await updateDelegationCalendar(calLink, share)
       return {
@@ -29,5 +31,4 @@ export const updateDelegationCalendarAsync = createAsyncThunk<
     } catch (err) {
       return rejectWithValue(toRejectedError(err))
     }
-  }
-)
+  })

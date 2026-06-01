@@ -2,14 +2,14 @@ import type { AppDispatch, RootState } from '@common/app/store'
 import { findCalendarById, getDisplayedCalendarRange } from '@common/utils'
 import { createListenerMiddleware } from '@reduxjs/toolkit'
 import {
-  deleteEventAsync,
-  deleteEventInstanceAsync,
-  moveEventAsync,
-  putEventAsync,
+  deleteEvent,
+  deleteEventInstance,
+  moveEvent,
+  putEvent,
   refreshCalendarWithSyncToken,
-  updateEventInstanceAsync,
-  updateSeriesAsync
-} from '@common/features/Calendars/services'
+  updateEventInstance,
+  updateSeries
+} from '../CalendarSlice'
 
 export const postMutationRefreshMiddleware = createListenerMiddleware()
 
@@ -35,7 +35,7 @@ function triggerRefresh(
 }
 
 startListening({
-  actionCreator: putEventAsync.fulfilled,
+  actionCreator: putEvent.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
@@ -46,7 +46,7 @@ startListening({
 })
 
 startListening({
-  actionCreator: deleteEventAsync.fulfilled,
+  actionCreator: deleteEvent.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
@@ -57,7 +57,7 @@ startListening({
 })
 
 startListening({
-  actionCreator: deleteEventInstanceAsync.fulfilled,
+  actionCreator: deleteEventInstance.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
@@ -68,7 +68,7 @@ startListening({
 })
 
 startListening({
-  actionCreator: updateEventInstanceAsync.fulfilled,
+  actionCreator: updateEventInstance.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
@@ -79,7 +79,7 @@ startListening({
 })
 
 startListening({
-  actionCreator: moveEventAsync.fulfilled,
+  actionCreator: moveEvent.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,
@@ -98,7 +98,7 @@ startListening({
 })
 
 startListening({
-  actionCreator: updateSeriesAsync.fulfilled,
+  actionCreator: updateSeries.fulfilled,
   effect: (action, listenerApi) => {
     triggerRefresh(
       listenerApi.dispatch,

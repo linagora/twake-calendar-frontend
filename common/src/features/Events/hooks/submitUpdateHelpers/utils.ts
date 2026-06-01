@@ -1,12 +1,12 @@
-import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUtils'
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { PrepareUpdateDataResult, PrepareUpdateDataParams } from './types'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
 export function getSeriesInstances(
   targetCalendar: Calendar,
   baseUID: string
@@ -123,7 +123,7 @@ export function prepareUpdateData({
     showMore,
     hasEndDateChanged: values.hasEndDateChanged
   })
-  console.log(masterEvent)
+
   const referenceEvent =
     typeOfAction === 'all' && masterEvent ? masterEvent : event
   const timeChanged = hasEventTimeChanged(referenceEvent, startISO, endISO)

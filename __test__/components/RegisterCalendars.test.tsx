@@ -1,11 +1,21 @@
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
-import * as CalendarSlice from '@common/features/Calendars/services'
+import { addCalendarResource } from '@common/features/Calendars/CalendarSlice'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 jest.mock('@common/features/Calendars/CalendarDAO')
-jest.mock('@common/features/Calendars/services/addCalendarResourceAsync')
+
+jest.mock('@common/features/Calendars/CalendarSlice', () => {
+  const calendarSlice = jest.requireActual(
+    '@common/features/Calendars/CalendarSlice'
+  )
+  return {
+    __esModule: true,
+    ...calendarSlice,
+    addCalendarResource: jest.fn()
+  }
+})
 
 jest.mock('@common/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
@@ -41,8 +51,7 @@ jest.mock('@common/components/Attendees/PeopleSearch', () => ({
 }))
 
 const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.Mock
-const mockedAddCalendarResourceAsync =
-  CalendarSlice.addCalendarResourceAsync as unknown as jest.Mock
+const mockedAddCalendarResource = addCalendarResource as unknown as jest.Mock
 
 describe('RegisterCalendars', () => {
   beforeEach(() => {
@@ -66,7 +75,7 @@ describe('RegisterCalendars', () => {
         onClose={onClose}
         open={isOpen}
         objectTypes={['resource']}
-        onSave={mockedAddCalendarResourceAsync as any}
+        onSave={mockedAddCalendarResource as any}
       />,
       {
         user: baseUser
@@ -122,7 +131,7 @@ describe('RegisterCalendars', () => {
     const mockDispatchResult = {
       unwrap: () => Promise.resolve({ type: 'success' })
     }
-    mockedAddCalendarResourceAsync.mockReturnValue(() => mockDispatchResult)
+    mockedAddCalendarResource.mockReturnValue(() => mockDispatchResult)
 
     const { onClose } = setup()
 
@@ -138,16 +147,16 @@ describe('RegisterCalendars', () => {
     })
     expect(addButton).not.toBeDisabled()
 
-    // Click add to trigger addCalendarResourceAsync
+    // Click add to trigger addCalendarResource
     await act(async () => {
       fireEvent.click(addButton)
     })
 
     await waitFor(() => {
       // It should only have been called for Room A because Room B failed (Promise.allSettled)
-      expect(mockedAddCalendarResourceAsync).toHaveBeenCalledTimes(1)
+      expect(mockedAddCalendarResource).toHaveBeenCalledTimes(1)
 
-      const payload = mockedAddCalendarResourceAsync.mock.calls[0][0]
+      const payload = mockedAddCalendarResource.mock.calls[0][0]
       expect(payload).toEqual(
         expect.objectContaining({
           userId: 'user1',
@@ -183,7 +192,7 @@ describe('RegisterCalendars', () => {
     const mockDispatchResult = {
       unwrap: () => Promise.resolve()
     }
-    mockedAddCalendarResourceAsync.mockReturnValue(() => mockDispatchResult)
+    mockedAddCalendarResource.mockReturnValue(() => mockDispatchResult)
 
     const { onClose } = setup()
 

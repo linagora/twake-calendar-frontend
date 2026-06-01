@@ -6,13 +6,8 @@
  * the store is hydrated.
  */
 
-import { renderHook, act } from '@testing-library/react'
-import {
-  useCalendarDataLoader,
-  mergeInterval,
-  subtractIntervals,
-  Interval
-} from '@common/features/Calendars/useCalendarLoader'
+import { useCalendarDataLoader } from '@common/features/Calendars/useCalendarLoader'
+import { act, renderHook } from '@testing-library/react'
 
 const mockDispatch = jest.fn()
 const mockGetState = jest.fn()
@@ -24,8 +19,9 @@ jest.mock('@common/app/hooks', () => ({
 }))
 
 const mockGetCalendarDetailAsync = jest.fn()
-jest.mock('@common/features/Calendars/services', () => ({
-  getCalendarDetailAsync: (args: unknown) => mockGetCalendarDetailAsync(args)
+jest.mock('@common/features/Calendars/CalendarSlice', () => ({
+  ...jest.requireActual('@common/features/Calendars/CalendarSlice'),
+  getCalendarDetail: (args: unknown) => mockGetCalendarDetailAsync(args)
 }))
 
 jest.mock('@common/utils/dateUtils', () => ({

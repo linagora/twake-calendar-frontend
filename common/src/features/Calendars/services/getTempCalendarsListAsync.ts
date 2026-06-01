@@ -1,41 +1,72 @@
 import { User } from '@common/components/Attendees/types'
 import { getCalendarVisibility } from '@common/components/Calendar/utils/calendarUtils'
-import { formatReduxError } from '@common/utils/errorUtils'
-import { createAsyncThunk } from '@reduxjs/toolkit'
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
-import { Calendar } from '@common/types/CalendarTypes'
-import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import {
   CalendarData,
   CalendarList
 } from '@common/features/Calendars/types/CalendarData'
+import { RejectedError } from '@common/features/Calendars/types/RejectedError'
+import { Calendar } from '@common/types/CalendarTypes'
+import { formatReduxError } from '@common/utils/errorUtils'
+import { ReducerCreators } from '@reduxjs/toolkit'
+import { CalendarState } from '../CalendarSlice'
 import { getOwnerOrResourceData } from './helpers'
 
-export const getTempCalendarsListAsync = createAsyncThunk<
-  Record<string, Calendar>,
-  User,
-  { rejectValue: RejectedError }
->('calendars/getTempCalendars', async (tempUser, { rejectWithValue }) => {
-  try {
-    const openpaasId = getValidOpenPaasId(tempUser)
-    const calendars = await fetchCalendars(openpaasId, 'sharedPublic=true&')
-    const rawCalendars = getRawCalendars(calendars, tempUser)
+export const getTempCalendarsListThunk = (
+  create: ReducerCreators<CalendarState>
+) =>
+  create.asyncThunk<
+    Record<string, Calendar>,
+    User,
+    { rejectValue: RejectedError }
+  >(
+    async (tempUser, { rejectWithValue }) => {
+      try {
+        const openpaasId = getValidOpenPaasId(tempUser)
+        const calendars = await fetchCalendars(openpaasId, 'sharedPublic=true&')
+        const rawCalendars = getRawCalendars(calendars, tempUser)
 
-    const importedCalendars: Record<string, Calendar> = {}
-    for (const cal of rawCalendars) {
-      const tempCal = await processTempCalendar(cal, tempUser)
-      importedCalendars[tempCal.id] = tempCal
+        const importedCalendars: Record<string, Calendar> = {}
+        for (const cal of rawCalendars) {
+          const tempCal = await processTempCalendar(cal, tempUser)
+          importedCalendars[tempCal.id] = tempCal
+        }
+
+        return importedCalendars
+      } catch (err) {
+        const error = err as { response?: { status?: number } }
+        return rejectWithValue({
+          message: formatReduxError(err),
+          status: error.response?.status
+        })
+      }
+    },
+    {
+      pending: state => {
+        state.pending = true
+      },
+      settled: state => {
+        state.pending = false
+      },
+      fulfilled: (state, action) => {
+        Object.keys(action.payload).forEach(
+          id => (state.templist[id] = action.payload[id])
+        )
+      },
+      rejected: (state, action) => {
+        if (
+          action.payload?.message.includes('aborted') ||
+          action.error.name === 'AbortError'
+        ) {
+          return
+        }
+        state.error =
+          action.payload?.message ||
+          action.error.message ||
+          'Failed to load temporary calendars'
+      }
     }
-
-    return importedCalendars
-  } catch (err) {
-    const error = err as { response?: { status?: number } }
-    return rejectWithValue({
-      message: formatReduxError(err),
-      status: error.response?.status
-    })
-  }
-})
+  )
 
 function getValidOpenPaasId(tempUser: User): string {
   if (!tempUser.openpaasId) {
