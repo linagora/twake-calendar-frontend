@@ -1,4 +1,4 @@
-import { DavSyncItem } from '../api/types'
+import { DavSyncItem } from '../types/CalendarApiTypes'
 
 export interface ProcessedSyncUpdates {
   toDelete: string[]

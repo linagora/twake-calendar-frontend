@@ -4,7 +4,7 @@ import { getOpenPaasUser } from '@/features/User/userAPI'
 import { defaultColors } from '@/utils/defaultColors'
 import { formatReduxError, toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { getCalendars } from '../CalendarApi'
+import { fetchCalendars } from '../CalendarDAO'
 import { Calendar, CalendarInvite } from '../CalendarTypes'
 import { CalendarData } from '../types/CalendarData'
 import { RejectedError } from '../types/RejectedError'
@@ -26,7 +26,7 @@ export const getCalendarsListAsync = createAsyncThunk<
   try {
     const fetchedCalendars: Record<string, Calendar> = {}
     const user = existingUser.id ? existingUser : await getOpenPaasUser()
-    const calendars = await getCalendars(user.id)
+    const calendars = await fetchCalendars(user.id)
     const rawCalendars = calendars._embedded['dav:calendar']
 
     const errors: string[] = []

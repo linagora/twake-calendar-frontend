@@ -1,4 +1,4 @@
-import * as CalendarApi from '@/features/Calendars/CalendarApi'
+import * as CalendarDAO from '@/features/Calendars/CalendarDAO'
 import * as EventDao from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import EventUpdateModal from '@/features/Events/EventUpdateModal'
@@ -6,7 +6,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 jest.mock('@/features/Events/EventDao')
-jest.mock('@/features/Calendars/CalendarApi')
+jest.mock('@/features/Calendars/CalendarDAO')
 
 describe('EventUpdateModal Timezone Handling', () => {
   const mockOnClose = jest.fn()
@@ -380,7 +380,7 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
           'END:VCALENDAR'
         ].join('\r\n')
       )
-    jest.spyOn(CalendarApi, 'getCalendar').mockResolvedValue({
+    jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []
       }
@@ -672,7 +672,7 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
           'END:VCALENDAR'
         ].join('\r\n')
       )
-    jest.spyOn(CalendarApi, 'getCalendar').mockResolvedValue({
+    jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {
         'dav:item': []
       }

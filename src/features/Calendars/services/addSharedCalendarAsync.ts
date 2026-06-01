@@ -2,7 +2,8 @@ import { OpenPaasUserData } from '@/features/User/type/OpenPaasUserData'
 import { getUserDetails } from '@/features/User/userAPI'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { addSharedCalendar } from '../CalendarApi'
+import { calendarAction } from '../CalendarDAO'
+import { makeAddSharedCalendarBody } from '../transformers'
 import { CalendarInput } from '../types/CalendarData'
 import { RejectedError } from '../types/RejectedError'
 
@@ -21,7 +22,8 @@ export const addSharedCalendarAsync = createAsyncThunk<
   'calendars/addSharedCalendar',
   async ({ userId, calId, cal }, { rejectWithValue }) => {
     try {
-      await addSharedCalendar(userId, calId, cal)
+      const body = makeAddSharedCalendarBody(calId, cal)
+      await calendarAction('POST', `/calendars/${userId}.json`, body)
       const ownerData = await getUserDetails(
         cal.cal._links.self.href
           .replace('/calendars/', '')

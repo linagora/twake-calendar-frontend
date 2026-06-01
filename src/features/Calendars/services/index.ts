@@ -1,3 +1,4 @@
+export { addCalendarResourceAsync } from './addCalendarResourceAsync'
 export { addSharedCalendarAsync } from './addSharedCalendarAsync'
 export { createCalendarAsync } from './createCalendarAsync'
 export { deleteEventAsync } from './deleteEventAsync'

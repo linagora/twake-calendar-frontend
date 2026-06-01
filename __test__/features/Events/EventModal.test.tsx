@@ -1,4 +1,4 @@
-import * as calendarsApi from '@/features/Calendars/CalendarApi'
+import * as calDAO from '@/features/Calendars/CalendarDAO'
 import * as eventThunks from '@/features/Calendars/services'
 import EventPopover from '@/features/Events/EventModal'
 import { api } from '@/utils/apiUtils'
@@ -307,8 +307,8 @@ describe('EventPopover', () => {
   it('adds a attendee', async () => {
     try {
       jest
-        .spyOn(calendarsApi, 'getCalendars')
-        .mockReturnValue({ json: jest.fn() })
+        .spyOn(calDAO, 'fetchCalendars')
+        .mockResolvedValue({ json: jest.fn() })
       renderPopover()
       fireEvent.change(screen.getByLabelText('event.form.title'), {
         target: { value: 'newEvent' }

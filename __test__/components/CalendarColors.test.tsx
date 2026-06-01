@@ -1,5 +1,5 @@
 import RegisterCalendars from '@/components/Calendar/RegisterCalendars'
-import * as CalendarApi from '@/features/Calendars/CalendarApi'
+import * as CalendarDAO from '@/features/Calendars/CalendarDAO'
 import * as CalendarSlice from '@/features/Calendars/services'
 import { searchUsers } from '@/features/User/userAPI'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
@@ -7,11 +7,11 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
 jest.mock('@/features/User/userAPI')
-jest.mock('@/features/Calendars/CalendarApi')
+jest.mock('@/features/Calendars/CalendarDAO')
 
 const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
-const mockedGetCalendars = CalendarApi.getCalendars as jest.MockedFunction<
-  typeof CalendarApi.getCalendars
+const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
+  typeof CalendarDAO.fetchCalendars
 >
 
 describe('RegisterCalendars', () => {
@@ -63,7 +63,7 @@ describe('RegisterCalendars', () => {
 
   it('searches for users and displays their calendars', async () => {
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [mockCalendar]
       }
@@ -92,7 +92,7 @@ describe('RegisterCalendars', () => {
     })
 
     await waitFor(() => {
-      expect(mockedGetCalendars).toHaveBeenCalledWith(
+      expect(mockedFetchCalendars).toHaveBeenCalledWith(
         'user123',
         'sharedPublic=true&'
       )
@@ -112,7 +112,7 @@ describe('RegisterCalendars', () => {
       })
 
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [mockCalendar]
       }
@@ -170,7 +170,7 @@ describe('RegisterCalendars', () => {
     }
 
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [existingCalendar]
       }
@@ -214,7 +214,7 @@ describe('RegisterCalendars', () => {
 
   it('displays message when user has no publicly available calendars', async () => {
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({})
+    mockedFetchCalendars.mockResolvedValueOnce({})
 
     await act(async () => {
       renderWithProviders(
@@ -247,7 +247,7 @@ describe('RegisterCalendars', () => {
 
   it('changes calendar color', async () => {
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [mockCalendar]
       }
@@ -301,7 +301,7 @@ describe('RegisterCalendars', () => {
     }
 
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [mockCalendar, secondCalendar]
       }
@@ -376,7 +376,7 @@ describe('RegisterCalendars', () => {
       }
     }
     mockedSearchUsers.mockResolvedValueOnce([mockUser])
-    mockedGetCalendars.mockResolvedValueOnce({
+    mockedFetchCalendars.mockResolvedValueOnce({
       _embedded: {
         'dav:calendar': [mockCalendarNoColor]
       }
@@ -409,7 +409,7 @@ describe('RegisterCalendars', () => {
     })
 
     await waitFor(() => {
-      expect(mockedGetCalendars).toHaveBeenCalledWith(
+      expect(mockedFetchCalendars).toHaveBeenCalledWith(
         'user123',
         'sharedPublic=true&'
       )

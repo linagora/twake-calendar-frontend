@@ -1,6 +1,6 @@
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { updateDelegationCalendar } from '../api/updateDelegationCalendar'
+import { updateDelegationCalendar } from '../CalendarDAO'
 import { RejectedError } from '../types/RejectedError'
 
 export const updateDelegationCalendarAsync = createAsyncThunk<

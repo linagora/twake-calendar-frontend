@@ -2,7 +2,7 @@ import {
   hasFreeBusyConflict,
   useAttendeesFreeBusy
 } from '@/components/Attendees/useFreeBusy'
-import * as CalendarApi from '@/features/Calendars/CalendarApi'
+import * as CalendarDAO from '@/features/Calendars/CalendarDAO'
 import * as FreeBusyDao from '@/features/Events/FreeBusyDao'
 import * as UserDao from '@/features/User/UserDao'
 import { renderHook, waitFor } from '@testing-library/react'
@@ -14,7 +14,7 @@ jest.mock('moment-timezone', () => {
 
 jest.mock('@/features/Events/FreeBusyDao')
 jest.mock('@/features/User/UserDao')
-jest.mock('@/features/Calendars/CalendarApi')
+jest.mock('@/features/Calendars/CalendarDAO')
 
 const mockGetUserData = UserDao.fetchUserByEmail as jest.MockedFunction<
   typeof UserDao.fetchUserByEmail
@@ -25,8 +25,8 @@ const mockREPORT = FreeBusyDao.fetchFreeBusyReports as jest.MockedFunction<
 const mockPOST = FreeBusyDao.fetchFreeBusyPost as jest.MockedFunction<
   typeof FreeBusyDao.fetchFreeBusyPost
 >
-const mockGetCalendars = CalendarApi.getCalendars as jest.MockedFunction<
-  typeof CalendarApi.getCalendars
+const mockGetCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
+  typeof CalendarDAO.fetchCalendars
 >
 
 const mockCalendarsResponse = {

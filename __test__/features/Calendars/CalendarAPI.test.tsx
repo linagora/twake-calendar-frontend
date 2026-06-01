@@ -1,15 +1,12 @@
 import {
-  addSharedCalendar,
-  getCalendar,
-  getCalendars,
-  postCalendar,
-  proppatchCalendar
-} from '@/features/Calendars/CalendarApi'
-import {
   calendarAction,
+  fetchCalendar,
   fetchCalendarExport,
-  fetchSecretLink
+  fetchCalendars,
+  fetchSecretLink,
+  updateDelegationCalendar
 } from '@/features/Calendars/CalendarDAO'
+import { makeAddSharedCalendarBody } from '@/features/Calendars/transformers'
 import { clientConfig } from '@/features/User/oidcAuth'
 import { api } from '@/utils/apiUtils'
 import { waitFor } from '@testing-library/dom'
@@ -17,7 +14,7 @@ clientConfig.url = 'https://example.com'
 
 jest.mock('@/utils/apiUtils')
 
-describe('Calendar API', () => {
+describe('Calendar DAO', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -30,7 +27,7 @@ describe('Calendar API', () => {
       json: jest.fn().mockResolvedValue(mockResponse)
     })
 
-    const calendars = await getCalendars(mockUserId)
+    const calendars = await fetchCalendars(mockUserId)
 
     expect(api.get).toHaveBeenCalledWith(
       `dav/calendars/${mockUserId}.json?personal=true&sharedDelegationStatus=accepted&sharedPublicSubscription=true&withRights=true`,
@@ -50,7 +47,7 @@ describe('Calendar API', () => {
       json: jest.fn().mockResolvedValue(mockCalendarData)
     })
 
-    const result = await getCalendar(calendarId, match)
+    const result = await fetchCalendar(calendarId, match)
 
     expect(api).toHaveBeenCalledWith(`dav/calendars/${calendarId}.json`, {
       method: 'REPORT',
@@ -62,53 +59,49 @@ describe('Calendar API', () => {
 
     expect(result).toEqual(mockCalendarData)
   })
-  it('postCalendar', async () => {
-    const calId = 'calId'
-    const userId = 'userId'
-    const color = { light: 'calId' }
-    const name = 'new cal'
-    const desc = 'desc'
 
-    const result = await postCalendar(userId, calId, color, name, desc)
+  it('postCalendar via calendarAction', async () => {
+    const userId = 'userId'
+    const body = JSON.stringify({
+      id: 'calId',
+      'dav:name': 'new cal',
+      'apple:color': 'calId',
+      'caldav:description': 'desc'
+    })
+
+    await calendarAction('POST', `/calendars/${userId}.json`, body)
 
     expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
       headers: {
         Accept: 'application/json, text/plain, */*'
       },
       method: 'POST',
-      body: JSON.stringify({
-        id: 'calId',
-        'dav:name': 'new cal',
-        'apple:color': 'calId',
-        'caldav:description': 'desc'
-      })
+      body
     })
   })
-  it('patch Calendar', async () => {
-    const calId = 'calId'
-    const calLink = '/calendars/calId.json'
-    const color = { light: 'calIdLight', dark: 'calIdDark' }
-    const name = 'new cal'
-    const desc = 'desc'
 
-    const result = await proppatchCalendar(calLink, { color, name, desc })
+  it('patch Calendar via calendarAction', async () => {
+    const calLink = '/calendars/calId.json'
+    const body = JSON.stringify({
+      'dav:name': 'new cal',
+      'caldav:description': 'desc',
+      'apple:color': 'calIdLight'
+    })
+
+    await calendarAction('PROPPATCH', calLink, body)
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
       method: 'PROPPATCH',
       headers: {
         Accept: 'application/json, text/plain, */*'
       },
-      body: JSON.stringify({
-        'dav:name': 'new cal',
-        'caldav:description': 'desc',
-        'apple:color': 'calIdLight'
-      })
+      body
     })
   })
 
-  it('remove Calendar', async () => {
+  it('remove Calendar via calendarAction', async () => {
     const calLink = '/calendars/calId.json'
-    const result = await calendarAction('DELETE', calLink)
+    await calendarAction('DELETE', calLink)
 
     expect(api).toHaveBeenCalledWith(`dav${calLink}`, {
       method: 'DELETE',
@@ -142,7 +135,7 @@ describe('Calendar API', () => {
     ;(api.get as jest.Mock).mockReturnValue({
       json: jest.fn().mockResolvedValue('link')
     })
-    const reset = await fetchSecretLink(calLink, true)
+    await fetchSecretLink(calLink, true)
 
     expect(api.get).toHaveBeenCalledWith(
       `calendar/api${calLink}/secret-link?shouldResetLink=true`,
@@ -159,7 +152,7 @@ describe('Calendar API', () => {
     ;(api.get as jest.Mock).mockReturnValue({
       text: jest.fn().mockResolvedValue('data')
     })
-    const data = await fetchCalendarExport(calLink)
+    await fetchCalendarExport(calLink)
 
     expect(api.get).toHaveBeenCalledWith(`dav${calLink}?export`, {
       headers: {
@@ -191,18 +184,28 @@ describe('Calendar API', () => {
       color: '#FF5733'
     }
 
-    await addSharedCalendar('currentUserId', 'newCalId123', calData)
+    const body = makeAddSharedCalendarBody('newCalId123', calData)
 
-    expect(api).toHaveBeenCalledWith(
-      'dav/calendars/currentUserId.json',
-      expect.objectContaining({
-        body: expect.stringContaining('"dav:name":"#default"')
-      })
-    )
+    expect(body).toContain('"dav:name":"#default"')
+  })
 
-    const callBody = JSON.parse(
-      String((api as unknown as jest.Mock).mock.calls[0][1]?.body)
+  it('updateDelegationCalendar posts to the correct DAV endpoint with the share body', async () => {
+    ;(api.post as jest.Mock).mockResolvedValue({ ok: true })
+
+    const share = {
+      set: [{ 'dav:href': 'mailto:alice@example.com', 'dav:read': true }],
+      remove: []
+    }
+
+    await updateDelegationCalendar('/calendars/user/cal1.json', share)
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        'dav/calendars/user/cal1.json',
+        expect.objectContaining({
+          body: JSON.stringify({ share })
+        })
+      )
     )
-    expect(callBody['dav:name']).toBe('#default')
   })
 })

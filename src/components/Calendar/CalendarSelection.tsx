@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { addCalendarResourceAsync } from '@/features/Calendars/api/addCalendarResourceAsync'
+import { addCalendarResourceAsync } from '@/features/Calendars/services'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
   addSharedCalendarAsync,

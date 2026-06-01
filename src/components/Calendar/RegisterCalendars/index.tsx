@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { getCalendars } from '@/features/Calendars/CalendarApi'
+import { fetchCalendars } from '@/features/Calendars/CalendarDAO'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import { Button, TextField, useTheme } from '@linagora/twake-mui'
 import { useMemo, useRef, useState } from 'react'
@@ -149,7 +149,7 @@ const RegisterCalendars: React.FC<{
     const results = await Promise.allSettled(
       value.map(async (user: User) => {
         if (!user?.openpaasId) return null
-        const cals = await getCalendars(user.openpaasId, 'sharedPublic=true&')
+        const cals = await fetchCalendars(user.openpaasId, 'sharedPublic=true&')
         return cals._embedded?.['dav:calendar']?.length > 0
           ? cals._embedded['dav:calendar'].map(cal => ({
               cal,

@@ -1,9 +1,9 @@
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { parseCalendarEvent } from '@/features/Events/utils'
 import { defaultColors } from '@/utils/defaultColors'
-import { CalDavItem } from '../api/types'
+import { CalDavItem } from '../types/CalendarApiTypes'
 import { Calendar } from '../CalendarTypes'
-import { VCalComponent } from '../types/CalendarData'
+import { VCalComponent, VObjectProperty } from '../types/CalendarData'
 
 export function extractCalendarEvents(
   item: CalDavItem,
@@ -34,7 +34,7 @@ export function extractCalendarEvents(
         return null
       }
 
-      const eventProps = vevent[1]
+      const eventProps = vevent[1] as VObjectProperty[]
       if (!Array.isArray(eventProps)) {
         return null
       }
@@ -52,7 +52,7 @@ export function extractCalendarEvents(
     .filter(Boolean) as CalendarEvent[]
 }
 
-function extractValarm(vevent: VCalComponent) {
+function extractValarm(vevent: VCalComponent): VCalComponent | undefined {
   const subComponents = vevent[2]
   if (!Array.isArray(subComponents)) {
     return undefined

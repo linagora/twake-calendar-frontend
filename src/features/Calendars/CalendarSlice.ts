@@ -2,10 +2,10 @@ import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
 import { browserDefaultTimeZone } from '@/utils/timezone'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { CalendarEvent } from '../Events/EventsTypes'
-import { addCalendarResourceAsync } from './api/addCalendarResourceAsync'
 import { Calendar } from './CalendarTypes'
 import {
   addSharedCalendarAsync,
+  addCalendarResourceAsync,
   createCalendarAsync,
   deleteEventAsync,
   deleteEventInstanceAsync,
@@ -511,14 +511,14 @@ const CalendarSlice = createSlice({
       .addCase(addSharedCalendarAsync.rejected, (state, action) => {
         state.pending = false
         state.error =
-          action.payload?.message ||
+          (action.error as Error).message ||
           action.error.message ||
           'Failed to add shared calendar'
       })
       .addCase(addCalendarResourceAsync.rejected, (state, action) => {
         state.pending = false
         state.error =
-          action.payload?.message ||
+          (action.error as Error).message ||
           action.error.message ||
           'Failed to add calendar resource'
       })

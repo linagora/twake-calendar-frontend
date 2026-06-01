@@ -1,7 +1,7 @@
 import { hasFreeBusyConflict } from '@/components/Attendees/useFreeBusy'
 import { extractCalendarHrefs } from '@/utils/extractCalendarHrefs'
 import { extractEventBaseUuid } from '@/utils/extractEventBaseUuid'
-import { getCalendars } from '../Calendars/CalendarApi'
+import { fetchCalendars } from '../Calendars/CalendarDAO'
 import {
   fetchFreeBusyPost,
   fetchFreeBusyReports,
@@ -13,7 +13,7 @@ export async function getFreeBusyForAddedAttendee(
   start: string,
   end: string
 ): Promise<boolean> {
-  const calendars = await getCalendars(
+  const calendars = await fetchCalendars(
     userId,
     'withFreeBusy=true&withRights=true'
   )

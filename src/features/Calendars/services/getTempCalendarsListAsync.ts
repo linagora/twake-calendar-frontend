@@ -2,7 +2,7 @@ import { User } from '@/components/Attendees/types'
 import { getCalendarVisibility } from '@/components/Calendar/utils/calendarUtils'
 import { formatReduxError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { getCalendars } from '../CalendarApi'
+import { fetchCalendars } from '../CalendarDAO'
 import { Calendar } from '../CalendarTypes'
 import { RejectedError } from '../types/RejectedError'
 import { fetchOwnerData } from './helpers'
@@ -20,7 +20,7 @@ export const getTempCalendarsListAsync = createAsyncThunk<
         `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
       )
     }
-    const calendars = await getCalendars(
+    const calendars = await fetchCalendars(
       tempUser.openpaasId,
       'sharedPublic=true&'
     )

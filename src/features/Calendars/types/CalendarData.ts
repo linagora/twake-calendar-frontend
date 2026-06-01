@@ -1,5 +1,5 @@
 import { User } from '@/components/Attendees/types'
-import { CalDavLink } from '../api/types'
+import { CalDavLink } from './CalendarApiTypes'
 
 // Access control entry
 export interface AclEntry {

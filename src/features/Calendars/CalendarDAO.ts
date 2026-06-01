@@ -1,5 +1,7 @@
 import { api } from '@/utils/apiUtils'
 import { CalendarList } from './types/CalendarData'
+import { Calendar } from './CalendarTypes'
+import { DavSyncResponse } from './types/CalendarApiTypes'
 
 export async function fetchCalendars(
   userId: string,
@@ -72,4 +74,36 @@ export async function fetchCalendarExport(calLink: string): Promise<string> {
       headers: { Accept: 'application/calendar' }
     })
     .text()
+}
+
+export async function fetchSyncTokenChanges(
+  calendar: Calendar
+): Promise<DavSyncResponse> {
+  const response = await api(`dav/calendars/${calendar.id}.json`, {
+    method: 'REPORT',
+    headers: {
+      Accept: 'application/json, text/plain, */*'
+    },
+    body: JSON.stringify({
+      'sync-token': calendar.syncToken
+    })
+  })
+  const update: DavSyncResponse = await response.json()
+  return update
+}
+
+export async function updateDelegationCalendar(
+  calLink: string,
+  share: {
+    set: { [x: string]: string | boolean; 'dav:href': string }[]
+    remove: { [x: string]: string | boolean; 'dav:href': string }[]
+  }
+): Promise<Response> {
+  const response = await api.post(`dav${calLink}`, {
+    headers: {
+      Accept: 'application/json, text/plain, */*'
+    },
+    body: JSON.stringify({ share })
+  })
+  return response
 }

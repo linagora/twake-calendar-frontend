@@ -1,14 +1,14 @@
-import { addCalendarResourceAsync } from '@/features/Calendars/api/addCalendarResourceAsync'
-import { addSharedCalendar } from '@/features/Calendars/CalendarApi'
+import { addCalendarResourceAsync } from '@/features/Calendars/services'
+import { calendarAction } from '@/features/Calendars/CalendarDAO'
 import { fetchOwnerOfResource } from '@/features/Calendars/services/helpers'
 import { toRejectedError } from '@/utils/errorUtils'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@/features/Calendars/CalendarApi')
+jest.mock('@/features/Calendars/CalendarDAO')
 jest.mock('@/features/Calendars/services/helpers')
 jest.mock('@/utils/errorUtils')
 
-const mockedAddSharedCalendar = addSharedCalendar as jest.Mock
+const mockedCalendarAction = calendarAction as jest.Mock
 const mockedFetchOwnerOfResource = fetchOwnerOfResource as jest.Mock
 const mockedToRejectedError = toRejectedError as jest.Mock
 
@@ -59,16 +59,16 @@ describe('addCalendarResourceAsync thunk', () => {
       lastname: 'User',
       emails: ['creator@example.com']
     })
-    mockedAddSharedCalendar.mockResolvedValueOnce({})
+    mockedCalendarAction.mockResolvedValueOnce({ ok: true })
 
     const result = await addCalendarResourceAsync(
       mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
     )(dispatch, store.getState, undefined)
 
-    expect(mockedAddSharedCalendar).toHaveBeenCalledWith(
-      mockPayload.userId,
-      mockPayload.calId,
-      mockPayload.cal
+    expect(mockedCalendarAction).toHaveBeenCalledWith(
+      'POST',
+      `/calendars/${mockPayload.userId}.json`,
+      expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith('res-456')
 
@@ -89,7 +89,7 @@ describe('addCalendarResourceAsync thunk', () => {
   })
 
   it('should fallback to name if resource details fetch fails', async () => {
-    mockedAddSharedCalendar.mockResolvedValueOnce({})
+    mockedCalendarAction.mockResolvedValueOnce({ ok: true })
     const errorDetails = new Error('Fetch failed')
     mockedFetchOwnerOfResource.mockRejectedValueOnce(errorDetails)
 
@@ -100,10 +100,10 @@ describe('addCalendarResourceAsync thunk', () => {
       mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
     )(dispatch, store.getState, undefined)
 
-    expect(mockedAddSharedCalendar).toHaveBeenCalledWith(
-      mockPayload.userId,
-      mockPayload.calId,
-      mockPayload.cal
+    expect(mockedCalendarAction).toHaveBeenCalledWith(
+      'POST',
+      `/calendars/${mockPayload.userId}.json`,
+      expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).toHaveBeenCalledWith('res-456')
 
@@ -125,9 +125,9 @@ describe('addCalendarResourceAsync thunk', () => {
     })
   })
 
-  it('should handle error if addSharedCalendar fails', async () => {
+  it('should handle error if calendarAction fails', async () => {
     const errorAdd = new Error('Add failed')
-    mockedAddSharedCalendar.mockRejectedValueOnce(errorAdd)
+    mockedCalendarAction.mockRejectedValueOnce(errorAdd)
     const mockRejectedErrorResult = { message: 'Add failed' }
     mockedToRejectedError.mockReturnValueOnce(mockRejectedErrorResult)
 
@@ -135,10 +135,10 @@ describe('addCalendarResourceAsync thunk', () => {
       mockPayload as unknown as Parameters<typeof addCalendarResourceAsync>[0]
     )(dispatch, store.getState, undefined)
 
-    expect(mockedAddSharedCalendar).toHaveBeenCalledWith(
-      mockPayload.userId,
-      mockPayload.calId,
-      mockPayload.cal
+    expect(mockedCalendarAction).toHaveBeenCalledWith(
+      'POST',
+      `/calendars/${mockPayload.userId}.json`,
+      expect.any(String)
     )
     expect(mockedFetchOwnerOfResource).not.toHaveBeenCalled()
 

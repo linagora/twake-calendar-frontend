@@ -5,7 +5,7 @@ import {
 } from '@/features/Calendars/types/CalendarData'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { getCalendar } from '../CalendarApi'
+import { fetchCalendar } from '../CalendarDAO'
 import { RejectedError } from '../types/RejectedError'
 import { extractCalendarEvents } from '../utils/extractCalendarEvents'
 import { type RootState } from '@/app/store'
@@ -36,7 +36,11 @@ export const getCalendarDetailAsync = createAsyncThunk<
           toRejectedError(new Error(`Calendar ${calId} not found in store`))
         )
       }
-      const calendar = (await getCalendar(calId, match, signal)) as CalendarData
+      const calendar = (await fetchCalendar(
+        calId,
+        match,
+        signal
+      )) as CalendarData
       const syncToken = calendar._embedded?.['sync-token']
 
       const items = calendar._embedded?.['dav:item']

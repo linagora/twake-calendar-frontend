@@ -1,11 +1,12 @@
 import RegisterCalendars from '@/components/Calendar/RegisterCalendars'
-import { getCalendars } from '@/features/Calendars/CalendarApi'
-import { addCalendarResourceAsync } from '@/features/Calendars/api/addCalendarResourceAsync'
+import * as CalendarDAO from '@/features/Calendars/CalendarDAO'
+import * as CalendarSlice from '@/features/Calendars/services'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@/features/Calendars/CalendarApi')
-jest.mock('@/features/Calendars/api/addCalendarResourceAsync')
+jest.mock('@/features/Calendars/CalendarDAO')
+jest.mock('@/features/Calendars/services/addCalendarResourceAsync')
+
 jest.mock('@/components/Attendees/PeopleSearch', () => ({
   PeopleSearch: ({
     onChange
@@ -39,9 +40,9 @@ jest.mock('@/components/Attendees/PeopleSearch', () => ({
   )
 }))
 
-const mockedGetCalendars = getCalendars as jest.Mock
+const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.Mock
 const mockedAddCalendarResourceAsync =
-  addCalendarResourceAsync as unknown as jest.Mock
+  CalendarSlice.addCalendarResourceAsync as unknown as jest.Mock
 
 describe('RegisterCalendars', () => {
   beforeEach(() => {
@@ -110,7 +111,7 @@ describe('RegisterCalendars', () => {
       }
     }
 
-    mockedGetCalendars.mockImplementation(userId => {
+    mockedFetchCalendars.mockImplementation(userId => {
       if (userId === 'room-a-id') return Promise.resolve(mockCalendarDataA)
       // Simulate failure for room-b
       if (userId === 'room-b-id')
@@ -175,8 +176,8 @@ describe('RegisterCalendars', () => {
       }
     }
 
-    mockedGetCalendars.mockResolvedValueOnce(mockCalendarDataA)
-    mockedGetCalendars.mockResolvedValueOnce([]) // Mock array of size 2 (for both A and B but second resolves empty)
+    mockedFetchCalendars.mockResolvedValueOnce(mockCalendarDataA)
+    mockedFetchCalendars.mockResolvedValueOnce([]) // Mock array of size 2 (for both A and B but second resolves empty)
 
     // Simulate successful API response
     const mockDispatchResult = {

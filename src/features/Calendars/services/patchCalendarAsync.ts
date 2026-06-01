@@ -1,6 +1,7 @@
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { proppatchCalendar } from '../CalendarApi'
+import { calendarAction } from '../CalendarDAO'
+import { makeProppatchCalendarBody } from '../transformers'
 import { RejectedError } from '../types/RejectedError'
 
 export const patchCalendarAsync = createAsyncThunk<
@@ -19,7 +20,8 @@ export const patchCalendarAsync = createAsyncThunk<
   'calendars/patchCalendar',
   async ({ calId, calLink, patch }, { rejectWithValue }) => {
     try {
-      await proppatchCalendar(calLink, patch)
+      const body = makeProppatchCalendarBody(patch)
+      await calendarAction('PROPPATCH', calLink, body)
       return {
         calId,
         calLink,

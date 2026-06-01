@@ -1,11 +1,12 @@
 import { OpenPaasUserData } from '@/features/User/type/OpenPaasUserData'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { addSharedCalendar } from '../CalendarApi'
+import { calendarAction } from '../CalendarDAO'
+import { makeAddSharedCalendarBody } from '../transformers'
 import { CalendarInput } from '../types/CalendarData'
 import { RejectedError } from '../types/RejectedError'
 import { User } from '@/components/Attendees/types'
-import { fetchOwnerOfResource } from '../services/helpers'
+import { fetchOwnerOfResource } from './helpers'
 
 export const addCalendarResourceAsync = createAsyncThunk<
   {
@@ -39,7 +40,8 @@ export const addCalendarResourceAsync = createAsyncThunk<
       resource: true
     }
     try {
-      await addSharedCalendar(userId, calId, cal)
+      const body = makeAddSharedCalendarBody(calId, cal)
+      await calendarAction('POST', `/calendars/${userId}.json`, body)
 
       if (resourceId) {
         try {

@@ -1,4 +1,4 @@
-import * as fetchSyncTokenChanges from '@/features/Calendars/api/fetchSyncTokenChanges'
+import * as CalendarDAO from '@/features/Calendars/CalendarDAO'
 import reducer from '@/features/Calendars/CalendarSlice'
 import { Calendar } from '@/features/Calendars/CalendarTypes'
 import {
@@ -9,7 +9,7 @@ import * as EventDao from '@/features/Events/EventDao'
 import { CalendarEvent } from '@/features/Events/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@/features/Calendars/api/fetchSyncTokenChanges')
+jest.mock('@/features/Calendars/CalendarDAO')
 jest.mock('@/features/Events/EventDao')
 
 describe('refreshCalendarWithSyncToken', () => {
@@ -76,7 +76,7 @@ describe('refreshCalendarWithSyncToken', () => {
       calType: undefined,
       syncStatus: 'NO_SYNC_TOKEN'
     })
-    expect(fetchSyncTokenChanges.fetchSyncTokenChanges).not.toHaveBeenCalled()
+    expect(CalendarDAO.fetchSyncTokenChanges).not.toHaveBeenCalled()
   })
 
   it('should handle deleted events (status 404)', async () => {
@@ -94,9 +94,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -152,9 +152,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
     ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
@@ -218,9 +218,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
     ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
@@ -257,9 +257,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -277,9 +277,9 @@ describe('refreshCalendarWithSyncToken', () => {
 
   it('should handle API errors gracefully', async () => {
     const mockError = new Error('Network error')
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockRejectedValue(mockError)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockRejectedValue(
+      mockError
+    )
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -301,9 +301,9 @@ describe('refreshCalendarWithSyncToken', () => {
       // Missing _embedded field
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -337,9 +337,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     const result = await store.dispatch(
@@ -399,9 +399,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
     ;(EventDao.reportEvent as jest.Mock)
       .mockRejectedValueOnce(new Error('Failed to fetch'))
       .mockResolvedValueOnce(mockEventData)
@@ -430,9 +430,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     await store.dispatch(
@@ -463,9 +463,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = storeFactory()
     await store.dispatch(
@@ -516,9 +516,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
     ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(mockEventData)
 
     const store = storeFactory()
@@ -573,9 +573,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     }
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     const store = configureStore({
       reducer: { calendars: reducer },
@@ -643,9 +643,9 @@ describe('refreshCalendarWithSyncToken', () => {
       }
     })
 
-    ;(
-      fetchSyncTokenChanges.fetchSyncTokenChanges as jest.Mock
-    ).mockResolvedValue(mockSyncResponse)
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+      mockSyncResponse
+    )
 
     let concurrentCalls = 0
     let maxConcurrent = 0

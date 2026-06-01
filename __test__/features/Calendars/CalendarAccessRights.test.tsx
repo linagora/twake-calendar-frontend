@@ -4,7 +4,7 @@ import {
   UserWithAccess
 } from '@/components/Calendar/CalendarAccessRights'
 import CalendarPopover from '@/components/Calendar/CalendarModal'
-import { updateDelegationCalendar } from '@/features/Calendars/api/updateDelegationCalendar'
+import { updateDelegationCalendar } from '@/features/Calendars/CalendarDAO'
 import { AccessRight, Calendar } from '@/features/Calendars/CalendarTypes'
 import * as eventThunks from '@/features/Calendars/services'
 import * as delegationThunks from '@/features/Calendars/services/updateDelegationCalendarAsync'
@@ -24,7 +24,8 @@ jest.mock('@/features/User/UserDao', () => ({
 
 jest.mock('@/features/Calendars/CalendarDAO', () => ({
   fetchSecretLink: jest.fn().mockResolvedValue({ secretLink: '' }),
-  fetchCalendarExport: jest.fn()
+  fetchCalendarExport: jest.fn(),
+  updateDelegationCalendar: jest.fn()
 }))
 
 const mockThunkWithUnwrap = (resolvedValue: unknown = {}) =>
@@ -50,30 +51,6 @@ describe('accessRightToDavProp', () => {
 
   it('defaults to dav:read for unknown values (covered by default case)', () => {
     expect(accessRightToDavProp(999 as AccessRight)).toBe('dav:read')
-  })
-})
-
-describe('updateDelegationCalendar', () => {
-  beforeEach(() => jest.clearAllMocks())
-
-  it('posts to the correct DAV endpoint with the share body', async () => {
-    ;(api.post as jest.Mock).mockResolvedValue({ ok: true })
-
-    const share = {
-      set: [{ 'dav:href': 'mailto:alice@example.com', 'dav:read': true }],
-      remove: []
-    }
-
-    await updateDelegationCalendar('/calendars/user/cal1.json', share)
-
-    await waitFor(() =>
-      expect(api.post).toHaveBeenCalledWith(
-        'dav/calendars/user/cal1.json',
-        expect.objectContaining({
-          body: JSON.stringify({ share })
-        })
-      )
-    )
   })
 })
 

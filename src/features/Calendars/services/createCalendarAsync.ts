@@ -2,7 +2,8 @@ import { OpenPaasUserData } from '@/features/User/type/OpenPaasUserData'
 import { userData } from '@/features/User/userDataTypes'
 import { toRejectedError } from '@/utils/errorUtils'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { postCalendar } from '../CalendarApi'
+import { calendarAction } from '../CalendarDAO'
+import { makePostCalendarBody } from '../transformers'
 import { RejectedError } from '../types/RejectedError'
 
 export const createCalendarAsync = createAsyncThunk<
@@ -30,7 +31,12 @@ export const createCalendarAsync = createAsyncThunk<
         throw new Error('No openpaasId')
       }
 
-      await postCalendar(userData.openpaasId, calId, color, name, desc)
+      const body = makePostCalendarBody({ calId, color, name, desc })
+      await calendarAction(
+        'POST',
+        `/calendars/${userData.openpaasId}.json`,
+        body
+      )
 
       return {
         userId: userData.openpaasId,

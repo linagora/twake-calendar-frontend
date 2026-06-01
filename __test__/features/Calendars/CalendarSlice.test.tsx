@@ -1,4 +1,4 @@
-import * as calAPI from '@/features/Calendars/CalendarApi'
+import * as calDAO from '@/features/Calendars/CalendarDAO'
 import reducer, {
   addEvent,
   createCalendar,
@@ -21,7 +21,7 @@ import * as userAPI from '@/features/User/userAPI'
 import userReducer, { setUserData } from '@/features/User/userSlice'
 import { configureStore } from '@reduxjs/toolkit'
 
-jest.mock('@/features/Calendars/CalendarApi')
+jest.mock('@/features/Calendars/CalendarDAO')
 jest.mock('@/features/User/userAPI')
 jest.mock('@/features/Events/EventDao')
 jest.mock('@/features/Events/utils')
@@ -124,7 +124,7 @@ describe('CalendarSlice', () => {
     })
     it('getCalendarsListAsync.fulfilled replaces list', async () => {
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
-      ;(calAPI.getCalendars as jest.Mock).mockResolvedValue({
+      ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': [] }
       })
       ;(userAPI.getUserDetails as jest.Mock).mockResolvedValue({
@@ -162,7 +162,7 @@ describe('CalendarSlice', () => {
       ]
 
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
-      ;(calAPI.getCalendars as jest.Mock).mockResolvedValue({
+      ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
@@ -221,7 +221,7 @@ describe('CalendarSlice', () => {
       ]
 
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
-      ;(calAPI.getCalendars as jest.Mock).mockResolvedValue({
+      ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
@@ -248,7 +248,7 @@ describe('CalendarSlice', () => {
       }))
 
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
-      ;(calAPI.getCalendars as jest.Mock).mockResolvedValue({
+      ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
@@ -311,7 +311,7 @@ describe('CalendarSlice', () => {
       ]
 
       ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
-      ;(calAPI.getCalendars as jest.Mock).mockResolvedValue({
+      ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
