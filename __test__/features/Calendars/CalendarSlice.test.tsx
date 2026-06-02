@@ -14,7 +14,7 @@ import reducer, {
   updateEventLocal
 } from '@common/features/Calendars/CalendarSlice'
 import * as userAPI from '@common/features/User/userAPI'
-import userReducer, { setUserData } from '@common/features/User/userSlice'
+import userReducer, { setUserData } from '@common/features/User/UserSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'

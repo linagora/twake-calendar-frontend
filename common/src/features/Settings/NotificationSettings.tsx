@@ -4,8 +4,8 @@ import React from 'react'
 import { useI18n } from 'twake-i18n'
 import {
   setAlarmEmails,
-  updateUserConfigurationsAsync
-} from '@common/features/User/userSlice'
+  updateUserConfigurations
+} from '@common/features/User/UserSlice'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 interface NotificationsSettingsProps {
@@ -30,7 +30,7 @@ export const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({
     const newValue = event.target.checked
     const previousValue = alarmEmailsEnabled
     dispatch(setAlarmEmails(newValue))
-    dispatch(updateUserConfigurationsAsync({ alarmEmails: newValue }))
+    dispatch(updateUserConfigurations({ alarmEmails: newValue }))
       .unwrap()
       .catch(() => {
         dispatch(setAlarmEmails(previousValue))

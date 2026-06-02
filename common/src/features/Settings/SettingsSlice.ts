@@ -4,7 +4,7 @@ import {
   ConfigurationItem,
   ModuleConfiguration
 } from '@common/features/User/userDataTypes'
-import { getOpenPaasUserDataAsync } from '@common/features/User/userSlice'
+import { getOpenPaasUserData } from '@common/features/User/UserSlice'
 
 export interface SettingsState {
   language: string
@@ -75,7 +75,7 @@ export const settingsSlice = createSlice({
     }
   },
   extraReducers: builder => {
-    builder.addCase(getOpenPaasUserDataAsync.fulfilled, (state, action) => {
+    builder.addCase(getOpenPaasUserData.fulfilled, (state, action) => {
       const coreModule = action.payload.configurations?.modules?.find(
         (module: ModuleConfiguration) => module.name === 'core'
       )

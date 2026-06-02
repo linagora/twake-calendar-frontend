@@ -15,8 +15,8 @@ import {
 import { useI18n } from 'twake-i18n'
 import {
   setTimezone as setUserTimeZone,
-  updateUserConfigurationsAsync
-} from '@common/features/User/userSlice'
+  updateUserConfigurations
+} from '@common/features/User/UserSlice'
 import {
   setIsBrowserDefaultTimeZone,
   setTimeZone as setSettingsTimeZone
@@ -53,7 +53,7 @@ export const TimezoneSelector: React.FC<TimezoneSelectorProps> = ({
     dispatch(setUserTimeZone(newTimeZone))
     dispatch(setSettingsTimeZone(newTimeZone))
     dispatch(
-      updateUserConfigurationsAsync({ timezone: newTimeZone, previousConfig })
+      updateUserConfigurations({ timezone: newTimeZone, previousConfig })
     )
       .unwrap()
       .catch(() => {
@@ -69,9 +69,7 @@ export const TimezoneSelector: React.FC<TimezoneSelectorProps> = ({
     if (isDefault) {
       dispatch(setUserTimeZone(null))
       dispatch(setSettingsTimeZone(browserDefaultTimeZone))
-      dispatch(
-        updateUserConfigurationsAsync({ timezone: null, previousConfig })
-      )
+      dispatch(updateUserConfigurations({ timezone: null, previousConfig }))
         .unwrap()
         .catch(() => {
           dispatch(setUserTimeZone(previousTimeZone))

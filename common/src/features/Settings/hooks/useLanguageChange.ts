@@ -2,8 +2,8 @@ import { useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import {
   setLanguage as setUserLanguage,
-  updateUserConfigurationsAsync
-} from '@common/features/User/userSlice'
+  updateUserConfigurations
+} from '@common/features/User/UserSlice'
 import { setLanguage as setSettingsLanguage } from '@common/features/Settings/SettingsSlice'
 import { EventChange } from '@common/features/Settings/LanguageSelector/index.types'
 
@@ -27,7 +27,7 @@ export const useLanguageChange = ({
     const requestSeq = ++languageRequestSeq.current
     dispatch(setUserLanguage(newLanguage))
     dispatch(setSettingsLanguage(newLanguage))
-    dispatch(updateUserConfigurationsAsync({ language: newLanguage }))
+    dispatch(updateUserConfigurations({ language: newLanguage }))
       .unwrap()
       .catch(() => {
         if (requestSeq !== languageRequestSeq.current) {

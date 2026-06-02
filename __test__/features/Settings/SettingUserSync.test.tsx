@@ -4,9 +4,9 @@ import settingsReducer, {
   setTimeZone
 } from '@common/features/Settings/SettingsSlice'
 import userReducer, {
-  getOpenPaasUserDataAsync,
+  getOpenPaasUserData,
   setTimezone as setUserTimeZone
-} from '@common/features/User/userSlice'
+} from '@common/features/User/UserSlice'
 import { api } from '@common/utils/apiUtils'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { configureStore } from '@reduxjs/toolkit'
@@ -15,7 +15,7 @@ import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 jest.mock('@common/utils/apiUtils')
 
-describe('Timezone synchronization after getOpenPaasUserDataAsync', () => {
+describe('Timezone synchronization after getOpenPaasUserData', () => {
   let apiGetSpy: jest.SpyInstance
 
   beforeEach(() => {
@@ -74,7 +74,7 @@ describe('Timezone synchronization after getOpenPaasUserDataAsync', () => {
       }
     })
 
-    const result = await store.dispatch(getOpenPaasUserDataAsync())
+    const result = await store.dispatch(getOpenPaasUserData())
 
     expect(result.type).toBe('user/getOpenPaasUserData/fulfilled')
 
@@ -132,7 +132,7 @@ describe('Timezone synchronization after getOpenPaasUserDataAsync', () => {
       }
     })
 
-    const result = await store.dispatch(getOpenPaasUserDataAsync())
+    const result = await store.dispatch(getOpenPaasUserData())
 
     expect(result.type).toBe('user/getOpenPaasUserData/fulfilled')
 
@@ -219,7 +219,7 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
       }
 
       await store.dispatch(
-        getOpenPaasUserDataAsync.fulfilled(backendResponse, '', undefined)
+        getOpenPaasUserData.fulfilled(backendResponse, '', undefined)
       )
 
       const settingsState = store.getState().settings
@@ -256,7 +256,7 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
       }
 
       await store.dispatch(
-        getOpenPaasUserDataAsync.fulfilled(backendResponse, '', undefined)
+        getOpenPaasUserData.fulfilled(backendResponse, '', undefined)
       )
 
       const settingsState = store.getState().settings
@@ -287,7 +287,7 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
       }
 
       await store.dispatch(
-        getOpenPaasUserDataAsync.fulfilled(backendResponse, '', undefined)
+        getOpenPaasUserData.fulfilled(backendResponse, '', undefined)
       )
 
       const settingsState = store.getState().settings
@@ -451,7 +451,7 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
     }
 
     await store.dispatch(
-      getOpenPaasUserDataAsync.fulfilled(backendResponseNull, '', undefined)
+      getOpenPaasUserData.fulfilled(backendResponseNull, '', undefined)
     )
 
     // Verify initial state

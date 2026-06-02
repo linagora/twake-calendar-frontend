@@ -1,8 +1,8 @@
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import settingsReducer from '@common/features/Settings/SettingsSlice'
 import userReducer, {
-  getOpenPaasUserDataAsync
-} from '@common/features/User/userSlice'
+  getOpenPaasUserData
+} from '@common/features/User/UserSlice'
 import { api } from '@common/utils/apiUtils'
 import { configureStore } from '@reduxjs/toolkit'
 import '@testing-library/jest-dom'
@@ -330,7 +330,7 @@ describe('Working Days and Business Hours Settings', () => {
     })
   })
 
-  describe('getOpenPaasUserDataAsync integration', () => {
+  describe('getOpenPaasUserData integration', () => {
     it('populates businessHours from core module configurations', async () => {
       const store = configureStore({
         reducer: { user: userReducer, settings: settingsReducer },
@@ -389,7 +389,7 @@ describe('Working Days and Business Hours Settings', () => {
       }
 
       await store.dispatch(
-        getOpenPaasUserDataAsync.fulfilled(mockResponse, '', undefined)
+        getOpenPaasUserData.fulfilled(mockResponse, '', undefined)
       )
 
       const state = store.getState()
@@ -452,7 +452,7 @@ describe('Working Days and Business Hours Settings', () => {
       }
 
       await store.dispatch(
-        getOpenPaasUserDataAsync.fulfilled(mockResponse, '', undefined)
+        getOpenPaasUserData.fulfilled(mockResponse, '', undefined)
       )
 
       const state = store.getState()

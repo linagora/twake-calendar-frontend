@@ -1,6 +1,6 @@
 import { useAppDispatch } from '@common/app/hooks'
 import { clearError as calendarClearError } from '@common/features/Calendars/CalendarSlice'
-import { clearError as userClearError } from '@common/features/User/userSlice'
+import { clearError as userClearError } from '@common/features/User/UserSlice'
 import { Alert, Button, Snackbar } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 

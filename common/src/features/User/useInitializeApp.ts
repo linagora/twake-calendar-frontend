@@ -2,10 +2,10 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { Auth } from '@common/features/User/oidcAuth'
 import {
-  getOpenPaasUserDataAsync,
+  getOpenPaasUserData,
   setTokens,
   setUserData
-} from '@common/features/User/userSlice'
+} from '@common/features/User/UserSlice'
 import { redirectTo } from '@common/utils/apiUtils'
 import { useEffect, useRef } from 'react'
 import { getCalendarsList } from '../Calendars/CalendarSlice'
@@ -35,7 +35,7 @@ export function useInitializeApp() {
         dispatch(setTokens(savedToken))
         dispatch(setUserData(savedUser))
         try {
-          await dispatch(getOpenPaasUserDataAsync())
+          await dispatch(getOpenPaasUserData())
           await dispatch(getCalendarsList())
         } finally {
           dispatch(setAppLoading(false))

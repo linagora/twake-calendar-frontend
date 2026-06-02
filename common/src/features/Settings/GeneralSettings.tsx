@@ -9,7 +9,7 @@ import {
 } from '@linagora/twake-mui'
 import { useRef, useCallback, useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
-import { updateUserConfigurationsAsync } from '@common/features/User/userSlice'
+import { updateUserConfigurations } from '@common/features/User/UserSlice'
 import {
   BusinessHour,
   setBusinessHours,
@@ -55,7 +55,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
 
   const handleHideDeclinedEvents = (value: boolean): void => {
     dispatch(setHideDeclinedEvents(value))
-    dispatch(updateUserConfigurationsAsync({ hideDeclinedEvents: value }))
+    dispatch(updateUserConfigurations({ hideDeclinedEvents: value }))
       .unwrap()
       .catch(() => {
         dispatch(setHideDeclinedEvents(!value))
@@ -65,7 +65,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
 
   const handleDisplayWeekNumbers = (value: boolean): void => {
     dispatch(setDisplayWeekNumbers(value))
-    dispatch(updateUserConfigurationsAsync({ displayWeekNumbers: value }))
+    dispatch(updateUserConfigurations({ displayWeekNumbers: value }))
       .unwrap()
       .catch(() => {
         dispatch(setDisplayWeekNumbers(!value))
@@ -89,7 +89,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
 
       businessHoursTimeoutRef.current = setTimeout(() => {
         dispatch(
-          updateUserConfigurationsAsync({
+          updateUserConfigurations({
             businessHours: pendingBusinessHoursRef.current
           })
         )
@@ -113,7 +113,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
 
   const handleWorkingDays = (value: boolean): void => {
     dispatch(setWorkingDays(value))
-    dispatch(updateUserConfigurationsAsync({ workingDays: value }))
+    dispatch(updateUserConfigurations({ workingDays: value }))
       .unwrap()
       .catch(() => {
         dispatch(setWorkingDays(!value))

@@ -3,10 +3,10 @@ import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
 import * as oidcAuth from '@common/features/User/oidcAuth'
 import {
-  getOpenPaasUserDataAsync,
+  getOpenPaasUserData,
   setTokens,
   setUserData
-} from '@common/features/User/userSlice'
+} from '@common/features/User/UserSlice'
 import { CallbackResume } from '@private/features/User/LoginCallback'
 import { render, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
@@ -34,7 +34,7 @@ jest.mock('@common/features/User/oidcAuth', () => ({
   Callback: jest.fn()
 }))
 
-jest.mock('@common/features/User/userSlice', () => {
+jest.mock('@common/features/User/UserSlice', () => {
   const mockGetUser = Object.assign(
     jest.fn(() => ({ type: 'GET_USER_ID' })),
     {
@@ -45,9 +45,10 @@ jest.mock('@common/features/User/userSlice', () => {
   )
 
   return {
+    ...jest.requireActual('@common/features/User/UserSlice'),
     setUserData: jest.fn(data => ({ type: 'SET_USER', payload: data })),
     setTokens: jest.fn(tokens => ({ type: 'SET_TOKENS', payload: tokens })),
-    getOpenPaasUserDataAsync: mockGetUser
+    getOpenPaasUserData: mockGetUser
   }
 })
 
@@ -128,7 +129,7 @@ describe('CallbackResume', () => {
       expect(dispatch).toHaveBeenCalledWith(setTokens(mockTokenSet))
     })
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserDataAsync())
+      expect(dispatch).toHaveBeenCalledWith(getOpenPaasUserData())
     })
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(getCalendarsList())

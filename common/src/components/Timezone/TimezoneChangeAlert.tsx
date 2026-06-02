@@ -2,8 +2,8 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setTimeZone as setSettingsTimeZone } from '@common/features/Settings/SettingsSlice'
 import {
   setTimezone as setUserTimeZone,
-  updateUserConfigurationsAsync
-} from '@common/features/User/userSlice'
+  updateUserConfigurations
+} from '@common/features/User/UserSlice'
 import { Alert, Box, Button, Snackbar, Typography } from '@linagora/twake-mui'
 import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -58,9 +58,7 @@ export const TimezoneChangeAlert: React.FC = () => {
     const previousTimeZone = configuredTZ
     dispatch(setUserTimeZone(browserTZ))
     dispatch(setSettingsTimeZone(browserTZ))
-    dispatch(
-      updateUserConfigurationsAsync({ timezone: browserTZ, previousConfig })
-    )
+    dispatch(updateUserConfigurations({ timezone: browserTZ, previousConfig }))
       .unwrap()
       .catch(() => {
         // Rollback on error
