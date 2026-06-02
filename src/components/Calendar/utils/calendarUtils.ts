@@ -70,6 +70,7 @@ export function formatEventChipTitle(
 }
 
 type ConvertedEvent = CalendarEvent & {
+  id: string
   colors: Record<string, string> | undefined
   editable: boolean
   priority: number
@@ -167,6 +168,14 @@ function buildConvertedEvent({
 
   const convertedEvent: ConvertedEvent = {
     ...event,
+    // FullCalendar reconciles events by `id`, not by our `uid`. Without a
+    // stable, grid-unique id it can't reliably drop chips when the event set
+    // shrinks (e.g. deselecting a shared calendar) — most visibly for a
+    // recurring series, whose occurrences are many sibling chips removed at
+    // once. The uid already embeds the recurrenceId for occurrences (see
+    // processEventUid), so it is unique within a calendar; the calId prefix
+    // keeps it unique when the same uid is shared across displayed calendars.
+    id: `${event.calId}/${event.uid}`,
     title: formatEventChipTitle(event, t),
     colors: event.color,
     editable: isEventEditable(
