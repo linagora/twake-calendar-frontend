@@ -114,8 +114,15 @@ export function ResourceSearch({
 
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
+      // Extract only the Input component props, not htmlInput props
+      const {
+        startAdornment: paramsStartAdornment,
+        endAdornment: paramsEndAdornment,
+        ...inputComponentProps
+      } = params.slotProps?.input || {}
+
       const inputProps = {
-        ...params.slotProps?.input,
+        ...inputComponentProps,
         startAdornment: (
           <>
             {!selectedResources?.length ? (
@@ -124,15 +131,13 @@ export function ResourceSearch({
                 sx={{ mr: 1, color: 'action.active' }}
               />
             ) : null}
-            {params.slotProps?.input.startAdornment}
+            {paramsStartAdornment}
           </>
         ),
         endAdornment: (
           <>
             {loading ? <CircularProgress color="inherit" size={20} /> : null}
-            {!selectedResources?.length
-              ? params.slotProps?.input.endAdornment
-              : null}
+            {!selectedResources?.length ? paramsEndAdornment : null}
           </>
         )
       }
@@ -161,12 +166,7 @@ export function ResourceSearch({
         helperText: inputError,
         placeholder: searchPlaceholder,
         label: '',
-        onKeyDown: handleEnterKey,
-        slotProps: {
-          input: {
-            ...inputProps
-          }
-        }
+        onKeyDown: handleEnterKey
       }
 
       if (inputSlot) {

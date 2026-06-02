@@ -1,4 +1,4 @@
-import { TextFieldProps } from '@linagora/twake-mui'
+import type { PickersTextFieldProps } from '@mui/x-date-pickers/PickersTextField'
 import {
   DatePickerFieldProps,
   DatePickerSlotProps
@@ -25,30 +25,30 @@ export const timePickerPopperSx = {
   }
 }
 
+type BaseFieldProps = Pick<
+  PickersTextFieldProps,
+  'size' | 'margin' | 'fullWidth' | 'error' | 'sx' | 'slotProps'
+>
+
 const baseFieldProps = (
   testId: string,
   hasError = false,
   label?: string,
   isMobile?: boolean
-): Pick<
-  TextFieldProps,
-  | 'size'
-  | 'margin'
-  | 'fullWidth'
-  | 'InputLabelProps'
-  | 'error'
-  | 'sx'
-  | 'inputProps'
-> => ({
+): BaseFieldProps => ({
   size: isMobile ? ('medium' as const) : ('small' as const),
   margin: 'dense' as const,
   fullWidth: true,
-  InputLabelProps: { shrink: true },
   error: hasError,
   sx: { width: '100%' },
-  inputProps: {
-    'data-testid': testId,
-    ...(label ? { 'aria-label': label } : {})
+  slotProps: {
+    inputLabel: { shrink: true },
+    htmlInput: {
+      'data-testid': testId,
+      ...(label ? { 'aria-label': label } : {})
+    } as React.InputHTMLAttributes<HTMLInputElement> & {
+      'data-testid'?: string
+    }
   }
 })
 
@@ -57,10 +57,8 @@ export const getDateSlotProps = (
   hasError = false,
   label?: string,
   isMobile?: boolean
-): Partial<DatePickerSlotProps<true>> => ({
-  textField: {
-    ...baseFieldProps(testId, hasError, label, isMobile)
-  }
+): Partial<DatePickerSlotProps> => ({
+  textField: baseFieldProps(testId, hasError, label, isMobile)
 })
 
 export const getDateFieldSlotProps = (
@@ -68,31 +66,13 @@ export const getDateFieldSlotProps = (
   hasError = false,
   label?: string,
   isMobile?: boolean
-): Partial<DatePickerFieldProps> &
-  Pick<
-    TextFieldProps,
-    | 'size'
-    | 'margin'
-    | 'fullWidth'
-    | 'InputLabelProps'
-    | 'error'
-    | 'sx'
-    | 'inputProps'
-  > => baseFieldProps(testId, hasError, label, isMobile)
+): Partial<DatePickerFieldProps> & BaseFieldProps =>
+  baseFieldProps(testId, hasError, label, isMobile)
 
 export const getTimeFieldSlotProps = (
   testId: string,
   hasError = false,
   label?: string,
   isMobile?: boolean
-): Partial<TimePickerFieldProps> &
-  Pick<
-    TextFieldProps,
-    | 'size'
-    | 'margin'
-    | 'fullWidth'
-    | 'InputLabelProps'
-    | 'error'
-    | 'sx'
-    | 'inputProps'
-  > => baseFieldProps(testId, hasError, label, isMobile)
+): Partial<TimePickerFieldProps> & BaseFieldProps =>
+  baseFieldProps(testId, hasError, label, isMobile)

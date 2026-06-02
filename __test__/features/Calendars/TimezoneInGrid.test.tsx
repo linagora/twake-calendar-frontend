@@ -82,9 +82,9 @@ describe('Calendar - Timezone Integration', () => {
 
       // Select a different timezone
       const autocomplete = screen.getByRole('combobox')
-      fireEvent.change(autocomplete, { target: { value: 'Tokyo' } })
+      fireEvent.mouseDown(autocomplete)
     })
-    const option = await screen.findByText(/Tokyo/i)
+    const option = await screen.findByRole('option', { name: /tokyo/i })
     fireEvent.click(option)
 
     expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Tokyo')
@@ -112,9 +112,9 @@ describe('Calendar - Timezone Integration', () => {
 
       // Select a different timezone
       const autocomplete = screen.getByRole('combobox')
-      fireEvent.change(autocomplete, { target: { value: 'Jakarta' } })
+      fireEvent.mouseDown(autocomplete)
     })
-    const option = await screen.findByText(/Jakarta/i)
+    const option = await screen.findByRole('option', { name: /jakarta/i })
     fireEvent.click(option)
 
     expect(setTimeZoneSpy).toHaveBeenCalledWith('Asia/Jakarta')

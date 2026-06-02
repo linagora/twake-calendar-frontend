@@ -1,4 +1,5 @@
 import {
+  Box,
   IconButton,
   InputAdornment,
   TextField,
@@ -55,7 +56,9 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
           startAdornment: (
             <>
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: theme.palette.grey[700] }} />
+                <Box sx={{ color: theme.palette.grey[700] }}>
+                  <SearchIcon fontSize="inherit" color="inherit" />
+                </Box>
               </InputAdornment>
               {params.slotProps.input?.startAdornment}
             </>

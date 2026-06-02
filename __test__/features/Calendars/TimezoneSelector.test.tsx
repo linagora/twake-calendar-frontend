@@ -57,10 +57,10 @@ describe('TimezoneSelector', () => {
     })
 
     const autocomplete = screen.getByRole('combobox')
-    fireEvent.change(autocomplete, { target: { value: 'Los Angeles' } })
+    fireEvent.mouseDown(autocomplete)
 
     // Find and click the Los Angeles option
-    const option = await screen.findByText(/Los Angeles/i)
+    const option = await screen.findByRole('option', { name: /los angeles/i })
     fireEvent.click(option)
 
     expect(mockOnChange).toHaveBeenCalledWith('America/Los_Angeles')
@@ -83,9 +83,9 @@ describe('TimezoneSelector', () => {
     })
 
     const autocomplete = screen.getByRole('combobox')
-    fireEvent.change(autocomplete, { target: { value: 'Tokyo' } })
+    fireEvent.mouseDown(autocomplete)
 
-    const option = await screen.findByText(/Tokyo/i)
+    const option = await screen.findByRole('option', { name: /tokyo/i })
     fireEvent.click(option)
 
     await waitFor(() => {

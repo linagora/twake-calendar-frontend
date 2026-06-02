@@ -48,7 +48,7 @@ function App() {
 Use `useTheme` to access theme variables:
 
 ```tsx
-import { useTheme } from '@mui/material/styles'
+import { useTheme } from '@linagora/twake-mui'
 
 function MyComponent() {
   const theme = useTheme()

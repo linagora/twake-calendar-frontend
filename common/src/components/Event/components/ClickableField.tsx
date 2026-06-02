@@ -1,5 +1,4 @@
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
-import { alpha } from '@mui/material/styles'
+import { alpha, Box, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 
 interface ClickableFieldProps {

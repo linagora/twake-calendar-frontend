@@ -21,11 +21,13 @@ const makeEvent = (overrides: Partial<CalendarEvent> = {}): CalendarEvent =>
     start: '2024-01-15T10:00:00',
     end: '2024-01-15T11:00:00',
     organizer: { cal_address: 'alice@example.com' },
+
     attendee: [
       { cal_address: 'alice@example.com', partstat: 'ACCEPTED' },
       { cal_address: 'owner@example.com', partstat: 'ACCEPTED' },
       { cal_address: 'other@example.com', partstat: 'NEEDS-ACTION' }
     ],
+
     ...overrides
   }) as CalendarEvent
 

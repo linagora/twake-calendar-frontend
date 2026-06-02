@@ -259,7 +259,6 @@ export const RepeatEvent: React.FC<{
                         }}
                         slots={{ field: ReadOnlyDateField }}
                         slotProps={{
-                          field: {},
                           layout: { sx: dateCalendarLayoutSx }
                         }}
                         disabled={!isOwn}

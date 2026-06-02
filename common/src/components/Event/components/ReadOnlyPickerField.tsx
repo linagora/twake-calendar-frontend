@@ -8,19 +8,19 @@ import {
   usePickerContext,
   useSplitFieldProps
 } from '@mui/x-date-pickers/hooks'
-import { PickerFieldProps } from '@mui/x-date-pickers/models'
+import { PickerFieldSlotProps } from '@mui/x-date-pickers/models'
 import {
-  PickerFieldAdapter,
-  PickerValidationScope,
   useValidation,
   validateDate,
-  validateTime
+  validateTime,
+  type PickerFieldAdapter,
+  type PickerValidationScope
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
 
 type FieldType = 'date' | 'time' | 'date-time'
 
-type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
+type GenericPickerFieldProps = PickerFieldSlotProps<Dayjs, false, false> & {
   fieldType: FieldType
   validator: (
     value: Dayjs | null,
@@ -65,14 +65,31 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
   const valueToDisplay =
     value == null ? '' : value.isValid() ? value.format(fieldFormat) : ''
 
-  const mergedInputProps = {
-    ...forwardedProps.InputProps,
-    ref: triggerRef,
-    readOnly: true,
-    sx: {
-      cursor: 'pointer',
-      '& *': { cursor: 'inherit' },
-      ...forwardedProps.InputProps?.sx
+  // Extract Input component props, excluding adornments that shouldn't go to DOM
+  const {
+    startAdornment: inputStartAdornment,
+    endAdornment: inputEndAdornment,
+    ...inputComponentProps
+  } = forwardedProps.slotProps?.input || {}
+
+  const mergedSlotProps = {
+    ...forwardedProps.slotProps,
+    input: {
+      ...inputComponentProps,
+      startAdornment: inputStartAdornment,
+      endAdornment: inputEndAdornment,
+      ref: triggerRef,
+      readOnly: true,
+      sx: {
+        cursor: 'pointer',
+        '& *': { cursor: 'inherit' },
+        ...inputComponentProps?.sx
+      }
+    },
+    htmlInput: {
+      ...forwardedProps.slotProps?.htmlInput,
+      'data-testid': forwardedProps.slotProps?.htmlInput?.['data-testid'],
+      'aria-label': forwardedProps.slotProps?.htmlInput?.['aria-label']
     }
   }
 
@@ -81,9 +98,7 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
       {...forwardedProps}
       value={valueToDisplay}
       placeholder={parsedFormat}
-      slotProps={{
-        input: mergedInputProps
-      }}
+      slotProps={mergedSlotProps}
       error={hasValidationError || forwardedProps.error}
       focused={open}
       onClick={() => setOpen((prev: boolean) => !prev)}

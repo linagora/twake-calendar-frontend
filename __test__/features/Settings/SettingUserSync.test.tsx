@@ -389,15 +389,11 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
       fireEvent.click(browserDefaultSwitch)
 
       // Now timezone combobox is visible
-      const timezoneInput = screen.getAllByRole('combobox')[1]
+      const autocomplete = screen.getAllByRole('combobox')[1]
+      fireEvent.mouseDown(autocomplete)
 
       // Type to filter options
-      fireEvent.change(timezoneInput, {
-        target: { value: 'Australia/Sydney' }
-      })
-
-      // Select from autocomplete dropdown
-      const option = await screen.findByText(/Australia\/Sydney/i)
+      const option = await screen.findByRole('option', { name: /sydney/i })
       fireEvent.click(option)
 
       await waitFor(() => {

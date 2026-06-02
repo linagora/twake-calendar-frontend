@@ -304,10 +304,10 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             {...props}
           />
         )}
-        renderValue={(value, getTagProps) => (
+        renderValue={(value, getItemProps) => (
           <PeopleSearchValueRenderer
             value={value as User[]}
-            getTagProps={getTagProps}
+            getItemProps={getItemProps}
             getChipIcon={getChipIcon}
           />
         )}

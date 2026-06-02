@@ -1,21 +1,20 @@
-import { Box, SxProps, Theme } from '@linagora/twake-mui'
-import { alpha } from '@mui/material/styles'
+import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
+import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { alpha, Box, SxProps, Theme } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { EventPreviewAttendees } from './EventPreviewAttendees'
-import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
-import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
-import { PrivateEventPreview } from './PrivateEventPreview'
 import {
-  EventVideoRow,
-  EventLocationRow,
-  EventResourceRow,
-  EventDescriptionRow,
   EventAlarmRow,
+  EventDescriptionRow,
+  EventErrorRow,
+  EventLocationRow,
   EventRepetitionRow,
-  EventErrorRow
+  EventResourceRow,
+  EventVideoRow
 } from './EventDetailsRows'
+import { EventPreviewAttendees } from './EventPreviewAttendees'
+import { PrivateEventPreview } from './PrivateEventPreview'
 
 export interface EventPreviewDetailsProps {
   event: CalendarEvent

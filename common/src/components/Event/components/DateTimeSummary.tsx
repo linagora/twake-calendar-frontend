@@ -1,5 +1,4 @@
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
-import { alpha } from '@mui/material/styles'
+import { Box, Typography, useTheme, alpha } from '@linagora/twake-mui'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import dayjs from 'dayjs'
 import 'dayjs/locale/en'
@@ -140,7 +139,11 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
 
   return (
     <SectionPreviewRow
-      icon={<AccessTimeIcon sx={{ color: 'text.secondary' }} />}
+      icon={
+        <Box sx={{ color: 'text.secondary' }}>
+          <AccessTimeIcon fontSize="inherit" color="inherit" />
+        </Box>
+      }
       onClick={onClick}
     >
       <Box>
