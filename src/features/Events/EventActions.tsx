@@ -21,29 +21,23 @@ export const EventActions: React.FC<EventActionsProps> = ({
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
+  const buttonSize = isMobile ? 'small' : 'medium'
+
   return (
     <Box display="flex" justifyContent="space-between" width="100%" px={2}>
       {showExpandedBtn && (
-        <Button
-          size={isMobile ? 'small' : 'medium'}
-          startIcon={<AddIcon />}
-          onClick={onExpanded}
-        >
+        <Button size={buttonSize} startIcon={<AddIcon />} onClick={onExpanded}>
           {t('common.moreOptions')}
         </Button>
       )}
       <Box display="flex" gap={1} ml={!showExpandedBtn ? 'auto' : 0}>
         {(!showExpandedBtn || isEdit) && (
-          <Button
-            size={isMobile ? 'small' : 'medium'}
-            variant="outlined"
-            onClick={onClose}
-          >
+          <Button size={buttonSize} variant="outlined" onClick={onClose}>
             {t('common.cancel')}
           </Button>
         )}
         <Button
-          size={isMobile ? 'small' : 'medium'}
+          size={buttonSize}
           variant="contained"
           onClick={() => void onSave()}
         >

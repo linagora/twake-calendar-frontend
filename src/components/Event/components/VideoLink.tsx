@@ -1,4 +1,11 @@
-import { Box, Button, IconButton, Link } from '@linagora/twake-mui'
+import {
+  alpha,
+  Box,
+  Button,
+  IconButton,
+  Link,
+  useTheme
+} from '@linagora/twake-mui'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
@@ -23,6 +30,8 @@ export const VideoLink: React.FC<{
   label?: string
 }> = ({ meetingLink, icon, label }) => {
   const { t } = useI18n()
+  const theme = useTheme()
+
   const [openToast, setOpenToast] = useState(false)
 
   const safeMeetingLink = sanitizeMeetingLink(meetingLink)
@@ -63,7 +72,7 @@ export const VideoLink: React.FC<{
           <IconButton
             onClick={() => void handleCopyMeetingLink()}
             size="small"
-            sx={{ color: 'primary.main' }}
+            sx={{ color: alpha(theme.palette.grey[900], 0.9) }}
             aria-label={t('event.form.copyMeetingLink')}
             title={t('event.form.copyMeetingLink')}
           >

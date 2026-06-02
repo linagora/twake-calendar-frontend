@@ -3,11 +3,11 @@ import { TextField } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { useAutoFocusTitle } from '../hooks/useAutoFocusTitle'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 export interface TitleFieldProps {
   value: string
   onChange: (value: string) => void
-  isMobile: boolean
   showMore: boolean
   isExpanded: boolean
   isOpen: boolean
@@ -17,13 +17,13 @@ export interface TitleFieldProps {
 export const TitleField: React.FC<TitleFieldProps> = ({
   value,
   onChange,
-  isMobile,
   showMore,
   isExpanded,
   isOpen,
   eventId
 }) => {
   const { t } = useI18n()
+  const inputSize = useResponsiveInputSize()
   const titleInputRef = useRef<HTMLInputElement>(null)
 
   useAutoFocusTitle({ isOpen, eventId, titleInputRef, showMore })
@@ -41,7 +41,7 @@ export const TitleField: React.FC<TitleFieldProps> = ({
         placeholder={t('event.form.titlePlaceholder')}
         value={value}
         onChange={e => onChange(e.target.value)}
-        size={isMobile ? 'medium' : 'small'}
+        size={inputSize}
         margin="dense"
         inputRef={titleInputRef}
       />

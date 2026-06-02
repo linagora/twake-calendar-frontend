@@ -23,6 +23,7 @@ import {
 import { useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '../Calendars/CalendarTypes'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 interface Props {
   mode: 'popover' | 'mobile'
@@ -30,6 +31,7 @@ interface Props {
 
 export const SearchInFilter: React.FC<Props> = ({ mode }) => {
   const { t } = useI18n()
+  const inputSize = useResponsiveInputSize()
   const dispatch = useAppDispatch()
   const searchParams = useAppSelector(state => state.searchResult.searchParams)
   const calendars = useAppSelector(selectCalendars)
@@ -73,6 +75,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
     >
       <InputLabel sx={{ m: 0 }}>{t('search.searchIn')}</InputLabel>
       <Select
+        size={inputSize}
         displayEmpty
         value={searchParams.filters.searchIn}
         onChange={e => dispatch(setFilters({ searchIn: e.target.value }))}

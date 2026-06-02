@@ -26,6 +26,7 @@ import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
 import { FC_DAYS, WeekDaySelector } from './WeekDaySelector'
 import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { preventFloatNumber, toPositiveInt } from '@/utils/preventFloatNumber'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 const numericSlotProps = {
   htmlInput: {
@@ -41,6 +42,7 @@ export const RepeatEvent: React.FC<{
 }> = ({ repetition, eventStart, setRepetition, isOwn = true }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const inputSize = useResponsiveInputSize()
   const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
   const day = new Date(eventStart)
   const dateCalendarLayoutSx = {
@@ -79,7 +81,7 @@ export const RepeatEvent: React.FC<{
                 interval: toPositiveInt(e.target.value)
               })
             }
-            size={isMobile ? 'medium' : 'small'}
+            size={inputSize}
             style={{ width: 80 }}
             slotProps={{
               htmlInput: {
@@ -277,7 +279,7 @@ export const RepeatEvent: React.FC<{
                   </Typography>
                   <TextField
                     type="number"
-                    size={isMobile ? 'medium' : 'small'}
+                    size={inputSize}
                     value={repetition.occurrences || 1}
                     onChange={e => {
                       const value = toPositiveInt(e.target.value)

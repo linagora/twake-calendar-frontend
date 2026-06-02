@@ -4,7 +4,7 @@ import {
   generateMeetingLink,
   removeVideoConferenceFromDescription
 } from '@/utils/videoConferenceUtils'
-import { Box, Button, IconButton } from '@linagora/twake-mui'
+import { alpha, Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
 import { Close as DeleteIcon } from '@mui/icons-material'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -26,6 +26,36 @@ export interface VideoConferenceFieldProps {
   setShowDescription?: (value: boolean) => void
 }
 
+const VideoConferenceHasLink: React.FC<{
+  meetingLink: string | null
+  cameraIcon: React.ReactNode
+  handleDeleteVideoConference: () => void
+}> = ({ meetingLink, cameraIcon, handleDeleteVideoConference }) => {
+  const { t } = useI18n()
+  const theme = useTheme()
+
+  return (
+    <Box display="flex" gap={1} alignItems="center">
+      <VideoLink
+        meetingLink={meetingLink}
+        icon={cameraIcon}
+        label={t('event.form.joinVisioConference')}
+      />
+      <Tooltip title={t('event.form.removeVideoConference')}>
+        <IconButton
+          onClick={handleDeleteVideoConference}
+          size="small"
+          sx={{ color: alpha(theme.palette.grey[900], 0.9) }}
+          aria-label={t('event.form.removeVideoConference')}
+          title={t('event.form.removeVideoConference')}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  )
+}
+
 const VideoConferenceFieldInShortMode: React.FC<{
   hasVideoConference: boolean
   meetingLink: string | null
@@ -43,24 +73,11 @@ const VideoConferenceFieldInShortMode: React.FC<{
 
   if (hasVideoConference && meetingLink) {
     return (
-      <Box display="flex" gap={1} alignItems="center">
-        <VideoLink
-          meetingLink={meetingLink}
-          icon={cameraIcon}
-          label={t('event.form.joinVisioConference')}
-        />
-        <Tooltip title={t('event.form.removeVideoConference')}>
-          <IconButton
-            onClick={handleDeleteVideoConference}
-            size="small"
-            sx={{ color: 'error.main' }}
-            aria-label={t('event.form.removeVideoConference')}
-            title={t('event.form.removeVideoConference')}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <VideoConferenceHasLink
+        meetingLink={meetingLink}
+        cameraIcon={cameraIcon}
+        handleDeleteVideoConference={handleDeleteVideoConference}
+      />
     )
   }
 
@@ -104,22 +121,11 @@ const VideoConferenceFieldInExpandedMode: React.FC<{
 
       {hasVideoConference && meetingLink && (
         <>
-          <VideoLink
+          <VideoConferenceHasLink
             meetingLink={meetingLink}
-            icon={cameraIcon}
-            label={t('event.form.joinVisioConference')}
+            cameraIcon={cameraIcon}
+            handleDeleteVideoConference={handleDeleteVideoConference}
           />
-          <Tooltip title={t('event.form.removeVideoConference')}>
-            <IconButton
-              onClick={handleDeleteVideoConference}
-              size="small"
-              sx={{ color: 'error.main' }}
-              aria-label={t('event.form.removeVideoConference')}
-              title={t('event.form.removeVideoConference')}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
         </>
       )}
     </Box>

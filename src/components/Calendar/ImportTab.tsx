@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { SettingsTab } from './SettingsTab'
 import { CalendarSelector } from './CalendarSelector'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 export const ImportTab: React.FC<{
   userId: string
@@ -34,7 +34,8 @@ export const ImportTab: React.FC<{
   newCalParams
 }) => {
   const { t } = useI18n()
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const inputSize = useResponsiveInputSize()
+
   const [importMode] = useState<'file' | 'url'>('file')
   const [importFile, setImportFile] = useState<File | null>(null)
   const [importUrl, setImportUrl] = useState('')
@@ -90,7 +91,7 @@ export const ImportTab: React.FC<{
             label={t('calendar.ics_feed_url')}
             value={importUrl}
             onChange={e => setImportUrl(e.target.value)}
-            size={isMobile ? 'medium' : 'small'}
+            size={inputSize}
             margin="dense"
             sx={{
               '&.MuiFormControl-root.MuiFormControl-marginDense': {

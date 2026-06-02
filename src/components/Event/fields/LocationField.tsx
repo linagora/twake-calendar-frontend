@@ -6,6 +6,7 @@ import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 import { useEventLocation } from '../hooks/useEventLocation'
 import { FieldWithLabel } from '../components/FieldWithLabel'
 import { SectionPreviewRow } from '../components/SectionPreviewRow'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 interface LocationFieldProps {
   location: string
@@ -29,6 +30,7 @@ export default function LocationField({
 }: LocationFieldProps): JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const inputSize = useResponsiveInputSize()
 
   const [hasClickedLocationSection, setHasClickedLocationSection] =
     useState(false)
@@ -66,7 +68,7 @@ export default function LocationField({
           placeholder={t('event.form.locationPlaceholder')}
           value={location}
           onChange={e => setLocation(e.target.value)}
-          size={isMobile ? 'medium' : 'small'}
+          size={inputSize}
           margin="dense"
         />
       )}

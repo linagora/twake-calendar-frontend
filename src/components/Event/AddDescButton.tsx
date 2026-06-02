@@ -5,6 +5,7 @@ import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from './components/FieldWithLabel'
 import { SectionPreviewRow } from './components/SectionPreviewRow'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 export function AddDescButton({
   showDescription,
@@ -21,6 +22,7 @@ export function AddDescButton({
 }): JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const inputSize = useResponsiveInputSize()
   const descriptionInputRef = React.useRef<HTMLTextAreaElement>(null)
 
   React.useEffect(() => {
@@ -43,7 +45,7 @@ export function AddDescButton({
         placeholder={t('event.form.descriptionPlaceholder')}
         value={description}
         onChange={e => setDescription(e.target.value)}
-        size={isMobile ? 'medium' : 'small'}
+        size={inputSize}
         margin="dense"
         multiline
         minRows={2}

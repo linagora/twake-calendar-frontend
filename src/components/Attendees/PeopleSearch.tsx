@@ -1,41 +1,36 @@
-import { useUserSearch } from './useUserSearch'
 import { SnackbarAlert } from '@/components/Loading/SnackBarAlert'
 import {
   Autocomplete,
-  CircularProgress,
   PaperProps,
   PopperProps,
-  TextField,
-  type AutocompleteRenderInputParams,
   Box,
-  SxProps
+  SxProps,
+  type AutocompleteRenderInputParams,
+  AutocompleteProps
 } from '@linagora/twake-mui'
 import { AttendeeOptionsList } from './AttendeeOptionsList'
-import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import {
   HTMLAttributes,
   ReactElement,
-  useCallback,
-  useEffect,
-  useRef,
-  type ReactNode,
-  type SyntheticEvent
+  SyntheticEvent,
+  type ReactNode
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import { isValidEmail } from '../../utils/isValidEmail'
-import { usePasteHandler } from './usePasteHandler'
 import { User } from './types'
-import { AttendeeChip } from './AttendeeChip'
+import { AttendeeChip, type AttendeeChipProps } from './AttendeeChip'
 import { SearchState } from '../Calendar/utils/tempSearchUtil'
-import { useAppSelector } from '@/app/hooks'
+import {
+  usePeopleSearchState,
+  normaliseUser,
+  dedupeByEmail
+} from './usePeopleSearchState'
+import {
+  PeopleSearchInput,
+  type ExtendedAutocompleteRenderInputParams
+} from './PeopleSearchInput'
 
-export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
-  error?: boolean
-  helperText?: string | null
-  placeholder?: string
-  label?: string
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-}
+export type { ExtendedAutocompleteRenderInputParams }
+export { normaliseUser, dedupeByEmail }
 
 export interface PeopleSearchProps {
   selectedUsers: User[]
@@ -64,6 +59,86 @@ export interface PeopleSearchProps {
   inputStyles?: SxProps
 }
 
+const autocompleteSx = {
+  '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
+    py: 0,
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    flexDirection: 'row'
+  },
+  '& .MuiInputBase-input': {
+    maxWidth: '80%'
+  }
+}
+
+const getAutocompleteSlotProps = (
+  customSlotProps?: PeopleSearchProps['customSlotProps']
+): AutocompleteProps<User, true, true, boolean>['slotProps'] => ({
+  ...customSlotProps,
+  popper: {
+    placement: 'bottom-start',
+    sx: { minWidth: '300px', ...customSlotProps?.popper?.sx },
+    ...customSlotProps?.popper
+  }
+})
+
+interface PeopleSearchValueRendererProps {
+  value: User[]
+  getTagProps: AttendeeChipProps['getTagProps']
+  getChipIcon?: (user: User) => ReactElement
+}
+
+const getOptionLabel = (option: User | string): string => {
+  if (typeof option === 'string') return option
+  return option.displayName || option.email
+}
+
+const resolveIsOpen = ({
+  hideOptions,
+  isOpen,
+  query,
+  loading,
+  hasSearched,
+  options,
+  hasCustomRenderInput
+}: {
+  hideOptions?: boolean
+  isOpen: boolean
+  query: string
+  loading: boolean
+  hasSearched: boolean
+  options: unknown[]
+  hasCustomRenderInput: boolean
+}): boolean => {
+  if (hideOptions) return false
+  if (!isOpen) return false
+  if (!query) return false
+  if (hasCustomRenderInput) {
+    if (loading && hasSearched) return true
+    return options.length > 0
+  }
+  return loading || hasSearched
+}
+
+const PeopleSearchValueRenderer: React.FC<PeopleSearchValueRendererProps> = ({
+  value,
+  getTagProps,
+  getChipIcon
+}) => (
+  <Box display="flex" flexWrap="wrap">
+    {value.map((option, index) => (
+      <AttendeeChip
+        key={index}
+        option={option}
+        getTagProps={getTagProps}
+        index={index}
+        getChipIcon={getChipIcon}
+      />
+    ))}
+  </Box>
+)
+
 export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   selectedUsers,
   onChange,
@@ -84,204 +159,34 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
 }) => {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
-  const errorMessage = t('peopleSearch.searchError')
 
-  const lastQueryTimeRef = useRef(0)
-  const currentUser = useAppSelector(state => state.user?.userData)
-
-  const {
-    query,
-    setQuery,
-    loading,
-    options,
-    hasSearched,
-    isOpen,
-    setIsOpen,
-    inputError,
-    setInputError,
-    snackbarOpen,
-    setSnackbarOpen,
-    snackbarMessage,
-    setSnackbarMessage,
-    queryTime
-  } = useUserSearch<User>({
+  const searchState = usePeopleSearchState({
     objectTypes,
-    errorMessage,
     showCurrentUser,
-    currentUser
-  })
-
-  const onSearchStateChangeRef = useRef(onSearchStateChange)
-  useEffect(() => {
-    onSearchStateChangeRef.current = onSearchStateChange
-  }, [onSearchStateChange])
-
-  useEffect(() => {
-    if (!hideOptions) return
-    if (queryTime !== lastQueryTimeRef.current) {
-      lastQueryTimeRef.current = queryTime
-      onSearchStateChangeRef.current?.({ query, options, loading })
-    }
-  }, [queryTime, query, options, loading, hideOptions])
-
-  useEffect(() => {
-    if (inputValue !== undefined) {
-      setQuery(inputValue)
-    }
-  }, [inputValue, setQuery])
-
-  const handleBlurCommit = useCallback(
-    (event: React.SyntheticEvent) => {
-      const trimmed = query.trim()
-      if (!trimmed) return
-      if (!isValidEmail(trimmed)) {
-        setInputError(
-          t('peopleSearch.invalidEmail').replace('%{email}', trimmed)
-        )
-        return
-      }
-      if (selectedUsers.find(u => u.email === trimmed)) {
-        setQuery('')
-        return
-      }
-      setInputError(null)
-      const newUser: User = { email: trimmed, displayName: trimmed }
-      onChange(event, [...selectedUsers, newUser])
-      setQuery('')
-    },
-    [query, selectedUsers, onChange, t, setInputError, setQuery]
-  )
-
-  const handlePaste = usePasteHandler({
-    freeSolo,
+    hideOptions,
+    onSearchStateChange,
+    inputValue,
     selectedUsers,
     onChange,
-    setQuery,
-    setInputError,
-    t
+    freeSolo
   })
-
-  const handleAutocompleteChange = useCallback(
-    (event: SyntheticEvent, value: (string | User)[]) => {
-      const last = value[value.length - 1]
-      if (typeof last === 'string' && !isValidEmail(last.trim())) {
-        setInputError(t('peopleSearch.invalidEmail').replace('%{email}', last))
-        return
-      }
-      setInputError(null)
-      onChange(event, dedupeByEmail(value.map(normaliseUser)))
-    },
-    [onChange, setInputError, t]
-  )
-
-  const defaultRenderInput = useCallback(
-    (params: AutocompleteRenderInputParams) => {
-      const inputProps = {
-        ...params.InputProps,
-        startAdornment: params.InputProps.startAdornment ?? (
-          <PeopleOutlineOutlinedIcon
-            fontSize="small"
-            sx={{ mr: 1, color: 'action.active' }}
-          />
-        ),
-        endAdornment: (
-          <>
-            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-            {params.InputProps.endAdornment}
-          </>
-        )
-      }
-
-      const enhancedParams = {
-        ...params,
-        InputProps: inputProps,
-        inputProps: {
-          ...params.inputProps,
-          autoComplete: 'off',
-          onPaste: handlePaste
-        }
-      }
-
-      const handleEnterKey = (
-        e: React.KeyboardEvent<HTMLInputElement>
-      ): void => {
-        if (e.key === 'Enter' && onToggleEventPreview && !isOpen) {
-          e.preventDefault()
-          onToggleEventPreview()
-        }
-      }
-
-      const defaultTextFieldProps = {
-        error: !!inputError,
-        helperText: inputError,
-        placeholder: searchPlaceholder,
-        label: '',
-        onKeyDown: handleEnterKey,
-        slotProps: {
-          input: {
-            ...inputProps
-          }
-        }
-      }
-
-      if (inputSlot) {
-        return (
-          <>
-            <label htmlFor={params.id} className="visually-hidden">
-              {t('peopleSearch.label')}
-            </label>
-            {inputSlot({
-              ...enhancedParams,
-              error: !!inputError,
-              helperText: inputError,
-              placeholder: searchPlaceholder,
-              label: '',
-              onKeyDown: handleEnterKey
-            })}
-          </>
-        )
-      }
-
-      return (
-        <>
-          <label htmlFor={params.id} className="visually-hidden">
-            {t('peopleSearch.label')}
-          </label>
-          <TextField
-            {...enhancedParams}
-            {...defaultTextFieldProps}
-            InputProps={inputProps}
-            size="medium"
-            sx={{
-              '& .MuiInputBase-input': {
-                maxWidth: '90%'
-              }
-            }}
-          />
-        </>
-      )
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      inputError,
-      t,
-      onToggleEventPreview,
-      loading,
-      searchPlaceholder,
-      handlePaste,
-      isOpen
-    ]
-  )
 
   const isOpenOptions = resolveIsOpen({
     hideOptions,
-    isOpen,
-    query,
-    loading,
-    hasSearched,
-    options,
+    isOpen: searchState.isOpen,
+    query: searchState.query,
+    loading: searchState.loading,
+    hasSearched: searchState.hasSearched,
+    options: searchState.options,
     hasCustomRenderInput: !!customRenderInput
   })
+
+  const handleSnackbarOpenChange = (open: boolean): void => {
+    searchState.setSnackbarOpen(open)
+    if (!open) {
+      searchState.setSnackbarMessage('')
+    }
+  }
 
   return (
     <>
@@ -289,52 +194,44 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         popupIcon={null}
         freeSolo={freeSolo}
         multiple
-        options={options}
+        options={searchState.options}
         autoComplete={false}
         clearOnBlur={false}
-        onBlur={freeSolo ? handleBlurCommit : undefined}
+        onBlur={freeSolo ? searchState.handleBlurCommit : undefined}
         open={isOpenOptions}
-        onOpen={() => setIsOpen(true)}
-        onClose={() => setIsOpen(false)}
+        onOpen={() => searchState.setIsOpen(true)}
+        onClose={() => searchState.setIsOpen(false)}
         disabled={disabled}
-        loading={loading}
+        loading={searchState.loading}
         filterOptions={x => x}
         fullWidth
         noOptionsText={t('peopleSearch.noResults')}
         loadingText={t('peopleSearch.loading')}
         getOptionLabel={getOptionLabel}
-        sx={{
-          '& .MuiAutocomplete-inputRoot.MuiOutlinedInput-root': {
-            py: 0,
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            flexDirection: 'row'
-          },
-          '& .MuiInputBase-input': {
-            maxWidth: '80%'
-          },
-          ...inputStyles
-        }}
+        sx={{ ...autocompleteSx, ...inputStyles }}
         filterSelectedOptions
         value={selectedUsers}
-        inputValue={query}
-        onInputChange={(_event, value) => setQuery(value)}
-        onChange={handleAutocompleteChange}
-        slotProps={{
-          ...customSlotProps,
-          popper: {
-            placement: 'bottom-start',
-            sx: { minWidth: '300px', ...customSlotProps?.popper?.sx },
-            ...customSlotProps?.popper
-          }
-        }}
+        inputValue={searchState.query}
+        onInputChange={(_event, value) => searchState.setQuery(value)}
+        onChange={searchState.handleAutocompleteChange}
+        slotProps={getAutocompleteSlotProps(customSlotProps)}
         forcePopupIcon={false}
         disableClearable
         renderInput={params =>
-          customRenderInput
-            ? customRenderInput(params, query, setQuery)
-            : defaultRenderInput(params)
+          customRenderInput ? (
+            customRenderInput(params, searchState.query, searchState.setQuery)
+          ) : (
+            <PeopleSearchInput
+              params={params}
+              loading={searchState.loading}
+              handlePaste={searchState.handlePaste}
+              onToggleEventPreview={onToggleEventPreview}
+              isOpen={searchState.isOpen}
+              inputError={searchState.inputError}
+              searchPlaceholder={searchPlaceholder}
+              inputSlot={inputSlot}
+            />
+          )
         }
         renderOption={(props, option) => (
           <AttendeeOptionsList
@@ -344,65 +241,19 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
           />
         )}
         renderValue={(value, getTagProps) => (
-          <Box display="flex" flexWrap="wrap">
-            {value.map((option, index) => (
-              <AttendeeChip
-                key={index}
-                option={option}
-                getTagProps={getTagProps}
-                index={index}
-                getChipIcon={getChipIcon}
-              />
-            ))}
-          </Box>
+          <PeopleSearchValueRenderer
+            value={value as User[]}
+            getTagProps={getTagProps}
+            getChipIcon={getChipIcon}
+          />
         )}
       />
       <SnackbarAlert
-        open={snackbarOpen}
-        setOpen={(open: boolean) => {
-          setSnackbarOpen(open)
-          if (!open) {
-            setSnackbarMessage('')
-          }
-        }}
-        message={snackbarMessage}
+        open={searchState.snackbarOpen}
+        setOpen={handleSnackbarOpenChange}
+        message={searchState.snackbarMessage}
         severity="error"
       />
     </>
   )
-}
-
-export const getOptionLabel = (option: User | string): string => {
-  if (typeof option === 'string') return option
-  return option.displayName || option.email
-}
-
-export const normaliseUser = (v: string | User): User =>
-  typeof v === 'string' ? { email: v.trim(), displayName: v.trim() } : v
-
-export const dedupeByEmail = (users: User[]): User[] =>
-  users.filter((u, i, arr) => arr.findIndex(x => x.email === u.email) === i)
-
-export const resolveIsOpen = ({
-  hideOptions,
-  isOpen,
-  query,
-  loading,
-  hasSearched,
-  options,
-  hasCustomRenderInput
-}: {
-  hideOptions?: boolean
-  isOpen: boolean
-  query: string
-  loading: boolean
-  hasSearched: boolean
-  options: unknown[]
-  hasCustomRenderInput: boolean
-}): boolean => {
-  if (hideOptions) return false
-  if (!isOpen || !query) return false
-  if (hasCustomRenderInput)
-    return (loading && hasSearched) || options.length > 0
-  return loading || hasSearched
 }

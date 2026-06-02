@@ -18,7 +18,7 @@ import { useI18n } from 'twake-i18n'
 import { AddDescButton } from '../Event/AddDescButton'
 import { ColorPicker } from './CalendarColorPicker'
 import { InfoRow } from '../Event/InfoRow'
-import { useScreenSizeDetection } from '@/useScreenSizeDetection'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 export function SettingsTab({
   name,
@@ -44,7 +44,7 @@ export function SettingsTab({
   autoFocusName?: boolean
 }) {
   const { t } = useI18n()
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const inputSize = useResponsiveInputSize()
   const [toggleDesc, setToggleDesc] = useState(Boolean(description))
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const isOwn = calendar ? extractEventBaseUuid(calendar.id) === userId : true
@@ -101,7 +101,7 @@ export function SettingsTab({
               placeholder={t('common.name')}
               value={name}
               onChange={e => setName(e.target.value)}
-              size={isMobile ? 'medium' : 'small'}
+              size={inputSize}
               sx={{
                 '&.MuiFormControl-root': {
                   marginTop: 0,

@@ -38,6 +38,7 @@ import { useEventFormValues } from './hooks/useEventFormValues'
 import { validateEventFormValues } from './utils/formValidation'
 import { EventTimeSubtitle } from '@/features/Events/EventPreview/EventTimeSubtitle'
 import { formatEventChipTitle } from '../Calendar/utils/calendarUtils'
+import { useResponsiveInputSize } from '@/hooks/useResponsiveInputSize'
 
 const showInputLabel = (showMore: boolean, label: string): string =>
   showMore ? label : ''
@@ -64,6 +65,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
 
     const { t } = useI18n()
     const { isTooSmall: isMobile } = useScreenSizeDetection()
+    const inputSize = useResponsiveInputSize()
 
     const calList = useAppSelector(state => state.calendars.list)
     const userOrganizer = useAppSelector(state => state.user.organiserData)
@@ -207,7 +209,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
         <TitleField
           value={v.title}
           onChange={setTitle}
-          isMobile={isMobile}
           showMore={showMore}
           isExpanded={isExpanded}
           isOpen={isOpen}
@@ -249,9 +250,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
             timezone={v.timezone}
             end={v.end}
             placeholder={t('event.form.addGuestsPlaceholder')}
-            inputSlot={params => (
-              <TextField {...params} size={isMobile ? 'medium' : 'small'} />
-            )}
+            inputSlot={params => <TextField {...params} size={inputSize} />}
           />
         </FieldWithLabel>
 
