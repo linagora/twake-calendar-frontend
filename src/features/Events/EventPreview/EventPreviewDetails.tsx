@@ -12,6 +12,7 @@ import { useI18n } from 'twake-i18n'
 import { CalendarEvent } from '../EventsTypes'
 import { EventPreviewAttendees } from './EventPreviewAttendees'
 import { makeRecurrenceString } from './utils/makeRecurrenceString'
+import { translateDuration } from './utils/parseDuration'
 import { renderAttendeeBadge } from '@/components/Event/utils/eventUtils'
 import { VideoLink } from '@/components/Event/components/VideoLink'
 import { useFilterEventAttendees } from '@/components/Event/hooks/useFilterEventAttendees'
@@ -208,7 +209,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
             </Box>
           }
           text={t('eventPreview.alarmText', {
-            trigger: t(`event.form.notifications.${event.alarm.trigger}`),
+            trigger: translateDuration(event.alarm.trigger, t),
             action: ((): string => {
               if (!event.alarm.action) return ''
               const translationKey = `event.form.notifications.${event.alarm.action}`
