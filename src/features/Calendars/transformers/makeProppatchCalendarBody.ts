@@ -1,13 +1,8 @@
 import { CalendarPostBody } from '../CalendarDAO'
-
-export interface ProppatchCalendarInput {
-  name: string
-  desc: string
-  color: Record<string, string>
-}
+import { PostCalendarInput } from './makePostCalendarBody'
 
 export function makeProppatchCalendarBody(
-  input: ProppatchCalendarInput
+  input: PostCalendarInput
 ): CalendarPostBody {
   return JSON.stringify({
     'dav:name': input.name,

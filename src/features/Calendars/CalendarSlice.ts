@@ -23,6 +23,7 @@ import {
   updateEventInstanceAsync,
   updateSeriesAsync
 } from './services'
+import { RejectedError } from './types/RejectedError'
 
 const CalendarSlice = createSlice({
   name: 'calendars',
@@ -511,14 +512,14 @@ const CalendarSlice = createSlice({
       .addCase(addSharedCalendarAsync.rejected, (state, action) => {
         state.pending = false
         state.error =
-          (action.error as Error).message ||
+          (action.payload as RejectedError).message ||
           action.error.message ||
           'Failed to add shared calendar'
       })
       .addCase(addCalendarResourceAsync.rejected, (state, action) => {
         state.pending = false
         state.error =
-          (action.error as Error).message ||
+          (action.payload as RejectedError).message ||
           action.error.message ||
           'Failed to add calendar resource'
       })

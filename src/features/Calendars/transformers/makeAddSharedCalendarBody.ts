@@ -5,6 +5,7 @@ export function makeAddSharedCalendarBody(
   calId: string,
   cal: CalendarInput
 ): CalendarPostBody {
+  if (!cal.cal) throw new Error('calendar body is undefined')
   return JSON.stringify({
     id: calId,
     ...cal.cal,
@@ -13,10 +14,10 @@ export function makeAddSharedCalendarBody(
       calendarHomeId: cal.cal.id,
       color: cal.cal['apple:color'],
       description: cal.cal['caldav:description'],
-      href: cal.cal?._links?.self?.href,
+      href: cal.cal._links.self?.href,
       id: cal.cal.id,
       invite: cal.cal.invite,
-      name: cal.cal['dav:name']
+      name: cal.cal?.['dav:name']
     }
   })
 }
