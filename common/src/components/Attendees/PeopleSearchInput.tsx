@@ -1,12 +1,12 @@
-import React, { type ReactNode } from 'react'
+import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 import {
   CircularProgress,
   TextField,
   type AutocompleteRenderInputParams
 } from '@linagora/twake-mui'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
+import React, { type ReactNode } from 'react'
 import { useI18n } from 'twake-i18n'
-import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -45,9 +45,16 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
 
   const inputSize = useResponsiveInputSize()
 
+  // Extract only the Input component props, not htmlInput props
+  const {
+    startAdornment: paramsStartAdornment,
+    endAdornment: paramsEndAdornment,
+    ...inputComponentProps
+  } = params.slotProps?.input || {}
+
   const inputProps = {
-    ...params.slotProps?.input,
-    startAdornment: params.slotProps?.input?.startAdornment ?? (
+    ...inputComponentProps,
+    startAdornment: paramsStartAdornment ?? (
       <PeopleOutlineOutlinedIcon
         fontSize="small"
         sx={{ mr: 1, color: 'action.active' }}
@@ -56,7 +63,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     endAdornment: (
       <>
         {loading ? <CircularProgress color="inherit" size={20} /> : null}
-        {params.slotProps?.input?.endAdornment}{' '}
+        {paramsEndAdornment}{' '}
       </>
     )
   }
@@ -99,12 +106,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     error: !!inputError,
     helperText: inputError,
     placeholder: searchPlaceholder,
-    label: '',
-    slotProps: {
-      input: {
-        ...inputProps
-      }
-    }
+    label: ''
   }
 
   if (inputSlot) {

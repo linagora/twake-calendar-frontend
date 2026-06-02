@@ -1,5 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { selectCalendars } from '@common/app/selectors/selectCalendars'
+import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
+import { User } from '@common/components/Attendees/types'
+import { Tooltip } from '@common/components/Tooltip'
 import { AttendeesFilter } from '@common/features/Search/AttendeesFilter'
 import { KeywordsFilter } from '@common/features/Search/KeywordsFilter'
 import { OrganizersFilter } from '@common/features/Search/OrganizersFilter'
@@ -32,9 +35,6 @@ import SearchIcon from '@mui/icons-material/Search'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
-import { User } from '@common/components/Attendees/types'
-import { Tooltip } from '@common/components/Tooltip'
 
 const SEARCH_OBJECT_TYPES = ['user', 'contact']
 
@@ -287,7 +287,9 @@ const SearchBar: React.FC<{
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <SearchIcon sx={{ color: '#605D62' }} />
+                          <Box sx={{ color: '#605D62' }}>
+                            <SearchIcon fontSize="inherit" color="inherit" />
+                          </Box>
                         </InputAdornment>
                         {params.slotProps.input?.startAdornment}
                       </>

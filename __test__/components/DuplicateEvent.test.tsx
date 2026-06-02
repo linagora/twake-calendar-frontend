@@ -2,6 +2,7 @@ import { RootState } from '@common/app/store'
 import EventDuplication from '@common/components/Event/EventDuplicate'
 import EventPreviewModal from '@common/components/EventPreview'
 import EventPopover from '@common/features/Events/EventModal'
+import { Menu } from '@linagora/twake-mui'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
@@ -67,14 +68,16 @@ describe('EventDuplication', () => {
     const handleClose = jest.fn()
     const onOpenDuplicate = jest.fn()
     renderWithProviders(
-      <EventDuplication
-        event={
-          preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
-            .event1
-        }
-        onClose={handleClose}
-        onOpenDuplicate={onOpenDuplicate}
-      />,
+      <Menu open={true} onClose={handleClose}>
+        <EventDuplication
+          event={
+            preloadedState.calendars.list['667037022b752d0026472254/cal1']
+              .events.event1
+          }
+          onClose={handleClose}
+          onOpenDuplicate={onOpenDuplicate}
+        />
+      </Menu>,
       preloadedState
     )
 

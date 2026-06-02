@@ -199,7 +199,11 @@ export const EventErrorRow: React.FC<{
   return (
     <BaseEventRow
       alignItems="flex-start"
-      icon={<ErrorOutlinedIcon sx={{ color: 'error.main' }} />}
+      icon={
+        <Box sx={{ ...infoIconSx, color: 'error.main' }}>
+          <ErrorOutlinedIcon fontSize="inherit" color="inherit" />
+        </Box>
+      }
       text={error}
       error
     />

@@ -3,9 +3,15 @@ import { useAttendeesFreeBusy } from '@common/components/Attendees/useFreeBusy'
 import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import { AvatarGroup, Box, Button, Typography } from '@linagora/twake-mui'
+import {
+  AvatarGroup,
+  Box,
+  Button,
+  Typography,
+  alpha,
+  useTheme
+} from '@linagora/twake-mui'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
-import { alpha, useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { makeAttendeePreview } from '.'

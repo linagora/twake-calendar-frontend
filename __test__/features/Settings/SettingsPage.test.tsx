@@ -130,16 +130,10 @@ describe('SettingsPage', () => {
 
     const languageSelect = screen.getByLabelText('settings.languageSelector')
 
-    // Verify Select exists
+    // Verify Select exists and displays the French language
     expect(languageSelect).toBeInTheDocument()
-
-    // Verify that the underlying native input reflects the user language ("fr")
-    // eslint-disable-next-line testing-library/no-node-access
-    const nativeInput = languageSelect.querySelector(
-      'input[aria-hidden="true"]'
-    ) as HTMLInputElement | null
-    expect(nativeInput).not.toBeNull()
-    expect(nativeInput?.value).toBe('fr')
+    // In MUI v9, the selected value is displayed in the button text
+    expect(languageSelect.textContent?.toLowerCase()).toContain('français')
   })
 
   it('updates language immediately (optimistic update) and calls API in background', async () => {
@@ -148,20 +142,17 @@ describe('SettingsPage', () => {
     const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
     const languageSelect = screen.getByLabelText('settings.languageSelector')
+    expect(languageSelect).toBeInTheDocument()
 
-    // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
-    const nativeInput = languageSelect.querySelector(
-      'input[aria-hidden="true"]'
-    ) as HTMLInputElement
-    expect(nativeInput).toBeInTheDocument()
+    // Open the select dropdown by clicking on it
+    fireEvent.mouseDown(languageSelect)
 
-    // Simulate change event on the native input
-    Object.defineProperty(nativeInput, 'value', {
-      writable: true,
-      value: 'fr'
+    // Find and click the French option in the dropdown menu
+    // The options are rendered in a MUI Menu/Popover portal
+    const frenchOption = await screen.findByRole('option', {
+      name: /français/i
     })
-    fireEvent.change(nativeInput, { target: { value: 'fr' } })
+    fireEvent.click(frenchOption)
 
     // Language should be updated immediately (optimistic update)
     await waitFor(() => {
@@ -197,20 +188,14 @@ describe('SettingsPage', () => {
     renderWithProviders(<SettingsPage />, preloadedState)
 
     const languageSelect = screen.getByLabelText('settings.languageSelector')
+    expect(languageSelect).toBeInTheDocument()
 
-    // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
-    const nativeInput = languageSelect.querySelector(
-      'input[aria-hidden="true"]'
-    ) as HTMLInputElement
-    expect(nativeInput).toBeInTheDocument()
-
-    // Simulate change event on the native input
-    Object.defineProperty(nativeInput, 'value', {
-      writable: true,
-      value: 'fr'
+    // Open the select dropdown and click on French option
+    fireEvent.mouseDown(languageSelect)
+    const frenchOption = await screen.findByRole('option', {
+      name: /français/i
     })
-    fireEvent.change(nativeInput, { target: { value: 'fr' } })
+    fireEvent.click(frenchOption)
 
     // localStorage should be updated immediately (optimistic update)
     await waitFor(() => {
@@ -224,20 +209,14 @@ describe('SettingsPage', () => {
     const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
     const languageSelect = screen.getByLabelText('settings.languageSelector')
+    expect(languageSelect).toBeInTheDocument()
 
-    // MUI Select uses a native input element - find and change it
-    // eslint-disable-next-line testing-library/no-node-access
-    const nativeInput = languageSelect.querySelector(
-      'input[aria-hidden="true"]'
-    ) as HTMLInputElement
-    expect(nativeInput).toBeInTheDocument()
-
-    // Simulate change event on the native input
-    Object.defineProperty(nativeInput, 'value', {
-      writable: true,
-      value: 'fr'
+    // Open the select dropdown and click on French option
+    fireEvent.mouseDown(languageSelect)
+    const frenchOption = await screen.findByRole('option', {
+      name: /français/i
     })
-    fireEvent.change(nativeInput, { target: { value: 'fr' } })
+    fireEvent.click(frenchOption)
 
     // Wait for rollback - language should be rolled back to "en" after error
     await waitFor(() => {
@@ -317,11 +296,14 @@ describe('SettingsPage', () => {
 
       const timezoneInput = screen.getAllByRole('combobox')[1]
 
-      // Clear the input and type new timezone
-      fireEvent.change(timezoneInput, { target: { value: 'Europe/Paris' } })
+      // Open the autocomplete dropdown
+      fireEvent.mouseDown(timezoneInput)
 
       // Find and click the timezone option from the dropdown
-      const option = await screen.findByText(/Europe\/Paris/i)
+      // The option text includes the offset, e.g., "Europe/Paris (UTC+1)"
+      const option = await screen.findByRole('option', {
+        name: /europe\/paris/i
+      })
       fireEvent.click(option)
 
       // Timezone should be updated immediately (optimistic update)
@@ -362,7 +344,7 @@ describe('SettingsPage', () => {
       const timezoneInput = screen.getAllByRole('combobox')[1]
 
       // Test with Asia/Tokyo
-      fireEvent.change(timezoneInput, { target: { value: 'Asia/Tokyo' } })
+      fireEvent.mouseDown(timezoneInput)
       const tokyoOption = await screen.findByText(/Asia\/Tokyo/i)
       fireEvent.click(tokyoOption)
 
@@ -399,9 +381,7 @@ describe('SettingsPage', () => {
       jest.clearAllMocks()
       ;(api.patch as jest.Mock).mockResolvedValue({ status: 204 })
 
-      fireEvent.change(timezoneInput, {
-        target: { value: 'America/Los_Angeles' }
-      })
+      fireEvent.mouseDown(timezoneInput)
       const laOption = await screen.findByText(/America\/Los Angeles/i)
       fireEvent.click(laOption)
 
@@ -529,7 +509,7 @@ describe('SettingsPage', () => {
 
       const timezoneInput = screen.getAllByRole('combobox')[1]
 
-      fireEvent.change(timezoneInput, { target: { value: 'Europe/Paris' } })
+      fireEvent.mouseDown(timezoneInput)
       const option = await screen.findByText(/Europe\/Paris/i)
       fireEvent.click(option)
 
@@ -636,8 +616,10 @@ describe('SettingsPage', () => {
 
       const timezoneInput = screen.getAllByRole('combobox')[1]
 
-      fireEvent.change(timezoneInput, { target: { value: 'Europe/Paris' } })
-      const option = await screen.findByText(/Europe\/Paris/i)
+      fireEvent.mouseDown(timezoneInput)
+      const option = await screen.findByRole('option', {
+        name: /europe\/paris/i
+      })
       fireEvent.click(option)
 
       await waitFor(() => {

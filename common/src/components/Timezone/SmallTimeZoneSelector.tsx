@@ -152,7 +152,9 @@ export const SmallTimezoneSelector: React.FC<
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'action.active', mr: 1 }} />
+                  <Box sx={{ color: 'action.active', mr: 1 }}>
+                    <SearchIcon fontSize="inherit" color="inherit" />
+                  </Box>
                 </InputAdornment>
               ),
               disableUnderline: true

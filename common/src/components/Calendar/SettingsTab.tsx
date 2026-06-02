@@ -7,11 +7,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  useTheme
+  useTheme,
+  alpha
 } from '@linagora/twake-mui'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
-import { alpha } from '@mui/material/styles'
 import PublicIcon from '@mui/icons-material/Public'
 import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'

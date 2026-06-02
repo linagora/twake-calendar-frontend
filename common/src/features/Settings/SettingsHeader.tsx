@@ -2,9 +2,9 @@ import { useAppDispatch } from '@common/app/hooks'
 import { Box, IconButton, Tab, Tabs } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useI18n } from 'twake-i18n'
+import { SettingsSubTab, SidebarNavItem } from './SettingsPage'
 import './SettingsPage.styl'
 import { setView } from './SettingsSlice'
-import { SettingsSubTab, SidebarNavItem } from './SettingsPage'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 export const SettingsHeader: React.FC<{
@@ -31,7 +31,7 @@ export const SettingsHeader: React.FC<{
           aria-label={t('settings.back') || 'Back to calendar'}
           className="back-button"
         >
-          <ArrowBackIcon sx={{ color: '#605D62', fontSize: 30 }} />
+          <ArrowBackIcon fontSize="inherit" color="inherit" />
         </IconButton>
       )}
       {activeNavItem === 'settings' && (

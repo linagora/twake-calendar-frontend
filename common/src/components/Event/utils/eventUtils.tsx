@@ -1,4 +1,5 @@
 import { AppDispatch } from '@common/app/store'
+import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 import {
   emptyEventsCal,
   getCalendarDetail,
@@ -12,7 +13,6 @@ import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -24,9 +24,13 @@ export function renderAttendeeBadge(
 ) {
   const classIcon =
     a.partstat === 'ACCEPTED' ? (
-      <CheckCircleIcon fontSize="inherit" sx={{ color: 'success.main' }} />
+      <Box sx={{ color: 'success.main' }}>
+        <CheckCircleIcon fontSize="inherit" color="inherit" />
+      </Box>
     ) : a.partstat === 'DECLINED' ? (
-      <CancelIcon fontSize="inherit" sx={{ color: 'error.main' }} />
+      <Box sx={{ color: 'error.main' }}>
+        <CancelIcon fontSize="inherit" color="inherit" />
+      </Box>
     ) : null
 
   if (!isFull) {

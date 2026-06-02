@@ -1,4 +1,5 @@
 import {
+  Box,
   TextField,
   useTheme,
   useMediaQuery,
@@ -60,7 +61,9 @@ export const TempCalendarsInput: React.FC<{
                       {params.slotProps?.input?.endAdornment}
                       {isMobile && (
                         <InputAdornment position="end">
-                          <SearchIcon sx={{ color: 'action.active' }} />
+                          <Box sx={{ color: 'action.active' }}>
+                            <SearchIcon fontSize="inherit" color="inherit" />
+                          </Box>
                         </InputAdornment>
                       )}
                     </React.Fragment>
