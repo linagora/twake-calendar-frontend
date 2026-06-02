@@ -1,6 +1,6 @@
 import * as EventDao from '@common/features/Events/EventDao'
 import searchResultReducer, {
-  searchEventsAsync,
+  searchEvents,
   setHits,
   setResults
 } from '@common/features/Search/SearchSlice'
@@ -56,7 +56,7 @@ describe('SearchSlice', () => {
     })
   })
 
-  describe('searchEventsAsync', () => {
+  describe('searchEvents', () => {
     const mockFilters = {
       searchIn: ['user1/calendar1'],
       keywords: 'meeting',
@@ -77,7 +77,7 @@ describe('SearchSlice', () => {
       ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
-        searchEventsAsync({ search: 'test', filters: mockFilters })
+        searchEvents({ search: 'test', filters: mockFilters })
       )
 
       const state = store.getState().searchResult
@@ -95,7 +95,7 @@ describe('SearchSlice', () => {
       ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
-        searchEventsAsync({ search: 'test', filters: mockFilters })
+        searchEvents({ search: 'test', filters: mockFilters })
       )
 
       expect(EventDao.searchEvent).toHaveBeenCalledWith({
@@ -114,7 +114,7 @@ describe('SearchSlice', () => {
       ;(EventDao.searchEvent as jest.Mock).mockResolvedValue(mockResponse)
 
       await store.dispatch(
-        searchEventsAsync({ search: 'nonexistent', filters: mockFilters })
+        searchEvents({ search: 'nonexistent', filters: mockFilters })
       )
 
       const state = store.getState().searchResult
@@ -127,7 +127,7 @@ describe('SearchSlice', () => {
       ;(EventDao.searchEvent as jest.Mock).mockRejectedValue(mockError)
 
       await store.dispatch(
-        searchEventsAsync({ search: 'test', filters: mockFilters })
+        searchEvents({ search: 'test', filters: mockFilters })
       )
 
       const state = store.getState().searchResult
@@ -142,7 +142,7 @@ describe('SearchSlice', () => {
       )
 
       const promise = store.dispatch(
-        searchEventsAsync({ search: 'test', filters: mockFilters })
+        searchEvents({ search: 'test', filters: mockFilters })
       )
 
       expect(store.getState().searchResult.loading).toBe(true)

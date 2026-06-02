@@ -4,7 +4,7 @@ import { AppDispatch } from '@common/app/store'
 import { Calendar } from '@common/types/CalendarTypes'
 import {
   clearFilters,
-  searchEventsAsync,
+  searchEvents,
   SearchFilters,
   setFilters,
   setSearchQuery
@@ -112,7 +112,7 @@ function useSearchAction(
       )
       if (!query) return
       dispatch(setSearchQuery(query.search))
-      await dispatch(searchEventsAsync(query))
+      await dispatch(searchEvents(query))
       dispatch(setView('search'))
       setDialogOpen(false)
     },
