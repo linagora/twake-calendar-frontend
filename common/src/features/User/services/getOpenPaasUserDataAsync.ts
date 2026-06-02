@@ -1,4 +1,4 @@
-import { formatReduxError, toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { getOpenPaasUser } from '../userAPI'
 import { OpenPaasUserData } from '../type/OpenPaasUserData'

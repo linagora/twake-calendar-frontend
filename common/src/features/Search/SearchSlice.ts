@@ -1,9 +1,8 @@
-import { formatReduxError } from '@common/utils/errorUtils'
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { searchEvent } from '@common/features/Events/EventDao'
-import { makeSearchEventParam } from '@common/features/Events/transformers/makeSearchEventParam'
+import { PayloadAction } from '@reduxjs/toolkit'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { SearchEventResult } from './types/SearchEventResult'
+import { searchEventsThunk } from './services'
+import { createAppSlice } from '@common/app/createAppSlice'
 
 export interface SearchFilters {
   searchIn: string
@@ -35,89 +34,48 @@ export const defaultSearchParams: SearchParams = {
   }
 }
 
-export const searchEventsAsync = createAsyncThunk<
-  { hits: number; events: SearchEventResult[] },
-  {
-    search: string
-    filters: {
-      searchIn: string[]
-      keywords: string
-      organizers: string[]
-      attendees: string[]
-    }
-  },
-  { rejectValue: { message: string; status?: number } }
->('events/searchEvents', async ({ search, filters }, { rejectWithValue }) => {
-  try {
-    const searchParams = makeSearchEventParam(search, filters)
-    const response = await searchEvent(searchParams)
-
-    return {
-      hits: Number(response._total_hits),
-      events: (response._embedded?.events ?? []) as SearchEventResult[]
-    }
-  } catch (err) {
-    const error = err as { response?: { status?: number } }
-    return rejectWithValue({
-      message: formatReduxError(err),
-      status: error.response?.status
-    })
-  }
-})
-
-const initialState: SearchResultsState = {
-  searchParams: defaultSearchParams,
-  hits: 0,
-  results: [],
-  error: null,
-  loading: false
-}
-
-export const searchResultsSlice = createSlice({
+const SearchSlice = createAppSlice({
   name: 'searchResult',
-  initialState,
-  reducers: {
-    setResults: (state, action: PayloadAction<SearchEventResult[]>) => {
-      state.results = action.payload
-    },
-    setHits: (state, action: PayloadAction<number>) => {
-      state.hits = action.payload
-    },
-    setSearchQuery: (state, action: PayloadAction<string>) => {
-      state.searchParams.search = action.payload
-    },
-    setFilters: (state, action: PayloadAction<Partial<SearchFilters>>) => {
-      state.searchParams.filters = {
-        ...state.searchParams.filters,
-        ...action.payload
+  initialState: {
+    searchParams: defaultSearchParams,
+    hits: 0,
+    results: [],
+    error: null,
+    loading: false
+  } as SearchResultsState,
+  reducers: create => ({
+    // Regular reducers
+    setResults: create.reducer(
+      (state, action: PayloadAction<SearchEventResult[]>) => {
+        state.results = action.payload
       }
-    },
-    clearFilters: state => {
+    ),
+    setHits: create.reducer((state, action: PayloadAction<number>) => {
+      state.hits = action.payload
+    }),
+    setSearchQuery: create.reducer((state, action: PayloadAction<string>) => {
+      state.searchParams.search = action.payload
+    }),
+    setFilters: create.reducer(
+      (state, action: PayloadAction<Partial<SearchFilters>>) => {
+        state.searchParams.filters = {
+          ...state.searchParams.filters,
+          ...action.payload
+        }
+      }
+    ),
+    clearFilters: create.reducer(state => {
       state.searchParams.filters = defaultSearchParams.filters
-    },
-    clearSearch: state => {
+    }),
+    clearSearch: create.reducer(state => {
       state.searchParams = defaultSearchParams
       state.results = []
       state.hits = 0
       state.error = null
-    }
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(searchEventsAsync.pending, state => {
-        state.loading = true
-        state.error = null // reset error on new search
-      })
-      .addCase(searchEventsAsync.fulfilled, (state, action) => {
-        state.loading = false
-        state.hits = action.payload.hits
-        state.results = action.payload.events
-      })
-      .addCase(searchEventsAsync.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload?.message || 'Unknown error occurred'
-      })
-  }
+    }),
+    // Thunks using create.asyncThunk
+    searchEvents: searchEventsThunk(create)
+  })
 })
 
 export const {
@@ -126,6 +84,9 @@ export const {
   setFilters,
   setSearchQuery,
   clearFilters,
-  clearSearch
-} = searchResultsSlice.actions
-export default searchResultsSlice.reducer
+  clearSearch,
+  // Thunks
+  searchEvents
+} = SearchSlice.actions
+
+export default SearchSlice.reducer

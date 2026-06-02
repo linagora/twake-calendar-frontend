@@ -6,7 +6,7 @@ import { OrganizersFilter } from '@common/features/Search/OrganizersFilter'
 import { SearchInFilter } from '@common/features/Search/SearchInFilter'
 import {
   clearFilters,
-  searchEventsAsync,
+  searchEvents,
   setFilters
 } from '@common/features/Search/SearchSlice'
 import { buildQuery } from '@common/features/Search/searchUtils'
@@ -140,7 +140,7 @@ const SearchBar: React.FC<{
       personnalCalendars.map(calendar => calendar.id)
     )
     if (cleanedQuery) {
-      await dispatch(searchEventsAsync(cleanedQuery))
+      await dispatch(searchEvents(cleanedQuery))
       dispatch(setView('search'))
       setAnchorEl(null)
     } else {
