@@ -28,6 +28,7 @@ import { User } from './types'
 import { AttendeeChip } from './AttendeeChip'
 import { SearchState } from '../Calendar/utils/tempSearchUtil'
 import { useAppSelector } from '@/app/hooks'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -83,6 +84,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   inputStyles
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
   const errorMessage = t('peopleSearch.searchError')
 
@@ -251,7 +253,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             {...enhancedParams}
             {...defaultTextFieldProps}
             InputProps={inputProps}
-            size="medium"
+            size={isMobile ? 'medium' : 'small'}
             sx={{
               '& .MuiInputBase-input': {
                 maxWidth: '90%'

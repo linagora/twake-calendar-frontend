@@ -23,6 +23,7 @@ import {
 import { useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '../Calendars/CalendarTypes'
+import { useScreenSizeDetection } from '@/useScreenSizeDetection'
 
 interface Props {
   mode: 'popover' | 'mobile'
@@ -30,6 +31,7 @@ interface Props {
 
 export const SearchInFilter: React.FC<Props> = ({ mode }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
   const dispatch = useAppDispatch()
   const searchParams = useAppSelector(state => state.searchResult.searchParams)
   const calendars = useAppSelector(selectCalendars)
@@ -73,6 +75,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
     >
       <InputLabel sx={{ m: 0 }}>{t('search.searchIn')}</InputLabel>
       <Select
+        size={isMobile ? 'medium' : 'small'}
         displayEmpty
         value={searchParams.filters.searchIn}
         onChange={e => dispatch(setFilters({ searchIn: e.target.value }))}

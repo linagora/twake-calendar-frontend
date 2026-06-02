@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@linagora/twake-mui'
 import Tooltip from '@/components/Tooltip'
-import { Delete } from '@mui/icons-material'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
@@ -100,7 +100,7 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
             aria-label={t('eventPreview.deleteEvent')}
             onClick={onDelete}
           >
-            <Delete />
+            <DeleteOutlinedIcon />
           </IconButton>
         </Tooltip>
       )}
