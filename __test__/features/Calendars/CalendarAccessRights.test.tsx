@@ -4,13 +4,11 @@ import {
   UserWithAccess
 } from '@common/components/Calendar/CalendarAccessRights'
 import CalendarPopover from '@common/components/Calendar/CalendarModal'
-import { updateDelegationCalendar } from '@common/features/Calendars/CalendarDAO'
 import { AccessRight, Calendar } from '@common/types/CalendarTypes'
 import * as delegationThunks from '@common/features/Calendars/CalendarSlice'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
-import { api } from '@common/utils/apiUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
