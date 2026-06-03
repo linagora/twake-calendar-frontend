@@ -408,4 +408,51 @@ describe('PeopleSearch', () => {
       expect(input).toHaveValue('Test')
     })
   })
+
+  describe('enableEmailAutocompleteAndCommit behavior', () => {
+    it('shows virtual email option when there are no search results and email is valid', async () => {
+      mockedSearchUsers.mockResolvedValueOnce([])
+      setup([], { enableEmailAutocompleteAndCommit: true })
+
+      const input = screen.getByRole('combobox')
+      await userEvent.type(input, 'valid@example.com')
+      await act(async () => {
+        jest.advanceTimersByTime(300)
+      })
+
+      const options = await screen.findAllByText('valid@example.com')
+      expect(options.length).toBeGreaterThan(0)
+    })
+
+    it('adds valid email as a chip and clears input when space is pressed', async () => {
+      const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
+
+      const input = screen.getByRole('combobox')
+      await userEvent.type(input, 'space@example.com')
+
+      fireEvent.keyDown(input, { key: ' ' })
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining([
+          expect.objectContaining({ email: 'space@example.com' })
+        ])
+      )
+      expect(input).toHaveValue('')
+    })
+
+    it('does not add email or clear input on space key if enableEmailAutocompleteAndCommit is false', async () => {
+      const { onChange } = setup([], {
+        enableEmailAutocompleteAndCommit: false
+      })
+
+      const input = screen.getByRole('combobox')
+      await userEvent.type(input, 'space@example.com')
+
+      fireEvent.keyDown(input, { key: ' ' })
+
+      expect(onChange).not.toHaveBeenCalled()
+      expect(input).toHaveValue('space@example.com')
+    })
+  })
 })

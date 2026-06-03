@@ -57,6 +57,7 @@ export interface PeopleSearchProps {
   onSearchStateChange?: (state: SearchState) => void
   inputValue?: string
   inputStyles?: SxProps
+  enableEmailAutocompleteAndCommit?: boolean
 }
 
 const autocompleteSx = {
@@ -139,6 +140,45 @@ const PeopleSearchValueRenderer: React.FC<PeopleSearchValueRendererProps> = ({
   </Box>
 )
 
+interface RenderInputParams {
+  params: AutocompleteRenderInputParams
+  customRenderInput: PeopleSearchProps['customRenderInput']
+  searchState: ReturnType<typeof usePeopleSearchState>
+  onToggleEventPreview: PeopleSearchProps['onToggleEventPreview']
+  searchPlaceholder: string
+  inputSlot: PeopleSearchProps['inputSlot']
+  enableEmailAutocompleteAndCommit?: boolean
+}
+
+const renderPeopleSearchInput = ({
+  params,
+  customRenderInput,
+  searchState,
+  onToggleEventPreview,
+  searchPlaceholder,
+  inputSlot,
+  enableEmailAutocompleteAndCommit
+}: RenderInputParams): ReactNode => {
+  if (customRenderInput) {
+    return customRenderInput(params, searchState.query, searchState.setQuery)
+  }
+  return (
+    <PeopleSearchInput
+      params={params}
+      loading={searchState.loading}
+      handlePaste={searchState.handlePaste}
+      onToggleEventPreview={onToggleEventPreview}
+      isOpen={searchState.isOpen}
+      inputError={searchState.inputError}
+      searchPlaceholder={searchPlaceholder}
+      inputSlot={inputSlot}
+      onKeyDown={
+        enableEmailAutocompleteAndCommit ? searchState.handleKeyDown : undefined
+      }
+    />
+  )
+}
+
 export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   selectedUsers,
   onChange,
@@ -155,7 +195,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   showCurrentUser,
   onSearchStateChange,
   inputValue,
-  inputStyles
+  inputStyles,
+  enableEmailAutocompleteAndCommit
 }) => {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
@@ -168,7 +209,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     inputValue,
     selectedUsers,
     onChange,
-    freeSolo
+    freeSolo,
+    enableEmailAutocompleteAndCommit
   })
 
   const isOpenOptions = resolveIsOpen({
@@ -180,13 +222,6 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     options: searchState.options,
     hasCustomRenderInput: !!customRenderInput
   })
-
-  const handleSnackbarOpenChange = (open: boolean): void => {
-    searchState.setSnackbarOpen(open)
-    if (!open) {
-      searchState.setSnackbarMessage('')
-    }
-  }
 
   return (
     <>
@@ -212,26 +247,21 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         filterSelectedOptions
         value={selectedUsers}
         inputValue={searchState.query}
-        onInputChange={(_event, value) => searchState.setQuery(value)}
+        onInputChange={searchState.handleInputChange}
         onChange={searchState.handleAutocompleteChange}
         slotProps={getAutocompleteSlotProps(customSlotProps)}
         forcePopupIcon={false}
         disableClearable
         renderInput={params =>
-          customRenderInput ? (
-            customRenderInput(params, searchState.query, searchState.setQuery)
-          ) : (
-            <PeopleSearchInput
-              params={params}
-              loading={searchState.loading}
-              handlePaste={searchState.handlePaste}
-              onToggleEventPreview={onToggleEventPreview}
-              isOpen={searchState.isOpen}
-              inputError={searchState.inputError}
-              searchPlaceholder={searchPlaceholder}
-              inputSlot={inputSlot}
-            />
-          )
+          renderPeopleSearchInput({
+            params,
+            customRenderInput,
+            searchState,
+            onToggleEventPreview,
+            searchPlaceholder,
+            inputSlot,
+            enableEmailAutocompleteAndCommit
+          })
         }
         renderOption={(props, option) => (
           <AttendeeOptionsList
@@ -250,7 +280,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
       />
       <SnackbarAlert
         open={searchState.snackbarOpen}
-        setOpen={handleSnackbarOpenChange}
+        setOpen={searchState.handleSnackbarOpenChange}
         message={searchState.snackbarMessage}
         severity="error"
       />
