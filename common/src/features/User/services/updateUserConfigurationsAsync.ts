@@ -3,9 +3,51 @@ import { ReducerCreators } from '@reduxjs/toolkit'
 import { updateUserConfigurations, UserConfigurationUpdates } from '../userAPI'
 import { UserState, RejectedError } from '../UserSlice'
 
+function applyLanguageUpdate(
+  state: UserState,
+  language: string | undefined
+): void {
+  if (language === undefined) return
+
+  state.coreConfig.language = language
+  if (state.userData) {
+    state.userData.language = language
+  }
+}
+
+function applyTimezoneUpdate(
+  state: UserState,
+  timezone: string | null | undefined
+): void {
+  if (timezone === undefined) return
+
+  if (!state.coreConfig.datetime) {
+    state.coreConfig.datetime = { timeZone: null }
+  }
+  state.coreConfig.datetime.timeZone = timezone
+  if (state.userData) {
+    state.userData.timezone = timezone
+  }
+}
+
+function applyAlarmEmailsUpdate(
+  state: UserState,
+  alarmEmails: boolean | undefined
+): void {
+  if (alarmEmails === undefined) return
+
+  state.alarmEmailsEnabled = alarmEmails === true
+}
+
 export const updateUserConfigurationsThunk = (
   create: ReducerCreators<UserState>
-) =>
+): ReturnType<
+  typeof create.asyncThunk<
+    UserConfigurationUpdates,
+    UserConfigurationUpdates,
+    { rejectValue: RejectedError }
+  >
+> =>
   create.asyncThunk<
     UserConfigurationUpdates,
     UserConfigurationUpdates,
@@ -21,24 +63,9 @@ export const updateUserConfigurationsThunk = (
     },
     {
       fulfilled: (state, action) => {
-        if (action.payload.language !== undefined) {
-          state.coreConfig.language = action.payload.language
-          if (state.userData) {
-            state.userData.language = action.payload.language
-          }
-        }
-        if (action.payload.timezone !== undefined) {
-          if (!state.coreConfig.datetime) {
-            state.coreConfig.datetime = { timeZone: null }
-          }
-          state.coreConfig.datetime.timeZone = action.payload.timezone
-          if (state.userData) {
-            state.userData.timezone = action.payload.timezone
-          }
-        }
-        if (action.payload.alarmEmails !== undefined) {
-          state.alarmEmailsEnabled = action.payload.alarmEmails === true
-        }
+        applyLanguageUpdate(state, action.payload.language)
+        applyTimezoneUpdate(state, action.payload.timezone)
+        applyAlarmEmailsUpdate(state, action.payload.alarmEmails)
       },
       rejected: (state, action) => {
         if (action.payload?.status !== 401) {
