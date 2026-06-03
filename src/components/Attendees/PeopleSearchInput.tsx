@@ -25,6 +25,7 @@ export interface PeopleSearchInputProps {
   inputError: string | null
   searchPlaceholder: string
   inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => ReactNode
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
@@ -35,7 +36,8 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
   isOpen,
   inputError,
   searchPlaceholder,
-  inputSlot
+  inputSlot,
+  onKeyDown
 }) => {
   const { t } = useI18n()
 
@@ -65,6 +67,8 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
       autoComplete: 'off',
       onPaste: handlePaste,
       onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
+        onKeyDown?.(e)
+        if (e.defaultPrevented) return
         params.inputProps.onKeyDown?.(e)
         if (e.key === 'Enter') {
           if (onToggleEventPreview && !isOpen) {

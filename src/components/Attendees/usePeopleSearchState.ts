@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, type SyntheticEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type SyntheticEvent
+} from 'react'
 import { useI18n } from 'twake-i18n'
 import { useAppSelector } from '@/app/hooks'
 import { isValidEmail } from '../../utils/isValidEmail'
@@ -16,6 +22,7 @@ interface UsePeopleSearchStateProps {
   selectedUsers: User[]
   onChange: (event: SyntheticEvent, users: User[]) => void
   freeSolo?: boolean
+  enableEmailAutocompleteAndCommit?: boolean
 }
 
 interface UsePeopleSearchStateReturn {
@@ -39,23 +46,13 @@ interface UsePeopleSearchStateReturn {
     event: SyntheticEvent,
     value: (string | User)[]
   ) => void
-}
-
-interface UsePeopleSearchCallbacksProps {
-  query: string
-  selectedUsers: User[]
-  onChange: (event: SyntheticEvent, users: User[]) => void
-  t: (key: string) => string
-  setInputError: (val: string | null) => void
-  setQuery: (val: string) => void
-}
-
-interface UsePeopleSearchCallbacksReturn {
-  handleBlurCommit: (event: SyntheticEvent) => void
-  handleAutocompleteChange: (
+  handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  handleInputChange: (
     event: SyntheticEvent,
-    value: (string | User)[]
+    value: string,
+    reason: string
   ) => void
+  handleSnackbarOpenChange: (open: boolean) => void
 }
 
 const useSearchStateSync = ({
@@ -95,15 +92,15 @@ const useSearchStateSync = ({
   }, [inputValue, setQuery])
 }
 
-const usePeopleSearchCallbacks = ({
-  query,
-  selectedUsers,
-  onChange,
-  t,
-  setInputError,
-  setQuery
-}: UsePeopleSearchCallbacksProps): UsePeopleSearchCallbacksReturn => {
-  const handleBlurCommit = useCallback(
+const useHandleBlurCommit = (
+  query: string,
+  selectedUsers: User[],
+  onChange: (event: SyntheticEvent, users: User[]) => void,
+  t: (key: string) => string,
+  setInputError: (val: string | null) => void,
+  setQuery: (val: string) => void
+): ((event: SyntheticEvent) => void) => {
+  return useCallback(
     (event: SyntheticEvent) => {
       const result = validateAndAddUser(query.trim(), selectedUsers, t)
       if (result.error !== null) {
@@ -120,8 +117,14 @@ const usePeopleSearchCallbacks = ({
     },
     [query, selectedUsers, onChange, t, setInputError, setQuery]
   )
+}
 
-  const handleAutocompleteChange = useCallback(
+const useHandleAutocompleteChange = (
+  onChange: (event: SyntheticEvent, users: User[]) => void,
+  setInputError: (val: string | null) => void,
+  t: (key: string) => string
+): ((event: SyntheticEvent, value: (string | User)[]) => void) => {
+  return useCallback(
     (event: SyntheticEvent, value: (string | User)[]) => {
       const error = getAutocompleteError(value[value.length - 1], t)
       if (error) {
@@ -133,11 +136,82 @@ const usePeopleSearchCallbacks = ({
     },
     [onChange, setInputError, t]
   )
+}
 
-  return {
-    handleBlurCommit,
-    handleAutocompleteChange
-  }
+const useHandleKeyDown = (
+  query: string,
+  selectedUsers: User[],
+  onChange: (event: SyntheticEvent, users: User[]) => void,
+  t: (key: string) => string,
+  setInputError: (val: string | null) => void,
+  setQuery: (val: string) => void,
+  enableEmailAutocompleteAndCommit?: boolean
+): ((event: React.KeyboardEvent<HTMLInputElement>) => void) => {
+  return useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (enableEmailAutocompleteAndCommit && event.key === ' ') {
+        const trimmed = query.trim()
+        if (!trimmed) {
+          return
+        }
+        event.preventDefault()
+        const result = validateAndAddUser(trimmed, selectedUsers, t)
+        if (result.error !== null) {
+          setInputError(result.error)
+          return
+        }
+        setInputError(null)
+        if (result.updatedUsers) {
+          onChange(event, result.updatedUsers)
+        }
+        if (result.shouldClearQuery) {
+          setQuery('')
+        }
+      }
+    },
+    [
+      query,
+      selectedUsers,
+      onChange,
+      t,
+      setInputError,
+      setQuery,
+      enableEmailAutocompleteAndCommit
+    ]
+  )
+}
+
+const useHandleInputChange = (
+  setQuery: (val: string) => void,
+  setInputError: (val: string | null) => void,
+  enableEmailAutocompleteAndCommit?: boolean
+): ((_event: SyntheticEvent, value: string, reason: string) => void) => {
+  return useCallback(
+    (_event: SyntheticEvent, value: string, reason: string) => {
+      setQuery(value)
+      if (!enableEmailAutocompleteAndCommit) return
+
+      if (['input', 'clear'].includes(reason) || !value.trim()) {
+        setInputError(null)
+      }
+    },
+    [setQuery, setInputError, enableEmailAutocompleteAndCommit]
+  )
+}
+
+const useHandleSnackbarOpenChange = (
+  setSnackbarOpen: (val: boolean) => void,
+  setSnackbarMessage: (val: string) => void
+): ((open: boolean) => void) => {
+  return useCallback(
+    (open: boolean): void => {
+      setSnackbarOpen(open)
+      if (!open) {
+        setSnackbarMessage('')
+      }
+    },
+    [setSnackbarOpen, setSnackbarMessage]
+  )
 }
 
 export const normaliseUser = (v: string | User): User =>
@@ -187,6 +261,102 @@ const getAutocompleteError = (
   return null
 }
 
+interface UsePeopleSearchHandlersProps {
+  query: string
+  setQuery: (val: string) => void
+  setInputError: (val: string | null) => void
+  setSnackbarOpen: (val: boolean) => void
+  setSnackbarMessage: (val: string) => void
+  selectedUsers: User[]
+  onChange: (event: SyntheticEvent, users: User[]) => void
+  t: (key: string) => string
+  freeSolo?: boolean
+  enableEmailAutocompleteAndCommit?: boolean
+}
+
+interface UsePeopleSearchHandlersReturn {
+  handlePaste: (event: React.ClipboardEvent<HTMLInputElement>) => void
+  handleBlurCommit: (event: SyntheticEvent) => void
+  handleAutocompleteChange: (
+    event: SyntheticEvent,
+    value: (string | User)[]
+  ) => void
+  handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
+  handleInputChange: (
+    event: SyntheticEvent,
+    value: string,
+    reason: string
+  ) => void
+  handleSnackbarOpenChange: (open: boolean) => void
+}
+
+const usePeopleSearchHandlers = ({
+  query,
+  setQuery,
+  setInputError,
+  setSnackbarOpen,
+  setSnackbarMessage,
+  selectedUsers,
+  onChange,
+  t,
+  freeSolo,
+  enableEmailAutocompleteAndCommit
+}: UsePeopleSearchHandlersProps): UsePeopleSearchHandlersReturn => {
+  const handleBlurCommit = useHandleBlurCommit(
+    query,
+    selectedUsers,
+    onChange,
+    t,
+    setInputError,
+    setQuery
+  )
+
+  const handleAutocompleteChange = useHandleAutocompleteChange(
+    onChange,
+    setInputError,
+    t
+  )
+
+  const handleKeyDown = useHandleKeyDown(
+    query,
+    selectedUsers,
+    onChange,
+    t,
+    setInputError,
+    setQuery,
+    enableEmailAutocompleteAndCommit
+  )
+
+  const handleInputChange = useHandleInputChange(
+    setQuery,
+    setInputError,
+    enableEmailAutocompleteAndCommit
+  )
+
+  const handleSnackbarOpenChange = useHandleSnackbarOpenChange(
+    setSnackbarOpen,
+    setSnackbarMessage
+  )
+
+  const handlePaste = usePasteHandler({
+    freeSolo,
+    selectedUsers,
+    onChange,
+    setQuery,
+    setInputError,
+    t
+  })
+
+  return {
+    handlePaste,
+    handleBlurCommit,
+    handleAutocompleteChange,
+    handleKeyDown,
+    handleInputChange,
+    handleSnackbarOpenChange
+  }
+}
+
 export const usePeopleSearchState = ({
   objectTypes,
   showCurrentUser,
@@ -195,7 +365,8 @@ export const usePeopleSearchState = ({
   inputValue,
   selectedUsers,
   onChange,
-  freeSolo
+  freeSolo,
+  enableEmailAutocompleteAndCommit
 }: UsePeopleSearchStateProps): UsePeopleSearchStateReturn => {
   const { t } = useI18n()
   const currentUser = useAppSelector(state => state.user?.userData)
@@ -224,29 +395,41 @@ export const usePeopleSearchState = ({
     onSearchStateChangeRef
   })
 
-  const { handleBlurCommit, handleAutocompleteChange } =
-    usePeopleSearchCallbacks({
-      query: userSearch.query,
-      selectedUsers,
-      onChange,
-      t,
-      setInputError: userSearch.setInputError,
-      setQuery: userSearch.setQuery
-    })
-
-  const handlePaste = usePasteHandler({
-    freeSolo,
-    selectedUsers,
-    onChange,
+  const handlers = usePeopleSearchHandlers({
+    query: userSearch.query,
     setQuery: userSearch.setQuery,
     setInputError: userSearch.setInputError,
-    t
+    setSnackbarOpen: userSearch.setSnackbarOpen,
+    setSnackbarMessage: userSearch.setSnackbarMessage,
+    selectedUsers,
+    onChange,
+    t,
+    freeSolo,
+    enableEmailAutocompleteAndCommit
   })
+
+  const displayOptions = useMemo(() => {
+    if (!enableEmailAutocompleteAndCommit) {
+      return userSearch.options
+    }
+    if (userSearch.options.length === 0 && userSearch.query) {
+      const email = userSearch.query.trim()
+      const isNewEmail = !selectedUsers.some(u => u.email === email)
+      if (isValidEmail(email) && isNewEmail) {
+        return [{ email, displayName: email } as User]
+      }
+    }
+    return userSearch.options
+  }, [
+    userSearch.options,
+    userSearch.query,
+    selectedUsers,
+    enableEmailAutocompleteAndCommit
+  ])
 
   return {
     ...userSearch,
-    handleBlurCommit,
-    handlePaste,
-    handleAutocompleteChange
+    ...handlers,
+    options: displayOptions
   }
 }
