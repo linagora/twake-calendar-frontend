@@ -5,7 +5,8 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { fetchCalendars } from '../CalendarDAO'
 import { Calendar } from '../CalendarTypes'
 import { RejectedError } from '../types/RejectedError'
-import { fetchOwnerData } from './helpers'
+import { CalendarData, CalendarList } from '../types/CalendarData'
+import { getOwnerOrResourceData } from './helpers'
 
 export const getTempCalendarsListAsync = createAsyncThunk<
   Record<string, Calendar>,
@@ -13,58 +14,14 @@ export const getTempCalendarsListAsync = createAsyncThunk<
   { rejectValue: RejectedError }
 >('calendars/getTempCalendars', async (tempUser, { rejectWithValue }) => {
   try {
+    const openpaasId = getValidOpenPaasId(tempUser)
+    const calendars = await fetchCalendars(openpaasId, 'sharedPublic=true&')
+    const rawCalendars = getRawCalendars(calendars, tempUser)
+
     const importedCalendars: Record<string, Calendar> = {}
-    if (!tempUser.openpaasId) {
-      const username = tempUser.displayName || tempUser.email || 'User'
-      throw new Error(
-        `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
-      )
-    }
-    const calendars = await fetchCalendars(
-      tempUser.openpaasId,
-      'sharedPublic=true&'
-    )
-
-    const rawCalendars = calendars._embedded?.['dav:calendar']
-    if (!rawCalendars || rawCalendars.length === 0) {
-      const userName = tempUser.displayName || tempUser.email || 'User'
-      // Format: TRANSLATION:key|param1=value1
-      const encodedName = encodeURIComponent(userName)
-      throw new Error(
-        `TRANSLATION:calendar.userDoesNotHavePublicCalendars|name=${encodedName}`
-      )
-    }
-
     for (const cal of rawCalendars) {
-      const name = cal['dav:name'] ?? ''
-      const description = cal['caldav:description'] ?? ''
-      const delegated = cal['calendarserver:delegatedsource'] ? true : false
-      const source = cal['calendarserver:source']
-        ? cal['calendarserver:source']._links.self?.href
-        : cal._links.self?.href
-      if (!source) {
-        throw new Error('No source for calendar')
-      }
-      const link = cal._links.self?.href ?? ''
-
-      const id = source.replace('/calendars/', '').replace('.json', '')
-      const visibility = getCalendarVisibility(cal['acl'] ?? [])
-      const ownerData = await fetchOwnerData(id.split('/')[0])
-
-      importedCalendars[id] = {
-        id,
-        name,
-        link,
-        owner: ownerData,
-        description,
-        delegated,
-        color: {
-          light: tempUser.color?.light ?? '#a8a8a8ff',
-          dark: tempUser.color?.dark ?? '#a8a8a8ff'
-        },
-        visibility,
-        events: {}
-      }
+      const tempCal = await processTempCalendar(cal, tempUser)
+      importedCalendars[tempCal.id] = tempCal
     }
 
     return importedCalendars
@@ -76,3 +33,67 @@ export const getTempCalendarsListAsync = createAsyncThunk<
     })
   }
 })
+
+function getValidOpenPaasId(tempUser: User): string {
+  if (!tempUser.openpaasId) {
+    const username = tempUser.displayName || tempUser.email || 'User'
+    throw new Error(
+      `TRANSLATION:calendar.userDoesNotHaveValidId|name=${encodeURIComponent(username)}`
+    )
+  }
+  return tempUser.openpaasId
+}
+
+function getRawCalendars(
+  calendars: CalendarList,
+  tempUser: User
+): CalendarData[] {
+  const rawCalendars = calendars._embedded?.['dav:calendar']
+  if (!rawCalendars || rawCalendars.length === 0) {
+    const userName = tempUser.displayName || tempUser.email || 'User'
+    const encodedName = encodeURIComponent(userName)
+    throw new Error(
+      `TRANSLATION:calendar.userDoesNotHavePublicCalendars|name=${encodedName}`
+    )
+  }
+  return rawCalendars
+}
+
+function getCalendarSource(cal: CalendarData): string {
+  const source = cal['calendarserver:source']
+    ? cal['calendarserver:source']._links.self?.href
+    : cal._links.self?.href
+  if (!source) {
+    throw new Error('No source for calendar')
+  }
+  return source
+}
+
+function getCalendarColor(tempUser: User): { light: string; dark: string } {
+  return {
+    light: tempUser.color?.light ?? '#a8a8a8ff',
+    dark: tempUser.color?.dark ?? '#a8a8a8ff'
+  }
+}
+
+async function processTempCalendar(
+  cal: CalendarData,
+  tempUser: User
+): Promise<Calendar> {
+  const source = getCalendarSource(cal)
+  const id = source.replace('/calendars/', '').replace('.json', '')
+  const isResource = tempUser.objectType === 'resource'
+  const ownerData = await getOwnerOrResourceData(id.split('/')[0], isResource)
+
+  return {
+    id,
+    name: cal['dav:name'] ?? '',
+    link: cal._links.self?.href ?? '',
+    owner: ownerData,
+    description: cal['caldav:description'] ?? '',
+    delegated: !!cal['calendarserver:delegatedsource'],
+    color: getCalendarColor(tempUser),
+    visibility: getCalendarVisibility(cal['acl'] ?? []),
+    events: {}
+  }
+}

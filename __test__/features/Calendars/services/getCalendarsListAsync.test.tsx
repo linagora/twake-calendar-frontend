@@ -1,12 +1,21 @@
 import { fetchCalendars } from '@/features/Calendars/CalendarDAO'
 import { getCalendarsListAsync } from '@/features/Calendars/services/getCalendarsListAsync'
-import { fetchOwnerData } from '@/features/Calendars/services/helpers'
+import { getOwnerOrResourceData } from '@/features/Calendars/services/helpers'
 import { normalizeCalendar } from '@/features/Calendars/utils/normalizeCalendar'
 import { fetchCurrentUser } from '@/features/User/UserDao'
 import { formatReduxError } from '@/utils/errorUtils'
 
 jest.mock('@/features/User/UserDao')
-jest.mock('@/features/Calendars/services/helpers')
+jest.mock('@/features/Calendars/services/helpers', () => {
+  const originalModule = jest.requireActual(
+    '@/features/Calendars/services/helpers'
+  )
+  return {
+    __esModule: true,
+    ...originalModule,
+    getOwnerOrResourceData: jest.fn()
+  }
+})
 jest.mock('@/features/Calendars/CalendarDAO')
 jest.mock('@/utils/errorUtils')
 jest.mock('@/features/Calendars/utils/normalizeCalendar')
@@ -19,7 +28,7 @@ jest.mock('@mui/material/styles', () => ({
 }))
 
 const mockedFetchCurrentUser = fetchCurrentUser as jest.Mock
-const mockedFetchOwnerData = fetchOwnerData as jest.Mock
+const mockedGetOwnerOrResourceData = getOwnerOrResourceData as jest.Mock
 const mockedFetchCalendars = fetchCalendars as jest.Mock
 const mockedFormatReduxError = formatReduxError as jest.Mock
 const mockedNormalizeCalendar = normalizeCalendar as jest.Mock
@@ -86,7 +95,7 @@ describe('getCalendarsListAsync', () => {
         invite: [{ href: '', principal: '', access: 3, inviteStatus: 1 }]
       })
 
-    mockedFetchOwnerData
+    mockedGetOwnerOrResourceData
       .mockResolvedValueOnce({
         firstname: 'John',
         lastname: 'Doe',
@@ -150,9 +159,7 @@ describe('getCalendarsListAsync', () => {
     })
 
     // toRejectedError is imported from a mocked module; provide the expected return
-    const { toRejectedError } = jest.requireMock('@/utils/errorUtils') as {
-      toRejectedError: jest.Mock
-    }
+    const { toRejectedError } = jest.requireMock('@/utils/errorUtils')
     toRejectedError.mockReturnValueOnce({
       status: 500,
       message: 'Server Error'
@@ -182,14 +189,19 @@ describe('getCalendarsListAsync', () => {
       ownerId: 'error-123'
     })
 
-    // fetchOwnerData fails
-    mockedFetchOwnerData.mockRejectedValueOnce(new Error('Network Error'))
+    // getOwnerOrResourceData fails
+    mockedGetOwnerOrResourceData.mockRejectedValueOnce(
+      new Error('Network Error')
+    )
 
     const thunk = getCalendarsListAsync()
     const result = await thunk(dispatch, getState, undefined)
 
     const payload = result.payload as any
-    expect(mockedFetchOwnerData).toHaveBeenCalledWith('error-123')
+    expect(mockedGetOwnerOrResourceData).toHaveBeenCalledWith(
+      'error-123',
+      false
+    )
     expect(payload.importedCalendars['cal-1'].owner).toEqual({
       firstname: '',
       lastname: 'Unknown User',
@@ -208,13 +220,16 @@ describe('getCalendarsListAsync', () => {
       _embedded: { 'dav:calendar': [{ id: 'cal-1' }] }
     })
     mockedNormalizeCalendar.mockReturnValue({
-      cal: { 'dav:name': 'Resource Cal' },
+      cal: {
+        'dav:name': 'Resource Cal',
+        invite: [{ href: 'principals/resources/resource-123', access: 1 }]
+      },
       id: 'cal-1',
       ownerId: 'resource-123'
     })
 
-    // fetchOwnerData succeeds and returns a resource config structure
-    mockedFetchOwnerData.mockResolvedValueOnce({
+    // getOwnerOrResourceData succeeds and returns a resource config structure
+    mockedGetOwnerOrResourceData.mockResolvedValueOnce({
       firstname: 'Creator',
       lastname: 'User',
       emails: [],
@@ -225,7 +240,10 @@ describe('getCalendarsListAsync', () => {
     const result = await thunk(dispatch, getState, undefined)
 
     const payload = result.payload as any
-    expect(mockedFetchOwnerData).toHaveBeenCalledWith('resource-123')
+    expect(mockedGetOwnerOrResourceData).toHaveBeenCalledWith(
+      'resource-123',
+      true
+    )
     expect(payload.importedCalendars['cal-1'].owner).toEqual({
       firstname: 'Creator',
       lastname: 'User',
