@@ -67,19 +67,29 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 ### Run it with docker
 
-After compiling the project with npm (see previous section) simply run:
+First, compile the project with npm:
 
-```
-docker build -t linagora/twake-calendar-front .
+```bash
+npm run build
 ```
 
-Then edit `.env.js` in order to match your configuration then run it with:
+Then build the docker image for the specific application (private or public):
 
+```bash
+# For private app:
+docker build -f apps/private/Dockerfile -t linagora/twake-calendar-private .
+
+# For public app:
+docker build -f apps/public/Dockerfile -t linagora/twake-calendar-public .
 ```
+
+To run the container, mount the `.env.js` configuration file from the root `public/` directory:
+
+```bash
 docker run -d \
-  -v $PWD/.env.example.js:/usr/share/nginx/html/.env.js \
+  -v $PWD/public/.env.js:/usr/share/nginx/html/.env.js \
   -p 5000:80 \
-  tcal-front
+  linagora/twake-calendar-private
 ```
 
 And then visit [https://localhost:5000](https://localhost:5000).

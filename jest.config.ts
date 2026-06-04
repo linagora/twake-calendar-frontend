@@ -31,7 +31,7 @@ const config: Config = {
       extensionsToTreatAsEsm: ['.ts', '.tsx'],
       testTimeout: 15000,
       transform: {
-        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
         '^.+\\.(js|jsx|mjs)$': 'babel-jest',
         '^.+\\.(css|scss|sass|less|styl|stylus)$':
           'jest-preview/transforms/css',
@@ -48,10 +48,13 @@ const config: Config = {
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
-        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@injected/(.*)$': '<rootDir>/common/src/$1',
+        '^@/common/(.*)$': '<rootDir>/common/src/$1',
+        '^@common/(.*)$': '<rootDir>/common/src/$1',
+        '^@/(.*)$': '<rootDir>/apps/calendar/src/$1',
         '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       },
-      setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts']
+      setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts']
     },
     {
       displayName: 'node',
@@ -70,13 +73,15 @@ const config: Config = {
       testMatch: ['**/*.test.ts'],
       testTimeout: 15000,
       transform: {
-        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
         '^.+\\.(js|jsx|mjs)$': 'babel-jest'
       },
       transformIgnorePatterns: ['/node_modules/(?!(ky|@linagora/twake-mui)/)'],
-      setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+      setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@/common/(.*)$': '<rootDir>/common/src/$1',
+        '^@common/(.*)$': '<rootDir>/common/src/$1',
+        '^@/(.*)$': '<rootDir>/apps/calendar/src/$1',
         '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       }
     }

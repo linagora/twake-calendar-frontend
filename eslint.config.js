@@ -9,14 +9,14 @@ const cozyReactConfigs = Array.isArray(cozyReact) ? cozyReact : [cozyReact]
 export default [
   {
     ignores: [
-      'dist/',
-      'build/',
-      'node_modules/',
-      'coverage/',
-      'public/',
-      '*.config.js',
-      '*.config.ts',
-      'fileTransformer.ts'
+      '**/dist/',
+      '**/build/',
+      '**/node_modules/',
+      '**/coverage/',
+      '**/public/',
+      '**/*.config.js',
+      '**/*.config.ts',
+      '**/fileTransformer.ts'
     ]
   },
 
@@ -39,7 +39,13 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
-        project: true
+        project: [
+          './apps/*/tsconfig.json',
+          './common/tsconfig.json',
+          './__test__/tsconfig.json',
+          './tsconfig.base.json'
+        ],
+        tsconfigRootDir: import.meta.dirname
       }
     },
 

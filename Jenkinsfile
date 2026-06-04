@@ -98,14 +98,16 @@ pipeline {
             echo "Docker tag: ${dockerTag}"
             def shortSha = env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : 'dev'
             sh 'npm run build'
-            sh "docker build --build-arg BUILD_VERSION=${shortSha} -t linagora/twake-calendar-web-pr:\$DOCKER_TAG ."
+            sh "docker build -f apps/private/Dockerfile --build-arg BUILD_VERSION=${shortSha} -t linagora/twake-calendar-private-pr:\$DOCKER_TAG ."
+            sh "docker build -f apps/public/Dockerfile --build-arg BUILD_VERSION=${shortSha} -t linagora/twake-calendar-public-pr:\$DOCKER_TAG ."
             sh 'echo $DOCKER_HUB_CREDENTIAL_PSW | docker login -u $DOCKER_HUB_CREDENTIAL_USR --password-stdin'
-            sh 'docker push linagora/twake-calendar-web-pr:$DOCKER_TAG'
+            sh 'docker push linagora/twake-calendar-private-pr:$DOCKER_TAG'
+            sh 'docker push linagora/twake-calendar-public-pr:$DOCKER_TAG'
             sh """
               HTTP_STATUS=\$(curl -s -o /tmp/gh_comment_response.json -w "%{http_code}" -X POST \\
                 -H "Authorization: token \${GITHUB_CREDENTIAL_PSW}" \\
                 -H "Content-Type: application/json" \\
-                -d "{\\"body\\": \\"Docker image published for this PR: linagora/twake-calendar-web-pr:${dockerTag}\\"}" \\
+                -d "{\\"body\\": \\"Docker images published for this PR:\\n- Private: linagora/twake-calendar-private-pr:${dockerTag}\\n- Public: linagora/twake-calendar-public-pr:${dockerTag}\\"}" \\
                 "https://api.github.com/repos/linagora/twake-calendar-frontend/issues/\${CHANGE_ID}/comments")
               if [ "\$HTTP_STATUS" -lt 200 ] || [ "\$HTTP_STATUS" -ge 300 ]; then
                 echo "WARNING: GitHub API comment failed with HTTP \$HTTP_STATUS"
@@ -134,9 +136,11 @@ pipeline {
 
             echo "Docker tag: ${env.DOCKER_TAG}"
             sh 'npm run build'
-            sh 'docker build --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-web:$DOCKER_TAG .'
+            sh 'docker build -f apps/private/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-private:$DOCKER_TAG .'
+            sh 'docker build -f apps/public/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-public:$DOCKER_TAG .'
             sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
-            sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+            sh 'docker push linagora/twake-calendar-private:$DOCKER_TAG'
+            sh 'docker push linagora/twake-calendar-public:$DOCKER_TAG'
           }
         }
       }
