@@ -1,6 +1,6 @@
 import Tooltip from '@common/components/Tooltip'
 import { IconButton, useTheme } from '@linagora/twake-mui'
-import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -107,7 +107,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
                     style={{ marginRight: 8 }}
                     aria-label={t('menubar.help')}
                   >
-                    <HelpOutlinedIcon />
+                    <HelpOutlineOutlinedIcon />
                   </IconButton>
                 </Tooltip>
               </div>
