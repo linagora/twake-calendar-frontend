@@ -5,15 +5,9 @@ import * as Sentry from '@sentry/react'
 import './index.styl'
 import App from './App'
 import { store } from '@common/app/store'
+import { initSentry, SentryErrorBoundary } from '@common/app/sentry'
 
-if (window.SENTRY_DSN) {
-  Sentry.init({
-    dsn: window.SENTRY_DSN,
-    integrations: [
-      Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })
-    ]
-  })
-}
+initSentry()
 
 const container = document.getElementById('root')
 if (!container) throw new Error('Root element not found')
