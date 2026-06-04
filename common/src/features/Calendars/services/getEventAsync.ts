@@ -35,10 +35,8 @@ export const getEventThunk = (create: ReducerCreators<CalendarState>) =>
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         if (!state.list[action.payload.calId]) {
           state.list[action.payload.calId] = {
             id: action.payload.calId,
@@ -71,6 +69,7 @@ export const getEventThunk = (create: ReducerCreators<CalendarState>) =>
         }
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||

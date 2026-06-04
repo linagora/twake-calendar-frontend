@@ -67,10 +67,8 @@ export const getCalendarsListThunk = (create: ReducerCreators<CalendarState>) =>
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         state.error = action.payload.errors.length
           ? action.payload.errors
           : null
@@ -91,6 +89,7 @@ export const getCalendarsListThunk = (create: ReducerCreators<CalendarState>) =>
         })
       },
       rejected: (state, action) => {
+        state.pending = false
         if (action.payload?.status !== 401) {
           state.error =
             action.payload?.message ||

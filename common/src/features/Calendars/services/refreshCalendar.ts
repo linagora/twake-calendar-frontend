@@ -81,10 +81,8 @@ export const refreshCalendarWithSyncToken = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         state.error = null
 
         const {
@@ -118,6 +116,7 @@ export const refreshCalendarWithSyncToken = (
         }
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||

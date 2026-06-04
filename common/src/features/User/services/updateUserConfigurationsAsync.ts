@@ -7,7 +7,7 @@ function applyLanguageUpdate(
   state: UserState,
   language: string | undefined
 ): void {
-  if (language === undefined) return
+  if (!language) return
 
   state.coreConfig.language = language
   if (state.userData) {
@@ -19,7 +19,7 @@ function applyTimezoneUpdate(
   state: UserState,
   timezone: string | null | undefined
 ): void {
-  if (timezone === undefined) return
+  if (!timezone) return
 
   if (!state.coreConfig.datetime) {
     state.coreConfig.datetime = { timeZone: null }
@@ -34,7 +34,7 @@ function applyAlarmEmailsUpdate(
   state: UserState,
   alarmEmails: boolean | undefined
 ): void {
-  if (alarmEmails === undefined) return
+  if (!alarmEmails) return
 
   state.alarmEmailsEnabled = alarmEmails === true
 }
@@ -68,10 +68,8 @@ export const updateUserConfigurationsThunk = (
         applyAlarmEmailsUpdate(state, action.payload.alarmEmails)
       },
       rejected: (state, action) => {
-        if (action.payload?.status !== 401) {
-          state.error =
-            action.payload?.message || 'Failed to update user configurations'
-        }
+        state.error =
+          action.payload?.message || 'Failed to update user configurations'
       }
     }
   )

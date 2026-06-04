@@ -22,15 +22,14 @@ export const patchACLCalendarThunk = (create: ReducerCreators<CalendarState>) =>
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         state.list[action.payload.calId].visibility =
           action.payload.request !== '' ? 'public' : 'private'
         state.error = null
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||

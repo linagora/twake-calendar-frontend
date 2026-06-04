@@ -7,8 +7,7 @@ export const removeEventReducer = (create: ReducerCreators<CalendarState>) =>
       state: CalendarState,
       action: PayloadAction<{ calendarUid: string; eventUid: string }>
     ) => {
-      delete state.list[action.payload.calendarUid].events[
-        action.payload.eventUid
-      ]
+      const { calendarUid, eventUid } = action.payload
+      delete state.list?.[calendarUid]?.events?.[eventUid]
     }
   )

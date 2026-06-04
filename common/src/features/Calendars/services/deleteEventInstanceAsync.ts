@@ -37,14 +37,13 @@ export const deleteEventInstanceThunk = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         delete state.list[action.payload.calId].events[action.payload.eventId]
         state.error = null
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||

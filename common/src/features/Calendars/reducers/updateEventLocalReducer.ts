@@ -11,6 +11,8 @@ export const updateEventLocalReducer = (
       action: PayloadAction<{ calId: string; event: CalendarEvent }>
     ) => {
       const { calId, event } = action.payload
-      state.list[calId].events[event.uid] = event
+      if (state.list[calId]) {
+        state.list[calId].events[event.uid] = event
+      }
     }
   )

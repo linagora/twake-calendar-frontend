@@ -27,13 +27,12 @@ export const moveEventThunk = (create: ReducerCreators<CalendarState>) =>
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: state => {
+        state.pending = false
         state.error = null
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           action.payload?.message ||
           action.error.message ||

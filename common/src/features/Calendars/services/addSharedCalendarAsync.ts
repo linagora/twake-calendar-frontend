@@ -28,13 +28,21 @@ export const addSharedCalendarThunk = (
       try {
         const body = makeAddSharedCalendarBody(calId, cal)
         await calendarAction('POST', `/calendars/${userId}.json`, body)
-        const ownerData = await getUserDetails(
-          cal.cal._links.self.href
-            .replace('/calendars/', '')
-            .replace('.json', '')
-            .split('/')[0]
-        )
-
+        let ownerData: OpenPaasUserData = {
+          firstname: '',
+          lastname: cal.cal['dav:name'] ?? '',
+          emails: []
+        }
+        try {
+          ownerData = await getUserDetails(
+            cal.cal._links.self.href
+              .replace('/calendars/', '')
+              .replace('.json', '')
+              .split('/')[0]
+          )
+        } catch (e) {
+          console.error('Error while fetching owner of shared calendar: ', e)
+        }
         return {
           calId: cal.cal._links.self?.href
             ?.replace('/calendars/', '')
@@ -53,10 +61,8 @@ export const addSharedCalendarThunk = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
@@ -69,8 +75,9 @@ export const addSharedCalendarThunk = (
         state.error = null
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
-          (action.payload as Error)?.message ||
+          (action.payload as RejectedError)?.message ||
           action.error.message ||
           'Failed to add shared calendar'
       }

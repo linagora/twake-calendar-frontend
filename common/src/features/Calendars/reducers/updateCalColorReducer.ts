@@ -10,6 +10,9 @@ export const updateCalColorReducer = (create: ReducerCreators<CalendarState>) =>
         color: { light: string; dark: string }
       }>
     ) => {
-      state.list[action.payload.id].color = action.payload.color
+      const cal = state.list[action.payload.id]
+      if (cal) {
+        cal.color = action.payload.color
+      }
     }
   )

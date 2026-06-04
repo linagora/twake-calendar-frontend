@@ -76,10 +76,8 @@ export const addCalendarResourceThunk = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         state.list[action.payload.calId] = {
           color: action.payload.color,
           id: action.payload.calId,
@@ -92,6 +90,7 @@ export const addCalendarResourceThunk = (
         state.error = null
       },
       rejected: (state, action) => {
+        state.pending = false
         state.error =
           (action.payload as RejectedError).message ||
           action.error.message ||

@@ -69,30 +69,18 @@ function applyDatetimeConfig(
     config => config.name === 'datetime'
   )
 
-  if (datetimeConfig?.value) {
-    const datetimeValue = datetimeConfig.value as { timeZone?: string }
-    const serverTimeZone = datetimeValue.timeZone
-    state.coreConfig.datetime = {
-      ...state.coreConfig.datetime,
-      ...(typeof datetimeConfig.value === 'object' &&
-      datetimeConfig.value !== null
-        ? datetimeConfig.value
-        : {}),
-      timeZone: serverTimeZone !== undefined ? serverTimeZone : null
-    }
-    if (state.userData) {
-      state.userData.timezone =
-        serverTimeZone !== undefined ? serverTimeZone : null
-    }
-  } else {
-    state.coreConfig.datetime = {
-      ...state.coreConfig.datetime,
-      timeZone: null
-    }
-    if (state.userData) {
-      state.userData.timezone = null
-    }
+  const datetimeValue =
+    datetimeConfig?.value && typeof datetimeConfig.value === 'object'
+      ? (datetimeConfig.value as { timeZone?: string })
+      : {}
+  const timeZone = datetimeValue.timeZone ?? null
+
+  state.coreConfig.datetime = {
+    ...state.coreConfig.datetime,
+    ...datetimeValue,
+    timeZone
   }
+  state.userData.timezone = timeZone
 }
 
 function applyCalendarModuleConfig(
@@ -140,15 +128,14 @@ export const getOpenPaasUserDataThunk = (create: ReducerCreators<UserState>) =>
       pending: state => {
         state.loading = true
       },
-      settled: state => {
-        state.loading = false
-      },
       fulfilled: (state, action) => {
         updateBasicUserData(state, action.payload)
         updateOrganizerData(state, action.payload)
         applyModuleConfigurations(state, action.payload)
+        state.loading = false
       },
       rejected: (state, action) => {
+        state.loading = false
         if (action.payload?.status !== 401) {
           state.error =
             action.payload?.message || 'Failed to fetch user information'

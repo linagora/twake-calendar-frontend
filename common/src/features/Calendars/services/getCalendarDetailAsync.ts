@@ -69,31 +69,28 @@ export const getCalendarDetailThunk = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
-        const type = action.payload.calType === 'temp' ? 'templist' : 'list'
+        state.pending = false
 
-        if (!state[type][action.payload.calId]) {
+        const { calId, events, calType, syncToken } = action.payload
+        const type = calType === 'temp' ? 'templist' : 'list'
+
+        if (!state[type][calId]) {
           return
         }
-        state[type][action.payload.calId].syncToken = action.payload.syncToken
-        action.payload.events.forEach(event => {
-          state[type][action.payload.calId].events[event.uid] = event
-        })
-        Object.keys(state[type][action.payload.calId].events).forEach(id => {
-          state[type][action.payload.calId].events[id].color =
-            state[type][action.payload.calId].color
-          state[type][action.payload.calId].events[id].calId =
-            action.payload.calId
-          if (!state[type][action.payload.calId].events[id].timezone) {
-            state[type][action.payload.calId].events[id].timezone =
+        state[type][calId].syncToken = syncToken
+        events.forEach(event => {
+          state[type][calId].events[event.uid] = event
+          state[type][calId].events[event.uid].color = state[type][calId].color
+          state[type][calId].events[event.uid].calId = calId
+          if (!state[type][calId].events[event.uid].timezone) {
+            state[type][calId].events[event.uid].timezone =
               browserDefaultTimeZone
           }
         })
       },
       rejected: (state, action) => {
+        state.pending = false
         if (
           action.payload?.message.includes('aborted') ||
           action.error.name === 'AbortError'

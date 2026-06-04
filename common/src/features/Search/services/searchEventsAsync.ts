@@ -38,14 +38,13 @@ export const searchEventsThunk = (
         state.loading = true
         state.error = null // reset error on new search
       },
-      settled: state => {
-        state.loading = false
-      },
       fulfilled: (state, action) => {
+        state.loading = false
         state.hits = action.payload.hits
         state.results = action.payload.events
       },
       rejected: (state, action) => {
+        state.loading = false
         state.error = action.payload?.message || 'Unknown error occurred'
       }
     }

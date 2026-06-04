@@ -11,6 +11,7 @@ import { formatReduxError } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 import { getOwnerOrResourceData } from './helpers'
+import { defaultColors } from '@common/utils/defaultColors'
 
 export const getTempCalendarsListThunk = (
   create: ReducerCreators<CalendarState>
@@ -45,17 +46,16 @@ export const getTempCalendarsListThunk = (
       pending: state => {
         state.pending = true
       },
-      settled: state => {
-        state.pending = false
-      },
       fulfilled: (state, action) => {
+        state.pending = false
         Object.keys(action.payload).forEach(
           id => (state.templist[id] = action.payload[id])
         )
       },
       rejected: (state, action) => {
+        state.pending = false
         if (
-          action.payload?.message.includes('aborted') ||
+          action.payload?.message?.includes('aborted') ||
           action.error.name === 'AbortError'
         ) {
           return
@@ -105,8 +105,8 @@ function getCalendarSource(cal: CalendarData): string {
 
 function getCalendarColor(tempUser: User): { light: string; dark: string } {
   return {
-    light: tempUser.color?.light ?? '#a8a8a8ff',
-    dark: tempUser.color?.dark ?? '#a8a8a8ff'
+    light: tempUser.color?.light ?? defaultColors[0].light,
+    dark: tempUser.color?.dark ?? defaultColors[0].dark
   }
 }
 
