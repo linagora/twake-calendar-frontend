@@ -4,7 +4,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { EventContentArg } from '@fullcalendar/core'
 import { getContrastRatio } from '@linagora/twake-mui'
 import CancelIcon from '@mui/icons-material/Cancel'
-import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import moment from 'moment'
 import React, { useLayoutEffect, useState } from 'react'
@@ -199,9 +199,11 @@ export function DisplayedIcons(
         letterSpacing: 'inherit'
       }}
     >
-      {IconDisplayed.needAction && <HelpOutlinedIcon style={iconStyle} />}
+      {IconDisplayed.needAction && (
+        <HelpOutlineOutlinedIcon style={iconStyle} />
+      )}
       {IconDisplayed.declined && <CancelIcon style={iconStyle} />}
-      {IconDisplayed.tentative && <HelpOutlinedIcon style={iconStyle} />}
+      {IconDisplayed.tentative && <HelpOutlineOutlinedIcon style={iconStyle} />}
       {IconDisplayed.private && <LockOutlinedIcon style={iconStyle} />}
     </span>
   )

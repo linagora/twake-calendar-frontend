@@ -118,7 +118,7 @@ export function TimezoneAutocomplete({
                 : {})
             },
             htmlInput: {
-              ...params.slotProps.input,
+              ...params.slotProps.htmlInput,
               autoComplete: 'new-password'
             }
           }}

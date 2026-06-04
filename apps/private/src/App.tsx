@@ -16,6 +16,7 @@ import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { CallbackResume } from '@/features/User/LoginCallback'
 import { useInitializeApp } from '@common/features/User/useInitializeApp'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
+import { makeCalendarOverrides } from '@common/CalendarTheme/makeCalendarOverrides'
 
 import {
   enGB,
@@ -65,7 +66,11 @@ export default function App(): JSX.Element {
   useInitializeApp()
 
   return (
-    <TwakeMuiThemeProvider>
+    <TwakeMuiThemeProvider
+      themeOptions={{
+        ...makeCalendarOverrides()
+      }}
+    >
       <I18n
         dictRequire={(lang: keyof typeof locale) => locale[lang]}
         lang={lang}

@@ -6,7 +6,8 @@ import {
   Divider,
   IconButton,
   SxProps,
-  Theme
+  Theme,
+  useTheme
 } from '@linagora/twake-mui'
 import AccessTime from '@mui/icons-material/AccessTime'
 import KeyboardAltOutlined from '@mui/icons-material/KeyboardAltOutlined'
@@ -28,41 +29,6 @@ const TIME_DISPLAY_SX = {
   fontWeight: 400
 } as const
 
-const TIME_INPUT_SX: SxProps<Theme> = {
-  width: '100%',
-  '& .MuiPickersInputBase-sectionAfter': { mx: '16px' },
-  '& .MuiPickersSectionList-root': { justifyContent: 'end' },
-  '& .MuiPickersInputBase-root': {
-    ...TIME_DISPLAY_SX,
-    color: 'text.secondary',
-    backgroundColor: 'transparent !important',
-    '&:before': { borderBottomColor: 'transparent !important' },
-    '&:after': { borderBottomColor: 'transparent !important' }
-  },
-  '& .MuiPickersInputBase-input': {
-    textAlign: 'center'
-  },
-  '& .MuiPickersInputBase-root.Mui-focused .MuiPickersInputBase-input': {
-    backgroundColor: 'transparent !important',
-    color: 'primary.main'
-  }
-}
-
-const STATIC_PICKER_SX: SxProps<Theme> = {
-  '& .MuiPickersToolbar-content': { justifyContent: 'center' },
-  '& .MuiTimePickerToolbar-hourMinuteLabel': {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '16px'
-  },
-  '& .MuiTimePickerToolbar-hourMinuteLabel .MuiPickersToolbarText-root[data-selected]':
-    { color: 'primary.main' },
-  '& .MuiPickersToolbar-root .MuiTypography-root': TIME_DISPLAY_SX,
-  '& .MuiPickersToolbar-title': { display: 'none' },
-  '& .MuiPickersArrowSwitcher-root': { display: 'none' }
-}
-
 type DialogView = 'clock' | 'keyboard'
 
 export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
@@ -74,6 +40,56 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
   disabled = false
 }) => {
   const { t } = useI18n()
+  const theme = useTheme()
+
+  const TIME_INPUT_SX: SxProps<Theme> = {
+    width: '100%',
+    '& .MuiPickersInputBase-sectionAfter': { mx: '16px' },
+    '& .MuiPickersSectionList-root': { justifyContent: 'end' },
+    '& .MuiPickersInputBase-root': {
+      ...TIME_DISPLAY_SX,
+      color: theme.palette.text.secondary,
+      backgroundColor: 'transparent !important',
+      '&:before': { borderBottomColor: 'transparent !important' },
+      '&:after': { borderBottomColor: 'transparent !important' }
+    },
+    '& .MuiPickersInputBase-input': {
+      textAlign: 'center'
+    },
+    '& .MuiPickersInputBase-root.Mui-focused .MuiPickersInputBase-input': {
+      backgroundColor: 'transparent !important',
+      color: theme.palette.primary.main
+    }
+  }
+
+  const STATIC_PICKER_SX: SxProps<Theme> = {
+    '& .MuiPickersToolbar-content': { justifyContent: 'center' },
+    '& .MuiTimePickerToolbar-hourMinuteLabel': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '16px'
+    },
+    '& .MuiTimePickerToolbar-hourMinuteLabel .MuiPickersToolbarText-root[data-selected]':
+      { color: theme.palette.primary.main },
+    '& .MuiPickersToolbar-root .MuiTypography-root': TIME_DISPLAY_SX,
+    '& .MuiPickersToolbar-title': { display: 'none' },
+    '& .MuiPickersArrowSwitcher-root': { display: 'none' },
+    '& .MuiClockPointer-root': {
+      backgroundColor: theme.palette.primary.main
+    },
+    '& .MuiClockPointer-thumb': {
+      backgroundColor: theme.palette.primary.main,
+      borderColor: theme.palette.primary.main
+    },
+    '& .MuiClock-pin': {
+      backgroundColor: theme.palette.primary.main
+    },
+    '& .MuiClockNumber-root[aria-selected="true"]': {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText
+    }
+  }
 
   const [open, setOpen] = useState(false)
   const [internalValue, setInternalValue] = useState<PickerValue>(value)

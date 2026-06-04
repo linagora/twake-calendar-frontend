@@ -1,5 +1,5 @@
 import { IconButton, Box, Tooltip } from '@linagora/twake-mui'
-import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import { useI18n } from 'twake-i18n'
 import { AppListMenu } from '@common/components/Menubar/AppListMenu'
 import { UserMenu } from '@common/components/Menubar/UserMenu'
@@ -34,7 +34,7 @@ export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
             style={{ marginRight: 4 }}
             aria-label={t('menubar.help')}
           >
-            <HelpOutlinedIcon fontSize="small" />
+            <HelpOutlineOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
