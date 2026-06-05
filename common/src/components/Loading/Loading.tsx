@@ -8,6 +8,7 @@ export function Loading() {
     <Box
       data-testid="loading"
       sx={{
+        backgroundColor: 'white',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -15,7 +16,8 @@ export function Loading() {
         height: '100vh',
         position: 'fixed',
         top: 0,
-        left: 0
+        left: 0,
+        zIndex: 9999
       }}
     >
       <DotLottieReact
