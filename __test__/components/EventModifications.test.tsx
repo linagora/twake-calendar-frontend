@@ -112,7 +112,9 @@ describe('CalendarApp integration', () => {
     expect(eventEl).toBeInTheDocument()
     act(() => {
       if (calendarApi) {
-        const fcEvent = calendarApi.getEventById('event1')
+        const fcEvent = calendarApi.getEventById(
+          '667037022b752d0026472254/cal1/event1'
+        )
         expect(fcEvent?.title).toBe('Test Event')
         const oldEnd = new Date(new Date().getTime() + 3600000) // +1 hour
         const newEnd = new Date(oldEnd.getTime() + 1800000) // +30 min

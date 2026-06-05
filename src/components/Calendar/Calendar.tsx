@@ -469,11 +469,18 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
     if (!isWebKit) return
 
     const api = calendarRef.current
-    if (!api) return
+    const wrapper = calendarWrapperRef.current
+    if (!api || !wrapper) return
 
-    const raf = requestAnimationFrame(() => api.updateSize())
+    const raf = requestAnimationFrame(() => {
+      api.updateSize()
+      wrapper.style.transform = 'translateZ(0)'
+      requestAnimationFrame(() => {
+        wrapper.style.transform = ''
+      })
+    })
     return (): void => cancelAnimationFrame(raf)
-  }, [sortedSelectedCalendars, calendarRef])
+  }, [sortedSelectedCalendars, fullCalendarEvents, calendarRef])
 
   useTouchListener(
     eventHandlers.handleDateSelect,
