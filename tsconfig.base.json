@@ -17,7 +17,9 @@
     "jsx": "react-jsx",
     "paths": {
       "@common/*": ["./common/src/*"],
-      "@injected/*": ["./common/src/*"]
+      "@injected/*": ["./common/src/*"],
+      "@private/*": ["./apps/private/src/*"],
+      "@public/*": ["./apps/public/src/*"]
     }
   }
 }

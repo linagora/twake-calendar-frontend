@@ -5,7 +5,8 @@
     "paths": {
       "@/common/*": ["../common/src/*"],
       "@common/*": ["../common/src/*"],
-      "@/*": ["../apps/calendar/src/*"]
+      "@private/*": ["../apps/private/src/*"],
+      "@public/*": ["../apps/public/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "../common/src/*.d.ts"]

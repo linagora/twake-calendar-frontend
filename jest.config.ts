@@ -51,7 +51,8 @@ const config: Config = {
         '^@injected/(.*)$': '<rootDir>/common/src/$1',
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',
-        '^@/(.*)$': '<rootDir>/apps/calendar/src/$1',
+        '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
+        '^@public/(.*)$': '<rootDir>/apps/public/src/$1',
         '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       },
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts']
@@ -81,7 +82,8 @@ const config: Config = {
       moduleNameMapper: {
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',
-        '^@/(.*)$': '<rootDir>/apps/calendar/src/$1',
+        '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
+        '^@public/(.*)$': '<rootDir>/apps/public/src/$1',
         '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
       }
     }
