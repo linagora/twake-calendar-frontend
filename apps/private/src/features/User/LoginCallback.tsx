@@ -10,6 +10,11 @@ import {
   setUserError
 } from '@common/features/User/userSlice'
 import { setAppLoading } from '@common/app/loadingSlice'
+import {
+  TokenEndpointResponse,
+  TokenEndpointResponseHelpers,
+  UserInfoResponse
+} from 'openid-client'
 
 interface RedirectState {
   code_verifier: string
@@ -42,7 +47,10 @@ const getErrorMessage = (error: unknown): string => {
 const processCallbackData = async (
   codeVerifier: string,
   state: string
-): Promise<{ userinfo: User; tokenSet: TokenSet }> => {
+): Promise<{
+  userinfo: UserInfoResponse
+  tokenSet: TokenEndpointResponse & TokenEndpointResponseHelpers
+}> => {
   const data = await Callback(codeVerifier, state)
   if (!data?.userinfo || !data?.tokenSet) {
     throw new Error('OAuth callback failed')
