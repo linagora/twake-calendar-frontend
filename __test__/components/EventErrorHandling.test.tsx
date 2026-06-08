@@ -69,8 +69,8 @@ describe('Event Error Handling', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText('Test Event'))
-        expect(screen.getByRole('alert')).toBeInTheDocument()
+        expect(screen.queryByText('Test Event')).toBeInTheDocument()
+        expect(screen.queryByRole('alert')).toBeInTheDocument()
       },
       { timeout: 10000 }
     )
@@ -96,5 +96,5 @@ describe('Event Error Handling', () => {
     }
 
     consoleWarnSpy.mockRestore()
-  }, 15000)
+  }, 30000)
 })

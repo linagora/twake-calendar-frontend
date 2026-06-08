@@ -5,7 +5,6 @@ import * as calendarDetailThunks from '@common/features/Calendars/services'
 import * as servicesModule from '@common/features/Calendars/services'
 import { searchUsers } from '@common/features/User/userAPI'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { useRef } from 'react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
@@ -321,7 +320,9 @@ describe('calendar Availability search', () => {
     const input = screen.getByPlaceholderText(
       'peopleSearch.availabilityPlaceholder'
     )
-    await act(async () => userEvent.type(input, 'New'))
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'New' } })
+    })
     const option = await screen.findByText('New User')
     await act(async () => {
       fireEvent.click(option)
@@ -352,7 +353,9 @@ describe('calendar Availability search', () => {
     const input = screen.getByPlaceholderText(
       'peopleSearch.availabilityPlaceholder'
     )
-    await act(async () => userEvent.type(input, 'New'))
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'New' } })
+    })
 
     const option = await screen.findByText('New User')
 
@@ -396,7 +399,9 @@ describe('calendar Availability search', () => {
     const input = screen.getByPlaceholderText(
       'peopleSearch.availabilityPlaceholder'
     )
-    await act(async () => userEvent.type(input, 'New'))
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'New' } })
+    })
 
     const option = await screen.findByText('New User')
     await act(async () => {
