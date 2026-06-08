@@ -61,7 +61,11 @@ const EventUpdateModalInternal: React.FC<
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title={t('event.updateEvent')}
+      title={
+        isSpecific
+          ? t('eventPreview.editEventSpecificSettings')
+          : t('event.updateEvent')
+      }
       isExpanded={showMore}
       onExpandToggle={handleExpandToggle}
       actions={actions}
