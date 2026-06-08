@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./common" },
+    { "path": "./apps/private" },
+    { "path": "./apps/public" },
+    { "path": "./__test__" }
+  ]
+}
