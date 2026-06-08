@@ -12,6 +12,7 @@ import { EventPreviewHeader } from '@common/components/EventPreview/EventPreview
 import { useEventPreviewState } from '@common/components/EventPreview/useEventPreviewState'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { EventPreviewTitleRow } from './EventPreviewTitleRow'
+import EventSettingsUpdateModal from '@common/features/Events/EventSettingsUpdateModal'
 
 const EventPreviewModal: React.FC<{
   eventId: string
@@ -186,21 +187,37 @@ const EventPreviewModal: React.FC<{
       />
 
       {/* Edit modal */}
-      <EventUpdateModal
-        open={openUpdateModal}
-        isSpecific={isSpecificRef.current}
-        onClose={() => {
-          setOpenUpdateModal(false)
-          setHidePreview(false)
-        }}
-        onCloseAll={() => {
-          setOpenUpdateModal(false)
-          onClose({}, 'backdropClick')
-        }}
-        eventId={eventId}
-        calId={updateModalCalId}
-        typeOfAction={resolvedTypeOfAction}
-      />
+      {isSpecificRef.current ? (
+        <EventSettingsUpdateModal
+          open={openUpdateModal}
+          onClose={() => {
+            setOpenUpdateModal(false)
+            setHidePreview(false)
+          }}
+          onCloseAll={() => {
+            setOpenUpdateModal(false)
+            onClose({}, 'backdropClick')
+          }}
+          eventId={eventId}
+          calId={updateModalCalId}
+          typeOfAction={resolvedTypeOfAction}
+        />
+      ) : (
+        <EventUpdateModal
+          open={openUpdateModal}
+          onClose={() => {
+            setOpenUpdateModal(false)
+            setHidePreview(false)
+          }}
+          onCloseAll={() => {
+            setOpenUpdateModal(false)
+            onClose({}, 'backdropClick')
+          }}
+          eventId={eventId}
+          calId={updateModalCalId}
+          typeOfAction={resolvedTypeOfAction}
+        />
+      )}
 
       {/* Duplicate modal */}
       <EventPopover

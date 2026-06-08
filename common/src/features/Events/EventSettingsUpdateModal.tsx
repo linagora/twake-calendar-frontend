@@ -7,7 +7,7 @@ import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventActions } from './EventActions'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { useEventUpdateModal } from './useEventUpdateModal'
+import { useEventSettingsUpdateModal } from './useEventSettingsUpdateModal'
 
 const dialogPaddingStyles = (isMobile: boolean): SxProps => ({
   '& .MuiDialogActions-root': {
@@ -16,7 +16,7 @@ const dialogPaddingStyles = (isMobile: boolean): SxProps => ({
   }
 })
 
-export interface EventUpdateModalProps {
+export interface EventSettingsUpdateModalProps {
   eventId: string
   calId: string
   open: boolean
@@ -26,8 +26,8 @@ export interface EventUpdateModalProps {
   typeOfAction?: 'solo' | 'all'
 }
 
-const EventUpdateModalInternal: React.FC<
-  EventUpdateModalProps & { event: CalendarEvent }
+const EventSettingsUpdateModalInternal: React.FC<
+  EventSettingsUpdateModalProps & { event: CalendarEvent }
 > = props => {
   const { open, event, typeOfAction } = props
   const { t } = useI18n()
@@ -42,30 +42,26 @@ const EventUpdateModalInternal: React.FC<
     initialValues,
     handleClose,
     handleSubmit,
-    handleExpandToggle,
     handleSave,
     tempContext
-  } = useEventUpdateModal(props)
+  } = useEventSettingsUpdateModal(props)
 
   const actions = (
     <EventActions
-      showExpandedBtn={!showMore}
+      showExpandedBtn={false}
       isEdit
       onClose={handleClose}
       onSave={handleSave}
-      onExpanded={() => setShowMore(s => !s)}
+      onExpanded={() => setShowMore((s: boolean) => !s)}
     />
   )
   return (
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title={t('event.updateEvent')}
-      isExpanded={showMore}
-      onExpandToggle={handleExpandToggle}
+      title={t('eventPreview.editEventSpecificSettings')}
       actions={actions}
       sx={dialogPaddingStyles(isMobile)}
-      expandText={t('tooltip.moreEventOptions')}
     >
       <EventFormFields
         key={effectiveEvent?.uid || 'no-event'}
@@ -73,7 +69,7 @@ const EventUpdateModalInternal: React.FC<
         initialValues={initialValues}
         showMore={showMore}
         isOpen={open}
-        isSpecific={false}
+        isSpecific={true}
         typeOfAction={typeOfAction}
         eventId={event.uid}
         event={event}
@@ -87,7 +83,9 @@ const EventUpdateModalInternal: React.FC<
   )
 }
 
-const EventUpdateModal: React.FC<EventUpdateModalProps> = props => {
+const EventSettingsUpdateModal: React.FC<
+  EventSettingsUpdateModalProps
+> = props => {
   const { eventId, calId, eventData } = props
   const cachedEvent = useAppSelector(
     state => state.calendars.list[calId]?.events[eventId]
@@ -96,7 +94,7 @@ const EventUpdateModal: React.FC<EventUpdateModalProps> = props => {
 
   if (!event) return null
 
-  return <EventUpdateModalInternal {...props} event={event} />
+  return <EventSettingsUpdateModalInternal {...props} event={event} />
 }
 
-export default EventUpdateModal
+export default EventSettingsUpdateModal

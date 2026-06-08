@@ -1,5 +1,5 @@
 import { Calendar } from '@common/types/CalendarTypes'
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormContext } from '@common/utils/eventFormTempStorage'
@@ -86,6 +86,9 @@ export interface EventFormFieldsProps {
 
   // Data needed for rendering
   userPersonalCalendars: Calendar[]
+
+  // Original event being edited (for organizer comparison)
+  event?: CalendarEvent | null
 
   // Save / cancel delegation
   onSubmit: (

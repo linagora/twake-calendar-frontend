@@ -12,12 +12,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { EventUpdateModalProps } from './EventUpdateModal'
+import { EventSettingsUpdateModalProps } from './EventSettingsUpdateModal'
 import { useMasterEvent } from './hooks/useMasterEvent'
 import { useSubmitUpdateEvent } from './hooks/useSubmitUpdateEvent'
 
-export function useEventUpdateModal(
-  props: EventUpdateModalProps & { event: CalendarEvent }
+export function useEventSettingsUpdateModal(
+  props: EventSettingsUpdateModalProps & { event: CalendarEvent }
 ): {
   userPersonalCalendars: Calendar[]
   showMore: boolean
@@ -27,7 +27,6 @@ export function useEventUpdateModal(
   initialValues: ReturnType<typeof useBuildInitialValues>
   handleClose: () => void
   handleSubmit: (values: EventFormValues) => Promise<void>
-  handleExpandToggle: () => void
   handleSave: () => Promise<void>
   tempContext: EventFormContext
 } {
@@ -83,8 +82,6 @@ export function useEventUpdateModal(
 
   const tempContext: EventFormContext = { eventId, calId, typeOfAction }
 
-  const handleExpandToggle = (): void => setShowMore(s => !s)
-
   const handleSave = useCallback(async () => {
     await formRef.current?.submit()
   }, [])
@@ -98,7 +95,6 @@ export function useEventUpdateModal(
     initialValues,
     handleClose,
     handleSubmit,
-    handleExpandToggle,
     handleSave,
     tempContext
   }

@@ -53,6 +53,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       isSpecific = false,
       eventId,
       userPersonalCalendars,
+      event,
       onSubmit,
       onCancel,
       tempStorageKey,
@@ -120,12 +121,12 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       },
       [onValidationChange]
     )
-
     const { organizer, isOrganizer } = useEventOrganizer({
-      calendarid: formValues.calendarid,
+      calendarid: event?.calId ?? formValues.calendarid,
       eventId,
       calList,
-      userOrganizer
+      userOrganizer,
+      event
     })
 
     // Keep organizer in a ref so submit() can read it synchronously
