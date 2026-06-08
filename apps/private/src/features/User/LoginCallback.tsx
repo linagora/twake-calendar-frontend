@@ -15,7 +15,6 @@ import {
 } from 'openid-client'
 import { useEffect, useRef } from 'react'
 import { replace } from 'redux-first-history'
-import { setAppLoading } from '@common/app/loadingSlice'
 
 interface RedirectState {
   code_verifier: string

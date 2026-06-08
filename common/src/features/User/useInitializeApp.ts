@@ -9,8 +9,9 @@ import {
 import { redirectTo } from '@common/utils/apiUtils'
 import { useEffect, useRef } from 'react'
 import { getCalendarsList } from '../Calendars/CalendarSlice'
+import { type userData } from './userDataTypes'
 
-export function useInitializeApp() {
+export const useInitializeApp = (): void => {
   const userData = useAppSelector(state => state.user)
   const calendars = useAppSelector(state => state.calendars)
   const dispatch = useAppDispatch()
@@ -18,16 +19,21 @@ export function useInitializeApp() {
 
   useEffect(() => {
     if (hasInitiatedRef.current) return
-    if (userData.userData && !calendars.pending) return
+    const isUserDataNotEmpty =
+      userData.userData && Object.keys(userData.userData).length > 0
+    if (isUserDataNotEmpty && !calendars.pending) return
     if (window.location.pathname === '/callback') return
     hasInitiatedRef.current = true
 
-    const initiateLogin = async () => {
+    const initiateLogin = async (): Promise<void> => {
       const savedToken = sessionStorage.getItem('tokenSet')
-        ? JSON.parse(sessionStorage.getItem('tokenSet') ?? '{}')
+        ? (JSON.parse(sessionStorage.getItem('tokenSet') ?? '{}') as Record<
+            string,
+            string
+          >)
         : null
       const savedUser = sessionStorage.getItem('userData')
-        ? JSON.parse(sessionStorage.getItem('userData') ?? '{}')
+        ? (JSON.parse(sessionStorage.getItem('userData') ?? '{}') as userData)
         : null
 
       if (savedToken && savedUser) {
@@ -55,7 +61,7 @@ export function useInitializeApp() {
       redirectTo(loginurl.redirectTo)
     }
 
-    initiateLogin()
+    void initiateLogin()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData.userData])
 }
