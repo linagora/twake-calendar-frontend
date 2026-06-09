@@ -308,6 +308,9 @@
       "tooltipOwn": "Only you and attendees can see the details of this event.",
       "hiddenDetails": "This is a private event. Details are hidden."
     },
+    "attachment": {
+      "more": "+ %{count} more"
+    },
     "free": {
       "label": "Free",
       "tooltip": "Others see you as available during the time range of this event."

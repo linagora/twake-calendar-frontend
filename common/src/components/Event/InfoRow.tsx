@@ -42,35 +42,36 @@ export function InfoRow({
       }}
     >
       {icon}
-      {content ? (
-        content
-      ) : (
-        <Typography
-          variant="body2"
-          color={error ? 'error' : 'textPrimary'}
-          sx={{
-            whiteSpace: 'pre-line',
-            maxHeight: isMobile ? 'none' : '33vh',
-            overflowY: isMobile ? undefined : 'auto',
-            width: '100%',
-            overflowWrap: 'break-word',
-            ...style
-          }}
-        >
-          {data ? (
-            <Link
-              href={data}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="always"
-            >
-              {text}
-            </Link>
-          ) : text ? (
-            detectUrls(text)
-          ) : null}
-        </Typography>
-      )}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {text && (
+          <Typography
+            variant="body2"
+            color={error ? 'error' : 'textPrimary'}
+            sx={{
+              whiteSpace: 'pre-line',
+              maxHeight: isMobile ? 'none' : '33vh',
+              overflowY: isMobile ? undefined : 'auto',
+              width: '100%',
+              overflowWrap: 'break-word',
+              ...style
+            }}
+          >
+            {data ? (
+              <Link
+                href={data}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="always"
+              >
+                {text}
+              </Link>
+            ) : text ? (
+              detectUrls(text)
+            ) : null}
+          </Typography>
+        )}
+        {content && content}
+      </Box>
     </Box>
   )
 }

@@ -1,4 +1,7 @@
+import { VideoLink } from '@common/components/Event/components/VideoLink'
 import { InfoRow } from '@common/components/Event/InfoRow'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { Attachment, RepetitionObject } from '@common/types/EventsTypes'
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
@@ -9,12 +12,10 @@ import SubjectIcon from '@mui/icons-material/Subject'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { VideoLink } from '@common/components/Event/components/VideoLink'
-import { makeRecurrenceString } from './utils/makeRecurrenceString'
-import { translateDuration, translateAlarmAction } from './utils/parseDuration'
-import { userAttendee } from '@common/features/User/models/attendee'
+import { AttachementPreview } from './AttachementPreview'
 import { infoIconSx } from './EventPreviewDetails'
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { makeRecurrenceString } from './utils/makeRecurrenceString'
+import { translateAlarmAction, translateDuration } from './utils/parseDuration'
 
 interface BaseEventRowProps {
   icon: React.ReactNode
@@ -135,14 +136,19 @@ export const EventResourceRow: React.FC<{
 
 export const EventDescriptionRow: React.FC<{
   description?: string
-}> = ({ description }) => {
-  if (!description) return null
+  attach?: Attachment[]
+}> = ({ description, attach }) => {
+  if (!(description || attach)) return null
   return (
     <BaseEventRow
       alignItems="flex-start"
       alignSelf="flex-start"
       icon={<SubjectIcon />}
       text={description}
+      content={
+        attach &&
+        attach.length > 0 && <AttachementPreview attachments={attach} />
+      }
     />
   )
 }

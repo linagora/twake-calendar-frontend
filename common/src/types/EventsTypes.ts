@@ -31,6 +31,13 @@ export interface CalendarEvent {
   exdates?: string[]
   passthroughProps?: VObjectProperty[]
   selectedResources?: Resource[]
+  attach?: Attachment[]
+}
+
+export interface Attachment {
+  uri: string
+  fmttype?: string
+  x_filename?: string
 }
 
 export interface RepetitionObject {
