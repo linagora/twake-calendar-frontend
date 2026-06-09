@@ -646,3 +646,44 @@ describe('RFC 5545 – EXDATE all-day', () => {
     expect(getProp(vevent, 'exdate')![2]).toBe('date-time')
   })
 })
+
+describe('RFC 5545 – RRULE must not appear in override (exception) events', () => {
+  it('omits rrule when event has a recurrenceId (override event)', () => {
+    const event = baseEvent({
+      recurrenceId: '2024-06-08T10:00:00',
+      repetition: { freq: 'WEEKLY' }
+    })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    expect(getProp(vevent, 'rrule')).toBeUndefined()
+  })
+
+  it('omits rrule for a fully-populated override (freq + interval + byday)', () => {
+    const event = baseEvent({
+      recurrenceId: '2024-06-08T10:00:00',
+      repetition: { freq: 'WEEKLY', interval: 2, byday: ['MO', 'WE'] }
+    })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    expect(getProp(vevent, 'rrule')).toBeUndefined()
+  })
+
+  it('still includes recurrence-id when rrule is suppressed', () => {
+    const event = baseEvent({
+      recurrenceId: '2024-06-08T10:00:00',
+      repetition: { freq: 'WEEKLY' }
+    })
+    const vevent = makeVevent(event, TZID, OWNER, false)
+    expect(getProp(vevent, 'recurrence-id')).toBeDefined()
+    expect(getProp(vevent, 'rrule')).toBeUndefined()
+  })
+
+  it('still writes rrule on the master when both recurrenceId and repetition are set (isMasterEvent=true)', () => {
+    // Ensures the fix doesn't regress master event serialisation
+    const event = baseEvent({
+      recurrenceId: '2024-06-08T10:00:00',
+      repetition: { freq: 'WEEKLY' }
+    })
+    const vevent = makeVevent(event, TZID, OWNER, true)
+    expect(getProp(vevent, 'rrule')).toBeDefined()
+    expect(getProp(vevent, 'recurrence-id')).toBeUndefined()
+  })
+})
