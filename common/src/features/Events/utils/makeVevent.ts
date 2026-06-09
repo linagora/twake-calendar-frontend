@@ -10,6 +10,7 @@ export function makeVevent(
   calOwnerEmail: string | undefined,
   isMasterEvent?: boolean
 ): [string, unknown[]] {
+  let isOccurrence = false
   const vevent: [string, unknown[]] = [
     'vevent',
     [
@@ -73,6 +74,7 @@ export function makeVevent(
     vevent[1].push(['location', {}, 'text', event.location])
   }
   if (event.recurrenceId && !isMasterEvent) {
+    isOccurrence = true
     vevent[1].push([
       'recurrence-id',
       event.allday ? {} : { tzid },
@@ -85,7 +87,7 @@ export function makeVevent(
   if (event.description) {
     vevent[1].push(['description', {}, 'text', event.description])
   }
-  if (event.repetition?.freq) {
+  if (event.repetition?.freq && !isOccurrence) {
     const repetitionRule: RepetitionRule = { freq: event.repetition.freq }
     if (event.repetition.interval) {
       repetitionRule.interval = event.repetition.interval
