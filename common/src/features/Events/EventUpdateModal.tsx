@@ -1,20 +1,13 @@
 import { useAppSelector } from '@common/app/hooks'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import type { SxProps } from '@mui/material/styles'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
+import { dialogPaddingStyles } from '@common/CalendarTheme/dialogPaddingStyles'
 import { EventActions } from './EventActions'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { useEventUpdateModal } from './useEventUpdateModal'
-
-const dialogPaddingStyles = (isMobile: boolean): SxProps => ({
-  '& .MuiDialogActions-root': {
-    paddingLeft: isMobile ? 2 : 4,
-    paddingRight: isMobile ? 2 : 4
-  }
-})
 
 export interface EventUpdateModalProps {
   eventId: string

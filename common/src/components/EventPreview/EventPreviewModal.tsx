@@ -1,18 +1,18 @@
 import ResponsiveDialog from '@common/components/Dialog/ResponsiveDialog'
 import { EditModeDialog } from '@common/components/Event/EditModeDialog'
 import { CalendarSelectField } from '@common/components/Event/fields/CalendarSelectField'
-import { DateSelectArg } from '@fullcalendar/core'
-import { useEffect, useRef } from 'react'
-import { useI18n } from 'twake-i18n'
-import { AttendanceValidation } from '@common/features/Events/AttendanceValidation/AttendanceValidation'
-import EventPopover from '@common/features/Events/EventModal'
 import { EventPreviewActionMenu } from '@common/components/EventPreview/EventPreviewActionMenu'
 import { EventPreviewDetails } from '@common/components/EventPreview/EventPreviewDetails'
 import { EventPreviewHeader } from '@common/components/EventPreview/EventPreviewHeader'
 import { useEventPreviewState } from '@common/components/EventPreview/useEventPreviewState'
-import EventUpdateModal from '@common/features/Events/EventUpdateModal'
-import { EventPreviewTitleRow } from './EventPreviewTitleRow'
+import { AttendanceValidation } from '@common/features/Events/AttendanceValidation/AttendanceValidation'
+import EventPopover from '@common/features/Events/EventModal'
 import EventSettingsUpdateModal from '@common/features/Events/EventSettingsUpdateModal'
+import EventUpdateModal from '@common/features/Events/EventUpdateModal'
+import { DateSelectArg } from '@fullcalendar/core'
+import { useEffect } from 'react'
+import { useI18n } from 'twake-i18n'
+import { EventPreviewTitleRow } from './EventPreviewTitleRow'
 
 const EventPreviewModal: React.FC<{
   eventId: string
@@ -37,7 +37,9 @@ const EventPreviewModal: React.FC<{
     canEdit,
     organizerWritableCalendar,
     openUpdateModal,
+    openSettingsUpdateModal,
     setOpenUpdateModal,
+    setOpenSettingsUpdateModal,
     openDuplicateModal,
     setOpenDuplicateModal,
     hidePreview,
@@ -59,7 +61,7 @@ const EventPreviewModal: React.FC<{
     handleCalendarMove,
     userPersonalCalendars
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
-  const isSpecificRef = useRef(false)
+
   useEffect(
     () => {
       if (open && (!event || !calendar)) {
@@ -171,8 +173,7 @@ const EventPreviewModal: React.FC<{
         onClose={() => setToggleActionMenu(null)}
         onDuplicate={handleDuplicateClick}
         onEdit={() => {
-          isSpecificRef.current = true
-          handleEditClick()
+          setOpenSettingsUpdateModal(true)
         }}
       />
 
@@ -186,38 +187,37 @@ const EventPreviewModal: React.FC<{
         }}
       />
 
+      {/* personal settings modal */}
+      <EventSettingsUpdateModal
+        open={openSettingsUpdateModal}
+        onClose={() => {
+          setOpenSettingsUpdateModal(false)
+          setHidePreview(false)
+        }}
+        onCloseAll={() => {
+          setOpenSettingsUpdateModal(false)
+          onClose({}, 'backdropClick')
+        }}
+        eventId={eventId}
+        calId={updateModalCalId}
+        typeOfAction={resolvedTypeOfAction}
+      />
+
       {/* Edit modal */}
-      {isSpecificRef.current ? (
-        <EventSettingsUpdateModal
-          open={openUpdateModal}
-          onClose={() => {
-            setOpenUpdateModal(false)
-            setHidePreview(false)
-          }}
-          onCloseAll={() => {
-            setOpenUpdateModal(false)
-            onClose({}, 'backdropClick')
-          }}
-          eventId={eventId}
-          calId={updateModalCalId}
-          typeOfAction={resolvedTypeOfAction}
-        />
-      ) : (
-        <EventUpdateModal
-          open={openUpdateModal}
-          onClose={() => {
-            setOpenUpdateModal(false)
-            setHidePreview(false)
-          }}
-          onCloseAll={() => {
-            setOpenUpdateModal(false)
-            onClose({}, 'backdropClick')
-          }}
-          eventId={eventId}
-          calId={updateModalCalId}
-          typeOfAction={resolvedTypeOfAction}
-        />
-      )}
+      <EventUpdateModal
+        open={openUpdateModal}
+        onClose={() => {
+          setOpenUpdateModal(false)
+          setHidePreview(false)
+        }}
+        onCloseAll={() => {
+          setOpenUpdateModal(false)
+          onClose({}, 'backdropClick')
+        }}
+        eventId={eventId}
+        calId={updateModalCalId}
+        typeOfAction={resolvedTypeOfAction}
+      />
 
       {/* Duplicate modal */}
       <EventPopover

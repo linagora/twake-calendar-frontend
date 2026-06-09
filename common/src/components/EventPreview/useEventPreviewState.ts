@@ -39,7 +39,9 @@ interface UseEventPreviewStateReturn {
   canEdit: boolean
   organizerWritableCalendar: Calendar | undefined
   openUpdateModal: boolean
+  openSettingsUpdateModal: boolean
   setOpenUpdateModal: React.Dispatch<React.SetStateAction<boolean>>
+  setOpenSettingsUpdateModal: React.Dispatch<React.SetStateAction<boolean>>
   openDuplicateModal: boolean
   setOpenDuplicateModal: React.Dispatch<React.SetStateAction<boolean>>
   hidePreview: boolean
@@ -94,6 +96,8 @@ export function useEventPreviewState(
 
   // Modal visibility
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false)
+  const [openSettingsUpdateModal, setOpenSettingsUpdateModal] =
+    useState<boolean>(false)
   const [openDuplicateModal, setOpenDuplicateModal] = useState<boolean>(false)
   const [hidePreview, setHidePreview] = useState<boolean>(false)
   const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(null)
@@ -293,7 +297,9 @@ export function useEventPreviewState(
 
     // Modal state
     openUpdateModal,
+    openSettingsUpdateModal,
     setOpenUpdateModal,
+    setOpenSettingsUpdateModal,
     openDuplicateModal,
     setOpenDuplicateModal,
     hidePreview,

@@ -1,5 +1,7 @@
 import { useAppSelector } from '@common/app/hooks'
+import AttendeeSelector from '@common/components/Attendees/AttendeeSearch'
 import { useEventOrganizer } from '@common/features/Events/useEventOrganizer'
+import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { saveEventFormDataToTemp } from '@common/utils/eventFormTempStorage'
 import {
@@ -8,7 +10,7 @@ import {
   resolveTimezone
 } from '@common/utils/timezone'
 import { TIMEZONES } from '@common/utils/timezone-data'
-import { Box, TextField, Typography } from '@linagora/twake-mui'
+import { TextField } from '@linagora/twake-mui'
 import React, {
   forwardRef,
   useCallback,
@@ -19,10 +21,8 @@ import React, {
   useState
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import AttendeeSelector from '@common/components/Attendees/AttendeeSearch'
 import { AddDescButton } from './AddDescButton'
 import { EventFormFieldsExpanded } from './components/EventFormFieldsExpanded'
-import { EventFormFieldsSpecific } from './components/EventFormFieldsSpecific'
 import { FieldWithLabel } from './components/FieldWithLabel'
 import {
   EventFormFieldsProps,
@@ -36,9 +36,6 @@ import { TitleField } from './fields/TitleField'
 import { VideoConferenceField } from './fields/VideoConferenceField'
 import { useEventFormValues } from './hooks/useEventFormValues'
 import { validateEventFormValues } from './utils/formValidation'
-import { EventTimeSubtitle } from '@common/components/EventPreview/EventTimeSubtitle'
-import { formatEventChipTitle } from '@common/components/Calendar/utils/calendarUtils'
-import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 
 const showInputLabel = (showMore: boolean, label: string): string =>
   showMore ? label : ''
@@ -53,7 +50,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       isSpecific = false,
       eventId,
       userPersonalCalendars,
-      event,
       onSubmit,
       onCancel,
       tempStorageKey,
@@ -121,12 +117,11 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       },
       [onValidationChange]
     )
-    const { organizer, isOrganizer } = useEventOrganizer({
-      calendarid: event?.calId ?? formValues.calendarid,
+    const { organizer } = useEventOrganizer({
+      calendarid: formValues.calendarid,
       eventId,
       calList,
-      userOrganizer,
-      event
+      userOrganizer
     })
 
     // Keep organizer in a ref so submit() can read it synchronously
@@ -168,43 +163,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
 
     const v = formValues
     const isExpanded = showMore && !isMobile
-    if (isSpecific) {
-      return (
-        <React.Fragment>
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <Typography
-              variant="h3"
-              sx={{
-                wordBreak: 'break-word'
-              }}
-            >
-              {formatEventChipTitle(v, t)}
-            </Typography>
-          </Box>
-          <EventTimeSubtitle event={v} timezone={v.timezone} />
 
-          {typeOfAction !== 'solo' && (
-            <CalendarSelectField
-              calendarid={v.calendarid}
-              setCalendarid={setCalendarid}
-              userPersonalCalendars={userPersonalCalendars}
-              showMore={showMore}
-              defaultExpanded
-            />
-          )}
-          <EventFormFieldsSpecific
-            alarm={v.alarm}
-            setAlarm={setAlarm}
-            busy={v.busy}
-            setBusy={setBusy}
-            eventClass={v.eventClass}
-            setEventClass={setEventClass}
-            showMore={showMore}
-            isOrganizer={isOrganizer}
-          />
-        </React.Fragment>
-      )
-    }
     return (
       <React.Fragment>
         <TitleField
