@@ -1,4 +1,7 @@
-import { calendarAction } from '@common/features/Calendars/CalendarDAO'
+import {
+  calendarAction,
+  fetchCalendars
+} from '@common/features/Calendars/CalendarDAO'
 import { makeAddSharedCalendarBody } from '@common/features/Calendars/transformers'
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
@@ -19,6 +22,7 @@ export const addSharedCalendarThunk = (
       link: string
       name: string
       desc: string
+      delegated: boolean
       owner: OpenPaasUserData
     },
     { userId: string; calId: string; cal: CalendarInput },
@@ -43,14 +47,22 @@ export const addSharedCalendarThunk = (
         } catch (e) {
           console.error('Error while fetching owner of shared calendar: ', e)
         }
+        const calendars = await fetchCalendars(userId)
+        const delegated = calendars._embedded['dav:calendar'].find(
+          c => c['calendarserver:delegatedsource'] === cal.cal._links.self?.href
+        )
+
         return {
           calId: cal.cal._links.self?.href
             ?.replace('/calendars/', '')
             .replace('.json', ''),
           color: cal.color,
-          link: `/calendars/${userId}/${calId}.json`,
+          link:
+            delegated?._links.self?.href ??
+            `/calendars/${userId}/${calId}.json`,
           desc: cal.cal['caldav:description'] ?? '',
           name: cal.cal['dav:name'] ?? '',
+          delegated: !!delegated,
           owner: ownerData
         }
       } catch (err) {
@@ -68,6 +80,7 @@ export const addSharedCalendarThunk = (
           id: action.payload.calId,
           link: action.payload.link,
           description: action.payload.desc,
+          delegated: action.payload.delegated,
           name: action.payload.name,
           events: {},
           owner: action.payload.owner

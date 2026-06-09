@@ -189,19 +189,20 @@ function buildFetchedCalendars(
           inviteStatus: number
         }>
       ).filter((inv): inv is CalendarInvite => [2, 3, 5].includes(inv.access))
-
-      fetchedCalendars[id] = {
-        id,
-        name: cal['dav:name'] ?? '',
-        link: link ?? '',
-        owner: ownerData,
-        description,
-        delegated,
-        color,
-        visibility,
-        access,
-        events: {},
-        invite
+      if (!fetchedCalendars[id] || delegated) {
+        fetchedCalendars[id] = {
+          id,
+          name: cal['dav:name'] ?? '',
+          link: link ?? '',
+          owner: ownerData,
+          description,
+          delegated,
+          color,
+          visibility,
+          access,
+          events: {},
+          invite
+        }
       }
     }
   )

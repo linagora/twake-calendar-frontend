@@ -1,7 +1,7 @@
+import { Calendar } from '@common/types/CalendarTypes'
 import { api } from '@common/utils/apiUtils'
-import { CalendarList } from './types/CalendarData'
-import { Calendar } from './CalendarTypes'
 import { DavSyncResponse } from './types/CalendarApiTypes'
+import { CalendarList } from './types/CalendarData'
 
 export async function fetchCalendars(
   userId: string,
