@@ -2,7 +2,6 @@ import { Attachment } from '@common/types/EventsTypes'
 import { Link, radius } from '@linagora/twake-mui'
 import { Box, Typography } from '@linagora/twake-mui'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
-import { useI18n } from 'twake-i18n'
 
 const chipStyle = {
   display: 'inline-flex',
@@ -44,21 +43,5 @@ export const AttachementChip: React.FC<{
         </Typography>
       </Box>
     </Link>
-  )
-}
-
-export const MoreAttachementChip: React.FC<{
-  count: number
-  onClick: () => void
-  showMore: boolean
-}> = ({ count, onClick, showMore }) => {
-  const { t } = useI18n()
-  return (
-    <Box sx={{ ...chipStyle }} onClick={onClick}>
-      <Typography noWrap variant="body1" sx={{ maxWidth: 160 }}>
-        {!showMore && t('eventPreview.attachment.more', { count: count })}
-        {showMore && '-'}
-      </Typography>
-    </Box>
   )
 }
