@@ -1,13 +1,10 @@
+// 1. Import these directly from official MUI core
+import { Fade as MuiFade, Box as MuiBox } from '@mui/material'
+
+// 2. Keep your other UI elements from your library
+import { Button, Paper, Stack, Typography } from '@linagora/twake-mui'
 import { useEffect, useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
-import {
-  Box,
-  Button,
-  Fade,
-  Paper,
-  Stack,
-  Typography
-} from '@linagora/twake-mui'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import ReplayIcon from '@mui/icons-material/Replay'
 import { useI18n } from 'twake-i18n'
@@ -35,11 +32,14 @@ export const Error: React.FC<ErrorProps> = ({
   const errorMessage =
     userError ||
     calendarError ||
-    (isCrashFallback ? errorBoundaryMessage?.message : t('error.unknown'))
+    (isCrashFallback
+      ? errorBoundaryMessage?.message
+      : String(t('error.unknown') || 'Unknown Error'))
 
   return (
-    <Fade in timeout={500}>
-      <Box
+    // 3. Use MuiFade and MuiBox here
+    <MuiFade in timeout={500}>
+      <MuiBox
         sx={{
           minHeight: '100vh',
           display: 'flex',
@@ -60,7 +60,7 @@ export const Error: React.FC<ErrorProps> = ({
           }}
         >
           <Stack spacing={2} sx={{ alignItems: 'center' }}>
-            <Box
+            <MuiBox
               sx={{
                 color: 'error.main',
                 borderRadius: '50%',
@@ -72,7 +72,7 @@ export const Error: React.FC<ErrorProps> = ({
               }}
             >
               <ErrorOutlinedIcon sx={{ fontSize: 40 }} />
-            </Box>
+            </MuiBox>
 
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
               {t('error.title')}
@@ -108,7 +108,7 @@ export const Error: React.FC<ErrorProps> = ({
             </Button>
           </Stack>
         </Paper>
-      </Box>
-    </Fade>
+      </MuiBox>
+    </MuiFade>
   )
 }

@@ -1,6 +1,5 @@
 import {
   alpha,
-  radius,
   makePalette,
   createTheme,
   ThemeOptions
@@ -10,7 +9,17 @@ import paletteData from './palette.json'
 export function makeCalendarOverrides(): ThemeOptions {
   const palette = makePalette('light', paletteData)
   const theme = createTheme({
-    palette
+    palette,
+    breakpoints: {
+      keys: ['xs', 'sm', 'md', 'lg', 'xl'],
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 900,
+        lg: 1200,
+        xl: 1536
+      }
+    }
   })
   return {
     palette,
