@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@linagora/twake-mui": "^1.6.1",
+    "@linagora/twake-mui": "^2.0.0",
     "@sentry/react": "^8.55.1",
     "@calendar/common": "*",
     "date-fns": "^4.1.0",

@@ -199,7 +199,6 @@ export function ResourceSearch({
           <TextField
             {...enhancedParams}
             {...defaultTextFieldProps}
-            slotProps={{ input: inputProps }}
             size="medium"
           />
         </>

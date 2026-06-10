@@ -16,7 +16,7 @@ import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { CallbackResume } from '@/features/User/LoginCallback'
 import { useInitializeApp } from '@common/features/User/useInitializeApp'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
-import { makeCalendarOverrides } from '@common/CalendarTheme/makeCalendarOverrides'
+import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
 
 import {
   enGB,
