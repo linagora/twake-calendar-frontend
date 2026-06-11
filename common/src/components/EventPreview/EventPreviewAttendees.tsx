@@ -147,7 +147,6 @@ export function EventPreviewAttendees({
                 size="small"
                 sx={{
                   marginLeft: 2,
-                  fontSize: '14px',
                   color: 'text.secondary',
                   alignSelf: 'center'
                 }}
@@ -164,7 +163,6 @@ export function EventPreviewAttendees({
               size="small"
               sx={{
                 marginLeft: 2,
-                fontSize: '14px',
                 color: 'text.secondary',
                 alignSelf: 'center'
               }}

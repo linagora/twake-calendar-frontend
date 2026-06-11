@@ -138,7 +138,7 @@ export const EventDescriptionRow: React.FC<{
   description?: string
   attach?: Attachment[]
 }> = ({ description, attach }) => {
-  if (!(description || attach)) return null
+  if (!(description || !!attach?.length)) return null
   return (
     <BaseEventRow
       alignItems="flex-start"
