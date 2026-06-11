@@ -102,7 +102,7 @@ export function SettingsTab({
               onChange={e => setName(e.target.value)}
               size={inputSize}
               slotProps={{
-                input: {
+                htmlInput: {
                   'aria-label': t('common.name')
                 }
               }}

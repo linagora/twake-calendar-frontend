@@ -20,11 +20,8 @@ export const PrivateEventPreview: React.FC = () => {
       }}
     >
       <Typography
+        variant="caption"
         sx={{
-          fontWeight: 500,
-          fontSize: '12px',
-          lineHeight: '16px',
-          letterSpacing: '0.5px',
           textAlign: 'center'
         }}
       >

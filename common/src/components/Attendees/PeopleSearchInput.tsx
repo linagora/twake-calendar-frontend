@@ -45,6 +45,28 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
 
   const inputSize = useResponsiveInputSize()
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    onKeyDown?.(e)
+    if (e.defaultPrevented) return
+    params.slotProps?.htmlInput?.onKeyDown?.(e)
+    if (e.key === 'Enter') {
+      // First, try the autocomplete selection handler
+      onEnterKeyDown?.(e)
+      // If event was already handled, don't trigger event preview
+      if (e.defaultPrevented) return
+
+      if (onToggleEventPreview && !isOpen) {
+        e.preventDefault()
+        ;(
+          e as React.KeyboardEvent<HTMLInputElement> & {
+            defaultMuiPrevented?: boolean
+          }
+        ).defaultMuiPrevented = true
+        onToggleEventPreview()
+      }
+    }
+  }
+
   // Extract only the Input component props, not htmlInput props
   const {
     startAdornment: paramsStartAdornment,
@@ -63,7 +85,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     endAdornment: (
       <>
         {loading ? <CircularProgress color="inherit" size={20} /> : null}
-        {paramsEndAdornment}{' '}
+        {paramsEndAdornment}
       </>
     )
   }
@@ -77,27 +99,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
         ...params.slotProps?.htmlInput,
         autoComplete: 'off',
         onPaste: handlePaste,
-        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
-          onKeyDown?.(e)
-          if (e.defaultPrevented) return
-          params.slotProps?.htmlInput?.onKeyDown?.(e)
-          if (e.key === 'Enter') {
-            // First, try the autocomplete selection handler
-            onEnterKeyDown?.(e)
-            // If event was already handled, don't trigger event preview
-            if (e.defaultPrevented) return
-
-            if (onToggleEventPreview && !isOpen) {
-              e.preventDefault()
-              ;(
-                e as React.KeyboardEvent<HTMLInputElement> & {
-                  defaultMuiPrevented?: boolean
-                }
-              ).defaultMuiPrevented = true
-              onToggleEventPreview()
-            }
-          }
-        }
+        onKeyDown: handleKeyDown
       }
     }
   }

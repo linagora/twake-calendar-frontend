@@ -110,9 +110,7 @@ function ColorPickerHeader(): JSX.Element {
   const { t } = useI18n()
   return (
     <>
-      <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>
-        {t('colorPicker.title')}
-      </Typography>
+      <Typography variant="subtitle2">{t('colorPicker.title')}</Typography>
       <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
         {t('colorPicker.subtitle')}
       </Typography>

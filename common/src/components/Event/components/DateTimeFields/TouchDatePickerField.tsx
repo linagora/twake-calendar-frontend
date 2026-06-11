@@ -69,9 +69,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
           gap: 1
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-          {displayDate}
-        </Typography>
+        <Typography variant="subtitle1">{displayDate}</Typography>
         <IconButton
           size="small"
           onClick={handleToggleView}

@@ -30,7 +30,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   const isString = typeof option === 'string'
   const label = isString ? option : option.displayName || option.email
   const chipColor = isString
-    ? themeChip.palette.grey[200]
+    ? theme.palette.grey[200]
     : (option.color?.light ?? theme.palette.grey[200])
   const textColor = getAccessiblePair(chipColor, theme)
 

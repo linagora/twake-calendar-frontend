@@ -1,5 +1,5 @@
 import { useAppSelector } from '@common/app/hooks'
-import { dialogPaddingStyles } from '@common/CalendarTheme/dialogPaddingStyles'
+import { dialogPaddingStyles } from '@common/theme/dialogPaddingStyles'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { EventFormFieldPersonalSettings } from '@common/components/Event/EventFormFieldPersonalSettings'
 import { useEventFormValues } from '@common/components/Event/hooks/useEventFormValues'

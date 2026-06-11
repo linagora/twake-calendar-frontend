@@ -57,7 +57,7 @@ export const FieldWithLabel = React.memo(
                 marginTop: 0
               }
             },
-            ...(Array.isArray(sx) ? sx : sx ? [sx] : [])
+            ...[sx].flat().filter(Boolean)
           ]}
         >
           {!isEmptyLabel && (

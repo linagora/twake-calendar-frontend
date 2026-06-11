@@ -626,9 +626,16 @@ const CalendarApp: React.FC<CalendarAppProps> = ({
                     <div className="weekSelector">
                       {displayWeekNumbers && (
                         <>
-                          <div>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              whiteSpace: 'nowrap',
+                              flexShrink: 1,
+                              fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                            }}
+                          >
                             {t('menubar.views.week')} {arg.num}
-                          </div>
+                          </Typography>
                           <TimezoneSelector
                             value={timezone}
                             referenceDate={

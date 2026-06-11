@@ -390,7 +390,10 @@ export function CalendarAccessRights({
                           accessRightOptions={accessRightOptions}
                         />
                       </InputAdornment>
-                    ),
+                    )
+                  },
+                  htmlInput: {
+                    ...params.slotProps.htmlInput,
                     sx: {
                       fontSize: '14px',
                       '&::placeholder': { fontSize: '14px' }

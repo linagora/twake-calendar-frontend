@@ -180,7 +180,8 @@ export const MiniCalendar: React.FC<{
                 },
                 '&.today': {
                   background: 'orange !important',
-                  color: 'white !important'
+                  color: 'white !important',
+                  outline: 'none'
                 }
               },
               'data-testid': `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,

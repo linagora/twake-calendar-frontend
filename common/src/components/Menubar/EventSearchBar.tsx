@@ -287,11 +287,9 @@ const SearchBar: React.FC<{
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <Box sx={{ color: '#605D62' }}>
-                            <SearchIcon fontSize="inherit" color="inherit" />
-                          </Box>
+                          <SearchIcon sx={{ color: 'text.secondary' }} />
+                          {params.slotProps.input?.startAdornment}
                         </InputAdornment>
-                        {params.slotProps.input?.startAdornment}
                       </>
                     ),
                     endAdornment: (

@@ -73,10 +73,8 @@ export const ViewSwitcher: React.FC<
                 primary={t(option.label)}
                 slotProps={{
                   primary: {
+                    variant: 'h6',
                     sx: {
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      lineHeight: '20px',
                       color: isSelected
                         ? theme.palette.primary.main
                         : theme.palette.text.primary
