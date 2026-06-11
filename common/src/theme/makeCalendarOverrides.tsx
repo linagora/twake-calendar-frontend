@@ -80,7 +80,7 @@ export function makeCalendarOverrides(): ThemeOptions {
             color: alpha(theme.palette.grey[900], 0.9)
           },
           '&.MuiDateCalendar-root .MuiPickerDay-root.MuiPickersDay-today': {
-            border: 'none'
+            outline: 'none'
           },
           '.MuiDateCalendar-root .MuiPickerDay-root.Mui-selected': {
             color: 'white',
