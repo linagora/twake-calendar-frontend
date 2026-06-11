@@ -1,9 +1,6 @@
-import {
-  alpha,
-  makePalette,
-  createTheme,
-  ThemeOptions
-} from '@linagora/twake-mui'
+import { alpha, createTheme, makePalette } from '@linagora/twake-mui'
+import type { ThemeOptions } from '@mui/material/styles'
+import type {} from '@mui/x-date-pickers/themeAugmentation'
 import paletteData from './palette.json'
 
 export function makeCalendarOverrides(): ThemeOptions {
@@ -24,140 +21,157 @@ export function makeCalendarOverrides(): ThemeOptions {
   return {
     palette,
     components: {
-      MuiDateCalendar: {
-        root: {
-          width: '230px',
-          maxWidth: '230px',
-          height: '300px',
-          maxHeight: '300px'
-        }
-      },
-      MuiDayCalendar: {
-        slideTransition: {
-          minHeight: '208px'
-        },
-        weekDayLabel: {
-          fontSize: '10px',
-          fontStyle: 'normal',
-          fontWeight: 500,
-          lineHeight: '16px',
-          height: '32px',
-          width: '32px',
-          margin: '0',
-          color: alpha(theme.palette.grey[900], 0.48)
-        }
-      },
-      MuiPickersCalendarHeader: {
-        root: {
-          padding: '6px 4px',
-          maxHeight: '32px',
-          minHeight: '32px'
-        },
-        label: {
-          fontSize: '14px',
-          fontStyle: 'normal',
-          fontWeight: 600,
-          lineHeight: '20px',
-          color: alpha(theme.palette.grey[900], 0.9)
-        },
-        switchViewButton: {
-          padding: '0',
-          width: '32px',
-          height: '32px',
-          color: theme.palette.grey[900]
-        },
-        switchViewIcon: {
-          fontSize: '15px'
-        }
-      },
-      MuiPickersArrowSwitcher: {
-        button: {
-          padding: '0',
-          width: '32px',
-          height: '32px',
-          color: alpha(theme.palette.grey[900], 0.48)
-        }
-      },
-      MuiPickerDay: {
-        root: {
-          fontSize: '10px',
-          fontStyle: 'normal',
-          fontWeight: 500,
-          lineHeight: '16px',
-          height: '32px',
-          width: '32px',
-          margin: '0',
-          color: alpha(theme.palette.grey[900], 0.9)
-        },
-        selected: {
-          backgroundColor: theme.palette.primary.main,
-          '&:hover': {
-            backgroundColor: theme.palette.primary.dark
-          }
-        }
-      },
-      MuiMonthCalendar: {
-        root: {
-          width: '215px'
-        }
-      },
-      MuiPickersMonth: {
-        monthButton: {
-          fontSize: '14px',
-          lineHeight: 1,
-          height: '30px',
-          width: '55px',
-          '&[tabindex="0"]': {
-            background: 'transparent'
+      MuiCssBaseline: {
+        styleOverrides: {
+          '.MuiDateCalendar-root.MuiDateCalendar-root': {
+            width: '230px',
+            maxWidth: '230px',
+            height: '300px',
+            maxHeight: '300px'
           },
-          '&.Mui-selected': {
-            color: theme.palette.primary.contrastText,
-            background: theme.palette.primary.main,
-            '&:hover': {
-              background: theme.palette.primary.dark
-            },
-            '&:focus': {
-              background: theme.palette.primary.dark
-            }
-          }
-        }
-      },
-      MuiYearCalendar: {
-        root: {
-          width: '245px',
-          maxWidth: '245px'
-        }
-      },
-      MuiPickersYear: {
-        yearButton: {
-          fontSize: '14px',
-          lineHeight: 1,
-          height: '30px',
-          width: '55px',
-          '&[tabindex="0"]': {
-            background: 'transparent'
+          '.MuiDateCalendar-root .MuiDayCalendar-slideTransition': {
+            minHeight: '208px'
           },
-          '&.Mui-selected': {
-            color: theme.palette.primary.contrastText,
-            background: theme.palette.primary.main,
-            '&:hover': {
-              background: theme.palette.primary.dark
-            },
-            '&:focus': {
-              background: theme.palette.primary.dark
-            }
-          }
-        }
-      },
-      MuiDigitalClock: {
-        item: {
-          '&.Mui-selected': {
+          '.MuiDateCalendar-root .MuiPickersCalendarHeader-root': {
+            padding: '6px 4px',
+            maxHeight: '32px',
+            minHeight: '32px'
+          },
+          '.MuiDateCalendar-root .MuiPickersCalendarHeader-label': {
+            fontSize: '14px',
+            fontStyle: 'normal',
+            fontWeight: 600,
+            lineHeight: '20px',
+            color: alpha(theme.palette.grey[900], 0.9)
+          },
+          '.MuiDateCalendar-root .MuiPickersCalendarHeader-switchViewButton': {
+            padding: '0',
+            width: '32px',
+            height: '32px',
+            color: theme.palette.grey[900]
+          },
+          '.MuiDateCalendar-root .MuiPickersCalendarHeader-switchViewIcon': {
+            fontSize: '15px'
+          },
+          '.MuiDateCalendar-root .MuiPickersArrowSwitcher-button': {
+            padding: '0',
+            width: '32px',
+            height: '32px',
+            color: alpha(theme.palette.grey[900], 0.48)
+          },
+          '.MuiDateCalendar-root .MuiDayCalendar-weekDayLabel': {
+            fontSize: '10px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '16px',
+            height: '32px',
+            width: '32px',
+            margin: '0',
+            color: alpha(theme.palette.grey[900], 0.48)
+          },
+          '.MuiDateCalendar-root .MuiPickerDay-root': {
+            fontSize: '10px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '16px',
+            height: '32px',
+            width: '32px',
+            margin: '0',
+            color: alpha(theme.palette.grey[900], 0.9)
+          },
+          '&.MuiDateCalendar-root .MuiPickerDay-root.MuiPickersDay-today': {
+            border: 'none'
+          },
+          '.MuiDateCalendar-root .MuiPickerDay-root.Mui-selected': {
+            color: 'white',
             backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
             '&:hover': {
               backgroundColor: theme.palette.primary.dark
             }
-          }
+          },
+          '.MuiDateCalendar-root .MuiButtonBase-root.MuiPickerDay-root.Mui-selected':
+            {
+              color: 'white',
+              backgroundColor: `${theme.palette.primary.main}`,
+              '&:hover': {
+                backgroundColor: `${theme.palette.primary.dark}`
+              }
+            },
+          '.MuiDateCalendar-root .MuiMonthCalendar-root': {
+            width: '215px'
+          },
+          '.MuiDateCalendar-root .MuiMonthCalendar-button': {
+            fontSize: '14px',
+            lineHeight: 1,
+            height: '30px',
+            width: '55px'
+          },
+          '.MuiDateCalendar-root .MuiMonthCalendar-button[tabindex="0"]': {
+            background: 'transparent'
+          },
+          '.MuiDateCalendar-root .MuiMonthCalendar-button.Mui-selected': {
+            color: theme.palette.primary.contrastText,
+            background: theme.palette.primary.main,
+            '&:hover': {
+              background: theme.palette.primary.dark
+            },
+            '&:focus': {
+              background: theme.palette.primary.dark
+            }
+          },
+          '.MuiDateCalendar-root .MuiMonthCalendar-button.Mui-selected[tabindex="0"]':
+            {
+              color: theme.palette.primary.contrastText,
+              background: theme.palette.primary.main,
+              '&:hover': {
+                background: theme.palette.primary.dark
+              },
+              '&:focus': {
+                background: theme.palette.primary.dark
+              }
+            },
+          '.MuiDateCalendar-root .MuiYearCalendar-root': {
+            width: '245px',
+            maxWidth: '245px'
+          },
+          '.MuiDateCalendar-root .MuiYearCalendar-button': {
+            fontSize: '14px',
+            lineHeight: 1,
+            height: '30px',
+            width: '55px'
+          },
+          '.MuiDateCalendar-root .MuiYearCalendar-button[tabindex="0"]': {
+            background: 'transparent'
+          },
+          '.MuiDateCalendar-root .MuiYearCalendar-button.Mui-selected': {
+            color: theme.palette.primary.contrastText,
+            background: theme.palette.primary.main,
+            '&:hover': {
+              background: theme.palette.primary.dark
+            },
+            '&:focus': {
+              background: theme.palette.primary.dark
+            }
+          },
+          '.MuiDateCalendar-root .MuiYearCalendar-button.Mui-selected[tabindex="0"]':
+            {
+              color: theme.palette.primary.contrastText,
+              background: theme.palette.primary.main,
+              '&:hover': {
+                background: theme.palette.primary.dark
+              },
+              '&:focus': {
+                background: theme.palette.primary.dark
+              }
+            },
+          '.MuiButtonBase-root.MuiMenuItem-root.MuiDigitalClock-item.Mui-selected':
+            {
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark
+              }
+            }
         }
       }
     }

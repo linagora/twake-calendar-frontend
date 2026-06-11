@@ -17,7 +17,6 @@ declare module 'classnames' {
   export = classnames
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare const process: {
   env: {
     [key: string]: string | undefined
