@@ -1,36 +1,37 @@
+import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   Autocomplete,
+  AutocompleteProps,
+  Box,
   PaperProps,
   PopperProps,
-  Box,
   SxProps,
-  type AutocompleteRenderInputParams,
-  AutocompleteProps
+  type AutocompleteRenderInputParams
 } from '@linagora/twake-mui'
-import { AttendeeOptionsList } from './AttendeeOptionsList'
 import {
   HTMLAttributes,
   ReactElement,
   SyntheticEvent,
+  useRef,
   type ReactNode
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import { User } from './types'
 import { AttendeeChip, type AttendeeChipProps } from './AttendeeChip'
-import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
-import {
-  usePeopleSearchState,
-  normaliseUser,
-  dedupeByEmail
-} from './usePeopleSearchState'
+import { AttendeeOptionsList } from './AttendeeOptionsList'
 import {
   PeopleSearchInput,
   type ExtendedAutocompleteRenderInputParams
 } from './PeopleSearchInput'
+import { User } from './types'
+import {
+  dedupeByEmail,
+  normaliseUser,
+  usePeopleSearchState
+} from './usePeopleSearchState'
 
+export { dedupeByEmail, normaliseUser }
 export type { ExtendedAutocompleteRenderInputParams }
-export { normaliseUser, dedupeByEmail }
 
 export interface PeopleSearchProps {
   selectedUsers: User[]
@@ -148,6 +149,7 @@ interface RenderInputParams {
   searchPlaceholder: string
   inputSlot: PeopleSearchProps['inputSlot']
   enableEmailAutocompleteAndCommit?: boolean
+  onEnterKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 const renderPeopleSearchInput = ({
@@ -157,7 +159,8 @@ const renderPeopleSearchInput = ({
   onToggleEventPreview,
   searchPlaceholder,
   inputSlot,
-  enableEmailAutocompleteAndCommit
+  enableEmailAutocompleteAndCommit,
+  onEnterKeyDown
 }: RenderInputParams): ReactNode => {
   if (customRenderInput) {
     return customRenderInput(params, searchState.query, searchState.setQuery)
@@ -175,6 +178,7 @@ const renderPeopleSearchInput = ({
       onKeyDown={
         enableEmailAutocompleteAndCommit ? searchState.handleKeyDown : undefined
       }
+      onEnterKeyDown={onEnterKeyDown}
     />
   )
 }
@@ -213,6 +217,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     enableEmailAutocompleteAndCommit
   })
 
+  const highlightedOptionRef = useRef<User | null>(null)
+
   const isOpenOptions = resolveIsOpen({
     hideOptions,
     isOpen: searchState.isOpen,
@@ -223,6 +229,31 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
     hasCustomRenderInput: !!customRenderInput
   })
 
+  const handleHighlightChange = (
+    _event: SyntheticEvent,
+    option: User | null
+  ): void => {
+    highlightedOptionRef.current = option
+  }
+
+  const handleEnterKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ): void => {
+    if (event.key !== 'Enter') return
+    const hasHighlightedOption =
+      highlightedOptionRef.current && searchState.options.length > 0
+    // If dropdown is open and there's a highlighted option, select it
+    if (isOpenOptions && hasHighlightedOption) {
+      event.preventDefault()
+      searchState.handleAutocompleteChange(event, [
+        ...selectedUsers,
+        highlightedOptionRef.current
+      ])
+      searchState.setQuery('')
+      highlightedOptionRef.current = null
+    }
+  }
+
   return (
     <>
       <Autocomplete
@@ -231,6 +262,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         multiple
         options={searchState.options}
         autoComplete={false}
+        autoHighlight
         clearOnBlur={false}
         onBlur={freeSolo ? searchState.handleBlurCommit : undefined}
         open={isOpenOptions}
@@ -249,6 +281,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
         inputValue={searchState.query}
         onInputChange={searchState.handleInputChange}
         onChange={searchState.handleAutocompleteChange}
+        onHighlightChange={handleHighlightChange}
         slotProps={getAutocompleteSlotProps(customSlotProps)}
         forcePopupIcon={false}
         disableClearable
@@ -260,7 +293,8 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             onToggleEventPreview,
             searchPlaceholder,
             inputSlot,
-            enableEmailAutocompleteAndCommit
+            enableEmailAutocompleteAndCommit,
+            onEnterKeyDown: handleEnterKeyDown
           })
         }
         renderOption={(props, option) => (

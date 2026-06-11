@@ -9,7 +9,8 @@ export function usePasteHandler({
   onChange,
   setQuery,
   setInputError,
-  t
+  t,
+  enableEmailAutocompleteAndCommit
 }: {
   freeSolo?: boolean
   selectedUsers: User[]
@@ -17,7 +18,8 @@ export function usePasteHandler({
   setQuery: (value: string) => void
   setInputError: (error: string | null) => void
   t: (key: string) => string
-}) {
+  enableEmailAutocompleteAndCommit?: boolean
+}): (event: React.ClipboardEvent<HTMLInputElement>) => void {
   return useCallback(
     (event: React.ClipboardEvent<HTMLInputElement>) => {
       if (!freeSolo) return
@@ -31,8 +33,10 @@ export function usePasteHandler({
         .map(s => s.trim())
         .filter(Boolean)
 
-      // If there is only one chunk, let the default Autocomplete behaviour handle it
-      if (chunks.length <= 1) return
+      if (chunks.length === 0) return
+
+      // Single chunk without enableEmailAutocompleteAndCommit: let the input handle it normally
+      if (chunks.length === 1 && !enableEmailAutocompleteAndCommit) return
 
       event.preventDefault()
 
@@ -65,6 +69,14 @@ export function usePasteHandler({
         setInputError(null)
       }
     },
-    [freeSolo, selectedUsers, onChange, setQuery, setInputError, t]
+    [
+      freeSolo,
+      selectedUsers,
+      onChange,
+      setQuery,
+      setInputError,
+      t,
+      enableEmailAutocompleteAndCommit
+    ]
   )
 }

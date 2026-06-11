@@ -26,6 +26,7 @@ export interface PeopleSearchInputProps {
   searchPlaceholder: string
   inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => ReactNode
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  onEnterKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
@@ -37,7 +38,8 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
   inputError,
   searchPlaceholder,
   inputSlot,
-  onKeyDown
+  onKeyDown,
+  onEnterKeyDown
 }) => {
   const { t } = useI18n()
 
@@ -71,6 +73,11 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
         if (e.defaultPrevented) return
         params.inputProps.onKeyDown?.(e)
         if (e.key === 'Enter') {
+          // First, try the autocomplete selection handler
+          onEnterKeyDown?.(e)
+          // If event was already handled, don't trigger event preview
+          if (e.defaultPrevented) return
+
           if (onToggleEventPreview && !isOpen) {
             e.preventDefault()
             ;(
