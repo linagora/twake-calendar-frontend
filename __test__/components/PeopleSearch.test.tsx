@@ -376,6 +376,89 @@ describe('PeopleSearch', () => {
       // Single email should NOT trigger multi-paste handler
       expect(onChange).not.toHaveBeenCalled()
     })
+
+    it('adds a single valid email on paste when enableEmailAutocompleteAndCommit is true', async () => {
+      const { onChange } = setup([], {
+        freeSolo: true,
+        enableEmailAutocompleteAndCommit: true
+      })
+      const input = screen.getByRole('combobox')
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => 'pasted@example.com'
+        }
+      })
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: 'pasted@example.com' })
+          ])
+        )
+      })
+    })
+
+    it('clears input after pasting a single email with enableEmailAutocompleteAndCommit', async () => {
+      const { onChange } = setup([], {
+        freeSolo: true,
+        enableEmailAutocompleteAndCommit: true
+      })
+      const input = screen.getByRole('combobox')
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => 'pasted@example.com'
+        }
+      })
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalled()
+      })
+
+      expect(input).toHaveValue('')
+    })
+
+    it('does not add duplicate email on paste with enableEmailAutocompleteAndCommit', async () => {
+      const existing: User = {
+        email: 'already@example.com',
+        displayName: 'Already Present'
+      }
+      const { onChange } = setup([existing], {
+        freeSolo: true,
+        enableEmailAutocompleteAndCommit: true
+      })
+      const input = screen.getByRole('combobox')
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => 'already@example.com'
+        }
+      })
+
+      // onChange should not be called because email is already present
+      expect(onChange).not.toHaveBeenCalled()
+      // Input should be cleared
+      expect(input).toHaveValue('')
+    })
+
+    it('does not add invalid single email on paste even with enableEmailAutocompleteAndCommit', async () => {
+      const { onChange } = setup([], {
+        freeSolo: true,
+        enableEmailAutocompleteAndCommit: true
+      })
+      const input = screen.getByRole('combobox')
+
+      fireEvent.paste(input, {
+        clipboardData: {
+          getData: () => 'not-an-email'
+        }
+      })
+
+      // onChange should not be called for invalid email
+      expect(onChange).not.toHaveBeenCalled()
+    })
   })
 
   it('retains input value when field loses focus (blur)', async () => {
@@ -453,6 +536,57 @@ describe('PeopleSearch', () => {
 
       expect(onChange).not.toHaveBeenCalled()
       expect(input).toHaveValue('space@example.com')
+    })
+
+    it('selects highlighted option on Enter key press', async () => {
+      mockedSearchUsers.mockResolvedValueOnce([baseUser])
+      const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
+
+      const input = screen.getByRole('combobox')
+      await userEvent.type(input, 'Test')
+      await act(async () => {
+        jest.advanceTimersByTime(300)
+      })
+
+      // Wait for options to appear
+      await waitFor(() => {
+        expect(screen.getByText('Test User')).toBeInTheDocument()
+      })
+
+      // Press Enter to select the highlighted option
+      fireEvent.keyDown(input, { key: 'Enter' })
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ email: 'test@example.com' })
+          ])
+        )
+      })
+    })
+
+    it('clears input after selecting with Enter key', async () => {
+      mockedSearchUsers.mockResolvedValueOnce([baseUser])
+      const { onChange } = setup([], { enableEmailAutocompleteAndCommit: true })
+
+      const input = screen.getByRole('combobox')
+      await userEvent.type(input, 'Test')
+      await act(async () => {
+        jest.advanceTimersByTime(300)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText('Test User')).toBeInTheDocument()
+      })
+
+      fireEvent.keyDown(input, { key: 'Enter' })
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalled()
+      })
+
+      expect(input).toHaveValue('')
     })
   })
 })

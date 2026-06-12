@@ -344,7 +344,8 @@ const usePeopleSearchHandlers = ({
     onChange,
     setQuery,
     setInputError,
-    t
+    t,
+    enableEmailAutocompleteAndCommit
   })
 
   return {
