@@ -104,10 +104,13 @@ function applyTimezoneToDateFields(
 
 export function parseFetchedEvent(
   event: CalendarEvent,
-  eventData: string,
+  eventData: VCalComponent | string,
   isMaster?: boolean
 ): CalendarEvent {
-  const eventical = ICAL.parse(eventData) as VCalComponent
+  const eventical =
+    typeof eventData === 'string'
+      ? (ICAL.parse(eventData) as VCalComponent)
+      : eventData
   const vevents = filterComponents(eventical, 'vevent')
   const vtimezones = filterComponents(eventical, 'vtimezone')
 

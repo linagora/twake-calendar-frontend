@@ -235,7 +235,10 @@
     "unknown": "An unknown error occurred",
     "retry": "Try Again",
     "multipleEvents": "%{count} events with errors",
-    "cannotLoadEvent": "Unable to load event"
+    "cannotLoadEvent": "Unable to load event",
+    "missingToken": "JWT token is missing",
+    "eventNotFound": "The event could not be found. It may have been deleted or the link is invalid.",
+    "invalidOrExpiredToken": "Your invitation link is invalid or has expired."
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",

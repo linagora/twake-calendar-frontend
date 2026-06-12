@@ -90,6 +90,10 @@ export function EventPreviewAttendees({
     return parts.join(', ')
   }, [acceptedCount, declinedCount, tentativeCount, waitingCount, t])
 
+  const participantsCount =
+    (organizer ? 1 : 0) + attendeesWithoutOrganizer.length
+  const resourcesCount = resources.length
+
   const renderParticipantsList = (): JSX.Element => (
     <Box
       sx={{
@@ -97,7 +101,7 @@ export function EventPreviewAttendees({
         flexDirection: 'column',
         gap: '12px',
         maxHeight: '300px',
-        overflowY: 'auto',
+        overflowY: participantsCount > 5 ? 'auto' : 'hidden',
         mt: 2
       }}
     >
@@ -115,7 +119,7 @@ export function EventPreviewAttendees({
         flexDirection: 'column',
         gap: '12px',
         maxHeight: '300px',
-        overflowY: 'auto',
+        overflowY: resourcesCount > 5 ? 'auto' : 'hidden',
         mt: 2
       }}
     >
