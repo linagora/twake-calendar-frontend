@@ -1,57 +1,92 @@
 import { EventPreviewDetails } from '@/components/EventPreview/EventPreviewDetails'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
-import { AttendanceValidation } from '@common/features/Events/AttendanceValidation/AttendanceValidation'
+import { AttendanceValidation } from './components/AttendanceValidation'
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { useParseToken } from './hooks/useParseToken'
-import { useFetchAttendeeDetail } from './hooks/useFetchAttendeeDetail'
-import { useFetchCalendarDetail } from './hooks/useFetchCalendarDetail'
 import { useFetchEventDetail } from './hooks/useFetchEventDetail'
-import { useCreateContext } from './hooks/useCreateContext'
+import { Loading } from '@common/components/Loading/Loading'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { Calendar } from '@common/types/CalendarTypes'
+import { useSearchParams } from 'react-router-dom'
+import { fetchEvent } from './EventDao'
 
-const checkIfEventIsPublic = (event: CalendarEvent | undefined): boolean => {
-  return !['PRIVATE', 'CONFIDENTIAL'].includes(event?.class as string)
+const isUnableToLoad = (
+  error: boolean,
+  event: CalendarEvent | undefined,
+  decodedClaims: unknown
+): boolean => {
+  return error || !event || !decodedClaims
 }
 
-const checkIfIsEventOwner = (
-  calendar: Calendar | undefined,
-  organizerEmail: string
-): boolean => {
-  return Boolean(calendar?.owner?.emails?.includes(organizerEmail))
+interface EventLoadErrorProps {
+  errorDetail: string | undefined
+  hasDecodedClaims: boolean
+  t: (key: string) => string
+}
+
+const EventLoadError: React.FC<EventLoadErrorProps> = ({
+  errorDetail,
+  hasDecodedClaims,
+  t
+}) => {
+  const detailMessage =
+    errorDetail ||
+    (!hasDecodedClaims ? t('error.invalidOrExpiredToken') : undefined)
+
+  return (
+    <Box sx={{ p: 4, textAlign: 'center' }}>
+      <Typography color="error" variant="h5">
+        {t('error.cannotLoadEvent')}
+      </Typography>
+      {detailMessage && (
+        <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
+          {detailMessage}
+        </Typography>
+      )}
+    </Box>
+  )
 }
 
 export const EventPreviewPage: React.FC = () => {
   const { t } = useI18n()
   const theme = useTheme()
+  const [, setSearchParams] = useSearchParams()
 
   const decodedClaims = useParseToken()
+  const { jwt = '', calId = '', action = undefined } = decodedClaims || {}
 
-  const calId = decodedClaims?.calId
-  const organizerEmail = decodedClaims?.organizerEmail
-  const attendeeEmail = decodedClaims?.attendeeEmail
+  const { event, links, loading, error, errorDetail } = useFetchEventDetail(
+    jwt,
+    calId
+  )
 
-  const event = useFetchEventDetail()
-
-  const calendar = useFetchCalendarDetail(calId, organizerEmail)
-
-  const user = useFetchAttendeeDetail(attendeeEmail)
-
-  const contextualizedEvent = useCreateContext({ event, calendar, user })
-
-  if (!decodedClaims || !event) {
-    return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="error" variant="h5">
-          {t('error.cannotLoadEvent')}
-        </Typography>
-      </Box>
-    )
+  const handleRsvpChoice = async (url: string): Promise<void> => {
+    try {
+      const urlObj = new URL(url)
+      const newJwt = urlObj.searchParams.get('jwt')
+      if (newJwt) {
+        await fetchEvent(newJwt)
+        setSearchParams({ jwt: newJwt })
+      }
+    } catch (e) {
+      console.error('Failed to process RSVP choice:', e)
+    }
   }
 
-  const isOwn = checkIfIsEventOwner(calendar, organizerEmail as string)
+  if (loading) {
+    return <Loading />
+  }
+
+  if (isUnableToLoad(error, event, decodedClaims)) {
+    return (
+      <EventLoadError
+        errorDetail={errorDetail}
+        hasDecodedClaims={!!decodedClaims}
+        t={t}
+      />
+    )
+  }
 
   return (
     <Box
@@ -67,38 +102,32 @@ export const EventPreviewPage: React.FC = () => {
       }}
     >
       <EventPreviewTitleRow
-        event={event}
-        isOwn={isOwn}
-        timezone={event.timezone}
+        event={event as CalendarEvent}
+        isOwn={false}
+        timezone={event?.timezone as string}
         t={t}
       />
 
       <EventPreviewDetails
-        event={event}
-        isOwn={isOwn}
-        isNotPrivate={checkIfEventIsPublic(event)}
-        isResourceEventPreview={false}
-        calendarName={calendar?.name}
+        event={event as CalendarEvent}
+        isOwn={false}
+        isNotPrivate={true}
       />
 
-      {contextualizedEvent && (
-        <Box
-          sx={{
-            borderTop: `1px solid ${theme.palette.divider}`,
-            pt: '24px',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          <AttendanceValidation
-            contextualizedEvent={contextualizedEvent}
-            user={user}
-            setAfterChoiceFunc={() => {}}
-            setOpenEditModePopup={() => {}}
-            hideCounterProposalSection={true}
-          />
-        </Box>
-      )}
+      <Box
+        sx={{
+          borderTop: `1px solid ${theme.palette.divider}`,
+          pt: '24px',
+          display: 'flex',
+          justifyContent: 'center'
+        }}
+      >
+        <AttendanceValidation
+          links={links}
+          currentUserPartstat={action}
+          onChoice={handleRsvpChoice}
+        />
+      </Box>
     </Box>
   )
 }

@@ -5,7 +5,7 @@ import { PartStat } from '@common/features/User/models/attendee'
 interface EventFromDecodedToken {
   calendarURI: string
   uid: string
-  action: PartStat
+  action: PartStat | 'REJECTED'
   organizerEmail: string
   attendeeEmail: string
 }
@@ -17,6 +17,7 @@ export interface ParsedToken extends Omit<
   calId: string
   eventId: string
   jwt: string
+  action: PartStat
 }
 
 function decodeJwt(token: string): EventFromDecodedToken | null {
@@ -52,7 +53,7 @@ export function useParseToken(): ParsedToken | null {
       jwt,
       calId: decoded.calendarURI || '',
       eventId: decoded.uid || '',
-      action: decoded.action || '',
+      action: decoded.action === 'REJECTED' ? 'DECLINED' : decoded.action,
       organizerEmail: decoded.organizerEmail || '',
       attendeeEmail: decoded.attendeeEmail || ''
     }

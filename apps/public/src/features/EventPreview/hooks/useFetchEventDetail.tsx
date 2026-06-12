@@ -1,57 +1,128 @@
+import { useState, useEffect, useRef } from 'react'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { fetchEvent } from '../EventDao'
+import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
+import { useI18n } from 'twake-i18n'
+import { HTTPError } from 'ky'
 
-export const useFetchEventDetail = (): CalendarEvent | undefined => {
-  // This is a placeholder for the actual event fetching logic.
-  // In a real implementation, you would replace this with an API call to fetch the event details.
-  // TO DO: Implement actual fetching logic here in https://github.com/linagora/twake-calendar-frontend/issues/984.
-  return {
-    uid: '75b296d6-288a-4a7d-ab72-6eb3caea420d',
-    calId: '5f50a663bdaffe002629099c',
-    title: 'Onboarding',
-    description: 'Onboarding session IT and compta',
-    location: '37 Rue Pierre Poli, 92130 Issy-les-Moulineaux',
-    x_openpass_videoconference: 'https://meet.jit.si/twake-onboarding',
-    attendee: [
-      {
-        cal_address: 'benoittellier3@gmail.com',
-        cn: 'Benoit Tellier 3',
-        partstat: 'ACCEPTED',
-        role: 'REQ-PARTICIPANT',
-        cutype: 'INDIVIDUAL',
-        rsvp: 'TRUE'
-      },
-      {
-        cal_address: 'klaus.heisler@twake.com',
-        cn: 'Klaus Heisler',
-        partstat: 'DECLINED',
-        role: 'REQ-PARTICIPANT',
-        cutype: 'INDIVIDUAL',
-        rsvp: 'FALSE'
-      },
-      {
-        cal_address: 'meeting-room-1@twake.com',
-        cn: 'Meeting Room 1',
-        partstat: 'ACCEPTED',
-        role: 'REQ-PARTICIPANT',
-        cutype: 'RESOURCE',
-        rsvp: 'FALSE'
-      },
-      {
-        cal_address: 'benoittellier@gmail.com',
-        cn: 'Benoit Tellier',
-        partstat: 'ACCEPTED',
-        role: 'CHAIR',
-        cutype: 'INDIVIDUAL',
-        rsvp: 'FALSE'
+const sanitizeErrorMessage = (message: string): string => {
+  return message.replace(/jwt=[A-Za-z0-9-_=~./+%]+/g, 'jwt=...')
+}
+
+const getEventDetailErrorMessage = (
+  err: unknown,
+  t: (key: string) => string
+): string => {
+  if (err instanceof HTTPError) {
+    const status = err.response.status
+    if (status === 404) {
+      return t('error.eventNotFound')
+    }
+    if (status === 401 || status === 403) {
+      return t('error.invalidOrExpiredToken')
+    }
+    return sanitizeErrorMessage(err.message)
+  }
+  const rawMessage = err instanceof Error ? err.message : String(err)
+  return sanitizeErrorMessage(rawMessage)
+}
+
+export interface EventDetailResult {
+  event: CalendarEvent | undefined
+  attendeeEmail: string | undefined
+  links:
+    | {
+        yes: string
+        no: string
+        maybe: string
       }
-    ],
-    organizer: {
-      cal_address: 'benoittellier@gmail.com',
-      cn: 'Benoit Tellier'
-    },
-    start: '2026-04-22T10:00:00Z',
-    end: '2026-04-22T10:30:00Z',
-    timezone: 'Europe/Paris',
-    URL: `/calendars/5f50a663bdaffe002629099c/${'75b296d6-288a-4a7d-ab72-6eb3caea420d'.split('/')[0]}.ics`
+    | undefined
+  loading: boolean
+  error: boolean
+  errorDetail: string | undefined
+}
+
+export const useFetchEventDetail = (
+  jwt: string | null,
+  calId: string
+): EventDetailResult => {
+  const { t } = useI18n()
+  const [data, setData] = useState<{
+    event: CalendarEvent | undefined
+    attendeeEmail: string | undefined
+    links: { yes: string; no: string; maybe: string } | undefined
+  }>({
+    event: undefined,
+    attendeeEmail: undefined,
+    links: undefined
+  })
+
+  const [loading, setLoading] = useState<boolean>(!!jwt)
+  const [error, setError] = useState<boolean>(!jwt)
+  const [errorDetail, setErrorDetail] = useState<string | undefined>(
+    !jwt ? t('error.missingToken') : undefined
+  )
+  const hasLoadedRef = useRef<boolean>(false)
+
+  useEffect((): (() => void) | void => {
+    if (!jwt) return
+
+    let isMounted = true
+
+    const loadData = async (): Promise<void> => {
+      if (!hasLoadedRef.current) {
+        setLoading(true)
+      }
+      setError(false)
+      setErrorDetail(undefined)
+      try {
+        const response = await fetchEvent(jwt)
+        if (!isMounted) return
+
+        const initialEvent: CalendarEvent = {
+          URL: '',
+          calId,
+          uid: '',
+          start: '',
+          timezone: 'UTC',
+          attendee: []
+        }
+
+        const parsed = parseFetchedEvent(initialEvent, response.eventJSON)
+        if (parsed.uid) {
+          parsed.URL = `/calendars/${parsed.calId}/${parsed.uid}.ics`
+        }
+
+        setData({
+          event: parsed,
+          attendeeEmail: response.attendeeEmail,
+          links: response.links
+        })
+        setLoading(false)
+        hasLoadedRef.current = true
+      } catch (err) {
+        console.error('Failed to fetch event participation:', err)
+        if (isMounted) {
+          setError(true)
+          setErrorDetail(getEventDetailErrorMessage(err, t))
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadData()
+
+    return (): void => {
+      isMounted = false
+    }
+  }, [jwt, calId, t])
+
+  return {
+    event: data.event,
+    attendeeEmail: data.attendeeEmail,
+    links: data.links,
+    loading,
+    error,
+    errorDetail
   }
 }
