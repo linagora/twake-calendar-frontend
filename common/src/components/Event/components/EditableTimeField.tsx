@@ -7,13 +7,13 @@ import {
   usePickerContext,
   useSplitFieldProps
 } from '@mui/x-date-pickers/hooks'
-import { PickerFieldProps } from '@mui/x-date-pickers/models'
+import { PickerFieldSlotProps } from '@mui/x-date-pickers/models'
 import { TimePickerFieldProps } from '@mui/x-date-pickers/TimePicker'
 import {
-  PickerFieldAdapter,
-  PickerValidationScope,
   useValidation,
-  validateTime
+  validateTime,
+  type PickerFieldAdapter,
+  type PickerValidationScope
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -21,7 +21,7 @@ import { parseTimeInput } from '@common/components/Event/utils/dateTimeHelpers'
 
 type FieldType = 'date' | 'time' | 'date-time'
 
-type GenericPickerFieldProps = PickerFieldProps<Dayjs, false, false> & {
+type GenericPickerFieldProps = PickerFieldSlotProps<Dayjs, false, false> & {
   fieldType: FieldType
   validator: (
     value: Dayjs | null,
@@ -274,12 +274,27 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
     }
   }
 
-  const mergedInputProps = {
-    ...forwardedProps.InputProps,
-    ref: triggerRef,
-    sx: {
-      cursor: 'text',
-      ...forwardedProps.InputProps?.sx
+  // Extract Input component props, excluding adornments that shouldn't go to DOM
+  const {
+    startAdornment: inputStartAdornment,
+    endAdornment: inputEndAdornment,
+    ...inputComponentProps
+  } = forwardedProps.slotProps?.input || {}
+
+  const mergedSlotProps = {
+    ...forwardedProps.slotProps,
+    input: {
+      ...inputComponentProps,
+      startAdornment: inputStartAdornment,
+      endAdornment: inputEndAdornment,
+      ref: triggerRef,
+      sx: {
+        cursor: 'text',
+        ...inputComponentProps?.sx
+      }
+    },
+    htmlInput: {
+      ...forwardedProps.slotProps?.htmlInput
     }
   }
 
@@ -289,7 +304,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
       value={inputValue}
       onChange={handleChange}
       placeholder={parsedFormat}
-      InputProps={mergedInputProps}
+      slotProps={mergedSlotProps}
       inputRef={inputRef}
       error={hasValidationError || forwardedProps.error}
       focused={isFocused}

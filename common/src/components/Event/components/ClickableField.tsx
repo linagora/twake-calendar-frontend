@@ -1,5 +1,4 @@
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
-import { alpha } from '@mui/material/styles'
+import { alpha, Box, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 
 interface ClickableFieldProps {
@@ -70,7 +69,7 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
         {icon}
       </Box>
       {children ? (
-        <Box flex={1}>{children}</Box>
+        <Box sx={{ flex: 1 }}>{children}</Box>
       ) : (
         <Typography
           sx={{

@@ -20,7 +20,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <Typography variant="h6" sx={{ mb: 1 }}>
         {t('settings.language')}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
         {t('settings.languageDescription')}
       </Typography>
       {isMobile ? (

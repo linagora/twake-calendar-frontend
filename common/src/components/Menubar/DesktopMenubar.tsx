@@ -1,16 +1,16 @@
-import { IconButton, useTheme } from '@linagora/twake-mui'
 import Tooltip from '@common/components/Tooltip'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import { IconButton, useTheme } from '@linagora/twake-mui'
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { AppListMenu } from './AppListMenu'
+import { NavigationControls } from './components/NavigationControls'
 import SearchBar from './EventSearchBar'
 import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
-import { NavigationControls } from './components/NavigationControls'
 import { SelectView } from './SelectView'
 import { UserMenu } from './UserMenu'
-import { useState } from 'react'
 
 export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
@@ -106,9 +106,8 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
                     rel="noopener noreferrer"
                     style={{ marginRight: 8 }}
                     aria-label={t('menubar.help')}
-                    title={t('menubar.help')}
                   >
-                    <HelpOutlineIcon />
+                    <HelpOutlineOutlinedIcon />
                   </IconButton>
                 </Tooltip>
               </div>

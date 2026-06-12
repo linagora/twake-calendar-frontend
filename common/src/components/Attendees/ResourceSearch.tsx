@@ -114,8 +114,15 @@ export function ResourceSearch({
 
   const defaultRenderInput = useCallback(
     (params: AutocompleteRenderInputParams) => {
+      // Extract only the Input component props, not htmlInput props
+      const {
+        startAdornment: paramsStartAdornment,
+        endAdornment: paramsEndAdornment,
+        ...inputComponentProps
+      } = params.slotProps?.input || {}
+
       const inputProps = {
-        ...params.InputProps,
+        ...inputComponentProps,
         startAdornment: (
           <>
             {!selectedResources?.length ? (
@@ -124,23 +131,26 @@ export function ResourceSearch({
                 sx={{ mr: 1, color: 'action.active' }}
               />
             ) : null}
-            {params.InputProps.startAdornment}
+            {paramsStartAdornment}
           </>
         ),
         endAdornment: (
           <>
             {loading ? <CircularProgress color="inherit" size={20} /> : null}
-            {!selectedResources?.length ? params.InputProps.endAdornment : null}
+            {!selectedResources?.length ? paramsEndAdornment : null}
           </>
         )
       }
 
       const enhancedParams = {
         ...params,
-        InputProps: inputProps,
-        inputProps: {
-          ...params.inputProps,
-          autoComplete: 'off'
+        slotProps: {
+          ...params.slotProps,
+          input: inputProps,
+          htmlInput: {
+            ...params.slotProps?.htmlInput,
+            autoComplete: 'off'
+          }
         }
       }
 
@@ -156,12 +166,7 @@ export function ResourceSearch({
         helperText: inputError,
         placeholder: searchPlaceholder,
         label: '',
-        onKeyDown: handleEnterKey,
-        slotProps: {
-          input: {
-            ...inputProps
-          }
-        }
+        onKeyDown: handleEnterKey
       }
 
       if (inputSlot) {
@@ -194,7 +199,6 @@ export function ResourceSearch({
           <TextField
             {...enhancedParams}
             {...defaultTextFieldProps}
-            InputProps={inputProps}
             size="medium"
           />
         </>
@@ -292,7 +296,7 @@ export function ResourceSearch({
             </ListItem>
           )
         }}
-        renderValue={(value: string[] | Resource[], getTagProps) =>
+        renderValue={(value: string[] | Resource[], getItemProps) =>
           value.map((option: string | Resource, index) => {
             const isString = typeof option === 'string'
             const label = isString ? option : option.displayName
@@ -303,7 +307,7 @@ export function ResourceSearch({
 
             return (
               <Chip
-                {...getTagProps({ index })}
+                {...getItemProps({ index })}
                 key={label}
                 style={{
                   backgroundColor: chipColor,

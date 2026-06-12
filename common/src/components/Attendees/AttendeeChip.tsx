@@ -1,13 +1,13 @@
-import { Chip, useTheme, Icon, IconButton } from '@linagora/twake-mui'
-import { User } from './types'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
-import { ReactElement } from 'react'
-import CloseIcon from '@mui/icons-material/Close'
+import { Box, Chip, Icon, IconButton, useTheme } from '@linagora/twake-mui'
 import CircleIcon from '@mui/icons-material/Circle'
+import CloseIcon from '@mui/icons-material/Close'
+import { ReactElement } from 'react'
+import { User } from './types'
 
 export interface AttendeeChipProps {
   option: string | User
-  getTagProps: (args: { index: number }) => {
+  getItemProps: (args: { index: number }) => {
     key: number
     className: string
     disabled: boolean
@@ -21,7 +21,7 @@ export interface AttendeeChipProps {
 
 export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   option,
-  getTagProps,
+  getItemProps,
   getChipIcon,
   index
 }) => {
@@ -30,7 +30,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   const isString = typeof option === 'string'
   const label = isString ? option : option.displayName || option.email
   const chipColor = isString
-    ? theme.palette.grey[200]
+    ? themeChip.palette.grey[200]
     : (option.color?.light ?? theme.palette.grey[200])
   const textColor = getAccessiblePair(chipColor, theme)
 
@@ -42,7 +42,9 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
     if (chipColor) {
       return (
         <Icon sx={{ display: 'flex', alignItems: 'center' }}>
-          <CircleIcon sx={{ color: chipColor }} />
+          <Box sx={{ color: chipColor }}>
+            <CircleIcon fontSize="inherit" color="inherit" />
+          </Box>
         </Icon>
       )
     }
@@ -65,7 +67,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
 
   return (
     <Chip
-      {...getTagProps({ index })}
+      {...getItemProps({ index })}
       key={label}
       variant="filled"
       color="secondary"

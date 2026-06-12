@@ -1,12 +1,12 @@
-import React, { type ReactNode } from 'react'
+import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 import {
   CircularProgress,
   TextField,
   type AutocompleteRenderInputParams
 } from '@linagora/twake-mui'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
+import React, { type ReactNode } from 'react'
 import { useI18n } from 'twake-i18n'
-import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -45,9 +45,16 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
 
   const inputSize = useResponsiveInputSize()
 
+  // Extract only the Input component props, not htmlInput props
+  const {
+    startAdornment: paramsStartAdornment,
+    endAdornment: paramsEndAdornment,
+    ...inputComponentProps
+  } = params.slotProps?.input || {}
+
   const inputProps = {
-    ...params.InputProps,
-    startAdornment: params.InputProps.startAdornment ?? (
+    ...inputComponentProps,
+    startAdornment: paramsStartAdornment ?? (
       <PeopleOutlineOutlinedIcon
         fontSize="small"
         sx={{ mr: 1, color: 'action.active' }}
@@ -56,36 +63,39 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     endAdornment: (
       <>
         {loading ? <CircularProgress color="inherit" size={20} /> : null}
-        {params.InputProps.endAdornment}
+        {paramsEndAdornment}{' '}
       </>
     )
   }
 
   const enhancedParams = {
     ...params,
-    InputProps: inputProps,
-    inputProps: {
-      ...params.inputProps,
-      autoComplete: 'off',
-      onPaste: handlePaste,
-      onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
-        onKeyDown?.(e)
-        if (e.defaultPrevented) return
-        params.inputProps.onKeyDown?.(e)
-        if (e.key === 'Enter') {
-          // First, try the autocomplete selection handler
-          onEnterKeyDown?.(e)
-          // If event was already handled, don't trigger event preview
+    slotProps: {
+      ...params.slotProps,
+      input: inputProps,
+      htmlInput: {
+        ...params.slotProps?.htmlInput,
+        autoComplete: 'off',
+        onPaste: handlePaste,
+        onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>): void => {
+          onKeyDown?.(e)
           if (e.defaultPrevented) return
+          params.slotProps?.htmlInput?.onKeyDown?.(e)
+          if (e.key === 'Enter') {
+            // First, try the autocomplete selection handler
+            onEnterKeyDown?.(e)
+            // If event was already handled, don't trigger event preview
+            if (e.defaultPrevented) return
 
-          if (onToggleEventPreview && !isOpen) {
-            e.preventDefault()
-            ;(
-              e as React.KeyboardEvent<HTMLInputElement> & {
-                defaultMuiPrevented?: boolean
-              }
-            ).defaultMuiPrevented = true
-            onToggleEventPreview()
+            if (onToggleEventPreview && !isOpen) {
+              e.preventDefault()
+              ;(
+                e as React.KeyboardEvent<HTMLInputElement> & {
+                  defaultMuiPrevented?: boolean
+                }
+              ).defaultMuiPrevented = true
+              onToggleEventPreview()
+            }
           }
         }
       }
@@ -96,12 +106,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     error: !!inputError,
     helperText: inputError,
     placeholder: searchPlaceholder,
-    label: '',
-    slotProps: {
-      input: {
-        ...inputProps
-      }
-    }
+    label: ''
   }
 
   if (inputSlot) {
@@ -129,7 +134,6 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
       <TextField
         {...enhancedParams}
         {...defaultTextFieldProps}
-        InputProps={inputProps}
         size={inputSize}
         sx={{
           '& .MuiInputBase-input': {

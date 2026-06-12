@@ -74,7 +74,6 @@ export const VideoLink: React.FC<{
             size="small"
             sx={{ color: alpha(theme.palette.grey[900], 0.9) }}
             aria-label={t('event.form.copyMeetingLink')}
-            title={t('event.form.copyMeetingLink')}
           >
             <CopyIcon />
           </IconButton>

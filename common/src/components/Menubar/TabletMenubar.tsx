@@ -1,7 +1,8 @@
 import { useAppDispatch } from '@common/app/hooks'
+import Tooltip from '@common/components/Tooltip'
 import { clearSearch } from '@common/features/Search/SearchSlice'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { IconButton, useTheme } from '@linagora/twake-mui'
+import { IconButton } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import MenuIcon from '@mui/icons-material/Menu'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -13,7 +14,6 @@ import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
 import MobileSearchBar from './MobileEventSearchBar'
 import { UserMenu } from './UserMenu'
-import Tooltip from '@common/components/Tooltip'
 
 export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
@@ -34,7 +34,6 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
 }: SharedMenubarProps) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
-  const theme = useTheme()
 
   const [openEventSearch, setOpenEventSearch] = useState(false)
   const handleBackClick = (event: React.MouseEvent): void => {
@@ -54,7 +53,7 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           aria-label={t('common.back')}
           sx={{ mr: 1 }}
         >
-          <ArrowBackIcon sx={{ color: theme.palette.text.secondary }} />
+          <ArrowBackIcon fontSize="inherit" color="inherit" />
         </IconButton>
         <MobileSearchBar />
       </header>
@@ -68,7 +67,6 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           <IconButton
             onClick={onToggleSidebar}
             aria-label={t('menubar.toggleSidebar')}
-            title={t('menubar.toggleSidebar')}
           >
             <MenuIcon />
           </IconButton>

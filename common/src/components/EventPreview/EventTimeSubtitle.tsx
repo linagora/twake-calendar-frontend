@@ -21,7 +21,7 @@ export const EventTimeSubtitle: React.FC<{
     : null
 
   return (
-    <Typography color="text.secondaryContainer">
+    <Typography sx={{ color: 'text.secondaryContainer' }}>
       {formatDate(event.start, t, timezone, event.allday)}
       {formattedEnd &&
         ` – ${formattedEnd} ${!event.allday ? getTimezoneOffset(timezone, new Date(event.start)) : ''}`}

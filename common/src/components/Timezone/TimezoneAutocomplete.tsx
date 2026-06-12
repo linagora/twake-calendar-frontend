@@ -92,34 +92,35 @@ export function TimezoneAutocomplete({
               : undefined
           }
           slotProps={{
+            ...params.slotProps,
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               startAdornment: showIcon ? (
                 <>
                   <TimezoneIcon
-                    style={{
+                    sx={{
                       marginRight: 8,
                       color: 'rgba(0, 0, 0, 0.54)'
                     }}
                   />
-                  {params.InputProps.startAdornment}
+                  {params.slotProps.input?.startAdornment}
                 </>
               ) : (
-                params.InputProps.startAdornment
+                params.slotProps.input?.startAdornment
               ),
               ...(inputFontSize || inputPadding
                 ? {
-                    style: {
+                    sx: {
                       ...(inputFontSize ? { fontSize: inputFontSize } : {}),
                       ...(inputPadding ? { padding: inputPadding } : {})
                     }
                   }
                 : {})
+            },
+            htmlInput: {
+              ...params.slotProps.htmlInput,
+              autoComplete: 'new-password'
             }
-          }}
-          inputProps={{
-            ...params.inputProps,
-            autoComplete: 'new-password'
           }}
         />
       )}

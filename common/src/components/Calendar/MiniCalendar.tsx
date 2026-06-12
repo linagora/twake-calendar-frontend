@@ -1,21 +1,21 @@
 import { useAppDispatch } from '@common/app/hooks'
+import Tooltip from '@common/components/Tooltip'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { computeStartOfTheWeek } from '@common/utils/dateUtils'
 import type { CalendarApi } from '@fullcalendar/core'
+import { IconButton, SxProps } from '@linagora/twake-mui'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { DateCalendar } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import moment from 'moment'
-import { useEffect, useState, forwardRef } from 'react'
-import { useI18n } from 'twake-i18n'
-import { CALENDAR_VIEWS } from './utils/constants'
-import { IconButton, SxProps } from '@linagora/twake-mui'
-import Tooltip from '@common/components/Tooltip'
 import {
   PickerSelectionState,
   PickerValue
 } from '@mui/x-date-pickers/internals'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import moment from 'moment'
+import { forwardRef, useEffect, useState } from 'react'
+import { useI18n } from 'twake-i18n'
+import { CALENDAR_VIEWS } from './utils/constants'
 
 const NextIconButton = forwardRef<
   HTMLButtonElement,
@@ -28,7 +28,7 @@ const NextIconButton = forwardRef<
       <IconButton
         {...rest}
         ref={ref}
-        title=""
+        title={undefined}
         sx={{
           ...(propSx as SxProps),
           '&::after': {
@@ -57,7 +57,7 @@ const PreviousIconButton = forwardRef<
       <IconButton
         {...rest}
         ref={ref}
-        title=""
+        title={undefined}
         sx={{
           ...(propSx as SxProps),
           '&::after': {
@@ -164,7 +164,6 @@ export const MiniCalendar: React.FC<{
               className: classNames,
               selected: classNames.includes('selectedWeek'),
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
-              disableMargin: false,
               style: {
                 backgroundColor: 'transparent',
                 position: 'relative',
@@ -181,7 +180,8 @@ export const MiniCalendar: React.FC<{
                 },
                 '&.today': {
                   background: 'orange !important',
-                  color: 'white !important'
+                  color: 'white !important',
+                  outline: 'none'
                 }
               },
               'data-testid': `date-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,

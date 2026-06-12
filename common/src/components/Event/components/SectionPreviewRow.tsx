@@ -1,5 +1,4 @@
-import { Box, radius, Typography, useTheme } from '@linagora/twake-mui'
-import { alpha } from '@mui/material/styles'
+import { Box, radius, Typography, useTheme, alpha } from '@linagora/twake-mui'
 import React from 'react'
 
 export interface SectionPreviewRowProps {
@@ -69,7 +68,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
       >
         {icon}
       </Box>
-      <Box flex={1} minWidth={0}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         {typeof children === 'string' ? (
           <Typography
             sx={{

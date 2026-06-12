@@ -1,5 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { selectCalendars } from '@common/app/selectors/selectCalendars'
+import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
+import { User } from '@common/components/Attendees/types'
+import { Tooltip } from '@common/components/Tooltip'
 import { AttendeesFilter } from '@common/features/Search/AttendeesFilter'
 import { KeywordsFilter } from '@common/features/Search/KeywordsFilter'
 import { OrganizersFilter } from '@common/features/Search/OrganizersFilter'
@@ -32,9 +35,6 @@ import SearchIcon from '@mui/icons-material/Search'
 import TuneIcon from '@mui/icons-material/Tune'
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
-import { User } from '@common/components/Attendees/types'
-import { Tooltip } from '@common/components/Tooltip'
 
 const SEARCH_OBJECT_TYPES = ['user', 'contact']
 
@@ -241,7 +241,7 @@ const SearchBar: React.FC<{
                 value={query}
                 inputRef={(el: HTMLInputElement | null) => {
                   inputRef.current = el
-                  const ref = params.InputProps.ref
+                  const ref = params.slotProps.input.ref
                   if (typeof ref === 'function') {
                     ref(el)
                   } else if (ref && 'current' in ref) {
@@ -276,52 +276,55 @@ const SearchBar: React.FC<{
                     padding: '0 10px'
                   }
                 }}
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: '#605D62' }} />
-                      </InputAdornment>
-                      {params.InputProps.startAdornment}
-                    </>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {(query || selectedContacts.length > 0) && (
+                slotProps={{
+                  ...params.slotProps,
+                  input: {
+                    ...params.slotProps.input,
+                    startAdornment: (
+                      <>
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ color: 'text.secondary' }} />
+                          {params.slotProps.input?.startAdornment}
+                        </InputAdornment>
+                      </>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {(query || selectedContacts.length > 0) && (
+                          <IconButton
+                            aria-label={t('common.clear')}
+                            onClick={() => {
+                              setQuery('')
+                              setSearch('')
+                              handleFilterChange('keywords', '')
+                              setSelectedContacts([])
+                            }}
+                          >
+                            <HighlightOffIcon />
+                          </IconButton>
+                        )}
                         <IconButton
-                          aria-label={t('common.clear')}
+                          aria-label={t('search.filter.filters')}
+                          onMouseDown={e => e.preventDefault()}
                           onClick={() => {
-                            setQuery('')
-                            setSearch('')
-                            handleFilterChange('keywords', '')
-                            setSelectedContacts([])
+                            setAnchorEl(containerRef.current)
+                            handleFilterChange('keywords', query)
+                            handleFilterChange(
+                              'organizers',
+                              selectedContacts.map((attendee: User) =>
+                                createAttendee({
+                                  cal_address: attendee.email,
+                                  cn: attendee.displayName
+                                })
+                              )
+                            )
                           }}
                         >
-                          <HighlightOffIcon />
+                          <TuneIcon />
                         </IconButton>
-                      )}
-                      <IconButton
-                        aria-label={t('search.filter.filters')}
-                        onMouseDown={e => e.preventDefault()}
-                        onClick={() => {
-                          setAnchorEl(containerRef.current)
-                          handleFilterChange('keywords', query)
-                          handleFilterChange(
-                            'organizers',
-                            selectedContacts.map((attendee: User) =>
-                              createAttendee({
-                                cal_address: attendee.email,
-                                cn: attendee.displayName
-                              })
-                            )
-                          )
-                        }}
-                      >
-                        <TuneIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
             )}

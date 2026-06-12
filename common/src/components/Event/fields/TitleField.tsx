@@ -37,7 +37,7 @@ export const TitleField: React.FC<TitleFieldProps> = ({
         fullWidth
         autoComplete="off"
         label=""
-        inputProps={{ 'aria-label': t('event.form.title') }}
+        slotProps={{ input: { 'aria-label': t('event.form.title') } }}
         placeholder={t('event.form.titlePlaceholder')}
         value={value}
         onChange={e => onChange(e.target.value)}

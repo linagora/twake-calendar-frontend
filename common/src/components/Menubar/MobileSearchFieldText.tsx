@@ -1,4 +1,5 @@
 import {
+  Box,
   IconButton,
   InputAdornment,
   TextField,
@@ -49,25 +50,29 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
         onQueryChange(e.target.value)
       }}
       variant="outlined"
-      InputProps={{
-        ...params.InputProps,
-        startAdornment: (
-          <>
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: theme.palette.grey[700] }} />
+      slotProps={{
+        input: {
+          ...params.slotProps.input,
+          startAdornment: (
+            <>
+              <InputAdornment position="start">
+                <Box sx={{ color: theme.palette.grey[700] }}>
+                  <SearchIcon fontSize="inherit" color="inherit" />
+                </Box>
+              </InputAdornment>
+              {params.slotProps.input?.startAdornment}
+            </>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {(query || selectedContacts.length > 0) && (
+                <IconButton aria-label={t('common.clear')} onClick={onClear}>
+                  <HighlightOffIcon />
+                </IconButton>
+              )}
             </InputAdornment>
-            {params.InputProps.startAdornment}
-          </>
-        ),
-        endAdornment: (
-          <InputAdornment position="end">
-            {(query || selectedContacts.length > 0) && (
-              <IconButton aria-label={t('common.clear')} onClick={onClear}>
-                <HighlightOffIcon />
-              </IconButton>
-            )}
-          </InputAdornment>
-        )
+          )
+        }
       }}
     />
   )

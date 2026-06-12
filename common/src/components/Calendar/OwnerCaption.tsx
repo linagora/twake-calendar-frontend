@@ -10,8 +10,8 @@ export function OwnerCaption({
   return (
     <Typography
       variant="caption"
-      color="text.secondary"
-      style={{
+      sx={{
+        color: 'text.secondary',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         overflowWrap: 'break-word'

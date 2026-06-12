@@ -2,20 +2,19 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { clearSearch } from '@common/features/Search/SearchSlice'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { CalendarApi } from '@fullcalendar/core'
-import { IconButton, Stack, useTheme } from '@linagora/twake-mui'
+import { IconButton, Stack, Typography } from '@linagora/twake-mui'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import MenuIcon from '@mui/icons-material/Menu'
 import SearchIcon from '@mui/icons-material/Search'
-import { Typography } from '@mui/material'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import { Tooltip } from '../Tooltip'
 import { DatePickerMobile } from './components/DatePickerMobile'
 import { SmallNavigationControls } from './components/SmallNavigationControls'
 import './Menubar.styl'
 import MobileSearchBar from './MobileEventSearchBar'
-import { Tooltip } from '@common/components/Tooltip'
 
 export interface MobileMenubarProps {
   calendarRef: React.RefObject<CalendarApi | null>
@@ -36,8 +35,6 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   const dispatch = useAppDispatch()
 
   const view = useAppSelector(state => state.settings.view)
-
-  const theme = useTheme()
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
   const [openEventSearch, setOpenEventSearch] = useState(false)
@@ -76,7 +73,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
           aria-label={t('common.back')}
           sx={{ mr: 1 }}
         >
-          <ArrowBackIcon sx={{ color: theme.palette.text.secondary }} />
+          <ArrowBackIcon fontSize="inherit" />
         </IconButton>
         <MobileSearchBar />
       </header>
@@ -130,7 +127,6 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
                       size="small"
                       onClick={onToggleDatePicker}
                       aria-label={toggleDatePickerTitle}
-                      title={toggleDatePickerTitle}
                       aria-expanded={openDatePicker}
                     >
                       {openDatePicker ? (

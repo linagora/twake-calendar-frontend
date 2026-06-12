@@ -69,7 +69,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
           gap: 1
         }}
       >
-        <Typography variant="subtitle1" fontWeight={500}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
           {displayDate}
         </Typography>
         <IconButton
@@ -98,7 +98,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
         />
       ) : (
         <Box sx={{ mt: 1, mb: 2 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {t('dateTimeFields.date')}
           </Typography>
           <DateField
@@ -110,7 +110,9 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
             autoFocus
             slotProps={{
               textField: {
-                inputProps: { inputMode: 'numeric', pattern: '[0-9]*' }
+                slotProps: {
+                  htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' }
+                }
               }
             }}
           />

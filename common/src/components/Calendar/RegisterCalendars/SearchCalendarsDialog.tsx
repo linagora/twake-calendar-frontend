@@ -95,7 +95,7 @@ export const SearchCalendarsDialog: React.FC<SearchCalendarsDialogProps> = ({
           aria-label={t('common.back')}
           sx={{ mr: 1 }}
         >
-          <ArrowBackIcon sx={{ color: '#605D62' }} />
+          <ArrowBackIcon fontSize="inherit" />
         </IconButton>
         <SplittedSearchInput
           objectTypes={objectTypes}

@@ -1,8 +1,13 @@
-import { Box, CircularProgress, Stack, Typography } from '@linagora/twake-mui'
+import {
+  Box,
+  CircularProgress,
+  Stack,
+  SxProps,
+  Typography
+} from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import logo from '@common/static/noResult-logo.svg'
 import { SearchEventResult } from './types/SearchEventResult'
-import { SxProps } from '@mui/material'
 
 interface ResultsListProps {
   loading: boolean

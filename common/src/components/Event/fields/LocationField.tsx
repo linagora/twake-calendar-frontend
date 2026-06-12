@@ -64,12 +64,16 @@ export default function LocationField({
           fullWidth
           label=""
           inputRef={locationInputRef}
-          inputProps={{ 'aria-label': t('event.form.location') }}
           placeholder={t('event.form.locationPlaceholder')}
           value={location}
           onChange={e => setLocation(e.target.value)}
           size={inputSize}
           margin="dense"
+          slotProps={{
+            input: {
+              'aria-label': t('event.form.location')
+            }
+          }}
         />
       )}
     </FieldWithLabel>

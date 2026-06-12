@@ -1,11 +1,11 @@
 import { useAppSelector } from '@common/app/hooks'
+import { dialogPaddingStyles } from '@common/theme/dialogPaddingStyles'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { dialogPaddingStyles } from '@common/CalendarTheme/dialogPaddingStyles'
 import { EventActions } from './EventActions'
 import { useEventUpdateModal } from './useEventUpdateModal'
 

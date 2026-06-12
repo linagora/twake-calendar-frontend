@@ -1,4 +1,5 @@
 import {
+  Box,
   TextField,
   useTheme,
   useMediaQuery,
@@ -51,18 +52,23 @@ export const TempCalendarsInput: React.FC<{
               {...params}
               size="small"
               onFocus={handleInputFocus}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {params.InputProps.endAdornment}
-                    {isMobile && (
-                      <InputAdornment position="end">
-                        <SearchIcon sx={{ color: 'action.active' }} />
-                      </InputAdornment>
-                    )}
-                  </React.Fragment>
-                )
+              slotProps={{
+                ...params.slotProps,
+                input: {
+                  ...params.slotProps?.input,
+                  endAdornment: (
+                    <React.Fragment>
+                      {params.slotProps?.input?.endAdornment}
+                      {isMobile && (
+                        <InputAdornment position="end">
+                          <Box sx={{ color: 'action.active' }}>
+                            <SearchIcon fontSize="inherit" color="inherit" />
+                          </Box>
+                        </InputAdornment>
+                      )}
+                    </React.Fragment>
+                  )
+                }
               }}
               sx={
                 tempUsers.length > 0

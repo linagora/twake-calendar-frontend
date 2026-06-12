@@ -7,11 +7,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  useTheme
+  useTheme,
+  alpha
 } from '@linagora/twake-mui'
-import LockOutlineIcon from '@mui/icons-material/LockOutline'
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
-import { alpha } from '@mui/material/styles'
 import PublicIcon from '@mui/icons-material/Public'
 import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -67,7 +67,7 @@ export function SettingsTab({
   return (
     <>
       {/* Form group 1: Name field - first group, margin top 0 */}
-      <Box mt={0}>
+      <Box sx={{ mt: 0 }}>
         <Typography
           variant="h6"
           sx={{ margin: 0, marginBottom: isResource ? '16px' : 0 }}
@@ -97,11 +97,15 @@ export function SettingsTab({
               fullWidth
               label=""
               autoFocus={autoFocusName}
-              inputProps={{ 'aria-label': t('common.name') }}
               placeholder={t('common.name')}
               value={name}
               onChange={e => setName(e.target.value)}
               size={inputSize}
+              slotProps={{
+                input: {
+                  'aria-label': t('common.name')
+                }
+              }}
               sx={{
                 '&.MuiFormControl-root': {
                   marginTop: 0,
@@ -115,7 +119,7 @@ export function SettingsTab({
 
       {/* Form group 2: Description */}
       {!isResource && (
-        <Box mt={2}>
+        <Box sx={{ mt: 2 }}>
           <AddDescButton
             showDescription={toggleDesc}
             setShowDescription={setToggleDesc}
@@ -127,7 +131,7 @@ export function SettingsTab({
       )}
 
       {/* Form group 3: Color */}
-      <Box mt={2}>
+      <Box sx={{ mt: 2 }}>
         <Typography variant="h6" sx={{ margin: 0 }}>
           {t('calendar.color')}
         </Typography>
@@ -141,7 +145,7 @@ export function SettingsTab({
 
       {/* Form group 4: New events visibility */}
       {isOwn && (
-        <Box mt={2}>
+        <Box sx={{ mt: 2 }}>
           <Typography variant="h6" sx={{ margin: 0 }}>
             {t('calendar.newEventsVisibility')}
           </Typography>
@@ -159,7 +163,7 @@ export function SettingsTab({
               </ToggleButton>
 
               <ToggleButton value="private" sx={{ width: '140px' }}>
-                <LockOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+                <LockOutlinedIcon fontSize="small" sx={{ mr: 1 }} />
                 {t('common.you')}
               </ToggleButton>
             </ToggleButtonGroup>

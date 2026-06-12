@@ -30,19 +30,21 @@ const ResourceItem: React.FC<{
   return (
     <Box
       key={cal.cal['dav:name']}
-      display="flex"
-      justifyContent="space-between"
-      flexDirection={isMobile ? 'column' : 'row'}
-      gap={2}
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: 2
+      }}
     >
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ResourceIcon avatarUrl={cal.owner.avatarUrl} />
         <Typography variant="body1">
           {renameDefault(cal.cal['dav:name'], cal.owner.displayName, t, false)}
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ColorPicker
           selectedColor={{
             light: cal.cal['apple:color'] ?? defaultColors[0].light,
@@ -76,17 +78,19 @@ const OtherCalendarItem: React.FC<{
   return (
     <Box
       key={cal.owner.email + cal.cal['dav:name']}
-      display="flex"
-      flexDirection="column"
-      alignItems="flex-start"
       style={{
         borderRadius: 8,
         border: '1px solid #e5e7eb',
         padding: 8,
         marginBottom: 8
       }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start'
+      }}
     >
-      <Box display="flex" alignItems="center" gap={2} mb={1}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
         <Avatar
           {...stringAvatar(cal.owner.displayName || cal.owner.email)}
           style={{
@@ -111,7 +115,7 @@ const OtherCalendarItem: React.FC<{
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ColorPicker
           colors={
             isMobile ? defaultColors.slice(0, 3) : defaultColors.slice(0, 4)
@@ -184,7 +188,7 @@ export const SelectedCalendarsList: React.FC<{
   }, {})
 
   return (
-    <Box mt={2}>
+    <Box sx={{ mt: 2 }}>
       {keyName === 'email' ? (
         <Typography variant="subtitle1" gutterBottom>
           {t('common.name')}
@@ -205,7 +209,7 @@ export const SelectedCalendarsList: React.FC<{
           visibleCals: CalendarWithOwner[]
           alreadyExisting: boolean
         }) => (
-          <Box key={owner[keyName]} mb={2}>
+          <Box key={owner[keyName]} sx={{ mb: 2 }}>
             {visibleCals.length > 0 ? (
               visibleCals.map(cal =>
                 cal.cal ? (

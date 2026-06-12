@@ -1,4 +1,5 @@
 import { AppDispatch } from '@common/app/store'
+import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 import {
   emptyEventsCal,
   getCalendarDetail,
@@ -12,7 +13,6 @@ import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -24,9 +24,13 @@ export function renderAttendeeBadge(
 ) {
   const classIcon =
     a.partstat === 'ACCEPTED' ? (
-      <CheckCircleIcon fontSize="inherit" color="success" />
+      <Box sx={{ color: 'success.main' }}>
+        <CheckCircleIcon fontSize="inherit" color="inherit" />
+      </Box>
     ) : a.partstat === 'DECLINED' ? (
-      <CancelIcon fontSize="inherit" color="error" />
+      <Box sx={{ color: 'error.main' }}>
+        <CancelIcon fontSize="inherit" color="inherit" />
+      </Box>
     ) : null
 
   if (!isFull) {
@@ -78,12 +82,12 @@ export function renderAttendeeBadge(
             {a.cn || a.cal_address}
           </Typography>
           {isOrganizer && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {t('event.organizer')}
             </Typography>
           )}
           {caption && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {caption}
             </Typography>
           )}
