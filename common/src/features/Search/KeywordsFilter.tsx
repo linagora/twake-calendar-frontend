@@ -8,12 +8,14 @@ interface Props {
   mode: 'popover' | 'mobile'
   error?: boolean
   onErrorClear?: () => void
+  onKeywordsChange?: (keywords: string) => void
 }
 
 export const KeywordsFilter: React.FC<Props> = ({
   mode,
   error,
-  onErrorClear
+  onErrorClear,
+  onKeywordsChange
 }) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
@@ -30,7 +32,10 @@ export const KeywordsFilter: React.FC<Props> = ({
       value={filters.keywords}
       onChange={e => {
         dispatch(setFilters({ keywords: e.target.value }))
-        if (e.target.value.trim()) onErrorClear?.()
+        if (e.target.value.trim()) {
+          onErrorClear?.()
+          onKeywordsChange?.(e.target.value)
+        }
       }}
       size="small"
     />

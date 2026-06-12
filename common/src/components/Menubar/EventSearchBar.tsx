@@ -133,6 +133,9 @@ const SearchBar: React.FC<{
       attendees: userAttendee[]
     }
   ): Promise<void> => {
+    if (searchQuery) {
+      handleFilterChange('keywords', searchQuery)
+    }
     const cleanedQuery = buildQuery(
       searchQuery,
       filters,
@@ -206,6 +209,7 @@ const SearchBar: React.FC<{
             onChange={(_event, users) => {
               handleContactSelect(users)
             }}
+            inputValue={search}
             objectTypes={SEARCH_OBJECT_TYPES}
             onToggleEventPreview={() => {}}
             customSlotProps={{
@@ -374,6 +378,7 @@ const SearchBar: React.FC<{
                 mode="popover"
                 error={filterError}
                 onErrorClear={() => setFilterError(false)}
+                onKeywordsChange={(keyword: string) => setSearch(keyword)}
               />
               <OrganizersFilter
                 mode="popover"

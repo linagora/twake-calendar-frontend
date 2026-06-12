@@ -46,7 +46,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
   if (!hits) {
     return (
       <Box className="noResults">
-        <img className="logo" src={logo} alt={t('search.noResults')} />
+        <img className="logoNoResults" src={logo} alt={t('search.noResults')} />
         <Typography
           sx={noResultsTitleSx}
           variant={noResultsTitleSx ? undefined : 'h5'}
