@@ -1,4 +1,4 @@
-import { Attachment } from '@common/types/EventsTypes'
+import { Attachment } from '@common/types/Attachment'
 import { Box, Button } from '@linagora/twake-mui'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'

@@ -64,7 +64,8 @@ export function prepareUpdatedEvent({
     sequence: nextSequence,
     color: targetCalendar?.color,
     alarm: { trigger: values.alarm, action: 'EMAIL' },
-    x_openpass_videoconference: values.meetingLink || undefined
+    x_openpass_videoconference: values.meetingLink || undefined,
+    attach: values.attachments?.length ? values.attachments : undefined
   }
 
   if (values.selectedResources?.length) {

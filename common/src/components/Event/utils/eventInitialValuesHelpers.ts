@@ -97,6 +97,7 @@ export function buildFromExistingEvent({
     hasVideoConference: !!event.x_openpass_videoconference,
     meetingLink: event.x_openpass_videoconference || null,
     selectedResources,
+    attachments: event.attach ?? [],
     showDescription: !!event.description,
     showRepeat
   }

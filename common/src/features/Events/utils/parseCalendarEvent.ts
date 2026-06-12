@@ -14,6 +14,7 @@ import { buildDelegatedEventURL } from './buildDelegatedEventURL'
 import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'
 import { WKST_NUM_TO_DAY } from './wkstUtils'
+import { Attachment } from '@common/types/Attachment'
 
 const KNOWN_PROPS = new Set([
   'uid',
@@ -212,11 +213,13 @@ const PROPERTY_PARSERS: Record<
   attach: (params, value, event) => {
     const paramsObj = (params ?? {}) as Record<string, string | undefined>
     if (!event.attach) event.attach = []
-    event.attach.push({
-      uri: safeString(value),
-      fmttype: paramsObj.fmttype,
-      x_filename: paramsObj['x-filename']
-    })
+    event.attach.push(
+      new Attachment(
+        safeString(value),
+        paramsObj.fmttype,
+        paramsObj['x-filename']
+      )
+    )
   }
 }
 

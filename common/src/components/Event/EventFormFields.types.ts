@@ -1,5 +1,6 @@
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { Attachment } from '@common/types/Attachment'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormContext } from '@common/utils/eventFormTempStorage'
@@ -25,6 +26,7 @@ export interface EventFormValues {
   hasVideoConference: boolean
   meetingLink: string | null
   selectedResources: Resource[]
+  attachments: Attachment[]
   // UI-only flags that must survive temp-storage restore
   showDescription: boolean
   showRepeat: boolean
@@ -48,6 +50,7 @@ export const DEFAULT_FORM_VALUES: EventFormValues = {
   hasVideoConference: false,
   meetingLink: null,
   selectedResources: [],
+  attachments: [],
   showDescription: false,
   showRepeat: false,
   hasEndDateChanged: false
@@ -136,6 +139,7 @@ export interface UseEventFormValuesReturn {
   setShowDescription: (v: boolean) => void
   setShowRepeat: (v: boolean) => void
   setHasEndDateChanged: (v: boolean) => void
+  setAttachments: (v: EventFormValues['attachments']) => void
   handleAllDayChange: (
     newAllDay: boolean,
     newStart: string,
