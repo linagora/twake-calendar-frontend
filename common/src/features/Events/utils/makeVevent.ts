@@ -145,6 +145,10 @@ export function makeVevent(
     })
   }
 
+  event?.attach?.forEach(attachment => {
+    vevent[1].push(attachment.asJcal())
+  })
+
   if (event.passthroughProps?.length) {
     const existingKeys = new Set(
       vevent[1].map(p => (p as [string])[0].toLowerCase())

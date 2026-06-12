@@ -3,6 +3,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { Attachment } from './Attachment'
 
 export interface CalendarEvent {
   URL: string
@@ -32,12 +33,6 @@ export interface CalendarEvent {
   passthroughProps?: VObjectProperty[]
   selectedResources?: Resource[]
   attach?: Attachment[]
-}
-
-export interface Attachment {
-  uri: string
-  fmttype?: string
-  x_filename?: string
 }
 
 export interface RepetitionObject {

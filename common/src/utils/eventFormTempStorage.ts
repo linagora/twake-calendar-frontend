@@ -1,6 +1,7 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
-import { RepetitionObject } from '@common/types/EventsTypes'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { Attachment } from '@common/types/Attachment'
+import { RepetitionObject } from '@common/types/EventsTypes'
 
 export interface EventFormTempData {
   // Form fields
@@ -19,6 +20,7 @@ export interface EventFormTempData {
   calendarid: string
   hasVideoConference: boolean
   meetingLink: string | null
+  attachments?: Attachment[]
   // UI state
   showMore?: boolean
   showDescription?: boolean
@@ -92,6 +94,7 @@ export interface EventFormState {
   calendarid: string
   hasVideoConference: boolean
   meetingLink: string | null
+  attachments?: Attachment[]
   showMore?: boolean
   showDescription?: boolean
   showRepeat?: boolean
@@ -137,6 +140,7 @@ export interface EventFormSetters {
   setShowRepeat?: (value: boolean) => void
   setHasEndDateChanged?: (value: boolean) => void
   setSelectedResources?: (value: Resource[]) => void
+  setAttachments?: (value: Attachment[]) => void
 }
 
 export function restoreFormDataFromTemp(
@@ -175,5 +179,17 @@ export function restoreFormDataFromTemp(
   }
   if (tempData.resources !== undefined) {
     setters.setSelectedResources?.(tempData.resources)
+  }
+  if (tempData.attachments !== undefined) {
+    setters.setAttachments?.(
+      tempData.attachments?.map(
+        attachment =>
+          new Attachment(
+            attachment.uri,
+            attachment.fmttype,
+            attachment.x_filename
+          )
+      )
+    )
   }
 }
