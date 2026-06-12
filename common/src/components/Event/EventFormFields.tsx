@@ -99,6 +99,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       setShowDescription,
       setShowRepeat,
       setHasEndDateChanged,
+      setAttachments,
       handleAllDayChange
     } = useEventFormValues({
       initialValues,
@@ -233,6 +234,8 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           showMore={showMore}
           description={v.description}
           setDescription={setDescription}
+          attachments={v.attachments}
+          setAttachments={setAttachments}
         />
 
         <LocationField

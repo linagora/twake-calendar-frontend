@@ -11,6 +11,7 @@ import {
   EventFormTempData,
   EventFormContext
 } from '@common/utils/eventFormTempStorage'
+import { Attachment } from '@common/types/Attachment'
 
 function isTempDataValidForContext(
   tempData: EventFormTempData | null,
@@ -46,6 +47,7 @@ function mapTempDataToFormValues(
     hasVideoConference: tempData.hasVideoConference,
     meetingLink: tempData.meetingLink,
     selectedResources: tempData.resources ?? [],
+    attachments: tempData.attachments ?? [],
     showDescription: tempData.showDescription ?? false,
     showRepeat: tempData.showRepeat ?? false,
     hasEndDateChanged: tempData.hasEndDateChanged ?? false
@@ -101,6 +103,7 @@ function useEventFormSetters(
 ): {
   setTitle: (v: string) => void
   setDescription: (v: string) => void
+  setAttachments: (v: Attachment[]) => void
   setLocation: (v: string) => void
   setStart: (v: string) => void
   setEnd: (v: string) => void
@@ -182,6 +185,10 @@ function useEventFormSetters(
     (v: boolean) => set('hasEndDateChanged', v),
     [set]
   )
+  const setAttachments = useCallback(
+    (v: EventFormValues['attachments']) => set('attachments', v),
+    [set]
+  )
 
   const handleAllDayChange = useCallback(
     (newAllDay: boolean, newStart: string, newEnd: string) => {
@@ -216,6 +223,7 @@ function useEventFormSetters(
     setShowDescription,
     setShowRepeat,
     setHasEndDateChanged,
+    setAttachments,
     handleAllDayChange
   }
 }
