@@ -1,5 +1,5 @@
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { useMemo } from 'react'
 
 const isResourceAttendee = (attendee: userAttendee): boolean =>
@@ -56,14 +56,7 @@ export const useFilterEventAttendees = ({
     () =>
       eventAttendees.find(
         a => a.cal_address === event.organizer?.cal_address
-      ) ||
-      ({
-        ...event.organizer,
-        partstat: 'ACCEPTED',
-        role: 'CHAIR',
-        cutype: 'INDIVIDUAL',
-        rsvp: 'FALSE'
-      } as userAttendee),
+      ) || userAttendee.fromOrganizer(event.organizer),
     [eventAttendees, event.organizer]
   )
 

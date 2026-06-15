@@ -9,13 +9,11 @@ import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarP
 
 export function makeEventWithOverrides(
   updatedEvent: CalendarEvent,
-  vevents: VCalComponent[],
-  calOwnerEmail?: string
+  vevents: VCalComponent[]
 ): VCalComponent {
   const updatedVevent = makeVevent(
     updatedEvent,
     updatedEvent.timezone,
-    calOwnerEmail,
     !updatedEvent.recurrenceId
   )
   const nextVevents = [...vevents]

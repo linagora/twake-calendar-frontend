@@ -12,6 +12,7 @@ import { DelegationAccess } from '@common/types/CalendarTypes'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 // Stored event jCal returned by the server (Europe/Paris). A PARTSTAT update
 // must patch this in place, so it is what fetchEventJCal resolves to in the
@@ -307,16 +308,16 @@ describe('Event Preview Display', () => {
                   '667037022b752d0026472254/cal1'
                 ].events.event1,
                 attendee: [
-                  {
+                  new userAttendee({
                     cal_address: 'test@test.com',
                     cn: 'Test User',
                     partstat: 'NEEDS-ACTION'
-                  },
-                  {
+                  }),
+                  new userAttendee({
                     cal_address: 'organizer@test.com',
                     cn: 'Test Organizer',
                     partstat: 'NEEDS-ACTION'
-                  }
+                  })
                 ],
                 organizer: {
                   cal_address: 'organizer@test.com'
@@ -366,11 +367,11 @@ describe('Event Preview Display', () => {
                   '667037022b752d0026472254/cal1'
                 ].events.event1,
                 attendee: [
-                  {
+                  new userAttendee({
                     cal_address: 'organizer@test.com',
                     cn: 'Test Organizer',
                     partstat: 'NEEDS-ACTION'
-                  }
+                  })
                 ],
                 organizer: {
                   cal_address: 'organizer@test.com'
@@ -426,11 +427,11 @@ describe('Event Preview Display', () => {
                   '667037022b752d0026472254/cal1'
                 ].events.event1,
                 attendee: [
-                  {
+                  new userAttendee({
                     cal_address: 'test@test.com',
                     cn: 'Test User',
                     partstat: 'NEEDS-ACTION'
-                  }
+                  })
                 ],
                 organizer: {
                   cal_address: 'organizer@test.com'
@@ -483,11 +484,11 @@ describe('Event Preview Display', () => {
                   '667037022b752d0026472254/cal1'
                 ].events.event1,
                 attendee: [
-                  {
+                  new userAttendee({
                     cal_address: 'test@test.com',
                     cn: 'Test User',
                     partstat: 'NEEDS-ACTION'
-                  }
+                  })
                 ],
                 organizer: {
                   cal_address: 'organizer@test.com'
@@ -542,11 +543,11 @@ describe('Event Preview Display', () => {
                   '667037022b752d0026472254/cal1'
                 ].events.event1,
                 attendee: [
-                  {
+                  new userAttendee({
                     cal_address: 'test@test.com',
                     cn: 'Test User',
                     partstat: 'NEEDS-ACTION'
-                  }
+                  })
                 ],
                 organizer: {
                   cal_address: 'organizer@test.com'

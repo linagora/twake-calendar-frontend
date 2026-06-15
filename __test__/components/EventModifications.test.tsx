@@ -13,6 +13,7 @@ import { jest } from '@jest/globals'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 describe('CalendarApp integration', () => {
   beforeEach(() => {
@@ -62,14 +63,14 @@ describe('CalendarApp integration', () => {
                   cal_address: 'alice@example.com'
                 },
                 attendee: [
-                  {
+                  new userAttendee({
                     cn: 'Alice',
                     partstat: 'ACCEPTED',
                     rsvp: 'TRUE',
                     role: 'REQ-PARTICIPANT',
                     cutype: 'INDIVIDUAL',
                     cal_address: 'alice@example.com'
-                  }
+                  })
                 ]
               }
             }
@@ -158,14 +159,14 @@ describe('CalendarApp integration', () => {
                 cal_address: 'alice@example.com'
               },
               attendee: [
-                {
+                new userAttendee({
                   cn: 'Alice',
                   partstat: 'ACCEPTED',
                   rsvp: 'TRUE',
                   role: 'REQ-PARTICIPANT',
                   cutype: 'INDIVIDUAL',
                   cal_address: 'alice@example.com'
-                }
+                })
               ],
               ...eventProps
             }
@@ -347,22 +348,22 @@ describe('CalendarApp integration', () => {
                   cal_address: 'alice@example.com'
                 },
                 attendee: [
-                  {
+                  new userAttendee({
                     cn: 'Alice',
                     partstat: 'ACCEPTED',
                     rsvp: 'TRUE',
                     role: 'CHAIR',
                     cutype: 'INDIVIDUAL',
                     cal_address: 'alice@example.com'
-                  },
-                  {
+                  }),
+                  new userAttendee({
                     cn: 'Bob',
                     partstat: 'ACCEPTED',
                     rsvp: 'TRUE',
                     role: 'REQ-PARTICIPANT',
                     cutype: 'INDIVIDUAL',
                     cal_address: 'bob@example.com'
-                  }
+                  })
                 ]
               }
             }

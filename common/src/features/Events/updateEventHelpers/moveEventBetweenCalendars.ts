@@ -93,14 +93,7 @@ function rewriteAttendeesForOrganizerChange(
   )
 
   if (!alreadyPresent && newAddr) {
-    filtered.push({
-      cal_address: newOrganizer.cal_address,
-      partstat: 'ACCEPTED',
-      role: 'CHAIR',
-      rsvp: 'FALSE',
-      cn: newOrganizer.cn || newOrganizer.cal_address,
-      cutype: 'INDIVIDUAL'
-    })
+    filtered.push(userAttendee.fromOrganizer(newOrganizer))
   }
 
   return filtered

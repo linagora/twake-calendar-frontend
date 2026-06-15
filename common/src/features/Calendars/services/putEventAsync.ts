@@ -15,10 +15,7 @@ export const putEventThunk = (create: ReducerCreators<CalendarState>) =>
   >(
     async ({ cal, newEvent, calType }, { rejectWithValue }) => {
       try {
-        const jCal = calendarEventToJCal(
-          newEvent,
-          cal.owner?.emails ? cal.owner.emails[0] : undefined
-        )
+        const jCal = calendarEventToJCal(newEvent)
         await putEvent(newEvent, jCal)
 
         return {

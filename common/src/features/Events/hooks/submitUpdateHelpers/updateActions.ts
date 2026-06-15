@@ -83,10 +83,7 @@ export async function handleConvertRecurringToSingle({
       recurrenceId: undefined
     }
 
-    const jCal = calendarEventToJCal(
-      finalNewEvent,
-      targetCalendar.owner?.emails?.[0]
-    )
+    const jCal = calendarEventToJCal(finalNewEvent)
     await putEvent(finalNewEvent, jCal)
     dispatch(updateEventLocal({ calId: targetCalId, event: finalNewEvent }))
     createdUID = finalNewEvent.uid

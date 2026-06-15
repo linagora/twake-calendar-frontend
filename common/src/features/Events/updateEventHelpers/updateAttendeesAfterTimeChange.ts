@@ -11,11 +11,8 @@ export const updateAttendeesAfterTimeChange = (
 
   const organizerAddr = organizer?.cal_address
 
-  const markNeedsAction = (att: userAttendee): userAttendee => ({
-    ...att,
-    partstat: 'NEEDS-ACTION',
-    rsvp: 'TRUE'
-  })
+  const markNeedsAction = (att: userAttendee): userAttendee =>
+    att.withPartStat('NEEDS-ACTION').withRsvp('TRUE')
 
   const getExistingOrDefault = (addr: string, fallback: userAttendee) =>
     attendee.find(a => a?.cal_address === addr) ?? fallback
@@ -32,13 +29,10 @@ export const updateAttendeesAfterTimeChange = (
     // Only append organizer entry if organizer exists
     const organizerEntry =
       organizer && organizerAddr
-        ? getExistingOrDefault(organizerAddr, {
-            ...organizer,
-            role: 'CHAIR',
-            cutype: 'INDIVIDUAL',
-            partstat: 'NEEDS-ACTION',
-            rsvp: 'TRUE'
-          })
+        ? getExistingOrDefault(
+            organizerAddr,
+            markNeedsAction(userAttendee.fromOrganizer(organizer))
+          )
         : null
 
     const deduped = organizerEntry

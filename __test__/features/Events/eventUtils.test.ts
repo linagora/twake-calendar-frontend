@@ -1,6 +1,4 @@
-import { Calendar } from '@common/types/CalendarTypes'
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import {
   calendarEventToJCal,
   combineMasterDateWithFormTime,
@@ -9,6 +7,10 @@ import {
   normalizeTimezone,
   parseCalendarEvent
 } from '@common/features/Events/utils'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { VAlarm } from '@common/types/VAlarm'
 
 describe('parseCalendarEvent', () => {
   const baseColor = { light: '#00FF00' }
@@ -451,14 +453,14 @@ describe('calendarEventToJCal', () => {
         cal_address: 'alice@example.com'
       },
       attendee: [
-        {
+        new userAttendee({
           cn: 'Bob',
           partstat: 'ACCEPTED',
           rsvp: 'TRUE',
           role: 'REQ-PARTICIPANT',
           cutype: 'INDIVIDUAL',
           cal_address: 'bob@example.com'
-        }
+        })
       ]
     }
 
@@ -559,11 +561,11 @@ describe('calendarEventToJCal', () => {
       end: '2025-07-20T08:00:00.000Z',
       timezone: 'Europe/Paris',
       allday: false,
-      alarm: { trigger: '-PT10M', action: 'DISPLAY' },
+      alarm: new VAlarm({ trigger: '-PT10M', action: 'DISPLAY' }),
       attendee: []
     } as unknown as CalendarEvent
 
-    const result = calendarEventToJCal(mockEvent, 'owner@example.com')
+    const result = calendarEventToJCal(mockEvent)
     const vevent = result[2][0]
 
     expect(vevent[2][0][0]).toBe('valarm')
@@ -617,14 +619,14 @@ describe('calendarEventToJCal', () => {
         cal_address: 'alice@example.com'
       },
       attendee: [
-        {
+        new userAttendee({
           cn: 'Bob',
           partstat: 'ACCEPTED',
           rsvp: 'TRUE',
           role: 'REQ-PARTICIPANT',
           cutype: 'INDIVIDUAL',
           cal_address: 'bob@example.com'
-        }
+        })
       ]
     }
 

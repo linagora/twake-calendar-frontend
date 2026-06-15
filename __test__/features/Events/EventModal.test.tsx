@@ -6,6 +6,7 @@ import { DateSelectArg } from '@fullcalendar/core'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/utils/apiUtils')
 
@@ -42,7 +43,8 @@ describe('EventPopover', () => {
         '667037022b752d0026472254/cal1': {
           id: '667037022b752d0026472254/cal1',
           name: 'Calendar 1',
-          color: '#FF0000'
+          color: '#FF0000',
+          owner: { emails: ['test@test.com'] }
         },
         '667037022b752d0026472254/cal2': {
           id: '667037022b752d0026472254/cal2',
@@ -354,23 +356,27 @@ describe('EventPopover', () => {
 
       expect(receivedPayload.newEvent.attendee).toHaveLength(2)
       expect(receivedPayload.newEvent.attendee).toStrictEqual([
-        {
+        new userAttendee({
           cn: 'test',
           cal_address: 'test@test.com',
           partstat: 'ACCEPTED',
           rsvp: 'FALSE',
           role: 'CHAIR',
           cutype: 'INDIVIDUAL'
-        },
-        {
+        }),
+        new userAttendee({
           cn: 'John Doe',
           cal_address: 'john@example.com',
           partstat: 'NEEDS-ACTION',
           rsvp: 'FALSE',
           role: 'REQ-PARTICIPANT',
           cutype: 'INDIVIDUAL'
-        }
+        })
       ])
+      expect(receivedPayload.newEvent.alarm.attendee?.cal_address).toBe(
+        'mailto:test@test.com'
+      )
+      expect(receivedPayload.newEvent.alarm.summary).toBe('newEvent')
     } finally {
       jest.useRealTimers()
     }
@@ -424,14 +430,16 @@ describe('EventPopover', () => {
       const receivedPayload = spy.mock.calls[0][0]
 
       expect(receivedPayload.newEvent.attendee).toHaveLength(2) // Organizer + 1 resource
-      expect(receivedPayload.newEvent.attendee[1]).toStrictEqual({
-        cn: 'Room 1',
-        cal_address: 'room1@example.com',
-        partstat: 'NEEDS-ACTION',
-        rsvp: 'TRUE',
-        role: 'REQ-PARTICIPANT',
-        cutype: 'RESOURCE'
-      })
+      expect(receivedPayload.newEvent.attendee[1]).toStrictEqual(
+        new userAttendee({
+          cn: 'Room 1',
+          cal_address: 'room1@example.com',
+          partstat: 'NEEDS-ACTION',
+          rsvp: 'TRUE',
+          role: 'REQ-PARTICIPANT',
+          cutype: 'RESOURCE'
+        })
+      )
     } finally {
       jest.useRealTimers()
     }

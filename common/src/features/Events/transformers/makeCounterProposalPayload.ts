@@ -31,9 +31,9 @@ export function makeCounterProposalPayload({
   const vevent = makeVevent(
     counterEvent,
     counterEvent.timezone,
-    senderEmail,
     !event.recurrenceId
   )
+
   if (message) {
     vevent[1].push(['comment', {}, 'text', message])
   }

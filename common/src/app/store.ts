@@ -25,7 +25,13 @@ export const setupStore = (preloadedState?: Partial<RootState>) => {
     reducer: rootReducer,
     preloadedState,
     middleware: getDefaultMiddleware =>
-      getDefaultMiddleware()
+      getDefaultMiddleware({
+        serializableCheck: {
+          // Class instances are intentionally stored here for .asJcal() serialization; plain data remains inspectable in devtools
+          ignoredActionPaths: ['payload.events'], // suppress during the fulfilled action check
+          ignoredPaths: [/^calendars\.list\..+\.events/] // suppress state checks for events
+        }
+      })
         .concat(routerMiddleware)
         .prepend(postMutationRefreshMiddleware.middleware)
   })

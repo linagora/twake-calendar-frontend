@@ -4,6 +4,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/features/Events/EventDao')
 jest.mock('@common/features/Calendars/CalendarDAO')
@@ -66,7 +67,9 @@ describe('EventUpdateModal Timezone Handling', () => {
       timezone: 'Asia/Bangkok',
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
-      attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+      attendee: [
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+      ],
       URL: '/calendars/667037022b752d0026472254/cal1/test-event-1.ics'
     } as CalendarEvent
 
@@ -128,7 +131,9 @@ describe('EventUpdateModal Timezone Handling', () => {
       timezone: 'Asia/Bangkok',
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
-      attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+      attendee: [
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+      ],
       URL: '/calendars/667037022b752d0026472254/cal1/test-event-2.ics'
     } as CalendarEvent
 
@@ -179,15 +184,15 @@ describe('EventUpdateModal Timezone Handling', () => {
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
       attendee: [
-        { cn: 'test', cal_address: 'test@test.com' },
-        {
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' }),
+        new userAttendee({
           cn: 'Conference Room',
           cal_address: 'room@test.com',
           partstat: 'ACCEPTED',
           rsvp: 'TRUE',
           role: 'REQ-PARTICIPANT',
           cutype: 'RESOURCE'
-        }
+        })
       ],
       URL: '/calendars/667037022b752d0026472254/cal1/test-event-resource.ics'
     } as CalendarEvent
@@ -311,7 +316,9 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       repetition: { freq: 'daily', interval: 1 },
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
-      attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+      attendee: [
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+      ],
       URL: `/calendars/${calId}/${baseUID}.ics`,
       timezone: 'UTC'
     } as CalendarEvent
@@ -477,7 +484,9 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       repetition: { freq: 'weekly', interval: 1 },
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
-      attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+      attendee: [
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+      ],
       URL: `/calendars/${calId}/${baseUID}.ics`,
       timezone: 'UTC'
     } as CalendarEvent
@@ -628,7 +637,9 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
       repetition: { freq: 'monthly', interval: 1 },
       allday: false,
       organizer: { cn: 'test', cal_address: 'test@test.com' },
-      attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+      attendee: [
+        new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+      ],
       URL: `/calendars/${calId}/${baseUID}.ics`,
       timezone: 'UTC'
     } as CalendarEvent

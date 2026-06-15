@@ -7,6 +7,7 @@ import * as EventDao from '@common/features/Events/EventDao'
 import { handleRSVP } from '@common/components/Event/eventHandlers/eventHandlers'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { userData } from '@common/features/User/userDataTypes'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 // The DTSTART the server stores, in Europe/Paris. This is what must survive a
 // PARTSTAT update untouched (regression test for #1031).
@@ -64,14 +65,14 @@ const STALE_EVENT = {
   allday: false,
   URL: '/calendars/cal-1/event-abc.ics',
   attendee: [
-    {
+    new userAttendee({
       cn: 'Me',
       cal_address: 'me@example.com',
       partstat: 'NEEDS-ACTION',
       rsvp: 'TRUE',
       role: 'REQ-PARTICIPANT',
       cutype: 'INDIVIDUAL'
-    }
+    })
   ]
 } as unknown as CalendarEvent
 

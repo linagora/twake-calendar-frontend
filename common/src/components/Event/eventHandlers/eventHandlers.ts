@@ -16,7 +16,6 @@ import {
   type AttendeeMatcher
 } from '@common/features/Events/transformers'
 import { PartStat, userAttendee } from '@common/features/User/models/attendee'
-import { createAttendee } from '@common/features/User/models/attendee.mapper'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -42,10 +41,9 @@ function updateEventAttendees(
     const updatedAttendees =
       event.attendee?.map(attendeeData =>
         attendeeData.cutype === 'RESOURCE' && attendeeData.cn === calendar.name
-          ? { ...attendeeData, partstat: rsvp }
+          ? attendeeData.withPartStat(rsvp)
           : attendeeData
       ) || []
-
     return { attendee: updatedAttendees }
   }
 
@@ -56,7 +54,7 @@ function updateEventAttendees(
   const eventHasNoAttendees = !event?.attendee || event.attendee.length === 0
   const isOrganizer = isEventOrganiser(event, user.email)
   if (eventHasNoAttendees) {
-    const userdata = createAttendee({
+    const userdata = new userAttendee({
       cal_address: user.email,
       cn: buildFamilyName(user.given_name, user.family_name, user.email),
       role: isOrganizer ? 'CHAIR' : 'REQ-PARTICIPANT',
@@ -77,12 +75,12 @@ function updateEventAttendees(
 
       const updatedAttendees = event.attendee.map(attendeeData =>
         attendeeData.cal_address?.toLowerCase() === userEmailLower
-          ? { ...attendeeData, partstat: rsvp }
+          ? attendeeData.withPartStat(rsvp)
           : attendeeData
       )
 
       if (!userExists) {
-        const newUserAttendee = createAttendee({
+        const newUserAttendee = new userAttendee({
           cal_address: user.email,
           cn: buildFamilyName(user.given_name, user.family_name, user.email),
           role: 'REQ-PARTICIPANT',

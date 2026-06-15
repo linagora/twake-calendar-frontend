@@ -21,11 +21,7 @@ export const updateEventInstanceThunk = (
     async ({ cal, event }, { rejectWithValue }) => {
       try {
         const vevents = await fetchAllRecurrentVevents(event)
-        const jCal = makeEventWithOverrides(
-          event,
-          vevents,
-          cal.owner?.emails?.[0]
-        )
+        const jCal = makeEventWithOverrides(event, vevents)
         await putEvent(event, jCal)
 
         return { calId: cal.id, event }

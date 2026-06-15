@@ -1,5 +1,4 @@
 import { userAttendee } from '@common/features/User/models/attendee'
-import { createAttendee } from '@common/features/User/models/attendee.mapper'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FreeBusyIndicator } from './FreeBusyIndicator'
 import {
@@ -165,8 +164,8 @@ export const AttendeeSearch: React.FC<{
     })
     setAddedUsers(value.filter(u => !initialEmails.has(u.email)))
     setAttendees(
-      value.map(u =>
-        createAttendee({ cal_address: u.email, cn: u.displayName })
+      value.map(
+        u => new userAttendee({ cal_address: u.email, cn: u.displayName })
       )
     )
   }

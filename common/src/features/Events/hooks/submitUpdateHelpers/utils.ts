@@ -4,6 +4,7 @@ import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUt
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
+import { VAlarm } from '@common/types/VAlarm'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
@@ -63,7 +64,12 @@ export function prepareUpdatedEvent({
     transp: values.busy,
     sequence: nextSequence,
     color: targetCalendar?.color,
-    alarm: { trigger: values.alarm, action: 'EMAIL' },
+    alarm: new VAlarm({
+      trigger: values.alarm,
+      action: 'EMAIL',
+      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      summary: values.title
+    }),
     x_openpass_videoconference: values.meetingLink || undefined,
     attach: values.attachments?.length ? values.attachments : undefined
   }
@@ -90,14 +96,7 @@ function mapResourcesToAttendees(
         a => a.cutype === 'RESOURCE' && a.cn === displayName
       )?.partstat || 'NEEDS-ACTION'
 
-    return {
-      cn: displayName,
-      cal_address: resource?.email ?? '',
-      partstat,
-      rsvp: 'TRUE',
-      role: 'REQ-PARTICIPANT',
-      cutype: 'RESOURCE'
-    }
+    return userAttendee.fromResource(resource).withPartStat(partstat)
   })
 }
 

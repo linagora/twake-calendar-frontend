@@ -1,31 +1,31 @@
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 
 describe('updateAttendeesAfterTimeChange', () => {
-  const mockAttendee: userAttendee = {
+  const mockAttendee: userAttendee = new userAttendee({
     cal_address: 'attendee@example.com',
     partstat: 'ACCEPTED',
     rsvp: 'FALSE',
     role: 'REQ-PARTICIPANT',
     cutype: 'INDIVIDUAL',
     cn: 'attendee'
-  }
+  })
 
-  const mockOrganizer: userOrganiser = {
+  const mockOrganizer: userOrganiser = new userAttendee({
     cn: 'Organizer',
     cal_address: 'organizer@example.com'
-  }
+  })
 
-  const organizerAttendee: userAttendee = {
+  const organizerAttendee: userAttendee = new userAttendee({
     cal_address: 'organizer@example.com',
     partstat: 'ACCEPTED',
     rsvp: 'FALSE',
     role: 'CHAIR',
     cutype: 'INDIVIDUAL',
     cn: 'organizer'
-  }
+  })
 
   const baseEvent: CalendarEvent = {
     uid: 'test-event',
@@ -89,14 +89,14 @@ describe('updateAttendeesAfterTimeChange', () => {
   })
 
   describe('with provided attendees list', () => {
-    const newAttendee: userAttendee = {
+    const newAttendee: userAttendee = new userAttendee({
       cal_address: 'new@example.com',
       partstat: 'ACCEPTED',
       rsvp: 'FALSE',
       role: 'REQ-PARTICIPANT',
       cutype: 'INDIVIDUAL',
       cn: 'new'
-    }
+    })
 
     it('should use existing attendee data when the address already exists in the event', () => {
       const result = updateAttendeesAfterTimeChange(baseEvent, false, [
@@ -195,14 +195,14 @@ describe('updateAttendeesAfterTimeChange', () => {
     })
 
     it('should not append an organizer entry when organizer is undefined and attendees list is provided', () => {
-      const newAttendee: userAttendee = {
+      const newAttendee: userAttendee = new userAttendee({
         cal_address: 'new@example.com',
         partstat: 'ACCEPTED',
         rsvp: 'FALSE',
         role: 'REQ-PARTICIPANT',
         cutype: 'INDIVIDUAL',
         cn: 'new'
-      }
+      })
       const result = updateAttendeesAfterTimeChange(eventNoOrganizer, false, [
         newAttendee
       ])

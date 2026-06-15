@@ -12,6 +12,8 @@ import {
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { putEvent } from '@common/features/Calendars/CalendarSlice'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { VAlarm } from '@common/types/VAlarm'
 
 export async function handleCreateEvent({
   dispatch,
@@ -56,34 +58,23 @@ export async function handleCreateEvent({
     repetition: values.repetition,
     organizer,
     timezone: values.timezone,
-    attendee: [
-      {
-        cn: organizer?.cn ?? '',
-        cal_address: organizer?.cal_address ?? '',
-        partstat: 'ACCEPTED',
-        rsvp: 'FALSE',
-        role: 'CHAIR',
-        cutype: 'INDIVIDUAL'
-      }
-    ],
+    attendee: [userAttendee.fromOrganizer(organizer)],
     transp: values.busy,
     sequence: 1,
     color: targetCalendar?.color,
-    alarm: { trigger: values.alarm, action: 'EMAIL' },
+    alarm: new VAlarm({
+      trigger: values.alarm,
+      action: 'EMAIL',
+      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      summary: values.title
+    }),
     x_openpass_videoconference: values.meetingLink || undefined
   }
 
   // Append resources as attendees
   values.selectedResources.forEach((resource: Resource) => {
     if (!newEvent.attendee) newEvent.attendee = []
-    newEvent.attendee.push({
-      cn: resource?.displayName ?? '',
-      cal_address: resource?.email ?? '',
-      partstat: 'NEEDS-ACTION',
-      rsvp: 'TRUE',
-      role: 'REQ-PARTICIPANT',
-      cutype: 'RESOURCE'
-    })
+    newEvent.attendee.push(userAttendee.fromResource(resource))
   })
 
   // Append human attendees

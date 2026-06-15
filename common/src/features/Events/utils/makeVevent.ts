@@ -1,13 +1,12 @@
-import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import moment from 'moment'
 import { RepetitionRule } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import moment from 'moment'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
 
 export function makeVevent(
   event: CalendarEvent,
   tzid: string,
-  calOwnerEmail: string | undefined,
   isMasterEvent?: boolean
 ): [string, unknown[]] {
   let isOccurrence = false
@@ -37,19 +36,7 @@ export function makeVevent(
     ]
   ]
   if (event.alarm?.trigger) {
-    const valarm = [
-      ['trigger', {}, 'duration', event.alarm.trigger],
-      ['action', {}, 'text', event.alarm.action],
-      ['attendee', {}, 'cal-address', `mailto:${calOwnerEmail}`],
-      ['summary', {}, 'text', event.title],
-      [
-        'description',
-        {},
-        'text',
-        'This is an automatic alarm sent by Twake Calendar'
-      ]
-    ]
-    vevent.push([['valarm', valarm]])
+    vevent.push([event.alarm.asJcal()])
   }
 
   if (event.end) {
@@ -115,21 +102,7 @@ export function makeVevent(
   }
 
   event.attendee.forEach(att => {
-    const attendee: Record<string, string> = {
-      partstat: att.partstat,
-      rsvp: att.rsvp,
-      role: att.role,
-      cutype: att.cutype
-    }
-    if (att.cn) {
-      attendee.cn = att.cn
-    }
-    vevent[1].push([
-      'attendee',
-      attendee,
-      'cal-address',
-      `mailto:${att.cal_address}`
-    ])
+    vevent[1].push(att.asJcal())
   })
 
   if (event.exdates && event.exdates.length > 0) {

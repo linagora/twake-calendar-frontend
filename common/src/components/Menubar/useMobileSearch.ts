@@ -1,7 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { selectCalendars } from '@common/app/selectors/selectCalendars'
 import { AppDispatch } from '@common/app/store'
-import { Calendar } from '@common/types/CalendarTypes'
+import { User } from '@common/components/Attendees/types'
+import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
 import {
   clearFilters,
   searchEvents,
@@ -11,11 +12,10 @@ import {
 } from '@common/features/Search/SearchSlice'
 import { buildQuery } from '@common/features/Search/searchUtils'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { createAttendee } from '@common/features/User/models/attendee.mapper'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { useCallback, useMemo, useState } from 'react'
-import { User } from '@common/components/Attendees/types'
-import { SearchState } from '@common/components/Calendar/utils/tempSearchUtil'
 
 type FilterKey = 'organizers' | 'attendees'
 
@@ -159,9 +159,7 @@ function useContactSelectHandler(
     filterData
   return useCallback(
     (contacts: User[]): void => {
-      const mapped = contacts.map(c =>
-        createAttendee({ cal_address: c.email, cn: c.displayName })
-      )
+      const mapped = contacts.map(contact => userAttendee.fromUser(contact))
       const nextFilters = { ...filters, [filterKey]: mapped }
       setSelectedContacts(contacts)
       dispatch(setFilters(nextFilters))

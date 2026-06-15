@@ -6,6 +6,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/features/Events/EventDao')
 jest.mock('@common/features/Calendars/CalendarDAO')
@@ -403,7 +404,9 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
         allday: false,
         timezone: 'America/New_York',
         organizer: { cn: 'test', cal_address: 'test@test.com' },
-        attendee: [{ cn: 'test', cal_address: 'test@test.com' }],
+        attendee: [
+          new userAttendee({ cn: 'test', cal_address: 'test@test.com' })
+        ],
         URL: `/calendars/${calId}/${baseUID}.ics`
       } as CalendarEvent
 

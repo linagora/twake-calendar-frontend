@@ -11,6 +11,7 @@ import * as EventDao from '@common/features/Events/EventDao'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/components/Event/utils/eventUtils', () => {
   const actual = jest.requireActual('@common/components/Event/utils/eventUtils')
@@ -55,22 +56,22 @@ const basePreloadedState = {
             timezone: 'UTC',
             URL: '/calendars/667037022b752d0026472254/cal1/recurring-base.ics',
             attendee: [
-              {
+              new userAttendee({
                 cn: 'test',
                 cal_address: 'test@test.com',
                 partstat: 'NEEDS-ACTION',
                 rsvp: 'TRUE',
                 role: 'REQ-PARTICIPANT',
                 cutype: 'INDIVIDUAL'
-              },
-              {
+              }),
+              new userAttendee({
                 cn: 'John',
                 cal_address: 'john@test.com',
                 partstat: 'NEEDS-ACTION',
                 rsvp: 'TRUE',
                 role: 'REQ-PARTICIPANT',
                 cutype: 'INDIVIDUAL'
-              }
+              })
             ]
           },
           'recurring-base/20250322T100000': {
@@ -84,14 +85,14 @@ const basePreloadedState = {
             timezone: 'UTC',
             URL: '/calendars/667037022b752d0026472254/cal1/recurring-base.ics',
             attendee: [
-              {
+              new userAttendee({
                 cn: 'test',
                 cal_address: 'test@test.com',
                 partstat: 'NEEDS-ACTION',
                 rsvp: 'TRUE',
                 role: 'REQ-PARTICIPANT',
                 cutype: 'INDIVIDUAL'
-              }
+              })
             ]
           }
         },
@@ -1037,11 +1038,11 @@ describe('handleRSVP function', () => {
       end: new Date('2025-03-15T11:00:00Z').toISOString(),
       organizer: { cn: 'test', cal_address: 'test@test.com' },
       attendee: [
-        {
+        new userAttendee({
           cn: 'test',
           cal_address: 'test@test.com',
           partstat: 'NEEDS-ACTION'
-        }
+        })
       ]
     }
 
@@ -1267,22 +1268,22 @@ describe('Event URL handling for recurring events', () => {
                 timezone: 'UTC',
                 URL: '/calendars/667037022b752d0026472254/cal1/recurring-base.ics',
                 attendee: [
-                  {
+                  new userAttendee({
                     cn: 'test',
                     cal_address: 'test@test.com',
                     partstat: 'NEEDS-ACTION',
                     rsvp: 'TRUE',
                     role: 'REQ-PARTICIPANT',
                     cutype: 'INDIVIDUAL'
-                  },
-                  {
+                  }),
+                  new userAttendee({
                     cn: 'John',
                     cal_address: 'john@test.com',
                     partstat: 'NEEDS-ACTION',
                     rsvp: 'TRUE',
                     role: 'REQ-PARTICIPANT',
                     cutype: 'INDIVIDUAL'
-                  }
+                  })
                 ]
               },
               'recurring-base/20250322T100000': {

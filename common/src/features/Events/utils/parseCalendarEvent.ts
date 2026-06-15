@@ -8,13 +8,13 @@ import {
   VObjectValue
 } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { createAttendee } from '@common/features/User/models/attendee.mapper'
-import { AlarmObject, CalendarEvent } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildDelegatedEventURL } from './buildDelegatedEventURL'
 import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'
 import { WKST_NUM_TO_DAY } from './wkstUtils'
 import { Attachment } from '@common/types/Attachment'
+import { AlarmData, VAlarm } from '@common/types/VAlarm'
 
 const KNOWN_PROPS = new Set([
   'uid',
@@ -95,7 +95,7 @@ function parseAttendeeProperty(
 
   if (!alreadyExists) {
     event.attendee.push(
-      createAttendee({
+      new userAttendee({
         cn: paramsObj?.cn,
         cal_address: calAddress,
         partstat: paramsObj?.partstat as userAttendee['partstat'],
@@ -245,11 +245,11 @@ function processEventUid(
   }
 }
 
-function parseAlarm(valarm?: VCalComponent): AlarmObject | undefined {
+function parseAlarm(valarm?: VCalComponent): VAlarm | undefined {
   if (!valarm) {
     return undefined
   }
-  const alarm = {} as AlarmObject
+  const alarm = {} as AlarmData
   for (const [key, , , value] of valarm[1]) {
     switch (key.toLowerCase()) {
       case 'action':
@@ -258,9 +258,18 @@ function parseAlarm(valarm?: VCalComponent): AlarmObject | undefined {
       case 'trigger':
         alarm.trigger = safeString(value)
         break
+      case 'description':
+        alarm.description = safeString(value)
+        break
+      case 'attendee':
+        alarm.attendee = userAttendee.fromEmailField(safeString(value))
+        break
+      case 'summary':
+        alarm.summary = safeString(value)
+        break
     }
   }
-  return alarm
+  return new VAlarm(alarm)
 }
 
 function processEventDates(

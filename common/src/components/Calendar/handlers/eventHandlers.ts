@@ -11,11 +11,10 @@ import { handleUpdateRecurringSeries } from '@common/features/Events/hooks/submi
 import { getSeriesInstances } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
 import { parseFetchedEvent } from '@common/features/Events/transformers'
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
-import { userAttendee } from '@common/features/User/models/attendee'
 import {
-  AttendeeOptions,
-  createAttendee
-} from '@common/features/User/models/attendee.mapper'
+  userAttendee,
+  UserAttendeeOptions
+} from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
@@ -141,7 +140,7 @@ export const createEventHandlers = (
   }
 
   const mapTempUserToAttendee = (user: User): userAttendee => {
-    const attendeeOption: AttendeeOptions = {
+    const attendeeOption: UserAttendeeOptions = {
       cal_address: user.email,
       cn: user.displayName,
       rsvp: 'TRUE'
@@ -150,7 +149,7 @@ export const createEventHandlers = (
     if (user.objectType === 'resource') {
       attendeeOption.cutype = 'RESOURCE'
     }
-    return createAttendee(attendeeOption)
+    return new userAttendee(attendeeOption)
   }
 
   const buildInitialTempEvent = (

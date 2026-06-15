@@ -4,6 +4,7 @@ import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Attachment } from './Attachment'
+import { VAlarm } from './VAlarm'
 
 export interface CalendarEvent {
   URL: string
@@ -28,7 +29,7 @@ export interface CalendarEvent {
   status?: string
   timezone: string
   repetition?: RepetitionObject
-  alarm?: AlarmObject
+  alarm?: VAlarm
   exdates?: string[]
   passthroughProps?: VObjectProperty[]
   selectedResources?: Resource[]
@@ -42,11 +43,6 @@ export interface RepetitionObject {
   occurrences?: number | null
   endDate?: string | null
   wkst?: string | null
-}
-
-export interface AlarmObject {
-  trigger: string
-  action: string
 }
 
 export interface ContextualizedEvent {

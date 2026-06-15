@@ -3,6 +3,8 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { makeSearchEventParam } from '@common/features/Events/transformers/makeSearchEventParam'
 import { clientConfig } from '@common/features/User/oidcAuth'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
+import { VAlarm } from '@common/types/VAlarm'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 clientConfig.url = 'https://example.com'
 
@@ -19,22 +21,22 @@ const mockEvent = {
   status: 'PUBLIC',
   organizer: { cn: 'test', cal_address: 'test@test.com' },
   attendee: [
-    {
+    new userAttendee({
       cn: 'test',
       cal_address: 'test@test.com',
       partstat: 'NEEDS-ACTION',
       rsvp: 'TRUE',
       role: 'REQ-PARTICIPANT',
       cutype: 'INDIVIDUAL'
-    },
-    {
+    }),
+    new userAttendee({
       cn: 'John',
       cal_address: 'john@test.com',
       partstat: 'NEEDS-ACTION',
       rsvp: 'TRUE',
       role: 'REQ-PARTICIPANT',
       cutype: 'INDIVIDUAL'
-    }
+    })
   ]
 } as CalendarEvent
 
@@ -322,22 +324,22 @@ describe('makeSeriesJCal', () => {
       {
         ...mockEvent,
         attendee: [
-          {
+          new userAttendee({
             cn: 'Bob',
             cal_address: 'bob@example.com',
             partstat: 'NEEDS-ACTION',
             cutype: 'INDIVIDUAL',
             role: 'REQ-PARTICIPANT',
             rsvp: 'TRUE'
-          },
-          {
+          }),
+          new userAttendee({
             cn: 'Charlie',
             cal_address: 'charlie@example.com',
             partstat: 'NEEDS-ACTION',
             cutype: 'INDIVIDUAL',
             role: 'REQ-PARTICIPANT',
             rsvp: 'TRUE'
-          }
+          })
         ]
       } as any,
       { removeOverrides: false }
@@ -586,7 +588,10 @@ describe('makeSeriesJCal', () => {
   it('replaces VALARM on overrides when alarm changes', async () => {
     const jCal = makeSeriesJCal(
       recurringWithAlarmVevents,
-      { ...mockEvent, alarm: { action: 'EMAIL', trigger: '-PT30M' } } as any,
+      {
+        ...mockEvent,
+        alarm: new VAlarm({ action: 'EMAIL', trigger: '-PT30M' })
+      } as any,
       { removeOverrides: false }
     )
 

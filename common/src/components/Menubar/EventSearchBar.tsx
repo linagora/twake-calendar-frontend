@@ -15,7 +15,6 @@ import {
 import { buildQuery } from '@common/features/Search/searchUtils'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { createAttendee } from '@common/features/User/models/attendee.mapper'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import {
   Box,
@@ -114,12 +113,7 @@ const SearchBar: React.FC<{
     if (contacts.length > 0) {
       void handleSearch('', {
         ...filters,
-        organizers: contacts.map(contact =>
-          createAttendee({
-            cal_address: contact.email,
-            cn: contact.displayName
-          })
-        )
+        organizers: contacts.map(userAttendee.fromUser.bind(userAttendee))
       })
     }
   }
@@ -316,10 +310,7 @@ const SearchBar: React.FC<{
                             handleFilterChange(
                               'organizers',
                               selectedContacts.map((attendee: User) =>
-                                createAttendee({
-                                  cal_address: attendee.email,
-                                  cn: attendee.displayName
-                                })
+                                userAttendee.fromUser(attendee)
                               )
                             )
                           }}

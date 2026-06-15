@@ -1,16 +1,18 @@
-import { Calendar } from '@common/types/CalendarTypes'
 import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
 import {
   fetchAllRecurrentVevents,
   putEvent
 } from '@common/features/Events/EventDao'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { makeEventWithOverrides } from '@common/features/Events/transformers/makeEventWithOverrides'
 import {
   calendarEventToJCal,
   makeVevent,
   parseCalendarEvent
 } from '@common/features/Events/utils'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { VAlarm } from '@common/types/VAlarm'
 
 jest.mock('@common/features/Events/EventDao')
 
@@ -303,22 +305,18 @@ describe('Standard event modification', () => {
     it('adds attendee while preserving custom props', () => {
       const event = baseCalendarEvent({
         attendee: [
-          {
+          new userAttendee({
             cal_address: 'alice@example.com',
             cn: 'Alice',
             partstat: 'ACCEPTED',
             rsvp: 'TRUE',
             role: 'REQ-PARTICIPANT',
             cutype: 'INDIVIDUAL'
-          }
+          })
         ],
         passthroughProps: CUSTOM_PROPS
       })
-      const [, props] = makeVevent(
-        event,
-        event.timezone,
-        'organizer@example.com'
-      )
+      const [, props] = makeVevent(event, event.timezone)
 
       const attendees = (props as VObjectProperty[]).filter(
         ([k]) => k === 'attendee'
@@ -381,36 +379,21 @@ describe('Recurring event — makeVevent as master', () => {
     })
 
   it('includes rrule in the output', () => {
-    const [, props] = makeVevent(
-      recurringBase(),
-      'Europe/Paris',
-      undefined,
-      true
-    )
+    const [, props] = makeVevent(recurringBase(), 'Europe/Paris', true)
     const rrule = (props as VObjectProperty[]).find(([k]) => k === 'rrule')
     expect(rrule).toBeDefined()
     expect((rrule?.[3] as Record<string, unknown>)?.freq).toBe('weekly')
   })
 
   it('preserves custom props on master vevent', () => {
-    const [, props] = makeVevent(
-      recurringBase(),
-      'Europe/Paris',
-      undefined,
-      true
-    )
+    const [, props] = makeVevent(recurringBase(), 'Europe/Paris', true)
     const keys = (props as VObjectProperty[]).map(([k]) => k.toLowerCase())
     expect(keys).toContain('x-attachment')
     expect(keys).toContain('x-custom-field')
   })
 
   it('does NOT include recurrence-id on master event', () => {
-    const [, props] = makeVevent(
-      recurringBase(),
-      'Europe/Paris',
-      undefined,
-      true
-    )
+    const [, props] = makeVevent(recurringBase(), 'Europe/Paris', true)
     const keys = (props as VObjectProperty[]).map(([k]) => k.toLowerCase())
     expect(keys).not.toContain('recurrence-id')
   })
@@ -425,12 +408,7 @@ describe('Recurring event — makeVevent as override (single instance)', () => {
     })
 
   it('preserves custom props on override vevent', () => {
-    const [, props] = makeVevent(
-      overrideBase(),
-      'Europe/Paris',
-      undefined,
-      false
-    )
+    const [, props] = makeVevent(overrideBase(), 'Europe/Paris', false)
     const keys = (props as VObjectProperty[]).map(([k]) => k.toLowerCase())
     expect(keys).toContain('x-attachment')
   })
@@ -442,7 +420,7 @@ describe('Recurring event — exdate (delete instance)', () => {
       exdates: ['2024-03-20T09:00:00.000Z', '2024-03-27T09:00:00.000Z'],
       passthroughProps: CUSTOM_PROPS
     })
-    const [, props] = makeVevent(event, 'Europe/Paris', undefined, true)
+    const [, props] = makeVevent(event, 'Europe/Paris', true)
 
     const exdates = (props as VObjectProperty[]).filter(([k]) => k === 'exdate')
     expect(exdates.length).toBe(2)
@@ -507,14 +485,10 @@ describe('Edge cases', () => {
 
   it('handles event with alarm alongside passthroughProps', () => {
     const event = baseCalendarEvent({
-      alarm: { trigger: '-PT15M', action: 'EMAIL' },
+      alarm: new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
       passthroughProps: CUSTOM_PROPS
     })
-    const [, props, subComponents] = makeVevent(
-      event,
-      event.timezone,
-      'owner@example.com'
-    )
+    const [, props, subComponents] = makeVevent(event, event.timezone)
     expect(Array.isArray(subComponents)).toBe(true)
 
     const keys = (props as VObjectProperty[]).map(([k]) => k.toLowerCase())
