@@ -8,7 +8,8 @@ import { SearchEventResult } from './types/SearchEventResult'
 import { useEventPreview } from './useEventPreview'
 import {
   RenderDate,
-  RenderText,
+  RenderLocation,
+  RenderDescription,
   RenderOrganizer,
   RenderTime,
   RenderTitle,
@@ -64,19 +65,21 @@ export default function DesktopResultItem({
           }
         }}
       >
-        <RenderDate
-          startDate={startDate}
-          endDate={endDate}
-          t={t}
-          timeZone={timeZone}
-        />
-        <RenderTime
-          startDate={startDate}
-          endDate={endDate}
-          allDay={!!eventData.data.allDay}
-          t={t}
-          timeZone={timeZone}
-        />
+        <Box display="flex" alignItems="center" sx={{ minWidth: '225px' }}>
+          <RenderDate
+            startDate={startDate}
+            endDate={endDate}
+            t={t}
+            timeZone={timeZone}
+          />
+          <RenderTime
+            startDate={startDate}
+            endDate={endDate}
+            allDay={!!eventData.data.allDay}
+            t={t}
+            timeZone={timeZone}
+          />
+        </Box>
         <SquareRoundedIcon
           style={{
             color: calendarColor ?? defaultColors[0].light,
@@ -92,8 +95,8 @@ export default function DesktopResultItem({
           t={t}
         />
         <RenderOrganizer organizer={eventData.data.organizer} />
-        <RenderText text={eventData.data.location} />
-        <RenderText text={eventData.data.description} />
+        <RenderLocation text={eventData.data.location} />
+        <RenderDescription text={eventData.data.description} />
         <RenderVideoJoin
           t={t}
           url={eventData.data['x-openpaas-videoconference']}

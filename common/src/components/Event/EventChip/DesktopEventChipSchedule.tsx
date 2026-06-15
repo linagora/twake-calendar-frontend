@@ -10,7 +10,8 @@ import {
   RenderOrganizer,
   RenderVideoJoin,
   RenderTitle,
-  RenderText
+  RenderLocation,
+  RenderDescription
 } from '@common/features/Search/searchResultsComponents'
 import {
   RenderDayIndicator,
@@ -85,8 +86,8 @@ export const DesktopEventChipSchedule: React.FC<
       />
       <RenderTitle summary={arg.event.title} isRecurrent={isRecurrent} t={t} />
       <RenderOrganizer organizer={ext.organizer} />
-      <RenderText text={ext.location} />
-      <RenderText text={ext.description} />
+      <RenderLocation text={ext.location} />
+      <RenderDescription text={ext.description} />
       <Box sx={{ ml: 'auto', flexShrink: 0 }}>
         <RenderVideoJoin t={t} url={videoUrl} />
       </Box>

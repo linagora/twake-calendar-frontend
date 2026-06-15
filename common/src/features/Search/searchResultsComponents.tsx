@@ -127,7 +127,7 @@ export const RenderTitle: React.FC<TitleProps> = ({
         display="flex"
         flexDirection="row"
         gap={1}
-        sx={{ minWidth: 0, width: '150px', alignItems: 'center' }}
+        sx={{ minWidth: 0, flex: '0 0 12%', alignItems: 'center' }}
       >
         <Typography
           sx={{
@@ -135,7 +135,9 @@ export const RenderTitle: React.FC<TitleProps> = ({
             fontSize: '17px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0
           }}
         >
           {summary || t('event.untitled')}
@@ -151,7 +153,9 @@ export const RenderTitle: React.FC<TitleProps> = ({
 }
 
 export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
-  if (!organizer?.cn && !organizer?.email) return null
+  if (!organizer?.cn && !organizer?.email) {
+    return <Box sx={{ minWidth: 0, flex: '0 0 20%' }} />
+  }
 
   const organizerName = organizer.cn || organizer.email
 
@@ -162,13 +166,14 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
           display: 'flex',
           alignItems: 'center',
           gap: 1,
-          minWidth: '150px',
-          maxWidth: '150px'
+          minWidth: 0,
+          maxWidth: '15%',
+          marginRight: 3
         }}
       >
         <Avatar
           alt={organizerName}
-          sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
+          sx={{ width: 24, height: 24, fontSize: '0.75rem', flexShrink: 0 }}
           {...stringAvatar(organizerName || '')}
         />
         <Typography
@@ -177,7 +182,8 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            flex: 1
+            flex: 1,
+            minWidth: 0
           }}
         >
           {organizerName}
@@ -187,7 +193,12 @@ export const RenderOrganizer: React.FC<OrganizerProps> = ({ organizer }) => {
   )
 }
 
-export const RenderText: React.FC<{ text?: string }> = ({ text }) => {
+interface RenderTextProps {
+  text?: string
+  sx?: React.ComponentProps<typeof Typography>['sx']
+}
+
+export const RenderText: React.FC<RenderTextProps> = ({ text, sx }) => {
   if (!text) return null
   return (
     <Typography
@@ -198,12 +209,20 @@ export const RenderText: React.FC<{ text?: string }> = ({ text }) => {
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         minWidth: 0,
-        maxWidth: '200px'
+        ...sx
       }}
     >
       {text.replace(/\n/g, ' ')}
     </Typography>
   )
+}
+
+export const RenderLocation: React.FC<{ text?: string }> = ({ text }) => {
+  return <RenderText text={text} sx={{ flex: '0 1 auto', maxWidth: '20%' }} />
+}
+
+export const RenderDescription: React.FC<{ text?: string }> = ({ text }) => {
+  return <RenderText text={text} sx={{ flex: '1 1 0%' }} />
 }
 
 export const RenderVideoJoin: React.FC<VideoJoinProps> = ({ url, t }) => {
