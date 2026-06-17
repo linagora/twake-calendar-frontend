@@ -77,6 +77,7 @@ export function getTitleStyle(
     case 'DECLINED':
       return { ...baseStyle, textDecoration: 'line-through' }
     case 'TENTATIVE':
+      return baseStyle
     case 'ACCEPTED':
       return { ...baseStyle, color: calendar?.color?.dark }
     case 'NEEDS-ACTION':
@@ -145,9 +146,7 @@ export function getCardStyle(
     case 'TENTATIVE':
       return {
         ...baseStyle,
-        backgroundColor: calendar?.color?.light,
-        color: calendar?.color?.dark,
-        border: '1px solid white'
+        border: '1px dashed'
       }
     case 'NEEDS-ACTION':
       return {
