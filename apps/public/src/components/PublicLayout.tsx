@@ -7,7 +7,7 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { PublicLanguageSelector } from './PublicLanguageSelector'
