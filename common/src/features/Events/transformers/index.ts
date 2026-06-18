@@ -1,5 +1,7 @@
 export { makeCounterProposalPayload } from './makeCounterProposalPayload'
 export { updateSeriesPartstatJCal } from './updateSeriesPartstatJCal'
+export { updateEventPartstatJCal } from './updateEventPartstatJCal'
+export type { AttendeeMatcher } from './updateEventPartstatJCal'
 export { makeDeleteEventInstanceJCal } from './makeDeleteEventInstanceJCal'
 export { makeEventWithOverrides } from './makeEventWithOverrides'
 export { makeSearchEventParam } from './makeSearchEventParam'

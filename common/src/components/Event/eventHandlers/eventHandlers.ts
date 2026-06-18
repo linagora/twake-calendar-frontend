@@ -7,9 +7,14 @@ import {
 } from '@common/features/Calendars/CalendarSlice'
 import {
   fetchAllRecurrentVevents,
+  fetchEventJCal,
   putEvent
 } from '@common/features/Events/EventDao'
-import { updateSeriesPartstatJCal } from '@common/features/Events/transformers'
+import {
+  updateEventPartstatJCal,
+  updateSeriesPartstatJCal,
+  type AttendeeMatcher
+} from '@common/features/Events/transformers'
 import { PartStat, userAttendee } from '@common/features/User/models/attendee'
 import { createAttendee } from '@common/features/User/models/attendee.mapper'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
@@ -17,6 +22,15 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
+
+interface RSVPHandlerParams {
+  dispatch: AppDispatch
+  calendar: Calendar
+  event: CalendarEvent
+  user: userData | undefined
+  rsvp: PartStat
+  typeOfAction?: string
+}
 
 function updateEventAttendees(
   calendar: Calendar,
@@ -100,22 +114,62 @@ async function handleAllRSVP(
   await putEvent(event, jCal)
 }
 
-async function handleDefaultRSVP(
-  dispatch: AppDispatch,
+function makePartstatMatcher(
   calendar: Calendar,
-  newEvent: CalendarEvent
-): Promise<void> {
-  await dispatch(putEventAsync({ cal: calendar, newEvent }))
+  user: userData | undefined
+): AttendeeMatcher | undefined {
+  if (calendar.owner?.resource) {
+    return (params, _calAddress) =>
+      params.cutype === 'RESOURCE' && params.cn === calendar.name
+  }
+  const userEmail = user?.email?.toLowerCase()
+  if (!userEmail) {
+    return undefined
+  }
+  return (_params, calAddress) => calAddress.toLowerCase() === userEmail
 }
 
-export async function handleRSVP(
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  user: userData | undefined,
-  event: CalendarEvent,
-  rsvp: PartStat,
-  typeOfAction?: string
-): Promise<void> {
+async function handleDefaultRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  fallbackEvent
+}: Omit<RSVPHandlerParams, 'typeOfAction'> & {
+  fallbackEvent: CalendarEvent
+}): Promise<void> {
+  // Update the attendee PARTSTAT directly in the stored jCal so that DTSTART,
+  // VTIMEZONE and every other property are preserved exactly. Regenerating the
+  // event from the parsed model drops the timezone when it is missing (#1031).
+  const matcher = makePartstatMatcher(calendar, user)
+  if (matcher) {
+    const jCal = await fetchEventJCal(event)
+    const patched = updateEventPartstatJCal(jCal, matcher, rsvp)
+    if (patched) {
+      const response = await putEvent(event, patched)
+      if (!response.ok) {
+        throw new Error(
+          `RSVP update failed for ${event.URL} with status ${response.status}`
+        )
+      }
+      return
+    }
+  }
+
+  // No matching attendee in the event (e.g. adding oneself for the first time):
+  // fall back to regenerating the event from the model.
+  await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
+}
+
+export async function handleRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  typeOfAction
+}: RSVPHandlerParams): Promise<void> {
   const newEvent = {
     ...event,
     ...updateEventAttendees(calendar, event, user, rsvp)
@@ -129,7 +183,14 @@ export async function handleRSVP(
     }
     await handleAllRSVP(event, user.email, rsvp)
   } else {
-    await handleDefaultRSVP(dispatch, calendar, newEvent)
+    await handleDefaultRSVP({
+      dispatch,
+      calendar,
+      event,
+      user,
+      rsvp,
+      fallbackEvent: newEvent
+    })
   }
 }
 

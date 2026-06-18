@@ -135,6 +135,24 @@ export async function fetchAllRecurrentVevents(
 }
 
 /**
+ * Fetches the full VCALENDAR jCal of an event (VEVENTs + VTIMEZONE + props).
+ * Used to update an event in place without regenerating it from the parsed
+ * model, so that properties like DTSTART/VTIMEZONE are preserved byte-for-byte.
+ */
+export async function fetchEventJCal(
+  event: CalendarEvent
+): Promise<VCalComponent> {
+  const response = await api.get(`dav${event.URL}`)
+  if (!response.ok) {
+    throw new Error(
+      `fetchEventJCal failed for ${event.URL} with status ${response.status}`
+    )
+  }
+  const eventData = await response.text()
+  return ICAL.parse(eventData) as VCalComponent
+}
+
+/**
  * POSTs an iTIP COUNTER proposal for a calendar event.
  * Accepts a pre-serialized ICS string and the envelope metadata.
  */

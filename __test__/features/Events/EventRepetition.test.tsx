@@ -262,8 +262,8 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -284,8 +284,8 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -306,8 +306,8 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -362,8 +362,8 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'single-event'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="single-event"
         />,
         nonRecurringState
       )
@@ -404,8 +404,8 @@ describe('Delete Recurring Event Instance', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -454,8 +454,8 @@ describe('Delete Recurring Event Instance', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -505,8 +505,8 @@ describe('RSVP to Recurring Event', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -566,8 +566,8 @@ describe('RSVP to Recurring Event', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -656,8 +656,8 @@ describe('Edit Recurring Event in Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -699,8 +699,8 @@ describe('Edit Recurring Event in Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
           typeOfAction="solo"
         />,
         basePreloadedState
@@ -753,8 +753,8 @@ describe('Edit Recurring Event in Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
           typeOfAction="all"
         />,
         basePreloadedState
@@ -786,8 +786,8 @@ describe('Edit Recurring Event in Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
           typeOfAction="solo"
           eventData={
             basePreloadedState.calendars.list['667037022b752d0026472254/cal1']
@@ -833,8 +833,8 @@ describe('Edit Recurring Event in Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
           typeOfAction="all"
         />,
         basePreloadedState
@@ -969,8 +969,8 @@ describe('RepeatEvent Component - Recurrence Editing', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'otherCal/cal'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="otherCal/cal"
+          eventId="recurring-base/20250315T100000"
         />,
         {
           ...basePreloadedState,
@@ -1045,13 +1045,14 @@ describe('handleRSVP function', () => {
       ]
     }
 
-    await handleRSVP(
-      mockDispatch,
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'],
-      basePreloadedState.user,
-      nonRecurringEvent,
-      'ACCEPTED'
-    )
+    await handleRSVP({
+      dispatch: mockDispatch,
+      calendar:
+        basePreloadedState.calendars.list['667037022b752d0026472254/cal1'],
+      user: basePreloadedState.user,
+      event: nonRecurringEvent,
+      rsvp: 'ACCEPTED'
+    })
 
     expect(mockDispatch).toHaveBeenCalled()
   })
@@ -1178,8 +1179,8 @@ describe('Calendar Integration - EditModeDialog Flow', () => {
         <EventPreviewModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         basePreloadedState
       )
@@ -1324,8 +1325,8 @@ describe('Event URL handling for recurring events', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'recurring-base/20250315T100000'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="recurring-base/20250315T100000"
         />,
         twoCalState
       )

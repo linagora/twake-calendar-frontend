@@ -7,9 +7,50 @@ import {
 } from '@common/components/Event/utils/eventUtils'
 import EventPreviewModal from '@common/components/EventPreview'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
+import * as EventDao from '@common/features/Events/EventDao'
 import { DelegationAccess } from '@common/types/CalendarTypes'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+
+// Stored event jCal returned by the server (Europe/Paris). A PARTSTAT update
+// must patch this in place, so it is what fetchEventJCal resolves to in the
+// RSVP tests below.
+const storedEventJCal = (): VCalComponent =>
+  [
+    'vcalendar',
+    [],
+    [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          [
+            'dtstart',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2025-01-15T11:00:00'
+          ],
+          [
+            'attendee',
+            { partstat: 'NEEDS-ACTION', cutype: 'INDIVIDUAL' },
+            'cal-address',
+            'mailto:test@test.com'
+          ]
+        ],
+        []
+      ]
+    ]
+  ] as unknown as VCalComponent
+
+const sentPartstat = (jCal: VCalComponent): string | undefined => {
+  const vevent = (jCal[2] as VCalComponent[]).find(c => c[0] === 'vevent')
+  const props = (vevent?.[1] ?? []) as Array<
+    [string, Record<string, string>, string, string]
+  >
+  const attendee = props.find(p => p[0] === 'attendee')
+  return attendee?.[1]?.partstat
+}
 
 describe('Event Preview Display', () => {
   const mockOnClose = jest.fn()
@@ -366,13 +407,10 @@ describe('Event Preview Display', () => {
   })
 
   it('handles RSVP Accept click', async () => {
+    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
     const spy = jest
-      .spyOn(eventThunks, 'putEvent')
-      .mockImplementation(payload => {
-        const promise = Promise.resolve(payload)
-        ;(promise as any).unwrap = () => promise
-        return () => promise as any
-      })
+      .spyOn(EventDao, 'putEvent')
+      .mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -422,18 +460,14 @@ describe('Event Preview Display', () => {
       expect(spy).toHaveBeenCalled()
     })
 
-    const updatedEvent = spy.mock.calls[0][0].newEvent
-    expect(updatedEvent.attendee[0].partstat).toBe('ACCEPTED')
+    expect(sentPartstat(spy.mock.calls[0][1] as VCalComponent)).toBe('ACCEPTED')
   })
 
   it('handles RSVP Maybe click', async () => {
+    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
     const spy = jest
-      .spyOn(eventThunks, 'putEvent')
-      .mockImplementation(payload => {
-        const promise = Promise.resolve(payload)
-        ;(promise as any).unwrap = () => promise
-        return () => promise as any
-      })
+      .spyOn(EventDao, 'putEvent')
+      .mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -483,18 +517,16 @@ describe('Event Preview Display', () => {
       expect(spy).toHaveBeenCalled()
     })
 
-    const updatedEvent = spy.mock.calls[0][0].newEvent
-    expect(updatedEvent.attendee[0].partstat).toBe('TENTATIVE')
+    expect(sentPartstat(spy.mock.calls[0][1] as VCalComponent)).toBe(
+      'TENTATIVE'
+    )
   })
 
   it('handles RSVP Decline click', async () => {
+    jest.spyOn(EventDao, 'fetchEventJCal').mockResolvedValue(storedEventJCal())
     const spy = jest
-      .spyOn(eventThunks, 'putEvent')
-      .mockImplementation(payload => {
-        const promise = Promise.resolve(payload)
-        ;(promise as any).unwrap = () => promise
-        return () => promise as any
-      })
+      .spyOn(EventDao, 'putEvent')
+      .mockResolvedValue({} as Response)
 
     const rsvpState = {
       ...preloadedState,
@@ -544,8 +576,7 @@ describe('Event Preview Display', () => {
       expect(spy).toHaveBeenCalled()
     })
 
-    const updatedEvent = spy.mock.calls[0][0].newEvent
-    expect(updatedEvent.attendee[0].partstat).toBe('DECLINED')
+    expect(sentPartstat(spy.mock.calls[0][1] as VCalComponent)).toBe('DECLINED')
   })
   it('handles Edit click when is own but with no organizer', async () => {
     renderWithProviders(

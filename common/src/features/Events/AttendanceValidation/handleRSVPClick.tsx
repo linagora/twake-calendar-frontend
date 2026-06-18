@@ -31,7 +31,14 @@ export async function handleRSVPClick(
           onLoadingChange?.(true, rsvp)
 
           try {
-            await handleRSVP(dispatch, calendar, user, event, rsvp, type)
+            await handleRSVP({
+              dispatch,
+              calendar,
+              user,
+              event,
+              rsvp,
+              typeOfAction: type
+            })
             onLoadingChange?.(false)
           } catch (error) {
             console.error('Error handling RSVP:', error)
@@ -43,7 +50,13 @@ export async function handleRSVPClick(
     setOpenEditModePopup('attendance')
   } else {
     try {
-      await handleRSVP(dispatch, calendar, user, event, rsvp)
+      await handleRSVP({
+        dispatch,
+        calendar,
+        user,
+        event,
+        rsvp
+      })
       onLoadingChange?.(false)
     } catch (error) {
       console.error('Error handling RSVP:', error)
