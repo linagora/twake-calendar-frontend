@@ -78,6 +78,7 @@ function useFilterSearchState(
 interface CalendarsResult {
   calendars: Calendar[]
   personalCalendars: Calendar[]
+  sharedCalendars: Calendar[]
 }
 
 function useCalendars(): CalendarsResult {
@@ -90,13 +91,21 @@ function useCalendars(): CalendarsResult {
         : [],
     [calendars, userId]
   )
-  return { calendars, personalCalendars }
+  const sharedCalendars = useMemo(
+    (): Calendar[] =>
+      userId
+        ? calendars.filter(c => extractEventBaseUuid(c.id) !== userId)
+        : [],
+    [calendars, userId]
+  )
+  return { calendars, personalCalendars, sharedCalendars }
 }
 
 function useSearchAction(
   dispatch: AppDispatch,
   calendarIds: string[],
   personalCalendarIds: string[],
+  sharedCalendarsIds: string[],
   setDialogOpen: (b: boolean) => void
 ): (searchQuery: string, currentFilters: SearchFilters) => Promise<void> {
   return useCallback(
@@ -108,7 +117,8 @@ function useSearchAction(
         searchQuery,
         currentFilters,
         calendarIds,
-        personalCalendarIds
+        personalCalendarIds,
+        sharedCalendarsIds
       )
       if (!query) return
       dispatch(setSearchQuery(query.search))
@@ -116,7 +126,13 @@ function useSearchAction(
       dispatch(setView('search'))
       setDialogOpen(false)
     },
-    [dispatch, calendarIds, personalCalendarIds, setDialogOpen]
+    [
+      dispatch,
+      calendarIds,
+      personalCalendarIds,
+      sharedCalendarsIds,
+      setDialogOpen
+    ]
   )
 }
 
@@ -215,7 +231,7 @@ export function useFilterSearch(
   const searchParams = useAppSelector(state => state.searchResult.searchParams)
   const filters = searchParams.filters
   const currentSearch = searchParams.search
-  const { calendars, personalCalendars } = useCalendars()
+  const { calendars, personalCalendars, sharedCalendars } = useCalendars()
   const {
     inputQuery,
     setInputQuery,
@@ -235,6 +251,7 @@ export function useFilterSearch(
     dispatch,
     calendars.map(c => c.id),
     personalCalendars.map(c => c.id),
+    sharedCalendars.map(c => c.id),
     setDialogOpen
   )
   const handleSearchChange = useSearchChangeHandler(

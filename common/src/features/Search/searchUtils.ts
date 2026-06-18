@@ -3,10 +3,15 @@ import { SearchFilters } from './SearchSlice'
 export function getSearchInCalendars(
   searchIn: string,
   allIds: string[],
-  personalIds: string[]
+  personalIds: string[],
+  sharedIds: string[]
 ): string[] {
   if (!searchIn) return allIds
+
   if (searchIn === 'my-calendars') return personalIds
+
+  if (searchIn === 'shared-calendars') return sharedIds
+
   return [searchIn]
 }
 
@@ -14,7 +19,8 @@ export function buildQuery(
   searchQuery: string,
   filters: SearchFilters,
   allIds: string[],
-  personalIds: string[]
+  personalIds: string[],
+  sharedIds: string[]
 ):
   | {
       search: string
@@ -42,7 +48,12 @@ export function buildQuery(
       keywords: trimmedKeywords,
       organizers: filters.organizers.map(u => u.cal_address),
       attendees: filters.attendees.map(u => u.cal_address),
-      searchIn: getSearchInCalendars(filters.searchIn, allIds, personalIds)
+      searchIn: getSearchInCalendars(
+        filters.searchIn,
+        allIds,
+        personalIds,
+        sharedIds
+      )
     }
   }
 }

@@ -40,6 +40,10 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
     ? calendars.filter(c => extractEventBaseUuid(c.id) === userId)
     : []
 
+  const sharedCalendars = userId
+    ? calendars.filter(c => extractEventBaseUuid(c.id) !== userId)
+    : []
+
   const selectorRef = useRef<MobileSelectorHandle>(null)
   const mobileSearch = useFilterSearch('organizers', () => {})
 
@@ -58,6 +62,7 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
         selectorRef={selectorRef}
         filters={searchParams.filters}
         personalCalendars={personalCalendars}
+        sharedCalendars={sharedCalendars}
         t={t}
         handleSelect={v => void handleSelect(v)}
       />
@@ -82,18 +87,26 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
         sx={{ height: '40px' }}
       >
         <MenuItem value="">
-          <Typography sx={{ color: '#243B55', fontSize: '16px' }}>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             {t('search.filter.allCalendar')}
           </Typography>
         </MenuItem>
         <Divider />
         <MenuItem
           value="my-calendars"
-          sx={{ color: '#243B55', fontSize: '12px' }}
+          sx={{ color: 'text.secondary', fontSize: '12px' }}
         >
           {t('search.filter.myCalendar')}
         </MenuItem>
         {CalendarItemList(personalCalendars)}
+        <Divider />
+        <MenuItem
+          value="shared-calendars"
+          sx={{ color: 'text.secondary', fontSize: '12px' }}
+        >
+          {t('search.filter.sharedCalendars')}
+        </MenuItem>
+        {CalendarItemList(sharedCalendars)}
       </Select>
     </Box>
   )
@@ -112,6 +125,10 @@ const getDisplayLabel = (
     return t('search.filter.myCalendar')
   }
 
+  if (filters.searchIn === 'shared-calendars') {
+    return t('search.filter.sharedCalendars')
+  }
+
   const selected = personalCalendars.find(c => c.id === filters.searchIn)
   return selected ? <CalendarName calendar={selected} /> : t('search.searchIn')
 }
@@ -120,13 +137,22 @@ const CalendarMobileSelector: React.FC<{
   selectorRef: React.RefObject<MobileSelectorHandle>
   filters: SearchFilters
   personalCalendars: Calendar[]
+  sharedCalendars: Calendar[]
   t: (key: string) => string
   handleSelect: (value: string) => void
-}> = ({ selectorRef, filters, personalCalendars, t, handleSelect }) => {
+}> = ({
+  selectorRef,
+  filters,
+  personalCalendars,
+  sharedCalendars,
+  t,
+  handleSelect
+}) => {
+  const allCalendar = [...personalCalendars, ...sharedCalendars]
   return (
     <MobileSelector
       ref={selectorRef}
-      displayText={getDisplayLabel(filters, personalCalendars, t)}
+      displayText={getDisplayLabel(filters, allCalendar, t)}
     >
       <List>
         <ListItemButton
@@ -135,17 +161,30 @@ const CalendarMobileSelector: React.FC<{
         >
           <ListItemText primary={t('search.filter.allCalendar')} />
         </ListItemButton>
-
         <Divider />
-
         <ListItemButton
           selected={filters.searchIn === 'my-calendars'}
           onClick={() => handleSelect('my-calendars')}
         >
           <ListItemText primary={t('search.filter.myCalendar')} />
         </ListItemButton>
-
         {personalCalendars.map(c => (
+          <ListItemButton
+            key={c.id}
+            selected={filters.searchIn === c.id}
+            onClick={() => handleSelect(c.id)}
+          >
+            <CalendarName calendar={c} />
+          </ListItemButton>
+        ))}
+        <Divider />
+        <ListItemButton
+          selected={filters.searchIn === 'shared-calendars'}
+          onClick={() => handleSelect('shared-calendars')}
+        >
+          <ListItemText primary={t('search.filter.sharedCalendars')} />
+        </ListItemButton>
+        {sharedCalendars.map(c => (
           <ListItemButton
             key={c.id}
             selected={filters.searchIn === c.id}

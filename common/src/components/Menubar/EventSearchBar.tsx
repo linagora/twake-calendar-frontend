@@ -59,6 +59,11 @@ const SearchBar: React.FC<{
   const personnalCalendars = userId
     ? calendars.filter(c => extractEventBaseUuid(c.id) === userId)
     : []
+
+  const sharedCalendars = userId
+    ? calendars.filter(c => c.id.split('/')[0] !== userId)
+    : []
+
   const filters = useAppSelector(
     state => state.searchResult.searchParams.filters
   )
@@ -134,7 +139,8 @@ const SearchBar: React.FC<{
       searchQuery,
       filters,
       calendars.map(calendar => calendar.id),
-      personnalCalendars.map(calendar => calendar.id)
+      personnalCalendars.map(calendar => calendar.id),
+      sharedCalendars.map(calendar => calendar.id)
     )
     if (cleanedQuery) {
       await dispatch(searchEvents(cleanedQuery))
