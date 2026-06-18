@@ -143,6 +143,11 @@ export async function fetchEventJCal(
   event: CalendarEvent
 ): Promise<VCalComponent> {
   const response = await api.get(`dav${event.URL}`)
+  if (!response.ok) {
+    console.error(
+      `fetchEventJCal failed for ${event.URL} with status ${response.status}`
+    )
+  }
   const eventData = await response.text()
   return ICAL.parse(eventData) as VCalComponent
 }

@@ -23,6 +23,15 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
 
+interface RSVPHandlerParams {
+  dispatch: AppDispatch
+  calendar: Calendar
+  event: CalendarEvent
+  user: userData | undefined
+  rsvp: PartStat
+  typeOfAction?: string
+}
+
 function updateEventAttendees(
   calendar: Calendar,
   event: CalendarEvent,
@@ -120,14 +129,16 @@ function makePartstatMatcher(
   return (_params, calAddress) => calAddress.toLowerCase() === userEmail
 }
 
-async function handleDefaultRSVP(
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  event: CalendarEvent,
-  user: userData | undefined,
-  rsvp: PartStat,
+async function handleDefaultRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  fallbackEvent
+}: Omit<RSVPHandlerParams, 'typeOfAction'> & {
   fallbackEvent: CalendarEvent
-): Promise<void> {
+}): Promise<void> {
   // Update the attendee PARTSTAT directly in the stored jCal so that DTSTART,
   // VTIMEZONE and every other property are preserved exactly. Regenerating the
   // event from the parsed model drops the timezone when it is missing (#1031).
@@ -136,7 +147,12 @@ async function handleDefaultRSVP(
     const jCal = await fetchEventJCal(event)
     const patched = updateEventPartstatJCal(jCal, matcher, rsvp)
     if (patched) {
-      await putEvent(event, patched)
+      const response = await putEvent(event, patched)
+      if (!response.ok) {
+        console.error(
+          `RSVP update failed for ${event.URL} with status ${response.status}`
+        )
+      }
       return
     }
   }
@@ -146,14 +162,14 @@ async function handleDefaultRSVP(
   await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
 }
 
-export async function handleRSVP(
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  user: userData | undefined,
-  event: CalendarEvent,
-  rsvp: PartStat,
-  typeOfAction?: string
-): Promise<void> {
+export async function handleRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  typeOfAction
+}: RSVPHandlerParams): Promise<void> {
   const newEvent = {
     ...event,
     ...updateEventAttendees(calendar, event, user, rsvp)
@@ -167,7 +183,14 @@ export async function handleRSVP(
     }
     await handleAllRSVP(event, user.email, rsvp)
   } else {
-    await handleDefaultRSVP(dispatch, calendar, event, user, rsvp, newEvent)
+    await handleDefaultRSVP({
+      dispatch,
+      calendar,
+      event,
+      user,
+      rsvp,
+      fallbackEvent: newEvent
+    })
   }
 }
 

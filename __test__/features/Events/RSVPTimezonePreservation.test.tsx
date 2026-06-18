@@ -105,7 +105,13 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
       .mockResolvedValue({} as Response)
     const dispatch = jest.fn()
 
-    await handleRSVP(dispatch, CALENDAR, USER, STALE_EVENT, 'TENTATIVE')
+    await handleRSVP({
+      dispatch,
+      calendar: CALENDAR,
+      user: USER,
+      event: STALE_EVENT,
+      rsvp: 'TENTATIVE'
+    })
 
     expect(putSpy).toHaveBeenCalledTimes(1)
     const putJCal = putSpy.mock.calls[0][1] as VCalComponent
@@ -152,7 +158,13 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
       .mockResolvedValue({} as Response)
     const dispatch = jest.fn()
 
-    await handleRSVP(dispatch, CALENDAR, USER, STALE_EVENT, 'TENTATIVE')
+    await handleRSVP({
+      dispatch,
+      calendar: CALENDAR,
+      user: USER,
+      event: STALE_EVENT,
+      rsvp: 'TENTATIVE'
+    })
 
     expect(putSpy).not.toHaveBeenCalled()
     expect(dispatch).toHaveBeenCalledTimes(1)
@@ -165,13 +177,13 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
       .mockResolvedValue({} as Response)
     const dispatch = jest.fn()
 
-    await handleRSVP(
+    await handleRSVP({
       dispatch,
-      CALENDAR,
-      {} as userData,
-      STALE_EVENT,
-      'TENTATIVE'
-    )
+      calendar: CALENDAR,
+      user: {} as userData,
+      event: STALE_EVENT,
+      rsvp: 'TENTATIVE'
+    })
 
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(putSpy).not.toHaveBeenCalled()
