@@ -88,16 +88,22 @@ const CalendarAccordion: React.FC<{
     >
       <AccordionSummary
         expandIcon={
-          <Tooltip
-            title={expended ? t('tooltip.collapse') : t('tooltip.expand')}
-          >
-            <ExpandMoreIcon />
-          </Tooltip>
+          calendars.length > 0 ? (
+            <Tooltip
+              title={expended ? t('tooltip.collapse') : t('tooltip.expand')}
+            >
+              <ExpandMoreIcon />
+            </Tooltip>
+          ) : null
         }
         aria-controls={`${title}-content`}
         id={`${title}-header`}
         className="calendarListHeader"
-        onClick={() => setExpended(!expended)}
+        onClick={() => {
+          if (calendars.length > 0) {
+            setExpended(!expended)
+          }
+        }}
         sx={{
           '& .MuiAccordionSummary-content': {
             display: 'flex',
