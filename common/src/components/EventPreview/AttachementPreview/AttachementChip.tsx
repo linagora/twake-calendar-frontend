@@ -1,7 +1,6 @@
 import { Attachment } from '@common/types/Attachment'
-import { Link, radius } from '@linagora/twake-mui'
-import { Box, Typography } from '@linagora/twake-mui'
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
+import { getFileTypeIcon, Icon } from '@linagora/twake-icons'
+import { Box, Link, radius, Typography } from '@linagora/twake-mui'
 import React, { ReactElement } from 'react'
 
 const chipStyle = {
@@ -24,6 +23,12 @@ export const AttachementChip: React.FC<{
   attachment: Attachment
   endAddorments?: ReactElement
 }> = ({ attachment, endAddorments }) => {
+  const fileIcon = (
+    <Icon
+      icon={getFileTypeIcon(attachment.x_filename ?? '', attachment.fmttype)}
+      size={24}
+    />
+  )
   return (
     <Link
       key={`${attachment.uri}`}
@@ -39,8 +44,8 @@ export const AttachementChip: React.FC<{
       }}
     >
       <Box sx={{ ...chipStyle, width: '150px' }}>
-        <InsertDriveFileIcon fontSize="small" />
-        <Typography noWrap variant="body2" sx={{ maxWidth: 160 }}>
+        {fileIcon}
+        <Typography noWrap variant="body2" sx={{ maxWidth: 240 }}>
           {attachment.x_filename ?? ''}
         </Typography>
         {endAddorments}

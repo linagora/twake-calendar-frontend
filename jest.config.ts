@@ -41,7 +41,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@lottiefiles)/)'
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-icons|mime)/)'
       ],
 
       moduleNameMapper: {
@@ -53,7 +53,9 @@ const config: Config = {
         '^@common/(.*)$': '<rootDir>/common/src/$1',
         '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
         '^@public/(.*)$': '<rootDir>/apps/public/src/$1',
-        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui',
+        '^@linagora/twake-icons$':
+          '<rootDir>/node_modules/@linagora/twake-icons'
       },
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts']
     },
@@ -77,14 +79,18 @@ const config: Config = {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
         '^.+\\.(js|jsx|mjs)$': 'babel-jest'
       },
-      transformIgnorePatterns: ['/node_modules/(?!(ky|@linagora/twake-mui)/)'],
+      transformIgnorePatterns: [
+        '/node_modules/(?!(ky|@linagora/twake-mui|@linagora/twake-icons)/)'
+      ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',
         '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
         '^@public/(.*)$': '<rootDir>/apps/public/src/$1',
-        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui'
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui',
+        '^@linagora/twake-icons$':
+          '<rootDir>/node_modules/@linagora/twake-icons'
       }
     }
   ]
