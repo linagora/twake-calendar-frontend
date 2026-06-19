@@ -64,12 +64,18 @@ export function prepareUpdatedEvent({
     transp: values.busy,
     sequence: nextSequence,
     color: targetCalendar?.color,
-    alarm: new VAlarm({
-      trigger: values.alarm,
-      action: 'EMAIL',
-      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
-      summary: values.title
-    }),
+    alarms: (values.alarms ?? []).map(
+      alarm =>
+        new VAlarm({
+          trigger: alarm.trigger,
+          action: alarm.action,
+          attendee:
+            alarm.attendee ??
+            userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+          summary: alarm.summary ?? values.title,
+          description: alarm.description
+        })
+    ),
     x_openpass_videoconference: values.meetingLink || undefined,
     attach: values.attachments?.length ? values.attachments : undefined
   }

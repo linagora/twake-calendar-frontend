@@ -2,6 +2,7 @@ import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Attachment } from '@common/types/Attachment'
 import { RepetitionObject } from '@common/types/EventsTypes'
+import { VAlarm } from '@common/types/VAlarm'
 
 export interface EventFormTempData {
   // Form fields
@@ -13,7 +14,7 @@ export interface EventFormTempData {
   allday: boolean
   repetition: RepetitionObject
   attendees: userAttendee[]
-  alarm: string
+  alarms: VAlarm[]
   busy: string
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   timezone: string
@@ -87,7 +88,7 @@ export interface EventFormState {
   allday: boolean
   repetition: RepetitionObject
   attendees: userAttendee[]
-  alarm: string
+  alarms: VAlarm[]
   busy: string
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   timezone: string
@@ -155,7 +156,7 @@ export function restoreFormDataFromTemp(
   setters.setAllDay(tempData.allday)
   setters.setRepetition(tempData.repetition)
   setters.setAttendees(tempData.attendees)
-  setters.setAlarm(tempData.alarm)
+  setters.setAlarm(tempData.alarms?.[0]?.trigger ?? '')
   setters.setBusy(tempData.busy)
   setters.setEventClass(tempData.eventClass)
   setters.setTimezone(tempData.timezone)

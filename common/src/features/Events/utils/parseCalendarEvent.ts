@@ -245,31 +245,35 @@ function processEventUid(
   }
 }
 
-function parseAlarm(valarm?: VCalComponent): VAlarm | undefined {
-  if (!valarm) {
+function parseAlarms(valarms?: VCalComponent[]): VAlarm[] | undefined {
+  if (!valarms?.length) {
     return undefined
   }
-  const alarm = {} as AlarmData
-  for (const [key, , , value] of valarm[1]) {
-    switch (key.toLowerCase()) {
-      case 'action':
-        alarm.action = safeString(value)
-        break
-      case 'trigger':
-        alarm.trigger = safeString(value)
-        break
-      case 'description':
-        alarm.description = safeString(value)
-        break
-      case 'attendee':
-        alarm.attendee = userAttendee.fromEmailField(safeString(value))
-        break
-      case 'summary':
-        alarm.summary = safeString(value)
-        break
+  const alarms: VAlarm[] = []
+  for (const valarm of valarms) {
+    const alarm: Partial<AlarmData> = {}
+    for (const [key, , , value] of valarm[1]) {
+      switch (key.toLowerCase()) {
+        case 'action':
+          alarm.action = safeString(value)
+          break
+        case 'trigger':
+          alarm.trigger = safeString(value)
+          break
+        case 'description':
+          alarm.description = safeString(value)
+          break
+        case 'attendee':
+          alarm.attendee = userAttendee.fromEmailField(safeString(value))
+          break
+        case 'summary':
+          alarm.summary = safeString(value)
+          break
+      }
     }
+    alarms.push(new VAlarm(alarm as AlarmData))
   }
-  return new VAlarm(alarm)
+  return alarms
 }
 
 function processEventDates(
@@ -305,13 +309,13 @@ export function parseCalendarEvent({
   color,
   calendar,
   eventURL,
-  valarm
+  valarms
 }: {
   data: VObjectProperty[]
   color: Record<string, string>
   calendar: Calendar
   eventURL: string
-  valarm?: VCalComponent
+  valarms?: VCalComponent[]
 }): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] }
   const context: PropertyContext = {}
@@ -322,9 +326,9 @@ export function parseCalendarEvent({
 
   processEventUid(event, context.recurrenceId)
 
-  const alarm = parseAlarm(valarm)
-  if (alarm) {
-    event.alarm = alarm
+  const alarms = parseAlarms(valarms)
+  if (alarms?.length) {
+    event.alarms = alarms
   }
 
   event.calId = calendar.id

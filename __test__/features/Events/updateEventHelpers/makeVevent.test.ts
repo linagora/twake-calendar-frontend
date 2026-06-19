@@ -466,7 +466,7 @@ describe('RFC 5545 – RECURRENCE-ID (§3.8.4.4)', () => {
 describe('VALARM (RFC 5545 §3.6.6)', () => {
   it('is added when alarm.trigger is set', () => {
     const event = baseEvent({
-      alarm: new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })
+      alarms: [new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })]
     })
     const vevent = makeVevent(event, TZID)
     // VALARM is appended as a nested array at the end of vevent
@@ -487,12 +487,14 @@ describe('VALARM (RFC 5545 §3.6.6)', () => {
 
   it('alarm attendee points to calendar owner from constructor data', () => {
     const event = baseEvent({
-      alarm: new VAlarm({
-        trigger: '-PT10M',
-        action: 'EMAIL',
-        attendee: new userAttendee({ cal_address: `mailto:${OWNER}` }),
-        summary: 'Test Event'
-      })
+      alarms: [
+        new VAlarm({
+          trigger: '-PT10M',
+          action: 'EMAIL',
+          attendee: new userAttendee({ cal_address: `mailto:${OWNER}` }),
+          summary: 'Test Event'
+        })
+      ]
     })
     const vevent = makeVevent(event, TZID)
     const valarmEntry = vevent[2]?.find(
@@ -503,6 +505,38 @@ describe('VALARM (RFC 5545 §3.6.6)', () => {
     const summary = innerProps.find(p => p[0] === 'summary')
     expect(att![3]).toBe(`mailto:${OWNER}`)
     expect(summary![3]).toBe('Test Event')
+  })
+
+  it('serializes multiple alarms as separate VALARM components', () => {
+    const event = baseEvent({
+      alarms: [
+        new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
+        new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' })
+      ]
+    })
+    const vevent = makeVevent(event, TZID)
+
+    // Find all VALARM entries in subcomponents
+    const valarmEntries = (vevent[2] ?? []).filter(
+      (p: unknown) => Array.isArray(p) && (p as unknown[])[0] === 'valarm'
+    )
+    expect(valarmEntries).toHaveLength(2)
+
+    // Verify first alarm
+    const firstValarm = valarmEntries[0] as unknown[]
+    const firstProps = firstValarm[1] as unknown[][]
+    const firstTrigger = firstProps.find(p => p[0] === 'trigger')
+    const firstAction = firstProps.find(p => p[0] === 'action')
+    expect(firstTrigger?.[3]).toBe('-PT15M')
+    expect(firstAction?.[3]).toBe('EMAIL')
+
+    // Verify second alarm
+    const secondValarm = valarmEntries[1] as unknown[]
+    const secondProps = secondValarm[1] as unknown[][]
+    const secondTrigger = secondProps.find(p => p[0] === 'trigger')
+    const secondAction = secondProps.find(p => p[0] === 'action')
+    expect(secondTrigger?.[3]).toBe('-PT30M')
+    expect(secondAction?.[3]).toBe('DISPLAY')
   })
 })
 

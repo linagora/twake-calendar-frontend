@@ -255,7 +255,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
         />
 
         <EventFormFieldsExpanded
-          alarm={v.alarm}
+          alarm={v.alarms?.[0]?.trigger ?? ''}
           setAlarm={setAlarm}
           busy={v.busy}
           setBusy={setBusy}

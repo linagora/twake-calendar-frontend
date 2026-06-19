@@ -1,10 +1,10 @@
-import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { makeSearchEventParam } from '@common/features/Events/transformers/makeSearchEventParam'
-import { clientConfig } from '@common/features/User/oidcAuth'
 import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
-import { VAlarm } from '@common/types/VAlarm'
+import { makeSearchEventParam } from '@common/features/Events/transformers/makeSearchEventParam'
+import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { clientConfig } from '@common/features/User/oidcAuth'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { VAlarm } from '@common/types/VAlarm'
 
 clientConfig.url = 'https://example.com'
 
@@ -585,12 +585,12 @@ describe('makeSeriesJCal', () => {
     ]
   ]
 
-  it('replaces VALARM on overrides when alarm changes', async () => {
+  it('replaces VALARM on overrides when alarms changes', async () => {
     const jCal = makeSeriesJCal(
       recurringWithAlarmVevents,
       {
         ...mockEvent,
-        alarm: new VAlarm({ action: 'EMAIL', trigger: '-PT30M' })
+        alarms: [new VAlarm({ action: 'EMAIL', trigger: '-PT30M' })]
       } as any,
       { removeOverrides: false }
     )

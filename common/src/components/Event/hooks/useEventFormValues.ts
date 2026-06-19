@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   DEFAULT_FORM_VALUES,
   EventFormValues,
   UseEventFormValuesParams,
   UseEventFormValuesReturn
 } from '@common/components/Event/EventFormFields.types'
-import {
-  restoreEventFormDataFromTemp,
-  saveEventFormDataToTemp,
-  EventFormTempData,
-  EventFormContext
-} from '@common/utils/eventFormTempStorage'
 import { Attachment } from '@common/types/Attachment'
+import { AlarmData, VAlarm } from '@common/types/VAlarm'
+import {
+  EventFormContext,
+  EventFormTempData,
+  restoreEventFormDataFromTemp,
+  saveEventFormDataToTemp
+} from '@common/utils/eventFormTempStorage'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 function isTempDataValidForContext(
   tempData: EventFormTempData | null,
@@ -39,7 +40,9 @@ function mapTempDataToFormValues(
     allday: tempData.allday,
     repetition: tempData.repetition,
     attendees: tempData.attendees,
-    alarm: tempData.alarm,
+    alarms: (tempData.alarms ?? []).map(
+      alarm => new VAlarm(alarm as AlarmData)
+    ),
     busy: tempData.busy,
     eventClass: tempData.eventClass,
     timezone: tempData.timezone,
@@ -157,7 +160,12 @@ function useEventFormSetters(
     (v: EventFormValues['attendees']) => set('attendees', v),
     [set]
   )
-  const setAlarm = useCallback((v: string) => set('alarm', v), [set])
+  const setAlarm = useCallback(
+    (v: string) => {
+      set('alarms', v ? [new VAlarm({ trigger: v, action: 'EMAIL' })] : [])
+    },
+    [set]
+  )
   const setBusy = useCallback((v: string) => set('busy', v), [set])
   const setEventClass = useCallback(
     (v: EventFormValues['eventClass']) => set('eventClass', v),

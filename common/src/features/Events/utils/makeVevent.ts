@@ -1,4 +1,7 @@
-import { RepetitionRule } from '@common/features/Calendars/types/CalendarData'
+import {
+  RepetitionRule,
+  VCalComponent
+} from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import moment from 'moment'
@@ -35,8 +38,18 @@ export function makeVevent(
       ['dtstamp', {}, 'date-time', formatDateTimeToICal(new Date())]
     ]
   ]
-  if (event.alarm?.trigger) {
-    vevent.push([event.alarm.asJcal()])
+  // Collect VALARM subcomponents
+  const valarms: VCalComponent[] = []
+  if (event.alarms && event.alarms.length > 0) {
+    for (const alarm of event.alarms) {
+      if (alarm.trigger) {
+        valarms.push(alarm.asJcal())
+      }
+    }
+  }
+  // Append valarms to vevent if any exist
+  if (valarms.length > 0) {
+    vevent.push(valarms)
   }
 
   if (event.end) {

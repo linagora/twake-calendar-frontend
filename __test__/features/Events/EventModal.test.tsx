@@ -1,12 +1,12 @@
 import * as calDAO from '@common/features/Calendars/CalendarDAO'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import EventPopover from '@common/features/Events/EventModal'
+import { userAttendee } from '@common/features/User/models/attendee'
 import { api } from '@common/utils/apiUtils'
 import { DateSelectArg } from '@fullcalendar/core'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
-import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/utils/apiUtils')
 
@@ -373,10 +373,8 @@ describe('EventPopover', () => {
           cutype: 'INDIVIDUAL'
         })
       ])
-      expect(receivedPayload.newEvent.alarm.attendee?.cal_address).toBe(
-        'mailto:test@test.com'
-      )
-      expect(receivedPayload.newEvent.alarm.summary).toBe('newEvent')
+      // No alarm was set in the form, so alarms should be empty
+      expect(receivedPayload.newEvent.alarms).toEqual([])
     } finally {
       jest.useRealTimers()
     }

@@ -29,7 +29,7 @@ export interface CalendarEvent {
   status?: string
   timezone: string
   repetition?: RepetitionObject
-  alarm?: VAlarm
+  alarms?: VAlarm[]
   exdates?: string[]
   passthroughProps?: VObjectProperty[]
   selectedResources?: Resource[]

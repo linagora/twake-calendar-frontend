@@ -94,7 +94,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
         attach={event.attach}
       />
 
-      <EventAlarmRow alarm={event.alarm} />
+      <EventAlarmRow alarms={event.alarms} />
 
       <EventRepetitionRow repetition={event.repetition} />
 

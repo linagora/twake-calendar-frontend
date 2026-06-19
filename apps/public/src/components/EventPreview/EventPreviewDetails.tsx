@@ -1,19 +1,19 @@
+import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
+import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
+import {
+  EventAlarmRow,
+  EventDescriptionRow,
+  EventErrorRow,
+  EventLocationRow,
+  EventRepetitionRow,
+  EventVideoRow
+} from '@common/components/EventPreview/EventDetailsRows'
+import { EventPreviewDetailsProps } from '@common/components/EventPreview/EventPreviewDetails'
+import { PrivateEventPreview } from '@common/components/EventPreview/PrivateEventPreview'
 import { Box } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventPreviewAttendees } from './EventPreviewAttendees'
-import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
-import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
-import { PrivateEventPreview } from '@common/components/EventPreview/PrivateEventPreview'
-import {
-  EventVideoRow,
-  EventLocationRow,
-  EventDescriptionRow,
-  EventAlarmRow,
-  EventRepetitionRow,
-  EventErrorRow
-} from '@common/components/EventPreview/EventDetailsRows'
-import { EventPreviewDetailsProps } from '@common/components/EventPreview/EventPreviewDetails'
 
 export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
   event,
@@ -52,7 +52,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
 
       <EventDescriptionRow description={event.description} />
 
-      <EventAlarmRow alarm={event.alarm} />
+      <EventAlarmRow alarms={event.alarms} />
 
       <EventRepetitionRow repetition={event.repetition} />
 
