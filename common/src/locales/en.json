@@ -236,9 +236,10 @@
     "retry": "Try Again",
     "multipleEvents": "%{count} events with errors",
     "cannotLoadEvent": "Unable to load event",
-    "missingToken": "JWT token is missing",
+    "missingToken": "Your link is invalid",
     "eventNotFound": "The event could not be found. It may have been deleted or the link is invalid.",
-    "invalidOrExpiredToken": "Your invitation link is invalid or has expired."
+    "invalidOrExpiredToken": "Your invitation link is invalid or has expired.",
+    "needHelp": "Need help"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",

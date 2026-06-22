@@ -22,6 +22,7 @@ declare global {
     SUPPORT_URL: string
     PRIVACY_URL: string
     TERMS_URL: string
+    LANDING_PAGE_URL: string
 
     SENTRY_DSN: string | undefined
 

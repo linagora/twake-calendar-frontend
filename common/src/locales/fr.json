@@ -238,9 +238,10 @@
     "retry": "Réessayer",
     "multipleEvents": "%{count} événements comportent des erreurs",
     "cannotLoadEvent": "Impossible de charger l'événement",
-    "missingToken": "Le jeton JWT est manquant",
+    "missingToken": "Votre lien est invalide",
     "eventNotFound": "L'événement est introuvable. Il a peut-être été supprimé ou le lien est invalide.",
-    "invalidOrExpiredToken": "Votre lien d'invitation est invalide ou a expiré."
+    "invalidOrExpiredToken": "Votre lien d'invitation est invalide ou a expiré.",
+    "needHelp": "Besoin d'aide"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Mettre à jour l'événement récurrent",

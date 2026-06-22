@@ -236,9 +236,10 @@
     "retry": "Thử lại",
     "multipleEvents": "%{count} sự kiện gặp lỗi",
     "cannotLoadEvent": "Không thể tải sự kiện",
-    "missingToken": "Thiếu mã thông báo JWT",
+    "missingToken": "Liên kết của bạn không hợp lệ",
     "eventNotFound": "Không tìm thấy sự kiện. Sự kiện có thể đã bị xóa hoặc liên kết không hợp lệ.",
-    "invalidOrExpiredToken": "Liên kết lời mời của bạn không hợp lệ hoặc đã hết hạn."
+    "invalidOrExpiredToken": "Liên kết lời mời của bạn không hợp lệ hoặc đã hết hạn.",
+    "needHelp": "Cần giúp đỡ"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Cập nhật sự kiện lặp lại",

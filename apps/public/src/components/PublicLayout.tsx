@@ -90,11 +90,17 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           textAlign: 'center'
         }}
       >
-        <img
-          src={logo}
-          alt={t('publicLayout.logoAlt')}
-          style={{ height: '32px', marginBottom: '8px' }}
-        />
+        <Link
+          href={window.LANDING_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src={logo}
+            alt={t('publicLayout.logoAlt')}
+            style={{ height: '32px', marginBottom: '8px' }}
+          />
+        </Link>
         <Typography variant="body2">{t('publicLayout.title')}</Typography>
         <Typography variant="body2">
           {t('publicLayout.useSubjectTo')}{' '}

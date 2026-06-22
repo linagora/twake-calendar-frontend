@@ -10,6 +10,7 @@ import { Loading } from '@common/components/Loading/Loading'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { useSearchParams } from 'react-router-dom'
 import { fetchEvent } from './EventDao'
+import logo from '@common/static/noResult-logo.svg'
 
 const isUnableToLoad = (
   error: boolean,
@@ -36,6 +37,7 @@ const EventLoadError: React.FC<EventLoadErrorProps> = ({
 
   return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
+      <img src={logo} alt={t('search.noResults')} />
       <Typography color="error" variant="h5">
         {t('error.cannotLoadEvent')}
       </Typography>
@@ -80,11 +82,24 @@ export const EventPreviewPage: React.FC = () => {
 
   if (isUnableToLoad(error, event, decodedClaims)) {
     return (
-      <EventLoadError
-        errorDetail={errorDetail}
-        hasDecodedClaims={!!decodedClaims}
-        t={t}
-      />
+      <Box
+        sx={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          width: '100%',
+          maxWidth: '600px',
+          padding: { xs: '24px', sm: '32px' },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
+        }}
+      >
+        <EventLoadError
+          errorDetail={errorDetail}
+          hasDecodedClaims={!!decodedClaims}
+          t={t}
+        />
+      </Box>
     )
   }
 
