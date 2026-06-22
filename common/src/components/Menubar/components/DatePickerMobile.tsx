@@ -50,11 +50,11 @@ const calculateCalendarHeightByMonth = (
   const adjustedWeekCount = Math.max(4, weekCount) // Minimum 4 weeks for consistency
 
   // Base height per week + some padding
-  const baseHeightPerWeek = 50
-  const padding = 80
+  const baseHeightPerWeek = 32
+  const padding = 50
   const minHeight = 200 // Minimum height for 4 weeks
-  const maxHeight = 400 // Maximum height for 6 weeks
-  const rootMinHeightOffset = 120
+  const maxHeight = 350 // Maximum height for 6 weeks
+  const rootMinHeightOffset = 100
   const slideTransitionOffset = 100
 
   const calculatedHeight = Math.max(
@@ -158,7 +158,7 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
           },
           day: {
             sx: {
-              '&.MuiPickerDay2-dayOutsideMonth': {
+              '&.MuiPickerDay-dayOutsideMonth': {
                 color: theme.palette.grey[500]
               }
             }

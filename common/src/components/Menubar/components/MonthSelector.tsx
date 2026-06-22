@@ -48,7 +48,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
         return (
           <Button
             key={i}
-            size="large"
+            size="medium"
             variant={isSelected ? 'contained' : 'outlined'}
             aria-pressed={isSelected}
             sx={{

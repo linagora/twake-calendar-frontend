@@ -61,7 +61,8 @@ function getDateCalendarRootOverrides(theme: Theme) {
       margin: '0',
       color: alpha(theme.palette.grey[900], 0.9)
     },
-    '&.MuiDateCalendar-root .MuiPickerDay-root.MuiPickersDay-today': {
+    '.MuiDateCalendar-root .MuiPickerDay-root.MuiPickerDay-today': {
+      border: 'none',
       outline: 'none'
     },
     '.MuiDateCalendar-root .MuiPickerDay-root.Mui-selected': {

@@ -132,12 +132,11 @@ export const MiniCalendar: React.FC<{
         slotProps={{
           day: ownerState => {
             const date = ownerState.day.toDate()
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
+            const today = moment()
             const selected = new Date(selectedDate)
             selected.setHours(0, 0, 0, 0)
 
-            const isToday = date.getTime() === today.getTime()
+            const isToday = ownerState.day.isSame(today, 'day')
             const isSelectedDay =
               calendarRef.current?.view.type === CALENDAR_VIEWS.timeGridDay &&
               date.getTime() === selected.getTime()
