@@ -61,7 +61,7 @@ const SearchBar: React.FC<{
     : []
 
   const sharedCalendars = userId
-    ? calendars.filter(c => c.id.split('/')[0] !== userId)
+    ? calendars.filter(c => extractEventBaseUuid(c.id) !== userId)
     : []
 
   const filters = useAppSelector(

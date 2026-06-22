@@ -53,58 +53,75 @@ describe('getSearchInCalendars', () => {
 })
 
 describe('buildQuery', () => {
-  it('includes all calendar ids when searchIn is empty', () => {
-    const result = buildQuery(
-      'meeting',
-      baseFilters,
-      ALL_IDS,
-      PERSONAL_IDS,
-      SHARED_IDS
-    )
-    expect(result?.filters.searchIn).toEqual(ALL_IDS)
-  })
+  const cases: Array<{
+    label: string
+    keyword: string
+    searchIn: string
+    allIds: string[]
+    personalIds: string[]
+    sharedIds: string[]
+    expected: string[]
+  }> = [
+    {
+      label: 'includes all calendar ids when searchIn is empty',
+      keyword: 'meeting',
+      searchIn: '',
+      allIds: ALL_IDS,
+      personalIds: PERSONAL_IDS,
+      sharedIds: SHARED_IDS,
+      expected: ALL_IDS
+    },
+    {
+      label: 'filters to personal calendars when searchIn is "my-calendars"',
+      keyword: 'meeting',
+      searchIn: 'my-calendars',
+      allIds: ALL_IDS,
+      personalIds: PERSONAL_IDS,
+      sharedIds: SHARED_IDS,
+      expected: PERSONAL_IDS
+    },
+    {
+      label: 'filters to shared calendars when searchIn is "shared-calendars"',
+      keyword: 'standup',
+      searchIn: 'shared-calendars',
+      allIds: ALL_IDS,
+      personalIds: PERSONAL_IDS,
+      sharedIds: SHARED_IDS,
+      expected: SHARED_IDS
+    },
+    {
+      label:
+        'filters to a single calendar when searchIn is a specific calendar id',
+      keyword: 'standup',
+      searchIn: 'other/cal3',
+      allIds: ALL_IDS,
+      personalIds: PERSONAL_IDS,
+      sharedIds: SHARED_IDS,
+      expected: ['other/cal3']
+    },
+    {
+      label:
+        'returns an empty searchIn when shared-calendars is selected but sharedIds is empty',
+      keyword: 'standup',
+      searchIn: 'shared-calendars',
+      allIds: PERSONAL_IDS,
+      personalIds: PERSONAL_IDS,
+      sharedIds: [],
+      expected: []
+    }
+  ]
 
-  it('filters to personal calendars when searchIn is "my-calendars"', () => {
-    const result = buildQuery(
-      'meeting',
-      { ...baseFilters, searchIn: 'my-calendars' },
-      ALL_IDS,
-      PERSONAL_IDS,
-      SHARED_IDS
-    )
-    expect(result?.filters.searchIn).toEqual(PERSONAL_IDS)
-  })
-
-  it('filters to shared calendars when searchIn is "shared-calendars"', () => {
-    const result = buildQuery(
-      'standup',
-      { ...baseFilters, searchIn: 'shared-calendars' },
-      ALL_IDS,
-      PERSONAL_IDS,
-      SHARED_IDS
-    )
-    expect(result?.filters.searchIn).toEqual(SHARED_IDS)
-  })
-
-  it('filters to a single calendar when searchIn is a specific calendar id', () => {
-    const result = buildQuery(
-      'standup',
-      { ...baseFilters, searchIn: 'other/cal3' },
-      ALL_IDS,
-      PERSONAL_IDS,
-      SHARED_IDS
-    )
-    expect(result?.filters.searchIn).toEqual(['other/cal3'])
-  })
-
-  it('returns an empty searchIn when shared-calendars is selected but sharedIds is empty', () => {
-    const result = buildQuery(
-      'standup',
-      { ...baseFilters, searchIn: 'shared-calendars' },
-      PERSONAL_IDS,
-      PERSONAL_IDS,
-      []
-    )
-    expect(result?.filters.searchIn).toEqual([])
-  })
+  it.each(cases)(
+    '$label',
+    ({ keyword, searchIn, allIds, personalIds, sharedIds, expected }) => {
+      const result = buildQuery(
+        keyword,
+        { ...baseFilters, searchIn },
+        allIds,
+        personalIds,
+        sharedIds
+      )
+      expect(result?.filters.searchIn).toEqual(expected)
+    }
+  )
 })
