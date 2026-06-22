@@ -1,6 +1,11 @@
 import { useAppSelector } from '@common/app/hooks'
+import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
+import { User } from '@common/components/Attendees/types'
+import { ResourceAdmin } from '@common/components/Calendar/ResourceAdmins'
+import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
+import { stringAvatar } from '@common/components/Event/utils/eventUtils'
+import { fetchUserById } from '@common/features/User/UserDao'
 import { AccessRight, Calendar } from '@common/types/CalendarTypes'
-import { getUserDetails } from '@common/features/User/userAPI'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { normalizeEmail } from '@common/utils/normalizeEmail'
 import {
@@ -17,11 +22,6 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
-import { User } from '@common/components/Attendees/types'
-import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
-import { stringAvatar } from '@common/components/Event/utils/eventUtils'
-import { ResourceAdmin } from '@common/components/Calendar/ResourceAdmins'
 import { AccessSelector } from './AccessSelector'
 
 export interface UserWithAccess extends User {
@@ -162,7 +162,7 @@ export function CalendarAccessRights({
     async (usersInCal: UserInCalendar[], cancelled: boolean) => {
       const results = await Promise.allSettled(
         usersInCal.map(async user => {
-          const details = await getUserDetails(user.id)
+          const details = await fetchUserById(user.id)
           const email = details?.preferredEmail ?? details?.emails?.[0] ?? ''
           return {
             openpaasId: user.id,

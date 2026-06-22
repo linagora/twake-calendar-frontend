@@ -1,27 +1,31 @@
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import * as CalendarDAO from '@common/features/Calendars/CalendarDAO'
 import * as CalendarSlice from '@common/features/Calendars/CalendarSlice'
-import { searchUsers } from '@common/features/User/userAPI'
+import { searchPeople } from '@common/features/User/UserDao'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/userAPI')
+jest.mock('@common/features/User/UserDao')
 jest.mock('@common/features/Calendars/CalendarDAO')
 
-const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
+const mockedSearchUsers = searchPeople as jest.MockedFunction<
+  typeof searchPeople
+>
 const mockedFetchCalendars = CalendarDAO.fetchCalendars as jest.MockedFunction<
   typeof CalendarDAO.fetchCalendars
 >
 
 describe('RegisterCalendars', () => {
   const mockOnClose = jest.fn()
-  const mockUser = {
-    email: 'user@example.com',
-    displayName: 'Test User',
-    avatarUrl: 'https://example.com/avatar.jpg',
-    openpaasId: 'user123'
-  }
+  const mockUser = new SearchResponseItem({
+    id: 'user123',
+    emailAddresses: [{ value: 'user@example.com' }],
+    names: [{ displayName: 'Test User' }],
+    photos: [{ url: 'https://example.com/avatar.jpg' }],
+    objectType: 'user'
+  })
 
   const mockCalendar = {
     'dav:name': 'Test Calendar',
@@ -435,6 +439,7 @@ describe('RegisterCalendars', () => {
           owner: {
             avatarUrl: 'https://example.com/avatar.jpg',
             displayName: 'Test User',
+            objectType: 'user',
             email: 'user@example.com',
             openpaasId: 'user123'
           }

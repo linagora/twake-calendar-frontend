@@ -13,14 +13,14 @@ import reducer, {
   removeTempCal,
   updateEventLocal
 } from '@common/features/Calendars/CalendarSlice'
-import * as userAPI from '@common/features/User/userAPI'
+import * as userDAO from '@common/features/User/UserDao'
 import userReducer, { setUserData } from '@common/features/User/UserSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { configureStore } from '@reduxjs/toolkit'
 
 jest.mock('@common/features/Calendars/CalendarDAO')
-jest.mock('@common/features/User/userAPI')
+jest.mock('@common/features/User/UserDao')
 jest.mock('@common/features/Events/EventDao')
 jest.mock('@common/features/Events/utils')
 jest.mock('@common/utils/apiUtils')
@@ -121,11 +121,11 @@ describe('CalendarSlice', () => {
       jest.resetAllMocks()
     })
     it('getCalendarsList.fulfilled replaces list', async () => {
-      ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
+      ;(userDAO.fetchCurrentUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': [] }
       })
-      ;(userAPI.getUserDetails as jest.Mock).mockResolvedValue({
+      ;(userDAO.fetchUserById as jest.Mock).mockResolvedValue({
         firstname: 'Alice',
         lastname: 'Smith',
         emails: ['a@b.com']
@@ -159,13 +159,13 @@ describe('CalendarSlice', () => {
         }
       ]
 
-      ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
+      ;(userDAO.fetchCurrentUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
-      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
-      getUserDetailsMock
+      const fetchUserByIdMock = userDAO.fetchUserById as jest.Mock
+      fetchUserByIdMock
         .mockResolvedValueOnce({
           firstname: 'Alice',
           lastname: 'Smith',
@@ -185,10 +185,10 @@ describe('CalendarSlice', () => {
       const store = storeFactory()
       await store.dispatch(getCalendarsList() as any)
 
-      expect(getUserDetailsMock).toHaveBeenCalledTimes(3)
-      expect(getUserDetailsMock).toHaveBeenCalledWith('u1')
-      expect(getUserDetailsMock).toHaveBeenCalledWith('u2')
-      expect(getUserDetailsMock).toHaveBeenCalledWith('u3')
+      expect(fetchUserByIdMock).toHaveBeenCalledTimes(3)
+      expect(fetchUserByIdMock).toHaveBeenCalledWith('u1')
+      expect(fetchUserByIdMock).toHaveBeenCalledWith('u2')
+      expect(fetchUserByIdMock).toHaveBeenCalledWith('u3')
 
       const state = store.getState().calendars
       expect(state.list['u1/cal1'].owner.firstname).toContain('Alice')
@@ -218,13 +218,13 @@ describe('CalendarSlice', () => {
         }
       ]
 
-      ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
+      ;(userDAO.fetchCurrentUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
-      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
-      getUserDetailsMock.mockResolvedValue({
+      const fetchUserByIdMock = userDAO.fetchUserById as jest.Mock
+      fetchUserByIdMock.mockResolvedValue({
         firstname: 'Alice',
         lastname: 'Smith',
         emails: ['alice@example.com']
@@ -233,8 +233,8 @@ describe('CalendarSlice', () => {
       const store = storeFactory()
       await store.dispatch(getCalendarsList() as any)
 
-      expect(getUserDetailsMock).toHaveBeenCalledTimes(1)
-      expect(getUserDetailsMock).toHaveBeenCalledWith('u1')
+      expect(fetchUserByIdMock).toHaveBeenCalledTimes(1)
+      expect(fetchUserByIdMock).toHaveBeenCalledWith('u1')
     })
 
     it('getCalendarsList processes owners in batches of 20', async () => {
@@ -245,13 +245,13 @@ describe('CalendarSlice', () => {
         acl: []
       }))
 
-      ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
+      ;(userDAO.fetchCurrentUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
-      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
-      getUserDetailsMock.mockImplementation((ownerId: string) =>
+      const fetchUserByIdMock = userDAO.fetchUserById as jest.Mock
+      fetchUserByIdMock.mockImplementation((ownerId: string) =>
         Promise.resolve({
           firstname: 'User',
           lastname: ownerId,
@@ -262,7 +262,7 @@ describe('CalendarSlice', () => {
       const store = storeFactory()
       await store.dispatch(getCalendarsList() as any)
 
-      expect(getUserDetailsMock).toHaveBeenCalledTimes(45)
+      expect(fetchUserByIdMock).toHaveBeenCalledTimes(45)
       const state = store.getState().calendars
       expect(Object.keys(state.list)).toHaveLength(45)
     })
@@ -282,11 +282,11 @@ describe('CalendarSlice', () => {
         payload: { importedCalendars: existingCalendars, errors: '' }
       })
       store.dispatch(setUserData({ openpaasId: 'bla' }))
-      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
+      const fetchUserByIdMock = userDAO.fetchUserById as jest.Mock
 
       await store.dispatch(getCalendarsList())
 
-      expect(getUserDetailsMock).not.toHaveBeenCalled()
+      expect(fetchUserByIdMock).not.toHaveBeenCalled()
 
       const state = store.getState().calendars
       expect(state.list).toEqual(existingCalendars)
@@ -308,13 +308,13 @@ describe('CalendarSlice', () => {
         }
       ]
 
-      ;(userAPI.getOpenPaasUser as jest.Mock).mockResolvedValue({ id: 'u1' })
+      ;(userDAO.fetchCurrentUser as jest.Mock).mockResolvedValue({ id: 'u1' })
       ;(calDAO.fetchCalendars as jest.Mock).mockResolvedValue({
         _embedded: { 'dav:calendar': mockCalendars }
       })
 
-      const getUserDetailsMock = userAPI.getUserDetails as jest.Mock
-      getUserDetailsMock
+      const fetchUserByIdMock = userDAO.fetchUserById as jest.Mock
+      fetchUserByIdMock
         .mockResolvedValueOnce({
           firstname: 'Alice',
           lastname: 'Smith',
@@ -325,7 +325,7 @@ describe('CalendarSlice', () => {
       const store = storeFactory()
       const result = await store.dispatch(getCalendarsList() as any)
 
-      expect(getUserDetailsMock).toHaveBeenCalledTimes(2)
+      expect(fetchUserByIdMock).toHaveBeenCalledTimes(2)
       const state = store.getState().calendars
       expect(state.list['u1/cal1'].owner.firstname).toContain('Alice')
       expect(state.list['u2/cal2'].owner.lastname).toContain('Unknown User')

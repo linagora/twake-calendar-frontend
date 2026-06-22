@@ -38,6 +38,7 @@ export const addCalendarResourceThunk = (
         ?.split('/')[0]
 
       let owner: OpenPaasUserData = {
+        id: resourceId?.split('/')[0] ?? '',
         firstname: '',
         lastname: cal.cal['dav:name'] ?? '',
         emails: [],

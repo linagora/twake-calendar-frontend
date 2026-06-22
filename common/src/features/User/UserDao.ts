@@ -1,10 +1,18 @@
 import { api } from '@common/utils/apiUtils'
 import { OpenPaasUserData } from './type/OpenPaasUserData'
-import { ModuleConfiguration, SearchResponseItem } from './userDataTypes'
+import { ModuleConfiguration } from './userDataTypes'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
 
 export async function fetchCurrentUser(): Promise<OpenPaasUserData> {
   const response = await api.get(`api/user`)
-  return response.json()
+  const data: OpenPaasUserData = await response.json()
+
+  // Normalize: ensure id is always present (fallback to _id if needed)
+  if (!data.id && data._id) {
+    data.id = data._id
+  }
+
+  return data
 }
 
 export async function fetchUserByEmail(
@@ -35,7 +43,7 @@ export async function searchPeople(
       })
     })
     .json()
-  return response
+  return response.map(item => new SearchResponseItem(item))
 }
 
 export async function patchConfigurations(

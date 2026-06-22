@@ -204,6 +204,7 @@ describe('getCalendarsList', () => {
     )
     expect(payload.importedCalendars['cal-1'].owner).toEqual({
       firstname: '',
+      id: 'error-123',
       lastname: 'Unknown User',
       emails: []
     })

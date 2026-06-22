@@ -3,7 +3,7 @@ import { CalendarData } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { normalizeCalendar } from '@common/features/Calendars/utils/normalizeCalendar'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
-import { getOpenPaasUser } from '@common/features/User/userAPI'
+import { fetchCurrentUser } from '@common/features/User/UserDao'
 import {
   Calendar,
   CalendarInvite,
@@ -30,8 +30,8 @@ export const getCalendarsListThunk = (create: ReducerCreators<CalendarState>) =>
       const existingCalendars = state.calendars.list || {}
       const existingUser = { id: state.user?.userData?.openpaasId || undefined }
       try {
-        const user = existingUser.id ? existingUser : await getOpenPaasUser()
-        const calendars = await fetchCalendars(user.id as string)
+        const user = existingUser.id ? existingUser : await fetchCurrentUser()
+        const calendars = await fetchCalendars(user.id)
         const rawCalendars = calendars._embedded['dav:calendar']
 
         const errors: string[] = []
@@ -125,6 +125,7 @@ async function fetchCalendarsOwnerData(
         error
       )
       ownerDataMap.set(ownerId, {
+        id: ownerId,
         firstname: '',
         lastname: 'Unknown User',
         emails: []
@@ -168,6 +169,7 @@ function buildFetchedCalendars(
       access
     }) => {
       const ownerData = ownerDataMap.get(ownerId) || {
+        id: ownerId,
         firstname: '',
         lastname: 'Unknown User',
         emails: []

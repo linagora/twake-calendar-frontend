@@ -1,3 +1,4 @@
+import { getCalendarDelegationAccess } from '@common/components/Calendar/utils/calendarUtils'
 import {
   calendarAction,
   fetchCalendars
@@ -5,10 +6,10 @@ import {
 import { makeAddSharedCalendarBody } from '@common/features/Calendars/transformers'
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
+import { getCalendarIdFromLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
-import { getUserDetails } from '@common/features/User/userAPI'
+import { fetchUserById } from '@common/features/User/UserDao'
 import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
-import { getCalendarDelegationAccess } from '@common/components/Calendar/utils/calendarUtils'
 import { toRejectedError } from '@common/utils/errorUtils'
 import {
   AsyncThunkConfig,
@@ -64,21 +65,26 @@ export const addSharedCalendarThunk = (
     { rejectValue: RejectedError }
   >(
     async ({ userId, calId, cal }, { rejectWithValue }) => {
+      // Validate calendar ID before any server mutations
+      const resultCalId = getCalendarIdFromLink(cal.cal._links)
+      if (!resultCalId) {
+        return rejectWithValue({
+          message: 'Invalid calendar ID',
+          status: 400
+        } as RejectedError)
+      }
+
       try {
         const body = makeAddSharedCalendarBody(calId, cal)
         await calendarAction('POST', `/calendars/${userId}.json`, body)
         let ownerData: OpenPaasUserData = {
+          id: userId,
           firstname: '',
           lastname: cal.cal['dav:name'] ?? '',
           emails: []
         }
         try {
-          ownerData = await getUserDetails(
-            (cal.cal._links?.self?.href as string)
-              .replace('/calendars/', '')
-              .replace('.json', '')
-              .split('/')[0]
-          )
+          ownerData = await fetchUserById(resultCalId.split('/')[0])
         } catch (e) {
           console.error('Error while fetching owner of shared calendar: ', e)
         }
@@ -92,10 +98,7 @@ export const addSharedCalendarThunk = (
         )
 
         return {
-          calId:
-            cal.cal._links.self?.href
-              ?.replace('/calendars/', '')
-              .replace('.json', '') ?? calId,
+          calId: getCalendarIdFromLink(cal.cal._links) ?? calId,
           color: cal.color,
           link:
             delegated?._links.self?.href ??

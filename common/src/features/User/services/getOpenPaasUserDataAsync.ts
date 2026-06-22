@@ -1,8 +1,8 @@
 import { toRejectedError } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
-import { getOpenPaasUser } from '../userAPI'
+import { fetchCurrentUser } from '../UserDao'
+import { RejectedError, UserState } from '../UserSlice'
 import { OpenPaasUserData } from '../type/OpenPaasUserData'
-import { UserState, RejectedError } from '../UserSlice'
 import { ConfigurationItem, ModuleConfiguration } from '../userDataTypes'
 
 function updateBasicUserData(
@@ -118,7 +118,7 @@ export const getOpenPaasUserDataThunk = (create: ReducerCreators<UserState>) =>
   create.asyncThunk<OpenPaasUserData, void, { rejectValue: RejectedError }>(
     async (_, { rejectWithValue }) => {
       try {
-        const user = await getOpenPaasUser()
+        const user = await fetchCurrentUser()
         return user
       } catch (err) {
         return rejectWithValue(toRejectedError(err))

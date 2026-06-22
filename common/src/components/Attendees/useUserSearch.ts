@@ -1,6 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import { searchUsers } from '@common/features/User/userAPI'
+import { searchPeople } from '@common/features/User/UserDao'
+import {
+  parseSearchUserResponse,
+  SEARCH_LIMIT
+} from '@common/features/User/transformers'
 import { userData } from '@common/features/User/userDataTypes'
+import { useEffect, useRef, useState } from 'react'
 
 export interface UseUserSearchProps {
   objectTypes: string[]
@@ -67,7 +71,13 @@ export function useUserSearch<T>({
       setHasSearched(false)
 
       try {
-        const res = await searchUsers(query, objectTypesRef.current)
+        const param = {
+          q: query,
+          objectTypes: objectTypesRef.current,
+          limit: SEARCH_LIMIT
+        }
+        const response = await searchPeople(param.q, param.objectTypes)
+        const res = parseSearchUserResponse(response)
         if (cancelled) return
         setOptions(
           (showCurrentUser || !currentUser

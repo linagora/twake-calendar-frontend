@@ -118,6 +118,7 @@ describe('addCalendarResource thunk', () => {
       name: 'Resource Room A',
       owner: {
         firstname: '',
+        id: 'res-456',
         lastname: 'Resource Room A',
         emails: [],
         resource: true
