@@ -224,11 +224,12 @@ var appList = [
 
 ## Roadmap
 
-The Minimum Viable Product involves all features currently used in production for **esn-frontend-calendar**.
+Now that we delivered all features in **esn-frontend-calendar** we plan to work on even more exciting features:
+ - Provide **Booking links** that allow people you send it to to book easily meeting with you, based on your availability.
+ - Deliver **Drive** integration in order to attach files to your events
+ - **Team Calendar** that would hold events of a team
 
-It includes basic calendaring features and shared / delegated calendar capacity.
-
-After completing the MVP which should be done ~Q1 2026 we will work on additional integrations (viso, drive), resources, tasks, and much more exciting features.
+Stay tuned!
 
 ## Credits
 
