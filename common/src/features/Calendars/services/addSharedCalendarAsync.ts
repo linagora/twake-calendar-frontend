@@ -7,14 +7,48 @@ import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
 import { getUserDetails } from '@common/features/User/userAPI'
-import { Calendar } from '@common/types/CalendarTypes'
+import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
+import { getCalendarDelegationAccess } from '@common/components/Calendar/utils/calendarUtils'
 import { toRejectedError } from '@common/utils/errorUtils'
-import { ReducerCreators } from '@reduxjs/toolkit'
+import {
+  AsyncThunkConfig,
+  AsyncThunkOptions,
+  AsyncThunkPayloadCreator,
+  AsyncThunkReducers,
+  ReducerCreators,
+  ReducerType
+} from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
+
+type AsyncThunkSliceReducerDefinition<
+  State,
+  ThunkArg,
+  Returned = unknown,
+  ThunkApiConfig extends AsyncThunkConfig = AsyncThunkConfig
+> = AsyncThunkReducers<State, ThunkArg, Returned, ThunkApiConfig> & {
+  options?: AsyncThunkOptions<ThunkArg, ThunkApiConfig>
+} & {
+  _reducerDefinitionType: ReducerType.asyncThunk
+  payloadCreator: AsyncThunkPayloadCreator<Returned, ThunkArg, ThunkApiConfig>
+}
 
 export const addSharedCalendarThunk = (
   create: ReducerCreators<CalendarState>
-) =>
+): AsyncThunkSliceReducerDefinition<
+  CalendarState,
+  { userId: string; calId: string; cal: CalendarInput },
+  {
+    calId: string
+    color: Record<string, string>
+    link: string
+    name: string
+    desc: string
+    delegated: boolean
+    owner: OpenPaasUserData
+    access?: DelegationAccess
+  },
+  { rejectValue: RejectedError }
+> =>
   create.asyncThunk<
     {
       calId: string
@@ -24,6 +58,7 @@ export const addSharedCalendarThunk = (
       desc: string
       delegated: boolean
       owner: OpenPaasUserData
+      access?: DelegationAccess
     },
     { userId: string; calId: string; cal: CalendarInput },
     { rejectValue: RejectedError }
@@ -39,7 +74,7 @@ export const addSharedCalendarThunk = (
         }
         try {
           ownerData = await getUserDetails(
-            cal.cal._links.self.href
+            (cal.cal._links?.self?.href as string)
               .replace('/calendars/', '')
               .replace('.json', '')
               .split('/')[0]
@@ -51,11 +86,16 @@ export const addSharedCalendarThunk = (
         const delegated = calendars._embedded['dav:calendar'].find(
           c => c['calendarserver:delegatedsource'] === cal.cal._links.self?.href
         )
+        const access = getCalendarDelegationAccess(
+          delegated ? (delegated['acl'] ?? []) : (cal.cal['acl'] ?? []),
+          userId
+        )
 
         return {
-          calId: cal.cal._links.self?.href
-            ?.replace('/calendars/', '')
-            .replace('.json', ''),
+          calId:
+            cal.cal._links.self?.href
+              ?.replace('/calendars/', '')
+              .replace('.json', '') ?? calId,
           color: cal.color,
           link:
             delegated?._links.self?.href ??
@@ -63,7 +103,8 @@ export const addSharedCalendarThunk = (
           desc: cal.cal['caldav:description'] ?? '',
           name: cal.cal['dav:name'] ?? '',
           delegated: !!delegated,
-          owner: ownerData
+          owner: ownerData,
+          access
         }
       } catch (err) {
         return rejectWithValue(toRejectedError(err))
@@ -83,7 +124,8 @@ export const addSharedCalendarThunk = (
           delegated: action.payload.delegated,
           name: action.payload.name,
           events: {},
-          owner: action.payload.owner
+          owner: action.payload.owner,
+          access: action.payload.access
         } as Calendar
         state.error = null
       },

@@ -409,6 +409,43 @@ describe('CalendarSlice', () => {
       expect(state.list['c1'].name).toBe('Shared')
     })
 
+    it('addSharedCalendar.fulfilled preserves access property', () => {
+      const mockAccess = {
+        freebusy: true,
+        read: true,
+        write: true,
+        'write-properties': true,
+        all: true
+      }
+      const payload = {
+        calId: 'c1',
+        color: { 'apple:color': '#0f0' },
+        link: '/calendars/u1/c1.json',
+        name: 'Shared',
+        desc: 'Shared Desc',
+        owner: { firstname: 'O', emails: ['o@example.com'] },
+        access: mockAccess
+      }
+      const mockCal = {
+        cal: {
+          _links: { self: { href: '/calendars/u1/c1.json' } },
+          'apple:color': '#0f0',
+          'caldav:description': 'Shared Desc',
+          'dav:name': 'Shared'
+        }
+      }
+      const state = reducer(
+        initialState,
+        addSharedCalendar.fulfilled(payload, 'req5', {
+          userId: 'u1',
+          calId: 'c1',
+          cal: mockCal
+        })
+      )
+      expect(state.list['c1'].name).toBe('Shared')
+      expect(state.list['c1'].access).toEqual(mockAccess)
+    })
+
     it('getTempCalendarsList.fulfilled updates templist', () => {
       const payload = {
         t1: {
