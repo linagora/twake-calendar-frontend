@@ -2,6 +2,7 @@ import { prepareUpdatedEvent } from '@common/features/Events/hooks/submitUpdateH
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 const baseEvent = {
   URL: '/calendars/cal-1/event-1.ics',
@@ -22,7 +23,7 @@ const baseValues = {
   eventClass: 'PUBLIC',
   timezone: 'Europe/Paris',
   busy: 'OPAQUE',
-  alarms: [new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })],
+  alarms: new Valarms([new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })]),
   meetingLink: '',
   attendees: [],
   selectedResources: []
@@ -44,31 +45,31 @@ describe('prepareUpdatedEvent', () => {
       newCalId: 'cal-1'
     })
 
-    expect(updatedEvent.alarms?.[0]?.attendee?.cal_address).toBe(
+    expect(updatedEvent.alarms?.getAlarm(0)?.attendee?.cal_address).toBe(
       'mailto:owner@example.com'
     )
-    expect(updatedEvent.alarms?.[0]?.summary).toBe('Updated title')
+    expect(updatedEvent.alarms?.getAlarm(0)?.summary).toBe('Updated title')
   })
 
   it('preserves multiple alarms when modifying non-alarm fields', () => {
     const eventWithMultipleAlarms = {
       ...baseEvent,
-      alarms: [
+      alarms: new Valarms([
         new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
         new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' }),
         new VAlarm({ trigger: '-PT1H', action: 'EMAIL' })
-      ]
+      ])
     } as unknown as CalendarEvent
 
     // Update only the title, not touching alarms
     const valuesWithUpdatedTitle = {
       ...baseValues,
       title: 'Modified Title',
-      alarms: [
+      alarms: new Valarms([
         new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
         new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' }),
         new VAlarm({ trigger: '-PT1H', action: 'EMAIL' })
-      ]
+      ])
     }
 
     const updatedEvent = prepareUpdatedEvent({
@@ -86,13 +87,13 @@ describe('prepareUpdatedEvent', () => {
     })
 
     // Verify all 3 alarms are preserved
-    expect(updatedEvent.alarms).toHaveLength(3)
-    expect(updatedEvent.alarms?.[0]?.trigger).toBe('-PT15M')
-    expect(updatedEvent.alarms?.[0]?.action).toBe('EMAIL')
-    expect(updatedEvent.alarms?.[1]?.trigger).toBe('-PT30M')
-    expect(updatedEvent.alarms?.[1]?.action).toBe('DISPLAY')
-    expect(updatedEvent.alarms?.[2]?.trigger).toBe('-PT1H')
-    expect(updatedEvent.alarms?.[2]?.action).toBe('EMAIL')
+    expect(updatedEvent.alarms?.count()).toBe(3)
+    expect(updatedEvent.alarms?.getAlarm(0)?.trigger).toBe('-PT15M')
+    expect(updatedEvent.alarms?.getAlarm(0)?.action).toBe('EMAIL')
+    expect(updatedEvent.alarms?.getAlarm(1)?.trigger).toBe('-PT30M')
+    expect(updatedEvent.alarms?.getAlarm(1)?.action).toBe('DISPLAY')
+    expect(updatedEvent.alarms?.getAlarm(2)?.trigger).toBe('-PT1H')
+    expect(updatedEvent.alarms?.getAlarm(2)?.action).toBe('EMAIL')
 
     // Verify title was updated
     expect(updatedEvent.title).toBe('Modified Title')

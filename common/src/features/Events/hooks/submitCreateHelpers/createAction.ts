@@ -7,7 +7,7 @@ import { buildDelegatedEventURL } from '@common/features/Events/utils/buildDeleg
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import {
   clearEventFormTempData,
@@ -62,18 +62,10 @@ export async function handleCreateEvent({
     transp: values.busy,
     sequence: 1,
     color: targetCalendar?.color,
-    alarms: (values.alarms ?? []).map(
-      alarm =>
-        new VAlarm({
-          trigger: alarm.trigger,
-          action: alarm.action,
-          attendee:
-            alarm.attendee ??
-            userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
-          summary: alarm.summary ?? values.title,
-          description: alarm.description
-        })
-    ),
+    alarms: Valarms.fromFormValues(values.alarms, {
+      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      summary: values.title
+    }),
     x_openpass_videoconference: values.meetingLink || undefined
   }
 

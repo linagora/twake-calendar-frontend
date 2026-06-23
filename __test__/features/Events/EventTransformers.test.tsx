@@ -5,6 +5,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { clientConfig } from '@common/features/User/oidcAuth'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 clientConfig.url = 'https://example.com'
 
@@ -590,7 +591,9 @@ describe('makeSeriesJCal', () => {
       recurringWithAlarmVevents,
       {
         ...mockEvent,
-        alarms: [new VAlarm({ action: 'EMAIL', trigger: '-PT30M' })]
+        alarms: new Valarms([
+          new VAlarm({ action: 'EMAIL', trigger: '-PT30M' })
+        ])
       } as any,
       { removeOverrides: false }
     )

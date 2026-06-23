@@ -2,6 +2,7 @@ import { makeVevent } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 const TZID = 'Europe/Paris'
 const OWNER = 'owner@example.com'
@@ -466,7 +467,7 @@ describe('RFC 5545 – RECURRENCE-ID (§3.8.4.4)', () => {
 describe('VALARM (RFC 5545 §3.6.6)', () => {
   it('is added when alarm.trigger is set', () => {
     const event = baseEvent({
-      alarms: [new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })]
+      alarms: new Valarms([new VAlarm({ trigger: '-PT15M', action: 'EMAIL' })])
     })
     const vevent = makeVevent(event, TZID)
     // VALARM is appended as a nested array at the end of vevent
@@ -487,14 +488,14 @@ describe('VALARM (RFC 5545 §3.6.6)', () => {
 
   it('alarm attendee points to calendar owner from constructor data', () => {
     const event = baseEvent({
-      alarms: [
+      alarms: new Valarms([
         new VAlarm({
           trigger: '-PT10M',
           action: 'EMAIL',
           attendee: new userAttendee({ cal_address: `mailto:${OWNER}` }),
           summary: 'Test Event'
         })
-      ]
+      ])
     })
     const vevent = makeVevent(event, TZID)
     const valarmEntry = vevent[2]?.find(
@@ -509,10 +510,10 @@ describe('VALARM (RFC 5545 §3.6.6)', () => {
 
   it('serializes multiple alarms as separate VALARM components', () => {
     const event = baseEvent({
-      alarms: [
+      alarms: new Valarms([
         new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
         new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' })
-      ]
+      ])
     })
     const vevent = makeVevent(event, TZID)
 

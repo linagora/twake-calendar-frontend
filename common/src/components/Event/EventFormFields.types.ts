@@ -1,7 +1,7 @@
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { Attachment } from '@common/types/Attachment'
-import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormContext } from '@common/utils/eventFormTempStorage'
@@ -19,7 +19,7 @@ export interface EventFormValues {
   allday: boolean
   repetition: RepetitionObject
   attendees: userAttendee[]
-  alarms: VAlarm[]
+  alarms: Valarms
   busy: string
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
   timezone: string
@@ -43,7 +43,7 @@ export const DEFAULT_FORM_VALUES: EventFormValues = {
   allday: false,
   repetition: {} as RepetitionObject,
   attendees: [],
-  alarms: [],
+  alarms: new Valarms(),
   busy: 'OPAQUE',
   eventClass: window.DISABLE_PUBLIC_VISIBILITY ? 'PRIVATE' : 'PUBLIC',
   timezone: '',

@@ -4,7 +4,7 @@ import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUt
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
-import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
@@ -64,18 +64,10 @@ export function prepareUpdatedEvent({
     transp: values.busy,
     sequence: nextSequence,
     color: targetCalendar?.color,
-    alarms: (values.alarms ?? []).map(
-      alarm =>
-        new VAlarm({
-          trigger: alarm.trigger,
-          action: alarm.action,
-          attendee:
-            alarm.attendee ??
-            userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
-          summary: alarm.summary ?? values.title,
-          description: alarm.description
-        })
-    ),
+    alarms: Valarms.fromFormValues(values.alarms, {
+      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      summary: values.title
+    }),
     x_openpass_videoconference: values.meetingLink || undefined,
     attach: values.attachments?.length ? values.attachments : undefined
   }
@@ -115,7 +107,7 @@ export function prepareUpdateData({
   eventId,
   typeOfAction,
   masterEvent
-}: PrepareUpdateDataParams): Promise<PrepareUpdateDataResult | null> {
+}: PrepareUpdateDataParams): PrepareUpdateDataResult | null {
   const targetCalendar = calList[values.calendarid]
   if (!targetCalendar) return null
 

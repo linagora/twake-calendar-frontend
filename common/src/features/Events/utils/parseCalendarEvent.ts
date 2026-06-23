@@ -15,6 +15,7 @@ import { inferTimezoneFromValue } from './inferTimezoneFromValue'
 import { WKST_NUM_TO_DAY } from './wkstUtils'
 import { Attachment } from '@common/types/Attachment'
 import { AlarmData, VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 const KNOWN_PROPS = new Set([
   'uid',
@@ -245,7 +246,7 @@ function processEventUid(
   }
 }
 
-function parseAlarms(valarms?: VCalComponent[]): VAlarm[] | undefined {
+function parseAlarms(valarms?: VCalComponent[]): Valarms | undefined {
   if (!valarms?.length) {
     return undefined
   }
@@ -273,7 +274,7 @@ function parseAlarms(valarms?: VCalComponent[]): VAlarm[] | undefined {
     }
     alarms.push(new VAlarm(alarm as AlarmData))
   }
-  return alarms
+  return Valarms.fromList(alarms)
 }
 
 function processEventDates(
@@ -327,7 +328,7 @@ export function parseCalendarEvent({
   processEventUid(event, context.recurrenceId)
 
   const alarms = parseAlarms(valarms)
-  if (alarms?.length) {
+  if (alarms?.hasAlarms()) {
     event.alarms = alarms
   }
 

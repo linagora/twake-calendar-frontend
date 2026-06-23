@@ -5,7 +5,8 @@ import {
   UseEventFormValuesReturn
 } from '@common/components/Event/EventFormFields.types'
 import { Attachment } from '@common/types/Attachment'
-import { AlarmData, VAlarm } from '@common/types/VAlarm'
+import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 import {
   EventFormContext,
   EventFormTempData,
@@ -40,9 +41,7 @@ function mapTempDataToFormValues(
     allday: tempData.allday,
     repetition: tempData.repetition,
     attendees: tempData.attendees,
-    alarms: (tempData.alarms ?? []).map(
-      alarm => new VAlarm(alarm as AlarmData)
-    ),
+    alarms: Valarms.fromJSON(tempData.alarms),
     busy: tempData.busy,
     eventClass: tempData.eventClass,
     timezone: tempData.timezone,
@@ -162,7 +161,12 @@ function useEventFormSetters(
   )
   const setAlarm = useCallback(
     (v: string) => {
-      set('alarms', v ? [new VAlarm({ trigger: v, action: 'EMAIL' })] : [])
+      set(
+        'alarms',
+        v
+          ? Valarms.fromList([new VAlarm({ trigger: v, action: 'EMAIL' })])
+          : new Valarms()
+      )
     },
     [set]
   )

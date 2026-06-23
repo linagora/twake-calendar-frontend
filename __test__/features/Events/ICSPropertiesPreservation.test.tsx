@@ -13,6 +13,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 jest.mock('@common/features/Events/EventDao')
 
@@ -485,10 +486,10 @@ describe('Edge cases', () => {
 
   it('handles event with alarms alongside passthroughProps', () => {
     const event = baseCalendarEvent({
-      alarms: [
+      alarms: new Valarms([
         new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
         new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' })
-      ],
+      ]),
       passthroughProps: CUSTOM_PROPS
     })
     const [, props, subComponents] = makeVevent(event, event.timezone)

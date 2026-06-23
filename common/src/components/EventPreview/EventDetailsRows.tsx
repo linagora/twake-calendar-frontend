@@ -3,7 +3,7 @@ import { InfoRow } from '@common/components/Event/InfoRow'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Attachment } from '@common/types/Attachment'
 import { RepetitionObject } from '@common/types/EventsTypes'
-import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
@@ -156,10 +156,10 @@ export const EventDescriptionRow: React.FC<{
 }
 
 export const EventAlarmRow: React.FC<{
-  alarms?: VAlarm[]
+  alarms?: Valarms
 }> = ({ alarms }) => {
   const { t } = useI18n()
-  if (!alarms?.length) return null
+  if (!alarms?.hasAlarms()) return null
 
   return (
     <BaseEventRow
@@ -168,7 +168,7 @@ export const EventAlarmRow: React.FC<{
       alignSelf="flex-start"
       content={
         <Box>
-          {alarms.map((alarm, index) => (
+          {alarms.getAlarms().map((alarm, index) => (
             <Typography key={`${alarm.trigger}-${index}`}>
               {t('eventPreview.alarmText', {
                 trigger: translateDuration(alarm.trigger, t),

@@ -14,6 +14,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 describe('parseCalendarEvent', () => {
   const baseColor = { light: '#00FF00' }
@@ -340,8 +341,8 @@ describe('parseCalendarEvent', () => {
       valarms
     })
 
-    expect(result.alarms?.[0]?.action).toBe('DISPLAY')
-    expect(result.alarms?.[0]?.trigger).toBe('-PT15M')
+    expect(result.alarms?.getAlarm(0)?.action).toBe('DISPLAY')
+    expect(result.alarms?.getAlarm(0)?.trigger).toBe('-PT15M')
   })
 
   it('handles optional organizer and attendee fields gracefully', () => {
@@ -566,7 +567,9 @@ describe('calendarEventToJCal', () => {
       end: '2025-07-20T08:00:00.000Z',
       timezone: 'Europe/Paris',
       allday: false,
-      alarms: [new VAlarm({ trigger: '-PT10M', action: 'DISPLAY' })],
+      alarms: new Valarms([
+        new VAlarm({ trigger: '-PT10M', action: 'DISPLAY' })
+      ]),
       attendee: []
     } as unknown as CalendarEvent
 

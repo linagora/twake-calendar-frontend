@@ -3,6 +3,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { resolveTimezone } from '@common/utils/timezone'
 import { addVideoConferenceToDescription } from '@common/utils/videoConferenceUtils'
 
@@ -87,7 +88,7 @@ export function buildFromExistingEvent({
     allday: isAllDay,
     repetition,
     attendees,
-    alarms: event.alarms ?? [],
+    alarms: event.alarms ?? new Valarms(),
     eventClass: window.DISABLE_PUBLIC_VISIBILITY
       ? 'PRIVATE'
       : (event.class ?? 'PUBLIC'),

@@ -374,7 +374,7 @@ describe('EventPopover', () => {
         })
       ])
       // No alarm was set in the form, so alarms should be empty
-      expect(receivedPayload.newEvent.alarms).toEqual([])
+      expect(receivedPayload.newEvent.alarms?.hasAlarms()).toBe(false)
     } finally {
       jest.useRealTimers()
     }

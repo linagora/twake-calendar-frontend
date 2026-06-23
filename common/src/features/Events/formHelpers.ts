@@ -168,7 +168,7 @@ export function populateFormFromEvent(
   )
 
   // Other fields
-  setAlarm(event.alarms?.[0]?.trigger ?? '')
+  setAlarm(event.alarms?.getAlarm(0)?.trigger ?? '')
   setEventClass(event.class ?? 'PUBLIC')
   setBusy(event.transp ?? 'OPAQUE')
   setTimezone(eventTimezone)
