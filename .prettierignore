@@ -1,0 +1,9 @@
+# Build output
+build/
+dist/
+
+# Markdown docs (formatting handled manually)
+*.md
+
+# Env files
+.env*
