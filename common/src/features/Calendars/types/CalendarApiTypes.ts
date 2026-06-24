@@ -10,9 +10,7 @@ export type CalDavLink = {
 }
 
 export function getCalendarIdFromLink(link: CalDavLink): string | undefined {
-  return link.self?.href
-    ?.replace('/calendars/', '')
-    .replace('.json', '')
+  return link.self?.href?.replace('/calendars/', '').replace('.json', '')
 }
 
 export type CalDavItem = {
