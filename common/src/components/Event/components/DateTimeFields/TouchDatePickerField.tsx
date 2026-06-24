@@ -39,7 +39,7 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
   onAccept,
   onCancel
 }) => {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
 
   const [viewMode, setViewMode] = useState<'calendar' | 'text'>('calendar')
 
@@ -54,8 +54,12 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
     setViewMode(viewMode === 'calendar' ? 'text' : 'calendar')
   }
 
-  const displayDate = internalValue?.isValid()
-    ? internalValue.format(DISPLAY_FORMAT)
+  const formattedDate =
+    dayjs.isDayjs(internalValue) && internalValue.isValid()
+      ? internalValue.locale(lang).format(DISPLAY_FORMAT)
+      : ''
+  const displayDate = formattedDate
+    ? formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
     : t('dateTimeFields.pickADate')
 
   return (

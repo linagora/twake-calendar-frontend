@@ -1,5 +1,3 @@
-// ReadOnlyPickerField
-
 import { TextField } from '@linagora/twake-mui'
 import { TimePickerFieldProps } from '@mui/x-date-pickers/TimePicker'
 import { DatePickerFieldProps } from '@mui/x-date-pickers/DatePicker'
@@ -17,6 +15,7 @@ import {
   type PickerValidationScope
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
+import { useI18n } from 'twake-i18n'
 
 type FieldType = 'date' | 'time' | 'date-time'
 
@@ -34,6 +33,8 @@ type GenericPickerFieldProps = PickerFieldSlotProps<Dayjs, false, false> & {
  * and opens the picker when clicking anywhere in the field.
  */
 const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
+  const { lang } = useI18n()
+
   const { fieldType, validator, ...fieldProps } = props
   const { internalProps, forwardedProps } = useSplitFieldProps(
     fieldProps,
@@ -62,8 +63,15 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
     props: internalProps
   })
 
-  const valueToDisplay =
-    value == null ? '' : value.isValid() ? value.format(fieldFormat) : ''
+  const formattedValue =
+    value == null
+      ? ''
+      : value.isValid()
+        ? (value as Dayjs).locale(lang).format(fieldFormat)
+        : ''
+  const valueToDisplay = formattedValue
+    ? formattedValue.charAt(0).toUpperCase() + formattedValue.slice(1)
+    : ''
 
   // Extract Input component props, excluding adornments that shouldn't go to DOM
   const {

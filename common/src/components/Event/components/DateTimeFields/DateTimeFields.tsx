@@ -108,21 +108,23 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   })
 
   const startDateValue = useMemo(
-    () => (startDate ? dayjs(startDate) : null),
-    [startDate]
+    () => toDayjs(startDate, undefined, lang),
+    [startDate, lang]
   )
   const startTimeValue = useMemo(
-    () => (startTime ? dayjs(startTime, 'HH:mm') : null),
-    [startTime]
+    () => toDayjs(startTime, 'HH:mm', lang),
+    [startTime, lang]
   )
   const endDateValue = useMemo(
-    () => (endDate ? dayjs(endDate) : null),
-    [endDate]
+    () => toDayjs(endDate, undefined, lang),
+    [endDate, lang]
   )
   const endTimeValue = useMemo(
-    () => (endTime ? dayjs(endTime, 'HH:mm') : null),
-    [endTime]
+    () => toDayjs(endTime, 'HH:mm', lang),
+    [endTime, lang]
   )
+
+  const layoutErrors = useMemo(() => getLayoutErrors(validation), [validation])
 
   const showFullField = showMore || shouldShowFullFieldsInNormal
   const containerClassName = classNames('date-time-group', {
@@ -150,21 +152,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           startTimeValue={startTimeValue}
           endDateValue={endDateValue}
           endTimeValue={endTimeValue}
-          errors={{
-            date: {
-              start:
-                validation.errors?.date?.start ||
-                validation.warnings?.date?.start,
-              end:
-                validation.errors?.date?.end ||
-                validation.warnings?.date?.end ||
-                ''
-            },
-            time: {
-              start: validation.errors?.time?.start,
-              end: validation.errors?.time?.end
-            }
-          }}
+          errors={layoutErrors}
           isMobile={isMobile}
           allday={allday}
           startDateLabel={startDateLabel}
@@ -184,38 +172,72 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 }
 
 function displayAsWarning(validation: ValidationResult): boolean | undefined {
-  if (
-    validation.errors.date?.start ||
-    validation.errors.date?.end ||
-    validation.errors.time?.start ||
-    validation.errors.time?.end
-  ) {
+  const hasError =
+    getSafe(validation, 'errors', 'date', 'start') ||
+    getSafe(validation, 'errors', 'date', 'end') ||
+    getSafe(validation, 'errors', 'time', 'start') ||
+    getSafe(validation, 'errors', 'time', 'end')
+  if (hasError) {
     return false
   }
-  return !!validation.warnings?.date?.start || !!validation.warnings?.date?.end
+  return (
+    !!getSafe(validation, 'warnings', 'date', 'start') ||
+    !!getSafe(validation, 'warnings', 'date', 'end')
+  )
 }
 
 function displayError(validation: {
   errors: DateTimeErrors
   warnings: DateTimeWarnings
 }): string {
-  if (validation?.errors?.date?.start) {
-    return validation.errors.date.start
+  return (
+    getSafe(validation, 'errors', 'date', 'start') ||
+    getSafe(validation, 'errors', 'time', 'end') ||
+    getSafe(validation, 'errors', 'date', 'end') ||
+    getSafe(validation, 'errors', 'time', 'start') ||
+    getSafe(validation, 'warnings', 'date', 'start') ||
+    getSafe(validation, 'warnings', 'date', 'end')
+  )
+}
+
+function toDayjs(
+  value: string,
+  format?: string,
+  lang?: string
+): dayjs.Dayjs | null {
+  if (!value) return null
+  const d = format ? dayjs(value, format) : dayjs(value)
+  return lang ? d.locale(lang) : d
+}
+
+function getLayoutErrors(validation: ValidationResult): {
+  date: { start: string; end: string }
+  time: { start: string; end: string }
+} {
+  return {
+    date: {
+      start:
+        getSafe(validation, 'errors', 'date', 'start') ||
+        getSafe(validation, 'warnings', 'date', 'start'),
+      end:
+        getSafe(validation, 'errors', 'date', 'end') ||
+        getSafe(validation, 'warnings', 'date', 'end')
+    },
+    time: {
+      start: getSafe(validation, 'errors', 'time', 'start'),
+      end: getSafe(validation, 'errors', 'time', 'end')
+    }
   }
-  if (validation?.errors?.time?.end) {
-    return validation.errors.time.end
+}
+
+function getSafe(obj: unknown, ...keys: string[]): string {
+  let curr: unknown = obj
+  for (const key of keys) {
+    if (curr && typeof curr === 'object') {
+      curr = (curr as Record<string, unknown>)[key]
+    } else {
+      return ''
+    }
   }
-  if (validation?.errors?.date?.end) {
-    return validation.errors.date.end
-  }
-  if (validation?.errors?.time?.start) {
-    return validation.errors.time.start
-  }
-  if (validation?.warnings?.date?.start) {
-    return validation.warnings.date.start
-  }
-  if (validation?.warnings?.date?.end) {
-    return validation.warnings.date.end
-  }
-  return ''
+  return typeof curr === 'string' ? curr : ''
 }
