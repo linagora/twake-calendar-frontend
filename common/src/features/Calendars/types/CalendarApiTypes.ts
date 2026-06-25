@@ -26,6 +26,21 @@ export class CalDavLink {
     const match = pathname.match(/^\/calendars\/(.+)\.json$/)
     return match?.[1]
   }
+
+  getFirstSubId(): string | undefined {
+    const calendarId = this.parseCalendarId()
+    return calendarId?.split('/')[0]
+  }
+
+  static parseCalendarIdFromHref(href: string | undefined): string | undefined {
+    if (!href) return undefined
+    return new CalDavLink({ self: { href } }).parseCalendarId()
+  }
+
+  static getFirstIdFromHref(href: string | undefined): string | undefined {
+    if (!href) return undefined
+    return new CalDavLink({ self: { href } }).getFirstSubId()
+  }
 }
 
 export type CalDavItem = {

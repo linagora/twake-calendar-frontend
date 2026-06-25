@@ -53,7 +53,7 @@ function applyUpdates(
   payload: ConfigurationUpdatesInput
 ): void {
   stateUpdaters.forEach(({ key, updater }) => {
-    if (payload[key] !== undefined) {
+    if (payload[key]) {
       updater(state, payload)
     }
   })
@@ -76,7 +76,7 @@ export const updateUserConfigurationsThunk = (
     async (updates, { rejectWithValue }) => {
       try {
         const body = makeConfigurationBody(updates)
-        if (body.modules.length === 0) {
+        if (!body.modules?.length) {
           return updates
         }
         await patchConfigurations(body.modules)

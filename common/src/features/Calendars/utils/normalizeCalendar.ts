@@ -2,6 +2,7 @@ import {
   getCalendarDelegationAccess,
   getCalendarVisibility
 } from '@common/components/Calendar/utils/calendarUtils'
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { CalendarData } from '@common/features/Calendars/types/CalendarData'
 
 export function normalizeCalendar(rawCalendar: CalendarData, userId: string) {
@@ -18,8 +19,8 @@ export function normalizeCalendar(rawCalendar: CalendarData, userId: string) {
   if (!source) {
     throw new Error('No source for calendar')
   }
-  const id = source.replace('/calendars/', '').replace('.json', '')
-  const ownerId = id.split('/')[0]
+  const id = CalDavLink.parseCalendarIdFromHref(source) ?? ''
+  const ownerId = CalDavLink.getFirstIdFromHref(source) ?? ''
   const visibility = getCalendarVisibility(rawCalendar['acl'] ?? [])
   const access = getCalendarDelegationAccess(rawCalendar['acl'] ?? [], userId)
 

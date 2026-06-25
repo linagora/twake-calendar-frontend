@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { fetchCalendars } from '@common/features/Calendars/CalendarDAO'
 import { Calendar } from '@common/types/CalendarTypes'
 import { Button, TextField, useTheme } from '@linagora/twake-mui'
@@ -73,10 +74,7 @@ const RegisterCalendars: React.FC<{
   ): boolean => {
     return Object.values(calendars).some(
       (existing: Calendar) =>
-        existing.id ===
-        cal.cal?._links?.self?.href
-          ?.replace('/calendars/', '')
-          .replace('.json', '')
+        existing.id === new CalDavLink(cal.cal?._links).parseCalendarId()
     )
   }
 
@@ -117,9 +115,7 @@ const RegisterCalendars: React.FC<{
             }
           })
         ).unwrap()
-        return cal.cal._links.self?.href
-          ?.replace('/calendars/', '')
-          .replace('.json', '')
+        return new CalDavLink(cal.cal._links).parseCalendarId()
       })
     )
 
