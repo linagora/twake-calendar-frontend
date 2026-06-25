@@ -1,8 +1,9 @@
 import { VideoLink } from '@common/components/Event/components/VideoLink'
 import { InfoRow } from '@common/components/Event/InfoRow'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { RepetitionObject } from '@common/types/EventsTypes'
 import { Attachment } from '@common/types/Attachment'
+import { RepetitionObject } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
@@ -155,18 +156,28 @@ export const EventDescriptionRow: React.FC<{
 }
 
 export const EventAlarmRow: React.FC<{
-  alarm?: { trigger: string; action: string }
-}> = ({ alarm }) => {
+  alarms?: Valarms
+}> = ({ alarms }) => {
   const { t } = useI18n()
-  if (!alarm) return null
+  if (!alarms?.hasAlarms()) return null
 
   return (
     <BaseEventRow
       icon={<NotificationsNoneIcon />}
-      text={t('eventPreview.alarmText', {
-        trigger: translateDuration(alarm.trigger, t),
-        action: translateAlarmAction(alarm.action, t)
-      })}
+      alignItems="flex-start"
+      alignSelf="flex-start"
+      content={
+        <Box>
+          {alarms.getAlarms().map((alarm, index) => (
+            <Typography key={`${alarm.trigger}-${index}`}>
+              {t('eventPreview.alarmText', {
+                trigger: translateDuration(alarm.trigger, t),
+                action: translateAlarmAction(alarm.action, t)
+              })}
+            </Typography>
+          ))}
+        </Box>
+      }
     />
   )
 }

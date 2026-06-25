@@ -1,14 +1,15 @@
-import { TIMEZONES } from '@common/utils/timezone-data'
-import moment from 'moment-timezone'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
   VCalComponent,
   VObjectProperty,
   VObjectValue
 } from '@common/features/Calendars/types/CalendarData'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { makeTimezone, parseCalendarEvent } from '@common/features/Events/utils'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
+import { makeTimezone, parseCalendarEvent } from '@common/features/Events/utils'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { TIMEZONES } from '@common/utils/timezone-data'
+import moment from 'moment-timezone'
+import { filterComponents } from './parseFetchedEvent'
 
 export function makeDeleteEventInstanceJCal(
   vevents: VCalComponent[],
@@ -31,7 +32,8 @@ export function makeDeleteEventInstanceJCal(
     data: vevents[masterIndex][1] as VObjectProperty[],
     color: {},
     calendar: { id: event.calId } as Calendar,
-    eventURL: ''
+    eventURL: '',
+    valarms: filterComponents(vevents[masterIndex], 'valarm')
   })
   const masterProps = vevents[masterIndex][1] as VObjectProperty[]
 

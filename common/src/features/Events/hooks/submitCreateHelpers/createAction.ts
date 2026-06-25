@@ -1,19 +1,19 @@
 import { AppDispatch } from '@common/app/store'
-import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUtils'
+import { putEvent } from '@common/features/Calendars/CalendarSlice'
 import { buildDelegatedEventURL } from '@common/features/Events/utils/buildDelegatedEventURL'
+import { userAttendee } from '@common/features/User/models/attendee'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
+import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import {
   clearEventFormTempData,
   saveEventFormDataToTemp,
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
-import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
-import { putEvent } from '@common/features/Calendars/CalendarSlice'
-import { Resource } from '@common/components/Attendees/ResourceSearch'
-import { userAttendee } from '@common/features/User/models/attendee'
-import { VAlarm } from '@common/types/VAlarm'
 
 export async function handleCreateEvent({
   dispatch,
@@ -62,9 +62,7 @@ export async function handleCreateEvent({
     transp: values.busy,
     sequence: 1,
     color: targetCalendar?.color,
-    alarm: new VAlarm({
-      trigger: values.alarm,
-      action: 'EMAIL',
+    alarms: Valarms.fromFormValues(values.alarms, {
       attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
       summary: values.title
     }),

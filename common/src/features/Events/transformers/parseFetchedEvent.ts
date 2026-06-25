@@ -1,17 +1,17 @@
 import {
+  VCalComponent,
+  VObjectProperty
+} from '@common/features/Calendars/types/CalendarData'
+import { parseCalendarEvent } from '@common/features/Events/utils'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import {
   convertEventDateTimeToISO,
   resolveTimezoneId
 } from '@common/utils/timezone'
 import ICAL from 'ical.js'
-import { Calendar } from '@common/types/CalendarTypes'
-import {
-  VCalComponent,
-  VObjectProperty
-} from '@common/features/Calendars/types/CalendarData'
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { parseCalendarEvent } from '@common/features/Events/utils'
 
-function filterComponents(
+export function filterComponents(
   eventical: VCalComponent,
   componentName: string
 ): VCalComponent[] {
@@ -126,7 +126,8 @@ export function parseFetchedEvent(
     data: targetVevent[1] as VObjectProperty[],
     color: event.color ?? {},
     calendar: { id: event?.calId } as Calendar,
-    eventURL: event.URL
+    eventURL: event.URL,
+    valarms: filterComponents(targetVevent, 'valarm')
   })
 
   const finalTimezone =

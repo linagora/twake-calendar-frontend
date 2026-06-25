@@ -1,4 +1,7 @@
-import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
+import {
+  VCalComponent,
+  VObjectProperty
+} from '@common/features/Calendars/types/CalendarData'
 import {
   calendarEventToJCal,
   combineMasterDateWithFormTime,
@@ -11,6 +14,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 describe('parseCalendarEvent', () => {
   const baseColor = { light: '#00FF00' }
@@ -319,24 +323,26 @@ describe('parseCalendarEvent', () => {
       ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z']
     ]
 
-    const valarm = [
-      'VALARM',
+    const valarms = [
       [
-        ['ACTION', {}, 'text', 'DISPLAY'],
-        ['TRIGGER', {}, 'duration', '-PT15M']
+        'VALARM',
+        [
+          ['ACTION', {}, 'text', 'DISPLAY'],
+          ['TRIGGER', {}, 'duration', '-PT15M']
+        ]
       ]
-    ] as unknown as VObjectProperty[]
+    ] as unknown as VCalComponent[]
 
     const result = parseCalendarEvent({
       data: rawData,
       color: baseColor,
       calendar,
       eventURL: '/calendars/test.ics',
-      valarm
+      valarms
     })
 
-    expect(result.alarm?.action).toBe('DISPLAY')
-    expect(result.alarm?.trigger).toBe('-PT15M')
+    expect(result.alarms?.getAlarm(0)?.action).toBe('DISPLAY')
+    expect(result.alarms?.getAlarm(0)?.trigger).toBe('-PT15M')
   })
 
   it('handles optional organizer and attendee fields gracefully', () => {
@@ -553,7 +559,7 @@ describe('calendarEventToJCal', () => {
     )
   })
 
-  it('converts with alarm included', () => {
+  it('converts with alarms included', () => {
     const mockEvent = {
       uid: 'event-10',
       title: 'Alarm Event',
@@ -561,7 +567,9 @@ describe('calendarEventToJCal', () => {
       end: '2025-07-20T08:00:00.000Z',
       timezone: 'Europe/Paris',
       allday: false,
-      alarm: new VAlarm({ trigger: '-PT10M', action: 'DISPLAY' }),
+      alarms: new Valarms([
+        new VAlarm({ trigger: '-PT10M', action: 'DISPLAY' })
+      ]),
       attendee: []
     } as unknown as CalendarEvent
 

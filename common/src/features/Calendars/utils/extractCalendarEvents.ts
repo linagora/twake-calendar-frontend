@@ -1,12 +1,12 @@
-import { CalendarEvent } from '@common/types/EventsTypes'
-import { parseCalendarEvent } from '@common/features/Events/utils'
-import { defaultColors } from '@common/utils/defaultColors'
 import { CalDavItem } from '@common/features/Calendars/types/CalendarApiTypes'
-import { Calendar } from '@common/types/CalendarTypes'
 import {
   VCalComponent,
   VObjectProperty
 } from '@common/features/Calendars/types/CalendarData'
+import { parseCalendarEvent } from '@common/features/Events/utils'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { defaultColors } from '@common/utils/defaultColors'
 
 export function extractCalendarEvents(
   item: CalDavItem,
@@ -42,27 +42,28 @@ export function extractCalendarEvents(
         return null
       }
 
-      const valarm = extractValarm(vevent as VCalComponent)
+      const valarms = extractValarms(vevent as VCalComponent)
 
       return parseCalendarEvent({
         data: eventProps,
         color: options?.color ?? defaultColors[0],
         calendar: options.cal,
         eventURL,
-        valarm
+        valarms
       })
     })
     .filter(Boolean) as CalendarEvent[]
 }
 
-function extractValarm(vevent: VCalComponent): VCalComponent | undefined {
+function extractValarms(vevent: VCalComponent): VCalComponent[] | undefined {
   const subComponents = vevent[2]
   if (!Array.isArray(subComponents)) {
     return undefined
   }
 
-  const valarmComponent = subComponents.find(
-    component => Array.isArray(component) && component[0] === 'valarm'
+  const valarmComponent = subComponents.filter(
+    component =>
+      Array.isArray(component) && component[0].toLowerCase() === 'valarm'
   )
 
   return valarmComponent
