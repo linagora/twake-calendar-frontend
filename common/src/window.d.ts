@@ -52,5 +52,7 @@ declare global {
     displayOrgAvatar: boolean
 
     __ws?: WebSocket
+
+    HIDE_LANGUAGE_SELECTOR: boolean
   }
 }
