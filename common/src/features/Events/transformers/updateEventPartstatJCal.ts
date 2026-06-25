@@ -19,6 +19,10 @@ export type AttendeeMatcher = (
  * model, which is lossy: when the in-memory timezone is missing, regeneration
  * silently rewrites DTSTART to UTC and drops the TZID parameter (see #1031).
  *
+ * When `recurrenceId` is provided the patch is restricted to the single VEVENT
+ * whose RECURRENCE-ID matches that value (solo recurring-instance RSVP, see
+ * #1088). Omit it to update every VEVENT (non-recurring events).
+ *
  * Returns the patched jCal, or `null` when no matching attendee was found so
  * the caller can fall back to the regeneration path (e.g. adding oneself as a
  * brand-new attendee).
@@ -26,7 +30,8 @@ export type AttendeeMatcher = (
 export function updateEventPartstatJCal(
   jcal: VCalComponent,
   matchAttendee: AttendeeMatcher,
-  partstat: string
+  partstat: string,
+  recurrenceId?: string
 ): VCalComponent | null {
   let matched = false
 
@@ -40,6 +45,18 @@ export function updateEventPartstatJCal(
     (component: VCalComponent): VCalComponent => {
       if (!Array.isArray(component) || component[0] !== 'vevent') {
         return component
+      }
+
+      if (recurrenceId !== undefined) {
+        const veventProps = component[1] as VObjectProperty[]
+        const ridProp = veventProps.find(([k]) => k === 'recurrence-id')
+        if (!ridProp) {
+          return component
+        }
+        const veventRid = normalizeId(ridProp[3] as string)
+        if (veventRid !== normalizeId(recurrenceId)) {
+          return component
+        }
       }
 
       const properties = component[1] as VObjectProperty[]
@@ -73,3 +90,6 @@ export function updateEventPartstatJCal(
 
   return [name, props, updatedComponents] as VCalComponent
 }
+
+const normalizeId = (id: unknown): string =>
+  ((id ?? '') as string).replace(/Z$/, '')

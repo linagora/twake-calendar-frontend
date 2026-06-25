@@ -94,12 +94,36 @@ function updateEventAttendees(
   }
 }
 
-async function handleSoloRSVP(
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  event: CalendarEvent
-): Promise<void> {
-  await dispatch(updateEventInstance({ cal: calendar, event }))
+async function handleSoloRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  fallbackEvent
+}: Omit<RSVPHandlerParams, 'typeOfAction'> & {
+  fallbackEvent: CalendarEvent
+}): Promise<void> {
+  // Direct patch: update only the specific exception VEVENT, preserving all
+  // other properties byte-for-byte (avoids lossy DTSTART/RECURRENCE-ID
+  // timezone regeneration via makeVevent, same root cause as #1031).
+  const matcher = makePartstatMatcher(calendar, user)
+  if (matcher && event.recurrenceId) {
+    const jCal = await fetchEventJCal(event)
+    const patched = updateEventPartstatJCal(jCal, matcher, rsvp, event.recurrenceId)
+    if (patched) {
+      const response = await putEvent(event, patched)
+      if (!response.ok) {
+        throw new Error(
+          `RSVP update failed for ${event.URL} with status ${response.status}`
+        )
+      }
+      return
+    }
+  }
+  // Fallback: no exception VEVENT exists yet (generated occurrence without an
+  // existing override) or the attendee is absent from it — use regeneration.
+  await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
 }
 
 async function handleAllRSVP(
@@ -174,7 +198,14 @@ export async function handleRSVP({
   }
 
   if (typeOfAction === 'solo') {
-    await handleSoloRSVP(dispatch, calendar, newEvent)
+    await handleSoloRSVP({
+      dispatch,
+      calendar,
+      event,
+      user,
+      rsvp,
+      fallbackEvent: newEvent
+    })
   } else if (typeOfAction === 'all') {
     if (!user?.email) {
       throw new Error('Cannot update all occurrences without user email')
