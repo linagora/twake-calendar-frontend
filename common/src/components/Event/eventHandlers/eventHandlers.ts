@@ -94,6 +94,34 @@ function updateEventAttendees(
   }
 }
 
+/**
+ * Fetches the stored jCal, patches only the attendee PARTSTAT (preserving
+ * DTSTART, VTIMEZONE and every other property byte-for-byte), then writes it
+ * back. Pass `recurrenceId` to restrict the patch to a single exception VEVENT.
+ *
+ * Returns `true` when the patch was applied, `false` when no matching attendee
+ * was found so the caller can fall back to the regeneration path.
+ */
+async function patchPartstatInJCal(
+  event: CalendarEvent,
+  matcher: AttendeeMatcher,
+  partstat: PartStat,
+  recurrenceId?: string
+): Promise<boolean> {
+  const jCal = await fetchEventJCal(event)
+  const patched = updateEventPartstatJCal(jCal, matcher, partstat, recurrenceId)
+  if (!patched) {
+    return false
+  }
+  const response = await putEvent(event, patched)
+  if (!response.ok) {
+    throw new Error(
+      `RSVP update failed for ${event.URL} with status ${response.status}`
+    )
+  }
+  return true
+}
+
 async function handleSoloRSVP({
   dispatch,
   calendar,
@@ -104,25 +132,12 @@ async function handleSoloRSVP({
 }: Omit<RSVPHandlerParams, 'typeOfAction'> & {
   fallbackEvent: CalendarEvent
 }): Promise<void> {
-  // Direct patch: update only the specific exception VEVENT, preserving all
-  // other properties byte-for-byte (avoids lossy DTSTART/RECURRENCE-ID
-  // timezone regeneration via makeVevent, same root cause as #1031).
   const matcher = makePartstatMatcher(calendar, user)
   if (matcher && event.recurrenceId) {
-    const jCal = await fetchEventJCal(event)
-    const patched = updateEventPartstatJCal(jCal, matcher, rsvp, event.recurrenceId)
-    if (patched) {
-      const response = await putEvent(event, patched)
-      if (!response.ok) {
-        throw new Error(
-          `RSVP update failed for ${event.URL} with status ${response.status}`
-        )
-      }
+    if (await patchPartstatInJCal(event, matcher, rsvp, event.recurrenceId)) {
       return
     }
   }
-  // Fallback: no exception VEVENT exists yet (generated occurrence without an
-  // existing override) or the attendee is absent from it — use regeneration.
   await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
 }
 
@@ -161,26 +176,10 @@ async function handleDefaultRSVP({
 }: Omit<RSVPHandlerParams, 'typeOfAction'> & {
   fallbackEvent: CalendarEvent
 }): Promise<void> {
-  // Update the attendee PARTSTAT directly in the stored jCal so that DTSTART,
-  // VTIMEZONE and every other property are preserved exactly. Regenerating the
-  // event from the parsed model drops the timezone when it is missing (#1031).
   const matcher = makePartstatMatcher(calendar, user)
-  if (matcher) {
-    const jCal = await fetchEventJCal(event)
-    const patched = updateEventPartstatJCal(jCal, matcher, rsvp)
-    if (patched) {
-      const response = await putEvent(event, patched)
-      if (!response.ok) {
-        throw new Error(
-          `RSVP update failed for ${event.URL} with status ${response.status}`
-        )
-      }
-      return
-    }
+  if (matcher && (await patchPartstatInJCal(event, matcher, rsvp))) {
+    return
   }
-
-  // No matching attendee in the event (e.g. adding oneself for the first time):
-  // fall back to regenerating the event from the model.
   await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
 }
 
