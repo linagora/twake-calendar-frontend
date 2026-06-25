@@ -493,6 +493,9 @@ describe('RSVP to Recurring Event', () => {
     jest.useRealTimers()
   })
   it('calls updateEventInstance when accepting single instance', async () => {
+    jest
+      .spyOn(EventDao, 'fetchEventJCal')
+      .mockResolvedValue(['vcalendar', [], []] as any)
     const spy = jest
       .spyOn(eventThunks, 'updateEventInstance')
       .mockImplementation(payload => {
