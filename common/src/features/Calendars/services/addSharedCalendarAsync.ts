@@ -6,7 +6,7 @@ import {
 import { makeAddSharedCalendarBody } from '@common/features/Calendars/transformers'
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
-import { getCalendarIdFromLink } from '@common/features/Calendars/types/CalendarApiTypes'
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { Calendar, DelegationAccess } from '@common/types/CalendarTypes'
@@ -66,7 +66,7 @@ export const addSharedCalendarThunk = (
   >(
     async ({ userId, calId, cal }, { rejectWithValue }) => {
       // Validate calendar ID before any server mutations
-      const resultCalId = getCalendarIdFromLink(cal.cal._links)
+      const resultCalId = new CalDavLink(cal.cal._links).parseCalendarId()
       if (!resultCalId) {
         return rejectWithValue({
           message: 'Invalid calendar ID',
@@ -98,7 +98,7 @@ export const addSharedCalendarThunk = (
         )
 
         return {
-          calId: getCalendarIdFromLink(cal.cal._links) ?? calId,
+          calId: new CalDavLink(cal.cal._links).parseCalendarId() ?? calId,
           color: cal.color,
           link:
             delegated?._links.self?.href ??
