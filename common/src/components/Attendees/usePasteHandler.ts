@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
-import { isValidEmail } from '@common/utils/isValidEmail'
+import { EmailAddress } from '@common/types/EmailAddress'
 import type { User } from './types'
 
 export function usePasteHandler({
@@ -45,11 +45,12 @@ export function usePasteHandler({
       const invalid: string[] = []
 
       for (const chunk of chunks) {
-        if (!isValidEmail(chunk)) {
+        const email = EmailAddress.parse(chunk)
+        if (!email) {
           invalid.push(chunk)
-        } else if (!existingEmails.has(chunk)) {
-          existingEmails.add(chunk)
-          validUsers.push({ email: chunk, displayName: chunk })
+        } else if (!existingEmails.has(email.value)) {
+          existingEmails.add(email.value)
+          validUsers.push({ email: email.value, displayName: email.value })
         }
         // silently skip duplicates
       }
