@@ -79,10 +79,11 @@ const EventSettingsUpdateModalInternal: React.FC<
     const originalAlarms = originalEvent?.alarms
 
     // Merge personal alarms from form with other alarms from original event
+    const personalAlarmsValarms = Valarms.fromList(personalAlarms)
     const mergedAlarms =
       originalAlarms && currentUser
-        ? originalAlarms.mergePersonalAlarms(formValues.alarms, currentUser)
-        : formValues.alarms
+        ? originalAlarms.mergePersonalAlarms(personalAlarmsValarms, currentUser)
+        : personalAlarmsValarms
 
     const valuesWithMergedAlarms = {
       ...formValues,
@@ -93,6 +94,7 @@ const EventSettingsUpdateModalInternal: React.FC<
   }, [
     handleSubmit,
     formValues,
+    personalAlarms,
     calList,
     props.calId,
     props.eventId,
@@ -132,7 +134,7 @@ const EventSettingsUpdateModalInternal: React.FC<
         setBusy={setBusy}
         setEventClass={setEventClass}
         isOrganizer={isOrganizer}
-        user={currentUser ?? new userAttendee({ cal_address: '' })}
+        user={currentUser}
       />
     </ResponsiveDialog>
   )

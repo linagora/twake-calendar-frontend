@@ -86,7 +86,8 @@ export class Valarms {
 
   updateGlobalAlarmsAttendees(attendees: userAttendee[]): Valarms {
     const newAlarms = this._alarms.map(alarm => {
-      if (alarm.attendees && alarm.attendees.length > 1) {
+      // Update global alarms: those with no attendees OR multiple attendees
+      if (!alarm.attendees || alarm.attendees.length > 1) {
         return new VAlarm({
           trigger: alarm.trigger,
           action: alarm.action,

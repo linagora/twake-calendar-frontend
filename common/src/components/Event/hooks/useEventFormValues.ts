@@ -5,7 +5,6 @@ import {
   UseEventFormValuesReturn
 } from '@common/components/Event/EventFormFields.types'
 import { Attachment } from '@common/types/Attachment'
-import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import {
   EventFormContext,

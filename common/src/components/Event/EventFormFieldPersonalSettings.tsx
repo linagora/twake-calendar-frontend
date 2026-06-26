@@ -37,6 +37,11 @@ export function EventFormFieldPersonalSettings({
 }): React.ReactNode {
   const setAlarmsWithUser = useCallback(
     (alarms: Valarms) => {
+      // Guard: don't stamp alarms if user has no valid cal_address
+      if (!user?.cal_address) {
+        setAlarms(alarms)
+        return
+      }
       const alarmsWithUser = Valarms.fromList(
         alarms.getAlarms().map(alarm => {
           if (alarm.attendees && alarm.attendees.length > 0) {

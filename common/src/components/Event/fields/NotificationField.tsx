@@ -15,7 +15,6 @@ import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
 const PREDEFINED_VALUES = [
-  '',
   '-PT1M',
   '-PT5M',
   '-PT10M',
@@ -51,31 +50,41 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
 
   const allValues = [...customTriggers, ...PREDEFINED_VALUES]
 
+  const addAlarmIfNotExists = (
+    currentAlarms: Valarms,
+    trigger: string
+  ): Valarms => {
+    const exists = currentAlarms.getAlarms().some(a => a.trigger === trigger)
+    if (exists) return currentAlarms
+    return currentAlarms.addAlarm(new VAlarm({ trigger, action: 'EMAIL' }))
+  }
+
+  const removeAlarmByTrigger = (
+    currentAlarms: Valarms,
+    trigger: string
+  ): Valarms => {
+    const idx = currentAlarms.getAlarms().findIndex(a => a.trigger === trigger)
+    if (idx === -1) return currentAlarms
+    return currentAlarms.removeAlarm(idx) ?? currentAlarms
+  }
+
   const handleChange = (e: SelectChangeEvent<string[]>) => {
     const next = e.target.value as string[]
-    const current = selectedTriggers
 
+    // If empty string is selected, clear all alarms
+    if (next.includes('')) {
+      setAlarms(new Valarms())
+      return
+    }
+
+    const current = selectedTriggers
     const added = next.filter(v => !current.includes(v))
     const removed = current.filter(v => !next.includes(v))
 
-    let updated = alarms
-    for (const trigger of added) {
-      // Check if an alarm with this trigger already exists to avoid duplicates
-      const existingIndex = updated
-        .getAlarms()
-        .findIndex(a => a.trigger === trigger)
-      if (existingIndex === -1) {
-        updated = updated.addAlarm(new VAlarm({ trigger, action: 'EMAIL' }))
-      }
-    }
-    for (const trigger of removed) {
-      const idx = updated.getAlarms().findIndex(a => a.trigger === trigger)
-      if (idx !== -1) {
-        updated = updated.removeAlarm(idx) ?? updated
-      }
-    }
+    const withAdded = added.reduce(addAlarmIfNotExists, alarms)
+    const withRemoved = removed.reduce(removeAlarmByTrigger, withAdded)
 
-    setAlarms(updated)
+    setAlarms(withRemoved)
   }
 
   const renderValue = (selected: string[]) => {
@@ -98,7 +107,9 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
           input={<OutlinedInput />}
           renderValue={renderValue}
         >
-          <MenuItem value="">{t('event.form.notifications.')}</MenuItem>
+          <MenuItem value="" onClick={() => setAlarms(new Valarms())}>
+            {t('event.form.notifications.')}
+          </MenuItem>
           {allValues.map(value => (
             <MenuItem key={value} value={value}>
               <ListItemText primary={translateDuration(value, t)} />

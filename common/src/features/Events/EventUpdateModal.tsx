@@ -44,13 +44,9 @@ const EventUpdateModalInternal: React.FC<
   // Filter initial values to only include global alarms (alarms with multiple attendees or no attendees)
   const globalInitialValues = useMemo(() => {
     if (!initialValues.alarms) return initialValues
-    const globalAlarms = initialValues.alarms.getAlarms().filter(alarm => {
-      // Global alarms have either no attendees or multiple attendees
-      return !alarm.attendees || alarm.attendees.length > 1
-    })
     return {
       ...initialValues,
-      alarms: Valarms.fromList(globalAlarms)
+      alarms: Valarms.fromList(initialValues.alarms.getGlobalAlarms())
     }
   }, [initialValues])
 
