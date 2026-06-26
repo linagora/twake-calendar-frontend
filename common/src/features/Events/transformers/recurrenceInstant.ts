@@ -37,25 +37,26 @@ export function recurrenceInstant(
 
 /**
  * True when two RECURRENCE-ID / EXDATE values designate the same occurrence.
- * Keeps the historical lenient string match (a trailing `Z` is ignored) and
- * additionally recognises values that resolve to the same instant even when
- * written in different forms (UTC vs TZID local time).
+ * Compares the resolved instants first so two forms of the same occurrence
+ * (UTC vs TZID local time) match while genuinely different occurrences stay
+ * distinct — even when `fallbackTz` is non-UTC, where a bare value and its
+ * `Z`-suffixed form resolve to different instants. The lenient string match
+ * (a trailing `Z` is ignored) is only a fallback for legacy/unparseable values.
  */
 export function sameRecurrence(
   a: { value: unknown; tzid?: string },
   b: { value: unknown; tzid?: string },
   fallbackTz?: string
 ): boolean {
-  if (normalizeRecurrenceId(a.value) === normalizeRecurrenceId(b.value)) {
-    return true
-  }
   const instantA = recurrenceInstant(a.value, a.tzid, fallbackTz)
   const instantB = recurrenceInstant(b.value, b.tzid, fallbackTz)
-  return (
-    Number.isFinite(instantA) &&
-    Number.isFinite(instantB) &&
-    instantA === instantB
-  )
+  if (Number.isFinite(instantA) && Number.isFinite(instantB)) {
+    return instantA === instantB
+  }
+
+  const normalizedA = normalizeRecurrenceId(a.value)
+  const normalizedB = normalizeRecurrenceId(b.value)
+  return Boolean(normalizedA) && normalizedA === normalizedB
 }
 
 /** Strips a trailing `Z` for the lenient string-form comparison. */

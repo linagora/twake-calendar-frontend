@@ -332,6 +332,31 @@ describe('makeDeleteEventInstanceJCal', () => {
       expect(exdates).toHaveLength(1)
     })
 
+    it('reads an upper-cased TZID parameter when deduplicating an existing EXDATE', () => {
+      // ICAL.js usually lowercases parameter names, but the TZID lookup stays
+      // case-insensitive (getTzidParam). An EXDATE stored with `TZID` must still
+      // resolve to its instant so the matching deletion is recognised as a dup.
+      const existingExdate: VObjectProperty = [
+        'exdate',
+        { TZID: 'Europe/Ulyanovsk' },
+        'date-time',
+        '2026-06-25T05:00:00'
+      ]
+      const event: CalendarEvent = {
+        ...baseCalendarEvent,
+        recurrenceId: '2026-06-25T01:00:00Z' // same instant, bare UTC form
+      } as unknown as CalendarEvent
+
+      const result = makeDeleteEventInstanceJCal(
+        [ulyanovskMaster([existingExdate])],
+        event
+      )
+
+      const masterProps = result[2][0][1] as VObjectProperty[]
+      const exdates = masterProps.filter(([k]) => k === 'exdate')
+      expect(exdates).toHaveLength(1)
+    })
+
     it('removes a matching override whose RECURRENCE-ID is stored in a different form', () => {
       const override: VCalComponent = [
         'vevent',

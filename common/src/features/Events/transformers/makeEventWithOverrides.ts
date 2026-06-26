@@ -22,7 +22,7 @@ export function makeEventWithOverrides(
   for (let i = 0; i < nextVevents.length; i++) {
     const ve = nextVevents[i]
     const recurrenceId = (ve[1] as VObjectProperty[]).find(
-      ([k]) => k === 'recurrence-id'
+      ([k]) => k.toLowerCase() === 'recurrence-id'
     )
     const storedTzid = getTzidParam(recurrenceId?.[1])
     if (

@@ -101,6 +101,12 @@ describe('makeEventWithOverrides — RECURRENCE-ID form (#1088)', () => {
     // byte-for-byte so the server still recognises the same occurrence.
     expect(recurrenceId![1]).toEqual({ tzid: 'Europe/Ulyanovsk' })
     expect(recurrenceId![3]).toBe('2026-06-25T05:00:00')
+    // The VEVENT was actually regenerated from updatedInstance (replacement),
+    // not merely kept untouched: its SUMMARY reflects the organiser's new title.
+    const summary = (overrides[0][1] as VObjectProperty[]).find(
+      ([k]) => k === 'summary'
+    )
+    expect(summary![3]).toBe('Updated by the organiser')
   })
 
   it('still matches when the stored override uses a bare UTC value and the in-memory id is wall-clock', () => {
@@ -136,5 +142,9 @@ describe('makeEventWithOverrides — RECURRENCE-ID form (#1088)', () => {
       ([k]) => k === 'recurrence-id'
     )
     expect(recurrenceId![3]).toBe('2026-06-25T01:00:00Z')
+    const summary = (overrides[0][1] as VObjectProperty[]).find(
+      ([k]) => k === 'summary'
+    )
+    expect(summary![3]).toBe('Updated by the organiser')
   })
 })
