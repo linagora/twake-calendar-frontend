@@ -11,7 +11,8 @@ import {
 } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 

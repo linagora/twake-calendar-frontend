@@ -1,5 +1,6 @@
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { Attachment } from '@common/types/Attachment'
 import { Valarms } from '@common/types/Valarms'
 import { userAttendee } from '@common/features/User/models/attendee'

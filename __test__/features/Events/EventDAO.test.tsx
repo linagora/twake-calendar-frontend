@@ -4,7 +4,8 @@ import {
   moveEvent,
   putEvent
 } from '@common/features/Events/EventDao'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { calendarEventToJCal } from '@common/features/Events/utils'
 import { api } from '@common/utils/apiUtils'
 import { userAttendee } from '@common/features/User/models/attendee'

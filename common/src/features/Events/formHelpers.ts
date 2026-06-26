@@ -5,7 +5,8 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { TIMEZONES } from '@common/utils/timezone-data'
 import { addVideoConferenceToDescription } from '@common/utils/videoConferenceUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { Calendar } from '@common/types/CalendarTypes'
 
 export interface TimezoneListResult {

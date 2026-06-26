@@ -1,4 +1,4 @@
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 
 export interface TimezoneListResult {
   zones: string[]

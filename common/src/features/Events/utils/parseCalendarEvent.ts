@@ -8,7 +8,8 @@ import {
   VObjectValue
 } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { buildDelegatedEventURL } from './buildDelegatedEventURL'
 import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'

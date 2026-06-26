@@ -5,7 +5,8 @@ import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEv
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { Valarms } from '@common/types/Valarms'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
 
