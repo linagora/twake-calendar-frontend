@@ -36,12 +36,42 @@ export function recurrenceInstant(
 }
 
 /**
+ * True when a value resolves to an unambiguous instant: it carries a trailing
+ * `Z`, an explicit `tzid`, or a `fallbackTz` is supplied to anchor the bare
+ * wall-clock value. Without any of these the value is tz-naive and would be
+ * resolved in the (arbitrary) system-local zone, so its instant cannot be
+ * trusted for comparison.
+ */
+function hasDefiniteZone(
+  value: unknown,
+  tzid?: string,
+  fallbackTz?: string
+): boolean {
+  const raw = value == null ? '' : String(value)
+  if (!raw) {
+    return false
+  }
+  if (/Z$/.test(raw)) {
+    return true
+  }
+  const zone = tzid ?? fallbackTz
+  return Boolean(zone && moment.tz.zone(zone))
+}
+
+/**
  * True when two RECURRENCE-ID / EXDATE values designate the same occurrence.
- * Compares the resolved instants first so two forms of the same occurrence
- * (UTC vs TZID local time) match while genuinely different occurrences stay
- * distinct — even when `fallbackTz` is non-UTC, where a bare value and its
- * `Z`-suffixed form resolve to different instants. The lenient string match
- * (a trailing `Z` is ignored) is only a fallback for legacy/unparseable values.
+ * Compares the resolved instants when both sides carry an unambiguous zone, so
+ * two forms of the same occurrence (UTC vs TZID local time) match while
+ * genuinely different occurrences stay distinct — even when `fallbackTz` is
+ * non-UTC, where a bare value and its `Z`-suffixed form resolve to different
+ * instants.
+ *
+ * When either side is tz-naive (no `Z`, no `tzid`, no `fallbackTz`) its instant
+ * would be resolved in the arbitrary system-local zone and cannot be trusted,
+ * so the comparison falls back to the lenient wall-clock string match (a
+ * trailing `Z` is ignored). This is the only signal available, and it keeps the
+ * solo recurring-instance RSVP matching when the in-memory event carries no
+ * timezone. See #1088.
  */
 export function sameRecurrence(
   a: { value: unknown; tzid?: string },
@@ -50,7 +80,10 @@ export function sameRecurrence(
 ): boolean {
   const instantA = recurrenceInstant(a.value, a.tzid, fallbackTz)
   const instantB = recurrenceInstant(b.value, b.tzid, fallbackTz)
-  if (Number.isFinite(instantA) && Number.isFinite(instantB)) {
+  const bothDefinite =
+    hasDefiniteZone(a.value, a.tzid, fallbackTz) &&
+    hasDefiniteZone(b.value, b.tzid, fallbackTz)
+  if (bothDefinite && Number.isFinite(instantA) && Number.isFinite(instantB)) {
     return instantA === instantB
   }
 
