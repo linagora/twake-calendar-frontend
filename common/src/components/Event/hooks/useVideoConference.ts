@@ -30,11 +30,11 @@ export const useVideoConference = ({
   const workplaceFqdn = useAppSelector(
     state => state.user.userData?.workplaceFqdn
   )
-  const sub = useAppSelector(state => state.user.userData?.sub)
+  const email = useAppSelector(state => state.user.userData?.email)
 
   const handleAddVideoConference = (): void => {
     const newMeetingLink = generateMeetingLink({
-      localpart: sub,
+      localpart: email?.split('@')[0],
       workplaceFqdn
     })
     const updatedDescription = addVideoConferenceToDescription(
