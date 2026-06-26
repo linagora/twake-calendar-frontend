@@ -3,7 +3,9 @@ import {
   deleteEventInstance,
   deleteEvent,
   putEvent as putEventAsync,
-  updateEventInstance
+  updateEventInstance,
+  updateEventLocal,
+  refreshCalendarWithSyncToken
 } from '@common/features/Calendars/CalendarSlice'
 import {
   fetchAllRecurrentVevents,
@@ -21,6 +23,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
+import { getDisplayedCalendarRange } from '@common/utils'
 
 interface RSVPHandlerParams {
   dispatch: AppDispatch
@@ -135,6 +138,13 @@ async function handleSoloRSVP({
   const matcher = makePartstatMatcher(calendar, user)
   if (matcher && event.recurrenceId) {
     if (await patchPartstatInJCal(event, matcher, rsvp, event.recurrenceId)) {
+      dispatch(updateEventLocal({ calId: calendar.id, event: fallbackEvent }))
+      void dispatch(
+        refreshCalendarWithSyncToken({
+          calendar,
+          calendarRange: getDisplayedCalendarRange()
+        })
+      )
       return
     }
   }
@@ -178,6 +188,13 @@ async function handleDefaultRSVP({
 }): Promise<void> {
   const matcher = makePartstatMatcher(calendar, user)
   if (matcher && (await patchPartstatInJCal(event, matcher, rsvp))) {
+    dispatch(updateEventLocal({ calId: calendar.id, event: fallbackEvent }))
+    void dispatch(
+      refreshCalendarWithSyncToken({
+        calendar,
+        calendarRange: getDisplayedCalendarRange()
+      })
+    )
     return
   }
   await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))

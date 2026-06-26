@@ -130,7 +130,13 @@ describe('#1031 partstat update preserves DTSTART timezone', () => {
     expect(attendeeParams.partstat).toBe('TENTATIVE')
 
     // The lossy regeneration path (redux thunk) was not used.
-    expect(dispatch).not.toHaveBeenCalled()
+    // Instead, we update the local store and refresh the calendar.
+    expect(dispatch).toHaveBeenCalledTimes(2)
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'calendars/updateEventLocal'
+      })
+    )
   })
 
   it('falls back to regeneration when the attendee is absent from the event', async () => {
@@ -211,11 +217,20 @@ const RECURRING_JCAL: VCalComponent = [
           'date-time',
           '2025-09-19T10:15:00'
         ],
-        ['dtend', { tzid: 'Europe/Brussels' }, 'date-time', '2025-09-19T11:00:00'],
+        [
+          'dtend',
+          { tzid: 'Europe/Brussels' },
+          'date-time',
+          '2025-09-19T11:00:00'
+        ],
         ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 1 }],
         [
           'attendee',
-          { partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT', cutype: 'INDIVIDUAL' },
+          {
+            partstat: 'ACCEPTED',
+            role: 'REQ-PARTICIPANT',
+            cutype: 'INDIVIDUAL'
+          },
           'cal-address',
           'mailto:me@example.com'
         ]
@@ -233,7 +248,12 @@ const RECURRING_JCAL: VCalComponent = [
           'date-time',
           '2026-06-19T10:15:00'
         ],
-        ['dtend', { tzid: 'Europe/Brussels' }, 'date-time', '2026-06-19T11:00:00'],
+        [
+          'dtend',
+          { tzid: 'Europe/Brussels' },
+          'date-time',
+          '2026-06-19T11:00:00'
+        ],
         [
           'recurrence-id',
           { tzid: 'Europe/Brussels' },
@@ -242,7 +262,11 @@ const RECURRING_JCAL: VCalComponent = [
         ],
         [
           'attendee',
-          { partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT', cutype: 'INDIVIDUAL' },
+          {
+            partstat: 'ACCEPTED',
+            role: 'REQ-PARTICIPANT',
+            cutype: 'INDIVIDUAL'
+          },
           'cal-address',
           'mailto:me@example.com'
         ]
@@ -254,12 +278,7 @@ const RECURRING_JCAL: VCalComponent = [
       [
         ['uid', {}, 'text', 'recurring-uid'],
         ['summary', {}, 'text', 'Weekly sync'],
-        [
-          'dtstart',
-          { tzid: 'Etc/UTC' },
-          'date-time',
-          '2026-06-26T08:15:00'
-        ],
+        ['dtstart', { tzid: 'Etc/UTC' }, 'date-time', '2026-06-26T08:15:00'],
         ['dtend', { tzid: 'Etc/UTC' }, 'date-time', '2026-06-26T09:00:00'],
         [
           'recurrence-id',
@@ -269,7 +288,11 @@ const RECURRING_JCAL: VCalComponent = [
         ],
         [
           'attendee',
-          { partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT', cutype: 'INDIVIDUAL' },
+          {
+            partstat: 'ACCEPTED',
+            role: 'REQ-PARTICIPANT',
+            cutype: 'INDIVIDUAL'
+          },
           'cal-address',
           'mailto:me@example.com'
         ]
@@ -344,15 +367,25 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
 
     // Only the 2026-06-19 exception should have its PARTSTAT updated.
     const master = vevents.find(v => recurrenceIdOf(v) === undefined)
-    const exc0619 = vevents.find(v => recurrenceIdOf(v) === '2026-06-19T10:15:00')
-    const exc0626 = vevents.find(v => recurrenceIdOf(v) === '2026-06-26T08:15:00')
+    const exc0619 = vevents.find(
+      v => recurrenceIdOf(v) === '2026-06-19T10:15:00'
+    )
+    const exc0626 = vevents.find(
+      v => recurrenceIdOf(v) === '2026-06-26T08:15:00'
+    )
 
     expect(attendeePartstatOf(master!)).toBe('ACCEPTED')
     expect(attendeePartstatOf(exc0619!)).toBe('DECLINED')
     expect(attendeePartstatOf(exc0626!)).toBe('ACCEPTED')
 
     // The lossy regeneration path (redux thunk) must not be used.
-    expect(dispatch).not.toHaveBeenCalled()
+    // Instead, we update the local store and refresh the calendar.
+    expect(dispatch).toHaveBeenCalledTimes(2)
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'calendars/updateEventLocal'
+      })
+    )
   })
 
   it('preserves the RECURRENCE-ID and DTSTART of the patched exception byte-for-byte', async () => {
@@ -388,7 +421,9 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
 
     const putJCal = putSpy.mock.calls[0][1] as VCalComponent
     const vevents = veventsOf(putJCal)
-    const exc0626 = vevents.find(v => recurrenceIdOf(v) === '2026-06-26T08:15:00')!
+    const exc0626 = vevents.find(
+      v => recurrenceIdOf(v) === '2026-06-26T08:15:00'
+    )!
 
     // DTSTART with Etc/UTC timezone must be preserved exactly (not re-generated
     // via makeVevent which would corrupt the time when the browser is not in UTC).
