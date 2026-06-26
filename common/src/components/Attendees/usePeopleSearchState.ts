@@ -256,13 +256,8 @@ const getAutocompleteError = (
   lastValue: string | User | undefined,
   t: (key: string) => string
 ): string | null => {
-  if (typeof lastValue === 'string') {
-    if (
-      typeof lastValue === 'string' &&
-      !EmailAddress.parse(lastValue.trim())
-    ) {
-      return t('peopleSearch.invalidEmail').replace('%{email}', lastValue)
-    }
+  if (typeof lastValue === 'string' && !EmailAddress.parse(lastValue)) {
+    return t('peopleSearch.invalidEmail').replace('%{email}', lastValue)
   }
   return null
 }

@@ -36,7 +36,7 @@ export const addCalendarResourceThunk = (
       const resourceId = new CalDavLink(cal.cal._links).getFirstSubId()
 
       let owner: OpenPaasUserData = {
-        id: resourceId?.split('/')[0] ?? '',
+        id: resourceId ?? '',
         firstname: '',
         lastname: cal.cal['dav:name'] ?? '',
         emails: [],
