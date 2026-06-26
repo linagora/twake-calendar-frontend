@@ -3,9 +3,43 @@ export interface DavSyncItem {
   _links: CalDavLink
 }
 
-export type CalDavLink = {
+export class CalDavLink {
   self?: {
     href?: string
+  }
+
+  constructor(data?: Partial<CalDavLink>) {
+    Object.assign(this, data)
+  }
+
+  /**
+   * Parses the calendar ID from the link's href.
+   * Extracts the ID from paths like '/calendars/user123/cal456.json'
+   * @returns The calendar ID or undefined if the href is invalid
+   */
+  parseCalendarId(): string | undefined {
+    const href = this.self?.href
+    if (!href) return undefined
+
+    const pathname = href.startsWith('http') ? new URL(href).pathname : href
+
+    const match = pathname.match(/^\/calendars\/(.+)\.json$/)
+    return match?.[1]
+  }
+
+  getFirstSubId(): string | undefined {
+    const calendarId = this.parseCalendarId()
+    return calendarId?.split('/')[0]
+  }
+
+  static parseCalendarIdFromHref(href: string | undefined): string | undefined {
+    if (!href) return undefined
+    return new CalDavLink({ self: { href } }).parseCalendarId()
+  }
+
+  static getFirstIdFromHref(href: string | undefined): string | undefined {
+    if (!href) return undefined
+    return new CalDavLink({ self: { href } }).getFirstSubId()
   }
 }
 

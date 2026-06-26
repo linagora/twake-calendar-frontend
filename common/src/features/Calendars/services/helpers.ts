@@ -1,7 +1,7 @@
+import { CalendarData } from '@common/features/Calendars/types/CalendarData'
 import { fetchResourceById } from '@common/features/User/ResourceDAO'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
-import { getUserDetails } from '@common/features/User/userAPI'
-import { CalendarData } from '@common/features/Calendars/types/CalendarData'
+import { fetchUserById } from '@common/features/User/UserDao'
 import { CalendarInvite } from '@common/types/CalendarTypes'
 
 export const fetchOwnerOfResource = async (
@@ -9,7 +9,7 @@ export const fetchOwnerOfResource = async (
 ): Promise<OpenPaasUserData> => {
   try {
     const data = await fetchResourceById(resourceId)
-    const ownerData = await getUserDetails(data.creator)
+    const ownerData = await fetchUserById(data.creator)
     return {
       ...ownerData,
       administrators: data.administrators,
@@ -29,7 +29,7 @@ export const fetchOwnerData = async (
   ownerId: string
 ): Promise<OpenPaasUserData> => {
   try {
-    const owner = await getUserDetails(ownerId)
+    const owner = await fetchUserById(ownerId)
     return owner
   } catch (error) {
     console.error(`Failed to fetch user details for ${ownerId}:`, error)

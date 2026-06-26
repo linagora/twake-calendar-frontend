@@ -1,13 +1,16 @@
-import CalendarLayout from '@private/components/Calendar/CalendarLayout'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import * as calendarDetailThunks from '@common/features/Calendars/CalendarSlice'
 import * as servicesModule from '@common/features/Calendars/CalendarSlice'
-import { searchUsers } from '@common/features/User/userAPI'
+import { searchPeople } from '@common/features/User/UserDao'
+import CalendarLayout from '@private/components/Calendar/CalendarLayout'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
 
-jest.mock('@common/features/User/userAPI')
-const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
+jest.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as jest.MockedFunction<
+  typeof searchPeople
+>
 
 // Test wrapper component to provide calendarRef
 function CalendarTestWrapper() {
@@ -250,12 +253,13 @@ describe('calendar Availability search', () => {
         return () => Promise.resolve(payload) as any
       })
     mockedSearchUsers.mockResolvedValueOnce([
-      {
-        email: 'newuser@example.com',
-        displayName: 'New User',
-        avatarUrl: 'image.png',
-        openpaasId: '1234567890'
-      }
+      new SearchResponseItem({
+        id: '1234567890',
+        emailAddresses: [{ value: 'newuser@example.com' }],
+        names: [{ displayName: 'New User' }],
+        photos: [{ url: 'image.png' }],
+        objectType: 'user'
+      })
     ])
 
     await act(async () =>
@@ -283,12 +287,13 @@ describe('calendar Availability search', () => {
         return () => Promise.resolve(payload) as any
       })
     mockedSearchUsers.mockResolvedValue([
-      {
-        email: 'newuser@example.com',
-        displayName: 'New User',
-        avatarUrl: 'image.png',
-        openpaasId: '1234567890'
-      }
+      new SearchResponseItem({
+        id: '1234567890',
+        emailAddresses: [{ value: 'newuser@example.com' }],
+        names: [{ displayName: 'New User' }],
+        photos: [{ url: 'image.png' }],
+        objectType: 'user'
+      })
     ])
 
     await act(async () =>
@@ -329,12 +334,13 @@ describe('calendar Availability search', () => {
         return () => Promise.resolve(payload) as any
       })
     mockedSearchUsers.mockResolvedValue([
-      {
-        email: 'newuser@example.com',
-        displayName: 'New User',
-        avatarUrl: 'image.png',
-        openpaasId: '1234567890'
-      }
+      new SearchResponseItem({
+        id: '1234567890',
+        emailAddresses: [{ value: 'newuser@example.com' }],
+        names: [{ displayName: 'New User' }],
+        photos: [{ url: 'image.png' }],
+        objectType: 'user'
+      })
     ])
 
     await act(async () =>

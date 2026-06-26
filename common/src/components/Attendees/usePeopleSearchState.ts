@@ -7,7 +7,7 @@ import {
 } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useAppSelector } from '@common/app/hooks'
-import { isValidEmail } from '@common/utils/isValidEmail'
+import { EmailAddress } from '@common/types/EmailAddress'
 import { useUserSearch } from './useUserSearch'
 import { usePasteHandler } from './usePasteHandler'
 import { User } from './types'
@@ -234,16 +234,17 @@ const validateAndAddUser = (
   if (!trimmed) {
     return { error: null, shouldClearQuery: false }
   }
-  if (!isValidEmail(trimmed)) {
+  const email = EmailAddress.parse(trimmed)
+  if (!email) {
     return {
       error: t('peopleSearch.invalidEmail').replace('%{email}', trimmed),
       shouldClearQuery: false
     }
   }
-  if (selectedUsers.some(u => u.email === trimmed)) {
+  if (selectedUsers.some(u => u.email === email.value)) {
     return { error: null, shouldClearQuery: true }
   }
-  const newUser: User = { email: trimmed, displayName: trimmed }
+  const newUser: User = { email: email.value, displayName: email.value }
   return {
     error: null,
     updatedUsers: [...selectedUsers, newUser],
@@ -255,7 +256,7 @@ const getAutocompleteError = (
   lastValue: string | User | undefined,
   t: (key: string) => string
 ): string | null => {
-  if (typeof lastValue === 'string' && !isValidEmail(lastValue.trim())) {
+  if (typeof lastValue === 'string' && !EmailAddress.parse(lastValue)) {
     return t('peopleSearch.invalidEmail').replace('%{email}', lastValue)
   }
   return null
@@ -414,10 +415,9 @@ export const usePeopleSearchState = ({
       return userSearch.options
     }
     if (userSearch.options.length === 0 && userSearch.query) {
-      const email = userSearch.query.trim()
-      const isNewEmail = !selectedUsers.some(u => u.email === email)
-      if (isValidEmail(email) && isNewEmail) {
-        return [{ email, displayName: email } as User]
+      const email = EmailAddress.parse(userSearch.query.trim())
+      if (email && !selectedUsers.some(u => u.email === email.value)) {
+        return [{ email: email.value, displayName: email.value } as User]
       }
     }
     return userSearch.options

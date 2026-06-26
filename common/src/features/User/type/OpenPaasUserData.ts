@@ -6,7 +6,7 @@ import {
 export interface OpenPaasUserData {
   firstname?: string
   lastname?: string
-  id?: string
+  id: string
   _id?: string
   preferredEmail?: string
   configurations?: {

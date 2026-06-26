@@ -1,3 +1,4 @@
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { renameDefault } from '@common/utils/renameDefault'
 import {
@@ -164,10 +165,7 @@ export const SelectedCalendarsList: React.FC<{
   >((acc, cal) => {
     const exists = Object.values(calendars).some(
       (existing: Calendar) =>
-        existing.id ===
-        cal.cal?._links?.self?.href
-          ?.replace('/calendars/', '')
-          .replace('.json', '')
+        existing.id === new CalDavLink(cal.cal?._links).parseCalendarId()
     )
 
     if (!acc[cal.owner[keyName]]) {

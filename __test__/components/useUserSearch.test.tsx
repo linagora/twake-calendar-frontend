@@ -1,14 +1,13 @@
-import { renderHook, act } from '@testing-library/react'
 import { useUserSearch } from '@common/components/Attendees/useUserSearch'
-import { searchUsers } from '@common/features/User/userAPI'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
+import { searchPeople } from '@common/features/User/UserDao'
+import { act, renderHook } from '@testing-library/react'
 
-jest.mock('@common/features/User/userAPI', () => ({
-  searchUsers: jest.fn()
-}))
+jest.mock('@common/features/User/UserDao')
+
+const mockSearchUsers = searchPeople as jest.Mock
 
 describe('useUserSearch', () => {
-  const mockSearchUsers = searchUsers as jest.Mock
-
   beforeEach(() => {
     jest.useFakeTimers()
     jest.clearAllMocks()
@@ -34,7 +33,15 @@ describe('useUserSearch', () => {
   })
 
   it('should debounce and fetch users when query changes', async () => {
-    const mockUsers = [{ displayName: 'John Doe', email: 'john@example.com' }]
+    const mockUsers = [
+      new SearchResponseItem({
+        id: 'user-1',
+        emailAddresses: [{ value: 'john@example.com' }],
+        names: [{ displayName: 'John Doe' }],
+        photos: [],
+        objectType: 'user'
+      })
+    ]
     mockSearchUsers.mockResolvedValueOnce(mockUsers)
 
     const { result } = renderHook(() =>
@@ -55,7 +62,15 @@ describe('useUserSearch', () => {
 
     expect(mockSearchUsers).toHaveBeenCalledWith('John', ['user'])
     expect(result.current.loading).toBe(false)
-    expect(result.current.options).toEqual(mockUsers)
+    expect(result.current.options).toEqual([
+      {
+        email: 'john@example.com',
+        displayName: 'John Doe',
+        avatarUrl: '',
+        openpaasId: 'user-1',
+        objectType: 'user'
+      }
+    ])
     expect(result.current.hasSearched).toBe(true)
   })
 

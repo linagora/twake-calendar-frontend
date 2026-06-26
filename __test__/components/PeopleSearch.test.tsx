@@ -1,20 +1,24 @@
 import { PeopleSearch } from '@common/components/Attendees/PeopleSearch'
 import { User } from '@common/components/Attendees/types'
-import { searchUsers } from '@common/features/User/userAPI'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
+import { searchPeople } from '@common/features/User/UserDao'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/userAPI')
-const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
+jest.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as jest.MockedFunction<
+  typeof searchPeople
+>
 
 describe('PeopleSearch', () => {
-  const baseUser: User = {
-    email: 'test@example.com',
-    displayName: 'Test User',
-    avatarUrl: 'https://example.com/avatar.png',
-    openpaasId: '1234567890'
-  }
+  const baseUser: SearchResponseItem = new SearchResponseItem({
+    id: '1234567890',
+    emailAddresses: [{ value: 'test@example.com' }],
+    names: [{ displayName: 'Test User' }],
+    photos: [{ url: 'https://example.com/avatar.png' }],
+    objectType: 'user'
+  })
 
   function setup(
     selectedUsers: User[] = [],
@@ -76,7 +80,14 @@ describe('PeopleSearch', () => {
 
   it('does not show already selected users in options', async () => {
     mockedSearchUsers.mockResolvedValueOnce([baseUser])
-    setup([baseUser])
+    setup([
+      {
+        email: 'test@example.com',
+        displayName: 'Test User',
+        avatarUrl: 'https://example.com/avatar.png',
+        openpaasId: '1234567890'
+      }
+    ])
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Test')
     await act(async () => {
@@ -133,7 +144,6 @@ describe('PeopleSearch', () => {
 
     await act(async () => {
       jest.advanceTimersByTime(300)
-      await Promise.resolve()
       await Promise.resolve()
     })
 

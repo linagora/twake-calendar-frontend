@@ -1,7 +1,8 @@
 import { User } from '@common/components/Attendees/types'
 import { calendarAction } from '@common/features/Calendars/CalendarDAO'
 import { makeAddSharedCalendarBody } from '@common/features/Calendars/transformers'
-import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
+import { CalendarInput } from '@common/features/Calendars/types/CalendarTypes'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
 import { Calendar } from '@common/types/CalendarTypes'
@@ -32,12 +33,10 @@ export const addCalendarResourceThunk = (
     { rejectValue: RejectedError }
   >(
     async ({ userId, calId, cal }, { rejectWithValue }) => {
-      const resourceId = cal.cal._links.self?.href
-        ?.replace('/calendars/', '')
-        ?.replace('.json', '')
-        ?.split('/')[0]
+      const resourceId = new CalDavLink(cal.cal._links).getFirstSubId()
 
       let owner: OpenPaasUserData = {
+        id: resourceId ?? '',
         firstname: '',
         lastname: cal.cal['dav:name'] ?? '',
         emails: [],
@@ -59,9 +58,7 @@ export const addCalendarResourceThunk = (
         }
 
         return {
-          calId: cal.cal._links.self?.href
-            ?.replace('/calendars/', '')
-            .replace('.json', ''),
+          calId: new CalDavLink(cal.cal._links).parseCalendarId(),
           color: cal.color,
           link: `/calendars/${userId}/${calId}.json`,
           desc: cal.cal['caldav:description'] ?? '',

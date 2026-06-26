@@ -2,7 +2,8 @@ import {
   getFreeBusyForAddedAttendee,
   getFreeBusyForEventAttendees
 } from '@common/features/Events/FreeBusyApi'
-import { getUserDataFromEmail } from '@common/features/User/userAPI'
+import { fetchUserByEmail } from '@common/features/User/UserDao'
+import { EmailAddress } from '@common/types/EmailAddress'
 import moment from 'moment-timezone'
 import { useEffect, useRef, useState } from 'react'
 
@@ -22,7 +23,9 @@ interface ResolvedAttendee {
 // Helpers
 async function resolveUserId(attendee: Attendee): Promise<string | null> {
   if (attendee.userId) return attendee.userId
-  return getUserDataFromEmail(attendee.email)
+  const email = EmailAddress.parse(attendee.email)
+  if (!email) return null
+  return fetchUserByEmail(email.value)
     .then(u => u[0]?._id ?? null)
     .catch(() => null)
 }

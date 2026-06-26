@@ -1,91 +1,81 @@
 import { clientConfig } from '@common/features/User/oidcAuth'
-import { fetchResourceById } from '@common/features/User/ResourceDAO'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import {
-  getOpenPaasUser,
-  getUserDetails,
-  updateUserConfigurations
-} from '@common/features/User/userAPI'
+  makeConfigurationBody,
+  parseSearchUserResponse,
+  SEARCH_LIMIT
+} from '@common/features/User/transformers'
 import {
-  fetchCurrentUser,
-  fetchUserById,
-  patchConfigurations
+  fetchUserByEmail,
+  patchConfigurations,
+  searchPeople
 } from '@common/features/User/UserDao'
-import { api } from '@common/utils/apiUtils'
 
 jest.mock('@common/features/User/UserDao')
 jest.mock('@common/utils/apiUtils')
 
 clientConfig.url = 'https://example.com'
 
-const mockFetchCurrentUser = fetchCurrentUser as jest.MockedFunction<
-  typeof fetchCurrentUser
+const mockFetchUserByEmail = fetchUserByEmail as jest.MockedFunction<
+  typeof fetchUserByEmail
 >
-const mockFetchUserById = fetchUserById as jest.MockedFunction<
-  typeof fetchUserById
+const mockSearchPeople = searchPeople as jest.MockedFunction<
+  typeof searchPeople
 >
-const mockedApiGet = api.get as jest.MockedFunction<typeof api.get>
 const mockPatchConfigurations = patchConfigurations as jest.MockedFunction<
   typeof patchConfigurations
 >
 
-describe('getOpenPaasUser', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
+describe('makeConfigurationBody', () => {
+  it('should create configuration body with language update', () => {
+    const result = makeConfigurationBody({ language: 'vi' })
+
+    expect(result).toEqual({
+      modules: [
+        {
+          name: 'core',
+          configurations: [{ name: 'language', value: 'vi' }]
+        }
+      ]
+    })
   })
 
-  it('should fetch and return user data', async () => {
-    const mockUser = { id: '123', name: 'OpenPaas User' }
-    mockFetchCurrentUser.mockResolvedValue(mockUser)
-
-    const result = await getOpenPaasUser()
-
-    expect(fetchCurrentUser).toHaveBeenCalledTimes(1)
-    expect(result).toEqual(mockUser)
-  })
-})
-
-describe('getUserDetails', () => {
-  it('should fetch and return user details', async () => {
-    const mockUser = {
-      firstname: 'John',
-      lastname: 'Doe',
-      emails: ['john@test.com']
-    } as any
-    const userId = '123'
-    mockFetchUserById.mockResolvedValue(mockUser)
-
-    const result = await getUserDetails(userId)
-
-    expect(fetchUserById).toHaveBeenCalledWith(userId)
-    expect(result).toEqual(mockUser)
-  })
-})
-
-describe('getResourceDetails', () => {
-  it('should fetch and return resource details', async () => {
-    const mockResource = { _id: 'res-123', name: 'Meeting Room A' } as any
-    const resourceId = 'res-123'
-
-    mockedApiGet.mockReturnValue({
-      json: () => Promise.resolve(mockResource)
+  it('should create configuration body with multiple updates', () => {
+    const result = makeConfigurationBody({
+      language: 'fr',
+      timezone: 'Europe/Paris'
     })
 
-    const result = await fetchResourceById(resourceId)
+    expect(result).toEqual({
+      modules: [
+        {
+          name: 'core',
+          configurations: [
+            { name: 'language', value: 'fr' },
+            { name: 'datetime', value: { timeZone: 'Europe/Paris' } }
+          ]
+        }
+      ]
+    })
+  })
 
-    expect(mockedApiGet).toHaveBeenCalledWith(`api/resources/${resourceId}`)
-    expect(result).toEqual(mockResource)
+  it('should return empty modules for empty updates', () => {
+    const result = makeConfigurationBody({})
+
+    expect(result).toEqual({ modules: [] })
   })
 })
 
-describe('updateUserConfigurations', () => {
+describe('patchConfigurations', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should call patchConfigurations with language update', async () => {
+  it('should call patchConfigurations with correct modules', async () => {
     mockPatchConfigurations.mockResolvedValue({ status: 204 } as any)
 
-    await updateUserConfigurations({ language: 'vi' })
+    const body = makeConfigurationBody({ language: 'vi' })
+    await patchConfigurations(body.modules)
 
     expect(patchConfigurations).toHaveBeenCalledWith([
       {
@@ -94,30 +84,89 @@ describe('updateUserConfigurations', () => {
       }
     ])
   })
+})
 
-  it('should call patchConfigurations with multiple updates', async () => {
-    mockPatchConfigurations.mockResolvedValue({ status: 204 } as any)
+describe('parseSearchUserResponse', () => {
+  it('should parse search response to user results', () => {
+    const mockResponse = [
+      new SearchResponseItem({
+        id: 'user-1',
+        emailAddresses: [{ value: 'john@test.com' }],
+        names: [{ displayName: 'John Doe' }],
+        photos: [{ url: 'http://example.com/photo.jpg' }],
+        objectType: 'user'
+      })
+    ]
 
-    await updateUserConfigurations({
-      language: 'fr',
-      timezone: 'Europe/Paris'
-    })
+    const result = parseSearchUserResponse(mockResponse)
 
-    expect(patchConfigurations).toHaveBeenCalledWith([
+    expect(result).toEqual([
       {
-        name: 'core',
-        configurations: [
-          { name: 'language', value: 'fr' },
-          { name: 'datetime', value: { timeZone: 'Europe/Paris' } }
-        ]
+        email: 'john@test.com',
+        displayName: 'John Doe',
+        avatarUrl: 'http://example.com/photo.jpg',
+        openpaasId: 'user-1',
+        objectType: 'user'
       }
     ])
   })
 
-  it('should handle empty updates without calling patchConfigurations', async () => {
-    const result = await updateUserConfigurations({})
+  it('should handle missing data gracefully', () => {
+    const mockResponse = [new SearchResponseItem({})]
 
-    expect(patchConfigurations).not.toHaveBeenCalled()
-    expect(result).toEqual({ status: 204 }) // comes from an early return
+    const result = parseSearchUserResponse(mockResponse)
+
+    expect(result).toEqual([
+      {
+        email: '',
+        displayName: '',
+        avatarUrl: '',
+        openpaasId: undefined,
+        objectType: undefined
+      }
+    ])
+  })
+})
+
+describe('searchPeople', () => {
+  it('should search people with correct params', async () => {
+    const mockResponse = [
+      new SearchResponseItem({
+        id: 'user-1',
+        emailAddresses: [{ value: 'john@test.com' }],
+        names: [{ displayName: 'John Doe' }],
+        photos: [{ url: 'http://example.com/photo.jpg' }],
+        objectType: 'user'
+      })
+    ]
+    mockSearchPeople.mockResolvedValue(mockResponse)
+
+    const param = { q: 'john', objectTypes: ['user'] }
+    const response = await searchPeople(param.q, param.objectTypes)
+    const result = parseSearchUserResponse(response)
+
+    expect(searchPeople).toHaveBeenCalledWith('john', ['user'])
+    expect(result[0].email).toEqual('john@test.com')
+    expect(result[0].displayName).toEqual('John Doe')
+  })
+})
+
+describe('fetchUserByEmail', () => {
+  it('should fetch user by email', async () => {
+    const mockUsers = [{ _id: 'user-1', email: 'john@test.com' }]
+    mockFetchUserByEmail.mockResolvedValue(mockUsers)
+
+    const result = await fetchUserByEmail('john@test.com')
+
+    expect(fetchUserByEmail).toHaveBeenCalledWith('john@test.com')
+    expect(result).toEqual(mockUsers)
+  })
+
+  it('should return empty array on error', async () => {
+    mockFetchUserByEmail.mockResolvedValue([])
+
+    const result = await fetchUserByEmail('notfound@test.com')
+
+    expect(result).toEqual([])
   })
 })

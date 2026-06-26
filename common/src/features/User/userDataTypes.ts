@@ -28,15 +28,6 @@ export interface userOrganiser {
   cn: string
   cal_address: string
 }
-// Type for search response from the API
-export interface SearchResponseItem {
-  id?: string
-  emailAddresses?: Array<{ value?: string }>
-  names?: Array<{ displayName?: string }>
-  photos?: Array<{ url?: string }>
-  objectType?: string
-}
-
 // Type for configuration item
 export interface ConfigurationItem {
   name: string

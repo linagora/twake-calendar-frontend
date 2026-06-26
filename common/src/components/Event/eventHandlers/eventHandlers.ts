@@ -3,7 +3,9 @@ import {
   deleteEventInstance,
   deleteEvent,
   putEvent as putEventAsync,
-  updateEventInstance
+  updateEventInstance,
+  updateEventLocal,
+  refreshCalendarWithSyncToken
 } from '@common/features/Calendars/CalendarSlice'
 import {
   fetchAllRecurrentVevents,
@@ -21,6 +23,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { buildFamilyName } from '@common/utils/buildFamilyName'
 import { isEventOrganiser } from '@common/utils/isEventOrganiser'
+import { getDisplayedCalendarRange } from '@common/utils'
 
 interface RSVPHandlerParams {
   dispatch: AppDispatch
@@ -94,12 +97,64 @@ function updateEventAttendees(
   }
 }
 
-async function handleSoloRSVP(
-  dispatch: AppDispatch,
-  calendar: Calendar,
-  event: CalendarEvent
-): Promise<void> {
-  await dispatch(updateEventInstance({ cal: calendar, event }))
+/**
+ * Fetches the stored jCal, patches only the attendee PARTSTAT (preserving
+ * DTSTART, VTIMEZONE and every other property byte-for-byte), then writes it
+ * back. Pass `recurrenceId` to restrict the patch to a single exception VEVENT.
+ *
+ * Returns `true` when the patch was applied, `false` when no matching attendee
+ * was found so the caller can fall back to the regeneration path.
+ */
+async function patchPartstatInJCal(
+  event: CalendarEvent,
+  matcher: AttendeeMatcher,
+  partstat: PartStat,
+  recurrenceId?: string
+): Promise<boolean> {
+  const jCal = await fetchEventJCal(event)
+  const patched = updateEventPartstatJCal(
+    jCal,
+    matcher,
+    partstat,
+    recurrenceId,
+    event.timezone
+  )
+  if (!patched) {
+    return false
+  }
+  const response = await putEvent(event, patched)
+  if (!response.ok) {
+    throw new Error(
+      `RSVP update failed for ${event.URL} with status ${response.status}`
+    )
+  }
+  return true
+}
+
+async function handleSoloRSVP({
+  dispatch,
+  calendar,
+  event,
+  user,
+  rsvp,
+  fallbackEvent
+}: Omit<RSVPHandlerParams, 'typeOfAction'> & {
+  fallbackEvent: CalendarEvent
+}): Promise<void> {
+  const matcher = makePartstatMatcher(calendar, user)
+  if (matcher && event.recurrenceId) {
+    if (await patchPartstatInJCal(event, matcher, rsvp, event.recurrenceId)) {
+      dispatch(updateEventLocal({ calId: calendar.id, event: fallbackEvent }))
+      void dispatch(
+        refreshCalendarWithSyncToken({
+          calendar,
+          calendarRange: getDisplayedCalendarRange()
+        })
+      )
+      return
+    }
+  }
+  await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
 }
 
 async function handleAllRSVP(
@@ -137,26 +192,17 @@ async function handleDefaultRSVP({
 }: Omit<RSVPHandlerParams, 'typeOfAction'> & {
   fallbackEvent: CalendarEvent
 }): Promise<void> {
-  // Update the attendee PARTSTAT directly in the stored jCal so that DTSTART,
-  // VTIMEZONE and every other property are preserved exactly. Regenerating the
-  // event from the parsed model drops the timezone when it is missing (#1031).
   const matcher = makePartstatMatcher(calendar, user)
-  if (matcher) {
-    const jCal = await fetchEventJCal(event)
-    const patched = updateEventPartstatJCal(jCal, matcher, rsvp)
-    if (patched) {
-      const response = await putEvent(event, patched)
-      if (!response.ok) {
-        throw new Error(
-          `RSVP update failed for ${event.URL} with status ${response.status}`
-        )
-      }
-      return
-    }
+  if (matcher && (await patchPartstatInJCal(event, matcher, rsvp))) {
+    dispatch(updateEventLocal({ calId: calendar.id, event: fallbackEvent }))
+    void dispatch(
+      refreshCalendarWithSyncToken({
+        calendar,
+        calendarRange: getDisplayedCalendarRange()
+      })
+    )
+    return
   }
-
-  // No matching attendee in the event (e.g. adding oneself for the first time):
-  // fall back to regenerating the event from the model.
   await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
 }
 
@@ -174,7 +220,14 @@ export async function handleRSVP({
   }
 
   if (typeOfAction === 'solo') {
-    await handleSoloRSVP(dispatch, calendar, newEvent)
+    await handleSoloRSVP({
+      dispatch,
+      calendar,
+      event,
+      user,
+      rsvp,
+      fallbackEvent: newEvent
+    })
   } else if (typeOfAction === 'all') {
     if (!user?.email) {
       throw new Error('Cannot update all occurrences without user email')

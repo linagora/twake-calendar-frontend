@@ -1,19 +1,23 @@
 import {
-  ResourceSearch,
-  Resource
+  Resource,
+  ResourceSearch
 } from '@common/components/Attendees/ResourceSearch'
-import { searchUsers } from '@common/features/User/userAPI'
+import { searchPeople } from '@common/features/User/UserDao'
+import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/userAPI')
-const mockedSearchUsers = searchUsers as jest.MockedFunction<typeof searchUsers>
+jest.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as jest.MockedFunction<
+  typeof searchPeople
+>
 
 describe('ResourceSearch', () => {
-  const baseResource: Resource = {
-    displayName: 'Projector Room'
-  }
+  const baseResource: SearchResponseItem = new SearchResponseItem({
+    id: '1234567890',
+    names: [{ displayName: 'Projector Room' }]
+  })
 
   function setup(
     selectedResources: Resource[] = [],
@@ -43,7 +47,7 @@ describe('ResourceSearch', () => {
   it('calls searchUsers after debounce when typing', async () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     setup()
 
     const input = screen.getByRole('combobox')
@@ -60,7 +64,7 @@ describe('ResourceSearch', () => {
   it('renders search results and allows selection', async () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     const { onChange } = setup()
 
     const input = screen.getByRole('combobox')
@@ -80,8 +84,8 @@ describe('ResourceSearch', () => {
   it('does not show already selected resources in options', async () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
-    setup([baseResource])
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
+    setup([{ displayName: 'Projector Room' }])
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Projector')
     await act(async () => {
@@ -105,7 +109,7 @@ describe('ResourceSearch', () => {
   it("no options doesn't show dropdown when input is empty", async () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     setup()
     const input = screen.getByRole('combobox')
 
@@ -149,7 +153,7 @@ describe('ResourceSearch', () => {
   it('clears options when search fails and shows error snackbar', async () => {
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     setup()
 
     const input = screen.getByRole('combobox')
@@ -178,7 +182,7 @@ describe('ResourceSearch', () => {
 
     mockedSearchUsers.mockResolvedValueOnce([
       baseResource
-    ] as unknown as Awaited<ReturnType<typeof searchUsers>>)
+    ] as unknown as Awaited<ReturnType<typeof searchPeople>>)
     await userEvent.clear(input)
     await userEvent.type(input, 'Room')
     await act(async () => {
@@ -197,7 +201,7 @@ describe('ResourceSearch', () => {
       resolveSearch = resolve
     })
     mockedSearchUsers.mockReturnValueOnce(
-      searchPromise as unknown as ReturnType<typeof searchUsers>
+      searchPromise as unknown as ReturnType<typeof searchPeople>
     )
     setup()
 

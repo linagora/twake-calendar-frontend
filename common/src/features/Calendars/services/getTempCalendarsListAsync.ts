@@ -11,6 +11,7 @@ import { formatReduxError } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 import { getOwnerOrResourceData } from './helpers'
+import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { defaultColors } from '@common/utils/defaultColors'
 
 export const getTempCalendarsListThunk = (
@@ -115,9 +116,15 @@ async function processTempCalendar(
   tempUser: User
 ): Promise<Calendar> {
   const source = getCalendarSource(cal)
-  const id = source.replace('/calendars/', '').replace('.json', '')
+  const id = CalDavLink.parseCalendarIdFromHref(source)
+  if (!id) {
+    throw new Error('Invalid calendar source')
+  }
   const isResource = tempUser.objectType === 'resource'
-  const ownerData = await getOwnerOrResourceData(id.split('/')[0], isResource)
+  const ownerData = await getOwnerOrResourceData(
+    CalDavLink.getFirstIdFromHref(source) ?? '',
+    isResource
+  )
 
   return {
     id,
