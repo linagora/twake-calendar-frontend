@@ -3,12 +3,14 @@ import {
   extractVideoConferenceFromDescription,
   generateMeetingId,
   generateMeetingLink,
-  removeVideoConferenceFromDescription
+  removeVideoConferenceFromDescription,
+  getVisioBaseUrl
 } from '@common/utils/videoConferenceUtils'
 
 // Mock window object for Node.js environment
 const mockWindow = {
-  VIDEO_CONFERENCE_BASE_URL: 'https://meet.linagora.com'
+  VIDEO_CONFERENCE_BASE_URL: 'https://meet.linagora.com',
+  VISIO_PATH: '/#/bridge'
 }
 
 // @ts-expect-error :  Mock window object for Node.js environment
@@ -116,6 +118,57 @@ describe('videoConferenceUtils', () => {
         'Visio: https://meet.linagora.com/abc-defg-hij\nRest of the text'
       const result = removeVideoConferenceFromDescription(description)
       expect(result).toBe('Rest of the text')
+    })
+  })
+
+  describe('getVisioBaseUrl', () => {
+    it('should return empty string for empty input', () => {
+      expect(getVisioBaseUrl('')).toBe('')
+    })
+
+    it('should append -visio and /#/bridge to the first subdomain segment of domain xxxx.twake.app', () => {
+      expect(getVisioBaseUrl('xxxx.twake.app')).toBe(
+        'https://xxxx-visio.twake.app/#/bridge'
+      )
+    })
+
+    it('should handle domain with sub-subdomain', () => {
+      expect(getVisioBaseUrl('sub.xxxx.twake.app')).toBe(
+        'https://sub-visio.xxxx.twake.app/#/bridge'
+      )
+    })
+
+    it('should keep http/https protocol if already provided', () => {
+      expect(getVisioBaseUrl('http://xxxx.twake.app')).toBe(
+        'http://xxxx-visio.twake.app/#/bridge'
+      )
+      expect(getVisioBaseUrl('https://xxxx.twake.app')).toBe(
+        'https://xxxx-visio.twake.app/#/bridge'
+      )
+    })
+
+    it('should handle single label hostname', () => {
+      expect(getVisioBaseUrl('localhost')).toBe(
+        'https://localhost-visio/#/bridge'
+      )
+    })
+
+    it('should handle missing VISIO_PATH', () => {
+      const originalPath = window.VISIO_PATH
+      delete window.VISIO_PATH
+      expect(getVisioBaseUrl('xxxx.twake.app')).toBe(
+        'https://xxxx-visio.twake.app'
+      )
+      window.VISIO_PATH = originalPath
+    })
+
+    it('should handle custom VISIO_PATH without leading slash', () => {
+      const originalPath = window.VISIO_PATH
+      window.VISIO_PATH = 'custom-bridge'
+      expect(getVisioBaseUrl('xxxx.twake.app')).toBe(
+        'https://xxxx-visio.twake.app/custom-bridge'
+      )
+      window.VISIO_PATH = originalPath
     })
   })
 })

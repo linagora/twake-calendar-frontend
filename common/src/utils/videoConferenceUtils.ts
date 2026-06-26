@@ -73,3 +73,40 @@ export function removeVideoConferenceFromDescription(
   const filtered = lines.filter(line => !VISIO_LINE_REGEX.test(line.trim()))
   return filtered.join('\n').trimEnd()
 }
+
+function getProtocol(url: string): string {
+  return url.startsWith('http://') ? 'http://' : 'https://'
+}
+
+function stripProtocol(url: string): string {
+  return url.replace(/^https?:\/\//, '')
+}
+
+function injectVisioIntoHost(host: string): string {
+  const parts = host.split('.')
+  parts[0] = `${parts[0]}-visio`
+  return parts.join('.')
+}
+
+function getCleanPath(visioPath?: string): string {
+  if (!visioPath) return ''
+  return `/${visioPath.replace(/^\//, '')}`
+}
+
+/**
+ * Convert a workplace FQDN to a Visio base URL by appending -visio to the first subdomain segment.
+ * E.g., xxxx.twake.app -> https://xxxx-visio.twake.app
+ * @param {string} workplaceFqdn - The workplace FQDN
+ * @returns {string} The constructed Visio base URL
+ */
+export function getVisioBaseUrl(workplaceFqdn: string): string {
+  if (!workplaceFqdn) return ''
+
+  const trimmed = workplaceFqdn.trim()
+  const protocol = getProtocol(trimmed)
+  const host = stripProtocol(trimmed)
+  const hostWithVisio = injectVisioIntoHost(host)
+  const cleanPath = getCleanPath(window.VISIO_PATH)
+
+  return `${protocol}${hostWithVisio}${cleanPath}`
+}

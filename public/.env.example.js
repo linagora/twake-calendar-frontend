@@ -26,3 +26,4 @@ var DISABLE_PUBLIC_VISIBILITY = false
 var ASK_FOR_TZ_UPDATE = true
 var TOOLTIP_DELAY_MS = 2000
 var HIDE_LANGUAGE_SELECTOR = false
+var VISIO_PATH = '/#/bridge'
