@@ -59,6 +59,22 @@ function hasDefiniteZone(
 }
 
 /**
+ * Resolves a value to a trustworthy instant: the epoch milliseconds when the
+ * value carries a definite zone, or `NaN` when it is tz-naive (so callers fall
+ * back to the lenient string comparison instead of trusting a system-local
+ * instant).
+ */
+function definiteInstant(
+  value: unknown,
+  tzid?: string,
+  fallbackTz?: string
+): number {
+  return hasDefiniteZone(value, tzid, fallbackTz)
+    ? recurrenceInstant(value, tzid, fallbackTz)
+    : NaN
+}
+
+/**
  * True when two RECURRENCE-ID / EXDATE values designate the same occurrence.
  * Compares the resolved instants when both sides carry an unambiguous zone, so
  * two forms of the same occurrence (UTC vs TZID local time) match while
@@ -78,12 +94,9 @@ export function sameRecurrence(
   b: { value: unknown; tzid?: string },
   fallbackTz?: string
 ): boolean {
-  const instantA = recurrenceInstant(a.value, a.tzid, fallbackTz)
-  const instantB = recurrenceInstant(b.value, b.tzid, fallbackTz)
-  const bothDefinite =
-    hasDefiniteZone(a.value, a.tzid, fallbackTz) &&
-    hasDefiniteZone(b.value, b.tzid, fallbackTz)
-  if (bothDefinite && Number.isFinite(instantA) && Number.isFinite(instantB)) {
+  const instantA = definiteInstant(a.value, a.tzid, fallbackTz)
+  const instantB = definiteInstant(b.value, b.tzid, fallbackTz)
+  if (Number.isFinite(instantA) && Number.isFinite(instantB)) {
     return instantA === instantB
   }
 
