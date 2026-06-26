@@ -112,7 +112,13 @@ async function patchPartstatInJCal(
   recurrenceId?: string
 ): Promise<boolean> {
   const jCal = await fetchEventJCal(event)
-  const patched = updateEventPartstatJCal(jCal, matcher, partstat, recurrenceId)
+  const patched = updateEventPartstatJCal(
+    jCal,
+    matcher,
+    partstat,
+    recurrenceId,
+    event.timezone
+  )
   if (!patched) {
     return false
   }

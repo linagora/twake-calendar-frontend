@@ -2,6 +2,7 @@ import {
   VCalComponent,
   VObjectProperty
 } from '@common/features/Calendars/types/CalendarData'
+import { getTzidParam, sameRecurrence } from './recurrenceInstant'
 
 /**
  * Predicate identifying the ATTENDEE whose PARTSTAT must be updated.
@@ -20,8 +21,15 @@ export type AttendeeMatcher = (
  * silently rewrites DTSTART to UTC and drops the TZID parameter (see #1031).
  *
  * When `recurrenceId` is provided the patch is restricted to the single VEVENT
- * whose RECURRENCE-ID matches that value (solo recurring-instance RSVP, see
- * #1088). Omit it to update every VEVENT (non-recurring events).
+ * whose RECURRENCE-ID designates that occurrence (solo recurring-instance RSVP,
+ * see #1088). Omit it to update every VEVENT (non-recurring events).
+ *
+ * The RECURRENCE-ID match is instant-aware: the same occurrence can be stored
+ * in a TZID wall-clock form while the in-memory `recurrenceId` is a bare UTC
+ * value (or vice versa). A plain string comparison missed that and fell back to
+ * regenerating the VEVENT, which appended a second exception for the same
+ * occurrence — SabreDAV then rejected the PUT with "Duplicate RECURRENCE-ID".
+ * `fallbackTz` (the series timezone) resolves tz-naive values. See #1088.
  *
  * Returns the patched jCal, or `null` when no matching attendee was found so
  * the caller can fall back to the regeneration path (e.g. adding oneself as a
@@ -31,7 +39,8 @@ export function updateEventPartstatJCal(
   jcal: VCalComponent,
   matchAttendee: AttendeeMatcher,
   partstat: string,
-  recurrenceId?: string
+  recurrenceId?: string,
+  fallbackTz?: string
 ): VCalComponent | null {
   let matched = false
 
@@ -49,12 +58,20 @@ export function updateEventPartstatJCal(
 
       if (recurrenceId !== undefined) {
         const veventProps = component[1] as VObjectProperty[]
-        const ridProp = veventProps.find(([k]) => k === 'recurrence-id')
+        const ridProp = veventProps.find(
+          ([k]) => k.toLowerCase() === 'recurrence-id'
+        )
         if (!ridProp) {
           return component
         }
-        const veventRid = normalizeId(ridProp[3] as string)
-        if (veventRid !== normalizeId(recurrenceId)) {
+        const storedTzid = getTzidParam(ridProp[1] as Record<string, unknown>)
+        if (
+          !sameRecurrence(
+            { value: ridProp[3], tzid: storedTzid },
+            { value: recurrenceId },
+            fallbackTz
+          )
+        ) {
           return component
         }
       }
@@ -90,6 +107,3 @@ export function updateEventPartstatJCal(
 
   return [name, props, updatedComponents] as VCalComponent
 }
-
-const normalizeId = (id: unknown): string =>
-  ((id ?? '') as string).replace(/Z$/, '')
