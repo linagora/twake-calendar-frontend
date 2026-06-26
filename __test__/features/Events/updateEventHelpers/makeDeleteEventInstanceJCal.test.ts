@@ -275,7 +275,9 @@ describe('makeDeleteEventInstanceJCal', () => {
 
   describe('cross-timezone form handling (#1088)', () => {
     /** Master series in Europe/Ulyanovsk local time (UTC+4, no DST). */
-    function ulyanovskMaster(extraProps: VObjectProperty[] = []): VCalComponent {
+    function ulyanovskMaster(
+      extraProps: VObjectProperty[] = []
+    ): VCalComponent {
       return [
         'vevent',
         [
