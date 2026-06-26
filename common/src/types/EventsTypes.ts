@@ -1,10 +1,14 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { Calendar } from '@common/types/CalendarTypes'
-import { VObjectProperty } from '@common/features/Calendars/types/CalendarData'
+import {
+  RepetitionRule,
+  VObjectProperty
+} from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Attachment } from './Attachment'
 import { Valarms } from './Valarms'
+import { formatUntilForRRule } from '@common/features/Events/utils/formatDateToICal'
 
 export interface CalendarEvent {
   URL: string
@@ -36,13 +40,42 @@ export interface CalendarEvent {
   attach?: Attachment[]
 }
 
-export interface RepetitionObject {
+export class RepetitionObject {
   freq: string
   interval?: number | null
   byday?: string[] | null
   occurrences?: number | null
   endDate?: string | null
   wkst?: string | null
+
+  constructor(data: Partial<RepetitionObject> = {}) {
+    this.freq = data.freq ?? ''
+    this.interval = data.interval
+    this.byday = data.byday
+    this.occurrences = data.occurrences
+    this.endDate = data.endDate
+    this.wkst = data.wkst
+  }
+
+  asJcal(allday: boolean, tzid: string): VObjectProperty {
+    const repetitionRule: RepetitionRule = { freq: this.freq }
+    if (this.interval != null) {
+      repetitionRule.interval = this.interval
+    }
+    if (this.occurrences != null) {
+      repetitionRule.count = this.occurrences
+    }
+    if (this.endDate) {
+      repetitionRule.until = formatUntilForRRule(this.endDate, allday, tzid)
+    }
+    if (this.byday !== null && this.byday !== undefined) {
+      repetitionRule.byday = this.byday
+    }
+    if (this.wkst) {
+      repetitionRule.wkst = this.wkst
+    }
+    return ['rrule', {}, 'recur', repetitionRule]
+  }
 }
 
 export interface ContextualizedEvent {

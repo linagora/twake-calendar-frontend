@@ -59,3 +59,22 @@ export function formatDateTimeToICal(date: Date, timezone?: string): string {
   const seconds = pad(date.getUTCSeconds())
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`
 }
+
+export function formatUntilForRRule(
+  endDate: string,
+  allday: boolean,
+  tzid: string
+): string {
+  if (allday) {
+    return endDate.replace(/-/g, '')
+  }
+
+  // Take the date part of endDate, add end of day, convert to UTC
+  const datePart = endDate
+  const timePart = '23:59:59'
+
+  return moment
+    .tz(`${datePart}T${timePart}`, tzid)
+    .utc()
+    .format('YYYYMMDDTHHmmss[Z]')
+}

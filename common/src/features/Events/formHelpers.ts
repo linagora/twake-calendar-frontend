@@ -141,15 +141,15 @@ export function populateFormFromEvent(
       repetitionSource = baseEvent.repetition
     }
   }
-
   if (repetitionSource && repetitionSource.freq) {
-    const repetitionData: RepetitionObject = {
+    const repetitionData = new RepetitionObject({
       freq: repetitionSource.freq,
       interval: repetitionSource.interval || 1,
       occurrences: repetitionSource.occurrences,
       endDate: repetitionSource.endDate,
-      byday: repetitionSource.byday || null
-    }
+      byday: repetitionSource.byday || null,
+      wkst: repetitionSource.wkst || null
+    })
     setRepetition(repetitionData)
     setShowRepeat(true)
   } else {
