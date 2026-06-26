@@ -19,13 +19,55 @@ export function generateMeetingId(): string {
 }
 
 /**
- * Generate a complete meeting link
- * @param {string} baseUrl - Base URL for video conference (from .env.js)
- * @returns {string} Complete meeting link
+ * Context used to resolve the template expressions of VIDEO_CONFERENCE_BASE_URL.
  */
-export function generateMeetingLink(baseUrl?: string): string {
-  const base = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
-  if (!base) return ''
+export interface VisioTemplateContext {
+  localpart?: string
+  workplaceFqdn?: string
+}
+
+/**
+ * Resolve a URI-template (RFC 6570 style) VIDEO_CONFERENCE_BASE_URL.
+ *
+ * Supported expressions:
+ *  - {localpart}             the user local part
+ *  - {workplaceFqdn}         the full workplace FQDN (e.g. tmle.stg.lin-saas.com)
+ *  - {workplaceFqdn.localpart} the first label of the FQDN (e.g. tmle)
+ *  - {workplaceFqdn.domain}  the FQDN without its first label (e.g. stg.lin-saas.com)
+ *
+ * Unknown expressions are left untouched.
+ */
+export function resolveVisioTemplate(
+  template: string,
+  { localpart = '', workplaceFqdn = '' }: VisioTemplateContext
+): string {
+  const [fqdnLocalpart = '', ...fqdnRest] = workplaceFqdn.split('.')
+  const fqdnDomain = fqdnRest.join('.')
+
+  const values: Record<string, string> = {
+    localpart,
+    workplaceFqdn,
+    'workplaceFqdn.localpart': fqdnLocalpart,
+    'workplaceFqdn.domain': fqdnDomain
+  }
+
+  return template.replace(/\{([^}]+)\}/g, (match, expression: string) => {
+    const key = expression.trim()
+    return key in values ? values[key] : match
+  })
+}
+
+/**
+ * Generate a complete meeting link from the VIDEO_CONFERENCE_BASE_URL template.
+ */
+export function generateMeetingLink(
+  context: VisioTemplateContext = {},
+  baseUrl?: string
+): string {
+  const template = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
+  if (!template) return ''
+
+  const base = resolveVisioTemplate(template, context)
   const meetingId = generateMeetingId()
   return `${base}/${meetingId}`
 }
@@ -33,9 +75,6 @@ export function generateMeetingLink(baseUrl?: string): string {
 /**
  * Add video conference footer to event description.
  * If description is empty, adds on first line; otherwise adds on the line below existing content.
- * @param {string} description - Original description
- * @param {string} meetingLink - Generated meeting link
- * @returns {string} Description with video conference footer
  */
 export function addVideoConferenceToDescription(
   description: string,
@@ -48,8 +87,6 @@ export function addVideoConferenceToDescription(
 
 /**
  * Extract video conference link from description
- * @param {string} description - Event description
- * @returns {string | null} Video conference link if found, null otherwise
  */
 export function extractVideoConferenceFromDescription(
   description: string
@@ -63,8 +100,6 @@ const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/
 /**
  * Remove the Visio video conference line from description.
  * Finds and removes the line matching "Visio: <url>" regardless of position (start, middle, end).
- * @param {string} description - Event description
- * @returns {string} Description with the Visio line removed
  */
 export function removeVideoConferenceFromDescription(
   description: string

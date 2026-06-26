@@ -8,6 +8,7 @@ export interface userData {
   openpaasId?: string
   language?: string
   timezone?: string | null
+  workplaceFqdn?: string
 }
 
 export interface UserConfigurations {

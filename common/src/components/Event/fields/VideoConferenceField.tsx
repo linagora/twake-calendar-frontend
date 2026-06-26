@@ -1,9 +1,5 @@
 import iconCamera from '@common/static/images/icon-camera.svg'
-import {
-  addVideoConferenceToDescription,
-  generateMeetingLink,
-  removeVideoConferenceFromDescription
-} from '@common/utils/videoConferenceUtils'
+import { useVideoConference } from '../hooks/useVideoConference'
 import { alpha, Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
 import { Close as DeleteIcon } from '@mui/icons-material'
 import React from 'react'
@@ -145,25 +141,15 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
-  const handleAddVideoConference = (): void => {
-    const newMeetingLink = generateMeetingLink()
-    const updatedDescription = addVideoConferenceToDescription(
+  const { handleAddVideoConference, handleDeleteVideoConference } =
+    useVideoConference({
       description,
-      newMeetingLink
-    )
-    setDescription(updatedDescription)
-    setHasVideoConference(true)
-    setMeetingLink(newMeetingLink)
-    if (showMore) {
-      setShowDescription?.(true)
-    }
-  }
-
-  const handleDeleteVideoConference = (): void => {
-    setDescription(removeVideoConferenceFromDescription(description))
-    setHasVideoConference(false)
-    setMeetingLink(null)
-  }
+      setDescription,
+      setHasVideoConference,
+      setMeetingLink,
+      showMore,
+      setShowDescription
+    })
 
   const cameraIcon = (
     <img src={iconCamera} alt="camera" width={24} height={24} />
