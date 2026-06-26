@@ -1,11 +1,14 @@
 import { Calendar } from '@common/types/CalendarTypes'
 import { Box, Typography } from '@linagora/twake-mui'
-import React from 'react'
+import React, { useCallback } from 'react'
+import { Valarms } from '@common/types/Valarms'
+import { VAlarm } from '@common/types/VAlarm'
 import { formatEventChipTitle } from '../Calendar/utils/calendarUtils'
 import { EventTimeSubtitle } from '../EventPreview/EventTimeSubtitle'
 import { EventFormFieldsSpecific } from './components/EventFormFieldsSpecific'
 import { EventFormValues } from './EventFormFields.types'
 import { CalendarSelectField } from './fields/CalendarSelectField'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 export function EventFormFieldPersonalSettings({
   v,
@@ -14,10 +17,11 @@ export function EventFormFieldPersonalSettings({
   setCalendarid,
   userPersonalCalendars,
   showMore,
-  setAlarm,
+  setAlarms,
   setBusy,
   setEventClass,
-  isOrganizer
+  isOrganizer,
+  user
 }: {
   v: EventFormValues
   t: (key: string, options?: object) => string
@@ -25,14 +29,36 @@ export function EventFormFieldPersonalSettings({
   setCalendarid: (v: string) => void
   userPersonalCalendars: Calendar[]
   showMore: boolean
-  setAlarm: (v: string) => void
+  setAlarms: (v: Valarms) => void
   setBusy: (v: string) => void
   setEventClass: (v: EventFormValues['eventClass']) => void
   isOrganizer: boolean
+  user: userAttendee
 }): React.ReactNode {
+  const setAlarmsWithUser = useCallback(
+    (alarms: Valarms) => {
+      const alarmsWithUser = Valarms.fromList(
+        alarms.getAlarms().map(alarm => {
+          if (alarm.attendees && alarm.attendees.length > 0) {
+            return alarm
+          }
+          return new VAlarm({
+            trigger: alarm.trigger,
+            action: alarm.action,
+            attendees: [user],
+            summary: alarm.summary,
+            description: alarm.description
+          })
+        })
+      )
+      setAlarms(alarmsWithUser)
+    },
+    [setAlarms, user]
+  )
+
   return (
     <React.Fragment>
-      <Box display="flex" alignItems="center" gap={1} mb={2}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Typography
           variant="h3"
           sx={{
@@ -54,8 +80,8 @@ export function EventFormFieldPersonalSettings({
         />
       )}
       <EventFormFieldsSpecific
-        alarm={v.alarms?.firstAlarmTrigger()}
-        setAlarm={setAlarm}
+        alarms={v.alarms}
+        setAlarms={setAlarmsWithUser}
         busy={v.busy}
         setBusy={setBusy}
         eventClass={v.eventClass}

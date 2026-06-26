@@ -3,8 +3,9 @@ import { dialogPaddingStyles } from '@common/theme/dialogPaddingStyles'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventActions } from './EventActions'
 import { useEventUpdateModal } from './useEventUpdateModal'
@@ -40,6 +41,19 @@ const EventUpdateModalInternal: React.FC<
     tempContext
   } = useEventUpdateModal(props)
 
+  // Filter initial values to only include global alarms (alarms with multiple attendees or no attendees)
+  const globalInitialValues = useMemo(() => {
+    if (!initialValues.alarms) return initialValues
+    const globalAlarms = initialValues.alarms.getAlarms().filter(alarm => {
+      // Global alarms have either no attendees or multiple attendees
+      return !alarm.attendees || alarm.attendees.length > 1
+    })
+    return {
+      ...initialValues,
+      alarms: Valarms.fromList(globalAlarms)
+    }
+  }, [initialValues])
+
   const actions = (
     <EventActions
       showExpandedBtn={!showMore}
@@ -63,7 +77,7 @@ const EventUpdateModalInternal: React.FC<
       <EventFormFields
         key={effectiveEvent?.uid || 'no-event'}
         ref={formRef}
-        initialValues={initialValues}
+        initialValues={globalInitialValues}
         showMore={showMore}
         isOpen={open}
         isSpecific={false}

@@ -10,7 +10,7 @@ export const DEFAULT_ALARM_DESCRIPTION =
 export interface AlarmData {
   trigger: string
   action: string
-  attendee?: userAttendee
+  attendees?: userAttendee[]
   summary?: string
   description?: string
 }
@@ -18,14 +18,14 @@ export interface AlarmData {
 export class VAlarm implements AlarmData {
   trigger: string
   action: string
-  attendee?: userAttendee
+  attendees?: userAttendee[]
   summary?: string
   description?: string
 
-  constructor({ trigger, action, attendee, summary, description }: AlarmData) {
+  constructor({ trigger, action, attendees, summary, description }: AlarmData) {
     this.trigger = trigger
     this.action = action
-    this.attendee = attendee
+    this.attendees = attendees
     this.summary = summary
     this.description = description ?? DEFAULT_ALARM_DESCRIPTION
   }
@@ -36,19 +36,21 @@ export class VAlarm implements AlarmData {
     }
     if (json && typeof json === 'object') {
       const obj = json as Partial<AlarmData>
-      // Deserialize attendee if it's a plain object (from JSON/session storage)
-      let attendee = obj.attendee
-      if (
-        attendee &&
-        typeof attendee === 'object' &&
-        !(attendee instanceof userAttendee)
-      ) {
-        attendee = new userAttendee(attendee as Partial<userAttendee>)
+      // Deserialize attendees if they're plain objects (from JSON/session storage)
+      let attendees = obj.attendees
+      if (attendees && Array.isArray(attendees)) {
+        attendees = attendees.map(attendee =>
+          attendee &&
+          typeof attendee === 'object' &&
+          !(attendee instanceof userAttendee)
+            ? new userAttendee(attendee as Partial<userAttendee>)
+            : attendee
+        )
       }
       return new VAlarm({
         trigger: obj.trigger ?? '',
         action: obj.action ?? '',
-        attendee,
+        attendees,
         summary: obj.summary,
         description: obj.description
       })
@@ -61,8 +63,10 @@ export class VAlarm implements AlarmData {
       ['trigger', {}, 'duration', this.trigger],
       ['action', {}, 'text', this.action]
     ]
-    if (this.attendee) {
-      props.push(['attendee', {}, 'cal-address', this.attendee.asMailto()])
+    if (this.attendees) {
+      for (const attendee of this.attendees) {
+        props.push(['attendee', {}, 'cal-address', attendee.asMailto()])
+      }
     }
     if (this.summary) {
       props.push(['summary', {}, 'text', this.summary])

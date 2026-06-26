@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { EventUpdateModalProps } from './EventUpdateModal'
 import { useMasterEvent } from './hooks/useMasterEvent'
 import { useSubmitUpdateEvent } from './hooks/useSubmitUpdateEvent'
@@ -86,8 +87,26 @@ export function useEventUpdateModal(
   const handleExpandToggle = (): void => setShowMore(s => !s)
 
   const handleSave = useCallback(async () => {
-    await formRef.current?.submit()
-  }, [])
+    // Get form values
+    const values = formRef.current?.getValues()
+    if (!values) return
+
+    // Get the original event to preserve personal alarms
+    const originalEvent = effectiveEvent || event
+    const originalAlarms = originalEvent?.alarms
+
+    // Merge global alarms from form with personal alarms from original event
+    const mergedAlarms = originalAlarms
+      ? values.alarms.withPersonalAlarmsFrom(originalAlarms)
+      : values.alarms
+
+    const valuesWithMergedAlarms = {
+      ...values,
+      alarms: mergedAlarms
+    }
+
+    await handleSubmit(valuesWithMergedAlarms)
+  }, [formRef, handleSubmit, effectiveEvent, event])
 
   return {
     userPersonalCalendars,

@@ -30,7 +30,7 @@ const baseValues = {
 } as any
 
 describe('prepareUpdatedEvent', () => {
-  it('sets alarm attendee and summary at VAlarm construction time', () => {
+  it('sets alarm attendees and summary at VAlarm construction time', () => {
     const updatedEvent = prepareUpdatedEvent({
       event: baseEvent,
       values: baseValues,
@@ -45,7 +45,7 @@ describe('prepareUpdatedEvent', () => {
       newCalId: 'cal-1'
     })
 
-    expect(updatedEvent.alarms?.getAlarm(0)?.attendee?.cal_address).toBe(
+    expect(updatedEvent.alarms?.getAlarm(0)?.attendees?.[0]?.cal_address).toBe(
       'mailto:owner@example.com'
     )
     expect(updatedEvent.alarms?.getAlarm(0)?.summary).toBe('Updated title')

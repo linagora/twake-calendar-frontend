@@ -486,13 +486,13 @@ describe('VALARM (RFC 5545 §3.6.6)', () => {
     expect(hasValarm).toBe(false)
   })
 
-  it('alarm attendee points to calendar owner from constructor data', () => {
+  it('alarm attendees points to calendar owner from constructor data', () => {
     const event = baseEvent({
       alarms: new Valarms([
         new VAlarm({
           trigger: '-PT10M',
           action: 'EMAIL',
-          attendee: new userAttendee({ cal_address: `mailto:${OWNER}` }),
+          attendees: [new userAttendee({ cal_address: `mailto:${OWNER}` })],
           summary: 'Test Event'
         })
       ])

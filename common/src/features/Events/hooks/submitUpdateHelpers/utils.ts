@@ -8,6 +8,23 @@ import { Valarms } from '@common/types/Valarms'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
+
+export function getAlarmAttendees(
+  values: EventFormValues,
+  targetCalendar: Calendar
+): userAttendee[] | undefined {
+  const attendees = values.attendees || []
+
+  const ownerEmail = targetCalendar.owner?.emails?.[0]
+  if (ownerEmail) {
+    const ownerAttendee = userAttendee.fromEmailField(ownerEmail)
+    if (ownerAttendee) {
+      return [ownerAttendee, ...attendees]
+    }
+  }
+
+  return attendees.length > 0 ? attendees : undefined
+}
 export function getSeriesInstances(
   targetCalendar: Calendar,
   baseUID: string
@@ -65,7 +82,7 @@ export function prepareUpdatedEvent({
     sequence: nextSequence,
     color: targetCalendar?.color,
     alarms: Valarms.fromFormValues(values.alarms, {
-      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      attendees: getAlarmAttendees(values, targetCalendar),
       summary: values.title
     }),
     x_openpass_videoconference: values.meetingLink || undefined,

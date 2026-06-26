@@ -4,12 +4,14 @@ import { ResponsiveDialog } from '@common/components/Dialog'
 import { EventFormFieldPersonalSettings } from '@common/components/Event/EventFormFieldPersonalSettings'
 import { useEventFormValues } from '@common/components/Event/hooks/useEventFormValues'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventActions } from './EventActions'
 import { useEventOrganizer } from './useEventOrganizer'
 import { useEventSettingsUpdateModal } from './useEventSettingsUpdateModal'
+import { userAttendee } from '../User/models/attendee'
 
 export interface EventSettingsUpdateModalProps {
   eventId: string
@@ -31,6 +33,11 @@ const EventSettingsUpdateModalInternal: React.FC<
   const calList = useAppSelector(state => state.calendars.list)
   const userOrganizer = useAppSelector(state => state.user.organiserData)
 
+  const currentUserEmail = calList[props.calId]?.owner?.emails?.[0]
+  const currentUser = currentUserEmail
+    ? userAttendee.fromEmailField(currentUserEmail)
+    : undefined
+
   const { isOrganizer } = useEventOrganizer({
     calendarid: props.calId,
     eventId: props.eventId,
@@ -48,7 +55,7 @@ const EventSettingsUpdateModalInternal: React.FC<
     tempContext
   } = useEventSettingsUpdateModal(props)
 
-  const { formValues, setAlarm, setBusy, setEventClass, setCalendarid } =
+  const { formValues, setAlarms, setBusy, setEventClass, setCalendarid } =
     useEventFormValues({
       initialValues,
       isOpen: open,
@@ -59,9 +66,39 @@ const EventSettingsUpdateModalInternal: React.FC<
       onAllDayChange: () => {}
     })
 
+  // Extract personal alarms for the current user (memoized to avoid recalculation)
+  const personalAlarms = useMemo(() => {
+    if (!currentUser) return []
+    return formValues.alarms.getAllAlarmsForAttendee(currentUser)
+  }, [formValues.alarms, currentUser])
+
   const handleSave = useCallback(async () => {
-    await handleSubmit(formValues)
-  }, [handleSubmit, formValues])
+    // Get the original event to preserve other attendees' alarms
+    const originalEvent =
+      calList[props.calId]?.events?.[props.eventId] || props.event
+    const originalAlarms = originalEvent?.alarms
+
+    // Merge personal alarms from form with other alarms from original event
+    const mergedAlarms =
+      originalAlarms && currentUser
+        ? originalAlarms.mergePersonalAlarms(formValues.alarms, currentUser)
+        : formValues.alarms
+
+    const valuesWithMergedAlarms = {
+      ...formValues,
+      alarms: mergedAlarms
+    }
+
+    await handleSubmit(valuesWithMergedAlarms)
+  }, [
+    handleSubmit,
+    formValues,
+    calList,
+    props.calId,
+    props.eventId,
+    props.event,
+    currentUser
+  ])
 
   const actions = (
     <EventActions
@@ -81,16 +118,21 @@ const EventSettingsUpdateModalInternal: React.FC<
       sx={dialogPaddingStyles(isMobile)}
     >
       <EventFormFieldPersonalSettings
-        v={formValues}
+        v={{
+          ...formValues,
+          // Show only the current user's personal alarms for editing
+          alarms: Valarms.fromList(personalAlarms)
+        }}
         t={t}
         typeOfAction={typeOfAction}
         setCalendarid={setCalendarid}
         userPersonalCalendars={userPersonalCalendars}
         showMore={showMore}
-        setAlarm={setAlarm}
+        setAlarms={setAlarms}
         setBusy={setBusy}
         setEventClass={setEventClass}
         isOrganizer={isOrganizer}
+        user={currentUser ?? new userAttendee({ cal_address: '' })}
       />
     </ResponsiveDialog>
   )

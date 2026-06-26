@@ -113,7 +113,7 @@ function useEventFormSetters(
   setTimezone: (v: string) => void
   setRepetition: (v: EventFormValues['repetition']) => void
   setAttendees: (v: EventFormValues['attendees']) => void
-  setAlarm: (v: string) => void
+  setAlarms: (v: Valarms) => void
   setBusy: (v: string) => void
   setEventClass: (v: EventFormValues['eventClass']) => void
   setCalendarid: (v: string) => void
@@ -159,14 +159,9 @@ function useEventFormSetters(
     (v: EventFormValues['attendees']) => set('attendees', v),
     [set]
   )
-  const setAlarm = useCallback(
-    (v: string) => {
-      set(
-        'alarms',
-        v
-          ? Valarms.fromList([new VAlarm({ trigger: v, action: 'EMAIL' })])
-          : new Valarms()
-      )
+  const setAlarms = useCallback(
+    (v: Valarms) => {
+      set('alarms', v)
     },
     [set]
   )
@@ -225,7 +220,7 @@ function useEventFormSetters(
     setTimezone,
     setRepetition,
     setAttendees,
-    setAlarm,
+    setAlarms,
     setBusy,
     setEventClass,
     setCalendarid,

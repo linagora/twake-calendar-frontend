@@ -14,6 +14,7 @@ import {
   saveEventFormDataToTemp,
   showErrorNotification
 } from '@common/utils/eventFormTempStorage'
+import { getAlarmAttendees } from '../submitUpdateHelpers/utils'
 
 export async function handleCreateEvent({
   dispatch,
@@ -63,7 +64,7 @@ export async function handleCreateEvent({
     sequence: 1,
     color: targetCalendar?.color,
     alarms: Valarms.fromFormValues(values.alarms, {
-      attendee: userAttendee.fromEmailField(targetCalendar.owner?.emails?.[0]),
+      attendees: getAlarmAttendees(values, targetCalendar),
       summary: values.title
     }),
     x_openpass_videoconference: values.meetingLink || undefined

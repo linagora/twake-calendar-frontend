@@ -6,12 +6,13 @@ import {
   Resource,
   ResourceSearch
 } from '@common/components/Attendees/ResourceSearch'
+import { Valarms } from '@common/types/Valarms'
 import { EventFormFieldsSpecific } from './EventFormFieldsSpecific'
 import { FieldWithLabel } from './FieldWithLabel'
 
 interface EventFormFieldsExpandedProps {
-  alarm: string
-  setAlarm: (v: string) => void
+  alarms: Valarms
+  setAlarms: (v: Valarms) => void
   busy: string
   setBusy: (v: string) => void
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
@@ -24,8 +25,8 @@ interface EventFormFieldsExpandedProps {
 export const EventFormFieldsExpanded: React.FC<
   EventFormFieldsExpandedProps
 > = ({
-  alarm,
-  setAlarm,
+  alarms,
+  setAlarms,
   busy,
   setBusy,
   eventClass,
@@ -61,8 +62,8 @@ export const EventFormFieldsExpanded: React.FC<
       )}
 
       <EventFormFieldsSpecific
-        alarm={alarm}
-        setAlarm={setAlarm}
+        alarms={alarms}
+        setAlarms={setAlarms}
         busy={busy}
         setBusy={setBusy}
         eventClass={eventClass}

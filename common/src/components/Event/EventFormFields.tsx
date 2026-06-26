@@ -89,7 +89,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       setTimezone,
       setRepetition,
       setAttendees,
-      setAlarm,
+      setAlarms,
       setBusy,
       setEventClass,
       setCalendarid,
@@ -255,8 +255,8 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
         />
 
         <EventFormFieldsExpanded
-          alarm={v.alarms?.firstAlarmTrigger()}
-          setAlarm={setAlarm}
+          alarms={v.alarms}
+          setAlarms={setAlarms}
           busy={v.busy}
           setBusy={setBusy}
           eventClass={v.eventClass}

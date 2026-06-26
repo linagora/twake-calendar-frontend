@@ -2,10 +2,11 @@ import React from 'react'
 import { FreeBusyField } from '@common/components/Event/fields/FreeBusyField'
 import { NotificationField } from '@common/components/Event/fields/NotificationField'
 import { VisibilityField } from '@common/components/Event/fields/VisibilityField'
+import { Valarms } from '@common/types/Valarms'
 
 interface EventFormFieldsSpecificProps {
-  alarm: string
-  setAlarm: (v: string) => void
+  alarms: Valarms
+  setAlarms: (v: Valarms) => void
   busy: string
   setBusy: (v: string) => void
   eventClass: 'PUBLIC' | 'PRIVATE' | 'CONFIDENTIAL'
@@ -17,8 +18,8 @@ interface EventFormFieldsSpecificProps {
 export const EventFormFieldsSpecific: React.FC<
   EventFormFieldsSpecificProps
 > = ({
-  alarm,
-  setAlarm,
+  alarms,
+  setAlarms,
   busy,
   setBusy,
   eventClass,
@@ -29,8 +30,8 @@ export const EventFormFieldsSpecific: React.FC<
   return (
     <>
       <NotificationField
-        alarm={alarm}
-        setAlarm={setAlarm}
+        alarms={alarms}
+        setAlarms={setAlarms}
         showMore={showMore}
       />
       {!isOrganizer && (

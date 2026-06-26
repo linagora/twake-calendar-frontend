@@ -246,13 +246,14 @@ function processEventUid(
   }
 }
 
-function parseAlarms(valarms?: VCalComponent[]): Valarms | undefined {
-  if (!valarms?.length) {
+function parseAlarms(valarms: unknown): Valarms | undefined {
+  if (!Array.isArray(valarms) || !valarms.length) {
     return undefined
   }
   const alarms: VAlarm[] = []
   for (const valarm of valarms) {
     const alarm: Partial<AlarmData> = {}
+    const attendees: userAttendee[] = []
     for (const [key, , , value] of valarm[1]) {
       switch (key.toLowerCase()) {
         case 'action':
@@ -265,12 +266,19 @@ function parseAlarms(valarms?: VCalComponent[]): Valarms | undefined {
           alarm.description = safeString(value)
           break
         case 'attendee':
-          alarm.attendee = userAttendee.fromEmailField(safeString(value))
+          const attendee = userAttendee.fromEmailField(safeString(value))
+          if (attendee) {
+            attendees.push(attendee)
+          }
           break
         case 'summary':
           alarm.summary = safeString(value)
           break
       }
+    }
+    // Only set attendees if at least one was found (keeps undefined for global alarms)
+    if (attendees.length > 0) {
+      alarm.attendees = attendees
     }
     alarms.push(new VAlarm(alarm as AlarmData))
   }

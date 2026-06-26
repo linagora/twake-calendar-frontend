@@ -130,7 +130,7 @@ export interface UseEventFormValuesReturn {
   setTimezone: (v: string) => void
   setRepetition: (v: EventFormValues['repetition']) => void
   setAttendees: (v: EventFormValues['attendees']) => void
-  setAlarm: (v: string) => void
+  setAlarms: (v: Valarms) => void
   setBusy: (v: string) => void
   setEventClass: (v: EventFormValues['eventClass']) => void
   setCalendarid: (v: string) => void
