@@ -55,7 +55,7 @@ export function makeDeleteEventInstanceJCal(
     : {}
   const exdateProperty: VObjectValue = useTzidForm
     ? (moment
-        .tz(exdateValue, seriesEvent.timezone)
+        .tz(exdateValue, dtstartTzid as string)
         .format('YYYY-MM-DDTHH:mm:ss') as VObjectValue)
     : (exdateValue as VObjectValue)
 
