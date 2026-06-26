@@ -44,20 +44,20 @@ export function makeDeleteEventInstanceJCal(
   // occurrence as local wall-clock time in that zone instead of a bare UTC value.
   // See #1088.
   const dtstartProp = masterProps.find(([k]) => k.toLowerCase() === 'dtstart')
-  const dtstartTzid = (
-    (dtstartProp?.[1] as Record<string, string> | undefined) ?? {}
-  ).tzid
+  const dtParams = (dtstartProp?.[1] ?? {}) as Record<string, string>
+  const dtstartTzid = dtParams.tzid
 
   const valueType = seriesEvent.allday ? 'date' : 'date-time'
   const useTzidForm = !seriesEvent.allday && Boolean(dtstartTzid)
   const exdateParams: Record<string, string> = useTzidForm
-    ? { tzid: dtstartTzid as string }
+    ? { tzid: dtstartTzid }
     : {}
-  const exdateProperty: VObjectValue = useTzidForm
-    ? (moment
-        .tz(exdateValue, dtstartTzid as string)
-        .format('YYYY-MM-DDTHH:mm:ss') as VObjectValue)
-    : (exdateValue as VObjectValue)
+
+  let exdateProperty = exdateValue as VObjectValue
+  if (useTzidForm) {
+    const zoned = moment.tz(exdateValue, dtstartTzid)
+    exdateProperty = zoned.format('YYYY-MM-DDTHH:mm:ss') as VObjectValue
+  }
 
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
     return (
