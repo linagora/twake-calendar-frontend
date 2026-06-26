@@ -10,6 +10,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { TIMEZONES } from '@common/utils/timezone-data'
 import moment from 'moment-timezone'
 import { filterComponents } from './parseFetchedEvent'
+import { getTzidParam, sameRecurrence } from './recurrenceInstant'
 
 export function makeDeleteEventInstanceJCal(
   vevents: VCalComponent[],
@@ -44,8 +45,7 @@ export function makeDeleteEventInstanceJCal(
   // occurrence as local wall-clock time in that zone instead of a bare UTC value.
   // See #1088.
   const dtstartProp = masterProps.find(([k]) => k.toLowerCase() === 'dtstart')
-  const dtParams = (dtstartProp?.[1] ?? {}) as Record<string, string>
-  const dtstartTzid = dtParams.tzid
+  const dtstartTzid = getTzidParam(dtstartProp?.[1])
 
   const valueType = seriesEvent.allday ? 'date' : 'date-time'
   const useTzidForm = !seriesEvent.allday && Boolean(dtstartTzid)
@@ -60,10 +60,14 @@ export function makeDeleteEventInstanceJCal(
   }
 
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
-    return (
-      prop[0].toLowerCase() === 'exdate' &&
-      prop[3] &&
-      normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateProperty)
+    if (prop[0].toLowerCase() !== 'exdate' || !prop[3]) {
+      return false
+    }
+    const existingTzid = getTzidParam(prop[1])
+    return sameRecurrence(
+      { value: prop[3], tzid: existingTzid },
+      { value: exdateProperty, tzid: useTzidForm ? dtstartTzid : undefined },
+      seriesEvent.timezone
     )
   })
 
@@ -75,19 +79,19 @@ export function makeDeleteEventInstanceJCal(
   // Update the master VEVENT with the new properties
   vevents[masterIndex][1] = masterProps
 
-  // Remove the override instance if it exists (in case it was an override being deleted)
+  // Remove the override instance if it exists (in case it was an override being
+  // deleted). Match by instant so an override stored in TZID/UTC form is still
+  // recognised against the deleted occurrence expressed in another form.
   const filteredVevents = vevents.filter(([, props]) => {
     const recurrenceIdProp = (props as VObjectProperty[]).find(
       ([k]) => k.toLowerCase() === 'recurrence-id'
     )
     if (!recurrenceIdProp) return true // Keep master
-    return (
-      normalizeRecurrenceId(recurrenceIdProp[3]) !==
-      normalizeRecurrenceId(
-        moment
-          .tz(exdateValue, seriesEvent.timezone)
-          .format('YYYY-MM-DDTHH:mm:ss') as VObjectValue
-      )
+    const overrideTzid = getTzidParam(recurrenceIdProp[1])
+    return !sameRecurrence(
+      { value: recurrenceIdProp[3], tzid: overrideTzid },
+      { value: exdateValue },
+      seriesEvent.timezone
     ) // Remove matching override
   })
 
@@ -101,9 +105,3 @@ export function makeDeleteEventInstanceJCal(
     [...filteredVevents, vtimezone.component.jCal as VCalComponent]
   ]
 }
-
-const normalizeRecurrenceId = (id: VObjectValue): string =>
-  (typeof id === 'string' || typeof id === 'number' ? String(id) : '').replace(
-    /Z$/,
-    ''
-  )

@@ -273,6 +273,107 @@ describe('makeDeleteEventInstanceJCal', () => {
     })
   })
 
+  describe('cross-timezone form handling (#1088)', () => {
+    /** Master series in Europe/Ulyanovsk local time (UTC+4, no DST). */
+    function ulyanovskMaster(extraProps: VObjectProperty[] = []): VCalComponent {
+      return [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event-uid-1'],
+          [
+            'dtstart',
+            { tzid: 'Europe/Ulyanovsk' },
+            'date-time',
+            '2026-06-25T05:00:00'
+          ],
+          ['rrule', {}, 'recur', { freq: 'DAILY' }],
+          ...extraProps
+        ],
+        []
+      ]
+    }
+
+    it('emits the EXDATE in TZID form when deleting an occurrence expressed in UTC', () => {
+      // 01:00Z === 05:00 Europe/Ulyanovsk.
+      const event: CalendarEvent = {
+        ...baseCalendarEvent,
+        recurrenceId: '2026-06-25T01:00:00Z'
+      } as unknown as CalendarEvent
+
+      const result = makeDeleteEventInstanceJCal([ulyanovskMaster()], event)
+
+      const masterProps = result[2][0][1] as VObjectProperty[]
+      const exdate = masterProps.find(([k]) => k === 'exdate')
+      expect(exdate).toBeDefined()
+      expect(exdate![1]).toEqual({ tzid: 'Europe/Ulyanovsk' })
+      expect(exdate![2]).toBe('date-time')
+      expect(exdate![3]).toBe('2026-06-25T05:00:00')
+    })
+
+    it('does not add a duplicate EXDATE when an existing one points at the same instant in another form', () => {
+      const existingExdate: VObjectProperty = [
+        'exdate',
+        {},
+        'date-time',
+        '2026-06-25T01:00:00Z' // bare UTC form, same instant as 05:00 Ulyanovsk
+      ]
+      const event: CalendarEvent = {
+        ...baseCalendarEvent,
+        recurrenceId: '2026-06-25T05:00:00' // wall-clock, no tzid param
+      } as unknown as CalendarEvent
+
+      const result = makeDeleteEventInstanceJCal(
+        [ulyanovskMaster([existingExdate])],
+        event
+      )
+
+      const masterProps = result[2][0][1] as VObjectProperty[]
+      const exdates = masterProps.filter(([k]) => k === 'exdate')
+      expect(exdates).toHaveLength(1)
+    })
+
+    it('removes a matching override whose RECURRENCE-ID is stored in a different form', () => {
+      const override: VCalComponent = [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event-uid-1'],
+          [
+            'recurrence-id',
+            { tzid: 'Europe/Ulyanovsk' },
+            'date-time',
+            '2026-06-25T05:00:00'
+          ],
+          [
+            'dtstart',
+            { tzid: 'Europe/Ulyanovsk' },
+            'date-time',
+            '2026-06-25T05:00:00'
+          ],
+          ['summary', {}, 'text', 'Accepted occurrence']
+        ],
+        []
+      ]
+      const event: CalendarEvent = {
+        ...baseCalendarEvent,
+        recurrenceId: '2026-06-25T01:00:00Z' // same instant, UTC form
+      } as unknown as CalendarEvent
+
+      const result = makeDeleteEventInstanceJCal(
+        [ulyanovskMaster(), override],
+        event
+      )
+
+      const remainingVevents = (result[2] as VCalComponent[]).filter(
+        ([name]) => name === 'vevent'
+      )
+      expect(remainingVevents).toHaveLength(1)
+      const hasOverride = remainingVevents.some(([, props]) =>
+        (props as VObjectProperty[]).some(([k]) => k === 'recurrence-id')
+      )
+      expect(hasOverride).toBe(false)
+    })
+  })
+
   describe('edge cases', () => {
     it('handles a recurrenceId with a trailing Z correctly when adding EXDATE', () => {
       const event: CalendarEvent = {
