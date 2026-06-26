@@ -66,11 +66,10 @@ function resolveOrganizerForCalendar(
     return originalOrganizer
   }
 
-  return {
-    ...originalOrganizer,
+  return new userOrganiser({
     cal_address: ownerEmail,
     cn: makeDisplayName(calendar) ?? originalOrganizer?.cn ?? ''
-  }
+  })
 }
 
 function rewriteAttendeesForOrganizerChange(

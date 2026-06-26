@@ -16,6 +16,7 @@ import { WKST_NUM_TO_DAY } from './wkstUtils'
 import { Attachment } from '@common/types/Attachment'
 import { AlarmData, VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
+import { userOrganiser } from '@common/features/User/userDataTypes'
 
 const KNOWN_PROPS = new Set([
   'uid',
@@ -181,10 +182,10 @@ const PROPERTY_PARSERS: Record<
   },
   organizer: (params, value, event) => {
     const paramsObj = params as Record<string, string>
-    event.organizer = {
+    event.organizer = new userOrganiser({
       cn: paramsObj?.cn ?? '',
       cal_address: safeString(value).replace(/^mailto:/i, '')
-    }
+    })
   },
   attendee: (params, value, event) => {
     parseAttendeeProperty(params, value, event)

@@ -26,13 +26,13 @@ export function useEventOrganizer({
 
   const organizer = useMemo(() => {
     if (selectedCalendar?.delegated && selectedCalendar?.owner) {
-      return {
+      return new userOrganiser({
         cn:
           makeDisplayName(selectedCalendar) ??
           selectedCalendar.owner.emails?.[0] ??
           '',
         cal_address: selectedCalendar.owner.emails?.[0] ?? ''
-      }
+      })
     }
     return userOrganizer
   }, [selectedCalendar, userOrganizer])

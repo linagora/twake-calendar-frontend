@@ -3,6 +3,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import moment from 'moment'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
+import { userAttendee } from '@common/features/User/models/attendee'
 
 export function makeVevent(
   event: CalendarEvent,
@@ -52,12 +53,16 @@ export function makeVevent(
     ])
   }
   if (event.organizer) {
-    vevent[1].push([
-      'organizer',
-      { cn: event.organizer.cn },
-      'cal-address',
-      `mailto:${event.organizer.cal_address}`
-    ])
+    vevent[1].push(
+      typeof (event.organizer as userAttendee).asJcal === 'function'
+        ? (event.organizer as userAttendee).asJcal()
+        : [
+            'organizer',
+            { cn: event.organizer.cn },
+            'cal-address',
+            `mailto:${event.organizer.cal_address}`
+          ]
+    )
   }
   if (event.location) {
     vevent[1].push(['location', {}, 'text', event.location])
