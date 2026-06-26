@@ -1,11 +1,5 @@
 import iconCamera from '@common/static/images/icon-camera.svg'
-import {
-  addVideoConferenceToDescription,
-  generateMeetingLink,
-  removeVideoConferenceFromDescription,
-  getVisioBaseUrl
-} from '@common/utils/videoConferenceUtils'
-import { useAppSelector } from '@common/app/hooks'
+import { useVideoConference } from '../hooks/useVideoConference'
 import { alpha, Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
 import { Close as DeleteIcon } from '@mui/icons-material'
 import React from 'react'
@@ -146,30 +140,16 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
-  const workplaceFqdn = useAppSelector(
-    state => state.user.userData?.workplaceFqdn
-  )
 
-  const handleAddVideoConference = (): void => {
-    const baseUrl = workplaceFqdn ? getVisioBaseUrl(workplaceFqdn) : undefined
-    const newMeetingLink = generateMeetingLink(baseUrl)
-    const updatedDescription = addVideoConferenceToDescription(
+  const { handleAddVideoConference, handleDeleteVideoConference } =
+    useVideoConference({
       description,
-      newMeetingLink
-    )
-    setDescription(updatedDescription)
-    setHasVideoConference(true)
-    setMeetingLink(newMeetingLink)
-    if (showMore) {
-      setShowDescription?.(true)
-    }
-  }
-
-  const handleDeleteVideoConference = (): void => {
-    setDescription(removeVideoConferenceFromDescription(description))
-    setHasVideoConference(false)
-    setMeetingLink(null)
-  }
+      setDescription,
+      setHasVideoConference,
+      setMeetingLink,
+      showMore,
+      setShowDescription
+    })
 
   const cameraIcon = (
     <img src={iconCamera} alt="camera" width={24} height={24} />

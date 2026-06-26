@@ -45,6 +45,33 @@ describe('videoConferenceUtils', () => {
         /^https:\/\/custom-meet\.example\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
       )
     })
+
+    it('should replace {localpart} with sub when present in custom base URL', () => {
+      const baseWithLocalpart = 'https://{localpart}-visio.example.com'
+      const link = generateMeetingLink(baseWithLocalpart, 'user123')
+      expect(link).toMatch(
+        /^https:\/\/user123-visio\.example\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
+      )
+    })
+
+    it('should replace {localpart} with empty string when sub is missing in custom base URL', () => {
+      const baseWithLocalpart = 'https://{localpart}-visio.example.com'
+      const link = generateMeetingLink(baseWithLocalpart)
+      expect(link).toMatch(
+        /^https:\/\/-visio\.example\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
+      )
+    })
+
+    it('should replace {localpart} with sub in default base URL when default has {localpart}', () => {
+      const originalDefault = window.VIDEO_CONFERENCE_BASE_URL
+      window.VIDEO_CONFERENCE_BASE_URL =
+        'https://{localpart}-visio.stg.lin-saas.com'
+      const link = generateMeetingLink(undefined, 'user123')
+      expect(link).toMatch(
+        /^https:\/\/user123-visio\.stg\.lin-saas\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
+      )
+      window.VIDEO_CONFERENCE_BASE_URL = originalDefault
+    })
   })
 
   describe('addVideoConferenceToDescription', () => {

@@ -20,12 +20,15 @@ export function generateMeetingId(): string {
 
 /**
  * Generate a complete meeting link
- * @param {string} baseUrl - Base URL for video conference (from .env.js)
- * @returns {string} Complete meeting link
  */
-export function generateMeetingLink(baseUrl?: string): string {
-  const base = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
+export function generateMeetingLink(baseUrl?: string, sub?: string): string {
+  let base = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
   if (!base) return ''
+
+  if (base.includes('{localpart}')) {
+    base = base.replace('{localpart}', sub || '')
+  }
+
   const meetingId = generateMeetingId()
   return `${base}/${meetingId}`
 }
@@ -33,9 +36,6 @@ export function generateMeetingLink(baseUrl?: string): string {
 /**
  * Add video conference footer to event description.
  * If description is empty, adds on first line; otherwise adds on the line below existing content.
- * @param {string} description - Original description
- * @param {string} meetingLink - Generated meeting link
- * @returns {string} Description with video conference footer
  */
 export function addVideoConferenceToDescription(
   description: string,
@@ -48,8 +48,6 @@ export function addVideoConferenceToDescription(
 
 /**
  * Extract video conference link from description
- * @param {string} description - Event description
- * @returns {string | null} Video conference link if found, null otherwise
  */
 export function extractVideoConferenceFromDescription(
   description: string
@@ -63,8 +61,6 @@ const VISIO_LINE_REGEX = /^Visio:\s*https?:\/\/\S+$/
 /**
  * Remove the Visio video conference line from description.
  * Finds and removes the line matching "Visio: <url>" regardless of position (start, middle, end).
- * @param {string} description - Event description
- * @returns {string} Description with the Visio line removed
  */
 export function removeVideoConferenceFromDescription(
   description: string
@@ -72,14 +68,6 @@ export function removeVideoConferenceFromDescription(
   const lines = description.split('\n')
   const filtered = lines.filter(line => !VISIO_LINE_REGEX.test(line.trim()))
   return filtered.join('\n').trimEnd()
-}
-
-function getProtocol(url: string): string {
-  return url.startsWith('http://') ? 'http://' : 'https://'
-}
-
-function stripProtocol(url: string): string {
-  return url.replace(/^https?:\/\//, '')
 }
 
 function injectVisioIntoHost(host: string): string {
@@ -96,15 +84,13 @@ function getCleanPath(visioPath?: string): string {
 /**
  * Convert a workplace FQDN to a Visio base URL by appending -visio to the first subdomain segment.
  * E.g., xxxx.twake.app -> https://xxxx-visio.twake.app
- * @param {string} workplaceFqdn - The workplace FQDN
- * @returns {string} The constructed Visio base URL
  */
 export function getVisioBaseUrl(workplaceFqdn: string): string {
   if (!workplaceFqdn) return ''
 
   const trimmed = workplaceFqdn.trim()
-  const protocol = getProtocol(trimmed)
-  const host = stripProtocol(trimmed)
+  const protocol = trimmed.startsWith('http://') ? 'http://' : 'https://'
+  const host = trimmed.replace(/^https?:\/\//, '')
   const hostWithVisio = injectVisioIntoHost(host)
   const cleanPath = getCleanPath(window.VISIO_PATH)
 
