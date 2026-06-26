@@ -14,6 +14,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
+import { filterComponents } from '../transformers/parseFetchedEvent'
 
 export interface MoveEventBetweenCalendarsParams {
   dispatch: AppDispatch
@@ -51,7 +52,8 @@ async function resolveMasterEvent(
     data: masterVevent[1],
     color: event.color as Record<string, string>,
     calendar,
-    eventURL: event.URL
+    eventURL: event.URL,
+    valarms: filterComponents(masterVevent, 'valarm')
   })
 }
 

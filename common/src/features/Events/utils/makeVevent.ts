@@ -35,8 +35,10 @@ export function makeVevent(
       ['dtstamp', {}, 'date-time', formatDateTimeToICal(new Date())]
     ]
   ]
-  if (event.alarm?.trigger) {
-    vevent.push([event.alarm.asJcal()])
+  // Collect VALARM subcomponents
+  const valarms = event.alarms?.asJcal() ?? []
+  if (valarms.length > 0) {
+    vevent.push(valarms)
   }
 
   if (event.end) {

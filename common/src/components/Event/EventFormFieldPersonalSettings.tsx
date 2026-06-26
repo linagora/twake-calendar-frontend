@@ -20,7 +20,7 @@ export function EventFormFieldPersonalSettings({
   isOrganizer
 }: {
   v: EventFormValues
-  t: (key: string, options?: Record<string, any>) => string
+  t: (key: string, options?: object) => string
   typeOfAction: string | undefined
   setCalendarid: (v: string) => void
   userPersonalCalendars: Calendar[]
@@ -54,7 +54,7 @@ export function EventFormFieldPersonalSettings({
         />
       )}
       <EventFormFieldsSpecific
-        alarm={v.alarm}
+        alarm={v.alarms?.firstAlarmTrigger()}
         setAlarm={setAlarm}
         busy={v.busy}
         setBusy={setBusy}

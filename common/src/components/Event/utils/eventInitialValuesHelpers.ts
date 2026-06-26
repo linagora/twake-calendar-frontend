@@ -1,24 +1,25 @@
-import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
-import { EventFormValues } from '@common/components/Event/EventFormFields.types'
+import { Calendar } from '@common/types/CalendarTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { resolveTimezone } from '@common/utils/timezone'
 import { addVideoConferenceToDescription } from '@common/utils/videoConferenceUtils'
 
 import {
-  formatEventDates,
-  buildFromSelectedRange,
-  buildDefaultNewEvent
-} from './initialValues/dateResolvers'
-import { resolveRepetition } from './initialValues/recurrenceResolvers'
-import {
   resolveAttendeesAndResources,
   resolveOrganizerEmail
 } from './initialValues/attendeeResolvers'
+import {
+  buildDefaultNewEvent,
+  buildFromSelectedRange,
+  formatEventDates
+} from './initialValues/dateResolvers'
 import { resolveFormCalendarId } from './initialValues/permissionResolvers'
+import { resolveRepetition } from './initialValues/recurrenceResolvers'
 
-export { buildFromSelectedRange, buildDefaultNewEvent }
+export { buildDefaultNewEvent, buildFromSelectedRange }
 
 function resolveDescription(event: CalendarEvent): string {
   const description = event.description ?? ''
@@ -87,7 +88,7 @@ export function buildFromExistingEvent({
     allday: isAllDay,
     repetition,
     attendees,
-    alarm: event.alarm?.trigger ?? '',
+    alarms: event.alarms ?? new Valarms(),
     eventClass: window.DISABLE_PUBLIC_VISIBILITY
       ? 'PRIVATE'
       : (event.class ?? 'PUBLIC'),

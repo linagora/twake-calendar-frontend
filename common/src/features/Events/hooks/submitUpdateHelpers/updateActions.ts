@@ -146,7 +146,7 @@ function shiftInstance(params: {
     class: newEvent.class,
     transp: newEvent.transp,
     attendee: newEvent.attendee,
-    alarm: newEvent.alarm,
+    alarms: newEvent.alarms,
     x_openpass_videoconference: newEvent.x_openpass_videoconference,
     recurrenceId: inst.recurrenceId
       ? formatLocalDateTime(
@@ -404,7 +404,7 @@ function updateSeriesInstancesLocally(
           class: newEvent.class,
           transp: newEvent.transp,
           attendee: newEvent.attendee,
-          alarm: newEvent.alarm,
+          alarms: newEvent.alarms,
           x_openpass_videoconference: newEvent.x_openpass_videoconference
         }
       })

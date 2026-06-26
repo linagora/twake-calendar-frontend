@@ -30,6 +30,32 @@ export class VAlarm implements AlarmData {
     this.description = description ?? DEFAULT_ALARM_DESCRIPTION
   }
 
+  static fromJSON(json: unknown): VAlarm {
+    if (json instanceof VAlarm) {
+      return json
+    }
+    if (json && typeof json === 'object') {
+      const obj = json as Partial<AlarmData>
+      // Deserialize attendee if it's a plain object (from JSON/session storage)
+      let attendee = obj.attendee
+      if (
+        attendee &&
+        typeof attendee === 'object' &&
+        !(attendee instanceof userAttendee)
+      ) {
+        attendee = new userAttendee(attendee as Partial<userAttendee>)
+      }
+      return new VAlarm({
+        trigger: obj.trigger ?? '',
+        action: obj.action ?? '',
+        attendee,
+        summary: obj.summary,
+        description: obj.description
+      })
+    }
+    return new VAlarm({ trigger: '', action: '' })
+  }
+
   asJcal(): VCalComponent {
     const props: VObjectProperty[] = [
       ['trigger', {}, 'duration', this.trigger],

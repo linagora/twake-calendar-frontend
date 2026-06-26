@@ -13,6 +13,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
+import { Valarms } from '@common/types/Valarms'
 
 jest.mock('@common/features/Events/EventDao')
 
@@ -483,9 +484,12 @@ describe('Edge cases', () => {
     expect(CUSTOM_PROPS).toEqual(originalProps)
   })
 
-  it('handles event with alarm alongside passthroughProps', () => {
+  it('handles event with alarms alongside passthroughProps', () => {
     const event = baseCalendarEvent({
-      alarm: new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
+      alarms: new Valarms([
+        new VAlarm({ trigger: '-PT15M', action: 'EMAIL' }),
+        new VAlarm({ trigger: '-PT30M', action: 'DISPLAY' })
+      ]),
       passthroughProps: CUSTOM_PROPS
     })
     const [, props, subComponents] = makeVevent(event, event.timezone)
@@ -493,6 +497,28 @@ describe('Edge cases', () => {
 
     const keys = (props as VObjectProperty[]).map(([k]) => k.toLowerCase())
     expect(keys).toContain('x-attachment')
+
+    // Verify both VALARM blocks are present in subComponents
+    const valarmComponents = (subComponents as unknown[]).filter(
+      comp => Array.isArray(comp) && (comp as unknown[])[0] === 'valarm'
+    )
+    expect(valarmComponents).toHaveLength(2)
+
+    // Verify first alarm (EMAIL)
+    const firstValarm = valarmComponents[0] as unknown[]
+    const firstProps = firstValarm[1] as unknown[][]
+    const firstTrigger = firstProps.find(p => p[0] === 'trigger')
+    const firstAction = firstProps.find(p => p[0] === 'action')
+    expect(firstTrigger?.[3]).toBe('-PT15M')
+    expect(firstAction?.[3]).toBe('EMAIL')
+
+    // Verify second alarm (DISPLAY)
+    const secondValarm = valarmComponents[1] as unknown[]
+    const secondProps = secondValarm[1] as unknown[][]
+    const secondTrigger = secondProps.find(p => p[0] === 'trigger')
+    const secondAction = secondProps.find(p => p[0] === 'action')
+    expect(secondTrigger?.[3]).toBe('-PT30M')
+    expect(secondAction?.[3]).toBe('DISPLAY')
   })
 })
 
