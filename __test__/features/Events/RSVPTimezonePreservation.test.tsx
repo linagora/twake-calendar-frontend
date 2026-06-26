@@ -437,6 +437,18 @@ describe('#1088 solo RSVP on recurring event patches only the target exception',
       '2026-06-26T08:15:00'
     ])
 
+    // RECURRENCE-ID must also be preserved byte-for-byte: a regression rewriting
+    // it (while keeping the value searchable) would still corrupt the identifier.
+    const recurrenceId = (exc0626[1] as VObjectProperty[]).find(
+      p => p[0] === 'recurrence-id'
+    )
+    expect(recurrenceId).toEqual([
+      'recurrence-id',
+      { tzid: 'Etc/UTC' },
+      'date-time',
+      '2026-06-26T08:15:00'
+    ])
+
     // PARTSTAT updated.
     expect(attendeePartstatOf(exc0626)).toBe('TENTATIVE')
   })

@@ -154,6 +154,43 @@ describe('makeDeleteEventInstanceJCal', () => {
       expect(exdate![3]).toBe(overrideRecurrenceId)
     })
 
+    it('emits the EXDATE in the same TZID form as the master DTSTART (#1088)', () => {
+      // Master DTSTART is expressed as TZID:Europe/Paris local time. The CalDAV
+      // server rejects an EXDATE in bare UTC form against such a DTSTART, so the
+      // EXDATE must carry the same TZID parameter and a matching local value.
+      const vevents: VCalComponent[] = [
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'event-uid-1'],
+            [
+              'dtstart',
+              { tzid: 'Europe/Paris' },
+              'date-time',
+              '2024-03-15T11:00:00'
+            ],
+            ['rrule', {}, 'recur', { freq: 'WEEKLY' }]
+          ],
+          []
+        ]
+      ]
+      // Occurrence to delete, expressed in UTC (10:00Z === 11:00 Europe/Paris).
+      const event: CalendarEvent = {
+        ...baseCalendarEvent,
+        recurrenceId: '2024-03-15T10:00:00Z'
+      } as unknown as CalendarEvent
+
+      const result = makeDeleteEventInstanceJCal(vevents, event)
+
+      const masterProps = result[2][0][1] as VObjectProperty[]
+      const exdate = masterProps.find(([k]) => k === 'exdate')
+      expect(exdate).toBeDefined()
+      expect(exdate![1]).toEqual({ tzid: 'Europe/Paris' })
+      expect(exdate![2]).toBe('date-time')
+      // Local wall-clock time in Europe/Paris, no trailing Z.
+      expect(exdate![3]).toBe('2024-03-15T11:00:00')
+    })
+
     it('does not add a duplicate EXDATE when one already matches', () => {
       const existingExdate: VObjectProperty = [
         'exdate',

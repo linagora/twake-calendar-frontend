@@ -35,19 +35,39 @@ export function makeDeleteEventInstanceJCal(
   })
   const masterProps = vevents[masterIndex][1] as VObjectProperty[]
 
+  // EXDATE must use the same date-time form as the master DTSTART, otherwise the
+  // CalDAV server rejects the update ("EXDATE date-time form (UTC) must match
+  // DTSTART date-time form (TZID:...)"). When the series DTSTART carries a TZID we
+  // therefore emit the EXDATE with that same TZID parameter and express the
+  // occurrence as local wall-clock time in that zone instead of a bare UTC value.
+  // See #1088.
+  const dtstartProp = masterProps.find(([k]) => k.toLowerCase() === 'dtstart')
+  const dtstartTzid = (
+    (dtstartProp?.[1] as Record<string, string> | undefined) ?? {}
+  ).tzid
+
+  const valueType = seriesEvent.allday ? 'date' : 'date-time'
+  const useTzidForm = !seriesEvent.allday && Boolean(dtstartTzid)
+  const exdateParams: Record<string, string> = useTzidForm
+    ? { tzid: dtstartTzid as string }
+    : {}
+  const exdateProperty: VObjectValue = useTzidForm
+    ? (moment
+        .tz(exdateValue, seriesEvent.timezone)
+        .format('YYYY-MM-DDTHH:mm:ss') as VObjectValue)
+    : (exdateValue as VObjectValue)
+
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
     return (
       prop[0].toLowerCase() === 'exdate' &&
       prop[3] &&
-      normalizeRecurrenceId(prop[3]) ===
-        normalizeRecurrenceId(exdateValue as VObjectValue)
+      normalizeRecurrenceId(prop[3]) === normalizeRecurrenceId(exdateProperty)
     )
   })
 
   if (!isDuplicate) {
     // Add new EXDATE property as a separate entry
-    const valueType = seriesEvent.allday ? 'date' : 'date-time'
-    masterProps.push(['exdate', {}, valueType, exdateValue])
+    masterProps.push(['exdate', exdateParams, valueType, exdateProperty])
   }
 
   // Update the master VEVENT with the new properties
