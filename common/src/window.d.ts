@@ -54,6 +54,5 @@ declare global {
     __ws?: WebSocket
 
     HIDE_LANGUAGE_SELECTOR: boolean
-    VISIO_PATH?: string
   }
 }

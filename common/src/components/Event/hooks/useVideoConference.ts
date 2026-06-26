@@ -2,8 +2,7 @@ import { useAppSelector } from '@common/app/hooks'
 import {
   addVideoConferenceToDescription,
   generateMeetingLink,
-  removeVideoConferenceFromDescription,
-  getVisioBaseUrl
+  removeVideoConferenceFromDescription
 } from '@common/utils/videoConferenceUtils'
 
 interface UseVideoConferenceProps {
@@ -34,11 +33,10 @@ export const useVideoConference = ({
   const sub = useAppSelector(state => state.user.userData?.sub)
 
   const handleAddVideoConference = (): void => {
-    const baseUrl = workplaceFqdn ? getVisioBaseUrl(workplaceFqdn) : undefined
-    const newMeetingLink = generateMeetingLink(
-      baseUrl,
-      workplaceFqdn ? undefined : sub
-    )
+    const newMeetingLink = generateMeetingLink({
+      localpart: sub,
+      workplaceFqdn
+    })
     const updatedDescription = addVideoConferenceToDescription(
       description,
       newMeetingLink

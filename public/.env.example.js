@@ -9,6 +9,13 @@ var CALENDAR_BASE_URL = 'https://calendar.example.com'
 var DAV_BASE_URL = 'https://dav.example.com'
 var CALDAV_PREFER_HANDLING = 'strict'
 var MAIL_SPA_URL = 'https://mail.example.com'
+// VIDEO_CONFERENCE_BASE_URL is a URI template (RFC 6570 style).
+// Supported expressions: {localpart}, {workplaceFqdn},
+// {workplaceFqdn.localpart}, {workplaceFqdn.domain}
+// Examples:
+//   'https://visio-{workplaceFqdn}/#/bridge'
+//   'https://visio-{localpart}.twake.app/#/bridge'
+//   'https://{workplaceFqdn.localpart}-visio.{workplaceFqdn.domain}/#/bridge'
 var VIDEO_CONFERENCE_BASE_URL = 'https://meet.linagora.com'
 var SUPPORT_URL = 'https://twake.app/support/'
 var PRIVACY_URL = 'https://twake.app/privacy'
@@ -26,4 +33,3 @@ var DISABLE_PUBLIC_VISIBILITY = false
 var ASK_FOR_TZ_UPDATE = true
 var TOOLTIP_DELAY_MS = 2000
 var HIDE_LANGUAGE_SELECTOR = false
-var VISIO_PATH = '/#/bridge'

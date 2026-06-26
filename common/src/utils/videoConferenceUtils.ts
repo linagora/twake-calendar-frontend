@@ -19,16 +19,55 @@ export function generateMeetingId(): string {
 }
 
 /**
- * Generate a complete meeting link
+ * Context used to resolve the template expressions of VIDEO_CONFERENCE_BASE_URL.
  */
-export function generateMeetingLink(baseUrl?: string, sub?: string): string {
-  let base = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
-  if (!base) return ''
+export interface VisioTemplateContext {
+  localpart?: string
+  workplaceFqdn?: string
+}
 
-  if (base.includes('{localpart}')) {
-    base = base.replace('{localpart}', sub || '')
+/**
+ * Resolve a URI-template (RFC 6570 style) VIDEO_CONFERENCE_BASE_URL.
+ *
+ * Supported expressions:
+ *  - {localpart}             the user local part
+ *  - {workplaceFqdn}         the full workplace FQDN (e.g. tmle.stg.lin-saas.com)
+ *  - {workplaceFqdn.localpart} the first label of the FQDN (e.g. tmle)
+ *  - {workplaceFqdn.domain}  the FQDN without its first label (e.g. stg.lin-saas.com)
+ *
+ * Unknown expressions are left untouched.
+ */
+export function resolveVisioTemplate(
+  template: string,
+  { localpart = '', workplaceFqdn = '' }: VisioTemplateContext
+): string {
+  const [fqdnLocalpart = '', ...fqdnRest] = workplaceFqdn.split('.')
+  const fqdnDomain = fqdnRest.join('.')
+
+  const values: Record<string, string> = {
+    localpart,
+    workplaceFqdn,
+    'workplaceFqdn.localpart': fqdnLocalpart,
+    'workplaceFqdn.domain': fqdnDomain
   }
 
+  return template.replace(/\{([^}]+)\}/g, (match, expression: string) => {
+    const key = expression.trim()
+    return key in values ? values[key] : match
+  })
+}
+
+/**
+ * Generate a complete meeting link from the VIDEO_CONFERENCE_BASE_URL template.
+ */
+export function generateMeetingLink(
+  context: VisioTemplateContext = {},
+  baseUrl?: string
+): string {
+  const template = baseUrl || window.VIDEO_CONFERENCE_BASE_URL
+  if (!template) return ''
+
+  const base = resolveVisioTemplate(template, context)
   const meetingId = generateMeetingId()
   return `${base}/${meetingId}`
 }
@@ -68,31 +107,4 @@ export function removeVideoConferenceFromDescription(
   const lines = description.split('\n')
   const filtered = lines.filter(line => !VISIO_LINE_REGEX.test(line.trim()))
   return filtered.join('\n').trimEnd()
-}
-
-function injectVisioIntoHost(host: string): string {
-  const parts = host.split('.')
-  parts[0] = `${parts[0]}-visio`
-  return parts.join('.')
-}
-
-function getCleanPath(visioPath?: string): string {
-  if (!visioPath) return ''
-  return `/${visioPath.replace(/^\//, '')}`
-}
-
-/**
- * Convert a workplace FQDN to a Visio base URL by appending -visio to the first subdomain segment.
- * E.g., xxxx.twake.app -> https://xxxx-visio.twake.app
- */
-export function getVisioBaseUrl(workplaceFqdn: string): string {
-  if (!workplaceFqdn) return ''
-
-  const trimmed = workplaceFqdn.trim()
-  const protocol = trimmed.startsWith('http://') ? 'http://' : 'https://'
-  const host = trimmed.replace(/^https?:\/\//, '')
-  const hostWithVisio = injectVisioIntoHost(host)
-  const cleanPath = getCleanPath(window.VISIO_PATH)
-
-  return `${protocol}${hostWithVisio}${cleanPath}`
 }
