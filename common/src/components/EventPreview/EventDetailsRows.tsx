@@ -157,9 +157,16 @@ export const EventDescriptionRow: React.FC<{
 
 export const EventAlarmRow: React.FC<{
   alarms?: Valarms
-}> = ({ alarms }) => {
+  ownerEmail?: string
+}> = ({ alarms, ownerEmail }) => {
   const { t } = useI18n()
   if (!alarms?.hasAlarms()) return null
+
+  const alarmsToShow = ownerEmail
+    ? alarms.getAllAlarmsForAttendee(userAttendee.fromEmailField(ownerEmail))
+    : alarms.getAlarms()
+
+  if (alarmsToShow.length === 0) return null
 
   return (
     <BaseEventRow
@@ -168,7 +175,7 @@ export const EventAlarmRow: React.FC<{
       alignSelf="flex-start"
       content={
         <Box>
-          {alarms.getAlarms().map((alarm, index) => (
+          {alarmsToShow.map((alarm, index) => (
             <Typography key={`${alarm.trigger}-${index}`}>
               {t('eventPreview.alarmText', {
                 trigger: translateDuration(alarm.trigger, t),

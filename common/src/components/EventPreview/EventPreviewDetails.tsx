@@ -22,6 +22,7 @@ export interface EventPreviewDetailsProps {
   isNotPrivate: boolean
   isResourceEventPreview?: boolean
   calendarName?: string
+  ownerEmail?: string
 }
 
 export const infoIconSx = (theme: Theme): SxProps<Theme> => ({
@@ -38,7 +39,8 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
   isOwn,
   isNotPrivate,
   isResourceEventPreview,
-  calendarName
+  calendarName,
+  ownerEmail
 }) => {
   const { t } = useI18n()
 
@@ -94,7 +96,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
         attach={event.attach}
       />
 
-      <EventAlarmRow alarms={event.alarms} />
+      <EventAlarmRow alarms={event.alarms} ownerEmail={ownerEmail} />
 
       <EventRepetitionRow repetition={event.repetition} />
 

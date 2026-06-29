@@ -66,8 +66,8 @@ const EventSettingsUpdateModalInternal: React.FC<
       onAllDayChange: () => {}
     })
 
-  // Extract personal alarms for the current user (memoized to avoid recalculation)
-  const personalAlarms = useMemo(() => {
+  // Extract all alarms the current user is part of (personal + global)
+  const editableAlarms = useMemo(() => {
     if (!currentUser) return []
     return formValues.alarms.getAllAlarmsForAttendee(currentUser)
   }, [formValues.alarms, currentUser])
@@ -78,12 +78,12 @@ const EventSettingsUpdateModalInternal: React.FC<
       calList[props.calId]?.events?.[props.eventId] || props.event
     const originalAlarms = originalEvent?.alarms
 
-    // Merge personal alarms from form with other alarms from original event
-    const personalAlarmsValarms = Valarms.fromList(personalAlarms)
+    // Merge form alarms back with original, handling global alarm unsubscription
+    const formAlarms = Valarms.fromList(editableAlarms)
     const mergedAlarms =
       originalAlarms && currentUser
-        ? originalAlarms.mergePersonalAlarms(personalAlarmsValarms, currentUser)
-        : personalAlarmsValarms
+        ? originalAlarms.mergeForPersonalSettingsUpdate(formAlarms, currentUser)
+        : formAlarms
 
     const valuesWithMergedAlarms = {
       ...formValues,
@@ -94,7 +94,7 @@ const EventSettingsUpdateModalInternal: React.FC<
   }, [
     handleSubmit,
     formValues,
-    personalAlarms,
+    editableAlarms,
     calList,
     props.calId,
     props.eventId,
@@ -122,8 +122,8 @@ const EventSettingsUpdateModalInternal: React.FC<
       <EventFormFieldPersonalSettings
         v={{
           ...formValues,
-          // Show only the current user's personal alarms for editing
-          alarms: Valarms.fromList(personalAlarms)
+          // Show all alarms the user is part of (personal + global)
+          alarms: Valarms.fromList(editableAlarms)
         }}
         t={t}
         typeOfAction={typeOfAction}

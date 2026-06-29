@@ -148,6 +148,7 @@ const EventPreviewModal: React.FC<{
           isNotPrivate={isNotPrivate}
           isResourceEventPreview={calendar.owner?.resource}
           calendarName={calendar.name}
+          ownerEmail={calendar.owner.emails?.[0]}
         />
 
         {/* Calendar label */}

@@ -68,7 +68,7 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
     return currentAlarms.removeAlarm(idx) ?? currentAlarms
   }
 
-  const handleChange = (e: SelectChangeEvent<string[]>) => {
+  const handleChange = (e: SelectChangeEvent<string[]>): void => {
     const next = e.target.value as string[]
 
     // If empty string is selected, clear all alarms
@@ -87,7 +87,7 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
     setAlarms(withRemoved)
   }
 
-  const renderValue = (selected: string[]) => {
+  const renderValue = (selected: string[]): string => {
     if (!selected.length) return t('event.form.notifications.')
     return selected.map(v => translateDuration(v, t)).join(', ')
   }
@@ -107,9 +107,7 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
           input={<OutlinedInput />}
           renderValue={renderValue}
         >
-          <MenuItem value="" onClick={() => setAlarms(new Valarms())}>
-            {t('event.form.notifications.')}
-          </MenuItem>
+          <MenuItem value="">{t('event.form.notifications.')}</MenuItem>
           {allValues.map(value => (
             <MenuItem key={value} value={value}>
               <ListItemText primary={translateDuration(value, t)} />
