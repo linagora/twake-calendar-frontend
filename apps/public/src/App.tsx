@@ -9,6 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
 import { PublicLayout } from './components/PublicLayout'
 import { EventPreviewPage } from './features/EventPreview/EventPreviewPage'
+import { BookingPage } from './features/booking/BookingPage'
 
 import {
   enGB,
@@ -77,6 +78,14 @@ export default function App(): JSX.Element {
                     element={
                       <PublicLayout>
                         <EventPreviewPage />
+                      </PublicLayout>
+                    }
+                  />
+                  <Route
+                    path="/booking/:bookingLinkPublicId"
+                    element={
+                      <PublicLayout>
+                        <BookingPage />
                       </PublicLayout>
                     }
                   />
