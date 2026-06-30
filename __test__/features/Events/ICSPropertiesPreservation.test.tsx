@@ -11,7 +11,7 @@ import {
 } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
@@ -75,7 +75,10 @@ function baseCalendarEvent(
     class: 'PUBLIC',
     sequence: 1,
     exdates: [],
-    ...overrides
+    ...overrides,
+    repetition: overrides.repetition?.freq
+      ? new RepetitionObject(overrides.repetition)
+      : undefined
   } as CalendarEvent
 }
 

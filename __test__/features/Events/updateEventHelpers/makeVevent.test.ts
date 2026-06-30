@@ -1,7 +1,7 @@
 import { makeVevent } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
@@ -27,6 +27,10 @@ function getAllProps(vevent: [string, unknown[]], name: string): unknown[][] {
 
 /** Minimal valid CalendarEvent to build on in each test. */
 function baseEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
+  const repetition =
+    overrides.repetition && !(overrides.repetition instanceof RepetitionObject)
+      ? new RepetitionObject(overrides.repetition)
+      : overrides.repetition
   return {
     uid: 'base-uuid-1234',
     title: 'Test Event',
@@ -35,7 +39,9 @@ function baseEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     timezone: TZID,
     allday: false,
     attendee: [],
-    ...overrides
+    timezone: 'Europe/Paris',
+    ...overrides,
+    repetition
   } as CalendarEvent
 }
 

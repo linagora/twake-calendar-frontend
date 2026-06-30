@@ -454,7 +454,7 @@ describe('calendarEventToJCal', () => {
       allday: false,
       location: 'Room 101',
       description: 'Discuss project roadmap.',
-      repetition: { freq: 'WEEKLY' },
+      repetition: new RepetitionObject({ freq: 'WEEKLY' }),
       organizer: new userOrganiser({
         cn: 'Alice',
         cal_address: 'alice@example.com'
@@ -622,7 +622,7 @@ describe('calendarEventToJCal', () => {
       allday: true,
       location: 'Room 101',
       description: 'Discuss project roadmap.',
-      repetition: { freq: 'WEEKLY', interval: 2 },
+      repetition: new RepetitionObject({ freq: 'WEEKLY', interval: 2 }),
       organizer: new userOrganiser({
         cn: 'Alice',
         cal_address: 'alice@example.com'
@@ -967,7 +967,7 @@ describe('calendarEventToJCal', () => {
       timezone: 'Europe/Paris',
       allday: false,
       sequence: 2,
-      repetition: { freq: 'DAILY', interval: 1 },
+      repetition: new RepetitionObject({ freq: 'DAILY', interval: 1 }),
       attendee: []
     }
 

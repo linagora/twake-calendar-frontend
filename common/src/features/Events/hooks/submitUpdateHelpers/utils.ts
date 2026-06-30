@@ -5,7 +5,7 @@ import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEv
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { Valarms } from '@common/types/Valarms'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
 
@@ -74,7 +74,9 @@ export function prepareUpdatedEvent({
     uid: event.uid,
     description: values.description,
     location: values.location,
-    repetition: values.repetition,
+    repetition: values.repetition?.freq
+      ? new RepetitionObject(values.repetition)
+      : undefined,
     class: values.eventClass,
     organizer: event.organizer,
     timezone: values.timezone,

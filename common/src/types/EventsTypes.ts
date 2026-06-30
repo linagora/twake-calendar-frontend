@@ -40,7 +40,18 @@ export interface CalendarEvent {
   attach?: Attachment[]
 }
 
-export class RepetitionObject {
+export interface RepetitionData {
+  freq: string
+  interval?: number | null
+  byday?: string[] | null
+  occurrences?: number | null
+  endDate?: string | null
+  wkst?: string | null
+}
+
+export type RepetitionOptions = Partial<RepetitionData>
+
+export class RepetitionObject implements RepetitionData {
   freq: string
   interval?: number | null
   byday?: string[] | null
@@ -48,13 +59,20 @@ export class RepetitionObject {
   endDate?: string | null
   wkst?: string | null
 
-  constructor(data: Partial<RepetitionObject> = {}) {
-    this.freq = data.freq ?? ''
-    this.interval = data.interval
-    this.byday = data.byday
-    this.occurrences = data.occurrences
-    this.endDate = data.endDate
-    this.wkst = data.wkst
+  constructor({
+    freq,
+    interval,
+    byday,
+    occurrences,
+    endDate,
+    wkst
+  }: RepetitionOptions = {}) {
+    this.freq = freq ?? ''
+    this.interval = interval
+    this.byday = byday
+    this.occurrences = occurrences
+    this.endDate = endDate
+    this.wkst = wkst
   }
 
   asJcal(allday: boolean, tzid: string): VObjectProperty {

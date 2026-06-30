@@ -6,7 +6,7 @@ import { putEvent } from '@common/features/Calendars/CalendarSlice'
 import { buildDelegatedEventURL } from '@common/features/Events/utils/buildDelegatedEventURL'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent } from '@common/types/EventsTypes'
+import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
 import { Valarms } from '@common/types/Valarms'
 import { assertThunkSuccess } from '@common/utils/assertThunkSuccess'
 import {
@@ -56,7 +56,9 @@ export async function handleCreateEvent({
     description: values.description,
     location: values.location,
     class: values.eventClass,
-    repetition: values.repetition,
+    repetition: values.repetition?.freq
+      ? new RepetitionObject(values.repetition)
+      : undefined,
     organizer,
     timezone: values.timezone,
     attendee: [userAttendee.fromOrganizer(organizer)],
