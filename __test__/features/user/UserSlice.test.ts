@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import userReducer, { setUserData } from '@common/features/User/UserSlice'
 import { userData, userOrganiser } from '@common/features/User/userDataTypes'
 
