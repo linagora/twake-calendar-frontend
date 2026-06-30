@@ -17,14 +17,19 @@ jest.mock('@common/utils/apiUtils', () => ({
 
 const mockSlotsResponse: BookingSlotsResponse = {
   durationMinutes: 30,
+  autoAccept: false,
+  owner: {
+    displayName: 'John Doe',
+    email: 'john.doe@open-paas.org'
+  },
   range: {
-    from: '2036-01-26T00:00:00Z',
-    to: '2036-01-27T00:00:00Z'
+    from: '2036-01-26T01:00:00+01:00',
+    to: '2036-01-27T01:00:00+01:00'
   },
   slots: [
-    { start: '2036-01-26T09:00:00Z' },
-    { start: '2036-01-26T09:30:00Z' },
-    { start: '2036-01-26T10:00:00Z' }
+    { start: '2036-01-26T10:00:00+01:00' },
+    { start: '2036-01-26T10:30:00+01:00' },
+    { start: '2036-01-26T11:00:00+01:00' }
   ]
 }
 
@@ -50,6 +55,26 @@ describe('Public Booking API', () => {
         'api/booking-links/550e8400-e29b-41d4-a716-446655440000/slots?from=2036-01-26T00%3A00%3A00Z&to=2036-01-27T00%3A00%3A00Z'
       )
       expect(result).toEqual(mockSlotsResponse)
+      expect(result.owner.displayName).toBe('John Doe')
+      expect(result.owner.email).toBe('john.doe@open-paas.org')
+    })
+
+    it('should include timeZone when provided', async () => {
+      ;(api.get as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockSlotsResponse)
+      })
+
+      await fetchBookingSlots(
+        '550e8400-e29b-41d4-a716-446655440000',
+        '2036-01-26T00:00:00Z',
+        '2036-01-27T00:00:00Z',
+        'Europe/Paris'
+      )
+
+      expect(api.get).toHaveBeenCalledWith(
+        'api/booking-links/550e8400-e29b-41d4-a716-446655440000/slots?from=2036-01-26T00%3A00%3A00Z&to=2036-01-27T00%3A00%3A00Z&timeZone=Europe%2FParis'
+      )
     })
 
     it('should URL encode query parameters', async () => {
@@ -118,12 +143,15 @@ describe('Public Booking API', () => {
       notes: 'Please call via Zoom.'
     }
 
-    it('should create booking successfully', async () => {
+    it('should create booking and return confirmation token', async () => {
       ;(api.post as jest.Mock).mockResolvedValue({
-        ok: true
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          bookingConfirmationToken: 'signed-jwt-token'
+        })
       })
 
-      await createBooking(
+      const result = await createBooking(
         '550e8400-e29b-41d4-a716-446655440000',
         mockBookingRequest
       )
@@ -132,6 +160,7 @@ describe('Public Booking API', () => {
         'api/booking-links/550e8400-e29b-41d4-a716-446655440000/book',
         { json: mockBookingRequest }
       )
+      expect(result.bookingConfirmationToken).toBe('signed-jwt-token')
     })
 
     it('should create booking without optional fields', async () => {
@@ -144,10 +173,13 @@ describe('Public Booking API', () => {
       }
 
       ;(api.post as jest.Mock).mockResolvedValue({
-        ok: true
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          bookingConfirmationToken: 'signed-jwt-token'
+        })
       })
 
-      await createBooking(
+      const result = await createBooking(
         '550e8400-e29b-41d4-a716-446655440000',
         minimalRequest
       )
@@ -156,6 +188,7 @@ describe('Public Booking API', () => {
         'api/booking-links/550e8400-e29b-41d4-a716-446655440000/book',
         { json: minimalRequest }
       )
+      expect(result.bookingConfirmationToken).toBe('signed-jwt-token')
     })
 
     it('should throw error when response is not ok (400 - invalid slot)', async () => {

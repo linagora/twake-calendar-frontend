@@ -1,3 +1,5 @@
+import { User } from '@common/components/Attendees/types'
+
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
 
 export interface WeeklyAvailabilityRule {
@@ -35,6 +37,10 @@ export interface Slot {
 
 export interface BookingSlotsResponse {
   durationMinutes: number
+  autoAccept: boolean
+  name?: string
+  description?: string
+  owner: User
   range: {
     from: string
     to: string
@@ -95,6 +101,10 @@ export interface UpdateBookingLinkRequest {
    * Omit to leave unchanged.
    */
   description?: string | null
+}
+
+export interface CreateBookingResponse {
+  bookingConfirmationToken: string
 }
 
 export interface ResetBookingLinkResponse {
