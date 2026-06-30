@@ -1,6 +1,5 @@
 import { RepetitionRule } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { userOrganiser } from '@common/features/User/userDataTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import moment from 'moment'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
@@ -53,15 +52,7 @@ export function makeVevent(
     ])
   }
   if (event.organizer) {
-    // event.organizer is typed as userOrganiser, but at runtime it can be a
-    // plain object: it originates from state.user.organiserData (initialised
-    // as a plain object) and any instance loses its prototype once stored in
-    // the Redux store. Re-wrap it so asJcal() is always callable.
-    const organizer =
-      event.organizer instanceof userOrganiser
-        ? event.organizer
-        : new userOrganiser(event.organizer)
-    vevent[1].push(organizer.asJcal())
+    vevent[1].push(event.organizer.asJcal())
   }
   if (event.location) {
     vevent[1].push(['location', {}, 'text', event.location])

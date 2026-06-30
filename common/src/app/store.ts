@@ -29,7 +29,10 @@ export const setupStore = (preloadedState?: Partial<RootState>) => {
         serializableCheck: {
           // Class instances are intentionally stored here for .asJcal() serialization; plain data remains inspectable in devtools
           ignoredActionPaths: ['payload.events'], // suppress during the fulfilled action check
-          ignoredPaths: [/^calendars\.list\..+\.events/] // suppress state checks for events
+          ignoredPaths: [
+            /^calendars\.list\..+\.events/, // suppress state checks for events
+            'user.organiserData' // userOrganiser instance, stored for asJcal()/asMailto()
+          ]
         }
       })
         .concat(routerMiddleware)

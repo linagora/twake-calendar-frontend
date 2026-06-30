@@ -38,7 +38,7 @@ const UserSlice = createAppSlice({
   name: 'user',
   initialState: {
     userData: {} as userData,
-    organiserData: {} as userOrganiser,
+    organiserData: new userOrganiser(),
     tokens: null,
     coreConfig: {
       language: null,
@@ -54,11 +54,12 @@ const UserSlice = createAppSlice({
     // Regular reducers
     setUserData: create.reducer((state, action: PayloadAction<userData>) => {
       state.userData = action.payload
-      if (!state.organiserData) {
-        state.organiserData = {} as userOrganiser
-      }
-      state.organiserData.cn = action.payload.sub
-      state.organiserData.cal_address = `mailto:${action.payload.email}`
+      // Reassign a full-fledged userOrganiser instance so that consumers (e.g.
+      // makeVevent) can rely on its methods (asJcal/asMailto) being available.
+      state.organiserData = new userOrganiser({
+        cn: action.payload.sub,
+        cal_address: `mailto:${action.payload.email}`
+      })
       state.loading = false
     }),
     setTokens: create.reducer(

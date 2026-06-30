@@ -3,7 +3,11 @@ import { ReducerCreators } from '@reduxjs/toolkit'
 import { fetchCurrentUser } from '../UserDao'
 import { RejectedError, UserState } from '../UserSlice'
 import { OpenPaasUserData } from '../type/OpenPaasUserData'
-import { ConfigurationItem, ModuleConfiguration } from '../userDataTypes'
+import {
+  ConfigurationItem,
+  ModuleConfiguration,
+  userOrganiser
+} from '../userDataTypes'
 
 function updateBasicUserData(
   state: UserState,
@@ -18,16 +22,19 @@ function updateOrganizerData(
   state: UserState,
   payload: OpenPaasUserData
 ): void {
-  if (!state.organiserData) {
-    state.organiserData = {} as { cn: string; cal_address: string }
-  }
+  // Reassign a full-fledged userOrganiser instance (rather than mutating
+  // fields) so its methods survive in the store; keep previously set values
+  // when the payload does not provide them.
+  let cn = state.organiserData?.cn ?? ''
+  let cal_address = state.organiserData?.cal_address ?? ''
   if (payload.firstname && payload.lastname) {
-    state.organiserData.cn = `${payload.firstname} ${payload.lastname}`
+    cn = `${payload.firstname} ${payload.lastname}`
   }
   if (payload.preferredEmail) {
-    state.organiserData.cal_address = payload.preferredEmail
+    cal_address = payload.preferredEmail
     state.userData.email = payload.preferredEmail
   }
+  state.organiserData = new userOrganiser({ cn, cal_address })
 }
 
 function applyCoreModuleConfig(
