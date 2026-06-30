@@ -47,6 +47,21 @@ export class RepetitionObject implements RepetitionData {
     this.timezone = timezone
   }
 
+  static fromFormValues(
+    repetition: RepetitionOptions | undefined,
+    context: {
+      allday?: boolean
+      timezone?: string
+    }
+  ): RepetitionObject | undefined {
+    if (!repetition?.freq) return undefined
+    return new RepetitionObject({
+      ...repetition,
+      allday: context.allday,
+      timezone: context.timezone
+    })
+  }
+
   asJcal(): VObjectProperty {
     const repetitionRule: RepetitionRule = { freq: this.freq }
     if (this.interval != null) {

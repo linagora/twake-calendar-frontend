@@ -57,13 +57,10 @@ export async function handleCreateEvent({
     description: values.description,
     location: values.location,
     class: values.eventClass,
-    repetition: values.repetition?.freq
-      ? new RepetitionObject({
-          ...values.repetition,
-          allday: values.allday,
-          timezone: values.timezone
-        })
-      : undefined,
+    repetition: RepetitionObject.fromFormValues(values.repetition, {
+      allday: values.allday,
+      timezone: values.timezone
+    }),
     organizer,
     timezone: values.timezone,
     attendee: [userAttendee.fromOrganizer(organizer)],

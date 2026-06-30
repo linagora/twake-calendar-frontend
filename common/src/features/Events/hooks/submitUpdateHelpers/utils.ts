@@ -75,13 +75,10 @@ export function prepareUpdatedEvent({
     uid: event.uid,
     description: values.description,
     location: values.location,
-    repetition: values.repetition?.freq
-      ? new RepetitionObject({
-          ...values.repetition,
-          allday: values.allday,
-          timezone: values.timezone
-        })
-      : undefined,
+    repetition: RepetitionObject.fromFormValues(values.repetition, {
+      allday: values.allday,
+      timezone: values.timezone
+    }),
     class: values.eventClass,
     organizer: event.organizer,
     timezone: values.timezone,

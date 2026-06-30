@@ -380,8 +380,7 @@ export function parseCalendarEvent({
   processEventDates(event, context.duration)
 
   if (event.repetition) {
-    event.repetition = new RepetitionObject({
-      ...event.repetition,
+    event.repetition = RepetitionObject.fromFormValues(event.repetition, {
       allday: event.allday,
       timezone: event.timezone
     })
