@@ -458,6 +458,9 @@
     "nextMonth": "Mois suivant",
     "previousMonth": "Mois précédent"
   },
+  "booking": {
+    "durationMinutes": "%{count} min"
+  },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
     "title": "Agenda public par Twake Calendar.",

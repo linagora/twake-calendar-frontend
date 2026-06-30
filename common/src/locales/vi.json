@@ -456,6 +456,9 @@
     "nextMonth": "Tháng sau",
     "previousMonth": "Tháng trước"
   },
+  "booking": {
+    "durationMinutes": "%{count} phút"
+  },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
     "title": "Lịch công khai bởi Twake Calendar.",
