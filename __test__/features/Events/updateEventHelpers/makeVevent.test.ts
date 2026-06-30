@@ -236,6 +236,22 @@ describe('RFC 5545 – ORGANIZER (§3.8.4.3)', () => {
     const vevent = makeVevent(baseEvent({ organizer: undefined }), TZID)
     expect(getProp(vevent, 'organizer')).toBeUndefined()
   })
+
+  // Regression for #1095: state.user.organiserData is a plain object, and any
+  // userOrganiser instance loses its prototype once stored in Redux, so
+  // event.organizer can reach makeVevent without an asJcal() method.
+  it('serializes a plain-object organizer without throwing', () => {
+    const event = baseEvent({
+      organizer: {
+        cn: 'Alice',
+        cal_address: 'mailto:alice@example.com'
+      } as userOrganiser
+    })
+    const vevent = makeVevent(event, TZID)
+    const org = getProp(vevent, 'organizer')
+    expect(org![3]).toBe('mailto:alice@example.com')
+    expect((org![1] as Record<string, string>).cn).toBe('Alice')
+  })
 })
 
 describe('RFC 5545 – ATTENDEE (§3.8.4.1)', () => {
