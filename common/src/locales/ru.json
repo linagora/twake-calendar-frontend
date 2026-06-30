@@ -459,7 +459,26 @@
     "previousMonth": "Предыдущий месяц"
   },
   "booking": {
-    "durationMinutes": "%{count} мин"
+    "durationMinutes": "%{count} мин",
+    "confirm": {
+      "title": "Подтвердите бронирование",
+      "button": "Подтвердить",
+      "inProgress": "Подтверждение..."
+    },
+    "form": {
+      "name": "Имя",
+      "namePlaceholder": "Ваше имя (необязательно)",
+      "email": "Email"
+    },
+    "error": {
+      "emailRequired": "Требуется email",
+      "createFailed": "Не удалось создать бронирование. Пожалуйста, попробуйте снова.",
+      "loadFailed": "Не удалось загрузить доступные слоты. Пожалуйста, попробуйте снова."
+    },
+    "noSlots": "Нет доступных слотов",
+    "selectDayPrompt": "Выберите день, чтобы увидеть доступное время",
+    "defaultEventTitle": "Бронирование",
+    "videoMeetingCaption": "Доступно после бронирования"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

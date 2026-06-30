@@ -15,7 +15,7 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
   bookingInfo
 }) => {
   const { t } = useI18n()
-  const timeZoneLabel = `(${getTimezoneOffset(browserDefaultTimeZone)}) ${browserDefaultTimeZone.replace(/_/g, ' ')}`
+  const timeZoneLabel = `(${getTimezoneOffset(browserDefaultTimeZone)}) ${browserDefaultTimeZone.replace(/_/g, ' ').split('/')?.[1]}`
   const cameraIcon = (
     <img src={iconCamera} alt="camera" width={24} height={24} />
   )
@@ -70,7 +70,7 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
           color: 'text.secondary',
           display: 'flex',
           flexDirection: 'column',
-          gap: '6px',
+          gap: '12px',
           whiteSpace: 'nowrap'
         }}
       >
@@ -80,26 +80,39 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              justifyContent: 'flex-end'
+              gap: '8px',
+              justifyContent: 'flex-start'
             }}
           >
             <LanguageOutlinedIcon sx={{ color: 'text.secondary' }} />
             {timeZoneLabel}
           </Typography>
         </Box>
-        <Typography
-          variant="caption"
+        <Box
           sx={{
             display: 'flex',
+            gap: '8px',
             alignItems: 'center',
-            gap: '6px',
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-start'
           }}
         >
           {cameraIcon}
-          {t('event.form.videoMeeting')}
-        </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              alignItems: 'flex-start'
+            }}
+          >
+            <Typography variant="caption">
+              {t('event.form.videoMeeting')}
+            </Typography>
+            <Typography variant="overline">
+              {t('booking.videoMeetingCaption')}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     </Box>
   )

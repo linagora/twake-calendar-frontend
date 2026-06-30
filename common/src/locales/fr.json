@@ -459,7 +459,26 @@
     "previousMonth": "Mois précédent"
   },
   "booking": {
-    "durationMinutes": "%{count} min"
+    "durationMinutes": "%{count} min",
+    "confirm": {
+      "title": "Confirmer votre réservation",
+      "button": "Confirmer",
+      "inProgress": "Confirmation..."
+    },
+    "form": {
+      "name": "Nom",
+      "namePlaceholder": "Votre nom (optionnel)",
+      "email": "Email"
+    },
+    "error": {
+      "emailRequired": "L'email est requis",
+      "createFailed": "Échec de la création de la réservation. Veuillez réessayer.",
+      "loadFailed": "Impossible de charger les créneaux disponibles. Veuillez réessayer."
+    },
+    "noSlots": "Aucun créneau disponible",
+    "selectDayPrompt": "Sélectionnez un jour pour voir les horaires disponibles",
+    "defaultEventTitle": "Réservation",
+    "videoMeetingCaption": "Disponible après la réservation"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

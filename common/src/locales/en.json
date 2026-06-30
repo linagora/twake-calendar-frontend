@@ -457,7 +457,26 @@
     "previousMonth": "Previous month"
   },
   "booking": {
-    "durationMinutes": "%{count} min"
+    "durationMinutes": "%{count} min",
+    "confirm": {
+      "title": "Confirm your booking",
+      "button": "Confirm",
+      "inProgress": "Confirming..."
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Your name (optional)",
+      "email": "Email"
+    },
+    "error": {
+      "emailRequired": "Email is required",
+      "createFailed": "Failed to create booking. Please try again.",
+      "loadFailed": "Unable to load available slots. Please try again."
+    },
+    "noSlots": "No slots available",
+    "selectDayPrompt": "Select a day to see available times",
+    "defaultEventTitle": "Booking",
+    "videoMeetingCaption": "Available after booking"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

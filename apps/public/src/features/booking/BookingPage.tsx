@@ -8,10 +8,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   Typography
 } from '@linagora/twake-mui'
@@ -23,10 +19,12 @@ import {
 } from '@mui/x-date-pickers'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { fetchBookingSlots } from './BookingDao'
+import { createBooking, fetchBookingSlots } from './BookingDao'
 import { useTheme } from '@mui/material'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Dayjs } from 'dayjs'
+import { BookingConfirmDialog } from './components/BookingConfirmDialog'
+import { useI18n } from 'twake-i18n'
 
 interface AvailableDayProps extends PickerDayProps {
   availableDays: Set<string>
@@ -54,6 +52,7 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
 }
 
 export const BookingPage: React.FC = () => {
+  const { t } = useI18n()
   const { bookingLinkPublicId } = useParams<{
     bookingLinkPublicId: string
   }>()
@@ -93,7 +92,7 @@ export const BookingPage: React.FC = () => {
         setSlots(response.slots)
         setBookingInfo(response)
       } catch {
-        setError('Unable to load available slots. Please try again.')
+        setError(t('booking.error.loadFailed'))
       } finally {
         setLoading(false)
       }
@@ -143,9 +142,23 @@ export const BookingPage: React.FC = () => {
     setConfirmOpen(false)
   }
 
-  const handleConfirmBooking = (): void => {
-    // TODO: call createBooking from BookingDao with selectedSlot + form data
+  const handleConfirmBooking = async (
+    name: string,
+    email: string
+  ): Promise<void> => {
+    if (!bookingLinkPublicId || !selectedSlot) {
+      return
+    }
+    await createBooking(bookingLinkPublicId, {
+      startUtc: selectedSlot.start,
+      creator: {
+        name: name || undefined,
+        email
+      },
+      eventTitle: bookingInfo?.eventTitle || t('booking.defaultEventTitle')
+    })
     setConfirmOpen(false)
+    setSelectedSlot(null)
   }
 
   return (
@@ -253,45 +266,27 @@ export const BookingPage: React.FC = () => {
                       variant="body2"
                       sx={{ color: 'text.secondary' }}
                     >
-                      No slots available
+                      {t('booking.noSlots')}
                     </Typography>
                   )}
                 </Box>
               </Box>
             ) : (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Select a day to see available times
+                {t('booking.selectDayPrompt')}
               </Typography>
             )}
           </Box>
         </Box>
       )}
 
-      <Dialog open={confirmOpen} onClose={handleCloseConfirm}>
-        <DialogTitle>Confirm your booking</DialogTitle>
-        <DialogContent>
-          {selectedSlot && (
-            <Typography variant="body2">
-              {new Date(selectedSlot.start).toLocaleString(undefined, {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </Typography>
-          )}
-          {/* TODO: name/email/notes form fields go here */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm} variant="text">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmBooking} variant="contained">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <BookingConfirmDialog
+        open={confirmOpen}
+        onClose={handleCloseConfirm}
+        selectedSlot={selectedSlot}
+        bookingInfo={bookingInfo}
+        onConfirm={handleConfirmBooking}
+      />
     </Box>
   )
 }
