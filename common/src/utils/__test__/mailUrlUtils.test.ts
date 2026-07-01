@@ -31,9 +31,9 @@ describe('resolveMailSpaUrl', () => {
   it('should resolve workplaceFqdn expressions', () => {
     window.MAIL_SPA_URL =
       'https://{workplaceFqdn.localpart}-mail.{workplaceFqdn.domain}'
-    expect(
-      resolveMailSpaUrl({ workplaceFqdn: 'tmle.stg.lin-saas.com' })
-    ).toBe('https://tmle-mail.stg.lin-saas.com')
+    expect(resolveMailSpaUrl({ workplaceFqdn: 'tmle.stg.lin-saas.com' })).toBe(
+      'https://tmle-mail.stg.lin-saas.com'
+    )
   })
 
   it('should return null when MAIL_SPA_URL is not configured', () => {
