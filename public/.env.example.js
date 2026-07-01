@@ -8,6 +8,12 @@ var SSO_POST_LOGOUT_REDIRECT = 'http://example.com?logout=1'
 var CALENDAR_BASE_URL = 'https://calendar.example.com'
 var DAV_BASE_URL = 'https://dav.example.com'
 var CALDAV_PREFER_HANDLING = 'strict'
+// MAIL_SPA_URL is a URI template (RFC 6570 style).
+// Supported expressions: {localpart}, {workplaceFqdn},
+// {workplaceFqdn.localpart}, {workplaceFqdn.domain}
+// Examples:
+//   'https://mail-{workplaceFqdn}'
+//   'https://{workplaceFqdn.localpart}-mail.{workplaceFqdn.domain}'
 var MAIL_SPA_URL = 'https://mail.example.com'
 // VIDEO_CONFERENCE_BASE_URL is a URI template (RFC 6570 style).
 // Supported expressions: {localpart}, {workplaceFqdn},

@@ -2,6 +2,8 @@ import EventDuplication from '@common/components/Event/EventDuplicate'
 import { Menu, MenuItem } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { useAppSelector } from '@common/app/hooks'
+import { resolveMailSpaUrl } from '@common/utils/mailUrlUtils'
 
 interface EventPreviewActionMenuProps {
   anchorEl: Element | null
@@ -23,7 +25,13 @@ export const EventPreviewActionMenu: React.FC<EventPreviewActionMenuProps> = ({
   onEdit
 }) => {
   const { t } = useI18n()
-  const mailSpaUrl = window.MAIL_SPA_URL ?? null
+  const workplaceFqdn = useAppSelector(
+    state => state.user.userData?.workplaceFqdn
+  )
+  const mailSpaUrl = resolveMailSpaUrl({
+    localpart: userEmail?.split('@')[0],
+    workplaceFqdn
+  })
 
   const attendees = event.attendee ?? []
   const otherAttendees = attendees.filter(
