@@ -21,7 +21,7 @@ export const BookingPage: React.FC = () => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
-  const { slots, bookingInfo, initialLoading, monthLoading, error } =
+  const { slots, bookingInfo, initialLoading, monthLoading, error, refetch } =
     useBookingData({
       bookingLinkPublicId,
       visibleMonth,
@@ -89,6 +89,7 @@ export const BookingPage: React.FC = () => {
       },
       eventTitle: bookingInfo?.name || t('booking.defaultEventTitle')
     })
+    refetch()
     setConfirmOpen(false)
     setSelectedSlot(null)
   }
@@ -102,7 +103,6 @@ export const BookingPage: React.FC = () => {
         borderRadius: '12px',
         width: '100%',
         maxWidth: '900px',
-        padding: { xs: '24px', sm: '32px' },
         display: 'flex',
         height: '100%',
         flexDirection: 'column'

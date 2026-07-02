@@ -2,6 +2,7 @@ import {
   BookingSlotsResponse,
   Slot
 } from '@common/features/booking/types/BookingTypes'
+import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useEffect, useRef, useState } from 'react'
 import { fetchBookingSlots } from '../BookingDao'
 
@@ -17,6 +18,7 @@ interface UseBookingDataResult {
   initialLoading: boolean
   monthLoading: boolean
   error: string | null
+  refetch: () => void
 }
 
 export const useBookingData = ({
@@ -33,6 +35,7 @@ export const useBookingData = ({
   const [error, setError] = useState<string | null>(null)
 
   const hasLoadedOnceRef = useRef<boolean>(false)
+  const [refreshVersion, setRefreshVersion] = useState<number>(0)
 
   useEffect(() => {
     if (!bookingLinkPublicId) {
@@ -60,7 +63,12 @@ export const useBookingData = ({
           59,
           59
         ).toISOString()
-        const response = await fetchBookingSlots(bookingLinkPublicId, from, to)
+        const response = await fetchBookingSlots(
+          bookingLinkPublicId,
+          from,
+          to,
+          browserDefaultTimeZone
+        )
 
         if (cancelled) {
           return
@@ -72,6 +80,8 @@ export const useBookingData = ({
       } catch {
         if (!cancelled) {
           setError(loadErrorMessage)
+          setSlots([])
+          setBookingInfo(null)
         }
       } finally {
         if (!cancelled) {
@@ -89,13 +99,18 @@ export const useBookingData = ({
     return () => {
       cancelled = true
     }
-  }, [bookingLinkPublicId, loadErrorMessage, visibleMonth])
+  }, [bookingLinkPublicId, loadErrorMessage, visibleMonth, refreshVersion])
+
+  const refetch = (): void => {
+    setRefreshVersion(v => v + 1)
+  }
 
   return {
     slots,
     bookingInfo,
     initialLoading,
     monthLoading,
-    error
+    error,
+    refetch
   }
 }

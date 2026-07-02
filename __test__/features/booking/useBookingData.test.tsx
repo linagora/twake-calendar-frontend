@@ -53,7 +53,8 @@ describe('useBookingData', () => {
     expect(mockFetchBookingSlots).toHaveBeenCalledWith(
       'public-booking-link-id',
       '2036-01-01T00:00:00.000Z',
-      '2036-01-31T23:59:59.000Z'
+      '2036-01-31T23:59:59.000Z',
+      expect.any(String)
     )
     expect(result.current.bookingInfo).toEqual(mockResponse)
     expect(result.current.slots).toEqual(mockResponse.slots)
@@ -106,7 +107,8 @@ describe('useBookingData', () => {
     expect(mockFetchBookingSlots).toHaveBeenLastCalledWith(
       'public-booking-link-id',
       '2036-02-01T00:00:00.000Z',
-      '2036-02-29T23:59:59.000Z'
+      '2036-02-29T23:59:59.000Z',
+      expect.any(String)
     )
     expect(result.current.slots).toEqual([
       { start: '2036-02-03T10:00:00.000Z' }

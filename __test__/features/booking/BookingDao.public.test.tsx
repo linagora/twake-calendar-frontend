@@ -194,7 +194,8 @@ describe('Public Booking API', () => {
     it('should throw error when response is not ok (400 - invalid slot)', async () => {
       ;(api.post as jest.Mock).mockResolvedValue({
         ok: false,
-        status: 400
+        status: 400,
+        text: jest.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -208,7 +209,8 @@ describe('Public Booking API', () => {
     it('should throw error when response is not ok (404 - link not found)', async () => {
       ;(api.post as jest.Mock).mockResolvedValue({
         ok: false,
-        status: 404
+        status: 404,
+        text: jest.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -222,7 +224,8 @@ describe('Public Booking API', () => {
     it('should throw error when response is not ok (422 - business validation)', async () => {
       ;(api.post as jest.Mock).mockResolvedValue({
         ok: false,
-        status: 422
+        status: 422,
+        text: jest.fn().mockResolvedValue('')
       })
 
       await expect(
@@ -231,6 +234,21 @@ describe('Public Booking API', () => {
           mockBookingRequest
         )
       ).rejects.toThrow('createBooking failed with status 422')
+    })
+
+    it('should throw error with backend message when response body is present', async () => {
+      ;(api.post as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 422,
+        text: jest.fn().mockResolvedValue('This slot is already booked')
+      })
+
+      await expect(
+        createBooking(
+          '550e8400-e29b-41d4-a716-446655440000',
+          mockBookingRequest
+        )
+      ).rejects.toThrow('This slot is already booked')
     })
   })
 })

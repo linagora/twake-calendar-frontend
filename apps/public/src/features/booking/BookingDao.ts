@@ -42,7 +42,10 @@ export async function createBooking(
     { json: request }
   )
   if (!response.ok) {
-    throw new Error(`createBooking failed with status ${response.status}`)
+    const body = await response.text()
+    throw new Error(
+      body || `createBooking failed with status ${response.status}`
+    )
   }
   return response.json()
 }
