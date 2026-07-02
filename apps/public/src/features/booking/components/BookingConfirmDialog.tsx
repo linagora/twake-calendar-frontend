@@ -4,19 +4,23 @@ import {
 } from '@common/features/booking/types/BookingTypes'
 import { DateTimeSummarySection } from '@common/components/Event/components/DateTimeFields/DateTimeSubPanels'
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   TextField,
   Typography
 } from '@linagora/twake-mui'
+import CloseIcon from '@mui/icons-material/Close'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
-
+import { Avatar } from '@linagora/twake-mui'
+import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 interface BookingConfirmDialogProps {
   open: boolean
   onClose: () => void
@@ -24,7 +28,6 @@ interface BookingConfirmDialogProps {
   bookingInfo: BookingSlotsResponse | null
   onConfirm: (name: string, email: string) => Promise<void>
 }
-
 export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   open,
   onClose,
@@ -37,7 +40,6 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const [email, setEmail] = useState<string>('')
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
-
   const handleConfirm = async (): Promise<void> => {
     if (!email) {
       setBookingError(t('booking.error.emailRequired'))
@@ -55,16 +57,45 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
       setBookingInProgress(false)
     }
   }
-
   const handleClose = (): void => {
     onClose()
     setBookingError(null)
   }
-
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>{t('booking.confirm.title')}</DialogTitle>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '4px',
+          my: '16px'
+        }}
+      >
+        {bookingInfo?.owner ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Avatar {...stringAvatar(bookingInfo.owner.displayName)} />
+            <Typography variant="caption">
+              {bookingInfo.owner.displayName}
+            </Typography>
+          </Box>
+        ) : (
+          <Box />
+        )}
+        <IconButton
+          onClick={handleClose}
+          size="small"
+          aria-label={t('common.close')}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
+        {bookingInfo?.name && (
+          <Typography variant="h4" sx={{ mb: '24px' }}>
+            {bookingInfo.name}
+          </Typography>
+        )}
         {selectedSlot && (
           <DateTimeSummarySection
             startDate={dayjs(selectedSlot.start).format('YYYY-MM-DD')}
