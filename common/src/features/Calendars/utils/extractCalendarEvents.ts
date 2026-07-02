@@ -37,6 +37,12 @@ export function extractCalendarEvents(
         return null
       }
 
+      // A calendar object can bundle non-event components (typically a
+      // VTIMEZONE) alongside its VEVENT(s); only VEVENTs are actual events.
+      if (typeof vevent[0] !== 'string' || vevent[0].toLowerCase() !== 'vevent') {
+        return null
+      }
+
       const eventProps = vevent[1] as VObjectProperty[]
       if (!Array.isArray(eventProps)) {
         return null
