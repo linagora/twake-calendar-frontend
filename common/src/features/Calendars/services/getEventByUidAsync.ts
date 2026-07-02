@@ -1,4 +1,4 @@
-import { type RootState } from '@common/app/store'
+import { RootState } from '@common/app/store'
 import {
   calendarIdFromEventHref,
   fetchEventByUid
@@ -74,7 +74,8 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
           state.list[calId].events[event.uid].color = state.list[calId].color
           state.list[calId].events[event.uid].calId = calId
           if (!state.list[calId].events[event.uid].timezone) {
-            state.list[calId].events[event.uid].timezone = browserDefaultTimeZone
+            state.list[calId].events[event.uid].timezone =
+              browserDefaultTimeZone
           }
         })
       },
