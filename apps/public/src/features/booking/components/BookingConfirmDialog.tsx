@@ -1,9 +1,12 @@
+import { DateTimeSummary } from '@common/components/Event/components/DateTimeSummary'
+import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import {
   BookingSlotsResponse,
   Slot
 } from '@common/features/booking/types/BookingTypes'
-import { DateTimeSummarySection } from '@common/components/Event/components/DateTimeFields/DateTimeSubPanels'
+import { browserDefaultTimeZone } from '@common/utils/timezone'
 import {
+  Avatar,
   Box,
   Button,
   Dialog,
@@ -18,9 +21,6 @@ import CloseIcon from '@mui/icons-material/Close'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { browserDefaultTimeZone } from '@common/utils/timezone'
-import { Avatar } from '@linagora/twake-mui'
-import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 
 interface BookingConfirmDialogProps {
   open: boolean
@@ -71,7 +71,6 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
   bookingInfo,
   selectedSlot
 }) => {
-  const { t } = useI18n()
   const endDateTime = selectedSlot
     ? dayjs(selectedSlot.start).add(
         bookingInfo?.durationMinutes ?? 30,
@@ -87,7 +86,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
         </Typography>
       )}
       {selectedSlot && endDateTime && (
-        <DateTimeSummarySection
+        <DateTimeSummary
           startDate={dayjs(selectedSlot.start).format('YYYY-MM-DD')}
           startTime={dayjs(selectedSlot.start).format('HH:mm')}
           endDate={endDateTime.format('YYYY-MM-DD')}
@@ -95,8 +94,9 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
           allday={false}
           timezone={browserDefaultTimeZone}
           repetition={{ freq: '' }}
-          hasEndDateChanged={false}
-          onExpand={() => {}}
+          showEndDate={false}
+          onClick={() => {}}
+          hideRepeatInfo
         />
       )}
     </>

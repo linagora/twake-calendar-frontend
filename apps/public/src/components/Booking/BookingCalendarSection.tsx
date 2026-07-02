@@ -1,3 +1,4 @@
+import { Box, useTheme } from '@linagora/twake-mui'
 import {
   DateCalendar,
   LocalizationProvider,
@@ -5,9 +6,7 @@ import {
   PickerDayProps
 } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { useTheme } from '@mui/material'
 import { Dayjs } from 'dayjs'
-import { Box } from '@linagora/twake-mui'
 
 const CELL_SIZE = 66
 const WEEK_ROWS = 7
@@ -25,6 +24,8 @@ interface BookingCalendarSectionProps {
 }
 const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
   const { availableDays, day, outsideCurrentMonth, ...other } = props
+  const theme = useTheme()
+
   if (outsideCurrentMonth) {
     return (
       <Box
@@ -41,7 +42,6 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
     )
   }
   const isSlot = availableDays?.has(day.toDate().toDateString()) ?? false
-  const theme = useTheme()
   return (
     <PickerDay
       {...other}
