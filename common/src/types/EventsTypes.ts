@@ -5,6 +5,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { Attachment } from './Attachment'
 import { Valarms } from './Valarms'
+import { RepetitionObject } from './Repetition'
 
 export interface CalendarEvent {
   URL: string
@@ -34,15 +35,6 @@ export interface CalendarEvent {
   passthroughProps?: VObjectProperty[]
   selectedResources?: Resource[]
   attach?: Attachment[]
-}
-
-export interface RepetitionObject {
-  freq: string
-  interval?: number | null
-  byday?: string[] | null
-  occurrences?: number | null
-  endDate?: string | null
-  wkst?: string | null
 }
 
 export interface ContextualizedEvent {

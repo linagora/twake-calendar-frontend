@@ -6,6 +6,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { Valarms } from '@common/types/Valarms'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { PrepareUpdateDataParams, PrepareUpdateDataResult } from './types'
 
@@ -74,7 +75,10 @@ export function prepareUpdatedEvent({
     uid: event.uid,
     description: values.description,
     location: values.location,
-    repetition: values.repetition,
+    repetition: RepetitionObject.fromFormValues(values.repetition, {
+      allday: values.allday,
+      timezone: values.timezone
+    }),
     class: values.eventClass,
     organizer: event.organizer,
     timezone: values.timezone,

@@ -5,6 +5,7 @@ import {
   putEvent
 } from '@common/features/Events/EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { calendarEventToJCal } from '@common/features/Events/utils'
 import { api } from '@common/utils/apiUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
@@ -156,7 +157,14 @@ describe('eventDAO', () => {
     const mockResponse = { status: 201, url: '/dav/cals/test.ics' }
     ;(api as unknown as jest.Mock).mockReturnValue(mockResponse)
 
-    const event = { ...mockEvent, repetition }
+    const event = {
+      ...mockEvent,
+      repetition: new RepetitionObject({
+        ...repetition,
+        allday: mockEvent.allday ?? false,
+        timezone: mockEvent.timezone ?? 'Europe/Paris'
+      })
+    }
     const jCal = calendarEventToJCal(event)
     await putEvent(event, jCal)
 

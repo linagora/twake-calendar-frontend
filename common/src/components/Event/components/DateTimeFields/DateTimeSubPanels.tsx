@@ -1,4 +1,4 @@
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import React from 'react'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { DateTimeSummary } from '@common/components/Event/components/DateTimeSummary'

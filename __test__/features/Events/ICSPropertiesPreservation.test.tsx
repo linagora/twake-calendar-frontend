@@ -12,6 +12,7 @@ import {
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
@@ -75,7 +76,14 @@ function baseCalendarEvent(
     class: 'PUBLIC',
     sequence: 1,
     exdates: [],
-    ...overrides
+    ...overrides,
+    repetition: overrides.repetition?.freq
+      ? new RepetitionObject({
+          ...overrides.repetition,
+          allday: overrides.allday ?? false,
+          timezone: overrides.timezone ?? 'Europe/Paris'
+        })
+      : undefined
   } as CalendarEvent
 }
 

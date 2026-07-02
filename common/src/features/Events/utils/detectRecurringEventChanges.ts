@@ -1,5 +1,6 @@
 import moment from 'moment-timezone'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { normalizeRepetition } from './normalizeRepetition'
 
 /**

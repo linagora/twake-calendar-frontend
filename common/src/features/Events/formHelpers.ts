@@ -5,7 +5,8 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { TIMEZONES } from '@common/utils/timezone-data'
 import { addVideoConferenceToDescription } from '@common/utils/videoConferenceUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { Calendar } from '@common/types/CalendarTypes'
 
 export interface TimezoneListResult {
@@ -141,15 +142,17 @@ export function populateFormFromEvent(
       repetitionSource = baseEvent.repetition
     }
   }
-
   if (repetitionSource && repetitionSource.freq) {
-    const repetitionData: RepetitionObject = {
+    const repetitionData = new RepetitionObject({
       freq: repetitionSource.freq,
       interval: repetitionSource.interval || 1,
       occurrences: repetitionSource.occurrences,
       endDate: repetitionSource.endDate,
-      byday: repetitionSource.byday || null
-    }
+      byday: repetitionSource.byday || null,
+      wkst: repetitionSource.wkst || null,
+      allday: isAllDay,
+      timezone: event.timezone ? eventTimezone : undefined
+    })
     setRepetition(repetitionData)
     setShowRepeat(true)
   } else {

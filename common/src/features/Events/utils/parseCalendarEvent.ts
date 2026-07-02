@@ -9,6 +9,7 @@ import {
 } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { buildDelegatedEventURL } from './buildDelegatedEventURL'
 import { formatDateTimeToICal } from './formatDateToICal'
 import { inferTimezoneFromValue } from './inferTimezoneFromValue'
@@ -114,31 +115,35 @@ function parseRruleProperty(
   event: Partial<CalendarEvent>
 ): void {
   const ruleValue = value as RepetitionRule
-  event.repetition = { freq: ruleValue.freq.toLowerCase() }
+  const repData: Partial<RepetitionObject> = {
+    freq: ruleValue.freq.toLowerCase()
+  }
 
   if (ruleValue.byday) {
-    event.repetition.byday =
+    repData.byday =
       typeof ruleValue.byday === 'string' ? [ruleValue.byday] : ruleValue.byday
   }
 
   if (ruleValue.until) {
-    event.repetition.endDate = ruleValue.until
+    repData.endDate = ruleValue.until
   }
 
   if (ruleValue.count) {
-    event.repetition.occurrences = ruleValue.count
+    repData.occurrences = ruleValue.count
   }
 
   if (ruleValue.interval) {
-    event.repetition.interval = ruleValue.interval
+    repData.interval = ruleValue.interval
   }
 
   if (ruleValue.wkst != null) {
-    event.repetition.wkst =
+    repData.wkst =
       typeof ruleValue.wkst === 'number'
         ? (WKST_NUM_TO_DAY[ruleValue.wkst] ?? String(ruleValue.wkst))
         : ruleValue.wkst
   }
+
+  event.repetition = new RepetitionObject(repData)
 }
 
 const PROPERTY_PARSERS: Record<
@@ -373,6 +378,13 @@ export function parseCalendarEvent({
   }
 
   processEventDates(event, context.duration)
+
+  if (event.repetition) {
+    event.repetition = RepetitionObject.fromFormValues(event.repetition, {
+      allday: event.allday,
+      timezone: event.timezone
+    })
+  }
 
   event.passthroughProps = data.filter(
     ([key]) => !KNOWN_PROPS.has(key.toLowerCase())

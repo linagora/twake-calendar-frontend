@@ -1,7 +1,7 @@
 import { Resource } from '@common/components/Attendees/ResourceSearch'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Attachment } from '@common/types/Attachment'
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { Valarms } from '@common/types/Valarms'
 
 export interface EventFormTempData {

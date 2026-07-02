@@ -2,6 +2,7 @@ import { makeVevent } from '@common/features/Events/utils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 
@@ -342,7 +343,9 @@ describe('RFC 5545 – ATTENDEE (§3.8.4.1)', () => {
 
 describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
   it('includes rrule when repetition.freq is set', () => {
-    const event = baseEvent({ repetition: { freq: 'WEEKLY' } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({ timezone: TZID, freq: 'WEEKLY' })
+    })
     const vevent = makeVevent(event, TZID)
     expect(getProp(vevent, 'rrule')).toBeDefined()
   })
@@ -353,14 +356,26 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
   })
 
   it('maps interval correctly', () => {
-    const event = baseEvent({ repetition: { freq: 'DAILY', interval: 2 } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'DAILY',
+        interval: 2
+      })
+    })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
     expect(rule.interval).toBe(2)
   })
 
   it('maps occurrences to COUNT', () => {
-    const event = baseEvent({ repetition: { freq: 'DAILY', occurrences: 10 } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'DAILY',
+        occurrences: 10
+      })
+    })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
     expect(rule.count).toBe(10)
@@ -368,7 +383,11 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
 
   it('maps endDate to UNTIL', () => {
     const event = baseEvent({
-      repetition: { freq: 'WEEKLY', endDate: '2024-12-31' }
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'WEEKLY',
+        endDate: '2024-12-31'
+      })
     })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
@@ -377,7 +396,11 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
 
   it('maps byday correctly', () => {
     const event = baseEvent({
-      repetition: { freq: 'WEEKLY', byday: ['MO', 'WE', 'FR'] }
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'WEEKLY',
+        byday: ['MO', 'WE', 'FR']
+      })
     })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
@@ -385,7 +408,13 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
   })
 
   it('omits byday when it is null', () => {
-    const event = baseEvent({ repetition: { freq: 'DAILY', byday: null } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'DAILY',
+        byday: null
+      })
+    })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
     expect(rule.byday).toBeUndefined()
@@ -393,7 +422,13 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
 
   it('preserves wkst as a weekday string (issue #860)', () => {
     const event = baseEvent({
-      repetition: { freq: 'WEEKLY', interval: 1, byday: ['TH'], wkst: 'MO' }
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'WEEKLY',
+        interval: 1,
+        byday: ['TH'],
+        wkst: 'MO'
+      })
     })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
@@ -401,14 +436,22 @@ describe('RFC 5545 – RRULE (§3.8.5.3)', () => {
   })
 
   it('omits wkst when absent', () => {
-    const event = baseEvent({ repetition: { freq: 'WEEKLY', byday: ['MO'] } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'WEEKLY',
+        byday: ['MO']
+      })
+    })
     const vevent = makeVevent(event, TZID)
     const rule = getProp(vevent, 'rrule')![3] as Record<string, unknown>
     expect(rule.wkst).toBeUndefined()
   })
 
   it('value type is "recur"', () => {
-    const event = baseEvent({ repetition: { freq: 'MONTHLY' } })
+    const event = baseEvent({
+      repetition: new RepetitionObject({ timezone: TZID, freq: 'MONTHLY' })
+    })
     const vevent = makeVevent(event, TZID)
     expect(getProp(vevent, 'rrule')![2]).toBe('recur')
   })
@@ -697,7 +740,7 @@ describe('RFC 5545 – RRULE must not appear in override (exception) events', ()
   it('omits rrule when event has a recurrenceId (override event)', () => {
     const event = baseEvent({
       recurrenceId: '2024-06-08T10:00:00',
-      repetition: { freq: 'WEEKLY' }
+      repetition: new RepetitionObject({ timezone: TZID, freq: 'WEEKLY' })
     })
     const vevent = makeVevent(event, TZID, false)
     expect(getProp(vevent, 'rrule')).toBeUndefined()
@@ -706,7 +749,12 @@ describe('RFC 5545 – RRULE must not appear in override (exception) events', ()
   it('omits rrule for a fully-populated override (freq + interval + byday)', () => {
     const event = baseEvent({
       recurrenceId: '2024-06-08T10:00:00',
-      repetition: { freq: 'WEEKLY', interval: 2, byday: ['MO', 'WE'] }
+      repetition: new RepetitionObject({
+        timezone: TZID,
+        freq: 'WEEKLY',
+        interval: 2,
+        byday: ['MO', 'WE']
+      })
     })
     const vevent = makeVevent(event, TZID, false)
     expect(getProp(vevent, 'rrule')).toBeUndefined()
@@ -715,7 +763,7 @@ describe('RFC 5545 – RRULE must not appear in override (exception) events', ()
   it('still includes recurrence-id when rrule is suppressed', () => {
     const event = baseEvent({
       recurrenceId: '2024-06-08T10:00:00',
-      repetition: { freq: 'WEEKLY' }
+      repetition: new RepetitionObject({ timezone: TZID, freq: 'WEEKLY' })
     })
     const vevent = makeVevent(event, TZID, false)
     expect(getProp(vevent, 'recurrence-id')).toBeDefined()
@@ -726,7 +774,7 @@ describe('RFC 5545 – RRULE must not appear in override (exception) events', ()
     // Ensures the fix doesn't regress master event serialisation
     const event = baseEvent({
       recurrenceId: '2024-06-08T10:00:00',
-      repetition: { freq: 'WEEKLY' }
+      repetition: new RepetitionObject({ timezone: TZID, freq: 'WEEKLY' })
     })
     const vevent = makeVevent(event, TZID, true)
     expect(getProp(vevent, 'rrule')).toBeDefined()

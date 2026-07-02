@@ -1,7 +1,5 @@
-import { RepetitionRule } from '@common/features/Calendars/types/CalendarData'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
-import moment from 'moment'
 import { formatDateTimeToICal, formatDateToICal } from './formatDateToICal'
 
 export function makeVevent(
@@ -72,30 +70,7 @@ export function makeVevent(
     vevent[1].push(['description', {}, 'text', event.description])
   }
   if (event.repetition?.freq && !isOccurrence) {
-    const repetitionRule: RepetitionRule = { freq: event.repetition.freq }
-    if (event.repetition.interval) {
-      repetitionRule.interval = event.repetition.interval
-    }
-    if (event.repetition.occurrences) {
-      repetitionRule.count = event.repetition.occurrences
-    }
-    if (event.repetition.endDate) {
-      repetitionRule.until = formatUntilForRRule(
-        event.repetition.endDate,
-        event.allday ?? false,
-        tzid
-      )
-    }
-    if (
-      event.repetition.byday !== null &&
-      event.repetition.byday !== undefined
-    ) {
-      repetitionRule.byday = event.repetition.byday
-    }
-    if (event.repetition.wkst) {
-      repetitionRule.wkst = event.repetition.wkst
-    }
-    vevent[1].push(['rrule', {}, 'recur', repetitionRule])
+    vevent[1].push(event.repetition.asJcal())
   }
 
   event.attendee.forEach(att => {
@@ -131,23 +106,4 @@ export function makeVevent(
   }
 
   return vevent
-}
-
-function formatUntilForRRule(
-  endDate: string,
-  allday: boolean,
-  tzid: string
-): string {
-  if (allday) {
-    return endDate.replace(/-/g, '')
-  }
-
-  // Take the date part of endDate, add end of day, convert to UTC
-  const datePart = endDate
-  const timePart = '23:59:59'
-
-  return moment
-    .tz(`${datePart}T${timePart}`, tzid)
-    .utc()
-    .format('YYYYMMDDTHHmmss[Z]')
 }

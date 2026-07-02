@@ -1,4 +1,4 @@
-import { RepetitionObject } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { getTimezoneOffset } from '@common/utils/timezone'
 import {
   Box,

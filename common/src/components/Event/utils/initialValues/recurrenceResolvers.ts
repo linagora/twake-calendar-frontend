@@ -1,5 +1,6 @@
 import { Calendar } from '@common/types/CalendarTypes'
-import { CalendarEvent, RepetitionObject } from '@common/types/EventsTypes'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 
 function getBaseRepetition(
@@ -39,13 +40,16 @@ export function resolveRepetition(
   }
 
   return {
-    repetition: {
+    repetition: new RepetitionObject({
       freq: source.freq,
       interval: source.interval || 1,
       occurrences: source.occurrences,
       endDate: source.endDate,
-      byday: source.byday || null
-    },
+      byday: source.byday || null,
+      wkst: source.wkst || null,
+      allday: event.allday,
+      timezone: event.timezone
+    }),
     showRepeat: true
   }
 }

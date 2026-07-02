@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Calendar } from '@common/types/CalendarTypes'
 import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 import { handleCreateEvent } from './submitCreateHelpers/createAction'
+import { userOrganiser } from '@common/features/User/userDataTypes'
 
 export interface UseSubmitCreateEventProps {
   showMore: boolean
@@ -17,7 +18,7 @@ export function useSubmitCreateEvent({
 }: UseSubmitCreateEventProps): {
   handleSubmit: (
     values: EventFormValues,
-    organizer?: { cn: string; cal_address: string }
+    organizer?: userOrganiser
   ) => Promise<void>
 } {
   const dispatch = useAppDispatch()
@@ -26,7 +27,7 @@ export function useSubmitCreateEvent({
   const handleSubmit = useCallback(
     async (
       values: EventFormValues,
-      organizer?: { cn: string; cal_address: string }
+      organizer?: userOrganiser
     ): Promise<void> => {
       const targetCalendar: Calendar | undefined =
         calList[values.calendarid] ||
