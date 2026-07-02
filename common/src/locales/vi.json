@@ -465,7 +465,6 @@
     },
     "form": {
       "name": "Tên",
-      "namePlaceholder": "Tên của bạn (tùy chọn)",
       "email": "Email"
     },
     "error": {

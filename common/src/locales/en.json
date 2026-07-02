@@ -465,7 +465,6 @@
     },
     "form": {
       "name": "Name",
-      "namePlaceholder": "Your name (optional)",
       "email": "Email"
     },
     "error": {

@@ -21,15 +21,26 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
 
   if (!selectedDay) {
     return (
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        {t('booking.selectDayPrompt')}
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          p: '24px',
+          gap: '16px'
+        }}
+      >
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {t('booking.selectDayPrompt')}
+        </Typography>
+      </Box>
     )
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+    <Box
+      sx={{ display: 'flex', flexDirection: 'column', p: '24px', gap: '16px' }}
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <DayBadge
           dayNum={selectedDay.date().toString()}
           dayName={selectedDay.toDate().toLocaleDateString(lang, {
@@ -41,11 +52,19 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
       <Box
         sx={{
           scrollbarWidth: 'thin',
+          scrollbarColor: 'transparent transparent',
+          scrollbarGutter: 'stable',
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
-          maxHeight: '300px',
-          overflowY: 'auto'
+          maxHeight: '370px',
+          overflowY: 'auto',
+          '&:hover': {
+            scrollbarColor: 'divider divider'
+          },
+          '&:hover::-webkit-scrollbar-thumb': {
+            backgroundColor: 'divider'
+          }
         }}
       >
         {slots.map(slot => {

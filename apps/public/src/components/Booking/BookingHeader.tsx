@@ -17,7 +17,12 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
   const { t } = useI18n()
   const timeZoneLabel = `(${getTimezoneOffset(browserDefaultTimeZone)}) ${browserDefaultTimeZone.replace(/_/g, ' ').split('/')?.[1]}`
   const cameraIcon = (
-    <img src={iconCamera} alt="camera" width={24} height={24} />
+    <img
+      src={iconCamera}
+      alt={t('booking.cameraIcon')}
+      width={24}
+      height={24}
+    />
   )
   return (
     <Box

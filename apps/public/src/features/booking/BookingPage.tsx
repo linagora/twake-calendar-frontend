@@ -104,8 +104,8 @@ export const BookingPage: React.FC = () => {
         maxWidth: '900px',
         padding: { xs: '24px', sm: '32px' },
         display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
+        height: '100%',
+        flexDirection: 'column'
       }}
     >
       {initialLoading && (
@@ -152,9 +152,7 @@ export const BookingPage: React.FC = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '3fr 1fr' },
-              gap: '32px',
-              overflow: 'visible'
+              gridTemplateColumns: { xs: '1fr', sm: '3fr 1fr' }
             }}
           >
             <BookingCalendarSection

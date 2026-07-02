@@ -467,7 +467,6 @@
     },
     "form": {
       "name": "Nom",
-      "namePlaceholder": "Votre nom (optionnel)",
       "email": "Email"
     },
     "error": {

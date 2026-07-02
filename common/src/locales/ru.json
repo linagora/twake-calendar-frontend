@@ -467,7 +467,6 @@
     },
     "form": {
       "name": "Имя",
-      "namePlaceholder": "Ваше имя (необязательно)",
       "email": "Email"
     },
     "error": {
