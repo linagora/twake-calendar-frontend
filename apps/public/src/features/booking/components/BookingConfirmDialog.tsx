@@ -77,6 +77,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
               .format('HH:mm')}
             allday={false}
             timezone={browserDefaultTimeZone}
+            repetition={{ freq: '' }}
             hasEndDateChanged={false}
             onExpand={() => {}}
           />

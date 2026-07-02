@@ -1,55 +1,15 @@
 import { BookingHeader } from '@/components/Booking/BookingHeader'
-import {
-  BookingSlotsResponse,
-  Slot
-} from '@common/features/booking/types/BookingTypes'
-import { DayBadge } from '@common/features/Search/searchResultsComponents'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  Typography
-} from '@linagora/twake-mui'
-import {
-  DateCalendar,
-  LocalizationProvider,
-  PickerDay,
-  PickerDayProps
-} from '@mui/x-date-pickers'
-import { useEffect, useMemo, useState } from 'react'
+import { Slot } from '@common/features/booking/types/BookingTypes'
+import { Box, CircularProgress, Divider, Typography } from '@linagora/twake-mui'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { createBooking, fetchBookingSlots } from './BookingDao'
-import { useTheme } from '@mui/material'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { createBooking } from './BookingDao'
 import { Dayjs } from 'dayjs'
+import { BookingCalendarSection } from '../../components/Booking/BookingCalendarSection'
 import { BookingConfirmDialog } from './components/BookingConfirmDialog'
+import { BookingTimeSlotSection } from '../../components/Booking/BookingTimeSlotSection'
 import { useI18n } from 'twake-i18n'
-
-interface AvailableDayProps extends PickerDayProps {
-  availableDays: Set<string>
-}
-
-// Custom day cell: marks days that have at least one slot, disables the rest
-const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
-  const { availableDays, day, ...other } = props
-  const isSlot = availableDays.has(day.toDate().toDateString())
-  const theme = useTheme()
-  return (
-    <PickerDay
-      {...other}
-      day={day}
-      disabled={!isSlot}
-      sx={{
-        borderRadius: '50%',
-        ...(isSlot && {
-          '&:not(.Mui-selected)': { backgroundColor: theme.palette.grey[200] },
-          '&.Mui-selected': { backgroundColor: 'text.secondary' }
-        })
-      }}
-    />
-  )
-}
+import { useBookingData } from './hooks/useBookingData'
 
 export const BookingPage: React.FC = () => {
   const { t } = useI18n()
@@ -61,44 +21,16 @@ export const BookingPage: React.FC = () => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
-  const [slots, setSlots] = useState<Slot[]>([])
-  const [bookingInfo, setBookingInfo] = useState<BookingSlotsResponse | null>(
-    null
-  )
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+  const { slots, bookingInfo, initialLoading, monthLoading, error } =
+    useBookingData({
+      bookingLinkPublicId,
+      visibleMonth,
+      loadErrorMessage: t('booking.error.loadFailed')
+    })
+
   const [selectedDay, setSelectedDay] = useState<Dayjs | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-  useEffect(() => {
-    const loadBookingData = async (): Promise<void> => {
-      if (!bookingLinkPublicId) {
-        return
-      }
-      setLoading(true)
-      setError(null)
-      try {
-        const from = visibleMonth.toISOString()
-        const to = new Date(
-          visibleMonth.getFullYear(),
-          visibleMonth.getMonth() + 1,
-          0,
-          23,
-          59,
-          59
-        ).toISOString()
-        const response = await fetchBookingSlots(bookingLinkPublicId, from, to)
-        setSlots(response.slots)
-        setBookingInfo(response)
-      } catch {
-        setError(t('booking.error.loadFailed'))
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadBookingData()
-  }, [bookingLinkPublicId, visibleMonth])
 
   // Group slots by calendar day for quick lookup when rendering the grid
   const slotsByDay = useMemo(() => {
@@ -155,11 +87,13 @@ export const BookingPage: React.FC = () => {
         name: name || undefined,
         email
       },
-      eventTitle: bookingInfo?.eventTitle || t('booking.defaultEventTitle')
+      eventTitle: bookingInfo?.name || t('booking.defaultEventTitle')
     })
     setConfirmOpen(false)
     setSelectedSlot(null)
   }
+
+  const showPanel = !initialLoading && !(error && !bookingInfo)
 
   return (
     <Box
@@ -174,7 +108,7 @@ export const BookingPage: React.FC = () => {
         gap: '24px'
       }}
     >
-      {loading && (
+      {initialLoading && (
         <Box
           sx={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}
         >
@@ -182,100 +116,59 @@ export const BookingPage: React.FC = () => {
         </Box>
       )}
 
-      {!loading && error && (
+      {!initialLoading && error && !bookingInfo && (
         <Typography color="error" variant="body2">
           {error}
         </Typography>
       )}
 
-      {!loading && !error && bookingInfo && (
-        <BookingHeader bookingInfo={bookingInfo} />
-      )}
-      <Divider />
-      {!loading && !error && (
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: '614.91px 1fr' },
-            gap: '32px',
-            overflow: 'visible'
-          }}
-        >
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar
-              value={selectedDay}
-              onChange={handleSelectDay}
-              onMonthChange={handleMonthChange}
-              slots={{ day: AvailableDay }}
-              slotProps={{
-                day: { availableDays } as AvailableDayProps
-              }}
+      {showPanel && bookingInfo && <BookingHeader bookingInfo={bookingInfo} />}
+      {showPanel && <Divider />}
+
+      {showPanel && (
+        <Box sx={{ position: 'relative' }}>
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+
+          {monthLoading && (
+            <Box
               sx={{
-                width: '100%',
-                '& .MuiDayCalendar-header, & .MuiDayCalendar-weekContainer': {
-                  justifyContent: 'space-around'
-                }
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                zIndex: 1
               }}
+            >
+              <CircularProgress size={24} />
+            </Box>
+          )}
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '3fr 1fr' },
+              gap: '32px',
+              overflow: 'visible'
+            }}
+          >
+            <BookingCalendarSection
+              selectedDay={selectedDay}
+              availableDays={availableDays}
+              onSelectDay={handleSelectDay}
+              onMonthChange={handleMonthChange}
             />
-          </LocalizationProvider>
-          <Box>
-            {selectedDay ? (
-              <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  <DayBadge
-                    dayNum={selectedDay.date().toString()}
-                    dayName={selectedDay.toDate().toLocaleDateString('en-US', {
-                      weekday: 'short'
-                    })}
-                    isToday
-                  />
-                </Box>
-                <Box
-                  sx={{
-                    scrollbarWidth: 'thin',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    maxHeight: '320px',
-                    overflowY: 'auto'
-                  }}
-                >
-                  {slotsForSelectedDay.map(slot => {
-                    const time = new Date(slot.start).toLocaleTimeString(
-                      undefined,
-                      {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }
-                    )
-                    const isSelected = selectedSlot?.start === slot.start
-                    return (
-                      <Button
-                        key={slot.start}
-                        variant="outlined"
-                        color={isSelected ? 'warning' : 'inherit'}
-                        onClick={() => handleSelectSlot(slot)}
-                        sx={{ justifyContent: 'center' }}
-                      >
-                        {time}
-                      </Button>
-                    )
-                  })}
-                  {slotsForSelectedDay.length === 0 && (
-                    <Typography
-                      variant="body2"
-                      sx={{ color: 'text.secondary' }}
-                    >
-                      {t('booking.noSlots')}
-                    </Typography>
-                  )}
-                </Box>
-              </Box>
-            ) : (
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {t('booking.selectDayPrompt')}
-              </Typography>
-            )}
+            <BookingTimeSlotSection
+              selectedDay={selectedDay}
+              slots={slotsForSelectedDay}
+              selectedSlot={selectedSlot}
+              onSelectSlot={handleSelectSlot}
+            />
           </Box>
         </Box>
       )}
