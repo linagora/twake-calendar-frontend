@@ -27,6 +27,26 @@ The repository is organized as a monorepo workspace:
 
 ---
 
+## Frontend Routes
+
+### Private App (`apps/private`)
+
+| Route | Description |
+|-------|-------------|
+| `/` | Login handler |
+| `/calendar` | Main calendar view (authenticated) |
+| `/callback` | OAuth callback |
+| `/error` | Error page |
+
+### Public App (`apps/public`)
+
+| Route | Description |
+|-------|-------------|
+| `/excal?jwt=${token}` | Event preview via JWT token |
+| `/booking/${bookingLinkPublicId}` | Public booking page for a shared link |
+
+---
+
 ## Contributing
 
 ### Formatting
