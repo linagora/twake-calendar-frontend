@@ -3,10 +3,7 @@ import {
   calendarIdFromEventHref,
   fetchEventByUid
 } from '@common/features/Calendars/CalendarDAO'
-import {
-  CalendarData,
-  CalendarItem
-} from '@common/features/Calendars/types/CalendarData'
+import { CalendarData } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { extractCalendarEvents } from '@common/features/Calendars/utils/extractCalendarEvents'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -34,7 +31,7 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
         }
         // A UID resolves to a single event (its master VEVENT plus any
         // recurrence overrides), so the first item holds everything we need.
-        const item = items[0] as CalendarItem
+        const item = items[0]
         const eventURL = item._links?.self?.href
         if (!eventURL) {
           return null
