@@ -13,6 +13,7 @@ import { Loading } from '@common/components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
+import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { CallbackResume } from '@/features/User/LoginCallback'
 import { useInitializeApp } from '@common/features/User/useInitializeApp'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
@@ -96,6 +97,7 @@ export default function App(): JSX.Element {
               <Routes>
                 <Route path="/" element={<HandleLogin />} />
                 <Route path="/calendar" element={<CalendarLayout />} />
+                <Route path="/events/:uid" element={<EventDeepLink />} />
                 <Route path="/callback" element={<CallbackResume />} />
                 <Route path="/error" element={<ErrorPage />} />
               </Routes>
