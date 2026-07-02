@@ -290,14 +290,76 @@ interface DayIndicatorProps {
   dayName: string
 }
 
+interface DayBadgeProps {
+  dayNum: string
+  dayName: string
+  isToday: boolean
+}
+
+export const DayBadge: React.FC<DayBadgeProps> = ({
+  dayNum,
+  dayName,
+  isToday
+}) => {
+  const theme = useTheme()
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {isToday ? (
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            bgcolor: '#FB9E3A',
+            color: '#FFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '22px',
+            flexShrink: 0
+          }}
+        >
+          {dayNum}
+        </Box>
+      ) : (
+        <Typography
+          sx={{
+            fontSize: '22px',
+            color: theme.palette.grey[900],
+            minWidth: '32px',
+            textAlign: 'center'
+          }}
+        >
+          {dayNum}
+        </Typography>
+      )}
+      <Typography
+        sx={{
+          fontSize: '14px',
+          color: theme.palette.grey[500],
+          textTransform: 'uppercase'
+        }}
+      >
+        {dayName}
+      </Typography>
+    </Box>
+  )
+}
+
+interface DayIndicatorProps {
+  isFirstRow: boolean
+  isToday: boolean
+  dayNum: string
+  dayName: string
+}
+
 export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
   isFirstRow,
   isToday,
   dayNum,
   dayName
 }) => {
-  const theme = useTheme()
-
   if (!isFirstRow) {
     return <Box sx={{ width: '80px', flexShrink: 0 }} />
   }
@@ -312,46 +374,7 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
         flexShrink: 0
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {isToday ? (
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              bgcolor: '#FB9E3A',
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '22px',
-              flexShrink: 0
-            }}
-          >
-            {dayNum}
-          </Box>
-        ) : (
-          <Typography
-            sx={{
-              fontSize: '22px',
-              color: theme.palette.grey[900],
-              minWidth: '32px',
-              textAlign: 'center'
-            }}
-          >
-            {dayNum}
-          </Typography>
-        )}
-        <Typography
-          sx={{
-            fontSize: '14px',
-            color: theme.palette.grey[500],
-            textTransform: 'uppercase'
-          }}
-        >
-          {dayName}
-        </Typography>
-      </Box>
+      <DayBadge dayNum={dayNum} dayName={dayName} isToday={isToday} />
     </Box>
   )
 }
