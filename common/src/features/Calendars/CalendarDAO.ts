@@ -31,6 +31,28 @@ export async function fetchCalendar(
   return response.json()
 }
 
+export async function fetchEventByUid(
+  userId: string,
+  uid: string,
+  signal?: AbortSignal
+): Promise<unknown> {
+  const response = await api(`dav/calendars/${userId}.json`, {
+    method: 'REPORT',
+    headers: { Accept: 'application/json, text/plain, */*' },
+    body: JSON.stringify({ uid }),
+    signal
+  })
+  return response.json()
+}
+
+// Extract the calendar id ("{userId}/{calendarId}") from an event href such as
+// "/calendars/{userId}/{calendarId}/{eventUid}.ics".
+export function calendarIdFromEventHref(href: string): string {
+  const parts = href.split('/').filter(Boolean)
+  const idx = parts.indexOf('calendars')
+  return `${parts[idx + 1]}/${parts[idx + 2]}`
+}
+
 export type CalendarPostBody = string
 
 export async function calendarAction(
