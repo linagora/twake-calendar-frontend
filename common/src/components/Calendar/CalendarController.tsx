@@ -27,6 +27,7 @@ import './Calendar.styl'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
 import { useOpenEventFromUrl } from './hooks/useOpenEventFromUrl'
+import { useOpenNewEventFromUrl } from './hooks/useOpenNewEventFromUrl'
 import { useHiddenDays } from './hooks/useCalendarControllerHooks'
 import { useTouchListener } from './hooks/useTouchListener'
 import { updateSlotLabelVisibility } from './utils/calendarUtils'
@@ -218,6 +219,15 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     setEventDisplayedCalId,
     setEventDisplayedTemp,
     setOpenEventDisplay
+  })
+
+  // Open the create event modal with prefilled attendee(s) when arriving from a
+  // /newEvent?attendee=xxx@yyy.com deep link.
+  useOpenNewEventFromUrl({
+    userId,
+    calendars,
+    setTempEvent,
+    setAnchorEl
   })
 
   useEffect(() => {
