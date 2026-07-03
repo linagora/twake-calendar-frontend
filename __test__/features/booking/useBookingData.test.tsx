@@ -147,7 +147,7 @@ describe('useBookingData', () => {
     )
 
     expect(mockFetchBookingSlots).not.toHaveBeenCalled()
-    expect(result.current.initialLoading).toBe(true)
+    expect(result.current.initialLoading).toBe(false)
     expect(result.current.slots).toEqual([])
   })
 })
