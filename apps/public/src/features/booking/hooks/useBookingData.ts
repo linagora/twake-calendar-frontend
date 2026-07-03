@@ -39,6 +39,7 @@ export const useBookingData = ({
 
   useEffect(() => {
     if (!bookingLinkPublicId) {
+      setInitialLoading(false)
       return
     }
 

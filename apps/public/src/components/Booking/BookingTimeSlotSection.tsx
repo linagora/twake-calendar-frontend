@@ -4,7 +4,6 @@ import { Box, Button, Typography } from '@linagora/twake-mui'
 import { Dayjs } from 'dayjs'
 import { useI18n } from 'twake-i18n'
 import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
-import { theme } from '@linagora/twake-mui'
 
 const DAY_BADGE_ROW_HEIGHT = 48 // measure actual DayBadge row height, adjust
 const SLOT_LIST_GAP = 16 // matches gap: '16px' on the parent Box
