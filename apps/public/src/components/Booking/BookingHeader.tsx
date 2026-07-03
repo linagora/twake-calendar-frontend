@@ -42,6 +42,9 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
         />
 
         <Box>
+          <Typography variant="subtitle1">
+            {bookingInfo.owner.displayName || bookingInfo.owner.email}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Typography variant="subtitle1">{bookingInfo.name}</Typography>
             <TimerOutlinedIcon sx={{ color: 'text.secondary' }} />
