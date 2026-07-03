@@ -1,7 +1,7 @@
 import { Slot } from '@common/features/booking/types/BookingTypes'
 import { DayBadge } from '@common/features/Search/searchResultsComponents'
 import { Box, Button, Typography } from '@linagora/twake-mui'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { useI18n } from 'twake-i18n'
 import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
 
@@ -26,7 +26,12 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
 }) => {
   const { t, lang } = useI18n()
 
-  if (!selectedDay) {
+  const isSelectedDayToday = selectedDay?.isSame(dayjs(), 'day')
+  const visibleSlots = isSelectedDayToday
+    ? slots.filter(slot => new Date(slot.start).getTime() >= Date.now())
+    : slots
+
+  if (!selectedDay || !visibleSlots) {
     return (
       <Box
         sx={{
@@ -75,7 +80,7 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
           }
         })}
       >
-        {slots.map(slot => {
+        {visibleSlots.map(slot => {
           const time = new Date(slot.start).toLocaleTimeString(lang, {
             hour: '2-digit',
             minute: '2-digit',
