@@ -24,7 +24,6 @@ interface DateTimeSummaryProps {
   repetition: RepetitionObject
   showEndDate: boolean
   onClick: () => void
-  hideRepeatInfo?: boolean
 }
 
 export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
@@ -36,8 +35,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   timezone,
   repetition,
   showEndDate,
-  onClick,
-  hideRepeatInfo
+  onClick
 }) => {
   const { t, lang } = useI18n()
   const theme = useTheme()
@@ -162,11 +160,9 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
           <Typography variant="caption" sx={{ color: '#444746' }}>
             {timezoneText}
           </Typography>
-          {!hideRepeatInfo && (
-            <Typography variant="caption" sx={{ color: '#444746' }}>
-              {repeatText}
-            </Typography>
-          )}
+          <Typography variant="caption" sx={{ color: '#444746' }}>
+            {repeatText}
+          </Typography>
         </Box>
         {startDateInPast && (
           <Typography

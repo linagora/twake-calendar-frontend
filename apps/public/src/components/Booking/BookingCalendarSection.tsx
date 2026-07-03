@@ -1,6 +1,7 @@
 import { Box, useTheme } from '@linagora/twake-mui'
 import {
   DateCalendar,
+  DateView,
   LocalizationProvider,
   PickerDay,
   PickerDayProps
@@ -11,12 +12,14 @@ import 'dayjs/locale/en'
 import 'dayjs/locale/fr'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/vi'
+import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-
-const CELL_SIZE = 66
-const WEEK_ROWS = 6 // a month never needs more than 6 rows
-const WEEKDAY_LABEL_HEIGHT = CELL_SIZE
-const CALENDAR_GRID_HEIGHT = CELL_SIZE * WEEK_ROWS
+import {
+  CALENDAR_GRID_HEIGHT,
+  CELL_SIZE,
+  ROW_GAP,
+  WEEKDAY_LABEL_HEIGHT
+} from './LayoutConstants'
 
 interface AvailableDayProps extends PickerDayProps {
   availableDays?: Set<string>
@@ -81,6 +84,8 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
   onMonthChange
 }) => {
   const { t } = useI18n()
+  const [view, setView] = useState<DateView>('day')
+
   return (
     <Box
       sx={{
@@ -97,9 +102,15 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
         <DateCalendar
           value={selectedDay}
           onChange={onSelectDay}
-          onMonthChange={onMonthChange}
+          onMonthChange={month => {
+            setView('day')
+            onMonthChange(month)
+          }}
+          view={view}
+          onViewChange={setView}
           slots={{ day: AvailableDay }}
           showDaysOutsideCurrentMonth
+          views={['day', 'month']}
           fixedWeekNumber={6}
           slotProps={{
             day: { availableDays } as AvailableDayProps
@@ -108,7 +119,6 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
             width: '100%',
             height: 'auto',
             maxHeight: '900px',
-            overflow: 'visible',
             p: '0px',
             m: '0px',
             '& .MuiPickersCalendarHeader-root': {
@@ -136,6 +146,14 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
               height: 'auto',
               minHeight: CALENDAR_GRID_HEIGHT,
               overflow: 'visible'
+            },
+            '& .MuiDayCalendar-weekContainer': {
+              width: '100%',
+              justifyContent: 'space-between',
+              m: '0px',
+              '&:not(:last-of-type)': {
+                marginBottom: `${ROW_GAP}px`
+              }
             },
             '& .MuiDayCalendar-slideTransition': {
               width: '100%',

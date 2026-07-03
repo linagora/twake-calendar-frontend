@@ -1,9 +1,9 @@
-import { DateTimeSummary } from '@common/components/Event/components/DateTimeSummary'
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import {
   BookingSlotsResponse,
   Slot
 } from '@common/features/booking/types/BookingTypes'
+import { isValidEmail } from '@common/utils/isValidEmail'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import {
   Avatar,
@@ -19,8 +19,9 @@ import {
 } from '@linagora/twake-mui'
 import CloseIcon from '@mui/icons-material/Close'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import { StaticDateTimeSummary } from './StaticDateTimeSummary'
 
 interface BookingConfirmDialogProps {
   open: boolean
@@ -86,17 +87,12 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
         </Typography>
       )}
       {selectedSlot && endDateTime && (
-        <DateTimeSummary
+        <StaticDateTimeSummary
           startDate={dayjs(selectedSlot.start).format('YYYY-MM-DD')}
           startTime={dayjs(selectedSlot.start).format('HH:mm')}
           endDate={endDateTime.format('YYYY-MM-DD')}
           endTime={endDateTime.format('HH:mm')}
-          allday={false}
           timezone={browserDefaultTimeZone}
-          repetition={{ freq: '' }}
-          showEndDate={false}
-          onClick={() => {}}
-          hideRepeatInfo
         />
       )}
     </>
@@ -106,6 +102,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
 interface BookingFormProps {
   name: string
   email: string
+  emailError: string | null
   bookingError: string | null
   onNameChange: (value: string) => void
   onEmailChange: (value: string) => void
@@ -114,6 +111,7 @@ interface BookingFormProps {
 const BookingForm: React.FC<BookingFormProps> = ({
   name,
   email,
+  emailError,
   bookingError,
   onNameChange,
   onEmailChange
@@ -138,6 +136,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
         margin="normal"
         size="small"
         required
+        error={!!emailError}
+        helperText={emailError}
       />
       {bookingError && (
         <Typography color="error" variant="body2" sx={{ mt: 1 }}>
@@ -158,16 +158,25 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const { t } = useI18n()
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
 
   const handleConfirm = async (): Promise<void> => {
+    setEmailError(null)
+    setBookingError(null)
+
     if (!email) {
-      setBookingError(t('booking.error.emailRequired'))
+      setEmailError(t('booking.error.emailRequired'))
       return
     }
+
+    if (!isValidEmail(email)) {
+      setEmailError(t('peopleSearch.invalidEmail').replace('%{email}', email))
+      return
+    }
+
     setBookingInProgress(true)
-    setBookingError(null)
     try {
       await onConfirm(name, email)
       setName('')
@@ -186,6 +195,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     }
     onClose()
     setBookingError(null)
+    setEmailError(null)
     setName('')
     setEmail('')
   }
@@ -202,6 +212,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         <BookingForm
           name={name}
           email={email}
+          emailError={emailError}
           bookingError={bookingError}
           onNameChange={setName}
           onEmailChange={setEmail}
