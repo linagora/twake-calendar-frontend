@@ -26,6 +26,7 @@ import AddIcon from '@mui/icons-material/Add'
 import './Calendar.styl'
 import './CustomCalendar.styl'
 import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
+import { useOpenEventFromUrl } from './hooks/useOpenEventFromUrl'
 import { useHiddenDays } from './hooks/useCalendarControllerHooks'
 import { useTouchListener } from './hooks/useTouchListener'
 import { updateSlotLabelVisibility } from './utils/calendarUtils'
@@ -94,6 +95,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   const hiddenDays = useHiddenDays(hideWorkingDays, workingDays)
 
   const calendars = useAppSelector(state => state.calendars.list)
+  const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const displayWeekNumbers = useAppSelector(
     state => state.settings.displayWeekNumbers
   )
@@ -205,6 +207,17 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     tempUsers,
     setTempEvent,
     timezone
+  })
+
+  // Open the event preview modal when arriving from a /events/:uid deep link.
+  useOpenEventFromUrl({
+    userId,
+    calendars,
+    dispatch,
+    setEventDisplayedId,
+    setEventDisplayedCalId,
+    setEventDisplayedTemp,
+    setOpenEventDisplay
   })
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import reducer, {
   getCalendarDetail,
   getCalendarsList,
   getEvent,
+  getEventByUid,
   getTempCalendarsList,
   patchACLCalendar,
   removeEvent,
@@ -499,6 +500,33 @@ describe('CalendarSlice', () => {
         })
       )
       expect(state.list.c1.events.e1.uid).toBe('e1')
+    })
+
+    it('getEventByUid.fulfilled adds the resolved event to its calendar', () => {
+      const payload = { calId: 'c1', events: [{ uid: 'e1' }] as any[] }
+      const state = reducer(
+        {
+          ...initialState,
+          list: {
+            ['c1']: {
+              id: 'c1',
+              color: { 'apple:color': '#abc' },
+              events: {}
+            } as unknown as Calendar
+          }
+        },
+        getEventByUid.fulfilled(payload, 'req12', { userId: 'u1', uid: 'e1' })
+      )
+      expect(state.list.c1.events.e1.uid).toBe('e1')
+      expect(state.list.c1.events.e1.calId).toBe('c1')
+    })
+
+    it('getEventByUid.fulfilled is a no-op when the payload is null', () => {
+      const state = reducer(
+        initialState,
+        getEventByUid.fulfilled(null, 'req13', { userId: 'u1', uid: 'missing' })
+      )
+      expect(state.list).toEqual({})
     })
 
     it('getEvent.fulfilled doesnt create new events when there are already event with base UID', () => {

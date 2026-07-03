@@ -1,8 +1,10 @@
 import {
   calendarAction,
+  calendarIdFromEventHref,
   fetchCalendar,
   fetchCalendarExport,
   fetchCalendars,
+  fetchEventByUid,
   fetchSecretLink,
   updateDelegationCalendar
 } from '@common/features/Calendars/CalendarDAO'
@@ -58,6 +60,34 @@ describe('Calendar DAO', () => {
     })
 
     expect(result).toEqual(mockCalendarData)
+  })
+
+  it('fetches an event by its UID through a REPORT on the user home', async () => {
+    const userId = 'user123'
+    const uid = 'event-uid'
+    const mockResponse = { _embedded: { 'dav:item': [] } }
+
+    ;(api as unknown as jest.Mock).mockReturnValue({
+      json: jest.fn().mockResolvedValue(mockResponse)
+    })
+
+    const result = await fetchEventByUid(userId, uid)
+
+    expect(api).toHaveBeenCalledWith(`dav/calendars/${userId}.json`, {
+      method: 'REPORT',
+      headers: {
+        Accept: 'application/json, text/plain, */*'
+      },
+      body: JSON.stringify({ uid }),
+      signal: undefined
+    })
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('derives the calendar id from an event href', () => {
+    expect(
+      calendarIdFromEventHref('/calendars/user123/cal456/event-uid.ics')
+    ).toBe('user123/cal456')
   })
 
   it('postCalendar via calendarAction', async () => {
