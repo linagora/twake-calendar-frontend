@@ -7,9 +7,14 @@ import {
 } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Dayjs } from 'dayjs'
+import 'dayjs/locale/en'
+import 'dayjs/locale/fr'
+import 'dayjs/locale/ru'
+import 'dayjs/locale/vi'
+import { useI18n } from 'twake-i18n'
 
 const CELL_SIZE = 66
-const WEEK_ROWS = 7
+const WEEK_ROWS = 6 // a month never needs more than 6 rows
 const WEEKDAY_LABEL_HEIGHT = CELL_SIZE
 const CALENDAR_GRID_HEIGHT = CELL_SIZE * WEEK_ROWS
 
@@ -74,60 +79,73 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
   availableDays,
   onSelectDay,
   onMonthChange
-}) => (
-  <Box
-    sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      p: '24px',
-      gap: '16px'
-    }}
-  >
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DateCalendar
-        value={selectedDay}
-        onChange={onSelectDay}
-        onMonthChange={onMonthChange}
-        slots={{ day: AvailableDay }}
-        showDaysOutsideCurrentMonth
-        slotProps={{
-          day: { availableDays } as AvailableDayProps
-        }}
-        sx={{
-          width: '100%',
-          height: '100%',
-          p: '0px',
-          m: '0px',
-          '& .MuiPickersCalendarHeader-root': {
+}) => {
+  const { t } = useI18n()
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        p: '24px',
+        gap: '16px'
+      }}
+    >
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        adapterLocale={t('locale') ?? 'en-gb'}
+      >
+        <DateCalendar
+          value={selectedDay}
+          onChange={onSelectDay}
+          onMonthChange={onMonthChange}
+          slots={{ day: AvailableDay }}
+          showDaysOutsideCurrentMonth
+          fixedWeekNumber={6}
+          slotProps={{
+            day: { availableDays } as AvailableDayProps
+          }}
+          sx={{
+            width: '100%',
+            height: 'auto',
+            maxHeight: '900px',
+            overflow: 'visible',
             p: '0px',
             m: '0px',
-            justifyContent: 'space-between'
-          },
-          '& .MuiPickersCalendarHeader-labelContainer': {
-            m: '0px'
-          },
-          '& .MuiPickersArrowSwitcher-root': {
-            m: '0px'
-          },
-          '& .MuiDayCalendar-header, & .MuiDayCalendar-weekContainer': {
-            width: '100%',
-            justifyContent: 'space-between',
-            m: '0px'
-          },
-          '& .MuiDayCalendar-weekDayLabel': {
-            width: CELL_SIZE,
-            height: WEEKDAY_LABEL_HEIGHT
-          },
-          '& .MuiDayCalendar-monthContainer': {
-            width: '100%',
-            height: CALENDAR_GRID_HEIGHT
-          },
-          '& .MuiDayCalendar-slideTransition': {
-            width: '100%',
-            minHeight: CALENDAR_GRID_HEIGHT
-          }
-        }}
-      />
-    </LocalizationProvider>
-  </Box>
-)
+            '& .MuiPickersCalendarHeader-root': {
+              p: '0px',
+              m: '0px',
+              justifyContent: 'space-between'
+            },
+            '& .MuiPickersCalendarHeader-labelContainer': {
+              m: '0px'
+            },
+            '& .MuiPickersArrowSwitcher-root': {
+              m: '0px'
+            },
+            '& .MuiDayCalendar-header, & .MuiDayCalendar-weekContainer': {
+              width: '100%',
+              justifyContent: 'space-between',
+              m: '0px'
+            },
+            '& .MuiDayCalendar-weekDayLabel': {
+              width: CELL_SIZE,
+              height: WEEKDAY_LABEL_HEIGHT
+            },
+            '& .MuiDayCalendar-monthContainer': {
+              width: '100%',
+              height: 'auto',
+              minHeight: CALENDAR_GRID_HEIGHT,
+              overflow: 'visible'
+            },
+            '& .MuiDayCalendar-slideTransition': {
+              width: '100%',
+              height: 'auto',
+              minHeight: CALENDAR_GRID_HEIGHT,
+              overflow: 'visible'
+            }
+          }}
+        />
+      </LocalizationProvider>
+    </Box>
+  )
+}

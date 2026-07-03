@@ -3,6 +3,14 @@ import { DayBadge } from '@common/features/Search/searchResultsComponents'
 import { Box, Button, Typography } from '@linagora/twake-mui'
 import { Dayjs } from 'dayjs'
 import { useI18n } from 'twake-i18n'
+import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
+import { theme } from '@linagora/twake-mui'
+
+const DAY_BADGE_ROW_HEIGHT = 48 // measure actual DayBadge row height, adjust
+const SLOT_LIST_GAP = 16 // matches gap: '16px' on the parent Box
+
+const SLOT_LIST_MAX_HEIGHT =
+  CALENDAR_CONTENT_HEIGHT - DAY_BADGE_ROW_HEIGHT - SLOT_LIST_GAP
 
 interface BookingTimeSlotSectionProps {
   selectedDay: Dayjs | null
@@ -50,27 +58,29 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
         />
       </Box>
       <Box
-        sx={{
+        sx={theme => ({
           scrollbarWidth: 'thin',
           scrollbarColor: 'transparent transparent',
           scrollbarGutter: 'stable',
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
-          maxHeight: '370px',
+          pr: '8px',
+          maxHeight: `${SLOT_LIST_MAX_HEIGHT}px`,
           overflowY: 'auto',
           '&:hover': {
-            scrollbarColor: 'divider divider'
+            scrollbarColor: `${theme.palette.grey[400]} transparent`
           },
           '&:hover::-webkit-scrollbar-thumb': {
             backgroundColor: 'divider'
           }
-        }}
+        })}
       >
         {slots.map(slot => {
-          const time = new Date(slot.start).toLocaleTimeString(undefined, {
+          const time = new Date(slot.start).toLocaleTimeString(lang, {
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: false
           })
           const isSelected = selectedSlot?.start === slot.start
 
