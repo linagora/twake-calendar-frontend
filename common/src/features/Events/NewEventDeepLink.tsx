@@ -6,7 +6,7 @@ import { Loading } from '@common/components/Loading/Loading'
 import {
   PENDING_NEW_EVENT_ATTENDEES_KEY,
   parseNewEventAttendees
-} from './newEventDeepLink'
+} from './newEventDeepLinkUtils'
 
 /**
  * Handles the /newEvent?attendee=xxx@yyy.com deep link: it remembers the

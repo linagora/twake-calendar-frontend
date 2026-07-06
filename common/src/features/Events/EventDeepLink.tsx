@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { push } from 'redux-first-history'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { Loading } from '@common/components/Loading/Loading'
-import { PENDING_EVENT_UID_KEY } from './eventDeepLink'
+import { PENDING_EVENT_UID_KEY } from './eventDeepLinkUtils'
 
 /**
  * Handles the /events/:uid deep link: it remembers the requested event UID and

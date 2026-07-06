@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { AppDispatch } from '@common/app/store'
 import { getEventByUid } from '@common/features/Calendars/CalendarSlice'
-import { PENDING_EVENT_UID_KEY } from '@common/features/Events/eventDeepLink'
+import { PENDING_EVENT_UID_KEY } from '@common/features/Events/eventDeepLinkUtils'
 import { Calendar } from '@common/types/CalendarTypes'
 
 interface UseOpenEventFromUrlProps {

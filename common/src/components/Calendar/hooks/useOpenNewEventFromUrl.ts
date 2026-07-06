@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { PENDING_NEW_EVENT_ATTENDEES_KEY } from '@common/features/Events/newEventDeepLink'
+import { PENDING_NEW_EVENT_ATTENDEES_KEY } from '@common/features/Events/newEventDeepLinkUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'

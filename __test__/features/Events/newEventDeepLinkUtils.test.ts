@@ -1,4 +1,4 @@
-import { parseNewEventAttendees } from '@common/features/Events/newEventDeepLink'
+import { parseNewEventAttendees } from '@common/features/Events/newEventDeepLinkUtils'
 
 describe('parseNewEventAttendees', () => {
   it('extracts a single attendee', () => {
