@@ -28,7 +28,8 @@
     },
     "resources": "Tài nguyên",
     "browseResources": "Tìm kiếm tài nguyên",
-    "searchTimezone": "Tìm kiếm múi giờ..."
+    "searchTimezone": "Tìm kiếm múi giờ...",
+    "bookingLinks": "Liên kết đặt lịch"
   },
   "actions": {
     "modify": "Chỉnh sửa",
@@ -454,7 +455,8 @@
     "collapse": "Thu gọn",
     "expand": "Mở rộng",
     "nextMonth": "Tháng sau",
-    "previousMonth": "Tháng trước"
+    "previousMonth": "Tháng trước",
+    "copyBookingLink": "Sao chép liên kết đặt lịch"
   },
   "booking": {
     "durationMinutes": "%{count} phút",
@@ -475,7 +477,8 @@
     "noSlots": "Không có khung giờ nào",
     "selectDayPrompt": "Chọn một ngày để xem các khung giờ có sẵn",
     "defaultEventTitle": "Đặt lịch",
-    "videoMeetingCaption": "Có sẵn sau khi đặt lịch"
+    "videoMeetingCaption": "Có sẵn sau khi đặt lịch",
+    "linkCopied": "Liên kết đặt lịch đã được sao chép"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

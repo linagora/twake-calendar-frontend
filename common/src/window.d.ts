@@ -54,5 +54,7 @@ declare global {
     __ws?: WebSocket
 
     HIDE_LANGUAGE_SELECTOR: boolean
+
+    BOOKING_LINK_PREFIX: string | undefined
   }
 }
