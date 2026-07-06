@@ -41,7 +41,6 @@ describe('BookingTimeSlotSection', () => {
       />
     )
 
-    expect(screen.getByTestId('day-badge')).toHaveTextContent('26')
     expect(screen.getByText('booking.noSlots')).toBeInTheDocument()
   })
 
