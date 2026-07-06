@@ -2,15 +2,85 @@ import { Slot } from '@common/features/booking/types/BookingTypes'
 import { DayBadge } from '@common/features/Search/searchResultsComponents'
 import { Box, Button, Typography } from '@linagora/twake-mui'
 import dayjs, { Dayjs } from 'dayjs'
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
 
-const DAY_BADGE_ROW_HEIGHT = 48 // measure actual DayBadge row height, adjust
-const SLOT_LIST_GAP = 16 // matches gap: '16px' on the parent Box
+const DAY_BADGE_ROW_HEIGHT = 48
+const SLOT_LIST_GAP = 16
 
 const SLOT_LIST_MAX_HEIGHT =
   CALENDAR_CONTENT_HEIGHT - DAY_BADGE_ROW_HEIGHT - SLOT_LIST_GAP
+
+const containerSx = {
+  display: 'flex',
+  flexDirection: 'column',
+  p: 3,
+  gap: 2
+} as const
+
+const scrollableListSx = (theme: { palette: { grey: { 400: string } } }) => ({
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'transparent transparent',
+  scrollbarGutter: 'stable',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1,
+  pr: 1,
+  maxHeight: `${SLOT_LIST_MAX_HEIGHT}px`,
+  overflowY: 'auto',
+  '&:hover': {
+    scrollbarColor: `${theme.palette.grey[400]} transparent`
+  },
+  '&:hover::-webkit-scrollbar-thumb': {
+    backgroundColor: 'divider'
+  }
+})
+
+const EmptyMessage: React.FC<{ message: string }> = ({ message }) => (
+  <Box sx={containerSx}>
+    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+      {message}
+    </Typography>
+  </Box>
+)
+
+interface SlotListProps {
+  slots: Slot[]
+  selectedSlot: Slot | null
+  onSelectSlot: (slot: Slot) => void
+  lang: string
+}
+
+const SlotList: React.FC<SlotListProps> = ({
+  slots,
+  selectedSlot,
+  onSelectSlot,
+  lang
+}) => (
+  <Box sx={scrollableListSx}>
+    {slots.map(slot => {
+      const time = new Date(slot.start).toLocaleTimeString(lang, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+      const isSelected = selectedSlot?.start === slot.start
+
+      return (
+        <Button
+          key={slot.start}
+          variant="outlined"
+          color={isSelected ? 'warning' : 'inherit'}
+          onClick={() => onSelectSlot(slot)}
+          sx={{ justifyContent: 'center' }}
+        >
+          {time}
+        </Button>
+      )
+    })}
+  </Box>
+)
 
 interface BookingTimeSlotSectionProps {
   selectedDay: Dayjs | null
@@ -27,33 +97,22 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
 }) => {
   const { t, lang } = useI18n()
 
-  const now = useMemo(() => Date.now(), [])
+  const [now] = useState(() => Date.now())
   const isSelectedDayToday = selectedDay?.isSame(dayjs(), 'day')
   const visibleSlots = isSelectedDayToday
     ? slots.filter(slot => new Date(slot.start).getTime() >= now)
     : slots
 
-  if (!selectedDay || !visibleSlots) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          p: '24px',
-          gap: '16px'
-        }}
-      >
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {t('booking.selectDayPrompt')}
-        </Typography>
-      </Box>
-    )
+  if (!selectedDay) {
+    return <EmptyMessage message={t('booking.selectDayPrompt')} />
+  }
+
+  if (!visibleSlots.length) {
+    return <EmptyMessage message={t('booking.noSlots')} />
   }
 
   return (
-    <Box
-      sx={{ display: 'flex', flexDirection: 'column', p: '24px', gap: '16px' }}
-    >
+    <Box sx={containerSx}>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <DayBadge
           dayNum={selectedDay.date().toString()}
@@ -63,51 +122,12 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
           isToday
         />
       </Box>
-      <Box
-        sx={theme => ({
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'transparent transparent',
-          scrollbarGutter: 'stable',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          pr: '8px',
-          maxHeight: `${SLOT_LIST_MAX_HEIGHT}px`,
-          overflowY: 'auto',
-          '&:hover': {
-            scrollbarColor: `${theme.palette.grey[400]} transparent`
-          },
-          '&:hover::-webkit-scrollbar-thumb': {
-            backgroundColor: 'divider'
-          }
-        })}
-      >
-        {visibleSlots.map(slot => {
-          const time = new Date(slot.start).toLocaleTimeString(lang, {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-          })
-          const isSelected = selectedSlot?.start === slot.start
-
-          return (
-            <Button
-              key={slot.start}
-              variant="outlined"
-              color={isSelected ? 'warning' : 'inherit'}
-              onClick={() => onSelectSlot(slot)}
-              sx={{ justifyContent: 'center' }}
-            >
-              {time}
-            </Button>
-          )
-        })}
-        {slots.length === 0 && (
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {t('booking.noSlots')}
-          </Typography>
-        )}
-      </Box>
+      <SlotList
+        slots={visibleSlots}
+        selectedSlot={selectedSlot}
+        onSelectSlot={onSelectSlot}
+        lang={lang}
+      />
     </Box>
   )
 }
