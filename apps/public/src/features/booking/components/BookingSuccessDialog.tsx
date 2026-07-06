@@ -34,6 +34,170 @@ interface BookingSuccessDialogProps {
   onCancelMeeting?: () => void
 }
 
+interface SlotTime {
+  date: string
+  time: string
+}
+
+interface SuccessHeaderProps {
+  onClose: () => void
+  title: string
+}
+
+const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
+  <Box sx={{ position: 'relative', textAlign: 'center', pt: 4, pb: 1 }}>
+    <IconButton
+      onClick={onClose}
+      size="small"
+      sx={{ position: 'absolute', top: 8, right: 8 }}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+    <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
+    <Typography variant="h3" sx={{ mb: 1 }}>
+      {title}
+    </Typography>
+  </Box>
+)
+
+interface SuccessSummaryProps {
+  ownerName: string
+  slotTime: SlotTime
+  subtitle: string
+  subsubtitle: string
+}
+
+const SuccessSummary: React.FC<SuccessSummaryProps> = ({
+  ownerName,
+  slotTime,
+  subtitle,
+  subsubtitle
+}) => (
+  <>
+    <Typography variant="body2" sx={{ textAlign: 'center', px: 3, mb: 1 }}>
+      {subtitle}
+    </Typography>
+    <Typography
+      variant="body2"
+      sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}
+    >
+      {subsubtitle}
+    </Typography>
+  </>
+)
+
+interface SuccessDetailsProps {
+  owner?: { displayName: string }
+  durationMinutes?: number
+  timeZoneLabel: string
+  durationLabel: string
+}
+
+const SuccessDetails: React.FC<SuccessDetailsProps> = ({
+  owner,
+  durationMinutes,
+  timeZoneLabel,
+  durationLabel
+}) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      borderTop: 1,
+      borderColor: 'divider',
+      p: 3,
+      gap: 1
+    }}
+  >
+    {owner && (
+      <BaseEventRow
+        icon={<Avatar {...stringAvatar(owner.displayName)} />}
+        content={<Typography variant="body1">{owner.displayName}</Typography>}
+      />
+    )}
+    {durationMinutes && (
+      <BaseEventRow
+        icon={<TimerOutlinedIcon />}
+        content={<Typography variant="body1">{durationLabel}</Typography>}
+      />
+    )}
+    <BaseEventRow
+      icon={<LanguageOutlinedIcon />}
+      content={<Typography variant="body1">{timeZoneLabel}</Typography>}
+    />
+  </Box>
+)
+
+interface CopyLinkSectionProps {
+  eventLink: string
+  copyLabel: string
+  copiedMessage: string
+}
+
+const CopyLinkSection: React.FC<CopyLinkSectionProps> = ({
+  eventLink,
+  copyLabel,
+  copiedMessage
+}) => {
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const handleCopyLink = useCallback(async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(eventLink)
+      setLinkCopied(true)
+    } catch (err) {
+      console.error('Failed to copy booking link:', err)
+    }
+  }, [eventLink])
+
+  return (
+    <>
+      <Button
+        onClick={() => void handleCopyLink()}
+        variant="outlined"
+        fullWidth
+        startIcon={<LinkIcon fontSize="small" />}
+        sx={{ mb: 3 }}
+      >
+        {copyLabel}
+      </Button>
+      <SnackbarAlert
+        setOpen={setLinkCopied}
+        open={linkCopied}
+        message={copiedMessage}
+      />
+    </>
+  )
+}
+
+interface SuccessFooterProps {
+  onCancelMeeting?: () => void
+  needChangesLabel: string
+  cancelLabel: string
+  suffixLabel: string
+}
+
+const SuccessFooter: React.FC<SuccessFooterProps> = ({
+  onCancelMeeting,
+  needChangesLabel,
+  cancelLabel,
+  suffixLabel
+}) => (
+  <Box sx={{ textAlign: 'center' }}>
+    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+      {needChangesLabel}
+    </Typography>
+    <Typography variant="body2">
+      {onCancelMeeting && (
+        <Link component="button" onClick={onCancelMeeting}>
+          {cancelLabel}
+        </Link>
+      )}{' '}
+      {suffixLabel}
+    </Typography>
+  </Box>
+)
+
 export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   open,
   onClose,
@@ -43,12 +207,11 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   onCancelMeeting
 }) => {
   const { t, lang } = useI18n()
-  const [linkCopied, setLinkCopied] = useState(false)
 
   const owner = bookingInfo?.owner
   const durationMinutes = bookingInfo?.durationMinutes
 
-  const slotTime = useMemo(() => {
+  const slotTime = useMemo<SlotTime | null>(() => {
     if (!selectedSlot) return null
     const startDate = dayjs(selectedSlot.start).locale(lang)
     return {
@@ -58,132 +221,52 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   }, [selectedSlot, lang])
 
   const timeZoneLabel = formatTimezoneLabel()
-
-  const handleCopyLink = useCallback(async (): Promise<void> => {
-    if (!eventLink) return
-    try {
-      navigator.clipboard.writeText(eventLink)
-      setLinkCopied(true)
-    } catch (err) {
-      console.error('Failed to copy booking link:', err)
-    }
-  }, [eventLink])
-
   const showFooter = Boolean(onCancelMeeting)
 
   return (
     <Dialog open={open} onClose={onClose}>
-      {/* Header */}
-      <Box sx={{ position: 'relative', textAlign: 'center', pt: 4, pb: 1 }}>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          sx={{ position: 'absolute', top: 8, right: 8 }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-        <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
-        <Typography variant="h3" sx={{ mb: 1 }}>
-          {t('booking.success.title')}
-        </Typography>
-      </Box>
+      <SuccessHeader onClose={onClose} title={t('booking.success.title')} />
 
       <DialogContent sx={{ px: 3, pb: 4 }}>
-        {/* Summary */}
         {slotTime && owner && (
-          <>
-            <Typography
-              variant="body2"
-              sx={{ textAlign: 'center', px: 3, mb: 1 }}
-            >
-              {t('booking.success.subtitle', {
-                owner: owner.displayName,
-                date: slotTime.date,
-                time: slotTime.time
-              })}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}
-            >
-              {t('booking.success.subsubtitle')}
-            </Typography>
-          </>
-        )}
-
-        {/* Details */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            borderTop: 1,
-            borderColor: 'divider',
-            p: 3,
-            gap: 1
-          }}
-        >
-          {owner && (
-            <BaseEventRow
-              icon={<Avatar {...stringAvatar(owner.displayName)} />}
-              content={
-                <Typography variant="body1">{owner.displayName}</Typography>
-              }
-            />
-          )}
-          {durationMinutes && (
-            <BaseEventRow
-              icon={<TimerOutlinedIcon />}
-              content={
-                <Typography variant="body1">
-                  {t('booking.durationMinutes', { count: durationMinutes })}
-                </Typography>
-              }
-            />
-          )}
-          <BaseEventRow
-            icon={<LanguageOutlinedIcon />}
-            content={<Typography variant="body1">{timeZoneLabel}</Typography>}
+          <SuccessSummary
+            ownerName={owner.displayName}
+            slotTime={slotTime}
+            subtitle={t('booking.success.subtitle', {
+              owner: owner.displayName,
+              date: slotTime.date,
+              time: slotTime.time
+            })}
+            subsubtitle={t('booking.success.subsubtitle')}
           />
-        </Box>
-
-        {/* Copy link */}
-        {eventLink && (
-          <>
-            <Button
-              onClick={() => void handleCopyLink()}
-              variant="outlined"
-              fullWidth
-              startIcon={<LinkIcon fontSize="small" />}
-              sx={{ mb: 3 }}
-            >
-              {t('booking.success.copyLink')}
-            </Button>
-            <SnackbarAlert
-              setOpen={setLinkCopied}
-              open={linkCopied}
-              message={t('common.link_copied')}
-            />
-          </>
         )}
 
-        {/* Footer actions */}
+        <SuccessDetails
+          owner={owner}
+          durationMinutes={durationMinutes}
+          timeZoneLabel={timeZoneLabel}
+          durationLabel={
+            durationMinutes
+              ? t('booking.durationMinutes', { count: durationMinutes })
+              : ''
+          }
+        />
+
+        {eventLink && (
+          <CopyLinkSection
+            eventLink={eventLink}
+            copyLabel={t('booking.success.copyLink')}
+            copiedMessage={t('common.link_copied')}
+          />
+        )}
+
         {showFooter && (
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', mb: 0.5 }}
-            >
-              {t('booking.success.needChanges')}
-            </Typography>
-            <Typography variant="body2">
-              {onCancelMeeting && (
-                <Link component="button" onClick={onCancelMeeting}>
-                  {t('booking.success.cancelMeeting')}
-                </Link>
-              )}{' '}
-              {t('booking.success.yourMeetingSuffix')}
-            </Typography>
-          </Box>
+          <SuccessFooter
+            onCancelMeeting={onCancelMeeting}
+            needChangesLabel={t('booking.success.needChanges')}
+            cancelLabel={t('booking.success.cancelMeeting')}
+            suffixLabel={t('booking.success.yourMeetingSuffix')}
+          />
         )}
       </DialogContent>
     </Dialog>

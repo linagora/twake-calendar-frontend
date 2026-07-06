@@ -1,4 +1,5 @@
 import { User } from '@common/components/Attendees/types'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'
 
@@ -112,5 +113,5 @@ export interface ResetBookingLinkResponse {
 }
 
 export interface BookedEventResponse {
-  eventJSON: unknown[] // jCal format (RFC 7265)
+  eventJSON: VCalComponent // jCal format (RFC 7265)
 }

@@ -111,11 +111,15 @@ export const BookingPage: React.FC = () => {
 
   const handleCancelMeeting = async (): Promise<void> => {
     if (!bookingConfirmationToken) return
-    await cancelBookedEvent(bookingConfirmationToken)
-    setBookingConfirmationToken(null)
-    refetch()
-    setSuccessOpen(false)
-    setSelectedSlot(null)
+    try {
+      await cancelBookedEvent(bookingConfirmationToken)
+      setBookingConfirmationToken(null)
+      refetch()
+      setSuccessOpen(false)
+      setSelectedSlot(null)
+    } catch (err) {
+      console.error('Failed to cancel meeting:', err)
+    }
   }
 
   const showPanel = !initialLoading && !(error && !bookingInfo)

@@ -3,7 +3,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import { getBookedEvent } from '@/features/booking/BookingDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { useI18n } from 'twake-i18n'
-import { getHttpErrorMessage } from './useEventDetailError'
+import { getSanitizedHttpErrorMessage } from './useEventDetailError'
 
 export interface BookedEventDetailResult {
   event: CalendarEvent | undefined
@@ -60,7 +60,7 @@ export const useFetchBookedEventDetail = (
         console.error('Failed to fetch booked event:', err)
         if (isMounted) {
           setError(true)
-          setErrorDetail(getHttpErrorMessage(err, t))
+          setErrorDetail(getSanitizedHttpErrorMessage(err, t))
           setLoading(false)
         }
       }
