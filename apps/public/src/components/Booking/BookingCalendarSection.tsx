@@ -7,7 +7,7 @@ import {
   PickerDayProps
 } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import 'dayjs/locale/en'
 import 'dayjs/locale/fr'
 import 'dayjs/locale/ru'
@@ -50,12 +50,14 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
     )
   }
   const isSlot = availableDays?.has(day.toDate().toDateString()) ?? false
+  const isBeforeToday = day.isBefore(dayjs(), 'day')
+
   return (
     <PickerDay
       {...other}
       day={day}
       outsideCurrentMonth={outsideCurrentMonth}
-      disabled={!isSlot}
+      disabled={!isSlot || isBeforeToday}
       sx={{
         boxSizing: 'border-box',
         width: CELL_SIZE,
@@ -69,10 +71,13 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
         padding: 0,
         borderRadius: '50%',
         fontSize: '14px',
-        ...(isSlot && {
-          '&:not(.Mui-selected)': { backgroundColor: theme.palette.grey[200] },
-          '&.Mui-selected': { backgroundColor: 'text.secondary' }
-        })
+        ...(isSlot &&
+          !isBeforeToday && {
+            '&:not(.Mui-selected)': {
+              backgroundColor: theme.palette.grey[200]
+            },
+            '&.Mui-selected': { backgroundColor: 'text.secondary' }
+          })
       }}
     />
   )
