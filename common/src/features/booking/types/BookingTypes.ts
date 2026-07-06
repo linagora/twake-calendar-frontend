@@ -110,3 +110,7 @@ export interface CreateBookingResponse {
 export interface ResetBookingLinkResponse {
   bookingLinkPublicId: string
 }
+
+export interface BookedEventResponse {
+  eventJSON: unknown[] // jCal format (RFC 7265)
+}

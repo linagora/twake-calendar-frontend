@@ -463,6 +463,15 @@
       "button": "Confirm",
       "inProgress": "Confirming..."
     },
+    "success": {
+      "title": "Meeting confirmed",
+      "subtitle": "Your meeting with %{owner} is scheduled for %{date} at %{time}",
+      "subsubtitle": "A calendar invite has been sent to your email.",
+      "needChanges": "Need to make changes?",
+      "cancelMeeting": "Cancel",
+      "copyLink": "Copy link",
+      "yourMeetingSuffix": "your meeting"
+    },
     "form": {
       "name": "Name",
       "email": "Email"

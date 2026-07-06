@@ -3,10 +3,11 @@ import { Slot } from '@common/features/booking/types/BookingTypes'
 import { Box, CircularProgress, Divider, Typography } from '@linagora/twake-mui'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { createBooking } from './BookingDao'
+import { cancelBookedEvent, createBooking } from './BookingDao'
 import { Dayjs } from 'dayjs'
 import { BookingCalendarSection } from '../../components/Booking/BookingCalendarSection'
-import { BookingConfirmDialog } from './components/BookingConfirmDialog'
+import { BookingConfirmDialog } from './components/BookingDialog'
+import { BookingSuccessDialog } from './components/BookingSuccessDialog'
 import { BookingTimeSlotSection } from '../../components/Booking/BookingTimeSlotSection'
 import { useI18n } from 'twake-i18n'
 import { useBookingData } from './hooks/useBookingData'
@@ -34,6 +35,10 @@ export const BookingPage: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<Dayjs | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
+  const [successOpen, setSuccessOpen] = useState<boolean>(false)
+  const [bookingConfirmationToken, setBookingConfirmationToken] = useState<
+    string | null
+  >(null)
 
   // Group slots by calendar day for quick lookup when rendering the grid
   const slotsByDay = useMemo(() => {
@@ -84,16 +89,32 @@ export const BookingPage: React.FC = () => {
     if (!bookingLinkPublicId || !selectedSlot) {
       return
     }
-    await createBooking(bookingLinkPublicId, {
+    const response = await createBooking(bookingLinkPublicId, {
       startUtc: selectedSlot.start,
       creator: {
         name: name || undefined,
         email
       },
-      eventTitle: bookingInfo?.name || t('booking.defaultEventTitle')
+      eventTitle: bookingInfo?.name || t('booking.defaultEventTitle'),
+      visioLink: true
     })
     refetch()
     setConfirmOpen(false)
+    setBookingConfirmationToken(response.bookingConfirmationToken)
+    setSuccessOpen(true)
+  }
+
+  const handleCloseSuccess = (): void => {
+    setSuccessOpen(false)
+    setSelectedSlot(null)
+  }
+
+  const handleCancelMeeting = async (): Promise<void> => {
+    if (!bookingConfirmationToken) return
+    await cancelBookedEvent(bookingConfirmationToken)
+    setBookingConfirmationToken(null)
+    refetch()
+    setSuccessOpen(false)
     setSelectedSlot(null)
   }
 
@@ -181,6 +202,14 @@ export const BookingPage: React.FC = () => {
         selectedSlot={selectedSlot}
         bookingInfo={bookingInfo}
         onConfirm={handleConfirmBooking}
+      />
+      <BookingSuccessDialog
+        open={successOpen}
+        onClose={handleCloseSuccess}
+        selectedSlot={selectedSlot}
+        bookingInfo={bookingInfo}
+        eventLink={`${window.location.origin}/booking/confirmed/${bookingConfirmationToken}`}
+        onCancelMeeting={handleCancelMeeting}
       />
     </Box>
   )

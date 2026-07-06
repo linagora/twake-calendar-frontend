@@ -465,6 +465,15 @@
       "button": "Confirmer",
       "inProgress": "Confirmation..."
     },
+    "success": {
+      "title": "Réunion confirmée",
+      "subtitle": "Votre réunion avec %{owner} est prévue le %{date} à %{time}",
+      "subsubtitle": "Une invitation a été envoyée à votre email.",
+      "needChanges": "Besoin de faire des modifications ?",
+      "cancelMeeting": "Annuler",
+      "copyLink": "Copier le lien",
+      "yourMeetingSuffix": "votre réunion"
+    },
     "form": {
       "name": "Nom",
       "email": "Email"

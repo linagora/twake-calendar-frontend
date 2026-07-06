@@ -1,7 +1,7 @@
 import { EventPreviewDetails } from '@/components/EventPreview/EventPreviewDetails'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { AttendanceValidation } from './components/AttendanceValidation'
-import { Box, Typography, useTheme } from '@linagora/twake-mui'
+import { Box, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { useParseToken } from './hooks/useParseToken'
@@ -10,45 +10,10 @@ import { Loading } from '@common/components/Loading/Loading'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { useSearchParams } from 'react-router-dom'
 import { fetchEvent } from './EventDao'
-import logo from '@common/static/noResult-logo.svg'
-
-const isUnableToLoad = (
-  error: boolean,
-  event: CalendarEvent | undefined,
-  decodedClaims: unknown
-): boolean => {
-  return error || !event || !decodedClaims
-}
-
-interface EventLoadErrorProps {
-  errorDetail: string | undefined
-  hasDecodedClaims: boolean
-  t: (key: string) => string
-}
-
-const EventLoadError: React.FC<EventLoadErrorProps> = ({
-  errorDetail,
-  hasDecodedClaims,
-  t
-}) => {
-  const detailMessage =
-    errorDetail ||
-    (!hasDecodedClaims ? t('error.invalidOrExpiredToken') : undefined)
-
-  return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <img src={logo} alt={t('search.noResults')} />
-      <Typography color="error" variant="h5">
-        {t('error.cannotLoadEvent')}
-      </Typography>
-      {detailMessage && (
-        <Typography color="text.secondary" variant="body2" sx={{ mt: 1 }}>
-          {detailMessage}
-        </Typography>
-      )}
-    </Box>
-  )
-}
+import {
+  EventLoadError,
+  PreviewContainer
+} from './components/EventPreviewShared'
 
 export const EventPreviewPage: React.FC = () => {
   const { t } = useI18n()
@@ -76,46 +41,27 @@ export const EventPreviewPage: React.FC = () => {
     }
   }
 
+  const detailMessage = React.useMemo(() => {
+    return (
+      errorDetail ||
+      (!decodedClaims ? t('error.invalidOrExpiredToken') : undefined)
+    )
+  }, [errorDetail, decodedClaims, t])
+
   if (loading) {
     return <Loading />
   }
 
-  if (isUnableToLoad(error, event, decodedClaims)) {
+  if (error || !event || !decodedClaims) {
     return (
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          width: '100%',
-          maxWidth: '600px',
-          padding: { xs: '24px', sm: '32px' },
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }}
-      >
-        <EventLoadError
-          errorDetail={errorDetail}
-          hasDecodedClaims={!!decodedClaims}
-          t={t}
-        />
-      </Box>
+      <PreviewContainer>
+        <EventLoadError errorDetail={detailMessage} />
+      </PreviewContainer>
     )
   }
 
   return (
-    <Box
-      sx={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        width: '100%',
-        maxWidth: '600px',
-        padding: { xs: '24px', sm: '32px' },
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-      }}
-    >
+    <PreviewContainer>
       <EventPreviewTitleRow
         event={event as CalendarEvent}
         isOwn={false}
@@ -143,7 +89,7 @@ export const EventPreviewPage: React.FC = () => {
           onChoice={handleRsvpChoice}
         />
       </Box>
-    </Box>
+    </PreviewContainer>
   )
 }
 

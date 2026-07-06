@@ -1,7 +1,8 @@
 import {
   BookingSlotsResponse,
   CreateBookingRequest,
-  CreateBookingResponse
+  CreateBookingResponse,
+  BookedEventResponse
 } from '@common/features/booking/types/BookingTypes'
 import { api } from '@common/utils/apiUtils'
 
@@ -46,6 +47,35 @@ export async function createBooking(
     throw new Error(
       body || `createBooking failed with status ${response.status}`
     )
+  }
+  return response.json()
+}
+
+/**
+ * Cancel a previously booked event using the confirmation token.
+ * No authentication required.
+ */
+export async function cancelBookedEvent(
+  bookingConfirmationToken: string
+): Promise<void> {
+  const params = new URLSearchParams({ bookingConfirmationToken })
+  const response = await api.delete(`api/booked-event?${params}`)
+  if (!response.ok) {
+    throw new Error(`cancelBookedEvent failed with status ${response.status}`)
+  }
+}
+
+/**
+ * Retrieve the details of a previously booked event using the confirmation token.
+ * No authentication required.
+ */
+export async function getBookedEvent(
+  bookingConfirmationToken: string
+): Promise<BookedEventResponse> {
+  const params = new URLSearchParams({ bookingConfirmationToken })
+  const response = await api.get(`api/booked-event?${params}`)
+  if (!response.ok) {
+    throw new Error(`getBookedEvent failed with status ${response.status}`)
   }
   return response.json()
 }

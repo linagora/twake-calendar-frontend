@@ -112,3 +112,13 @@ export function getTimezoneOffset(
   const offsetPart = parts.find(p => p.type === 'timeZoneName')
   return offsetPart?.value.replace('GMT', 'UTC') ?? ''
 }
+
+/**
+ * Returns a formatted timezone label with offset and readable timezone name.
+ * Example: "(UTC+2) Europe Paris"
+ */
+export function formatTimezoneLabel(
+  tzName: string = browserDefaultTimeZone
+): string {
+  return `(${getTimezoneOffset(tzName)}) ${tzName.replace(/_/g, ' ')}`
+}

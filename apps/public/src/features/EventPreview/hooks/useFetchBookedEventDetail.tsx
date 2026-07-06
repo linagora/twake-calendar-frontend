@@ -1,49 +1,31 @@
 import { useState, useEffect, useRef } from 'react'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { fetchEvent } from '../EventDao'
+import { getBookedEvent } from '@/features/booking/BookingDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { useI18n } from 'twake-i18n'
-import { getSanitizedHttpErrorMessage } from './useEventDetailError'
+import { getHttpErrorMessage } from './useEventDetailError'
 
-export interface EventDetailResult {
+export interface BookedEventDetailResult {
   event: CalendarEvent | undefined
-  attendeeEmail: string | undefined
-  links:
-    | {
-        yes: string
-        no: string
-        maybe: string
-      }
-    | undefined
   loading: boolean
   error: boolean
   errorDetail: string | undefined
 }
 
-export const useFetchEventDetail = (
-  jwt: string | null,
-  calId: string
-): EventDetailResult => {
+export const useFetchBookedEventDetail = (
+  bookingConfirmationToken: string | undefined
+): BookedEventDetailResult => {
   const { t } = useI18n()
-  const [data, setData] = useState<{
-    event: CalendarEvent | undefined
-    attendeeEmail: string | undefined
-    links: { yes: string; no: string; maybe: string } | undefined
-  }>({
-    event: undefined,
-    attendeeEmail: undefined,
-    links: undefined
-  })
-
-  const [loading, setLoading] = useState<boolean>(!!jwt)
-  const [error, setError] = useState<boolean>(!jwt)
+  const [event, setEvent] = useState<CalendarEvent | undefined>(undefined)
+  const [loading, setLoading] = useState<boolean>(!!bookingConfirmationToken)
+  const [error, setError] = useState<boolean>(!bookingConfirmationToken)
   const [errorDetail, setErrorDetail] = useState<string | undefined>(
-    !jwt ? t('error.missingToken') : undefined
+    !bookingConfirmationToken ? t('error.missingToken') : undefined
   )
   const hasLoadedRef = useRef<boolean>(false)
 
   useEffect((): (() => void) | void => {
-    if (!jwt) return
+    if (!bookingConfirmationToken) return
 
     let isMounted = true
 
@@ -54,12 +36,12 @@ export const useFetchEventDetail = (
       setError(false)
       setErrorDetail(undefined)
       try {
-        const response = await fetchEvent(jwt)
+        const response = await getBookedEvent(bookingConfirmationToken)
         if (!isMounted) return
 
         const initialEvent: CalendarEvent = {
           URL: '',
-          calId,
+          calId: '',
           uid: '',
           start: '',
           timezone: 'UTC',
@@ -71,18 +53,14 @@ export const useFetchEventDetail = (
           parsed.URL = `/calendars/${parsed.calId}/${parsed.uid}.ics`
         }
 
-        setData({
-          event: parsed,
-          attendeeEmail: response.attendeeEmail,
-          links: response.links
-        })
+        setEvent(parsed)
         setLoading(false)
         hasLoadedRef.current = true
       } catch (err) {
-        console.error('Failed to fetch event participation:', err)
+        console.error('Failed to fetch booked event:', err)
         if (isMounted) {
           setError(true)
-          setErrorDetail(getSanitizedHttpErrorMessage(err, t))
+          setErrorDetail(getHttpErrorMessage(err, t))
           setLoading(false)
         }
       }
@@ -93,12 +71,10 @@ export const useFetchEventDetail = (
     return (): void => {
       isMounted = false
     }
-  }, [jwt, calId, t])
+  }, [bookingConfirmationToken, t])
 
   return {
-    event: data.event,
-    attendeeEmail: data.attendeeEmail,
-    links: data.links,
+    event,
     loading,
     error,
     errorDetail

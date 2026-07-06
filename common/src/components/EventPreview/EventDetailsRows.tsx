@@ -30,7 +30,7 @@ interface BaseEventRowProps {
   error?: boolean
 }
 
-const BaseEventRow: React.FC<BaseEventRowProps> = ({
+export const BaseEventRow: React.FC<BaseEventRowProps> = ({
   icon,
   text,
   content,

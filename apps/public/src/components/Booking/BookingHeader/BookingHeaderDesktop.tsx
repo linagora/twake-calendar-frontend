@@ -1,9 +1,6 @@
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import { BookingSlotsResponse } from '@common/features/booking/types/BookingTypes'
-import {
-  browserDefaultTimeZone,
-  getTimezoneOffset
-} from '@common/utils/timezone'
+import { formatTimezoneLabel } from '@common/utils/timezone'
 import { Avatar, Box, Typography } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -15,15 +12,8 @@ export const BookingHeaderDesktop: React.FC<{
   bookingInfo: BookingSlotsResponse
 }> = ({ bookingInfo }) => {
   const { t } = useI18n()
-  const timeZoneLabel = `(${getTimezoneOffset(browserDefaultTimeZone)}) ${browserDefaultTimeZone.replace(/_/g, ' ')}`
-  const cameraIcon = (
-    <img
-      src={iconCamera}
-      alt={t('booking.cameraIcon')}
-      width={24}
-      height={24}
-    />
-  )
+  const timeZoneLabel = formatTimezoneLabel()
+  const cameraIcon = <img src={iconCamera} width={24} height={24} />
   return (
     <Box
       sx={{

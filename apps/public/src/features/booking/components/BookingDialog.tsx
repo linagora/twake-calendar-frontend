@@ -37,7 +37,6 @@ interface DialogHeaderProps {
 }
 
 const DialogHeader: React.FC<DialogHeaderProps> = ({ owner, onClose }) => {
-  const { t } = useI18n()
   return (
     <DialogTitle
       sx={{
@@ -56,7 +55,7 @@ const DialogHeader: React.FC<DialogHeaderProps> = ({ owner, onClose }) => {
       ) : (
         <Box />
       )}
-      <IconButton onClick={onClose} size="small" aria-label={t('common.close')}>
+      <IconButton onClick={onClose} size="small">
         <CloseIcon fontSize="small" />
       </IconButton>
     </DialogTitle>

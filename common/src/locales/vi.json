@@ -463,6 +463,15 @@
       "button": "Xác nhận",
       "inProgress": "Đang xác nhận..."
     },
+    "success": {
+      "title": "Cuộc họp đã được xác nhận",
+      "subtitle": "Cuộc họp của bạn với %{owner} được lên lịch vào %{date} lúc %{time}",
+      "subsubtitle": "Thư mỏi đã được gửi đến email của bạn.",
+      "needChanges": "Cần thay đổi?",
+      "cancelMeeting": "hủy",
+      "copyLink": "Sao chép liên kết",
+      "yourMeetingSuffix": "cuộc họp của bạn"
+    },
     "form": {
       "name": "Tên",
       "email": "Email"

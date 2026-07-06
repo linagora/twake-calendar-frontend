@@ -10,6 +10,7 @@ import { Loading } from '@common/components/Loading/Loading'
 import { PublicLayout } from './components/PublicLayout'
 import { EventPreviewPage } from './features/EventPreview/EventPreviewPage'
 import { BookingPage } from './features/booking/BookingPage'
+import { BookedEventPreviewPage } from './components/EventPreview/BookedEventPreview'
 
 import {
   enGB,
@@ -78,6 +79,14 @@ export default function App(): JSX.Element {
                     element={
                       <PublicLayout>
                         <EventPreviewPage />
+                      </PublicLayout>
+                    }
+                  />
+                  <Route
+                    path="/booking/confirmed/:bookingConfirmationToken"
+                    element={
+                      <PublicLayout>
+                        <BookedEventPreviewPage />
                       </PublicLayout>
                     }
                   />

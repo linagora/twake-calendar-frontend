@@ -465,6 +465,15 @@
       "button": "Подтвердить",
       "inProgress": "Подтверждение..."
     },
+    "success": {
+      "title": "Встреча подтверждена",
+      "subtitle": "Ваша встреча с %{owner} назначена на %{date} в %{time}",
+      "subsubtitle": "Приглашение отправлено на вашу почту.",
+      "needChanges": "Нужно внести изменения?",
+      "cancelMeeting": "отменить",
+      "copyLink": "Копировать ссылку",
+      "yourMeetingSuffix": "вашу встречу"
+    },
     "form": {
       "name": "Имя",
       "email": "Email"
