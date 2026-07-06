@@ -2,7 +2,7 @@ import { Slot } from '@common/features/booking/types/BookingTypes'
 import { DayBadge } from '@common/features/Search/searchResultsComponents'
 import { Box, Button, Typography } from '@linagora/twake-mui'
 import dayjs, { Dayjs } from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
 
@@ -11,6 +11,8 @@ const SLOT_LIST_GAP = 16
 
 const SLOT_LIST_MAX_HEIGHT =
   CALENDAR_CONTENT_HEIGHT - DAY_BADGE_ROW_HEIGHT - SLOT_LIST_GAP
+
+const NOW_REFRESH_INTERVAL_MS = 60_000 // 1 min: slot granularity doesn't need finer resolution
 
 const containerSx = {
   display: 'flex',
@@ -97,11 +99,16 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
 }) => {
   const { t, lang } = useI18n()
 
-  const [now] = useState(() => Date.now())
+  const [now, setNow] = useState(() => Date.now())
   const isSelectedDayToday = selectedDay?.isSame(dayjs(), 'day')
   const visibleSlots = isSelectedDayToday
     ? slots.filter(slot => new Date(slot.start).getTime() >= now)
     : slots
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), NOW_REFRESH_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [])
 
   if (!selectedDay) {
     return <EmptyMessage message={t('booking.selectDayPrompt')} />
