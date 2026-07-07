@@ -1,7 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { listBookingLinks } from '@common/features/booking/BookingDao'
-import EventIcon from '@mui/icons-material/Event'
-import LinkIcon from '@mui/icons-material/Link'
 import { BookingLink } from '@common/features/booking/types/BookingTypes'
 import {
   addCalendarResource,
@@ -11,6 +9,7 @@ import {
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import { defaultColors } from '@common/utils/defaultColors'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
@@ -23,13 +22,14 @@ import {
   Checkbox,
   IconButton,
   ListItem,
-  Snackbar,
   Tooltip,
   Typography,
   useTheme
 } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
+import EventIcon from '@mui/icons-material/Event'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import LinkIcon from '@mui/icons-material/Link'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import {
   Dispatch,
@@ -41,14 +41,13 @@ import {
   useState
 } from 'react'
 import { useI18n } from 'twake-i18n'
+import { SnackbarAlert } from '../Loading/SnackBarAlert'
 import CalendarPopover from './CalendarModal'
 import { CalendarSelectorMenu } from './CalendarSelectorMenu'
 import { DeleteCalendarDialog } from './DeleteCalendarDialog'
 import { OwnerCaption } from './OwnerCaption'
 import RegisterCalendars from './RegisterCalendars'
 import type { ResourceCal } from './RegisterCalendars/index.types'
-import { defaultColors } from '@common/utils/defaultColors'
-import { SnackbarAlert } from '../Loading/SnackBarAlert'
 
 /**
  * Keeps a section's expanded state in sync whenever the caller's
@@ -207,24 +206,13 @@ const CalendarAccordion: React.FC<{
   )
 }
 
-const BookingLinksAccordion: React.FC<{
-  title: string
-  bookingLinks: BookingLink[]
-  defaultExpanded?: boolean
+const BookingLinkChip: React.FC<{
+  link: BookingLink
   handleMenuOpen?: (e, link) => void
-  onAddClick?: () => void
-  addBtnTooltip?: string
-}> = ({
-  title,
-  bookingLinks,
-  defaultExpanded = false,
-  handleMenuOpen,
-  onAddClick,
-  addBtnTooltip
-}) => {
+}> = ({ link, handleMenuOpen }) => {
+  const theme = useTheme()
   const { t } = useI18n()
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
-  const theme = useTheme()
 
   const getBookingLinkUrl = (publicId: string): string => {
     const prefix =
@@ -241,100 +229,119 @@ const BookingLinksAccordion: React.FC<{
       console.error('Failed to copy booking link:', err)
     }
   }
-
   return (
     <>
-      <CollapsibleSection
-        title={title}
-        itemCount={bookingLinks.length}
-        defaultExpanded={defaultExpanded}
-        onAddClick={onAddClick}
-        addBtnTooltip={addBtnTooltip}
+      <ListItem
+        key={link.publicId}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          '& .MoreBtn': { opacity: 0 },
+          '&:hover': {
+            backgroundColor: '#F3F3F6',
+            '& .MoreBtn': { opacity: 1 }
+          }
+        }}
       >
-        {bookingLinks.map(link => (
-          <ListItem
-            key={link.publicId}
-            sx={{
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: 'calc(100% - 40px)',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              transition: 'background-color 0.2s ease',
-              '& .MoreBtn': { opacity: 0 },
-              '&:hover': {
-                backgroundColor: '#F3F3F6',
-                '& .MoreBtn': { opacity: 1 }
-              }
+              padding: '9px',
+              marginRight: '4px'
             }}
           >
-            <div
+            <EventIcon sx={{ color: defaultColors[4].dark }} fontSize="small" />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <span
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: 'calc(100% - 40px)',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                overflowWrap: 'break-word',
+                fontSize: '0.875rem',
+                color: alpha(theme.palette.grey[900], 0.9)
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  padding: '9px',
-                  marginRight: '4px'
-                }}
-              >
-                <EventIcon
-                  sx={{ color: defaultColors[4].dark }}
-                  fontSize="small"
-                />
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden'
-                }}
-              >
-                <span
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    overflowWrap: 'break-word',
-                    fontSize: '0.875rem',
-                    color: alpha(theme.palette.grey[900], 0.9)
-                  }}
-                >
-                  {link.name || `${link.durationMinutes}min`}
-                </span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Tooltip title={t('tooltip.copyBookingLink')}>
-                <IconButton
-                  onClick={() => void handleCopyLink(link.publicId)}
-                  size="small"
-                >
-                  <LinkIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              {handleMenuOpen && (
-                <IconButton
-                  className="MoreBtn"
-                  size="small"
-                  onClick={e => handleMenuOpen(e, link)}
-                >
-                  <MoreHorizIcon fontSize="small" />
-                </IconButton>
-              )}
-            </div>
-          </ListItem>
-        ))}
-      </CollapsibleSection>
+              {link.name || `${link.durationMinutes}min`}
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title={t('tooltip.copyBookingLink')}>
+            <IconButton
+              onClick={() => void handleCopyLink(link.publicId)}
+              size="small"
+            >
+              <LinkIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {handleMenuOpen && (
+            <IconButton
+              className="MoreBtn"
+              size="small"
+              onClick={e => handleMenuOpen(e, link)}
+            >
+              <MoreHorizIcon fontSize="small" />
+            </IconButton>
+          )}
+        </div>
+      </ListItem>
       <SnackbarAlert
         open={copySnackbarOpen}
         setOpen={setCopySnackbarOpen}
         message={t('booking.linkCopied')}
       />
     </>
+  )
+}
+
+const BookingLinksAccordion: React.FC<{
+  title: string
+  bookingLinks: BookingLink[]
+  defaultExpanded?: boolean
+  handleMenuOpen?: (e, link) => void
+  onAddClick?: () => void
+  addBtnTooltip?: string
+}> = ({
+  title,
+  bookingLinks,
+  defaultExpanded = false,
+  handleMenuOpen,
+  onAddClick,
+  addBtnTooltip
+}) => {
+  return (
+    <CollapsibleSection
+      title={title}
+      itemCount={bookingLinks.length}
+      defaultExpanded={defaultExpanded}
+      onAddClick={onAddClick}
+      addBtnTooltip={addBtnTooltip}
+    >
+      {bookingLinks.map(link => (
+        <BookingLinkChip
+          key={link.publicId}
+          link={link}
+          handleMenuOpen={handleMenuOpen}
+        />
+      ))}
+    </CollapsibleSection>
   )
 }
 
