@@ -1,5 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { listBookingLinks } from '@common/features/booking/BookingDao'
+import {
+  deleteBookingLink,
+  listBookingLinks
+} from '@common/features/booking/BookingLinksSlice'
 import { BookingLink } from '@common/features/booking/types/BookingTypes'
 import {
   addCalendarResource,
@@ -43,6 +46,7 @@ import {
 import { useI18n } from 'twake-i18n'
 import { SnackbarAlert } from '../Loading/SnackBarAlert'
 import CalendarPopover from './CalendarModal'
+import { BookingLinkSelectorMenu } from './BookingLinkSelectorMenu'
 import { CalendarSelectorMenu } from './CalendarSelectorMenu'
 import { DeleteCalendarDialog } from './DeleteCalendarDialog'
 import { OwnerCaption } from './OwnerCaption'
@@ -208,11 +212,13 @@ const CalendarAccordion: React.FC<{
 
 const BookingLinkChip: React.FC<{
   link: BookingLink
-  handleMenuOpen?: (e, link) => void
-}> = ({ link, handleMenuOpen }) => {
+  onDelete: (publicId: string) => void
+}> = ({ link, onDelete }) => {
   const theme = useTheme()
   const { t } = useI18n()
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
+  const menuOpen = Boolean(menuAnchorEl)
 
   const getBookingLinkUrl = (publicId: string): string => {
     const prefix = window.PUBLIC_PAGE_BASE
@@ -229,6 +235,20 @@ const BookingLinkChip: React.FC<{
       console.error('Failed to copy booking link:', err)
     }
   }
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = (): void => {
+    setMenuAnchorEl(null)
+  }
+
+  const handleDelete = (): void => {
+    onDelete(link.publicId)
+    handleMenuClose()
+  }
+
   return (
     <>
       <ListItem
@@ -291,17 +311,17 @@ const BookingLinkChip: React.FC<{
               <LinkIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          {handleMenuOpen && (
-            <IconButton
-              className="MoreBtn"
-              size="small"
-              onClick={e => handleMenuOpen(e, link)}
-            >
-              <MoreHorizIcon fontSize="small" />
-            </IconButton>
-          )}
+          <IconButton className="MoreBtn" size="small" onClick={handleMenuOpen}>
+            <MoreHorizIcon fontSize="small" />
+          </IconButton>
         </div>
       </ListItem>
+      <BookingLinkSelectorMenu
+        anchorEl={menuAnchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        onDelete={handleDelete}
+      />
       <SnackbarAlert
         open={copySnackbarOpen}
         setOpen={setCopySnackbarOpen}
@@ -315,14 +335,14 @@ const BookingLinksAccordion: React.FC<{
   title: string
   bookingLinks: BookingLink[]
   defaultExpanded?: boolean
-  handleMenuOpen?: (e, link) => void
+  onDelete: (publicId: string) => void
   onAddClick?: () => void
   addBtnTooltip?: string
 }> = ({
   title,
   bookingLinks,
   defaultExpanded = false,
-  handleMenuOpen,
+  onDelete,
   onAddClick,
   addBtnTooltip
 }) => {
@@ -335,11 +355,7 @@ const BookingLinksAccordion: React.FC<{
       addBtnTooltip={addBtnTooltip}
     >
       {bookingLinks.map(link => (
-        <BookingLinkChip
-          key={link.publicId}
-          link={link}
-          handleMenuOpen={handleMenuOpen}
-        />
+        <BookingLinkChip key={link.publicId} link={link} onDelete={onDelete} />
       ))}
     </CollapsibleSection>
   )
@@ -388,6 +404,7 @@ const CalendarSelection: React.FC<{
   setSelectedCalendars: (value: SetStateAction<string[]>) => void
 }> = ({ selectedCalendars, setSelectedCalendars }) => {
   const { t } = useI18n()
+  const dispatch = useAppDispatch()
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const calendars = useAppSelector(state => state.calendars.list)
 
@@ -411,15 +428,17 @@ const CalendarSelection: React.FC<{
   const [anchorElCalResources, setAnchorElCalResources] =
     useState<HTMLElement | null>(null)
 
-  // Booking links state
-  const [bookingLinks, setBookingLinks] = useState<BookingLink[]>([])
+  // Booking links from Redux
+  const bookingLinks = useAppSelector(state => state.bookingLinks.list)
 
   // Fetch booking links on mount
   useEffect(() => {
-    listBookingLinks()
-      .then(links => setBookingLinks(links))
-      .catch(err => console.error('Failed to fetch booking links:', err))
-  }, [])
+    dispatch(listBookingLinks())
+  }, [dispatch])
+
+  const handleDeleteBookingLink = (publicId: string): void => {
+    dispatch(deleteBookingLink(publicId))
+  }
 
   return (
     <>
@@ -428,6 +447,7 @@ const CalendarSelection: React.FC<{
           title={t('calendar.bookingLinks')}
           bookingLinks={bookingLinks}
           defaultExpanded
+          onDelete={handleDeleteBookingLink}
         />
 
         <CalendarAccordion

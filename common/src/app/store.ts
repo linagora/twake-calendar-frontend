@@ -1,5 +1,6 @@
 import eventsCalendar from '@common/features/Calendars/CalendarSlice'
 import { postMutationRefreshMiddleware } from '@common/features/Calendars/listeners/postMutationRefresh'
+import bookingLinksReducer from '@common/features/booking/BookingLinksSlice'
 import searchResultReducer from '@common/features/Search/SearchSlice'
 import settingsReducer from '@common/features/Settings/SettingsSlice'
 import userReducer from '@common/features/User/UserSlice'
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   router: routerReducer,
   user: userReducer,
   calendars: eventsCalendar,
+  bookingLinks: bookingLinksReducer,
   settings: settingsReducer,
   searchResult: searchResultReducer,
   loading: loadingReducer

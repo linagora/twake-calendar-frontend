@@ -11,7 +11,7 @@ import {
   getBookingLink,
   resetBookingLink,
   updateBookingLink
-} from '@private/features/booking/BookingDao'
+} from '@common/features/booking/BookingDao'
 
 jest.mock('@common/utils/apiUtils', () => ({
   api: {
