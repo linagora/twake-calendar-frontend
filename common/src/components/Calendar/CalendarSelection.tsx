@@ -215,9 +215,9 @@ const BookingLinkChip: React.FC<{
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
 
   const getBookingLinkUrl = (publicId: string): string => {
-    const prefix =
-      `${window.PUBLIC_PAGE_BASE}/booking` ||
-      `${window.location.origin}/booking`
+    const prefix = window.PUBLIC_PAGE_BASE
+      ? `${window.PUBLIC_PAGE_BASE}/booking`
+      : `${window.location.origin}/booking`
     return `${prefix}/${publicId}`
   }
 
