@@ -173,7 +173,7 @@ interface SuccessFooterProps {
   suffixLabel: string
 }
 
-const SuccessFooter: React.FC<SuccessFooterProps> = ({
+export const SuccessFooter: React.FC<SuccessFooterProps> = ({
   onCancelMeeting,
   needChangesLabel,
   cancelLabel,

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { getBookedEvent } from '@/features/booking/BookingDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
+import { CalendarEvent } from '@common/types/EventsTypes'
+import { useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { getSanitizedHttpErrorMessage } from './useEventDetailError'
 
@@ -10,6 +10,7 @@ export interface BookedEventDetailResult {
   loading: boolean
   error: boolean
   errorDetail: string | undefined
+  refetch: () => void
 }
 
 export const useFetchBookedEventDetail = (
@@ -23,6 +24,7 @@ export const useFetchBookedEventDetail = (
     !bookingConfirmationToken ? t('error.missingToken') : undefined
   )
   const hasLoadedRef = useRef<boolean>(false)
+  const [refreshKey, setRefreshKey] = useState<number>(0)
 
   useEffect((): (() => void) | void => {
     if (!bookingConfirmationToken) return
@@ -71,12 +73,17 @@ export const useFetchBookedEventDetail = (
     return (): void => {
       isMounted = false
     }
-  }, [bookingConfirmationToken, t])
+  }, [bookingConfirmationToken, t, refreshKey])
+
+  const refetch = (): void => {
+    setRefreshKey(prev => prev + 1)
+  }
 
   return {
     event,
     loading,
     error,
-    errorDetail
+    errorDetail,
+    refetch
   }
 }
