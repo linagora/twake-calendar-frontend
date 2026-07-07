@@ -55,6 +55,6 @@ declare global {
 
     HIDE_LANGUAGE_SELECTOR: boolean
 
-    BOOKING_LINK_PREFIX: string | undefined
+    PUBLIC_PAGE_BASE: string | undefined
   }
 }

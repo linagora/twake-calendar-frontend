@@ -31,7 +31,15 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useI18n } from 'twake-i18n'
 import CalendarPopover from './CalendarModal'
 import { CalendarSelectorMenu } from './CalendarSelectorMenu'
@@ -41,6 +49,113 @@ import RegisterCalendars from './RegisterCalendars'
 import type { ResourceCal } from './RegisterCalendars/index.types'
 import { defaultColors } from '@common/utils/defaultColors'
 import { SnackbarAlert } from '../Loading/SnackBarAlert'
+
+/**
+ * Keeps a section's expanded state in sync whenever the caller's
+ * `defaultExpanded` prop changes (e.g. switching views resets sections).
+ */
+const useSyncedExpanded = (
+  defaultExpanded: boolean
+): [boolean, Dispatch<SetStateAction<boolean>>] => {
+  const [expanded, setExpanded] = useState(defaultExpanded)
+
+  useEffect(() => {
+    setExpanded(defaultExpanded)
+  }, [defaultExpanded])
+
+  return [expanded, setExpanded]
+}
+
+/**
+ * Shared collapsible shell used by both the calendar list accordions and
+ * the booking links accordion. Handles the expand/collapse chrome, the
+ * optional add button, and the empty-state hiding rule; callers only
+ * supply their own list content as children.
+ */
+const CollapsibleSection: React.FC<{
+  title: string
+  itemCount: number
+  defaultExpanded?: boolean
+  onAddClick?: () => void
+  addBtnTooltip?: string
+  children: ReactNode
+}> = ({
+  title,
+  itemCount,
+  defaultExpanded = false,
+  onAddClick,
+  addBtnTooltip,
+  children
+}) => {
+  const { t } = useI18n()
+  const [expanded, setExpanded] = useSyncedExpanded(defaultExpanded)
+
+  if (itemCount === 0 && !onAddClick) return null
+
+  return (
+    <Accordion
+      defaultExpanded={defaultExpanded}
+      expanded={expanded}
+      sx={{
+        width: '100%',
+        padding: 0,
+        margin: 0,
+        marginBottom: '12px',
+        boxShadow: 'none',
+        '&::before': {
+          display: 'none'
+        }
+      }}
+    >
+      <AccordionSummary
+        expandIcon={
+          itemCount > 0 ? (
+            <Tooltip
+              title={expanded ? t('tooltip.collapse') : t('tooltip.expand')}
+            >
+              <ExpandMoreIcon />
+            </Tooltip>
+          ) : null
+        }
+        aria-controls={`${title}-content`}
+        id={`${title}-header`}
+        className="calendarListHeader"
+        onClick={() => {
+          if (itemCount > 0) {
+            setExpanded(!expanded)
+          }
+        }}
+        sx={{
+          '& .MuiAccordionSummary-content': {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }
+        }}
+      >
+        <Typography variant="body2">{title}</Typography>
+        {onAddClick && (
+          <Tooltip title={addBtnTooltip}>
+            <IconButton
+              component="span"
+              onClick={e => {
+                if (expanded) {
+                  e.stopPropagation()
+                }
+                onAddClick()
+              }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </AccordionSummary>
+      <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
+        {children}
+      </AccordionDetails>
+    </Accordion>
+  )
+}
 
 const CalendarAccordion: React.FC<{
   title: string
@@ -68,91 +183,27 @@ const CalendarAccordion: React.FC<{
   const allCalendars = useAppSelector(state => state.calendars.list)
   const { t } = useI18n()
 
-  const [expended, setExpended] = useState(defaultExpanded)
-
-  useEffect(() => {
-    const handleExpendedChange = (): void => {
-      setExpended(defaultExpanded)
-    }
-    handleExpendedChange()
-  }, [defaultExpanded])
-
-  if (calendars.length === 0 && !showAddButton) return null
   return (
-    <Accordion
+    <CollapsibleSection
+      title={title}
+      itemCount={calendars.length}
       defaultExpanded={defaultExpanded}
-      expanded={expended}
-      sx={{
-        width: '100%',
-        padding: 0,
-        margin: 0,
-        marginBottom: '12px',
-        boxShadow: 'none',
-        '&::before': {
-          display: 'none'
-        }
-      }}
+      onAddClick={showAddButton ? onAddClick : undefined}
+      addBtnTooltip={addBtnTooltip}
     >
-      <AccordionSummary
-        expandIcon={
-          calendars.length > 0 ? (
-            <Tooltip
-              title={expended ? t('tooltip.collapse') : t('tooltip.expand')}
-            >
-              <ExpandMoreIcon />
-            </Tooltip>
-          ) : null
-        }
-        aria-controls={`${title}-content`}
-        id={`${title}-header`}
-        className="calendarListHeader"
-        onClick={() => {
-          if (calendars.length > 0) {
-            setExpended(!expended)
-          }
-        }}
-        sx={{
-          '& .MuiAccordionSummary-content': {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }
-        }}
-      >
-        <Typography variant="body2">{title}</Typography>
-        {showAddButton && (
-          <Tooltip title={addBtnTooltip}>
-            <IconButton
-              component="span"
-              onClick={e => {
-                if (expended) {
-                  e.stopPropagation()
-                }
-                if (onAddClick) {
-                  onAddClick()
-                }
-              }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </AccordionSummary>
-      <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
-        {calendars.map(id => (
-          <CalendarSelector
-            key={id}
-            calendars={allCalendars}
-            id={id}
-            isPersonal={title === t('calendar.personal')}
-            selectedCalendars={selectedCalendars}
-            handleCalendarToggle={handleToggle}
-            setOpen={() => setOpen(id)}
-            hideOwner={hideOwner}
-          />
-        ))}
-      </AccordionDetails>
-    </Accordion>
+      {calendars.map(id => (
+        <CalendarSelector
+          key={id}
+          calendars={allCalendars}
+          id={id}
+          isPersonal={title === t('calendar.personal')}
+          selectedCalendars={selectedCalendars}
+          handleCalendarToggle={handleToggle}
+          setOpen={() => setOpen(id)}
+          hideOwner={hideOwner}
+        />
+      ))}
+    </CollapsibleSection>
   )
 }
 
@@ -172,170 +223,112 @@ const BookingLinksAccordion: React.FC<{
   addBtnTooltip
 }) => {
   const { t } = useI18n()
-  const [expanded, setExpanded] = useState(defaultExpanded)
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
   const theme = useTheme()
 
-  useEffect(() => {
-    setExpanded(defaultExpanded)
-  }, [defaultExpanded])
-
   const getBookingLinkUrl = (publicId: string): string => {
     const prefix =
-      window.BOOKING_LINK_PREFIX || `${window.location.origin}/booking`
+      `${window.PUBLIC_PAGE_BASE}/booking` ||
+      `${window.location.origin}/booking`
     return `${prefix}/${publicId}`
   }
 
   const handleCopyLink = async (publicId: string): Promise<void> => {
-    const url = getBookingLinkUrl(publicId)
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(getBookingLinkUrl(publicId))
       setCopySnackbarOpen(true)
     } catch (err) {
       console.error('Failed to copy booking link:', err)
     }
   }
 
-  if (bookingLinks.length === 0) return null
-
   return (
     <>
-      <Accordion
+      <CollapsibleSection
+        title={title}
+        itemCount={bookingLinks.length}
         defaultExpanded={defaultExpanded}
-        expanded={expanded}
-        style={{
-          width: '100%',
-          padding: 0,
-          margin: 0,
-          marginBottom: '12px',
-          boxShadow: 'none'
-        }}
-        sx={{
-          '&::before': {
-            display: 'none'
-          }
-        }}
+        onAddClick={onAddClick}
+        addBtnTooltip={addBtnTooltip}
       >
-        <AccordionSummary
-          expandIcon={
-            bookingLinks.length > 0 ? (
-              <Tooltip
-                title={expanded ? t('tooltip.collapse') : t('tooltip.expand')}
-              >
-                <ExpandMoreIcon />
-              </Tooltip>
-            ) : null
-          }
-          aria-controls={`${title}-content`}
-          id={`${title}-header`}
-          className="calendarListHeader"
-          onClick={() => {
-            if (bookingLinks.length > 0) setExpanded(!expanded)
-          }}
-          sx={{
-            '& .MuiAccordionSummary-content': {
+        {bookingLinks.map(link => (
+          <ListItem
+            key={link.publicId}
+            sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
-            }
-          }}
-        >
-          <Typography variant="body2">{title}</Typography>
-          {onAddClick && (
-            <Tooltip title={addBtnTooltip}>
-              <IconButton
-                component="span"
-                onClick={e => {
-                  if (expanded) e.stopPropagation()
-                  onAddClick()
-                }}
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </AccordionSummary>
-        <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
-          {bookingLinks.map(link => (
-            <ListItem
-              key={link.publicId}
-              sx={{
+              justifyContent: 'space-between',
+              transition: 'background-color 0.2s ease',
+              '& .MoreBtn': { opacity: 0 },
+              '&:hover': {
+                backgroundColor: '#F3F3F6',
+                '& .MoreBtn': { opacity: 1 }
+              }
+            }}
+          >
+            <div
+              style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'background-color 0.2s ease',
-                '& .MoreBtn': { opacity: 0 },
-                '&:hover': {
-                  backgroundColor: '#F3F3F6',
-                  '& .MoreBtn': { opacity: 1 }
-                }
+                maxWidth: 'calc(100% - 40px)',
+                overflow: 'hidden'
               }}
             >
               <div
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  maxWidth: 'calc(100% - 40px)',
+                  padding: '9px',
+                  marginRight: '4px'
+                }}
+              >
+                <EventIcon
+                  sx={{ color: defaultColors[4].dark }}
+                  fontSize="small"
+                />
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   overflow: 'hidden'
                 }}
               >
-                <div
+                <span
                   style={{
-                    display: 'flex',
-                    padding: '9px',
-                    marginRight: '4px'
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    overflowWrap: 'break-word',
+                    fontSize: '0.875rem',
+                    color: alpha(theme.palette.grey[900], 0.9)
                   }}
                 >
-                  <EventIcon
-                    sx={{ color: defaultColors[4].dark }}
-                    fontSize="small"
-                  />
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden'
-                    // Removed the fixed padding: '6px' that pushed the text off-center
-                  }}
+                  {link.name || `${link.durationMinutes}min`}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Tooltip title={t('tooltip.copyBookingLink')}>
+                <IconButton
+                  onClick={() => void handleCopyLink(link.publicId)}
+                  size="small"
                 >
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      overflowWrap: 'break-word',
-                      fontSize: '0.875rem', // Aligns text sizing closely with standard list typography
-                      color: alpha(theme.palette.grey[900], 0.9)
-                    }}
-                  >
-                    {link.name || `${link.durationMinutes}min`}
-                  </span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Tooltip title={t('tooltip.copyBookingLink')}>
-                  <IconButton
-                    onClick={() => void handleCopyLink(link.publicId)}
-                    size="small"
-                  >
-                    <LinkIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                {handleMenuOpen && (
-                  <IconButton
-                    className="MoreBtn"
-                    size="small"
-                    onClick={e => handleMenuOpen(e, link)}
-                  >
-                    <MoreHorizIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </div>
-            </ListItem>
-          ))}
-        </AccordionDetails>
-      </Accordion>
+                  <LinkIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              {handleMenuOpen && (
+                <IconButton
+                  className="MoreBtn"
+                  size="small"
+                  onClick={e => handleMenuOpen(e, link)}
+                >
+                  <MoreHorizIcon fontSize="small" />
+                </IconButton>
+              )}
+            </div>
+          </ListItem>
+        ))}
+      </CollapsibleSection>
       <SnackbarAlert
         open={copySnackbarOpen}
         setOpen={setCopySnackbarOpen}
@@ -343,6 +336,44 @@ const BookingLinksAccordion: React.FC<{
       />
     </>
   )
+}
+
+type CalendarBuckets = {
+  personal: string[]
+  delegated: string[]
+  shared: string[]
+  resources: string[]
+}
+
+/**
+ * Splits calendar ids into mutually exclusive buckets in a single pass,
+ * replacing four separate `.filter()` calls that each re-derived the
+ * same ownership checks.
+ */
+const categorizeCalendars = (
+  calendars: Record<string, Calendar>,
+  userId: string
+): CalendarBuckets => {
+  const buckets: CalendarBuckets = {
+    personal: [],
+    delegated: [],
+    shared: [],
+    resources: []
+  }
+
+  Object.keys(calendars || {}).forEach(id => {
+    if (extractEventBaseUuid(id) === userId) {
+      buckets.personal.push(id)
+    } else if (calendars[id]?.owner?.resource) {
+      buckets.resources.push(id)
+    } else if (calendars[id]?.delegated) {
+      buckets.delegated.push(id)
+    } else {
+      buckets.shared.push(id)
+    }
+  })
+
+  return buckets
 }
 
 const CalendarSelection: React.FC<{
@@ -353,25 +384,12 @@ const CalendarSelection: React.FC<{
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const calendars = useAppSelector(state => state.calendars.list)
 
-  const personalCalendars = Object.keys(calendars || {}).filter(
-    id => extractEventBaseUuid(id) === userId
-  )
-  const delegatedCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId &&
-      calendars[id]?.delegated &&
-      !calendars?.[id]?.owner?.resource
-  )
-  const sharedCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId &&
-      !calendars?.[id]?.delegated &&
-      !calendars?.[id]?.owner?.resource
-  )
-  const resourceCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId && calendars?.[id]?.owner?.resource
-  )
+  const {
+    personal: personalCalendars,
+    delegated: delegatedCalendars,
+    shared: sharedCalendars,
+    resources: resourceCalendars
+  } = useMemo(() => categorizeCalendars(calendars, userId), [calendars, userId])
 
   const handleCalendarToggle = (name: string): void => {
     setSelectedCalendars((prev: string[]) =>
