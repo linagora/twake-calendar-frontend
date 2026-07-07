@@ -61,15 +61,11 @@ const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
 )
 
 interface SuccessSummaryProps {
-  ownerName: string
-  slotTime: SlotTime
   subtitle: string
   subsubtitle: string
 }
 
 const SuccessSummary: React.FC<SuccessSummaryProps> = ({
-  ownerName,
-  slotTime,
   subtitle,
   subsubtitle
 }) => (
@@ -230,8 +226,6 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
       <DialogContent sx={{ px: 3, pb: 4 }}>
         {slotTime && owner && (
           <SuccessSummary
-            ownerName={owner.displayName}
-            slotTime={slotTime}
             subtitle={t('booking.success.subtitle', {
               owner: owner.displayName,
               date: slotTime.date,

@@ -1,7 +1,6 @@
 import { EventPreviewDetails } from '@/components/EventPreview/EventPreviewDetails'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { Loading } from '@common/components/Loading/Loading'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useI18n } from 'twake-i18n'
@@ -36,17 +35,13 @@ export const BookedEventPreviewPage: React.FC = () => {
   return (
     <PreviewContainer>
       <EventPreviewTitleRow
-        event={event as CalendarEvent}
+        event={event}
         isOwn={false}
-        timezone={event?.timezone as string}
+        timezone={event?.timezone}
         t={t}
       />
 
-      <EventPreviewDetails
-        event={event as CalendarEvent}
-        isOwn={false}
-        isNotPrivate={true}
-      />
+      <EventPreviewDetails event={event} isOwn={false} isNotPrivate={true} />
     </PreviewContainer>
   )
 }

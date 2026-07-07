@@ -7,7 +7,6 @@ import { useI18n } from 'twake-i18n'
 import { useParseToken } from './hooks/useParseToken'
 import { useFetchEventDetail } from './hooks/useFetchEventDetail'
 import { Loading } from '@common/components/Loading/Loading'
-import { CalendarEvent } from '@common/types/EventsTypes'
 import { useSearchParams } from 'react-router-dom'
 import { fetchEvent } from './EventDao'
 import {
@@ -63,17 +62,13 @@ export const EventPreviewPage: React.FC = () => {
   return (
     <PreviewContainer>
       <EventPreviewTitleRow
-        event={event as CalendarEvent}
+        event={event}
         isOwn={false}
-        timezone={event?.timezone as string}
+        timezone={event?.timezone}
         t={t}
       />
 
-      <EventPreviewDetails
-        event={event as CalendarEvent}
-        isOwn={false}
-        isNotPrivate={true}
-      />
+      <EventPreviewDetails event={event} isOwn={false} isNotPrivate={true} />
 
       <Box
         sx={{
