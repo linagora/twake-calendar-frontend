@@ -11,9 +11,9 @@ import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 import iconCamera from '@common/static/images/icon-camera.svg'
 
-export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
-  bookingInfo
-}) => {
+export const BookingHeaderMobile: React.FC<{
+  bookingInfo: BookingSlotsResponse
+}> = ({ bookingInfo }) => {
   const { t } = useI18n()
   const timeZoneLabel = `(${getTimezoneOffset(browserDefaultTimeZone)}) ${browserDefaultTimeZone.replace(/_/g, ' ')}`
   const cameraIcon = (
@@ -30,47 +30,52 @@ export const BookingHeader: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
+        flexDirection: 'column',
         gap: '16px',
-        p: '24px'
+        p: '24px',
+        pb: 0
       }}
     >
-      <Box sx={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: '10px',
+          alignItems: 'flex-start',
+          flexDirection: 'column'
+        }}
+      >
         <Avatar
+          size="s"
           {...stringAvatar(
             bookingInfo.owner.displayName || bookingInfo.owner.email
           )}
         />
 
-        <Box>
-          <Typography variant="subtitle1">
-            {bookingInfo.owner.displayName || bookingInfo.owner.email}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Typography variant="subtitle1">{bookingInfo.name}</Typography>
+          <TimerOutlinedIcon sx={{ color: 'text.secondary' }} />
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: 'text.secondary'
+            }}
+          >
+            {t('booking.durationMinutes', {
+              count: bookingInfo.durationMinutes
+            })}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Typography variant="subtitle1">{bookingInfo.name}</Typography>
-            <TimerOutlinedIcon sx={{ color: 'text.secondary' }} />
-            <Typography
-              variant="caption"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                color: 'text.secondary'
-              }}
-            >
-              {t('booking.durationMinutes', {
-                count: bookingInfo.durationMinutes
-              })}
-            </Typography>
-          </Box>
-          {bookingInfo.description && (
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', mt: '4px', maxWidth: '320px' }}
-            >
-              {bookingInfo.description}
-            </Typography>
-          )}
         </Box>
+        {bookingInfo.description && (
+          <Typography
+            variant="body2"
+            sx={{ color: 'text.secondary', mt: '4px', maxWidth: '320px' }}
+          >
+            {bookingInfo.description}
+          </Typography>
+        )}
       </Box>
       <Box
         sx={{

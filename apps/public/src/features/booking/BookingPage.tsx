@@ -10,9 +10,12 @@ import { BookingConfirmDialog } from './components/BookingConfirmDialog'
 import { BookingTimeSlotSection } from '../../components/Booking/BookingTimeSlotSection'
 import { useI18n } from 'twake-i18n'
 import { useBookingData } from './hooks/useBookingData'
+import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 export const BookingPage: React.FC = () => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
+
   const { bookingLinkPublicId } = useParams<{
     bookingLinkPublicId: string
   }>()
@@ -123,7 +126,7 @@ export const BookingPage: React.FC = () => {
       )}
 
       {showPanel && bookingInfo && <BookingHeader bookingInfo={bookingInfo} />}
-      {showPanel && <Divider />}
+      {showPanel && !isMobile && <Divider />}
 
       {showPanel && (
         <Box sx={{ position: 'relative' }}>
@@ -161,6 +164,7 @@ export const BookingPage: React.FC = () => {
               onSelectDay={handleSelectDay}
               onMonthChange={handleMonthChange}
             />
+            {showPanel && isMobile && <Divider />}
             <BookingTimeSlotSection
               selectedDay={selectedDay}
               slots={slotsForSelectedDay}

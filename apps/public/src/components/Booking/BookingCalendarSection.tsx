@@ -14,12 +14,8 @@ import 'dayjs/locale/ru'
 import 'dayjs/locale/vi'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import {
-  CALENDAR_GRID_HEIGHT,
-  CELL_SIZE,
-  ROW_GAP,
-  WEEKDAY_LABEL_HEIGHT
-} from './LayoutConstants'
+import { getLayoutConstants } from './LayoutConstants'
+import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 interface AvailableDayProps extends PickerDayProps {
   availableDays?: Set<string>
@@ -33,6 +29,8 @@ interface BookingCalendarSectionProps {
 const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
   const { availableDays, day, outsideCurrentMonth, ...other } = props
   const theme = useTheme()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const { CELL_SIZE } = getLayoutConstants(isMobile)
 
   if (outsideCurrentMonth) {
     return (
@@ -89,6 +87,10 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
   onMonthChange
 }) => {
   const { t } = useI18n()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const { CELL_SIZE, WEEKDAY_LABEL_HEIGHT, CALENDAR_GRID_HEIGHT, ROW_GAP } =
+    getLayoutConstants(isMobile)
+
   const [view, setView] = useState<DateView>('day')
 
   return (

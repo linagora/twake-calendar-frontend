@@ -1,16 +1,21 @@
 import { Slot } from '@common/features/booking/types/BookingTypes'
 import { DayBadge } from '@common/features/Search/searchResultsComponents'
-import { Box, Button, Typography } from '@linagora/twake-mui'
+import {
+  Box,
+  Button,
+  SxProps,
+  Theme,
+  Typography,
+  useTheme
+} from '@linagora/twake-mui'
 import dayjs, { Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { CALENDAR_CONTENT_HEIGHT } from './LayoutConstants'
+import { getLayoutConstants } from './LayoutConstants'
+import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 const DAY_BADGE_ROW_HEIGHT = 48
 const SLOT_LIST_GAP = 16
-
-const SLOT_LIST_MAX_HEIGHT =
-  CALENDAR_CONTENT_HEIGHT - DAY_BADGE_ROW_HEIGHT - SLOT_LIST_GAP
 
 const NOW_REFRESH_INTERVAL_MS = 60_000 // 1 min: slot granularity doesn't need finer resolution
 
@@ -21,7 +26,10 @@ const containerSx = {
   gap: 2
 } as const
 
-const scrollableListSx = (theme: { palette: { grey: { 400: string } } }) => ({
+const scrollableListSx = (
+  theme: { palette: { grey: { 400: string } } },
+  slotListMaxHeight: number
+): SxProps<Theme> => ({
   scrollbarWidth: 'thin',
   scrollbarColor: 'transparent transparent',
   scrollbarGutter: 'stable',
@@ -29,7 +37,7 @@ const scrollableListSx = (theme: { palette: { grey: { 400: string } } }) => ({
   flexDirection: 'column',
   gap: 1,
   pr: 1,
-  maxHeight: `${SLOT_LIST_MAX_HEIGHT}px`,
+  maxHeight: `${slotListMaxHeight}px`,
   overflowY: 'auto',
   '&:hover': {
     scrollbarColor: `${theme.palette.grey[400]} transparent`
@@ -59,30 +67,38 @@ const SlotList: React.FC<SlotListProps> = ({
   selectedSlot,
   onSelectSlot,
   lang
-}) => (
-  <Box sx={scrollableListSx}>
-    {slots.map(slot => {
-      const time = new Date(slot.start).toLocaleTimeString(lang, {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-      const isSelected = selectedSlot?.start === slot.start
+}) => {
+  const theme = useTheme()
+  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const { CALENDAR_CONTENT_HEIGHT } = getLayoutConstants(isMobile)
 
-      return (
-        <Button
-          key={slot.start}
-          variant="outlined"
-          color={isSelected ? 'warning' : 'inherit'}
-          onClick={() => onSelectSlot(slot)}
-          sx={{ justifyContent: 'center' }}
-        >
-          {time}
-        </Button>
-      )
-    })}
-  </Box>
-)
+  const SLOT_LIST_MAX_HEIGHT =
+    CALENDAR_CONTENT_HEIGHT - DAY_BADGE_ROW_HEIGHT - SLOT_LIST_GAP
+  return (
+    <Box sx={scrollableListSx(theme, SLOT_LIST_MAX_HEIGHT)}>
+      {slots.map(slot => {
+        const time = new Date(slot.start).toLocaleTimeString(lang, {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        })
+        const isSelected = selectedSlot?.start === slot.start
+
+        return (
+          <Button
+            key={slot.start}
+            variant="outlined"
+            color={isSelected ? 'warning' : 'inherit'}
+            onClick={() => onSelectSlot(slot)}
+            sx={{ justifyContent: 'center' }}
+          >
+            {time}
+          </Button>
+        )
+      })}
+    </Box>
+  )
+}
 
 interface BookingTimeSlotSectionProps {
   selectedDay: Dayjs | null
@@ -107,7 +123,7 @@ export const BookingTimeSlotSection: React.FC<BookingTimeSlotSectionProps> = ({
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), NOW_REFRESH_INTERVAL_MS)
-    return () => clearInterval(id)
+    return (): void => clearInterval(id)
   }, [])
 
   if (!selectedDay) {
