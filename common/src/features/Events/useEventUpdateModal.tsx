@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { Valarms } from '@common/types/Valarms'
 import { EventUpdateModalProps } from './EventUpdateModal'
 import { useMasterEvent } from './hooks/useMasterEvent'
 import { useSubmitUpdateEvent } from './hooks/useSubmitUpdateEvent'
@@ -94,10 +95,17 @@ export function useEventUpdateModal(
     const originalEvent = effectiveEvent || event
     const originalAlarms = originalEvent?.alarms
 
+    // Strip current user's personal alarms from form values before merging,
+    // since those are being edited. We only want to preserve OTHER users'
+    // personal alarms from the original event.
+    const globalAlarmsFromForm = Valarms.fromList(
+      values.alarms.getGlobalAlarms()
+    )
+
     // Merge global alarms from form with personal alarms from original event
     const mergedAlarms = originalAlarms
-      ? values.alarms.withPersonalAlarmsFrom(originalAlarms)
-      : values.alarms
+      ? globalAlarmsFromForm.withPersonalAlarmsFrom(originalAlarms)
+      : globalAlarmsFromForm
 
     const valuesWithMergedAlarms = {
       ...values,

@@ -97,6 +97,25 @@ export class Valarms {
   }
 
   /**
+   * Get alarms that should be shown in the edit form for a specific attendee.
+   * Includes global alarms (no attendees or multiple attendees) AND
+   * the attendee's personal alarms (single attendee matching the user).
+   */
+  getEditableAlarms(attendee: userAttendee | undefined): VAlarm[] {
+    if (!attendee) return this.getGlobalAlarms()
+    const attendeeEmail = attendee.cal_address.toLowerCase()
+
+    const globalAlarms = this.getGlobalAlarms()
+    const personalAlarms = this._alarms.filter(
+      alarm =>
+        alarm.attendees?.length === 1 &&
+        alarm.attendees[0].cal_address.toLowerCase() === attendeeEmail
+    )
+
+    return [...globalAlarms, ...personalAlarms]
+  }
+
+  /**
    * Merge personal alarms from newPersonalAlarms with this Valarms.
    * Replaces existing personal alarms for the given attendee with new ones.
    * Keeps all other alarms (global alarms and other attendees' personal alarms).

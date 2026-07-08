@@ -4,6 +4,7 @@ import { resolveEventISORange } from '@common/components/Event/utils/dateRangeUt
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
+import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { RepetitionObject } from '@common/types/Repetition'
@@ -85,10 +86,34 @@ export function prepareUpdatedEvent({
     transp: values.busy,
     sequence: nextSequence,
     color: targetCalendar?.color,
-    alarms: Valarms.fromFormValues(values.alarms, {
-      attendees: getAlarmAttendees(values, targetCalendar),
-      summary: values.title
-    }),
+    alarms: (() => {
+      const alarmAttendees = getAlarmAttendees(values, targetCalendar)
+      const isMultiUser = (alarmAttendees?.length ?? 0) > 1
+
+      // If event has multiple attendees, convert personal alarms (single attendee)
+      // to global alarms by stripping their personal attendee so fromFormValues
+      // assigns all attendees. Keep global alarms as-is.
+      const alarmsForFormValues = isMultiUser
+        ? Valarms.fromList(
+            values.alarms.getAlarms().map(alarm =>
+              alarm.attendees && alarm.attendees.length === 1
+                ? new VAlarm({
+                    trigger: alarm.trigger,
+                    action: alarm.action,
+                    summary: alarm.summary,
+                    description: alarm.description
+                    // attendees omitted → will use defaults (all attendees)
+                  })
+                : alarm
+            )
+          )
+        : values.alarms
+
+      return Valarms.fromFormValues(alarmsForFormValues, {
+        attendees: alarmAttendees,
+        summary: values.title
+      })
+    })(),
     x_openpass_videoconference: values.meetingLink || undefined,
     attach: values.attachments?.length ? values.attachments : undefined
   }
