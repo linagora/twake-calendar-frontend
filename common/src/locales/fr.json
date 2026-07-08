@@ -28,7 +28,8 @@
     },
     "resources": "Ressources",
     "browseResources": "Parcourir les ressources",
-    "searchTimezone": "Rechercher un fuseau horaire..."
+    "searchTimezone": "Rechercher un fuseau horaire...",
+    "bookingLinks": "Liens de réservation"
   },
   "actions": {
     "modify": "Modifier",
@@ -456,7 +457,8 @@
     "collapse": "Réduire",
     "expand": "Développer",
     "nextMonth": "Mois suivant",
-    "previousMonth": "Mois précédent"
+    "previousMonth": "Mois précédent",
+    "copyBookingLink": "Copier le lien de réservation"
   },
   "booking": {
     "durationMinutes": "%{count} min",
@@ -486,7 +488,8 @@
     "noSlots": "Aucun créneau disponible",
     "selectDayPrompt": "Sélectionnez un jour pour voir les horaires disponibles",
     "defaultEventTitle": "Réservation",
-    "videoMeetingCaption": "Disponible après la réservation"
+    "videoMeetingCaption": "Disponible après la réservation",
+    "linkCopied": "Lien de réservation copié dans le presse-papiers"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

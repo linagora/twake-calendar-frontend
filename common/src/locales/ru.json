@@ -28,7 +28,8 @@
     },
     "resources": "Ресурсы",
     "browseResources": "Просмотреть ресурсы",
-    "searchTimezone": "Поиск часового пояса..."
+    "searchTimezone": "Поиск часового пояса...",
+    "bookingLinks": "Ссылки для бронирования"
   },
   "actions": {
     "modify": "Изменить",
@@ -456,7 +457,8 @@
     "collapse": "Свернуть",
     "expand": "Развернуть",
     "nextMonth": "Следующий месяц",
-    "previousMonth": "Предыдущий месяц"
+    "previousMonth": "Предыдущий месяц",
+    "copyBookingLink": "Копировать ссылку для бронирования"
   },
   "booking": {
     "durationMinutes": "%{count} мин",
@@ -486,7 +488,8 @@
     "noSlots": "Нет доступных слотов",
     "selectDayPrompt": "Выберите день, чтобы увидеть доступное время",
     "defaultEventTitle": "Бронирование",
-    "videoMeetingCaption": "Доступно после бронирования"
+    "videoMeetingCaption": "Доступно после бронирования",
+    "linkCopied": "Ссылка для бронирования скопирована в буфер обмена"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

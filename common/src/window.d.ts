@@ -54,5 +54,7 @@ declare global {
     __ws?: WebSocket
 
     HIDE_LANGUAGE_SELECTOR: boolean
+
+    PUBLIC_PAGE_BASE: string | undefined
   }
 }

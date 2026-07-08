@@ -1,4 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
+import { listBookingLinks } from '@common/features/booking/BookingDao'
+import { BookingLink } from '@common/features/booking/types/BookingTypes'
 import {
   addCalendarResource,
   addSharedCalendar,
@@ -7,6 +9,7 @@ import {
 import { CalendarInput } from '@common/features/Calendars/types/CalendarData'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import { defaultColors } from '@common/utils/defaultColors'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
@@ -15,23 +18,143 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  alpha,
   Checkbox,
   IconButton,
   ListItem,
   Tooltip,
-  Typography
+  Typography,
+  useTheme
 } from '@linagora/twake-mui'
 import AddIcon from '@mui/icons-material/Add'
+import EventIcon from '@mui/icons-material/Event'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import LinkIcon from '@mui/icons-material/Link'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useI18n } from 'twake-i18n'
+import { SnackbarAlert } from '../Loading/SnackBarAlert'
 import CalendarPopover from './CalendarModal'
 import { CalendarSelectorMenu } from './CalendarSelectorMenu'
 import { DeleteCalendarDialog } from './DeleteCalendarDialog'
 import { OwnerCaption } from './OwnerCaption'
 import RegisterCalendars from './RegisterCalendars'
 import type { ResourceCal } from './RegisterCalendars/index.types'
+
+/**
+ * Keeps a section's expanded state in sync whenever the caller's
+ * `defaultExpanded` prop changes (e.g. switching views resets sections).
+ */
+const useSyncedExpanded = (
+  defaultExpanded: boolean
+): [boolean, Dispatch<SetStateAction<boolean>>] => {
+  const [expanded, setExpanded] = useState(defaultExpanded)
+
+  useEffect(() => {
+    setExpanded(defaultExpanded)
+  }, [defaultExpanded])
+
+  return [expanded, setExpanded]
+}
+
+/**
+ * Shared collapsible shell used by both the calendar list accordions and
+ * the booking links accordion. Handles the expand/collapse chrome, the
+ * optional add button, and the empty-state hiding rule; callers only
+ * supply their own list content as children.
+ */
+const CollapsibleSection: React.FC<{
+  title: string
+  itemCount: number
+  defaultExpanded?: boolean
+  onAddClick?: () => void
+  addBtnTooltip?: string
+  children: ReactNode
+}> = ({
+  title,
+  itemCount,
+  defaultExpanded = false,
+  onAddClick,
+  addBtnTooltip,
+  children
+}) => {
+  const { t } = useI18n()
+  const [expanded, setExpanded] = useSyncedExpanded(defaultExpanded)
+
+  if (itemCount === 0 && !onAddClick) return null
+
+  return (
+    <Accordion
+      defaultExpanded={defaultExpanded}
+      expanded={expanded}
+      sx={{
+        width: '100%',
+        padding: 0,
+        margin: 0,
+        marginBottom: '12px',
+        boxShadow: 'none',
+        '&::before': {
+          display: 'none'
+        }
+      }}
+    >
+      <AccordionSummary
+        expandIcon={
+          itemCount > 0 ? (
+            <Tooltip
+              title={expanded ? t('tooltip.collapse') : t('tooltip.expand')}
+            >
+              <ExpandMoreIcon />
+            </Tooltip>
+          ) : null
+        }
+        aria-controls={`${title}-content`}
+        id={`${title}-header`}
+        className="calendarListHeader"
+        onClick={() => {
+          if (itemCount > 0) {
+            setExpanded(!expanded)
+          }
+        }}
+        sx={{
+          '& .MuiAccordionSummary-content': {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }
+        }}
+      >
+        <Typography variant="body2">{title}</Typography>
+        {onAddClick && (
+          <Tooltip title={addBtnTooltip}>
+            <IconButton
+              component="span"
+              onClick={e => {
+                if (expanded) {
+                  e.stopPropagation()
+                }
+                onAddClick()
+              }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </AccordionSummary>
+      <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
+        {children}
+      </AccordionDetails>
+    </Accordion>
+  )
+}
 
 const CalendarAccordion: React.FC<{
   title: string
@@ -59,94 +182,205 @@ const CalendarAccordion: React.FC<{
   const allCalendars = useAppSelector(state => state.calendars.list)
   const { t } = useI18n()
 
-  const [expended, setExpended] = useState(defaultExpanded)
-
-  useEffect(() => {
-    const handleExpendedChange = (): void => {
-      setExpended(defaultExpanded)
-    }
-    handleExpendedChange()
-  }, [defaultExpanded])
-
-  if (calendars.length === 0 && !showAddButton) return null
   return (
-    <Accordion
+    <CollapsibleSection
+      title={title}
+      itemCount={calendars.length}
       defaultExpanded={defaultExpanded}
-      expanded={expended}
-      style={{
-        width: '100%',
-        padding: 0,
-        margin: 0,
-        marginBottom: '12px',
-        boxShadow: 'none'
-      }}
-      sx={{
-        '&::before': {
-          display: 'none'
-        }
-      }}
+      onAddClick={showAddButton ? onAddClick : undefined}
+      addBtnTooltip={addBtnTooltip}
     >
-      <AccordionSummary
-        expandIcon={
-          calendars.length > 0 ? (
-            <Tooltip
-              title={expended ? t('tooltip.collapse') : t('tooltip.expand')}
-            >
-              <ExpandMoreIcon />
-            </Tooltip>
-          ) : null
-        }
-        aria-controls={`${title}-content`}
-        id={`${title}-header`}
-        className="calendarListHeader"
-        onClick={() => {
-          if (calendars.length > 0) {
-            setExpended(!expended)
-          }
-        }}
+      {calendars.map(id => (
+        <CalendarSelector
+          key={id}
+          calendars={allCalendars}
+          id={id}
+          isPersonal={title === t('calendar.personal')}
+          selectedCalendars={selectedCalendars}
+          handleCalendarToggle={handleToggle}
+          setOpen={() => setOpen(id)}
+          hideOwner={hideOwner}
+        />
+      ))}
+    </CollapsibleSection>
+  )
+}
+
+const BookingLinkChip: React.FC<{
+  link: BookingLink
+  handleMenuOpen?: (e, link) => void
+}> = ({ link, handleMenuOpen }) => {
+  const theme = useTheme()
+  const { t } = useI18n()
+  const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
+
+  const getBookingLinkUrl = (publicId: string): string => {
+    const prefix = window.PUBLIC_PAGE_BASE
+      ? `${window.PUBLIC_PAGE_BASE}/booking`
+      : `${window.location.origin}/booking`
+    return `${prefix}/${publicId}`
+  }
+
+  const handleCopyLink = async (publicId: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(getBookingLinkUrl(publicId))
+      setCopySnackbarOpen(true)
+    } catch (err) {
+      console.error('Failed to copy booking link:', err)
+    }
+  }
+  return (
+    <>
+      <ListItem
+        key={link.publicId}
         sx={{
-          '& .MuiAccordionSummary-content': {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          '& .MoreBtn': { opacity: 0 },
+          '&:hover': {
+            backgroundColor: '#F3F3F6',
+            '& .MoreBtn': { opacity: 1 }
           }
         }}
       >
-        <Typography variant="body2">{title}</Typography>
-        {showAddButton && (
-          <Tooltip title={addBtnTooltip}>
-            <IconButton
-              component="span"
-              onClick={e => {
-                if (expended) {
-                  e.stopPropagation()
-                }
-                if (onAddClick) {
-                  onAddClick()
-                }
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: 'calc(100% - 40px)',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              padding: '9px',
+              marginRight: '4px'
+            }}
+          >
+            <EventIcon sx={{ color: defaultColors[4].dark }} fontSize="small" />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                overflowWrap: 'break-word',
+                fontSize: '0.875rem',
+                color: alpha(theme.palette.grey[900], 0.9)
               }}
             >
-              <AddIcon />
+              {link.name || `${link.durationMinutes}min`}
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title={t('tooltip.copyBookingLink')}>
+            <IconButton
+              onClick={() => void handleCopyLink(link.publicId)}
+              size="small"
+            >
+              <LinkIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        )}
-      </AccordionSummary>
-      <AccordionDetails style={{ textAlign: 'left', padding: 0 }}>
-        {calendars.map(id => (
-          <CalendarSelector
-            key={id}
-            calendars={allCalendars}
-            id={id}
-            isPersonal={title === t('calendar.personal')}
-            selectedCalendars={selectedCalendars}
-            handleCalendarToggle={handleToggle}
-            setOpen={() => setOpen(id)}
-            hideOwner={hideOwner}
-          />
-        ))}
-      </AccordionDetails>
-    </Accordion>
+          {handleMenuOpen && (
+            <IconButton
+              className="MoreBtn"
+              size="small"
+              onClick={e => handleMenuOpen(e, link)}
+            >
+              <MoreHorizIcon fontSize="small" />
+            </IconButton>
+          )}
+        </div>
+      </ListItem>
+      <SnackbarAlert
+        open={copySnackbarOpen}
+        setOpen={setCopySnackbarOpen}
+        message={t('booking.linkCopied')}
+      />
+    </>
   )
+}
+
+const BookingLinksAccordion: React.FC<{
+  title: string
+  bookingLinks: BookingLink[]
+  defaultExpanded?: boolean
+  handleMenuOpen?: (e, link) => void
+  onAddClick?: () => void
+  addBtnTooltip?: string
+}> = ({
+  title,
+  bookingLinks,
+  defaultExpanded = false,
+  handleMenuOpen,
+  onAddClick,
+  addBtnTooltip
+}) => {
+  return (
+    <CollapsibleSection
+      title={title}
+      itemCount={bookingLinks.length}
+      defaultExpanded={defaultExpanded}
+      onAddClick={onAddClick}
+      addBtnTooltip={addBtnTooltip}
+    >
+      {bookingLinks.map(link => (
+        <BookingLinkChip
+          key={link.publicId}
+          link={link}
+          handleMenuOpen={handleMenuOpen}
+        />
+      ))}
+    </CollapsibleSection>
+  )
+}
+
+type CalendarBuckets = {
+  personal: string[]
+  delegated: string[]
+  shared: string[]
+  resources: string[]
+}
+
+/**
+ * Splits calendar ids into mutually exclusive buckets in a single pass,
+ * replacing four separate `.filter()` calls that each re-derived the
+ * same ownership checks.
+ */
+const categorizeCalendars = (
+  calendars: Record<string, Calendar>,
+  userId: string
+): CalendarBuckets => {
+  const buckets: CalendarBuckets = {
+    personal: [],
+    delegated: [],
+    shared: [],
+    resources: []
+  }
+
+  Object.keys(calendars || {}).forEach(id => {
+    if (extractEventBaseUuid(id) === userId) {
+      buckets.personal.push(id)
+    } else if (calendars[id]?.owner?.resource) {
+      buckets.resources.push(id)
+    } else if (calendars[id]?.delegated) {
+      buckets.delegated.push(id)
+    } else {
+      buckets.shared.push(id)
+    }
+  })
+
+  return buckets
 }
 
 const CalendarSelection: React.FC<{
@@ -157,25 +391,12 @@ const CalendarSelection: React.FC<{
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const calendars = useAppSelector(state => state.calendars.list)
 
-  const personalCalendars = Object.keys(calendars || {}).filter(
-    id => extractEventBaseUuid(id) === userId
-  )
-  const delegatedCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId &&
-      calendars[id]?.delegated &&
-      !calendars?.[id]?.owner?.resource
-  )
-  const sharedCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId &&
-      !calendars?.[id]?.delegated &&
-      !calendars?.[id]?.owner?.resource
-  )
-  const resourceCalendars = Object.keys(calendars || {}).filter(
-    id =>
-      extractEventBaseUuid(id) !== userId && calendars?.[id]?.owner?.resource
-  )
+  const {
+    personal: personalCalendars,
+    delegated: delegatedCalendars,
+    shared: sharedCalendars,
+    resources: resourceCalendars
+  } = useMemo(() => categorizeCalendars(calendars, userId), [calendars, userId])
 
   const handleCalendarToggle = (name: string): void => {
     setSelectedCalendars((prev: string[]) =>
@@ -190,9 +411,25 @@ const CalendarSelection: React.FC<{
   const [anchorElCalResources, setAnchorElCalResources] =
     useState<HTMLElement | null>(null)
 
+  // Booking links state
+  const [bookingLinks, setBookingLinks] = useState<BookingLink[]>([])
+
+  // Fetch booking links on mount
+  useEffect(() => {
+    listBookingLinks()
+      .then(links => setBookingLinks(links))
+      .catch(err => console.error('Failed to fetch booking links:', err))
+  }, [])
+
   return (
     <>
       <div>
+        <BookingLinksAccordion
+          title={t('calendar.bookingLinks')}
+          bookingLinks={bookingLinks}
+          defaultExpanded
+        />
+
         <CalendarAccordion
           title={t('calendar.personal')}
           calendars={personalCalendars}

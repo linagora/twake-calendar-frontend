@@ -21,17 +21,6 @@ export async function createBookingLink(
 }
 
 /**
- * List all booking links of the authenticated user (sorted by update time).
- */
-export async function listBookingLinks(): Promise<BookingLink[]> {
-  const response = await api.get('api/booking-links')
-  if (!response.ok) {
-    throw new Error(`listBookingLinks failed with status ${response.status}`)
-  }
-  return response.json()
-}
-
-/**
  * Retrieve a booking link by its public ID.
  * Only returns the link if it belongs to the authenticated user.
  */

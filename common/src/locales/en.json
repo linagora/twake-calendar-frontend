@@ -28,7 +28,8 @@
     },
     "resources": "Resources",
     "browseResources": "Browse resources",
-    "searchTimezone": "Search timezone..."
+    "searchTimezone": "Search timezone...",
+    "bookingLinks": "Booking links"
   },
   "actions": {
     "modify": "Modify",
@@ -454,7 +455,8 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "nextMonth": "Next month",
-    "previousMonth": "Previous month"
+    "previousMonth": "Previous month",
+    "copyBookingLink": "Copy booking link"
   },
   "booking": {
     "durationMinutes": "%{count} min",
@@ -484,7 +486,8 @@
     "noSlots": "No slots available",
     "selectDayPrompt": "Select a day to see available times",
     "defaultEventTitle": "Booking",
-    "videoMeetingCaption": "Available after booking"
+    "videoMeetingCaption": "Available after booking",
+    "linkCopied": "Booking link copied to clipboard"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
