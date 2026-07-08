@@ -1,13 +1,13 @@
-import { stringAvatar } from '@common/components/Event/utils/eventUtils'
+import { EventVideoRow } from '@common/components/EventPreview/EventDetailsRows'
 import { BaseEventRow } from '@common/components/EventPreview/EventDetailsRows'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   BookingSlotsResponse,
   Slot
 } from '@common/features/booking/types/BookingTypes'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { formatTimezoneLabel } from '@common/utils/timezone'
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
@@ -22,8 +22,10 @@ import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 import LinkIcon from '@mui/icons-material/Link'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import dayjs from 'dayjs'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
+import { getBookedEvent } from '../BookingDao'
 
 interface BookingSuccessDialogProps {
   open: boolean
@@ -31,6 +33,7 @@ interface BookingSuccessDialogProps {
   selectedSlot: Slot | null
   bookingInfo: BookingSlotsResponse | null
   eventLink?: string
+  bookingConfirmationToken?: string | null
   onCancelMeeting?: () => void
 }
 
@@ -45,7 +48,7 @@ interface SuccessHeaderProps {
 }
 
 const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
-  <Box sx={{ position: 'relative', textAlign: 'center', pt: 2, pb: 1 }}>
+  <Box sx={{ position: 'relative', textAlign: 'center', pt: 2 }}>
     <IconButton
       onClick={onClose}
       size="small"
@@ -70,12 +73,12 @@ const SuccessSummary: React.FC<SuccessSummaryProps> = ({
   subsubtitle
 }) => (
   <>
-    <Typography variant="body1" sx={{ textAlign: 'center', px: 3, mb: 1 }}>
+    <Typography variant="body1" sx={{ textAlign: 'center', px: 3, mb: 3 }}>
       {subtitle}
     </Typography>
     <Typography
       variant="body2"
-      sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}
+      sx={{ textAlign: 'center', color: 'text.secondary' }}
     >
       {subsubtitle}
     </Typography>
@@ -83,17 +86,19 @@ const SuccessSummary: React.FC<SuccessSummaryProps> = ({
 )
 
 interface SuccessDetailsProps {
-  owner?: { displayName: string }
+  owner?: BookingSlotsResponse['owner']
   durationMinutes?: number
   timeZoneLabel: string
   durationLabel: string
+  videoLink?: string
 }
 
 const SuccessDetails: React.FC<SuccessDetailsProps> = ({
   owner,
   durationMinutes,
   timeZoneLabel,
-  durationLabel
+  durationLabel,
+  videoLink
 }) => (
   <Box
     sx={{
@@ -105,12 +110,8 @@ const SuccessDetails: React.FC<SuccessDetailsProps> = ({
       gap: 1
     }}
   >
-    {owner && (
-      <BaseEventRow
-        icon={<Avatar {...stringAvatar(owner.displayName)} />}
-        content={<Typography variant="body2">{owner.displayName}</Typography>}
-      />
-    )}
+    {owner && <BookingOwnerDisplay owner={owner} />}
+    {videoLink && <EventVideoRow meetingLink={videoLink} />}
     {durationMinutes && (
       <BaseEventRow
         icon={<TimerOutlinedIcon />}
@@ -194,18 +195,71 @@ export const SuccessFooter: React.FC<SuccessFooterProps> = ({
   </Box>
 )
 
+function extractVideoLink(eventJSON: VCalComponent): string | undefined {
+  const vevents = (eventJSON[2] ?? []).filter(
+    (c): c is VCalComponent =>
+      Array.isArray(c) && c[0].toLowerCase() === 'vevent'
+  )
+  const vevent = vevents[0]
+  if (!vevent) return undefined
+  const props = vevent[1] as Array<
+    [string, Record<string, string>, string, unknown]
+  >
+  const prop = props.find(
+    p => p[0].toLowerCase() === 'x-openpaas-videoconference'
+  )
+  return typeof prop?.[3] === 'string' ? prop[3] : undefined
+}
+
 export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   open,
   onClose,
   selectedSlot,
   bookingInfo,
   eventLink,
+  bookingConfirmationToken,
   onCancelMeeting
 }) => {
   const { t, lang } = useI18n()
 
   const owner = bookingInfo?.owner
   const durationMinutes = bookingInfo?.durationMinutes
+
+  const [videoLinkData, setVideoLinkData] = useState<{
+    link: string | undefined
+    token: string | null | undefined
+  }>({ link: undefined, token: null })
+
+  useEffect(() => {
+    if (!open || !bookingConfirmationToken) {
+      return
+    }
+
+    let isMounted = true
+    const load = async (): Promise<void> => {
+      try {
+        const response = await getBookedEvent(bookingConfirmationToken)
+        if (isMounted) {
+          setVideoLinkData({
+            link: extractVideoLink(response.eventJSON),
+            token: bookingConfirmationToken
+          })
+        }
+      } catch (err) {
+        console.error('Failed to fetch booked event:', err)
+      }
+    }
+    void load()
+    return (): void => {
+      isMounted = false
+    }
+  }, [open, bookingConfirmationToken])
+
+  // Only show video link if it matches the current token
+  const videoLink =
+    videoLinkData.token === bookingConfirmationToken
+      ? videoLinkData.link
+      : undefined
 
   const slotTime = useMemo<SlotTime | null>(() => {
     if (!selectedSlot) return null
@@ -222,19 +276,17 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   return (
     <Dialog open={open} onClose={onClose}>
       <SuccessHeader onClose={onClose} title={t('booking.success.title')} />
-
+      {slotTime && owner && (
+        <SuccessSummary
+          subtitle={t('booking.success.subtitle', {
+            owner: owner.displayName,
+            date: slotTime.date,
+            time: slotTime.time
+          })}
+          subsubtitle={t('booking.success.subsubtitle')}
+        />
+      )}
       <DialogContent sx={{ px: 3, pb: 4 }}>
-        {slotTime && owner && (
-          <SuccessSummary
-            subtitle={t('booking.success.subtitle', {
-              owner: owner.displayName,
-              date: slotTime.date,
-              time: slotTime.time
-            })}
-            subsubtitle={t('booking.success.subsubtitle')}
-          />
-        )}
-
         <SuccessDetails
           owner={owner}
           durationMinutes={durationMinutes}
@@ -244,6 +296,7 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
               ? t('booking.durationMinutes', { count: durationMinutes })
               : ''
           }
+          videoLink={videoLink}
         />
 
         {eventLink && (

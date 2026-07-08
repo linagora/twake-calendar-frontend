@@ -259,6 +259,7 @@ export const BookingPage: React.FC = () => {
           selectedSlot={selectedSlot}
           bookingInfo={bookingInfo}
           eventLink={`${window.location.origin}/booking/confirmed/${bookingConfirmationToken}`}
+          bookingConfirmationToken={bookingConfirmationToken}
           onCancelMeeting={() => void handleCancelMeeting()}
         />
       </Box>
