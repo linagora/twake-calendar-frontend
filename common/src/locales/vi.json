@@ -493,7 +493,8 @@
       "DECLINED": "Người tổ chức đã từ chối cuộc họp",
       "TENTATIVE": "Người tổ chức đã chấp nhận tạm thời cuộc họp",
       "NEEDS-ACTION": "Đang chờ phản hồi từ người tổ chức"
-    }
+    },
+    "cancelSuccess": "Đặt chỗ đã bị hủy. Bạn có thể đặt một khung giờ mới nếu muốn."
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

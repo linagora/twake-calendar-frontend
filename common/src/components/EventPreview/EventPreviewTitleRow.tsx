@@ -21,7 +21,7 @@ export const EventPreviewTitleRow: React.FC<EventPreviewTitleRowProps> = ({
   t
 }) => {
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box>
       <Box
         sx={{
           display: 'flex',

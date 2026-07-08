@@ -17,6 +17,7 @@ export interface CalendarEvent {
   end?: string
   class?: 'PRIVATE' | 'PUBLIC' | 'CONFIDENTIAL'
   x_openpass_videoconference?: string
+  bookingLinkPublicId?: string
   title?: string
   description?: string
   location?: string

@@ -42,7 +42,7 @@ export const PreviewContainer: React.FC<PreviewContainerProps> = ({
       padding: { xs: '24px', sm: '32px' },
       display: 'flex',
       flexDirection: 'column',
-      gap: '24px'
+      gap: 2
     }}
   >
     {children}

@@ -26,6 +26,7 @@ const KNOWN_PROPS = new Set([
   'dtend',
   'class',
   'x-openpaas-videoconference',
+  'x-openpaas-booking-link',
   'summary',
   'description',
   'location',
@@ -176,6 +177,9 @@ const PROPERTY_PARSERS: Record<
   'x-openpaas-videoconference': (params, value, event) => {
     event.x_openpass_videoconference = safeString(value)
   },
+  'x-openpaas-booking-link': (params, value, event) => {
+    event.bookingLinkPublicId = safeString(value)
+  },
   summary: (params, value, event) => {
     event.title = safeString(value)
   },
@@ -252,7 +256,10 @@ function processEventUid(
   }
 }
 
-type AlarmPropertyHandler = (alarm: Partial<AlarmData>, value: unknown) => void
+type AlarmPropertyHandler = (
+  alarm: Partial<AlarmData>,
+  value: VObjectValue
+) => void
 
 const ALARM_PROPERTY_HANDLERS: Record<string, AlarmPropertyHandler> = {
   action: (alarm, value) => {
@@ -275,7 +282,9 @@ function parseAlarmAttendees(
   const attendees: userAttendee[] = []
   for (const [key, , , value] of valarmProps) {
     if (key.toLowerCase() === 'attendee') {
-      const attendee = userAttendee.fromEmailField(safeString(value))
+      const attendee = userAttendee.fromEmailField(
+        safeString(value as VObjectValue)
+      )
       if (attendee) attendees.push(attendee)
     }
   }
@@ -290,7 +299,7 @@ function parseSingleAlarm(
 
   for (const [key, , , value] of valarmProps) {
     const handler = ALARM_PROPERTY_HANDLERS[key.toLowerCase()]
-    if (handler) handler(alarm, value)
+    if (handler) handler(alarm, value as VObjectValue)
   }
 
   const attendees = parseAlarmAttendees(valarmProps)

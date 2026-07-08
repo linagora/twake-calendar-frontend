@@ -3,7 +3,7 @@ import { SuccessFooter } from '@/features/booking/components/BookingSuccessDialo
 import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { Loading } from '@common/components/Loading/Loading'
-import { Box, Typography } from '@linagora/twake-mui'
+import { Typography } from '@linagora/twake-mui'
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useI18n } from 'twake-i18n'
@@ -20,17 +20,31 @@ export const BookedEventPreviewPage: React.FC = () => {
     bookingConfirmationToken: string
   }>()
 
-  const { event, loading, error, errorDetail, refetch } =
-    useFetchBookedEventDetail(bookingConfirmationToken)
+  const { event, loading, error, errorDetail } = useFetchBookedEventDetail(
+    bookingConfirmationToken
+  )
 
-  const { organizer } = useFilterEventAttendees({ event: event || {} })
+  const { organizer } = useFilterEventAttendees({
+    event: event || {
+      URL: '',
+      calId: '',
+      uid: '',
+      start: '',
+      timezone: 'UTC',
+      attendee: []
+    }
+  })
   const organizerPartstat = organizer?.partstat
 
   const handleCancelMeeting = async (): Promise<void> => {
     if (!bookingConfirmationToken) return
     try {
       await cancelBookedEvent(bookingConfirmationToken)
-      void refetch()
+      const base = window.PUBLIC_PAGE_BASE ?? window.location.origin
+      const linkId = event?.bookingLinkPublicId
+      window.location.href = linkId
+        ? `${base}/booking/${linkId}?cancelled=true`
+        : base
     } catch (err) {
       console.error('Failed to cancel meeting:', err)
     }
@@ -57,13 +71,11 @@ export const BookedEventPreviewPage: React.FC = () => {
         t={t}
       />
 
-      <Box sx={{ textAlign: 'center', mb: 2 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {organizerPartstat
-            ? t(`booking.organizerStatus.${organizerPartstat}`)
-            : t('booking.organizerStatus.WAITING')}
-        </Typography>
-      </Box>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        {organizerPartstat
+          ? t(`booking.organizerStatus.${organizerPartstat}`)
+          : t('booking.organizerStatus.WAITING')}
+      </Typography>
 
       <EventPreviewDetails event={event} isOwn={false} isNotPrivate={true} />
       <SuccessFooter

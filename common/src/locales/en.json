@@ -493,7 +493,8 @@
       "DECLINED": "Meeting declined by organizer",
       "TENTATIVE": "Meeting tentatively accepted by organizer",
       "NEEDS-ACTION": "Waiting for organizer response"
-    }
+    },
+    "cancelSuccess": "Reservation cancelled. You can book a new slot if you wish to."
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
