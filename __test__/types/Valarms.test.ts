@@ -29,7 +29,9 @@ describe('Valarms', () => {
       const alarm = new VAlarm({ trigger: '-PT15M', action: 'DISPLAY' })
       const valarms = new Valarms([alarm])
 
-      const result = valarms.getEditableAlarms(createAttendee('user@example.com'))
+      const result = valarms.getEditableAlarms(
+        createAttendee('user@example.com')
+      )
 
       expect(result).toHaveLength(1)
       expect(result[0].trigger).toBe('-PT15M')
@@ -46,7 +48,9 @@ describe('Valarms', () => {
       })
       const valarms = new Valarms([alarm])
 
-      const result = valarms.getEditableAlarms(createAttendee('user@example.com'))
+      const result = valarms.getEditableAlarms(
+        createAttendee('user@example.com')
+      )
 
       expect(result).toHaveLength(1)
       expect(result[0].trigger).toBe('-PT15M')
@@ -65,7 +69,9 @@ describe('Valarms', () => {
       })
       const valarms = new Valarms([currentUserAlarm, otherUserAlarm])
 
-      const result = valarms.getEditableAlarms(createAttendee('current@example.com'))
+      const result = valarms.getEditableAlarms(
+        createAttendee('current@example.com')
+      )
 
       expect(result).toHaveLength(1)
       expect(result[0].trigger).toBe('-PT10M')
@@ -86,9 +92,15 @@ describe('Valarms', () => {
         action: 'EMAIL',
         attendees: [createAttendee('other@example.com')]
       })
-      const valarms = new Valarms([globalAlarm, currentUserAlarm, otherUserAlarm])
+      const valarms = new Valarms([
+        globalAlarm,
+        currentUserAlarm,
+        otherUserAlarm
+      ])
 
-      const result = valarms.getEditableAlarms(createAttendee('current@example.com'))
+      const result = valarms.getEditableAlarms(
+        createAttendee('current@example.com')
+      )
 
       expect(result).toHaveLength(2)
       expect(result.map(a => a.trigger)).toContain('-PT15M')
@@ -104,7 +116,9 @@ describe('Valarms', () => {
       })
       const valarms = new Valarms([alarm])
 
-      const result = valarms.getEditableAlarms(createAttendee('user@example.com'))
+      const result = valarms.getEditableAlarms(
+        createAttendee('user@example.com')
+      )
 
       expect(result).toHaveLength(1)
       expect(result[0].trigger).toBe('-PT10M')
