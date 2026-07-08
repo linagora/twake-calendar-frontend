@@ -45,7 +45,7 @@ interface SuccessHeaderProps {
 }
 
 const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
-  <Box sx={{ position: 'relative', textAlign: 'center', pt: 4, pb: 1 }}>
+  <Box sx={{ position: 'relative', textAlign: 'center', pt: 2, pb: 1 }}>
     <IconButton
       onClick={onClose}
       size="small"
@@ -70,7 +70,7 @@ const SuccessSummary: React.FC<SuccessSummaryProps> = ({
   subsubtitle
 }) => (
   <>
-    <Typography variant="body2" sx={{ textAlign: 'center', px: 3, mb: 1 }}>
+    <Typography variant="body1" sx={{ textAlign: 'center', px: 3, mb: 1 }}>
       {subtitle}
     </Typography>
     <Typography
@@ -108,18 +108,18 @@ const SuccessDetails: React.FC<SuccessDetailsProps> = ({
     {owner && (
       <BaseEventRow
         icon={<Avatar {...stringAvatar(owner.displayName)} />}
-        content={<Typography variant="body1">{owner.displayName}</Typography>}
+        content={<Typography variant="body2">{owner.displayName}</Typography>}
       />
     )}
     {durationMinutes && (
       <BaseEventRow
         icon={<TimerOutlinedIcon />}
-        content={<Typography variant="body1">{durationLabel}</Typography>}
+        content={<Typography variant="body2">{durationLabel}</Typography>}
       />
     )}
     <BaseEventRow
       icon={<LanguageOutlinedIcon />}
-      content={<Typography variant="body1">{timeZoneLabel}</Typography>}
+      content={<Typography variant="body2">{timeZoneLabel}</Typography>}
     />
   </Box>
 )
@@ -180,10 +180,10 @@ export const SuccessFooter: React.FC<SuccessFooterProps> = ({
   suffixLabel
 }) => (
   <Box sx={{ textAlign: 'center' }}>
-    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5 }}>
       {needChangesLabel}
     </Typography>
-    <Typography variant="body2">
+    <Typography variant="caption">
       {onCancelMeeting && (
         <Link component="button" onClick={onCancelMeeting}>
           {cancelLabel}
