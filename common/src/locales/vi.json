@@ -487,7 +487,13 @@
     "selectDayPrompt": "Chọn một ngày để xem các khung giờ có sẵn",
     "defaultEventTitle": "Đặt lịch",
     "videoMeetingCaption": "Có sẵn sau khi đặt lịch",
-    "linkCopied": "Liên kết đặt lịch đã được sao chép"
+    "linkCopied": "Liên kết đặt lịch đã được sao chép",
+    "organizerStatus": {
+      "ACCEPTED": "Người tổ chức đã chấp nhận cuộc họp",
+      "DECLINED": "Người tổ chức đã từ chối cuộc họp",
+      "TENTATIVE": "Người tổ chức đã chấp nhận tạm thời cuộc họp",
+      "NEEDS-ACTION": "Đang chờ phản hồi từ người tổ chức"
+    }
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

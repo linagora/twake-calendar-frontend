@@ -489,7 +489,13 @@
     "selectDayPrompt": "Sélectionnez un jour pour voir les horaires disponibles",
     "defaultEventTitle": "Réservation",
     "videoMeetingCaption": "Disponible après la réservation",
-    "linkCopied": "Lien de réservation copié dans le presse-papiers"
+    "linkCopied": "Lien de réservation copié dans le presse-papiers",
+    "organizerStatus": {
+      "ACCEPTED": "Réunion acceptée par l'organisateur",
+      "DECLINED": "Réunion refusée par l'organisateur",
+      "TENTATIVE": "Réunion acceptée provisoirement par l'organisateur",
+      "NEEDS-ACTION": "En attente de réponse de l'organisateur"
+    }
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

@@ -487,7 +487,13 @@
     "selectDayPrompt": "Select a day to see available times",
     "defaultEventTitle": "Booking",
     "videoMeetingCaption": "Available after booking",
-    "linkCopied": "Booking link copied to clipboard"
+    "linkCopied": "Booking link copied to clipboard",
+    "organizerStatus": {
+      "ACCEPTED": "Meeting accepted by organizer",
+      "DECLINED": "Meeting declined by organizer",
+      "TENTATIVE": "Meeting tentatively accepted by organizer",
+      "NEEDS-ACTION": "Waiting for organizer response"
+    }
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
