@@ -468,7 +468,7 @@
       "inProgress": "Confirmation..."
     },
     "success": {
-      "title": "Réunion confirmée",
+      "title": "Réunion créée",
       "subtitle": "Votre réunion avec %{owner} est prévue le %{date} à %{time}",
       "subsubtitle": "Une invitation a été envoyée à votre email.",
       "needChanges": "Besoin de faire des modifications ?",
