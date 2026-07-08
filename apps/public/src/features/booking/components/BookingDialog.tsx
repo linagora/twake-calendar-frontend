@@ -1,11 +1,9 @@
-import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import {
   BookingSlotsResponse,
   Slot
 } from '@common/features/booking/types/BookingTypes'
 import { isValidEmail } from '@common/utils/isValidEmail'
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
@@ -19,6 +17,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
+import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { StaticDateTimeSummary } from './StaticDateTimeSummary'
 
 interface BookingConfirmDialogProps {
@@ -46,14 +45,7 @@ const DialogHeader: React.FC<DialogHeaderProps> = ({ owner, onClose }) => {
         my: '16px'
       }}
     >
-      {owner ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Avatar {...stringAvatar(owner.displayName)} />
-          <Typography variant="body2">{owner.displayName}</Typography>
-        </Box>
-      ) : (
-        <Box />
-      )}
+      {owner ? <BookingOwnerDisplay owner={owner} /> : <Box />}
       <IconButton onClick={onClose} size="small">
         <CloseIcon fontSize="small" />
       </IconButton>
