@@ -1,5 +1,5 @@
 import { Box } from '@linagora/twake-mui'
-import CalendarSelection from '@common/components/Calendar/CalendarSelection'
+import CalendarSelection from '../CalendarSelection'
 import { TempCalendarsInput } from '@common/components/Calendar/TempCalendarsInput'
 import { CalendarSidebarProps } from './SideBar'
 

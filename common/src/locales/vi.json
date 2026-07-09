@@ -77,7 +77,9 @@
     "noResults": "Không tìm thấy kết quả",
     "resultsTitle": "Kết quả tìm kiếm",
     "noResultsSubtitle": "Hãy thử điều chỉnh bộ lọc hoặc thuật ngữ tìm kiếm của bạn.",
-    "error": { "emptySearch": "Hãy thử thêm từ khóa hoặc các bộ lọc khác." }
+    "error": {
+      "emptySearch": "Hãy thử thêm từ khóa hoặc các bộ lọc khác."
+    }
   },
   "calendarPopover": {
     "tabs": {
@@ -456,9 +458,11 @@
     "expand": "Mở rộng",
     "nextMonth": "Tháng sau",
     "previousMonth": "Tháng trước",
-    "copyBookingLink": "Sao chép liên kết đặt lịch"
+    "copyBookingLink": "Sao chép liên kết đặt lịch",
+    "createAppointment": "Create appointment schedule"
   },
   "booking": {
+    "fillRequiredFields": "Vui lòng điền tất cả các trường bắt buộc.",
     "durationMinutes": "%{count} phút",
     "confirm": {
       "title": "Xác nhận đặt lịch",
@@ -494,7 +498,16 @@
       "TENTATIVE": "Người tổ chức đã chấp nhận tạm thời cuộc họp",
       "NEEDS-ACTION": "Đang chờ phản hồi từ người tổ chức"
     },
-    "cancelSuccess": "Đặt chỗ đã bị hủy. Bạn có thể đặt một khung giờ mới nếu muốn."
+    "cancelSuccess": "Đặt chỗ đã bị hủy. Bạn có thể đặt một khung giờ mới nếu muốn.",
+    "createAppointmentTitle": "Tạo lịch hẹn",
+    "scheduleName": "Tên lịch trình",
+    "chooseTimeSlot": "Chọn khung giờ",
+    "15minutes": "15 phút",
+    "30minutes": "30 phút",
+    "45minutes": "45 phút",
+    "1hour": "1 giờ",
+    "2hours": "2 giờ",
+    "save": "Lưu"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

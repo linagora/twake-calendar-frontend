@@ -77,7 +77,9 @@
     "noResults": "No events found",
     "resultsTitle": "Search Results",
     "noResultsSubtitle": "Try adjusting your filters or search terms.",
-    "error": { "emptySearch": "Try adding keywords or other filters." }
+    "error": {
+      "emptySearch": "Try adding keywords or other filters."
+    }
   },
   "calendarPopover": {
     "tabs": {
@@ -456,9 +458,11 @@
     "expand": "Expand",
     "nextMonth": "Next month",
     "previousMonth": "Previous month",
-    "copyBookingLink": "Copy booking link"
+    "copyBookingLink": "Copy booking link",
+    "createAppointment": "Create appointment schedule"
   },
   "booking": {
+    "fillRequiredFields": "Please fill all required fields.",
     "durationMinutes": "%{count} min",
     "confirm": {
       "title": "Confirm your booking",
@@ -494,7 +498,16 @@
       "TENTATIVE": "Meeting tentatively accepted by organizer",
       "NEEDS-ACTION": "Waiting for organizer response"
     },
-    "cancelSuccess": "Reservation cancelled. You can book a new slot if you wish to."
+    "cancelSuccess": "Reservation cancelled. You can book a new slot if you wish to.",
+    "createAppointmentTitle": "Create appointment schedule",
+    "scheduleName": "Schedule name",
+    "chooseTimeSlot": "Choose time slot",
+    "15minutes": "15 minutes",
+    "30minutes": "30 minutes",
+    "45minutes": "45 minutes",
+    "1hour": "1 hour",
+    "2hours": "2 hours",
+    "save": "Save"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

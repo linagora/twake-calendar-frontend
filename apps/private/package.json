@@ -16,7 +16,8 @@
     "twake-i18n": "^0.3.0",
     "classnames": "^2.5.1",
     "cozy-external-bridge": "^1.2.1",
-    "openid-client": "^6.5.3"
+    "openid-client": "^6.5.3",
+    "@mui/icons-material": "^9.0.1"
   },
   "scripts": {
     "start": "PORT=5000 rsbuild dev",

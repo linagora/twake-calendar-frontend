@@ -76,6 +76,7 @@ export interface CreateBookingLinkRequest {
   availabilityRules?: AvailabilityRule[]
   name?: string
   description?: string
+  timeZone?: string
 }
 
 export interface CreateBookingLinkResponse {

@@ -1,9 +1,20 @@
-import CalendarSelection from '@common/components/Calendar/CalendarSelection'
+import CalendarSelection from '../../apps/private/src/components/Calendar/CalendarSelection'
 import * as calendarThunks from '@common/features/Calendars/CalendarSlice'
 import '@testing-library/jest-dom'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
+
+jest.mock(
+  '../../apps/private/src/features/booking/CreateAppointmentModal',
+  () => ({
+    CreateAppointmentModal: () => null
+  })
+)
+
+jest.mock('@common/features/booking/BookingDao', () => ({
+  listBookingLinks: jest.fn().mockResolvedValue([])
+}))
 
 describe('CalendarSelection', () => {
   beforeEach(() => {
@@ -150,7 +161,7 @@ describe('CalendarSelection', () => {
     )
 
     const addButtons = screen.getAllByRole('button')
-    fireEvent.click(addButtons[1])
+    fireEvent.click(addButtons[3])
 
     await waitFor(() =>
       expect(
@@ -236,7 +247,7 @@ describe('CalendarSelection', () => {
     )
 
     const addButtons = screen.getAllByTestId('AddIcon')
-    fireEvent.click(addButtons[1]) // seccond Add button (other)
+    fireEvent.click(addButtons[2]) // seccond Add button (other)
 
     expect(
       screen.getByText('calendar.browseOtherCalendars')

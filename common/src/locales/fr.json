@@ -458,9 +458,11 @@
     "expand": "Développer",
     "nextMonth": "Mois suivant",
     "previousMonth": "Mois précédent",
-    "copyBookingLink": "Copier le lien de réservation"
+    "copyBookingLink": "Copier le lien de réservation",
+    "createAppointment": "Créer un planning de rendez-vous"
   },
   "booking": {
+    "fillRequiredFields": "Veuillez remplir tous les champs obligatoires.",
     "durationMinutes": "%{count} min",
     "confirm": {
       "title": "Confirmer votre réservation",
@@ -496,7 +498,16 @@
       "TENTATIVE": "Réunion acceptée provisoirement par l'organisateur",
       "NEEDS-ACTION": "En attente de réponse de l'organisateur"
     },
-    "cancelSuccess": "Réservation annulée. Vous pouvez réserver un nouveau créneau si vous le souhaitez."
+    "cancelSuccess": "Réservation annulée. Vous pouvez réserver un nouveau créneau si vous le souhaitez.",
+    "createAppointmentTitle": "Créer un planning de rendez-vous",
+    "scheduleName": "Nom du planning",
+    "chooseTimeSlot": "Choisir un créneau",
+    "15minutes": "15 minutes",
+    "30minutes": "30 minutes",
+    "45minutes": "45 minutes",
+    "1hour": "1 heure",
+    "2hours": "2 heures",
+    "save": "Enregistrer"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

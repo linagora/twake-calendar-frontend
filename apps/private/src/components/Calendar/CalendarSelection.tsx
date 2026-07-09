@@ -44,14 +44,15 @@ import {
   useState
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import { SnackbarAlert } from '../Loading/SnackBarAlert'
-import CalendarPopover from './CalendarModal'
-import { BookingLinkSelectorMenu } from './BookingLinkSelectorMenu'
-import { CalendarSelectorMenu } from './CalendarSelectorMenu'
-import { DeleteCalendarDialog } from './DeleteCalendarDialog'
-import { OwnerCaption } from './OwnerCaption'
-import RegisterCalendars from './RegisterCalendars'
-import type { ResourceCal } from './RegisterCalendars/index.types'
+import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
+import CalendarPopover from '@common/components/Calendar/CalendarModal'
+import { BookingLinkSelectorMenu } from '@common/components/Calendar/BookingLinkSelectorMenu'
+import { CalendarSelectorMenu } from '@common/components/Calendar/CalendarSelectorMenu'
+import { DeleteCalendarDialog } from '@common/components/Calendar/DeleteCalendarDialog'
+import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
+import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
+import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
+import { CreateAppointmentModal } from '../../features/booking/CreateAppointmentModal'
 
 /**
  * Keeps a section's expanded state in sync whenever the caller's
@@ -336,6 +337,7 @@ const BookingLinksAccordion: React.FC<{
   bookingLinks: BookingLink[]
   defaultExpanded?: boolean
   onDelete: (publicId: string) => void
+  handleMenuOpen?: (e: React.MouseEvent<HTMLElement>, link: BookingLink) => void
   onAddClick?: () => void
   addBtnTooltip?: string
 }> = ({
@@ -431,6 +433,9 @@ const CalendarSelection: React.FC<{
   // Booking links from Redux
   const bookingLinks = useAppSelector(state => state.bookingLinks.list)
 
+  const [isCreateAppointmentModalOpen, setIsCreateAppointmentModalOpen] =
+    useState(false)
+
   // Fetch booking links on mount
   useEffect(() => {
     dispatch(listBookingLinks())
@@ -448,6 +453,8 @@ const CalendarSelection: React.FC<{
           bookingLinks={bookingLinks}
           defaultExpanded
           onDelete={handleDeleteBookingLink}
+          onAddClick={() => setIsCreateAppointmentModalOpen(true)}
+          addBtnTooltip={t('tooltip.createAppointment')}
         />
 
         <CalendarAccordion
@@ -557,6 +564,10 @@ const CalendarSelection: React.FC<{
             })
           }
         }}
+      />
+      <CreateAppointmentModal
+        open={isCreateAppointmentModalOpen}
+        onClose={() => setIsCreateAppointmentModalOpen(false)}
       />
     </>
   )

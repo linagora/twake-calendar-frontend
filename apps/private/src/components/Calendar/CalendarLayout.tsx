@@ -14,7 +14,7 @@ import CalendarController, {
 } from '@common/components/Calendar/CalendarController'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import Sidebar from '@common/components/Calendar/Sidebar/SideBar'
+import Sidebar from './Sidebar/SideBar'
 import TempSearchDialog from '@common/components/Calendar/TempSearchDialog'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import { useManageCalendarSelection } from './hooks/useManageCalendarSelection'

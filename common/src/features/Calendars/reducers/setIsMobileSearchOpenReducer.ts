@@ -1,9 +1,9 @@
-import { PayloadAction, ReducerCreators } from '@reduxjs/toolkit'
+import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
 export const setIsMobileSearchOpenReducer = (
   create: ReducerCreators<CalendarState>
 ) =>
-  create.reducer((state: CalendarState, action: PayloadAction<boolean>) => {
+  create.reducer<boolean>((state, action): void => {
     state.isMobileSearchOpen = action.payload
   })
