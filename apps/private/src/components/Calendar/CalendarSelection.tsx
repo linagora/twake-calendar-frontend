@@ -4,6 +4,7 @@ import {
   listBookingLinks
 } from '@common/features/booking/BookingLinksSlice'
 import { BookingLink } from '@common/features/booking/types/BookingTypes'
+import { calendarIdFromEventHref } from '@common/features/Calendars/CalendarDAO'
 import {
   addCalendarResource,
   addSharedCalendar,
@@ -220,7 +221,9 @@ const BookingLinkChip: React.FC<{
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
   const menuOpen = Boolean(menuAnchorEl)
-
+  const calendars = useAppSelector(state => state.calendars.list)
+  const calendarId = calendarIdFromEventHref(link.calendarUrl)
+  const calendarColor = calendars?.[calendarId]?.color?.light
   const getBookingLinkUrl = (publicId: string): string => {
     const prefix = window.PUBLIC_PAGE_BASE
       ? `${window.PUBLIC_PAGE_BASE}/booking`
@@ -280,7 +283,10 @@ const BookingLinkChip: React.FC<{
               marginRight: '4px'
             }}
           >
-            <EventIcon sx={{ color: defaultColors[4].dark }} fontSize="small" />
+            <EventIcon
+              sx={{ color: calendarColor ?? defaultColors[4].dark }}
+              fontSize="small"
+            />
           </div>
 
           <div

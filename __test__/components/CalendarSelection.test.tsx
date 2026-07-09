@@ -140,7 +140,9 @@ describe('CalendarSelection', () => {
         }
       )
 
-      expect(screen.queryByText('calendar.bookingLinks')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText('calendar.bookingLinks')
+      ).not.toBeInTheDocument()
       expect(listBookingLinks).not.toHaveBeenCalled()
     }
   )
