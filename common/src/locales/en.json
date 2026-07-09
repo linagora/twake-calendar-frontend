@@ -479,6 +479,7 @@
       "email": "Email"
     },
     "error": {
+      "nameRequired": "Name is required",
       "emailRequired": "Email is required",
       "createFailed": "Failed to create booking. Please try again.",
       "loadFailed": "Unable to load available slots. Please try again."

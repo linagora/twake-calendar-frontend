@@ -114,6 +114,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
 interface BookingFormProps {
   name: string
   email: string
+  nameError: string | null
   emailError: string | null
   bookingError: string | null
   onNameChange: (value: string) => void
@@ -123,6 +124,7 @@ interface BookingFormProps {
 const BookingForm: React.FC<BookingFormProps> = ({
   name,
   email,
+  nameError,
   emailError,
   bookingError,
   onNameChange,
@@ -138,6 +140,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
         fullWidth
         margin="normal"
         size="small"
+        required
+        error={!!nameError}
+        helperText={nameError}
       />
       <TextField
         placeholder={t('booking.form.email')}
@@ -171,13 +176,20 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const { t } = useI18n()
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
+  const [nameError, setNameError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
 
   const handleConfirm = async (): Promise<void> => {
+    setNameError(null)
     setEmailError(null)
     setBookingError(null)
+
+    if (!name.trim()) {
+      setNameError(t('booking.error.nameRequired'))
+      return
+    }
 
     if (!email) {
       setEmailError(t('booking.error.emailRequired'))
@@ -208,6 +220,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     }
     onClose()
     setBookingError(null)
+    setNameError(null)
     setEmailError(null)
     setName('')
     setEmail('')
@@ -229,6 +242,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         <BookingForm
           name={name}
           email={email}
+          nameError={nameError}
           emailError={emailError}
           bookingError={bookingError}
           onNameChange={setName}

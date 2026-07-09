@@ -180,7 +180,7 @@ export const SuccessFooter: React.FC<SuccessFooterProps> = ({
   cancelLabel,
   suffixLabel
 }) => (
-  <Box sx={{ textAlign: 'center' }}>
+  <Box sx={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
     <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5 }}>
       {needChangesLabel}
     </Typography>
