@@ -462,6 +462,7 @@
     "createAppointment": "Créer un planning de rendez-vous"
   },
   "booking": {
+    "fillRequiredFields": "Veuillez remplir tous les champs obligatoires.",
     "durationMinutes": "%{count} min",
     "confirm": {
       "title": "Confirmer votre réservation",

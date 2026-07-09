@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Button, TextField, Box, Divider } from '@linagora/twake-mui'
+import {
+  Button,
+  TextField,
+  Box,
+  Divider,
+  Typography
+} from '@linagora/twake-mui'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { useI18n } from 'twake-i18n'
-import { createBookingLink } from './BookingDao'
+import { createBookingLink } from '@common/features/booking/BookingDao'
 import { useAppSelector } from '@common/app/hooks'
 import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import { AddDescButton } from '@common/components/Event/AddDescButton'
@@ -34,6 +40,10 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     () => Intl.DateTimeFormat().resolvedOptions().timeZone
   )
   const [calendarid, setCalendarid] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const isFormValid =
+    name.trim().length > 0 && calendarid !== '' && duration > 0
 
   useEffect(() => {
     if (!calendarid && userPersonalCalendars.length > 0) {
@@ -42,10 +52,14 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
   }, [userPersonalCalendars, calendarid])
 
   const handleSave = async (): Promise<void> => {
-    if (!name.trim() || !calendarid || !duration) return
+    if (!isFormValid) {
+      setError(t('booking.fillRequiredFields'))
+      return
+    }
 
     try {
       setLoading(true)
+      setError(null)
       await createBookingLink({
         name,
         durationMinutes: duration,
@@ -64,8 +78,9 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         description
       })
       onClose()
-    } catch (error) {
-      console.error('Failed to create booking link:', error)
+    } catch (err) {
+      console.error('Failed to create booking link:', err)
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
@@ -82,12 +97,17 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         <Button
           onClick={() => void handleSave()}
           variant="contained"
-          disabled={loading}
+          disabled={loading || !isFormValid}
         >
           {t('booking.save', { defaultValue: 'Save' })}
         </Button>
       }
     >
+      {error && (
+        <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
       <TextField
         autoFocus
         margin="dense"

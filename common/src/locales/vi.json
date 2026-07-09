@@ -462,6 +462,7 @@
     "createAppointment": "Create appointment schedule"
   },
   "booking": {
+    "fillRequiredFields": "Vui lòng điền tất cả các trường bắt buộc.",
     "durationMinutes": "%{count} phút",
     "confirm": {
       "title": "Xác nhận đặt lịch",
@@ -498,15 +499,15 @@
       "NEEDS-ACTION": "Đang chờ phản hồi từ người tổ chức"
     },
     "cancelSuccess": "Đặt chỗ đã bị hủy. Bạn có thể đặt một khung giờ mới nếu muốn.",
-    "createAppointmentTitle": "Create appointment schedule",
-    "scheduleName": "Schedule name",
-    "chooseTimeSlot": "Choose time slot",
-    "15minutes": "15 minutes",
-    "30minutes": "30 minutes",
-    "45minutes": "45 minutes",
-    "1hour": "1 hour",
-    "2hours": "2 hours",
-    "save": "Save"
+    "createAppointmentTitle": "Tạo lịch hẹn",
+    "scheduleName": "Tên lịch trình",
+    "chooseTimeSlot": "Chọn khung giờ",
+    "15minutes": "15 phút",
+    "30minutes": "30 phút",
+    "45minutes": "45 phút",
+    "1hour": "1 giờ",
+    "2hours": "2 giờ",
+    "save": "Lưu"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

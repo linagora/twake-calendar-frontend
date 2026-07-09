@@ -459,9 +459,10 @@
     "nextMonth": "Следующий месяц",
     "previousMonth": "Предыдущий месяц",
     "copyBookingLink": "Копировать ссылку для бронирования",
-    "createAppointment": "Create appointment schedule"
+    "createAppointment": "Создать расписание встреч"
   },
   "booking": {
+    "fillRequiredFields": "Пожалуйста, заполните все обязательные поля.",
     "durationMinutes": "%{count} мин",
     "confirm": {
       "title": "Подтвердите бронирование",
@@ -498,15 +499,15 @@
       "NEEDS-ACTION": "Ожидание ответа организатора"
     },
     "cancelSuccess": "Бронирование отменено. Вы можете забронировать новый слот, если хотите.",
-    "createAppointmentTitle": "Create appointment schedule",
-    "scheduleName": "Schedule name",
-    "chooseTimeSlot": "Choose time slot",
-    "15minutes": "15 minutes",
-    "30minutes": "30 minutes",
-    "45minutes": "45 minutes",
-    "1hour": "1 hour",
-    "2hours": "2 hours",
-    "save": "Save"
+    "createAppointmentTitle": "Создать расписание встреч",
+    "scheduleName": "Название расписания",
+    "chooseTimeSlot": "Выберите время",
+    "15minutes": "15 минут",
+    "30minutes": "30 минут",
+    "45minutes": "45 минут",
+    "1hour": "1 час",
+    "2hours": "2 часа",
+    "save": "Сохранить"
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",

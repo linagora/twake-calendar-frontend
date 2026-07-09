@@ -462,6 +462,7 @@
     "createAppointment": "Create appointment schedule"
   },
   "booking": {
+    "fillRequiredFields": "Please fill all required fields.",
     "durationMinutes": "%{count} min",
     "confirm": {
       "title": "Confirm your booking",
