@@ -1,12 +1,8 @@
 import { BookingSlotsResponse } from '@common/features/booking/types/BookingTypes'
 import { Box } from '@linagora/twake-mui'
 import React from 'react'
-import {
-  BookingOwnerAvatar,
-  BookingOwnerName,
-  BookingEventDetails
-} from './BookingOwnerInfo'
 import { BookingMetaInfo } from './BookingMetaInfo'
+import { BookingEventDetails, BookingOwnerDisplay } from './BookingOwnerInfo'
 
 export const BookingHeaderDesktop: React.FC<{
   bookingInfo: BookingSlotsResponse
@@ -24,10 +20,15 @@ export const BookingHeaderDesktop: React.FC<{
         p: '24px'
       }}
     >
-      <Box sx={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-        <BookingOwnerAvatar owner={bookingInfo.owner} />
-        <Box>
-          <BookingOwnerName owner={bookingInfo.owner} />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          flexDirection: 'column'
+        }}
+      >
+        <BookingOwnerDisplay owner={bookingInfo.owner} />
+        <Box sx={{ ml: 6.5 }}>
           <BookingEventDetails bookingInfo={bookingInfo} />
         </Box>
       </Box>

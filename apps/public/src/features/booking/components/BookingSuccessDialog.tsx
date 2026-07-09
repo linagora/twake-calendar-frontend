@@ -48,7 +48,7 @@ interface SuccessHeaderProps {
 }
 
 const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
-  <Box sx={{ position: 'relative', textAlign: 'center', pt: 2 }}>
+  <Box sx={{ position: 'relative', textAlign: 'center', pt: 3 }}>
     <IconButton
       onClick={onClose}
       size="small"
@@ -56,7 +56,7 @@ const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
     >
       <CloseIcon fontSize="small" />
     </IconButton>
-    <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
+    <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 1 }} />
     <Typography variant="h3" sx={{ mb: 1 }}>
       {title}
     </Typography>
