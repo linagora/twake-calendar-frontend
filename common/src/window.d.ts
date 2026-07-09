@@ -47,6 +47,8 @@ declare global {
 
     ENABLE_CREATE_BOOKING: boolean
 
+    BOOKING_LINK_ENABLED: boolean | undefined
+
     ASK_FOR_TZ_UPDATE: boolean
 
     TOOLTIP_DELAY_MS: number

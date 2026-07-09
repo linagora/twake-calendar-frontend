@@ -39,3 +39,5 @@ var DISABLE_PUBLIC_VISIBILITY = false
 var ASK_FOR_TZ_UPDATE = true
 var TOOLTIP_DELAY_MS = 2000
 var HIDE_LANGUAGE_SELECTOR = false
+// Exposes the booking link section in the left bar. Defaults to false.
+var BOOKING_LINK_ENABLED = false

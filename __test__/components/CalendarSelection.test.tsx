@@ -1,4 +1,5 @@
 import CalendarSelection from '../../apps/private/src/components/Calendar/CalendarSelection'
+import { listBookingLinks } from '@common/features/booking/BookingDao'
 import * as calendarThunks from '@common/features/Calendars/CalendarSlice'
 import '@testing-library/jest-dom'
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
@@ -18,11 +19,14 @@ jest.mock('@common/features/booking/BookingDao', () => ({
 
 describe('CalendarSelection', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     window.HIDE_RESOURCES = undefined
+    window.BOOKING_LINK_ENABLED = true
     localStorage.clear()
   })
   afterEach(() => {
     window.HIDE_RESOURCES = undefined
+    window.BOOKING_LINK_ENABLED = undefined
   })
   const baseUser = {
     userData: {
@@ -103,6 +107,43 @@ describe('CalendarSelection', () => {
 
     expect(screen.queryByText('calendar.resources')).not.toBeInTheDocument()
   })
+
+  it('renders booking links when BOOKING_LINK_ENABLED is true', () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false }
+      }
+    )
+
+    expect(screen.getByText('calendar.bookingLinks')).toBeInTheDocument()
+    expect(listBookingLinks).toHaveBeenCalled()
+  })
+
+  it.each([[undefined], [false]])(
+    'does not render booking links when BOOKING_LINK_ENABLED is %s',
+    value => {
+      window.BOOKING_LINK_ENABLED = value
+
+      renderWithProviders(
+        <CalendarSelection
+          selectedCalendars={[]}
+          setSelectedCalendars={jest.fn()}
+        />,
+        {
+          user: baseUser,
+          calendars: { list: calendarsMock, pending: false }
+        }
+      )
+
+      expect(screen.queryByText('calendar.bookingLinks')).not.toBeInTheDocument()
+      expect(listBookingLinks).not.toHaveBeenCalled()
+    }
+  )
 
   it('toggles a calendar selection on click', () => {
     const setSelectedCalendars = jest.fn()

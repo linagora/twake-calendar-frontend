@@ -432,14 +432,17 @@ const CalendarSelection: React.FC<{
 
   // Booking links from Redux
   const bookingLinks = useAppSelector(state => state.bookingLinks.list)
+  const bookingLinkEnabled = window.BOOKING_LINK_ENABLED === true
 
   const [isCreateAppointmentModalOpen, setIsCreateAppointmentModalOpen] =
     useState(false)
 
   // Fetch booking links on mount
   useEffect(() => {
-    dispatch(listBookingLinks())
-  }, [dispatch])
+    if (bookingLinkEnabled) {
+      dispatch(listBookingLinks())
+    }
+  }, [dispatch, bookingLinkEnabled])
 
   const handleDeleteBookingLink = (publicId: string): void => {
     dispatch(deleteBookingLink(publicId))
@@ -448,14 +451,16 @@ const CalendarSelection: React.FC<{
   return (
     <>
       <div>
-        <BookingLinksAccordion
-          title={t('calendar.bookingLinks')}
-          bookingLinks={bookingLinks}
-          defaultExpanded
-          onDelete={handleDeleteBookingLink}
-          onAddClick={() => setIsCreateAppointmentModalOpen(true)}
-          addBtnTooltip={t('tooltip.createAppointment')}
-        />
+        {bookingLinkEnabled && (
+          <BookingLinksAccordion
+            title={t('calendar.bookingLinks')}
+            bookingLinks={bookingLinks}
+            defaultExpanded
+            onDelete={handleDeleteBookingLink}
+            onAddClick={() => setIsCreateAppointmentModalOpen(true)}
+            addBtnTooltip={t('tooltip.createAppointment')}
+          />
+        )}
 
         <CalendarAccordion
           title={t('calendar.personal')}
