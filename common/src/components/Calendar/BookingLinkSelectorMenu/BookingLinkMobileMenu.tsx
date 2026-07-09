@@ -17,13 +17,17 @@ interface BookingLinkMobileMenuProps {
   onClose: () => void
   onDelete: () => void
   onEdit: () => void
+  onToggleVisibility?: () => void
+  isVisible?: boolean
 }
 
 export const BookingLinkMobileMenu: React.FC<BookingLinkMobileMenuProps> = ({
   open,
   onClose,
   onDelete,
-  onEdit
+  onEdit,
+  onToggleVisibility,
+  isVisible
 }) => {
   const { t } = useI18n()
 
@@ -36,6 +40,18 @@ export const BookingLinkMobileMenu: React.FC<BookingLinkMobileMenuProps> = ({
       disableAutoFocus
     >
       <List>
+        {onToggleVisibility !== undefined && (
+          <ListItemButton
+            onClick={() => {
+              onToggleVisibility()
+              onClose()
+            }}
+          >
+            <ListItemText
+              primary={isVisible ? t('actions.hide') : t('actions.show')}
+            />
+          </ListItemButton>
+        )}
         <ListItemButton
           onClick={() => {
             onEdit()

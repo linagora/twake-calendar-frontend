@@ -41,7 +41,9 @@
     "add": "Thêm",
     "reset": "Đặt lại",
     "export": "Xuất",
-    "exporting": "Đang xuất..."
+    "exporting": "Đang xuất...",
+    "hide": "Ẩn",
+    "show": "Hiện"
   },
   "common": {
     "cancel": "Hủy",

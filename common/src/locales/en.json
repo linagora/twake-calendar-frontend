@@ -41,7 +41,9 @@
     "add": "Add",
     "reset": "Reset",
     "export": "Export",
-    "exporting": "Exporting..."
+    "exporting": "Exporting...",
+    "hide": "Hide",
+    "show": "Show"
   },
   "common": {
     "cancel": "Cancel",

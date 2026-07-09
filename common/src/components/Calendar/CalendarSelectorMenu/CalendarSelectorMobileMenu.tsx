@@ -17,13 +17,24 @@ interface CalendarSelectorMobileMenuProps {
   onClose: () => void
   onModify: () => void
   onDelete: () => void
+  onToggleVisibility?: () => void
   isDefault: boolean
   isPersonal: boolean
+  isVisible?: boolean
 }
 
 export const CalendarSelectorMobileMenu: React.FC<
   CalendarSelectorMobileMenuProps
-> = ({ open, onClose, onModify, onDelete, isDefault, isPersonal }) => {
+> = ({
+  open,
+  onClose,
+  onModify,
+  onDelete,
+  onToggleVisibility,
+  isDefault,
+  isPersonal,
+  isVisible
+}) => {
   const { t } = useI18n()
 
   return (
@@ -35,6 +46,18 @@ export const CalendarSelectorMobileMenu: React.FC<
       disableAutoFocus
     >
       <List>
+        {onToggleVisibility !== undefined && (
+          <ListItemButton
+            onClick={() => {
+              onToggleVisibility()
+              onClose()
+            }}
+          >
+            <ListItemText
+              primary={isVisible ? t('actions.hide') : t('actions.show')}
+            />
+          </ListItemButton>
+        )}
         <ListItemButton
           onClick={() => {
             onModify()

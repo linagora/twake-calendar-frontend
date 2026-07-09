@@ -1,4 +1,12 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
+import { BookingLinkSelectorMenu } from '@common/components/Calendar/BookingLinkSelectorMenu'
+import CalendarPopover from '@common/components/Calendar/CalendarModal'
+import { CalendarSelectorMenu } from '@common/components/Calendar/CalendarSelectorMenu'
+import { DeleteCalendarDialog } from '@common/components/Calendar/DeleteCalendarDialog'
+import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
+import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
+import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
+import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   deleteBookingLink,
   listBookingLinks
@@ -17,6 +25,8 @@ import { defaultColors } from '@common/utils/defaultColors'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
+import { setVisibleBookingLinks } from '@common/utils/storage/setVisibleBookingLinks'
+import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
 import { trimLongTextWithoutSpace } from '@common/utils/textUtils'
 import {
   Accordion,
@@ -45,14 +55,6 @@ import {
   useState
 } from 'react'
 import { useI18n } from 'twake-i18n'
-import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
-import CalendarPopover from '@common/components/Calendar/CalendarModal'
-import { BookingLinkSelectorMenu } from '@common/components/Calendar/BookingLinkSelectorMenu'
-import { CalendarSelectorMenu } from '@common/components/Calendar/CalendarSelectorMenu'
-import { DeleteCalendarDialog } from '@common/components/Calendar/DeleteCalendarDialog'
-import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
-import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
-import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
 import { CreateAppointmentModal } from '../../features/booking/CreateAppointmentModal'
 import { EditAppointmentModal } from '../../features/booking/EditAppointmentModal'
 
@@ -217,7 +219,9 @@ const BookingLinkChip: React.FC<{
   link: BookingLink
   onDelete: (publicId: string) => void
   onEdit: (link: BookingLink) => void
-}> = ({ link, onDelete, onEdit }) => {
+  isVisible: boolean
+  onToggleVisibility: () => void
+}> = ({ link, onDelete, onEdit, isVisible, onToggleVisibility }) => {
   const theme = useTheme()
   const { t } = useI18n()
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
@@ -291,7 +295,11 @@ const BookingLinkChip: React.FC<{
             }}
           >
             <EventIcon
-              sx={{ color: calendarColor ?? defaultColors[4].dark }}
+              sx={{
+                color: isVisible
+                  ? (calendarColor ?? defaultColors[4].dark)
+                  : theme.palette.grey[400]
+              }}
               fontSize="small"
             />
           </div>
@@ -336,6 +344,8 @@ const BookingLinkChip: React.FC<{
         onClose={handleMenuClose}
         onDelete={handleDelete}
         onEdit={handleEdit}
+        onToggleVisibility={onToggleVisibility}
+        isVisible={isVisible}
       />
       <SnackbarAlert
         open={copySnackbarOpen}
@@ -354,6 +364,8 @@ const BookingLinksAccordion: React.FC<{
   onEdit: (link: BookingLink) => void
   onAddClick?: () => void
   addBtnTooltip?: string
+  visibleBookingLinks: string[]
+  onToggleVisibility: (publicId: string) => void
 }> = ({
   title,
   bookingLinks,
@@ -361,7 +373,9 @@ const BookingLinksAccordion: React.FC<{
   onDelete,
   onEdit,
   onAddClick,
-  addBtnTooltip
+  addBtnTooltip,
+  visibleBookingLinks,
+  onToggleVisibility
 }) => {
   return (
     <CollapsibleSection
@@ -377,6 +391,8 @@ const BookingLinksAccordion: React.FC<{
           link={link}
           onDelete={onDelete}
           onEdit={onEdit}
+          isVisible={visibleBookingLinks.includes(link.publicId)}
+          onToggleVisibility={() => onToggleVisibility(link.publicId)}
         />
       ))}
     </CollapsibleSection>
@@ -476,10 +492,18 @@ const CalendarSelection: React.FC<{
     setEditingBookingLink(link)
     setIsEditAppointmentModalOpen(true)
   }
-
   const handleCloseEditModal = (): void => {
     setIsEditAppointmentModalOpen(false)
     setEditingBookingLink(null)
+  }
+
+  const visibleBookingLinks = useVisibleBookingLinks()
+  const handleToggleBookingLinkVisibility = (publicId: string): void => {
+    setVisibleBookingLinks(
+      visibleBookingLinks.includes(publicId)
+        ? visibleBookingLinks.filter(id => id !== publicId)
+        : [...visibleBookingLinks, publicId]
+    )
   }
 
   return (
@@ -494,6 +518,8 @@ const CalendarSelection: React.FC<{
             onEdit={handleEditBookingLink}
             onAddClick={() => setIsCreateAppointmentModalOpen(true)}
             addBtnTooltip={t('tooltip.createAppointment')}
+            visibleBookingLinks={visibleBookingLinks}
+            onToggleVisibility={handleToggleBookingLinkVisibility}
           />
         )}
 
@@ -788,8 +814,10 @@ const CalendarSelector: React.FC<{
         onClose={handleClose}
         onModify={setOpen}
         onDelete={() => setDeletePopupOpen(true)}
+        onToggleVisibility={() => handleCalendarToggle(id)}
         isDefault={isDefault}
         isPersonal={isPersonal}
+        isVisible={selectedCalendars.includes(id)}
       />
 
       <DeleteCalendarDialog

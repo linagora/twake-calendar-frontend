@@ -9,8 +9,10 @@ interface CalendarSelectorDesktopMenuProps {
   onClose: () => void
   onModify: () => void
   onDelete: () => void
+  onToggleVisibility?: () => void
   isDefault: boolean
   isPersonal: boolean
+  isVisible?: boolean
 }
 
 export const CalendarSelectorDesktopMenu: React.FC<
@@ -22,13 +24,26 @@ export const CalendarSelectorDesktopMenu: React.FC<
   onClose,
   onModify,
   onDelete,
+  onToggleVisibility,
   isDefault,
-  isPersonal
+  isPersonal,
+  isVisible
 }) => {
   const { t } = useI18n()
 
   return (
     <Menu id={id} anchorEl={anchorEl} open={open} onClose={onClose}>
+      {onToggleVisibility !== undefined && (
+        <MenuItem
+          onClick={() => {
+            onToggleVisibility()
+            onClose()
+          }}
+        >
+          {isVisible ? t('actions.hide') : t('actions.show')}
+        </MenuItem>
+      )}
+      {onToggleVisibility !== undefined && <Divider />}
       <MenuItem
         onClick={() => {
           onModify()

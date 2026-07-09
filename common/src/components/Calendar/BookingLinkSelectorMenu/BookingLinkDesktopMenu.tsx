@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, MenuItem } from '@linagora/twake-mui'
+import { Divider, Menu, MenuItem } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 
 interface BookingLinkDesktopMenuProps {
@@ -8,6 +8,8 @@ interface BookingLinkDesktopMenuProps {
   onClose: () => void
   onDelete: () => void
   onEdit: () => void
+  onToggleVisibility?: () => void
+  isVisible?: boolean
 }
 
 export const BookingLinkDesktopMenu: React.FC<BookingLinkDesktopMenuProps> = ({
@@ -15,12 +17,25 @@ export const BookingLinkDesktopMenu: React.FC<BookingLinkDesktopMenuProps> = ({
   open,
   onClose,
   onDelete,
-  onEdit
+  onEdit,
+  onToggleVisibility,
+  isVisible
 }) => {
   const { t } = useI18n()
 
   return (
     <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
+      {onToggleVisibility !== undefined && (
+        <MenuItem
+          onClick={() => {
+            onToggleVisibility()
+            onClose()
+          }}
+        >
+          {isVisible ? t('actions.hide') : t('actions.show')}
+        </MenuItem>
+      )}
+      {onToggleVisibility !== undefined && <Divider />}
       <MenuItem
         onClick={() => {
           onEdit()

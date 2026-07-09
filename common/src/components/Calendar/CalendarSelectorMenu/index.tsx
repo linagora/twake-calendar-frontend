@@ -10,8 +10,10 @@ interface CalendarSelectorMenuProps {
   onClose: () => void
   onModify: () => void
   onDelete: () => void
+  onToggleVisibility?: () => void
   isDefault: boolean
   isPersonal: boolean
+  isVisible?: boolean
 }
 
 export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
@@ -21,8 +23,10 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   onClose,
   onModify,
   onDelete,
+  onToggleVisibility,
   isDefault,
-  isPersonal
+  isPersonal,
+  isVisible
 }) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
@@ -35,8 +39,10 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
         onClose={onClose}
         onModify={onModify}
         onDelete={onDelete}
+        onToggleVisibility={onToggleVisibility}
         isDefault={isDefault}
         isPersonal={isPersonal}
+        isVisible={isVisible}
       />
     )
   }
@@ -47,8 +53,10 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
       onClose={onClose}
       onModify={onModify}
       onDelete={onDelete}
+      onToggleVisibility={onToggleVisibility}
       isDefault={isDefault}
       isPersonal={isPersonal}
+      isVisible={isVisible}
     />
   )
 }

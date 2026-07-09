@@ -41,7 +41,9 @@
     "add": "Ajouter",
     "reset": "Réinitialiser",
     "export": "Exporter",
-    "exporting": "En cours d'exportation..."
+    "exporting": "En cours d'exportation...",
+    "hide": "Masquer",
+    "show": "Afficher"
   },
   "common": {
     "cancel": "Annuler",

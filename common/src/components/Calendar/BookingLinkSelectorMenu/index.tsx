@@ -9,11 +9,21 @@ interface BookingLinkSelectorMenuProps {
   onClose: () => void
   onDelete: () => void
   onEdit: () => void
+  onToggleVisibility?: () => void
+  isVisible?: boolean
 }
 
 export const BookingLinkSelectorMenu: React.FC<
   BookingLinkSelectorMenuProps
-> = ({ anchorEl, open, onClose, onDelete, onEdit }) => {
+> = ({
+  anchorEl,
+  open,
+  onClose,
+  onDelete,
+  onEdit,
+  onToggleVisibility,
+  isVisible
+}) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   if (!isMobile) {
@@ -24,6 +34,8 @@ export const BookingLinkSelectorMenu: React.FC<
         onClose={onClose}
         onDelete={onDelete}
         onEdit={onEdit}
+        onToggleVisibility={onToggleVisibility}
+        isVisible={isVisible}
       />
     )
   }
@@ -34,6 +46,8 @@ export const BookingLinkSelectorMenu: React.FC<
       onClose={onClose}
       onDelete={onDelete}
       onEdit={onEdit}
+      onToggleVisibility={onToggleVisibility}
+      isVisible={isVisible}
     />
   )
 }
