@@ -88,31 +88,24 @@ export function prepareUpdatedEvent({
     color: targetCalendar?.color,
     alarms: (() => {
       const alarmAttendees = getAlarmAttendees(values, targetCalendar)
-      const isMultiUser = (alarmAttendees?.length ?? 0) > 1
 
-      // If event has multiple attendees, convert personal alarms (single attendee)
-      // to global alarms by stripping their personal attendee so fromFormValues
-      // assigns all attendees. Keep global alarms as-is.
-      const alarmsForFormValues = isMultiUser
-        ? Valarms.fromList(
-            values.alarms.getAlarms().map(alarm =>
-              alarm.attendees && alarm.attendees.length === 1
-                ? new VAlarm({
-                    trigger: alarm.trigger,
-                    action: alarm.action,
-                    summary: alarm.summary,
-                    description: alarm.description
-                    // attendees omitted → will use defaults (all attendees)
-                  })
-                : alarm
-            )
-          )
-        : values.alarms
-
-      return Valarms.fromFormValues(alarmsForFormValues, {
-        attendees: alarmAttendees,
-        summary: values.title
-      })
+      // If alarms already have attendees (from handleSave merge), preserve them.
+      // Only use fromFormValues for alarms without attendees (new alarms from UI).
+      return Valarms.fromList(
+        values.alarms.getAlarms().map(alarm => {
+          if (alarm.attendees && alarm.attendees.length > 0) {
+            return alarm // Preserve existing attendees from merge
+          }
+          // New alarm without attendees - add defaults
+          return new VAlarm({
+            trigger: alarm.trigger,
+            action: alarm.action,
+            attendees: alarmAttendees,
+            summary: values.title,
+            description: alarm.description
+          })
+        })
+      )
     })(),
     x_openpass_videoconference: values.meetingLink || undefined,
     attach: values.attachments?.length ? values.attachments : undefined

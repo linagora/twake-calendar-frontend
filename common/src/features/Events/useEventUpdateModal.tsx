@@ -95,17 +95,20 @@ export function useEventUpdateModal(
     const originalEvent = effectiveEvent || event
     const originalAlarms = originalEvent?.alarms
 
-    // Strip current user's personal alarms from form values before merging,
-    // since those are being edited. We only want to preserve OTHER users'
-    // personal alarms from the original event.
-    const globalAlarmsFromForm = Valarms.fromList(
-      values.alarms.getGlobalAlarms()
-    )
+    const isMultiUser = (values.attendees?.length ?? 0) > 1
 
-    // Merge global alarms from form with personal alarms from original event
-    const mergedAlarms = originalAlarms
-      ? globalAlarmsFromForm.withPersonalAlarmsFrom(originalAlarms)
-      : globalAlarmsFromForm
+    let mergedAlarms: Valarms
+    if (isMultiUser && originalAlarms) {
+      // Multi-user event: edit global alarms only, preserve personal alarms
+      // from other users that aren't shown in the form
+      const globalAlarmsFromForm = Valarms.fromList(
+        values.alarms.getGlobalAlarms()
+      )
+      mergedAlarms = globalAlarmsFromForm.withPersonalAlarmsFrom(originalAlarms)
+    } else {
+      // Single-user event: use form alarms directly
+      mergedAlarms = values.alarms
+    }
 
     const valuesWithMergedAlarms = {
       ...values,

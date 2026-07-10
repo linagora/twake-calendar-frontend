@@ -159,15 +159,11 @@ describe('prepareUpdatedEvent', () => {
       newCalId: 'cal-1'
     })
 
-    // The alarm should now have both attendees (owner + other)
+    // The alarm should preserve its original attendee (owner)
+    // because prepareUpdatedEvent preserves existing attendees
     const alarm = updatedEvent.alarms?.getAlarm(0)
-    expect(alarm?.attendees).toHaveLength(2)
-    expect(alarm?.attendees?.map(a => a.cal_address)).toContain(
-      'mailto:owner@example.com'
-    )
-    expect(alarm?.attendees?.map(a => a.cal_address)).toContain(
-      'mailto:other@example.com'
-    )
+    expect(alarm?.attendees).toHaveLength(1)
+    expect(alarm?.attendees?.[0]?.cal_address).toBe('mailto:owner@example.com')
   })
 
   it('keeps personal alarm when event stays single-user', () => {
