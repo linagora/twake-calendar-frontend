@@ -53,6 +53,7 @@ import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
 import { CreateAppointmentModal } from '../../features/booking/CreateAppointmentModal'
+import { EditAppointmentModal } from '../../features/booking/EditAppointmentModal'
 
 /**
  * Keeps a section's expanded state in sync whenever the caller's
@@ -214,7 +215,8 @@ const CalendarAccordion: React.FC<{
 const BookingLinkChip: React.FC<{
   link: BookingLink
   onDelete: (publicId: string) => void
-}> = ({ link, onDelete }) => {
+  onEdit: (link: BookingLink) => void
+}> = ({ link, onDelete, onEdit }) => {
   const theme = useTheme()
   const { t } = useI18n()
   const [copySnackbarOpen, setCopySnackbarOpen] = useState(false)
@@ -247,6 +249,11 @@ const BookingLinkChip: React.FC<{
 
   const handleDelete = (): void => {
     onDelete(link.publicId)
+    handleMenuClose()
+  }
+
+  const handleEdit = (): void => {
+    onEdit(link)
     handleMenuClose()
   }
 
@@ -322,6 +329,7 @@ const BookingLinkChip: React.FC<{
         open={menuOpen}
         onClose={handleMenuClose}
         onDelete={handleDelete}
+        onEdit={handleEdit}
       />
       <SnackbarAlert
         open={copySnackbarOpen}
@@ -337,7 +345,7 @@ const BookingLinksAccordion: React.FC<{
   bookingLinks: BookingLink[]
   defaultExpanded?: boolean
   onDelete: (publicId: string) => void
-  handleMenuOpen?: (e: React.MouseEvent<HTMLElement>, link: BookingLink) => void
+  onEdit: (link: BookingLink) => void
   onAddClick?: () => void
   addBtnTooltip?: string
 }> = ({
@@ -345,6 +353,7 @@ const BookingLinksAccordion: React.FC<{
   bookingLinks,
   defaultExpanded = false,
   onDelete,
+  onEdit,
   onAddClick,
   addBtnTooltip
 }) => {
@@ -357,7 +366,12 @@ const BookingLinksAccordion: React.FC<{
       addBtnTooltip={addBtnTooltip}
     >
       {bookingLinks.map(link => (
-        <BookingLinkChip key={link.publicId} link={link} onDelete={onDelete} />
+        <BookingLinkChip
+          key={link.publicId}
+          link={link}
+          onDelete={onDelete}
+          onEdit={onEdit}
+        />
       ))}
     </CollapsibleSection>
   )
@@ -436,6 +450,10 @@ const CalendarSelection: React.FC<{
 
   const [isCreateAppointmentModalOpen, setIsCreateAppointmentModalOpen] =
     useState(false)
+  const [isEditAppointmentModalOpen, setIsEditAppointmentModalOpen] =
+    useState(false)
+  const [editingBookingLink, setEditingBookingLink] =
+    useState<BookingLink | null>(null)
 
   // Fetch booking links on mount
   useEffect(() => {
@@ -448,6 +466,16 @@ const CalendarSelection: React.FC<{
     dispatch(deleteBookingLink(publicId))
   }
 
+  const handleEditBookingLink = (link: BookingLink): void => {
+    setEditingBookingLink(link)
+    setIsEditAppointmentModalOpen(true)
+  }
+
+  const handleCloseEditModal = (): void => {
+    setIsEditAppointmentModalOpen(false)
+    setEditingBookingLink(null)
+  }
+
   return (
     <>
       <div>
@@ -457,6 +485,7 @@ const CalendarSelection: React.FC<{
             bookingLinks={bookingLinks}
             defaultExpanded
             onDelete={handleDeleteBookingLink}
+            onEdit={handleEditBookingLink}
             onAddClick={() => setIsCreateAppointmentModalOpen(true)}
             addBtnTooltip={t('tooltip.createAppointment')}
           />
@@ -573,6 +602,11 @@ const CalendarSelection: React.FC<{
       <CreateAppointmentModal
         open={isCreateAppointmentModalOpen}
         onClose={() => setIsCreateAppointmentModalOpen(false)}
+      />
+      <EditAppointmentModal
+        open={isEditAppointmentModalOpen}
+        onClose={handleCloseEditModal}
+        bookingLink={editingBookingLink!}
       />
     </>
   )

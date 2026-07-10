@@ -8,11 +8,12 @@ interface BookingLinkSelectorMenuProps {
   open: boolean
   onClose: () => void
   onDelete: () => void
+  onEdit: () => void
 }
 
 export const BookingLinkSelectorMenu: React.FC<
   BookingLinkSelectorMenuProps
-> = ({ anchorEl, open, onClose, onDelete }) => {
+> = ({ anchorEl, open, onClose, onDelete, onEdit }) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   if (!isMobile) {
@@ -22,11 +23,17 @@ export const BookingLinkSelectorMenu: React.FC<
         open={open}
         onClose={onClose}
         onDelete={onDelete}
+        onEdit={onEdit}
       />
     )
   }
 
   return (
-    <BookingLinkMobileMenu open={open} onClose={onClose} onDelete={onDelete} />
+    <BookingLinkMobileMenu
+      open={open}
+      onClose={onClose}
+      onDelete={onDelete}
+      onEdit={onEdit}
+    />
   )
 }

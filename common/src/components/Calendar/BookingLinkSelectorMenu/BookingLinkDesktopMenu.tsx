@@ -7,18 +7,28 @@ interface BookingLinkDesktopMenuProps {
   open: boolean
   onClose: () => void
   onDelete: () => void
+  onEdit: () => void
 }
 
 export const BookingLinkDesktopMenu: React.FC<BookingLinkDesktopMenuProps> = ({
   anchorEl,
   open,
   onClose,
-  onDelete
+  onDelete,
+  onEdit
 }) => {
   const { t } = useI18n()
 
   return (
     <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
+      <MenuItem
+        onClick={() => {
+          onEdit()
+          onClose()
+        }}
+      >
+        {t('actions.edit')}
+      </MenuItem>
       <MenuItem
         onClick={() => {
           onDelete()

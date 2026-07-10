@@ -1,6 +1,7 @@
 import { createAppSlice } from '@common/app/createAppSlice'
 import { deleteBookingLinkThunk } from './services/deleteBookingLinkThunk'
 import { listBookingLinksThunk } from './services/listBookingLinksThunk'
+import { updateBookingLinkThunk } from './services/updateBookingLinkThunk'
 import { BookingLink } from './types/BookingTypes'
 
 export interface BookingLinksState {
@@ -18,10 +19,12 @@ const BookingLinksSlice = createAppSlice({
   } as BookingLinksState,
   reducers: create => ({
     listBookingLinks: listBookingLinksThunk(create),
-    deleteBookingLink: deleteBookingLinkThunk(create)
+    deleteBookingLink: deleteBookingLinkThunk(create),
+    updateBookingLink: updateBookingLinkThunk(create)
   })
 })
 
-export const { listBookingLinks, deleteBookingLink } = BookingLinksSlice.actions
+export const { listBookingLinks, deleteBookingLink, updateBookingLink } =
+  BookingLinksSlice.actions
 
 export default BookingLinksSlice.reducer
