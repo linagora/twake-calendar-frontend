@@ -42,7 +42,7 @@ export const BookingLinkMobileMenu: React.FC<BookingLinkMobileMenuProps> = ({
             onClose()
           }}
         >
-          <ListItemText primary={t('actions.edit')} />
+          <ListItemText primary={t('actions.modify')} />
         </ListItemButton>
         <ListItemButton
           onClick={() => {

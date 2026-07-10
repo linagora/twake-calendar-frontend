@@ -55,16 +55,10 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
           request: {
             name,
             durationMinutes: duration,
-            calendarUrl: bookingLink.calendarUrl,
-            availabilityRules: (
-              ['MON', 'TUE', 'WED', 'THU', 'FRI'] as const
-            ).map(day => ({
-              type: 'weekly',
-              dayOfWeek: day,
-              start: '09:00',
-              end: '18:00',
-              timeZone: timezone
-            })),
+            calendarUrl: `/calendars/${calendarid}`,
+            availabilityRules: (bookingLink.availabilityRules ?? []).map(
+              rule => ({ ...rule, timeZone: timezone })
+            ),
             description: description || null
           }
         })

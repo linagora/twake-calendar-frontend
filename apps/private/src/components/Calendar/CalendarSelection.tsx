@@ -603,11 +603,13 @@ const CalendarSelection: React.FC<{
         open={isCreateAppointmentModalOpen}
         onClose={() => setIsCreateAppointmentModalOpen(false)}
       />
-      <EditAppointmentModal
-        open={isEditAppointmentModalOpen}
-        onClose={handleCloseEditModal}
-        bookingLink={editingBookingLink!}
-      />
+      {editingBookingLink && (
+        <EditAppointmentModal
+          open={isEditAppointmentModalOpen}
+          onClose={handleCloseEditModal}
+          bookingLink={editingBookingLink}
+        />
+      )}
     </>
   )
 }

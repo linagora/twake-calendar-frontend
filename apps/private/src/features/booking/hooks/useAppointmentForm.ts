@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
+import { calendarIdFromEventHref } from '@common/features/Calendars/CalendarDAO'
 
 interface UseAppointmentFormOptions {
   bookingLink?: BookingLink
@@ -29,6 +30,13 @@ interface UseAppointmentFormReturn {
   userPersonalCalendars: ReturnType<typeof useUserPersonalCalendars>
 }
 
+const localTimezone = (): string =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone
+
+const bookingTimezone = (bookingLink: BookingLink): string =>
+  bookingLink.availabilityRules?.find(rule => rule.type === 'weekly')
+    ?.timeZone ?? localTimezone()
+
 export const useAppointmentForm = ({
   bookingLink,
   isOpen
@@ -42,57 +50,36 @@ export const useAppointmentForm = ({
   const [loading, setLoading] = useState(false)
   const [showDescription, setShowDescription] = useState(false)
   const [description, setDescription] = useState('')
-  const [timezone, setTimezone] = useState(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone
-  )
+  const [timezone, setTimezone] = useState(localTimezone)
   const [calendarid, setCalendarid] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const isFormValid =
     name.trim().length > 0 && calendarid !== '' && duration > 0
 
-  // Initialize form when modal opens
+  // Edit mode: populate form from existing booking link
   useEffect(() => {
-    if (isOpen) {
-      if (bookingLink) {
-        // Edit mode: populate with existing data
-        setName(bookingLink.name || '')
-        setDuration(bookingLink.durationMinutes)
-        setDescription(bookingLink.description || '')
-        setShowDescription(Boolean(bookingLink.description))
-        // Extract calendar ID from calendarUrl (e.g., "/calendars/abc123" -> "abc123")
-        const extractedCalendarId =
-          bookingLink.calendarUrl.split('/').pop() || ''
-        setCalendarid(extractedCalendarId)
-        // Try to extract timezone from availability rules
-        const weeklyRule = bookingLink.availabilityRules?.find(
-          rule => rule.type === 'weekly'
-        )
-        setTimezone(
-          weeklyRule?.timeZone ||
-            Intl.DateTimeFormat().resolvedOptions().timeZone
-        )
-      } else {
-        // Create mode: reset form
-        setName('')
-        setDuration(30)
-        setDescription('')
-        setShowDescription(false)
-        setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
-        setCalendarid(
-          userPersonalCalendars.length > 0 ? userPersonalCalendars[0].id : ''
-        )
-      }
-      setError(null)
-    }
-  }, [isOpen, bookingLink, userPersonalCalendars])
+    if (!isOpen || !bookingLink) return
+    setName(bookingLink.name || '')
+    setDuration(bookingLink.durationMinutes)
+    setDescription(bookingLink.description || '')
+    setShowDescription(Boolean(bookingLink.description))
+    setCalendarid(calendarIdFromEventHref(bookingLink.calendarUrl))
+    setTimezone(bookingTimezone(bookingLink))
+    setError(null)
+  }, [isOpen, bookingLink])
 
-  // Set default calendar for create mode
+  // Create mode: reset form to defaults
   useEffect(() => {
-    if (!bookingLink && !calendarid && userPersonalCalendars.length > 0) {
-      setCalendarid(userPersonalCalendars[0].id)
-    }
-  }, [bookingLink, userPersonalCalendars, calendarid])
+    if (!isOpen || bookingLink) return
+    setName('')
+    setDuration(30)
+    setDescription('')
+    setShowDescription(false)
+    setTimezone(localTimezone())
+    setCalendarid(userPersonalCalendars[0]?.id ?? '')
+    setError(null)
+  }, [isOpen, bookingLink, userPersonalCalendars])
 
   return {
     name,

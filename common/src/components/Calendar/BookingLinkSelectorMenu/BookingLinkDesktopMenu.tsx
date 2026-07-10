@@ -27,7 +27,7 @@ export const BookingLinkDesktopMenu: React.FC<BookingLinkDesktopMenuProps> = ({
           onClose()
         }}
       >
-        {t('actions.edit')}
+        {t('actions.modify')}
       </MenuItem>
       <MenuItem
         onClick={() => {

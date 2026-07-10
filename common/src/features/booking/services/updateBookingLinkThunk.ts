@@ -40,10 +40,12 @@ export function updateBookingLinkThunk(
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to update booking link'
+        if (action.payload?.status !== 401) {
+          state.error =
+            action.payload?.message ||
+            action.error.message ||
+            'Failed to update booking link'
+        }
       }
     }
   )
