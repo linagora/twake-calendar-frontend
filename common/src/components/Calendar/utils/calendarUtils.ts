@@ -230,12 +230,18 @@ export const eventToFullCalendarFormat = ({
     ) as EventInput[]
 }
 
+interface ExtractEventsOptions {
+  userAddress?: string
+  hideDeclinedEvents?: boolean | null
+  visibleBookingLinks?: string[]
+}
+
 export const extractEvents = (
   selectedCalendars: string[],
   calendars: Record<string, Calendar>,
-  userAddress?: string,
-  hideDeclinedEvents?: boolean | null
+  options?: ExtractEventsOptions
 ): CalendarEvent[] => {
+  const { hideDeclinedEvents, visibleBookingLinks } = options ?? {}
   const allEvents: CalendarEvent[] = []
 
   selectedCalendars.forEach(id => {
@@ -258,6 +264,16 @@ export const extractEvents = (
           )
         )
     )
+    .filter(event => {
+      if (
+        !event.bookingLinkPublicId ||
+        !visibleBookingLinks ||
+        visibleBookingLinks.length === 0
+      ) {
+        return true
+      }
+      return visibleBookingLinks.includes(event.bookingLinkPublicId)
+    })
 }
 
 export const updateCalsDetails = (

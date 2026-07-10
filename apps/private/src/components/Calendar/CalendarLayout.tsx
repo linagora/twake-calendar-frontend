@@ -18,6 +18,7 @@ import Sidebar from './Sidebar/SideBar'
 import TempSearchDialog from '@common/components/Calendar/TempSearchDialog'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import { useManageCalendarSelection } from './hooks/useManageCalendarSelection'
+import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
 
 export default function CalendarLayout(): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
@@ -66,6 +67,8 @@ export default function CalendarLayout(): JSX.Element {
     selectedMiniDate,
     setSelectedMiniDate
   } = useManageCalendarSelection()
+
+  const visibleBookingLinks = useVisibleBookingLinks()
 
   const handleRefresh = async (): Promise<void> => {
     if (calendarRef.current) {
@@ -167,6 +170,7 @@ export default function CalendarLayout(): JSX.Element {
               setSelectedMiniDate={setSelectedMiniDate}
               onDateChange={handleDateChange}
               onViewChange={handleViewChange}
+              visibleBookingLinks={visibleBookingLinks}
             />
           </div>
           {isMobile && (

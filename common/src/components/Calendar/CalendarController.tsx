@@ -55,6 +55,7 @@ export interface CalendarControllerProps {
   onDateChange?: (date: Date) => void
   onViewChange: (view: string) => void
   controllerRef?: MutableRefObject<CalendarControllerRef | null>
+  visibleBookingLinks?: string[]
 }
 
 const getCalendarIds = (calendarIdsString: string): string[] => {
@@ -70,7 +71,8 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   setSelectedMiniDate,
   onDateChange,
   onViewChange,
-  controllerRef
+  controllerRef,
+  visibleBookingLinks
 }: CalendarControllerProps) => {
   const { t } = useI18n()
 
@@ -331,6 +333,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
           handleMoreLinkClick={handleMoreLinkClick}
           datesSet={datesSet}
           openEventDisplay={openEventDisplay}
+          visibleBookingLinks={visibleBookingLinks}
         />
       )}
       {view === 'search' && <SearchResultsPage />}

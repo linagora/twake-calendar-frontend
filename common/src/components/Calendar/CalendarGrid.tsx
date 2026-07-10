@@ -68,6 +68,7 @@ export interface CalendarGridProps {
   handleMoreLinkClick: (arg: MoreLinkArg) => string | void
   datesSet: (arg: DatesSetArg) => void
   openEventDisplay: boolean
+  visibleBookingLinks?: string[]
 }
 
 const CALENDAR_PLUGINS = [
@@ -122,7 +123,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   displayWeekNumbers,
   handleMoreLinkClick,
   datesSet,
-  openEventDisplay
+  openEventDisplay,
+  visibleBookingLinks
 }) => {
   const { lang } = useI18n()
   const { isTooSmall: isMobile, isTablet } = useScreenSizeDetection()
@@ -138,7 +140,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       setSelectedDate,
       setSelectedMiniDate,
       onViewChange,
-      errorHandler
+      errorHandler,
+      visibleBookingLinks
     })
 
   const { handlers: swipeHandlers } = useSwipeNavigation(

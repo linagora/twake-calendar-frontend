@@ -27,14 +27,13 @@ const getFilteredEvents = (
   selectedCalendars: string[],
   calendars: RootState['calendars']['list'],
   email: string | undefined,
-  hideDeclinedEvents: boolean | undefined
+  hideDeclinedEvents: boolean | undefined,
+  visibleBookingLinks?: string[]
 ): CalendarEvent[] => {
-  return extractEvents(
-    selectedCalendars,
-    calendars || {},
-    email,
-    hideDeclinedEvents
-  )
+  return extractEvents(selectedCalendars, calendars || {}, {
+    hideDeclinedEvents,
+    visibleBookingLinks
+  })
 }
 
 export interface UseCalendarGridStateProps {
@@ -47,6 +46,7 @@ export interface UseCalendarGridStateProps {
   setSelectedMiniDate: (date: Date) => void
   onViewChange: (view: string) => void
   errorHandler: EventErrorHandler
+  visibleBookingLinks?: string[]
 }
 
 export interface CalendarGridState {
@@ -85,6 +85,7 @@ interface FullCalendarEventsProps {
   isPending: boolean
   hideDeclinedEvents: boolean
   t: (key: string) => string
+  visibleBookingLinks?: string[]
 }
 
 const useFullCalendarEvents = ({
@@ -95,7 +96,8 @@ const useFullCalendarEvents = ({
   userId,
   isPending,
   hideDeclinedEvents,
-  t
+  t,
+  visibleBookingLinks
 }: FullCalendarEventsProps): EventInput[] => {
   const tempCalendarIds = useMemo(
     () => getTempCalendarIds(tempcalendars),
@@ -109,9 +111,16 @@ const useFullCalendarEvents = ({
         selectedCalendars,
         calendars,
         email,
-        hideDeclinedEvents
+        hideDeclinedEvents,
+        visibleBookingLinks
       ),
-    [selectedCalendars, calendars, email, hideDeclinedEvents]
+    [
+      selectedCalendars,
+      calendars,
+      email,
+      hideDeclinedEvents,
+      visibleBookingLinks
+    ]
   )
 
   const filteredTempEvents = useMemo(
@@ -120,9 +129,16 @@ const useFullCalendarEvents = ({
         tempCalendarIds,
         tempcalendars,
         email,
-        hideDeclinedEvents
+        hideDeclinedEvents,
+        visibleBookingLinks
       ),
-    [tempCalendarIds, tempcalendars, email, hideDeclinedEvents]
+    [
+      tempCalendarIds,
+      tempcalendars,
+      email,
+      hideDeclinedEvents,
+      visibleBookingLinks
+    ]
   )
 
   return useMemo(() => {
@@ -156,8 +172,11 @@ export const useCalendarEventsData = ({
   hideDeclinedEvents,
   currentView,
   timezone,
-  t
-}: UseCalendarEventsDataProps): CalendarEventsData => {
+  t,
+  visibleBookingLinks
+}: UseCalendarEventsDataProps & {
+  visibleBookingLinks?: string[]
+}): CalendarEventsData => {
   const sortedSelectedCalendars = useMemo(
     () => [...selectedCalendars].sort(),
     [selectedCalendars]
@@ -171,7 +190,8 @@ export const useCalendarEventsData = ({
     userId,
     isPending,
     hideDeclinedEvents,
-    t
+    t,
+    visibleBookingLinks
   })
 
   const filteredCalendarEvents = useFilteredCalendarEvents(
@@ -231,7 +251,8 @@ export const useCalendarGridState = ({
   setSelectedDate,
   setSelectedMiniDate,
   onViewChange,
-  errorHandler
+  errorHandler,
+  visibleBookingLinks
 }: UseCalendarGridStateProps): CalendarGridState => {
   const { t } = useI18n()
   const {
@@ -261,7 +282,8 @@ export const useCalendarGridState = ({
     hideDeclinedEvents,
     currentView,
     timezone,
-    t
+    t,
+    visibleBookingLinks
   })
 
   const viewHandlers = useCalendarViewHandlers({

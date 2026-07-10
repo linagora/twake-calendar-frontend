@@ -215,6 +215,13 @@ const CalendarAccordion: React.FC<{
   )
 }
 
+const getBookingLinkUrl = (publicId: string): string => {
+  const prefix = window.PUBLIC_PAGE_BASE
+    ? `${window.PUBLIC_PAGE_BASE}/booking`
+    : `${window.location.origin}/booking`
+  return `${prefix}/${publicId}`
+}
+
 const BookingLinkChip: React.FC<{
   link: BookingLink
   onDelete: (publicId: string) => void
@@ -230,29 +237,22 @@ const BookingLinkChip: React.FC<{
   const calendars = useAppSelector(state => state.calendars.list)
   const calendarId = calendarIdFromEventHref(link.calendarUrl)
   const calendarColor = calendars?.[calendarId]?.color?.light
-  const getBookingLinkUrl = (publicId: string): string => {
-    const prefix = window.PUBLIC_PAGE_BASE
-      ? `${window.PUBLIC_PAGE_BASE}/booking`
-      : `${window.location.origin}/booking`
-    return `${prefix}/${publicId}`
-  }
+  const iconColor = isVisible
+    ? (calendarColor ?? defaultColors[4].dark)
+    : theme.palette.grey[400]
 
-  const handleCopyLink = async (publicId: string): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(getBookingLinkUrl(publicId))
-      setCopySnackbarOpen(true)
-    } catch (err) {
-      console.error('Failed to copy booking link:', err)
-    }
+  const handleCopyLink = (publicId: string): void => {
+    void navigator.clipboard
+      .writeText(getBookingLinkUrl(publicId))
+      .then(() => setCopySnackbarOpen(true))
+      .catch(err => console.error('Failed to copy booking link:', err))
   }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setMenuAnchorEl(event.currentTarget)
   }
 
-  const handleMenuClose = (): void => {
-    setMenuAnchorEl(null)
-  }
+  const handleMenuClose = (): void => setMenuAnchorEl(null)
 
   const handleDelete = (): void => {
     onDelete(link.publicId)
@@ -287,21 +287,8 @@ const BookingLinkChip: React.FC<{
             overflow: 'hidden'
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              padding: '9px',
-              marginRight: '4px'
-            }}
-          >
-            <EventIcon
-              sx={{
-                color: isVisible
-                  ? (calendarColor ?? defaultColors[4].dark)
-                  : theme.palette.grey[400]
-              }}
-              fontSize="small"
-            />
+          <div style={{ display: 'flex', padding: '9px', marginRight: '4px' }}>
+            <EventIcon sx={{ color: iconColor }} fontSize="small" />
           </div>
 
           <div
@@ -327,7 +314,7 @@ const BookingLinkChip: React.FC<{
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('tooltip.copyBookingLink')}>
             <IconButton
-              onClick={() => void handleCopyLink(link.publicId)}
+              onClick={() => handleCopyLink(link.publicId)}
               size="small"
             >
               <LinkIcon fontSize="small" />
