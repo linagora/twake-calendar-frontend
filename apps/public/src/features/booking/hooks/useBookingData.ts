@@ -4,6 +4,7 @@ import {
 } from '@common/features/booking/types/BookingTypes'
 import { useEffect, useRef, useState } from 'react'
 import { fetchBookingSlots } from '../BookingDao'
+import { HTTPError } from 'ky'
 
 interface UseBookingDataParams {
   bookingLinkPublicId?: string
@@ -17,7 +18,7 @@ interface UseBookingDataResult {
   bookingInfo: BookingSlotsResponse | null
   initialLoading: boolean
   monthLoading: boolean
-  error: string | null
+  error: string | number | null
   refetch: () => void
 }
 
@@ -33,27 +34,54 @@ export const useBookingData = ({
   )
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
   const [monthLoading, setMonthLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | number | null>(null)
 
   const hasLoadedOnceRef = useRef<boolean>(false)
   const [refreshVersion, setRefreshVersion] = useState<number>(0)
 
   useEffect(() => {
     if (!bookingLinkPublicId) {
-      setInitialLoading(false)
+      const removeLoading = (): void => {
+        setInitialLoading(false)
+      }
+      removeLoading()
       return
     }
 
     let cancelled = false
     const isFirstLoad = !hasLoadedOnceRef.current
 
-    const loadBookingData = async (): Promise<void> => {
+    const startLoading = (): void => {
       if (isFirstLoad) {
         setInitialLoading(true)
       } else {
         setMonthLoading(true)
       }
       setError(null)
+    }
+
+    const stopLoading = (): void => {
+      if (isFirstLoad) {
+        setInitialLoading(false)
+      } else {
+        setMonthLoading(false)
+      }
+    }
+
+    const handleError = (err: unknown): void => {
+      if (err instanceof HTTPError) {
+        setError(err.response.status)
+      } else {
+        setError(loadErrorMessage)
+      }
+      setSlots([])
+      if (isFirstLoad) {
+        setBookingInfo(null)
+      }
+    }
+
+    const loadBookingData = async (): Promise<void> => {
+      startLoading()
 
       try {
         const from = visibleMonth.toISOString()
@@ -79,26 +107,21 @@ export const useBookingData = ({
         setSlots(response.slots)
         setBookingInfo(response)
         hasLoadedOnceRef.current = true
-      } catch {
-        if (!cancelled) {
-          setError(loadErrorMessage)
-          setSlots([])
-          setBookingInfo(null)
+      } catch (err) {
+        if (cancelled) {
+          return
         }
-      } finally {
-        if (!cancelled) {
-          if (isFirstLoad) {
-            setInitialLoading(false)
-          } else {
-            setMonthLoading(false)
-          }
-        }
+        handleError(err)
+      }
+
+      if (!cancelled) {
+        stopLoading()
       }
     }
 
-    loadBookingData()
+    void loadBookingData()
 
-    return () => {
+    return (): void => {
       cancelled = true
     }
   }, [

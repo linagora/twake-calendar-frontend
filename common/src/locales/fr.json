@@ -486,7 +486,15 @@
       "nameRequired": "Le nom est requis",
       "emailRequired": "L'email est requis",
       "createFailed": "Échec de la création de la réservation. Veuillez réessayer.",
-      "loadFailed": "Impossible de charger les créneaux disponibles. Veuillez réessayer."
+      "loadFailed": "Impossible de charger les créneaux disponibles. Veuillez réessayer.",
+      "notFound": "Ce lien de réservation n'est pas trouvé.",
+      "notAvailable": "Ce lien de réservation n'est pas disponible",
+      "noLongerAvailable": "Ce créneau horaire n'est plus disponible.",
+      "refreshPage": "Veuillez rafraîchir la page et réessayer",
+      "refresh": "Rafraîchir",
+      "ownerNoRights": "Le propriétaire du lien de réservation n'a plus le droit de créer des événements dans ce calendrier",
+      "submitFailed": "Échec de la soumission de la réservation",
+      "generic": "Une erreur s'est produite"
     },
     "noSlots": "Aucun créneau disponible",
     "selectDayPrompt": "Sélectionnez un jour pour voir les horaires disponibles",

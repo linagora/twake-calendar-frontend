@@ -1,11 +1,12 @@
 import { BookingHeader } from '@/components/Booking/BookingHeader'
 import { Slot } from '@common/features/booking/types/BookingTypes'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
-import { Box, CircularProgress, Divider, Typography } from '@linagora/twake-mui'
+import { Box, CircularProgress, Divider } from '@linagora/twake-mui'
 import { useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { cancelBookedEvent, createBooking } from './BookingDao'
 import { Dayjs } from 'dayjs'
+import { HTTPError } from 'ky'
 import { BookingCalendarSection } from '../../components/Booking/BookingCalendarSection'
 import { BookingConfirmDialog } from './components/BookingDialog'
 import { BookingSuccessDialog } from './components/BookingSuccessDialog'
@@ -14,6 +15,7 @@ import { useI18n } from 'twake-i18n'
 import { useBookingData } from './hooks/useBookingData'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
+import { BookingErrorBoundary } from './components/BookingErrorBoundary'
 
 export const BookingPage: React.FC = () => {
   const { t } = useI18n()
@@ -49,13 +51,13 @@ export const BookingPage: React.FC = () => {
   const [cancelToastOpen, setCancelToastOpen] = useState<boolean>(
     searchParams.get('cancelled') === 'true'
   )
+  const [nowMs] = useState(Date.now)
+  const [submitError, setSubmitError] = useState<number | string | null>(null)
 
   const tzFormatter = useMemo(
     () => new Intl.DateTimeFormat('en-CA', { timeZone: selectedTimezone }),
     [selectedTimezone]
   )
-
-  const [nowMs] = useState(Date.now)
 
   // Group slots by calendar day for quick lookup when rendering the grid
   const slotsByDay = useMemo(() => {
@@ -85,11 +87,13 @@ export const BookingPage: React.FC = () => {
     setVisibleMonth(new Date(month.year(), month.month(), 1))
     setSelectedDay(null)
     setSelectedSlot(null)
+    setSubmitError(null)
   }
 
   const handleSelectDay = (date: Dayjs | null): void => {
     setSelectedDay(date)
     setSelectedSlot(null)
+    setSubmitError(null)
   }
 
   const handleSelectSlot = (slot: Slot): void => {
@@ -105,22 +109,30 @@ export const BookingPage: React.FC = () => {
     name: string,
     email: string
   ): Promise<void> => {
-    if (!bookingLinkPublicId || !selectedSlot) {
-      return
+    if (!bookingLinkPublicId || !selectedSlot) return
+
+    try {
+      const response = await createBooking(bookingLinkPublicId, {
+        startUtc: selectedSlot.start,
+        creator: {
+          name: name || undefined,
+          email
+        },
+        eventTitle: bookingInfo?.name || t('booking.defaultEventTitle'),
+        visioLink: true
+      })
+      refetch()
+      setConfirmOpen(false)
+      setBookingConfirmationToken(response.bookingConfirmationToken)
+      setSuccessOpen(true)
+    } catch (err: unknown) {
+      if (err instanceof HTTPError) {
+        setSubmitError(err.response.status)
+      } else {
+        setSubmitError(t('booking.error.submitFailed'))
+      }
+      setConfirmOpen(false)
     }
-    const response = await createBooking(bookingLinkPublicId, {
-      startUtc: selectedSlot.start,
-      creator: {
-        name: name || undefined,
-        email
-      },
-      eventTitle: bookingInfo?.name || t('booking.defaultEventTitle'),
-      visioLink: true
-    })
-    refetch()
-    setConfirmOpen(false)
-    setBookingConfirmationToken(response.bookingConfirmationToken)
-    setSuccessOpen(true)
   }
 
   const handleCloseSuccess = (): void => {
@@ -153,122 +165,120 @@ export const BookingPage: React.FC = () => {
     setSelectedSlot(null)
   }
 
-  const showPanel = !initialLoading && !(error && !bookingInfo)
+  const errorStatus = submitError || error
 
   return (
-    <>
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          width: '100%',
-          maxWidth: '900px',
-          display: 'flex',
-          height: '100%',
-          flexDirection: 'column'
-        }}
-      >
-        {initialLoading && (
+    <BookingErrorBoundary
+      errorStatus={errorStatus}
+      initialLoading={initialLoading}
+      hasBookingInfo={Boolean(bookingInfo)}
+    >
+      {nonBlockingErrorNode => (
+        <>
           <Box
             sx={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              width: '100%',
+              maxWidth: '900px',
               display: 'flex',
-              justifyContent: 'center',
-              padding: '32px 0'
+              height: '100%',
+              flexDirection: 'column'
             }}
           >
-            <CircularProgress size={28} />
-          </Box>
-        )}
-
-        {!initialLoading && error && !bookingInfo && (
-          <Typography color="error" variant="body2">
-            {error}
-          </Typography>
-        )}
-
-        {showPanel && bookingInfo && (
-          <BookingHeader
-            bookingInfo={bookingInfo}
-            selectedTimezone={selectedTimezone}
-            onTimezoneChange={handleTimezoneChange}
-            referenceDate={visibleMonth}
-          />
-        )}
-        {showPanel && !isMobile && <Divider />}
-
-        {showPanel && (
-          <Box sx={{ position: 'relative' }}>
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-                {error}
-              </Typography>
-            )}
-
-            {monthLoading && (
+            {initialLoading ? (
               <Box
                 sx={{
-                  position: 'absolute',
-                  inset: 0,
                   display: 'flex',
-                  alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                  zIndex: 1
+                  padding: '32px 0'
                 }}
               >
-                <CircularProgress size={24} />
+                <CircularProgress size={28} />
               </Box>
+            ) : (
+              <>
+                {bookingInfo && (
+                  <BookingHeader
+                    bookingInfo={bookingInfo}
+                    selectedTimezone={selectedTimezone}
+                    onTimezoneChange={handleTimezoneChange}
+                    referenceDate={visibleMonth}
+                  />
+                )}
+                {!isMobile && <Divider />}
+
+                <Box sx={{ position: 'relative' }}>
+                  {nonBlockingErrorNode}
+
+                  {monthLoading && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                        zIndex: 1
+                      }}
+                    >
+                      <CircularProgress size={24} />
+                    </Box>
+                  )}
+
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', sm: '3fr 1fr' }
+                    }}
+                  >
+                    <BookingCalendarSection
+                      selectedDay={selectedDay}
+                      availableDays={availableDays}
+                      onSelectDay={handleSelectDay}
+                      onMonthChange={handleMonthChange}
+                      selectedTimezone={selectedTimezone}
+                    />
+                    {isMobile && <Divider />}
+                    <BookingTimeSlotSection
+                      selectedDay={selectedDay}
+                      slots={slotsForSelectedDay}
+                      selectedSlot={selectedSlot}
+                      onSelectSlot={handleSelectSlot}
+                      selectedTimezone={selectedTimezone}
+                    />
+                  </Box>
+                </Box>
+              </>
             )}
 
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '3fr 1fr' }
-              }}
-            >
-              <BookingCalendarSection
-                selectedDay={selectedDay}
-                availableDays={availableDays}
-                onSelectDay={handleSelectDay}
-                onMonthChange={handleMonthChange}
-                selectedTimezone={selectedTimezone}
-              />
-              {showPanel && isMobile && <Divider />}
-              <BookingTimeSlotSection
-                selectedDay={selectedDay}
-                slots={slotsForSelectedDay}
-                selectedSlot={selectedSlot}
-                onSelectSlot={handleSelectSlot}
-                selectedTimezone={selectedTimezone}
-              />
-            </Box>
+            <BookingConfirmDialog
+              open={confirmOpen}
+              onClose={handleCloseConfirm}
+              selectedSlot={selectedSlot}
+              bookingInfo={bookingInfo}
+              onConfirm={handleConfirmBooking}
+              selectedTimezone={selectedTimezone}
+            />
+            <BookingSuccessDialog
+              open={successOpen}
+              onClose={handleCloseSuccess}
+              selectedSlot={selectedSlot}
+              bookingInfo={bookingInfo}
+              eventLink={`${window.location.origin}/booking/confirmed/${bookingConfirmationToken}`}
+              bookingConfirmationToken={bookingConfirmationToken}
+              onCancelMeeting={() => void handleCancelMeeting()}
+            />
           </Box>
-        )}
-
-        <BookingConfirmDialog
-          open={confirmOpen}
-          onClose={handleCloseConfirm}
-          selectedSlot={selectedSlot}
-          bookingInfo={bookingInfo}
-          onConfirm={handleConfirmBooking}
-          selectedTimezone={selectedTimezone}
-        />
-        <BookingSuccessDialog
-          open={successOpen}
-          onClose={handleCloseSuccess}
-          selectedSlot={selectedSlot}
-          bookingInfo={bookingInfo}
-          eventLink={`${window.location.origin}/booking/confirmed/${bookingConfirmationToken}`}
-          bookingConfirmationToken={bookingConfirmationToken}
-          onCancelMeeting={() => void handleCancelMeeting()}
-        />
-      </Box>
-      <SnackbarAlert
-        open={cancelToastOpen}
-        setOpen={setCancelToastOpen}
-        message={t('booking.cancelSuccess')}
-      />
-    </>
+          <SnackbarAlert
+            open={cancelToastOpen}
+            setOpen={setCancelToastOpen}
+            message={t('booking.cancelSuccess')}
+          />
+        </>
+      )}
+    </BookingErrorBoundary>
   )
 }
 

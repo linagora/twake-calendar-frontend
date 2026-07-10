@@ -485,8 +485,16 @@
     "error": {
       "nameRequired": "Tên là bắt buộc",
       "emailRequired": "Email là bắt buộc",
-      "createFailed": "Không thể tạo đặt lịch. Vui lòng thử lại.",
-      "loadFailed": "Không thể tải các khung giờ có sẵn. Vui lòng thử lại."
+      "createFailed": "Tạo lịch hẹn thất bại. Vui lòng thử lại.",
+      "loadFailed": "Không thể tải các khoảng thời gian trống. Vui lòng thử lại.",
+      "notFound": "Liên kết đặt lịch này không tồn tại.",
+      "notAvailable": "Liên kết đặt lịch này không khả dụng",
+      "noLongerAvailable": "Khoảng thời gian này không còn khả dụng nữa.",
+      "refreshPage": "Vui lòng làm mới trang và thử lại",
+      "refresh": "Làm mới",
+      "ownerNoRights": "Chủ sở hữu liên kết đặt lịch không còn quyền tạo sự kiện trong lịch này",
+      "submitFailed": "Không thể gửi đặt lịch",
+      "generic": "Đã xảy ra lỗi"
     },
     "noSlots": "Không có khung giờ nào",
     "selectDayPrompt": "Chọn một ngày để xem các khung giờ có sẵn",

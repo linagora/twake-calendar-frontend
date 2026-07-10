@@ -9,10 +9,17 @@ import { useFetchEventDetail } from './hooks/useFetchEventDetail'
 import { Loading } from '@common/components/Loading/Loading'
 import { useSearchParams } from 'react-router-dom'
 import { fetchEvent } from './EventDao'
-import {
-  EventLoadError,
-  PreviewContainer
-} from './components/EventPreviewShared'
+import { PreviewContainer } from './components/EventPreviewShared'
+import { PublicLoadError } from '@/components/PublicLoadError'
+import { CalendarEvent } from '@common/types/EventsTypes'
+
+const isUnableToLoad = (
+  error: boolean,
+  event: CalendarEvent | undefined,
+  decodedClaims: unknown
+): boolean => {
+  return error || !event || !decodedClaims
+}
 
 export const EventPreviewPage: React.FC = () => {
   const { t } = useI18n()
@@ -51,10 +58,13 @@ export const EventPreviewPage: React.FC = () => {
     return <Loading />
   }
 
-  if (error || !event || !decodedClaims) {
+  if (isUnableToLoad(error, event, decodedClaims)) {
     return (
       <PreviewContainer>
-        <EventLoadError errorDetail={detailMessage} />
+        <PublicLoadError
+          title={t('error.cannotLoadEvent')}
+          detailMessage={detailMessage}
+        />
       </PreviewContainer>
     )
   }
@@ -62,13 +72,17 @@ export const EventPreviewPage: React.FC = () => {
   return (
     <PreviewContainer>
       <EventPreviewTitleRow
-        event={event}
+        event={event as CalendarEvent}
         isOwn={false}
-        timezone={event?.timezone}
+        timezone={event?.timezone as string}
         t={t}
       />
 
-      <EventPreviewDetails event={event} isOwn={false} isNotPrivate={true} />
+      <EventPreviewDetails
+        event={event as CalendarEvent}
+        isOwn={false}
+        isNotPrivate={true}
+      />
 
       <Box
         sx={{

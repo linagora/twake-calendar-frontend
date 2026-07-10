@@ -486,7 +486,15 @@
       "nameRequired": "Name is required",
       "emailRequired": "Email is required",
       "createFailed": "Failed to create booking. Please try again.",
-      "loadFailed": "Unable to load available slots. Please try again."
+      "loadFailed": "Unable to load available slots. Please try again.",
+      "notFound": "This booking link is not found.",
+      "notAvailable": "This booking link is not available",
+      "noLongerAvailable": "This time slot is no longer available.",
+      "refreshPage": "Please refresh page and retry",
+      "refresh": "Refresh",
+      "ownerNoRights": "The owner of the booking link no longer has the right to create events in this calendar",
+      "submitFailed": "Failed to submit booking",
+      "generic": "An error occurred"
     },
     "noSlots": "No slots available",
     "selectDayPrompt": "Select a day to see available times",
