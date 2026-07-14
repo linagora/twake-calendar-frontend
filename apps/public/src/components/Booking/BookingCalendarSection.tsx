@@ -2,25 +2,15 @@ import { Box, useTheme } from '@linagora/twake-mui'
 import {
   DateCalendar,
   DateView,
-  LocalizationProvider,
   PickerDay,
   PickerDayProps
 } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs, { Dayjs } from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
-import 'dayjs/locale/en'
-import 'dayjs/locale/fr'
-import 'dayjs/locale/ru'
-import 'dayjs/locale/vi'
 import { useState } from 'react'
-import { useI18n } from 'twake-i18n'
 import { getLayoutConstants } from './LayoutConstants'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
+import { PickerValue } from '@mui/x-date-pickers/internals'
+import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 
 interface AvailableDayProps extends PickerDayProps {
   availableDays?: Set<string>
@@ -29,7 +19,7 @@ interface AvailableDayProps extends PickerDayProps {
 interface BookingCalendarSectionProps {
   selectedDay: Dayjs | null
   availableDays: Set<string>
-  onSelectDay: (date: Dayjs | null) => void
+  onSelectDay: (date: PickerValue | null) => void
   onMonthChange: (month: Dayjs) => void
   selectedTimezone: string
 }
@@ -66,7 +56,7 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
     ? dayjs().tz(selectedTimezone).startOf('day')
     : dayjs().startOf('day')
 
-  const isBeforeToday = (day as Dayjs).isBefore(todayInTimezone, 'day')
+  const isBeforeToday = day.isBefore(todayInTimezone, 'day')
 
   return (
     <PickerDay
@@ -105,7 +95,6 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
   onMonthChange,
   selectedTimezone
 }) => {
-  const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const { CELL_SIZE, WEEKDAY_LABEL_HEIGHT, CALENDAR_GRID_HEIGHT, ROW_GAP } =
     getLayoutConstants(isMobile)
@@ -121,10 +110,7 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
         gap: '16px'
       }}
     >
-      <LocalizationProvider
-        dateAdapter={AdapterDayjs}
-        adapterLocale={t('locale') ?? 'en-gb'}
-      >
+      <TwakeLocalizationProvider>
         <DateCalendar
           value={selectedDay}
           onChange={onSelectDay}
@@ -189,7 +175,7 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
             }
           }}
         />
-      </LocalizationProvider>
+      </TwakeLocalizationProvider>
     </Box>
   )
 }

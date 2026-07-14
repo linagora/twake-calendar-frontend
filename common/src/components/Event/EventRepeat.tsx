@@ -12,14 +12,9 @@ import {
   TextField,
   Typography
 } from '@linagora/twake-mui'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import dayjs from 'dayjs'
-import 'dayjs/locale/en'
-import 'dayjs/locale/fr'
-import 'dayjs/locale/ru'
-import 'dayjs/locale/vi'
 import { useI18n } from 'twake-i18n'
 import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
 import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
@@ -30,7 +25,7 @@ import {
   toPositiveInt
 } from '@common/utils/preventFloatNumber'
 import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
-
+import { getDateFieldSlotProps } from './components/DateTimeFields/dateTimePickerSlotProps'
 const numericSlotProps = {
   htmlInput: {
     inputMode: 'numeric'
@@ -79,10 +74,12 @@ export const RepeatEvent: React.FC<{
             onKeyDown={preventFloatNumber}
             disabled={!isOwn}
             onChange={e =>
-              setRepetition({
-                ...repetition,
-                interval: toPositiveInt(e.target.value)
-              })
+              setRepetition(
+                new RepetitionObject({
+                  ...repetition,
+                  interval: toPositiveInt(e.target.value)
+                })
+              )
             }
             size={inputSize}
             style={{ width: 80 }}
@@ -107,17 +104,21 @@ export const RepeatEvent: React.FC<{
                 if (e.target.value === 'weekly') {
                   const jsDay = day.getDay()
                   const icsDay = days[(jsDay + 6) % 7]
-                  setRepetition({
-                    ...repetition,
-                    freq: e.target.value,
-                    byday: [icsDay]
-                  })
+                  setRepetition(
+                    new RepetitionObject({
+                      ...repetition,
+                      freq: e.target.value,
+                      byday: [icsDay]
+                    })
+                  )
                 } else {
-                  setRepetition({
-                    ...repetition,
-                    freq: e.target.value,
-                    byday: null
-                  })
+                  setRepetition(
+                    new RepetitionObject({
+                      ...repetition,
+                      freq: e.target.value,
+                      byday: null
+                    })
+                  )
                 }
               }}
             >
@@ -148,10 +149,12 @@ export const RepeatEvent: React.FC<{
                 const icsDays = fcDays
                   .map(fc => FC_DAYS.find(d => d.fc === fc)?.ics ?? '')
                   .filter(Boolean)
-                setRepetition({
-                  ...repetition,
-                  byday: icsDays.length > 0 ? icsDays : null
-                })
+                setRepetition(
+                  new RepetitionObject({
+                    ...repetition,
+                    byday: icsDays.length > 0 ? icsDays : null
+                  })
+                )
               }}
               disabled={!isOwn}
             />
@@ -170,28 +173,34 @@ export const RepeatEvent: React.FC<{
               if (value === endOption) return
 
               if (value === 'never') {
-                setRepetition({
-                  ...repetition,
-                  occurrences: null,
-                  endDate: null
-                })
+                setRepetition(
+                  new RepetitionObject({
+                    ...repetition,
+                    occurrences: null,
+                    endDate: null
+                  })
+                )
               }
               if (value === 'after') {
-                setRepetition({
-                  ...repetition,
-                  occurrences:
-                    repetition.occurrences && repetition.occurrences > 0
-                      ? repetition.occurrences
-                      : 1,
-                  endDate: null
-                })
+                setRepetition(
+                  new RepetitionObject({
+                    ...repetition,
+                    occurrences:
+                      repetition.occurrences && repetition.occurrences > 0
+                        ? repetition.occurrences
+                        : 1,
+                    endDate: null
+                  })
+                )
               }
               if (value === 'on') {
-                setRepetition({
-                  ...repetition,
-                  occurrences: null,
-                  endDate: repetition.endDate || defaultEndDate
-                })
+                setRepetition(
+                  new RepetitionObject({
+                    ...repetition,
+                    occurrences: null,
+                    endDate: repetition.endDate || defaultEndDate
+                  })
+                )
               }
             }}
           >
@@ -216,10 +225,7 @@ export const RepeatEvent: React.FC<{
                   <Typography variant="h6">
                     {t('event.repeat.end.on')}
                   </Typography>
-                  <LocalizationProvider
-                    dateAdapter={AdapterDayjs}
-                    adapterLocale={t('locale') ?? 'en'}
-                  >
+                  <TwakeLocalizationProvider>
                     <Box
                       sx={{
                         width: 220,
@@ -243,28 +249,38 @@ export const RepeatEvent: React.FC<{
                         onChange={value => {
                           if (!value || !value.isValid()) return
                           const newDateStr = value.format('YYYY-MM-DD')
-                          setRepetition({
-                            ...repetition,
-                            occurrences: null,
-                            endDate: newDateStr
-                          })
+                          setRepetition(
+                            new RepetitionObject({
+                              ...repetition,
+                              occurrences: null,
+                              endDate: newDateStr
+                            })
+                          )
                         }}
                         onOpen={() => {
                           if (!isOwn || endOption === 'on') return
-                          setRepetition({
-                            ...repetition,
-                            occurrences: null,
-                            endDate: repetition.endDate || defaultEndDate
-                          })
+                          setRepetition(
+                            new RepetitionObject({
+                              ...repetition,
+                              occurrences: null,
+                              endDate: repetition.endDate || defaultEndDate
+                            })
+                          )
                         }}
                         slots={{ field: ReadOnlyDateField }}
                         slotProps={{
+                          field: getDateFieldSlotProps(
+                            'event-repeat-end-date',
+                            false,
+                            undefined,
+                            isMobile
+                          ),
                           layout: { sx: dateCalendarLayoutSx }
                         }}
                         disabled={!isOwn}
                       />
                     </Box>
-                  </LocalizationProvider>
+                  </TwakeLocalizationProvider>
                 </Box>
               }
             />
@@ -285,11 +301,13 @@ export const RepeatEvent: React.FC<{
                     value={repetition.occurrences || 1}
                     onChange={e => {
                       const value = toPositiveInt(e.target.value)
-                      setRepetition({
-                        ...repetition,
-                        endDate: null,
-                        occurrences: value > 0 ? value : 1
-                      })
+                      setRepetition(
+                        new RepetitionObject({
+                          ...repetition,
+                          endDate: null,
+                          occurrences: value > 0 ? value : 1
+                        })
+                      )
                     }}
                     sx={{ width: 100 }}
                     onKeyDown={preventFloatNumber}

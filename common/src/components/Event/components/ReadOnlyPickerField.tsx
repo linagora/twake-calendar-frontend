@@ -6,33 +6,53 @@ import {
   usePickerContext,
   useSplitFieldProps
 } from '@mui/x-date-pickers/hooks'
-import { PickerFieldSlotProps } from '@mui/x-date-pickers/models'
+import {
+  DateValidationError,
+  PickerFieldSlotProps,
+  TimeValidationError
+} from '@mui/x-date-pickers/models'
 import {
   useValidation,
   validateDate,
+  ValidateDateProps,
   validateTime,
-  type PickerFieldAdapter,
-  type PickerValidationScope
+  ValidateTimeProps,
+  type Validator
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
 import { useI18n } from 'twake-i18n'
+import { PickerValue } from '@mui/x-date-pickers/internals'
 
 type FieldType = 'date' | 'time' | 'date-time'
 
-type GenericPickerFieldProps = PickerFieldSlotProps<Dayjs, false, false> & {
+type GenericPickerFieldProps<
+  TProps = ValidateDateProps | ValidateTimeProps,
+  TError = DateValidationError | TimeValidationError
+> = PickerFieldSlotProps<Dayjs> & {
   fieldType: FieldType
-  validator: (
-    value: Dayjs | null,
-    context: PickerValidationScope,
-    adapter: PickerFieldAdapter<Dayjs>
-  ) => string | null
+  validator: Validator<PickerValue, TError, TProps>
+}
+
+const formatPickerValue = (
+  value: Dayjs | null | undefined,
+  lang: string,
+  fieldFormat: string
+): string => {
+  if (!value || !value.isValid()) return ''
+  const formatted = value.locale(lang).format(fieldFormat)
+  return formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1) : ''
 }
 
 /**
  * Shared read-only field for date/time pickers. Disables typing, removes icon,
  * and opens the picker when clicking anywhere in the field.
  */
-const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
+const ReadOnlyPickerField = <
+  TProps extends ValidateDateProps | ValidateTimeProps,
+  TError extends DateValidationError | TimeValidationError
+>(
+  props: GenericPickerFieldProps<TProps, TError>
+): React.ReactNode => {
   const { lang } = useI18n()
 
   const { fieldType, validator, ...fieldProps } = props
@@ -60,28 +80,32 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
     validator,
     value: value,
     timezone: timezone,
-    props: internalProps
+    props: internalProps as unknown as TProps
   })
 
-  const formattedValue =
-    value == null
-      ? ''
-      : value.isValid()
-        ? (value as Dayjs).locale(lang).format(fieldFormat)
-        : ''
-  const valueToDisplay = formattedValue
-    ? formattedValue.charAt(0).toUpperCase() + formattedValue.slice(1)
-    : ''
+  const valueToDisplay = formatPickerValue(value, lang, fieldFormat)
 
-  // Extract Input component props, excluding adornments that shouldn't go to DOM
+  const fp = forwardedProps as React.ComponentProps<typeof TextField> & {
+    slotProps?: {
+      input?: Omit<React.HTMLAttributes<HTMLInputElement>, 'color'> & {
+        sx?: Record<string, unknown>
+        startAdornment?: React.ReactNode
+        endAdornment?: React.ReactNode
+      }
+      htmlInput?: React.InputHTMLAttributes<HTMLInputElement> & {
+        'data-testid'?: string
+      }
+    }
+  }
+
   const {
     startAdornment: inputStartAdornment,
     endAdornment: inputEndAdornment,
     ...inputComponentProps
-  } = forwardedProps.slotProps?.input || {}
+  } = fp.slotProps?.input || {}
 
   const mergedSlotProps = {
-    ...forwardedProps.slotProps,
+    ...fp.slotProps,
     input: {
       ...inputComponentProps,
       startAdornment: inputStartAdornment,
@@ -91,23 +115,19 @@ const ReadOnlyPickerField: React.FC<GenericPickerFieldProps> = props => {
       sx: {
         cursor: 'pointer',
         '& *': { cursor: 'inherit' },
-        ...inputComponentProps?.sx
+        ...inputComponentProps.sx
       }
     },
-    htmlInput: {
-      ...forwardedProps.slotProps?.htmlInput,
-      'data-testid': forwardedProps.slotProps?.htmlInput?.['data-testid'],
-      'aria-label': forwardedProps.slotProps?.htmlInput?.['aria-label']
-    }
-  }
+    htmlInput: fp.slotProps?.htmlInput
+  } as React.ComponentProps<typeof TextField>['slotProps']
 
   return (
     <TextField
-      {...forwardedProps}
+      {...(forwardedProps as React.ComponentProps<typeof TextField>)}
       value={valueToDisplay}
       placeholder={parsedFormat}
       slotProps={mergedSlotProps}
-      error={hasValidationError || forwardedProps.error}
+      error={hasValidationError || fp.error}
       focused={open}
       onClick={() => setOpen((prev: boolean) => !prev)}
       className={rootClassName}
