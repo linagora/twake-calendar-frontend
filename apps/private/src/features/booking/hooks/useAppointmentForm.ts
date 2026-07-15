@@ -1,16 +1,16 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
-import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import type {
+  AvailabilityRule,
   BookingLink,
-  WeeklyAvailabilityRule,
-  AvailabilityRule
+  WeeklyAvailabilityRule
 } from '@common/features/booking/types/BookingTypes'
 import { calendarIdFromEventHref } from '@common/features/Calendars/CalendarDAO'
+import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  DAY_TO_FC,
   DayAvailability,
-  DAYS,
-  DAY_TO_FC
+  DAYS
 } from '../components/RegularHoursField/RegularHoursTypes'
 
 interface UseAppointmentFormOptions {
@@ -145,7 +145,7 @@ const computeInitialFormState = (
 }
 
 const checkFormValid = (form: FormState): boolean =>
-  form.name.trim().length > 0 && form.calendarid !== '' && form.duration > 0
+  form.calendarid !== '' && form.duration > 0
 
 export const useAppointmentForm = ({
   bookingLink,

@@ -309,6 +309,7 @@ const BookingLinkChip: React.FC<{
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('tooltip.copyBookingLink')}>
             <IconButton
+              className="MoreBtn"
               onClick={() =>
                 handleCopyLink(
                   getBookingLinkUrl(link.publicId),
