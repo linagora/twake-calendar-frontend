@@ -1,24 +1,21 @@
-import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import SettingsPage from '@common/features/Settings/SettingsPage'
-import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { getViewRange } from '@common/utils/dateUtils'
-import type { CalendarApi } from '@fullcalendar/core'
-import CozyBridge from 'cozy-external-bridge'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import TempSearchDialog from '@common/components/Calendar/TempSearchDialog'
+import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { refreshCalendars } from '@common/components/Event/utils/eventUtils'
 import { Menubar, MenubarProps } from '@common/components/Menubar/Menubar'
-import CalendarController, {
-  CalendarControllerRef
-} from '@common/components/Calendar/CalendarController'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
-import { setView } from '@common/features/Settings/SettingsSlice'
-import Sidebar from './Sidebar/SideBar'
-import TempSearchDialog from '@common/components/Calendar/TempSearchDialog'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
+import SettingsPage from '@common/features/Settings/SettingsPage'
+import { setView } from '@common/features/Settings/SettingsSlice'
+import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import { getViewRange } from '@common/utils/dateUtils'
+import type { CalendarApi } from '@fullcalendar/core'
+import CalendarController, { CalendarControllerRef } from './CalendarController'
+import cx from 'classnames'
+import CozyBridge from 'cozy-external-bridge'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useManageCalendarSelection } from './hooks/useManageCalendarSelection'
-import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
+import Sidebar from './Sidebar/SideBar'
 
 export default function CalendarLayout(): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
@@ -67,8 +64,6 @@ export default function CalendarLayout(): JSX.Element {
     selectedMiniDate,
     setSelectedMiniDate
   } = useManageCalendarSelection()
-
-  const visibleBookingLinks = useVisibleBookingLinks()
 
   const handleRefresh = async (): Promise<void> => {
     if (calendarRef.current) {
@@ -170,7 +165,6 @@ export default function CalendarLayout(): JSX.Element {
               setSelectedMiniDate={setSelectedMiniDate}
               onDateChange={handleDateChange}
               onViewChange={handleViewChange}
-              visibleBookingLinks={visibleBookingLinks}
             />
           </div>
           {isMobile && (

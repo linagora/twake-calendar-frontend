@@ -9,5 +9,9 @@
       "@injected/*": ["./src/*"]
     }
   },
-  "include": ["src", "../*.d.ts"]
+  "include": [
+    "src",
+    "../*.d.ts",
+    "../apps/private/src/components/Calendar/CalendarController.tsx"
+  ]
 }

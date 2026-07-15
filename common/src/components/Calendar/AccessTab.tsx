@@ -14,7 +14,7 @@ import {
 } from '@linagora/twake-mui'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
-import { useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
@@ -65,11 +65,6 @@ export function AccessTab({
     fetchSecret()
   }, [calendar.link])
 
-  const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content)
-    setOpen(true)
-  }
-
   const handleResetSecretLink = async () => {
     try {
       const newSecret = await fetchSecretLink(
@@ -105,6 +100,13 @@ export function AccessTab({
     }
   }
 
+  function handleCopyLink(
+    arg0: URL,
+    setOpen: Dispatch<SetStateAction<boolean>>
+  ): void {
+    throw new Error('Function not implemented.')
+  }
+
   return (
     <>
       <CalendarAccessRights
@@ -129,7 +131,9 @@ export function AccessTab({
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() => handleCopy(calDAVLink)}
+                        onClick={() =>
+                          handleCopyLink(new URL(calDAVLink), setOpen)
+                        }
                         edge="end"
                       >
                         <ContentCopyIcon fontSize="small" />
@@ -157,7 +161,9 @@ export function AccessTab({
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={() => handleCopy(secretLink)}
+                      onClick={() =>
+                        handleCopyLink(new URL(secretLink), setOpen)
+                      }
                       edge="end"
                     >
                       <ContentCopyIcon fontSize="small" />

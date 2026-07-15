@@ -26,7 +26,6 @@ import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { renameDefault } from '@common/utils/renameDefault'
 import { setVisibleBookingLinks } from '@common/utils/storage/setVisibleBookingLinks'
-import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
 import { trimLongTextWithoutSpace } from '@common/utils/textUtils'
 import {
   Accordion,
@@ -57,6 +56,8 @@ import {
 import { useI18n } from 'twake-i18n'
 import { CreateAppointmentModal } from '../../features/booking/CreateAppointmentModal'
 import { EditAppointmentModal } from '../../features/booking/EditAppointmentModal'
+import { handleCopyLink } from '@calendar/common/src/utils/handleCopyLink'
+import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 
 /**
  * Keeps a section's expanded state in sync whenever the caller's
@@ -215,11 +216,12 @@ const CalendarAccordion: React.FC<{
   )
 }
 
-const getBookingLinkUrl = (publicId: string): string => {
-  const prefix = window.PUBLIC_PAGE_BASE
-    ? `${window.PUBLIC_PAGE_BASE}/booking`
-    : `${window.location.origin}/booking`
-  return `${prefix}/${publicId}`
+const getBookingLinkUrl = (publicId: string): URL => {
+  if (!window.PUBLIC_PAGE_BASE) {
+    throw new Error('No public base page setup')
+  }
+  const prefix = `${window.PUBLIC_PAGE_BASE}/booking`
+  return new URL(`${prefix}/${publicId}`)
 }
 
 const BookingLinkChip: React.FC<{
@@ -240,13 +242,6 @@ const BookingLinkChip: React.FC<{
   const iconColor = isVisible
     ? (calendarColor ?? defaultColors[4].dark)
     : theme.palette.grey[400]
-
-  const handleCopyLink = (publicId: string): void => {
-    void navigator.clipboard
-      .writeText(getBookingLinkUrl(publicId))
-      .then(() => setCopySnackbarOpen(true))
-      .catch(err => console.error('Failed to copy booking link:', err))
-  }
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setMenuAnchorEl(event.currentTarget)
@@ -314,7 +309,12 @@ const BookingLinkChip: React.FC<{
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('tooltip.copyBookingLink')}>
             <IconButton
-              onClick={() => handleCopyLink(link.publicId)}
+              onClick={() =>
+                handleCopyLink(
+                  getBookingLinkUrl(link.publicId),
+                  setCopySnackbarOpen
+                )
+              }
               size="small"
             >
               <LinkIcon fontSize="small" />

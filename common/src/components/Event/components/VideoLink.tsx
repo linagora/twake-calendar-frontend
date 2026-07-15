@@ -11,6 +11,7 @@ import { useI18n } from 'twake-i18n'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import { ContentCopy as CopyIcon } from '@mui/icons-material'
 import Tooltip from '@common/components/Tooltip'
+import { handleCopyLink } from '@common/utils/handleCopyLink'
 
 const sanitizeMeetingLink = (raw: string | null): string | null => {
   if (!raw) return null
@@ -36,16 +37,6 @@ export const VideoLink: React.FC<{
 
   const safeMeetingLink = sanitizeMeetingLink(meetingLink)
 
-  const handleCopyMeetingLink = async (): Promise<void> => {
-    if (!safeMeetingLink) return
-    try {
-      await navigator.clipboard.writeText(safeMeetingLink)
-      setOpenToast(true)
-    } catch (err) {
-      console.error('Failed to copy link:', err)
-    }
-  }
-
   if (!safeMeetingLink) {
     return null
   }
@@ -70,7 +61,9 @@ export const VideoLink: React.FC<{
         </Link>
         <Tooltip title={t('event.form.copyMeetingLink')}>
           <IconButton
-            onClick={() => void handleCopyMeetingLink()}
+            onClick={() =>
+              void handleCopyLink(new URL(safeMeetingLink), setOpenToast)
+            }
             size="small"
             sx={{ color: alpha(theme.palette.grey[900], 0.9) }}
             aria-label={t('event.form.copyMeetingLink')}

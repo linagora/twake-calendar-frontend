@@ -25,17 +25,18 @@ import Tooltip from '@common/components/Tooltip'
 import AddIcon from '@mui/icons-material/Add'
 import './Calendar.styl'
 import './CustomCalendar.styl'
-import { useCalendarEventHandlers } from './hooks/useCalendarEventHandlers'
-import { useOpenEventFromUrl } from './hooks/useOpenEventFromUrl'
-import { useOpenNewEventFromUrl } from './hooks/useOpenNewEventFromUrl'
-import { useHiddenDays } from './hooks/useCalendarControllerHooks'
-import { useTouchListener } from './hooks/useTouchListener'
-import { updateSlotLabelVisibility } from './utils/calendarUtils'
-import { CALENDAR_VIEWS } from './utils/constants'
-import ViewMoreEvents from './ViewMoreEvents'
-import { CalendarGrid } from './CalendarGrid'
+import { useCalendarEventHandlers } from '@common/components/Calendar/hooks/useCalendarEventHandlers'
+import { useOpenEventFromUrl } from '@common/components/Calendar/hooks/useOpenEventFromUrl'
+import { useOpenNewEventFromUrl } from '@common/components/Calendar/hooks/useOpenNewEventFromUrl'
+import { useHiddenDays } from '@common/components/Calendar/hooks/useCalendarControllerHooks'
+import { useTouchListener } from '@common/components/Calendar/hooks/useTouchListener'
+import { updateSlotLabelVisibility } from '@common/components/Calendar/utils/calendarUtils'
+import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import ViewMoreEvents from '@common/components/Calendar/ViewMoreEvents'
+import { CalendarGrid } from '@common/components/Calendar/CalendarGrid'
 import ImportAlert from '@common/features/Events/ImportAlert'
 import { TimezoneChangeAlert } from '@common/components/Timezone/TimezoneChangeAlert'
+import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 
 export interface CalendarControllerRef {
   handleCreateEvent: () => void
@@ -55,7 +56,6 @@ export interface CalendarControllerProps {
   onDateChange?: (date: Date) => void
   onViewChange: (view: string) => void
   controllerRef?: MutableRefObject<CalendarControllerRef | null>
-  visibleBookingLinks?: string[]
 }
 
 const getCalendarIds = (calendarIdsString: string): string[] => {
@@ -71,8 +71,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   setSelectedMiniDate,
   onDateChange,
   onViewChange,
-  controllerRef,
-  visibleBookingLinks
+  controllerRef
 }: CalendarControllerProps) => {
   const { t } = useI18n()
 
@@ -89,6 +88,9 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   const workingDays: number[] | undefined = useAppSelector(
     state => state.settings.businessHours?.daysOfWeek
   )
+
+  const visibleBookingLinks = useVisibleBookingLinks()
+
   const hideWorkingDays = useAppSelector(state =>
     Boolean(state.settings.workingDays)
   )
