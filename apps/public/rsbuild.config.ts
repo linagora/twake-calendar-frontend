@@ -10,7 +10,7 @@ import { injectedAliases } from './injectedAliases'
 export default defineConfig({
   plugins: [pluginReact(), pluginStylus(), pluginSvgr()],
   html: {
-    template: '../../public/index.html'
+    template: './index.html'
   },
   server: {
     port: 5001,
