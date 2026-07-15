@@ -510,7 +510,8 @@
       "NEEDS-ACTION": "En attente de réponse de l'organisateur"
     },
     "cancelSuccess": "Réservation annulée. Vous pouvez réserver un nouveau créneau si vous le souhaitez.",
-    "createAppointmentTitle": "Créer un planning de rendez-vous",
+    "createAppointmentTitle": "Créer un lien de prise de rendez-vous",
+    "editAppointmentTitle": "Modifier le lien de prise de rendez-vous",
     "scheduleName": "Nom du planning",
     "chooseTimeSlot": "Choisir un créneau",
     "15minutes": "15 minutes",

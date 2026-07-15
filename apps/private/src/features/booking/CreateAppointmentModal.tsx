@@ -1,10 +1,10 @@
 import { createBookingLink } from '@common/features/booking/BookingDao'
 import { setVisibleBookingLinks } from '@common/utils/storage/setVisibleBookingLinks'
-import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
 import React, { useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
 import { AppointmentModalForm } from './components/AppointmentModalForm'
 import { useAppointmentForm } from './hooks/useAppointmentForm'
+import { getVisibleBookingLinks } from '@common/utils/storage/getVisibleBookingLinks'
 
 interface CreateAppointmentModalProps {
   open: boolean
@@ -36,8 +36,6 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     isFormValid,
     userPersonalCalendars
   } = useAppointmentForm({ isOpen: open })
-
-  const visibleBookingLinks = useVisibleBookingLinks()
 
   useEffect(() => {
     if (!calendarid && userPersonalCalendars.length > 0) {
@@ -71,10 +69,10 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         ),
         description
       })
-      setVisibleBookingLinks([
-        ...visibleBookingLinks,
-        response.bookingLinkPublicId
-      ])
+      const currentLinks = getVisibleBookingLinks()
+      if (!currentLinks.includes(response.bookingLinkPublicId)) {
+        setVisibleBookingLinks([...currentLinks, response.bookingLinkPublicId])
+      }
       onClose()
     } catch (err) {
       console.error('Failed to create booking link:', err)

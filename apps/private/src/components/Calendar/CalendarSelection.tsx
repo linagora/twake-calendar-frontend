@@ -226,7 +226,7 @@ const getBookingLinkUrl = (publicId: string): URL => {
 
 const BookingLinkChip: React.FC<{
   link: BookingLink
-  onDelete: (publicId: string) => void
+  onDelete: (link: BookingLink) => void
   onEdit: (link: BookingLink) => void
   isVisible: boolean
   onToggleVisibility: () => void
@@ -250,7 +250,7 @@ const BookingLinkChip: React.FC<{
   const handleMenuClose = (): void => setMenuAnchorEl(null)
 
   const handleDelete = (): void => {
-    onDelete(link.publicId)
+    onDelete(link)
     handleMenuClose()
   }
 
@@ -347,7 +347,7 @@ const BookingLinksAccordion: React.FC<{
   header: SectionHeader
   bookingLinks: BookingLink[]
   defaultExpanded?: boolean
-  onDelete: (publicId: string) => void
+  onDelete: (link: BookingLink) => void
   onEdit: (link: BookingLink) => void
   onAddClick?: () => void
   visibleBookingLinks: string[]
@@ -468,8 +468,8 @@ const CalendarSelection: React.FC<{
     }
   }, [dispatch, bookingLinkEnabled])
 
-  const handleDeleteBookingLink = (publicId: string): void => {
-    dispatch(deleteBookingLink(publicId))
+  const handleDeleteBookingLink = (link: BookingLink): void => {
+    dispatch(deleteBookingLink(link.publicId))
   }
 
   const handleEditBookingLink = (link: BookingLink): void => {

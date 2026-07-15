@@ -511,6 +511,7 @@
     },
     "cancelSuccess": "Đặt chỗ đã bị hủy. Bạn có thể đặt một khung giờ mới nếu muốn.",
     "createAppointmentTitle": "Tạo lịch hẹn",
+    "editAppointmentTitle": "Chỉnh sửa lịch hẹn",
     "scheduleName": "Tên lịch trình",
     "chooseTimeSlot": "Chọn khung giờ",
     "15minutes": "15 phút",
