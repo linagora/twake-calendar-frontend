@@ -1,8 +1,10 @@
-import React from 'react'
-import { useI18n } from 'twake-i18n'
 import { createBookingLink } from '@common/features/booking/BookingDao'
-import { useAppointmentForm } from './hooks/useAppointmentForm'
+import { setVisibleBookingLinks } from '@common/utils/storage/setVisibleBookingLinks'
+import { useVisibleBookingLinks } from '@common/utils/storage/useVisibleBookingLinks'
+import React, { useEffect } from 'react'
+import { useI18n } from 'twake-i18n'
 import { AppointmentModalForm } from './components/AppointmentModalForm'
+import { useAppointmentForm } from './hooks/useAppointmentForm'
 
 interface CreateAppointmentModalProps {
   open: boolean
@@ -35,6 +37,14 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     userPersonalCalendars
   } = useAppointmentForm({ isOpen: open })
 
+  const visibleBookingLinks = useVisibleBookingLinks()
+
+  useEffect(() => {
+    if (!calendarid && userPersonalCalendars.length > 0) {
+      setCalendarid(userPersonalCalendars[0].id)
+    }
+  }, [userPersonalCalendars, calendarid])
+
   const handleSave = async (): Promise<void> => {
     if (!isFormValid) {
       setError(t('booking.fillRequiredFields'))
@@ -44,7 +54,7 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     try {
       setLoading(true)
       setError(null)
-      await createBookingLink({
+      const response = await createBookingLink({
         name,
         durationMinutes: duration,
         calendarUrl: `/calendars/${calendarid}`,
@@ -61,6 +71,10 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         ),
         description
       })
+      setVisibleBookingLinks([
+        ...visibleBookingLinks,
+        response.bookingLinkPublicId
+      ])
       onClose()
     } catch (err) {
       console.error('Failed to create booking link:', err)
