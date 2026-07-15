@@ -467,7 +467,9 @@ describe('Working Days and Business Hours Settings', () => {
         getOpenPaasUserData.fulfilled(mockResponse, '', undefined)
       )
 
-      expect(store.getState().settings.businessHours?.daysOfWeek).toEqual([1, 0])
+      expect(store.getState().settings.businessHours?.daysOfWeek).toEqual([
+        1, 0
+      ])
     })
 
     it('sets businessHours to null when not present in API response', async () => {
