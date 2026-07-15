@@ -59,6 +59,11 @@ import { EditAppointmentModal } from '../../features/booking/EditAppointmentModa
 import { handleCopyLink } from '@calendar/common/src/utils/handleCopyLink'
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 
+type SectionHeader = {
+  title: string
+  addBtnTooltip?: string
+}
+
 /**
  * Keeps a section's expanded state in sync whenever the caller's
  * `defaultExpanded` prop changes (e.g. switching views resets sections).
@@ -82,18 +87,16 @@ const useSyncedExpanded = (
  * supply their own list content as children.
  */
 const CollapsibleSection: React.FC<{
-  title: string
+  header: SectionHeader
   itemCount: number
   defaultExpanded?: boolean
   onAddClick?: () => void
-  addBtnTooltip?: string
   children: ReactNode
 }> = ({
-  title,
+  header: { title, addBtnTooltip },
   itemCount,
   defaultExpanded = false,
   onAddClick,
-  addBtnTooltip,
   children
 }) => {
   const { t } = useI18n()
@@ -167,7 +170,7 @@ const CollapsibleSection: React.FC<{
 }
 
 const CalendarAccordion: React.FC<{
-  title: string
+  header: SectionHeader
   calendars: string[]
   selectedCalendars: string[]
   handleToggle: (id: string) => void
@@ -176,9 +179,8 @@ const CalendarAccordion: React.FC<{
   defaultExpanded?: boolean
   setOpen: (id: string) => void
   hideOwner?: boolean
-  addBtnTooltip?: string
 }> = ({
-  title,
+  header,
   calendars,
   selectedCalendars,
   handleToggle,
@@ -186,26 +188,24 @@ const CalendarAccordion: React.FC<{
   onAddClick,
   defaultExpanded = false,
   setOpen,
-  hideOwner,
-  addBtnTooltip
+  hideOwner
 }) => {
   const allCalendars = useAppSelector(state => state.calendars.list)
   const { t } = useI18n()
 
   return (
     <CollapsibleSection
-      title={title}
+      header={header}
       itemCount={calendars.length}
       defaultExpanded={defaultExpanded}
       onAddClick={showAddButton ? onAddClick : undefined}
-      addBtnTooltip={addBtnTooltip}
     >
       {calendars.map(id => (
         <CalendarSelector
           key={id}
           calendars={allCalendars}
           id={id}
-          isPersonal={title === t('calendar.personal')}
+          isPersonal={header.title === t('calendar.personal')}
           selectedCalendars={selectedCalendars}
           handleCalendarToggle={handleToggle}
           setOpen={() => setOpen(id)}
@@ -344,33 +344,30 @@ const BookingLinkChip: React.FC<{
 }
 
 const BookingLinksAccordion: React.FC<{
-  title: string
+  header: SectionHeader
   bookingLinks: BookingLink[]
   defaultExpanded?: boolean
   onDelete: (publicId: string) => void
   onEdit: (link: BookingLink) => void
   onAddClick?: () => void
-  addBtnTooltip?: string
   visibleBookingLinks: string[]
   onToggleVisibility: (publicId: string) => void
 }> = ({
-  title,
+  header,
   bookingLinks,
   defaultExpanded = false,
   onDelete,
   onEdit,
   onAddClick,
-  addBtnTooltip,
   visibleBookingLinks,
   onToggleVisibility
 }) => {
   return (
     <CollapsibleSection
-      title={title}
+      header={header}
       itemCount={bookingLinks.length}
       defaultExpanded={defaultExpanded}
       onAddClick={onAddClick}
-      addBtnTooltip={addBtnTooltip}
     >
       {bookingLinks.map(link => (
         <BookingLinkChip
@@ -498,20 +495,25 @@ const CalendarSelection: React.FC<{
       <div>
         {bookingLinkEnabled && (
           <BookingLinksAccordion
-            title={t('calendar.bookingLinks')}
+            header={{
+              title: t('calendar.bookingLinks'),
+              addBtnTooltip: t('tooltip.createAppointment')
+            }}
             bookingLinks={bookingLinks}
             defaultExpanded
             onDelete={handleDeleteBookingLink}
             onEdit={handleEditBookingLink}
             onAddClick={() => setIsCreateAppointmentModalOpen(true)}
-            addBtnTooltip={t('tooltip.createAppointment')}
             visibleBookingLinks={visibleBookingLinks}
             onToggleVisibility={handleToggleBookingLinkVisibility}
           />
         )}
 
         <CalendarAccordion
-          title={t('calendar.personal')}
+          header={{
+            title: t('calendar.personal'),
+            addBtnTooltip: t('tooltip.addPersonalCalendar')
+          }}
           calendars={personalCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
@@ -522,11 +524,10 @@ const CalendarSelection: React.FC<{
             setSelectedCalId(id)
           }}
           defaultExpanded
-          addBtnTooltip={t('tooltip.addPersonalCalendar')}
         />
 
         <CalendarAccordion
-          title={t('calendar.delegated')}
+          header={{ title: t('calendar.delegated') }}
           calendars={delegatedCalendars}
           selectedCalendars={selectedCalendars}
           handleToggle={handleCalendarToggle}
@@ -538,7 +539,10 @@ const CalendarSelection: React.FC<{
         />
 
         <CalendarAccordion
-          title={t('calendar.other')}
+          header={{
+            title: t('calendar.other'),
+            addBtnTooltip: t('tooltip.registerOtherCalendars')
+          }}
           calendars={sharedCalendars}
           selectedCalendars={selectedCalendars}
           showAddButton
@@ -551,12 +555,14 @@ const CalendarSelection: React.FC<{
             setSelectedCalId(id)
           }}
           defaultExpanded
-          addBtnTooltip={t('tooltip.registerOtherCalendars')}
         />
 
         {!window.HIDE_RESOURCES && (
           <CalendarAccordion
-            title={t('calendar.resources')}
+            header={{
+              title: t('calendar.resources'),
+              addBtnTooltip: t('tooltip.registerResources')
+            }}
             calendars={resourceCalendars}
             selectedCalendars={selectedCalendars}
             onAddClick={() => {
@@ -570,7 +576,6 @@ const CalendarSelection: React.FC<{
             }}
             defaultExpanded
             hideOwner={true}
-            addBtnTooltip={t('tooltip.registerResources')}
           />
         )}
       </div>
