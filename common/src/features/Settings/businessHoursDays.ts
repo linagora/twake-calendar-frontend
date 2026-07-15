@@ -21,7 +21,9 @@ export function businessHoursToIso(
   if (!businessHours) return businessHours
   return {
     ...businessHours,
-    daysOfWeek: businessHours.daysOfWeek.map(fcToIso)
+    daysOfWeek: Array.isArray(businessHours.daysOfWeek)
+      ? businessHours.daysOfWeek.map(fcToIso)
+      : []
   }
 }
 
@@ -31,6 +33,8 @@ export function businessHoursFromIso(
   if (!businessHours) return businessHours
   return {
     ...businessHours,
-    daysOfWeek: businessHours.daysOfWeek.map(isoToFc)
+    daysOfWeek: Array.isArray(businessHours.daysOfWeek)
+      ? businessHours.daysOfWeek.map(isoToFc)
+      : []
   }
 }
