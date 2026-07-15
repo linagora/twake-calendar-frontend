@@ -64,12 +64,14 @@ describe('updateCalendars', () => {
     debouncedUpdateFns: Map<string, (dispatch: AppDispatch) => void>
     debouncedListUpdateFn?: (dispatch: AppDispatch) => void
     shouldRefreshCalendarListRef: React.MutableRefObject<boolean>
+    shouldRefreshBookingLinksRef: React.MutableRefObject<boolean>
     currentDebouncePeriod?: number
   } = {
     calendarsToRefresh: new Map<string, any>(),
     calendarsToHide: new Set(),
     debouncedUpdateFns: new Map(),
     shouldRefreshCalendarListRef: { current: false },
+    shouldRefreshBookingLinksRef: { current: false },
     currentDebouncePeriod: 0
   }
 
@@ -84,6 +86,7 @@ describe('updateCalendars', () => {
     mockAccumulators.debouncedListUpdateFn = undefined
     mockAccumulators.currentDebouncePeriod = 0
     mockAccumulators.shouldRefreshCalendarListRef.current = false
+    mockAccumulators.shouldRefreshBookingLinksRef.current = false
     window.WS_SKIP_DELAY_MS = 0
   })
 

@@ -44,6 +44,7 @@ const mockAccumulators: {
   debouncedUpdateFns: Map<string, (dispatch: AppDispatch) => void>
   debouncedListUpdateFn?: (dispatch: AppDispatch) => void
   shouldRefreshCalendarListRef: React.MutableRefObject<boolean>
+  shouldRefreshBookingLinksRef: React.MutableRefObject<boolean>
   currentDebouncePeriod?: number
   delayedRefreshTimers?: Map<string, ReturnType<typeof setTimeout>>
 } = {
@@ -51,6 +52,7 @@ const mockAccumulators: {
   calendarsToHide: new Set(),
   debouncedUpdateFns: new Map(),
   shouldRefreshCalendarListRef: { current: false },
+  shouldRefreshBookingLinksRef: { current: false },
   currentDebouncePeriod: 0,
   delayedRefreshTimers: new Map()
 }
@@ -70,6 +72,7 @@ describe('websocket messages storm', () => {
     mockAccumulators.debouncedUpdateFns = new Map()
     mockAccumulators.debouncedListUpdateFn = undefined
     mockAccumulators.shouldRefreshCalendarListRef.current = false
+    mockAccumulators.shouldRefreshBookingLinksRef.current = false
     mockAccumulators.currentDebouncePeriod = 0
     mockAccumulators.delayedRefreshTimers = new Map()
   })
