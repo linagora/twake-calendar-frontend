@@ -1,5 +1,4 @@
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { Dayjs } from 'dayjs'
 import React from 'react'
 import {
   dtDate,
@@ -87,7 +86,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     if (!value?.isValid()) return
 
     isUserActionRef.current = true
-    const newDateStr = dtDate(value as Dayjs)
+    const newDateStr = dtDate(value)
     const duration = initialDurationRef.current ?? getCurrentDuration()
 
     onStartDateChange(newDateStr)
@@ -109,7 +108,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     if (!value?.isValid()) return
 
     isUserActionRef.current = true
-    const newTimeStr = dtTime(value as Dayjs)
+    const newTimeStr = dtTime(value)
     const duration = initialDurationRef.current ?? getCurrentDuration()
 
     onStartTimeChange(newTimeStr)
@@ -134,7 +133,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     if (!value?.isValid()) return
 
     isUserActionRef.current = true
-    const newDateStr = dtDate(value as Dayjs)
+    const newDateStr = dtDate(value)
     const newEnd = toDateTime(newDateStr, endTime)
     const currentStart = toDateTime(startDate, startTime)
 
@@ -163,7 +162,7 @@ export function useDateTimeHandlers(props: DateTimeHandlersProps): {
     if (!value?.isValid()) return
 
     isUserActionRef.current = true
-    const newTimeStr = dtTime(value as Dayjs)
+    const newTimeStr = dtTime(value)
     const newEnd = toDateTime(endDate, newTimeStr)
     const currentStart = toDateTime(startDate, startTime)
 

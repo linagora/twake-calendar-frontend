@@ -1,8 +1,7 @@
 import { CalendarApi } from '@fullcalendar/core'
 import { useTheme } from '@linagora/twake-mui'
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import React, { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import dayjs from 'dayjs'
@@ -78,7 +77,7 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
   onDateChange,
   onCloseDatePicker
 }) => {
-  const { t, lang } = useI18n()
+  const { lang } = useI18n()
   const theme = useTheme()
 
   const { rootMinHeight, calendarHeight, slideTransitionMinHeight } = useMemo(
@@ -110,16 +109,7 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
   }
 
   return (
-    <LocalizationProvider
-      key={lang}
-      dateAdapter={AdapterDayjs}
-      adapterLocale={lang ?? 'en'}
-      localeText={{
-        okButtonLabel: t('common.ok'),
-        cancelButtonLabel: t('common.cancel'),
-        todayButtonLabel: t('menubar.today')
-      }}
-    >
+    <TwakeLocalizationProvider key={lang}>
       <StaticDatePicker
         value={dayjs(currentDate)}
         onChange={handlePickDate}
@@ -166,6 +156,6 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
         }}
       />
       <MonthSelector currentDate={currentDate} onMonthChange={onMonthChange} />
-    </LocalizationProvider>
+    </TwakeLocalizationProvider>
   )
 }

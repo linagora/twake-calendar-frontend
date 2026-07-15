@@ -6,13 +6,12 @@ import type { CalendarApi } from '@fullcalendar/core'
 import { IconButton, SxProps } from '@linagora/twake-mui'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { DateCalendar } from '@mui/x-date-pickers'
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import {
   PickerSelectionState,
   PickerValue
 } from '@mui/x-date-pickers/internals'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { forwardRef, useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { CALENDAR_VIEWS } from './utils/constants'
@@ -82,7 +81,6 @@ export const MiniCalendar: React.FC<{
 }> = ({ calendarRef, selectedDate, setSelectedMiniDate }) => {
   const dispatch = useAppDispatch()
   const [visibleDate, setVisibleDate] = useState(selectedDate)
-  const { t } = useI18n()
 
   useEffect(() => {
     const handleVisibleDateChange = (): void => {
@@ -105,12 +103,9 @@ export const MiniCalendar: React.FC<{
   }
 
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterMoment}
-      adapterLocale={t('locale') ?? 'en-gb'}
-    >
+    <TwakeLocalizationProvider>
       <DateCalendar
-        value={moment(visibleDate)}
+        value={dayjs(visibleDate)}
         onChange={handleChange}
         showDaysOutsideCurrentMonth
         onMonthChange={month => {
@@ -132,7 +127,7 @@ export const MiniCalendar: React.FC<{
         slotProps={{
           day: ownerState => {
             const date = ownerState.day.toDate()
-            const today = moment()
+            const today = dayjs()
             const selected = new Date(selectedDate)
             selected.setHours(0, 0, 0, 0)
 
@@ -189,6 +184,6 @@ export const MiniCalendar: React.FC<{
           }
         }}
       />
-    </LocalizationProvider>
+    </TwakeLocalizationProvider>
   )
 }

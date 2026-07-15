@@ -1,13 +1,8 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { Box } from '@linagora/twake-mui'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
-import 'dayjs/locale/en'
-import 'dayjs/locale/fr'
-import 'dayjs/locale/ru'
-import 'dayjs/locale/vi'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import React, { useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -132,16 +127,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   })
 
   return (
-    <LocalizationProvider
-      key={lang}
-      dateAdapter={AdapterDayjs}
-      adapterLocale={lang ?? 'en'}
-      localeText={{
-        okButtonLabel: t('common.ok'),
-        cancelButtonLabel: t('common.cancel'),
-        todayButtonLabel: t('menubar.today')
-      }}
-    >
+    <TwakeLocalizationProvider key={lang}>
       <Box
         sx={{ display: 'flex', flexDirection: 'column' }}
         className={containerClassName}
@@ -167,7 +153,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           warning={displayAsWarning(validation)}
         />
       </Box>
-    </LocalizationProvider>
+    </TwakeLocalizationProvider>
   )
 }
 
