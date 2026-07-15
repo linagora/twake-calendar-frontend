@@ -6,6 +6,7 @@ import {
 import { getOpenPaasUserData } from '@common/features/User/UserSlice'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { PayloadAction } from '@reduxjs/toolkit'
+import { businessHoursFromIso } from './businessHoursDays'
 
 export interface BusinessHour {
   start: string
@@ -123,7 +124,7 @@ const SettingsSlice = createAppSlice({
       state.businessHours =
         Array.isArray(businessHoursConfig?.value) &&
         businessHoursConfig?.value?.[0]
-          ? businessHoursConfig.value[0]
+          ? businessHoursFromIso(businessHoursConfig.value[0])
           : null
 
       // From esnCalendarModule (alongside hideDeclinedEvents)

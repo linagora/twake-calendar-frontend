@@ -259,7 +259,7 @@ describe('Working Days and Business Hours Settings', () => {
       jest.useRealTimers()
     })
 
-    it('sends businessHours as array to API', async () => {
+    it('sends businessHours as array to API with Sunday in ISO-8601 format (7)', async () => {
       jest.useFakeTimers()
 
       renderWithProviders(<SettingsPage />, basePreloadedState)
@@ -283,7 +283,9 @@ describe('Working Days and Business Hours Settings', () => {
                       expect.objectContaining({
                         start: '8:0',
                         end: '19:0',
-                        daysOfWeek: expect.arrayContaining([0])
+                        // FullCalendar Sunday (0) must be sent as ISO-8601 (7),
+                        // otherwise the backend rejects DayOfWeek.of(0).
+                        daysOfWeek: expect.arrayContaining([7])
                       })
                     ])
                   })
@@ -293,6 +295,13 @@ describe('Working Days and Business Hours Settings', () => {
           })
         )
       })
+
+      const patchedDays = (api.patch as jest.Mock).mock.calls[0][1].json
+        .find((m: { name: string }) => m.name === 'core')
+        .configurations.find(
+          (c: { name: string }) => c.name === 'businessHours'
+        ).value[0].daysOfWeek
+      expect(patchedDays).not.toContain(0)
 
       jest.useRealTimers()
     })
@@ -399,6 +408,64 @@ describe('Working Days and Business Hours Settings', () => {
         daysOfWeek: [1, 2, 3, 4, 5]
       })
       expect(state.settings.workingDays).toBe(true)
+    })
+
+    it('converts ISO-8601 Sunday (7) from API back to FullCalendar Sunday (0)', async () => {
+      const store = configureStore({
+        reducer: { user: userReducer, settings: settingsReducer },
+        preloadedState: {
+          user: {
+            userData: {
+              sub: 'test',
+              email: 'test@test.com',
+              family_name: 'Doe',
+              name: 'John',
+              sid: 'mockSid',
+              openpaasId: '667037022b752d0026472254'
+            },
+            organiserData: null,
+            tokens: null,
+            coreConfig: { language: 'en', datetime: { timeZone: 'UTC' } },
+            alarmEmailsEnabled: null,
+            loading: false,
+            error: null
+          },
+          settings: {
+            language: 'en',
+            timeZone: 'UTC',
+            isBrowserDefaultTimeZone: false,
+            view: 'calendar',
+            businessHours: null,
+            workingDays: null
+          }
+        }
+      })
+
+      const mockResponse = {
+        id: '667037022b752d0026472254',
+        firstname: 'John',
+        lastname: 'Doe',
+        preferredEmail: 'test@test.com',
+        configurations: {
+          modules: [
+            {
+              name: 'core',
+              configurations: [
+                {
+                  name: 'businessHours',
+                  value: [{ start: '8:0', end: '19:0', daysOfWeek: [1, 7] }]
+                }
+              ]
+            }
+          ]
+        }
+      }
+
+      await store.dispatch(
+        getOpenPaasUserData.fulfilled(mockResponse, '', undefined)
+      )
+
+      expect(store.getState().settings.businessHours?.daysOfWeek).toEqual([1, 0])
     })
 
     it('sets businessHours to null when not present in API response', async () => {

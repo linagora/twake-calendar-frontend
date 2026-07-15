@@ -1,4 +1,5 @@
 import { BusinessHour } from '@common/features/Settings/SettingsSlice'
+import { businessHoursToIso } from '@common/features/Settings/businessHoursDays'
 import { ConfigurationItem, ModuleConfiguration } from '../userDataTypes'
 
 export interface ConfigurationUpdatesInput {
@@ -36,7 +37,9 @@ function buildCoreConfigs(
   pushIfDefined(
     configs,
     'businessHours',
-    updates.businessHours ? [updates.businessHours] : updates.businessHours
+    updates.businessHours
+      ? [businessHoursToIso(updates.businessHours)]
+      : updates.businessHours
   )
 
   if (updates.timezone !== undefined) {

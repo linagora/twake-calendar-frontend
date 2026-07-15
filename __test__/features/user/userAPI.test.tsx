@@ -64,6 +64,45 @@ describe('makeConfigurationBody', () => {
 
     expect(result).toEqual({ modules: [] })
   })
+
+  it('should send businessHours days in ISO-8601 format (Sunday 0 -> 7)', () => {
+    const result = makeConfigurationBody({
+      businessHours: {
+        start: '9:0',
+        end: '18:0',
+        daysOfWeek: [1, 2, 3, 4, 5, 6, 0]
+      }
+    })
+
+    expect(result).toEqual({
+      modules: [
+        {
+          name: 'core',
+          configurations: [
+            {
+              name: 'businessHours',
+              value: [
+                { start: '9:0', end: '18:0', daysOfWeek: [1, 2, 3, 4, 5, 6, 7] }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+  })
+
+  it('should forward businessHours null to clear the config', () => {
+    const result = makeConfigurationBody({ businessHours: null })
+
+    expect(result).toEqual({
+      modules: [
+        {
+          name: 'core',
+          configurations: [{ name: 'businessHours', value: null }]
+        }
+      ]
+    })
+  })
 })
 
 describe('patchConfigurations', () => {
