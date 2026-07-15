@@ -3,6 +3,7 @@ import {
   fetchSecretLink
 } from '@common/features/Calendars/CalendarDAO'
 import { Calendar } from '@common/types/CalendarTypes'
+import { handleCopyLink } from '@common/utils/handleCopyLink'
 import {
   Box,
   Button,
@@ -14,7 +15,7 @@ import {
 } from '@linagora/twake-mui'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
@@ -100,13 +101,6 @@ export function AccessTab({
     }
   }
 
-  function handleCopyLink(
-    arg0: URL,
-    setOpen: Dispatch<SetStateAction<boolean>>
-  ): void {
-    throw new Error('Function not implemented.')
-  }
-
   return (
     <>
       <CalendarAccessRights
@@ -132,7 +126,10 @@ export function AccessTab({
                     <InputAdornment position="end">
                       <IconButton
                         onClick={() =>
-                          handleCopyLink(new URL(calDAVLink), setOpen)
+                          handleCopyLink(
+                            new URL(calDAVLink, window.location.origin),
+                            setOpen
+                          )
                         }
                         edge="end"
                       >
@@ -162,7 +159,10 @@ export function AccessTab({
                   <InputAdornment position="end">
                     <IconButton
                       onClick={() =>
-                        handleCopyLink(new URL(secretLink), setOpen)
+                        handleCopyLink(
+                          new URL(secretLink, window.location.origin),
+                          setOpen
+                        )
                       }
                       edge="end"
                     >

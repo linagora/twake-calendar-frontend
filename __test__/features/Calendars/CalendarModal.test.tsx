@@ -328,7 +328,7 @@ describe('CalendarPopover - Tabs Scenarios', () => {
   it('copies CalDAV link from Access tab', async () => {
     window.DAV_BASE_URL = 'https://cal.example.org'
     Object.assign(navigator, {
-      clipboard: { writeText: jest.fn() }
+      clipboard: { writeText: jest.fn().mockResolvedValue(undefined) }
     })
     ;(fetchSecretLink as jest.Mock).mockResolvedValue({
       secretLink: 'https://example.org/secret/initial'
