@@ -31,8 +31,13 @@ describe('DateTimeFields', () => {
     hasEndDateChanged: false,
     showEndDate: false,
     validation: {
+      isValid: true,
       errors: {
-        dateTime: ''
+        date: { start: '', end: '' },
+        time: { start: '', end: '' }
+      },
+      warnings: {
+        date: { start: '' }
       }
     },
     ...mockHandlers
@@ -89,6 +94,24 @@ describe('DateTimeFields', () => {
 
     await waitFor(() =>
       expect(mockHandlers.onEndDateChange).toHaveBeenCalledWith('2025-01-03')
+    )
+  })
+
+  it('updates the end time as soon as a complete value is typed', async () => {
+    await renderField({
+      startDate: '2025-01-01',
+      startTime: '10:00',
+      endDate: '2025-01-01',
+      endTime: '10:00',
+      showMore: true
+    })
+
+    fireEvent.change(screen.getByTestId('end-time-input'), {
+      target: { value: '11:00' }
+    })
+
+    await waitFor(() =>
+      expect(mockHandlers.onEndTimeChange).toHaveBeenCalledWith('11:00')
     )
   })
 

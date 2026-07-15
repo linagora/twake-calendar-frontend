@@ -256,7 +256,17 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
+    const value = e.target.value
+    setInputValue(value)
+
+    // Keep partial and shorthand input editable, but immediately propagate a
+    // complete time so form validation is refreshed while the user is typing.
+    if (/^\d{2}:\d{2}$/.test(value.trim())) {
+      const newValue = parseTimeInput(value, pickerValue as Dayjs | null)
+      if (newValue) {
+        pickerActions.setValue(newValue, { changeImportance: 'accept' })
+      }
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
