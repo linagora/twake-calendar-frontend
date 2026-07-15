@@ -296,11 +296,13 @@ describe('Working Days and Business Hours Settings', () => {
         )
       })
 
-      const patchedDays = (api.patch as jest.Mock).mock.calls[0][1].json
-        .find((m: { name: string }) => m.name === 'core')
-        .configurations.find(
-          (c: { name: string }) => c.name === 'businessHours'
-        ).value[0].daysOfWeek
+      const coreModule = (api.patch as jest.Mock).mock.calls[0][1].json.find(
+        (m: { name: string }) => m.name === 'core'
+      )
+      const businessHoursConfig = coreModule.configurations.find(
+        (c: { name: string }) => c.name === 'businessHours'
+      )
+      const patchedDays = businessHoursConfig.value[0].daysOfWeek
       expect(patchedDays).not.toContain(0)
 
       jest.useRealTimers()
