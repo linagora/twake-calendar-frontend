@@ -1,8 +1,8 @@
+import { useState, useMemo } from 'react'
 import { useAppSelector } from '@common/app/hooks'
+import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
 import { calendarIdFromEventHref } from '@common/features/Calendars/CalendarDAO'
-import { useUserPersonalCalendars } from '@common/features/Calendars/hooks/useUserPersonalCalendars'
-import { useEffect, useState } from 'react'
 
 interface UseAppointmentFormOptions {
   bookingLink?: BookingLink
@@ -40,15 +40,6 @@ const bookingTimezone = (bookingLink: BookingLink): string =>
   bookingLink.availabilityRules?.find(rule => rule.type === 'weekly')
     ?.timeZone ?? localTimezone()
 
-const DEFAULT_FORM_STATE: FormState = {
-  name: '',
-  duration: 30,
-  description: '',
-  showDescription: false,
-  timezone: localTimezone(),
-  calendarid: ''
-}
-
 const formStateFromBookingLink = (bookingLink: BookingLink): FormState => ({
   name: bookingLink.name ?? '',
   duration: bookingLink.durationMinutes,
@@ -56,6 +47,31 @@ const formStateFromBookingLink = (bookingLink: BookingLink): FormState => ({
   showDescription: Boolean(bookingLink.description),
   timezone: bookingTimezone(bookingLink),
   calendarid: calendarIdFromEventHref(bookingLink.calendarUrl)
+})
+
+const defaultFormState = (defaultCalendarId: string): FormState => ({
+  name: '',
+  duration: 30,
+  description: '',
+  showDescription: false,
+  timezone: localTimezone(),
+  calendarid: defaultCalendarId
+})
+
+const makeSetters = (
+  setForm: React.Dispatch<React.SetStateAction<FormState>>
+) => ({
+  setName: (value: string): void => setForm(prev => ({ ...prev, name: value })),
+  setDuration: (value: number): void =>
+    setForm(prev => ({ ...prev, duration: value })),
+  setDescription: (value: string): void =>
+    setForm(prev => ({ ...prev, description: value })),
+  setShowDescription: (value: boolean): void =>
+    setForm(prev => ({ ...prev, showDescription: value })),
+  setTimezone: (value: string): void =>
+    setForm(prev => ({ ...prev, timezone: value })),
+  setCalendarid: (value: string): void =>
+    setForm(prev => ({ ...prev, calendarid: value }))
 })
 
 export const useAppointmentForm = ({
@@ -66,43 +82,23 @@ export const useAppointmentForm = ({
   const calList = useAppSelector(state => state.calendars.list)
   const userPersonalCalendars = useUserPersonalCalendars(calList, userId)
 
-  const [form, setForm] = useState<FormState>(DEFAULT_FORM_STATE)
+  const initialForm = useMemo((): FormState => {
+    if (!isOpen) return defaultFormState('')
+    return bookingLink
+      ? formStateFromBookingLink(bookingLink)
+      : defaultFormState(userPersonalCalendars[0]?.id ?? '')
+  }, [isOpen, bookingLink, userPersonalCalendars])
+
+  const [form, setForm] = useState<FormState>(initialForm)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const setField =
-    <K extends keyof FormState>(key: K) =>
-    (value: FormState[K]) =>
-      setForm(prev => ({ ...prev, [key]: value }))
 
   const isFormValid =
     form.name.trim().length > 0 && form.calendarid !== '' && form.duration > 0
 
-  // Edit mode: populate form from existing booking link
-  useEffect(() => {
-    if (!isOpen || !bookingLink) return
-    setForm(formStateFromBookingLink(bookingLink))
-    setError(null)
-  }, [isOpen, bookingLink])
-
-  // Create mode: reset form to defaults
-  useEffect(() => {
-    if (!isOpen || bookingLink) return
-    setForm({
-      ...DEFAULT_FORM_STATE,
-      calendarid: userPersonalCalendars[0]?.id ?? ''
-    })
-    setError(null)
-  }, [isOpen, bookingLink, userPersonalCalendars])
-
   return {
     ...form,
-    setName: setField('name'),
-    setDuration: setField('duration'),
-    setDescription: setField('description'),
-    setShowDescription: setField('showDescription'),
-    setTimezone: setField('timezone'),
-    setCalendarid: setField('calendarid'),
+    ...makeSetters(setForm),
     error,
     setError,
     loading,
