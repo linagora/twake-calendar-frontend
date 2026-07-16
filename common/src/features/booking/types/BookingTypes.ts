@@ -30,6 +30,7 @@ export interface BookingLink {
   availabilityRules?: AvailabilityRule[]
   name?: string
   description?: string
+  color?: string
 }
 
 export interface Slot {
@@ -77,6 +78,7 @@ export interface CreateBookingLinkRequest {
   name?: string
   description?: string
   timeZone?: string
+  color?: string
 }
 
 export interface CreateBookingLinkResponse {
@@ -103,6 +105,11 @@ export interface UpdateBookingLinkRequest {
    * Omit to leave unchanged.
    */
   description?: string | null
+  /**
+   * Set to null or blank to clear this field.
+   * Omit to leave unchanged.
+   */
+  color?: string | null
 }
 
 export interface CreateBookingResponse {

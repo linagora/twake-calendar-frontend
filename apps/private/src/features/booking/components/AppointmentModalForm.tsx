@@ -1,16 +1,24 @@
 import React from 'react'
-import { Button, TextField, Typography } from '@linagora/twake-mui'
+import {
+  Button,
+  TextField,
+  Box,
+  Typography,
+  useTheme
+} from '@linagora/twake-mui'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { useI18n } from 'twake-i18n'
 import { AddDescButton } from '@common/components/Event/AddDescButton'
 import { TimeSlotSelectField } from './TimeSlotSelectField'
 import { TimezoneSelectField } from './TimezoneSelectField'
 import { CalendarSelectField } from '@common/components/Event/fields/CalendarSelectField'
+import { ColorPicker } from '@common/components/Calendar/CalendarColorPicker'
 import type { Calendar } from '@common/types/CalendarTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { RegularHoursField } from './RegularHoursField'
 import { DayAvailability } from './RegularHoursField/RegularHoursTypes'
 import { useAppSelector } from '@common/app/hooks'
+import { getAccessiblePair } from '@common/utils/getAccessiblePair'
 
 interface AppointmentModalFormProps {
   open: boolean
@@ -28,6 +36,8 @@ interface AppointmentModalFormProps {
   setTimezone: (value: string) => void
   calendarid: string
   setCalendarid: (value: string) => void
+  color: string
+  setColor: (value: string) => void
   userPersonalCalendars: Calendar[]
   availabilityRules?: DayAvailability[]
   setAvailabilityRules?: React.Dispatch<React.SetStateAction<DayAvailability[]>>
@@ -54,6 +64,8 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
   setTimezone,
   calendarid,
   setCalendarid,
+  color,
+  setColor,
   userPersonalCalendars,
   availabilityRules,
   setAvailabilityRules,
@@ -65,6 +77,7 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const theme = useTheme()
 
   const businessHours = useAppSelector(state => state.settings.businessHours)
   const workingDays = businessHours?.daysOfWeek
@@ -118,6 +131,19 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
       />
 
       <TimezoneSelectField timezone={timezone} setTimezone={setTimezone} />
+
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+          {t('booking.color', { defaultValue: 'Color' })}
+        </Typography>
+        <ColorPicker
+          selectedColor={{
+            light: color,
+            dark: getAccessiblePair(color, theme)
+          }}
+          onChange={c => setColor(c.light)}
+        />
+      </Box>
 
       <CalendarSelectField
         calendarid={calendarid}

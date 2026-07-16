@@ -29,6 +29,8 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     setTimezone,
     calendarid,
     setCalendarid,
+    color,
+    setColor,
     error,
     setError,
     loading,
@@ -71,7 +73,8 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
               timeZone: timezone
             }))
           ),
-        description
+        description,
+        color
       })
       const currentLinks = getVisibleBookingLinks()
       if (!currentLinks.includes(response.bookingLinkPublicId)) {
@@ -103,6 +106,8 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
       setTimezone={setTimezone}
       calendarid={calendarid}
       setCalendarid={setCalendarid}
+      color={color}
+      setColor={setColor}
       userPersonalCalendars={userPersonalCalendars}
       availabilityRules={availabilityRules}
       setAvailabilityRules={setAvailabilityRules}

@@ -516,6 +516,7 @@
     "createAppointmentTitle": "Créer un lien de prise de rendez-vous",
     "editAppointmentTitle": "Modifier le lien de prise de rendez-vous",
     "scheduleName": "Nom du planning",
+    "color": "Couleur",
     "chooseTimeSlot": "Choisir un créneau",
     "15minutes": "15 minutes",
     "30minutes": "30 minutes",

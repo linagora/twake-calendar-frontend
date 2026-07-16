@@ -516,6 +516,7 @@
     "createAppointmentTitle": "Create appointment schedule",
     "editAppointmentTitle": "Edit appointment schedule",
     "scheduleName": "Schedule name",
+    "color": "Color",
     "chooseTimeSlot": "Choose time slot",
     "15minutes": "15 minutes",
     "30minutes": "30 minutes",

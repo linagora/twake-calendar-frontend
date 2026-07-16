@@ -240,7 +240,7 @@ const BookingLinkChip: React.FC<{
   const calendarId = calendarIdFromEventHref(link.calendarUrl)
   const calendarColor = calendars?.[calendarId]?.color?.light
   const iconColor = isVisible
-    ? (calendarColor ?? defaultColors[4].dark)
+    ? (link.color ?? calendarColor ?? defaultColors[4].dark)
     : theme.palette.grey[400]
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>): void => {

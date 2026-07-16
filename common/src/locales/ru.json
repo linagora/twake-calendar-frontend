@@ -516,6 +516,7 @@
     "createAppointmentTitle": "Создать расписание встреч",
     "editAppointmentTitle": "Редактировать расписание встреч",
     "scheduleName": "Название расписания",
+    "color": "Цвет",
     "chooseTimeSlot": "Выберите время",
     "15minutes": "15 минут",
     "30minutes": "30 минут",

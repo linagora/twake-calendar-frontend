@@ -32,6 +32,8 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
     setTimezone,
     calendarid,
     setCalendarid,
+    color,
+    setColor,
     error,
     setError,
     loading,
@@ -69,7 +71,8 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
                   timeZone: timezone
                 }))
               ),
-            description: description || null
+            description: description || null,
+            color
           }
         })
       ).unwrap()
@@ -101,6 +104,8 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
       setTimezone={setTimezone}
       calendarid={calendarid}
       setCalendarid={setCalendarid}
+      color={color}
+      setColor={setColor}
       userPersonalCalendars={userPersonalCalendars}
       availabilityRules={availabilityRules}
       setAvailabilityRules={setAvailabilityRules}
