@@ -16,12 +16,14 @@ interface BookingLinkMobileMenuProps {
   open: boolean
   onClose: () => void
   onDelete: () => void
+  onEdit: () => void
 }
 
 export const BookingLinkMobileMenu: React.FC<BookingLinkMobileMenuProps> = ({
   open,
   onClose,
-  onDelete
+  onDelete,
+  onEdit
 }) => {
   const { t } = useI18n()
 
@@ -34,6 +36,14 @@ export const BookingLinkMobileMenu: React.FC<BookingLinkMobileMenuProps> = ({
       disableAutoFocus
     >
       <List>
+        <ListItemButton
+          onClick={() => {
+            onEdit()
+            onClose()
+          }}
+        >
+          <ListItemText primary={t('actions.modify')} />
+        </ListItemButton>
         <ListItemButton
           onClick={() => {
             onDelete()

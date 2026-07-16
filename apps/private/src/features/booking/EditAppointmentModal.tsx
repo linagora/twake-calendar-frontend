@@ -1,19 +1,24 @@
 import React from 'react'
 import { useI18n } from 'twake-i18n'
-import { createBookingLink } from '@common/features/booking/BookingDao'
+import { useAppDispatch } from '@common/app/hooks'
+import { updateBookingLink } from '@common/features/booking/BookingLinksSlice'
 import { useAppointmentForm } from './hooks/useAppointmentForm'
 import { AppointmentModalForm } from './components/AppointmentModalForm'
+import type { BookingLink } from '@common/features/booking/types/BookingTypes'
 
-interface CreateAppointmentModalProps {
+interface EditAppointmentModalProps {
   open: boolean
   onClose: () => void
+  bookingLink: BookingLink
 }
 
-export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
+export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   open,
-  onClose
+  onClose,
+  bookingLink
 }) => {
   const { t } = useI18n()
+  const dispatch = useAppDispatch()
   const {
     name,
     setName,
@@ -33,7 +38,7 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     setLoading,
     isFormValid,
     userPersonalCalendars
-  } = useAppointmentForm({ isOpen: open })
+  } = useAppointmentForm({ bookingLink, isOpen: open })
 
   const handleSave = async (): Promise<void> => {
     if (!isFormValid) {
@@ -44,26 +49,23 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     try {
       setLoading(true)
       setError(null)
-      await createBookingLink({
-        name,
-        durationMinutes: duration,
-        calendarUrl: `/calendars/${calendarid}`,
-        active: true,
-        autoAccept: false,
-        availabilityRules: (['MON', 'TUE', 'WED', 'THU', 'FRI'] as const).map(
-          day => ({
-            type: 'weekly',
-            dayOfWeek: day,
-            start: '09:00',
-            end: '18:00',
-            timeZone: timezone
-          })
-        ),
-        description
-      })
+      await dispatch(
+        updateBookingLink({
+          publicId: bookingLink.publicId,
+          request: {
+            name,
+            durationMinutes: duration,
+            calendarUrl: `/calendars/${calendarid}`,
+            availabilityRules: (bookingLink.availabilityRules ?? []).map(
+              rule => ({ ...rule, timeZone: timezone })
+            ),
+            description: description || null
+          }
+        })
+      ).unwrap()
       onClose()
     } catch (err) {
-      console.error('Failed to create booking link:', err)
+      console.error('Failed to update booking link:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
@@ -74,8 +76,8 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
     <AppointmentModalForm
       open={open}
       onClose={onClose}
-      title={t('booking.createAppointmentTitle', {
-        defaultValue: 'Create appointment schedule'
+      title={t('booking.editAppointmentTitle', {
+        defaultValue: 'Edit appointment schedule'
       })}
       name={name}
       setName={setName}
@@ -94,7 +96,7 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
       loading={loading}
       isFormValid={isFormValid}
       onSave={handleSave}
-      saveButtonText={t('booking.save', { defaultValue: 'Save' })}
+      saveButtonText={t('actions.save', { defaultValue: 'Save' })}
     />
   )
 }
