@@ -1,5 +1,6 @@
 import { CalendarData } from '@common/features/Calendars/types/CalendarData'
 import { fetchResourceById } from '@common/features/User/ResourceDAO'
+import { makeResourceToUserData } from '@common/features/User/transformers'
 import { OpenPaasUserData } from '@common/features/User/type/OpenPaasUserData'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { CalendarInvite } from '@common/types/CalendarTypes'
@@ -10,14 +11,10 @@ export const fetchOwnerOfResource = async (
   try {
     const data = await fetchResourceById(resourceId)
     const ownerData = await fetchUserById(data.creator)
+    const { owner, resourceIcon } = makeResourceToUserData(data, ownerData)
     return {
-      ...ownerData,
-      administrators: data.administrators,
-      // The `icon` from resource detail contains the name only, so we must map with URL to have full URL of icon
-      resourceIcon:
-        window.CALENDAR_BASE_URL && data.icon
-          ? `${window.CALENDAR_BASE_URL}/images/icon/${data.icon}.svg`
-          : undefined
+      ...owner,
+      resourceIcon
     }
   } catch (error) {
     console.error(`Failed to fetch resource details for ${resourceId}:`, error)

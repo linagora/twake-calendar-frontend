@@ -1,7 +1,7 @@
 import { toRejectedError } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
-import { searchEvent } from '../../Events/EventDao'
-import { makeSearchEventParam } from '../../Events/transformers/makeSearchEventParam'
+import { searchEvent } from '../SearchDAO'
+import { makeSearchEventParam } from '../transformers'
 import { SearchResultsState } from '../SearchSlice'
 import { SearchEventResult } from '../types/SearchEventResult'
 

@@ -5,3 +5,6 @@ export type {
   ConfigurationBody,
   ConfigurationUpdatesInput
 } from './makeConfigurationBody'
+
+export { makeResourceToUserData } from './makeResourceToUserData'
+export type { ResourceOwnerData } from './makeResourceToUserData'
