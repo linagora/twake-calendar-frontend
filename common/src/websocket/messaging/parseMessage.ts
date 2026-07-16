@@ -4,8 +4,14 @@ export function parseMessage(message: unknown) {
   const calendarsToRefresh = new Set<string>()
   const calendarsToHide = new Set<string>()
   let shouldRefreshCalendarList = false
+  let shouldRefreshBookingLinks = false
   if (typeof message !== 'object' || message === null) {
-    return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList }
+    return {
+      calendarsToRefresh,
+      calendarsToHide,
+      shouldRefreshCalendarList,
+      shouldRefreshBookingLinks
+    }
   }
 
   for (const [key, value] of Object.entries(message)) {
@@ -35,11 +41,19 @@ export function parseMessage(message: unknown) {
           }
         })
         break
+      case WS_INBOUND_EVENTS.BOOKING_LINK_STATE_CHANGED:
+        shouldRefreshBookingLinks = true
+        break
       default: {
         calendarsToRefresh.add(key)
       }
     }
   }
 
-  return { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList }
+  return {
+    calendarsToRefresh,
+    calendarsToHide,
+    shouldRefreshCalendarList,
+    shouldRefreshBookingLinks
+  }
 }

@@ -5,6 +5,7 @@ import {
   getCalendarsList
 } from '@common/features/Calendars/CalendarSlice'
 import { refreshCalendarWithSyncToken } from '@common/features/Calendars/CalendarSlice'
+import { listBookingLinks } from '@common/features/booking/BookingLinksSlice'
 import { Calendar } from '@common/types/CalendarTypes'
 import { findCalendarById, getDisplayedCalendarRange } from '@common/utils'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
@@ -96,29 +97,75 @@ function createDebouncedListUpdate(
   )
 }
 
-function processDebouncedUpdates({
-  dispatch,
-  accumulators,
-  debouncePeriod,
-  shouldRefreshCalendarList,
-  calendarsToRefresh,
-  calendarsToHide
-}: {
-  dispatch: AppDispatch
-  accumulators: UpdateCalendarsAccumulators
-  debouncePeriod: number
-  shouldRefreshCalendarList: boolean
-  calendarsToRefresh: Set<string>
-  calendarsToHide: Set<string>
-}): void {
-  if (accumulators.currentDebouncePeriod !== debouncePeriod) {
-    accumulators.debouncedUpdateFns.forEach(fn => fn.cancel())
-    accumulators.debouncedUpdateFns.clear()
-    accumulators.debouncedListUpdateFn?.cancel()
-    accumulators.debouncedListUpdateFn = undefined
-    accumulators.currentDebouncePeriod = debouncePeriod
-  }
+function createDebouncedBookingLinksUpdate(
+  debouncePeriodMs: number,
+  shouldRefreshBookingLinksRef: MutableRefObject<boolean>
+): DebouncedFunc<(dispatch: AppDispatch) => void> {
+  return debounce(
+    (dispatch: AppDispatch): void => {
+      const shouldRefresh = shouldRefreshBookingLinksRef.current
 
+      // Clear accumulator
+      shouldRefreshBookingLinksRef.current = false
+
+      try {
+        if (shouldRefresh) {
+          void dispatch(listBookingLinks())
+        }
+      } catch (error) {
+        console.warn(
+          'Error processing accumulated booking links update:',
+          error
+        )
+      }
+    },
+    debouncePeriodMs,
+    { leading: true, trailing: true }
+  )
+}
+
+function getOrCreateDebouncedListUpdate(
+  accumulators: UpdateCalendarsAccumulators,
+  debouncePeriod: number
+): DebouncedFunc<(dispatch: AppDispatch) => void> {
+  if (!accumulators.debouncedListUpdateFn) {
+    accumulators.debouncedListUpdateFn = createDebouncedListUpdate(
+      debouncePeriod,
+      accumulators.shouldRefreshCalendarListRef
+    )
+  }
+  return accumulators.debouncedListUpdateFn
+}
+
+function getOrCreateDebouncedBookingLinksUpdate(
+  accumulators: UpdateCalendarsAccumulators,
+  debouncePeriod: number
+): DebouncedFunc<(dispatch: AppDispatch) => void> {
+  if (!accumulators.debouncedBookingLinksUpdateFn) {
+    accumulators.debouncedBookingLinksUpdateFn =
+      createDebouncedBookingLinksUpdate(
+        debouncePeriod,
+        accumulators.shouldRefreshBookingLinksRef
+      )
+  }
+  return accumulators.debouncedBookingLinksUpdateFn
+}
+
+function resetDebouncedFunctions(
+  accumulators: UpdateCalendarsAccumulators
+): void {
+  accumulators.debouncedUpdateFns.forEach(fn => fn.cancel())
+  accumulators.debouncedUpdateFns.clear()
+  accumulators.debouncedListUpdateFn?.cancel()
+  accumulators.debouncedListUpdateFn = undefined
+  accumulators.debouncedBookingLinksUpdateFn?.cancel()
+  accumulators.debouncedBookingLinksUpdateFn = undefined
+}
+
+function collectUniqueCalendarIds(
+  calendarsToRefresh: Set<string>,
+  calendarsToHide: Set<string>
+): Set<string> {
   const uniqueCalIds = new Set<string>()
   calendarsToRefresh.forEach(path => {
     const calId = parseCalendarPath(path)
@@ -128,7 +175,15 @@ function processDebouncedUpdates({
     const calId = parseCalendarPath(path)
     if (calId) uniqueCalIds.add(calId)
   })
+  return uniqueCalIds
+}
 
+function processDebouncedCalendarUpdates(
+  uniqueCalIds: Set<string>,
+  accumulators: UpdateCalendarsAccumulators,
+  debouncePeriod: number,
+  dispatch: AppDispatch
+): void {
   uniqueCalIds.forEach(calendarId => {
     let debouncedFn = accumulators.debouncedUpdateFns.get(calendarId)
     if (!debouncedFn) {
@@ -143,24 +198,63 @@ function processDebouncedUpdates({
     }
     debouncedFn(dispatch)
   })
+}
+
+function processDebouncedUpdates({
+  dispatch,
+  accumulators,
+  debouncePeriod,
+  shouldRefreshCalendarList,
+  shouldRefreshBookingLinks,
+  calendarsToRefresh,
+  calendarsToHide
+}: {
+  dispatch: AppDispatch
+  accumulators: UpdateCalendarsAccumulators
+  debouncePeriod: number
+  shouldRefreshCalendarList: boolean
+  shouldRefreshBookingLinks: boolean
+  calendarsToRefresh: Set<string>
+  calendarsToHide: Set<string>
+}): void {
+  if (accumulators.currentDebouncePeriod !== debouncePeriod) {
+    resetDebouncedFunctions(accumulators)
+    accumulators.currentDebouncePeriod = debouncePeriod
+  }
+
+  const uniqueCalIds = collectUniqueCalendarIds(
+    calendarsToRefresh,
+    calendarsToHide
+  )
+  processDebouncedCalendarUpdates(
+    uniqueCalIds,
+    accumulators,
+    debouncePeriod,
+    dispatch
+  )
 
   if (shouldRefreshCalendarList) {
-    let debouncedListFn = accumulators.debouncedListUpdateFn
-    if (!debouncedListFn) {
-      debouncedListFn = createDebouncedListUpdate(
-        debouncePeriod,
-        accumulators.shouldRefreshCalendarListRef
-      )
-      accumulators.debouncedListUpdateFn = debouncedListFn
-    }
+    const debouncedListFn = getOrCreateDebouncedListUpdate(
+      accumulators,
+      debouncePeriod
+    )
     debouncedListFn(dispatch)
+  }
+
+  if (shouldRefreshBookingLinks) {
+    const debouncedBookingLinksFn = getOrCreateDebouncedBookingLinksUpdate(
+      accumulators,
+      debouncePeriod
+    )
+    debouncedBookingLinksFn(dispatch)
   }
 }
 
 function processImmediateUpdates(
   dispatch: AppDispatch,
   accumulators: UpdateCalendarsAccumulators,
-  shouldRefreshCalendarList: boolean
+  shouldRefreshCalendarList: boolean,
+  shouldRefreshBookingLinks: boolean
 ): void {
   const currentRange = getDisplayedCalendarRange()
   const calendarsToProcess = new Map(accumulators.calendarsToRefresh)
@@ -169,6 +263,7 @@ function processImmediateUpdates(
   accumulators.calendarsToRefresh.clear()
   accumulators.calendarsToHide.clear()
   accumulators.shouldRefreshCalendarListRef.current = false
+  accumulators.shouldRefreshBookingLinksRef.current = false
 
   try {
     scheduleCalendarsRefresh(
@@ -181,6 +276,9 @@ function processImmediateUpdates(
     if (shouldRefreshCalendarList) {
       void dispatch(getCalendarsList())
     }
+    if (shouldRefreshBookingLinks) {
+      void dispatch(listBookingLinks())
+    }
   } catch (error) {
     console.warn('Error processing calendar updates:', error)
   }
@@ -192,8 +290,12 @@ export function updateCalendars(
   accumulators: UpdateCalendarsAccumulators
 ): void {
   const state = store.getState()
-  const { calendarsToRefresh, calendarsToHide, shouldRefreshCalendarList } =
-    parseMessage(message)
+  const {
+    calendarsToRefresh,
+    calendarsToHide,
+    shouldRefreshCalendarList,
+    shouldRefreshBookingLinks
+  } = parseMessage(message)
 
   // Accumulate
   accumulateCalendarsToRefresh(
@@ -219,6 +321,10 @@ export function updateCalendars(
     accumulators.shouldRefreshCalendarListRef.current ||
     shouldRefreshCalendarList
 
+  accumulators.shouldRefreshBookingLinksRef.current =
+    accumulators.shouldRefreshBookingLinksRef.current ||
+    shouldRefreshBookingLinks
+
   const debouncePeriod = window.WS_DEBOUNCE_PERIOD_MS ?? DEFAULT_DEBOUNCE_MS
 
   if (debouncePeriod > 0) {
@@ -227,11 +333,17 @@ export function updateCalendars(
       accumulators,
       debouncePeriod,
       shouldRefreshCalendarList,
+      shouldRefreshBookingLinks,
       calendarsToRefresh,
       calendarsToHide
     })
   } else {
-    processImmediateUpdates(dispatch, accumulators, shouldRefreshCalendarList)
+    processImmediateUpdates(
+      dispatch,
+      accumulators,
+      shouldRefreshCalendarList,
+      shouldRefreshBookingLinks
+    )
   }
 }
 

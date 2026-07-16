@@ -73,4 +73,29 @@ describe('parseMessage', () => {
     expect(result.calendarsToRefresh.size).toBe(1)
     expect(result.calendarsToRefresh).toContain('/calendars/cal1/entry1')
   })
+
+  it('should handle bookingLinkStateChanged event', () => {
+    const message = {
+      [WS_INBOUND_EVENTS.BOOKING_LINK_STATE_CHANGED]: true
+    }
+
+    const result = parseMessage(message)
+
+    expect(result.shouldRefreshBookingLinks).toBe(true)
+    expect(result.calendarsToRefresh.size).toBe(0)
+    expect(result.calendarsToHide.size).toBe(0)
+  })
+
+  it('should handle bookingLinkStateChanged with other events', () => {
+    const message = {
+      [WS_INBOUND_EVENTS.BOOKING_LINK_STATE_CHANGED]: true,
+      [WS_INBOUND_EVENTS.CLIENT_REGISTERED]: ['/calendars/cal1/entry1']
+    }
+
+    const result = parseMessage(message)
+
+    expect(result.shouldRefreshBookingLinks).toBe(true)
+    expect(result.calendarsToRefresh.size).toBe(1)
+    expect(result.calendarsToRefresh).toContain('/calendars/cal1/entry1')
+  })
 })

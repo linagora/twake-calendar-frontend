@@ -63,10 +63,14 @@ export function WebSocketGate(): JSX.Element | null {
   >(new Map())
   const calendarsToHideRef = useRef<Set<string>>(new Set())
   const shouldRefreshCalendarListRef = useRef<boolean>(false)
+  const shouldRefreshBookingLinksRef = useRef<boolean>(false)
   const debouncedUpdateFnsRef = useRef<
     Map<string, DebouncedFunc<(dispatch: AppDispatch) => void>>
   >(new Map())
   const debouncedListUpdateFnRef = useRef<
+    DebouncedFunc<(dispatch: AppDispatch) => void> | undefined
+  >(undefined)
+  const debouncedBookingLinksUpdateFnRef = useRef<
     DebouncedFunc<(dispatch: AppDispatch) => void> | undefined
   >(undefined)
   const currentDebouncePeriodRef = useRef<number | undefined>()
@@ -80,14 +84,18 @@ export function WebSocketGate(): JSX.Element | null {
         calendarsToRefresh: calendarsToRefreshRef.current,
         calendarsToHide: calendarsToHideRef.current,
         shouldRefreshCalendarListRef,
+        shouldRefreshBookingLinksRef,
         debouncedUpdateFns: debouncedUpdateFnsRef.current,
         debouncedListUpdateFn: debouncedListUpdateFnRef.current,
+        debouncedBookingLinksUpdateFn: debouncedBookingLinksUpdateFnRef.current,
         currentDebouncePeriod: currentDebouncePeriodRef.current,
         delayedRefreshTimers: delayedRefreshTimersRef.current
       }
       updateCalendars(message, dispatch, accumulators)
       // Persist any mutations back to refs
       debouncedListUpdateFnRef.current = accumulators.debouncedListUpdateFn
+      debouncedBookingLinksUpdateFnRef.current =
+        accumulators.debouncedBookingLinksUpdateFn
       currentDebouncePeriodRef.current = accumulators.currentDebouncePeriod
     },
     [dispatch]
