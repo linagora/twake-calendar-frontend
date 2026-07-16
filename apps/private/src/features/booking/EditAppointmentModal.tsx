@@ -37,7 +37,9 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
     loading,
     setLoading,
     isFormValid,
-    userPersonalCalendars
+    userPersonalCalendars,
+    availabilityRules,
+    setAvailabilityRules
   } = useAppointmentForm({ bookingLink, isOpen: open })
 
   const handleSave = async (): Promise<void> => {
@@ -56,9 +58,17 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
             name,
             durationMinutes: duration,
             calendarUrl: `/calendars/${calendarid}`,
-            availabilityRules: (bookingLink.availabilityRules ?? []).map(
-              rule => ({ ...rule, timeZone: timezone })
-            ),
+            availabilityRules: availabilityRules
+              .filter(rule => rule.enabled)
+              .flatMap(rule =>
+                rule.slots.map(slot => ({
+                  type: 'weekly' as const,
+                  dayOfWeek: rule.dayOfWeek,
+                  start: slot.start,
+                  end: slot.end,
+                  timeZone: timezone
+                }))
+              ),
             description: description || null
           }
         })
@@ -92,6 +102,8 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
       calendarid={calendarid}
       setCalendarid={setCalendarid}
       userPersonalCalendars={userPersonalCalendars}
+      availabilityRules={availabilityRules}
+      setAvailabilityRules={setAvailabilityRules}
       error={error}
       loading={loading}
       isFormValid={isFormValid}
