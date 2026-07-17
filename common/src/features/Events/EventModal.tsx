@@ -117,6 +117,7 @@ const EventPopover: React.FC<{
       title={modalTitle}
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(s => !s)}
+      draggable={!showMore}
       actions={
         <EventActions
           showExpandedBtn={!showMore}

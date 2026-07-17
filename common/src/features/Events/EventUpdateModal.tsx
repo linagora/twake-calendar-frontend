@@ -59,6 +59,7 @@ const EventUpdateModalInternal: React.FC<
       title={t('event.updateEvent')}
       isExpanded={showMore}
       onExpandToggle={handleExpandToggle}
+      draggable={!showMore}
       actions={actions}
       sx={dialogPaddingStyles(isMobile)}
       expandText={t('tooltip.moreEventOptions')}

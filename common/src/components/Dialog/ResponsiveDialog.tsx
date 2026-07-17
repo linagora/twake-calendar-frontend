@@ -8,6 +8,8 @@ import {
   DialogTitle,
   DialogTitleProps,
   IconButton,
+  Paper,
+  PaperProps,
   Stack,
   SxProps,
   Theme,
@@ -19,7 +21,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import CozyBridge from 'cozy-external-bridge'
-import React, { ReactNode, useMemo } from 'react'
+import React, { ReactNode, useCallback, useMemo, useRef } from 'react'
+import Draggable from 'react-draggable'
 
 /**
  * ResponsiveDialog - A reusable dialog component that can switch between normal and expanded modes
@@ -90,6 +93,8 @@ interface ResponsiveDialogProps extends Omit<
   actionsJustifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between'
 
   expandText?: string
+
+  draggable?: boolean
 }
 
 function ResponsiveDialog({
@@ -115,12 +120,32 @@ function ResponsiveDialog({
   actionsJustifyContent = 'flex-end',
   sx,
   expandText,
+  draggable = false,
   ...otherDialogProps
 }: ResponsiveDialogProps): JSX.Element {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const isInIframe = useMemo(() => new CozyBridge().isInIframe(), [])
+
+  const isDraggable = draggable && !isMobile && !isExpanded
+
+  // Ref lives at component level — cannot call useRef inside useCallback
+  const paperRef = useRef<HTMLDivElement>(null)
+
+  const DraggablePaper = useCallback(
+    (props: PaperProps) => (
+      <Draggable
+        nodeRef={paperRef}
+        handle="#draggable-dialog-title"
+        cancel='[class*="MuiDialogContent-root"]'
+        disabled={!isDraggable}
+      >
+        <Paper {...props} ref={paperRef} />
+      </Draggable>
+    ),
+    [isDraggable]
+  )
 
   const baseSx: SxProps<Theme> | undefined = isMobile
     ? undefined
@@ -199,9 +224,15 @@ function ResponsiveDialog({
         ] as SxProps<Theme>
       }
       style={isExpanded ? { zIndex: 1200 } : undefined}
+      PaperComponent={DraggablePaper}
+      aria-labelledby="draggable-dialog-title"
       {...otherDialogProps}
     >
-      <DialogTitle sx={titleSx} {...dialogTitleProps}>
+      <DialogTitle
+        id="draggable-dialog-title"
+        sx={[titleSx, isDraggable ? { cursor: 'move' } : {}] as SxProps<Theme>}
+        {...dialogTitleProps}
+      >
         {isExpanded && onExpandToggle && !isMobile ? (
           <IconButton
             onClick={onExpandToggle}

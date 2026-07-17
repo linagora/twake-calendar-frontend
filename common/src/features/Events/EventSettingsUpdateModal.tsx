@@ -116,6 +116,7 @@ const EventSettingsUpdateModalInternal: React.FC<
       open={open}
       onClose={handleClose}
       title={t('eventPreview.editEventSpecificSettings')}
+      draggable
       actions={actions}
       sx={dialogPaddingStyles(isMobile)}
     >

@@ -126,6 +126,7 @@ const EventPreviewModal: React.FC<{
         open={open && !hidePreview}
         onClose={() => onClose({}, 'backdropClick')}
         showHeaderActions={false}
+        draggable
         actionsBorderTop={hasActionsBorderTop}
         actionsJustifyContent="center"
         style={{ overflow: 'auto' }}

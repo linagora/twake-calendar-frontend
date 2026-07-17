@@ -165,6 +165,7 @@ export function EventCounterModal({
         open={open}
         onClose={() => setOpen(false)}
         title={t('eventPreview.proposeNewTime')}
+        draggable
         actions={
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="text" onClick={() => setOpen(false)}>
