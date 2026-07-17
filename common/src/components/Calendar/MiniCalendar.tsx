@@ -1,7 +1,6 @@
 import { useAppDispatch } from '@common/app/hooks'
 import Tooltip from '@common/components/Tooltip'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { computeStartOfTheWeek } from '@common/utils/dateUtils'
 import type { CalendarApi } from '@fullcalendar/core'
 import { IconButton, SxProps } from '@linagora/twake-mui'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
@@ -14,7 +13,6 @@ import {
 import dayjs from 'dayjs'
 import { forwardRef, useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { CALENDAR_VIEWS } from './utils/constants'
 
 const NextIconButton = forwardRef<
   HTMLButtonElement,
@@ -132,31 +130,10 @@ export const MiniCalendar: React.FC<{
             selected.setHours(0, 0, 0, 0)
 
             const isToday = ownerState.day.isSame(today, 'day')
-            const isSelectedDay =
-              calendarRef.current?.view.type === CALENDAR_VIEWS.timeGridDay &&
-              date.getTime() === selected.getTime()
-
-            const isInSelectedWeek =
-              calendarRef.current?.view.type === CALENDAR_VIEWS.timeGridWeek ||
-              calendarRef.current?.view.type === undefined
-                ? ((): boolean => {
-                    const startOfWeek = computeStartOfTheWeek(selected)
-                    const endOfWeek = new Date(startOfWeek)
-                    endOfWeek.setDate(startOfWeek.getDate() + 6)
-                    endOfWeek.setHours(23, 59, 59, 999)
-                    return date >= startOfWeek && date <= endOfWeek
-                  })()
-                : false
-
-            const classNames = [
-              isToday ? 'today' : '',
-              isSelectedDay ? 'selectedDay' : '',
-              isInSelectedWeek ? 'selectedWeek' : ''
-            ].join(' ')
+            const classNames = [isToday ? 'today' : ''].join(' ')
 
             return {
               className: classNames,
-              selected: classNames.includes('selectedWeek'),
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
               style: {
                 backgroundColor: 'transparent',
@@ -167,9 +144,7 @@ export const MiniCalendar: React.FC<{
               sx: {
                 '&.Mui-selected': {
                   color: 'inherit !important',
-                  fontWeight: 'inherit !important'
-                },
-                '&.selectedDay': {
+                  fontWeight: 'inherit !important',
                   backgroundColor: 'lightgray !important'
                 },
                 '&.today': {
