@@ -13,6 +13,7 @@ import {
   DayAvailability,
   DAYS
 } from '../components/RegularHoursField/RegularHoursTypes'
+import { defaultColors } from '@common/utils/defaultColors'
 
 interface UseAppointmentFormOptions {
   bookingLink?: BookingLink
@@ -80,7 +81,7 @@ const formStateFromBookingLink = (
         })) || []
     }
   }),
-  color: bookingLink.color ?? calendarColor ?? '#0B57D0'
+  color: bookingLink.color ?? calendarColor ?? defaultColors[4].dark
 })
 
 const defaultFormState = (
@@ -104,7 +105,7 @@ const defaultFormState = (
       slots: [{ start: '09:00', end: '18:00' }]
     }
   }),
-  color: defaultCalendarColor ?? '#0B57D0'
+  color: defaultCalendarColor ?? defaultColors[4].dark
 })
 
 interface FormSetters {
