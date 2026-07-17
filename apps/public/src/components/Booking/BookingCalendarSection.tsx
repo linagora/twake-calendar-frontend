@@ -82,6 +82,9 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
             '&:not(.Mui-selected)': {
               backgroundColor: theme.palette.grey[200]
             },
+            '&:not(.Mui-selected):hover': {
+              backgroundColor: theme.palette.grey[300]
+            },
             '&.Mui-selected': { backgroundColor: 'text.secondary' }
           })
       }}
