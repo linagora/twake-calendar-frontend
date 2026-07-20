@@ -10,8 +10,8 @@ export const useManageCalendarSelection = (): {
   setSelectedCalendars: React.Dispatch<React.SetStateAction<string[]>>
   tempUsers: User[]
   setTempUsers: React.Dispatch<React.SetStateAction<User[]>>
-  selectedMiniDate: Date
-  setSelectedMiniDate: React.Dispatch<React.SetStateAction<Date>>
+  selectedMiniDate: Date | null
+  setSelectedMiniDate: React.Dispatch<React.SetStateAction<Date | null>>
 } => {
   const calendars = useAppSelector(state => state.calendars.list)
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
@@ -20,7 +20,7 @@ export const useManageCalendarSelection = (): {
   const [selectedCalendars, setSelectedCalendars] =
     useState<string[]>(storedCalendars)
   const [tempUsers, setTempUsers] = useState<User[]>([])
-  const [selectedMiniDate, setSelectedMiniDate] = useState(new Date())
+  const [selectedMiniDate, setSelectedMiniDate] = useState<Date | null>(null)
 
   const calendarIdsString = useMemo(
     () =>

@@ -74,15 +74,17 @@ PreviousIconButton.displayName = 'PreviousIconButton'
 
 export const MiniCalendar: React.FC<{
   calendarRef: React.MutableRefObject<CalendarApi | null>
-  selectedDate: Date
+  selectedDate: Date | null
   setSelectedMiniDate: (d: Date) => void
 }> = ({ calendarRef, selectedDate, setSelectedMiniDate }) => {
   const dispatch = useAppDispatch()
-  const [visibleDate, setVisibleDate] = useState(selectedDate)
+  const [visibleDate, setVisibleDate] = useState(selectedDate ?? new Date())
 
   useEffect(() => {
     const handleVisibleDateChange = (): void => {
-      setVisibleDate(selectedDate)
+      if (selectedDate) {
+        setVisibleDate(selectedDate)
+      }
     }
     handleVisibleDateChange()
   }, [selectedDate])
@@ -126,17 +128,18 @@ export const MiniCalendar: React.FC<{
           day: ownerState => {
             const date = ownerState.day.toDate()
             const today = dayjs()
-            const selected = new Date(selectedDate)
-            selected.setHours(0, 0, 0, 0)
 
             const isToday = ownerState.day.isSame(today, 'day')
+            const isSelected =
+              selectedDate &&
+              date.getTime() === new Date(selectedDate).setHours(0, 0, 0, 0)
             const classNames = [isToday ? 'today' : ''].join(' ')
 
             return {
               className: classNames,
+              selected: isSelected,
               outsideCurrentMonth: ownerState.isDayOutsideMonth,
               style: {
-                backgroundColor: 'transparent',
                 position: 'relative',
                 flexDirection: 'column',
                 border: 0

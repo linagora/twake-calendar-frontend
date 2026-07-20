@@ -51,7 +51,7 @@ export interface CalendarControllerProps {
   setSelectedCalendars: (calendars: string[]) => void
   tempUsers: User[]
   setTempUsers: (users: User[]) => void
-  selectedMiniDate: Date
+  selectedMiniDate: Date | null
   setSelectedMiniDate: (date: Date) => void
   onDateChange?: (date: Date) => void
   onViewChange: (view: string) => void

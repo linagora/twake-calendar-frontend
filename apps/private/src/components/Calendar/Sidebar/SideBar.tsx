@@ -13,7 +13,7 @@ export interface CalendarSidebarProps {
   isIframe?: boolean
   onCreateEvent: () => void
   onViewChange: (view: string) => void
-  selectedMiniDate: Date
+  selectedMiniDate: Date | null
   setSelectedMiniDate: (date: Date) => void
   selectedCalendars: string[]
   setSelectedCalendars: Dispatch<SetStateAction<string[]>>
