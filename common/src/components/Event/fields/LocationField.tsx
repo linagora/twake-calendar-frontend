@@ -1,5 +1,5 @@
 import { TextField } from '@linagora/twake-mui'
-import { LocationOn as LocationIcon } from '@mui/icons-material'
+import { LocationOnOutlined as LocationIcon } from '@mui/icons-material'
 import { useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
