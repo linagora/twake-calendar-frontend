@@ -111,6 +111,7 @@
   },
   "event": {
     "createEvent": "Create",
+    "createInAgenda": "Create in %{owner}'s agenda",
     "updateEvent": "Update Event",
     "organizer": "Organizer",
     "untitled": "Untitled",

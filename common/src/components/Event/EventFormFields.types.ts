@@ -120,6 +120,9 @@ export interface EventFormFieldsProps {
 
   // Validation notification for parent (e.g. to disable Save button)
   onValidationChange?: (isValid: boolean) => void
+
+  // Callback when calendar selection changes
+  onCalendarChange?: (newCalendarId: string) => void
 }
 
 export interface UseEventFormValuesReturn {

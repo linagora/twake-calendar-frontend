@@ -1,10 +1,14 @@
 import { useAppSelector } from '@common/app/hooks'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
-import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
+import type {
+  EventFormHandle,
+  EventFormValues
+} from '@common/components/Event/EventFormFields.types'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
+import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -36,6 +40,9 @@ const EventPopover: React.FC<{
   const calList = useAppSelector(state => state.calendars.list)
 
   const [showMore, setShowMore] = useState(false)
+  const [selectedCalendarId, setSelectedCalendarId] = useState<
+    string | undefined
+  >(undefined)
   const formRef = useRef<EventFormHandle>(null)
 
   const initialValues = useBuildInitialValues({
@@ -47,6 +54,28 @@ const EventPopover: React.FC<{
     cal =>
       cal.id?.split('/')[0] === userId || (cal.delegated && cal.access?.write)
   )
+
+  const currentCalendarId = selectedCalendarId ?? initialValues.calendarid
+  const selectedCalendar = useMemo(() => {
+    if (!currentCalendarId) return undefined
+    return userPersonalCalendars.find(cal => cal.id === currentCalendarId)
+  }, [currentCalendarId, userPersonalCalendars])
+
+  const isDelegatedCalendar = !!selectedCalendar?.delegated
+  const calendarOwnerName = useMemo(() => {
+    if (!isDelegatedCalendar || !selectedCalendar) return ''
+    return makeDisplayName(selectedCalendar) ?? ''
+  }, [isDelegatedCalendar, selectedCalendar])
+
+  const modalTitle = useMemo(() => {
+    if (event?.uid) {
+      return t('eventDuplication.duplicateEvent')
+    }
+    if (isDelegatedCalendar && calendarOwnerName) {
+      return t('event.createInAgenda', { owner: calendarOwnerName })
+    }
+    return t('event.createEvent')
+  }, [event?.uid, isDelegatedCalendar, calendarOwnerName, t])
 
   useEffect(() => {
     const resetShowMore = (): void => {
@@ -73,17 +102,18 @@ const EventPopover: React.FC<{
     clearEventFormTempData('create')
     onClose(false)
     setShowMore(false)
+    setSelectedCalendarId(undefined)
   }, [onClose])
+
+  const handleCalendarChange = useCallback((newCalendarId: string) => {
+    setSelectedCalendarId(newCalendarId)
+  }, [])
 
   return (
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
-      title={
-        event?.uid
-          ? t('eventDuplication.duplicateEvent')
-          : t('event.createEvent')
-      }
+      title={modalTitle}
       isExpanded={showMore}
       onExpandToggle={() => setShowMore(s => !s)}
       actions={
@@ -109,6 +139,7 @@ const EventPopover: React.FC<{
         onSubmit={handleSubmit}
         onCancel={handleClose}
         tempStorageKey="create"
+        onCalendarChange={handleCalendarChange}
         onStartChange={handleStartChange}
         onEndChange={handleEndChange}
         onAllDayChange={handleAllDayChange}
