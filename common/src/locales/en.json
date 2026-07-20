@@ -338,6 +338,20 @@
       "DECLINED": "Declined",
       "NEEDS-ACTION": "Pending"
     },
+    "organizer": {
+      "ACCEPTED": "Meeting accepted by organizer",
+      "TENTATIVE": "Meeting tentatively accepted by organizer",
+      "DECLINED": "Meeting declined by organizer",
+      "NEEDS-ACTION": "Waiting for organizer response",
+      "WAITING": "Waiting for organizer response"
+    },
+    "attendee": {
+      "ACCEPTED": "You are attending",
+      "TENTATIVE": "You tentatively accepted",
+      "DECLINED": "You declined",
+      "NEEDS-ACTION": "Awaiting your response",
+      "WAITING": "Awaiting your response"
+    },
     "showMore": "Show more",
     "showLess": "Show less",
     "editInOrganizerCalendar": "Edit in %{calendarName}",

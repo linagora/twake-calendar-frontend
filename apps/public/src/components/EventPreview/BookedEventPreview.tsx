@@ -1,9 +1,9 @@
 import { EventPreviewDetails } from '@/components/EventPreview/EventPreviewDetails'
+import { EventStatus } from '@/components/EventPreview/EventStatus'
 import { SuccessFooter } from '@/features/booking/components/BookingSuccessDialog'
 import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { Loading } from '@common/components/Loading/Loading'
-import { Typography } from '@linagora/twake-mui'
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useI18n } from 'twake-i18n'
@@ -70,13 +70,7 @@ export const BookedEventPreviewPage: React.FC = () => {
         timezone={event?.timezone}
         t={t}
       />
-
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        {organizerPartstat
-          ? t(`booking.organizerStatus.${organizerPartstat}`)
-          : t('booking.organizerStatus.WAITING')}
-      </Typography>
-
+      <EventStatus partStat={organizerPartstat} isOrganizer />
       <EventPreviewDetails event={event} isOwn={false} isNotPrivate={true} />
       <SuccessFooter
         onCancelMeeting={handleCancelMeeting}

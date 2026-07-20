@@ -338,6 +338,20 @@
       "DECLINED": "Đã từ chối",
       "NEEDS-ACTION": "Đang chờ"
     },
+    "organizer": {
+      "ACCEPTED": "Người tổ chức đã chấp nhận cuộc họp",
+      "TENTATIVE": "Người tổ chức đã chấp nhận tạm thời cuộc họp",
+      "DECLINED": "Người tổ chức đã từ chối cuộc họp",
+      "NEEDS-ACTION": "Đang chờ phản hồi từ người tổ chức",
+      "WAITING": "Đang chờ phản hồi từ người tổ chức"
+    },
+    "attendee": {
+      "ACCEPTED": "Bạn đã chấp nhận tham dự",
+      "TENTATIVE": "Bạn đã chấp nhận tạm thời",
+      "DECLINED": "Bạn đã từ chối",
+      "NEEDS-ACTION": "Đang chờ phản hồi của bạn",
+      "WAITING": "Đang chờ phản hồi của bạn"
+    },
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "editInOrganizerCalendar": "Chỉnh sửa trong %{calendarName}",

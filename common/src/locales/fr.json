@@ -338,6 +338,20 @@
       "DECLINED": "Refusé",
       "NEEDS-ACTION": "En attente"
     },
+    "organizer": {
+      "ACCEPTED": "Réunion acceptée par l'organisateur",
+      "TENTATIVE": "Réunion acceptée provisoirement par l'organisateur",
+      "DECLINED": "Réunion refusée par l'organisateur",
+      "NEEDS-ACTION": "En attente de réponse de l'organisateur",
+      "WAITING": "En attente de réponse de l'organisateur"
+    },
+    "attendee": {
+      "ACCEPTED": "Vous participez",
+      "TENTATIVE": "Vous avez accepté provisoirement",
+      "DECLINED": "Vous avez refusé",
+      "NEEDS-ACTION": "En attente de votre réponse",
+      "WAITING": "En attente de votre réponse"
+    },
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "editInOrganizerCalendar": "Modifier dans %{calendarName}",

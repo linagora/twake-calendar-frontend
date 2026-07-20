@@ -13,6 +13,18 @@ import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { PartStat } from '@common/features/User/models/attendee'
+
+export const classIcon = (partStat?: PartStat) =>
+  partStat === 'ACCEPTED' ? (
+    <Box sx={{ color: 'success.main' }}>
+      <CheckCircleIcon fontSize="inherit" color="inherit" />
+    </Box>
+  ) : partStat === 'DECLINED' ? (
+    <Box sx={{ color: 'error.main' }}>
+      <CancelIcon fontSize="inherit" color="inherit" />
+    </Box>
+  ) : null
 
 export function renderAttendeeBadge(
   a: userAttendee,
@@ -22,17 +34,7 @@ export function renderAttendeeBadge(
   isOrganizer?: boolean,
   caption?: string
 ) {
-  const classIcon =
-    a.partstat === 'ACCEPTED' ? (
-      <Box sx={{ color: 'success.main' }}>
-        <CheckCircleIcon fontSize="inherit" color="inherit" />
-      </Box>
-    ) : a.partstat === 'DECLINED' ? (
-      <Box sx={{ color: 'error.main' }}>
-        <CancelIcon fontSize="inherit" color="inherit" />
-      </Box>
-    ) : null
-
+  const icon = classIcon(a.partstat)
   if (!isFull) {
     return <Avatar key={key} {...stringAvatar(a.cn || a.cal_address)} />
   } else {
@@ -59,7 +61,7 @@ export function renderAttendeeBadge(
             sx={{ marginRight: 2 }}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             badgeContent={
-              classIcon && (
+              icon && (
                 <Box
                   style={{
                     fontSize: 14,
@@ -69,7 +71,7 @@ export function renderAttendeeBadge(
                     padding: '1px'
                   }}
                 >
-                  {classIcon}
+                  {icon}
                 </Box>
               )
             }
