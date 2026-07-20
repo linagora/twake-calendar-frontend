@@ -1,10 +1,7 @@
 import { useAppSelector } from '@common/app/hooks'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import EventFormFields from '@common/components/Event/EventFormFields'
-import type {
-  EventFormHandle,
-  EventFormValues
-} from '@common/components/Event/EventFormFields.types'
+import type { EventFormHandle } from '@common/components/Event/EventFormFields.types'
 import { clearEventFormTempData } from '@common/utils/eventFormTempStorage'
 import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
