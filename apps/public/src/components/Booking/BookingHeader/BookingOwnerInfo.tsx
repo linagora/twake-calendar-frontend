@@ -48,8 +48,10 @@ export const BookingEventDetails: React.FC<{
   const { t } = useI18n()
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Typography variant="subtitle1">{bookingInfo.name}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mt: 1 }}>
+        {bookingInfo.name && (
+          <Typography variant="subtitle1">{bookingInfo.name}</Typography>
+        )}
         <TimerOutlinedIcon sx={{ color: 'text.secondary' }} />
         <Typography
           variant="caption"

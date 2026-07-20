@@ -28,9 +28,7 @@ export const BookingHeaderDesktop: React.FC<{
         }}
       >
         <BookingOwnerDisplay owner={bookingInfo.owner} />
-        <Box sx={{ ml: bookingInfo.title ? 6.5 : 5 }}>
-          <BookingEventDetails bookingInfo={bookingInfo} />
-        </Box>
+        <BookingEventDetails bookingInfo={bookingInfo} />
       </Box>
       <BookingMetaInfo
         selectedTimezone={selectedTimezone}
