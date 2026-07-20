@@ -276,6 +276,7 @@ function ResponsiveDialog({
         fullScreen={isMobile}
         fullWidth
         transitionDuration={isExpanded ? 0 : 300}
+        {...otherDialogProps}
         sx={
           [
             ...(baseSx ? [baseSx] : []),
@@ -285,15 +286,14 @@ function ResponsiveDialog({
         style={isExpanded ? { zIndex: 1200 } : undefined}
         PaperComponent={DraggablePaper}
         aria-labelledby={titleId}
-        {...otherDialogProps}
       >
         <DialogTitle
+          {...dialogTitleProps}
           id={titleId}
           className="draggable-dialog-title"
           sx={
             [titleSx, isDraggable ? { cursor: 'move' } : {}] as SxProps<Theme>
           }
-          {...dialogTitleProps}
         >
           {isExpanded && onExpandToggle && !isMobile ? (
             <IconButton
