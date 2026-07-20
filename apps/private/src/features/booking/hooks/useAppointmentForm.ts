@@ -14,6 +14,7 @@ import {
   DAYS
 } from '../components/RegularHoursField/RegularHoursTypes'
 import { defaultColors } from '@common/utils/defaultColors'
+import { DEFAULT_SLOT } from './useRegularHours'
 
 interface UseAppointmentFormOptions {
   bookingLink?: BookingLink
@@ -74,11 +75,10 @@ const formStateFromBookingLink = (
     return {
       dayOfWeek: day,
       enabled: !!rules?.length,
-      slots:
-        rules?.map((r: WeeklyAvailabilityRule) => ({
-          start: r.start,
-          end: r.end
-        })) || []
+      slots: rules?.map((r: WeeklyAvailabilityRule) => ({
+        start: r.start,
+        end: r.end
+      })) || [DEFAULT_SLOT]
     }
   }),
   color: bookingLink.color ?? calendarColor ?? defaultColors[4].dark
@@ -102,7 +102,7 @@ const defaultFormState = (
     return {
       dayOfWeek: day,
       enabled: isWorkingDay,
-      slots: [{ start: '09:00', end: '18:00' }]
+      slots: [DEFAULT_SLOT]
     }
   }),
   color: defaultCalendarColor ?? defaultColors[4].dark
