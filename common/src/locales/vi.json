@@ -111,6 +111,7 @@
   },
   "event": {
     "createEvent": "Tạo sự kiện",
+    "createInAgenda": "Tạo trong lịch của %{owner}",
     "updateEvent": "Cập nhật sự kiện",
     "organizer": "Người tổ chức",
     "untitled": "Không có tiêu đề",

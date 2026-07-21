@@ -111,6 +111,7 @@
   },
   "event": {
     "createEvent": "Создать",
+    "createInAgenda": "Создать в календаре %{owner}",
     "updateEvent": "Обновить событие",
     "organizer": "Организатор",
     "untitled": "Без названия",
