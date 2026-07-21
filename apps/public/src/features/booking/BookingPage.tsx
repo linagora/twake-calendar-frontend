@@ -5,7 +5,7 @@ import { Box, CircularProgress, Divider } from '@linagora/twake-mui'
 import { useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { cancelBookedEvent, createBooking } from './BookingDao'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { HTTPError } from 'ky'
 import { BookingCalendarSection } from '../../components/Booking/BookingCalendarSection'
 import { BookingConfirmDialog } from './components/BookingDialog'
@@ -76,12 +76,30 @@ export const BookingPage: React.FC = () => {
 
   const availableDays = useMemo(() => new Set(slotsByDay.keys()), [slotsByDay])
 
+  // Compute effective selected day - use default if user hasn't selected yet
+  const effectiveSelectedDay = useMemo<Dayjs | null>(() => {
+    // If user has already selected a day, use that
+    if (selectedDay !== null) {
+      return selectedDay
+    }
+    // Otherwise, default to today or first available day
+    if (availableDays.size === 0) {
+      return null
+    }
+    const today = dayjs().format('YYYY-MM-DD')
+    if (availableDays.has(today)) {
+      return dayjs()
+    }
+    const earliestDay = Array.from(availableDays).sort().at(0)
+    return earliestDay ? dayjs(earliestDay) : null
+  }, [availableDays, selectedDay])
+
   const slotsForSelectedDay = useMemo<Slot[]>(() => {
-    if (!selectedDay) {
+    if (!effectiveSelectedDay) {
       return []
     }
-    return slotsByDay.get(selectedDay.format('YYYY-MM-DD')) ?? []
-  }, [selectedDay, slotsByDay])
+    return slotsByDay.get(effectiveSelectedDay.format('YYYY-MM-DD')) ?? []
+  }, [effectiveSelectedDay, slotsByDay])
 
   const handleMonthChange = (month: Dayjs): void => {
     setVisibleMonth(new Date(month.year(), month.month(), 1))
@@ -234,7 +252,7 @@ export const BookingPage: React.FC = () => {
                     }}
                   >
                     <BookingCalendarSection
-                      selectedDay={selectedDay}
+                      selectedDay={effectiveSelectedDay}
                       availableDays={availableDays}
                       onSelectDay={handleSelectDay}
                       onMonthChange={handleMonthChange}
@@ -242,7 +260,7 @@ export const BookingPage: React.FC = () => {
                     />
                     {isMobile && <Divider />}
                     <BookingTimeSlotSection
-                      selectedDay={selectedDay}
+                      selectedDay={effectiveSelectedDay}
                       slots={slotsForSelectedDay}
                       selectedSlot={selectedSlot}
                       onSelectSlot={handleSelectSlot}
