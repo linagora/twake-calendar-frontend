@@ -86,7 +86,7 @@ export const BookingPage: React.FC = () => {
     if (availableDays.size === 0) {
       return null
     }
-    const today = dayjs().format('YYYY-MM-DD')
+    const today = dayjs().tz(selectedTimezone).format('YYYY-MM-DD')
     if (availableDays.has(today)) {
       return dayjs()
     }
