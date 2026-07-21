@@ -297,7 +297,7 @@ const BookingLinkChip: React.FC<{
               style={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                overflowWrap: 'break-word',
+                whiteSpace: 'nowrap',
                 fontSize: '0.875rem',
                 color: alpha(theme.palette.grey[900], 0.9)
               }}
