@@ -15,16 +15,24 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { PartStat } from '@common/features/User/models/attendee'
 
-export const classIcon = (partStat?: PartStat) =>
-  partStat === 'ACCEPTED' ? (
-    <Box sx={{ color: 'success.main' }}>
-      <CheckCircleIcon fontSize="inherit" color="inherit" />
-    </Box>
-  ) : partStat === 'DECLINED' ? (
-    <Box sx={{ color: 'error.main' }}>
-      <CancelIcon fontSize="inherit" color="inherit" />
-    </Box>
-  ) : null
+export const classIcon = (partStat?: PartStat) => {
+  switch (partStat) {
+    case 'ACCEPTED':
+      return (
+        <Box sx={{ color: 'success.main' }}>
+          <CheckCircleIcon fontSize="inherit" color="inherit" />
+        </Box>
+      )
+    case 'DECLINED':
+      return (
+        <Box sx={{ color: 'error.main' }}>
+          <CancelIcon fontSize="inherit" color="inherit" />
+        </Box>
+      )
+    default:
+      return null
+  }
+}
 
 export function renderAttendeeBadge(
   a: userAttendee,
