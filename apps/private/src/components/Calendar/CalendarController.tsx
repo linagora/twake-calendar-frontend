@@ -37,6 +37,7 @@ import { CalendarGrid } from '@common/components/Calendar/CalendarGrid'
 import ImportAlert from '@common/features/Events/ImportAlert'
 import { TimezoneChangeAlert } from '@common/components/Timezone/TimezoneChangeAlert'
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
+import dayjs from 'dayjs'
 
 export interface CalendarControllerRef {
   handleCreateEvent: () => void
@@ -273,16 +274,22 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     const calendarCurrentDate =
       calendarRef.current?.getDate() || new Date(arg.start)
     setDisplayedDateAndRange(calendarCurrentDate)
+    const today = new Date()
 
     if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
       const start = new Date(arg.start).getTime()
       const end = new Date(arg.end).getTime()
       const middle = start + (end - start) / 2
       setSelectedDate(new Date(middle))
-      setSelectedMiniDate(calendarCurrentDate)
+      const todayIsInCurrentMonth = dayjs(today).isSame(
+        dayjs(arg.start),
+        'month'
+      )
+      setSelectedMiniDate(todayIsInCurrentMonth ? today : calendarCurrentDate)
     } else {
       setSelectedDate(calendarCurrentDate)
-      setSelectedMiniDate(calendarCurrentDate)
+      const todayIsInCurrentWeek = dayjs(today).isSame(dayjs(arg.start), 'week')
+      setSelectedMiniDate(todayIsInCurrentWeek ? today : calendarCurrentDate)
     }
 
     if (onDateChange) {
