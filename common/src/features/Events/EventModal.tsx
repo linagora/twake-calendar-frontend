@@ -102,9 +102,13 @@ const EventPopover: React.FC<{
     setSelectedCalendarId(undefined)
   }, [onClose])
 
-  const handleCalendarChange = useCallback((newCalendarId: string) => {
-    setSelectedCalendarId(newCalendarId)
-  }, [])
+  const handleCalendarChange = useCallback(
+    (newCalendarId: string) => {
+      setSelectedCalendarId(newCalendarId)
+      setDraftCalendarId?.(newCalendarId)
+    },
+    [setDraftCalendarId]
+  )
 
   return (
     <ResponsiveDialog
@@ -140,7 +144,6 @@ const EventPopover: React.FC<{
         onStartChange={handleStartChange}
         onEndChange={handleEndChange}
         onAllDayChange={handleAllDayChange}
-        onCalendarChange={setDraftCalendarId}
       />
     </ResponsiveDialog>
   )
