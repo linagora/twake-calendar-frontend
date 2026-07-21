@@ -112,7 +112,8 @@ function getCardVariantStyle(
     color: baseColor,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    cursor: 'pointer'
   }
 
   switch (variant) {
