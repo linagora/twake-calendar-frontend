@@ -144,8 +144,11 @@ export const EventDescriptionRow: React.FC<{
   const displayedDescription = removeVideoConferenceFromDescription(
     description ?? ''
   )
+  const displayableAttach = attach?.filter(attachment =>
+    attachment.hasDisplayableFilename()
+  )
   const showAttachments =
-    window.ENABLE_EVENT_ATTACHMENTS === true && !!attach?.length
+    window.ENABLE_EVENT_ATTACHMENTS === true && !!displayableAttach?.length
   if (!(displayedDescription || showAttachments)) return null
 
   return (
@@ -155,7 +158,9 @@ export const EventDescriptionRow: React.FC<{
       icon={<SubjectIcon />}
       text={displayedDescription}
       content={
-        showAttachments && attach && <AttachementPreview attachments={attach} />
+        showAttachments && displayableAttach && (
+          <AttachementPreview attachments={displayableAttach} />
+        )
       }
     />
   )

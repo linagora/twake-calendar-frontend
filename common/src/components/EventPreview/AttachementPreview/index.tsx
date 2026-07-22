@@ -16,7 +16,13 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
   const { t } = useI18n()
   const [showAllAttachments, setShowAllAttachments] = useState(false)
 
-  if (!attachments?.length) {
+  // Attachments positioned by third party clients (e.g. inline CID references)
+  // carry no filename and would render as an empty, broken chip: filter them out.
+  const displayableAttachments = attachments?.filter(attachment =>
+    attachment.hasDisplayableFilename()
+  )
+
+  if (!displayableAttachments?.length) {
     return null
   }
 
@@ -24,8 +30,11 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
     <Box
       sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}
     >
-      {renderAttachments({ attachments, slice: 'first' })}
-      {attachments.length > ATTACHMENT_DISPLAY_LIMIT && (
+      {renderAttachments({
+        attachments: displayableAttachments,
+        slice: 'first'
+      })}
+      {displayableAttachments.length > ATTACHMENT_DISPLAY_LIMIT && (
         <Button
           variant="text"
           size="small"
@@ -37,7 +46,11 @@ export const AttachementPreview: React.FC<AttachementPreviewProps> = ({
             : t('eventPreview.showMore')}
         </Button>
       )}
-      {showAllAttachments && renderAttachments({ attachments, slice: 'rest' })}
+      {showAllAttachments &&
+        renderAttachments({
+          attachments: displayableAttachments,
+          slice: 'rest'
+        })}
     </Box>
   )
 }
