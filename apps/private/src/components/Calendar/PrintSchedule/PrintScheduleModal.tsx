@@ -88,13 +88,10 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
       return
     }
 
-    const periods = buildPrintPeriods(
-      scale,
-      rangeStart,
-      rangeEnd,
-      lang,
-      t('print.weekPrefix')
-    )
+    const periods = buildPrintPeriods(scale, rangeStart, rangeEnd, {
+      locale: lang,
+      weekPrefix: t('print.weekPrefix')
+    })
     if (periods.length === 0) return
 
     setErrorKey(null)

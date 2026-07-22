@@ -1,8 +1,14 @@
 import './dayjsSetup'
 import { Dayjs } from 'dayjs'
-import { layoutTimedEvents } from './layout'
+import { PositionedEvent, layoutTimedEvents } from './layout'
 import { eventsInPeriod } from './selectPrintEvents'
 import { PrintEvent, PrintLabels, PrintPeriod } from './types'
+
+/** Vertical hour window a time grid is cropped to, in whole hours [0, 24]. */
+interface HourRange {
+  min: number
+  max: number
+}
 
 const HOUR_HEIGHT = 42
 const DEFAULT_START_HOUR = 8
@@ -39,7 +45,7 @@ const chip = (event: PrintEvent, withTime: boolean): string => {
   )
 }
 
-const hourBounds = (timed: PrintEvent[]): { min: number; max: number } => {
+const hourBounds = (timed: PrintEvent[]): HourRange => {
   let min = DEFAULT_START_HOUR
   let max = DEFAULT_END_HOUR
   timed.forEach(event => {
@@ -56,12 +62,9 @@ const daysOfPeriod = (period: PrintPeriod): Dayjs[] => {
 }
 
 const renderTimedEvent = (
-  event: PrintEvent,
-  column: number,
-  columns: number,
+  { event, column, columns }: PositionedEvent,
   dayStart: Dayjs,
-  min: number,
-  max: number
+  { min, max }: HourRange
 ): string => {
   const minMinutes = min * 60
   const maxMinutes = max * 60
@@ -85,8 +88,7 @@ const renderTimedEvent = (
 const renderDayColumn = (
   day: Dayjs,
   timed: PrintEvent[],
-  min: number,
-  max: number
+  bounds: HourRange
 ): string => {
   const dayStart = day.startOf('day')
   const dayEnd = dayStart.add(1, 'day')
@@ -94,9 +96,7 @@ const renderDayColumn = (
     event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
   )
   const blocks = layoutTimedEvents(forDay)
-    .map(({ event, column, columns }) =>
-      renderTimedEvent(event, column, columns, dayStart, min, max)
-    )
+    .map(placement => renderTimedEvent(placement, dayStart, bounds))
     .join('')
 
   return `<div class="tg-col">${blocks}</div>`
@@ -111,7 +111,8 @@ const renderTimeGrid = (
   const days = daysOfPeriod(period)
   const timed = periodEvents.filter(event => !event.allDay)
   const allDay = periodEvents.filter(event => event.allDay)
-  const { min, max } = hourBounds(timed)
+  const bounds = hourBounds(timed)
+  const { min, max } = bounds
 
   const headCells = days
     .map(day => {
@@ -147,7 +148,7 @@ const renderTimeGrid = (
     .join('')
 
   const columns = days
-    .map(day => renderDayColumn(day, timed, min, max))
+    .map(day => renderDayColumn(day, timed, bounds))
     .join('')
 
   const gridHeight = (max - min) * HOUR_HEIGHT

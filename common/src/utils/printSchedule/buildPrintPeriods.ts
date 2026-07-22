@@ -7,6 +7,12 @@ export const MAX_PRINT_PERIODS = 92
 
 type DayjsUnit = 'day' | 'week' | 'month'
 
+/** Localization inputs shared by every generated period label. */
+export interface PrintLabelOptions {
+  locale?: string
+  weekPrefix?: string
+}
+
 const scaleToUnit: Record<PrintScale, DayjsUnit> = {
   day: 'day',
   week: 'week',
@@ -22,8 +28,7 @@ const formatLabel = (
   start: Dayjs,
   end: Dayjs,
   scale: PrintScale,
-  locale: string,
-  weekPrefix: string
+  { locale = 'en', weekPrefix = 'W' }: PrintLabelOptions
 ): string => {
   const localizedStart = start.locale(locale)
   switch (scale) {
@@ -48,8 +53,7 @@ export const buildPrintPeriods = (
   scale: PrintScale,
   rangeStart: Dayjs,
   rangeEnd: Dayjs,
-  locale = 'en',
-  weekPrefix = 'W'
+  labels: PrintLabelOptions = {}
 ): PrintPeriod[] => {
   const unit = scaleToUnit[scale]
   const periods: PrintPeriod[] = []
@@ -66,7 +70,7 @@ export const buildPrintPeriods = (
       scale,
       start: cursor,
       end,
-      label: formatLabel(cursor, end, scale, locale, weekPrefix)
+      label: formatLabel(cursor, end, scale, labels)
     })
     cursor = end
   }
