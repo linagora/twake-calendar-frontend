@@ -28,7 +28,7 @@ interface UseRegularHoursReturn {
   getDayLabel: (day: DayOfWeek) => string
 }
 
-const DEFAULT_SLOT: TimeSlot = { start: '09:00', end: '18:00' }
+export const DEFAULT_SLOT: TimeSlot = { start: '09:00', end: '18:00' }
 const DEFAULT_SLOTS: TimeSlot[] = [DEFAULT_SLOT]
 
 const updateRule = (
@@ -62,7 +62,11 @@ export const useRegularHours = ({
   const handleToggleDay = (day: DayOfWeek): void => {
     updateAvailability(
       day,
-      rule => ({ ...rule, enabled: !rule.enabled }),
+      rule => ({
+        ...rule,
+        enabled: !rule.enabled,
+        slots: rule.slots?.length ? rule.slots : [...DEFAULT_SLOTS]
+      }),
       () => {
         const isWorkingDay = workingDays
           ? workingDays.includes(DAY_TO_FC[day])

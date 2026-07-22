@@ -2,7 +2,7 @@ import React from 'react'
 import { Stack } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { DayAvailability, DAYS, DAY_TO_FC } from './RegularHoursTypes'
-import { useRegularHours } from '../../hooks/useRegularHours'
+import { DEFAULT_SLOT, useRegularHours } from '../../hooks/useRegularHours'
 import { RegularHoursRow } from './RegularHoursRow'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
@@ -48,7 +48,7 @@ export const RegularHoursField: React.FC<RegularHoursFieldProps> = ({
               ? workingDays.includes(DAY_TO_FC[day])
               : true
             const isEnabled = rule ? rule.enabled : isWorkingDay
-            const slots = rule?.slots || [{ start: '09:00', end: '18:00' }]
+            const slots = rule?.slots?.length ? rule.slots : [DEFAULT_SLOT]
 
             return (
               <RegularHoursRow
