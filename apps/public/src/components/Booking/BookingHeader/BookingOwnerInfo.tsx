@@ -68,10 +68,7 @@ export const BookingEventDetails: React.FC<{
         </Typography>
       </Box>
       {bookingInfo.description && (
-        <Typography
-          variant="body2"
-          sx={{ color: 'text.secondary', mt: '4px', maxWidth: '320px' }}
-        >
+        <Typography variant="body2" sx={{ color: 'text.secondary', mt: '4px' }}>
           {bookingInfo.description}
         </Typography>
       )}
