@@ -49,6 +49,8 @@ declare global {
 
     BOOKING_LINK_ENABLED: boolean | undefined
 
+    ENABLE_EVENT_ATTACHMENTS: boolean | undefined
+
     ASK_FOR_TZ_UPDATE: boolean
 
     TOOLTIP_DELAY_MS: number
