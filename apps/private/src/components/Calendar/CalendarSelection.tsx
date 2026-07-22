@@ -243,6 +243,9 @@ const BookingLinkChip: React.FC<{
     ? (link.color ?? calendarColor ?? defaultColors[4].dark)
     : theme.palette.grey[400]
 
+  const linkName =
+    link.name || t('booking.durationMinutes', { count: link.durationMinutes })
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setMenuAnchorEl(event.currentTarget)
   }
@@ -279,32 +282,35 @@ const BookingLinkChip: React.FC<{
             display: 'flex',
             alignItems: 'center',
             maxWidth: 'calc(100% - 40px)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            cursor: 'pointer'
           }}
         >
           <div style={{ display: 'flex', padding: '9px', marginRight: '4px' }}>
             <EventIcon sx={{ color: iconColor }} fontSize="small" />
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <span
+          <Tooltip title={linkName} enterDelay={500} placement="bottom-start">
+            <div
               style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                fontSize: '0.875rem',
-                color: alpha(theme.palette.grey[900], 0.9)
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
               }}
             >
-              {link.name || `${link.durationMinutes}min`}
-            </span>
-          </div>
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontSize: '0.875rem',
+                  color: alpha(theme.palette.grey[900], 0.9)
+                }}
+              >
+                {linkName}
+              </span>
+            </div>
+          </Tooltip>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('tooltip.copyBookingLink')}>
@@ -752,47 +758,50 @@ const CalendarSelector: React.FC<{
           }
         }}
       >
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            maxWidth: 'calc(100% - 40px)',
-            overflow: 'hidden'
-          }}
-        >
-          <Checkbox
-            sx={{
-              color: calendars[id].color?.light,
-              '&.Mui-checked': { color: calendars[id].color?.light }
-            }}
-            size="small"
-            checked={selectedCalendars.includes(id)}
-            onChange={() => handleCalendarToggle(id)}
-            slotProps={{ input: { 'aria-label': displayName } }}
-          />
-          <div
+        <Tooltip title={displayName} enterDelay={500} placement="bottom-start">
+          <label
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              padding: showCaption ? '6px' : undefined
+              alignItems: 'center',
+              maxWidth: 'calc(100% - 40px)',
+              overflow: 'hidden'
             }}
           >
-            <span
+            <Checkbox
+              sx={{
+                color: calendars[id].color?.light,
+                '&.Mui-checked': { color: calendars[id].color?.light }
+              }}
+              size="small"
+              checked={selectedCalendars.includes(id)}
+              onChange={() => handleCalendarToggle(id)}
+              slotProps={{ input: { 'aria-label': displayName } }}
+            />
+            <div
               style={{
+                display: 'flex',
+                flexDirection: 'column',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                overflowWrap: 'break-word'
+                padding: showCaption ? '6px' : undefined
               }}
             >
-              {displayName}
-            </span>
-            <OwnerCaption
-              showCaption={showCaption}
-              ownerDisplayName={ownerDisplayName ?? ''}
-            />
-          </div>
-        </label>
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {displayName}
+              </span>
+              <OwnerCaption
+                showCaption={showCaption}
+                ownerDisplayName={ownerDisplayName ?? ''}
+              />
+            </div>
+          </label>
+        </Tooltip>
         {!isMobile && (
           <IconButton className="MoreBtn" onClick={handleClick}>
             <MoreHorizIcon />
