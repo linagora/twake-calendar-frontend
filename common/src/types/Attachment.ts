@@ -7,6 +7,10 @@ export class Attachment {
     public x_filename?: string
   ) {}
 
+  isDisplayable(): boolean {
+    return Boolean(this.x_filename?.trim())
+  }
+
   asJcal(): VObjectProperty {
     const params: Record<string, string> = {}
     if (this.fmttype) params['fmttype'] = this.fmttype
