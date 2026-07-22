@@ -87,9 +87,15 @@ describe('CalendarSelection', () => {
     expect(screen.getByText('calendar.delegated')).toBeInTheDocument()
     expect(screen.getByText('calendar.other')).toBeInTheDocument()
 
-    expect(screen.getByLabelText('Calendar personal')).toBeChecked()
-    expect(screen.getByLabelText('Calendar delegated')).not.toBeChecked()
-    expect(screen.getByLabelText('Calendar shared')).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar personal' })
+    ).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar delegated' })
+    ).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar shared' })
+    ).not.toBeChecked()
   })
 
   it('does not render resources when HIDE_RESOURCES is true', () => {
@@ -161,7 +167,7 @@ describe('CalendarSelection', () => {
       }
     )
 
-    const checkbox = screen.getByLabelText('Calendar personal')
+    const checkbox = screen.getByRole('checkbox', { name: 'Calendar personal' })
     fireEvent.click(checkbox)
 
     expect(setSelectedCalendars).toHaveBeenCalledWith(expect.any(Function))
@@ -184,7 +190,7 @@ describe('CalendarSelection', () => {
       }
     )
 
-    const checkbox = screen.getByLabelText('Calendar personal')
+    const checkbox = screen.getByRole('checkbox', { name: 'Calendar personal' })
     fireEvent.click(checkbox)
 
     const updater = setSelectedCalendars.mock.calls[0][0]

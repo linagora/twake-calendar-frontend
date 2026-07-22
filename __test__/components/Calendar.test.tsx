@@ -148,9 +148,15 @@ describe('CalendarSelection', () => {
     expect(screen.getByText('calendar.delegated')).toBeInTheDocument()
     expect(screen.getByText('calendar.other')).toBeInTheDocument()
 
-    expect(screen.getByLabelText('Calendar personal')).toBeInTheDocument()
-    expect(screen.getByLabelText('Calendar delegated')).toBeInTheDocument()
-    expect(screen.getByLabelText('Calendar shared')).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar personal' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar delegated' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar shared' })
+    ).toBeInTheDocument()
   })
   it('open accordeon when clicking on button only', async () => {
     await act(async () => {
@@ -160,9 +166,15 @@ describe('CalendarSelection', () => {
     expect(screen.getByText('calendar.delegated')).toBeInTheDocument()
     expect(screen.getByText('calendar.other')).toBeInTheDocument()
 
-    expect(screen.getByLabelText('Calendar personal')).toBeInTheDocument()
-    expect(screen.getByLabelText('Calendar delegated')).toBeInTheDocument()
-    expect(screen.getByLabelText('Calendar shared')).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar personal' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar delegated' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar shared' })
+    ).toBeInTheDocument()
 
     const sharedAccordionSummary = screen
       .getByText('calendar.other')
@@ -188,22 +200,36 @@ describe('CalendarSelection', () => {
       renderWithProviders(<CalendarLayout />, preloadedState)
     })
 
-    expect(screen.getByLabelText('Calendar personal')).toBeChecked()
-    expect(screen.getByLabelText('Calendar delegated')).toBeChecked()
-    expect(screen.getByLabelText('Calendar shared')).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar personal' })
+    ).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar delegated' })
+    ).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar shared' })
+    ).toBeChecked()
   })
   it('persist selected calendars in local storage', async () => {
     await act(async () => {
       renderWithProviders(<CalendarLayout />, preloadedState)
     })
 
-    expect(screen.getByLabelText('Calendar personal')).toBeChecked()
-    expect(screen.getByLabelText('Calendar delegated')).not.toBeChecked()
-    expect(screen.getByLabelText('Calendar shared')).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar personal' })
+    ).toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar delegated' })
+    ).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: 'Calendar shared' })
+    ).not.toBeChecked()
 
     await act(async () => {
-      fireEvent.click(screen.getByLabelText('Calendar personal'))
-      fireEvent.click(screen.getByLabelText('Calendar shared'))
+      fireEvent.click(
+        screen.getByRole('checkbox', { name: 'Calendar personal' })
+      )
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Calendar shared' }))
     })
 
     expect(localStorage.getItem('selectedCalendars')).toBe('["user3/cal1"]')
@@ -389,7 +415,7 @@ describe('calendar Availability search', () => {
       })
     )
 
-    const checkbox = screen.getByLabelText('Calendar personal')
+    const checkbox = screen.getByRole('checkbox', { name: 'Calendar personal' })
     expect(checkbox).toBeChecked()
 
     fireEvent.click(checkbox) // toggle off
