@@ -155,8 +155,7 @@ export const EventDescriptionRow: React.FC<{
       icon={<SubjectIcon />}
       text={displayedDescription}
       content={
-        showAttachments &&
-        attach && <AttachementPreview attachments={attach} />
+        showAttachments && attach && <AttachementPreview attachments={attach} />
       }
     />
   )
