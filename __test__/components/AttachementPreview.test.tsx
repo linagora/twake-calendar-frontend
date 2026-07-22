@@ -16,7 +16,9 @@ jest.mock(
       attachment
     }: {
       attachment: { x_filename?: string; uri: string }
-    }) => <div data-testid="chip">{attachment.x_filename ?? attachment.uri}</div>
+    }) => (
+      <div data-testid="chip">{attachment.x_filename ?? attachment.uri}</div>
+    )
   })
 )
 
