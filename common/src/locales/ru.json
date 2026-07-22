@@ -539,11 +539,11 @@
   },
   "publicLayout": {
     "logoAlt": "Twake Calendar",
-    "title": "Публичный календарь от Twake Calendar.",
-    "useSubjectTo": "Использование вами регулируется",
-    "privacyPolicy": "Политикой конфиденциальности Twake",
+    "title": "Публичный календарь Twake Calendar.",
+    "useSubjectTo": "Используя этот календарь, вы соглашаетесь с",
+    "privacyPolicy": "Политикой конфиденциальности",
     "and": "и",
-    "termsOfService": "Условиями обслуживания",
+    "termsOfService": "Условиями использования Twake",
     "dot": "."
   }
 }
