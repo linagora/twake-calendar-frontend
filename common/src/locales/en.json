@@ -481,7 +481,28 @@
     "createAppointment": "Create appointment schedule",
     "chat": "Chat",
     "copyEmail": "Copy email address",
-    "emailCopied": "Email copied"
+    "emailCopied": "Email copied",
+    "printSchedule": "Print your schedule as a PDF"
+  },
+  "print": {
+    "action": "Print schedule",
+    "title": "Print schedule",
+    "scale": "One page per",
+    "scale_day": "Day",
+    "scale_week": "Week",
+    "scale_month": "Month",
+    "period": "Period",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "generate": "Print",
+    "documentTitle": "Schedule",
+    "allDay": "All day",
+    "noTitle": "(No title)",
+    "weekPrefix": "Week",
+    "invalidRange": "The end date must be after the start date.",
+    "popupBlocked": "Please allow pop-ups to open the printable schedule."
   },
   "booking": {
     "addSlot": "Add slot",

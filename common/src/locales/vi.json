@@ -480,7 +480,29 @@
     "copyBookingLink": "Sao chép liên kết đặt lịch",
     "createAppointment": "Tạo lịch hẹn",
     "copyEmail": "Sao chép địa chỉ email",
-    "emailCopied": "Email đã được sao chép"
+    "emailCopied": "Email đã được sao chép",
+    "createAppointment": "Create appointment schedule",
+    "printSchedule": "In lịch của bạn dưới dạng PDF"
+  },
+  "print": {
+    "action": "In lịch",
+    "title": "In lịch",
+    "scale": "Mỗi trang một",
+    "scale_day": "Ngày",
+    "scale_week": "Tuần",
+    "scale_month": "Tháng",
+    "period": "Khoảng thời gian",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "thisWeek": "Tuần này",
+    "thisMonth": "Tháng này",
+    "generate": "In",
+    "documentTitle": "Lịch trình",
+    "allDay": "Cả ngày",
+    "noTitle": "(Không có tiêu đề)",
+    "weekPrefix": "Tuần",
+    "invalidRange": "Ngày kết thúc phải sau ngày bắt đầu.",
+    "popupBlocked": "Vui lòng cho phép cửa sổ bật lên để mở lịch cần in."
   },
   "booking": {
     "addSlot": "Thêm khung giờ",

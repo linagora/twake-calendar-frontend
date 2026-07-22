@@ -480,7 +480,28 @@
     "copyBookingLink": "Копировать ссылку для бронирования",
     "createAppointment": "Создать расписание встреч",
     "copyEmail": "Копировать адрес электронной почты",
-    "emailCopied": "Email скопирован"
+    "emailCopied": "Email скопирован",
+    "printSchedule": "Распечатать расписание в PDF"
+  },
+  "print": {
+    "action": "Печать расписания",
+    "title": "Печать расписания",
+    "scale": "Одна страница на",
+    "scale_day": "День",
+    "scale_week": "Неделя",
+    "scale_month": "Месяц",
+    "period": "Период",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания",
+    "thisWeek": "Эта неделя",
+    "thisMonth": "Этот месяц",
+    "generate": "Печать",
+    "documentTitle": "Расписание",
+    "allDay": "Весь день",
+    "noTitle": "(Без названия)",
+    "weekPrefix": "Неделя",
+    "invalidRange": "Дата окончания должна быть позже даты начала.",
+    "popupBlocked": "Разрешите всплывающие окна, чтобы открыть расписание для печати."
   },
   "booking": {
     "addSlot": "Добавить слот",
