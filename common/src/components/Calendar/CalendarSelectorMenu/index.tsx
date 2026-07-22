@@ -11,6 +11,7 @@ interface CalendarSelectorMenuProps {
   onModify: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
+  onPrint?: () => void
   isDefault: boolean
   isPersonal: boolean
   isVisible?: boolean
@@ -24,6 +25,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
   onModify,
   onDelete,
   onToggleVisibility,
+  onPrint,
   isDefault,
   isPersonal,
   isVisible
@@ -40,6 +42,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
         onModify={onModify}
         onDelete={onDelete}
         onToggleVisibility={onToggleVisibility}
+        onPrint={onPrint}
         isDefault={isDefault}
         isPersonal={isPersonal}
         isVisible={isVisible}
@@ -54,6 +57,7 @@ export const CalendarSelectorMenu: React.FC<CalendarSelectorMenuProps> = ({
       onModify={onModify}
       onDelete={onDelete}
       onToggleVisibility={onToggleVisibility}
+      onPrint={onPrint}
       isDefault={isDefault}
       isPersonal={isPersonal}
       isVisible={isVisible}

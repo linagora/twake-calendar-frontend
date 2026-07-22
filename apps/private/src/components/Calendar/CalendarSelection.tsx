@@ -58,6 +58,7 @@ import { CreateAppointmentModal } from '../../features/booking/CreateAppointment
 import { EditAppointmentModal } from '../../features/booking/EditAppointmentModal'
 import { handleCopyLink } from '@calendar/common/src/utils/handleCopyLink'
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
+import { PrintScheduleModal } from './PrintSchedule/PrintScheduleModal'
 
 type SectionHeader = {
   title: string
@@ -708,6 +709,7 @@ const CalendarSelector: React.FC<{
   const isDefault = isPersonal && userId === calId
 
   const [deletePopupOpen, setDeletePopupOpen] = useState(false)
+  const [printOpen, setPrintOpen] = useState(false)
   const handleDeleteConfirm = async (): Promise<void> => {
     await dispatch(removeCalendar({ calId: id, calLink }))
     setDeletePopupOpen(false)
@@ -818,9 +820,16 @@ const CalendarSelector: React.FC<{
         onModify={setOpen}
         onDelete={() => setDeletePopupOpen(true)}
         onToggleVisibility={() => handleCalendarToggle(id)}
+        onPrint={() => setPrintOpen(true)}
         isDefault={isDefault}
         isPersonal={isPersonal}
         isVisible={selectedCalendars.includes(id)}
+      />
+
+      <PrintScheduleModal
+        open={printOpen}
+        onClose={() => setPrintOpen(false)}
+        selectedCalendars={[id]}
       />
 
       <DeleteCalendarDialog

@@ -18,6 +18,7 @@ interface CalendarSelectorMobileMenuProps {
   onModify: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
+  onPrint?: () => void
   isDefault: boolean
   isPersonal: boolean
   isVisible?: boolean
@@ -31,6 +32,7 @@ export const CalendarSelectorMobileMenu: React.FC<
   onModify,
   onDelete,
   onToggleVisibility,
+  onPrint,
   isDefault,
   isPersonal,
   isVisible
@@ -66,6 +68,16 @@ export const CalendarSelectorMobileMenu: React.FC<
         >
           <ListItemText primary={t('actions.modify')} />
         </ListItemButton>
+        {onPrint !== undefined && (
+          <ListItemButton
+            onClick={() => {
+              onPrint()
+              onClose()
+            }}
+          >
+            <ListItemText primary={t('print.action')} />
+          </ListItemButton>
+        )}
         {!isDefault && (
           <ListItemButton
             onClick={() => {

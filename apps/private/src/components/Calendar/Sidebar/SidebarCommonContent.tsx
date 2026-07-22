@@ -2,7 +2,6 @@ import { Box } from '@linagora/twake-mui'
 import CalendarSelection from '../CalendarSelection'
 import { TempCalendarsInput } from '@common/components/Calendar/TempCalendarsInput'
 import { CalendarSidebarProps } from './SideBar'
-import { PrintScheduleButton } from '../PrintSchedule/PrintScheduleButton'
 
 export const SidebarCommonContent: React.FC<
   Pick<
@@ -36,9 +35,6 @@ export const SidebarCommonContent: React.FC<
           selectedCalendars={selectedCalendars}
           setSelectedCalendars={setSelectedCalendars}
         />
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <PrintScheduleButton selectedCalendars={selectedCalendars} />
       </Box>
     </>
   )
