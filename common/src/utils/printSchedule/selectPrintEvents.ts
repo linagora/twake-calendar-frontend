@@ -25,7 +25,10 @@ const resolveEnd = (
 ): Dayjs => {
   const rawEnd = event.end
     ? resolveInstant(event.end, allDay, timezone)
-    : start.add(allDay ? 1 : DEFAULT_DURATION_MINUTES, allDay ? 'day' : 'minute')
+    : start.add(
+        allDay ? 1 : DEFAULT_DURATION_MINUTES,
+        allDay ? 'day' : 'minute'
+      )
   // Guard against malformed events whose end precedes their start.
   return rawEnd.isAfter(start)
     ? rawEnd

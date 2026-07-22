@@ -2,7 +2,11 @@ import { PrintEvent } from '../types'
 import { layoutTimedEvents } from '../layout'
 import { printDayjs as dayjs } from '../index'
 
-const timed = (uid: string, startHour: number, endHour: number): PrintEvent => ({
+const timed = (
+  uid: string,
+  startHour: number,
+  endHour: number
+): PrintEvent => ({
   uid,
   title: uid,
   start: dayjs(`2026-07-22T${String(startHour).padStart(2, '0')}:00:00Z`),

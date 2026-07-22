@@ -34,11 +34,7 @@ describe('renderPrintDocument', () => {
       dayjs('2026-07-22'),
       dayjs('2026-07-22')
     )
-    const events = selectPrintEvents(
-      [makeEvent({})],
-      'Etc/UTC',
-      LABELS.noTitle
-    )
+    const events = selectPrintEvents([makeEvent({})], 'Etc/UTC', LABELS.noTitle)
 
     const html = renderPrintDocument({
       periods,

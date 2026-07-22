@@ -61,10 +61,7 @@ export const buildPrintPeriods = (
   let cursor = startOfPeriod(rangeStart, scale)
   const lastStart = startOfPeriod(rangeEnd, scale)
 
-  while (
-    !cursor.isAfter(lastStart) &&
-    periods.length < MAX_PRINT_PERIODS
-  ) {
+  while (!cursor.isAfter(lastStart) && periods.length < MAX_PRINT_PERIODS) {
     const end = cursor.add(1, unit)
     periods.push({
       scale,

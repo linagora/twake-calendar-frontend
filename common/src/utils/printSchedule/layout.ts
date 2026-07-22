@@ -16,7 +16,8 @@ export interface PositionedEvent {
  */
 export const layoutTimedEvents = (events: PrintEvent[]): PositionedEvent[] => {
   const sorted = [...events].sort(
-    (a, b) => a.start.valueOf() - b.start.valueOf() || a.end.valueOf() - b.end.valueOf()
+    (a, b) =>
+      a.start.valueOf() - b.start.valueOf() || a.end.valueOf() - b.end.valueOf()
   )
 
   const positioned: PositionedEvent[] = []

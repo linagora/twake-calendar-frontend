@@ -37,7 +37,8 @@ const timedEventLabel = (event: PrintEvent): string =>
   `${event.start.format('HH:mm')}–${event.end.format('HH:mm')}`
 
 const chip = (event: PrintEvent, withTime: boolean): string => {
-  const time = withTime && !event.allDay ? `${event.start.format('HH:mm')} ` : ''
+  const time =
+    withTime && !event.allDay ? `${event.start.format('HH:mm')} ` : ''
   return (
     `<div class="chip" style="${eventStyle(event.color)}">` +
     `<span class="chip-time">${esc(time)}</span>${esc(event.title)}` +
@@ -142,14 +143,11 @@ const renderTimeGrid = (
   const hours = Array.from({ length: max - min }, (_, i) => min + i)
   const timeLabels = hours
     .map(
-      hour =>
-        `<div class="tg-time">${String(hour).padStart(2, '0')}:00</div>`
+      hour => `<div class="tg-time">${String(hour).padStart(2, '0')}:00</div>`
     )
     .join('')
 
-  const columns = days
-    .map(day => renderDayColumn(day, timed, bounds))
-    .join('')
+  const columns = days.map(day => renderDayColumn(day, timed, bounds)).join('')
 
   const gridHeight = (max - min) * HOUR_HEIGHT
   const gridStyle =
@@ -176,8 +174,10 @@ const renderMonthGrid = (
   const gridEnd = period.end.subtract(1, 'day').endOf('isoWeek')
   const weekCount = Math.ceil(gridEnd.diff(gridStart, 'day') / 7)
 
-  const weekdayNames = Array.from({ length: 7 }, (_, i) =>
-    `<div class="mg-dow">${esc(gridStart.add(i, 'day').locale(locale).format('ddd'))}</div>`
+  const weekdayNames = Array.from(
+    { length: 7 },
+    (_, i) =>
+      `<div class="mg-dow">${esc(gridStart.add(i, 'day').locale(locale).format('ddd'))}</div>`
   ).join('')
 
   const weeks = Array.from({ length: weekCount }, (_, w) => {

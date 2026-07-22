@@ -70,12 +70,20 @@ describe('eventsInPeriod', () => {
     const events = selectPrintEvents(
       [
         makeEvent({ uid: 'in', start: '2026-07-22T09:00:00Z' }),
-        makeEvent({ uid: 'out', start: '2026-08-01T09:00:00Z', end: '2026-08-01T10:00:00Z' })
+        makeEvent({
+          uid: 'out',
+          start: '2026-08-01T09:00:00Z',
+          end: '2026-08-01T10:00:00Z'
+        })
       ],
       'Etc/UTC',
       '(No title)'
     )
-    const [week] = buildPrintPeriods('week', dayjs('2026-07-22'), dayjs('2026-07-22'))
+    const [week] = buildPrintPeriods(
+      'week',
+      dayjs('2026-07-22'),
+      dayjs('2026-07-22')
+    )
 
     const inRange = eventsInPeriod(events, week)
 
