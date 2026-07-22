@@ -32,3 +32,9 @@ export interface PrintLabels {
   noTitle: string
   weekPrefix: string
 }
+
+/** Calendar identity shown as a subtitle on every printed page. */
+export interface PrintHeading {
+  calendarName: string
+  ownerName?: string
+}

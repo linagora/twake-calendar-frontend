@@ -2,11 +2,16 @@ import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { store } from '@common/app/store'
 import { extractEvents } from '@common/components/Calendar/utils/calendarUtils'
 import { getCalendarDetail } from '@common/features/Calendars/CalendarSlice'
+import { Calendar } from '@common/types/CalendarTypes'
 import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
+import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
+import { makeDisplayName } from '@common/utils/makeDisplayName'
+import { renameDefault } from '@common/utils/renameDefault'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import {
   buildPrintPeriods,
   printDayjs as dayjs,
+  PrintHeading,
   PrintScale,
   renderPrintDocument,
   selectPrintEvents
@@ -47,6 +52,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
   const { t, lang } = useI18n()
   const dispatch = useAppDispatch()
   const visibleBookingLinks = useVisibleBookingLinks()
+  const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
   const timezone =
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
 
@@ -74,6 +80,26 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
     noTitle: t('print.noTitle'),
     weekPrefix: t('print.weekPrefix')
   })
+
+  // Per-calendar print: the heading names the (single) calendar and its owner.
+  const buildHeading = (
+    calendars: Record<string, Calendar>
+  ): PrintHeading | undefined => {
+    const calId = selectedCalendars[0]
+    const calendar = calId ? calendars[calId] : undefined
+    if (!calendar) return undefined
+    const ownerName = makeDisplayName(calendar)
+    const isOwnCalendar = extractEventBaseUuid(calId) === userId
+    return {
+      calendarName: renameDefault(
+        calendar.name,
+        ownerName ?? '',
+        t,
+        isOwnCalendar
+      ),
+      ownerName
+    }
+  }
 
   const handlePrint = async (): Promise<void> => {
     if (!startDate || !endDate) return
@@ -121,7 +147,8 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         periods,
         events,
         locale: lang,
-        labels: buildLabels()
+        labels: buildLabels(),
+        heading: buildHeading(calendars)
       })
 
       const printWindow = window.open('', '_blank')

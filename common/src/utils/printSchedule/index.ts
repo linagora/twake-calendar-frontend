@@ -6,5 +6,11 @@ export {
 } from './selectPrintEvents'
 export { layoutTimedEvents } from './layout'
 export { renderPrintDocument } from './renderPrintDocument'
-export type { PrintScale, PrintEvent, PrintPeriod, PrintLabels } from './types'
+export type {
+  PrintScale,
+  PrintEvent,
+  PrintPeriod,
+  PrintLabels,
+  PrintHeading
+} from './types'
 export { default as printDayjs } from './dayjsSetup'

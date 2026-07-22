@@ -2,7 +2,7 @@ import './dayjsSetup'
 import { Dayjs } from 'dayjs'
 import { PositionedEvent, layoutTimedEvents } from './layout'
 import { eventsInPeriod } from './selectPrintEvents'
-import { PrintEvent, PrintLabels, PrintPeriod } from './types'
+import { PrintEvent, PrintHeading, PrintLabels, PrintPeriod } from './types'
 
 /** Vertical hour window a time grid is cropped to, in whole hours [0, 24]. */
 interface HourRange {
@@ -11,14 +11,16 @@ interface HourRange {
 }
 
 const HOUR_HEIGHT = 42
-const DEFAULT_START_HOUR = 8
-const DEFAULT_END_HOUR = 19
+
+/** Time grids always span the whole day so no event is ever cropped out. */
+const FULL_DAY_BOUNDS: HourRange = { min: 0, max: 24 }
 
 export interface RenderPrintDocumentOptions {
   periods: PrintPeriod[]
   events: PrintEvent[]
   labels: PrintLabels
   locale: string
+  heading?: PrintHeading
 }
 
 const esc = (value: string): string =>
@@ -44,17 +46,6 @@ const chip = (event: PrintEvent, withTime: boolean): string => {
     `<span class="chip-time">${esc(time)}</span>${esc(event.title)}` +
     '</div>'
   )
-}
-
-const hourBounds = (timed: PrintEvent[]): HourRange => {
-  let min = DEFAULT_START_HOUR
-  let max = DEFAULT_END_HOUR
-  timed.forEach(event => {
-    min = Math.min(min, event.start.hour())
-    const endHour = event.end.hour() + (event.end.minute() > 0 ? 1 : 0)
-    max = Math.max(max, endHour)
-  })
-  return { min: Math.max(0, min), max: Math.min(24, Math.max(max, min + 1)) }
 }
 
 const daysOfPeriod = (period: PrintPeriod): Dayjs[] => {
@@ -112,7 +103,7 @@ const renderTimeGrid = (
   const days = daysOfPeriod(period)
   const timed = periodEvents.filter(event => !event.allDay)
   const allDay = periodEvents.filter(event => event.allDay)
-  const bounds = hourBounds(timed)
+  const bounds = FULL_DAY_BOUNDS
   const { min, max } = bounds
 
   const headCells = days
@@ -208,11 +199,20 @@ const renderMonthGrid = (
   )
 }
 
+const renderHeading = (heading?: PrintHeading): string => {
+  if (!heading) return ''
+  const owner = heading.ownerName
+    ? ` <span class="page-owner">· ${esc(heading.ownerName)}</span>`
+    : ''
+  return `<div class="page-subtitle">${esc(heading.calendarName)}${owner}</div>`
+}
+
 const renderPage = (
   period: PrintPeriod,
   events: PrintEvent[],
   labels: PrintLabels,
-  locale: string
+  locale: string,
+  heading?: PrintHeading
 ): string => {
   const periodEvents = eventsInPeriod(events, period)
   const grid =
@@ -222,7 +222,8 @@ const renderPage = (
 
   return (
     '<section class="page">' +
-    `<h1 class="page-title">${esc(period.label)}</h1>${grid}</section>`
+    `<h1 class="page-title">${esc(period.label)}</h1>` +
+    `${renderHeading(heading)}${grid}</section>`
   )
 }
 
@@ -231,7 +232,9 @@ const STYLES = `
   body { margin: 0; font-family: Roboto, Arial, Helvetica, sans-serif; color: #1a2233; }
   .page { page-break-after: always; padding: 16px 20px; }
   .page:last-child { page-break-after: auto; }
-  .page-title { font-size: 18px; font-weight: 600; margin: 0 0 12px; text-transform: capitalize; }
+  .page-title { font-size: 18px; font-weight: 600; margin: 0 0 2px; text-transform: capitalize; }
+  .page-subtitle { font-size: 12px; color: #4a5468; margin: 0 0 12px; }
+  .page-owner { color: #6b7488; }
   .chip { font-size: 10px; line-height: 1.3; color: #fff; border-radius: 4px; border-left: 3px solid; padding: 1px 4px; margin: 1px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chip-time { font-weight: 600; }
   .tg { border: 1px solid #d5d9e2; border-radius: 6px; overflow: hidden; }
@@ -277,10 +280,11 @@ export const renderPrintDocument = ({
   periods,
   events,
   labels,
-  locale
+  locale,
+  heading
 }: RenderPrintDocumentOptions): string => {
   const pages = periods
-    .map(period => renderPage(period, events, labels, locale))
+    .map(period => renderPage(period, events, labels, locale, heading))
     .join('')
 
   return (
