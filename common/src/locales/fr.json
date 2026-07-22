@@ -502,7 +502,10 @@
     "noTitle": "(Sans titre)",
     "weekPrefix": "Semaine",
     "invalidRange": "La date de fin doit être postérieure à la date de début.",
-    "popupBlocked": "Veuillez autoriser les pop-ups pour ouvrir l'agenda à imprimer."
+    "popupBlocked": "Veuillez autoriser les pop-ups pour ouvrir l'agenda à imprimer.",
+    "tooManyPages": "La période sélectionnée est trop grande pour l'impression. Réduisez-la ou choisissez une échelle plus large.",
+    "fetchFailed": "Impossible de charger les événements du calendrier. Veuillez réessayer.",
+    "failed": "Impossible de générer l'agenda à imprimer. Veuillez réessayer."
   },
   "booking": {
     "addSlot": "Ajouter un créneau",

@@ -502,7 +502,10 @@
     "noTitle": "(Không có tiêu đề)",
     "weekPrefix": "Tuần",
     "invalidRange": "Ngày kết thúc phải sau ngày bắt đầu.",
-    "popupBlocked": "Vui lòng cho phép cửa sổ bật lên để mở lịch cần in."
+    "popupBlocked": "Vui lòng cho phép cửa sổ bật lên để mở lịch cần in.",
+    "tooManyPages": "Khoảng thời gian đã chọn quá lớn để in. Vui lòng thu hẹp hoặc chọn thang đo lớn hơn.",
+    "fetchFailed": "Không thể tải các sự kiện lịch. Vui lòng thử lại.",
+    "failed": "Không thể tạo lịch để in. Vui lòng thử lại."
   },
   "booking": {
     "addSlot": "Thêm khung giờ",

@@ -502,7 +502,10 @@
     "noTitle": "(No title)",
     "weekPrefix": "Week",
     "invalidRange": "The end date must be after the start date.",
-    "popupBlocked": "Please allow pop-ups to open the printable schedule."
+    "popupBlocked": "Please allow pop-ups to open the printable schedule.",
+    "tooManyPages": "The selected range is too large to print. Please narrow it or choose a coarser scale.",
+    "fetchFailed": "Could not load the calendar events. Please try again.",
+    "failed": "Could not generate the printable schedule. Please try again."
   },
   "booking": {
     "addSlot": "Add slot",

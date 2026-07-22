@@ -9,13 +9,15 @@ const FALLBACK_DURATION_MINUTES = 30
 const resolveColor = (event: CalendarEvent): string | undefined =>
   event.color?.light ?? event.color?.dark
 
-// All-day events keep their calendar date; timed events resolve into the
-// user's timezone.
+// Both all-day and timed events resolve into the print timezone so their
+// instants align with the timezone-anchored print range. All-day values are
+// date-only, so their time component (if any) is dropped before anchoring.
 const resolveInstant = (
   value: string,
   allDay: boolean,
   timezone: string
-): Dayjs => (allDay ? dayjs(value) : dayjs(value).tz(timezone))
+): Dayjs =>
+  allDay ? dayjs.tz(value.split('T')[0], timezone) : dayjs(value).tz(timezone)
 
 const resolveEnd = (
   event: CalendarEvent,
@@ -29,10 +31,14 @@ const resolveEnd = (
         allDay ? 1 : DEFAULT_DURATION_MINUTES,
         allDay ? 'day' : 'minute'
       )
-  // Guard against malformed events whose end precedes their start.
+  // Guard against malformed events whose end precedes their start, keeping
+  // all-day events at least a full day and timed events a minute-based span.
   return rawEnd.isAfter(start)
     ? rawEnd
-    : start.add(FALLBACK_DURATION_MINUTES, 'minute')
+    : start.add(
+        allDay ? 1 : FALLBACK_DURATION_MINUTES,
+        allDay ? 'day' : 'minute'
+      )
 }
 
 /**

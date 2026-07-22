@@ -15,6 +15,13 @@ const HOUR_HEIGHT = 42
 /** Time grids always span the whole day so no event is ever cropped out. */
 const FULL_DAY_BOUNDS: HourRange = { min: 0, max: 24 }
 
+/** Document-wide rendering context shared by every page. */
+interface PageContext {
+  labels: PrintLabels
+  locale: string
+  heading?: PrintHeading
+}
+
 export interface RenderPrintDocumentOptions {
   periods: PrintPeriod[]
   events: PrintEvent[]
@@ -210,9 +217,7 @@ const renderHeading = (heading?: PrintHeading): string => {
 const renderPage = (
   period: PrintPeriod,
   events: PrintEvent[],
-  labels: PrintLabels,
-  locale: string,
-  heading?: PrintHeading
+  { labels, locale, heading }: PageContext
 ): string => {
   const periodEvents = eventsInPeriod(events, period)
   const grid =
@@ -284,7 +289,7 @@ export const renderPrintDocument = ({
   heading
 }: RenderPrintDocumentOptions): string => {
   const pages = periods
-    .map(period => renderPage(period, events, labels, locale, heading))
+    .map(period => renderPage(period, events, { labels, locale, heading }))
     .join('')
 
   return (

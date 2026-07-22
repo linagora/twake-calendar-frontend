@@ -10,6 +10,7 @@ import { renameDefault } from '@common/utils/renameDefault'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import {
   buildPrintPeriods,
+  MAX_PRINT_PERIODS,
   printDayjs as dayjs,
   PrintHeading,
   PrintScale,
@@ -53,6 +54,9 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
   const dispatch = useAppDispatch()
   const visibleBookingLinks = useVisibleBookingLinks()
   const userId = useAppSelector(state => state.user.userData?.openpaasId) ?? ''
+  const hideDeclinedEvents = useAppSelector(
+    state => state.settings.hideDeclinedEvents
+  )
   const timezone =
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
 
@@ -120,6 +124,18 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
     })
     if (periods.length === 0) return
 
+    // buildPrintPeriods silently caps at MAX_PRINT_PERIODS; a last page that
+    // does not reach rangeEnd means the range was truncated. Gate printing so
+    // the user narrows the range rather than getting a silently clipped output.
+    const lastPeriodEnd = periods[periods.length - 1].end
+    if (
+      periods.length >= MAX_PRINT_PERIODS &&
+      !lastPeriodEnd.isAfter(rangeEnd)
+    ) {
+      setErrorKey('print.tooManyPages')
+      return
+    }
+
     setErrorKey(null)
     setLoading(true)
     try {
@@ -129,16 +145,22 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
           periods[periods.length - 1].end.toDate()
         )
       }
-      await Promise.all(
+      const fetchResults = await Promise.all(
         selectedCalendars.map(calId =>
           dispatch(getCalendarDetail({ calId, match }))
             .unwrap()
-            .catch(() => undefined)
+            .then(() => true)
+            .catch(() => false)
         )
       )
+      if (!fetchResults.some(Boolean)) {
+        setErrorKey('print.fetchFailed')
+        return
+      }
 
       const calendars = store.getState().calendars.list
       const rawEvents = extractEvents(selectedCalendars, calendars, {
+        hideDeclinedEvents,
         visibleBookingLinks
       })
       const events = selectPrintEvents(rawEvents, timezone, t('print.noTitle'))
@@ -160,6 +182,8 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
       printWindow.document.write(html)
       printWindow.document.close()
       onClose()
+    } catch {
+      setErrorKey('print.failed')
     } finally {
       setLoading(false)
     }
@@ -200,12 +224,14 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 <DatePicker
                   label={t('print.startDate')}
                   value={startDate}
+                  maxDate={endDate ?? undefined}
                   onChange={value => setStartDate(value)}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
                 <DatePicker
                   label={t('print.endDate')}
                   value={endDate}
+                  minDate={startDate ?? undefined}
                   onChange={value => setEndDate(value)}
                   slotProps={{ textField: { size: 'small', fullWidth: true } }}
                 />
