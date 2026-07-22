@@ -285,6 +285,7 @@ const BookingLinkChip: React.FC<{
             overflow: 'hidden',
             cursor: 'pointer'
           }}
+          onClick={() => onEdit(link)}
         >
           <div style={{ display: 'flex', padding: '9px', marginRight: '4px' }}>
             <EventIcon sx={{ color: iconColor }} fontSize="small" />
