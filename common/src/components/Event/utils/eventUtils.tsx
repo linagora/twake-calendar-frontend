@@ -19,13 +19,17 @@ export const classIcon = (partStat?: PartStat) => {
   switch (partStat) {
     case 'ACCEPTED':
       return (
-        <Box sx={{ color: 'success.main' }}>
+        <Box
+          sx={{ color: 'success.main', display: 'flex', alignItems: 'center' }}
+        >
           <CheckCircleIcon fontSize="inherit" color="inherit" />
         </Box>
       )
     case 'DECLINED':
       return (
-        <Box sx={{ color: 'error.main' }}>
+        <Box
+          sx={{ color: 'error.main', display: 'flex', alignItems: 'center' }}
+        >
           <CancelIcon fontSize="inherit" color="inherit" />
         </Box>
       )
