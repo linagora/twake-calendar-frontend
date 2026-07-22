@@ -12,6 +12,7 @@ import { fetchEvent } from './EventDao'
 import { PreviewContainer } from './components/EventPreviewShared'
 import { PublicLoadError } from '@/components/PublicLoadError'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { EventStatus } from '@/components/EventPreview/EventStatus'
 
 const isUnableToLoad = (
   error: boolean,
@@ -77,7 +78,7 @@ export const EventPreviewPage: React.FC = () => {
         timezone={event?.timezone as string}
         t={t}
       />
-
+      <EventStatus partStat={action} />
       <EventPreviewDetails
         event={event as CalendarEvent}
         isOwn={false}
