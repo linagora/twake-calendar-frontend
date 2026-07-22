@@ -28,7 +28,7 @@ const formatLabel = (
   start: Dayjs,
   end: Dayjs,
   scale: PrintScale,
-  { locale = 'en', weekPrefix = 'W' }: PrintLabelOptions
+  { locale = 'en', weekPrefix = 'Week' }: PrintLabelOptions
 ): string => {
   const localizedStart = start.locale(locale)
   switch (scale) {
