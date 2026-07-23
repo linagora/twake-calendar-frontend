@@ -189,6 +189,7 @@
       "addTdriveFile": "Add file from Tdrive",
       "tdriveFiles": "Files",
       "tdrivePickerTitle": "Select a file from Tdrive",
+      "tdriveLoadingError": "Failed to load Tdrive. Please try again.",
       "location": "Location",
       "locationPlaceholder": "Add location",
       "calendar": "Calendar",

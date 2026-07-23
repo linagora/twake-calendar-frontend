@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Dialog,
   Box,
@@ -10,11 +10,149 @@ import { Close as CloseIcon } from '@mui/icons-material'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../hooks/useTdrivePicker'
 
+const HANDSHAKE_TIMEOUT_MS = 30_000
+
 interface TdrivePickerDialogProps {
   open: boolean
   iframeUrl: string | null
   onClose: () => void
   onFileSelected: (file: TdriveFile) => void
+}
+
+type IframeState = 'loading' | 'ready' | 'error'
+
+function getMessageType(data: unknown): string | undefined {
+  if (typeof data === 'string') return data
+  if (typeof data === 'object' && data !== null) {
+    return (data as Record<string, unknown>).type as string | undefined
+  }
+  return undefined
+}
+
+function isReadyMessage(typeStr: string | undefined): boolean {
+  return typeStr?.endsWith(':ready') ?? false
+}
+
+function extractIntentId(typeStr: string): string {
+  return typeStr.split(':')[0]
+}
+
+function buildReadyResponse(intentId: string): object {
+  return { type: `${intentId}:send`, payload: {} }
+}
+
+function parseFileSelection(data: unknown): TdriveFile | null {
+  if (typeof data !== 'object' || data === null) return null
+
+  const msg = data as Record<string, unknown>
+  if (msg.type !== 'intent-response') return null
+
+  const file = msg.file as Record<string, string> | undefined
+  if (!file) return null
+
+  return {
+    id: file.id,
+    name: file.name,
+    url: file.url,
+    type: file.action === 'sharingLink' ? 'sharingLink' : 'downloadLink'
+  }
+}
+
+interface PickerContentProps {
+  iframeUrl: string
+  onFileSelected: (file: TdriveFile) => void
+}
+
+const PickerContent: React.FC<PickerContentProps> = ({
+  iframeUrl,
+  onFileSelected
+}) => {
+  const { t } = useI18n()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [iframeState, setIframeState] = useState<IframeState>('loading')
+
+  const handleMessage = useCallback(
+    (event: MessageEvent): void => {
+      const iframeOrigin = new URL(iframeUrl).origin
+      if (event.origin !== iframeOrigin) return
+
+      const typeStr = getMessageType(event.data)
+
+      if (typeStr !== undefined && isReadyMessage(typeStr)) {
+        const intentId = extractIntentId(typeStr)
+        iframeRef.current?.contentWindow?.postMessage(
+          buildReadyResponse(intentId),
+          iframeOrigin
+        )
+        setIframeState('ready')
+        return
+      }
+
+      const file = parseFileSelection(event.data)
+      if (file) {
+        onFileSelected(file)
+      }
+    },
+    [iframeUrl, onFileSelected]
+  )
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setIframeState(prev => (prev === 'loading' ? 'error' : prev))
+    }, HANDSHAKE_TIMEOUT_MS)
+
+    window.addEventListener('message', handleMessage)
+
+    return (): void => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [handleMessage])
+
+  const showLoader = iframeState !== 'ready'
+  const showError = iframeState === 'error'
+
+  return (
+    <>
+      {showLoader && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'background.paper',
+            gap: 2,
+            zIndex: 1
+          }}
+        >
+          {showError ? (
+            <Typography color="error">
+              {t('event.form.tdriveLoadingError')}
+            </Typography>
+          ) : (
+            <CircularProgress />
+          )}
+        </Box>
+      )}
+      <iframe
+        ref={iframeRef}
+        src={iframeUrl}
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          visibility: iframeState === 'ready' ? 'visible' : 'hidden'
+        }}
+        title="Tdrive file picker"
+      />
+    </>
+  )
 }
 
 export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
@@ -24,79 +162,6 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
   onFileSelected
 }) => {
   const { t } = useI18n()
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [isIframeReady, setIsIframeReady] = useState(false)
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent): void => {
-      if (!iframeUrl) return
-
-      const iframeOrigin = new URL(iframeUrl).origin
-
-      // Only accept messages from the Tdrive iframe origin
-      if (event.origin !== iframeOrigin) {
-        return
-      }
-
-      const data = event.data
-
-      // Handle "ready" postMessage from Tdrive intent
-      // Format: "intent-<id>:ready" or { type: "intent-<id>:ready" }
-      const typeStr =
-        typeof data === 'string'
-          ? data
-          : typeof data === 'object' && data !== null
-            ? data.type
-            : undefined
-
-      const isReady = typeStr?.endsWith(':ready') ?? false
-
-      if (isReady) {
-        console.info('[Tdrive] Received ready, posting send message to iframe')
-
-        // Send postMessage to iframe to send {} over its WebSocket
-        // Use the same intent ID prefix for the response
-        const intentId = typeStr?.split(':')[0] // "intent-xxx"
-        iframeRef.current?.contentWindow?.postMessage(
-          { type: `${intentId}:send`, payload: {} },
-          iframeOrigin
-        )
-
-        // Show iframe content now that post is sent
-        setIsIframeReady(true)
-
-        return
-      }
-
-      // Handle file selection message from Tdrive intent
-      if (data && typeof data === 'object' && data.type === 'intent-response') {
-        const file = data.file
-        if (file) {
-          onFileSelected({
-            id: file.id,
-            name: file.name,
-            url: file.url,
-            type: file.action === 'sharingLink' ? 'sharingLink' : 'downloadLink'
-          })
-        }
-      }
-    }
-
-    if (open) {
-      window.addEventListener('message', handleMessage)
-    }
-
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [open, iframeUrl, onFileSelected])
-
-  // Reset ready state when dialog closes
-  useEffect(() => {
-    if (!open) {
-      setIsIframeReady(false)
-    }
-  }, [open])
 
   return (
     <Dialog
@@ -126,40 +191,16 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
         <Typography variant="h6">
           {t('event.form.tdrivePickerTitle')}
         </Typography>
-        <IconButton onClick={onClose} aria-label={t('action.close')}>
+        <IconButton onClick={onClose} aria-label={t('actions.close')}>
           <CloseIcon />
         </IconButton>
       </Box>
       <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        {/* Loading indicator shown until iframe is ready */}
-        {!isIframeReady && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'background.paper'
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
         {iframeUrl && (
-          <iframe
-            ref={iframeRef}
-            src={iframeUrl}
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              visibility: isIframeReady ? 'visible' : 'hidden'
-            }}
-            title={t('event.form.tdrivePickerTitle')}
+          <PickerContent
+            key={iframeUrl}
+            iframeUrl={iframeUrl}
+            onFileSelected={onFileSelected}
           />
         )}
       </Box>

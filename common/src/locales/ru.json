@@ -189,6 +189,7 @@
       "addTdriveFile": "Добавить файл из Tdrive",
       "tdriveFiles": "Файлы",
       "tdrivePickerTitle": "Выбрать файл из Tdrive",
+      "tdriveLoadingError": "Не удалось загрузить Tdrive. Пожалуйста, попробуйте снова.",
       "location": "Место",
       "locationPlaceholder": "Указать место",
       "calendar": "Календарь",

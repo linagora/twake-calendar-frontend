@@ -189,6 +189,7 @@
       "addTdriveFile": "Ajouter un fichier depuis Tdrive",
       "tdriveFiles": "Fichiers",
       "tdrivePickerTitle": "Sélectionner un fichier depuis Tdrive",
+      "tdriveLoadingError": "Échec du chargement de Tdrive. Veuillez réessayer.",
       "location": "Lieu",
       "locationPlaceholder": "Ajouter un lieu",
       "calendar": "Calendrier",

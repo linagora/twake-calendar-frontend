@@ -78,9 +78,17 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
         isExpanded={isExpanded}
       >
         {!showMore ? (
-          <TdriveButtonInShortMode onClick={openPicker} />
+          <TdriveButtonInShortMode
+            onClick={() => {
+              openPicker().catch(() => {})
+            }}
+          />
         ) : (
-          <TdriveButtonInExpandedMode onClick={openPicker} />
+          <TdriveButtonInExpandedMode
+            onClick={() => {
+              openPicker().catch(() => {})
+            }}
+          />
         )}
       </FieldWithLabel>
 

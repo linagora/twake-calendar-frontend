@@ -93,7 +93,7 @@ export const api: KyInstance = ky.extend({
             ? (JSON.parse(raw) as TokenEndpointResponse &
                 TokenEndpointResponseHelpers)
             : null
-          const access_token = saved?.access_token as string | undefined
+          const access_token = saved?.access_token
           if (access_token) {
             headers.set('Authorization', `Bearer ${access_token}`)
           }

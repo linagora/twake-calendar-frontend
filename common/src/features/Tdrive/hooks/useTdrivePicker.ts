@@ -22,6 +22,28 @@ interface UseTdrivePickerProps {
   onFileSelected: (file: TdriveFile) => void
 }
 
+function getUserContext(
+  email: string | undefined,
+  workplaceFqdn: string | undefined
+): { localpart: string | undefined; tdriveBaseUrl: string | null } {
+  const localpart = email?.split('@')[0]
+  const tdriveBaseUrl = resolveTdriveUrl({ localpart, workplaceFqdn })
+  return { localpart, tdriveBaseUrl }
+}
+
+async function fetchIntentUrl(
+  tdriveBaseUrl: string,
+  idToken: string
+): Promise<string | null> {
+  const tokenResponse = await exchangeToken(tdriveBaseUrl, idToken)
+  const intentResponse = await createIntent(
+    tdriveBaseUrl,
+    tokenResponse.access_token
+  )
+
+  return intentResponse.data.attributes.services[0]?.href ?? null
+}
+
 export function useTdrivePicker({
   onFileSelected
 }: UseTdrivePickerProps): UseTdrivePickerReturn {
@@ -35,38 +57,32 @@ export function useTdrivePicker({
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
 
   const openPicker = useCallback(async () => {
-    const localpart = email?.split('@')[0]
-    const tdriveBaseUrl = resolveTdriveUrl({ localpart, workplaceFqdn })
+    const { tdriveBaseUrl } = getUserContext(email, workplaceFqdn)
 
     if (!tdriveBaseUrl) {
       console.error('Tdrive URL is not configured')
       return
     }
 
-    try {
-      // Step 1: Exchange token
-      if (!idToken) {
-        console.error('idToken is not available')
-        return
-      }
-      const tokenResponse = await exchangeToken(tdriveBaseUrl, idToken)
-      const intentResponse = await createIntent(
-        tdriveBaseUrl,
-        tokenResponse.access_token
-      )
+    if (!idToken) {
+      console.error('idToken is not available')
+      return
+    }
 
-      const intentUrl = intentResponse.data.attributes.services[0]?.href
+    try {
+      const intentUrl = await fetchIntentUrl(tdriveBaseUrl, idToken)
 
       if (!intentUrl) {
         console.error('No intent service URL returned')
         return
       }
+
       setIframeUrl(intentUrl)
       setIsOpen(true)
     } catch (error) {
       console.error('Failed to open Tdrive picker:', error)
     }
-  }, [email, workplaceFqdn])
+  }, [email, workplaceFqdn, idToken])
 
   const closePicker = useCallback(() => {
     setIsOpen(false)

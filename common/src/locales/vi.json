@@ -189,6 +189,7 @@
       "addTdriveFile": "Thêm tệp từ Tdrive",
       "tdriveFiles": "Tệp",
       "tdrivePickerTitle": "Chọn tệp từ Tdrive",
+      "tdriveLoadingError": "Không thể tải Tdrive. Vui lòng thử lại.",
       "location": "Địa điểm",
       "locationPlaceholder": "Thêm địa điểm",
       "calendar": "Lịch",
