@@ -24,9 +24,9 @@ const PREDEFINED_VALUES = [
   '-PT2H',
   '-PT5H',
   '-PT12H',
-  '-PT1D',
-  '-PT2D',
-  '-PT1W'
+  '-P1D',
+  '-P2D',
+  '-P1W'
 ]
 
 export interface NotificationFieldProps {

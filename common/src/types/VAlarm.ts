@@ -3,6 +3,7 @@ import {
   VObjectProperty
 } from '@common/features/Calendars/types/CalendarData'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { normalizeAlarmTrigger } from '@common/utils/normalizeAlarmTrigger'
 
 export const DEFAULT_ALARM_DESCRIPTION =
   'This is an automatic alarm sent by Twake Calendar'
@@ -23,7 +24,7 @@ export class VAlarm implements AlarmData {
   description?: string
 
   constructor({ trigger, action, attendees, summary, description }: AlarmData) {
-    this.trigger = trigger
+    this.trigger = normalizeAlarmTrigger(trigger)
     this.action = action
     this.attendees = attendees
     this.summary = summary
