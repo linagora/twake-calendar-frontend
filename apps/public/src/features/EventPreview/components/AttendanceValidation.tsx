@@ -112,7 +112,7 @@ export const AttendanceValidation: React.FC<AttendanceValidationProps> = ({
       >
         {!isMobile && (
           <Typography variant="body2" sx={{ marginRight: 1 }}>
-            {t('eventPreview.attendingQuestion')}
+            {t('eventPreview.wantToChangeQuestion')}
           </Typography>
         )}
         <Box sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}>

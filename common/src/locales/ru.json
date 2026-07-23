@@ -325,6 +325,7 @@
       "tooltip": "Другие видят вас свободным."
     },
     "attendingQuestion": "Присоединитесь?",
+    "wantToChangeQuestion": "Хотите изменить?",
     "authorizeQuestion": "Авторизовать?",
     "proposeNewTime": "Предложить новое время",
     "yourProposal": "Ваше предложение",
@@ -360,7 +361,7 @@
     "editInOrganizerCalendar": "Редактировать в %{calendarName}",
     "joinVideo": "Присоединиться к видеоконференции",
     "joinVideoShort": "Присоединиться",
-    "guests": "%{count} гостей",
+    "guests": "%{count} участников",
     "yesCount": "%{count} да",
     "maybeCount": "%{count} может быть",
     "needActionCount": "%{count} в ожидании",
