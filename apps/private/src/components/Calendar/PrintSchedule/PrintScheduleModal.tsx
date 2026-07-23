@@ -174,6 +174,14 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
       return
     }
 
+    // Popup blockers only honour window.open while the click's user activation
+    // is still live, so the tab has to be opened before any await.
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      setErrorKey('print.popupBlocked')
+      return
+    }
+
     setErrorKey(null)
     setLoading(true)
     try {
@@ -195,6 +203,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         )
       )
       if (!fetchResults.some(Boolean)) {
+        printWindow.close()
         setErrorKey('print.fetchFailed')
         return
       }
@@ -220,16 +229,12 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         labels: buildLabels()
       })
 
-      const printWindow = window.open('', '_blank')
-      if (!printWindow) {
-        setErrorKey('print.popupBlocked')
-        return
-      }
       printWindow.document.open()
       printWindow.document.write(html)
       printWindow.document.close()
       onClose()
     } catch {
+      printWindow.close()
       setErrorKey('print.failed')
     } finally {
       setLoading(false)
@@ -238,7 +243,18 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t('print.title')}</DialogTitle>
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        {t('print.title')}
+        <IconButton onClick={onClose} aria-label="close" size="small">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
         <TwakeLocalizationProvider>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
