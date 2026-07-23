@@ -10,6 +10,7 @@ interface CalendarSelectorDesktopMenuProps {
   onModify: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
+  onPrint?: () => void
   isDefault: boolean
   isPersonal: boolean
   isVisible?: boolean
@@ -25,6 +26,7 @@ export const CalendarSelectorDesktopMenu: React.FC<
   onModify,
   onDelete,
   onToggleVisibility,
+  onPrint,
   isDefault,
   isPersonal,
   isVisible
@@ -52,6 +54,17 @@ export const CalendarSelectorDesktopMenu: React.FC<
       >
         {t('actions.modify')}
       </MenuItem>
+      {onPrint !== undefined && <Divider />}
+      {onPrint !== undefined && (
+        <MenuItem
+          onClick={() => {
+            onPrint()
+            onClose()
+          }}
+        >
+          {t('print.action')}
+        </MenuItem>
+      )}
       {!isDefault && <Divider />}
       {!isDefault && (
         <MenuItem
