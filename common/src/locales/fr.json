@@ -43,7 +43,8 @@
     "export": "Exporter",
     "exporting": "En cours d'exportation...",
     "hide": "Masquer",
-    "show": "Afficher"
+    "show": "Afficher",
+    "close": "Fermer"
   },
   "common": {
     "cancel": "Annuler",
@@ -185,6 +186,9 @@
       "doNotEditSection": "Veuillez ne pas modifier cette section.",
       "copyMeetingLink": "Copier le lien de la réunion",
       "removeVideoConference": "Supprimer la visioconférence",
+      "addTdriveFile": "Ajouter un fichier depuis Tdrive",
+      "tdriveFiles": "Fichiers",
+      "tdrivePickerTitle": "Sélectionner un fichier depuis Tdrive",
       "location": "Lieu",
       "locationPlaceholder": "Ajouter un lieu",
       "calendar": "Calendrier",

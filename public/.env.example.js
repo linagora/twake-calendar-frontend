@@ -50,3 +50,5 @@ var ENABLE_EVENT_ATTACHMENTS = false
 //   'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain}/#/bridge/web/#/chat/@{target}:{workplaceFqdn.domain}'
 //   'https://{localpart}-chat.twake.linagora.com/#/bridge/web/#/chat/@{target}:linagora.com'
 var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain}/#/bridge/web/#/chat/@{target}:{workplaceFqdn.domain}'
+var TDRIVE_ENABLED = false
+var TDRIVE_INTENT_URL = ""

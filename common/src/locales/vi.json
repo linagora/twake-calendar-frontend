@@ -43,7 +43,8 @@
     "export": "Xuất",
     "exporting": "Đang xuất...",
     "hide": "Ẩn",
-    "show": "Hiện"
+    "show": "Hiện",
+    "close": "Đóng"
   },
   "common": {
     "cancel": "Hủy",
@@ -185,6 +186,9 @@
       "doNotEditSection": "Vui lòng không chỉnh sửa phần này.",
       "copyMeetingLink": "Sao chép liên kết họp",
       "removeVideoConference": "Xóa cuộc họp",
+      "addTdriveFile": "Thêm tệp từ Tdrive",
+      "tdriveFiles": "Tệp",
+      "tdrivePickerTitle": "Chọn tệp từ Tdrive",
       "location": "Địa điểm",
       "locationPlaceholder": "Thêm địa điểm",
       "calendar": "Lịch",

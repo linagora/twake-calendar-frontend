@@ -43,7 +43,8 @@
     "export": "Export",
     "exporting": "Exporting...",
     "hide": "Hide",
-    "show": "Show"
+    "show": "Show",
+    "close": "Close"
   },
   "common": {
     "cancel": "Cancel",
@@ -185,6 +186,9 @@
       "doNotEditSection": "Please do not edit this section.",
       "copyMeetingLink": "Copy meeting link",
       "removeVideoConference": "Remove video conference",
+      "addTdriveFile": "Add file from Tdrive",
+      "tdriveFiles": "Files",
+      "tdrivePickerTitle": "Select a file from Tdrive",
       "location": "Location",
       "locationPlaceholder": "Add location",
       "calendar": "Calendar",

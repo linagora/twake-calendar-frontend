@@ -34,6 +34,9 @@ import { EventDateTimeField } from './fields/EventDateTimeField'
 import LocationField from './fields/LocationField'
 import { TitleField } from './fields/TitleField'
 import { VideoConferenceField } from './fields/VideoConferenceField'
+import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
+import { TdriveFile } from '@common/features/Tdrive/hooks/useTdrivePicker'
+import { Attachment } from '@common/types/Attachment'
 import { useEventFormValues } from './hooks/useEventFormValues'
 import { validateEventFormValues } from './utils/formValidation'
 
@@ -170,6 +173,19 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
     const v = formValues
     const isExpanded = showMore && !isMobile
 
+    const handleTdriveFileSelected = useCallback(
+      (file: TdriveFile): void => {
+        // Convert Tdrive file to Attachment
+        const attachment = new Attachment(
+          file.url,
+          file.type === 'sharingLink' ? 'text/uri-list' : undefined,
+          file.name
+        )
+        setAttachments([...v.attachments, attachment])
+      },
+      [v.attachments, setAttachments]
+    )
+
     return (
       <React.Fragment>
         <TitleField
@@ -241,6 +257,11 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           setDescription={setDescription}
           attachments={v.attachments}
           setAttachments={setAttachments}
+        />
+
+        <TdriveButton
+          onFileSelected={handleTdriveFileSelected}
+          showMore={showMore}
         />
 
         <LocationField

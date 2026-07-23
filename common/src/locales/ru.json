@@ -43,7 +43,8 @@
     "export": "Экспортировать",
     "exporting": "Экспорт...",
     "hide": "Скрыть",
-    "show": "Показать"
+    "show": "Показать",
+    "close": "Закрыть"
   },
   "common": {
     "cancel": "Отмена",
@@ -185,6 +186,9 @@
       "doNotEditSection": "Пожалуйста, не редактируйте этот раздел.",
       "copyMeetingLink": "Скопировать ссылку на встречу",
       "removeVideoConference": "Удалить видеоконференцию",
+      "addTdriveFile": "Добавить файл из Tdrive",
+      "tdriveFiles": "Файлы",
+      "tdrivePickerTitle": "Выбрать файл из Tdrive",
       "location": "Место",
       "locationPlaceholder": "Указать место",
       "calendar": "Календарь",
