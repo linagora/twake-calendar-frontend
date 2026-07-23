@@ -325,6 +325,7 @@
       "tooltip": "Les autres vous voient comme disponible pendant la plage horaire de cet événement."
     },
     "attendingQuestion": "Participer ?",
+    "wantToChangeQuestion": "Voulez-vous changer ?",
     "authorizeQuestion": "Autoriser ?",
     "proposeNewTime": "Nouvel horaire",
     "yourProposal": "Votre proposition",

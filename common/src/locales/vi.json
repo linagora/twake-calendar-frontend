@@ -325,6 +325,7 @@
       "tooltip": "Người khác sẽ thấy bạn rảnh trong khoảng thời gian này."
     },
     "attendingQuestion": "Tham dự?",
+    "wantToChangeQuestion": "Muốn thay đổi?",
     "authorizeQuestion": "Cho phép?",
     "proposeNewTime": "Hẹn lại",
     "yourProposal": "Đề xuất của bạn",
@@ -360,7 +361,7 @@
     "editInOrganizerCalendar": "Chỉnh sửa trong %{calendarName}",
     "joinVideo": "Tham gia cuộc họp video",
     "joinVideoShort": "Tham gia",
-    "guests": "%{count} khách",
+    "guests": "%{count} người tham gia",
     "yesCount": "%{count} đồng ý",
     "maybeCount": "%{count} có thể",
     "needActionCount": "%{count} đang chờ",
