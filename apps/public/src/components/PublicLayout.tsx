@@ -31,14 +31,13 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         flexDirection: 'column',
         minHeight: '100vh',
         backgroundColor: theme.palette.grey[100],
-        position: 'relative',
-        padding: { xs: 2, sm: 4 }
+        position: 'relative'
       }}
     >
       <Box
         sx={{
           position: 'absolute',
-          top: { xs: 16, sm: 24 },
+          top: 16,
           right: { xs: 16, sm: 24 },
           display: 'flex',
           alignItems: 'center',
@@ -73,7 +72,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           justifyContent: 'center',
           alignItems: 'center',
           mt: 8,
-          mb: 6
+          mb: 4
         }}
       >
         {children}
