@@ -12,7 +12,7 @@
     "@fullcalendar/moment-timezone": "^6.1.19",
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
-    "@linagora/twake-icons": "^2.6.7",
+    "@linagora/twake-icons": "^2.7.0",
     "@linagora/twake-mui": "^2.0.0",
     "@lottiefiles/dotlottie-react": "^0.17.13",
     "@mui/icons-material": "^9.0.1",

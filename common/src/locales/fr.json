@@ -478,7 +478,10 @@
     "nextMonth": "Mois suivant",
     "previousMonth": "Mois précédent",
     "copyBookingLink": "Copier le lien de réservation",
-    "createAppointment": "Créer un planning de rendez-vous"
+    "createAppointment": "Créer un planning de rendez-vous",
+    "chat": "Discuter",
+    "copyEmail": "Copier l'adresse e-mail",
+    "emailCopied": "Email copié"
   },
   "booking": {
     "addSlot": "Ajouter un créneau",
@@ -561,5 +564,8 @@
     "and": "et aux",
     "termsOfService": "Conditions d'utilisation",
     "dot": "."
+  },
+  "attendees": {
+    "sendMail": "Envoyer un e-mail"
   }
 }

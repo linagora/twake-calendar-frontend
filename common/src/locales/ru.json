@@ -478,7 +478,9 @@
     "nextMonth": "Следующий месяц",
     "previousMonth": "Предыдущий месяц",
     "copyBookingLink": "Копировать ссылку для бронирования",
-    "createAppointment": "Создать расписание встреч"
+    "createAppointment": "Создать расписание встреч",
+    "copyEmail": "Копировать адрес электронной почты",
+    "emailCopied": "Email скопирован"
   },
   "booking": {
     "addSlot": "Добавить слот",
@@ -561,5 +563,10 @@
     "and": "и",
     "termsOfService": "Условиями использования Twake",
     "dot": "."
+  },
+  "attendees": {
+    "sendMail": "Отправить письмо",
+    "chat": "Чат",
+    "createEvent": "Создать событие"
   }
 }

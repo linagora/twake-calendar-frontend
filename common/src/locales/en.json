@@ -478,7 +478,10 @@
     "nextMonth": "Next month",
     "previousMonth": "Previous month",
     "copyBookingLink": "Copy booking link",
-    "createAppointment": "Create appointment schedule"
+    "createAppointment": "Create appointment schedule",
+    "chat": "Chat",
+    "copyEmail": "Copy email address",
+    "emailCopied": "Email copied"
   },
   "booking": {
     "addSlot": "Add slot",
@@ -561,5 +564,8 @@
     "and": "and",
     "termsOfService": "Terms of Service",
     "dot": "."
+  },
+  "attendees": {
+    "sendMail": "Send mail"
   }
 }

@@ -105,9 +105,24 @@ export function EventPreviewAttendees({
         mt: 2
       }}
     >
-      {organizer && renderAttendeeBadge(organizer, 'organizer', t, true, true)}
+      {organizer &&
+        renderAttendeeBadge({
+          a: organizer,
+          key: 'organizer',
+          t,
+          isFull: true,
+          isOrganizer: true,
+          isPublic: true
+        })}
       {attendeesWithoutOrganizer.map((a, idx) =>
-        renderAttendeeBadge(a, `participant-${idx}`, t, true, false)
+        renderAttendeeBadge({
+          a,
+          key: `participant-${idx}`,
+          t,
+          isFull: true,
+          isOrganizer: false,
+          isPublic: true
+        })
       )}
     </Box>
   )
@@ -124,7 +139,14 @@ export function EventPreviewAttendees({
       }}
     >
       {resources.map((r, idx) =>
-        renderAttendeeBadge(r, `resource-${idx}`, t, true, false)
+        renderAttendeeBadge({
+          a: r,
+          key: `resource-${idx}`,
+          t,
+          isFull: true,
+          isOrganizer: false,
+          isPublic: true
+        })
       )}
     </Box>
   )

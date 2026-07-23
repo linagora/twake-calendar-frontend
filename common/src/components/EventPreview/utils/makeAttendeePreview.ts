@@ -2,7 +2,7 @@ import { userAttendee } from '@common/features/User/models/attendee'
 
 export function makeAttendeePreview(
   attendees: userAttendee[] | undefined,
-  t: (k: string, p?: string | object) => string
+  t: (k: string, p?: Record<string, unknown>) => string
 ) {
   const attendeePreview = []
   const counts = (attendees ?? []).reduce(

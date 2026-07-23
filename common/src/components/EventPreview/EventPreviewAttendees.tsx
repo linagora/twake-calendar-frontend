@@ -137,15 +137,20 @@ export function EventPreviewAttendees({
             >
               <AvatarGroup max={ATTENDEE_DISPLAY_LIMIT}>
                 {organizer &&
-                  renderAttendeeBadge(
-                    organizer,
-                    'org',
+                  renderAttendeeBadge({
+                    a: organizer,
+                    key: 'org',
                     t,
-                    showAllAttendees,
-                    true
-                  )}
+                    isFull: showAllAttendees,
+                    isOrganizer: true
+                  })}
                 {attendees.map((a, idx) =>
-                  renderAttendeeBadge(a, idx.toString(), t, showAllAttendees)
+                  renderAttendeeBadge({
+                    a,
+                    key: idx.toString(),
+                    t,
+                    isFull: showAllAttendees
+                  })
                 )}
               </AvatarGroup>
               <Button
@@ -182,17 +187,23 @@ export function EventPreviewAttendees({
 
       {showAllAttendees &&
         organizer &&
-        renderAttendeeBadge(organizer, 'org', t, showAllAttendees, true)}
+        renderAttendeeBadge({
+          a: organizer,
+          key: 'org',
+          t,
+          isFull: showAllAttendees,
+          isOrganizer: true
+        })}
       {showAllAttendees &&
         attendees.map((a, idx) =>
-          renderAttendeeBadge(
+          renderAttendeeBadge({
             a,
-            idx.toString(),
+            key: idx.toString(),
             t,
-            showAllAttendees,
-            false,
-            busyCaption(a)
-          )
+            isFull: showAllAttendees,
+            isOrganizer: false,
+            caption: busyCaption(a)
+          })
         )}
     </>
   )

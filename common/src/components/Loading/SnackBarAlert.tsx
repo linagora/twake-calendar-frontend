@@ -5,13 +5,15 @@ export function SnackbarAlert({
   open,
   setOpen,
   message,
-  severity = 'success'
+  severity = 'success',
+  sx
 }: {
   open: boolean
   setOpen: (o: boolean) => void
   message: string
   severity?: AlertColor
-}) {
+  sx?: object
+}): JSX.Element {
   return (
     <Snackbar
       open={open}
@@ -22,7 +24,7 @@ export function SnackbarAlert({
       <Alert
         severity={severity}
         onClose={() => setOpen(false)}
-        sx={{ width: '100%' }}
+        sx={{ width: '100%', ...sx }}
       >
         {message}
       </Alert>

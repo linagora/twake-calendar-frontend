@@ -73,7 +73,13 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
 
       {isResourceEventPreview &&
         organizer &&
-        renderAttendeeBadge(organizer, 'org', t, true, true)}
+        renderAttendeeBadge({
+          a: organizer,
+          key: 'org',
+          t,
+          isFull: true,
+          isOrganizer: true
+        })}
 
       {shouldShowAttendeesSection && (
         <EventPreviewAttendees
