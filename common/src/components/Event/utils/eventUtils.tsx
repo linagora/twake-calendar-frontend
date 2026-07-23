@@ -16,14 +16,20 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { AttendeePopover } from '@common/components/Attendees/AttendeePopover'
 import { PartStat } from '@common/features/User/models/attendee'
 
-export const classIcon = (partStat?: PartStat): JSX.Element | null => {
+export const classIcon = (
+  partStat?: PartStat,
+  fontSize?: string
+): JSX.Element | null => {
   switch (partStat) {
     case 'ACCEPTED':
       return (
         <Box
           sx={{ color: 'success.main', display: 'flex', alignItems: 'center' }}
         >
-          <CheckCircleIcon fontSize="inherit" color="inherit" />
+          <CheckCircleIcon
+            sx={{ fontSize: fontSize ?? 'inherit' }}
+            color="inherit"
+          />
         </Box>
       )
     case 'DECLINED':
@@ -31,7 +37,10 @@ export const classIcon = (partStat?: PartStat): JSX.Element | null => {
         <Box
           sx={{ color: 'error.main', display: 'flex', alignItems: 'center' }}
         >
-          <CancelIcon fontSize="inherit" color="inherit" />
+          <CancelIcon
+            sx={{ fontSize: fontSize ?? 'inherit' }}
+            color="inherit"
+          />
         </Box>
       )
     default:
