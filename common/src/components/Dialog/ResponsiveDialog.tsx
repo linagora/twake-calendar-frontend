@@ -193,6 +193,7 @@ function ResponsiveDialog({
       transitionDuration={isExpanded ? 0 : 300}
       sx={
         [
+          { '& .MuiDialog-paper': { overflowY: 'hidden' } },
           ...(baseSx ? [baseSx] : []),
           ...(Array.isArray(sx) ? (sx as SxProps<Theme>[]) : sx ? [sx] : [])
         ] as SxProps<Theme>
