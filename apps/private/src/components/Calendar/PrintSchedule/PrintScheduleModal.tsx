@@ -69,10 +69,12 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
   const [loading, setLoading] = useState(false)
   const [errorKey, setErrorKey] = useState<string | null>(null)
 
-  const applyQuickOption = (nextScale: PrintScale): void => {
-    setScale(nextScale)
-    setStartDate(dayjs().startOf(nextScale === 'week' ? 'isoWeek' : nextScale))
-    setEndDate(dayjs().endOf(nextScale === 'week' ? 'isoWeek' : nextScale))
+  // Quick options only move the date range; the chosen granularity is left as
+  // the user set it.
+  const applyQuickRange = (unit: 'week' | 'month'): void => {
+    const rangeUnit = unit === 'week' ? 'isoWeek' : 'month'
+    setStartDate(dayjs().startOf(rangeUnit))
+    setEndDate(dayjs().endOf(rangeUnit))
     setErrorKey(null)
   }
 
@@ -264,10 +266,10 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 />
               </Stack>
               <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-                <Button size="small" onClick={() => applyQuickOption('week')}>
+                <Button size="small" onClick={() => applyQuickRange('week')}>
                   {t('print.thisWeek')}
                 </Button>
-                <Button size="small" onClick={() => applyQuickOption('month')}>
+                <Button size="small" onClick={() => applyQuickRange('month')}>
                   {t('print.thisMonth')}
                 </Button>
               </Stack>

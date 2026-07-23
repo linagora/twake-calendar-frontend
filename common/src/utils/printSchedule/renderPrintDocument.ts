@@ -16,7 +16,9 @@ interface HourRange {
   max: number
 }
 
-const HOUR_HEIGHT = 42
+// Kept small enough that a full 24h day grid plus its chrome fits one printed
+// page (A4/Letter) instead of spilling a couple of rows onto the next page.
+const HOUR_HEIGHT = 36
 
 /** Time grids always span the whole day so no event is ever cropped out. */
 const FULL_DAY_BOUNDS: HourRange = { min: 0, max: 24 }
@@ -335,7 +337,7 @@ const STYLES = `
   .tg-allday-col { flex: 1; border-left: 1px solid #eceef3; padding: 2px; }
   .tg-body { display: flex; }
   .tg-times { width: 56px; flex: none; }
-  .tg-time { height: var(--hour-height, 42px); font-size: 10px; color: #6b7488; text-align: right; padding-right: 6px; transform: translateY(-6px); }
+  .tg-time { height: var(--hour-height, 36px); font-size: 10px; color: #6b7488; text-align: right; padding-right: 6px; transform: translateY(-6px); }
   .tg-cols { flex: 1; display: flex; background-image: linear-gradient(to bottom, #eceef3 1px, transparent 1px); background-repeat: repeat-y; }
   .tg-col { flex: 1; position: relative; border-left: 1px solid #eceef3; }
   .ev { position: absolute; border-radius: 4px; border-left: 3px solid; color: #fff; padding: 1px 3px; overflow: hidden; font-size: 10px; line-height: 1.2; }
@@ -363,6 +365,7 @@ const STYLES = `
   .sc-loc { flex: none; max-width: 38%; color: #6b7488; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sc-empty { padding: 14px; text-align: center; color: #9aa2b1; font-size: 11px; }
   @media print {
+    @page { margin: 8mm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { padding: 0; }
   }
