@@ -3,22 +3,12 @@ import {
   Slot
 } from '@common/features/booking/types/BookingTypes'
 import { isValidEmail } from '@common/utils/isValidEmail'
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  TextField,
-  Typography
-} from '@linagora/twake-mui'
-import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { StaticDateTimeSummary } from './StaticDateTimeSummary'
+import { ResponsiveDialog } from '@common/components/Dialog'
 
 interface BookingConfirmDialogProps {
   open: boolean
@@ -27,30 +17,6 @@ interface BookingConfirmDialogProps {
   bookingInfo: BookingSlotsResponse | null
   onConfirm: (name: string, email: string) => Promise<void>
   selectedTimezone: string
-}
-
-interface DialogHeaderProps {
-  owner: BookingSlotsResponse['owner'] | undefined
-  onClose: () => void
-}
-
-const DialogHeader: React.FC<DialogHeaderProps> = ({ owner, onClose }) => {
-  return (
-    <DialogTitle
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '4px',
-        my: '16px'
-      }}
-    >
-      {owner ? <BookingOwnerDisplay owner={owner} /> : <Box />}
-      <IconButton onClick={onClose} size="small">
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </DialogTitle>
-  )
 }
 
 interface BookingDetailsProps {
@@ -230,41 +196,52 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     ? t('booking.confirm.inProgress')
     : t('booking.confirm.button')
 
+  const title = bookingInfo?.owner ? (
+    <BookingOwnerDisplay owner={bookingInfo.owner} />
+  ) : (
+    <Box />
+  )
+
+  const actions = (
+    <>
+      <Button onClick={handleClose} variant="text" disabled={bookingInProgress}>
+        {t('common.cancel')}
+      </Button>
+      <Button
+        onClick={() => void handleConfirm()}
+        variant="contained"
+        disabled={bookingInProgress}
+      >
+        {confirmButtonText}
+      </Button>
+    </>
+  )
+
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogHeader owner={bookingInfo?.owner} onClose={handleClose} />
-      <DialogContent>
-        <BookingDetails
-          bookingInfo={bookingInfo}
-          selectedSlot={selectedSlot}
-          selectedTimezone={selectedTimezone}
-        />
-        <BookingForm
-          name={name}
-          email={email}
-          nameError={nameError}
-          emailError={emailError}
-          bookingError={bookingError}
-          onNameChange={setName}
-          onEmailChange={setEmail}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={handleClose}
-          variant="text"
-          disabled={bookingInProgress}
-        >
-          {t('common.cancel')}
-        </Button>
-        <Button
-          onClick={() => void handleConfirm()}
-          variant="contained"
-          disabled={bookingInProgress}
-        >
-          {confirmButtonText}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <ResponsiveDialog
+      open={open}
+      onClose={handleClose}
+      title={title}
+      actions={actions}
+      normalMaxWidth="570px"
+      titleSx={{
+        my: '16px'
+      }}
+    >
+      <BookingDetails
+        bookingInfo={bookingInfo}
+        selectedSlot={selectedSlot}
+        selectedTimezone={selectedTimezone}
+      />
+      <BookingForm
+        name={name}
+        email={email}
+        nameError={nameError}
+        emailError={emailError}
+        bookingError={bookingError}
+        onNameChange={setName}
+        onEmailChange={setEmail}
+      />
+    </ResponsiveDialog>
   )
 }
