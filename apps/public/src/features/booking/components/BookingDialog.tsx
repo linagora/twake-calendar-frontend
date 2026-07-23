@@ -147,6 +147,15 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
 
+  const handleEmailChange = (value: string): void => {
+    setEmail(value)
+    if (!isValidEmail(value)) {
+      setEmailError(t('peopleSearch.invalidEmail').replace('%{email}', value))
+    } else {
+      setEmailError(null)
+    }
+  }
+
   const handleConfirm = async (): Promise<void> => {
     setNameError(null)
     setEmailError(null)
@@ -240,7 +249,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         emailError={emailError}
         bookingError={bookingError}
         onNameChange={setName}
-        onEmailChange={setEmail}
+        onEmailChange={handleEmailChange}
       />
     </ResponsiveDialog>
   )
