@@ -54,6 +54,7 @@ export const CalendarSelectorDesktopMenu: React.FC<
       >
         {t('actions.modify')}
       </MenuItem>
+      {onPrint !== undefined && <Divider />}
       {onPrint !== undefined && (
         <MenuItem
           onClick={() => {
