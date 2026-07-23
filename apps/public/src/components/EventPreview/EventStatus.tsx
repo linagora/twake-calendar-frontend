@@ -11,7 +11,7 @@ export const EventStatus = ({
   isOrganizer?: boolean
 }) => {
   const { t } = useI18n()
-  const icon = classIcon(partStat)
+  const icon = classIcon(partStat, 'big')
   const statusText = partStat
     ? t(`eventPreview.${isOrganizer ? 'organizer' : 'attendee'}.${partStat}`)
     : t(`eventPreview.${isOrganizer ? 'organizer' : 'attendee'}.WAITING`)
@@ -25,9 +25,7 @@ export const EventStatus = ({
       }}
     >
       {icon}
-      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        {statusText}
-      </Typography>
+      <Typography variant="body2">{statusText}</Typography>
     </Box>
   )
 }
