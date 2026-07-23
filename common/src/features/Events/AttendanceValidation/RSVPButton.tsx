@@ -132,19 +132,20 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
           sx={{
             borderRadius: '50px',
             // Override MUI's default disabled styles to keep the color
-            '&.Mui-disabled': shouldShowActive
-              ? {
-                  backgroundColor: (theme: Theme): string =>
-                    theme.palette[buttonColor].main,
-                  color: (theme: Theme): string =>
-                    theme.palette[buttonColor].contrastText,
-                  borderColor: (theme: Theme): string =>
-                    theme.palette[buttonColor].main
-                }
-              : {}
+            '&.Mui-disabled':
+              isLoading && shouldShowActive
+                ? {
+                    backgroundColor: (theme: Theme): string =>
+                      theme.palette[buttonColor].main,
+                    color: (theme: Theme): string =>
+                      theme.palette[buttonColor].contrastText,
+                    borderColor: (theme: Theme): string =>
+                      theme.palette[buttonColor].main
+                  }
+                : {}
           }}
           onClick={() => void handleClick()}
-          disabled={isLoading || isReadDelegated}
+          disabled={isLoading || isReadDelegated || isCurrentlyActive}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {showLoading && <CircularProgress size={20} color="inherit" />}
