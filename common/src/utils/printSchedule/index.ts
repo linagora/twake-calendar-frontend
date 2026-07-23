@@ -12,6 +12,7 @@ export type {
   PrintEvent,
   PrintPeriod,
   PrintLabels,
-  PrintHeading
+  PrintHeading,
+  PrintCalendar
 } from './types'
 export { default as printDayjs } from './dayjsSetup'

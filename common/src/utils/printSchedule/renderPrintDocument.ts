@@ -3,6 +3,7 @@ import { Dayjs } from 'dayjs'
 import { PositionedEvent, layoutTimedEvents } from './layout'
 import { eventsInPeriod } from './selectPrintEvents'
 import {
+  PrintCalendar,
   PrintEvent,
   PrintHeading,
   PrintLabels,
@@ -28,16 +29,14 @@ interface PageContext {
   labels: PrintLabels
   locale: string
   layout: PrintLayout
-  heading?: PrintHeading
 }
 
 export interface RenderPrintDocumentOptions {
   periods: PrintPeriod[]
-  events: PrintEvent[]
+  calendars: PrintCalendar[]
   labels: PrintLabels
   locale: string
   layout?: PrintLayout
-  heading?: PrintHeading
 }
 
 const esc = (value: string): string =>
@@ -280,13 +279,13 @@ const renderSchedule = (
   return `<div class="sc">${content}</div>`
 }
 
-const renderHeading = (heading?: PrintHeading): string => {
-  if (!heading) return ''
-  const owner = heading.ownerName
-    ? ` <span class="page-owner">· ${esc(heading.ownerName)}</span>`
-    : ''
-  return `<div class="page-subtitle">${esc(heading.calendarName)}${owner}</div>`
-}
+const headingText = (heading: PrintHeading): string =>
+  heading.ownerName
+    ? `${esc(heading.calendarName)} <span class="page-owner">· ${esc(heading.ownerName)}</span>`
+    : esc(heading.calendarName)
+
+const renderHeading = (heading?: PrintHeading): string =>
+  heading ? `<div class="page-subtitle">${headingText(heading)}</div>` : ''
 
 const renderBody = (
   period: PrintPeriod,
@@ -301,18 +300,72 @@ const renderBody = (
     : renderTimeGrid(period, periodEvents, labels, locale)
 }
 
-const renderPage = (
+// Day and agenda views print one column per calendar; week and month views
+// merge every calendar into a single shared grid.
+const isSideBySide = (period: PrintPeriod, layout: PrintLayout): boolean =>
+  layout === 'schedule' || period.scale === 'day'
+
+const renderCalendarColumn = (
+  calendar: PrintCalendar,
   period: PrintPeriod,
-  events: PrintEvent[],
   context: PageContext
 ): string => {
-  const periodEvents = eventsInPeriod(events, period)
-  const body = renderBody(period, periodEvents, context)
+  const head = calendar.heading
+    ? `<div class="col-head">${headingText(calendar.heading)}</div>`
+    : ''
+  const body = renderBody(
+    period,
+    eventsInPeriod(calendar.events, period),
+    context
+  )
+  return `<div class="col">${head}${body}</div>`
+}
+
+const renderPageBody = (
+  period: PrintPeriod,
+  calendars: PrintCalendar[],
+  context: PageContext
+): string => {
+  if (calendars.length > 1 && isSideBySide(period, context.layout)) {
+    const cols = calendars
+      .map(calendar => renderCalendarColumn(calendar, period, context))
+      .join('')
+    return `<div class="cols-row">${cols}</div>`
+  }
+  const merged = calendars.flatMap(calendar =>
+    eventsInPeriod(calendar.events, period)
+  )
+  return renderBody(period, merged, context)
+}
+
+const renderPageSubtitle = (
+  period: PrintPeriod,
+  calendars: PrintCalendar[],
+  layout: PrintLayout
+): string => {
+  // Side-by-side columns carry their own per-calendar headers.
+  if (calendars.length > 1 && isSideBySide(period, layout)) return ''
+  if (calendars.length === 1) return renderHeading(calendars[0].heading)
+  const names = calendars
+    .map(calendar => calendar.heading?.calendarName)
+    .filter((name): name is string => Boolean(name))
+    .map(esc)
+    .join(', ')
+  return names ? `<div class="page-subtitle">${names}</div>` : ''
+}
+
+const renderPage = (
+  period: PrintPeriod,
+  calendars: PrintCalendar[],
+  context: PageContext
+): string => {
+  const body = renderPageBody(period, calendars, context)
+  const subtitle = renderPageSubtitle(period, calendars, context.layout)
 
   return (
     '<section class="page">' +
     `<h1 class="page-title">${esc(period.label)}</h1>` +
-    `${renderHeading(context.heading)}${body}</section>`
+    `${subtitle}${body}</section>`
   )
 }
 
@@ -364,6 +417,9 @@ const STYLES = `
   .sc-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sc-loc { flex: none; max-width: 38%; color: #6b7488; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sc-empty { padding: 14px; text-align: center; color: #9aa2b1; font-size: 11px; }
+  .cols-row { display: flex; gap: 12px; align-items: flex-start; }
+  .col { flex: 1 1 0; min-width: 0; }
+  .col-head { font-size: 12px; font-weight: 600; margin: 0 0 6px; color: #4a5468; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   @media print {
     @page { margin: 8mm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -378,16 +434,14 @@ const STYLES = `
  */
 export const renderPrintDocument = ({
   periods,
-  events,
+  calendars,
   labels,
   locale,
-  layout = 'grid',
-  heading
+  layout = 'grid'
 }: RenderPrintDocumentOptions): string => {
+  const context: PageContext = { labels, locale, layout }
   const pages = periods
-    .map(period =>
-      renderPage(period, events, { labels, locale, layout, heading })
-    )
+    .map(period => renderPage(period, calendars, context))
     .join('')
 
   return (

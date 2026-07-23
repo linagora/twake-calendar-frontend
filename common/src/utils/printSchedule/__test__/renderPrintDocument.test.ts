@@ -28,6 +28,9 @@ const makeEvent = (overrides: Partial<CalendarEvent>): CalendarEvent =>
     ...overrides
   }) as CalendarEvent
 
+const printEvents = (events: CalendarEvent[]) =>
+  selectPrintEvents(events, 'Etc/UTC', LABELS.noTitle)
+
 describe('renderPrintDocument', () => {
   it('renders one printable page per period with the event and auto-print script', () => {
     const periods = buildPrintPeriods(
@@ -35,11 +38,10 @@ describe('renderPrintDocument', () => {
       dayjs('2026-07-22'),
       dayjs('2026-07-22')
     )
-    const events = selectPrintEvents([makeEvent({})], 'Etc/UTC', LABELS.noTitle)
 
     const html = renderPrintDocument({
       periods,
-      events,
+      calendars: [{ events: printEvents([makeEvent({})]) }],
       locale: 'en',
       labels: LABELS
     })
@@ -57,11 +59,10 @@ describe('renderPrintDocument', () => {
       dayjs('2026-07-22'),
       dayjs('2026-07-22')
     )
-    const events = selectPrintEvents([makeEvent({})], 'Etc/UTC', LABELS.noTitle)
 
     const html = renderPrintDocument({
       periods,
-      events,
+      calendars: [{ events: printEvents([makeEvent({})]) }],
       locale: 'en',
       layout: 'schedule',
       labels: LABELS
@@ -82,7 +83,7 @@ describe('renderPrintDocument', () => {
 
     const html = renderPrintDocument({
       periods,
-      events: [],
+      calendars: [{ events: [] }],
       locale: 'en',
       layout: 'schedule',
       labels: LABELS
@@ -97,9 +98,10 @@ describe('renderPrintDocument', () => {
       dayjs('2026-07-01'),
       dayjs('2026-07-31')
     )
+
     const html = renderPrintDocument({
       periods,
-      events: [],
+      calendars: [{ events: [] }],
       locale: 'en',
       labels: LABELS
     })
@@ -108,12 +110,7 @@ describe('renderPrintDocument', () => {
     expect(html).toContain('mg-daynum')
   })
 
-  it('escapes HTML-sensitive characters in event titles', () => {
-    const events = selectPrintEvents(
-      [makeEvent({ title: '<script>alert(1)</script>' })],
-      'Etc/UTC',
-      LABELS.noTitle
-    )
+  it('prints calendars side by side with their own headers at day scale', () => {
     const periods = buildPrintPeriods(
       'day',
       dayjs('2026-07-22'),
@@ -122,7 +119,74 @@ describe('renderPrintDocument', () => {
 
     const html = renderPrintDocument({
       periods,
-      events,
+      calendars: [
+        {
+          events: printEvents([makeEvent({ title: 'Alpha' })]),
+          heading: { calendarName: 'Cal A' }
+        },
+        {
+          events: printEvents([makeEvent({ title: 'Beta' })]),
+          heading: { calendarName: 'Cal B' }
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    expect(html).toContain('class="cols-row"')
+    expect(html).toContain('Cal A')
+    expect(html).toContain('Cal B')
+    expect(html).toContain('Alpha')
+    expect(html).toContain('Beta')
+  })
+
+  it('merges calendars into a single grid at week scale', () => {
+    const periods = buildPrintPeriods(
+      'week',
+      dayjs('2026-07-22'),
+      dayjs('2026-07-22')
+    )
+
+    const html = renderPrintDocument({
+      periods,
+      calendars: [
+        {
+          events: printEvents([makeEvent({ title: 'Alpha' })]),
+          heading: { calendarName: 'Cal A' }
+        },
+        {
+          events: printEvents([makeEvent({ title: 'Beta' })]),
+          heading: { calendarName: 'Cal B' }
+        }
+      ],
+      locale: 'en',
+      labels: LABELS
+    })
+
+    // One shared grid, no side-by-side columns; both events present.
+    expect(html).not.toContain('class="cols-row"')
+    expect(html).toContain('Alpha')
+    expect(html).toContain('Beta')
+    // Merged pages list every calendar name in the subtitle.
+    expect(html).toContain('Cal A, Cal B')
+  })
+
+  it('escapes HTML-sensitive characters in event titles', () => {
+    const periods = buildPrintPeriods(
+      'day',
+      dayjs('2026-07-22'),
+      dayjs('2026-07-22')
+    )
+
+    const html = renderPrintDocument({
+      periods,
+      calendars: [
+        {
+          events: printEvents([
+            makeEvent({ title: '<script>alert(1)</script>' })
+          ])
+        }
+      ],
       locale: 'en',
       labels: LABELS
     })

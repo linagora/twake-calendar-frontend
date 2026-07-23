@@ -42,3 +42,9 @@ export interface PrintHeading {
   calendarName: string
   ownerName?: string
 }
+
+/** One calendar's print-ready events plus how to label it on the page. */
+export interface PrintCalendar {
+  events: PrintEvent[]
+  heading?: PrintHeading
+}
