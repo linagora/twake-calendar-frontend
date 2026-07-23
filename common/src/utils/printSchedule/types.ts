@@ -3,6 +3,9 @@ import { Dayjs } from 'dayjs'
 /** One printed page corresponds to one period at the chosen scale. */
 export type PrintScale = 'day' | 'week' | 'month'
 
+/** How each page lays out its events: a time/month grid or an agenda list. */
+export type PrintLayout = 'grid' | 'schedule'
+
 /**
  * A calendar event normalized for printing: timezone already resolved, so
  * `start`/`end` are wall-clock instants in the user's timezone.
@@ -31,6 +34,7 @@ export interface PrintLabels {
   allDay: string
   noTitle: string
   weekPrefix: string
+  noEvents: string
 }
 
 /** Calendar identity shown as a subtitle on every printed page. */

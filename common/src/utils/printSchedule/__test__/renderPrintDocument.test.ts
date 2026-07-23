@@ -11,7 +11,8 @@ const LABELS: PrintLabels = {
   documentTitle: 'Schedule',
   allDay: 'All day',
   noTitle: '(No title)',
-  weekPrefix: 'Week'
+  weekPrefix: 'Week',
+  noEvents: 'No events'
 }
 
 const makeEvent = (overrides: Partial<CalendarEvent>): CalendarEvent =>
@@ -48,6 +49,46 @@ describe('renderPrintDocument', () => {
     expect(html).toContain('page-break-after')
     expect(html).toContain('window.print()')
     expect(html).toContain('#336699')
+  })
+
+  it('renders an agenda list with the event when layout is schedule', () => {
+    const periods = buildPrintPeriods(
+      'week',
+      dayjs('2026-07-22'),
+      dayjs('2026-07-22')
+    )
+    const events = selectPrintEvents([makeEvent({})], 'Etc/UTC', LABELS.noTitle)
+
+    const html = renderPrintDocument({
+      periods,
+      events,
+      locale: 'en',
+      layout: 'schedule',
+      labels: LABELS
+    })
+
+    expect(html).toContain('class="sc"')
+    expect(html).toContain('Team sync')
+    // Agenda layout skips the time-grid scaffold entirely.
+    expect(html).not.toContain('class="tg-times"')
+  })
+
+  it('shows the no-events placeholder for an empty schedule period', () => {
+    const periods = buildPrintPeriods(
+      'week',
+      dayjs('2026-07-22'),
+      dayjs('2026-07-22')
+    )
+
+    const html = renderPrintDocument({
+      periods,
+      events: [],
+      locale: 'en',
+      layout: 'schedule',
+      labels: LABELS
+    })
+
+    expect(html).toContain('No events')
   })
 
   it('renders a month grid with day numbers at month scale', () => {

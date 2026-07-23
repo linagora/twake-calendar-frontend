@@ -8,6 +8,7 @@ export { layoutTimedEvents } from './layout'
 export { renderPrintDocument } from './renderPrintDocument'
 export type {
   PrintScale,
+  PrintLayout,
   PrintEvent,
   PrintPeriod,
   PrintLabels,

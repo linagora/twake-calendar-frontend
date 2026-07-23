@@ -13,6 +13,7 @@ import {
   MAX_PRINT_PERIODS,
   printDayjs as dayjs,
   PrintHeading,
+  PrintLayout,
   PrintScale,
   renderPrintDocument,
   selectPrintEvents
@@ -44,6 +45,7 @@ export interface PrintScheduleModalProps {
 }
 
 const SCALES: PrintScale[] = ['day', 'week', 'month']
+const LAYOUTS: PrintLayout[] = ['grid', 'schedule']
 
 export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
   open,
@@ -61,6 +63,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
 
   const [scale, setScale] = useState<PrintScale>('week')
+  const [layout, setLayout] = useState<PrintLayout>('grid')
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs())
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs())
   const [loading, setLoading] = useState(false)
@@ -78,11 +81,13 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
     allDay: string
     noTitle: string
     weekPrefix: string
+    noEvents: string
   } => ({
     documentTitle: t('print.documentTitle'),
     allDay: t('print.allDay'),
     noTitle: t('print.noTitle'),
-    weekPrefix: t('print.weekPrefix')
+    weekPrefix: t('print.weekPrefix'),
+    noEvents: t('print.noEvents')
   })
 
   // Per-calendar print: the heading names the (single) calendar and its owner.
@@ -169,6 +174,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         periods,
         events,
         locale: lang,
+        layout,
         labels: buildLabels(),
         heading: buildHeading(calendars)
       })
@@ -211,6 +217,27 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 {SCALES.map(value => (
                   <ToggleButton key={value} value={value}>
                     {t(`print.scale_${value}`)}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+
+            <Box>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                {t('print.layout')}
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                value={layout}
+                onChange={(_, value: PrintLayout | null) =>
+                  value && setLayout(value)
+                }
+                size="small"
+              >
+                {LAYOUTS.map(value => (
+                  <ToggleButton key={value} value={value}>
+                    {t(`print.layout_${value}`)}
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>

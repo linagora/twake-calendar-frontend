@@ -2,7 +2,13 @@ import './dayjsSetup'
 import { Dayjs } from 'dayjs'
 import { PositionedEvent, layoutTimedEvents } from './layout'
 import { eventsInPeriod } from './selectPrintEvents'
-import { PrintEvent, PrintHeading, PrintLabels, PrintPeriod } from './types'
+import {
+  PrintEvent,
+  PrintHeading,
+  PrintLabels,
+  PrintLayout,
+  PrintPeriod
+} from './types'
 
 /** Vertical hour window a time grid is cropped to, in whole hours [0, 24]. */
 interface HourRange {
@@ -19,6 +25,7 @@ const FULL_DAY_BOUNDS: HourRange = { min: 0, max: 24 }
 interface PageContext {
   labels: PrintLabels
   locale: string
+  layout: PrintLayout
   heading?: PrintHeading
 }
 
@@ -27,6 +34,7 @@ export interface RenderPrintDocumentOptions {
   events: PrintEvent[]
   labels: PrintLabels
   locale: string
+  layout?: PrintLayout
   heading?: PrintHeading
 }
 
@@ -206,6 +214,70 @@ const renderMonthGrid = (
   )
 }
 
+/** All calendar days spanned by a period, for the agenda layout. */
+const scheduleDays = (period: PrintPeriod): Dayjs[] => {
+  const count = period.end.diff(period.start, 'day')
+  return Array.from({ length: count }, (_, i) => period.start.add(i, 'day'))
+}
+
+const scheduleTime = (event: PrintEvent, allDayLabel: string): string =>
+  event.allDay
+    ? allDayLabel
+    : `${event.start.format('HH:mm')} – ${event.end.format('HH:mm')}`
+
+const renderScheduleRow = (event: PrintEvent, allDayLabel: string): string => {
+  const location = event.location
+    ? `<span class="sc-loc">${esc(event.location)}</span>`
+    : ''
+  return (
+    '<div class="sc-row">' +
+    `<span class="sc-time">${esc(scheduleTime(event, allDayLabel))}</span>` +
+    `<span class="sc-bar" style="${eventStyle(event.color)}"></span>` +
+    `<span class="sc-title">${esc(event.title)}</span>${location}</div>`
+  )
+}
+
+const renderScheduleDay = (
+  day: Dayjs,
+  periodEvents: PrintEvent[],
+  labels: PrintLabels,
+  locale: string
+): string => {
+  const dayStart = day.startOf('day')
+  const dayEnd = dayStart.add(1, 'day')
+  const dayEvents = periodEvents
+    .filter(
+      event => event.start.isBefore(dayEnd) && event.end.isAfter(dayStart)
+    )
+    .sort((a, b) => {
+      if (a.allDay !== b.allDay) return a.allDay ? -1 : 1
+      return a.start.valueOf() - b.start.valueOf()
+    })
+  if (dayEvents.length === 0) return ''
+
+  const rows = dayEvents
+    .map(event => renderScheduleRow(event, labels.allDay))
+    .join('')
+  return (
+    '<div class="sc-day">' +
+    `<div class="sc-date">${esc(day.locale(locale).format('dddd D MMMM'))}</div>` +
+    `${rows}</div>`
+  )
+}
+
+const renderSchedule = (
+  period: PrintPeriod,
+  periodEvents: PrintEvent[],
+  labels: PrintLabels,
+  locale: string
+): string => {
+  const body = scheduleDays(period)
+    .map(day => renderScheduleDay(day, periodEvents, labels, locale))
+    .join('')
+  const content = body || `<div class="sc-empty">${esc(labels.noEvents)}</div>`
+  return `<div class="sc">${content}</div>`
+}
+
 const renderHeading = (heading?: PrintHeading): string => {
   if (!heading) return ''
   const owner = heading.ownerName
@@ -214,21 +286,31 @@ const renderHeading = (heading?: PrintHeading): string => {
   return `<div class="page-subtitle">${esc(heading.calendarName)}${owner}</div>`
 }
 
+const renderBody = (
+  period: PrintPeriod,
+  periodEvents: PrintEvent[],
+  { labels, locale, layout }: PageContext
+): string => {
+  if (layout === 'schedule') {
+    return renderSchedule(period, periodEvents, labels, locale)
+  }
+  return period.scale === 'month'
+    ? renderMonthGrid(period, periodEvents, locale)
+    : renderTimeGrid(period, periodEvents, labels, locale)
+}
+
 const renderPage = (
   period: PrintPeriod,
   events: PrintEvent[],
-  { labels, locale, heading }: PageContext
+  context: PageContext
 ): string => {
   const periodEvents = eventsInPeriod(events, period)
-  const grid =
-    period.scale === 'month'
-      ? renderMonthGrid(period, periodEvents, locale)
-      : renderTimeGrid(period, periodEvents, labels, locale)
+  const body = renderBody(period, periodEvents, context)
 
   return (
     '<section class="page">' +
     `<h1 class="page-title">${esc(period.label)}</h1>` +
-    `${renderHeading(heading)}${grid}</section>`
+    `${renderHeading(context.heading)}${body}</section>`
   )
 }
 
@@ -270,6 +352,16 @@ const STYLES = `
   .mg-cell:first-child { border-left: none; }
   .mg-outside { background: #f6f7f9; color: #9aa2b1; }
   .mg-daynum { font-size: 11px; font-weight: 600; text-align: right; padding: 0 2px; }
+  .sc { border: 1px solid #d5d9e2; border-radius: 6px; overflow: hidden; }
+  .sc-day { border-top: 1px solid #eceef3; padding: 6px 10px; break-inside: avoid; }
+  .sc-day:first-child { border-top: none; }
+  .sc-date { font-size: 12px; font-weight: 600; text-transform: capitalize; margin-bottom: 4px; color: #4a5468; }
+  .sc-row { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 11px; }
+  .sc-time { flex: none; width: 104px; color: #6b7488; font-variant-numeric: tabular-nums; }
+  .sc-bar { flex: none; width: 3px; align-self: stretch; border-radius: 2px; min-height: 12px; }
+  .sc-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-loc { flex: none; max-width: 38%; color: #6b7488; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-empty { padding: 14px; text-align: center; color: #9aa2b1; font-size: 11px; }
   @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { padding: 0; }
@@ -286,10 +378,13 @@ export const renderPrintDocument = ({
   events,
   labels,
   locale,
+  layout = 'grid',
   heading
 }: RenderPrintDocumentOptions): string => {
   const pages = periods
-    .map(period => renderPage(period, events, { labels, locale, heading }))
+    .map(period =>
+      renderPage(period, events, { labels, locale, layout, heading })
+    )
     .join('')
 
   return (
