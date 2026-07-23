@@ -35,9 +35,9 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@linagora/twake-mui'
+import { DatePickerField } from '@common/components/Event/components/DateTimeFields/DatePickerField'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Dayjs } from 'dayjs'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -289,20 +289,22 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 {t('print.period')}
               </Typography>
               <Stack direction="row" spacing={1}>
-                <DatePicker
-                  label={t('print.startDate')}
-                  value={startDate}
-                  maxDate={endDate ?? undefined}
-                  onChange={value => setStartDate(value)}
-                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                />
-                <DatePicker
-                  label={t('print.endDate')}
-                  value={endDate}
-                  minDate={startDate ?? undefined}
-                  onChange={value => setEndDate(value)}
-                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <DatePickerField
+                    value={startDate}
+                    onChange={value => setStartDate(value)}
+                    testId="print-start-date"
+                    label={t('print.startDate')}
+                  />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <DatePickerField
+                    value={endDate}
+                    onChange={value => setEndDate(value)}
+                    testId="print-end-date"
+                    label={t('print.endDate')}
+                  />
+                </Box>
               </Stack>
               <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
                 <Button size="small" onClick={() => applyQuickRange('week')}>
