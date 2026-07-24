@@ -460,6 +460,7 @@
   "tooltip": {
     "download": "Xuất chi tiết sự kiện sang file .ics",
     "createEvent": "Tạo sự kiện mới",
+    "createEventWithAttendee": "Tạo sự kiện mới với %{attendee}",
     "editEvent": "Chỉnh sửa sự kiện",
     "deleteEvent": "Xóa sự kiện",
     "ACCEPTED": "Chấp nhận lời mời",
@@ -482,7 +483,8 @@
     "createAppointment": "Tạo lịch hẹn",
     "copyEmail": "Sao chép địa chỉ email",
     "emailCopied": "Email đã được sao chép",
-    "createAppointment": "Create appointment schedule",
+    "cannotOpenChatExternalUser": "Không thể mở trò chuyện với người dùng bên ngoài",
+    "openChat": "Mở trò chuyện với %{attendee}",
     "printSchedule": "In lịch của bạn dưới dạng PDF"
   },
   "print": {

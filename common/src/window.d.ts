@@ -18,6 +18,7 @@ declare global {
     DAV_BASE_URL: string
     CALDAV_PREFER_HANDLING?: 'strict'
     MAIL_SPA_URL: string
+    CHAT_SPA_URL: string
     VIDEO_CONFERENCE_BASE_URL: string
     SUPPORT_URL: string
     PRIVACY_URL: string

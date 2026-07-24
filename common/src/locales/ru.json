@@ -460,6 +460,7 @@
   "tooltip": {
     "download": "Экспорт деталей события в файл .ics",
     "createEvent": "Создать новое событие",
+    "createEventWithAttendee": "Создать новое событие с %{attendee}",
     "editEvent": "Редактировать событие",
     "deleteEvent": "Удалить событие",
     "ACCEPTED": "Принять приглашение",
@@ -482,6 +483,8 @@
     "createAppointment": "Создать расписание встреч",
     "copyEmail": "Копировать адрес электронной почты",
     "emailCopied": "Email скопирован",
+    "cannotOpenChatExternalUser": "Невозможно открыть чат с внешним пользователем",
+    "openChat": "Открыть чат с %{attendee}",
     "printSchedule": "Распечатать расписание в PDF"
   },
   "print": {

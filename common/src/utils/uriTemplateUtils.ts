@@ -9,6 +9,7 @@
 export interface UriTemplateContext {
   localpart?: string
   workplaceFqdn?: string
+  target?: string
 }
 
 /**
@@ -19,12 +20,13 @@ export interface UriTemplateContext {
  *  - {workplaceFqdn}           the full workplace FQDN (e.g. tmle.stg.lin-saas.com)
  *  - {workplaceFqdn.localpart} the first label of the FQDN (e.g. tmle)
  *  - {workplaceFqdn.domain}    the FQDN without its first label (e.g. stg.lin-saas.com)
+ *  - {target}                  the target username for chat url
  *
  * Unknown expressions are left untouched.
  */
 export function resolveUriTemplate(
   template: string,
-  { localpart = '', workplaceFqdn = '' }: UriTemplateContext
+  { localpart = '', workplaceFqdn = '', target = '' }: UriTemplateContext
 ): string {
   const [fqdnLocalpart = '', ...fqdnRest] = workplaceFqdn.split('.')
   const fqdnDomain = fqdnRest.join('.')
@@ -33,7 +35,8 @@ export function resolveUriTemplate(
     localpart,
     workplaceFqdn,
     'workplaceFqdn.localpart': fqdnLocalpart,
-    'workplaceFqdn.domain': fqdnDomain
+    'workplaceFqdn.domain': fqdnDomain,
+    target
   }
 
   return template.replace(/\{([^}]+)\}/g, (match, expression: string) => {

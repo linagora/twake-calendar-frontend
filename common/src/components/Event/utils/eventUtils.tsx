@@ -48,13 +48,9 @@ export const classIcon = (
   }
 }
 
-function renderSimpleAttendeeBadge(
-  a: userAttendee,
-  key: string,
-  isPublic?: boolean
-): JSX.Element {
+function renderSimpleAttendeeBadge(a: userAttendee, key: string): JSX.Element {
   return (
-    <AttendeePopover key={key} attendee={a} isPublic={isPublic}>
+    <AttendeePopover key={key} attendee={a}>
       <Avatar {...stringAvatar(a?.cn || a?.cal_address)} />
     </AttendeePopover>
   )
@@ -65,15 +61,13 @@ function renderFullAttendeeBadge({
   key,
   t,
   isOrganizer,
-  caption,
-  isPublic
+  caption
 }: {
   a: userAttendee
   key: string
   t: (key: string) => string
   isOrganizer?: boolean
   caption?: string
-  isPublic?: boolean
 }): JSX.Element {
   const icon = classIcon(a.partstat)
   const displayName = a.cn || a.cal_address
@@ -95,7 +89,7 @@ function renderFullAttendeeBadge({
           <ResourceIcon />
         </Box>
       ) : (
-        <AttendeePopover attendee={a} isPublic={isPublic}>
+        <AttendeePopover attendee={a}>
           <Badge
             overlap="circular"
             sx={{ marginRight: 2 }}
@@ -121,7 +115,7 @@ function renderFullAttendeeBadge({
         </AttendeePopover>
       )}
       <Box style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <AttendeePopover attendee={a} isPublic={isPublic}>
+        <AttendeePopover attendee={a}>
           <Typography variant="body2" noWrap>
             {displayName}
           </Typography>
@@ -147,8 +141,7 @@ export function renderAttendeeBadge({
   t,
   isFull,
   isOrganizer,
-  caption,
-  isPublic
+  caption
 }: {
   a: userAttendee
   key: string
@@ -156,14 +149,13 @@ export function renderAttendeeBadge({
   isFull?: boolean
   isOrganizer?: boolean
   caption?: string
-  isPublic?: boolean
 }): JSX.Element {
   if (!a) return <></>
 
   if (!isFull) {
-    return renderSimpleAttendeeBadge(a, key, isPublic)
+    return renderSimpleAttendeeBadge(a, key)
   }
-  return renderFullAttendeeBadge({ a, key, t, isOrganizer, caption, isPublic })
+  return renderFullAttendeeBadge({ a, key, t, isOrganizer, caption })
 }
 
 export function stringToColor(string: string): string {

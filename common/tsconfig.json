@@ -5,8 +5,7 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "paths": {
-      "@common/*": ["./src/*"],
-      "@injected/*": ["./src/*"]
+      "@common/*": ["./src/*"]
     }
   },
   "include": ["src", "../*.d.ts"]

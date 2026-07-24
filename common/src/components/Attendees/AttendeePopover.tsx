@@ -2,7 +2,6 @@ import { userAttendee } from '@common/features/User/models/attendee'
 import {
   Avatar,
   Box,
-  Button,
   IconButton,
   Typography,
   Popper,
@@ -13,19 +12,17 @@ import {
 import { ClickAwayListener } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
-import { Icon, CalendarToday, EmailOpen } from '@linagora/twake-icons'
 import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { useAppSelector } from '@common/app/hooks'
-import { resolveMailSpaUrl } from '@common/utils/mailUrlUtils'
 import { Tooltip } from '../Tooltip'
 import { stringAvatar } from '../Event/utils/eventUtils'
 import { SnackbarAlert } from '../Loading/SnackBarAlert'
+import { AttendeeActions } from '@injected/components/Attendees/AttendeeActions'
+import { useAppSelector } from '@common/app/hooks'
 
 interface AttendeePopoverProps {
   attendee: userAttendee
   children: React.ReactElement
-  isPublic?: boolean
 }
 
 function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
@@ -75,90 +72,9 @@ function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
   )
 }
 
-function AttendeeActions({
-  attendee,
-  isPublic
-}: {
-  attendee: userAttendee
-  isPublic?: boolean
-}): JSX.Element {
-  const { t } = useI18n()
-  const theme = useTheme()
-
-  const workplaceFqdn = useAppSelector(
-    state => state.user.userData?.workplaceFqdn
-  )
-  const userEmail = useAppSelector(state => state.user.userData?.email)
-  const mailSpaUrl = resolveMailSpaUrl({
-    localpart: userEmail?.split('@')[0],
-    workplaceFqdn
-  })
-
-  const handleSendMail = (): void => {
-    if (!mailSpaUrl) return
-    window.open(
-      `${mailSpaUrl}/mailto/?uri=${encodeURIComponent(
-        `mailto:${attendee.cal_address}`
-      )}`,
-      '_blank',
-      'noopener,noreferrer'
-    )
-  }
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: 1,
-        mt: 1,
-        alignItems: 'center'
-      }}
-    >
-      {mailSpaUrl && (
-        <Button
-          variant="outlined"
-          startIcon={<Icon icon={EmailOpen} size={18} />}
-          onClick={handleSendMail}
-          sx={{
-            borderRadius: 6,
-            textTransform: 'none',
-            borderColor: 'divider',
-            color: alpha(theme.palette.grey[900], 0.9)
-          }}
-        >
-          {t('attendees.sendMail')}
-        </Button>
-      )}
-      {!isPublic && (
-        <Tooltip title={t('tooltip.createEvent')}>
-          <IconButton
-            onClick={() => {
-              window.open(
-                `/newEvent?attendee=${encodeURIComponent(attendee.cal_address)}`,
-                '_self'
-              )
-            }}
-            sx={{
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: '50%',
-              padding: 1,
-              color: alpha(theme.palette.grey[900], 0.9)
-            }}
-            size="small"
-          >
-            <Icon icon={CalendarToday} size={20} />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Box>
-  )
-}
-
 export function AttendeePopover({
   attendee,
-  children,
-  isPublic
+  children
 }: AttendeePopoverProps): React.ReactElement {
   const theme = useTheme()
   const userEmail = useAppSelector(state => state.user.userData?.email)
@@ -245,7 +161,7 @@ export function AttendeePopover({
             </IconButton>
 
             <AttendeeInfo attendee={attendee} />
-            <AttendeeActions attendee={attendee} isPublic={isPublic} />
+            <AttendeeActions attendee={attendee} />
           </Paper>
         </Popper>
       </div>

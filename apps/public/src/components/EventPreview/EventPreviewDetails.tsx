@@ -63,8 +63,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           key: 'org',
           t,
           isFull: true,
-          isOrganizer: true,
-          isPublic: true
+          isOrganizer: true
         })}
 
       {shouldShowAttendeesSection && (

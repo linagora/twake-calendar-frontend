@@ -20,7 +20,8 @@
     "react-router-dom": "^6.23.1",
     "redux-first-history": "^5.2.0",
     "twake-i18n": "^0.3.0",
-    "@fullcalendar/core": "^6.1.17"
+    "@fullcalendar/core": "^6.1.17",
+    "@linagora/twake-icons": "^2.7.0"
   },
   "scripts": {
     "start": "PORT=5000 rsbuild dev",

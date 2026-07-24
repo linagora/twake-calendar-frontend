@@ -43,3 +43,10 @@ var HIDE_LANGUAGE_SELECTOR = false
 var BOOKING_LINK_ENABLED = false
 // Displays the attachments section in the event display modal. Defaults to false.
 var ENABLE_EVENT_ATTACHMENTS = false
+// CHAT_SPA_URL is a URI template (RFC 6570 style).
+// Supported expressions: {localpart},
+// {workplaceFqdn.localpart}, {workplaceFqdn.domain}
+// Examples:
+//   'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain}/#/bridge/web/#/chat/@{target}:{workplaceFqdn.domain}'
+//   'https://{localpart}-chat.twake.linagora.com/#/bridge/web/#/chat/@{target}:linagora.com'
+var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain}/#/bridge/web/#/chat/@{target}:{workplaceFqdn.domain}'

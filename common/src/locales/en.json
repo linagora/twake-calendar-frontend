@@ -460,6 +460,7 @@
   "tooltip": {
     "download": "Export event details to .ics file",
     "createEvent": "Create a new event",
+    "createEventWithAttendee": "Create a new event with %{attendee}",
     "editEvent": "Edit event",
     "deleteEvent": "Delete event",
     "ACCEPTED": "Accept invitation",
@@ -483,6 +484,8 @@
     "chat": "Chat",
     "copyEmail": "Copy email address",
     "emailCopied": "Email copied",
+    "cannotOpenChatExternalUser": "Cannot open chat with external user",
+    "openChat": "Open chat with %{attendee}",
     "printSchedule": "Print your schedule as a PDF"
   },
   "print": {

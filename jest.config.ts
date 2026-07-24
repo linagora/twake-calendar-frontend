@@ -28,6 +28,7 @@ const config: Config = {
       ],
       testEnvironment: 'jsdom',
       testMatch: ['**/*.test.tsx'],
+      testPathIgnorePatterns: ['\\.public\\.test\\.tsx$', '/apps/public/'],
       extensionsToTreatAsEsm: ['.ts', '.tsx'],
       testTimeout: 15000,
       transform: {
@@ -48,7 +49,53 @@ const config: Config = {
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
-        '^@injected/(.*)$': '<rootDir>/common/src/$1',
+        '^@injected/(.*)$': '<rootDir>/apps/private/src/$1',
+        '^@/common/(.*)$': '<rootDir>/common/src/$1',
+        '^@common/(.*)$': '<rootDir>/common/src/$1',
+        '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
+        '^@public/(.*)$': '<rootDir>/apps/public/src/$1',
+        '^@linagora/twake-mui$': '<rootDir>/node_modules/@linagora/twake-mui',
+        '^@linagora/twake-icons$':
+          '<rootDir>/node_modules/@linagora/twake-icons'
+      },
+      setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts']
+    },
+    {
+      displayName: 'public-dom',
+      clearMocks: true,
+      moduleFileExtensions: [
+        'js',
+        'mjs',
+        'cjs',
+        'jsx',
+        'ts',
+        'tsx',
+        'json',
+        'node'
+      ],
+      testEnvironment: 'jsdom',
+      testMatch: ['**/*.public.test.tsx', '**/apps/public/**/*.test.tsx'],
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+      testTimeout: 15000,
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
+        '^.+\\.(js|jsx|mjs)$': 'babel-jest',
+        '^.+\\.(css|scss|sass|less|styl|stylus)$':
+          'jest-preview/transforms/css',
+        '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)':
+          'jest-preview/transforms/file',
+        '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+          '<rootDir>/fileTransformer.ts'
+      },
+      transformIgnorePatterns: [
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-icons|mime)/)'
+      ],
+
+      moduleNameMapper: {
+        '^preact(/(.*)|$)': 'preact$1',
+        '^react$': '<rootDir>/node_modules/react',
+        '^react-dom$': '<rootDir>/node_modules/react-dom',
+        '^@injected/(.*)$': '<rootDir>/apps/public/src/$1',
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',
         '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
