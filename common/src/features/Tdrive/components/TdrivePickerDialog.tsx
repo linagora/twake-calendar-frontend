@@ -9,6 +9,13 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../hooks/useTdrivePicker'
+import {
+  getMessageType,
+  isReadyMessage,
+  extractIntentId,
+  buildReadyResponse,
+  parseFileSelection
+} from './TdrivePickerMessageUtils'
 
 const HANDSHAKE_TIMEOUT_MS = 30_000
 
@@ -20,43 +27,6 @@ interface TdrivePickerDialogProps {
 }
 
 type IframeState = 'loading' | 'ready' | 'error'
-
-function getMessageType(data: unknown): string | undefined {
-  if (typeof data === 'string') return data
-  if (typeof data === 'object' && data !== null) {
-    return (data as Record<string, unknown>).type as string | undefined
-  }
-  return undefined
-}
-
-function isReadyMessage(typeStr: string | undefined): boolean {
-  return typeStr?.endsWith(':ready') ?? false
-}
-
-function extractIntentId(typeStr: string): string {
-  return typeStr.split(':')[0]
-}
-
-function buildReadyResponse(intentId: string): object {
-  return { type: `${intentId}:send`, payload: {} }
-}
-
-function parseFileSelection(data: unknown): TdriveFile | null {
-  if (typeof data !== 'object' || data === null) return null
-
-  const msg = data as Record<string, unknown>
-  if (msg.type !== 'intent-response') return null
-
-  const file = msg.file as Record<string, string> | undefined
-  if (!file) return null
-
-  return {
-    id: file.id,
-    name: file.name,
-    url: file.url,
-    type: file.action === 'sharingLink' ? 'sharingLink' : 'downloadLink'
-  }
-}
 
 interface PickerContentProps {
   iframeUrl: string
@@ -85,6 +55,11 @@ const PickerContent: React.FC<PickerContentProps> = ({
           iframeOrigin
         )
         setIframeState('ready')
+        return
+      }
+
+      if (typeStr !== undefined && typeStr.endsWith(':error')) {
+        setIframeState('error')
         return
       }
 

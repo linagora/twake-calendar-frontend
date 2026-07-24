@@ -7,7 +7,6 @@ import FolderIcon from '@mui/icons-material/Folder'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { useTdrivePicker, TdriveFile } from '../hooks/useTdrivePicker'
 import { TdrivePickerDialog } from './TdrivePickerDialog'
-import { isTdriveEnabled } from '@common/utils/tdriveUrlUtils'
 
 interface TdriveButtonProps {
   onFileSelected: (file: TdriveFile) => void
@@ -63,11 +62,6 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const { isOpen, iframeUrl, openPicker, closePicker, handleFileSelected } =
     useTdrivePicker({ onFileSelected })
-
-  // Don't render if Tdrive is not enabled
-  if (!isTdriveEnabled()) {
-    return null
-  }
 
   const isExpanded = showMore && !isMobile
 

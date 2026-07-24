@@ -186,7 +186,9 @@ describe('TdrivePickerDialog', () => {
       jest.advanceTimersByTime(31000)
     })
 
-    expect(screen.getByText('event.form.tdriveLoadingError')).toBeInTheDocument()
+    expect(
+      screen.getByText('event.form.tdriveLoadingError')
+    ).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 

@@ -24,12 +24,3 @@ export function resolveTdriveUrl(
 
   return resolveUriTemplate(template, context)
 }
-
-/**
- * Check if Tdrive integration is enabled.
- *
- * @returns true if TDRIVE_ENABLED is set to true and TDRIVE_INTENT_URL is configured
- */
-export function isTdriveEnabled(): boolean {
-  return window.TDRIVE_ENABLED === true && !!window.TDRIVE_INTENT_URL
-}

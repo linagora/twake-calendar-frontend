@@ -51,4 +51,10 @@ var ENABLE_EVENT_ATTACHMENTS = false
 //   'https://{localpart}-chat.twake.linagora.com/#/bridge/web/#/chat/@{target}:linagora.com'
 var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain}/#/bridge/web/#/chat/@{target}:{workplaceFqdn.domain}'
 var TDRIVE_ENABLED = false
-var TDRIVE_INTENT_URL = ""
+var TDRIVE_INTENT_URL = "https://{localpart}.example.com"
+// TDRIVE_INTENT_URL is a URI template (RFC 6570 style).
+// Supported expressions: {localpart}, {workplaceFqdn},
+// {workplaceFqdn.localpart}, {workplaceFqdn.domain}
+// Examples:
+//   'https://{workplaceFqdn}'
+//   'https://{workplaceFqdn.localpart}.{workplaceFqdn.domain}'

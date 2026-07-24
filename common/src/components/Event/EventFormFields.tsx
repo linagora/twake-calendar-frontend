@@ -259,10 +259,12 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           setAttachments={setAttachments}
         />
 
-        <TdriveButton
-          onFileSelected={handleTdriveFileSelected}
-          showMore={showMore}
-        />
+        {window.TDRIVE_INTENT_URL && window.TDRIVE_ENABLED && (
+          <TdriveButton
+            onFileSelected={handleTdriveFileSelected}
+            showMore={showMore}
+          />
+        )}
 
         <LocationField
           location={v.location}

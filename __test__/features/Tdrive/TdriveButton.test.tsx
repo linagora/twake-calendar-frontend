@@ -24,32 +24,19 @@ jest.mock('@common/utils/tdriveUrlUtils')
 
 describe('TdriveButton', () => {
   const mockOnFileSelected = jest.fn()
-  const mockIsTdriveEnabled = jest.spyOn(tdriveUrlUtils, 'isTdriveEnabled')
 
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(Provider, { store: setupStore() }, children)
 
   beforeEach(() => {
     jest.clearAllMocks()
-  })
-
-  it('renders nothing when Tdrive is not enabled', () => {
-    mockIsTdriveEnabled.mockReturnValue(false)
-
-    const { container } = render(
-      React.createElement(TdriveButton, {
-        onFileSelected: mockOnFileSelected,
-        showMore: false
-      }),
-      { wrapper: Wrapper }
-    )
-
-    expect(container).toBeEmptyDOMElement()
+    window.TDRIVE_ENABLED = false
+    window.TDRIVE_INTENT_URL = undefined
   })
 
   it('renders short mode button when showMore is false', () => {
-    mockIsTdriveEnabled.mockReturnValue(true)
-
+    window.TDRIVE_ENABLED = true
+    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     render(
       React.createElement(TdriveButton, {
         onFileSelected: mockOnFileSelected,
@@ -62,8 +49,8 @@ describe('TdriveButton', () => {
   })
 
   it('renders expanded mode button when showMore is true', () => {
-    mockIsTdriveEnabled.mockReturnValue(true)
-
+    window.TDRIVE_ENABLED = true
+    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     render(
       React.createElement(TdriveButton, {
         onFileSelected: mockOnFileSelected,
@@ -78,8 +65,8 @@ describe('TdriveButton', () => {
   })
 
   it('shows label in expanded mode', () => {
-    mockIsTdriveEnabled.mockReturnValue(true)
-
+    window.TDRIVE_ENABLED = true
+    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     render(
       React.createElement(TdriveButton, {
         onFileSelected: mockOnFileSelected,
@@ -92,8 +79,8 @@ describe('TdriveButton', () => {
   })
 
   it('does not show label in short mode', () => {
-    mockIsTdriveEnabled.mockReturnValue(true)
-
+    window.TDRIVE_ENABLED = true
+    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     render(
       React.createElement(TdriveButton, {
         onFileSelected: mockOnFileSelected,
@@ -106,8 +93,8 @@ describe('TdriveButton', () => {
   })
 
   it('renders TdrivePickerDialog', () => {
-    mockIsTdriveEnabled.mockReturnValue(true)
-
+    window.TDRIVE_ENABLED = true
+    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     render(
       React.createElement(TdriveButton, {
         onFileSelected: mockOnFileSelected,

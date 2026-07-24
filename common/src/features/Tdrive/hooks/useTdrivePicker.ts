@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { exchangeToken, createIntent } from '../TdriveDao'
-import { resolveTdriveUrl } from '@common/utils/tdriveUrlUtils'
+import { useTdriveUserContext } from './useTdriveUserContext'
 
 export interface TdriveFile {
   id: string
@@ -20,15 +20,6 @@ interface UseTdrivePickerReturn {
 
 interface UseTdrivePickerProps {
   onFileSelected: (file: TdriveFile) => void
-}
-
-function getUserContext(
-  email: string | undefined,
-  workplaceFqdn: string | undefined
-): { localpart: string | undefined; tdriveBaseUrl: string | null } {
-  const localpart = email?.split('@')[0]
-  const tdriveBaseUrl = resolveTdriveUrl({ localpart, workplaceFqdn })
-  return { localpart, tdriveBaseUrl }
 }
 
 async function fetchIntentUrl(
@@ -50,15 +41,10 @@ export function useTdrivePicker({
   const [isOpen, setIsOpen] = useState(false)
   const [iframeUrl, setIframeUrl] = useState<string | null>(null)
 
-  const workplaceFqdn = useAppSelector(
-    state => state.user.userData?.workplaceFqdn
-  )
-  const email = useAppSelector(state => state.user.userData?.email)
+  const { tdriveBaseUrl } = useTdriveUserContext()
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
 
   const openPicker = useCallback(async () => {
-    const { tdriveBaseUrl } = getUserContext(email, workplaceFqdn)
-
     if (!tdriveBaseUrl) {
       console.error('Tdrive URL is not configured')
       return
@@ -82,7 +68,7 @@ export function useTdrivePicker({
     } catch (error) {
       console.error('Failed to open Tdrive picker:', error)
     }
-  }, [email, workplaceFqdn, idToken])
+  }, [tdriveBaseUrl, idToken])
 
   const closePicker = useCallback(() => {
     setIsOpen(false)
