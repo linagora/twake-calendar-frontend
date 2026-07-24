@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React from 'react'
 import {
   Dialog,
   Box,
@@ -9,15 +9,7 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../hooks/useTdrivePicker'
-import {
-  getMessageType,
-  isReadyMessage,
-  extractIntentId,
-  buildReadyResponse,
-  parseFileSelection
-} from './TdrivePickerMessageUtils'
-
-const HANDSHAKE_TIMEOUT_MS = 30_000
+import { usePickerIframeState } from '../hooks/usePickerIframeState'
 
 interface TdrivePickerDialogProps {
   open: boolean
@@ -25,8 +17,6 @@ interface TdrivePickerDialogProps {
   onClose: () => void
   onFileSelected: (file: TdriveFile) => void
 }
-
-type IframeState = 'loading' | 'ready' | 'error'
 
 interface PickerContentProps {
   iframeUrl: string
@@ -38,51 +28,10 @@ const PickerContent: React.FC<PickerContentProps> = ({
   onFileSelected
 }) => {
   const { t } = useI18n()
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [iframeState, setIframeState] = useState<IframeState>('loading')
-
-  const handleMessage = useCallback(
-    (event: MessageEvent): void => {
-      const iframeOrigin = new URL(iframeUrl).origin
-      if (event.origin !== iframeOrigin) return
-
-      const typeStr = getMessageType(event.data)
-
-      if (typeStr !== undefined && isReadyMessage(typeStr)) {
-        const intentId = extractIntentId(typeStr)
-        iframeRef.current?.contentWindow?.postMessage(
-          buildReadyResponse(intentId),
-          iframeOrigin
-        )
-        setIframeState('ready')
-        return
-      }
-
-      if (typeStr !== undefined && typeStr.endsWith(':error')) {
-        setIframeState('error')
-        return
-      }
-
-      const file = parseFileSelection(event.data)
-      if (file) {
-        onFileSelected(file)
-      }
-    },
-    [iframeUrl, onFileSelected]
+  const { iframeRef, iframeState } = usePickerIframeState(
+    iframeUrl,
+    onFileSelected
   )
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setIframeState(prev => (prev === 'loading' ? 'error' : prev))
-    }, HANDSHAKE_TIMEOUT_MS)
-
-    window.addEventListener('message', handleMessage)
-
-    return (): void => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [handleMessage])
 
   const showLoader = iframeState !== 'ready'
   const showError = iframeState === 'error'

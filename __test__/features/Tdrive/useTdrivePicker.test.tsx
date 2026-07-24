@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useTdrivePicker } from '@common/features/Tdrive/hooks/useTdrivePicker'
 import * as TdriveDao from '@common/features/Tdrive/TdriveDao'

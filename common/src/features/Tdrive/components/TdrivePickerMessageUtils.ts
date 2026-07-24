@@ -3,7 +3,8 @@ import { TdriveFile } from '../hooks/useTdrivePicker'
 export function getMessageType(data: unknown): string | undefined {
   if (typeof data === 'string') return data
   if (typeof data === 'object' && data !== null) {
-    return (data as Record<string, unknown>).type as string | undefined
+    const { type } = data as Record<string, unknown>
+    return typeof type === 'string' ? type : undefined
   }
   return undefined
 }
@@ -26,13 +27,22 @@ export function parseFileSelection(data: unknown): TdriveFile | null {
   const msg = data as Record<string, unknown>
   if (msg.type !== 'intent-response') return null
 
-  const file = msg.file as Record<string, string> | undefined
+  const file = msg.file as Record<string, unknown> | undefined
   if (!file) return null
 
+  const { id, name, url, action } = file
+  if (
+    typeof id !== 'string' ||
+    typeof name !== 'string' ||
+    typeof url !== 'string'
+  ) {
+    return null
+  }
+
   return {
-    id: file.id,
-    name: file.name,
-    url: file.url,
-    type: file.action === 'sharingLink' ? 'sharingLink' : 'downloadLink'
+    id,
+    name,
+    url,
+    type: action === 'sharingLink' ? 'sharingLink' : 'downloadLink'
   }
 }

@@ -13,6 +13,7 @@ export interface TdriveFile {
 interface UseTdrivePickerReturn {
   isOpen: boolean
   iframeUrl: string | null
+  openPickerError: string | null
   openPicker: () => Promise<void>
   closePicker: () => void
   handleFileSelected: (file: TdriveFile) => void
@@ -40,18 +41,20 @@ export function useTdrivePicker({
 }: UseTdrivePickerProps): UseTdrivePickerReturn {
   const [isOpen, setIsOpen] = useState(false)
   const [iframeUrl, setIframeUrl] = useState<string | null>(null)
+  const [openPickerError, setOpenPickerError] = useState<string | null>(null)
 
   const { tdriveBaseUrl } = useTdriveUserContext()
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
 
   const openPicker = useCallback(async () => {
+    setOpenPickerError(null)
     if (!tdriveBaseUrl) {
-      console.error('Tdrive URL is not configured')
+      setOpenPickerError('tdriveUrlNotConfigured')
       return
     }
 
     if (!idToken) {
-      console.error('idToken is not available')
+      setOpenPickerError('tdriveTokenUnavailable')
       return
     }
 
@@ -59,7 +62,7 @@ export function useTdrivePicker({
       const intentUrl = await fetchIntentUrl(tdriveBaseUrl, idToken)
 
       if (!intentUrl) {
-        console.error('No intent service URL returned')
+        setOpenPickerError('tdriveNoIntentUrl')
         return
       }
 
@@ -67,6 +70,7 @@ export function useTdrivePicker({
       setIsOpen(true)
     } catch (error) {
       console.error('Failed to open Tdrive picker:', error)
+      setOpenPickerError('tdrivePickerFailed')
     }
   }, [tdriveBaseUrl, idToken])
 
@@ -86,6 +90,7 @@ export function useTdrivePicker({
   return {
     isOpen,
     iframeUrl,
+    openPickerError,
     openPicker,
     closePicker,
     handleFileSelected

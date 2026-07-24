@@ -1,7 +1,7 @@
 import React from 'react'
 import { SectionPreviewRow } from '@common/components/Event/components/SectionPreviewRow'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
-import { Box, Button, Icon } from '@linagora/twake-mui'
+import { Box, Button, Icon, Snackbar, Alert } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import FolderIcon from '@mui/icons-material/Folder'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
@@ -60,8 +60,14 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
-  const { isOpen, iframeUrl, openPicker, closePicker, handleFileSelected } =
-    useTdrivePicker({ onFileSelected })
+  const {
+    isOpen,
+    iframeUrl,
+    openPickerError,
+    openPicker,
+    closePicker,
+    handleFileSelected
+  } = useTdrivePicker({ onFileSelected })
 
   const isExpanded = showMore && !isMobile
 
@@ -72,17 +78,9 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
         isExpanded={isExpanded}
       >
         {!showMore ? (
-          <TdriveButtonInShortMode
-            onClick={() => {
-              openPicker().catch(() => {})
-            }}
-          />
+          <TdriveButtonInShortMode onClick={openPicker} />
         ) : (
-          <TdriveButtonInExpandedMode
-            onClick={() => {
-              openPicker().catch(() => {})
-            }}
-          />
+          <TdriveButtonInExpandedMode onClick={openPicker} />
         )}
       </FieldWithLabel>
 
@@ -92,6 +90,16 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
         onClose={closePicker}
         onFileSelected={handleFileSelected}
       />
+      <Snackbar
+        open={openPickerError !== null}
+        autoHideDuration={4000}
+        onClose={closePicker}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={closePicker}>
+          {t('event.form.tdrivePickerError')}
+        </Alert>
+      </Snackbar>
     </>
   )
 }
