@@ -161,6 +161,7 @@ export function AttendeePopover({
   isPublic
 }: AttendeePopoverProps): React.ReactElement {
   const theme = useTheme()
+  const userEmail = useAppSelector(state => state.user.userData?.email)
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
@@ -174,7 +175,13 @@ export function AttendeePopover({
 
   const open = Boolean(anchorEl)
 
-  if (attendee.role === 'CHAIR' || attendee.cutype === 'RESOURCE') {
+  const normalizeEmail = (email: string): string =>
+    email.replace(/^mailto:/i, '').toLowerCase()
+  const isSelf =
+    !!userEmail &&
+    normalizeEmail(attendee.cal_address) === normalizeEmail(userEmail)
+
+  if (isSelf || attendee.cutype === 'RESOURCE') {
     return <>{children}</>
   }
 
