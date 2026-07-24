@@ -249,6 +249,13 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           />
         )}
 
+        {window.TDRIVE_INTENT_URL && window.TDRIVE_ENABLED && (
+          <TdriveButton
+            onFileSelected={handleTdriveFileSelected}
+            showMore={showMore}
+          />
+        )}
+
         <AddDescButton
           showDescription={v.showDescription}
           setShowDescription={setShowDescription}
@@ -258,13 +265,6 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           attachments={v.attachments}
           setAttachments={setAttachments}
         />
-
-        {window.TDRIVE_INTENT_URL && window.TDRIVE_ENABLED && (
-          <TdriveButton
-            onFileSelected={handleTdriveFileSelected}
-            showMore={showMore}
-          />
-        )}
 
         <LocationField
           location={v.location}

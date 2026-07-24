@@ -3,10 +3,10 @@ import { SectionPreviewRow } from '@common/components/Event/components/SectionPr
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { Box, Button, Icon, Snackbar, Alert } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
-import FolderIcon from '@mui/icons-material/Folder'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { useTdrivePicker, TdriveFile } from '../hooks/useTdrivePicker'
 import { TdrivePickerDialog } from './TdrivePickerDialog'
+import { Drive } from '@linagora/twake-icons'
 
 interface TdriveButtonProps {
   onFileSelected: (file: TdriveFile) => void
@@ -14,8 +14,8 @@ interface TdriveButtonProps {
 }
 
 const TdriveIcon: React.FC = () => (
-  <Icon sx={{ color: '#4A90E2' }}>
-    <FolderIcon />
+  <Icon sx={{ overflow: 'visible' }}>
+    <Drive fontSize={'22px'} />
   </Icon>
 )
 
