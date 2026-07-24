@@ -19,6 +19,7 @@ import { RegularHoursField } from './RegularHoursField'
 import { DayAvailability } from './RegularHoursField/RegularHoursTypes'
 import { useAppSelector } from '@common/app/hooks'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
+import { useFocusTitleOnOpen } from '@common/components/Event/hooks/useAutoFocusTitle'
 
 interface AppointmentModalFormProps {
   open: boolean
@@ -79,6 +80,10 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const theme = useTheme()
 
+  const nameInputRef = React.useRef<HTMLInputElement>(null)
+
+  useFocusTitleOnOpen(open, null, nameInputRef)
+
   const businessHours = useAppSelector(state => state.settings.businessHours)
   const workingDays = businessHours?.daysOfWeek
 
@@ -103,6 +108,7 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
         </Typography>
       )}
       <TextField
+        sx={{ pt: 1 }}
         size={isMobile ? 'medium' : 'small'}
         margin="dense"
         placeholder={t('booking.scheduleName')}
@@ -110,6 +116,7 @@ export const AppointmentModalForm: React.FC<AppointmentModalFormProps> = ({
         fullWidth
         value={name}
         onChange={e => setName(e.target.value)}
+        inputRef={nameInputRef}
       />
 
       <TimeSlotSelectField duration={duration} setDuration={setDuration} />

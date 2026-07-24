@@ -4,11 +4,11 @@ import React, { useEffect, useRef } from 'react'
 // because jsdom has no layout engine and focus() calls produce false positives.
 const isNotTestEnv = process.env.NODE_ENV !== 'test'
 
-function useFocusTitleOnOpen(
+export const useFocusTitleOnOpen = (
   isOpen: boolean,
   eventId: string | null | undefined,
   titleInputRef: React.RefObject<HTMLInputElement>
-): void {
+): void => {
   useEffect(() => {
     const isNewEventOpen = isOpen && !eventId
     if (!isNewEventOpen || !isNotTestEnv) return
