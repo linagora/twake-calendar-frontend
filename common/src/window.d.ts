@@ -20,6 +20,8 @@ declare global {
     MAIL_SPA_URL: string
     CHAT_SPA_URL: string
     VIDEO_CONFERENCE_BASE_URL: string
+    TDRIVE_ENABLED: boolean | undefined
+    TDRIVE_INTENT_URL: string | undefined
     SUPPORT_URL: string
     PRIVACY_URL: string
     TERMS_URL: string

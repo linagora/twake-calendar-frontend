@@ -85,23 +85,27 @@ export const api: KyInstance = ky.extend({
   hooks: {
     beforeRequest: [
       async (request: KyRequest): Promise<KyRequest> => {
-        const saved = sessionStorage.getItem('tokenSet')
-          ? (JSON.parse(
-              sessionStorage.getItem('tokenSet') ?? '{}'
-            ) as TokenEndpointResponse & TokenEndpointResponseHelpers)
-          : null
-        const access_token = saved?.access_token as string
-        if (access_token) {
-          request.headers.set('Authorization', `Bearer ${access_token}`)
+        const headers = new Headers(request.headers)
+
+        if (!headers.has('Authorization')) {
+          const raw = sessionStorage.getItem('tokenSet')
+          const saved = raw
+            ? (JSON.parse(raw) as TokenEndpointResponse &
+                TokenEndpointResponseHelpers)
+            : null
+          const access_token = saved?.access_token
+          if (access_token) {
+            headers.set('Authorization', `Bearer ${access_token}`)
+          }
         }
 
         if (MUTATING_METHODS.has(request.method)) {
           await assertWebSocketAlive()
         }
-        return request
+
+        return new Request(request, { headers }) as KyRequest
       }
     ],
-
     beforeRetry: [
       ({ request, error, retryCount }): void => {
         console.warn(
