@@ -401,6 +401,66 @@ describe('makeDeleteEventInstanceJCal', () => {
     })
   })
 
+  describe('SEQUENCE handling (#1217)', () => {
+    const sequenceOf = (result: VCalComponent): number | undefined => {
+      const masterProps = result[2][0][1] as VObjectProperty[]
+      const sequence = masterProps.find(([k]) => k === 'sequence')
+      return sequence?.[3] as number | undefined
+    }
+
+    it('increments an existing SEQUENCE when a new EXDATE is added', () => {
+      const vevents: VCalComponent[] = [
+        makeMasterVEvent([['sequence', {}, 'integer', 1]])
+      ]
+
+      const result = makeDeleteEventInstanceJCal(vevents, baseCalendarEvent)
+
+      expect(sequenceOf(result)).toBe(2)
+    })
+
+    it('initialises SEQUENCE to 1 when the master has none and a new EXDATE is added', () => {
+      const vevents: VCalComponent[] = [makeMasterVEvent()]
+
+      const result = makeDeleteEventInstanceJCal(vevents, baseCalendarEvent)
+
+      expect(sequenceOf(result)).toBe(1)
+    })
+
+    it('leaves SEQUENCE unchanged when the EXDATE already exists and no override is removed', () => {
+      const existingExdate: VObjectProperty = [
+        'exdate',
+        {},
+        'date-time',
+        '2024-03-15T10:00:00'
+      ]
+      const vevents: VCalComponent[] = [
+        makeMasterVEvent([['sequence', {}, 'integer', 1], existingExdate])
+      ]
+
+      const result = makeDeleteEventInstanceJCal(vevents, baseCalendarEvent)
+
+      expect(sequenceOf(result)).toBe(1)
+    })
+
+    it('increments SEQUENCE when a matching override is removed even if the EXDATE already existed', () => {
+      const existingExdate: VObjectProperty = [
+        'exdate',
+        {},
+        'date-time',
+        '2024-03-15T10:00:00'
+      ]
+      const override = makeOverrideVEvent('2024-03-15T10:00:00')
+      const vevents: VCalComponent[] = [
+        makeMasterVEvent([['sequence', {}, 'integer', 1], existingExdate]),
+        override
+      ]
+
+      const result = makeDeleteEventInstanceJCal(vevents, baseCalendarEvent)
+
+      expect(sequenceOf(result)).toBe(2)
+    })
+  })
+
   describe('edge cases', () => {
     it('handles a recurrenceId with a trailing Z correctly when adding EXDATE', () => {
       const event: CalendarEvent = {

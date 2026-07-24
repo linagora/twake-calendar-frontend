@@ -102,7 +102,7 @@ const applyMetadataChanges = (
 }
 
 // Increment the sequence number in properties
-const incrementSequenceNumber = (
+export const incrementSequenceNumber = (
   props: VObjectProperty[]
 ): VObjectProperty[] => {
   const newProps = [...props]

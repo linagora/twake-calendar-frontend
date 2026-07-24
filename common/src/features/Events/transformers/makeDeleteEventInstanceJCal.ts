@@ -9,6 +9,7 @@ import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { TIMEZONES } from '@common/utils/timezone-data'
 import moment from 'moment-timezone'
+import { incrementSequenceNumber } from './makeSeriesJCal'
 import { filterComponents } from './parseFetchedEvent'
 import { getTzidParam, sameRecurrence } from './recurrenceInstant'
 
@@ -71,13 +72,14 @@ export function makeDeleteEventInstanceJCal(
     )
   })
 
+  let updatedMasterProps = masterProps
   if (!isDuplicate) {
     // Add new EXDATE property as a separate entry
-    masterProps.push(['exdate', exdateParams, valueType, exdateProperty])
+    updatedMasterProps = [
+      ...masterProps,
+      ['exdate', exdateParams, valueType, exdateProperty]
+    ]
   }
-
-  // Update the master VEVENT with the new properties
-  vevents[masterIndex][1] = masterProps
 
   // Remove the override instance if it exists (in case it was an override being
   // deleted). Match by instant so an override stored in TZID/UTC form is still
@@ -94,6 +96,19 @@ export function makeDeleteEventInstanceJCal(
       seriesEvent.timezone
     ) // Remove matching override
   })
+
+  // This is an organizer-side change to the recurring master, so the CUA must
+  // manage SEQUENCE (the CalDAV server stores the data as-is). Bump it whenever
+  // the master effectively changed: a fresh EXDATE was added, or a matching
+  // override VEVENT was removed. A duplicate EXDATE with no override removal is
+  // a no-op and must not increment. See #1217.
+  const overrideRemoved = filteredVevents.length < vevents.length
+  if (!isDuplicate || overrideRemoved) {
+    updatedMasterProps = incrementSequenceNumber(updatedMasterProps)
+  }
+
+  // Update the master VEVENT with the new properties
+  vevents[masterIndex][1] = updatedMasterProps
 
   // Build the updated jCal with all VEVENTs and timezone
   const timezoneData = TIMEZONES.zones[seriesEvent.timezone]
