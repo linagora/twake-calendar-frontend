@@ -26,7 +26,7 @@ export function makeVevent(
       [
         'x-openpaas-videoconference',
         {},
-        'unknown',
+        'uri',
         event.x_openpass_videoconference ?? null
       ],
       ['summary', {}, 'text', event.title ?? ''],

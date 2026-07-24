@@ -500,7 +500,7 @@ describe('calendarEventToJCal', () => {
         ['class', {}, 'text', 'PUBLIC'],
         ['location', {}, 'text', 'Room 101'],
         ['description', {}, 'text', 'Discuss project roadmap.'],
-        ['x-openpaas-videoconference', {}, 'unknown', null],
+        ['x-openpaas-videoconference', {}, 'uri', null],
         ['rrule', {}, 'recur', { freq: 'WEEKLY' }],
         [
           'organizer',
@@ -657,7 +657,7 @@ describe('calendarEventToJCal', () => {
         ['class', {}, 'text', 'PUBLIC'],
         ['location', {}, 'text', 'Room 101'],
         ['description', {}, 'text', 'Discuss project roadmap.'],
-        ['x-openpaas-videoconference', {}, 'unknown', null],
+        ['x-openpaas-videoconference', {}, 'uri', null],
         ['rrule', {}, 'recur', { freq: 'WEEKLY', interval: 2 }],
         [
           'organizer',

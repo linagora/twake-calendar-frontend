@@ -398,6 +398,7 @@ describe('makeSeriesJCal', () => {
     const override = getOverrideFromJCal(jCal)
 
     const videoconf = getProp(override, 'x-openpaas-videoconference')
+    expect(videoconf[2]).toBe('uri')
     expect(videoconf[3]).toBe('https://meet.new.com')
   })
 
