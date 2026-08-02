@@ -40,19 +40,23 @@ export const useManageCalendarSelection = (): {
     const updateSelectedCalendars = (): void => {
       const isValid = initialLoadRef.current && calendarIds.length > 0 && userId
       if (isValid) {
+        const personalCalendarIds = calendarIds.filter(
+          id => extractEventBaseUuid(id) === userId
+        )
         const cached = localStorage.getItem('selectedCalendars')
         if (cached && cached.length > 0) {
           try {
             const parsed = JSON.parse(cached) as string[]
             const valid = parsed.filter(id => calendars[id])
-            setSelectedCalendars(valid)
+            // Fall through to the personal-calendar default when the cached
+            // list references only calendar ids that no longer exist (renamed,
+            // removed, or a fresh login on a different account). Without this
+            // fallback the calendar grid loads empty with no events fetched.
+            setSelectedCalendars(valid.length > 0 ? valid : personalCalendarIds)
           } catch {
-            setSelectedCalendars([])
+            setSelectedCalendars(personalCalendarIds)
           }
         } else {
-          const personalCalendarIds = calendarIds.filter(
-            id => extractEventBaseUuid(id) === userId
-          )
           setSelectedCalendars(personalCalendarIds)
         }
         initialLoadRef.current = false

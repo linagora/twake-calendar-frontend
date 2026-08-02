@@ -132,6 +132,10 @@ export const AttendeeSearch: React.FC<{
   end?: string
   timezone?: string
   eventUid?: string | null
+  // WS3 host-delegation: only render the crown toggle on chips when the
+  // event has an active Meet URL — delegating admin on a non-existing
+  // room is meaningless.
+  hasVideoConference?: boolean
 }> = ({
   attendees,
   setAttendees,
@@ -141,7 +145,8 @@ export const AttendeeSearch: React.FC<{
   start,
   end,
   timezone,
-  eventUid
+  eventUid,
+  hasVideoConference
 }) => {
   const {
     selectedUsers,
@@ -164,11 +169,28 @@ export const AttendeeSearch: React.FC<{
     })
     setAddedUsers(value.filter(u => !initialEmails.has(u.email)))
     setAttendees(
-      value.map(
-        u => new userAttendee({ cal_address: u.email, cn: u.displayName })
+      value.map(u => {
+        // Preserve existing attendee metadata (partstat, is_delegate_host, …)
+        // so list mutations don't wipe the crown toggle or other bits.
+        const existing = attendees.find(a => a.cal_address === u.email)
+        if (existing) return existing
+        return new userAttendee({ cal_address: u.email, cn: u.displayName })
+      })
+    )
+  }
+
+  const toggleDelegateHost = (email: string): void => {
+    setAttendees(
+      attendees.map(a =>
+        a.cal_address === email ? a.withDelegateHost(!a.is_delegate_host) : a
       )
     )
   }
+
+  const attendeeByEmail = useMemo(
+    () => new Map(attendees.map(a => [a.cal_address, a])),
+    [attendees]
+  )
 
   return (
     <PeopleSearch
@@ -185,6 +207,18 @@ export const AttendeeSearch: React.FC<{
             )
           : undefined
       }
+      getChipAction={(user): {
+        isDelegateHost: boolean
+        onToggle: () => void
+      } | undefined => {
+        if (!hasVideoConference) return undefined
+        const att = attendeeByEmail.get(user.email)
+        if (!att || att.cutype === 'RESOURCE') return undefined
+        return {
+          isDelegateHost: att.is_delegate_host,
+          onToggle: () => toggleDelegateHost(user.email)
+        }
+      }}
       onChange={handleOnChange}
       freeSolo
       enableEmailAutocompleteAndCommit

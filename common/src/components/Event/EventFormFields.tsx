@@ -233,6 +233,9 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
             end={v.end}
             placeholder={t('event.form.addGuestsPlaceholder')}
             inputSlot={params => <TextField {...params} size={inputSize} />}
+            hasVideoConference={
+              !!(v.hasVideoConference && v.meetingLink)
+            }
           />
         </FieldWithLabel>
 

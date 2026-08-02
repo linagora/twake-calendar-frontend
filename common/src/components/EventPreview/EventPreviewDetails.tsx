@@ -78,7 +78,8 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           key: 'org',
           t,
           isFull: true,
-          isOrganizer: true
+          isOrganizer: true,
+          showDelegateHost: !!event.x_openpass_videoconference
         })}
 
       {shouldShowAttendeesSection && (
@@ -90,6 +91,7 @@ export const EventPreviewDetails: React.FC<EventPreviewDetailsProps> = ({
           end={event.end}
           timezone={event.timezone}
           eventUid={event.uid}
+          hasVideoConference={!!event.x_openpass_videoconference}
         />
       )}
 

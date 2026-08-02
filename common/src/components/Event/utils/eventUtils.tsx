@@ -13,6 +13,7 @@ import { formatDateToYYYYMMDDTHHMMSS } from '@common/utils/dateUtils'
 import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'
 import { AttendeePopover } from '@common/components/Attendees/AttendeePopover'
 import { PartStat } from '@common/features/User/models/attendee'
 
@@ -48,10 +49,41 @@ export const classIcon = (
   }
 }
 
-function renderSimpleAttendeeBadge(a: userAttendee, key: string): JSX.Element {
+function renderSimpleAttendeeBadge(
+  a: userAttendee,
+  key: string,
+  showDelegateHost: boolean = false
+): JSX.Element {
+  const avatar = <Avatar {...stringAvatar(a?.cn || a?.cal_address)} />
   return (
     <AttendeePopover key={key} attendee={a}>
-      <Avatar {...stringAvatar(a?.cn || a?.cal_address)} />
+      {a.is_delegate_host && showDelegateHost ? (
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          badgeContent={
+            <Box
+              style={{
+                fontSize: 14,
+                lineHeight: 0,
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                padding: '1px'
+              }}
+            >
+              <WorkspacePremiumIcon
+                fontSize="inherit"
+                sx={{ color: 'warning.main' }}
+                titleAccess="Delegate host"
+              />
+            </Box>
+          }
+        >
+          {avatar}
+        </Badge>
+      ) : (
+        avatar
+      )}
     </AttendeePopover>
   )
 }
@@ -61,13 +93,15 @@ function renderFullAttendeeBadge({
   key,
   t,
   isOrganizer,
-  caption
+  caption,
+  showDelegateHost = false
 }: {
   a: userAttendee
   key: string
   t: (key: string) => string
   isOrganizer?: boolean
   caption?: string
+  showDelegateHost?: boolean
 }): JSX.Element {
   const icon = classIcon(a.partstat)
   const displayName = a.cn || a.cal_address
@@ -114,12 +148,26 @@ function renderFullAttendeeBadge({
           </Badge>
         )}
         <Box style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <Typography variant="body2" noWrap>
-            {displayName}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography variant="body2" noWrap>
+              {displayName}
+            </Typography>
+            {a.is_delegate_host && showDelegateHost && (
+              <WorkspacePremiumIcon
+                fontSize="small"
+                sx={{ color: 'warning.main' }}
+                titleAccess="Delegate host — will get admin on the Meet room"
+              />
+            )}
+          </Box>
           {isOrganizer && (
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               {t('event.organizer')}
+            </Typography>
+          )}
+          {a.is_delegate_host && showDelegateHost && !isOrganizer && (
+            <Typography variant="caption" sx={{ color: 'warning.main' }}>
+              Delegate host
             </Typography>
           )}
           {caption && (
@@ -139,7 +187,8 @@ export function renderAttendeeBadge({
   t,
   isFull,
   isOrganizer,
-  caption
+  caption,
+  showDelegateHost = false
 }: {
   a: userAttendee
   key: string
@@ -147,13 +196,18 @@ export function renderAttendeeBadge({
   isFull?: boolean
   isOrganizer?: boolean
   caption?: string
+  // WS3: only render the delegate-host crown when the event has an
+  // active Meet URL. Without it, the flag is meaningless (nothing to
+  // delegate) — hiding it avoids showing stale data on events whose
+  // videoconference was removed after delegates were set.
+  showDelegateHost?: boolean
 }): JSX.Element {
   if (!a) return <></>
 
   if (!isFull) {
-    return renderSimpleAttendeeBadge(a, key)
+    return renderSimpleAttendeeBadge(a, key, showDelegateHost)
   }
-  return renderFullAttendeeBadge({ a, key, t, isOrganizer, caption })
+  return renderFullAttendeeBadge({ a, key, t, isOrganizer, caption, showDelegateHost })
 }
 
 export function stringToColor(string: string): string {

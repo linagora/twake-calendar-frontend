@@ -25,6 +25,7 @@ interface EventPreviewAttendeesProps {
   end?: string
   timezone?: string
   eventUid?: string | null
+  hasVideoConference?: boolean
 }
 
 const ATTENDEE_DISPLAY_LIMIT = 3
@@ -36,7 +37,8 @@ export function EventPreviewAttendees({
   start,
   end,
   timezone,
-  eventUid
+  eventUid,
+  hasVideoConference = false
 }: EventPreviewAttendeesProps): JSX.Element {
   const { t } = useI18n()
   const theme = useTheme()
@@ -151,14 +153,16 @@ export function EventPreviewAttendees({
                     key: 'org',
                     t,
                     isFull: showAllAttendees,
-                    isOrganizer: true
+                    isOrganizer: true,
+                    showDelegateHost: hasVideoConference
                   })}
                 {attendees.map((a, idx) =>
                   renderAttendeeBadge({
                     a,
                     key: idx.toString(),
                     t,
-                    isFull: showAllAttendees
+                    isFull: showAllAttendees,
+                    showDelegateHost: hasVideoConference
                   })
                 )}
               </AvatarGroup>
@@ -201,7 +205,8 @@ export function EventPreviewAttendees({
           key: 'org',
           t,
           isFull: showAllAttendees,
-          isOrganizer: true
+          isOrganizer: true,
+          showDelegateHost: hasVideoConference
         })}
       {showAllAttendees &&
         attendees.map((a, idx) =>
@@ -211,7 +216,8 @@ export function EventPreviewAttendees({
             t,
             isFull: showAllAttendees,
             isOrganizer: false,
-            caption: busyCaption(a)
+            caption: busyCaption(a),
+            showDelegateHost: hasVideoConference
           })
         )}
     </>
