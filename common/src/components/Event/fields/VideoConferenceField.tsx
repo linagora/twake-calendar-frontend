@@ -90,20 +90,27 @@ const VideoConferenceFieldInExpandedMode: React.FC<{
   cameraIcon: React.ReactNode
   handleDeleteVideoConference: () => void
   handleAddVideoConference: () => void
+  isAddingVideoConference: boolean
 }> = ({
   hasVideoConference,
   meetingLink,
   cameraIcon,
   handleDeleteVideoConference,
-  handleAddVideoConference
+  handleAddVideoConference,
+  isAddingVideoConference
 }) => {
   const { t } = useI18n()
 
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+      {/* The room is now created server-side, so adding a conference is a
+          round trip rather than a string concatenation. Disabling the button
+          while it is in flight keeps a second click from asking for a second
+          room — the first one would then be orphaned. */}
       <Button
         startIcon={cameraIcon}
         onClick={handleAddVideoConference}
+        disabled={isAddingVideoConference}
         size="medium"
         variant="contained"
         color="secondary"
@@ -141,15 +148,18 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
-  const { handleAddVideoConference, handleDeleteVideoConference } =
-    useVideoConference({
-      description,
-      setDescription,
-      setHasVideoConference,
-      setMeetingLink,
-      showMore,
-      setShowDescription
-    })
+  const {
+    handleAddVideoConference,
+    handleDeleteVideoConference,
+    isAddingVideoConference
+  } = useVideoConference({
+    description,
+    setDescription,
+    setHasVideoConference,
+    setMeetingLink,
+    showMore,
+    setShowDescription
+  })
 
   const cameraIcon = (
     <img src={iconCamera} alt="camera" width={24} height={24} />
@@ -167,7 +177,7 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
             meetingLink={meetingLink}
             cameraIcon={cameraIcon}
             handleDeleteVideoConference={handleDeleteVideoConference}
-            handleAddVideoConference={handleAddVideoConference}
+            handleAddVideoConference={() => void handleAddVideoConference()}
           />
         ) : (
           <VideoConferenceFieldInExpandedMode
@@ -175,7 +185,8 @@ export const VideoConferenceField: React.FC<VideoConferenceFieldProps> = ({
             meetingLink={meetingLink}
             cameraIcon={cameraIcon}
             handleDeleteVideoConference={handleDeleteVideoConference}
-            handleAddVideoConference={handleAddVideoConference}
+            handleAddVideoConference={() => void handleAddVideoConference()}
+            isAddingVideoConference={isAddingVideoConference}
           />
         )}
       </FieldWithLabel>
