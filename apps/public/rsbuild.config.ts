@@ -5,7 +5,10 @@ import { pluginStylus } from '@rsbuild/plugin-stylus'
 import { pluginSvgr } from '@rsbuild/plugin-svgr'
 
 import { getInjectedAliases } from '../../common/injectedAliases'
-import { isSentryConfigured, setupSentryPlugin } from '../../common/sentryBuildUtils'
+import {
+  isSentryConfigured,
+  setupSentryPlugin
+} from '../../common/sentryBuildUtils'
 import { injectedAliases } from './injectedAliases'
 
 export default defineConfig({
