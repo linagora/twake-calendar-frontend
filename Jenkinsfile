@@ -125,22 +125,33 @@ pipeline {
           }
         }
         steps {
-          script {
-            def shortSha = env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : 'dev'
-            env.DOCKER_TAG = 'branch-master'
-            env.BUILD_VERSION = shortSha
-            if (env.TAG_NAME) {
-              env.DOCKER_TAG = env.TAG_NAME
-              env.BUILD_VERSION = env.TAG_NAME
-            }
+          withVault([
+            vaultSecrets: [
+                [path: 'secret/jenkins/calendar-frontend', secretValues: [
+                    [envVar: 'SENTRY_AUTH_TOKEN', vaultKey: 'SENTRY_AUTH_TOKEN'],
+                    [envVar: 'SENTRY_ORG', vaultKey: 'SENTRY_ORG'],
+                    [envVar: 'SENTRY_PROJECT', vaultKey: 'SENTRY_PROJECT'],
+                    [envVar: 'SENTRY_URL', vaultKey: 'SENTRY_URL']
+                ]]
+            ]
+          ]) {
+            script {
+              def shortSha = env.GIT_COMMIT ? env.GIT_COMMIT.take(8) : 'dev'
+              env.DOCKER_TAG = 'branch-master'
+              env.BUILD_VERSION = shortSha
+              if (env.TAG_NAME) {
+                env.DOCKER_TAG = env.TAG_NAME
+                env.BUILD_VERSION = env.TAG_NAME
+              }
 
-            echo "Docker tag: ${env.DOCKER_TAG}"
-            sh 'npm run build'
-            sh 'docker build -f apps/private/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-web:$DOCKER_TAG .'
-            sh 'docker build -f apps/public/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-public:$DOCKER_TAG .'
-            sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
-            sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
-            sh 'docker push linagora/twake-calendar-public:$DOCKER_TAG'
+              echo "Docker tag: ${env.DOCKER_TAG}"
+              sh 'npm run build'
+              sh 'docker build -f apps/private/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-web:$DOCKER_TAG .'
+              sh 'docker build -f apps/public/Dockerfile --build-arg BUILD_VERSION=$BUILD_VERSION -t linagora/twake-calendar-public:$DOCKER_TAG .'
+              sh 'docker login -u $DOCKER_HUB_CREDENTIAL_USR -p $DOCKER_HUB_CREDENTIAL_PSW'
+              sh 'docker push linagora/twake-calendar-web:$DOCKER_TAG'
+              sh 'docker push linagora/twake-calendar-public:$DOCKER_TAG'
+            }
           }
         }
       }
