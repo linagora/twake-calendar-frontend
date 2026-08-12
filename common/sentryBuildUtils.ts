@@ -1,5 +1,14 @@
 import { sentryWebpackPlugin } from '@sentry/webpack-plugin'
 
+export function isSentryConfigured(): boolean {
+  return Boolean(
+    process.env.SENTRY_URL &&
+    process.env.SENTRY_AUTH_TOKEN &&
+    process.env.SENTRY_ORG &&
+    process.env.SENTRY_PROJECT
+  )
+}
+
 /**
  * Utility function to configure and attach the Sentry Webpack/Rspack plugin to Rsbuild.
  *
@@ -11,16 +20,14 @@ export function setupSentryPlugin(
   appendPlugins: (plugin: any) => void,
   outputDir: string = 'dist'
 ): void {
+  if (!isSentryConfigured()) {
+    return
+  }
+
   const sentryUrl = process.env.SENTRY_URL
   const org = process.env.SENTRY_ORG
   const project = process.env.SENTRY_PROJECT
   const authToken = process.env.SENTRY_AUTH_TOKEN
-
-  const hasSentryConfig = Boolean(sentryUrl && authToken && org && project)
-  // Early return if Sentry is not configured at all
-  if (!hasSentryConfig) {
-    return
-  }
 
   const cleanOutputDir = outputDir.replace(/\/+$/, '')
 
