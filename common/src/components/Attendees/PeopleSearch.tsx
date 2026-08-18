@@ -53,6 +53,7 @@ export interface PeopleSearchProps {
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>
   }
   getChipIcon?: (user: User) => ReactElement
+  getChipAction?: AttendeeChipProps['getChipAction']
   hideOptions?: boolean
   showCurrentUser?: boolean
   onSearchStateChange?: (state: SearchState) => void
@@ -90,6 +91,7 @@ interface PeopleSearchValueRendererProps {
   value: User[]
   getItemProps: AttendeeChipProps['getItemProps']
   getChipIcon?: (user: User) => ReactElement
+  getChipAction?: AttendeeChipProps['getChipAction']
 }
 
 const getOptionLabel = (option: User | string): string => {
@@ -127,7 +129,8 @@ const resolveIsOpen = ({
 const PeopleSearchValueRenderer: React.FC<PeopleSearchValueRendererProps> = ({
   value,
   getItemProps,
-  getChipIcon
+  getChipIcon,
+  getChipAction
 }) => (
   <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
     {value.map((option, index) => (
@@ -137,6 +140,7 @@ const PeopleSearchValueRenderer: React.FC<PeopleSearchValueRendererProps> = ({
         getItemProps={getItemProps}
         index={index}
         getChipIcon={getChipIcon}
+        getChipAction={getChipAction}
       />
     ))}
   </Box>
@@ -196,6 +200,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   customRenderInput,
   customSlotProps,
   getChipIcon,
+  getChipAction,
   hideOptions,
   showCurrentUser,
   onSearchStateChange,
@@ -311,6 +316,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             value={value as User[]}
             getItemProps={getItemProps}
             getChipIcon={getChipIcon}
+            getChipAction={getChipAction}
           />
         )}
       />

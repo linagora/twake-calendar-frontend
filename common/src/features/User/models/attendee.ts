@@ -14,6 +14,7 @@ export interface UserAttendeeData {
   cutype: CuType
   rsvp: 'TRUE' | 'FALSE'
   cn: string
+  is_delegate_host: boolean
 }
 
 export type UserAttendeeOptions = Partial<UserAttendeeData>
@@ -25,6 +26,7 @@ export class userAttendee implements UserAttendeeData {
   cutype: CuType
   rsvp: 'TRUE' | 'FALSE'
   cn: string
+  is_delegate_host: boolean
 
   constructor({
     cal_address,
@@ -32,7 +34,8 @@ export class userAttendee implements UserAttendeeData {
     role,
     cutype,
     rsvp,
-    cn
+    cn,
+    is_delegate_host
   }: UserAttendeeOptions = {}) {
     this.cal_address = cal_address ?? ''
     this.partstat = partstat ?? 'NEEDS-ACTION'
@@ -40,6 +43,7 @@ export class userAttendee implements UserAttendeeData {
     this.cutype = cutype ?? 'INDIVIDUAL'
     this.rsvp = rsvp ?? 'FALSE'
     this.cn = cn ?? ''
+    this.is_delegate_host = is_delegate_host ?? false
   }
 
   static fromOrganizer(organizer: userOrganiser | undefined): userAttendee {
@@ -86,6 +90,10 @@ export class userAttendee implements UserAttendeeData {
 
   withRsvp(rsvp: 'TRUE' | 'FALSE'): userAttendee {
     return new userAttendee({ ...this, rsvp })
+  }
+
+  withDelegateHost(is_delegate_host: boolean): userAttendee {
+    return new userAttendee({ ...this, is_delegate_host })
   }
 
   asMailto(): string {

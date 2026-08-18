@@ -27,6 +27,7 @@ const KNOWN_PROPS = new Set([
   'class',
   'x-openpaas-videoconference',
   'x-openpaas-booking-link',
+  'x-twake-delegate-hosts',
   'summary',
   'description',
   'location',
@@ -56,6 +57,10 @@ function safeString(value: VObjectValue): string {
 interface PropertyContext {
   recurrenceId?: string
   duration?: string
+  // WS3 host-delegation: emails flagged as delegate hosts, captured from
+  // the top-level X-TWAKE-DELEGATE-HOSTS property. Applied to matching
+  // attendees after all properties are parsed.
+  delegateHostEmails?: Set<string>
 }
 
 function parseDateProperty(
@@ -179,6 +184,16 @@ const PROPERTY_PARSERS: Record<
   },
   'x-openpaas-booking-link': (params, value, event) => {
     event.bookingLinkPublicId = safeString(value)
+  },
+  'x-twake-delegate-hosts': (params, value, _event, context) => {
+    const raw = safeString(value)
+    if (!raw) return
+    context.delegateHostEmails = new Set(
+      raw
+        .split(',')
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0)
+    )
   },
   summary: (params, value, event) => {
     event.title = safeString(value)
@@ -367,6 +382,24 @@ export function parseCalendarEvent({
   }
 
   processEventUid(event, context.recurrenceId)
+
+  // WS3 host-delegation: apply the X-TWAKE-DELEGATE-HOSTS emails to the
+  // matching parsed attendees so the UI can hydrate the crown toggle.
+  // Guarded try/catch — a broken attendee shape (post-Redux plain object
+  // without .withDelegateHost) would otherwise reject the whole calendar
+  // refresh via the pMap outer promise.
+  try {
+    if (context.delegateHostEmails && event.attendee) {
+      event.attendee = event.attendee.map(att =>
+        typeof att.withDelegateHost === 'function' &&
+        context.delegateHostEmails!.has((att.cal_address || '').toLowerCase())
+          ? att.withDelegateHost(true)
+          : att
+      )
+    }
+  } catch (err) {
+    console.warn('[WS3] failed to apply delegate-host flag', err)
+  }
 
   const alarms = parseAlarms(valarms)
   if (alarms?.hasAlarms()) {

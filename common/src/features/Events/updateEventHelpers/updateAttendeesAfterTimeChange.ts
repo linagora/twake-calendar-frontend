@@ -23,7 +23,11 @@ export const updateAttendeesAfterTimeChange = (
         att.cal_address,
         markNeedsAction(att)
       )
-      return timeChanged ? markNeedsAction(existing) : existing
+      const base = timeChanged ? markNeedsAction(existing) : existing
+      // The form-side attendee carries UI-owned bits that the existing
+      // event attendee should not override (e.g. WS3 is_delegate_host,
+      // toggled via the crown). partstat/rsvp/role remain server-owned.
+      return base.withDelegateHost(att.is_delegate_host)
     })
 
     // Only append organizer entry if organizer exists

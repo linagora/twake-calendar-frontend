@@ -77,6 +77,24 @@ export function makeVevent(
     vevent[1].push(att.asJcal())
   })
 
+  // WS3 host-delegation: emit X-TWAKE-DELEGATE-HOSTS with the emails of
+  // attendees flagged as delegate hosts. Only emit when the event has an
+  // active Meet URL — the side-service consumer would silently bail
+  // without one, but keeping the ICS clean is nicer for round-trip.
+  if (event.x_openpass_videoconference) {
+    const delegateEmails = event.attendee
+      .filter(att => att.is_delegate_host)
+      .map(att => att.cal_address.replace(/^mailto:/i, ''))
+    if (delegateEmails.length > 0) {
+      vevent[1].push([
+        'x-twake-delegate-hosts',
+        {},
+        'text',
+        delegateEmails.join(',')
+      ])
+    }
+  }
+
   if (event.exdates && event.exdates.length > 0) {
     event.exdates.forEach(ex => {
       vevent[1].push([
