@@ -128,7 +128,8 @@ describe('useTdrivePicker', () => {
         theme: { type: 'light' },
         multiple: true,
         sharingLink: { label: 'tdrive.addAsAttachment' },
-        downloadLink: null
+        downloadLink: null,
+        displayCloseButton: true
       },
       ['GET']
     )

@@ -61,6 +61,14 @@ interface StartTdrivePickerOptions {
   t: (key: string) => string
 }
 
+interface CozyIntent {
+  start: (
+    element: HTMLElement,
+    options: { onReady?: () => void; onReadyToUse?: () => void }
+  ) => Promise<unknown>
+  stop?: () => void
+}
+
 async function startTdrivePicker({
   tdriveBaseUrl,
   idToken,
@@ -93,10 +101,11 @@ async function startTdrivePicker({
       theme: { type: 'light' },
       multiple: true,
       sharingLink: { label: t('tdrive.addAsAttachment') },
-      downloadLink: null
+      downloadLink: null,
+      displayCloseButton: true
     },
     ['GET']
-  )
+  ) as CozyIntent
 
   intentRef.current = intent
 
@@ -163,8 +172,8 @@ export function useTdrivePicker({
 
     try {
       const { files } = await startTdrivePicker({
-        tdriveBaseUrl,
-        idToken,
+        tdriveBaseUrl: tdriveBaseUrl as string,
+        idToken: idToken as string,
         containerRef,
         readyCallbackRef,
         cancellationRef,
