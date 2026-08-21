@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react'
-import { Dialog, DialogTitle, Box, IconButton } from '@linagora/twake-mui'
+import { Dialog, Box, IconButton, alpha, useTheme } from '@linagora/twake-mui'
 import { Close as CloseIcon } from '@mui/icons-material'
-import { useI18n } from 'twake-i18n'
-import { TdriveFile } from '../hooks/useTdrivePicker'
+import { TdriveFile } from '../types'
 import { PickerSkeleton } from './PickerSkeleton'
 
 interface TdrivePickerDialogProps {
@@ -48,7 +47,8 @@ const PickerContent: React.FC<PickerContentProps> = ({
             '& > iframe': {
               width: '100%',
               height: '100%',
-              border: 'none'
+              border: 'none',
+              background: '#fff'
             }
           }}
         />
@@ -63,7 +63,7 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
   containerRef,
   onReadyToUse
 }) => {
-  const { t } = useI18n()
+  const theme = useTheme()
   const [isReady, setIsReady] = useState(false)
 
   // Reset loader each time the dialog opens
@@ -85,29 +85,24 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
           height: '80vh',
           maxHeight: '800px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          position: 'relative'
         }
       }}
     >
-      <Box
+      <PickerContent containerRef={containerRef} isReady={isReady} />
+      <IconButton
+        aria-label="close"
+        onClick={onClose}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          p: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
-          flexShrink: 0
+          position: 'absolute',
+          right: 12,
+          top: 12,
+          color: alpha(theme.palette.grey[900], 0.9)
         }}
       >
-        <DialogTitle sx={{ p: 0 }}>
-          {t('event.form.tdrivePickerTitle')}
-        </DialogTitle>
-        <IconButton aria-label={t('actions.close')} onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <PickerContent containerRef={containerRef} isReady={isReady} />
+        <CloseIcon />
+      </IconButton>
     </Dialog>
   )
 }
