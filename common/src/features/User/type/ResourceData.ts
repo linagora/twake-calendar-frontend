@@ -10,6 +10,7 @@ export interface ResourceData {
     _id: string
     id: string
     objectType: string
+    access?: number
   }[]
   timestamps: {
     creation: string

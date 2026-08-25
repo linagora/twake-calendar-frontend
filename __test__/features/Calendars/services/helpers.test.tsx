@@ -110,7 +110,15 @@ describe('helpers', () => {
       const mockResource = {
         _id: 'r-1',
         name: 'Conference Room',
-        creator: 'u-creator'
+        creator: 'u-creator',
+        administrators: [
+          {
+            _id: 'admin-1',
+            id: 'admin-1',
+            objectType: 'user',
+            access: 5
+          }
+        ]
       } as any
       const mockCreator = {
         id: 'u-creator',
@@ -124,6 +132,7 @@ describe('helpers', () => {
       const result = await getOwnerOrResourceData('r-1')
       expect(result.resource).toBe(true)
       expect(result.id).toBe('u-creator')
+      expect(result.administrators).toEqual(mockResource.administrators)
     })
 
     it('should return team calendar owner data when fetchEntityById returns teamCalendar root key', async () => {

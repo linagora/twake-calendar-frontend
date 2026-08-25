@@ -260,7 +260,7 @@ export function CalendarAccessRights({
           .filter(admin => admin.id !== calendar.owner._id)
           .map(admin => ({
             id: admin.id,
-            access: 5 // ADMIN
+            access: (admin.access ?? 5) as AccessRight
           })) satisfies UserInCalendar[]
         const admins = await handleLoadUsers(
           resourceAdminsWithoutOwner,

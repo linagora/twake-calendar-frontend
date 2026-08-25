@@ -19,6 +19,7 @@ export interface OpenPaasUserData {
     _id: string
     id: string
     objectType: string
+    access?: number
   }[]
   resourceIcon?: string
 }

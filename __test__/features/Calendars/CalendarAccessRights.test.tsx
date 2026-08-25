@@ -260,7 +260,7 @@ describe('CalendarAccessRights', () => {
         resource: true,
         emails: ['resource1@example.com'],
         administrators: [
-          { id: 'admin1' },
+          { id: 'admin1', access: 5 },
           { id: 'admin2' },
           { id: 'resource1' } // Owner shouldn't be loaded as an admin
         ]
