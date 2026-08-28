@@ -23,6 +23,7 @@ import {
   useCompactMode
 } from './EventChipUtils'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 
 const PRIVATE_CLASSIFICATIONS = ['PRIVATE', 'CONFIDENTIAL']
 
@@ -44,6 +45,12 @@ export const EventChip: React.FC<EventChipProps> = ({
   const event = arg.event
   const props = event._def.extendedProps
   const { calId, temp, attendee: attendees = [], class: classification } = props
+
+  // ponytail: strip the invisible video-conference footer (visio join link +
+  // "do not edit" block) so it doesn't leak into the grid preview.
+  const displayDescription = props.description
+    ? new EventDescriptionBuilder(props.description).removeFooter().buildPlainText()
+    : ''
 
   try {
     // Calendar validation
@@ -244,7 +251,7 @@ export const EventChip: React.FC<EventChipProps> = ({
                 </Typography>
               )}
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                {event._def.extendedProps.description && (
+                {displayDescription && (
                   <Typography
                     sx={{
                       fontWeight: 500,
@@ -262,7 +269,7 @@ export const EventChip: React.FC<EventChipProps> = ({
                       color: titleStyle.color
                     }}
                   >
-                    {event._def.extendedProps.description}
+                    {displayDescription}
                   </Typography>
                 )}
               </Box>

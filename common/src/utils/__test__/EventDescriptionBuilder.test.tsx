@@ -119,6 +119,16 @@ describe('EventDescriptionBuilder', () => {
     expect(builder.getAttachments()).toEqual([])
   })
 
+  it('should strip the visio footer when building plain text for the grid preview', () => {
+    const text = `Weekly sync\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio : https://visio.link/123\n\nPlease do not edit this section.\n${EVENT_FOOTER_SEPARATOR}`
+    const plain = new EventDescriptionBuilder(text)
+      .removeFooter()
+      .buildPlainText()
+    expect(plain).toBe('Weekly sync')
+    expect(plain).not.toContain('visio.link')
+    expect(plain).not.toContain(EVENT_FOOTER_SEPARATOR)
+  })
+
   it('should chain methods', () => {
     const attach = new Attachment('url', 'type', 'name')
     const text = `<h1>Meeting</h1>\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio: https://visio.link/123\n${EVENT_FOOTER_SEPARATOR}`
