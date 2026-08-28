@@ -49,7 +49,9 @@ export const EventChip: React.FC<EventChipProps> = ({
   // ponytail: strip the invisible video-conference footer (visio join link +
   // "do not edit" block) so it doesn't leak into the grid preview.
   const displayDescription = props.description
-    ? new EventDescriptionBuilder(props.description).removeFooter().buildPlainText()
+    ? new EventDescriptionBuilder(props.description)
+        .removeFooter()
+        .buildPlainText()
     : ''
 
   try {
