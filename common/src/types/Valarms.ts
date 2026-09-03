@@ -25,6 +25,7 @@ export class Valarms {
       (valarms?.getAlarms() ?? []).map(
         alarm =>
           new VAlarm({
+            uid: alarm.uid,
             trigger: alarm.trigger,
             action: alarm.action,
             attendees: alarm.attendees ?? defaults.attendees,
@@ -165,6 +166,7 @@ export class Valarms {
     )
     if (!remaining.length) return null
     return new VAlarm({
+      uid: alarm.uid,
       trigger: alarm.trigger,
       action: alarm.action,
       attendees: remaining,
@@ -187,11 +189,10 @@ export class Valarms {
     if (!attendee) return formAlarms
 
     const attendeeEmail = this.normalizeEmail(attendee.cal_address)
-    const selectedTriggers = new Set(formAlarms.getAlarms().map(a => a.trigger))
 
     const selectedAlarms = this.processSelectedAlarms(formAlarms)
     const deselectedAlarms = this.processDeselectedAlarms(
-      selectedTriggers,
+      formAlarms,
       attendeeEmail
     )
 
@@ -214,21 +215,28 @@ export class Valarms {
 
   private processSelectedAlarms(formAlarms: Valarms): VAlarm[] {
     return formAlarms.getAlarms().map(formAlarm => {
-      const originalAlarm = this._alarms.find(
-        a => a.trigger === formAlarm.trigger
-      )
+      const originalAlarm = formAlarm.uid
+        ? this._alarms.find(a => a.uid === formAlarm.uid)
+        : this._alarms.find(a => !a.uid && a.trigger === formAlarm.trigger)
       return originalAlarm ?? formAlarm
     })
   }
 
   private processDeselectedAlarms(
-    selectedTriggers: Set<string>,
+    formAlarms: Valarms,
     attendeeEmail: string
   ): VAlarm[] {
     const result: VAlarm[] = []
 
     for (const alarm of this._alarms) {
-      if (selectedTriggers.has(alarm.trigger)) continue
+      const isSelected = alarm.uid
+        ? formAlarms.getAlarms().some(formAlarm => formAlarm.uid === alarm.uid)
+        : formAlarms
+            .getAlarms()
+            .some(
+              formAlarm => !formAlarm.uid && formAlarm.trigger === alarm.trigger
+            )
+      if (isSelected) continue
 
       const processedAlarm = this.processDeselectedAlarm(alarm, attendeeEmail)
       if (processedAlarm) {

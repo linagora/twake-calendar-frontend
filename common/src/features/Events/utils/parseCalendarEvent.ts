@@ -265,6 +265,9 @@ type AlarmPropertyHandler = (
 ) => void
 
 const ALARM_PROPERTY_HANDLERS: Record<string, AlarmPropertyHandler> = {
+  uid: (alarm, value) => {
+    alarm.uid = safeString(value)
+  },
   action: (alarm, value) => {
     alarm.action = safeString(value)
   },

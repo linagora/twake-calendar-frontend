@@ -9,6 +9,7 @@ export const DEFAULT_ALARM_DESCRIPTION =
   'This is an automatic alarm sent by Twake Calendar'
 
 export interface AlarmData {
+  uid?: string
   trigger: string
   action: string
   attendees?: userAttendee[]
@@ -17,13 +18,22 @@ export interface AlarmData {
 }
 
 export class VAlarm implements AlarmData {
+  uid?: string
   trigger: string
   action: string
   attendees?: userAttendee[]
   summary?: string
   description?: string
 
-  constructor({ trigger, action, attendees, summary, description }: AlarmData) {
+  constructor({
+    uid,
+    trigger,
+    action,
+    attendees,
+    summary,
+    description
+  }: AlarmData) {
+    this.uid = uid
     this.trigger = normalizeAlarmTrigger(trigger)
     this.action = action
     this.attendees = attendees
@@ -49,6 +59,7 @@ export class VAlarm implements AlarmData {
         )
       }
       return new VAlarm({
+        uid: obj.uid,
         trigger: obj.trigger ?? '',
         action: obj.action ?? '',
         attendees,
@@ -64,6 +75,9 @@ export class VAlarm implements AlarmData {
       ['trigger', {}, 'duration', this.trigger],
       ['action', {}, 'text', this.action]
     ]
+    if (this.uid) {
+      props.unshift(['uid', {}, 'text', this.uid])
+    }
     if (this.attendees) {
       for (const attendee of this.attendees) {
         props.push(['attendee', {}, 'cal-address', attendee.asMailto()])
