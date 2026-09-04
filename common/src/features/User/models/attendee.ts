@@ -99,15 +99,22 @@ export class userAttendee implements UserAttendeeData {
   }
 
   asJcal(): VObjectProperty {
+    const rsvp =
+      typeof this.rsvp === 'boolean'
+        ? this.rsvp
+          ? 'TRUE'
+          : 'FALSE'
+        : String(this.rsvp ?? 'FALSE').toUpperCase()
+
     const params: Record<string, string> = {
-      partstat: this.partstat,
-      rsvp: this.rsvp,
-      role: this.role,
-      cutype: this.cutype
+      partstat: String(this.partstat ?? 'NEEDS-ACTION'),
+      rsvp,
+      role: String(this.role ?? 'REQ-PARTICIPANT'),
+      cutype: String(this.cutype ?? 'INDIVIDUAL')
     }
 
     if (this.cn) {
-      params.cn = this.cn
+      params.cn = String(this.cn)
     }
 
     return ['attendee', params, 'cal-address', this.asMailto()]
