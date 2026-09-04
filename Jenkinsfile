@@ -48,7 +48,7 @@ pipeline {
           sh 'npm run build'
           dir('e2e') {
             sh 'SKIP_FRONTEND_BUILD=true ./pre-build.sh'
-            sh 'mvn clean test'
+            sh 'mvn clean test -Dapi.version=1.44'
           }
         }
         post {
