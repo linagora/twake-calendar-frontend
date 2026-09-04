@@ -49,6 +49,7 @@ export async function performUpdateAction(
 
     if (typeOfAction === 'all') {
       await handleUpdateRecurringSeries(params)
+      return
     }
   } catch (error) {
     handleUpdateError({

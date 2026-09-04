@@ -29,6 +29,7 @@ export function useEventSettingsUpdateModal(
   handleSubmit: (values: EventFormValues) => Promise<void>
   handleSave: () => Promise<void>
   tempContext: EventFormContext
+  masterEvent: CalendarEvent | null
 } {
   const { eventId, calId, open, onClose, onCloseAll, event, typeOfAction } =
     props
@@ -92,6 +93,7 @@ export function useEventSettingsUpdateModal(
     setShowMore,
     formRef,
     effectiveEvent,
+    masterEvent,
     initialValues,
     handleClose,
     handleSubmit,

@@ -62,7 +62,8 @@ const EventPreviewModal: React.FC<{
     handleDuplicateClick,
     calendarid,
     handleCalendarMove,
-    userPersonalCalendars
+    userPersonalCalendars,
+    handleSettingsEditClick
   } = useEventPreviewState(eventId, calId, tempEvent, open, onClose)
 
   useEffect(
@@ -185,9 +186,7 @@ const EventPreviewModal: React.FC<{
         userEmail={user.email}
         onClose={() => setToggleActionMenu(null)}
         onDuplicate={handleDuplicateClick}
-        onEdit={() => {
-          setOpenSettingsUpdateModal(true)
-        }}
+        onEdit={handleSettingsEditClick}
       />
 
       {/* Recurring edit/delete mode picker */}

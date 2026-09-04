@@ -12,6 +12,9 @@ import { EventActions } from './EventActions'
 import { useEventOrganizer } from './useEventOrganizer'
 import { useEventSettingsUpdateModal } from './useEventSettingsUpdateModal'
 import { userAttendee } from '../User/models/attendee'
+import moment from 'moment'
+import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
+import { EventFormValues } from '@common/components/Event/EventFormFields.types'
 
 export interface EventSettingsUpdateModalProps {
   eventId: string
@@ -24,6 +27,76 @@ export interface EventSettingsUpdateModalProps {
   anchorEl?: HTMLElement | null
 }
 
+function getCurrentUser(
+  calList: Record<string, { owner?: { emails?: string[] } }>,
+  calId: string
+): userAttendee | undefined {
+  const email = calList[calId]?.owner?.emails?.[0]
+  return email ? userAttendee.fromEmailField(email) : undefined
+}
+
+function getOriginalEvent(params: {
+  typeOfAction?: 'solo' | 'all'
+  masterEvent: CalendarEvent | null
+  cachedEvent?: CalendarEvent
+  fallbackEvent: CalendarEvent
+}): CalendarEvent {
+  if (params.typeOfAction === 'all' && params.masterEvent) {
+    return params.masterEvent
+  }
+  return params.cachedEvent || params.fallbackEvent
+}
+
+function mergeUserAlarms(
+  originalAlarms: Valarms | undefined,
+  editableAlarms: ReturnType<Valarms['getAllAlarmsForAttendee']>,
+  currentUser?: userAttendee
+): Valarms {
+  const formAlarms = Valarms.fromList(editableAlarms)
+  if (originalAlarms && currentUser) {
+    return originalAlarms.mergeForPersonalSettingsUpdate(
+      formAlarms,
+      currentUser
+    )
+  }
+  return formAlarms
+}
+
+function computeUpdatedFormValues(params: {
+  formValues: EventFormValues
+  mergedAlarms: Valarms
+  originalEvent: CalendarEvent
+  typeOfAction?: 'solo' | 'all'
+}): EventFormValues {
+  const { formValues, mergedAlarms, originalEvent, typeOfAction } = params
+  if (typeOfAction !== 'all') {
+    return {
+      ...formValues,
+      alarms: mergedAlarms
+    }
+  }
+
+  const updateData = {
+    ...formValues,
+    start: formatLocalDateTime(
+      moment.tz(originalEvent.start, originalEvent.timezone).toDate(),
+      originalEvent.timezone
+    ),
+    alarms: mergedAlarms
+  }
+
+  if (originalEvent.end) {
+    updateData.end = formatLocalDateTime(
+      moment.tz(originalEvent.end, originalEvent.timezone).toDate(),
+      originalEvent.timezone
+    )
+  }
+
+  return updateData
+}
+
+const toggleShowMore = (s: boolean): boolean => !s
+
 const EventSettingsUpdateModalInternal: React.FC<
   EventSettingsUpdateModalProps & { event: CalendarEvent }
 > = props => {
@@ -33,11 +106,7 @@ const EventSettingsUpdateModalInternal: React.FC<
 
   const calList = useAppSelector(state => state.calendars.list)
   const userOrganizer = useAppSelector(state => state.user.organiserData)
-
-  const currentUserEmail = calList[props.calId]?.owner?.emails?.[0]
-  const currentUser = currentUserEmail
-    ? userAttendee.fromEmailField(currentUserEmail)
-    : undefined
+  const currentUser = getCurrentUser(calList, props.calId)
 
   const { isOrganizer } = useEventOrganizer({
     calendarid: props.calId,
@@ -53,7 +122,8 @@ const EventSettingsUpdateModalInternal: React.FC<
     initialValues,
     handleClose,
     handleSubmit,
-    tempContext
+    tempContext,
+    masterEvent
   } = useEventSettingsUpdateModal(props)
 
   const { formValues, setAlarms, setBusy, setEventClass, setCalendarid } =
@@ -67,29 +137,30 @@ const EventSettingsUpdateModalInternal: React.FC<
       onAllDayChange: () => {}
     })
 
-  // Extract all alarms the current user is part of (personal + global)
   const editableAlarms = useMemo(() => {
-    if (!currentUser) return []
-    return formValues.alarms.getAllAlarmsForAttendee(currentUser)
+    return currentUser
+      ? formValues.alarms.getAllAlarmsForAttendee(currentUser)
+      : []
   }, [formValues.alarms, currentUser])
 
   const handleSave = useCallback(async () => {
-    // Get the original event to preserve other attendees' alarms
-    const originalEvent =
-      calList[props.calId]?.events?.[props.eventId] || props.event
-    const originalAlarms = originalEvent?.alarms
-
-    // Merge form alarms back with original, handling global alarm unsubscription
-    const formAlarms = Valarms.fromList(editableAlarms)
-    const mergedAlarms =
-      originalAlarms && currentUser
-        ? originalAlarms.mergeForPersonalSettingsUpdate(formAlarms, currentUser)
-        : formAlarms
-
-    const valuesWithMergedAlarms = {
-      ...formValues,
-      alarms: mergedAlarms
-    }
+    const originalEvent = getOriginalEvent({
+      typeOfAction,
+      masterEvent,
+      cachedEvent: calList[props.calId]?.events?.[props.eventId],
+      fallbackEvent: props.event
+    })
+    const mergedAlarms = mergeUserAlarms(
+      originalEvent.alarms,
+      editableAlarms,
+      currentUser
+    )
+    const valuesWithMergedAlarms = computeUpdatedFormValues({
+      formValues,
+      mergedAlarms,
+      originalEvent,
+      typeOfAction
+    })
 
     await handleSubmit(valuesWithMergedAlarms)
   }, [
@@ -100,7 +171,9 @@ const EventSettingsUpdateModalInternal: React.FC<
     props.calId,
     props.eventId,
     props.event,
-    currentUser
+    currentUser,
+    masterEvent,
+    typeOfAction
   ])
 
   const actions = (
@@ -109,7 +182,7 @@ const EventSettingsUpdateModalInternal: React.FC<
       isEdit
       onClose={handleClose}
       onSave={handleSave}
-      onExpanded={() => setShowMore((s: boolean) => !s)}
+      onExpanded={() => setShowMore(toggleShowMore)}
     />
   )
   return (
@@ -125,10 +198,8 @@ const EventSettingsUpdateModalInternal: React.FC<
       <EventFormFieldPersonalSettings
         v={{
           ...formValues,
-          // Show all alarms the user is part of (personal + global)
           alarms: Valarms.fromList(editableAlarms)
         }}
-        t={t}
         typeOfAction={typeOfAction}
         setCalendarid={setCalendarid}
         userPersonalCalendars={userPersonalCalendars}

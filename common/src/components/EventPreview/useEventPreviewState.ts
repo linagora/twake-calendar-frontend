@@ -64,6 +64,7 @@ interface UseEventPreviewStateReturn {
   resolvedTypeOfAction: 'solo' | 'all' | undefined
   handleEditClick: () => void
   handleEditInOrganizerCalendar: () => void
+  handleSettingsEditClick: () => void
   handleDeleteClick: () => Promise<void>
   handleDuplicateClick: () => void
   calendarid: string
@@ -236,6 +237,20 @@ export function useEventPreviewState(
     }
   }
 
+  const handleSettingsEditClick = (): void => {
+    setUpdateModalCalId(calId)
+    if (isRecurring) {
+      setAfterChoiceFunc(() => (): void => {
+        setHidePreview(true)
+        setOpenSettingsUpdateModal(true)
+      })
+      setOpenEditModePopup('edit')
+    } else {
+      setHidePreview(true)
+      setOpenSettingsUpdateModal(true)
+    }
+  }
+
   const handleDeleteClick = async (): Promise<void> => {
     if (isRecurring) {
       setAfterChoiceFunc(
@@ -339,6 +354,7 @@ export function useEventPreviewState(
     // Handlers
     handleEditClick,
     handleEditInOrganizerCalendar,
+    handleSettingsEditClick,
     handleDeleteClick,
     handleDuplicateClick,
 

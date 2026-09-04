@@ -9,10 +9,10 @@ import { EventFormFieldsSpecific } from './components/EventFormFieldsSpecific'
 import { EventFormValues } from './EventFormFields.types'
 import { CalendarSelectField } from './fields/CalendarSelectField'
 import { userAttendee } from '@common/features/User/models/attendee'
+import { useI18n } from 'twake-i18n'
 
 export function EventFormFieldPersonalSettings({
   v,
-  t,
   typeOfAction,
   setCalendarid,
   userPersonalCalendars,
@@ -24,7 +24,6 @@ export function EventFormFieldPersonalSettings({
   user
 }: {
   v: EventFormValues
-  t: (key: string, options?: object) => string
   typeOfAction: string | undefined
   setCalendarid: (v: string) => void
   userPersonalCalendars: Calendar[]
@@ -35,6 +34,8 @@ export function EventFormFieldPersonalSettings({
   isOrganizer: boolean
   user: userAttendee
 }): React.ReactNode {
+  const { t } = useI18n()
+
   const setAlarmsWithUser = useCallback(
     (alarms: Valarms) => {
       // Guard: don't stamp alarms if user has no valid cal_address
