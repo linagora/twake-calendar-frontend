@@ -48,6 +48,7 @@ export function EventFormFieldPersonalSettings({
             return alarm
           }
           return new VAlarm({
+            uid: alarm.uid,
             trigger: alarm.trigger,
             action: alarm.action,
             attendees: [user],

@@ -62,6 +62,7 @@ export function buildUpdatedAlarms(
       }
       // New alarm without attendees - add defaults
       return new VAlarm({
+        uid: alarm.uid,
         trigger: alarm.trigger,
         action: alarm.action,
         attendees: alarmAttendees,
