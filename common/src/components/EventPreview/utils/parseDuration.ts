@@ -1,3 +1,5 @@
+const MAX_DURATION_LENGTH = 64
+
 /**
  * Parses an ISO 8601 duration string (e.g., -PT20M, -PT1H, P1D, -PT15M)
  * and formats it using the translation function `t`.
@@ -6,6 +8,13 @@ export function translateDuration(
   durationStr: string,
   t: (key: string, options?: Record<string, unknown>) => string
 ): string {
+  // RFC 5545 durations are a couple of dozen characters at most. The unit
+  // lookups below are unanchored `(\d+)X` scans, which backtrack quadratically
+  // over a long digit run, so refuse oversized input rather than parse it.
+  if (durationStr.length > MAX_DURATION_LENGTH) {
+    return durationStr
+  }
+
   // First, check if there is an exact translation key matching this trigger
   const exactKey = `event.form.notifications.${durationStr}`
   const exactTranslation = t(exactKey)
