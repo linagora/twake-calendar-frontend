@@ -1,10 +1,8 @@
 import { AttachementChip } from '@common/components/EventPreview/AttachementPreview/AttachementChip'
 import { Attachment } from '@common/types/Attachment'
 import { isSafeHttpUrl } from '@common/utils/isSafeUrl'
-import { Box, IconButton } from '@linagora/twake-mui'
-import CloseIcon from '@mui/icons-material/Close'
+import { Box } from '@linagora/twake-mui'
 import { MouseEvent } from 'react'
-import { useI18n } from 'twake-i18n'
 
 interface AttachmentFieldProps {
   attachments?: Attachment[]
@@ -15,7 +13,6 @@ export const AttachmentField: React.FC<AttachmentFieldProps> = ({
   attachments,
   setAttachments
 }) => {
-  const { t } = useI18n()
   const handleRemove = (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
     index: number
@@ -45,15 +42,7 @@ export const AttachmentField: React.FC<AttachmentFieldProps> = ({
           <AttachementChip
             key={`${attachment.uri}-${index}`}
             attachment={attachment}
-            endAddorments={
-              <IconButton
-                size="small"
-                onClick={e => handleRemove(e, index)}
-                aria-label={t('actions.remove')}
-              >
-                <CloseIcon />
-              </IconButton>
-            }
+            onDelete={e => handleRemove(e, index)}
           />
         )
       })}
