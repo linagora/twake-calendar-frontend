@@ -10,16 +10,7 @@ export function detectUrls(text: string): JSX.Element[] {
 
   text.replace(urlRegex, (match, _, offset: number) => {
     // Strip trailing punctuation, but preserve balanced parentheses (e.g. Wikipedia)
-    let url = match
-
-    while (/[.,;:!?)]$/.test(url)) {
-      if (url.endsWith(')')) {
-        const openCount = countChar(url, '(')
-        const closeCount = countChar(url, ')')
-        if (closeCount <= openCount) break
-      }
-      url = url.slice(0, -1)
-    }
+    const url = trimTrailingPunctuation(match)
 
     const trailing = match.slice(url.length)
 
@@ -67,6 +58,34 @@ export function detectUrls(text: string): JSX.Element[] {
   return parts
 }
 
-function countChar(value: string, char: '(' | ')'): number {
-  return (value.match(new RegExp(`\\${char}`, 'g')) || []).length
+const TRAILING_PUNCTUATION = new Set(['.', ',', ';', ':', '!', '?', ')'])
+
+/**
+ * Drops the punctuation a URL picked up from the surrounding sentence, keeping
+ * a closing parenthesis that balances an opening one inside the URL.
+ *
+ * Counts the parentheses once and updates them as characters are dropped: the
+ * previous version re-counted (and recompiled a RegExp) on every iteration,
+ * which is quadratic in the length of the match, and `location` reaches here
+ * straight from the event.
+ */
+function trimTrailingPunctuation(match: string): string {
+  let openCount = 0
+  let closeCount = 0
+  for (const char of match) {
+    if (char === '(') openCount++
+    else if (char === ')') closeCount++
+  }
+
+  let end = match.length
+  while (end > 0 && TRAILING_PUNCTUATION.has(match[end - 1])) {
+    if (match[end - 1] === ')') {
+      // A closing parenthesis that matches an opening one belongs to the URL.
+      if (closeCount <= openCount) break
+      closeCount--
+    }
+    end--
+  }
+
+  return end === match.length ? match : match.slice(0, end)
 }
