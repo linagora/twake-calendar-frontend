@@ -14,18 +14,44 @@ export class EventDescriptionBuilder {
     this.attachments = attachments
   }
 
+  /**
+   * Removes every `SEPARATOR ... SEPARATOR` footer block, along with the blank
+   * lines surrounding it.
+   *
+   * Deliberately scan-based rather than regex-based: the previous
+   * `\n*SEP[\s\S]*?SEP\n*` pattern backtracked over its leading `\n*` on
+   * every position of a newline run, which is quadratic in the description
+   * length (a remote attendee could freeze the UI thread with a description
+   * made of one separator preceded by a long run of newlines).
+   */
   public removeFooter(): this {
-    if (this.text.includes(EVENT_FOOTER_SEPARATOR)) {
-      const escapedSeparator = EVENT_FOOTER_SEPARATOR.replace(
-        /[-/\\^$*+?.()|[\]{}]/g,
-        '\\$&'
-      )
-      const regex = new RegExp(
-        `\\n*${escapedSeparator}[\\s\\S]*?${escapedSeparator}\\n*`,
-        'g'
-      )
-      this.text = this.text.replace(regex, '\n').trimEnd()
+    if (!this.text.includes(EVENT_FOOTER_SEPARATOR)) {
+      return this
     }
+
+    const sepLength = EVENT_FOOTER_SEPARATOR.length
+    let result = ''
+    let cursor = 0
+
+    for (;;) {
+      const start = this.text.indexOf(EVENT_FOOTER_SEPARATOR, cursor)
+      if (start === -1) break
+      const end = this.text.indexOf(EVENT_FOOTER_SEPARATOR, start + sepLength)
+      if (end === -1) break
+
+      let from = start
+      while (from > cursor && this.text[from - 1] === '\n') from--
+      let to = end + sepLength
+      while (to < this.text.length && this.text[to] === '\n') to++
+
+      result += this.text.slice(cursor, from)
+      // The newline only joins what surrounds the removed block; a footer that
+      // opens the description has nothing to join it to.
+      if (result) result += '\n'
+      cursor = to
+    }
+
+    this.text = (result + this.text.slice(cursor)).trimEnd()
     return this
   }
 

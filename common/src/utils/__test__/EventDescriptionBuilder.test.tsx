@@ -37,6 +37,34 @@ describe('EventDescriptionBuilder', () => {
       const builder = new EventDescriptionBuilder(text).removeFooter()
       expect(builder.buildHtml()).toBe(text)
     })
+
+    it('should remove every footer block when several are present', () => {
+      const text = `Notes\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio: a\n${EVENT_FOOTER_SEPARATOR}\n\nMore\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio: b\n${EVENT_FOOTER_SEPARATOR}\n\nTail`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe('Notes\nMore\nTail')
+    })
+
+    it('should leave an unterminated separator untouched', () => {
+      const text = `Notes\n\n${EVENT_FOOTER_SEPARATOR}\nJoin Visio: a`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe(text)
+    })
+
+    it('should not leave a leading newline when the footer opens the description', () => {
+      const text = `${EVENT_FOOTER_SEPARATOR}\nJoin Visio: a\n${EVENT_FOOTER_SEPARATOR}\n\nMeeting notes`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe('Meeting notes')
+    })
+
+    // Regression guard for the quadratic backtracking the scan-based
+    // implementation replaced. No wall-clock assertion: the previous
+    // implementation needed ~40s on this input and so blows the suite timeout
+    // on its own, whereas a threshold would be a coin flip on a loaded CI box.
+    it('should stay usable on a long run of newlines before a separator', () => {
+      const text = `${'\n'.repeat(400000)}${EVENT_FOOTER_SEPARATOR}`
+      const builder = new EventDescriptionBuilder(text).removeFooter()
+      expect(builder.buildHtml()).toBe(text.trimEnd())
+    })
   })
 
   describe('withFooter', () => {
