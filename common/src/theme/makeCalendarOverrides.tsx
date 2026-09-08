@@ -1,7 +1,17 @@
 import { alpha, createTheme, Theme, makePalette } from '@linagora/twake-mui'
 import type { ThemeOptions } from '@mui/material/styles'
 import type {} from '@mui/x-date-pickers/themeAugmentation'
+import { AccordionExpandIcon } from '@linagora/twake-mui'
 import paletteData from './palette.json'
+import { typography } from './typography'
+
+export const radius = {
+  none: '0',
+  sm: '4px',
+  md: '8px',
+  lg: '12px',
+  pill: '100px'
+}
 
 function getDateCalendarRootOverrides(theme: Theme) {
   return {
@@ -167,6 +177,73 @@ function getYearCalendarOverrides(theme: Theme) {
   }
 }
 
+const basicThemeOverrides = {
+  MuiAccordion: {
+    styleOverrides: {
+      root: {
+        '&::before': {
+          display: 'none'
+        }
+      }
+    }
+  },
+  MuiAccordionSummary: {
+    defaultProps: { expandIcon: <AccordionExpandIcon /> },
+    styleOverrides: {
+      root: ({ theme }) => ({
+        ...theme.typography.caption,
+        color: theme.palette.text.secondary,
+        minHeight: '18px',
+        padding: 0,
+        '&.Mui-expanded': {
+          minHeight: '18px'
+        }
+      }),
+      expandIconWrapper: {
+        '&&': {
+          marginLeft: '8px'
+        },
+        transform: 'rotate(-180deg)',
+        '& svg': {
+          width: '10px',
+          height: '10px'
+        },
+        '&.Mui-expanded': {
+          marginLeft: '8px',
+          transform: 'rotate(0deg)'
+        }
+      },
+      content: ({ theme }) => ({
+        margin: 0,
+        padding: 0,
+        ...theme.typography.caption,
+        display: 'flex',
+        alignItems: 'center',
+        '&.Mui-expanded': {
+          margin: 0
+        }
+      })
+    }
+  },
+  MuiListItem: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        '.MuiAccordion-root &': {
+          padding: '0',
+          borderRadius: '4px',
+          '&:hover': {
+            backgroundColor: alpha(theme.palette.grey[900], 0.04)
+          },
+          '& label': {
+            ...theme.typography.body2,
+            color: alpha(theme.palette.grey[900], 0.9)
+          }
+        }
+      })
+    }
+  }
+}
+
 /**
 This function allows us to create themes overrides that are specific to Twake Calendar.
 (eg. palette, specific components like date pickers from mui/x-date-pickers, etc)
@@ -189,7 +266,9 @@ export function makeCalendarOverrides(): ThemeOptions {
 
   return {
     palette,
+    typography,
     components: {
+      ...basicThemeOverrides,
       MuiCssBaseline: {
         styleOverrides: {
           ...getDateCalendarRootOverrides(theme),
