@@ -593,6 +593,12 @@ public class CalendarPage {
 
     /** Measures an element where it already is: scrolling here would move everything else. */
     private BoundingBox boxOf(Locator locator, String what) {
+        try {
+            locator.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE).setTimeout(5_000));
+        } catch (com.microsoft.playwright.TimeoutError ignored) {
+            // nothing to wait for any more: the assertion below names what is missing.
+        }
         BoundingBox box = locator.boundingBox();
         if (box == null) {
             throw new AssertionError("Could not locate " + what + " on screen");
