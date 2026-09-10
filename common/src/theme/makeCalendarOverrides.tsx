@@ -190,30 +190,30 @@ const basicThemeOverrides = {
   MuiAccordionSummary: {
     defaultProps: { expandIcon: <AccordionExpandIcon /> },
     styleOverrides: {
-      root: ({ theme }) => ({
+      root: ({ theme }: { theme: Theme }) => ({
         ...theme.typography.caption,
         color: theme.palette.text.secondary,
-        minHeight: '18px',
+        minHeight: theme.typography.pxToRem(18),
         padding: 0,
         '&.Mui-expanded': {
-          minHeight: '18px'
+          minHeight: theme.typography.pxToRem(18)
         }
       }),
-      expandIconWrapper: {
+      expandIconWrapper: ({ theme }: { theme: Theme }) => ({
         '&&': {
-          marginLeft: '8px'
+          marginLeft: theme.typography.pxToRem(8)
         },
         transform: 'rotate(-180deg)',
         '& svg': {
-          width: '10px',
-          height: '10px'
+          width: theme.typography.pxToRem(16),
+          height: theme.typography.pxToRem(16)
         },
         '&.Mui-expanded': {
-          marginLeft: '8px',
+          marginLeft: theme.typography.pxToRem(8),
           transform: 'rotate(0deg)'
         }
-      },
-      content: ({ theme }) => ({
+      }),
+      content: ({ theme }: { theme: Theme }) => ({
         margin: 0,
         padding: 0,
         ...theme.typography.caption,
@@ -227,10 +227,10 @@ const basicThemeOverrides = {
   },
   MuiListItem: {
     styleOverrides: {
-      root: ({ theme }) => ({
+      root: ({ theme }: { theme: Theme }) => ({
         '.MuiAccordion-root &': {
           padding: '0',
-          borderRadius: '4px',
+          borderRadius: theme.typography.pxToRem(4),
           '&:hover': {
             backgroundColor: alpha(theme.palette.grey[900], 0.04)
           },
