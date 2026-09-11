@@ -1,8 +1,13 @@
 import { Attachment } from '@common/types/Attachment'
 import { sanitizeHtml } from './sanitizeUtils'
 
-export const EVENT_FOOTER_SEPARATOR =
+// We use a new separator for new events, but we keep the legacy separator to be able to
+// strip it from older event descriptions that were created before the change.
+export const EVENT_FOOTER_SEPARATOR = '-_-_-_-_-_-_-_-'
+export const SEPARATORS_NEED_HANDLE = [
+  EVENT_FOOTER_SEPARATOR,
   '-::~:~::~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~:~::~:~::-'
+]
 
 export class EventDescriptionBuilder {
   private text: string
@@ -25,18 +30,23 @@ export class EventDescriptionBuilder {
    * made of one separator preceded by a long run of newlines).
    */
   public removeFooter(): this {
-    if (!this.text.includes(EVENT_FOOTER_SEPARATOR)) {
-      return this
-    }
+    SEPARATORS_NEED_HANDLE.forEach(separator => {
+      if (this.text.includes(separator)) {
+        this.removeFooterSeparator(separator)
+      }
+    })
+    return this
+  }
 
-    const sepLength = EVENT_FOOTER_SEPARATOR.length
+  private removeFooterSeparator(separator: string): void {
+    const sepLength = separator.length
     let result = ''
     let cursor = 0
 
     for (;;) {
-      const start = this.text.indexOf(EVENT_FOOTER_SEPARATOR, cursor)
+      const start = this.text.indexOf(separator, cursor)
       if (start === -1) break
-      const end = this.text.indexOf(EVENT_FOOTER_SEPARATOR, start + sepLength)
+      const end = this.text.indexOf(separator, start + sepLength)
       if (end === -1) break
 
       let from = start
@@ -52,7 +62,6 @@ export class EventDescriptionBuilder {
     }
 
     this.text = (result + this.text.slice(cursor)).trimEnd()
-    return this
   }
 
   public linkify(): this {
@@ -93,6 +102,8 @@ export class EventDescriptionBuilder {
     if (!meetingLink && !hasAttachments) {
       return this
     }
+
+    this.removeFooter()
 
     const { joinText, attachmentsText, doNotEditText } =
       this.getFooterTranslations(t)
