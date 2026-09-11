@@ -157,11 +157,15 @@ async function handleSoloRSVP({
   await dispatch(updateEventInstance({ cal: calendar, event: fallbackEvent }))
 }
 
-async function handleAllRSVP(
-  event: CalendarEvent,
-  userEmail: string,
+async function handleAllRSVP({
+  event,
+  userEmail,
+  rsvp
+}: {
+  event: CalendarEvent
+  userEmail: string
   rsvp: PartStat
-): Promise<void> {
+}): Promise<void> {
   const vevents = await fetchAllRecurrentVevents(event)
   const jCal = updateSeriesPartstatJCal(vevents, event, userEmail, rsvp)
   await putEvent(event, jCal)
@@ -206,6 +210,19 @@ async function handleDefaultRSVP({
   await dispatch(putEventAsync({ cal: calendar, newEvent: fallbackEvent }))
 }
 
+function getAttendeeEmail(
+  calendar: Calendar,
+  user: userData | undefined
+): string {
+  if (calendar.delegated && calendar.owner?.emails?.[0]) {
+    return calendar.owner.emails[0]
+  }
+  if (user?.email) {
+    return user.email
+  }
+  throw new Error('Cannot update all occurrences without user email')
+}
+
 export async function handleRSVP({
   dispatch,
   calendar,
@@ -229,10 +246,12 @@ export async function handleRSVP({
       fallbackEvent: newEvent
     })
   } else if (typeOfAction === 'all') {
-    if (!user?.email) {
-      throw new Error('Cannot update all occurrences without user email')
-    }
-    await handleAllRSVP(event, user.email, rsvp)
+    const attendeeEmail = getAttendeeEmail(calendar, user)
+    await handleAllRSVP({
+      event,
+      userEmail: attendeeEmail,
+      rsvp
+    })
   } else {
     await handleDefaultRSVP({
       dispatch,

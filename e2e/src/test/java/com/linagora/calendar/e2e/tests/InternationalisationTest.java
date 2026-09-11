@@ -169,6 +169,13 @@ class InternationalisationTest extends TwakeCalendarE2ETest {
         page.getByLabel(FR_CREATE).click();
         page.getByLabel("Titre").first().fill(title("Invalide"));
         page.getByLabel("expand").click();
+        
+        // Ensure start and end dates are identical so time validation triggers reliably
+        String startDate = page.getByTestId("start-date-input").inputValue();
+        page.getByTestId("end-date-input").evaluate("el => el.removeAttribute('readonly')");
+        page.getByTestId("end-date-input").fill(startDate);
+        page.getByTestId("end-date-input").press("Enter");
+
         page.getByTestId("start-time-input").fill("14:00");
         page.getByTestId("end-time-input").fill("09:00");
         page.waitForTimeout(1500);
