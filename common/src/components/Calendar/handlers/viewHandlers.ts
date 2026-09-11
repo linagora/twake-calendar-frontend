@@ -138,15 +138,21 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
   }
 
   const handleDayHeaderContent = (arg: DayHeaderContentArg): JSX.Element => {
-    const m = moment.tz(arg.date, timezone)
-    const date = m.date()
-    const weekDay = m
-      .toDate()
-      .toLocaleDateString(t('locale'), {
-        weekday: 'short',
-        timeZone: timezone
-      })
-      .toUpperCase()
+    const isMonthView = arg.view.type === CALENDAR_VIEWS.dayGridMonth
+    const weekDay = (
+      isMonthView
+        ? arg.date.toLocaleDateString(t('locale'), {
+            weekday: 'short',
+            timeZone: 'UTC'
+          })
+        : moment
+            .tz(arg.date, timezone)
+            .toDate()
+            .toLocaleDateString(t('locale'), {
+              weekday: 'short',
+              timeZone: timezone
+            })
+    ).toUpperCase()
 
     return React.createElement(
       'div',
@@ -154,14 +160,14 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
         className: `fc-daygrid-day-top ${isTablet || isMobile ? 'fc-daygrid-day-top--mobile' : ''}`
       },
       React.createElement('small', null, weekDay),
-      arg.view.type !== CALENDAR_VIEWS.dayGridMonth
+      !isMonthView
         ? React.createElement(
             'span',
             {
               className: `fc-daygrid-day-number ${arg.isToday ? 'current-date' : ''}`,
               onClick: (e: React.MouseEvent) => handleDayNumberClick(e, arg)
             },
-            date
+            moment.tz(arg.date, timezone).date()
           )
         : null
     )
