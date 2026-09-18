@@ -5,6 +5,7 @@ import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
 import { exchangeToken, fetchIntentJSON } from '../TdriveDao'
 import { useTdriveUserContext } from './useTdriveUserContext'
+import { useEmbedding } from '../../../contexts/EmbeddingContext'
 
 interface UseTdrivePickerReturn {
   isOpen: boolean
@@ -58,6 +59,7 @@ interface StartTdrivePickerOptions {
   readyCallbackRef: React.MutableRefObject<(() => void) | null>
   cancellationRef: { cancelled: boolean }
   intentRef: React.MutableRefObject<{ stop?: () => void } | null>
+  fetchJSON: ((data: object) => Promise<object>) | null
   t: (key: string) => string
 }
 
@@ -69,6 +71,37 @@ interface CozyIntent {
   stop?: () => void
 }
 
+/**
+ * The picker container is rendered inside the dialog, which only mounts after
+ * `isOpen` flips to true and React commits the render. Wait for that commit
+ * before reading the ref, instead of checking it synchronously (which would run
+ * before the dialog has mounted when the bridge `fetchJSON` path skips the
+ * `exchangeToken` await).
+ */
+const waitForContainer = (
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  timeoutMs = 5000
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (containerRef.current) {
+      resolve()
+      return
+    }
+    const start = Date.now()
+    const tick = (): void => {
+      if (containerRef.current) {
+        resolve()
+        return
+      }
+      if (Date.now() - start >= timeoutMs) {
+        reject(new Error('Picker container is not mounted'))
+        return
+      }
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+
 async function startTdrivePicker({
   tdriveBaseUrl,
   idToken,
@@ -76,23 +109,35 @@ async function startTdrivePicker({
   readyCallbackRef,
   cancellationRef,
   intentRef,
+  fetchJSON,
   t
 }: StartTdrivePickerOptions): Promise<{
   files: TdriveFile[]
   intent: { stop?: () => void }
 }> {
-  const tokenResponse = await exchangeToken(tdriveBaseUrl, idToken)
+  let intents
 
   if (cancellationRef.cancelled) {
     return { files: [], intent: {} }
   }
 
-  const intents = new Intents({
-    fetch: fetchIntentJSON({
-      tdriveBaseUrl,
-      accessToken: tokenResponse.access_token
+  if (fetchJSON) {
+    intents = new Intents({
+      fetch: async (method, path, body) => {
+        const res = await fetchJSON({ method, path, body })
+        return res
+      }
     })
-  })
+  } else {
+    const tokenResponse = await exchangeToken(tdriveBaseUrl, idToken)
+
+    intents = new Intents({
+      fetch: fetchIntentJSON({
+        tdriveBaseUrl,
+        accessToken: tokenResponse.access_token
+      })
+    })
+  }
 
   const intent = intents.create(
     'PICK',
@@ -109,13 +154,21 @@ async function startTdrivePicker({
 
   intentRef.current = intent
 
-  if (!containerRef.current) {
+  await waitForContainer(containerRef)
+
+  if (cancellationRef.cancelled) {
+    return { files: [], intent }
+  }
+
+  const container = containerRef.current
+  if (!container) {
     throw new Error('Picker container is not mounted')
   }
 
-  const result = await intent.start(containerRef.current, {
+  const result = await intent.start(container, {
     onReady: () => {
       console.info('Tdrive picker iframe loaded')
+      readyCallbackRef.current?.()
     },
     onReadyToUse: () => {
       readyCallbackRef.current?.()
@@ -138,6 +191,8 @@ export function useTdrivePicker({
   const [openPickerError, setOpenPickerError] = useState<string | null>(null)
 
   const { tdriveBaseUrl } = useTdriveUserContext()
+  const { fetchJSON } = useEmbedding()
+  console.log('🟢', fetchJSON)
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -178,6 +233,7 @@ export function useTdrivePicker({
         readyCallbackRef,
         cancellationRef,
         intentRef,
+        fetchJSON,
         t
       })
 

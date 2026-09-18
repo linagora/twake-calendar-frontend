@@ -3,14 +3,20 @@
  */
 
 import React from 'react'
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 
 const mockIsInIframe = jest.fn()
+const mockRequestParentOrigin = jest.fn()
+const mockSetupBridge = jest.fn()
+const mockFetchJSON = jest.fn()
 
 jest.mock('cozy-external-bridge', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(() => ({
-    isInIframe: mockIsInIframe
+    isInIframe: mockIsInIframe,
+    requestParentOrigin: mockRequestParentOrigin,
+    setupBridge: mockSetupBridge,
+    fetchJSON: mockFetchJSON
   }))
 }))
 
@@ -27,6 +33,11 @@ describe('useIsTdrivePickerAvailable', () => {
 
   beforeEach(() => {
     mockIsInIframe.mockReset()
+    mockRequestParentOrigin.mockReset()
+    mockSetupBridge.mockReset()
+    mockFetchJSON.mockReset()
+    mockRequestParentOrigin.mockResolvedValue('https://container.example.com')
+    mockSetupBridge.mockReturnValue(true)
     window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     window.TDRIVE_ENABLED = true
   })
@@ -36,11 +47,12 @@ describe('useIsTdrivePickerAvailable', () => {
     window.TDRIVE_ENABLED = originalEnabled
   })
 
-  it('should be available when configured and served as a Cozy app', () => {
+  it('should be available when configured and served as a Cozy app', async () => {
     mockIsInIframe.mockReturnValue(true)
     const { result } = renderHook(() => useIsTdrivePickerAvailable(), {
       wrapper
     })
+    await waitFor(() => expect(mockSetupBridge).toHaveBeenCalled())
     expect(result.current).toBe(true)
   })
 
@@ -52,21 +64,23 @@ describe('useIsTdrivePickerAvailable', () => {
     expect(result.current).toBe(false)
   })
 
-  it('should not be available when TDRIVE_ENABLED is false', () => {
+  it('should not be available when TDRIVE_ENABLED is false', async () => {
     mockIsInIframe.mockReturnValue(true)
     window.TDRIVE_ENABLED = false
     const { result } = renderHook(() => useIsTdrivePickerAvailable(), {
       wrapper
     })
+    await waitFor(() => expect(mockSetupBridge).toHaveBeenCalled())
     expect(result.current).toBe(false)
   })
 
-  it('should not be available when TDRIVE_INTENT_URL is missing', () => {
+  it('should not be available when TDRIVE_INTENT_URL is missing', async () => {
     mockIsInIframe.mockReturnValue(true)
     window.TDRIVE_INTENT_URL = ''
     const { result } = renderHook(() => useIsTdrivePickerAvailable(), {
       wrapper
     })
+    await waitFor(() => expect(mockSetupBridge).toHaveBeenCalled())
     expect(result.current).toBe(false)
   })
 })
