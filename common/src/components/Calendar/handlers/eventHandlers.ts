@@ -134,6 +134,26 @@ export const createEventHandlers = (
     )
   }
 
+  /**
+   * The grid is filled by an expanded REPORT, which returns occurrences without
+   * the RRULE of their master: a recurring instance therefore reaches the store
+   * with no repetition, and that gap justifies fetching the whole event again.
+   */
+  const lacksSeriesRepetition = (event: CalendarEvent): boolean =>
+    event.uid.includes('/') && event.repetition === undefined
+
+  /**
+   * That same REPORT normalises every time to UTC, and states the zone the event
+   * was written in aside, as a VTIMEZONE. Should it not state it at all, reading
+   * the event back is the only way to reopen it in the zone it was created with,
+   * rather than in the one of the browser.
+   */
+  const lacksOriginalTimezone = (event: CalendarEvent): boolean =>
+    !event.timezone
+
+  const needsFullRead = (event: CalendarEvent): boolean =>
+    lacksSeriesRepetition(event) || lacksOriginalTimezone(event)
+
   const dispatchGetEventIfPresent = (
     dispatch: AppDispatch,
     calendars: Record<string, Calendar>,
@@ -142,7 +162,7 @@ export const createEventHandlers = (
   ): void => {
     if (!calId || !uid) return
     const event = calendars[calId]?.events?.[uid]
-    if (event) {
+    if (event && needsFullRead(event)) {
       void dispatch(getEvent(event))
     }
   }

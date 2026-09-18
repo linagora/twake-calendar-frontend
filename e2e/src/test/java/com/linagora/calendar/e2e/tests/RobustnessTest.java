@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,8 +20,12 @@ import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
+import com.linagora.calendar.e2e.pages.EventPreviewPopover;
 import com.linagora.calendar.e2e.pages.LoginPage;
+import com.linagora.calendar.e2e.pages.RecurrenceSection;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Request;
+import com.microsoft.playwright.Response;
 import com.microsoft.playwright.Route;
 
 /**
@@ -225,5 +232,72 @@ class RobustnessTest extends TwakeCalendarE2ETest {
             .as("nor leave a handler behind for later")
             .isZero();
         assertThat(preview).contains("plain");
+    }
+
+    @Test
+    @DisplayName("ROBUST-19 Opening a simple event asks the server for nothing more")
+    void openingASimpleEventAsksForNothingMore(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = unique("Standalone");
+        calendar.createEvent(title);
+        reload(calendar, title);
+        List<Request> eventReads = recordEventReads(page);
+
+        String preview = calendar.openEvent(title).text();
+        page.waitForTimeout(2000);
+
+        assertThat(preview).contains(title);
+        assertThat(eventReads)
+            .as("the grid already holds every field the preview of a simple event shows")
+            .isEmpty();
+    }
+
+    @Test
+    @DisplayName("ROBUST-20 Opening an occurrence reads its rule once, as jCal")
+    void openingAnOccurrenceReadsItsRuleOnce(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = unique("Series");
+        EventFormModal form = calendar.createEvent().title(title).expand()
+            .startTime("09:00").endTime("10:00");
+        form.repeat().frequency(RecurrenceSection.WEEKLY).every(2).endsNever();
+        form.save();
+        // the expanded occurrences the grid is rebuilt from carry no RRULE: the rule the preview
+        // states can only come from reading the event itself
+        reload(calendar, title);
+        List<Request> eventReads = recordEventReads(page);
+
+        EventPreviewPopover preview = calendar.openEvent(title);
+
+        Awaitility.await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
+            assertThat(preview.text().toLowerCase())
+                .as("the rule is missing from the grid, so it was read back from the server")
+                .contains("2")
+                .contains("week"));
+        assertThat(eventReads)
+            .as("one read is enough to learn a rule")
+            .hasSize(1);
+        Response response = eventReads.get(0).response();
+        assertThat(response).isNotNull();
+        assertThat(response.headers().get("content-type"))
+            .as("asking for jCal spares the client a raw ICS to parse")
+            .contains("application/calendar+json");
+    }
+
+    private void reload(CalendarPage calendar, String title) {
+        calendar.eventCard(title).first().waitFor();
+        calendar.page().reload();
+        calendar.waitUntilLoaded();
+        calendar.eventCard(title).first().waitFor();
+    }
+
+    /** Every read of a single event object, the request opening an event used to always fire. */
+    private List<Request> recordEventReads(Page page) {
+        List<Request> reads = Collections.synchronizedList(new ArrayList<>());
+        page.onRequest(request -> {
+            if ("GET".equals(request.method()) && request.url().contains(".ics")) {
+                reads.add(request);
+            }
+        });
+        return reads;
     }
 }

@@ -7,6 +7,26 @@ import { parseCalendarEvent } from '@common/features/Events/utils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { defaultColors } from '@common/utils/defaultColors'
+import { resolveTimezoneId } from '@common/utils/timezone'
+
+/**
+ * An expanded REPORT normalises every occurrence to UTC and leaves the zone the
+ * event was written in to a sibling VTIMEZONE. Reading that component back is
+ * the only way the grid learns an event created in Tokyo is a Tokyo event, and
+ * not one of the browser.
+ */
+function bundledTimezone(components: unknown[]): string | undefined {
+  const vtimezone = components.find(
+    component =>
+      Array.isArray(component) &&
+      typeof component[0] === 'string' &&
+      component[0].toLowerCase() === 'vtimezone'
+  ) as VCalComponent | undefined
+
+  const tzid = vtimezone?.[1].find(([key]) => key.toLowerCase() === 'tzid')?.[3]
+
+  return typeof tzid === 'string' ? resolveTimezoneId(tzid) : undefined
+}
 
 export function extractCalendarEvents(
   item: CalDavItem,
@@ -30,6 +50,8 @@ export function extractCalendarEvents(
   if (!eventURL) {
     return []
   }
+
+  const timezoneOfTheCalendarObject = bundledTimezone(vevents)
 
   return vevents
     .map(vevent => {
@@ -58,7 +80,8 @@ export function extractCalendarEvents(
         color: options?.color ?? defaultColors[0],
         calendar: options.cal,
         eventURL,
-        valarms
+        valarms,
+        timezoneOfTheCalendarObject
       })
     })
     .filter(Boolean) as CalendarEvent[]

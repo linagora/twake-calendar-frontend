@@ -4,6 +4,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { jCalFromIcs } from '../../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 
@@ -387,18 +388,20 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
     jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
-        [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'BEGIN:VEVENT',
-          `UID:${baseUID}`,
-          'SUMMARY:Recurring Meeting',
-          'DTSTART:20250115T100000Z',
-          'DTEND:20250115T110000Z',
-          'RRULE:FREQ=DAILY;INTERVAL=1',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n')
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Recurring Meeting',
+            'DTSTART:20250115T100000Z',
+            'DTEND:20250115T110000Z',
+            'RRULE:FREQ=DAILY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       )
     jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {
@@ -539,18 +542,20 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
     jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
-        [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'BEGIN:VEVENT',
-          `UID:${baseUID}`,
-          'SUMMARY:Recurring Meeting',
-          'DTSTART:20250115T100000Z',
-          'DTEND:20250115T110000Z',
-          'RRULE:FREQ=WEEKLY;INTERVAL=1',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n')
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Recurring Meeting',
+            'DTSTART:20250115T100000Z',
+            'DTEND:20250115T110000Z',
+            'RRULE:FREQ=WEEKLY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       )
 
     const { store } = renderWithProviders(
@@ -689,18 +694,20 @@ describe('EventUpdateModal Recurring to Non-Recurring Conversion', () => {
     jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
-        [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'BEGIN:VEVENT',
-          `UID:${baseUID}`,
-          'SUMMARY:Recurring Meeting',
-          'DTSTART:20250115T100000Z',
-          'DTEND:20250115T110000Z',
-          'RRULE:FREQ=MONTHLY;INTERVAL=1',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n')
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `UID:${baseUID}`,
+            'SUMMARY:Recurring Meeting',
+            'DTSTART:20250115T100000Z',
+            'DTEND:20250115T110000Z',
+            'RRULE:FREQ=MONTHLY;INTERVAL=1',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       )
     jest.spyOn(CalendarDAO, 'fetchCalendar').mockResolvedValue({
       _embedded: {

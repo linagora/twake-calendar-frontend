@@ -32,9 +32,15 @@ export async function reportEvent(
   return response.json()
 }
 
-export async function fetchEvent(event: CalendarEvent): Promise<string> {
-  const response = await api.get(`dav${event.URL}`)
-  return response.text()
+/**
+ * Fetches an event as jCal: the DAV proxy serves `text/calendar` by default, so
+ * without this Accept header the client has to parse a raw ICS payload itself.
+ */
+export async function fetchEvent(event: CalendarEvent): Promise<VCalComponent> {
+  const response = await api.get(`dav${event.URL}`, {
+    headers: { Accept: 'application/calendar+json' }
+  })
+  return response.json<VCalComponent>()
 }
 
 export async function fetchEventIcs(event: CalendarEvent): Promise<string> {

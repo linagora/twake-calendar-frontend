@@ -357,19 +357,29 @@ export function parseCalendarEvent({
   color,
   calendar,
   eventURL,
-  valarms
+  valarms,
+  timezoneOfTheCalendarObject
 }: {
   data: VObjectProperty[]
   color: Record<string, string>
   calendar: Calendar
   eventURL: string
   valarms?: VCalComponent[]
+  timezoneOfTheCalendarObject?: string
 }): CalendarEvent {
   const event: Partial<CalendarEvent> = { color, attendee: [] }
   const context: PropertyContext = {}
 
   for (const prop of data) {
     parseEventProperty(prop, event, context)
+  }
+
+  // A zone stated on DTSTART itself is the one of that very occurrence, and
+  // wins over the one of the calendar object it belongs to. Settling it here,
+  // once every property has spoken, is what lets the dates and the recurrence
+  // rule below both be built in the zone the event was written in.
+  if (!event.timezone) {
+    event.timezone = timezoneOfTheCalendarObject
   }
 
   processEventUid(event, context.recurrenceId)

@@ -13,6 +13,7 @@ import { jest } from '@jest/globals'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
+import { jCalFromIcs } from '../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 
 describe('CalendarApp integration', () => {
@@ -483,17 +484,19 @@ describe('CalendarApp integration', () => {
       jest
         .spyOn(EventDao, 'fetchEvent')
         .mockImplementation(async event =>
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            `UID:${event.uid}`,
-            `SUMMARY:${event.title || 'Event'}`,
-            'DTSTART:20251114T103100Z',
-            'DTEND:20251114T113100Z',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
+          jCalFromIcs(
+            [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'BEGIN:VEVENT',
+              `UID:${event.uid}`,
+              `SUMMARY:${event.title || 'Event'}`,
+              'DTSTART:20251114T103100Z',
+              'DTEND:20251114T113100Z',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n')
+          )
         )
 
       const eventHandlers = createEventHandlers({
@@ -574,17 +577,19 @@ describe('CalendarApp integration', () => {
       jest
         .spyOn(EventDao, 'fetchEvent')
         .mockImplementation(async event =>
-          [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            `UID:${event.uid}`,
-            `SUMMARY:${event.title || 'Event'}`,
-            'DTSTART:20251114T103100Z',
-            'DTEND:20251114T113100Z',
-            'END:VEVENT',
-            'END:VCALENDAR'
-          ].join('\r\n')
+          jCalFromIcs(
+            [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'BEGIN:VEVENT',
+              `UID:${event.uid}`,
+              `SUMMARY:${event.title || 'Event'}`,
+              'DTSTART:20251114T103100Z',
+              'DTEND:20251114T113100Z',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n')
+          )
         )
 
       const eventHandlers = createEventHandlers({

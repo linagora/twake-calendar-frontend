@@ -11,6 +11,7 @@ import * as EventDao from '@common/features/Events/EventDao'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
+import { jCalFromIcs } from '../../utils/jCalFromIcs'
 import { userAttendee } from '@common/features/User/models/attendee'
 
 jest.mock('@common/components/Event/utils/eventUtils', () => {
@@ -432,17 +433,23 @@ describe('Delete Recurring Event Instance', () => {
   })
 
   it('calls deleteEvent when deleting all instances', async () => {
-    jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
-    BEGIN:VCALENDAR
-    VERSION:2.0
-    BEGIN:VEVENT
-    UID:recurring-base
-    SUMMARY:Recurring Event Instance
-    DTSTART:20250315T100000Z
-    DTEND:20250315T110000Z
-    END:VEVENT
-    END:VCALENDAR
-    `)
+    jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            'UID:recurring-base',
+            'SUMMARY:Recurring Event Instance',
+            'DTSTART:20250315T100000Z',
+            'DTEND:20250315T110000Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+      )
 
     const spy = jest
       .spyOn(eventThunks, 'deleteEvent')
@@ -676,17 +683,19 @@ describe('Edit Recurring Event in Full Display', () => {
     jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
-        [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'BEGIN:VEVENT',
-          'UID:recurring-base',
-          'SUMMARY:Recurring Event Instance',
-          'DTSTART:20250315T100000Z',
-          'DTEND:20250315T110000Z',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n')
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            'UID:recurring-base',
+            'SUMMARY:Recurring Event Instance',
+            'DTSTART:20250315T100000Z',
+            'DTEND:20250315T110000Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       )
     const spy = jest
       .spyOn(eventThunks, 'updateEventInstance')
@@ -729,18 +738,24 @@ describe('Edit Recurring Event in Full Display', () => {
   })
 
   it("calls updateSeries when saving all instances with typeOfAction='all'", async () => {
-    const getEventSpy = jest.spyOn(EventDao, 'fetchEvent').mockResolvedValue(`
-    BEGIN:VCALENDAR
-    VERSION:2.0
-    BEGIN:VEVENT
-    UID:recurring-base
-    RECURRENCE-ID:20250315T100000Z
-    SUMMARY:Recurring Event Instance
-    DTSTART:20250315T100000Z
-    DTEND:20250315T110000Z
-    END:VEVENT
-    END:VCALENDAR
-    `)
+    const getEventSpy = jest
+      .spyOn(EventDao, 'fetchEvent')
+      .mockResolvedValue(
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            'UID:recurring-base',
+            'RECURRENCE-ID:20250315T100000Z',
+            'SUMMARY:Recurring Event Instance',
+            'DTSTART:20250315T100000Z',
+            'DTEND:20250315T110000Z',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
+      )
 
     const spy = jest
       .spyOn(eventThunks, 'updateSeries')
@@ -816,20 +831,22 @@ describe('Edit Recurring Event in Full Display', () => {
     const getEventSpy = jest
       .spyOn(EventDao, 'fetchEvent')
       .mockResolvedValue(
-        [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'PRODID:-//Test//EN',
-          'BEGIN:VEVENT',
-          'UID:recurring-base',
-          'SUMMARY:Master Event Title',
-          'DESCRIPTION:Master Description',
-          'DTSTART:20250315T100000Z',
-          'DTEND:20250315T110000Z',
-          'RRULE:FREQ=WEEKLY;COUNT=4',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n')
+        jCalFromIcs(
+          [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Test//EN',
+            'BEGIN:VEVENT',
+            'UID:recurring-base',
+            'SUMMARY:Master Event Title',
+            'DESCRIPTION:Master Description',
+            'DTSTART:20250315T100000Z',
+            'DTEND:20250315T110000Z',
+            'RRULE:FREQ=WEEKLY;COUNT=4',
+            'END:VEVENT',
+            'END:VCALENDAR'
+          ].join('\r\n')
+        )
       )
 
     await act(async () =>

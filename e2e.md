@@ -688,7 +688,7 @@ Four of the forty nine, each with what stands in the way.
 - [ ] `RESP-17` Guest lists stay usable on a small screen
 - [x] `RESP-18` The recurrence form stays usable on a small screen
 
-## ROBUST — Robustness and large volumes (18)
+## ROBUST — Robustness and large volumes (20)
 
 - [x] `ROBUST-01` A backend 500 shows the error banner rather than a blank screen
 - [ ] `ROBUST-02` A backend 401 restarts the SSO flow
@@ -708,6 +708,8 @@ Four of the forty nine, each with what stands in the way.
 - [ ] `ROBUST-16` Closing the modal while saving does not create a duplicate
 - [x] `ROBUST-17` A title with special characters and emojis is returned unchanged
 - [x] `ROBUST-18` A description containing HTML is displayed escaped, never interpreted
+- [x] `ROBUST-19` Opening a simple event fires no extra request ([#1364](https://github.com/linagora/twake-calendar-frontend/issues/1364))
+- [x] `ROBUST-20` Opening an occurrence reads its rule once, as jCal ([#1364](https://github.com/linagora/twake-calendar-frontend/issues/1364))
 
 ## DRIVE — Attachments (10)
 
@@ -741,8 +743,8 @@ Four of the forty nine, each with what stands in the way.
 | --- | --- | --- |
 | Past incidents | 45 | 49 |
 | Essential | 189 | 194 |
-| Bonus | 233 | 286 |
-| **Total** | **467** | **529** |
+| Bonus | 235 | 288 |
+| **Total** | **469** | **531** |
 
 The essential batch is complete but for five scenarios. `SYNC-08` and `SYNC-09` need the
 websocket cut and restored under the application; `SEARCH-09`, `SET-07` and `SET-13` are simply
