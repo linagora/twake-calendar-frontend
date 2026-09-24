@@ -55,6 +55,24 @@ declare module '@linagora/twake-mui' {
   export const TwakeMuiThemeProvider: import('react').FC<
     import('@mui/material/styles').ThemeProviderProps
   >
+
+  export interface ChipProps extends Omit<
+    import('@mui/material').ChipProps,
+    'color'
+  > {
+    color?:
+      | 'default'
+      | 'primary'
+      | 'secondary'
+      | 'error'
+      | 'info'
+      | 'success'
+      | 'warning'
+      | (string & {})
+    square?: boolean
+  }
+
+  export const Chip: import('react').FC<ChipProps>
 }
 
 declare const process: {
