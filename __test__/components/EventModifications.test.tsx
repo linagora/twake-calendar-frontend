@@ -94,8 +94,11 @@ describe('CalendarApp integration', () => {
     jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
 
     renderCalendar()
-    const calendarRef: React.RefObject<CalendarApi | null> = (window as any)
-      .__calendarRef
+    const calendarRef: React.RefObject<CalendarApi | null> | undefined =
+      window.__calendarRef
+    if (!calendarRef) {
+      throw new Error('Expected the calendar reference to be initialized')
+    }
 
     const calendarApi = calendarRef.current
 
