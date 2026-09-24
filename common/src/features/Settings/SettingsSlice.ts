@@ -18,6 +18,8 @@ export interface SettingsState {
   language: string
   timeZone: string | null // Allow null to represent browser default
   isBrowserDefaultTimeZone: boolean
+  // set when the user picks a zone while a user data fetch is in flight
+  timeZonePickedDuringUserDataFetch: boolean
   hideDeclinedEvents: boolean | null
   displayWeekNumbers: boolean
   view: 'calendar' | 'settings' | 'search'
@@ -33,12 +35,22 @@ const savedTimeZone = localStorage.getItem('timeZone')
 const defaultTimeZone =
   savedTimeZone === 'null' || !savedTimeZone ? null : savedTimeZone
 
+const applyServerTimeZone = (
+  state: SettingsState,
+  serverTimeZone: string | undefined
+) => {
+  state.timeZone = serverTimeZone || browserDefaultTimeZone
+  state.isBrowserDefaultTimeZone = !serverTimeZone
+  localStorage.setItem('timeZone', state.timeZone)
+}
+
 const SettingsSlice = createAppSlice({
   name: 'settings',
   initialState: {
     language: defaultLang,
     timeZone: defaultTimeZone,
     isBrowserDefaultTimeZone: defaultTimeZone === null,
+    timeZonePickedDuringUserDataFetch: false,
     hideDeclinedEvents: null,
     displayWeekNumbers: true,
     view: 'calendar',
@@ -52,11 +64,13 @@ const SettingsSlice = createAppSlice({
     }),
     setTimeZone: create.reducer((state, action: PayloadAction<string>) => {
       state.timeZone = action.payload
+      state.timeZonePickedDuringUserDataFetch = true
       localStorage.setItem('timeZone', action.payload)
     }),
     setIsBrowserDefaultTimeZone: create.reducer(
       (state, action: PayloadAction<boolean>) => {
         state.isBrowserDefaultTimeZone = action.payload
+        state.timeZonePickedDuringUserDataFetch = true
       }
     ),
     setHideDeclinedEvents: create.reducer(
@@ -86,6 +100,9 @@ const SettingsSlice = createAppSlice({
     )
   }),
   extraReducers: builder => {
+    builder.addCase(getOpenPaasUserData.pending, state => {
+      state.timeZonePickedDuringUserDataFetch = false
+    })
     builder.addCase(getOpenPaasUserData.fulfilled, (state, action) => {
       const coreModule = action.payload.configurations?.modules?.find(
         (module: ModuleConfiguration) => module.name === 'core'
@@ -98,18 +115,10 @@ const SettingsSlice = createAppSlice({
         | undefined
       const timeZone = datetimeValue?.timeZone
 
-      // a zone the user picked in this session must not be clobbered by a
-      // boot-time server fetch that was still in flight when they picked it
-      if (state.timeZone === null) {
-        if (timeZone) {
-          state.timeZone = timeZone
-          state.isBrowserDefaultTimeZone = false
-          localStorage.setItem('timeZone', timeZone)
-        } else {
-          state.timeZone = browserDefaultTimeZone
-          state.isBrowserDefaultTimeZone = true
-          localStorage.setItem('timeZone', browserDefaultTimeZone)
-        }
+      // a zone the user picked while this fetch was in flight must not be
+      // clobbered by the (now stale) server value
+      if (!state.timeZonePickedDuringUserDataFetch) {
+        applyServerTimeZone(state, timeZone)
       }
       const esnCalendarModule = action.payload.configurations?.modules?.find(
         (module: ModuleConfiguration) => module.name === 'linagora.esn.calendar'

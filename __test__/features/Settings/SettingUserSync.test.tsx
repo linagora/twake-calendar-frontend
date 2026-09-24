@@ -300,6 +300,47 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
     })
   })
 
+  describe('User pick while the user data fetch is in flight', () => {
+    const backendResponseParis = {
+      firstname: 'John',
+      lastname: 'Doe',
+      id: '123',
+      preferredEmail: 'john@example.com',
+      configurations: {
+        modules: [
+          {
+            name: 'core',
+            configurations: [
+              { name: 'datetime', value: { timeZone: 'Europe/Paris' } }
+            ]
+          }
+        ]
+      }
+    }
+
+    test('Keeps the zone picked after the fetch started', () => {
+      store.dispatch(getOpenPaasUserData.pending('req', undefined))
+      store.dispatch(setTimeZone('Asia/Tokyo'))
+      store.dispatch(
+        getOpenPaasUserData.fulfilled(backendResponseParis, 'req', undefined)
+      )
+
+      expect(store.getState().settings.timeZone).toBe('Asia/Tokyo')
+      expect(localStorage.getItem('timeZone')).toBe('Asia/Tokyo')
+    })
+
+    test('Applies the server zone when the pick predates the fetch', () => {
+      store.dispatch(setTimeZone('Asia/Tokyo'))
+      store.dispatch(getOpenPaasUserData.pending('req', undefined))
+      store.dispatch(
+        getOpenPaasUserData.fulfilled(backendResponseParis, 'req', undefined)
+      )
+
+      expect(store.getState().settings.timeZone).toBe('Europe/Paris')
+      expect(localStorage.getItem('timeZone')).toBe('Europe/Paris')
+    })
+  })
+
   test('Settings state ALWAYS has a concrete value (never null)', () => {
     // Test 1: Browser default scenario
     store.dispatch(setIsBrowserDefaultTimeZone(true))
