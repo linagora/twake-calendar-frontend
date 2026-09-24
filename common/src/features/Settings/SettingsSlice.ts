@@ -98,14 +98,18 @@ const SettingsSlice = createAppSlice({
         | undefined
       const timeZone = datetimeValue?.timeZone
 
-      if (timeZone) {
-        state.timeZone = timeZone
-        state.isBrowserDefaultTimeZone = false
-        localStorage.setItem('timeZone', timeZone)
-      } else {
-        state.timeZone = browserDefaultTimeZone
-        state.isBrowserDefaultTimeZone = true
-        localStorage.setItem('timeZone', browserDefaultTimeZone)
+      // a zone the user picked in this session must not be clobbered by a
+      // boot-time server fetch that was still in flight when they picked it
+      if (state.timeZone === null) {
+        if (timeZone) {
+          state.timeZone = timeZone
+          state.isBrowserDefaultTimeZone = false
+          localStorage.setItem('timeZone', timeZone)
+        } else {
+          state.timeZone = browserDefaultTimeZone
+          state.isBrowserDefaultTimeZone = true
+          localStorage.setItem('timeZone', browserDefaultTimeZone)
+        }
       }
       const esnCalendarModule = action.payload.configurations?.modules?.find(
         (module: ModuleConfiguration) => module.name === 'linagora.esn.calendar'
