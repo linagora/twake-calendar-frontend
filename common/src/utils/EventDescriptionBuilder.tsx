@@ -1,5 +1,7 @@
 import { Attachment } from '@common/types/Attachment'
 import { sanitizeHtml } from './sanitizeUtils'
+import linkifyHtml from 'linkify-html'
+import { linkifyOptions } from './urlUtils'
 
 // We use a new separator for new events, but we keep the legacy separator to be able to
 // strip it from older event descriptions that were created before the change.
@@ -67,24 +69,7 @@ export class EventDescriptionBuilder {
   public linkify(): this {
     if (!this.text) return this
 
-    const urlRegex = /(https?:\/\/[^\s<]+)/g
-    if (!urlRegex.test(this.text)) return this
-
-    let insideAnchor = false
-
-    this.text = this.text.replace(
-      /(<[^>]+>)|(https?:\/\/[^\s<"']+)/g,
-      (match: string, tag: string | undefined, url: string | undefined) => {
-        if (tag) {
-          if (/^<a[\s>]/i.test(tag)) insideAnchor = true
-          else if (/^<\/a>/i.test(tag)) insideAnchor = false
-          return tag
-        }
-        return url && !insideAnchor
-          ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
-          : match
-      }
-    )
+    this.text = linkifyHtml(this.text, linkifyOptions)
 
     return this
   }

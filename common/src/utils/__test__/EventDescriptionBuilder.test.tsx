@@ -226,5 +226,27 @@ describe('EventDescriptionBuilder', () => {
         'He said: "Go to <a href="https://example.com" target="_blank" rel="noopener noreferrer">https://example.com</a>".'
       )
     })
+
+    it('should convert bare domains in SAFE_BARE_TLDS', () => {
+      const text = 'Go to figma.com now'
+      const builder = new EventDescriptionBuilder(text).linkify()
+      expect(builder.buildHtml()).toBe(
+        'Go to <a href="https://figma.com" target="_blank" rel="noopener noreferrer">figma.com</a> now'
+      )
+    })
+
+    it('should NOT convert unknown or excluded bare domains like .pdf', () => {
+      const text = 'Look at document.pdf'
+      const builder = new EventDescriptionBuilder(text).linkify()
+      expect(builder.buildHtml()).toBe('Look at document.pdf')
+    })
+
+    it('should enforce https for bare www domains', () => {
+      const text = 'Visit www.example.com today'
+      const builder = new EventDescriptionBuilder(text).linkify()
+      expect(builder.buildHtml()).toBe(
+        'Visit <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">www.example.com</a> today'
+      )
+    })
   })
 })

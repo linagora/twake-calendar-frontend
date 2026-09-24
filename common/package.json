@@ -44,7 +44,9 @@
     "redux-first-history": "^5.2.0",
     "twake-i18n": "^0.3.0",
     "dompurify": "^3.4.13",
-    "html-react-parser": "^6.1.7"
+    "html-react-parser": "^6.1.7",
+    "linkify-html": "^4.3.3",
+    "linkifyjs": "^4.3.3"
   },
   "devDependencies": {
     "@sentry/webpack-plugin": "^5.4.0"
