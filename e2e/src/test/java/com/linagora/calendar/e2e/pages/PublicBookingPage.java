@@ -53,7 +53,17 @@ public class PublicBookingPage {
     }
 
     public PublicBookingPage selectDay(LocalDate day) {
-        java.time.YearMonth wanted = java.time.YearMonth.from(day);
+        navigateToMonth(java.time.YearMonth.from(day));
+        Locator cell = dayCell(day);
+        if (Boolean.TRUE.equals(cell.isDisabled())) {
+            throw new AssertionError(day + " is not open for booking. The days on offer that "
+                + "month are " + bookableDays());
+        }
+        cell.click();
+        return this;
+    }
+
+    private void navigateToMonth(java.time.YearMonth wanted) {
         // the picker opens on the current month: walk forward until the day is on screen,
         // rather than assuming a target within the next few days never crosses a month
         for (int guard = 0; guard < 12 && !displayedMonth().equals(wanted); guard++) {
@@ -64,13 +74,6 @@ public class PublicBookingPage {
             throw new AssertionError("The picker never reached " + wanted
                 + ", it stopped on " + displayedMonth());
         }
-        Locator cell = dayCell(day);
-        if (Boolean.TRUE.equals(cell.isDisabled())) {
-            throw new AssertionError(day + " is not open for booking. The days on offer that "
-                + "month are " + bookableDays());
-        }
-        cell.click();
-        return this;
     }
 
     /** A day of the picker. They are grid cells, not buttons: the month grid is a real grid. */
@@ -89,6 +92,10 @@ public class PublicBookingPage {
     }
 
     public boolean isBookable(LocalDate day) {
+        // one month is on screen at a time: without this walk the lookup would read the
+        // same-numbered cell of the displayed month, which is disabled, for any day in
+        // another month
+        navigateToMonth(java.time.YearMonth.from(day));
         return !Boolean.TRUE.equals(dayCell(day).isDisabled());
     }
 
