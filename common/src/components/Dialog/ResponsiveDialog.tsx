@@ -24,6 +24,9 @@ import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import React, { ReactNode, useContext, useId, useMemo, useState } from 'react'
 import useDynamicPosition from './useDynamicPosition'
 
+/** Open expanded dialogs sharing the fullscreen-view body class. */
+let expandedDialogCount = 0
+
 /**
  * ResponsiveDialog - A reusable dialog component that can switch between normal and expanded modes
  *
@@ -336,12 +339,18 @@ function ResponsiveDialog({
   // The menubar hides its controls while an expanded dialog covers the page.
   // Release them through the cleanup: an expanded dialog is often closed by
   // unmounting it (save, close all), and would otherwise leave them hidden.
+  // Several expanded dialogs can be open at once: count them so that the
+  // first one to go does not release the controls from under the others.
   React.useEffect(() => {
     if (!open || !isExpanded) return
 
+    expandedDialogCount++
     document.body.classList.add('fullscreen-view')
     return (): void => {
-      document.body.classList.remove('fullscreen-view')
+      expandedDialogCount--
+      if (expandedDialogCount === 0) {
+        document.body.classList.remove('fullscreen-view')
+      }
     }
   }, [open, isExpanded])
 

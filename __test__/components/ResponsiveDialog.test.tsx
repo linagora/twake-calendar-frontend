@@ -470,5 +470,37 @@ describe('ResponsiveDialog', () => {
 
       expect(document.body).toHaveClass('fullscreen-view')
     })
+
+    it('is kept while another expanded dialog remains when one is unmounted', () => {
+      render(expandableDialog({ open: true, isExpanded: true }))
+      const { unmount } = render(
+        expandableDialog({ open: true, isExpanded: true })
+      )
+
+      unmount()
+
+      expect(document.body).toHaveClass('fullscreen-view')
+    })
+
+    it('is kept while another expanded dialog remains when one collapses', () => {
+      render(expandableDialog({ open: true, isExpanded: true }))
+      const { rerender } = render(
+        expandableDialog({ open: true, isExpanded: true })
+      )
+
+      rerender(expandableDialog({ open: true, isExpanded: false }))
+
+      expect(document.body).toHaveClass('fullscreen-view')
+    })
+
+    it('is released once every expanded dialog is gone', () => {
+      const first = render(expandableDialog({ open: true, isExpanded: true }))
+      const second = render(expandableDialog({ open: true, isExpanded: true }))
+
+      second.unmount()
+      first.rerender(expandableDialog({ open: true, isExpanded: false }))
+
+      expect(document.body).not.toHaveClass('fullscreen-view')
+    })
   })
 })
