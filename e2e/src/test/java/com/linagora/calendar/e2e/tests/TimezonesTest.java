@@ -70,7 +70,9 @@ class TimezonesTest extends TwakeCalendarE2ETest {
 
         var form = calendar.createEvent().expand();
 
-        assertThat(form.timezone()).contains("Asia/Tokyo");
+        // the settings write lands in the store asynchronously: a strict assert races it
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(form.timezone()).contains("Asia/Tokyo"));
     }
 
     @Test

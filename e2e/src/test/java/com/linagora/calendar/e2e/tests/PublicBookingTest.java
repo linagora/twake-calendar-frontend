@@ -88,7 +88,9 @@ class PublicBookingTest extends TwakeCalendarE2ETest {
         Page visitor = sessions.blankPage();
         PublicBookingPage booking = PublicBookingPage.open(visitor, publicId);
 
-        assertThat(booking.isBookable(day)).isTrue();
+        // availability loads asynchronously: a strict assert races the picker hydration
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(booking.isBookable(day)).isTrue());
         assertThat(booking.isBookable(day.plusDays(1)))
             .as("a day the schedule does not cover must not be selectable")
             .isFalse();
