@@ -331,6 +331,7 @@
     "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "displayWeekNumbers": "Show week number",
     "displayWeekNumbersUpdateError": "Failed to update show week number",
+    "showFeatureExplanations": "Show feature explanations",
     "sync.empty": "Sync settings coming soon",
     "calAndEvent": "Calendar and events",
     "showDeclinedEvent": "Show declined events",
@@ -488,6 +489,13 @@
   },
   "sidebar": {
     "displayMode": "Display mode"
+  },
+  "featureExplanation": {
+    "stopShowing": "Stop showing explanations",
+    "bookingLinks": {
+      "label": "What are booking links?",
+      "text": "A booking link lets anyone, even outside your organization, book a meeting with you without going back and forth by email. Create an appointment schedule with the hours you are available, then share its link: visitors pick one of your free slots, and the meeting lands straight in your calendar."
+    }
   },
   "tooltip": {
     "teamOrganizer": "%{displayName} organized this event for the team",

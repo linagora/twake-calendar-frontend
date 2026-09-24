@@ -498,6 +498,9 @@ Four of the forty nine, each with what stands in the way.
 - [ ] `BOOK-20` The schedule timezone is independent from the user's own
 - [x] `BOOK-21` Two schedules can coexist without overlapping
 - [x] `BOOK-22` A schedule with video conferencing generates a link on booking
+- [x] `BOOK-23` The Booking links section explains what a booking link is ([#1390](https://github.com/linagora/twake-calendar-frontend/issues/1390))
+- [x] `BOOK-24` "Stop showing explanations" removes them, across reloads and in the settings too
+- [x] `BOOK-25` Feature explanations can be switched off and on again from the settings
 
 ## PUB — Public application (21)
 

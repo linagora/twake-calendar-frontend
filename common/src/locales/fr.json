@@ -331,6 +331,7 @@
     "alarmEmailsUpdateError": "Échec de la mise à jour du mode de notification par e-mail",
     "displayWeekNumbers": "Afficher le numéro de la semaine",
     "displayWeekNumbersUpdateError": "Échec de la mise à jour de l'affichage du numéro de la semaine",
+    "showFeatureExplanations": "Afficher les explications des fonctionnalités",
     "sync.empty": "Paramètres de synchronisation à venir",
     "calAndEvent": "Calendrier et événements",
     "showDeclinedEvent": "Afficher les événements déclinés",
@@ -488,6 +489,13 @@
   },
   "sidebar": {
     "displayMode": "Mode d'affichage"
+  },
+  "featureExplanation": {
+    "stopShowing": "Ne plus afficher les explications",
+    "bookingLinks": {
+      "label": "À quoi servent les liens de réservation ?",
+      "text": "Un lien de réservation permet à n'importe qui, même en dehors de votre organisation, de prendre rendez-vous avec vous sans échanges d'e-mails. Créez un planning de rendez-vous avec vos heures de disponibilité, puis partagez son lien : vos visiteurs choisissent l'un de vos créneaux libres, et le rendez-vous arrive directement dans votre calendrier."
+    }
   },
   "tooltip": {
     "teamOrganizer": "%{displayName} a organisé cet événement pour l'équipe",

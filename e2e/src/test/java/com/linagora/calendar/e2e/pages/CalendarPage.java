@@ -232,9 +232,12 @@ public class CalendarPage {
         return this;
     }
 
-    /** The expandable sidebar sections: My calendars, Other calendars, Resources... */
+    /**
+     * The expandable sidebar sections: My calendars, Other calendars, Resources...
+     * Anchored on the header id, as a header may nest its own help button whose name repeats the section's.
+     */
     public Locator sidebarSection(String name) {
-        return page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName(name));
+        return page.locator("[id='" + name + "-header']");
     }
 
     /** The reverse of {@link #longDate}: reads a date back out of a form field. */
@@ -642,6 +645,26 @@ public class CalendarPage {
     public AppointmentModal createBookingLink() {
         page.getByLabel("Create appointment schedule").first().click();
         return new AppointmentModal(page).waitUntilOpen();
+    }
+
+    /** The help button next to the title of the Booking links section. */
+    public Locator bookingLinksExplanationButton() {
+        return page.getByLabel("What are booking links?");
+    }
+
+    /** Clicks the help button of the Booking links section and returns the explanation shown. */
+    public String explainBookingLinks() {
+        bookingLinksExplanationButton().first().click();
+        Locator explanation = page.locator(".MuiPopover-paper").last();
+        explanation.waitFor();
+        return explanation.innerText();
+    }
+
+    /** Opts out of feature explanations from within the explanation currently shown. */
+    public CalendarPage stopShowingExplanations() {
+        page.getByRole(AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Stop showing explanations")).click();
+        return this;
     }
 
     /** The sidebar entry of a booking link, which carries its name as accessible name. */

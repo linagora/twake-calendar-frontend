@@ -21,6 +21,7 @@ import com.linagora.calendar.e2e.pages.LoginPage;
 import com.linagora.calendar.e2e.pages.PublicBookingPage;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
+import com.microsoft.playwright.options.AriaRole;
 
 /**
  * Booking links seen from the side of the person who publishes one.
@@ -291,5 +292,52 @@ class BookingLinksTest extends TwakeCalendarE2ETest {
                 .as("the conference link belongs in the event, not only on the confirmation screen")
                 .containsIgnoringCase("meet");
         });
+    }
+
+    @Test
+    @DisplayName("BOOK-23 The Booking links section explains what a booking link is")
+    void theSectionExplainsWhatABookingLinkIs(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+
+        String explanation = calendar.explainBookingLinks();
+
+        assertThat(explanation).contains("book a meeting with you");
+        PlaywrightAssertions.assertThat(page.getByRole(AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Stop showing explanations"))).isVisible();
+    }
+
+    @Test
+    @DisplayName("BOOK-24 Stopping the explanations removes them for good")
+    void stoppingTheExplanationsRemovesThemForGood(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+
+        calendar.explainBookingLinks();
+        calendar.stopShowingExplanations();
+
+        PlaywrightAssertions.assertThat(calendar.bookingLinksExplanationButton()).hasCount(0);
+        page.reload();
+        calendar.waitUntilLoaded();
+        PlaywrightAssertions.assertThat(page.getByText("Booking links").first()).isVisible();
+        PlaywrightAssertions.assertThat(calendar.bookingLinksExplanationButton()).hasCount(0);
+        assertThat(calendar.openSettings().isChecked("Show feature explanations"))
+            .as("the settings must reflect the choice made from the explanation")
+            .isFalse();
+    }
+
+    @Test
+    @DisplayName("BOOK-25 Feature explanations are switched off and on again from the settings")
+    void featureExplanationsAreToggledFromTheSettings(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        PlaywrightAssertions.assertThat(calendar.bookingLinksExplanationButton().first()).isVisible();
+
+        calendar = calendar.openSettings()
+            .toggleInBrowser("Show feature explanations")
+            .backToCalendar();
+        PlaywrightAssertions.assertThat(calendar.bookingLinksExplanationButton()).hasCount(0);
+
+        calendar = calendar.openSettings()
+            .toggleInBrowser("Show feature explanations")
+            .backToCalendar();
+        PlaywrightAssertions.assertThat(calendar.bookingLinksExplanationButton().first()).isVisible();
     }
 }

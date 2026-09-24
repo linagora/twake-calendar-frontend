@@ -11,6 +11,10 @@ import { useI18n } from 'twake-i18n'
 import { updateUserConfigurations } from '@common/features/User/UserSlice'
 import { setDisplayWeekNumbers, setHideDeclinedEvents } from './SettingsSlice'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import {
+  setShowFeatureExplanations,
+  useShowFeatureExplanations
+} from '@common/utils/storage/featureExplanations'
 
 interface CalendarEventsSettingsProps {
   inputMinWidth: string | number
@@ -34,6 +38,8 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
   const displayWeekNumbers = useAppSelector(
     state => state.settings?.displayWeekNumbers
   )
+
+  const showFeatureExplanations = useShowFeatureExplanations()
 
   const latestHideDeclinedEventsRef = useRef<boolean | undefined>(undefined)
   const latestDisplayWeekNumbersRef = useRef<boolean | undefined>(undefined)
@@ -95,6 +101,24 @@ export const CalendarEventsSettings: React.FC<CalendarEventsSettingsProps> = ({
             />
           }
           label={t('settings.displayWeekNumbers')}
+          labelPlacement="start"
+          sx={{
+            minWidth: isMobile ? '100%' : 400,
+            justifyContent: 'space-between',
+            marginLeft: 0
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showFeatureExplanations}
+              onChange={() =>
+                setShowFeatureExplanations(!showFeatureExplanations)
+              }
+              aria-label={t('settings.showFeatureExplanations')}
+            />
+          }
+          label={t('settings.showFeatureExplanations')}
           labelPlacement="start"
           sx={{
             minWidth: isMobile ? '100%' : 400,

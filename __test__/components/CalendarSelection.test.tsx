@@ -130,6 +130,82 @@ describe('CalendarSelection', () => {
     expect(listBookingLinks).toHaveBeenCalled()
   })
 
+  it('explains booking links on click of the help button', async () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false }
+      }
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'featureExplanation.bookingLinks.label'
+      })
+    )
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('featureExplanation.bookingLinks.text')
+      ).toBeInTheDocument()
+    )
+  })
+
+  it('stops showing explanations once asked to', async () => {
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false }
+      }
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'featureExplanation.bookingLinks.label'
+      })
+    )
+    fireEvent.click(await screen.findByText('featureExplanation.stopShowing'))
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', {
+          name: 'featureExplanation.bookingLinks.label'
+        })
+      ).not.toBeInTheDocument()
+    )
+    expect(localStorage.getItem('showFeatureExplanations')).toBe('false')
+  })
+
+  it('hides the explanation when the user opted out', () => {
+    localStorage.setItem('showFeatureExplanations', 'false')
+
+    renderWithProviders(
+      <CalendarSelection
+        selectedCalendars={[]}
+        setSelectedCalendars={jest.fn()}
+      />,
+      {
+        user: baseUser,
+        calendars: { list: calendarsMock, pending: false }
+      }
+    )
+
+    expect(screen.getByText('calendar.bookingLinks')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', {
+        name: 'featureExplanation.bookingLinks.label'
+      })
+    ).not.toBeInTheDocument()
+  })
+
   it.each([[undefined], [false]])(
     'does not render booking links when BOOKING_LINK_ENABLED is %s',
     value => {
@@ -209,8 +285,9 @@ describe('CalendarSelection', () => {
       }
     )
 
-    const addButtons = screen.getAllByRole('button')
-    fireEvent.click(addButtons[3])
+    fireEvent.click(
+      screen.getByRole('button', { name: 'tooltip.addPersonalCalendar' })
+    )
 
     await waitFor(() =>
       expect(

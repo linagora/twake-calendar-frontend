@@ -6,6 +6,7 @@ import { DeleteCalendarDialog } from '@common/components/Calendar/DeleteCalendar
 import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
 import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
+import { FeatureExplanation } from '@common/components/FeatureExplanation'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   deleteBookingLink,
@@ -32,6 +33,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   alpha,
+  Box,
   Checkbox,
   IconButton,
   ListItem,
@@ -64,6 +66,7 @@ import WebAssetOffOutlinedIcon from '@mui/icons-material/WebAssetOffOutlined'
 type SectionHeader = {
   title: string
   addBtnTooltip?: string
+  explanation?: { label: string; text: string }
 }
 
 /**
@@ -95,7 +98,7 @@ const CollapsibleSection: React.FC<{
   onAddClick?: () => void
   children: ReactNode
 }> = ({
-  header: { title, addBtnTooltip },
+  header: { title, addBtnTooltip, explanation },
   itemCount,
   defaultExpanded = false,
   onAddClick,
@@ -147,7 +150,15 @@ const CollapsibleSection: React.FC<{
           }
         }}
       >
-        <Typography variant="body2">{title}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="body2">{title}</Typography>
+          {explanation && (
+            <FeatureExplanation
+              label={explanation.label}
+              explanation={explanation.text}
+            />
+          )}
+        </Box>
         {onAddClick && (
           <Tooltip title={addBtnTooltip}>
             <IconButton
@@ -530,7 +541,11 @@ const CalendarSelection: React.FC<{
           <BookingLinksAccordion
             header={{
               title: t('calendar.bookingLinks'),
-              addBtnTooltip: t('tooltip.createAppointment')
+              addBtnTooltip: t('tooltip.createAppointment'),
+              explanation: {
+                label: t('featureExplanation.bookingLinks.label'),
+                text: t('featureExplanation.bookingLinks.text')
+              }
             }}
             bookingLinks={bookingLinks}
             defaultExpanded

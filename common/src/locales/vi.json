@@ -331,6 +331,7 @@
     "alarmEmailsUpdateError": "Cập nhật cài đặt thông báo email thất bại",
     "displayWeekNumbers": "Hiển thị số tuần",
     "displayWeekNumbersUpdateError": "Không cập nhật được cách hiển thị số tuần",
+    "showFeatureExplanations": "Hiển thị giải thích tính năng",
     "sync.empty": "Cài đặt đồng bộ sắp có",
     "calAndEvent": "Lịch và sự kiện",
     "showDeclinedEvent": "Hiển thị các sự kiện đã từ chối",
@@ -488,6 +489,13 @@
   },
   "sidebar": {
     "displayMode": "Chế độ hiển thị"
+  },
+  "featureExplanation": {
+    "stopShowing": "Không hiển thị giải thích nữa",
+    "bookingLinks": {
+      "label": "Liên kết đặt lịch là gì?",
+      "text": "Liên kết đặt lịch cho phép bất kỳ ai, kể cả người ngoài tổ chức của bạn, đặt cuộc hẹn với bạn mà không cần trao đổi email qua lại. Hãy tạo lịch hẹn với những khung giờ bạn rảnh, rồi chia sẻ liên kết: khách truy cập chọn một khung giờ trống và cuộc hẹn sẽ tự động có trong lịch của bạn."
+    }
   },
   "tooltip": {
     "teamOrganizer": "%{displayName} đã tổ chức sự kiện này cho nhóm",

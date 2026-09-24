@@ -2,6 +2,8 @@ package com.linagora.calendar.e2e.pages;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.assertions.LocatorAssertions;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.AriaRole;
 
 /** The settings panel, reachable from the user menu. */
@@ -109,6 +111,23 @@ public class SettingsPage {
     public SettingsPage toggle(String label) {
         awaitPersisted(() -> page.getByLabel(label).first().click());
         return this;
+    }
+
+    /**
+     * Flips one of the switches kept in the browser only, which therefore never reaches the
+     * server and has no write to wait for.
+     */
+    public SettingsPage toggleInBrowser(String label) {
+        Locator toggle = page.getByLabel(label).first();
+        boolean wasChecked = toggle.isChecked();
+        toggle.click();
+        PlaywrightAssertions.assertThat(toggle)
+            .isChecked(new LocatorAssertions.IsCheckedOptions().setChecked(!wasChecked));
+        return this;
+    }
+
+    public boolean isChecked(String label) {
+        return page.getByLabel(label).first().isChecked();
     }
 
     /**
