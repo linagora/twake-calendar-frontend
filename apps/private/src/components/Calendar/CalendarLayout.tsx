@@ -10,6 +10,7 @@ import SettingsPage from '@common/features/Settings/SettingsPage'
 import { setView } from '@common/features/Settings/SettingsSlice'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { getViewRange } from '@common/utils/dateUtils'
+import { getDisplayedDate } from '@common/utils/storage/displayedDate'
 import type { CalendarApi } from '@fullcalendar/core'
 import CalendarController, { CalendarControllerRef } from './CalendarController'
 import cx from 'classnames'
@@ -30,7 +31,7 @@ export default function CalendarLayout(): JSX.Element {
   const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
   const [openSidebar, setOpenSideBar] = useState(false)
 
-  const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [currentDate, setCurrentDate] = useState<Date>(getDisplayedDate)
   const [currentView, setCurrentView] = useState<string>(
     isTablet || isMobile
       ? CALENDAR_VIEWS.timeGridDay

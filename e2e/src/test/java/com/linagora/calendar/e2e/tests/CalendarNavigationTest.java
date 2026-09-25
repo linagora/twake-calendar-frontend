@@ -180,6 +180,23 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
     }
 
     @Test
+    @DisplayName("NAV-17 Reloading the page (F5) keeps the displayed week")
+    void reloadingKeepsTheDisplayedWeek(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        calendar.next().next();
+        java.time.LocalDate shown = calendar.firstVisibleDate();
+        List<String> shownWeek = calendar.visibleDayHeaders();
+
+        page.reload();
+        calendar.waitUntilLoaded();
+
+        PlaywrightAssertions.assertThat(calendar.dayColumn(shown).first())
+            .isAttached(new com.microsoft.playwright.assertions.LocatorAssertions.IsAttachedOptions()
+                .setTimeout(20_000));
+        assertThat(calendar.visibleDayHeaders()).isEqualTo(shownWeek);
+    }
+
+    @Test
     @DisplayName("NAV-15 The time grid is scrolled to the working hours on opening")
     void theTimeGridIsScrolledOnOpening(Page page, E2EUser user) {
         LoginPage.loginAs(page, user);

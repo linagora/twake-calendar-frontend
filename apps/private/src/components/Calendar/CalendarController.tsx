@@ -5,6 +5,10 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import SearchResultsPage from '@common/features/Search/SearchResultsPage'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { setDisplayedDateAndRange } from '@common/utils/CalendarRangeManager'
+import {
+  getDisplayedDate,
+  setDisplayedDate
+} from '@common/utils/storage/displayedDate'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import type {
   DatesSetArg,
@@ -86,8 +90,8 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
 }: CalendarControllerProps) => {
   const { t } = useI18n()
 
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [debouncedDate, setDebouncedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(getDisplayedDate)
+  const [debouncedDate, setDebouncedDate] = useState(selectedDate)
   useEffect(() => {
     const t = setTimeout(() => setDebouncedDate(selectedDate), 300)
     return (): void => clearTimeout(t)
@@ -309,6 +313,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     const calendarCurrentDate =
       calendarRef.current?.getDate() || new Date(arg.start)
     setDisplayedDateAndRange(calendarCurrentDate)
+    setDisplayedDate(calendarCurrentDate)
     const today = new Date()
 
     if (arg.view.type === CALENDAR_VIEWS.dayGridMonth) {
