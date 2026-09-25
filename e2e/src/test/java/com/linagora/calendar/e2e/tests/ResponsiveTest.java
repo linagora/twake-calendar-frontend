@@ -157,7 +157,7 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
         // pinned to today: left to itself the form opens on the next round hour, which late in
         // the evening is tomorrow, and the phone would open its day view on an empty day
         java.time.LocalDate day = desktop.browserToday();
-        desktop.createEvent().title(title).expand().startDate(day).endDate(day).save();
+        desktop.createEvent().title(title).expand().at(day, "10:00", "11:00").save();
         desktop.eventCard(title).first().waitFor();
         CalendarPage phone = sessions.openFor(user, PHONE_WIDTH, PHONE_HEIGHT);
         phone.eventCard(title).first().waitFor(

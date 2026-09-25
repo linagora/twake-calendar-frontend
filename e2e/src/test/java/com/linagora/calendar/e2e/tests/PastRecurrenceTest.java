@@ -127,7 +127,7 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         // leave the series with a single occurrence.
         LocalDate weekStart = calendar.firstVisibleDate();
         var form = calendar.createEvent().title(title).expand()
-            .startDate(weekStart).endDate(weekStart).startTime("09:00").endTime("10:00");
+            .at(weekStart, "09:00", "10:00");
         form.repeat().frequency(RecurrenceSection.DAILY).endsOn(weekStart.plusDays(4));
         form.save();
         Awaitility.await().atMost(Duration.ofSeconds(30))
