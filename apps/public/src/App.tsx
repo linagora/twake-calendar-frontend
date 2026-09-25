@@ -9,6 +9,7 @@ import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
+import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { PublicLayout } from './components/PublicLayout'
 import { EventPreviewPage } from './features/EventPreview/EventPreviewPage'
 import { BookingPage } from './features/booking/BookingPage'
@@ -37,6 +38,7 @@ const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale }
 
 export default function App(): JSX.Element {
   const [lang, setLang] = useState<SupportedLanguage>(getDefaultLanguage)
+  useDocumentLanguage(lang)
 
   const handleLanguageChange = (newLang: SupportedLanguage): void => {
     localStorage.setItem('lang', newLang)

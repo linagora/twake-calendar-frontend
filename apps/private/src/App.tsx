@@ -13,6 +13,7 @@ import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
+import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
@@ -59,6 +60,8 @@ export default function App(): JSX.Element {
     [userLanguage, settingsLanguage, savedLang, defaultLang].find(
       l => !!l && isValidLanguage(l)
     ) || 'en'
+
+  useDocumentLanguage(lang)
 
   const dispatch = useAppDispatch()
   useEffect(() => {
