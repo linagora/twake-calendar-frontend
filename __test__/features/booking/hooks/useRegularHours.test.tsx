@@ -110,16 +110,16 @@ describe('useRegularHours', () => {
     expect(getRules()[0].slots[0].start).toBe('10:00')
   })
 
-  it('does not change time slot if start >= end', () => {
+  it('keeps the entered value even if start >= end so that it can be reported', () => {
     const { result, getRules } = setup(
-      createMockRule([{ start: '09:00', end: '12:00' }])
+      createMockRule([{ start: '09:00', end: '18:00' }])
     )
 
     act(() => {
-      result.current.handleTimeChange('MON', 0, 'start', '13:00')
+      result.current.handleTimeChange('MON', 0, 'end', '08:00')
     })
 
-    expect(getRules()[0].slots[0].start).toBe('09:00')
+    expect(getRules()[0].slots[0]).toEqual({ start: '09:00', end: '08:00' })
   })
 
   it('changes a time slot for a day with no existing rules', () => {

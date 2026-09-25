@@ -114,14 +114,10 @@ export const useRegularHours = ({
     field: keyof TimeSlot,
     value: string
   ): void => {
-    const updateSlot = (slot: TimeSlot): TimeSlot => {
-      const updatedSlot = { ...slot, [field]: value }
-      const isValidTime = updatedSlot.start && updatedSlot.end
-      if (isValidTime && updatedSlot.start >= updatedSlot.end) {
-        return slot
-      }
-      return updatedSlot
-    }
+    const updateSlot = (slot: TimeSlot): TimeSlot => ({
+      ...slot,
+      [field]: value
+    })
 
     updateAvailability(
       day,

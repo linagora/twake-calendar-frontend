@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography, Switch, IconButton, Stack } from '@linagora/twake-mui'
 import { Add, ContentCopy } from '@mui/icons-material'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import { DayOfWeek, TimeSlot } from './RegularHoursTypes'
+import { DayOfWeek, TimeSlot, isInvalidSlot } from './RegularHoursTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { Tooltip } from '@common/components/Tooltip'
 import { useI18n } from 'twake-i18n'
@@ -55,7 +55,8 @@ const TimeSlotItem: React.FC<TimeSlotItemProps> = ({
 
   const startValue = parseTime(slot.start)
   const endValue = parseTime(slot.end)
-  const hasError = slot.start >= slot.end
+  const hasError = isEnabled && isInvalidSlot(slot)
+  const errorId = `slot-error-${day}-${index}`
   const width = isMobile ? '100%' : 110
 
   const isFirst = index === 0
@@ -65,55 +66,69 @@ const TimeSlotItem: React.FC<TimeSlotItemProps> = ({
   const actionLabel = isFirst ? 'add-slot' : 'remove-slot'
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Box sx={{ width }}>
-        <TimePickerField
-          testId={`start-time-${day}-${index}`}
-          label={t('dateTimeFields.startTime')}
-          value={startValue}
-          onChange={handleTimeChangeCallback('start')}
-          disabled={!isEnabled}
-          hasError={hasError}
-        />
-      </Box>
-      <Typography sx={{ mx: isMobile ? 0.5 : 1 }}>-</Typography>
-      <Box sx={{ width }}>
-        <TimePickerField
-          testId={`end-time-${day}-${index}`}
-          label={t('dateTimeFields.endTime')}
-          value={endValue}
-          onChange={handleTimeChangeCallback('end')}
-          disabled={!isEnabled}
-          hasError={hasError}
-        />
-      </Box>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ width }}>
+          <TimePickerField
+            testId={`start-time-${day}-${index}`}
+            label={t('dateTimeFields.startTime')}
+            value={startValue}
+            onChange={handleTimeChangeCallback('start')}
+            disabled={!isEnabled}
+            hasError={hasError}
+            errorId={errorId}
+          />
+        </Box>
+        <Typography sx={{ mx: isMobile ? 0.5 : 1 }}>-</Typography>
+        <Box sx={{ width }}>
+          <TimePickerField
+            testId={`end-time-${day}-${index}`}
+            label={t('dateTimeFields.endTime')}
+            value={endValue}
+            onChange={handleTimeChangeCallback('end')}
+            disabled={!isEnabled}
+            hasError={hasError}
+            errorId={errorId}
+          />
+        </Box>
 
-      <Tooltip title={actionTitle}>
-        <IconButton
-          size="small"
-          sx={{ ml: 1 }}
-          disabled={!isEnabled}
-          onClick={handleAction}
-          aria-label={actionLabel}
-        >
-          {isFirst ? (
-            <Add fontSize="small" />
-          ) : (
-            <DeleteOutlinedIcon fontSize="small" />
-          )}
-        </IconButton>
-      </Tooltip>
+        <Tooltip title={actionTitle}>
+          <IconButton
+            size="small"
+            sx={{ ml: 1 }}
+            disabled={!isEnabled}
+            onClick={handleAction}
+            aria-label={actionLabel}
+          >
+            {isFirst ? (
+              <Add fontSize="small" />
+            ) : (
+              <DeleteOutlinedIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
 
-      <Tooltip title={t('booking.copySlot')}>
-        <IconButton
-          size="small"
-          disabled={!isEnabled}
-          onClick={() => handleCopySlot(day, index)}
-          aria-label="copy-slot"
+        <Tooltip title={t('booking.copySlot')}>
+          <IconButton
+            size="small"
+            disabled={!isEnabled}
+            onClick={() => handleCopySlot(day, index)}
+            aria-label="copy-slot"
+          >
+            <ContentCopy fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      {hasError && (
+        <Typography
+          variant="caption"
+          color="error"
+          id={errorId}
+          data-testid={errorId}
         >
-          <ContentCopy fontSize="small" />
-        </IconButton>
-      </Tooltip>
+          {t('event.validation.endAfterStart')}
+        </Typography>
+      )}
     </Box>
   )
 }

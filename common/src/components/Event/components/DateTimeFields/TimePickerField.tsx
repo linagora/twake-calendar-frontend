@@ -11,6 +11,7 @@ export interface TimePickerFieldProps {
   testId: string
   label: string
   hasError?: boolean
+  errorId?: string
   disabled?: boolean
 }
 

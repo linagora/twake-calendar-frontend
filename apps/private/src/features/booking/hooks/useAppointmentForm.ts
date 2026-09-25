@@ -11,7 +11,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   DAY_TO_FC,
   DayAvailability,
-  DAYS
+  DAYS,
+  hasInvalidSlot
 } from '../components/RegularHoursField/RegularHoursTypes'
 import { defaultColors } from '@common/utils/defaultColors'
 import { DEFAULT_SLOT } from './useRegularHours'
@@ -265,7 +266,9 @@ const computeInitialFormState = ({
 }
 
 const checkFormValid = (form: FormState): boolean =>
-  form.calendarid !== '' && form.duration > 0
+  form.calendarid !== '' &&
+  form.duration > 0 &&
+  !hasInvalidSlot(form.availabilityRules)
 
 export const useAppointmentForm = ({
   bookingLink,

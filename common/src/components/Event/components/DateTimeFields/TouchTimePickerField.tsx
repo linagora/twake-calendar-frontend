@@ -37,6 +37,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
   testId,
   label,
   hasError = false,
+  errorId,
   disabled = false
 }) => {
   const { t } = useI18n()
@@ -129,7 +130,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
         slotProps={{
           openPickerButton: { sx: { display: 'none' } },
           field: {
-            ...getTimeFieldSlotProps(testId, hasError, label, true),
+            ...getTimeFieldSlotProps(testId, hasError, label, true, errorId),
             onFocus: e => e.target.blur()
           }
         }}

@@ -11,6 +11,12 @@ export interface DayAvailability {
   slots: TimeSlot[]
 }
 
+export const isInvalidSlot = (slot: TimeSlot): boolean =>
+  !!slot.start && !!slot.end && slot.start >= slot.end
+
+export const hasInvalidSlot = (rules: DayAvailability[]): boolean =>
+  rules.some(rule => rule.enabled && rule.slots.some(isInvalidSlot))
+
 export const DAY_TO_FC: Record<DayOfWeek, number> = {
   SUN: 0,
   MON: 1,

@@ -34,7 +34,8 @@ const baseFieldProps = (
   testId: string,
   hasError = false,
   label?: string,
-  isMobile?: boolean
+  isMobile?: boolean,
+  errorId?: string
 ): BaseFieldProps => ({
   size: isMobile ? ('medium' as const) : ('small' as const),
   margin: 'dense' as const,
@@ -45,7 +46,8 @@ const baseFieldProps = (
     inputLabel: { shrink: true },
     htmlInput: {
       'data-testid': testId,
-      ...(label ? { 'aria-label': label } : {})
+      ...(label ? { 'aria-label': label } : {}),
+      ...(hasError && errorId ? { 'aria-describedby': errorId } : {})
     } as React.InputHTMLAttributes<HTMLInputElement> & {
       'data-testid'?: string
     }
@@ -73,6 +75,7 @@ export const getTimeFieldSlotProps = (
   testId: string,
   hasError = false,
   label?: string,
-  isMobile?: boolean
+  isMobile?: boolean,
+  errorId?: string
 ): Partial<TimePickerFieldProps> & BaseFieldProps =>
-  baseFieldProps(testId, hasError, label, isMobile)
+  baseFieldProps(testId, hasError, label, isMobile, errorId)
