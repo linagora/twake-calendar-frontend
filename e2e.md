@@ -171,7 +171,7 @@ Four of the forty nine, each with what stands in the way.
 - [x] `SHELL-14` Saving a full screen event edit gives the menubar its actions back
 - [x] `SHELL-15` Saving a full screen event creation gives the menubar its actions back
 
-## NAV — Navigation and views (15)
+## NAV — Navigation and views (16)
 
 - [x] `NAV-01` Next moves the week view to the following week
 - [x] `NAV-02` Today comes back to the current week after browsing away
@@ -188,6 +188,7 @@ Four of the forty nine, each with what stands in the way.
 - [x] `NAV-14` Changing view keeps the displayed date
 - [x] `NAV-15` The time grid is scrolled to the current hour on opening
 - [x] `NAV-16` Browsing twelve weeks in a row does not duplicate any event
+- [x] `NAV-17` The month view shows the events of the adjacent-month days of its last row ([#1412](https://github.com/linagora/twake-calendar-frontend/issues/1412))
 
 ## CRUD — Creating a simple event (21)
 

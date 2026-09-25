@@ -68,7 +68,7 @@ export default function CalendarLayout(): JSX.Element {
   const handleRefresh = async (): Promise<void> => {
     if (calendarRef.current) {
       const view = calendarRef.current.view
-      const calendarRange = getViewRange(view.activeStart, view.type)
+      const calendarRange = getViewRange(view.currentStart, view.type)
 
       await refreshCalendars(
         dispatch,

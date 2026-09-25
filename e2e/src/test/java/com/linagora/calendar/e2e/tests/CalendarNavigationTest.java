@@ -2,13 +2,23 @@ package com.linagora.calendar.e2e.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
+import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.backend.Ical;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Page;
@@ -213,7 +223,39 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("NAV-11 The week number shown matches the ISO week of the displayed days")
+    @DisplayName("NAV-17 (#1412) The month view shows the events of the adjacent-month days of its last row")
+    void theMonthViewShowsTheEventsOfItsLastRow(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        // a month ahead, so that nothing has been loaded around it yet, whose days fit in
+        // five weeks: its sixth row is then only made of days of the next month
+        YearMonth month = Stream.iterate(YearMonth.now().plusMonths(2), m -> m.plusMonths(1))
+            .filter(m -> firstGridDay(m).plusWeeks(5).isAfter(m.atEndOfMonth()))
+            .findFirst()
+            .orElseThrow();
+        // the month grid always renders six weeks
+        LocalDate lastGridDay = firstGridDay(month)
+            .plusWeeks(6)
+            .minusDays(1);
+        String title = "Last row " + UUID.randomUUID().toString().substring(0, 6);
+        String uid = UUID.randomUUID().toString();
+        probe.putEvent(user, uid, Ical.event(uid, title, lastGridDay, 12));
+
+        calendar.switchView("Month");
+        calendar.goToMonth(month);
+
+        assertThat(calendar.visibleDates()).contains(lastGridDay.toString());
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(calendar.eventDates(title))
+                .as("every day of the grid is loaded, not only the days of the month")
+                .containsExactly(lastGridDay.toString()));
+    }
+
+    private static LocalDate firstGridDay(YearMonth month) {
+        return month.atDay(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    }
+
+    @Test
+    @DisplayName("NAV-11The week number shown matches the ISO week of the displayed days")
     void theWeekNumberMatchesTheDisplayedWeek(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 

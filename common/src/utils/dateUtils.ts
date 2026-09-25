@@ -5,27 +5,19 @@ export function formatDateToYYYYMMDDTHHMMSS(date: Date) {
   return moment(date).format('YYYYMMDDTHHmmss')
 }
 
-export function getCalendarRange(date = new Date()) {
-  const year = date.getFullYear()
-  const month = date.getMonth()
+// FullCalendar's month view always renders six weeks (fixedWeekCount)
+const MONTH_GRID_WEEKS = 6
 
-  const firstOfMonth = new Date(year, month, 1)
+export function getCalendarRange(date = new Date()) {
+  const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
   const dayOfWeekStart = firstOfMonth.getDay()
   const diffToMonday = (dayOfWeekStart + 6) % 7
   const startDate = new Date(firstOfMonth)
   startDate.setDate(firstOfMonth.getDate() - diffToMonday)
   startDate.setHours(0, 0, 0, 0)
 
-  const lastOfMonth = new Date(year, month + 1, 0)
-
-  const daysFromStart = Math.floor(
-    (lastOfMonth.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  )
-
-  const weeksNeeded = Math.ceil((daysFromStart + 1) / 7)
-
   const endDate = new Date(startDate)
-  endDate.setDate(startDate.getDate() + weeksNeeded * 7 - 1)
+  endDate.setDate(startDate.getDate() + MONTH_GRID_WEEKS * 7 - 1)
   endDate.setHours(23, 59, 59, 999)
 
   return {
