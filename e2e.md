@@ -189,7 +189,7 @@ Four of the forty nine, each with what stands in the way.
 - [x] `NAV-15` The time grid is scrolled to the current hour on opening
 - [x] `NAV-16` Browsing twelve weeks in a row does not duplicate any event
 
-## CRUD — Creating a simple event (21)
+## CRUD — Creating a simple event (22)
 
 - [x] `CRUD-01` An event created from the form shows up in the grid
 - [x] `CRUD-02` An event created from the form reaches CalDAV
@@ -212,6 +212,7 @@ Four of the forty nine, each with what stands in the way.
 - [x] `CRUD-20` The default destination calendar is "My calendar"
 - [x] `CRUD-21` A 255 character title is accepted and displayed truncated in the grid
 - [x] `CRUD-22` Two events on the same slot are laid out side by side
+- [x] `CRUD-23` An event created while another month is displayed shows up back on its week
 
 ## EDIT — Editing and deleting (20)
 

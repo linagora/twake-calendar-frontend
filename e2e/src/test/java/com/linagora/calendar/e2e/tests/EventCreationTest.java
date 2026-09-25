@@ -337,6 +337,30 @@ class EventCreationTest extends TwakeCalendarE2ETest {
     }
 
     @Test
+    @DisplayName("CRUD-23 An event created while another month is displayed shows up back on its week. See #1422")
+    void eventCreatedFromAnotherMonthShowsUpOnItsWeek(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = uniqueTitle("Created from afar");
+        java.time.LocalDate today = calendar.browserToday();
+        // The current week got loaded on login. The refresh following the creation only
+        // covers the grid displayed at that time, a few months away.
+        calendar.goToMonth(java.time.YearMonth.from(today).plusMonths(3));
+
+        calendar.createEvent().title(title).expand()
+            .startDate(today).endDate(today).startTime("10:00").endTime("11:00")
+            .save();
+        Awaitility.await().atMost(java.time.Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(probe.eventSummaries(user)).containsExactly(title));
+        // lets the refresh that follows the creation land before going back
+        page.waitForTimeout(2000);
+        calendar.today();
+
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(calendar.eventCard(title))
+            .hasCount(1, new com.microsoft.playwright.assertions.LocatorAssertions.HasCountOptions()
+                .setTimeout(30_000));
+    }
+
+    @Test
     @DisplayName("CRUD-18 / DND-15 Dragging a time range in the grid prefills the event times")
     void draggingATimeRangePrefillsTheTimes(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
