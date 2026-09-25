@@ -1,6 +1,7 @@
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import React from 'react'
-import { LONG_DATE_FORMAT } from '@common/components/Event/utils/dateTimeFormatters'
+import { useI18n } from 'twake-i18n'
+import { getLongDateFormat } from '@common/components/Event/utils/dateTimeFormatters'
 import { ReadOnlyDateField } from '@common/components/Event/components/ReadOnlyPickerField'
 import {
   dateCalendarLayoutSx,
@@ -15,16 +16,19 @@ export const DesktopDatePickerField: React.FC<DatePickerFieldProps> = ({
   testId,
   label,
   hasError = false
-}) => (
-  <DatePicker
-    format={LONG_DATE_FORMAT}
-    value={value}
-    onChange={onChange}
-    slots={{ field: ReadOnlyDateField }}
-    slotProps={{
-      ...getDateSlotProps(testId, hasError, label),
-      field: getDateFieldSlotProps(testId, hasError, label),
-      layout: { sx: dateCalendarLayoutSx }
-    }}
-  />
-)
+}) => {
+  const { lang } = useI18n()
+  return (
+    <DatePicker
+      format={getLongDateFormat(lang)}
+      value={value}
+      onChange={onChange}
+      slots={{ field: ReadOnlyDateField }}
+      slotProps={{
+        ...getDateSlotProps(testId, hasError, label),
+        field: getDateFieldSlotProps(testId, hasError, label),
+        layout: { sx: dateCalendarLayoutSx }
+      }}
+    />
+  )
+}

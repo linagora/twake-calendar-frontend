@@ -1,4 +1,4 @@
-import { LONG_DATE_FORMAT } from '@common/components/Event/utils/dateTimeFormatters'
+import { getLongDateFormat } from '@common/components/Event/utils/dateTimeFormatters'
 import { getTimezoneOffset } from '@common/utils/timezone'
 import { Box, Typography, alpha, useTheme } from '@linagora/twake-mui'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
@@ -45,13 +45,8 @@ export const StaticDateTimeSummary: React.FC<StaticDateTimeSummaryProps> = ({
       return `${weekdayLabel}, ${day} Tháng ${month}, ${year}`
     }
 
-    if (locale === 'fr') {
-      const formatted = date.locale('fr').format('dddd, D MMMM YYYY')
-      return formatted.charAt(0).toUpperCase() + formatted.slice(1)
-    }
-
-    const formatted = date.locale(locale).format(LONG_DATE_FORMAT)
-    if (locale === 'ru') {
+    const formatted = date.locale(locale).format(getLongDateFormat(locale))
+    if (locale === 'fr' || locale === 'ru') {
       return formatted.charAt(0).toUpperCase() + formatted.slice(1)
     }
     return formatted

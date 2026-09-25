@@ -17,7 +17,7 @@ import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import dayjs from 'dayjs'
 import { useI18n } from 'twake-i18n'
 import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
-import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
+import { getLongDateFormat } from './utils/dateTimeFormatters'
 import { FC_DAYS, WeekDaySelector } from './WeekDaySelector'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import {
@@ -38,7 +38,7 @@ export const RepeatEvent: React.FC<{
   setRepetition: (repetition: RepetitionObject) => void
   isOwn?: boolean
 }> = ({ repetition, eventStart, setRepetition, isOwn = true }) => {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const inputSize = useResponsiveInputSize()
   const days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
@@ -239,7 +239,7 @@ export const RepeatEvent: React.FC<{
                     >
                       <DatePicker
                         sx={{ width: '100%' }}
-                        format={LONG_DATE_FORMAT}
+                        format={getLongDateFormat(lang)}
                         minDate={dayjs(eventStart)}
                         value={
                           repetition.endDate

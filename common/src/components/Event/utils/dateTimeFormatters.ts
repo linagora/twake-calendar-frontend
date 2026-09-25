@@ -81,3 +81,18 @@ export function getRoundedCurrentTime(): Date {
 
 /** Long date display format for date pickers */
 export const LONG_DATE_FORMAT = 'dddd, MMMM D, YYYY'
+
+const LOCALIZED_LONG_DATE_FORMATS: Record<string, string> = {
+  fr: 'dddd D MMMM YYYY',
+  ru: 'dddd, D MMMM YYYY',
+  vi: 'dddd, D MMMM YYYY'
+}
+
+/**
+ * Long date display format following the day/month ordering of the locale
+ * @param locale - Language code (en, fr, ru, vi)
+ * @returns dayjs format string
+ */
+export function getLongDateFormat(locale?: string): string {
+  return (locale && LOCALIZED_LONG_DATE_FORMATS[locale]) || LONG_DATE_FORMAT
+}

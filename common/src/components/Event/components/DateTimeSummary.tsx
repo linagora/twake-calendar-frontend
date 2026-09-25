@@ -9,7 +9,7 @@ import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { getTimezoneOffset } from '@common/utils/timezone'
 import { RepetitionObject } from '@common/types/Repetition'
-import { LONG_DATE_FORMAT } from '@common/components/Event/utils/dateTimeFormatters'
+import { getLongDateFormat } from '@common/components/Event/utils/dateTimeFormatters'
 import { SectionPreviewRow } from './SectionPreviewRow'
 import { makeRecurrenceString } from '@common/components/EventPreview/utils/makeRecurrenceString'
 import { isDateInPast } from '@common/components/Event/utils/formValidation'
@@ -40,7 +40,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   const { t, lang } = useI18n()
   const theme = useTheme()
 
-  // Format date with current locale. VI: "Thứ 4, 4 Tháng 2, 2026"; FR: "mercredi, 5 février 2026"; RU: first letter capitalized
+  // Format date with current locale. VI: "Thứ 4, 4 Tháng 2, 2026"; FR: "Mercredi 5 février 2026"; RU: first letter capitalized
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
     const date = dayjs(dateStr)
@@ -55,14 +55,8 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
       return `${weekdayLabel}, ${day} Tháng ${month}, ${year}`
     }
 
-    // French: "5 février" (day before month), not "février 5"
-    if (locale === 'fr') {
-      const formatted = date.locale('fr').format('dddd, D MMMM YYYY')
-      return formatted.charAt(0).toUpperCase() + formatted.slice(1)
-    }
-
-    const formatted = date.locale(locale).format(LONG_DATE_FORMAT)
-    if (locale === 'ru') {
+    const formatted = date.locale(locale).format(getLongDateFormat(locale))
+    if (locale === 'fr' || locale === 'ru') {
       return formatted.charAt(0).toUpperCase() + formatted.slice(1)
     }
     return formatted
