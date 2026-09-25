@@ -1,5 +1,7 @@
 import {
   isDateInPast,
+  isValidRepetition,
+  MAX_REPEAT_INTERVAL,
   validateEventForm,
   ValidationParams
 } from '@common/components/Event/utils/formValidation'
@@ -311,4 +313,27 @@ describe('validateEventForm — all-day events', () => {
     )
     expect(result.isValid).toBe(true)
   })
+})
+
+describe('isValidRepetition', () => {
+  it('is valid when the event does not repeat', () => {
+    expect(isValidRepetition(undefined)).toBe(true)
+    expect(isValidRepetition({ freq: '', interval: 0 })).toBe(true)
+  })
+
+  it('is valid when the interval is not set', () => {
+    expect(isValidRepetition({ freq: 'weekly', interval: null })).toBe(true)
+    expect(isValidRepetition({ freq: 'weekly' })).toBe(true)
+  })
+
+  it.each([1, 2, MAX_REPEAT_INTERVAL])('accepts interval %p', interval => {
+    expect(isValidRepetition({ freq: 'weekly', interval })).toBe(true)
+  })
+
+  it.each([0, -1, 1.5, NaN, Infinity, MAX_REPEAT_INTERVAL + 1])(
+    'rejects interval %p',
+    interval => {
+      expect(isValidRepetition({ freq: 'weekly', interval })).toBe(false)
+    }
+  )
 })

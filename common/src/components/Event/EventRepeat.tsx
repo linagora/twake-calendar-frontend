@@ -15,6 +15,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ReadOnlyDateField } from './components/ReadOnlyPickerField'
 import { LONG_DATE_FORMAT } from './utils/dateTimeFormatters'
@@ -26,11 +27,18 @@ import {
 } from '@common/utils/preventFloatNumber'
 import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
 import { getDateFieldSlotProps } from './components/DateTimeFields/dateTimePickerSlotProps'
+import {
+  isValidRepeatInterval,
+  MAX_REPEAT_INTERVAL
+} from './utils/formValidation'
 const numericSlotProps = {
   htmlInput: {
     inputMode: 'numeric'
   }
 }
+
+const parseInterval = (raw: string): number =>
+  raw.trim() === '' ? 0 : Number(raw)
 
 export const RepeatEvent: React.FC<{
   repetition: RepetitionObject
@@ -62,6 +70,21 @@ export const RepeatEvent: React.FC<{
 
   const defaultEndDate = dayjs(eventStart).add(1, 'day').format('YYYY-MM-DD')
 
+  // Keep the raw input so that empty or out-of-range values stay visible
+  // and can be flagged instead of being silently coerced.
+  const [intervalInput, setIntervalInput] = useState(
+    String(repetition.interval ?? 1)
+  )
+
+  useEffect(() => {
+    if (parseInterval(intervalInput) !== repetition.interval) {
+      setIntervalInput(String(repetition.interval ?? 1))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repetition.interval])
+
+  const isIntervalValid = isValidRepeatInterval(parseInterval(intervalInput))
+
   return (
     <Box>
       <Stack>
@@ -70,23 +93,26 @@ export const RepeatEvent: React.FC<{
           <Typography variant="h6">{t('event.repeat.every')}</Typography>
           <TextField
             type="number"
-            value={repetition.interval ?? 1}
+            value={intervalInput}
             onKeyDown={preventFloatNumber}
             disabled={!isOwn}
-            onChange={e =>
+            onChange={e => {
+              setIntervalInput(e.target.value)
               setRepetition(
                 new RepetitionObject({
                   ...repetition,
-                  interval: toPositiveInt(e.target.value)
+                  interval: parseInterval(e.target.value)
                 })
               )
-            }
+            }}
+            error={!isIntervalValid}
             size={inputSize}
             style={{ width: 80 }}
             slotProps={{
               htmlInput: {
                 ...numericSlotProps.htmlInput,
                 min: 1,
+                max: MAX_REPEAT_INTERVAL,
                 step: 1,
                 'data-testid': 'repeat-interval',
                 style: {
@@ -137,6 +163,19 @@ export const RepeatEvent: React.FC<{
             </Select>
           </FormControl>
         </Box>
+        {!isIntervalValid && (
+          <Typography
+            variant="caption"
+            color="error"
+            role="alert"
+            data-testid="repeat-interval-error"
+            sx={{ mb: 1 }}
+          >
+            {t('event.validation.invalidRepeatInterval', {
+              max: MAX_REPEAT_INTERVAL
+            })}
+          </Typography>
+        )}
 
         {/* Weekly selection */}
         {repetition.freq === 'weekly' && (

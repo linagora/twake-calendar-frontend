@@ -1,4 +1,7 @@
+import { RepetitionData } from '@common/types/Repetition'
 import { combineDateTime, splitDateTime } from './dateTimeHelpers'
+
+export const MAX_REPEAT_INTERVAL = 999
 
 /**
  * Validation parameters for event form
@@ -157,6 +160,23 @@ export function isDateInPast(startDate: string): boolean {
   return !isNaN(startDay.getTime()) && startDay < today
 }
 
+export function isValidRepeatInterval(
+  interval: number | null | undefined
+): boolean {
+  if (interval == null) return true
+  return (
+    Number.isInteger(interval) &&
+    interval >= 1 &&
+    interval <= MAX_REPEAT_INTERVAL
+  )
+}
+
+export function isValidRepetition(
+  repetition: Pick<RepetitionData, 'freq' | 'interval'> | undefined
+): boolean {
+  return !repetition?.freq || isValidRepeatInterval(repetition.interval)
+}
+
 /**
  * Convenience wrapper: validate an EventFormValues bag without needing to
  * split the datetime strings manually. Used by EventFormFields.isValid().
@@ -167,9 +187,11 @@ export function validateEventFormValues(
     end: string
     allday: boolean
     hasEndDateChanged: boolean
+    repetition?: Pick<RepetitionData, 'freq' | 'interval'>
   },
   showMore: boolean
 ): boolean {
+  if (!isValidRepetition(values.repetition)) return false
   const { date: startDate, time: startTime } = splitDateTime(values.start)
   const { date: endDate, time: endTime } = splitDateTime(values.end)
   return validateEventForm({

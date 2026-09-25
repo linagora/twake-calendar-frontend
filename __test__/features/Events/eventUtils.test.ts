@@ -237,6 +237,23 @@ describe('parseCalendarEvent', () => {
     expect(result.allday).toBe(true)
   })
 
+  it('parses a string recurrence interval as a number', () => {
+    const rawData: VObjectProperty[] = [
+      ['UID', {}, 'text', 'event-2'],
+      ['DTSTART', {}, 'date-time', '2025-07-18T09:00:00Z'],
+      ['RRULE', {}, 'recur', { freq: 'DAILY', interval: '2' }]
+    ]
+
+    const result = parseCalendarEvent({
+      data: rawData,
+      color: baseColor,
+      calendar,
+      eventURL: '/calendars/test.ics'
+    })
+
+    expect(result.repetition?.interval).toBe(2)
+  })
+
   it('appends recurrence-id to UID if present', () => {
     const rawData: VObjectProperty[] = [
       ['UID', {}, 'text', 'event-2'],

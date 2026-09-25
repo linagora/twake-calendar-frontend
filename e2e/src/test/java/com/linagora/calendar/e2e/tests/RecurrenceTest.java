@@ -24,6 +24,7 @@ import com.linagora.calendar.e2e.pages.LoginPage;
 import com.linagora.calendar.e2e.pages.RecurrenceSection;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
 /** Building a recurrence rule from the form, and what it produces on the grid. */
@@ -444,14 +445,19 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("RECUR-23 An interval of 0 is brought back to 1")
-    void aZeroIntervalIsBroughtBackToOne(Page page, E2EUser user, CalendarProbe probe) {
+    @DisplayName("RECUR-23 An interval of 0 is flagged and blocks the save")
+    void aZeroIntervalBlocksTheSave(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        series(calendar, repeat -> repeat.frequency(RecurrenceSection.DAILY).every(0).endsNever());
 
-        assertThat(Ics.rulePart(rule(probe, user), "INTERVAL").orElse("1"))
+        var form = calendar.createEvent().title(title("Zero")).expand();
+        form.repeat().frequency(RecurrenceSection.DAILY).every(0).endsNever();
+        form.trySave();
+
+        PlaywrightAssertions.assertThat(page.getByTestId("repeat-interval-error")).isVisible();
+        assertThat(form.isOpen())
             .as("an interval of zero would mean an event repeating forever on the spot")
-            .isEqualTo("1");
+            .isTrue();
+        assertThat(probe.rawEvents(user)).isEmpty();
     }
 
     @Test

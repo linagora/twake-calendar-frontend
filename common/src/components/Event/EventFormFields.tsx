@@ -16,7 +16,6 @@ import { TIMEZONES } from '@common/utils/timezone-data'
 import { TextField } from '@linagora/twake-mui'
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -37,7 +36,10 @@ import { EventDateTimeField } from './fields/EventDateTimeField'
 import LocationField from './fields/LocationField'
 import { TitleField } from './fields/TitleField'
 import { VideoConferenceField } from './fields/VideoConferenceField'
-import { validateEventFormValues } from './utils/formValidation'
+import {
+  isValidRepetition,
+  validateEventFormValues
+} from './utils/formValidation'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { EventFormAttachments } from './fields/EventFormAttachments'
 import { useEventFormValues } from './hooks/useEventFormValues'
@@ -139,7 +141,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
     const calList = useAppSelector(state => state.calendars.list)
     const userOrganizer = useAppSelector(state => state.user.organiserData)
 
-    const [isFormValid, setIsFormValid] = useState(false)
+    const [isDateTimeValid, setIsDateTimeValid] = useState(false)
 
     const timezoneList = useMemo(
       () => ({
@@ -191,13 +193,12 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
       onDirtyChange?.(isDirty)
     }, [isDirty, onDirtyChange])
 
-    const handleValidationChange = useCallback(
-      (valid: boolean) => {
-        setIsFormValid(valid)
-        onValidationChange?.(valid)
-      },
-      [onValidationChange]
-    )
+    const isFormValid =
+      isDateTimeValid && isValidRepetition(formValues.repetition)
+
+    useEffect(() => {
+      onValidationChange?.(isFormValid)
+    }, [isFormValid, onValidationChange])
 
     const selectedCalendar = calList?.[formValues.calendarid]
     const isTeamCalendar = Boolean(selectedCalendar?.owner?.teamCalendar)
@@ -266,7 +267,7 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           onEndChange={onEndChange}
           onAllDayChange={handleAllDayChange}
           onHasEndDateChangedChange={setHasEndDateChanged}
-          onValidationChange={handleValidationChange}
+          onValidationChange={setIsDateTimeValid}
         />
 
         <FieldWithLabel

@@ -246,7 +246,8 @@
       "startDateInPast": "La date de début est dans le passé",
       "invalidDate": "Date invalide",
       "invalidDateTime": "Date/heure invalide",
-      "invalidTimeFormat": "Format d'heure invalide"
+      "invalidTimeFormat": "Format d'heure invalide",
+      "invalidRepeatInterval": "Saisissez un nombre entier entre 1 et %{max}"
     }
   },
   "peopleSearch": {

@@ -246,7 +246,8 @@
       "startDateInPast": "Дата начала не может быть в прошлом",
       "invalidDate": "Неверная дата",
       "invalidDateTime": "Неверная дата/время",
-      "invalidTimeFormat": "Неверный формат времени"
+      "invalidTimeFormat": "Неверный формат времени",
+      "invalidRepeatInterval": "Введите целое число от 1 до %{max}"
     }
   },
   "peopleSearch": {

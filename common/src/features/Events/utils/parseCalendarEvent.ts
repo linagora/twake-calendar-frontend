@@ -134,7 +134,8 @@ function parseRruleProperty(
   }
 
   if (ruleValue.interval) {
-    repData.interval = ruleValue.interval
+    // Sabre serialises INTERVAL as a string in jCal
+    repData.interval = Number(ruleValue.interval)
   }
 
   if (ruleValue.wkst != null) {

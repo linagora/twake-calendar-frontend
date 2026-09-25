@@ -190,7 +190,33 @@ describe('RepeatEvent Component', () => {
     expect(setRepetition).toHaveBeenCalledWith(
       expect.objectContaining({ interval: 3 })
     )
+    expect(
+      screen.queryByTestId('repeat-interval-error')
+    ).not.toBeInTheDocument()
   })
+
+  it.each([
+    ['0', 0],
+    ['-2', -2],
+    ['', 0],
+    ['1000', 1000]
+  ])(
+    'flags interval %p as invalid instead of coercing it',
+    (value, expected) => {
+      const { setRepetition } = setupRepeatEvent({ freq: 'weekly' })
+
+      const intervalInput = screen.getByTestId('repeat-interval')
+      fireEvent.change(intervalInput, { target: { value } })
+
+      expect(setRepetition).toHaveBeenCalledWith(
+        expect.objectContaining({ interval: expected })
+      )
+      expect(intervalInput).toHaveValue(value === '' ? null : Number(value))
+      expect(screen.getByTestId('repeat-interval-error')).toHaveTextContent(
+        'event.validation.invalidRepeatInterval'
+      )
+    }
+  )
 
   it('toggles day selection for weekly frequency', () => {
     const { setRepetition } = setupRepeatEvent({ freq: 'weekly' })
@@ -251,6 +277,22 @@ describe('Repeat Event Integration Tests', () => {
 
     await expectRRule({ freq: 'daily', interval: 2 })
     expect(mockOnClose).toHaveBeenCalledWith(true)
+  })
+
+  it('does not save the event when the interval is 0', async () => {
+    await setupEventPopover()
+    const spy = jest.spyOn(eventThunks, 'putEvent')
+
+    const intervalInput = screen.getByTestId('repeat-interval')
+    fireEvent.change(intervalInput, { target: { value: '0' } })
+
+    expect(screen.getByTestId('repeat-interval-error')).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    })
+
+    expect(spy).not.toHaveBeenCalled()
+    expect(mockOnClose).not.toHaveBeenCalled()
   })
 
   it('sends correct API payload for repeat daily for 5 repetitions', async () => {

@@ -73,7 +73,7 @@ export interface CalendarInput {
 // Vevent repetition rule
 export interface RepetitionRule {
   freq: string
-  interval?: number
+  interval?: number | string
   count?: number
   until?: string
   byday?: string | string[]

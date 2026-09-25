@@ -246,7 +246,8 @@
       "startDateInPast": "Ngày bắt đầu không thể là ngày trong quá khứ",
       "invalidDate": "Ngày không hợp lệ",
       "invalidDateTime": "Ngày/giờ không hợp lệ",
-      "invalidTimeFormat": "Định dạng thời gian không hợp lệ"
+      "invalidTimeFormat": "Định dạng thời gian không hợp lệ",
+      "invalidRepeatInterval": "Nhập số nguyên từ 1 đến %{max}"
     }
   },
   "peopleSearch": {
