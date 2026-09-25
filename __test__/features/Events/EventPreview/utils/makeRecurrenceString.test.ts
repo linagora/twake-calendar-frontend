@@ -2,6 +2,13 @@ import { makeRecurrenceString } from '@common/components/EventPreview/utils/make
 import { RepetitionObject } from '@common/types/Repetition'
 
 describe('makeRecurrenceString', () => {
+  const freqUnits: Record<string, string> = {
+    daily: 'days',
+    weekly: 'weeks',
+    monthly: 'months',
+    yearly: 'years'
+  }
+
   const mockT = jest.fn((key: string, params?: any) => {
     if (params) {
       if (key === 'eventPreview.everyInterval') {
@@ -10,8 +17,12 @@ describe('makeRecurrenceString', () => {
       if (key === 'eventPreview.recurrenceOnDays') {
         return `on ${params.days}`
       }
+      if (key.startsWith('eventPreview.everyIntervalByFreq.')) {
+        const freq = key.split('.').pop()
+        return `Every ${params.smart_count} ${freqUnits[freq ?? '']}`
+      }
       if (key === 'eventPreview.forOccurrences') {
-        return `for ${params.count} times`
+        return `for ${params.smart_count} times`
       }
       if (key === 'eventPreview.until') {
         return `until ${params.date}`
@@ -71,10 +82,17 @@ describe('makeRecurrenceString', () => {
     const result = makeRecurrenceString({ repetition, t: mockT, startText })
 
     expect(result).toBe('Repeats, Every 2 weeks')
-    expect(mockT).toHaveBeenCalledWith('eventPreview.everyInterval', {
-      interval: 2,
-      unit: 'weeks'
-    })
+    expect(mockT).toHaveBeenCalledWith(
+      'eventPreview.everyIntervalByFreq.weekly',
+      { smart_count: 2 }
+    )
+  })
+
+  it('falls back to the raw frequency for unsupported frequencies', () => {
+    const repetition: RepetitionObject = { freq: 'hourly', interval: 2 }
+    const result = makeRecurrenceString({ repetition, t: mockT, startText })
+
+    expect(result).toBe('Repeats, Every 2 hourly')
   })
 
   it('formats string with specific days and sorts them according to WEEK_DAYS order', () => {

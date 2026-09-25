@@ -83,7 +83,7 @@ export function EventErrorSnackbar({
   const summary =
     messages.length === 1
       ? messages[0]
-      : t('error.multipleEvents', { count: messages.length })
+      : t('error.multipleEvents', { smart_count: messages.length })
 
   return (
     <Snackbar

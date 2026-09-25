@@ -124,7 +124,7 @@ export function BookingExtraAttendees({
 
         <Typography variant="body2" sx={{ mr: isMobile ? 0 : 2 }}>
           {t('eventPreview.extraAttendees', {
-            count: extraAttendees.length
+            smart_count: extraAttendees.length
           })}
         </Typography>
 

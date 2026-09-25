@@ -263,7 +263,7 @@
     "title": "Une erreur s'est produite",
     "unknown": "Une erreur inconnue s'est produite",
     "retry": "Réessayer",
-    "multipleEvents": "%{count} événements comportent des erreurs",
+    "multipleEvents": "%{smart_count} événement comporte des erreurs |||| %{smart_count} événements comportent des erreurs",
     "cannotLoadEvent": "Impossible de charger l'événement",
     "missingToken": "Votre lien est invalide",
     "eventNotFound": "L'événement est introuvable. Il a peut-être été supprimé ou le lien est invalide.",
@@ -341,7 +341,7 @@
     "workingDaysUpdateError": "Échec de la mise à jour des jours ouvrés"
   },
   "eventPreview": {
-    "extraAttendees": "%{count} participants supplémentaires",
+    "extraAttendees": "%{smart_count} participant supplémentaire |||| %{smart_count} participants supplémentaires",
     "emailAttendees": "Email aux participants",
     "deleteEvent": "Supprimer l'événement",
     "editEventSpecificSettings": "Modifier les paramètres personnels de l'événement",
@@ -390,7 +390,7 @@
     "editInOrganizerCalendar": "Modifier dans %{calendarName}",
     "joinVideo": "Rejoindre la visioconférence",
     "joinVideoShort": "Rejoindre",
-    "guests": "%{count} participants",
+    "guests": "%{smart_count} participant |||| %{smart_count} participants",
     "yesCount": "%{count} oui",
     "maybeCount": "%{count} peut-être",
     "needActionCount": "%{count} en attente",
@@ -413,7 +413,13 @@
     },
     "recurrenceOnDays": "le %{days}",
     "everyInterval": "Tous les %{interval} %{unit}",
-    "forOccurrences": "pour %{count} occurrences",
+    "everyIntervalByFreq": {
+      "daily": "Tous les jours |||| Tous les %{smart_count} jours",
+      "weekly": "Toutes les semaines |||| Toutes les %{smart_count} semaines",
+      "monthly": "Tous les mois |||| Tous les %{smart_count} mois",
+      "yearly": "Tous les ans |||| Tous les %{smart_count} ans"
+    },
+    "forOccurrences": "pour %{smart_count} occurrence |||| pour %{smart_count} occurrences",
     "until": "jusqu'au %{date}",
     "days": "jours",
     "months": "mois",
@@ -438,7 +444,9 @@
     "reconnected": "Les mises à jour en temps réel sont de nouveau actives.",
     "error": "Un problème est survenu avec les mises à jour en temps réel : %{error}",
     "closedUnexpectedly": "Les mises à jour en temps réel ont été interrompues. Tentative de reconnexion…",
-    "importCompleted": "Votre import est terminé. %{succeedCount} élément(s) importé(s), %{failedCount} erreur(s)",
+    "importCompleted": "Votre import est terminé. %{imported}, %{errors}",
+    "importedItems": "%{smart_count} élément importé |||| %{smart_count} éléments importés",
+    "importErrors": "%{smart_count} erreur |||| %{smart_count} erreurs",
     "importFailed": "Votre import a échoué."
   },
   "months": {

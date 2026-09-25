@@ -124,7 +124,8 @@ class AttendeesFullTest extends TwakeCalendarE2ETest {
         assertThat(attendeeLine(ical, user.email()))
             .as("the organizer attends their own event")
             .contains("ROLE=CHAIR");
-        assertThat(calendar.openEvent(title).text()).contains("1 participants");
+        assertThat(calendar.openEvent(title).text()).contains("1 participant")
+            .doesNotContain("1 participants");
     }
 
     @Test

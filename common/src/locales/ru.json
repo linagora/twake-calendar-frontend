@@ -263,7 +263,7 @@
     "title": "Что-то пошло не так",
     "unknown": "Произошла неизвестная ошибка",
     "retry": "Повторить",
-    "multipleEvents": "%{count} событий с ошибками",
+    "multipleEvents": "%{smart_count} событие с ошибками |||| %{smart_count} события с ошибками |||| %{smart_count} событий с ошибками",
     "cannotLoadEvent": "Не удалось загрузить событие",
     "missingToken": "Ваша ссылка-приглашение недействительна или истек срок ее действия.",
     "eventNotFound": "Событие не найдено. Возможно, оно было удалено или ссылка недействительна.",
@@ -341,7 +341,7 @@
     "workingDaysUpdateError": "Не удалось обновить настройку рабочих дней"
   },
   "eventPreview": {
-    "extraAttendees": "%{count} дополнительных участников",
+    "extraAttendees": "%{smart_count} дополнительный участник |||| %{smart_count} дополнительных участника |||| %{smart_count} дополнительных участников",
     "emailAttendees": "Написать участникам",
     "deleteEvent": "Удалить",
     "editEventSpecificSettings": "Редактировать персональные настройки события",
@@ -390,7 +390,7 @@
     "editInOrganizerCalendar": "Редактировать в %{calendarName}",
     "joinVideo": "Присоединиться к видеоконференции",
     "joinVideoShort": "Присоединиться",
-    "guests": "%{count} участников",
+    "guests": "%{smart_count} участник |||| %{smart_count} участника |||| %{smart_count} участников",
     "yesCount": "%{count} да",
     "maybeCount": "%{count} может быть",
     "needActionCount": "%{count} в ожидании",
@@ -413,7 +413,13 @@
     },
     "recurrenceOnDays": "по %{days}",
     "everyInterval": "Каждые %{interval} %{unit}",
-    "forOccurrences": "в течение %{count} повторений",
+    "everyIntervalByFreq": {
+      "daily": "Каждый %{smart_count} день |||| Каждые %{smart_count} дня |||| Каждые %{smart_count} дней",
+      "weekly": "Каждую %{smart_count} неделю |||| Каждые %{smart_count} недели |||| Каждые %{smart_count} недель",
+      "monthly": "Каждый %{smart_count} месяц |||| Каждые %{smart_count} месяца |||| Каждые %{smart_count} месяцев",
+      "yearly": "Каждый %{smart_count} год |||| Каждые %{smart_count} года |||| Каждые %{smart_count} лет"
+    },
+    "forOccurrences": "в течение %{smart_count} повторения |||| в течение %{smart_count} повторений |||| в течение %{smart_count} повторений",
     "until": "до %{date}",
     "days": "дни",
     "months": "месяцы",
@@ -438,7 +444,9 @@
     "reconnected": "Обновления в реальном времени снова работают.",
     "error": "Произошла ошибка в обновлениях в реальном времени: %{error}",
     "closedUnexpectedly": "Обновления в реальном времени были прерваны. Пробуем переподключиться…",
-    "importCompleted": "Импорт завершён. Импортировано элементов: %{succeedCount}, ошибок: %{failedCount}",
+    "importCompleted": "Импорт завершён. %{imported}, %{errors}",
+    "importedItems": "импортирован %{smart_count} элемент |||| импортировано %{smart_count} элемента |||| импортировано %{smart_count} элементов",
+    "importErrors": "%{smart_count} ошибка |||| %{smart_count} ошибки |||| %{smart_count} ошибок",
     "importFailed": "Импорт не удался."
   },
   "months": {

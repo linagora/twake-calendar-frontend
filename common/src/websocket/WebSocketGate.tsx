@@ -434,8 +434,10 @@ function importResultMessage(
     return t('websocket.importFailed')
   }
   return t('websocket.importCompleted', {
-    succeedCount: result.succeedCount,
-    failedCount: result.failedCount
+    imported: t('websocket.importedItems', {
+      smart_count: result.succeedCount
+    }),
+    errors: t('websocket.importErrors', { smart_count: result.failedCount })
   })
 }
 

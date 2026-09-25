@@ -170,7 +170,9 @@ export function EventPreviewAttendees({
         content={
           <Box>
             <Typography variant="body1">
-              {t('eventPreview.guests', { count: participants.length })}
+              {t('eventPreview.guests', {
+                smart_count: participants.length
+              })}
             </Typography>
             {subtitle && (
               <Typography variant="body2" color="text.secondary">

@@ -263,7 +263,7 @@
     "title": "Something went wrong",
     "unknown": "An unknown error occurred",
     "retry": "Try Again",
-    "multipleEvents": "%{count} events with errors",
+    "multipleEvents": "%{smart_count} event with errors |||| %{smart_count} events with errors",
     "cannotLoadEvent": "Unable to load event",
     "missingToken": "Your link is invalid",
     "eventNotFound": "The event could not be found. It may have been deleted or the link is invalid.",
@@ -341,7 +341,7 @@
     "workingDaysUpdateError": "Failed to update working days setting"
   },
   "eventPreview": {
-    "extraAttendees": "%{count} extra participants",
+    "extraAttendees": "%{smart_count} extra participant |||| %{smart_count} extra participants",
     "emailAttendees": "Email attendees",
     "deleteEvent": "Delete event",
     "editEventSpecificSettings": "Edit personal event settings",
@@ -390,7 +390,7 @@
     "editInOrganizerCalendar": "Edit in %{calendarName}",
     "joinVideo": "Join the video conference",
     "joinVideoShort": "Join",
-    "guests": "%{count} participants",
+    "guests": "%{smart_count} participant |||| %{smart_count} participants",
     "yesCount": "%{count} yes",
     "maybeCount": "%{count} maybe",
     "needActionCount": "%{count} waiting",
@@ -413,7 +413,13 @@
     },
     "recurrenceOnDays": "on %{days}",
     "everyInterval": "Every %{interval} %{unit}",
-    "forOccurrences": "for %{count} occurrences",
+    "everyIntervalByFreq": {
+      "daily": "Every day |||| Every %{smart_count} days",
+      "weekly": "Every week |||| Every %{smart_count} weeks",
+      "monthly": "Every month |||| Every %{smart_count} months",
+      "yearly": "Every year |||| Every %{smart_count} years"
+    },
+    "forOccurrences": "for %{smart_count} occurrence |||| for %{smart_count} occurrences",
     "until": "until %{date}",
     "days": "days",
     "months": "months",
@@ -438,7 +444,9 @@
     "reconnected": "Live updates are back.",
     "error": "There was a problem with live updates: %{error}",
     "closedUnexpectedly": "Live updates were interrupted. Trying to reconnect…",
-    "importCompleted": "Your import completed. %{succeedCount} item(s) imported, %{failedCount} error(s)",
+    "importCompleted": "Your import completed. %{imported}, %{errors}",
+    "importedItems": "%{smart_count} item imported |||| %{smart_count} items imported",
+    "importErrors": "%{smart_count} error |||| %{smart_count} errors",
     "importFailed": "Your import failed."
   },
   "months": {

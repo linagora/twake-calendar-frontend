@@ -117,7 +117,9 @@ export function EventPreviewAttendees({
           >
             <Box>
               <Typography>
-                {t('eventPreview.guests', { count: allAttendees.length })}
+                {t('eventPreview.guests', {
+                  smart_count: allAttendees.length
+                })}
               </Typography>
               <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
                 {attendeePreview}

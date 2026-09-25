@@ -314,7 +314,7 @@ class ImportExportTest extends TwakeCalendarE2ETest {
 
         PlaywrightAssertions.assertThat(page.getByRole(AriaRole.ALERT)
                 .filter(new Locator.FilterOptions().setHasText("Your import completed")))
-            .containsText("2 item(s) imported, 0 error(s)",
+            .containsText("2 items imported, 0 errors",
                 new LocatorAssertions.ContainsTextOptions().setTimeout(IMPORT_MS.toMillis()));
     }
 }

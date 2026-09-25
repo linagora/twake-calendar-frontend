@@ -263,7 +263,7 @@
     "title": "Đã xảy ra lỗi",
     "unknown": "Có lỗi không xác định",
     "retry": "Thử lại",
-    "multipleEvents": "%{count} sự kiện gặp lỗi",
+    "multipleEvents": "%{smart_count} sự kiện gặp lỗi",
     "cannotLoadEvent": "Không thể tải sự kiện",
     "missingToken": "Liên kết của bạn không hợp lệ",
     "eventNotFound": "Không tìm thấy sự kiện. Sự kiện có thể đã bị xóa hoặc liên kết không hợp lệ.",
@@ -341,7 +341,7 @@
     "workingDaysUpdateError": "Không thể cập nhật cài đặt ngày làm việc"
   },
   "eventPreview": {
-    "extraAttendees": "%{count} người tham gia khác",
+    "extraAttendees": "%{smart_count} người tham gia khác",
     "emailAttendees": "Gửi email cho người tham gia",
     "deleteEvent": "Xóa sự kiện",
     "editEventSpecificSettings": "Chỉnh sửa cài đặt sự kiện cá nhân",
@@ -390,7 +390,7 @@
     "editInOrganizerCalendar": "Chỉnh sửa trong %{calendarName}",
     "joinVideo": "Tham gia cuộc họp video",
     "joinVideoShort": "Tham gia",
-    "guests": "%{count} người tham gia",
+    "guests": "%{smart_count} người tham gia",
     "yesCount": "%{count} đồng ý",
     "maybeCount": "%{count} có thể",
     "needActionCount": "%{count} đang chờ",
@@ -413,7 +413,13 @@
     },
     "recurrenceOnDays": "vào %{days}",
     "everyInterval": "Mỗi %{interval} %{unit}",
-    "forOccurrences": "trong %{count} lần",
+    "everyIntervalByFreq": {
+      "daily": "Mỗi %{smart_count} ngày",
+      "weekly": "Mỗi %{smart_count} tuần",
+      "monthly": "Mỗi %{smart_count} tháng",
+      "yearly": "Mỗi %{smart_count} năm"
+    },
+    "forOccurrences": "trong %{smart_count} lần",
     "until": "đến %{date}",
     "days": "ngày",
     "months": "tháng",
@@ -438,7 +444,9 @@
     "reconnected": "Cập nhật thời gian thực đã hoạt động trở lại.",
     "error": "Đã xảy ra sự cố với cập nhật thời gian thực: %{error}",
     "closedUnexpectedly": "Cập nhật thời gian thực đã bị gián đoạn. Đang thử kết nối lại…",
-    "importCompleted": "Nhập dữ liệu hoàn tất. Đã nhập %{succeedCount} mục, %{failedCount} lỗi",
+    "importCompleted": "Nhập dữ liệu hoàn tất. %{imported}, %{errors}",
+    "importedItems": "Đã nhập %{smart_count} mục",
+    "importErrors": "%{smart_count} lỗi",
     "importFailed": "Nhập dữ liệu thất bại."
   },
   "months": {
