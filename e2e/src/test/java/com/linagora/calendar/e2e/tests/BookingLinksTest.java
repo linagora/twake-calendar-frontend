@@ -292,4 +292,20 @@ class BookingLinksTest extends TwakeCalendarE2ETest {
                 .containsIgnoringCase("meet");
         });
     }
+
+    @Test
+    @DisplayName("BOOK-23 A new schedule shows its owner as busy by default")
+    void aNewScheduleShowsItsOwnerAsBusyByDefault(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String name = uniqueName("Busy by default");
+
+        AppointmentModal modal = calendar.createBookingLink().name(name).moreOptions();
+
+        assertThat(modal.showMeAs())
+            .as("a free booking leaves the slot open to be booked again")
+            .isEqualTo("Busy");
+        modal.save();
+        PlaywrightAssertions.assertThat(calendar.bookingLinkChip(name).first()).isVisible();
+        assertThat(calendar.bookingLinksJson()).contains("\"transparency\":\"OPAQUE\"");
+    }
 }

@@ -172,7 +172,7 @@ const defaultFormState = (
   attendees: [],
   location: '',
   alarms: new Valarms(),
-  busy: 'TRANSPARENT',
+  busy: 'OPAQUE',
   eventClass: 'PUBLIC',
   selectedResources: []
 })

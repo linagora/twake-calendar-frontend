@@ -115,7 +115,7 @@ public class AppointmentModal {
 
     /**
      * The "Show me as" choice: whether the events this schedule creates make the owner busy.
-     * It defaults to Free, which lets the very same slot be booked more than once.
+     * It defaults to Busy: Free would let the very same slot be booked more than once.
      */
     public AppointmentModal showMeAs(String label) {
         Locator combo = page.locator(
