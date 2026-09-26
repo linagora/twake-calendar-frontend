@@ -26,4 +26,18 @@ describe('oldestSyncToken', () => {
   it('keeps the held token when the tokens cannot be compared', () => {
     expect(oldestSyncToken('opaque-a', 'opaque-b')).toBe('opaque-a')
   })
+
+  it('does not read a sequence out of a token that merely ends with digits', () => {
+    expect(oldestSyncToken('opaque-10', 'opaque-2')).toBe('opaque-10')
+  })
+
+  it('keeps the held token when the incoming one is malformed', () => {
+    expect(oldestSyncToken(token(4), 'http://sabre.io/ns/sync/')).toBe(token(4))
+  })
+
+  it('does not compare sequences across namespaces', () => {
+    expect(oldestSyncToken(token(4), 'http://other.example/ns/sync/1')).toBe(
+      token(4)
+    )
+  })
 })
