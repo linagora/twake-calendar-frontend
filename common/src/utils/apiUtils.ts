@@ -21,6 +21,12 @@ const RETRY_CONFIG = {
   maxDelay: 120000
 }
 
+// ky also retries PUT and DELETE by default. A failed event PUT was then
+// silently replayed for minutes while the user saw nothing, and re-creating
+// the event produced a duplicate once a replay went through. Only safe
+// methods are retried: writes fail fast so the caller can report them.
+const RETRIED_METHODS = ['get', 'head', 'options', 'trace']
+
 let isRedirectingToSso = false
 
 const redirectSSO = async (
@@ -75,6 +81,7 @@ export const api: KyInstance = ky.extend({
   prefixUrl: window.CALENDAR_BASE_URL,
   retry: {
     limit: RETRY_CONFIG.maxRetries,
+    methods: RETRIED_METHODS,
     backoffLimit: RETRY_CONFIG.maxDelay,
     delay: attemptCount =>
       getRetryDelay(attemptCount - 1, {
