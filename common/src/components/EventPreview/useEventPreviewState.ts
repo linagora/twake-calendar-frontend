@@ -18,6 +18,9 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { useMemo, useState } from 'react'
 import { useEventUpdateModalReopen } from './useEventUpdateModalReopen'
 
+const isMaskedClassification = (classification?: string): boolean =>
+  classification === 'PRIVATE' || classification === 'CONFIDENTIAL'
+
 interface StoredEventReopenData {
   eventId: string
   calId: string
@@ -37,6 +40,7 @@ interface UseEventPreviewStateReturn {
   isOrganizer: boolean
   isNotPrivate: boolean
   canEdit: boolean
+  canModify: boolean
   organizerWritableCalendar: Calendar | undefined
   openUpdateModal: boolean
   openSettingsUpdateModal: boolean
@@ -146,10 +150,12 @@ export function useEventPreviewState(
   const isOrganizer = event?.organizer
     ? isEventOrganiser(event, effectiveEmail, calendar)
     : isOwn
-  const isNotPrivate =
-    event?.class !== 'PRIVATE' && event?.class !== 'CONFIDENTIAL'
+  const isNotPrivate = !isMaskedClassification(event?.class)
 
-  const canEdit = isOrganizer && (isOwn || (isWriteDelegated && isNotPrivate))
+  // Private events of a delegated calendar are served masked ("Busy", details
+  // stripped): writing them back would overwrite the owner's real content.
+  const canModify = isOwn || (isWriteDelegated && isNotPrivate)
+  const canEdit = isOrganizer && canModify
 
   // If the user cannot edit here but has write access to the organizer's delegated
   // calendar, surface a shortcut so they don't have to hunt for the source event.
@@ -161,7 +167,8 @@ export function useEventPreviewState(
             cal.delegated &&
             cal.access?.write &&
             cal.owner?.emails?.some(e => e.toLowerCase() === organizerEmail) &&
-            cal.events[eventId] !== undefined
+            cal.events[eventId] !== undefined &&
+            !isMaskedClassification(cal.events[eventId].class)
         )
       : undefined
 
@@ -327,6 +334,7 @@ export function useEventPreviewState(
     isOrganizer,
     isNotPrivate,
     canEdit,
+    canModify,
     organizerWritableCalendar,
 
     // Modal state

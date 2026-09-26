@@ -34,10 +34,10 @@ const EventPreviewModal: React.FC<{
     contextualizedEvent,
     attendanceUser,
     isOwn,
-    isWriteDelegated,
     isOrganizer,
     isNotPrivate,
     canEdit,
+    canModify,
     organizerWritableCalendar,
     openUpdateModal,
     openSettingsUpdateModal,
@@ -103,9 +103,9 @@ const EventPreviewModal: React.FC<{
       eventId={eventId}
       isOrganizer={isOrganizer}
       isOwn={isOwn}
-      isWriteDelegated={isWriteDelegated}
       isNotPrivate={isNotPrivate}
       canEdit={canEdit}
+      canDelete={canModify}
       onDelete={() => void handleDeleteClick()}
       onClose={() => onClose({}, 'backdropClick')}
       onEdit={handleEditClick}
@@ -126,7 +126,6 @@ const EventPreviewModal: React.FC<{
     />
   )
 
-  const canModifyCalendar = isOwn || isWriteDelegated
   const hasMultipleAttendees = (event?.attendee?.length ?? 0) > 1
 
   return (
@@ -171,17 +170,17 @@ const EventPreviewModal: React.FC<{
           calendarid={calendarid}
           setCalendarid={handleCalendarMove}
           userPersonalCalendars={
-            !canModifyCalendar ? [calendar] : userPersonalCalendars
+            !canModify ? [calendar] : userPersonalCalendars
           }
           showMore={false}
-          disabled={!canModifyCalendar}
+          disabled={!canModify}
         />
       </ResponsiveDialog>
 
       {/* Action menu (more vert) */}
       <EventPreviewActionMenu
         anchorEl={toggleActionMenu}
-        isEditable={canModifyCalendar && hasMultipleAttendees}
+        isEditable={canModify && hasMultipleAttendees}
         event={event}
         userEmail={user.email}
         onClose={() => setToggleActionMenu(null)}

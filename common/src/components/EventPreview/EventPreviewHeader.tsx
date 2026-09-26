@@ -15,9 +15,9 @@ interface EventPreviewHeaderProps {
   eventId: string
   isOrganizer: boolean
   isOwn: boolean
-  isWriteDelegated: boolean
   isNotPrivate: boolean
   canEdit: boolean
+  canDelete: boolean
   onClose: () => void
   onEdit: () => void
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void
@@ -30,9 +30,9 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
   event,
   eventId,
   isOwn,
-  isWriteDelegated,
   isNotPrivate,
   canEdit,
+  canDelete,
   onClose,
   onEdit,
   onMoreClick,
@@ -97,7 +97,7 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
           </IconButton>
         </Tooltip>
       )}
-      {(isOwn || isWriteDelegated) && (
+      {canDelete && (
         <Tooltip title={t('tooltip.deleteEvent')}>
           <IconButton
             size="small"

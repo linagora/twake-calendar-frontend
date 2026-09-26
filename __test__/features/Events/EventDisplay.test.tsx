@@ -1703,9 +1703,40 @@ describe('Event Preview Display', () => {
         )
         expect(screen.queryByTestId('EditIcon')).not.toBeInTheDocument()
       })
+
+      it.each(['PRIVATE', 'CONFIDENTIAL'])(
+        'does not offer to edit a masked %s event of a write-delegated calendar',
+        classification => {
+          renderWithProviders(
+            <EventPreviewModal
+              eventId="event-1"
+              calId="user2/cal1"
+              open={true}
+              onClose={mockOnClose}
+            />,
+            makeDelegatedState({ title: 'Busy', class: classification })
+          )
+          expect(screen.queryByTestId('EditIcon')).not.toBeInTheDocument()
+        }
+      )
     })
 
     describe('delete menu item visibility', () => {
+      it('does not show delete option on a masked private event of a write-delegated calendar', () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({ title: 'Busy', class: 'PRIVATE' })
+        )
+        expect(
+          screen.queryByLabelText('eventPreview.deleteEvent')
+        ).not.toBeInTheDocument()
+      })
+
       it('shows delete option when calendar is write-delegated', () => {
         renderWithProviders(
           <EventPreviewModal
