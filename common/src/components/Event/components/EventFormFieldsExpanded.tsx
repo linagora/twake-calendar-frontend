@@ -13,6 +13,11 @@ import { OrganizerSelectField } from '../fields/OrganizerSelectField'
 import { Calendar } from '@common/types/CalendarTypes'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
+import { FreeBusyIndicator } from '@common/components/Attendees/FreeBusyIndicator'
+import {
+  resourceKey,
+  useResourcesFreeBusy
+} from '@common/components/Attendees/useResourcesFreeBusy'
 
 interface EventFormFieldsExpandedProps {
   alarms: Valarms
@@ -30,6 +35,59 @@ interface EventFormFieldsExpandedProps {
   isDisableOrganizerSelection?: boolean
   setSelectedOrganizer?: (organizer: userOrganiser) => void
   selectedOrganizer?: userOrganiser
+  start?: string
+  end?: string
+  timezone?: string
+  eventUid?: string | null
+}
+
+interface ResourceFieldProps {
+  selectedResources: Resource[]
+  setSelectedResources: (resources: Resource[]) => void
+  start?: string
+  end?: string
+  timezone?: string
+  eventUid?: string | null
+}
+
+const ResourceField: React.FC<ResourceFieldProps> = ({
+  selectedResources,
+  setSelectedResources,
+  start,
+  end,
+  timezone,
+  eventUid
+}) => {
+  const inputSize = useResponsiveInputSize()
+  const statusMap = useResourcesFreeBusy({
+    resources: selectedResources,
+    start,
+    end,
+    timezone,
+    eventUid
+  })
+
+  return (
+    <ResourceSearch
+      objectTypes={['resource']}
+      selectedResources={selectedResources}
+      inputSlot={params => <TextField {...params} size={inputSize} />}
+      onChange={(_event: React.SyntheticEvent, value: Resource[]) =>
+        setSelectedResources(value)
+      }
+      hideLabel={true}
+      getChipIcon={(resource): JSX.Element =>
+        start && end ? (
+          <FreeBusyIndicator
+            status={statusMap[resourceKey(resource)] ?? 'unknown'}
+            isResource
+          />
+        ) : (
+          <></>
+        )
+      }
+    />
+  )
 }
 
 export const EventFormFieldsExpanded: React.FC<
@@ -49,7 +107,11 @@ export const EventFormFieldsExpanded: React.FC<
   userOrganizer,
   selectedCalendar,
   isTeamCalendar,
-  isDisableOrganizerSelection
+  isDisableOrganizerSelection,
+  start,
+  end,
+  timezone,
+  eventUid
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -80,14 +142,13 @@ export const EventFormFieldsExpanded: React.FC<
           isExpanded={showMore && !isMobile}
         >
           <FormControl fullWidth margin="dense" size={inputSize}>
-            <ResourceSearch
-              objectTypes={['resource']}
+            <ResourceField
               selectedResources={selectedResources}
-              inputSlot={params => <TextField {...params} size={inputSize} />}
-              onChange={(_event: React.SyntheticEvent, value: Resource[]) =>
-                setSelectedResources(value)
-              }
-              hideLabel={true}
+              setSelectedResources={setSelectedResources}
+              start={start}
+              end={end}
+              timezone={timezone}
+              eventUid={eventUid}
             />
           </FormControl>
         </FieldWithLabel>

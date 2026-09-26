@@ -174,7 +174,9 @@
       "busy": "This person is busy",
       "busyCalOwner": "You have another event at this time",
       "free": "User is free",
-      "loading": "Status is loading"
+      "loading": "Status is loading",
+      "resourceBusy": "This resource is already booked",
+      "resourceUnknown": "Can't show this resource's availability."
     },
     "form": {
       "title": "Title",

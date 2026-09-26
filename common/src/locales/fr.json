@@ -174,7 +174,9 @@
       "busy": "Cette personne est occupée",
       "busyCalOwner": "Vous avez un autre événement à cette heure-ci",
       "free": "L'utilisateur est disponible",
-      "loading": "Chargement du statut"
+      "loading": "Chargement du statut",
+      "resourceBusy": "Cette ressource est déjà réservée",
+      "resourceUnknown": "Impossible d'afficher la disponibilité de cette ressource."
     },
     "form": {
       "title": "Titre",

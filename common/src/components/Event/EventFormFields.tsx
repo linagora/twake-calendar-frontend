@@ -345,6 +345,10 @@ const EventFormFields = forwardRef<EventFormHandle, EventFormFieldsProps>(
           isDisableOrganizerSelection={typeOfAction === 'solo'}
           setSelectedOrganizer={setOrganizer}
           selectedOrganizer={v.organizer}
+          start={v.start}
+          end={v.end}
+          timezone={v.timezone}
+          eventUid={eventId}
         />
       </React.Fragment>
     )

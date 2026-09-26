@@ -20,6 +20,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   HTMLAttributes,
   useCallback,
+  type ReactElement,
   type ReactNode,
   type SyntheticEvent
 } from 'react'
@@ -52,7 +53,8 @@ export function ResourceSearch({
   inputSlot,
   customRenderInput,
   customSlotProps,
-  hideLabel
+  hideLabel,
+  getChipIcon
 }: {
   selectedResources: Resource[]
   onChange: (event: SyntheticEvent, users: Resource[]) => void
@@ -73,6 +75,7 @@ export function ResourceSearch({
     listbox?: Partial<HTMLAttributes<HTMLUListElement>>
   }
   hideLabel?: boolean
+  getChipIcon?: (resource: Resource) => ReactElement
 }) {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('resourceSearch.placeholder')
@@ -314,6 +317,7 @@ export function ResourceSearch({
                   color: textColor
                 }}
                 label={label}
+                icon={isString ? undefined : getChipIcon?.(option)}
               />
             )
           })

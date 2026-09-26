@@ -3,6 +3,7 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -32,6 +33,8 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions;
  */
 class ResourcesTest extends TwakeCalendarE2ETest {
     private static final long PROPAGATION_MS = 60_000;
+    private static final String BOOKED = "This resource is already booked";
+    private static final String FREE = "";
 
     private static String unique(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
@@ -420,6 +423,67 @@ class ResourcesTest extends TwakeCalendarE2ETest {
             assertThat(probe.singleEvent(user))
                 .as("a room taken off an event is no longer booked by it")
                 .doesNotContain("CUTYPE=RESOURCE"));
+    }
+
+    /** Saves an event booking the room on a given day, at the given local times. */
+    private void bookAt(CalendarPage calendar, String title, String room, LocalDate day,
+                        String from, String to) {
+        calendar.createEvent().title(title).expand()
+            .startDate(day).endDate(day).startTime(from).endTime(to)
+            .addResource(room).save();
+        calendar.eventCard(title).first().waitFor();
+    }
+
+    @Test
+    @DisplayName("RES-19 A room already booked at that hour is flagged when booking it again")
+    void aRoomAlreadyBookedIsFlaggedWhenBookingItAgain(Page page, E2EUser user,
+                                                      ResourceProbe resources,
+                                                      CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        LocalDate day = calendar.browserToday();
+        // a short name on purpose: the chip that carries it is width capped
+        String room = "Room " + UUID.randomUUID().toString().substring(0, 6);
+        resources.create(room, "A room", user);
+        awaitResourceVisible(page, room);
+        bookAt(calendar, unique("First come"), room, day, "11:00", "12:00");
+        Awaitility.await().atMost(Duration.ofMillis(PROPAGATION_MS)).untilAsserted(() ->
+            assertThat(resourceLineIn(probe, user))
+                .as("the room has to be taken before somebody else tries to book it")
+                .contains("PARTSTAT=ACCEPTED"));
+
+        EventFormModal form = calendar.createEvent().title(unique("First served")).expand()
+            .startDate(day).endDate(day).startTime("11:00").endTime("12:00")
+            .addResource(room);
+
+        form.awaitAvailabilityOfResource(room, BOOKED,
+            "a room another event holds at that hour is not available for this one");
+        form.cancel();
+    }
+
+    @Test
+    @DisplayName("RES-20 The event holding a room does not make it look taken to itself")
+    void theEventHoldingARoomDoesNotMakeItLookTaken(Page page, E2EUser user,
+                                                    ResourceProbe resources) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        LocalDate day = calendar.browserToday();
+        String room = "Room " + UUID.randomUUID().toString().substring(0, 6);
+        resources.create(room, "A room", user);
+        awaitResourceVisible(page, room);
+        String title = unique("Holding the room");
+        bookAt(calendar, title, room, day, "11:00", "12:00");
+        bookAt(calendar, unique("Later in the room"), room, day, "14:00", "15:00");
+
+        EventFormModal form = calendar.openEvent(title).edit().expand();
+        // moved onto the other booking first: that the room shows taken there proves its
+        // availability is computed, so that the free answer below is not merely "not yet"
+        form.startTime("14:00").endTime("15:00");
+        form.awaitAvailabilityOfResource(room, BOOKED,
+            "the room is held by another event at two");
+        form.startTime("11:00").endTime("12:00");
+
+        form.awaitAvailabilityOfResource(room, FREE,
+            "the only event holding the room at eleven is the one being edited");
+        form.cancel();
     }
 
     @Test

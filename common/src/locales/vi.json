@@ -174,7 +174,9 @@
       "busy": "Người này hiện đang bận",
       "busyCalOwner": "Bạn có một sự kiện khác vào thời gian này",
       "free": "Người dùng đang rảnh",
-      "loading": "Đang tải trạng thái"
+      "loading": "Đang tải trạng thái",
+      "resourceBusy": "Tài nguyên này đã được đặt",
+      "resourceUnknown": "Không thể hiển thị lịch của tài nguyên này."
     },
     "form": {
       "title": "Tiêu đề",

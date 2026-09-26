@@ -7,15 +7,24 @@ import { FreeBusyStatus } from './useFreeBusy'
 interface FreeBusyIndicatorProps {
   status: FreeBusyStatus
   size?: number
+  isResource?: boolean
+}
+
+function labelKey(status: FreeBusyStatus, isResource: boolean): string {
+  if (!isResource) return `event.freeBusy.${status}`
+  return status === 'busy'
+    ? 'event.freeBusy.resourceBusy'
+    : 'event.freeBusy.resourceUnknown'
 }
 
 export const FreeBusyIndicator: React.FC<FreeBusyIndicatorProps> = ({
-  status
+  status,
+  isResource = false
 }) => {
   const { t } = useI18n()
   if (!['busy', 'unknown', 'contact'].includes(status)) return null
 
-  const label = t(`event.freeBusy.${status}`)
+  const label = t(labelKey(status, isResource))
   const StatusIcon =
     status === 'busy' ? AccessTimeFilledIcon : HelpOutlineOutlinedIcon
 

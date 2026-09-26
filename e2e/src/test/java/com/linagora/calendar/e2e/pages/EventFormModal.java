@@ -465,6 +465,14 @@ public class EventFormModal {
         return dialog().getByPlaceholder("Search by name");
     }
 
+    /**
+     * Waits for the availability shown on the chip of a booked resource, found by its name as
+     * a guest is by their email: the indicator is the same, only its wording differs.
+     */
+    public EventFormModal awaitAvailabilityOfResource(String name, String expected, String because) {
+        return awaitAvailabilityOf(name, expected, because);
+    }
+
     /** Types a guest without validating, to cover what happens when the field loses focus. */
     public EventFormModal typeGuest(String email) {
         Locator guests = page.getByPlaceholder("Add participants");
