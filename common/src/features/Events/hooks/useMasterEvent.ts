@@ -2,6 +2,14 @@ import { useState, useEffect, useMemo } from 'react'
 import { fetchEvent } from '@common/features/Events/EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
+import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
+import { findFieldValue } from '@common/features/Events/utils'
+
+const isOverride = ([name, props]: VCalComponent): boolean =>
+  name.toLowerCase() === 'vevent' && !!findFieldValue(props, 'recurrence-id')
+
+const hasOverride = (jCal: VCalComponent): boolean =>
+  (jCal?.[2] ?? []).some(isOverride)
 
 export function useMasterEvent(
   event: CalendarEvent | null | undefined,
@@ -11,11 +19,14 @@ export function useMasterEvent(
   masterEvent: CalendarEvent | null
   isLoadingMasterEvent: boolean
   effectiveEvent: CalendarEvent | null | undefined
+  hasOverrides: boolean
 } {
   const [masterEvent, setMasterEvent] = useState<CalendarEvent | null>(null)
   const [isLoadingMasterEvent, setIsLoadingMasterEvent] = useState(false)
+  const [hasOverrides, setHasOverrides] = useState(false)
 
   useEffect(() => {
+    setHasOverrides(false)
     if (!event || !open || typeOfAction !== 'all') {
       setMasterEvent(null)
       setIsLoadingMasterEvent(false)
@@ -44,7 +55,10 @@ export function useMasterEvent(
         const response = await fetchEvent(masterEventToFetch)
         const fetched = parseFetchedEvent(masterEventToFetch, response, true)
 
-        if (!cancelled) setMasterEvent(fetched)
+        if (!cancelled) {
+          setMasterEvent(fetched)
+          setHasOverrides(hasOverride(response))
+        }
       } catch (err) {
         console.error('Failed to fetch master event:', err)
         if (!cancelled) setMasterEvent(event)
@@ -68,5 +82,5 @@ export function useMasterEvent(
     return shouldShowMaster ? masterEvent : event
   }, [typeOfAction, masterEvent, isLoadingMasterEvent, event])
 
-  return { masterEvent, isLoadingMasterEvent, effectiveEvent }
+  return { masterEvent, isLoadingMasterEvent, effectiveEvent, hasOverrides }
 }

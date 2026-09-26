@@ -623,4 +623,229 @@ describe('makeSeriesJCal', () => {
     const override = getOverrideFromJCal(jCal)
     expect(override).toBeUndefined()
   })
+
+  describe('series stored with EXDATE and overrides (#1430)', () => {
+    // Weekly on Sundays 10:00 Paris, crossing the DST change of 25/10/2026:
+    // the 18/10 occurrence was deleted, the 01/11 one got a new title, and the
+    // 25/10 one was moved to 14:00
+    const parisSeries: VCalComponent[] = [
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          [
+            'dtstart',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-11T10:00:00'
+          ],
+          [
+            'dtend',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-11T11:00:00'
+          ],
+          ['rrule', {}, 'recur', { freq: 'WEEKLY', count: 5 }],
+          ['summary', {}, 'text', 'Series'],
+          [
+            'exdate',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-18T10:00:00'
+          ],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          [
+            'recurrence-id',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-11-01T10:00:00'
+          ],
+          [
+            'dtstart',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-11-01T10:00:00'
+          ],
+          [
+            'dtend',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-11-01T11:00:00'
+          ],
+          ['summary', {}, 'text', 'EXC'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ],
+      [
+        'vevent',
+        [
+          ['uid', {}, 'text', 'event1'],
+          [
+            'recurrence-id',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-25T10:00:00'
+          ],
+          [
+            'dtstart',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-25T14:00:00'
+          ],
+          [
+            'dtend',
+            { tzid: 'Europe/Paris' },
+            'date-time',
+            '2026-10-25T15:00:00'
+          ],
+          ['summary', {}, 'text', 'Series'],
+          ['sequence', {}, 'integer', 1]
+        ],
+        []
+      ]
+    ]
+
+    const parisEvent = {
+      ...mockEvent,
+      timezone: 'Europe/Paris',
+      title: 'Series',
+      start: '2026-10-11T08:00:00.000Z',
+      end: '2026-10-11T09:00:00.000Z'
+    } as CalendarEvent
+
+    const vevents = (jCal: any) => jCal[2].filter(([n]: any) => n === 'vevent')
+
+    const master = (jCal: any) =>
+      vevents(jCal).find(
+        ([, props]: any) => !props.some(([k]: any) => k === 'recurrence-id')
+      )
+
+    const overrideOf = (jCal: any, recurrenceId: string) =>
+      vevents(jCal).find(([, props]: any) =>
+        props.some(
+          ([k, , , v]: any) => k === 'recurrence-id' && v === recurrenceId
+        )
+      )
+
+    const valuesOf = (vevent: any, key: string) =>
+      vevent[1].filter(([k]: any) => k === key).map(([, , , v]: any) => v)
+
+    it('keeps the stored EXDATE when the edited event carries none', () => {
+      const jCal = makeSeriesJCal(
+        parisSeries,
+        { ...parisEvent, title: 'Renamed' },
+        { removeOverrides: false }
+      )
+
+      expect(valuesOf(master(jCal), 'exdate')).toEqual(['2026-10-18T10:00:00'])
+    })
+
+    it('keeps the overrides and their own title on a rename', () => {
+      const jCal = makeSeriesJCal(
+        parisSeries,
+        { ...parisEvent, title: 'Renamed' },
+        { removeOverrides: false }
+      )
+
+      expect(vevents(jCal)).toHaveLength(3)
+      expect(
+        valuesOf(overrideOf(jCal, '2026-11-01T10:00:00'), 'summary')
+      ).toEqual(['EXC'])
+      expect(
+        valuesOf(overrideOf(jCal, '2026-10-25T10:00:00'), 'summary')
+      ).toEqual(['Renamed'])
+    })
+
+    it('leaves overrides and EXDATE in place without followTimeChange', () => {
+      const jCal = makeSeriesJCal(
+        parisSeries,
+        {
+          ...parisEvent,
+          start: '2026-10-11T09:00:00.000Z',
+          end: '2026-10-11T10:00:00.000Z'
+        },
+        { removeOverrides: false }
+      )
+
+      expect(valuesOf(master(jCal), 'exdate')).toEqual(['2026-10-18T10:00:00'])
+      expect(overrideOf(jCal, '2026-11-01T10:00:00')).toBeDefined()
+    })
+
+    it('moves overrides and EXDATE with the time of the series', () => {
+      // 10:00 -> 11:00 Paris, which is 09:00Z before the DST change
+      const jCal = makeSeriesJCal(
+        parisSeries,
+        {
+          ...parisEvent,
+          start: '2026-10-11T09:00:00.000Z',
+          end: '2026-10-11T10:00:00.000Z'
+        },
+        { removeOverrides: false, followTimeChange: true }
+      )
+
+      expect(valuesOf(master(jCal), 'exdate')).toEqual(['2026-10-18T11:00:00'])
+
+      // Renamed occurrence, after the DST change: still 11:00 local time
+      const renamed = overrideOf(jCal, '2026-11-01T11:00:00')
+      expect(valuesOf(renamed, 'dtstart')).toEqual(['2026-11-01T11:00:00'])
+      expect(valuesOf(renamed, 'dtend')).toEqual(['2026-11-01T12:00:00'])
+      expect(valuesOf(renamed, 'summary')).toEqual(['EXC'])
+      expect(valuesOf(renamed, 'sequence')).toEqual([2])
+
+      // Rescheduled occurrence: re-anchored, but keeps its own time
+      const moved = overrideOf(jCal, '2026-10-25T11:00:00')
+      expect(valuesOf(moved, 'dtstart')).toEqual(['2026-10-25T14:00:00'])
+      expect(valuesOf(moved, 'dtend')).toEqual(['2026-10-25T15:00:00'])
+    })
+
+    it('moves UTC recurrence ids by the wall clock shift', () => {
+      const utcSeries: VCalComponent[] = [
+        parisSeries[0],
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'event1'],
+            // 01/11 10:00 Paris (winter time)
+            ['recurrence-id', {}, 'date-time', '2026-11-01T09:00:00Z'],
+            ['dtstart', {}, 'date-time', '2026-11-01T09:00:00Z'],
+            ['dtend', {}, 'date-time', '2026-11-01T10:00:00Z'],
+            ['summary', {}, 'text', 'EXC']
+          ],
+          []
+        ]
+      ]
+
+      const jCal = makeSeriesJCal(
+        utcSeries,
+        {
+          ...parisEvent,
+          start: '2026-10-11T09:00:00.000Z',
+          end: '2026-10-11T10:00:00.000Z'
+        },
+        { removeOverrides: false, followTimeChange: true }
+      )
+
+      const renamed = overrideOf(jCal, '2026-11-01T10:00:00Z')
+      expect(valuesOf(renamed, 'dtstart')).toEqual(['2026-11-01T10:00:00Z'])
+    })
+
+    it('drops overrides and EXDATE when asked to', () => {
+      const jCal = makeSeriesJCal(
+        parisSeries,
+        { ...parisEvent, exdates: [] },
+        { removeOverrides: true }
+      )
+
+      expect(vevents(jCal)).toHaveLength(1)
+      expect(valuesOf(master(jCal), 'exdate')).toEqual([])
+    })
+  })
 })

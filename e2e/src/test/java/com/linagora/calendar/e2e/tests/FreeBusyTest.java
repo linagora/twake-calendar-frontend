@@ -68,7 +68,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
         for (String guest : guests) {
             form.addGuest(guest);
         }
-        form.expand().startDate(day).endDate(day).startTime(from).endTime(to);
+        form.expand().at(day, from, to);
         // Availability is computed for the hour the event is at, so a time fill that did not
         // take would send every assertion here looking at the wrong hour and report a guest as
         // free. Check it landed before saving, rather than debug it afterwards.
@@ -150,7 +150,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
         CalendarPage mateCalendar = sessions.openFor(mate);
         String own = unique("Not really busy");
         mateCalendar.createEvent().title(own).expand()
-            .startDate(day).endDate(day).startTime("11:00").endTime("12:00")
+            .at(day, "11:00", "12:00")
             .showMeAs("Free").save();
         mateCalendar.eventCard(own).first().waitFor();
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", mate.email());
@@ -170,7 +170,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
         CalendarPage mateCalendar = sessions.openFor(mate);
         String own = unique("Genuinely busy");
         mateCalendar.createEvent().title(own).expand()
-            .startDate(day).endDate(day).startTime("11:00").endTime("12:00")
+            .at(day, "11:00", "12:00")
             .showMeAs("Busy").save();
         mateCalendar.eventCard(own).first().waitFor();
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", mate.email());
@@ -190,7 +190,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
         CalendarPage mateCalendar = sessions.openFor(mate);
         String series = unique("Daily busy");
         EventFormModal own = mateCalendar.createEvent().title(series).expand()
-            .startDate(day).endDate(day).startTime("11:00").endTime("12:00");
+            .at(day, "11:00", "12:00");
         own.repeat().frequency(com.linagora.calendar.e2e.pages.RecurrenceSection.DAILY)
             .endsAfter(5);
         own.save();

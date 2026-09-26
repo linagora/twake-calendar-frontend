@@ -21,6 +21,7 @@ export function detectRecurringEventChanges(
   timeChanged: boolean
   timezoneChanged: boolean
   repetitionRulesChanged: boolean
+  recurrenceChanged: boolean
 } {
   const oldTimezone = resolveTimezone(oldEvent.timezone || 'UTC')
   const newTimezone = resolveTimezone(newData.timezone || 'UTC')
@@ -44,16 +45,20 @@ export function detectRecurringEventChanges(
 
   const timeChanged = oldStartTime !== newStartTime || oldEndTime !== newEndTime
 
-  const repetitionRulesChanged =
+  // The set of occurrences changes with the rule, the zone or the all-day
+  // flag. A new time of day only moves each occurrence within its own day.
+  const recurrenceChanged =
     JSON.stringify(normalizeRepetition(oldEvent.repetition)) !==
       JSON.stringify(normalizeRepetition(newData.repetition)) ||
     timezoneChanged ||
-    oldEvent.allday !== newData.allday ||
-    timeChanged
+    oldEvent.allday !== newData.allday
+
+  const repetitionRulesChanged = recurrenceChanged || timeChanged
 
   return {
     timeChanged,
     timezoneChanged,
-    repetitionRulesChanged
+    repetitionRulesChanged,
+    recurrenceChanged
   }
 }

@@ -143,6 +143,29 @@ public class EventFormModal {
         return this;
     }
 
+    public String endDate() {
+        return page.getByTestId("end-date-input").inputValue();
+    }
+
+    /**
+     * Puts the event on {@code day}, from {@code from} to {@code to}.
+     *
+     * <p>The times go first. The form opens on the next round hour, one hour long, which from
+     * 22:00 on ends tomorrow: setting the end date to the start one then puts the end before the
+     * start, and the form keeps the duration by moving the start back to the day before. Once
+     * the times are set, the end follows the start date and nothing crosses midnight any more.
+     */
+    public EventFormModal at(java.time.LocalDate day, String from, String to) {
+        startTime(from).endTime(to).startDate(day).endDate(day);
+        java.time.LocalDate start = CalendarPage.parseLongDate(startDate());
+        java.time.LocalDate end = CalendarPage.parseLongDate(endDate());
+        if (!start.equals(day) || !end.equals(day)) {
+            throw new AssertionError("The event was meant to be on " + day
+                + ", the form puts it from " + start + " to " + end);
+        }
+        return this;
+    }
+
     /**
      * The repeat panel, enabling the recurrence if it is not on yet.
      *

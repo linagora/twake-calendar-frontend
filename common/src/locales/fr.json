@@ -187,6 +187,7 @@
       "end": "Fin",
       "allDay": "Toute la journée",
       "repeat": "Répéter",
+      "seriesOverridesWarning": "Certaines occurrences de cette série ont été modifiées individuellement. Changer la date, la répétition ou le fuseau horaire de la série supprime ces modifications.",
       "timezone": "Fuseau horaire",
       "timezonePlaceholder": "Sélectionner un fuseau horaire",
       "addGuestsPlaceholder": "Ajouter des participants",

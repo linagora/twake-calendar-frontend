@@ -478,6 +478,94 @@ describe('refreshCalendarWithSyncToken', () => {
     expect(state.list[mockCalendar.id].events['event1']).toBeUndefined()
   })
 
+  it('should clear the fetch cache when cached occurrences are replaced', async () => {
+    const calendarWithRecurringEvent = {
+      ...mockCalendar,
+      events: {
+        'recurring-base/20240108': {
+          uid: 'recurring-base/20240108',
+          title: 'Recurring Event Instance',
+          start: '2024-01-08T10:00:00',
+          end: '2024-01-08T11:00:00',
+          calId: 'user1/cal1',
+          URL: '/calendars/user1/cal1/recurring-base.ics'
+        } as CalendarEvent,
+        'recurring-base/20240212': {
+          uid: 'recurring-base/20240212',
+          title: 'Recurring Event Instance',
+          start: '2024-02-12T10:00:00',
+          end: '2024-02-12T11:00:00',
+          calId: 'user1/cal1',
+          URL: '/calendars/user1/cal1/recurring-base.ics'
+        } as CalendarEvent
+      }
+    }
+
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue({
+      'sync-token': 'new-token',
+      _embedded: {
+        'dav:item': [
+          {
+            status: 200,
+            _links: {
+              self: { href: '/calendars/user1/cal1/recurring-base.ics' }
+            }
+          }
+        ]
+      }
+    })
+    ;(EventDao.reportEvent as jest.Mock).mockResolvedValue({
+      data: [null, null, []],
+      _links: {
+        self: { href: '/calendars/user1/cal1/recurring-base.ics' }
+      }
+    })
+
+    const store = configureStore({
+      reducer: { calendars: reducer },
+      preloadedState: {
+        calendars: {
+          list: { [calendarWithRecurringEvent.id]: calendarWithRecurringEvent },
+          templist: {},
+          pending: false,
+          error: null
+        }
+      }
+    })
+
+    await store.dispatch(
+      refreshCalendarWithSyncToken({
+        calendar: calendarWithRecurringEvent,
+        calendarRange
+      })
+    )
+
+    // The occurrence of February lies outside of the refreshed range: it is
+    // dropped, and the loader has to fetch it again
+    const calendar = store.getState().calendars.list[mockCalendar.id]
+    expect(calendar.events['recurring-base/20240212']).toBeUndefined()
+    expect(calendar.lastCacheCleared).toEqual(expect.any(Number))
+  })
+
+  it('should keep the fetch cache when nothing is removed', async () => {
+    ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue({
+      'sync-token': 'new-token',
+      _embedded: { 'dav:item': [] }
+    })
+
+    const store = storeFactory()
+    await store.dispatch(
+      refreshCalendarWithSyncToken({
+        calendar: mockCalendar,
+        calendarRange
+      })
+    )
+
+    expect(
+      store.getState().calendars.list[mockCalendar.id].lastCacheCleared
+    ).toBeUndefined()
+  })
+
   it('should add new events to calendar state', async () => {
     const mockSyncResponse = {
       'sync-token': 'new-token',

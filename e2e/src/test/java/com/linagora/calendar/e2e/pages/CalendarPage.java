@@ -97,6 +97,18 @@ public class CalendarPage {
         return new EventPreviewPopover(page).waitUntilOpen();
     }
 
+    /** The card of an event in the grid column of the given day. */
+    public Locator eventCardOn(String title, java.time.LocalDate day) {
+        return page.locator("[data-date='" + day + "'] " + EVENT_CARD)
+            .filter(new Locator.FilterOptions().setHasText(title));
+    }
+
+    /** Opens the occurrence of a series that falls on the given day. */
+    public EventPreviewPopover openEventOn(String title, java.time.LocalDate day) {
+        eventCardOn(title, day).first().click();
+        return new EventPreviewPopover(page).waitUntilOpen();
+    }
+
     /** All day events live in their own row, above the time grid. */
     public Locator allDayEventCards() {
         return page.locator(".fc-daygrid-body " + EVENT_CARD);

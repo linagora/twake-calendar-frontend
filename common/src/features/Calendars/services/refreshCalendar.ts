@@ -103,16 +103,24 @@ export const refreshCalendarWithSyncToken = (
 
         if (syncStatus === 'SUCCESS') {
           const deletedSet = new Set(deletedEvents)
-          Object.values(target.events)
-            .filter(event => deletedSet.has(event.URL))
-            .forEach(event => {
-              delete target.events[event.uid]
-            })
+          const removedEvents = Object.values(target.events).filter(event =>
+            deletedSet.has(event.URL)
+          )
+          removedEvents.forEach(event => {
+            delete target.events[event.uid]
+          })
 
           for (const event of createdOrUpdatedEvents) {
             target.events[event.uid] = event
           }
           target.syncToken = syncToken
+
+          // An updated event is only re-expanded over the displayed range: its
+          // occurrences cached outside of it are gone, so the ranges already
+          // fetched have to be loaded again.
+          if (removedEvents.length > 0 && calType !== 'temp') {
+            target.lastCacheCleared = Date.now()
+          }
         }
       },
       rejected: (state, action) => {

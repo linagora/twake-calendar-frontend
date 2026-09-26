@@ -187,6 +187,7 @@
       "end": "Kết thúc",
       "allDay": "Cả ngày",
       "repeat": "Lặp lại",
+      "seriesOverridesWarning": "Một số lần lặp của chuỗi sự kiện này đã được sửa riêng. Thay đổi ngày, quy tắc lặp lại hoặc múi giờ của chuỗi sẽ hủy các thay đổi này.",
       "timezone": "Múi giờ",
       "timezonePlaceholder": "Chọn múi giờ",
       "addGuestsPlaceholder": "Thêm người tham gia",

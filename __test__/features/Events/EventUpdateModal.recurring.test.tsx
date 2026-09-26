@@ -411,6 +411,125 @@ describe("EventUpdateModal - Recurring Event 'Edit All' Handling", () => {
       })
     })
 
+    it('keeps overrides with a single series write when renaming from a later occurrence', async () => {
+      const masterEvent = {
+        uid: baseUID,
+        title: 'Weekly Meeting',
+        calId,
+        start: '2025-01-15T10:00:00.000Z',
+        end: '2025-01-15T11:00:00.000Z',
+        repetition: { freq: 'weekly', interval: 1 },
+        allday: false,
+        organizer: new userOrganiser({
+          cn: 'test',
+          cal_address: 'test@test.com'
+        }),
+        URL: `/calendars/${calId}/${baseUID}.ics`
+      } as CalendarEvent
+
+      const laterInstance = {
+        ...masterEvent,
+        uid: `${baseUID}/20250129`,
+        start: '2025-01-29T10:00:00.000Z',
+        end: '2025-01-29T11:00:00.000Z'
+      }
+
+      const stateWithSeries = {
+        ...preloadedState,
+        calendars: {
+          ...preloadedState.calendars,
+          list: {
+            [calId]: {
+              ...preloadedState.calendars.list[calId],
+              events: {
+                [`${baseUID}/20250122`]: {
+                  ...masterEvent,
+                  uid: `${baseUID}/20250122`,
+                  title: 'EXC'
+                },
+                [`${baseUID}/20250129`]: laterInstance
+              }
+            }
+          }
+        }
+      }
+
+      jest
+        .spyOn(EventDao, 'fetchEvent')
+        .mockResolvedValue(
+          jCalFromIcs(
+            [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'BEGIN:VEVENT',
+              `UID:${baseUID}`,
+              'SUMMARY:Weekly Meeting',
+              'DTSTART:20250115T100000Z',
+              'DTEND:20250115T110000Z',
+              'RRULE:FREQ=WEEKLY;INTERVAL=1',
+              'EXDATE:20250205T100000Z',
+              'END:VEVENT',
+              'BEGIN:VEVENT',
+              `UID:${baseUID}`,
+              'RECURRENCE-ID:20250122T100000Z',
+              'SUMMARY:EXC',
+              'DTSTART:20250122T140000Z',
+              'DTEND:20250122T150000Z',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n')
+          )
+        )
+      const updateSeriesSpy = jest.spyOn(eventThunks, 'updateSeries')
+      const updateEventInstanceSpy = jest.spyOn(
+        eventThunks,
+        'updateEventInstance'
+      )
+
+      renderWithProviders(
+        <EventUpdateModal
+          open={true}
+          onClose={mockOnClose}
+          calId={calId}
+          eventId={`${baseUID}/20250129`}
+          typeOfAction="all"
+        />,
+        stateWithSeries
+      )
+
+      // The clicked occurrence already shows the series title: wait for the
+      // stored series to be fetched, otherwise the form gets remounted on the
+      // master after the rename
+      expect(
+        await screen.findByTestId('series-overrides-warning')
+      ).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Weekly Meeting')).toBeInTheDocument()
+
+      fireEvent.change(screen.getByDisplayValue('Weekly Meeting'), {
+        target: { value: 'Renamed Meeting' }
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+      })
+
+      await waitFor(() => {
+        expect(updateSeriesSpy).toHaveBeenCalledTimes(1)
+      })
+      expect(updateSeriesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            uid: baseUID,
+            title: 'Renamed Meeting'
+          }),
+          removeOverrides: false,
+          sourceRecurrenceId: undefined,
+          followTimeChange: false
+        })
+      )
+      expect(updateEventInstanceSpy).not.toHaveBeenCalled()
+    })
+
     it('should use base UID when updating series with recurrence rule changes', async () => {
       const masterEvent = {
         uid: baseUID,

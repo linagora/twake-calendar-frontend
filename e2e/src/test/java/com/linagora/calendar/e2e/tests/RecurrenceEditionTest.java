@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +35,8 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 /** Editing and deleting a recurring event: the scope dialog and what it does to the series. */
 class RecurrenceEditionTest extends TwakeCalendarE2ETest {
 
+    private static final int LATER_WEEKS = 6;
+
     private static String title(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
     }
@@ -54,7 +57,7 @@ class RecurrenceEditionTest extends TwakeCalendarE2ETest {
         // not on screen to be counted. Anchoring it to the visible week keeps every occurrence
         // of a week or less in view whatever day the suite runs.
         LocalDate weekStart = calendar.firstVisibleDate();
-        form.expand().startDate(weekStart).endDate(weekStart).startTime("09:00").endTime("10:00");
+        form.expand().at(weekStart, "09:00", "10:00");
         form.repeat().frequency(RecurrenceSection.DAILY).endsAfter(occurrences);
         form.save();
         awaitAttached(calendar.eventCard(title));
@@ -220,6 +223,218 @@ class RecurrenceEditionTest extends TwakeCalendarE2ETest {
     }
 
     @Test
+    @DisplayName("RECUR-EDIT-26 Deleting this event keeps the later occurrences already loaded. See #1413")
+    void deletingOneOccurrenceKeepsTheLaterOnes(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = title("Weekly");
+        LocalDate weekStart = calendar.firstVisibleDate();
+        var creation = calendar.createEvent().title(title).expand()
+            .at(weekStart, "09:00", "10:00");
+        creation.repeat().frequency(RecurrenceSection.WEEKLY).endsAfter(LATER_WEEKS + 1);
+        creation.save();
+        awaitAttached(calendar.eventCard(title));
+        page.reload();
+        calendar.waitUntilLoaded();
+
+        // Walking the weeks ahead loads them. The last one lies past the month grid the
+        // refresh following the deletion re-expands the series over, whatever today is.
+        walkTheLaterWeeks(calendar, title);
+        calendar.today();
+        awaitAttached(calendar.eventCard(title));
+
+        calendar.openEvent(title).delete(THIS_EVENT);
+
+        PlaywrightAssertions.assertThat(calendar.eventCard(title))
+            .hasCount(0, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.properties(master(probe, user), "EXDATE")).hasSize(1));
+        // lets the refresh that follows the deletion land before walking again
+        page.waitForTimeout(2000);
+
+        walkTheLaterWeeks(calendar, title);
+    }
+
+    @Test
+    @DisplayName("RECUR-EDIT-27 Renaming all the events keeps an occurrence customized beforehand. See #1430")
+    void renamingTheSeriesKeepsACustomizedOccurrence(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = dailySeries(calendar, 4);
+        LocalDate firstDay = calendar.firstVisibleDate();
+        String exception = title("Exception");
+        customizeOccurrence(calendar, probe, user, title, firstDay.plusDays(2), exception);
+
+        String renamed = title("Renamed");
+        var form = calendar.openEventOn(title, firstDay.plusDays(3)).edit(ALL_EVENTS);
+        PlaywrightAssertions.assertThat(page.getByTestId("series-overrides-warning")).isVisible();
+        form.title(renamed);
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            String ical = probe.singleEvent(user);
+            assertThat(Ics.property(Ics.master(ical), "SUMMARY")).hasValue(renamed);
+            List<String> overrides = Ics.overrides(ical);
+            assertThat(overrides).hasSize(1);
+            assertThat(Ics.property(overrides.getFirst(), "SUMMARY")).hasValue(exception);
+            assertThat(Ics.property(overrides.getFirst(), "DTSTART").orElseThrow()).contains("T140000");
+        });
+        page.reload();
+        calendar.waitUntilLoaded();
+        PlaywrightAssertions.assertThat(calendar.eventCardOn(exception, firstDay.plusDays(2)))
+            .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        PlaywrightAssertions.assertThat(calendar.eventCard(renamed))
+            .hasCount(3, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+    }
+
+    @Test
+    @DisplayName("RECUR-EDIT-28 Renaming all the events keeps a deleted occurrence deleted. See #1430")
+    void renamingTheSeriesKeepsTheExdate(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = dailySeries(calendar, 4);
+        LocalDate firstDay = calendar.firstVisibleDate();
+
+        calendar.openEventOn(title, firstDay.plusDays(1)).delete(THIS_EVENT);
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.properties(master(probe, user), "EXDATE")).hasSize(1));
+        PlaywrightAssertions.assertThat(calendar.eventCard(title))
+            .hasCount(3, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+
+        String renamed = title("Renamed");
+        var form = calendar.openEventOn(title, firstDay.plusDays(2)).edit(ALL_EVENTS);
+        form.title(renamed);
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            String master = master(probe, user);
+            assertThat(Ics.property(master, "SUMMARY")).hasValue(renamed);
+            assertThat(Ics.properties(master, "EXDATE")).hasSize(1);
+        });
+        page.reload();
+        calendar.waitUntilLoaded();
+        PlaywrightAssertions.assertThat(calendar.eventCard(renamed))
+            .hasCount(3, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        PlaywrightAssertions.assertThat(calendar.eventCardOn(renamed, firstDay.plusDays(1))).hasCount(0);
+    }
+
+    @Test
+    @DisplayName("RECUR-EDIT-29 Renaming all the events writes the series once, without fabricated exceptions. See #1430")
+    void renamingTheSeriesWritesItOnce(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = dailySeries(calendar, 4);
+        LocalDate firstDay = calendar.firstVisibleDate();
+        AtomicInteger puts = new AtomicInteger();
+        page.onRequest(request -> {
+            if ("PUT".equals(request.method()) && request.url().contains(".ics")) {
+                puts.incrementAndGet();
+            }
+        });
+
+        String renamed = title("Renamed");
+        var form = calendar.openEventOn(title, firstDay).edit(ALL_EVENTS);
+        form.title(renamed);
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.property(master(probe, user), "SUMMARY")).hasValue(renamed));
+        // leaves any stray write the time to go out
+        page.waitForTimeout(3000);
+        assertThat(puts.get()).as("one save of the series is one write").isEqualTo(1);
+        assertThat(Ics.overrides(probe.singleEvent(user))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("RECUR-EDIT-30 Moving the time of all the events moves the exceptions and deleted occurrences along. See #1430")
+    void movingTheSeriesMovesItsExceptions(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = dailySeries(calendar, 4);
+        LocalDate firstDay = calendar.firstVisibleDate();
+
+        calendar.openEventOn(title, firstDay.plusDays(1)).delete(THIS_EVENT);
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.properties(master(probe, user), "EXDATE")).hasSize(1));
+        String exception = title("Exception");
+        var renaming = calendar.openEventOn(title, firstDay.plusDays(2)).edit(THIS_EVENT);
+        renaming.title(exception);
+        renaming.save();
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.overrides(probe.singleEvent(user))).hasSize(1));
+
+        var form = calendar.openEventOn(title, firstDay).edit(ALL_EVENTS).expand();
+        form.startTime("11:00").endTime("12:00");
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            String ical = probe.singleEvent(user);
+            String master = Ics.master(ical);
+            assertThat(Ics.property(master, "DTSTART").orElseThrow()).contains("T110000");
+            assertThat(Ics.properties(master, "EXDATE")).singleElement().asString().contains("T110000");
+            List<String> overrides = Ics.overrides(ical);
+            assertThat(overrides).hasSize(1);
+            assertThat(Ics.property(overrides.getFirst(), "SUMMARY")).hasValue(exception);
+            assertThat(Ics.property(overrides.getFirst(), "RECURRENCE-ID").orElseThrow()).contains("T110000");
+            assertThat(Ics.property(overrides.getFirst(), "DTSTART").orElseThrow()).contains("T110000");
+        });
+        page.reload();
+        calendar.waitUntilLoaded();
+        PlaywrightAssertions.assertThat(calendar.eventCardOn(exception, firstDay.plusDays(2)))
+            .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        PlaywrightAssertions.assertThat(calendar.eventCard(title))
+            .hasCount(2, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+    }
+
+    @Test
+    @DisplayName("RECUR-EDIT-31 Editing this event keeps the later occurrences already loaded. See #1430")
+    void editingOneOccurrenceKeepsTheLaterOnes(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = title("Weekly");
+        LocalDate weekStart = calendar.firstVisibleDate();
+        var creation = calendar.createEvent().title(title).expand()
+            .at(weekStart, "09:00", "10:00");
+        creation.repeat().frequency(RecurrenceSection.WEEKLY).endsAfter(LATER_WEEKS + 1);
+        creation.save();
+        awaitAttached(calendar.eventCard(title));
+        page.reload();
+        calendar.waitUntilLoaded();
+
+        walkTheLaterWeeks(calendar, title);
+        calendar.today();
+        awaitAttached(calendar.eventCard(title));
+
+        String exception = title("Exception");
+        var form = calendar.openEvent(title).edit(THIS_EVENT).expand();
+        form.title(exception).startTime("14:00").endTime("15:00");
+        form.save();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.overrides(probe.singleEvent(user))).hasSize(1));
+        PlaywrightAssertions.assertThat(calendar.eventCard(exception))
+            .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        // lets the refresh that follows the edition land before walking again
+        page.waitForTimeout(2000);
+
+        walkTheLaterWeeks(calendar, title);
+    }
+
+    /** Renames one occurrence and moves it to 14:00, "This event" only. */
+    private void customizeOccurrence(CalendarPage calendar, CalendarProbe probe, E2EUser user,
+                                     String title, LocalDate day, String exception) {
+        var form = calendar.openEventOn(title, day).edit(THIS_EVENT).expand();
+        form.title(exception).startTime("14:00").endTime("15:00");
+        form.save();
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(Ics.overrides(probe.singleEvent(user))).hasSize(1));
+        PlaywrightAssertions.assertThat(calendar.eventCardOn(exception, day))
+            .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+    }
+
+    private void walkTheLaterWeeks(CalendarPage calendar, String title) {
+        for (int week = 1; week <= LATER_WEEKS; week++) {
+            calendar.next();
+            PlaywrightAssertions.assertThat(calendar.eventCard(title))
+                .hasCount(1, new LocatorAssertions.HasCountOptions().setTimeout(30_000));
+        }
+    }
+
+    @Test
     @DisplayName("RECUR-EDIT-10 Deleting all the events clears the series from the calendar")
     void deletingTheSeriesClearsIt(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
@@ -292,7 +507,7 @@ class RecurrenceEditionTest extends TwakeCalendarE2ETest {
         // stay countable: bounds taken from today put half the occurrences in next week
         LocalDate weekStart = calendar.firstVisibleDate();
         var creation = calendar.createEvent().title(title).expand()
-            .startDate(weekStart).endDate(weekStart).startTime("09:00").endTime("10:00");
+            .at(weekStart, "09:00", "10:00");
         creation.repeat().frequency(RecurrenceSection.DAILY).endsOn(weekStart.plusDays(1));
         creation.save();
         awaitAttached(calendar.eventCard(title));

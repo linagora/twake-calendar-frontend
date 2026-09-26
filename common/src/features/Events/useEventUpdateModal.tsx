@@ -26,6 +26,7 @@ export function useEventUpdateModal(
   setShowMore: React.Dispatch<React.SetStateAction<boolean>>
   formRef: React.RefObject<EventFormHandle>
   effectiveEvent: CalendarEvent | undefined | null
+  hasOverrides: boolean
   initialValues: ReturnType<typeof useBuildInitialValues>
   handleClose: () => void
   handleSubmit: (
@@ -50,7 +51,7 @@ export function useEventUpdateModal(
   const [showMore, setShowMore] = useState(false)
   const formRef = useRef<EventFormHandle>(null)
 
-  const { masterEvent, effectiveEvent } = useMasterEvent(
+  const { masterEvent, effectiveEvent, hasOverrides } = useMasterEvent(
     event,
     open,
     typeOfAction
@@ -135,6 +136,7 @@ export function useEventUpdateModal(
     setShowMore,
     formRef,
     effectiveEvent,
+    hasOverrides,
     initialValues,
     handleClose,
     handleSubmit,

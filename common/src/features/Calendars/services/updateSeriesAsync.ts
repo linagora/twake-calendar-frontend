@@ -18,11 +18,18 @@ export const updateSeriesThunk = (create: ReducerCreators<CalendarState>) =>
       event: CalendarEvent
       removeOverrides?: boolean
       sourceRecurrenceId?: string
+      followTimeChange?: boolean
     },
     { rejectValue: RejectedError }
   >(
     async (
-      { cal, event, removeOverrides = true, sourceRecurrenceId },
+      {
+        cal,
+        event,
+        removeOverrides = true,
+        sourceRecurrenceId,
+        followTimeChange
+      },
       { rejectWithValue }
     ) => {
       try {
@@ -30,7 +37,8 @@ export const updateSeriesThunk = (create: ReducerCreators<CalendarState>) =>
         const jCal = makeSeriesJCal(vevents, event, {
           calOwnerEmail: cal.owner?.emails?.[0],
           removeOverrides,
-          sourceRecurrenceId
+          sourceRecurrenceId,
+          followTimeChange
         })
 
         await putEvent(event, jCal)

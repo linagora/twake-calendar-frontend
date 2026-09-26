@@ -2,6 +2,7 @@ import { useAppSelector } from '@common/app/hooks'
 import { dialogPaddingStyles } from '@common/theme/dialogPaddingStyles'
 import { ConfirmDiscardChangesDialog } from '@common/components/Dialog/ConfirmDiscardChangesDialog'
 import { ResponsiveDialog } from '@common/components/Dialog'
+import { Alert } from '@linagora/twake-mui'
 import EventFormFields from '@common/components/Event/EventFormFields'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
@@ -38,6 +39,7 @@ const EventUpdateModalInternal: React.FC<
     setShowMore,
     formRef,
     effectiveEvent,
+    hasOverrides,
     initialValues,
     handleClose: performClose,
     handleSubmit,
@@ -81,6 +83,15 @@ const EventUpdateModalInternal: React.FC<
         sx={dialogPaddingStyles(isMobile)}
         expandText={t('tooltip.moreEventOptions')}
       >
+        {typeOfAction === 'all' && hasOverrides && (
+          <Alert
+            severity="warning"
+            sx={{ mb: 2 }}
+            data-testid="series-overrides-warning"
+          >
+            {t('event.form.seriesOverridesWarning')}
+          </Alert>
+        )}
         <EventFormFields
           key={effectiveEvent?.uid || 'no-event'}
           ref={formRef}

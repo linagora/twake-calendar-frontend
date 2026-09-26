@@ -187,6 +187,7 @@
       "end": "End",
       "allDay": "All day",
       "repeat": "Repeat",
+      "seriesOverridesWarning": "Some occurrences of this series were modified individually. Changing the date, the repetition or the time zone of the series discards these changes.",
       "timezone": "Timezone",
       "timezonePlaceholder": "Select timezone",
       "addGuestsPlaceholder": "Add participants",

@@ -22,6 +22,9 @@ export interface RecurringUpdateContext extends UpdateHelperContext {
   masterEvent?: CalendarEvent | null
   getSeriesInstances: () => Record<string, CalendarEvent>
   recurrenceId?: string
+  // Dragging an occurrence moves the series: that occurrence then follows
+  // the series, even if it had been customized
+  dropSourceOverride?: boolean
 }
 
 export interface PerformUpdateActionParams {

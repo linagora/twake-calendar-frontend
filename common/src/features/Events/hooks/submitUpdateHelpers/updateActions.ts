@@ -1,5 +1,4 @@
 import { AppDispatch } from '@common/app/store'
-import { formatLocalDateTime } from '@common/components/Event/utils/dateTimeFormatters'
 import {
   clearFetchCache,
   putEvent as putEventAsync,
@@ -132,145 +131,26 @@ export async function handleUpdateRecurringSolo({
   clearEventFormTempData('update')
 }
 
-function shiftInstance(params: {
-  inst: CalendarEvent
-  masterTz: string
-  seriesDeltaMs: number
-  newEvent: CalendarEvent
-}): CalendarEvent {
-  const { inst, masterTz, seriesDeltaMs, newEvent } = params
-  return {
-    ...inst,
-    title: newEvent.title,
-    description: newEvent.description,
-    location: newEvent.location,
-    class: newEvent.class,
-    transp: newEvent.transp,
-    attendee: newEvent.attendee,
-    alarms: newEvent.alarms,
-    x_openpass_videoconference: newEvent.x_openpass_videoconference,
-    recurrenceId: inst.recurrenceId
-      ? formatLocalDateTime(
-          moment
-            .tz(inst.recurrenceId, masterTz)
-            .add(seriesDeltaMs, 'ms')
-            .toDate(),
-          masterTz
-        )
-      : undefined,
-    start: formatLocalDateTime(
-      moment.tz(inst.start, masterTz).add(seriesDeltaMs, 'ms').toDate(),
-      masterTz
-    ),
-    end: inst.end
-      ? formatLocalDateTime(
-          moment.tz(inst.end, masterTz).add(seriesDeltaMs, 'ms').toDate(),
-          masterTz
-        )
-      : undefined
-  }
-}
-
-async function handleUpdateSeriesTimeChangeOnly(params: {
-  updateContext: RecurringUpdateContext
-  seriesDeltaMs: number
-  masterTz: string
-}): Promise<void> {
-  const { updateContext, seriesDeltaMs, masterTz } = params
-  const { event, values, dispatch, calId, targetCalendar, getSeriesInstances } =
-    updateContext
-
-  let updatedExdates = event.exdates
-  if (event.exdates) {
-    updatedExdates = event.exdates.map(exdate => {
-      const mExdate = moment.tz(exdate, masterTz)
-      return formatLocalDateTime(
-        mExdate.add(seriesDeltaMs, 'ms').toDate(),
-        masterTz
-      )
-    })
-  }
-
-  const shiftedMasterEvent = {
-    ...updateContext.newEvent,
-    start: values.start,
-    end: values.end,
-    uid: updateContext.baseUID,
-    recurrenceId: undefined,
-    exdates: updatedExdates
-  }
-
-  const seriesSnap = getSeriesInstances()
-  const shiftedInstances = Object.values(seriesSnap).map(inst =>
-    shiftInstance({
-      inst,
-      masterTz,
-      seriesDeltaMs,
-      newEvent: updateContext.newEvent
-    })
+// The master, not the clicked occurrence, tells what the series was: the form
+// of an "all events" edit starts from the master date
+function startsOnSeriesDay(
+  values: RecurringUpdateContext['values'],
+  seriesEvent: CalendarEvent
+): boolean {
+  const seriesTz = resolveTimezone(
+    values.timezone || seriesEvent.timezone || 'UTC'
   )
-
-  const result = await dispatch(
-    updateSeries({
-      cal: targetCalendar,
-      event: shiftedMasterEvent,
-      removeOverrides: false,
-      sourceRecurrenceId: updateContext.recurrenceId
-    })
-  )
-  await assertThunkSuccess(result)
-
-  const results = await Promise.allSettled(
-    shiftedInstances.map(inst =>
-      dispatch(updateEventInstance({ cal: targetCalendar, event: inst }))
-    )
-  )
-  const failures = results.filter(r => r.status === 'rejected')
-  if (failures.length > 0) {
-    console.error(`${failures.length} instance update(s) failed`)
-  }
-
-  dispatch(clearFetchCache(calId))
-  clearEventFormTempData('update')
-}
-
-async function handleUpdateSeriesRuleOrDateChange(params: {
-  updateContext: RecurringUpdateContext
-  isSameDay: boolean
-  changes: {
-    timeChanged: boolean
-    timezoneChanged: boolean
-    repetitionRulesChanged: boolean
-  }
-}): Promise<void> {
-  const { updateContext, isSameDay, changes } = params
-  const shouldClearExdates =
-    !isSameDay || changes.repetitionRulesChanged || changes.timezoneChanged
-
-  const modifiedNewEvent = {
-    ...updateContext.newEvent,
-    exdates: shouldClearExdates ? [] : updateContext.newEvent.exdates
-  }
-
-  if (changes.repetitionRulesChanged || !isSameDay) {
-    await handleUpdateRecurringSeriesWithRuleChange({
-      ...updateContext,
-      newEvent: modifiedNewEvent
-    })
-  } else {
-    await handleUpdateRecurringSeriesMetadataOnly({
-      ...updateContext,
-      newEvent: modifiedNewEvent
-    })
-  }
+  const seriesDay = moment.tz(seriesEvent.start, seriesTz)
+  return moment.tz(values.start, seriesTz).isSame(seriesDay, 'day')
 }
 
 export async function handleUpdateRecurringSeries(
   params: RecurringUpdateContext
 ): Promise<void> {
   const { event, values, masterEvent } = params
+  const seriesEvent = masterEvent || event
   const changes = detectRecurringEventChanges(
-    event,
+    seriesEvent,
     {
       repetition: values.repetition,
       timezone: values.timezone,
@@ -282,26 +162,20 @@ export async function handleUpdateRecurringSeries(
     resolveTimezone
   )
 
-  const isSameDay = moment(values.start).isSame(moment(event.start), 'day')
-  const isTimeChangeOnly =
-    isSameDay && !changes.repetitionRulesChanged && !changes.timezoneChanged
+  // Overrides and EXDATEs designate occurrences: they survive as long as the
+  // series keeps the same occurrences, possibly at another time of the day
+  const keepsOccurrences =
+    startsOnSeriesDay(values, seriesEvent) && !changes.recurrenceChanged
 
-  if (isTimeChangeOnly) {
-    const masterTz =
-      event.timezone || resolveTimezone(masterEvent?.timezone || '')
-    const seriesDeltaMs =
-      moment(values.start).valueOf() - moment(event.start).valueOf()
-
-    await handleUpdateSeriesTimeChangeOnly({
-      updateContext: params,
-      seriesDeltaMs,
-      masterTz
+  if (keepsOccurrences) {
+    await handleUpdateRecurringSeriesKeepingOverrides({
+      ...params,
+      followTimeChange: changes.timeChanged
     })
   } else {
-    await handleUpdateSeriesRuleOrDateChange({
-      updateContext: params,
-      isSameDay,
-      changes
+    await handleUpdateRecurringSeriesWithRuleChange({
+      ...params,
+      newEvent: { ...params.newEvent, exdates: [] }
     })
   }
 }
@@ -445,16 +319,27 @@ async function handleUpdateRecurringSeriesWithRuleChange({
   }
 }
 
-async function handleUpdateRecurringSeriesMetadataOnly({
+// A single PUT of the whole calendar object: the master, plus the stored
+// overrides and EXDATEs, moved along when the time of day changes
+async function handleUpdateRecurringSeriesKeepingOverrides({
   dispatch,
   calId,
   newEvent,
   baseUID,
   targetCalendar,
   getSeriesInstances,
-  recurrenceId
-}: RecurringUpdateContext): Promise<void> {
-  updateSeriesInstancesLocally(dispatch, calId, getSeriesInstances(), newEvent)
+  recurrenceId,
+  dropSourceOverride,
+  followTimeChange
+}: RecurringUpdateContext & { followTimeChange: boolean }): Promise<void> {
+  if (!followTimeChange) {
+    updateSeriesInstancesLocally(
+      dispatch,
+      calId,
+      getSeriesInstances(),
+      newEvent
+    )
+  }
   const masterForUpdate = {
     ...newEvent,
     uid: baseUID,
@@ -465,7 +350,8 @@ async function handleUpdateRecurringSeriesMetadataOnly({
       cal: targetCalendar,
       event: masterForUpdate,
       removeOverrides: false,
-      sourceRecurrenceId: recurrenceId
+      sourceRecurrenceId: dropSourceOverride ? recurrenceId : undefined,
+      followTimeChange
     })
   )
   await assertThunkSuccess(result)
