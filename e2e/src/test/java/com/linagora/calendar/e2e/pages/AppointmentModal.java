@@ -68,9 +68,23 @@ public class AppointmentModal {
         if (!dayCheckbox(day).isChecked()) {
             dayCheckbox(day).check();
         }
-        startOf(day).fill(from);
-        endOf(day).fill(to);
-        return this;
+        // a fill is a focus then typed text: when the form takes the focus back in between --
+        // it hands it to the name as it finishes loading -- the hours land in the name. So the
+        // fields are read back, and the name put back if it caught them.
+        String name = name();
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            startOf(day).fill(from);
+            endOf(day).fill(to);
+            if (!name().equals(name)) {
+                name(name);
+            }
+            if (from.equals(startTimeOn(day)) && to.equals(endTimeOn(day)) && name().equals(name)) {
+                return this;
+            }
+            page.waitForTimeout(300);
+        }
+        throw new AssertionError("Could not set " + day + " to " + from + "-" + to + ", it reads "
+            + startTimeOn(day) + "-" + endTimeOn(day) + " and the name " + name());
     }
 
     public AppointmentModal unavailableOn(String day) {
@@ -143,13 +157,28 @@ public class AppointmentModal {
     }
 
     public AppointmentModal description(String description) {
-        page.getByPlaceholder("Add description").fill(description);
-        return this;
+        return fillKeepingTheName(page.getByPlaceholder("Add description"), description);
     }
 
     public AppointmentModal location(String location) {
-        page.getByPlaceholder("Add location").fill(location);
-        return this;
+        return fillKeepingTheName(page.getByPlaceholder("Add location"), location);
+    }
+
+    /** A fill whose text the name may catch instead, see {@link #availableOn}. */
+    private AppointmentModal fillKeepingTheName(Locator field, String value) {
+        String name = name();
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            field.fill(value);
+            if (!name().equals(name)) {
+                name(name);
+            }
+            if (value.equals(field.inputValue()) && name().equals(name)) {
+                return this;
+            }
+            page.waitForTimeout(300);
+        }
+        throw new AssertionError("Could not fill " + value + ", the field reads "
+            + field.inputValue() + " and the name " + name());
     }
 
     /** The switch that publishes or retires a schedule. */

@@ -22,7 +22,30 @@ public class LoginPage {
         waitUntilDisplayed();
         fill(user.email(), user.password());
         submit();
-        return new CalendarPage(page).waitUntilLoaded();
+        if (!landsOnTheCalendar()) {
+            // the token exchange of the callback is a single request, and Chromium drops the
+            // requests in flight whenever a network interface of the host comes or goes -- any
+            // container started on a shared CI agent. Not what a login test is about: go again.
+            System.out.println("[e2e] the OIDC callback failed, logging in again");
+            page.navigate("/");
+            page.waitForURL(url -> url.contains("/auth") || url.contains("/calendar"));
+            if (page.url().contains("/auth")) {
+                loginField().waitFor();
+                fill(user.email(), user.password());
+                submit();
+            }
+        }
+        CalendarPage calendar = new CalendarPage(page).waitUntilLoaded();
+        // the SPA took its date as it started, on the callback, which runs on the real clock:
+        // see E2EClock
+        page.reload();
+        calendar.waitUntilLoaded();
+        return calendar;
+    }
+
+    private boolean landsOnTheCalendar() {
+        page.waitForURL(url -> url.contains("/calendar") || url.contains("/error"));
+        return !page.url().contains("/error");
     }
 
     /** Fills the form without submitting it, for the tests that assert on what it does next. */

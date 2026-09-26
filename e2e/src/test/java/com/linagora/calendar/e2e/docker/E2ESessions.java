@@ -34,6 +34,8 @@ public class E2ESessions {
     public CalendarPage openFor(E2EUser user, String browserTimezone) {
         BrowserContext context = browser.newContext(
             TwakeCalendarE2EExtension.contextOptions().setTimezoneId(browserTimezone));
+        E2EClock.install(context);
+        LiveProbe.install(context);
         contexts.add(context);
         Page page = context.newPage();
         LoginPage.loginAs(page, user);
@@ -44,6 +46,8 @@ public class E2ESessions {
     public Page pageFor(E2EUser user) {
         BrowserContext context = browser.newContext(TwakeCalendarE2EExtension.contextOptions());
         context.grantPermissions(java.util.List.of("clipboard-read", "clipboard-write"));
+        E2EClock.install(context);
+        LiveProbe.install(context);
         contexts.add(context);
         Page page = context.newPage();
         LoginPage.loginAs(page, user);
@@ -60,6 +64,8 @@ public class E2ESessions {
     public CalendarPage openFor(E2EUser user, int width, int height) {
         BrowserContext context = browser.newContext(
             TwakeCalendarE2EExtension.contextOptions().setViewportSize(width, height));
+        E2EClock.install(context);
+        LiveProbe.install(context);
         contexts.add(context);
         Page page = context.newPage();
         LoginPage.loginAs(page, user);
@@ -74,6 +80,8 @@ public class E2ESessions {
      */
     public Page blankPage() {
         BrowserContext context = browser.newContext(TwakeCalendarE2EExtension.contextOptions());
+        E2EClock.install(context);
+        LiveProbe.install(context);
         contexts.add(context);
         return context.newPage();
     }

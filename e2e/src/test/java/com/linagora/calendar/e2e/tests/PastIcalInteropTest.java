@@ -3,7 +3,6 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -15,6 +14,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
@@ -38,7 +38,7 @@ class PastIcalInteropTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String uid = UUID.randomUUID().toString();
         String title = "Imported event";
-        String stamp = LocalDate.now().toString().replace("-", "");
+        String stamp = E2EClock.today().toString().replace("-", "");
         probe.putEvent(user, uid, """
             BEGIN:VCALENDAR
             VERSION:2.0

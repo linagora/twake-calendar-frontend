@@ -3,7 +3,6 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -14,6 +13,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarModal;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -37,7 +37,7 @@ class CalendarsTest extends TwakeCalendarE2ETest {
     private String seedEvent(CalendarProbe probe, E2EUser user) {
         String title = "Seeded " + UUID.randomUUID().toString().substring(0, 8);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         return title;
     }
 

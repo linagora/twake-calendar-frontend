@@ -243,8 +243,11 @@ function validateDateTimeRange(
   endDate: string,
   endTime: string
 ): { valid: boolean; timeStartError: string; timeEndError: string } {
-  const start = new Date(combineDateTime(startDate, startTime))
-  const end = new Date(combineDateTime(endDate, endTime))
+  // Wall clock times, compared as such: read in the zone of the browser, a time
+  // in the hour a clock change skips moves forward and may catch up with the
+  // end -- and the event has a zone of its own anyway.
+  const start = new Date(`${combineDateTime(startDate, startTime)}Z`)
+  const end = new Date(`${combineDateTime(endDate, endTime)}Z`)
 
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     return {

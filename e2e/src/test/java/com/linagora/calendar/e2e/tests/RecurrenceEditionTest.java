@@ -333,7 +333,9 @@ class RecurrenceEditionTest extends TwakeCalendarE2ETest {
     void makingASingleEventRecurring(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Was alone");
-        calendar.createEvent().title(title).expand().startTime("09:00").endTime("10:00").save();
+        // from the first day of the week on screen, or the occurrences run off it on a weekend
+        calendar.createEvent().title(title).expand()
+            .startDate(calendar.firstVisibleDate()).startTime("09:00").endTime("10:00").save();
         awaitAttached(calendar.eventCard(title));
 
         var form = calendar.openEvent(title).edit().expand();

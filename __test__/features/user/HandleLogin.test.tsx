@@ -89,6 +89,37 @@ describe('HandleLogin', () => {
     )
   })
 
+  test('does not reload the user when the user data changes while calendars are pending', () => {
+    // a zone or a language picked in the settings rewrites the user data; a reload
+    // fired then races the write and its stale answer undoes the pick
+    sessionStorage.setItem('tokenSet', JSON.stringify({ access_token: 'test' }))
+    sessionStorage.setItem('userData', JSON.stringify({ sub: 'test' }))
+    jest.spyOn(oidcAuth, 'Auth')
+    const dispatch = appHooks.useAppDispatch()
+
+    renderHook(() => useInitializeApp(), {
+      wrapper: ({ children }) => (
+        <Provider
+          store={setupStore({
+            user: {
+              userData: { sub: 'test', email: 'test@test.com' },
+              tokens: { access_token: 'test' },
+              loading: false,
+              error: null,
+              coreConfig: { language: 'en' }
+            },
+            calendars: { list: {}, pending: true, error: null }
+          })}
+        >
+          {children}
+        </Provider>
+      )
+    })
+
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(oidcAuth.Auth).not.toHaveBeenCalled()
+  })
+
   test('does not render loading element when userData exists and calendars pending is true', () => {
     const preloadedState = {
       user: {

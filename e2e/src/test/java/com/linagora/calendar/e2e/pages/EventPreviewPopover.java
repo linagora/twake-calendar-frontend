@@ -29,7 +29,7 @@ public class EventPreviewPopover {
 
     public EventFormModal edit() {
         clickEdit();
-        return new EventFormModal(page).waitUntilOpen();
+        return new EventFormModal(page).waitUntilOpen().waitUntilFilledIn();
     }
 
     /**
@@ -44,7 +44,7 @@ public class EventPreviewPopover {
         } else {
             dialog.allEvents();
         }
-        return new EventFormModal(page).waitUntilOpen();
+        return new EventFormModal(page).waitUntilOpen().waitUntilFilledIn();
     }
 
     /** Clicks Edit without assuming what comes next, for the tests that assert on it. */

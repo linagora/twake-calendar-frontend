@@ -138,6 +138,10 @@ public class EventFormModal {
         return page.getByTestId("start-date-input").inputValue();
     }
 
+    public String endDate() {
+        return page.getByTestId("end-date-input").inputValue();
+    }
+
     public EventFormModal endDate(java.time.LocalDate date) {
         DatePickerField.pick(page, page.getByTestId("end-date-input"), date);
         return this;
@@ -328,13 +332,45 @@ public class EventFormModal {
     }
 
     public EventFormModal description(String description) {
-        page.getByLabel("Description").fill(description);
-        return this;
+        return fillAndHold(page.getByLabel("Description"), description);
     }
 
     public EventFormModal location(String location) {
-        page.getByLabel("Location").fill(location);
+        return fillAndHold(page.getByLabel("Location"), location);
+    }
+
+    /**
+     * The form of an existing event opens first and fills in with it a moment later: an edit
+     * made before that is overwritten. An event always has a title, so its showing up says
+     * the values are in.
+     */
+    EventFormModal waitUntilFilledIn() {
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(titleInput())
+            .not().hasValue("");
         return this;
+    }
+
+    /**
+     * Fills a field and makes sure the value holds, a late render being able to undo it.
+     *
+     * <p>A fill is a focus then typed text, and the form hands the focus back to the title as
+     * it opens or expands: text meant for this field can land in the title instead. So the
+     * title is checked too, and put back when it caught it.
+     */
+    private EventFormModal fillAndHold(Locator field, String value) {
+        String title = title();
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            field.fill(value);
+            page.waitForTimeout(300);
+            if (!title.equals(title())) {
+                titleInput().fill(title);
+            }
+            if (value.equals(field.inputValue()) && title.equals(title())) {
+                return this;
+            }
+        }
+        throw new AssertionError("The field does not keep " + value
+            + ", it reads " + field.inputValue());
     }
 
     /**
@@ -437,12 +473,23 @@ public class EventFormModal {
     /** Books a resource on the event, from the dedicated field of the expanded form. */
     public EventFormModal addResource(String name) {
         Locator search = resourceSearch();
-        search.click();
-        search.fill("");
-        search.pressSequentially(name, new Locator.PressSequentiallyOptions().setDelay(30));
         Locator wanted = page.locator("li[role=option]")
             .filter(new Locator.FilterOptions().setHasText(name));
-        wanted.first().waitFor(new Locator.WaitForOptions().setTimeout(20_000));
+        // a resource created a moment ago is indexed asynchronously: the query typed first may
+        // come back empty, and nothing asks again until the text changes -- so type it again
+        for (int attempt = 1; ; attempt++) {
+            search.click();
+            search.fill("");
+            search.pressSequentially(name, new Locator.PressSequentiallyOptions().setDelay(30));
+            try {
+                wanted.first().waitFor(new Locator.WaitForOptions().setTimeout(20_000));
+                break;
+            } catch (com.microsoft.playwright.TimeoutError notIndexedYet) {
+                if (attempt == 3) {
+                    throw notIndexedYet;
+                }
+            }
+        }
         wanted.first().click();
         awaitNoOverlay();
         return this;

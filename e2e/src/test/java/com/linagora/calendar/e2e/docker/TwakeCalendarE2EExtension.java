@@ -2,11 +2,13 @@ package com.linagora.calendar.e2e.docker;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -16,10 +18,10 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.MailProbe;
 import com.linagora.calendar.e2e.backend.ResourceProbe;
 import com.linagora.calendar.e2e.backend.TeamCalendarProbe;
-import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
@@ -61,6 +63,12 @@ public class TwakeCalendarE2EExtension implements BeforeEachCallback, AfterTestE
      * catch bugs, it manufactures flakes.
      */
     private static final double DEFAULT_TIMEOUT_MS = 30_000;
+
+    static {
+        // conditions are evaluated on the thread of the test: the clock of E2EClock belongs to
+        // it, and Playwright objects are not meant to be driven from another thread anyway
+        Awaitility.pollInSameThread();
+    }
 
     /** One engine per worker thread; closing an engine closes the browsers it launched. */
     private static final ThreadLocal<Browser> BROWSER = new ThreadLocal<>();
@@ -137,7 +145,18 @@ public class TwakeCalendarE2EExtension implements BeforeEachCallback, AfterTestE
     public void beforeEach(ExtensionContext extensionContext) {
         Browser browser = browser();
         TestState state = new TestState();
+        LocalDateTime start = extensionContext.getTestMethod()
+            .map(method -> method.getAnnotation(ClockAt.class))
+            .or(() -> extensionContext.getTestClass().map(type -> type.getAnnotation(ClockAt.class)))
+            .map(E2EClock::startOf)
+            .orElseGet(E2EClock::defaultStart);
+        E2EClock.startAt(start);
+        System.out.println("[e2e] " + testId(extensionContext) + " starts at " + start
+            + " " + E2EClock.BROWSER_ZONE + ", reproduce the whole run with E2E_NOW="
+            + E2EClock.defaultStart());
         state.context = browser.newContext(contextOptions());
+        E2EClock.install(state.context);
+        LiveProbe.install(state.context);
         state.context.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
         // several features hand something to the clipboard and confirm it on screen; without the
         // permission the write silently rejects and the confirmation never comes
@@ -194,6 +213,7 @@ public class TwakeCalendarE2EExtension implements BeforeEachCallback, AfterTestE
 
     @Override
     public void afterEach(ExtensionContext extensionContext) {
+        E2EClock.reset();
         TestState state = STATE.get();
         if (state != null) {
             state.sessions.closeAll();

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -94,7 +95,7 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
     void theCreationFormTakesTheWholePhoneScreen(Page page, E2EUser user, E2ESessions sessions) {
         CalendarPage phone = sessions.openFor(user, PHONE_WIDTH, PHONE_HEIGHT);
 
-        phone.selectTimeRange(java.time.LocalDate.now(), "10:00:00", "11:00:00")
+        phone.selectTimeRange(E2EClock.today(), "10:00:00", "11:00:00")
             .title(unique("On a phone"));
 
         double width = phone.page().locator("[role=dialog]").last().boundingBox().width;
@@ -107,7 +108,7 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
     @DisplayName("RESP-10 Form fields are large enough not to make a phone zoom in")
     void formFieldsAreLargeEnoughNotToZoom(Page page, E2EUser user, E2ESessions sessions) {
         CalendarPage phone = sessions.openFor(user, PHONE_WIDTH, PHONE_HEIGHT);
-        phone.selectTimeRange(java.time.LocalDate.now(), "10:00:00", "11:00:00")
+        phone.selectTimeRange(E2EClock.today(), "10:00:00", "11:00:00")
             .title(unique("Zoom free"));
 
         @SuppressWarnings("unchecked")
@@ -194,7 +195,7 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
         CalendarPage phone = sessions.openFor(user, PHONE_WIDTH, PHONE_HEIGHT);
         // the phone form is a compact one: the rest of the fields sit behind More options,
         // which is what the expand chevron is on a desktop
-        var form = phone.selectTimeRange(java.time.LocalDate.now(), "10:00:00", "11:00:00")
+        var form = phone.selectTimeRange(E2EClock.today(), "10:00:00", "11:00:00")
             .title(unique("Repeating on a phone"));
         phone.page().getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
             new Page.GetByRoleOptions().setName("More options")).click();

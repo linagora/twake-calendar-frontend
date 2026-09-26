@@ -6,6 +6,7 @@ import {
 } from '@common/features/Calendars/types/CalendarData'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { extractCalendarEvents } from '@common/features/Calendars/utils/extractCalendarEvents'
+import { oldestSyncToken } from '@common/features/Calendars/utils/oldestSyncToken'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { toRejectedError } from '@common/utils/errorUtils'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
@@ -78,7 +79,10 @@ export const getCalendarDetailThunk = (
         if (!state[type][calId]) {
           return
         }
-        state[type][calId].syncToken = syncToken
+        state[type][calId].syncToken = oldestSyncToken(
+          state[type][calId].syncToken,
+          syncToken
+        )
         events.forEach(event => {
           state[type][calId].events[event.uid] = event
           state[type][calId].events[event.uid].color = state[type][calId].color
