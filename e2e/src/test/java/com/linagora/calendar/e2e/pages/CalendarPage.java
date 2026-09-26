@@ -158,10 +158,14 @@ public class CalendarPage {
      * socket is up: a change made in between is delivered to nobody, and since nothing reloads
      * the page afterwards the event simply never shows. Waiting on the grid being loaded is not
      * enough, the socket comes later, and the gap widens when several classes share the backend.
+     * Nor is an open socket: the registration to the calendars follows it. See LiveProbe.
      */
     public CalendarPage waitUntilLiveConnected() {
-        page.waitForFunction("() => window.__ws && window.__ws.readyState === 1",
+        page.waitForFunction(
+            "() => window.__ws && window.__ws.readyState === 1 && window.__wsRegistered === true",
             null, new Page.WaitForFunctionOptions().setTimeout(60_000));
+        // the registration is a message with no answer: leave the server a moment to act on it
+        page.waitForTimeout(500);
         return this;
     }
 
@@ -257,12 +261,51 @@ public class CalendarPage {
                       + String(now.getDate()).padStart(2, '0'); }""")));
     }
 
+    /** The day the grid marks as today, empty when today is not on screen. */
+    public java.util.Optional<java.time.LocalDate> markedToday() {
+        Object date = page.evaluate(
+            "() => { const c = document.querySelector('.fc-view-harness .fc-day-today[data-date]');"
+            + " return c ? c.getAttribute('data-date') : null; }");
+        return java.util.Optional.ofNullable(date).map(String::valueOf).map(java.time.LocalDate::parse);
+    }
+
     /** The first day the grid currently shows, read from the grid itself. */
     public java.time.LocalDate firstVisibleDate() {
         String date = String.valueOf(page.evaluate(
             "() => { const c = document.querySelector('[data-date]');"
             + " return c ? c.getAttribute('data-date') : null; }"));
         return java.time.LocalDate.parse(date);
+    }
+
+    /**
+     * A day of the week on screen other than today, two days away from it.
+     *
+     * <p>Not simply two days from now: late in the week that is a day of the next one, off the
+     * grid, and every assertion on it then fails for a reason that has nothing to do with the
+     * feature. The weeks start on Monday, so the day falls back to two days earlier from
+     * Saturday on.
+     */
+    public java.time.LocalDate anotherDayOfTheWeekOnScreen() {
+        java.time.LocalDate today = browserToday();
+        java.time.LocalDate later = today.plusDays(2);
+        return visibleDates().contains(later.toString()) ? later : today.minusDays(2);
+    }
+
+    /** Moves the week or day grid until it shows the given day, whatever it shows now. */
+    public CalendarPage goToDate(java.time.LocalDate day) {
+        for (int guard = 0; guard < 60; guard++) {
+            List<String> visible = visibleDates();
+            if (visible.contains(day.toString())) {
+                return this;
+            }
+            if (!visible.isEmpty() && day.isBefore(java.time.LocalDate.parse(visible.get(0)))) {
+                previous();
+            } else {
+                next();
+            }
+            page.waitForTimeout(150);
+        }
+        throw new AssertionError("Could not reach " + day + ", the grid shows " + periodTitle());
     }
 
     /** Every day the grid currently shows. */
@@ -658,7 +701,11 @@ public class CalendarPage {
     /** Reopens an existing schedule for edition. */
     public AppointmentModal editBookingLink(String name) {
         bookingLinkChip(name).first().click();
-        return new AppointmentModal(page).waitUntilOpen();
+        AppointmentModal modal = new AppointmentModal(page).waitUntilOpen();
+        // the form opens empty and fills in with the schedule: edit it only once it has
+        com.microsoft.playwright.assertions.PlaywrightAssertions
+            .assertThat(page.getByPlaceholder("Schedule name")).hasValue(name);
+        return modal;
     }
 
     /** Clicks the copy button of the Booking links section and returns what landed in the clipboard. */
@@ -762,11 +809,12 @@ public class CalendarPage {
 
     /**
      * Searches until the expected text shows up. Events are indexed asynchronously, so a query
-     * fired right after a creation legitimately comes back empty the first time.
+     * fired right after a creation legitimately comes back empty the first time -- and with
+     * four classes writing at once the backlog has been seen to exceed a minute.
      */
     public CalendarPage searchUntil(String keywords, String expected) {
         org.awaitility.Awaitility.await()
-            .atMost(java.time.Duration.ofSeconds(60))
+            .atMost(java.time.Duration.ofSeconds(120))
             .pollInterval(java.time.Duration.ofSeconds(3))
             .until(() -> {
                 search(keywords);

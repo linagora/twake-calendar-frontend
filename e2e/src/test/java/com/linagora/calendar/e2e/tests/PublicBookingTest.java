@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -35,7 +36,8 @@ class PublicBookingTest extends TwakeCalendarE2ETest {
     }
 
     private static LocalDate nextWeekSameDay() {
-        return LocalDate.now().plusDays(7);
+        // the slots are computed by the backend, on the real clock: ahead on both
+        return E2EClock.daysAheadOnBothClocks(7);
     }
 
     private static String dayCode(LocalDate day) {

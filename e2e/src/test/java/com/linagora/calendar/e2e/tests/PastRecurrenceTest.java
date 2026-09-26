@@ -20,6 +20,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -98,7 +99,9 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
     void deletingOccurrencesDoesNotResurrectPreviousDeletions(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Vacation");
-        var form = calendar.createEvent().title(title).expand().startTime("09:00").endTime("10:00");
+        // from the first day of the week on screen, or the occurrences run off it on a weekend
+        var form = calendar.createEvent().title(title).expand()
+            .startDate(calendar.firstVisibleDate()).startTime("09:00").endTime("10:00");
         form.repeat().frequency(RecurrenceSection.DAILY).endsAfter(5);
         form.save();
         Awaitility.await().atMost(Duration.ofSeconds(30))
@@ -201,7 +204,7 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Until");
         var form = calendar.createEvent().title(title).expand().startTime("09:00").endTime("10:00");
-        form.repeat().frequency(RecurrenceSection.DAILY).endsOn(LocalDate.now().plusDays(6));
+        form.repeat().frequency(RecurrenceSection.DAILY).endsOn(E2EClock.today().plusDays(6));
         form.save();
         awaitAttached(calendar.eventCard(title));
 
@@ -222,7 +225,7 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String uid = UUID.randomUUID().toString();
         String title = "Wkst series";
-        String stamp = LocalDate.now().toString().replace("-", "");
+        String stamp = E2EClock.today().toString().replace("-", "");
         probe.putEvent(user, uid, """
             BEGIN:VCALENDAR
             VERSION:2.0
@@ -282,8 +285,8 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         String uid = UUID.randomUUID().toString();
         String title = "Seeded series";
         String exception = "Moved occurrence";
-        String today = LocalDate.now().toString().replace("-", "");
-        String tomorrow = LocalDate.now().plusDays(1).toString().replace("-", "");
+        String today = E2EClock.today().toString().replace("-", "");
+        String tomorrow = E2EClock.today().plusDays(1).toString().replace("-", "");
         probe.putEvent(user, uid, """
             BEGIN:VCALENDAR
             VERSION:2.0
@@ -341,8 +344,9 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, organizer);
 
         String title = title("Shared series");
+        // from the first day of the week on screen, or the occurrences run off it on a weekend
         var form = calendar.createEvent().title(title).addGuest(guest.email())
-            .expand().startTime("09:00").endTime("10:00");
+            .expand().startDate(calendar.firstVisibleDate()).startTime("09:00").endTime("10:00");
         form.repeat().frequency(RecurrenceSection.DAILY).endsAfter(4);
         form.save();
         awaitAttached(calendar.eventCard(title));
@@ -416,7 +420,8 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
     void turningASeriesIntoASimpleEventDropsTheScopeDialog(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Was recurring");
-        var form = calendar.createEvent().title(title).expand().startTime("09:00").endTime("10:00");
+        var form = calendar.createEvent().title(title).expand()
+            .startDate(calendar.firstVisibleDate()).startTime("09:00").endTime("10:00");
         form.repeat().frequency(RecurrenceSection.DAILY).endsAfter(3);
         form.save();
         awaitAttached(calendar.eventCard(title));
@@ -449,7 +454,7 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
 
         // the trailing days of a month grid belong to the next month: they must be loaded too,
         // which is exactly what #263 got wrong
-        java.time.LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+        java.time.LocalDate endOfMonth = E2EClock.today().withDayOfMonth(E2EClock.today().lengthOfMonth());
         Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
             assertThat(calendar.eventDates(title))
                 .as("a daily series must reach the spill over days of the month view")

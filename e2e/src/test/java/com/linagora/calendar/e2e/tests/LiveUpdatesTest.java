@@ -15,6 +15,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -42,7 +43,7 @@ class LiveUpdatesTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user).waitUntilLiveConnected();
         String before = unique("Before");
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, before, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, before, E2EClock.today(), 9));
         // the subject here is the live *rename*: get the starting state on screen the reliable
         // way, so a slow first delivery cannot be mistaken for a broken update
         page.reload();
@@ -50,7 +51,7 @@ class LiveUpdatesTest extends TwakeCalendarE2ETest {
         awaitAttached(calendar.eventCard(before));
 
         String after = unique("After");
-        probe.putEvent(user, uid, Ical.event(uid, after, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, after, E2EClock.today(), 9));
 
         PlaywrightAssertions.assertThat(calendar.eventCard(after).first())
             .isAttached(new LocatorAssertions.IsAttachedOptions().setTimeout(60_000));
@@ -63,8 +64,8 @@ class LiveUpdatesTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user).waitUntilLiveConnected();
         String title = unique("Moving");
         String uid = UUID.randomUUID().toString();
-        // the day after tomorrow, so both slots stay inside the week on screen whatever day it is
-        LocalDate from = LocalDate.now();
+        // two days of the week on screen, whatever day it is: from a Sunday, tomorrow is not on it
+        LocalDate from = calendar.firstVisibleDate();
         LocalDate to = from.plusDays(1);
         probe.putEvent(user, uid, Ical.event(uid, title, from, 9));
         page.reload();
@@ -127,7 +128,7 @@ class LiveUpdatesTest extends TwakeCalendarE2ETest {
         context.setOffline(true);
         page.waitForTimeout(2000);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         page.waitForTimeout(2000);
         context.setOffline(false);
         calendar.refresh();
@@ -160,7 +161,7 @@ class LiveUpdatesTest extends TwakeCalendarE2ETest {
         calendar.waitUntilLoaded();
 
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         calendar.refresh();
 
         PlaywrightAssertions.assertThat(calendar.eventCard(title).first())

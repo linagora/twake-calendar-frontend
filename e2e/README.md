@@ -46,6 +46,31 @@ npx playwright show-trace target/e2e-artifacts/EventCreationTest/createdEventSho
 Browser console errors and uncaught exceptions are printed in the maven output, prefixed
 with `[browser console error]` / `[browser page error]`.
 
+### The clock
+
+A calendar behaves differently on a Sunday, on the last day of a month or at 23:50: a suite
+reading the wall clock passes or fails depending on when it runs. So the suite does not read
+it. `E2EClock` starts every test at a chosen instant, in the browsers and on the Java side
+alike, and time flows normally from there:
+
+| | Starts at |
+|---|---|
+| Any test | a Wednesday, 10:00 Europe/Paris, the one closest to the real date whose week lies whole within its month |
+| `@ClockAt(day = LAST_OF_MONTH, time = "23:45")` | that edge, around the month boundary closest to the real date; also `FIRST_OF_MONTH` and `SUNDAY` |
+| `E2E_NOW=2026-09-27T23:50` | that instant, for every test without `@ClockAt`: how a failure seen on another day is reproduced |
+
+Every test prints the instant it starts at, and the `E2E_NOW` value reproducing the run.
+
+In a test, "today" is `E2EClock.today()`, never `LocalDate.now()`; better still, read the
+date off the grid (`calendar.firstVisibleDate()`, `anotherDayOfTheWeekOnScreen()`) and walk
+to a day with `goToDate` rather than assume it is on screen.
+
+Only the browsers and the tests are moved: the backend keeps the real clock, which is why the
+chosen instants stay within a couple of weeks of the real date. Dates the tests write are
+explicit, and `E2EClock.daysAheadOnBothClocks` gives a day in the future for both, for what
+the server computes from its own clock -- bookable slots. The OIDC callback runs on the real
+clock too, since it checks the tokens against it: the login therefore ends with a reload.
+
 ### What it costs
 
 Measured on a developer laptop, 22 tests:

@@ -40,6 +40,7 @@ import { useTouchListener } from '@common/components/Calendar/hooks/useTouchList
 import { updateSlotLabelVisibility } from '@common/components/Calendar/utils/calendarUtils'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { buildCreateEventRange } from '@common/components/Calendar/utils/createEventRange'
+import { isWithinRange } from '@common/components/Calendar/utils/isWithinRange'
 import ViewMoreEvents from '@common/components/Calendar/ViewMoreEvents'
 import { CalendarGrid } from '@common/components/Calendar/CalendarGrid'
 import ImportAlert from '@common/features/Events/ImportAlert'
@@ -47,7 +48,6 @@ import { TimezoneChangeAlert } from '@common/components/Timezone/TimezoneChangeA
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 import { EditAppointmentModal } from '../../features/booking/EditAppointmentModal'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
-import dayjs from 'dayjs'
 
 export interface CalendarControllerRef {
   handleCreateEvent: () => void
@@ -316,14 +316,16 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
       const end = new Date(arg.end).getTime()
       const middle = start + (end - start) / 2
       setSelectedDate(new Date(middle))
-      const todayIsInCurrentMonth = dayjs(today).isSame(
-        dayjs(arg.start),
-        'month'
+      // the month itself, not the grid: that one starts in the previous month
+      const todayIsInCurrentMonth = isWithinRange(
+        today,
+        arg.view.currentStart,
+        arg.view.currentEnd
       )
       setSelectedMiniDate(todayIsInCurrentMonth ? today : calendarCurrentDate)
     } else {
       setSelectedDate(calendarCurrentDate)
-      const todayIsInCurrentWeek = dayjs(today).isSame(dayjs(arg.start), 'week')
+      const todayIsInCurrentWeek = isWithinRange(today, arg.start, arg.end)
       setSelectedMiniDate(todayIsInCurrentWeek ? today : calendarCurrentDate)
     }
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Page;
@@ -101,7 +102,7 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
 
         calendar.previous();
 
-        String expected = java.time.LocalDate.now().minusMonths(1)
+        String expected = E2EClock.today().minusMonths(1)
             .format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", java.util.Locale.ENGLISH));
         PlaywrightAssertions.assertThat(page.locator(".current-date-time"))
             .containsText(expected.split(" ")[0],
@@ -119,7 +120,7 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
         calendar.next();
 
         assertThat(calendar.visibleDayHeaders()).hasSize(1).isNotEqualTo(today);
-        PlaywrightAssertions.assertThat(calendar.dayColumn(java.time.LocalDate.now().plusDays(1)).first())
+        PlaywrightAssertions.assertThat(calendar.dayColumn(E2EClock.today().plusDays(1)).first())
             .isAttached();
     }
 
@@ -148,7 +149,7 @@ class CalendarNavigationTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
         PlaywrightAssertions.assertThat(page.locator(".fc-timegrid-col.fc-day-today").first()).isAttached();
-        assertThat(calendar.dayColumn(java.time.LocalDate.now()).count()).isPositive();
+        assertThat(calendar.dayColumn(E2EClock.today()).count()).isPositive();
     }
 
     @Test

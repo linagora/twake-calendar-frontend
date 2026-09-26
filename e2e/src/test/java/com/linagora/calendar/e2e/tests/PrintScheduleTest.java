@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.linagora.calendar.e2e.pages.PrintDialog;
@@ -82,8 +83,8 @@ class PrintScheduleTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
         PrintDialog print = calendar.printCalendar(OWN_CALENDAR)
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().minusDays(3))
+            .startDate(E2EClock.today())
+            .endDate(E2EClock.today().minusDays(3))
             .printExpectingRefusal();
 
         page.waitForTimeout(2500);
@@ -99,8 +100,8 @@ class PrintScheduleTest extends TwakeCalendarE2ETest {
 
         PrintDialog print = calendar.printCalendar(OWN_CALENDAR)
             .scale("Day")
-            .startDate(LocalDate.now())
-            .endDate(LocalDate.now().plusMonths(10))
+            .startDate(E2EClock.today())
+            .endDate(E2EClock.today().plusMonths(10))
             .printExpectingRefusal();
 
         page.waitForTimeout(2500);
@@ -131,8 +132,8 @@ class PrintScheduleTest extends TwakeCalendarE2ETest {
 
         PrintDialog print = calendar.printCalendar(OWN_CALENDAR)
             .layout("Schedule")
-            .startDate(LocalDate.now().plusMonths(6))
-            .endDate(LocalDate.now().plusMonths(6).plusDays(2));
+            .startDate(E2EClock.today().plusMonths(6))
+            .endDate(E2EClock.today().plusMonths(6).plusDays(2));
         Page printed = print.print();
 
         assertThat(printed.locator("body").innerText())
@@ -144,7 +145,7 @@ class PrintScheduleTest extends TwakeCalendarE2ETest {
     @DisplayName("PRINT-09 An event with no title is printed under a stand in")
     void anUntitledEventIsPrintedUnderAStandIn(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        calendar.selectTimeRange(LocalDate.now(), "10:00:00", "11:00:00").save();
+        calendar.selectTimeRange(E2EClock.today(), "10:00:00", "11:00:00").save();
         page.waitForTimeout(3000);
 
         PrintDialog print = calendar.printCalendar(OWN_CALENDAR).layout("Schedule").thisWeek();

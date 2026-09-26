@@ -13,7 +13,6 @@ import { type userData } from './userDataTypes'
 
 export const useInitializeApp = (): void => {
   const userData = useAppSelector(state => state.user)
-  const calendars = useAppSelector(state => state.calendars)
   const dispatch = useAppDispatch()
   const hasInitiatedRef = useRef(false)
 
@@ -21,7 +20,14 @@ export const useInitializeApp = (): void => {
     if (hasInitiatedRef.current) return
     const isUserDataNotEmpty =
       userData.userData && Object.keys(userData.userData).length > 0
-    if (isUserDataNotEmpty && !calendars.pending) return
+    if (isUserDataNotEmpty) {
+      // The login callback already loaded everything. A later change of the
+      // user data -- a timezone or a language picked in the settings -- is no
+      // reason to load it all over again: that reload would race the write
+      // the change triggered, and its stale answer would undo the pick.
+      hasInitiatedRef.current = true
+      return
+    }
     if (window.location.pathname === '/callback') return
     hasInitiatedRef.current = true
 

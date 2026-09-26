@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -229,7 +230,7 @@ class EventCreationTest extends TwakeCalendarE2ETest {
         String title = uniqueTitle("Backdated");
 
         var form = calendar.createEvent().title(title).expand();
-        form.startDate(java.time.LocalDate.now().minusDays(3));
+        form.startDate(E2EClock.today().minusDays(3));
         page.waitForTimeout(800);
         assertThat(page.locator("[role=dialog]").last().innerText()).containsIgnoringCase("past");
 
@@ -246,7 +247,7 @@ class EventCreationTest extends TwakeCalendarE2ETest {
     void aMultiDayEventSpreadsOverTheColumns(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = uniqueTitle("Long haul");
-        java.time.LocalDate start = java.time.LocalDate.now();
+        java.time.LocalDate start = E2EClock.today();
 
         calendar.createEvent().title(title).expand().allDay()
             .startDate(start).endDate(start.plusDays(2)).save();
@@ -341,7 +342,7 @@ class EventCreationTest extends TwakeCalendarE2ETest {
     void draggingATimeRangePrefillsTheTimes(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
-        var form = calendar.selectTimeRange(java.time.LocalDate.now(), "10:00:00", "11:30:00")
+        var form = calendar.selectTimeRange(E2EClock.today(), "10:00:00", "11:30:00")
             .expand();
 
         assertThat(form.startTime())
@@ -355,7 +356,7 @@ class EventCreationTest extends TwakeCalendarE2ETest {
     void selectingAMonthCellCreatesAnAllDayEvent(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         calendar.switchView("Month");
-        java.time.LocalDate target = java.time.LocalDate.now().plusDays(1);
+        java.time.LocalDate target = E2EClock.today().plusDays(1);
         String title = uniqueTitle("From the month grid");
 
         var form = calendar.selectMonthCell(target);

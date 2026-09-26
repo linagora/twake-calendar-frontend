@@ -2,7 +2,6 @@ package com.linagora.calendar.e2e.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +11,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Page;
@@ -38,7 +38,7 @@ class BackendSyncTest extends TwakeCalendarE2ETest {
         String title = "Pushed live " + UUID.randomUUID().toString().substring(0, 8);
 
         probe.putEvent(user, UUID.randomUUID().toString(), Ical.event(
-            UUID.randomUUID().toString(), title, LocalDate.now(), 9));
+            UUID.randomUUID().toString(), title, E2EClock.today(), 9));
 
         PlaywrightAssertions.assertThat(calendar.eventCard(title).first())
             .isAttached(new LocatorAssertions.IsAttachedOptions().setTimeout(LIVE_DELIVERY_MS));
@@ -50,7 +50,7 @@ class BackendSyncTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user).waitUntilLiveConnected();
         String title = "Deleted behind your back " + UUID.randomUUID().toString().substring(0, 8);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 10));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 10));
         calendar.eventCard(title).first().waitFor();
 
         probe.deleteEvent(user, uid);
@@ -66,7 +66,7 @@ class BackendSyncTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = "Next week " + UUID.randomUUID().toString().substring(0, 8);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now().plusWeeks(1), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today().plusWeeks(1), 9));
         // Reload so that the SPA starts from a clean slate and really has to fetch the range
         page.reload();
         calendar.waitUntilLoaded();

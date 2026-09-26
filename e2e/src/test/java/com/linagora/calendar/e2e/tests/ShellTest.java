@@ -16,6 +16,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
 import com.linagora.calendar.e2e.docker.BrowserLog;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
@@ -74,16 +75,16 @@ class ShellTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
         org.assertj.core.api.Assertions.assertThat(calendar.miniCalendarMonth())
-            .isEqualTo(LocalDate.now().format(MONTH_YEAR));
+            .isEqualTo(E2EClock.today().format(MONTH_YEAR));
         assertThat(page.locator("button.MuiPickerDay-root.Mui-selected").first())
-            .hasText(String.valueOf(LocalDate.now().getDayOfMonth()));
+            .hasText(String.valueOf(E2EClock.today().getDayOfMonth()));
     }
 
     @Test
     @DisplayName("SHELL-06 Clicking a date in the mini calendar moves the main grid to that date")
     void clickingTheMiniCalendarMovesTheGrid(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        LocalDate target = LocalDate.now().withDayOfMonth(1).plusDays(20);
+        LocalDate target = E2EClock.today().withDayOfMonth(1).plusDays(20);
         String before = calendar.periodTitle();
 
         calendar.miniCalendarDay(target.getDayOfMonth()).click();
@@ -103,7 +104,7 @@ class ShellTest extends TwakeCalendarE2ETest {
         calendar.miniCalendarNextMonth();
 
         org.assertj.core.api.Assertions.assertThat(calendar.miniCalendarMonth())
-            .isEqualTo(LocalDate.now().plusMonths(1).format(MONTH_YEAR));
+            .isEqualTo(E2EClock.today().plusMonths(1).format(MONTH_YEAR));
         org.assertj.core.api.Assertions.assertThat(calendar.visibleDayHeaders())
             .as("browsing the mini calendar is not navigating the agenda")
             .isEqualTo(gridBefore);
@@ -130,10 +131,10 @@ class ShellTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = "Refreshed " + UUID.randomUUID().toString().substring(0, 8);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         probe.deleteEvent(user, uid);
         // put it back without the websocket noticing, so only a refresh can surface it
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
 
         calendar.refresh();
 

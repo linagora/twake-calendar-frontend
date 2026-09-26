@@ -16,6 +16,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
@@ -88,7 +89,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = anEventAt(calendar, "Dragged", "09:00", "10:00");
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "14:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "14:00:00");
 
         Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() ->
             assertThat(startTimeOf(calendar, title)).isEqualTo("14:00"));
@@ -101,7 +102,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         String title = anEventAt(calendar, "Persisted drag", "09:00", "10:00");
         String before = dtStart(probe, user);
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "15:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "15:00:00");
 
         Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
             assertThat(dtStart(probe, user)).isNotEqualTo(before);
@@ -117,9 +118,9 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         // any other column of the week on screen: plusDays would fall off the grid on its edge
         LocalDate destination = calendar.visibleDates().stream()
             .map(LocalDate::parse)
-            .filter(date -> !date.equals(LocalDate.now()))
+            .filter(date -> !date.equals(E2EClock.today()))
             .min(java.util.Comparator.comparingLong(
-                date -> Math.abs(date.toEpochDay() - LocalDate.now().toEpochDay())))
+                date -> Math.abs(date.toEpochDay() - E2EClock.today().toEpochDay())))
             .orElseThrow();
 
         calendar.dragEventToDay(title, destination);
@@ -173,7 +174,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         form.save();
         awaitAttached(calendar.eventCard(title));
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "16:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "16:00:00");
 
         ScopeDialog.waitFor(page).thisEvent();
     }
@@ -189,7 +190,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         form.save();
         awaitAttached(calendar.eventCard(title));
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "17:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "17:00:00");
         ScopeDialog.waitFor(page).thisEvent();
 
         Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
@@ -220,7 +221,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         String before = Awaitility.await().atMost(Duration.ofSeconds(30))
             .until(() -> dtStart(probe, user), java.util.Objects::nonNull);
 
-        boolean moved = calendar.tryDragEventToSlot(title, LocalDate.now(), "18:00:00");
+        boolean moved = calendar.tryDragEventToSlot(title, E2EClock.today(), "18:00:00");
 
         assertThat(moved)
             .as("an event the user was only invited to is not theirs to move")
@@ -245,7 +246,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
             assertThat(probe.eventSummaries(guest)).contains(title));
         String guestBefore = dtStart(probe, guest);
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "13:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "13:00:00");
 
         Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
             assertThat(dtStart(probe, guest)).isNotEqualTo(guestBefore));
@@ -272,7 +273,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
                 route.resume();
             }
         });
-        boolean moved = calendar.tryDragEventToSlot(title, LocalDate.now(), "19:00:00");
+        boolean moved = calendar.tryDragEventToSlot(title, E2EClock.today(), "19:00:00");
         page.unrouteAll();
 
         assertThat(moved)
@@ -290,7 +291,9 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
     void draggingInTheMonthViewKeepsTheTime(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = anEventAt(calendar, "Month move", "09:00", "10:00");
-        LocalDate destination = LocalDate.now().plusDays(2);
+        // a day of the current week: the month grid always holds it whole, and the week view the
+        // test goes back to at the end shows it too
+        LocalDate destination = calendar.anotherDayOfTheWeekOnScreen();
         calendar.switchView("Month");
         awaitAttached(calendar.eventCard(title));
 
@@ -308,7 +311,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = anEventAt(calendar, "Reloaded", "09:00", "10:00");
 
-        calendar.dragEventToSlot(title, LocalDate.now(), "16:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(), "16:00:00");
         Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() ->
             assertThat(startTimeOf(calendar, title)).isEqualTo("16:00"));
 
@@ -330,7 +333,7 @@ class DragAndDropTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = inShanghai(LoginPage.loginAs(page, user));
         String title = anEventAt(calendar, "Shanghai drag", "09:00", "10:00");
 
-        calendar.dragEventToSlot(title, LocalDate.now(ZoneId.of(SHANGHAI)), "14:00:00");
+        calendar.dragEventToSlot(title, E2EClock.today(ZoneId.of(SHANGHAI)), "14:00:00");
 
         // the dropped time used to be read back in the zone of the browser, six hours later
         Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {

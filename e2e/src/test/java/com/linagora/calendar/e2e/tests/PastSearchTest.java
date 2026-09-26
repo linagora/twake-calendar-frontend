@@ -60,6 +60,10 @@ class PastSearchTest extends TwakeCalendarE2ETest {
     void aSearchCalledOffLeavesNothingBehind(Page page, E2EUser user, E2EUserFactory users) {
         E2EUser other = users.newUser("other");
         CalendarPage calendar = LoginPage.loginAs(page, user);
+        // the sidebar fills in after the grid: compare against it once it holds the calendar
+        calendar.calendarCheckbox("My calendar").waitFor(
+            new com.microsoft.playwright.Locator.WaitForOptions()
+                .setState(com.microsoft.playwright.options.WaitForSelectorState.ATTACHED));
         List<String> before = sidebarRows(page);
 
         calendar.browseOtherCalendars();

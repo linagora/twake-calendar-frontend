@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Year;
 import java.time.ZoneId;
 import java.util.UUID;
 
@@ -18,6 +17,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.docker.RuntimeConfig;
 import com.linagora.calendar.e2e.pages.CalendarPage;
@@ -52,14 +52,16 @@ class TimezonesTest extends TwakeCalendarE2ETest {
             assertThat(probe.eventSummaries(user)).containsExactly(title));
     }
 
-    /** The last Sunday of a month, when Europe shifts its clocks. */
+    /** The next last Sunday of a month, when Europe shifts its clocks. */
     private static LocalDate clockChange(Month month) {
-        LocalDate last = LocalDate.of(Year.now().getValue(), month, 1)
-            .withDayOfMonth(LocalDate.of(Year.now().getValue(), month, 1).lengthOfMonth());
-        while (last.getDayOfWeek() != java.time.DayOfWeek.SUNDAY) {
-            last = last.minusDays(1);
-        }
-        return last.isBefore(LocalDate.now()) ? last.plusYears(1) : last;
+        LocalDate change = lastSunday(E2EClock.today().getYear(), month);
+        // recomputed for the next year, not shifted by one: a year later it is another weekday
+        return change.isBefore(E2EClock.today()) ? lastSunday(change.getYear() + 1, month) : change;
+    }
+
+    private static LocalDate lastSunday(int year, Month month) {
+        return LocalDate.of(year, month, 1)
+            .with(java.time.temporal.TemporalAdjusters.lastInMonth(java.time.DayOfWeek.SUNDAY));
     }
 
     @Test
@@ -142,12 +144,15 @@ class TimezonesTest extends TwakeCalendarE2ETest {
         CalendarPage paris = LoginPage.loginAs(page, organizer);
 
         String title = title("From Paris");
+        LocalDate day = paris.browserToday();
         paris.createEvent().title(title).addGuest(guest.email())
-            .expand().startTime("10:00").endTime("11:00").save();
+            .expand().startDate(day).startTime("10:00").endTime("11:00").save();
         awaitAttached(paris.eventCard(title));
 
         tokyo.page().reload();
         tokyo.waitUntilLoaded();
+        // seven hours ahead, Tokyo may already be showing the next week
+        tokyo.goToDate(day);
         PlaywrightAssertions.assertThat(tokyo.eventCard(title).first())
             .isAttached(new LocatorAssertions.IsAttachedOptions().setTimeout(60_000));
         assertThat(tokyo.eventCard(title).first().innerText())
@@ -182,7 +187,7 @@ class TimezonesTest extends TwakeCalendarE2ETest {
     @DisplayName("TZ-09 An all day event does not move from one timezone to another")
     void anAllDayEventDoesNotMove(Page page, E2EUser user, E2ESessions sessions) {
         CalendarPage paris = LoginPage.loginAs(page, user);
-        LocalDate day = LocalDate.now().plusDays(2);
+        LocalDate day = paris.anotherDayOfTheWeekOnScreen();
         String title = title("Holiday");
         paris.createEvent().title(title).expand().allDay().startDate(day).save();
         awaitAttached(paris.eventCard(title));
@@ -190,6 +195,8 @@ class TimezonesTest extends TwakeCalendarE2ETest {
         CalendarPage tokyo = inTimezone(sessions.openFor(user, "Asia/Tokyo"), "Asia/Tokyo");
         tokyo.page().reload();
         tokyo.waitUntilLoaded();
+        // seven hours ahead, Tokyo is already in the next week on a Sunday evening
+        tokyo.goToDate(day);
 
         Awaitility.await().atMost(Duration.ofSeconds(60)).untilAsserted(() ->
             assertThat(tokyo.eventDates(title))
@@ -426,7 +433,7 @@ class TimezonesTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = inTimezone(LoginPage.loginAs(page, user), TONGATAPU);
         String title = title("Early in Tonga");
 
-        var form = calendar.selectTimeRange(LocalDate.now(ZoneId.of(TONGATAPU)), "05:00:00", "05:30:00")
+        var form = calendar.selectTimeRange(E2EClock.today(ZoneId.of(TONGATAPU)), "05:00:00", "05:30:00")
             .title(title).expand();
         assertThat(form.startTime()).isEqualTo("05:00");
         assertThat(form.endTime()).isEqualTo("06:00");
@@ -448,7 +455,7 @@ class TimezonesTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = inTimezone(LoginPage.loginAs(page, user), TONGATAPU);
         String title = title("Longer in Tonga");
 
-        var form = calendar.selectTimeRange(LocalDate.now(ZoneId.of(TONGATAPU)), "05:00:00", "05:30:00")
+        var form = calendar.selectTimeRange(E2EClock.today(ZoneId.of(TONGATAPU)), "05:00:00", "05:30:00")
             .title(title).expand().endTime("07:00");
 
         // the draft of the grid used to read 07:00 in the zone of the browser, eleven hours earlier

@@ -15,6 +15,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
@@ -64,7 +65,7 @@ class PastAllDayTest extends TwakeCalendarE2ETest {
     @DisplayName("PAST-24 (#870) Creating an all day event on the clicked day lands on that day")
     void creatingAnAllDayEventLandsOnTheClickedDay(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        LocalDate target = LocalDate.now().plusDays(2);
+        LocalDate target = calendar.anotherDayOfTheWeekOnScreen();
         String title = title("Clicked day");
 
         calendar.createEvent()
@@ -118,7 +119,7 @@ class PastAllDayTest extends TwakeCalendarE2ETest {
         PlaywrightAssertions.assertThat(page.getByTestId("end-time-input")).hasCount(0);
 
         // and still hidden once it spans several days
-        form.endDate(LocalDate.now().plusDays(1));
+        form.endDate(E2EClock.today().plusDays(1));
         PlaywrightAssertions.assertThat(page.getByTestId("start-time-input")).hasCount(0);
         PlaywrightAssertions.assertThat(page.getByTestId("end-time-input")).hasCount(0);
     }

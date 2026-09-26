@@ -3,10 +3,8 @@ package com.linagora.calendar.e2e.tests;
 import static com.linagora.calendar.e2e.pages.EventFormModal.Scope.ALL_EVENTS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -97,7 +95,8 @@ class PastTimezoneTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         calendar.openSettings().selectTimezone("Asia/Jakarta").backToCalendar();
 
-        LocalDate monday = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        // read off the grid, drawn in Jakarta: late on a Sunday in Paris it is already next week there
+        LocalDate monday = calendar.firstVisibleDate();
         String title = title("Monday standup");
         calendar.createEvent().title(title).expand()
             .startDate(monday)
@@ -118,7 +117,9 @@ class PastTimezoneTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = title("Jakarta call");
 
+        // midweek: 05:00 in Jakarta is the evening before in Paris, off the grid on a Monday
         calendar.createEvent().title(title).expand()
+            .startDate(calendar.firstVisibleDate().plusDays(2))
             .timezone("Asia/Jakarta")
             .startTime("05:00")
             .endTime("06:00")

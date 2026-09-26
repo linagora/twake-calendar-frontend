@@ -177,7 +177,7 @@ class EventEditionTest extends TwakeCalendarE2ETest {
     void changingTheDateMovesTheColumn(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = uniqueTitle("Rescheduled");
-        java.time.LocalDate target = java.time.LocalDate.now().plusDays(2);
+        java.time.LocalDate target = calendar.anotherDayOfTheWeekOnScreen();
         calendar.createEvent(title);
 
         var form = calendar.openEvent(title).edit().expand();

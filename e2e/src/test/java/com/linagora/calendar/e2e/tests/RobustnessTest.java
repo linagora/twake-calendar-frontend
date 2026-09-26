@@ -18,6 +18,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
 import com.linagora.calendar.e2e.pages.EventPreviewPopover;
@@ -101,7 +102,7 @@ class RobustnessTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = unique("Slowly fetched");
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
 
         page.route("**/*", route -> {
             if (route.request().url().contains("calendars")) {
@@ -129,10 +130,13 @@ class RobustnessTest extends TwakeCalendarE2ETest {
         // the account is provisioned on its first login, and the probe needs it to exist
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String marker = UUID.randomUUID().toString().substring(0, 8);
+        // the first five days of the week on screen: counted from today, most of them would be
+        // in the next week late in the week, and never rendered
+        LocalDate monday = calendar.firstVisibleDate();
         for (int index = 0; index < 200; index++) {
             String uid = UUID.randomUUID().toString();
             probe.putEvent(user, uid, Ical.event(uid, "Bulk " + marker + " " + index,
-                LocalDate.now().plusDays(index % 5), 8 + (index % 10)));
+                monday.plusDays(index % 5), 8 + (index % 10)));
         }
 
         long startedAt = System.currentTimeMillis();
@@ -156,7 +160,7 @@ class RobustnessTest extends TwakeCalendarE2ETest {
         for (int index = 0; index < 12; index++) {
             String uid = UUID.randomUUID().toString();
             probe.putEvent(user, uid, Ical.event(uid, "Crowd " + marker + " " + index,
-                LocalDate.now(), 8 + (index % 8)));
+                E2EClock.today(), 8 + (index % 8)));
         }
 
         page.reload();

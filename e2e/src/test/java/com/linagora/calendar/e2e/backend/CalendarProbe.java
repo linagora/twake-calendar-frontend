@@ -20,6 +20,7 @@ import org.bson.Document;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.TwakeCalendarStack;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -213,7 +214,7 @@ public class CalendarProbe {
      * because it is public -- and 403 when they may not.
      */
     public int readStatus(E2EUser reader, String calendarPath) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = E2EClock.today();
         String body = "{\"match\":{\"start\":\"" + today.minusDays(7).format(DAY) + "T000000\","
             + "\"end\":\"" + today.plusDays(7).format(DAY) + "T000000\"}}";
         return execute(reader, "REPORT", calendarPath + ".json", body, "application/json",

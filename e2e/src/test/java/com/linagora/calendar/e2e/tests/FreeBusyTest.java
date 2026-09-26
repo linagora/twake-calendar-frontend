@@ -13,6 +13,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
@@ -48,10 +49,12 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
      * midnight between the two.
      */
     private E2EUser somebodyBusyAt(E2EUserFactory users, E2ESessions sessions, CalendarProbe probe,
-                                   LocalDate day, int utcHour) {
+                                   LocalDate day, int parisHour) {
         E2EUser busy = users.newUser("busy");
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(busy, uid, Ical.event(uid, "Already taken", day, utcHour));
+        // a wall clock hour: seeded in UTC, the same slot would move by an hour with the seasons
+        java.time.ZonedDateTime start = day.atTime(parisHour, 0).atZone(E2EClock.BROWSER_ZONE);
+        probe.putEvent(busy, uid, Ical.eventBetween(uid, "Already taken", start, start.plusHours(1)));
         return busy;
     }
 
@@ -86,7 +89,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
                                              E2ESessions sessions, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         LocalDate day = calendar.browserToday();
-        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 9);
+        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 11);
 
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", busy.email());
 
@@ -101,7 +104,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
                                             E2ESessions sessions, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         LocalDate day = calendar.browserToday();
-        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 9);
+        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 11);
 
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", busy.email());
 
@@ -116,7 +119,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
                                                    E2ESessions sessions, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         LocalDate day = calendar.browserToday();
-        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 9);
+        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 11);
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", busy.email());
         form.awaitAvailabilityOf(busy.email(), BUSY, "the guest is taken at eleven");
 
@@ -212,7 +215,7 @@ class FreeBusyTest extends TwakeCalendarE2ETest {
                                                E2ESessions sessions, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         LocalDate day = calendar.browserToday();
-        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 9);
+        E2EUser busy = somebodyBusyAt(users, sessions, probe, day, 11);
         EventFormModal form = anEventWith(calendar, day, "11:00", "12:00", busy.email());
         form.awaitAvailabilityOf(busy.email(), BUSY, "the guest starts out flagged busy");
 

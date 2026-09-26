@@ -3,7 +3,6 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.awaitility.Awaitility;
@@ -14,16 +13,17 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
+import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarModal;
 import com.linagora.calendar.e2e.pages.CalendarPage;
-import com.linagora.calendar.e2e.backend.Ical;
-import com.linagora.calendar.e2e.backend.Ics;
 import com.linagora.calendar.e2e.pages.EventFormModal;
 import com.linagora.calendar.e2e.pages.EventPreviewPopover;
-import com.linagora.calendar.e2e.pages.SharedCalendar;
-import com.linagora.calendar.e2e.pages.RecurrenceSection;
 import com.linagora.calendar.e2e.pages.LoginPage;
+import com.linagora.calendar.e2e.pages.RecurrenceSection;
+import com.linagora.calendar.e2e.pages.SharedCalendar;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.LocatorAssertions;
@@ -77,7 +77,7 @@ class SharingTest extends TwakeCalendarE2ETest {
     private String seedOwnerEvent(CalendarProbe probe, E2EUser owner, String prefix, int startHourUtc) {
         String title = uniqueTitle(prefix);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(owner, uid, Ical.event(uid, title, LocalDate.now(), startHourUtc));
+        probe.putEvent(owner, uid, Ical.event(uid, title, E2EClock.today(), startHourUtc));
         return title;
     }
 
@@ -244,7 +244,7 @@ class SharingTest extends TwakeCalendarE2ETest {
         String secret = uniqueTitle("Secret interview");
         String secretPlace = uniqueTitle("Room of secrets");
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.privateEvent(uid, secret, secretPlace, LocalDate.now(), 13));
+        probe.putEvent(user, uid, Ical.privateEvent(uid, secret, secretPlace, E2EClock.today(), 13));
         share(calendar, mate, "View all events");
         probe.setPublicRight(user, CalendarProbe.PublicRight.NONE);
 

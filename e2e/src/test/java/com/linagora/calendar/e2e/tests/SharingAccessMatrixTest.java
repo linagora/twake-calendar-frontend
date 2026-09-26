@@ -3,7 +3,6 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -15,11 +14,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
-import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.CalendarProbe.PublicRight;
+import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarModal;
 import com.linagora.calendar.e2e.pages.CalendarPage;
@@ -94,7 +94,7 @@ class SharingAccessMatrixTest extends TwakeCalendarE2ETest {
         String title = uniqueTitle("Owner meeting");
         String uid = UUID.randomUUID().toString();
         probe.putEvent(user, uid,
-            Ical.eventOrganisedBy(uid, title, LocalDate.now(), 10, user.email()));
+            Ical.eventOrganisedBy(uid, title, E2EClock.today(), 10, user.email()));
         CalendarModal modal = calendar.modifyCalendar(OWN_CALENDAR).tab("Access");
         modal.grantAccess(mate.email(), grant.label);
         modal.save();
@@ -163,7 +163,7 @@ class SharingAccessMatrixTest extends TwakeCalendarE2ETest {
         mateCalendar.eventCard(ownerTitle).first().waitFor();
 
         String before = probe.dtStart(owner, ownerTitle).orElseThrow();
-        boolean moved = mateCalendar.tryDragEventToSlot(ownerTitle, LocalDate.now(), "18:00:00");
+        boolean moved = mateCalendar.tryDragEventToSlot(ownerTitle, E2EClock.today(), "18:00:00");
         assertThat(moved)
             .as("an event the user may only read is not theirs to move")
             .isFalse();

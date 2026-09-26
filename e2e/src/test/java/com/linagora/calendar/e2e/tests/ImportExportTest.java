@@ -19,6 +19,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarModal;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -265,7 +266,7 @@ class ImportExportTest extends TwakeCalendarE2ETest {
         String title = "From a third party client " + uid.substring(0, 8);
 
         probe.putEvent(user, uid, com.linagora.calendar.e2e.backend.Ical.event(
-            uid, title, java.time.LocalDate.now(), 11));
+            uid, title, E2EClock.today(), 11));
 
         com.microsoft.playwright.assertions.PlaywrightAssertions
             .assertThat(calendar.eventCard(title).first())

@@ -2,7 +2,6 @@ package com.linagora.calendar.e2e.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +11,8 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ical;
+import com.linagora.calendar.e2e.docker.ClockAt;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.BrowserContext;
@@ -40,7 +41,7 @@ class PastStabilityTest extends TwakeCalendarE2ETest {
         context.setOffline(false);
 
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         calendar.refresh();
 
         // the shell must still be there, and the app must still be able to load data
@@ -73,7 +74,7 @@ class PastStabilityTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         String title = "Anchor " + UUID.randomUUID().toString().substring(0, 8);
         String uid = UUID.randomUUID().toString();
-        probe.putEvent(user, uid, Ical.event(uid, title, LocalDate.now(), 9));
+        probe.putEvent(user, uid, Ical.event(uid, title, E2EClock.today(), 9));
         page.reload();
         calendar.waitUntilLoaded();
         awaitAttached(calendar.eventCard(title));
@@ -99,6 +100,20 @@ class PastStabilityTest extends TwakeCalendarE2ETest {
         PlaywrightAssertions.assertThat(today.first()).isVisible();
         assertThat(today.first().innerText().trim())
             .as("the mini calendar must open on the current week, today selected")
-            .isEqualTo(String.valueOf(LocalDate.now().getDayOfMonth()));
+            .isEqualTo(String.valueOf(E2EClock.today().getDayOfMonth()));
+    }
+
+    @Test
+    @ClockAt(day = ClockAt.Day.SUNDAY, time = "10:00")
+    @DisplayName("EDGE-13 The mini calendar highlights today on a Sunday, not the Monday of its week")
+    void theMiniCalendarHighlightsTodayOnASunday(Page page, E2EUser user) {
+        LoginPage.loginAs(page, user);
+
+        Locator today = page.locator("button.MuiPickerDay-root.Mui-selected");
+
+        PlaywrightAssertions.assertThat(today.first()).isVisible();
+        assertThat(today.first().innerText().trim())
+            .as("a week drawn from Monday to Sunday holds its Sunday: today is in it")
+            .isEqualTo(String.valueOf(E2EClock.today().getDayOfMonth()));
     }
 }

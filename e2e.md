@@ -139,6 +139,34 @@ Four of the forty nine, each with what stands in the way.
 
 ---
 
+# Calendar edges (13)
+
+The first and last days of a month, the first and last minutes of a day, and the Sunday that
+closes the week. Every other test starts on a Wednesday at 10:00 in the middle of a month (see
+the Clock section of [`e2e/README.md`](e2e/README.md)), so the edges are covered here, on
+purpose, rather than by whichever day the suite happens to run on.
+
+`EDGE-01` to `EDGE-12` live in `CalendarEdgesContract` and run four times each, once per
+corner: `EdgeLastDayMidnightTest` (last day, 00:05), `EdgeLastDayEveningTest` (last day,
+23:45), `EdgeFirstDayMidnightTest` (first day, 00:05) and `EdgeFirstDayEveningTest` (first
+day, 23:45) — 48 tests.
+
+- [x] `EDGE-01` The week grid marks the clock's day as today
+- [x] `EDGE-02` The month view opens on the month of today and marks today
+- [x] `EDGE-03` The day view walks into the next and the previous day
+- [x] `EDGE-04` Next week then Today brings the week of today back
+- [x] `EDGE-05` The month view walks to the next and the previous month
+- [x] `EDGE-06` The mini calendar opens on the month of today
+- [x] `EDGE-07` The creation form defaults to the next round hour, date included
+- [x] `EDGE-08` A quick event is stored and shown at the slot the form offered
+- [x] `EDGE-09` An all day event is stored and shown on the day the form offered
+- [x] `EDGE-10` A daily series of three shows on three consecutive days
+- [x] `EDGE-11` An event spanning midnight between two months shows on both days
+- [x] `EDGE-12` Events at 23:00 on the last day and 00:00 on the first stay on their day
+- [x] `EDGE-13` The mini calendar highlights today on a Sunday, not the Monday of its week
+
+---
+
 # Essential (200)
 
 ## AUTH — Authentication and session (9)

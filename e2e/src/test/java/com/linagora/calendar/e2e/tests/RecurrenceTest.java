@@ -18,6 +18,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.EventFormModal;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -64,11 +65,11 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     private String series(CalendarPage calendar, LocalDate start,
                           java.util.function.Consumer<RecurrenceSection> recipe) {
         String title = title("Series");
+        // by default from the first day of the week on screen: from today, a series has only a
+        // day or two left in the week late in it, and weekday rules may have none at all
+        LocalDate startsOn = start == null ? calendar.firstVisibleDate() : start;
         EventFormModal form = calendar.createEvent().title(title).expand()
-            .startTime("09:00").endTime("10:00");
-        if (start != null) {
-            form.startDate(start);
-        }
+            .startDate(startsOn).startTime("09:00").endTime("10:00");
         recipe.accept(form.repeat());
         form.save();
         if (start == null) {
@@ -241,7 +242,7 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         // the 15th exists in every month: a monthly rule skips the months missing its day rather
         // than rolling back, so anchoring on a safe day is what makes this test mean something
-        LocalDate start = LocalDate.now().plusMonths(1).withDayOfMonth(15);
+        LocalDate start = E2EClock.today().plusMonths(1).withDayOfMonth(15);
         String title = series(calendar, start,
             repeat -> repeat.frequency(RecurrenceSection.MONTHLY).endsNever());
         assertThat(Ics.rulePart(rule(probe, user), "FREQ")).hasValue("MONTHLY");
@@ -258,8 +259,8 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     @DisplayName("RECUR-12 A monthly recurrence on the 31st skips the short months")
     void aMonthlyRecurrenceOnThe31stSkipsShortMonths(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        LocalDate onA31st = LocalDate.now().withDayOfMonth(1);
-        while (onA31st.lengthOfMonth() != 31 || onA31st.withDayOfMonth(31).isBefore(LocalDate.now())) {
+        LocalDate onA31st = E2EClock.today().withDayOfMonth(1);
+        while (onA31st.lengthOfMonth() != 31 || onA31st.withDayOfMonth(31).isBefore(E2EClock.today())) {
             onA31st = onA31st.plusMonths(1);
         }
         onA31st = onA31st.withDayOfMonth(31);
@@ -289,7 +290,7 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     @DisplayName("RECUR-13 A monthly interval of 3 behaves as a quarterly recurrence")
     void aMonthlyIntervalOfThreeIsQuarterly(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        LocalDate start = LocalDate.now().plusMonths(1).withDayOfMonth(15);
+        LocalDate start = E2EClock.today().plusMonths(1).withDayOfMonth(15);
         String title = series(calendar, start,
             repeat -> repeat.frequency(RecurrenceSection.MONTHLY).every(3).endsNever());
 
@@ -314,7 +315,12 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     @DisplayName("RECUR-14 A yearly recurrence comes back on the same date the following year")
     void aYearlyRecurrenceComesBackNextYear(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        String title = series(calendar,
+        // never a 29th of February, which a yearly rule skips for three years out of four
+        LocalDate start = calendar.firstVisibleDate();
+        if (start.getMonthValue() == 2 && start.getDayOfMonth() == 29) {
+            start = start.plusDays(1);
+        }
+        String title = series(calendar, start,
             repeat -> repeat.frequency(RecurrenceSection.YEARLY).endsNever());
         assertThat(Ics.rulePart(rule(probe, user), "FREQ")).hasValue("YEARLY");
         // the series starts on the day the form opened on, not necessarily on today
@@ -389,7 +395,7 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
     @DisplayName("RECUR-19 The Until ending shows nothing past the chosen date")
     void theUntilEndingStopsOnTheChosenDate(Page page, E2EUser user, CalendarProbe probe) {
         CalendarPage calendar = LoginPage.loginAs(page, user);
-        LocalDate last = LocalDate.now().plusDays(2);
+        LocalDate last = E2EClock.today().plusDays(2);
         String title = series(calendar,
             repeat -> repeat.frequency(RecurrenceSection.DAILY).endsOn(last));
 
@@ -408,7 +414,7 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
         var repeat = calendar.createEvent().title(title("Bounded")).expand().repeat();
         repeat.frequency(RecurrenceSection.DAILY);
 
-        assertThat(repeat.canEndOn(LocalDate.now().minusDays(1)))
+        assertThat(repeat.canEndOn(E2EClock.today().minusDays(1)))
             .as("a series cannot end before it starts")
             .isFalse();
     }
@@ -419,7 +425,7 @@ class RecurrenceTest extends TwakeCalendarE2ETest {
         CalendarPage calendar = LoginPage.loginAs(page, user);
         series(calendar, repeat -> {
             repeat.frequency(RecurrenceSection.DAILY).endsAfter(4);
-            repeat.endsOn(LocalDate.now().plusDays(3));
+            repeat.endsOn(E2EClock.today().plusDays(3));
         });
 
         String rrule = rule(probe, user);

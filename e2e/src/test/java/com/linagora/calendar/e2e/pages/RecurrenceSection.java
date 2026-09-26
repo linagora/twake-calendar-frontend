@@ -30,7 +30,26 @@ public class RecurrenceSection {
     }
 
     public RecurrenceSection every(int interval) {
-        intervalInput().fill(String.valueOf(interval));
+        return fillKeepingTheTitle(intervalInput(), String.valueOf(interval));
+    }
+
+    /**
+     * Turning the recurrence on renders this section and hands the focus back to the title of
+     * the event: a fill racing that render types into the title. The value itself is not
+     * checked, the field being entitled to normalise it -- some tests are about exactly that.
+     */
+    private RecurrenceSection fillKeepingTheTitle(Locator field, String value) {
+        Locator title = page.getByLabel("Title").first();
+        String before = title.inputValue();
+        field.fill(value);
+        if (!before.equals(title.inputValue())) {
+            title.fill(before);
+            field.fill(value);
+        }
+        if (!before.equals(title.inputValue())) {
+            throw new AssertionError("Filling the recurrence with " + value
+                + " keeps landing in the title, which now reads " + title.inputValue());
+        }
         return this;
     }
 
@@ -94,7 +113,7 @@ public class RecurrenceSection {
 
     public RecurrenceSection endsAfter(int occurrences) {
         page.locator("input[type=radio][value=after]").check();
-        page.getByTestId("occurrences-input").fill(String.valueOf(occurrences));
+        fillKeepingTheTitle(page.getByTestId("occurrences-input"), String.valueOf(occurrences));
         return this;
     }
 

@@ -14,6 +14,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.RuntimeConfig;
 import com.linagora.calendar.e2e.pages.AppointmentModal;
 import com.linagora.calendar.e2e.pages.CalendarPage;
@@ -37,7 +38,8 @@ class BookingLinksTest extends TwakeCalendarE2ETest {
 
     /** A weekday far enough ahead that no slot of it has gone past. */
     private static LocalDate nextWeekSameDay() {
-        return LocalDate.now().plusDays(7);
+        // the slots are computed by the backend, on the real clock: ahead on both
+        return E2EClock.daysAheadOnBothClocks(7);
     }
 
     private static String dayCode(LocalDate day) {
