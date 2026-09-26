@@ -23,6 +23,7 @@
     "userDoesNotHavePublicCalendars": "%{name} не имеет общедоступных календарей",
     "delete": {
       "title": "Удалить %{name}?",
+      "removeTitle": "Удалить %{name}?",
       "personalWarning": "Вы потеряете все события в этом календаре.",
       "sharedWarning": "Вы потеряете доступ. Позже можно добавить снова."
     },

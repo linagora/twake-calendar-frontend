@@ -23,6 +23,7 @@
     "userDoesNotHavePublicCalendars": "%{name} không có lịch công khai",
     "delete": {
       "title": "Xóa %{name}?",
+      "removeTitle": "Gỡ bỏ %{name}?",
       "personalWarning": "Bạn sẽ mất tất cả sự kiện trong lịch này.",
       "sharedWarning": "Bạn sẽ mất quyền truy cập các sự kiện của lịch. Bạn vẫn có thể thêm lại sau."
     },

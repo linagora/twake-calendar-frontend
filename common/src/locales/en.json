@@ -22,7 +22,8 @@
     "noMoreCalendarsFor": "No more calendars for %{name}",
     "userDoesNotHavePublicCalendars": "%{name} does not have public calendars",
     "delete": {
-      "title": "Remove %{name}?",
+      "title": "Delete %{name}?",
+      "removeTitle": "Remove %{name}?",
       "personalWarning": "You will lose all events in this calendar.",
       "sharedWarning": "You will lose access to its events. You will still be able to add it back later."
     },

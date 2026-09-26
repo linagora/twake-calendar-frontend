@@ -23,6 +23,7 @@
     "userDoesNotHavePublicCalendars": "%{name} n'a pas de calendriers publics",
     "delete": {
       "title": "Supprimer %{name} ?",
+      "removeTitle": "Retirer %{name} ?",
       "personalWarning": "Vous allez perdre tous les événements de ce calendrier.",
       "sharedWarning": "Vous allez perdre l’accès à ses événements. Vous pourrez toujours le rajouter plus tard."
     },

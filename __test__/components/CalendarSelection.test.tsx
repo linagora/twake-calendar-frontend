@@ -275,7 +275,7 @@ describe('CalendarSelection', () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText('calendar.delete.title(name=Calendar delegated)')
+        screen.getByText('calendar.delete.removeTitle(name=Calendar delegated)')
       ).toBeInTheDocument()
     )
     fireEvent.click(screen.getByRole('button', { name: /remove/i }))

@@ -25,12 +25,13 @@ export function DeleteCalendarDialog({
   handleDeleteConfirm: () => void
 }) {
   const { t } = useI18n()
+  const titleKey = isPersonal
+    ? 'calendar.delete.title'
+    : 'calendar.delete.removeTitle'
 
   return (
     <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
-      <DialogTitle>
-        {t('calendar.delete.title', { name: calendars[id].name })}
-      </DialogTitle>
+      <DialogTitle>{t(titleKey, { name: calendars[id].name })}</DialogTitle>
 
       <DialogContent>
         <DialogContentText>
