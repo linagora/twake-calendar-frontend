@@ -31,9 +31,7 @@ export function DeleteCalendarDialog({
 
   return (
     <Dialog open={deletePopupOpen} onClose={() => setDeletePopupOpen(false)}>
-      <DialogTitle>
-        {t(titleKey, { name: calendars[id].name })}
-      </DialogTitle>
+      <DialogTitle>{t(titleKey, { name: calendars[id].name })}</DialogTitle>
 
       <DialogContent>
         <DialogContentText>
