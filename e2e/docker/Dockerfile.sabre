@@ -1,5 +1,5 @@
 # Build context: the e2e/ directory
-ARG SABRE_IMAGE="linagora/esn-sabre:2.4.6.2"
+ARG SABRE_IMAGE="linagora/esn-sabre:2.4.6.6"
 
 FROM ${SABRE_IMAGE}
 
