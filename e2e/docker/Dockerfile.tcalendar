@@ -1,5 +1,5 @@
 # Build context: the e2e/ directory
-FROM linagora/twake-calendar-side-service:2.4.6.2
+FROM linagora/twake-calendar-side-service:2.4.6.4
 
 COPY src/test/resources/twake-calendar-side-service-conf/configuration.properties /root/conf/configuration.properties
 COPY src/test/resources/twake-calendar-side-service-conf/opensearch.properties /root/conf/opensearch.properties
