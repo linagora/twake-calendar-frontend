@@ -6,6 +6,23 @@ import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { redirectTo } from '@common/utils/navigation'
 import { useEffect, useState } from 'react'
 
+/**
+ * Ends the session here and on the SSO, then leaves the application.
+ */
+export const logOut = async (): Promise<void> => {
+  // The tokens are dropped, here and in the other tabs, before anything else:
+  // even if the SSO cannot be reached, this browser no longer holds a
+  // session.
+  endLocalSession()
+  try {
+    const logoutUrl = await Logout()
+    redirectTo(logoutUrl.href)
+  } catch (error) {
+    console.error('Logout failed:', error)
+    redirectTo('/')
+  }
+}
+
 export const useUtilMenus = (): {
   anchorEl: null | HTMLElement
   userMenuAnchorEl: null | HTMLElement
@@ -52,19 +69,9 @@ export const useUtilMenus = (): {
     handleUserMenuClose()
   }
 
-  const handleLogoutClick = async (): Promise<void> => {
-    // The tokens are dropped, here and in the other tabs, before anything else:
-    // even if the SSO cannot be reached, this browser no longer holds a
-    // session.
-    endLocalSession()
+  const handleLogoutClick = (): Promise<void> => {
     handleUserMenuClose()
-    try {
-      const logoutUrl = await Logout()
-      redirectTo(logoutUrl.href)
-    } catch (error) {
-      console.error('Logout failed:', error)
-      redirectTo('/')
-    }
+    return logOut()
   }
 
   return {
