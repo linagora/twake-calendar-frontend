@@ -155,6 +155,10 @@ describe('TwakeBarProvider', () => {
       cozyURL: 'https://alice.twake.app'
     })
     expect(getBarHeight()).toBe('3rem')
+    expect(screen.queryByAltText('menubar.logoAlt')).toBe(null)
+    expect(screen.queryByLabelText('menubar.apps')).toBe(null)
+    expect(screen.queryByLabelText('menubar.userProfile')).toBe(null)
+    expect(screen.queryByLabelText('menubar.settings')).toBeInTheDocument()
   })
 
   it('checks the integrity of the script when given', () => {

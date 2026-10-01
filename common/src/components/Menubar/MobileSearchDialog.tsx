@@ -29,7 +29,7 @@ export function MobileSearchDialog({
       elevation={4}
       sx={{
         position: 'fixed',
-        top: '70px',
+        top: 'calc(70px + var(--twake-bar-height, 0px))',
         left: 0,
         right: 0,
         bottom: 0,

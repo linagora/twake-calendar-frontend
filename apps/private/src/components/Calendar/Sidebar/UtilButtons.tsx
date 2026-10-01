@@ -6,7 +6,7 @@ import { UserMenu } from '@common/components/Menubar/UserMenu'
 import { useAppSelector } from '@common/app/hooks'
 import { useUtilMenus } from '@common/components/Calendar/hooks/useUtilMenus'
 
-export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
+export const UtilButtons: React.FC = () => {
   const { t } = useI18n()
   const user = useAppSelector(state => state.user.userData)
 
@@ -52,7 +52,6 @@ export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
         onSettingsClick={handleSettingsClick}
         onLogoutClick={() => void handleLogoutClick()}
         onUserMenuOpen={handleUserMenuOpen}
-        isIframe={isIframe}
         user={user}
         size="s"
       />
