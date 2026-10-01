@@ -1,6 +1,7 @@
 import type { AppIconProps } from '@common/components/Menubar/Menubar'
 import type { MutableRefObject } from 'react'
 import type { CalendarApi } from '@fullcalendar/core'
+import type { TwakeBarApi } from '@common/contexts/TwakeBarContext'
 
 export {}
 
@@ -57,6 +58,10 @@ declare global {
     ENABLE_EVENT_ATTACHMENTS: boolean | undefined
 
     ENABLE_REFRESH_BUTTON: boolean | undefined
+
+    TWAKE_BAR_URL: string | undefined
+    TWAKE_BAR_INTEGRITY: string | undefined
+    TwakeBar?: TwakeBarApi
 
     ASK_FOR_TZ_UPDATE: boolean
 
