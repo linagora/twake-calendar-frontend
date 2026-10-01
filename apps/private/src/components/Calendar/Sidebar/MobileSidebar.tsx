@@ -27,7 +27,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
   selectedCalendars,
   setSelectedCalendars,
   currentView,
-  isIframe,
+  isEmbedded,
   calendarRef,
   onDateChange
 }) => {
@@ -64,7 +64,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
       }}
       slotProps={{ paper: { className: 'sidebar' } }}
     >
-      {!isIframe && (
+      {!isEmbedded && (
         <Box
           sx={{
             display: 'flex',
@@ -80,7 +80,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
             onDateChange={onDateChange}
           />
 
-          <UtilButtons isIframe={isIframe} />
+          <UtilButtons />
         </Box>
       )}
 
