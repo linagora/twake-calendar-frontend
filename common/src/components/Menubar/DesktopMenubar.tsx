@@ -15,7 +15,7 @@ import { UserMenu } from './UserMenu'
 export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
   currentView,
-  isIframe,
+  isEmbedded,
   dateLabel,
   supportLink,
   anchorEl,
@@ -43,7 +43,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
       style={{ borderBottom: `1px solid ${theme.palette.divider}` }}
     >
       <div className="left-menu">
-        {!isIframe && (
+        {!isEmbedded && (
           <div className="menu-items">
             <MainTitle
               calendarRef={calendarRef}
@@ -85,7 +85,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
           <SelectView currentView={currentView} onViewChange={onViewChange} />
         </div>
 
-        {!isIframe && (
+        {!isEmbedded && (
           <>
             {supportLink && (
               <div className="menu-items">
@@ -121,7 +121,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
             onSettingsClick={onSettingsClick}
             onLogoutClick={onLogoutClick}
             onUserMenuOpen={onUserMenuOpen}
-            isIframe={isIframe}
+            isEmbedded={isEmbedded}
             user={user}
           />
         </div>

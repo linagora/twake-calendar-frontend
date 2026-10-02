@@ -4,7 +4,7 @@ import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { refreshCalendars } from '@common/components/Event/utils/eventUtils'
 import { Menubar, MenubarProps } from '@common/components/Menubar/Menubar'
-import { useIsInIframe } from '@common/contexts/EmbeddingContext'
+import { useIsEmbedded } from '@common/contexts/TwakeBarContext'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import { setView } from '@common/features/Settings/SettingsSlice'
@@ -53,7 +53,7 @@ export default function CalendarLayout(): JSX.Element {
     setViewMode()
   }, [isTablet, isMobile])
 
-  const isInIframe = useIsInIframe()
+  const isEmbedded = useIsEmbedded()
 
   // Manage calendar selection states
   const {
@@ -119,17 +119,16 @@ export default function CalendarLayout(): JSX.Element {
     onDateChange: handleDateChange,
     currentView,
     onViewChange: handleViewChange,
-    isIframe: isInIframe,
     onToggleSidebar: () => setOpenSideBar(true)
   }
 
   return (
     <div className={cx('App ', { 'App--mobile': isMobile })}>
-      {!isInIframe && <Menubar {...menubarProps} />}
+      {!isEmbedded && <Menubar {...menubarProps} />}
       {(view === 'calendar' || view === 'search') && (
         <main
           className={cx('main-layout calendar-layout', {
-            isInIframe: isInIframe,
+            isEmbedded,
             'calendar-layout--desktop': !isMobile
           })}
         >
@@ -137,7 +136,7 @@ export default function CalendarLayout(): JSX.Element {
             open={openSidebar}
             onClose={() => setOpenSideBar(false)}
             calendarRef={calendarRef}
-            isIframe={isInIframe}
+            isEmbedded={isEmbedded}
             onCreateEvent={() => controllerRef.current?.handleCreateEvent()}
             onViewChange={handleViewChange}
             selectedMiniDate={selectedMiniDate}
@@ -150,7 +149,7 @@ export default function CalendarLayout(): JSX.Element {
             onDateChange={handleDateChange}
           />
           <div className="calendar">
-            {isInIframe && <Menubar {...menubarProps} />}
+            {isEmbedded && <Menubar {...menubarProps} />}
             <CalendarController
               calendarRef={calendarRef}
               controllerRef={controllerRef}
@@ -183,7 +182,7 @@ export default function CalendarLayout(): JSX.Element {
         </main>
       )}
       {view === 'settings' && (
-        <SettingsPage menubarProps={menubarProps} isInIframe={isInIframe} />
+        <SettingsPage menubarProps={menubarProps} isEmbedded={isEmbedded} />
       )}
       <ErrorSnackbar error={error} type="calendar" />
     </div>

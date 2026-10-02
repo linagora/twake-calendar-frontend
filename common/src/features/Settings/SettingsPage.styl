@@ -1,14 +1,14 @@
 .main-layout.settings-layout
   display flex
   flex-direction row
-  height calc(100vh - 70px)
+  height calc(100vh - 70px - var(--twake-bar-height, 0px))
   padding 0 10px 10px 0;
 
   &--mobile
     padding 0
 
-.main-layout.settings-layout.isInIframe
-  height 100vh
+.main-layout.settings-layout.isEmbedded
+  height calc(100vh - var(--twake-bar-height, 0px))
 
 .settings-sidebar
   width 350px

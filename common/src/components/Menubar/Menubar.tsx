@@ -11,6 +11,7 @@ import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
 import { MobileMenubar } from './MobileMenuBar'
 import { useUtilMenus } from '@common/components/Calendar/hooks/useUtilMenus'
+import { useIsEmbedded } from '@common/contexts/TwakeBarContext'
 
 export type AppIconProps = {
   name: string
@@ -25,11 +26,11 @@ export type MenubarProps = {
   onDateChange?: (date: Date) => void
   currentView: string
   onViewChange?: (view: string) => void
-  isIframe?: boolean
   onToggleSidebar: () => void
 }
 
 export type SharedMenubarProps = MenubarProps & {
+  isEmbedded: boolean
   dateLabel: string
   supportLink: string | undefined
   anchorEl: HTMLElement | null
@@ -52,7 +53,6 @@ export const Menubar: React.FC<MenubarProps> = ({
   onDateChange,
   currentView,
   onViewChange,
-  isIframe,
   onToggleSidebar
 }) => {
   const { t } = useI18n() // deliberately NOT using f()
@@ -70,6 +70,8 @@ export const Menubar: React.FC<MenubarProps> = ({
     handleSettingsClick,
     handleLogoutClick
   } = useUtilMenus()
+
+  const isEmbedded = useIsEmbedded()
 
   const dispatch = useAppDispatch()
   const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
@@ -126,7 +128,7 @@ export const Menubar: React.FC<MenubarProps> = ({
     onDateChange,
     currentView,
     onViewChange: handleViewChange,
-    isIframe,
+    isEmbedded,
     onToggleSidebar,
     dateLabel,
     supportLink,
