@@ -22,7 +22,15 @@ export const AccessSelector: React.FC<{
   setAccessRight: (r: AccessRight) => void
   accessRightOptions: { value: AccessRight; label: string }[]
   disabled?: boolean
-}> = ({ accessRight, setAccessRight, accessRightOptions, disabled }) => {
+  /** What the selected right applies to, e.g. "Access for Jane" */
+  ariaLabel?: string
+}> = ({
+  accessRight,
+  setAccessRight,
+  accessRightOptions,
+  disabled,
+  ariaLabel
+}) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   if (isMobile) {
@@ -47,6 +55,7 @@ export const AccessSelector: React.FC<{
       setAccessRight={setAccessRight}
       disabled={disabled}
       accessRightOptions={accessRightOptions}
+      ariaLabel={ariaLabel}
     />
   )
 }
@@ -56,10 +65,18 @@ const DesktopAccessSelector: React.FC<{
   setAccessRight: (r: AccessRight) => void
   disabled: boolean | undefined
   accessRightOptions: { value: AccessRight; label: string }[]
-}> = ({ accessRight, setAccessRight, disabled, accessRightOptions }) => {
+  ariaLabel?: string
+}> = ({
+  accessRight,
+  setAccessRight,
+  disabled,
+  accessRightOptions,
+  ariaLabel
+}) => {
   return (
     <Select
       value={accessRight}
+      SelectDisplayProps={ariaLabel ? { 'aria-label': ariaLabel } : undefined}
       onChange={e => setAccessRight(e.target.value as AccessRight)}
       variant="standard"
       disableUnderline

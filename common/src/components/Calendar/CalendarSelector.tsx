@@ -36,7 +36,11 @@ export const CalendarSelector: React.FC<{
   if (isMobile) {
     return (
       <>
-        <Typography variant="h6" sx={{ margin: 0, marginBottom: 1 }}>
+        <Typography
+          component="p"
+          variant="h6"
+          sx={{ margin: 0, marginBottom: 1 }}
+        >
           {t('calendar.import_to')}
         </Typography>
         <MobileSelector

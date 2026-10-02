@@ -100,9 +100,16 @@ public class SettingsPage {
         return this;
     }
 
+    /** The working day buttons are named after the full day, as a screen reader announces them. */
+    private static final java.util.Map<String, String> DAY_NAMES = java.util.Map.of(
+        "MO", "Monday", "TU", "Tuesday", "WE", "Wednesday", "TH", "Thursday",
+        "FR", "Friday", "SA", "Saturday", "SU", "Sunday");
+
     /** Toggles one of the working day buttons, by its iCalendar code. */
     public SettingsPage workingDay(String icalDay) {
-        awaitPersisted(() -> page.getByLabel(icalDay, new Page.GetByLabelOptions().setExact(true))
+        awaitPersisted(() -> page.getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
+                new Page.GetByRoleOptions()
+                    .setName(DAY_NAMES.getOrDefault(icalDay, icalDay)).setExact(true))
             .first().click());
         return this;
     }

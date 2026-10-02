@@ -76,6 +76,7 @@ export function AttendeePopover({
   attendee,
   children
 }: AttendeePopoverProps): React.ReactElement {
+  const { t } = useI18n()
   const theme = useTheme()
   const userEmail = useAppSelector(state => state.user.userData?.email)
 
@@ -208,6 +209,7 @@ export function AttendeePopover({
           >
             <IconButton
               size="small"
+              aria-label={t('actions.close')}
               onClick={handleClose}
               sx={{
                 position: 'absolute',

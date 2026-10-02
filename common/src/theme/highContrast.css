@@ -1,0 +1,126 @@
+/*
+ * High contrast mode (settings > Accessibility): every rule is scoped to
+ * html[data-high-contrast='true'], so that nothing changes while the mode is
+ * off. See accessibility/A10Y_REMEDIATIONS-2026-10-01.md.
+ */
+
+/* --- R-03: a visible focus indicator on every focusable element --------- */
+
+html[data-high-contrast='true'] {
+  --hc-focus-color: #1c1b1f;
+  --hc-focus-on-dark: #ffffff;
+}
+
+/* MUI resets the outline of its ButtonBase and twake-mui removes the focus
+   shadow of buttons: draw one ring for everything instead, 3px, ≥ 3:1 against
+   the white and light grey backgrounds of the application */
+html[data-high-contrast='true'] :focus-visible,
+html[data-high-contrast='true'] .Mui-focusVisible {
+  outline: 3px solid var(--hc-focus-color) !important;
+  outline-offset: 2px !important;
+}
+
+/* inside menus and lists the ring would be clipped: draw it inside */
+html[data-high-contrast='true'] .MuiMenuItem-root.Mui-focusVisible,
+html[data-high-contrast='true'] .MuiListItemButton-root.Mui-focusVisible,
+html[data-high-contrast='true'] .MuiMenuItem-root:focus-visible,
+html[data-high-contrast='true'] .MuiListItemButton-root:focus-visible,
+html[data-high-contrast='true'] .MuiAutocomplete-option.Mui-focused {
+  outline-offset: -3px !important;
+}
+
+/* text fields show their focus through their border: make it thick and dark */
+html[data-high-contrast='true']
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-width: 2px !important;
+  border-color: var(--hc-focus-color) !important;
+}
+html[data-high-contrast='true'] .MuiInputBase-input:focus-visible {
+  outline: none !important;
+}
+
+/* actions shown on hover only must show up on keyboard focus too (CAL-03) */
+html[data-high-contrast='true'] .MoreBtn:focus-visible,
+html[data-high-contrast='true'] li:focus-within .MoreBtn {
+  opacity: 1 !important;
+}
+
+/* Windows high contrast themes repaint colours: use the system highlight */
+@media (forced-colors: active) {
+  html[data-high-contrast='true'] :focus-visible,
+  html[data-high-contrast='true'] .Mui-focusVisible {
+    outline-color: Highlight !important;
+  }
+}
+
+/* --- R-07: skip link, off screen until it receives the focus ----------- */
+
+html[data-high-contrast='true'] .skip-link {
+  position: absolute;
+  left: -10000px;
+  top: 8px;
+  z-index: 2000;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1c1b1f;
+  font-weight: 600;
+  text-decoration: underline;
+}
+html[data-high-contrast='true'] .skip-link:focus {
+  left: 8px;
+}
+/* the main region only receives the focus to move the reading position */
+html[data-high-contrast='true'] #main-content:focus,
+html[data-high-contrast='true'] #main-content:focus-visible {
+  outline: none !important;
+}
+
+/* --- R-08: colours outside the MUI theme ------------------------------- */
+
+/* mini calendar: today was white on orange (1.97:1), the selected day a
+   light grey barely distinct from white (1.5:1) */
+html[data-high-contrast='true'] .MuiPickerDay-root.today {
+  background: #b5470f !important;
+  color: #ffffff !important;
+}
+html[data-high-contrast='true'] .MuiPickerDay-root.Mui-selected:not(.today) {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 2px #1c1b1f;
+}
+
+/* settings: the active entry and tab were only marked by a 2.64:1 orange */
+html[data-high-contrast='true'] .settings-nav-item:before,
+html[data-high-contrast='true'] .settings-content-tabs .MuiTabs-indicator,
+html[data-high-contrast='true']
+  .settings-content-tabs--mobile
+  .MuiTabs-indicator {
+  background-color: #b5470f !important;
+}
+html[data-high-contrast='true'] .settings-nav-item.active .MuiListItemIcon-root,
+html[data-high-contrast='true'] .settings-nav-item:hover .MuiListItemIcon-root {
+  color: #b5470f !important;
+}
+html[data-high-contrast='true']
+  .settings-nav-item.active
+  .MuiListItemText-primary {
+  font-weight: 700;
+}
+html[data-high-contrast='true']
+  .settings-content-tabs
+  .MuiTab-root.Mui-selected,
+html[data-high-contrast='true']
+  .settings-content-tabs--mobile
+  .MuiTab-root.Mui-selected {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* --- R-11: actions are not hidden until hover --------------------------- */
+
+/* a touch screen never hovers, and a cue that only shows up under the mouse
+   is missed by keyboard and magnifier users alike */
+html[data-high-contrast='true'] .MoreBtn {
+  opacity: 1 !important;
+}

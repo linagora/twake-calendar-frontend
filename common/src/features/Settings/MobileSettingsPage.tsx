@@ -1,6 +1,7 @@
 import { Box } from '@linagora/twake-mui'
 import { GeneralSettings } from './GeneralSettings'
 import { NotificationsSettings } from './NotificationSettings'
+import { AccessibilitySettings } from './Accessibility/AccessibilitySettings'
 import './SettingsPage.styl'
 import { SettingsHeader } from './SettingsHeader'
 import { SettingsSubTab } from './SettingsPage'
@@ -54,6 +55,7 @@ export const MobileSettingsPage: React.FC<{
             onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
           />
         )}
+        {activeSettingsSubTab === 'accessibility' && <AccessibilitySettings />}
       </Box>
     </Box>
   )

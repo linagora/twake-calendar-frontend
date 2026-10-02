@@ -48,6 +48,8 @@ interface MobileSelectorProps {
   fullscreen?: boolean
   selectorButtonSx?: React.ComponentProps<typeof ButtonBase>['sx']
   disabled?: boolean
+  /** What is being chosen ("Language"…): the button only shows the value */
+  label?: string
 }
 
 export const MobileSelector = forwardRef<
@@ -57,6 +59,7 @@ export const MobileSelector = forwardRef<
   (
     {
       displayText,
+      label,
       children,
       bottomSheetChildren,
       fullscreen,
@@ -76,6 +79,13 @@ export const MobileSelector = forwardRef<
       <>
         <ButtonComponent
           onClick={() => !disabled && setOpen(true)}
+          aria-label={
+            label && typeof displayText === 'string'
+              ? `${label}: ${displayText}`
+              : undefined
+          }
+          aria-haspopup="dialog"
+          aria-expanded={open}
           disabled={disabled}
           sx={selectorButtonSx}
         >
@@ -104,6 +114,7 @@ export const MobileSelector = forwardRef<
             disableAutoFocus
             slotProps={{
               paper: {
+                'aria-label': label,
                 sx: fullscreen ? { height: '100dvh' } : { maxHeight: '90dvh' }
               }
             }}

@@ -12,43 +12,85 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
-import { useEffect, useState } from 'react'
+import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useI18n } from 'twake-i18n'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
 import { defaultColors } from '@common/utils/defaultColors'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
+
+// Names of the preset colours, so that a screen reader does not spell a hex code
+const COLOR_NAME_KEYS: Record<string, string> = {
+  '#D0ECDA': 'colorPicker.colors.green',
+  '#FAE3CE': 'colorPicker.colors.orange',
+  '#F5CFD0': 'colorPicker.colors.red',
+  '#AFCBEF': 'colorPicker.colors.blue',
+  '#E8E4F8': 'colorPicker.colors.purple'
+}
+
+const NEXT_KEYS = ['ArrowRight', 'ArrowDown']
+const PREVIOUS_KEYS = ['ArrowLeft', 'ArrowUp']
 
 export function ColorPicker({
   selectedColor,
   colors = defaultColors.slice(0, 4),
-  onChange
+  onChange,
+  ariaLabel
 }: {
   selectedColor: Record<string, string>
   colors?: Record<string, string>[]
   onChange: (color: Record<string, string>) => void
+  /** Name of the radio group, "Color" by default */
+  ariaLabel?: string
 }): JSX.Element {
+  const { t } = useI18n()
+  const groupRef = useRef<HTMLDivElement>(null)
   const customColor = !colors.find(c => c.light === selectedColor?.light)
     ? selectedColor
     : undefined
+  const swatches = customColor ? [...colors, customColor] : colors
+  const selectedIndex = swatches.findIndex(
+    c => c.light === selectedColor?.light
+  )
+  // Roving tabindex: one Tab stop for the whole group, on the selected swatch
+  const tabStop = selectedIndex === -1 ? 0 : selectedIndex
+
+  // Radio group keyboard model: arrows move to and select the next swatch
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+    const step = NEXT_KEYS.includes(event.key)
+      ? 1
+      : PREVIOUS_KEYS.includes(event.key)
+        ? -1
+        : 0
+    if (!step) return
+    event.preventDefault()
+    const next = (tabStop + step + swatches.length) % swatches.length
+    onChange(swatches[next])
+    groupRef.current
+      ?.querySelectorAll<HTMLElement>('[role="radio"]')
+      [next]?.focus()
+  }
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {colors.map(c => (
-        <ColorBox
-          key={c.light}
-          color={c}
-          onChange={onChange}
-          selectedColor={selectedColor}
-        />
-      ))}
-      {customColor && (
-        <ColorBox
-          color={customColor ?? {}}
-          onChange={onChange}
-          selectedColor={selectedColor}
-        />
-      )}
+      <Box
+        ref={groupRef}
+        role="radiogroup"
+        aria-label={ariaLabel ?? t('calendar.color')}
+        onKeyDown={handleKeyDown}
+        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+      >
+        {swatches.map((c, index) => (
+          <ColorBox
+            key={c.light}
+            color={c}
+            onChange={onChange}
+            selectedColor={selectedColor}
+            isTabStop={index === tabStop}
+          />
+        ))}
+      </Box>
 
       <ColorPickerBox
         onChange={c => {
@@ -63,16 +105,34 @@ export function ColorPicker({
 function ColorBox({
   color,
   onChange,
-  selectedColor
+  selectedColor,
+  isTabStop
 }: {
   color: Record<string, string>
   onChange: (color: Record<string, string>) => void
   selectedColor: Record<string, string>
+  isTabStop: boolean
 }): JSX.Element {
+  const { t } = useI18n()
+  const nameKey = COLOR_NAME_KEYS[color.light?.toUpperCase()]
+  const isSelected = selectedColor?.light === color.light
+
   return (
     <Box
-      role="button"
-      aria-label={`select color ${color.light}`}
+      role="radio"
+      aria-checked={isSelected}
+      aria-label={
+        nameKey
+          ? t(nameKey)
+          : t('colorPicker.customColorHex', { hex: color.light })
+      }
+      tabIndex={isTabStop ? 0 : -1}
+      onKeyDown={event => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault()
+          onChange(color)
+        }
+      }}
       onClick={() => onChange(color)}
       style={{
         width: '46px',
@@ -97,8 +157,7 @@ function ColorBox({
       ></Box>
       <CheckIcon
         style={{
-          visibility:
-            selectedColor?.light === color.light ? 'visible' : 'hidden',
+          visibility: isSelected ? 'visible' : 'hidden',
           color: color.dark
         }}
       />
@@ -110,7 +169,9 @@ function ColorPickerHeader(): JSX.Element {
   const { t } = useI18n()
   return (
     <>
-      <Typography variant="subtitle2">{t('colorPicker.title')}</Typography>
+      <Typography component="p" variant="subtitle2">
+        {t('colorPicker.title')}
+      </Typography>
       <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
         {t('colorPicker.subtitle')}
       </Typography>
@@ -128,7 +189,19 @@ function ColorPickerFields({
   fullWidth?: boolean
 }): JSX.Element {
   const { t } = useI18n()
+  const hexLabelId = useId()
+  const pickerRef = useRef<HTMLDivElement>(null)
   const [draftLight, setDraftLight] = useState(color.light)
+
+  // react-colorful names its two sliders in English, and takes no prop for it
+  useEffect(() => {
+    const sliders =
+      pickerRef.current?.querySelectorAll<HTMLElement>('[role="slider"]') ?? []
+    const labels = [t('colorPicker.saturation'), t('colorPicker.hue')]
+    sliders.forEach((slider, index) => {
+      if (labels[index]) slider.setAttribute('aria-label', labels[index])
+    })
+  }, [t])
 
   useEffect(() => {
     const updateDraftColor = (): void => {
@@ -149,7 +222,7 @@ function ColorPickerFields({
 
   return (
     <>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2 }} ref={pickerRef}>
         <HexColorPicker
           color={color.light}
           onChange={onColorChange}
@@ -158,7 +231,7 @@ function ColorPickerFields({
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Typography variant="body2" sx={{ mr: 1 }}>
+        <Typography id={hexLabelId} variant="body2" sx={{ mr: 1 }}>
           {t('colorPicker.hex')}
         </Typography>
         <TextField
@@ -169,7 +242,10 @@ function ColorPickerFields({
           variant="standard"
           size="small"
           fullWidth={fullWidth}
-          slotProps={{ inputLabel: { shrink: true } }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            htmlInput: { 'aria-labelledby': hexLabelId }
+          }}
         />
       </Box>
     </>
@@ -215,7 +291,7 @@ function ColorPickerBox({
   const theme = useTheme()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>): void => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -245,8 +321,10 @@ function ColorPickerBox({
     <>
       <Box
         key="colorPicker"
-        role="button"
+        {...buttonLikeProps}
         aria-label={t('colorPicker.selectCustom')}
+        aria-haspopup="dialog"
+        aria-expanded={open}
         onClick={handleClick}
         style={{
           width: '46px',
@@ -276,7 +354,11 @@ function ColorPickerBox({
       {isMobile ? (
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
           <DialogTitle sx={{ pb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>
+            <Typography
+              component="span"
+              variant="subtitle1"
+              sx={{ fontWeight: '600' }}
+            >
               {t('colorPicker.title')}
             </Typography>
           </DialogTitle>

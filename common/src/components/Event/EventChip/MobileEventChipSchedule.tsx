@@ -13,6 +13,7 @@ import { SearchEventResult } from '@common/features/Search/types/SearchEventResu
 import { useI18n } from 'twake-i18n'
 import { getEffectiveColor } from './EventChipUtils'
 import { useAppSelector } from '@common/app/hooks'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
 
 export interface MobileEventChipScheduleProps extends EventChipScheduleProps {
   arg: EventContentArg
@@ -90,7 +91,10 @@ export const MobileEventChipSchedule: React.FC<
   )
 
   return (
+    // Replaces FullCalendar's focusable link: the click bubbles up to the
+    // eventClick handler
     <Box
+      {...buttonLikeProps}
       data-event-id={ext.uid}
       sx={{
         display: 'flex',

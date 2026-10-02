@@ -45,8 +45,11 @@ public class PublicEventPreviewPage {
     }
 
     public Locator answerButton(String label) {
-        return page.getByRole(AriaRole.BUTTON,
-            new Page.GetByRoleOptions().setName(label).setExact(true));
+        // the current answer adds "(current answer)" to its name
+        return page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions()
+            // no Pattern.quote: Playwright runs the pattern as a JavaScript RegExp, which
+            // knows nothing of \Q...\E; the labels are plain words
+            .setName(java.util.regex.Pattern.compile("^" + label + "\\s*(\\(.*\\))?$")));
     }
 
     /** Opens the panel offering another time for the event. */

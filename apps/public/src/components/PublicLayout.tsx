@@ -11,6 +11,8 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import { PublicLanguageSelector } from './PublicLanguageSelector'
+import { MAIN_CONTENT_ID, SkipLink } from '@common/components/SkipLink'
+import { HighContrastSwitch } from '@common/features/Settings/Accessibility/HighContrastSwitch'
 
 interface PublicLayoutProps {
   children?: React.ReactNode
@@ -34,7 +36,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         position: 'relative'
       }}
     >
+      <SkipLink />
       <Box
+        component="header"
         sx={{
           position: 'absolute',
           top: 16,
@@ -66,6 +70,9 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       </Box>
 
       <Box
+        component="main"
+        id={MAIN_CONTENT_ID}
+        tabIndex={-1}
         sx={{
           flex: 1,
           display: 'flex',
@@ -101,6 +108,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           />
         </Link>
         <Typography variant="body2">{t('publicLayout.title')}</Typography>
+        {/* R-29: the public pages have no settings, the switch sits here */}
+        <HighContrastSwitch />
         <Typography variant="body2">
           {t('publicLayout.useSubjectTo')}{' '}
           <Link

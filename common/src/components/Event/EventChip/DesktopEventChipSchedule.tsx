@@ -92,7 +92,14 @@ export const DesktopEventChipSchedule: React.FC<
       <SquareRoundedIcon
         style={{ color: calendarColor, width: 24, height: 24, flexShrink: 0 }}
       />
-      <RenderTitle summary={arg.event.title} isRecurrent={isRecurrent} t={t} />
+      {/* FullCalendar's own focusable link is replaced by this content: the
+          title takes over, its click bubbles up to the eventClick handler */}
+      <RenderTitle
+        summary={arg.event.title}
+        isRecurrent={isRecurrent}
+        t={t}
+        focusable
+      />
       <RenderOrganizer organizer={ext.organizer} />
       <RenderLocation text={ext.location} />
       <RenderDescription text={ext.description} />

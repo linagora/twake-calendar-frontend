@@ -10,6 +10,11 @@ import 'dayjs/locale/fr'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/vi'
 import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles'
+import { enUS, frFR, ruRU, viVN } from '@mui/x-date-pickers/locales'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
+import { languageCode } from '@common/theme/highContrastTheme'
+
+const PICKER_LOCALES = { en: enUS, fr: frFR, ru: ruRU, vi: viVN }
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -24,6 +29,15 @@ export const TwakeLocalizationProvider = ({
   const { t } = useI18n()
   const locale = t('locale')
   const outerTheme = useTheme()
+  const highContrast = useHighContrast()
+  // R-06, high contrast mode: every picker text in the user language, not
+  // only ok / cancel / today
+  const pickerLocaleText = highContrast
+    ? (
+        PICKER_LOCALES[languageCode(locale) as keyof typeof PICKER_LOCALES] ??
+        enUS
+      ).components.MuiLocalizationProvider.defaultProps.localeText
+    : undefined
 
   const themeWithPickers = useMemo(() => {
     if (locale !== 'vi') return outerTheme
@@ -45,6 +59,7 @@ export const TwakeLocalizationProvider = ({
         dateAdapter={AdapterDayjs}
         adapterLocale={locale ?? 'en'}
         localeText={{
+          ...pickerLocaleText,
           okButtonLabel: t('common.ok'),
           cancelButtonLabel: t('common.cancel'),
           todayButtonLabel: t('menubar.today')

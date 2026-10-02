@@ -9,6 +9,7 @@ import {
   getDateSlotProps
 } from './dateTimePickerSlotProps'
 import { DatePickerFieldProps } from './DatePickerField'
+import { useDateTimeErrorId } from './DateTimeError'
 
 export const DesktopDatePickerField: React.FC<DatePickerFieldProps> = ({
   value,
@@ -17,6 +18,7 @@ export const DesktopDatePickerField: React.FC<DatePickerFieldProps> = ({
   label,
   hasError = false
 }) => {
+  const errorId = useDateTimeErrorId()
   const { lang } = useI18n()
   return (
     <DatePicker
@@ -26,7 +28,7 @@ export const DesktopDatePickerField: React.FC<DatePickerFieldProps> = ({
       slots={{ field: ReadOnlyDateField }}
       slotProps={{
         ...getDateSlotProps(testId, hasError, label),
-        field: getDateFieldSlotProps(testId, hasError, label),
+        field: getDateFieldSlotProps(testId, hasError, label, false, errorId),
         layout: { sx: dateCalendarLayoutSx }
       }}
     />

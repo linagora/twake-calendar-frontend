@@ -2,6 +2,8 @@ import { Drawer } from '@linagora/twake-mui'
 import { CalendarSidebarProps } from './SideBar'
 import { SidebarCommonContent } from './SidebarCommonContent'
 import { ViewSwitcher } from './ViewSwitcher'
+import { useI18n } from 'twake-i18n'
+import { HighContrastSwitch } from '@common/features/Settings/Accessibility/HighContrastSwitch'
 
 export const TabletSidebar: React.FC<CalendarSidebarProps> = ({
   open,
@@ -14,6 +16,7 @@ export const TabletSidebar: React.FC<CalendarSidebarProps> = ({
   setSelectedCalendars,
   currentView
 }) => {
+  const { t } = useI18n()
   return (
     <Drawer
       variant="temporary"
@@ -30,7 +33,9 @@ export const TabletSidebar: React.FC<CalendarSidebarProps> = ({
           marginTop: 0
         }
       }}
-      slotProps={{ paper: { className: 'sidebar' } }}
+      slotProps={{
+        paper: { className: 'sidebar', 'aria-label': t('a11y.sidebar') }
+      }}
     >
       <ViewSwitcher
         onClose={onClose}
@@ -45,6 +50,8 @@ export const TabletSidebar: React.FC<CalendarSidebarProps> = ({
         selectedCalendars={selectedCalendars}
         setSelectedCalendars={setSelectedCalendars}
       />
+      {/* R-29: the accessible version within one step of every view */}
+      <HighContrastSwitch sx={{ mt: 'auto', pt: 2 }} />
     </Drawer>
   )
 }

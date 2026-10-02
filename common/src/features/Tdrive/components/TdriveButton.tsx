@@ -10,6 +10,7 @@ import { TdriveFile } from '../types'
 import { TdrivePickerDialog } from './TdrivePickerDialog'
 import { Icon, Drive } from '@linagora/twake-icons'
 import { Attachment } from '@common/types/Attachment'
+import { useMessageDuration } from '@common/components/Loading/useMessageDuration'
 
 interface TdriveButtonProps {
   onFilesSelected: (file: TdriveFile[]) => void
@@ -67,6 +68,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
   setAttachments
 }) => {
   const { t } = useI18n()
+  const errorDuration = useMessageDuration(4000, 'error')
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const {
     isOpen,
@@ -107,7 +109,7 @@ export const TdriveButton: React.FC<TdriveButtonProps> = ({
 
       <Snackbar
         open={openPickerError !== null}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={closePicker}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

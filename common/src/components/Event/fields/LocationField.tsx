@@ -70,7 +70,7 @@ export default function LocationField({
           size={inputSize}
           margin="dense"
           slotProps={{
-            input: {
+            htmlInput: {
               'aria-label': t('event.form.location')
             }
           }}

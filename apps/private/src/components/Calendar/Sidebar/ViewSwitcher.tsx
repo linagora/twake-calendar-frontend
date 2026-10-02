@@ -74,6 +74,7 @@ export const ViewSwitcher: React.FC<
                 slotProps={{
                   primary: {
                     variant: 'h6',
+                    component: 'span',
                     sx: {
                       color: isSelected
                         ? theme.palette.primary.main

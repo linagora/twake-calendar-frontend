@@ -4,7 +4,8 @@ import {
 } from '@common/features/booking/types/BookingTypes'
 import { isValidEmail } from '@common/utils/isValidEmail'
 import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
-import React, { useState } from 'react'
+import React, { RefObject, useId, useRef, useState } from 'react'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 import { useI18n } from 'twake-i18n'
 import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { StaticDateTimeSummary } from './StaticDateTimeSummary'
@@ -60,7 +61,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
   return (
     <>
       {bookingInfo?.name && (
-        <Typography variant="h4" sx={{ mb: '24px' }}>
+        <Typography component="h3" variant="h4" sx={{ mb: '24px' }}>
           {bookingInfo.name}
         </Typography>
       )}
@@ -85,6 +86,9 @@ interface BookingFormProps {
   bookingError: string | null
   onNameChange: (value: string) => void
   onEmailChange: (value: string) => void
+  nameRef: RefObject<HTMLInputElement>
+  emailRef: RefObject<HTMLInputElement>
+  onEmailBlur: () => void
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -94,13 +98,32 @@ const BookingForm: React.FC<BookingFormProps> = ({
   emailError,
   bookingError,
   onNameChange,
-  onEmailChange
+  onEmailChange,
+  nameRef,
+  emailRef,
+  onEmailBlur
 }) => {
   const { t } = useI18n()
+  // R-13, high contrast mode: visible labels (MUI then shows the required
+  // asterisk) instead of placeholders that vanish while typing
+  const highContrast = useHighContrast()
   return (
     <>
+      {highContrast && (
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          {t('a11y.requiredLegend')}
+        </Typography>
+      )}
       <TextField
-        placeholder={t('booking.form.name')}
+        inputRef={nameRef}
+        label={highContrast ? t('booking.form.name') : undefined}
+        placeholder={highContrast ? undefined : t('booking.form.name')}
+        slotProps={{
+          htmlInput: {
+            'aria-label': t('booking.form.name'),
+            autoComplete: 'name'
+          }
+        }}
         value={name}
         onChange={e => onNameChange(e.target.value)}
         fullWidth
@@ -111,7 +134,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
         helperText={nameError}
       />
       <TextField
-        placeholder={t('booking.form.email')}
+        inputRef={emailRef}
+        label={highContrast ? t('booking.form.email') : undefined}
+        placeholder={highContrast ? undefined : t('booking.form.email')}
+        onBlur={onEmailBlur}
+        slotProps={{
+          htmlInput: {
+            'aria-label': t('booking.form.email'),
+            autoComplete: 'email'
+          }
+        }}
         type="email"
         value={email}
         onChange={e => onEmailChange(e.target.value)}
@@ -123,7 +155,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         helperText={emailError}
       />
       {bookingError && (
-        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+        <Typography role="alert" color="error" variant="body2" sx={{ mt: 1 }}>
           {bookingError}
         </Typography>
       )}
@@ -146,9 +178,12 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const [emailError, setEmailError] = useState<string | null>(null)
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const highContrast = useHighContrast()
+  const formId = useId()
 
-  const handleEmailChange = (value: string): void => {
-    setEmail(value)
+  const validateEmail = (value: string): void => {
     if (!isValidEmail(value)) {
       setEmailError(t('peopleSearch.invalidEmail').replace('%{email}', value))
     } else {
@@ -156,23 +191,42 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     }
   }
 
+  const handleEmailChange = (value: string): void => {
+    setEmail(value)
+    // high contrast mode: no error while still typing, checked on leaving
+    if (highContrast) {
+      if (emailError) setEmailError(null)
+      return
+    }
+    validateEmail(value)
+  }
+
+  const handleEmailBlur = (): void => {
+    if (highContrast && email) validateEmail(email)
+  }
+
   const handleConfirm = async (): Promise<void> => {
     setNameError(null)
     setEmailError(null)
     setBookingError(null)
 
+    // Each check sends the focus to the field in error, so that its message
+    // (linked by aria-describedby) is read out
     if (!name.trim()) {
       setNameError(t('booking.error.nameRequired'))
+      nameRef.current?.focus()
       return
     }
 
     if (!email) {
       setEmailError(t('booking.error.emailRequired'))
+      emailRef.current?.focus()
       return
     }
 
     if (!isValidEmail(email)) {
       setEmailError(t('peopleSearch.invalidEmail').replace('%{email}', email))
+      emailRef.current?.focus()
       return
     }
 
@@ -217,7 +271,10 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         {t('common.cancel')}
       </Button>
       <Button
-        onClick={() => void handleConfirm()}
+        // high contrast mode: a real form, so that Enter submits it too
+        {...(highContrast
+          ? { type: 'submit' as const, form: formId }
+          : { onClick: () => void handleConfirm() })}
         variant="contained"
         disabled={bookingInProgress}
       >
@@ -226,11 +283,27 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     </>
   )
 
+  const bookingForm = (
+    <BookingForm
+      name={name}
+      email={email}
+      nameError={nameError}
+      emailError={emailError}
+      bookingError={bookingError}
+      onNameChange={setName}
+      onEmailChange={handleEmailChange}
+      nameRef={nameRef}
+      emailRef={emailRef}
+      onEmailBlur={handleEmailBlur}
+    />
+  )
+
   return (
     <ResponsiveDialog
       open={open}
       onClose={handleClose}
       title={title}
+      ariaLabel={t('booking.confirm.title')}
       actions={actions}
       normalMaxWidth="570px"
       titleSx={{
@@ -242,15 +315,21 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         selectedSlot={selectedSlot}
         selectedTimezone={selectedTimezone}
       />
-      <BookingForm
-        name={name}
-        email={email}
-        nameError={nameError}
-        emailError={emailError}
-        bookingError={bookingError}
-        onNameChange={setName}
-        onEmailChange={handleEmailChange}
-      />
+      {highContrast ? (
+        <Box
+          component="form"
+          id={formId}
+          noValidate
+          onSubmit={(event: React.FormEvent) => {
+            event.preventDefault()
+            void handleConfirm()
+          }}
+        >
+          {bookingForm}
+        </Box>
+      ) : (
+        bookingForm
+      )}
     </ResponsiveDialog>
   )
 }

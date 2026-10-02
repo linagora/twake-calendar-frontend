@@ -152,6 +152,7 @@ export function ResourceSearch({
           input: inputProps,
           htmlInput: {
             ...params.slotProps?.htmlInput,
+            'aria-label': t('resourceSearch.label'),
             autoComplete: 'off'
           }
         }
@@ -176,7 +177,11 @@ export function ResourceSearch({
         return (
           <>
             {!hideLabel && (
-              <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+              <Typography
+                component="p"
+                variant="h6"
+                sx={{ marginBottom: '10px' }}
+              >
                 {t('resourceSearch.label')}
               </Typography>
             )}
@@ -195,7 +200,11 @@ export function ResourceSearch({
       return (
         <>
           {!hideLabel && (
-            <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+            <Typography
+              component="p"
+              variant="h6"
+              sx={{ marginBottom: '10px' }}
+            >
               {t('resourceSearch.label')}
             </Typography>
           )}

@@ -5,7 +5,10 @@ import { updateBookingLink } from '@common/features/booking/BookingLinksSlice'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import { ResponsiveDialog } from '@common/components/Dialog'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { useAppointmentForm } from './hooks/useAppointmentForm'
+import {
+  invalidAppointmentMessage,
+  useAppointmentForm
+} from './hooks/useAppointmentForm'
 import { AppointmentModalForm } from './components/AppointmentModalForm'
 import { HeaderRightAction } from './components/HeaderRightAction'
 import { ModalActions } from './components/ModalActions'
@@ -16,6 +19,7 @@ import {
   formatExtraAttendees,
   buildUpdateBookingPayload
 } from './utils'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface EditAppointmentModalProps {
   open: boolean
@@ -29,6 +33,7 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
   bookingLink
 }) => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
   const dispatch = useAppDispatch()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const buttonSize = isMobile ? 'small' : 'medium'
@@ -110,7 +115,14 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({
 
   const handleSave = async (): Promise<void> => {
     if (!isFormValid) {
-      setError(t('booking.fillRequiredFields'))
+      setError(
+        highContrast
+          ? invalidAppointmentMessage(
+              { calendarid, duration, availabilityRules },
+              t
+            )
+          : t('booking.fillRequiredFields')
+      )
       return
     }
 

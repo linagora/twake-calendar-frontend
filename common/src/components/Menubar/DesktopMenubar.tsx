@@ -70,6 +70,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
       <div className="right-menu">
         <div
           className="search-container"
+          role="search"
           style={{
             minWidth: 0
           }}

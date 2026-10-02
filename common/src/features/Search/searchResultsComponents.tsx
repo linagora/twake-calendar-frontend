@@ -13,6 +13,8 @@ import {
 import RepeatIcon from '@mui/icons-material/Repeat'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import React from 'react'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface DateProps {
   startDate: Date
@@ -34,6 +36,8 @@ interface TitleProps {
   summary?: string
   isRecurrent: boolean
   t: (key: string) => string
+  /** Lets the keyboard open the event when the row itself is not focusable */
+  focusable?: boolean
 }
 
 interface OrganizerProps {
@@ -118,13 +122,15 @@ export const RenderTime: React.FC<TimeProps> = ({
 export const RenderTitle: React.FC<TitleProps> = ({
   summary,
   isRecurrent,
-  t
+  t,
+  focusable = false
 }) => {
   const theme = useTheme()
 
   return (
     <Tooltip title={summary || t('event.untitled')}>
       <Box
+        {...(focusable ? buttonLikeProps : {})}
         sx={{
           display: 'flex',
           flexDirection: 'row',
@@ -310,6 +316,8 @@ export const DayBadge: React.FC<DayBadgeProps> = ({
   isToday
 }) => {
   const theme = useTheme()
+  // R-08, high contrast mode: white on #FB9E3A was 2.09:1, the weekday 2.28:1
+  const highContrast = useHighContrast()
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -319,7 +327,7 @@ export const DayBadge: React.FC<DayBadgeProps> = ({
             width: 32,
             height: 32,
             borderRadius: '50%',
-            bgcolor: '#FB9E3A',
+            bgcolor: highContrast ? '#B5470F' : '#FB9E3A',
             color: '#FFF',
             display: 'flex',
             alignItems: 'center',
@@ -345,7 +353,7 @@ export const DayBadge: React.FC<DayBadgeProps> = ({
       <Typography
         sx={{
           fontSize: '14px',
-          color: theme.palette.grey[500],
+          color: highContrast ? 'text.secondary' : theme.palette.grey[500],
           textTransform: 'uppercase'
         }}
       >

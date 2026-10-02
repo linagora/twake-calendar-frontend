@@ -28,7 +28,7 @@ export const RenderMobileDate: React.FC<MobileDateProps> = ({
   timeZone
 }) => (
   <Box sx={{ width: '100%' }}>
-    <Typography variant="h4" sx={{ fontWeight: 400 }}>
+    <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
       {startDate.toLocaleDateString(t('locale'), { day: '2-digit', timeZone })}
     </Typography>
     <Typography variant="caption" sx={{ color: 'text.secondary' }}>

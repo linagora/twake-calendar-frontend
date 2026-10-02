@@ -144,7 +144,7 @@ class BookingLinksTest extends TwakeCalendarE2ETest {
         modal.addSlotOn("MON");
 
         PlaywrightAssertions.assertThat(page.getByTestId("start-time-MON-1")).isVisible();
-        page.getByLabel("remove-slot").first().click();
+        page.getByLabel("Remove slot").first().click();
         PlaywrightAssertions.assertThat(page.getByTestId("start-time-MON-1")).hasCount(0);
     }
 

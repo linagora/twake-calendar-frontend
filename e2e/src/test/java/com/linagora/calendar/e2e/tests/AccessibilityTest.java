@@ -104,9 +104,10 @@ class AccessibilityTest extends TwakeCalendarE2ETest {
               // the shadow inputs MUI keeps beside its own controls are not fields a user meets
               .filter(field => field.type !== 'hidden' && field.offsetParent !== null)
               .filter(field => field.getAttribute('aria-hidden') !== 'true' && !field.readOnly)
+              // a placeholder is no label (RGAA 11.1): it vanishes as soon as one types
               .filter(field => !(field.getAttribute('aria-label') || '').trim()
-                && !(field.getAttribute('placeholder') || '').trim()
-                && !field.getAttribute('aria-labelledby')
+                && !(field.getAttribute('aria-labelledby') || '').split(' ')
+                  .some(id => id && document.getElementById(id))
                 && !(field.id && document.querySelector(`label[for="${field.id}"]`))
                 && !field.closest('label'))
               .map(field => field.outerHTML.slice(0, 100))""");
@@ -151,14 +152,17 @@ class AccessibilityTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("A11Y-14 The document title says which application this is")
-    void theDocumentTitleSaysWhichApplicationThisIs(Page page, E2EUser user) {
-        LoginPage.loginAs(page, user);
+    @DisplayName("A11Y-14 The document title says which view of the application is shown")
+    void theDocumentTitleSaysWhichViewIsShown(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
 
         assertThat(page.title())
             .as("a browser full of tabs needs each one to say what it holds")
-            .isNotBlank()
-            .containsIgnoringCase("calendar");
+            .endsWith("Twake Calendar")
+            .contains("Week");
+
+        calendar.openSettings();
+        assertThat(page.title()).isEqualTo("Settings – Twake Calendar");
     }
 
     @Test
@@ -182,5 +186,32 @@ class AccessibilityTest extends TwakeCalendarE2ETest {
             .as("something going wrong has to reach somebody who cannot see the colour red")
             .isPositive();
         page.unrouteAll();
+    }
+
+    @Test
+    @DisplayName("A11Y-15 The high contrast mode is switched from the settings and kept on reload")
+    void theHighContrastModeIsSwitchedFromTheSettings(Page page, E2EUser user) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        assertThat(page.locator("html").getAttribute("data-high-contrast"))
+            .as("off by default: the interface looks as designed")
+            .isNull();
+
+        calendar.openSettings();
+        page.getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Accessibility")).click();
+        // the switch of the Accessibility section; the side bar has its own (R-29)
+        page.locator(".settings-content").getByRole(com.microsoft.playwright.options.AriaRole.SWITCH,
+            new com.microsoft.playwright.Locator.GetByRoleOptions().setName("High contrast mode")).click();
+
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(page.locator("html"))
+            .hasAttribute("data-high-contrast", "true");
+        page.reload();
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(page.locator("html"))
+            .hasAttribute("data-high-contrast", "true");
+        // back on the calendar, the side bar switch tells the mode is on
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+                page.locator(".sidebar").getByRole(com.microsoft.playwright.options.AriaRole.SWITCH,
+                    new com.microsoft.playwright.Locator.GetByRoleOptions().setName("High contrast mode")))
+            .isChecked();
     }
 }

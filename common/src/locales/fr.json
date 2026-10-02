@@ -117,7 +117,17 @@
     "selectCustom": "Sélectionner une couleur personnalisée",
     "title": "Choisir une couleur personnalisée",
     "subtitle": "Choisissez une couleur d'arrière-plan pour ce calendrier",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Vert",
+      "orange": "Orange",
+      "red": "Rouge",
+      "blue": "Bleu",
+      "purple": "Violet"
+    },
+    "customColorHex": "Couleur personnalisée %{hex}",
+    "saturation": "Saturation et luminosité",
+    "hue": "Teinte"
   },
   "event": {
     "createEvent": "Créer",
@@ -343,7 +353,37 @@
     "back": "Retour au calendrier",
     "chooseWorkingDays": "Choisissez vos jours ouvrés",
     "showOnlyWorkingDays": "Afficher uniquement les jours sélectionnés",
-    "workingDaysUpdateError": "Échec de la mise à jour des jours ouvrés"
+    "workingDaysUpdateError": "Échec de la mise à jour des jours ouvrés",
+    "accessibility": {
+      "title": "Accessibilité",
+      "display": "Affichage",
+      "highContrast": "Mode contraste élevé",
+      "highContrastDescription": "Couleurs plus contrastées, focus clavier visible, étiquettes de champs visibles et autres aides à l'accessibilité. Ce réglage est enregistré sur cet appareil.",
+      "keyboard": {
+        "title": "Clavier",
+        "keys": "Touches",
+        "action": "Action",
+        "caption": "Les principaux raccourcis clavier de Twake Calendar.",
+        "key1": "Tab / Maj+Tab",
+        "action1": "Aller au contrôle suivant / précédent",
+        "key2": "Entrée ou Espace",
+        "action2": "Activer le bouton, l'événement ou la ligne qui a le focus",
+        "key3": "Échap",
+        "action3": "Fermer une fenêtre ou un menu",
+        "key4": "Entrée, Espace ou Alt+↓",
+        "action4": "Ouvrir le sélecteur d'un champ de date ou d'heure",
+        "key5": "Flèches, Page préc. / Page suiv.",
+        "action5": "Changer de jour / de mois dans un sélecteur de date",
+        "key6": "Maj+F10 ou touche Menu",
+        "action6": "Ouvrir les actions de l'agenda qui a le focus",
+        "key7": "Flèches",
+        "action7": "Choisir la couleur d'un agenda",
+        "key8": "← / → puis Retour arrière",
+        "action8": "Retirer un participant du champ des participants",
+        "key9": "Entrée",
+        "action9": "Lancer la recherche saisie dans le champ de recherche"
+      }
+    }
   },
   "eventPreview": {
     "extraAttendees": "%{smart_count} participant supplémentaire |||| %{smart_count} participants supplémentaires",
@@ -658,5 +698,39 @@
   "debug": {
     "enabled": "Mode debug activé.",
     "disabled": "Mode debug désactivé."
+  },
+  "pageTitle": {
+    "booking": "Prendre rendez-vous",
+    "bookingConfirmed": "Rendez-vous confirmé",
+    "bookingUnavailable": "Prise de rendez-vous indisponible"
+  },
+  "a11y": {
+    "removeItem": "Retirer %{name}",
+    "moreActionsFor": "Plus d'actions pour %{name}",
+    "copyItem": "Copier %{name}",
+    "collapseDialog": "Réduire",
+    "editItem": "Modifier %{name}",
+    "editBookingLink": "Modifier le lien de réservation",
+    "time": "Heure",
+    "event": "Événement",
+    "sidebar": "Agendas et navigation",
+    "calendar": "Agenda",
+    "loading": "Chargement…",
+    "slotsOn": "Horaires disponibles le %{date}",
+    "slotsAvailable": "%{smart_count} créneau disponible le %{date} |||| %{smart_count} créneaux disponibles le %{date}",
+    "currentAnswer": "(réponse actuelle)",
+    "repeatUnit": "Unité de répétition",
+    "repeatEndDate": "Répéter jusqu'au",
+    "occurrenceCount": "Nombre d'occurrences",
+    "searchEvents": "Rechercher des événements",
+    "accessFor": "Accès pour %{name}",
+    "accessToGrant": "Accès à accorder",
+    "searchResultsCount": "%{smart_count} événement trouvé |||| %{smart_count} événements trouvés",
+    "moreEvents": "Autres événements",
+    "calendarSettings": "Paramètres de l'agenda",
+    "moreEventsHint": "Afficher %{smart_count} autre événement |||| Afficher %{smart_count} autres événements",
+    "skipToContent": "Aller au contenu",
+    "requiredLegend": "Les champs marqués d'un astérisque (*) sont obligatoires.",
+    "calendarNameRequired": "Un nom est nécessaire pour enregistrer l'agenda."
   }
 }

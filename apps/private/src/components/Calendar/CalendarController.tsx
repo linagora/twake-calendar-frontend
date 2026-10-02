@@ -65,6 +65,8 @@ export interface CalendarControllerProps {
   selectedMiniDate: Date | null
   setSelectedMiniDate: (date: Date) => void
   onDateChange?: (date: Date) => void
+  /** The displayed period, as FullCalendar words it in the user locale */
+  onPeriodTitleChange?: (title: string) => void
   onViewChange: (view: string) => void
   controllerRef?: MutableRefObject<CalendarControllerRef | null>
 }
@@ -81,6 +83,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   tempUsers,
   setSelectedMiniDate,
   onDateChange,
+  onPeriodTitleChange,
   onViewChange,
   controllerRef
 }: CalendarControllerProps) => {
@@ -328,6 +331,8 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
       const todayIsInCurrentWeek = isWithinRange(today, arg.start, arg.end)
       setSelectedMiniDate(todayIsInCurrentWeek ? today : calendarCurrentDate)
     }
+
+    onPeriodTitleChange?.(arg.view.title)
 
     if (onDateChange) {
       onDateChange(calendarCurrentDate)

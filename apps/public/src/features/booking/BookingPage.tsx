@@ -12,13 +12,17 @@ import { BookingConfirmDialog } from './components/BookingDialog'
 import { BookingSuccessDialog } from './components/BookingSuccessDialog'
 import { BookingTimeSlotSection } from '../../components/Booking/BookingTimeSlotSection'
 import { useI18n } from 'twake-i18n'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
 import { useBookingData } from './hooks/useBookingData'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { BookingErrorBoundary } from './components/BookingErrorBoundary'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
+import { MAIN_CONTENT_ID } from '@common/components/SkipLink'
 
 export const BookingPage: React.FC = () => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const { bookingLinkPublicId } = useParams<{
@@ -185,6 +189,14 @@ export const BookingPage: React.FC = () => {
 
   const errorStatus = submitError || error
 
+  useDocumentTitle(
+    ...(errorStatus && !bookingInfo
+      ? [t('pageTitle.bookingUnavailable')]
+      : successOpen
+        ? [t('pageTitle.bookingConfirmed'), bookingInfo?.name]
+        : [bookingInfo?.name, t('pageTitle.booking')])
+  )
+
   return (
     <BookingErrorBoundary
       errorStatus={errorStatus}
@@ -212,7 +224,7 @@ export const BookingPage: React.FC = () => {
                   padding: '32px 0'
                 }}
               >
-                <CircularProgress size={28} />
+                <CircularProgress size={28} aria-label={t('a11y.loading')} />
               </Box>
             ) : (
               <>
@@ -241,7 +253,10 @@ export const BookingPage: React.FC = () => {
                         zIndex: 1
                       }}
                     >
-                      <CircularProgress size={24} />
+                      <CircularProgress
+                        size={24}
+                        aria-label={t('a11y.loading')}
+                      />
                     </Box>
                   )}
 
@@ -282,6 +297,13 @@ export const BookingPage: React.FC = () => {
             <BookingSuccessDialog
               open={successOpen}
               onClose={handleCloseSuccess}
+              // R-13, high contrast mode: the button that opened the booking
+              // dialog is gone, bring the focus back to the page content
+              onExited={
+                highContrast
+                  ? () => document.getElementById(MAIN_CONTENT_ID)?.focus()
+                  : undefined
+              }
               selectedSlot={selectedSlot}
               bookingInfo={bookingInfo}
               eventLink={`${window.location.origin}/booking/confirmed/${bookingConfirmationToken}`}

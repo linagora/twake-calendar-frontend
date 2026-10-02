@@ -15,7 +15,8 @@ public class EventPreviewPopover {
     EventPreviewPopover waitUntilOpen() {
         // the title heading, not the Edit button: a guest invited to an event they do not own
         // gets the preview without the editing actions
-        content().locator("h3").first().waitFor();
+        // (an h2: the heading level of a dialog title)
+        content().locator("h2.MuiTypography-h3").first().waitFor();
         return this;
     }
 
@@ -101,21 +102,16 @@ public class EventPreviewPopover {
             new Locator.WaitForOptions().setState(WaitForSelectorState.DETACHED));
     }
 
-    /**
-     * Opens the overflow menu of the preview header. The button carries no accessible name, so
-     * it is located as the unlabelled sibling of the Delete action.
-     */
+    /** Opens the overflow menu of the preview header, named after its tooltip. */
     public EventPreviewPopover moreOptions() {
-        Locator siblings = page.getByLabel("Delete event").locator("xpath=..")
-            .locator("button:not([aria-label])");
-        for (int index = 0; index < siblings.count(); index++) {
-            siblings.nth(index).click();
-            page.waitForTimeout(500);
-            if (page.locator("[role=menu], [role=menuitem]").count() > 0) {
-                return this;
-            }
+        Locator more = page.getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Show more options").setExact(true));
+        if (more.count() == 0) {
+            throw new AssertionError("No overflow menu in the event preview");
         }
-        throw new AssertionError("No overflow menu in the event preview");
+        more.last().click();
+        page.locator("[role=menu], [role=menuitem]").first().waitFor();
+        return this;
     }
 
     /** Opens the personal settings of the event: the reminder and busy status of this user only. */

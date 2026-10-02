@@ -117,7 +117,17 @@
     "selectCustom": "Chọn màu tùy chỉnh",
     "title": "Chọn màu tùy chỉnh",
     "subtitle": "Chọn màu nền cho lịch này",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Xanh lá",
+      "orange": "Cam",
+      "red": "Đỏ",
+      "blue": "Xanh dương",
+      "purple": "Tím"
+    },
+    "customColorHex": "Màu tùy chỉnh %{hex}",
+    "saturation": "Độ bão hòa và độ sáng",
+    "hue": "Sắc độ"
   },
   "event": {
     "createEvent": "Tạo sự kiện",
@@ -343,7 +353,37 @@
     "back": "Quay lại lịch",
     "chooseWorkingDays": "Chọn ngày làm việc của bạn",
     "showOnlyWorkingDays": "Chỉ hiển thị ngày làm việc",
-    "workingDaysUpdateError": "Không thể cập nhật cài đặt ngày làm việc"
+    "workingDaysUpdateError": "Không thể cập nhật cài đặt ngày làm việc",
+    "accessibility": {
+      "title": "Trợ năng",
+      "display": "Hiển thị",
+      "highContrast": "Chế độ tương phản cao",
+      "highContrastDescription": "Màu sắc tương phản hơn, tiêu điểm bàn phím hiển thị rõ, nhãn trường hiển thị và các hỗ trợ trợ năng khác. Cài đặt này được lưu trên thiết bị này.",
+      "keyboard": {
+        "title": "Bàn phím",
+        "keys": "Phím",
+        "action": "Thao tác",
+        "caption": "Các phím tắt chính của Twake Calendar.",
+        "key1": "Tab / Shift+Tab",
+        "action1": "Chuyển đến điều khiển tiếp theo / trước đó",
+        "key2": "Enter hoặc Space",
+        "action2": "Kích hoạt nút, sự kiện hoặc dòng đang được chọn",
+        "key3": "Escape",
+        "action3": "Đóng hộp thoại hoặc menu",
+        "key4": "Enter, Space hoặc Alt+↓",
+        "action4": "Mở bộ chọn của trường ngày hoặc giờ",
+        "key5": "Phím mũi tên, Page Up / Page Down",
+        "action5": "Di chuyển giữa các ngày / tháng trong bộ chọn ngày",
+        "key6": "Shift+F10 hoặc phím Menu",
+        "action6": "Mở các thao tác của lịch đang được chọn",
+        "key7": "Phím mũi tên",
+        "action7": "Chọn màu cho lịch",
+        "key8": "← / → rồi Backspace",
+        "action8": "Xóa người tham gia khỏi trường người tham gia",
+        "key9": "Enter",
+        "action9": "Thực hiện tìm kiếm trong ô tìm kiếm"
+      }
+    }
   },
   "eventPreview": {
     "extraAttendees": "%{smart_count} người tham gia khác",
@@ -659,5 +699,39 @@
   "debug": {
     "enabled": "Đã bật chế độ gỡ lỗi.",
     "disabled": "Đã tắt chế độ gỡ lỗi."
+  },
+  "pageTitle": {
+    "booking": "Đặt lịch hẹn",
+    "bookingConfirmed": "Đã xác nhận lịch hẹn",
+    "bookingUnavailable": "Không thể đặt lịch hẹn"
+  },
+  "a11y": {
+    "removeItem": "Xóa %{name}",
+    "moreActionsFor": "Thêm thao tác cho %{name}",
+    "copyItem": "Sao chép %{name}",
+    "collapseDialog": "Thu gọn",
+    "editItem": "Chỉnh sửa %{name}",
+    "editBookingLink": "Chỉnh sửa liên kết đặt lịch",
+    "time": "Thời gian",
+    "event": "Sự kiện",
+    "sidebar": "Lịch và điều hướng",
+    "calendar": "Lịch",
+    "loading": "Đang tải…",
+    "slotsOn": "Khung giờ trống ngày %{date}",
+    "slotsAvailable": "%{smart_count} khung giờ trống ngày %{date}",
+    "currentAnswer": "(câu trả lời hiện tại)",
+    "repeatUnit": "Đơn vị lặp lại",
+    "repeatEndDate": "Lặp lại đến",
+    "occurrenceCount": "Số lần lặp",
+    "searchEvents": "Tìm kiếm sự kiện",
+    "accessFor": "Quyền truy cập của %{name}",
+    "accessToGrant": "Quyền truy cập cần cấp",
+    "searchResultsCount": "Tìm thấy %{smart_count} sự kiện",
+    "moreEvents": "Các sự kiện khác",
+    "calendarSettings": "Cài đặt lịch",
+    "moreEventsHint": "Hiển thị thêm %{smart_count} sự kiện",
+    "skipToContent": "Chuyển đến nội dung",
+    "requiredLegend": "Các trường có dấu sao (*) là bắt buộc.",
+    "calendarNameRequired": "Cần có tên để lưu lịch."
   }
 }

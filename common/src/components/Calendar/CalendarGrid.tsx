@@ -41,6 +41,7 @@ import { usePreserveScrollPositionInScheduleView } from './hooks/usePreserveScro
 import { useDraftEvent } from './hooks/useDraftEvent'
 import { BookingLinkOverlay } from './BookingLinkOverlay'
 import type { BookingLink } from '@common/features/booking/types/BookingTypes'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
@@ -121,7 +122,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   datesSet,
   ...otherProps
 }) => {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
+  const highContrast = useHighContrast()
   const { isTooSmall: isMobile, isTablet } = useScreenSizeDetection()
   const isNotDesktop = isTablet || isMobile
 
@@ -201,6 +203,19 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           initialView={getInitialCalendarView(otherProps.currentView, isTablet)}
           initialDate={otherProps.selectedDate}
           locale={localeMap[lang]}
+          // headers of the Schedule view table, visually hidden by FullCalendar
+          timeHint={t('a11y.time')}
+          eventHint={t('a11y.event')}
+          // R-06, high contrast mode: the texts FullCalendar displays (tooltips
+          // of the "+N" link and of the popover close button, all day row)
+          {...(highContrast
+            ? {
+                closeHint: t('actions.close'),
+                moreLinkHint: (count: number) =>
+                  t('a11y.moreEventsHint', { smart_count: count }),
+                allDayText: t('event.form.allDay')
+              }
+            : {})}
           hiddenDays={otherProps.hiddenDays}
           timeZone={otherProps.timezone}
           select={otherProps.eventHandlers.handleDateSelect}

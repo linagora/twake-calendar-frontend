@@ -11,14 +11,7 @@ export const BookingMetaInfo: React.FC<{
   referenceDate: Date
 }> = ({ selectedTimezone, onTimezoneChange, referenceDate }) => {
   const { t } = useI18n()
-  const cameraIcon = (
-    <img
-      src={iconCamera}
-      alt={t('booking.cameraIcon')}
-      width={24}
-      height={24}
-    />
-  )
+  const cameraIcon = <img src={iconCamera} alt="" width={24} height={24} />
   return (
     <Box
       sx={{

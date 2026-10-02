@@ -150,7 +150,7 @@ class InternationalisationTest extends TwakeCalendarE2ETest {
         Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             page.getByLabel(FR_CREATE).click();
             page.getByLabel("Titre").first().waitFor();
-            page.getByLabel("expand").click();
+            page.getByLabel("Afficher plus d'options").last().click();
             assertThat(page.getByTestId("start-date-input").inputValue())
                 .as("English read %s", english)
                 .isNotEqualTo(english)
@@ -167,13 +167,14 @@ class InternationalisationTest extends TwakeCalendarE2ETest {
 
         page.getByLabel(FR_CREATE).click();
         page.getByLabel("Titre").first().fill(title("Invalide"));
-        page.getByLabel("expand").click();
+        page.getByLabel("Afficher plus d'options").last().click();
         
         // Ensure start and end dates are identical so time validation triggers reliably
         String startDate = page.getByTestId("start-date-input").inputValue();
         page.getByTestId("end-date-input").evaluate("el => el.removeAttribute('readonly')");
         page.getByTestId("end-date-input").fill(startDate);
-        page.getByTestId("end-date-input").press("Enter");
+        // Tab, not Enter: Enter opens the date picker of the field
+        page.getByTestId("end-date-input").press("Tab");
 
         page.getByTestId("start-time-input").fill("14:00");
         page.getByTestId("end-time-input").fill("09:00");

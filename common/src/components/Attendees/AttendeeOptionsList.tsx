@@ -4,6 +4,7 @@ import { Typography, Box } from '@linagora/twake-mui'
 import { AttendeeAvatar } from './AttendeeAvatar'
 import { User } from './types'
 import { useI18n } from 'twake-i18n'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
 
 export interface AttendeeOptionsListProps extends HTMLAttributes<HTMLLIElement> {
   options: User[]
@@ -28,6 +29,10 @@ export const AttendeeOptionsList: React.FC<AttendeeOptionsListProps> = ({
         return (
           <ListItem
             key={option.email}
+            // Standalone lists (outside an Autocomplete, which brings its own
+            // option role and keyboard handling) must be operable too
+            {...(onOptionClick ? buttonLikeProps : {})}
+            aria-disabled={onOptionClick ? isSelected : undefined}
             onClick={() => !isSelected && onOptionClick?.(option)}
             disableGutters
             sx={{

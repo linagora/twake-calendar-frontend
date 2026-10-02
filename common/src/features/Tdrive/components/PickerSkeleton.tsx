@@ -28,7 +28,7 @@ export const PickerSkeleton: React.FC = () => (
     >
       <img
         src={driveLogotype}
-        alt="Drive logotype"
+        alt="Twake Drive"
         height="32px"
         style={{ width: 'auto' }}
       />

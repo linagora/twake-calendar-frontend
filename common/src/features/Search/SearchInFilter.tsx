@@ -21,7 +21,7 @@ import {
   Select,
   Typography
 } from '@linagora/twake-mui'
-import { useRef } from 'react'
+import { useRef, useId } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '@common/types/CalendarTypes'
 import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
@@ -32,6 +32,7 @@ interface Props {
 
 export const SearchInFilter: React.FC<Props> = ({ mode }) => {
   const { t } = useI18n()
+  const labelId = useId()
   const inputSize = useResponsiveInputSize()
   const dispatch = useAppDispatch()
   const searchParams = useAppSelector(state => state.searchResult.searchParams)
@@ -65,6 +66,8 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
 
   return (
     <Box
+      role="group"
+      aria-labelledby={labelId}
       sx={{
         display: 'grid',
         gridTemplateColumns: '140px 1fr',
@@ -72,8 +75,11 @@ export const SearchInFilter: React.FC<Props> = ({ mode }) => {
         alignItems: 'center'
       }}
     >
-      <InputLabel sx={{ m: 0 }}>{t('search.searchIn')}</InputLabel>
+      <InputLabel id={labelId} sx={{ m: 0 }}>
+        {t('search.searchIn')}
+      </InputLabel>
       <Select
+        labelId={labelId}
         size={inputSize}
         displayEmpty
         value={searchParams.filters.searchIn}
@@ -165,6 +171,7 @@ const CalendarMobileSelector: React.FC<{
     <MobileSelector
       ref={selectorRef}
       displayText={getDisplayLabel(filters, allCalendar, t)}
+      label={t('search.searchIn')}
     >
       <List>
         <ListItemButton

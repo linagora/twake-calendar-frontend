@@ -1,6 +1,7 @@
 import { Snackbar } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import './SettingsPage.styl'
+import { useMessageDuration } from '@common/components/Loading/useMessageDuration'
 
 export const SettingErrorSnackbars: React.FC<{
   languageErrorOpen: boolean
@@ -30,12 +31,13 @@ export const SettingErrorSnackbars: React.FC<{
   setWorkingDaysErrorOpen
 }) => {
   const { t } = useI18n()
+  const errorDuration = useMessageDuration(4000, 'error')
 
   return (
     <>
       <Snackbar
         open={languageErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={handleLanguageErrorClose}
         message={
           t('settings.languageUpdateError') || 'Failed to update language'
@@ -43,13 +45,13 @@ export const SettingErrorSnackbars: React.FC<{
       />
       <Snackbar
         open={timeZoneErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={handleTimeZoneErrorClose}
         message={t('settings.timeZoneUpdateError')}
       />
       <Snackbar
         open={alarmEmailsErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={handleAlarmEmailsErrorClose}
         message={
           t('settings.alarmEmailsUpdateError') ||
@@ -58,19 +60,19 @@ export const SettingErrorSnackbars: React.FC<{
       />
       <Snackbar
         open={hideDeclinedEventsErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={handleHideDeclinedEventsErrorClose}
         message={t('settings.hideDeclinedEventsUpdateError')}
       />
       <Snackbar
         open={displayWeekNumbersErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={handleDisplayWeekNumbersErrorClose}
         message={t('settings.displayWeekNumbersUpdateError')}
       />
       <Snackbar
         open={workingDaysErrorOpen}
-        autoHideDuration={4000}
+        autoHideDuration={errorDuration}
         onClose={() => setWorkingDaysErrorOpen(false)}
         message={t('settings.workingDaysUpdateError')}
       />

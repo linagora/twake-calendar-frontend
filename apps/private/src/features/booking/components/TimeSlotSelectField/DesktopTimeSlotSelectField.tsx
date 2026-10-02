@@ -13,6 +13,7 @@ export const DesktopTimeSlotSelectField: React.FC<TimeSlotSelectFieldProps> = ({
     <Select
       value={duration ?? ''}
       onChange={e => setDuration(Number(e.target.value))}
+      SelectDisplayProps={{ 'aria-label': t('booking.chooseTimeSlot') }}
     >
       {TIME_SLOT_OPTIONS.map(({ value, label }) => (
         <MenuItem key={value} value={value}>

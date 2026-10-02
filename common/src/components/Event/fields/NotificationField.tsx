@@ -102,7 +102,7 @@ export const NotificationField: React.FC<NotificationFieldProps> = ({
     >
       <FormControl fullWidth margin="dense" size={inputSize}>
         <Select
-          labelId="notification"
+          SelectDisplayProps={{ 'aria-label': t('event.form.notification') }}
           multiple
           displayEmpty
           value={selectedTriggers}

@@ -126,11 +126,14 @@ export function AccessTab({
               value={calDAVLink}
               size="small"
               slotProps={{
+                htmlInput: { 'aria-label': t('calendar.caldav_access') },
                 input: {
-                  'aria-label': t('calendar.caldav_access'),
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
+                        aria-label={t('a11y.copyItem', {
+                          name: t('calendar.caldav_access')
+                        })}
                         onClick={() =>
                           handleCopyLink(
                             new URL(calDAVLink, window.location.origin),
@@ -159,11 +162,14 @@ export function AccessTab({
             value={secretLink}
             size="small"
             slotProps={{
+              htmlInput: { 'aria-label': t('calendar.secretUrl') },
               input: {
-                'aria-label': t('calendar.secretUrl'),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
+                      aria-label={t('a11y.copyItem', {
+                        name: t('calendar.secretUrl')
+                      })}
                       onClick={() =>
                         handleCopyLink(
                           new URL(secretLink, window.location.origin),
