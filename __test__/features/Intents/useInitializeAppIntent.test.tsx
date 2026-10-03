@@ -13,16 +13,8 @@ const loginUrlMock = {
 }
 
 const renderInitializeApp = (): void => {
-  const store = setupStore({
-    user: {
-      userData: null,
-      tokens: null,
-      loading: false,
-      error: null,
-      coreConfig: { language: 'en' }
-    },
-    calendars: { list: {}, pending: false, error: null }
-  })
+  // The initial state is the one of a user who is not signed in yet
+  const store = setupStore()
   const wrapper = ({ children }: PropsWithChildren): JSX.Element => (
     <Provider store={store}>{children}</Provider>
   )
