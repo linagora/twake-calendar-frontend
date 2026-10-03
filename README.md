@@ -197,6 +197,24 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
+### Cozy intents
+
+Other apps of the workplace open `/intents` in an iframe (see the route table
+above). Set `INTENTS_FRAME_ANCESTORS` to the origins allowed to do so, usually
+the Cozy domain with a wildcard:
+
+```bash
+docker run -d \
+  -v $PWD/public/.env.js:/usr/share/nginx/html/.env.js \
+  -e INTENTS_FRAME_ANCESTORS='https://*.twake.example.com' \
+  -p 5000:80 \
+  linagora/twake-calendar-private
+```
+
+Without it, `/intents` cannot be framed at all. The Cozy side needs the
+calendar app's `service_url_flag` set to this application's origin, and the
+token exchange configured for `registry://calendar`.
+
 ---
 
 ## Configuring the Application
