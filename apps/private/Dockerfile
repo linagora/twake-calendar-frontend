@@ -25,5 +25,9 @@ CMD sh -c 'if [ -f /usr/share/nginx/html/.env.js ] && grep -q -E "DEBUG\s*=\s*tr
              echo "map \$uri \$html_cache_control { default \"no-store, no-cache, must-revalidate, proxy-revalidate\"; }" >> /etc/nginx/conf.d/cache_env.conf; \
              echo "Production mode detected. Enabling Nginx browser cache."; \
            fi && \
+           if [ "${INTENTS_FRAME_ANCESTORS}" != "$(printf "%s" "${INTENTS_FRAME_ANCESTORS}" | tr -d "\n\r\"\\\\\$")" ]; then \
+             echo "INTENTS_FRAME_ANCESTORS must not contain double quotes, backslashes, dollar signs or newlines." >&2; \
+             exit 1; \
+           fi && \
            echo "map \$uri \$intents_frame_ancestors_env { default \"${INTENTS_FRAME_ANCESTORS}\"; }" >> /etc/nginx/conf.d/cache_env.conf && \
            nginx -g "daemon off;"'

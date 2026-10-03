@@ -211,6 +211,12 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
+The value is a space-separated list of CSP sources, for example
+`https://*.twake.example.com https://other.example.com`. Do not separate them
+with `;` or `,`. The container refuses to start if the value contains a double
+quote, a backslash, a `$` or a newline. Only the private image reads this
+variable: the public image ignores it and never lets `/intents` be framed.
+
 Without it, `/intents` cannot be framed at all. The Cozy side needs the
 calendar app's `service_url_flag` set to this application's origin, and the
 token exchange configured for `registry://calendar`.
