@@ -249,6 +249,73 @@ describe('CallbackResume', () => {
     expect(dispatch).not.toHaveBeenCalledWith(replace('/intents?intent=stale'))
   })
 
+  it('sends a failed callback back to the pending intent', async () => {
+    sessionStorage.clear()
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    ;(oidcAuth.Callback as jest.Mock).mockRejectedValue(new Error('token'))
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({ code_verifier: 'verifier123', state: 'state456' })
+    )
+    sessionStorage.setItem('pendingIntentId', 'intent-1')
+
+    render(<CallbackResume />)
+
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(
+        replace('/intents?intent=intent-1&authError=callback_failed')
+      )
+    )
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/error'))
+  })
+
+  it('sends a failed user loading back to the pending intent', async () => {
+    sessionStorage.clear()
+    ;(oidcAuth.Callback as jest.Mock).mockResolvedValue({
+      tokenSet: { access_token: 'abc' },
+      userinfo: { name: 'Test User' }
+    })
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({ code_verifier: 'verifier123', state: 'state456' })
+    )
+    sessionStorage.setItem('pendingIntentId', 'intent-1')
+
+    const { rerender } = render(<CallbackResume />)
+    await waitFor(() => expect(oidcAuth.Callback).toHaveBeenCalled())
+
+    mockUserState = {
+      userData: { name: 'Test User' },
+      tokens: { access_token: 'abc' },
+      loading: false,
+      error: 'OpenPaaS user loading failed'
+    }
+    rerender(<CallbackResume />)
+
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(
+        replace('/intents?intent=intent-1&authError=callback_failed')
+      )
+    )
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/error'))
+  })
+
+  it('keeps the error page for a failed regular sign in', async () => {
+    sessionStorage.clear()
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    ;(oidcAuth.Callback as jest.Mock).mockRejectedValue(new Error('token'))
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({ code_verifier: 'verifier123', state: 'state456' })
+    )
+
+    render(<CallbackResume />)
+
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(replace('/error'))
+    )
+  })
+
   it('sends an SSO error back to the pending intent', async () => {
     sessionStorage.clear()
     window.history.pushState(

@@ -71,6 +71,13 @@ export const CallbackResume: React.FC = () => {
   const userData = useAppSelector(state => state.user)
   const calendars = useAppSelector(state => state.calendars)
 
+  // The error page would start an interactive sign in inside the intent
+  // frame: the frame explains the failure instead.
+  const getFailurePath = (): string =>
+    pendingIntentRef.current
+      ? buildIntentPath(pendingIntentRef.current, 'callback_failed')
+      : '/error'
+
   // Process callback and load data
   useEffect(() => {
     if (hasRun.current) {
@@ -122,7 +129,7 @@ export const CallbackResume: React.FC = () => {
         console.error('OIDC callback error:', e)
         dispatch(setAppLoading(false))
         dispatch(setUserError(getErrorMessage(e)))
-        dispatch(replace('/error'))
+        dispatch(replace(getFailurePath()))
       }
     }
 
@@ -137,7 +144,7 @@ export const CallbackResume: React.FC = () => {
     // view: only a broken user session justifies the full error page.
     if (userData.error) {
       dispatch(setAppLoading(false))
-      dispatch(replace('/error'))
+      dispatch(replace(getFailurePath()))
       return
     }
     if (!userData.userData || !userData.tokens) return

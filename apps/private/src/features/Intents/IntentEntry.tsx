@@ -42,6 +42,9 @@ export default function IntentEntry(): JSX.Element {
     authError ? null : getIntentIdFromSearch(location.search)
   )
 
+  if (authError === 'callback_failed') {
+    return <IntentMessage reason="serviceFailed" />
+  }
   if (authError) return <IntentMessage reason="sessionExpired" />
   if (state.status === 'loading') return <Loading />
   if (state.status === 'error') return <IntentMessage reason={state.reason} />

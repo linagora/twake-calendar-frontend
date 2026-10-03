@@ -87,6 +87,20 @@ describe('IntentEntry', () => {
     )
   })
 
+  it('reports a sign in that failed inside the frame', () => {
+    mockUseIntentService.mockReturnValue({
+      status: 'error',
+      reason: 'missingIntent'
+    })
+
+    renderAt('/intents?intent=abc&authError=callback_failed')
+
+    expect(mockUseIntentService).toHaveBeenCalledWith(null)
+    expect(screen.queryByTestId('intent-message')).toHaveTextContent(
+      'intents.error.serviceFailed'
+    )
+  })
+
   it('shows the day view for OPEN calendar events', () => {
     const service = makeIntentService()
     mockUseIntentService.mockReturnValue({
