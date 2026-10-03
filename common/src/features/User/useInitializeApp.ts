@@ -1,6 +1,11 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
-import { Auth } from '@common/features/User/oidcAuth'
+import {
+  getIntentIdFromSearch,
+  isIntentLocation,
+  rememberPendingIntent
+} from '@common/features/Intents/pendingIntent'
+import { Auth, type AuthOptions } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
   setUserError
@@ -18,10 +23,10 @@ export const SSO_UNREACHABLE_ERROR = 'TRANSLATION:error.ssoUnreachable'
 
 // Reaching the SSO takes a discovery request: a network blip, or a request the
 // browser dropped, is no reason to leave the user on a blank page.
-const authWithRetry = async (): ReturnType<typeof Auth> => {
+const authWithRetry = async (options: AuthOptions): ReturnType<typeof Auth> => {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await Auth()
+      return await Auth(options)
     } catch (error) {
       if (attempt + 1 >= SSO_ATTEMPTS) throw error
       console.warn('Reaching the SSO failed, trying again:', error)
@@ -71,9 +76,21 @@ export const useInitializeApp = (): void => {
         return
       }
 
+      const intentId = isIntentLocation(
+        window.location.pathname,
+        window.location.search
+      )
+        ? getIntentIdFromSearch(window.location.search)
+        : null
+      if (intentId) {
+        // An intent frame cannot show a login form: a dead SSO session must
+        // come back as an error, and the callback must return to the intent.
+        rememberPendingIntent(intentId)
+      }
+
       let loginurl: Awaited<ReturnType<typeof Auth>>
       try {
-        loginurl = await authWithRetry()
+        loginurl = await authWithRetry(intentId ? { prompt: 'none' } : {})
       } catch (error) {
         console.error('The SSO cannot be reached:', error)
         dispatch(setUserError(SSO_UNREACHABLE_ERROR))
