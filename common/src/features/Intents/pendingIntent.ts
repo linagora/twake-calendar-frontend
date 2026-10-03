@@ -7,8 +7,11 @@ const PENDING_INTENT_ID_KEY = 'pendingIntentId'
 export const getIntentIdFromSearch = (search: string): string | null =>
   new URLSearchParams(search).get('intent') || null
 
-export const isIntentLocation = (pathname: string, search: string): boolean =>
-  pathname === INTENT_ROUTE && getIntentIdFromSearch(search) !== null
+// Same matching as the server and the router: any case, optional trailing slash
+const INTENT_ROUTE_PATTERN = /^\/intents\/?$/i
+
+const isIntentRoute = (pathname: string): boolean =>
+  INTENT_ROUTE_PATTERN.test(pathname)
 
 /**
  * The intent frame leaves for the SSO before it can serve the intent: keep its
@@ -25,10 +28,9 @@ export const rememberPendingIntent = (intentId: string): void => {
  * would otherwise hijack this sign in.
  */
 export const prepareIntentLogin = (): AuthOptions => {
-  const intentId =
-    window.location.pathname === INTENT_ROUTE
-      ? getIntentIdFromSearch(window.location.search)
-      : null
+  const intentId = isIntentRoute(window.location.pathname)
+    ? getIntentIdFromSearch(window.location.search)
+    : null
   if (!intentId) {
     sessionStorage.removeItem(PENDING_INTENT_ID_KEY)
     return {}

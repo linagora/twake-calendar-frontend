@@ -4,7 +4,6 @@
 import {
   buildIntentPath,
   getIntentIdFromSearch,
-  isIntentLocation,
   prepareIntentLogin,
   rememberPendingIntent,
   takePendingIntent
@@ -26,12 +25,6 @@ describe('pendingIntent', () => {
     expect(getIntentIdFromSearch('?intent=')).toBe(null)
   })
 
-  it('recognises the intent route only with an intent id', () => {
-    expect(isIntentLocation('/intents', '?intent=abc')).toBe(true)
-    expect(isIntentLocation('/intents', '')).toBe(false)
-    expect(isIntentLocation('/calendar', '?intent=abc')).toBe(false)
-  })
-
   it('hands the pending intent back once', () => {
     rememberPendingIntent('abc')
     expect(takePendingIntent()).toBe('abc')
@@ -43,6 +36,14 @@ describe('pendingIntent', () => {
 
     expect(prepareIntentLogin()).toEqual({ prompt: 'none' })
     expect(sessionStorage.getItem('pendingIntentId')).toBe('abc')
+  })
+
+  it('recognises the intent route whatever its case or trailing slash', () => {
+    window.history.pushState({}, '', '/intents/?intent=abc')
+    expect(prepareIntentLogin()).toEqual({ prompt: 'none' })
+
+    window.history.pushState({}, '', '/Intents?intent=abc')
+    expect(prepareIntentLogin()).toEqual({ prompt: 'none' })
   })
 
   it('forgets a stale pending intent on a regular sign in', () => {
@@ -58,6 +59,9 @@ describe('pendingIntent', () => {
     expect(prepareIntentLogin()).toEqual({})
 
     window.history.pushState({}, '', '/intents')
+    expect(prepareIntentLogin()).toEqual({})
+
+    window.history.pushState({}, '', '/intents/sub?intent=abc')
     expect(prepareIntentLogin()).toEqual({})
 
     expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
