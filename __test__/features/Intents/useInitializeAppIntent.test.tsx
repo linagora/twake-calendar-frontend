@@ -30,11 +30,17 @@ const renderInitializeApp = (): void => {
 }
 
 describe('useInitializeApp on the intent route', () => {
+  let pendingIntentIdWhenAuthCalled: string | null
+
   beforeEach(() => {
     jest.clearAllMocks()
+    pendingIntentIdWhenAuthCalled = null
     sessionStorage.clear()
     jest.spyOn(apiUtils, 'redirectTo').mockImplementation(() => {})
-    jest.spyOn(oidcAuth, 'Auth').mockResolvedValue(loginUrlMock)
+    jest.spyOn(oidcAuth, 'Auth').mockImplementation(() => {
+      pendingIntentIdWhenAuthCalled = sessionStorage.getItem('pendingIntentId')
+      return Promise.resolve(loginUrlMock)
+    })
   })
 
   afterEach(() => {
@@ -49,7 +55,8 @@ describe('useInitializeApp on the intent route', () => {
     await waitFor(() =>
       expect(oidcAuth.Auth).toHaveBeenCalledWith({ prompt: 'none' })
     )
-    expect(sessionStorage.getItem('pendingIntentId')).toBe('abc')
+    // remembered before leaving for the SSO, or the callback loses the intent
+    expect(pendingIntentIdWhenAuthCalled).toBe('abc')
     await waitFor(() =>
       expect(apiUtils.redirectTo).toHaveBeenCalledWith(loginUrlMock.redirectTo)
     )
