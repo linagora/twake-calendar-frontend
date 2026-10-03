@@ -1,4 +1,5 @@
 import { useIntentService } from '@common/features/Intents/hooks/useIntentService'
+import type { IntentHandlerProps } from '@common/features/Intents/types'
 import IntentEntry from '@private/features/Intents/IntentEntry'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
@@ -8,8 +9,13 @@ jest.mock('@common/features/Intents/hooks/useIntentService')
 jest.mock('@common/components/Loading/Loading', () => ({
   Loading: () => <div data-testid="loading" />
 }))
+const mockDayViewProps = jest.fn()
+
 jest.mock('@private/features/Intents/IntentDayView', () => ({
-  IntentDayView: () => <div data-testid="intent-day-view" />
+  IntentDayView: (props: IntentHandlerProps): JSX.Element => {
+    mockDayViewProps(props)
+    return <div data-testid="intent-day-view" />
+  }
 }))
 jest.mock('twake-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key })
@@ -68,9 +74,10 @@ describe('IntentEntry', () => {
   })
 
   it('shows the day view for OPEN calendar events', () => {
+    const service = makeIntentService()
     mockUseIntentService.mockReturnValue({
       status: 'ready',
-      service: makeIntentService(),
+      service,
       action: 'OPEN',
       type: 'io.cozy.calendar.events',
       data: { date: '2026-10-03' }
@@ -80,6 +87,10 @@ describe('IntentEntry', () => {
 
     expect(screen.queryByTestId('intent-layout')).toBeInTheDocument()
     expect(screen.queryByTestId('intent-day-view')).toBeInTheDocument()
+    expect(mockDayViewProps).toHaveBeenCalledWith({
+      service,
+      data: { date: '2026-10-03' }
+    })
   })
 
   it('fails an intent it does not handle', () => {
