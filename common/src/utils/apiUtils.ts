@@ -1,3 +1,4 @@
+import { prepareIntentLogin } from '@common/features/Intents/pendingIntent'
 import { Auth } from '@common/features/User/oidcAuth'
 import { assertWebSocketAlive } from '@common/websocket/connection/lifecycle/assertWebSocketAlive'
 import ky, {
@@ -61,7 +62,7 @@ const redirectSSO = async (
   }
   isRedirectingToSso = true
   try {
-    const loginurl = await Auth()
+    const loginurl = await Auth(prepareIntentLogin())
 
     sessionStorage.setItem(
       'redirectState',

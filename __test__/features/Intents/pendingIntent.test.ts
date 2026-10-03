@@ -5,6 +5,7 @@ import {
   buildIntentPath,
   getIntentIdFromSearch,
   isIntentLocation,
+  prepareIntentLogin,
   rememberPendingIntent,
   takePendingIntent
 } from '@common/features/Intents/pendingIntent'
@@ -12,6 +13,10 @@ import {
 describe('pendingIntent', () => {
   beforeEach(() => {
     sessionStorage.clear()
+  })
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/')
   })
 
   it('reads the intent id wherever it is in the query string', () => {
@@ -31,6 +36,23 @@ describe('pendingIntent', () => {
     rememberPendingIntent('abc')
     expect(takePendingIntent()).toBe('abc')
     expect(takePendingIntent()).toBe(null)
+  })
+
+  it('prepares a sign in without any SSO page in an intent frame', () => {
+    window.history.pushState({}, '', '/intents?intent=abc')
+
+    expect(prepareIntentLogin()).toEqual({ prompt: 'none' })
+    expect(sessionStorage.getItem('pendingIntentId')).toBe('abc')
+  })
+
+  it('prepares the regular sign in everywhere else', () => {
+    window.history.pushState({}, '', '/calendar?intent=abc')
+    expect(prepareIntentLogin()).toEqual({})
+
+    window.history.pushState({}, '', '/intents')
+    expect(prepareIntentLogin()).toEqual({})
+
+    expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
   })
 
   it('builds the intent path, with the SSO error when given', () => {
