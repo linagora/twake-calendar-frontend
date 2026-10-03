@@ -1,4 +1,5 @@
 import { setupStore } from '@common/app/store'
+import { getCozyURL } from '@common/utils/cozyUrl'
 import { useIntentService } from '@common/features/Intents/hooks/useIntentService'
 import { CozyStackError } from '@common/features/Intents/IntentsDao'
 import * as TdriveDao from '@common/features/Tdrive/TdriveDao'
@@ -67,6 +68,7 @@ describe('useIntentService', () => {
       access_token: 'cozy-token'
     })
     mockCreateService.mockResolvedValue(service)
+    ;(getCozyURL as jest.Mock).mockReturnValue('https://alice.twake.app')
   })
 
   it('creates the intent service on the Cozy stack, once', async () => {
@@ -99,6 +101,31 @@ describe('useIntentService', () => {
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(result.current).toEqual({ status: 'loading' })
     expect(TdriveDao.exchangeToken).not.toHaveBeenCalled()
+  })
+
+  it('reports a workplace it cannot find once signed in', async () => {
+    ;(getCozyURL as jest.Mock).mockReturnValue(null)
+
+    const { result } = renderService('abc')
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        status: 'error',
+        reason: 'tokenExchangeFailed'
+      })
+    )
+    expect(TdriveDao.exchangeToken).not.toHaveBeenCalled()
+  })
+
+  it('keeps waiting without a workplace until signed in', async () => {
+    ;(getCozyURL as jest.Mock).mockReturnValue(null)
+
+    const { result } = renderService('abc', {
+      user: { userData: null, organiserData: {}, tokens: null }
+    })
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(result.current).toEqual({ status: 'loading' })
   })
 
   it('reports a failed token exchange', async () => {

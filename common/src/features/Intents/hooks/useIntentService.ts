@@ -68,5 +68,9 @@ export function useIntentService(intentId: string | null): IntentServiceState {
   }, [intentId, idToken, cozyURL])
 
   if (!intentId) return { status: 'error', reason: 'missingIntent' }
+  // Signed in, but no workplace to exchange the token with
+  if (idToken && !cozyURL) {
+    return { status: 'error', reason: 'tokenExchangeFailed' }
+  }
   return state
 }
