@@ -45,6 +45,14 @@ describe('pendingIntent', () => {
     expect(sessionStorage.getItem('pendingIntentId')).toBe('abc')
   })
 
+  it('forgets a stale pending intent on a regular sign in', () => {
+    rememberPendingIntent('stale')
+    window.history.pushState({}, '', '/calendar')
+
+    expect(prepareIntentLogin()).toEqual({})
+    expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
+  })
+
   it('prepares the regular sign in everywhere else', () => {
     window.history.pushState({}, '', '/calendar?intent=abc')
     expect(prepareIntentLogin()).toEqual({})

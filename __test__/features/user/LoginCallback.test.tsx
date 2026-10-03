@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
+import { prepareIntentLogin } from '@common/features/Intents/pendingIntent'
 import * as oidcAuth from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
@@ -210,6 +211,42 @@ describe('CallbackResume', () => {
     )
     expect(dispatch).not.toHaveBeenCalledWith(replace('/calendar'))
     expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
+  })
+
+  it('lands on the calendar after a regular sign in despite a stale intent', async () => {
+    sessionStorage.clear()
+    // An intent frame closed mid sign in left its intent pending
+    sessionStorage.setItem('pendingIntentId', 'stale')
+    window.history.pushState({}, '', '/calendar')
+    try {
+      prepareIntentLogin()
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
+    ;(oidcAuth.Callback as jest.Mock).mockResolvedValue({
+      tokenSet: { access_token: 'abc' },
+      userinfo: { name: 'Test User' }
+    })
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({ code_verifier: 'verifier123', state: 'state456' })
+    )
+
+    const { rerender } = render(<CallbackResume />)
+    await waitFor(() => expect(oidcAuth.Callback).toHaveBeenCalled())
+
+    mockUserState = {
+      userData: { name: 'Test User' },
+      tokens: { access_token: 'abc' },
+      loading: false,
+      error: null
+    }
+    rerender(<CallbackResume />)
+
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(replace('/calendar'))
+    )
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/intents?intent=stale'))
   })
 
   it('sends an SSO error back to the pending intent', async () => {

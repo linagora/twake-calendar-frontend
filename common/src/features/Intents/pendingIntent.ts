@@ -20,14 +20,19 @@ export const rememberPendingIntent = (intentId: string): void => {
 
 /**
  * An intent frame cannot show a login form: a dead SSO session must come back
- * as an error, and the login callback must return to the intent.
+ * as an error, and the login callback must return to the intent. Any other
+ * sign in forgets the intent of a frame closed before its callback, which
+ * would otherwise hijack this sign in.
  */
 export const prepareIntentLogin = (): AuthOptions => {
   const intentId =
     window.location.pathname === INTENT_ROUTE
       ? getIntentIdFromSearch(window.location.search)
       : null
-  if (!intentId) return {}
+  if (!intentId) {
+    sessionStorage.removeItem(PENDING_INTENT_ID_KEY)
+    return {}
+  }
 
   rememberPendingIntent(intentId)
   return { prompt: 'none' }

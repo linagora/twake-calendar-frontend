@@ -70,4 +70,15 @@ describe('useInitializeApp on the intent route', () => {
     await waitFor(() => expect(oidcAuth.Auth).toHaveBeenCalledWith({}))
     expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
   })
+
+  it('forgets an intent left pending by a frame closed mid sign in', async () => {
+    sessionStorage.setItem('pendingIntentId', 'stale')
+    window.history.pushState({}, '', '/calendar')
+
+    renderInitializeApp()
+
+    await waitFor(() => expect(oidcAuth.Auth).toHaveBeenCalledWith({}))
+    expect(pendingIntentIdWhenAuthCalled).toBe(null)
+    expect(sessionStorage.getItem('pendingIntentId')).toBe(null)
+  })
 })
