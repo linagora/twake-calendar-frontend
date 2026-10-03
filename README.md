@@ -37,6 +37,7 @@ The repository is organized as a monorepo workspace:
 | `/calendar` | Main calendar view (authenticated) |
 | `/events/:uid` | Deep link that opens the event identified by `uid` once the calendar is loaded (going through the login flow first when needed) |
 | `/newEvent?attendee=alice@example.com` | Deep link that opens the create-event modal with the attendee(s) prefilled. Accepts several attendees, either repeated (`?attendee=a@x.com&attendee=b@x.com`) or comma separated (`?attendee=a@x.com,b@x.com`) |
+| `/intents?intent=<id>` | Service of the Cozy intents Twake Calendar handles (`OPEN io.cozy.calendar.events` with `{ date: 'YYYY-MM-DD' }`). The Cozy stack opens it in an iframe of the app that started the intent; see "Cozy intents" below |
 | `/callback` | OAuth callback |
 | `/error` | Error page |
 

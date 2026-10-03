@@ -18,6 +18,7 @@ import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { default as NewEventDeepLink } from '@common/features/Events/NewEventDeepLink'
+import { default as IntentEntry } from '@/features/Intents/IntentEntry'
 import { CallbackResume } from '@/features/User/LoginCallback'
 import { useInitializeApp } from '@common/features/User/useInitializeApp'
 import { onSessionEndedElsewhere } from '@common/features/User/localSession'
@@ -114,6 +115,7 @@ export default function App(): JSX.Element {
                   <Route path="/calendar" element={<CalendarLayout />} />
                   <Route path="/events/:uid" element={<EventDeepLink />} />
                   <Route path="/newEvent" element={<NewEventDeepLink />} />
+                  <Route path="/intents" element={<IntentEntry />} />
                   <Route path="/callback" element={<CallbackResume />} />
                   <Route path="/error" element={<ErrorPage />} />
                 </Routes>
