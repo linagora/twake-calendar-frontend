@@ -277,6 +277,10 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
       setOpen(false)
       inputRef.current?.blur()
     } else if (e.key === 'Escape') {
+      // Escape closing the time list must not also reach an enclosing dialog
+      if (open) {
+        e.stopPropagation()
+      }
       setInputValue(getFormattedValue())
       setIsFocused(false)
       setOpen(false)

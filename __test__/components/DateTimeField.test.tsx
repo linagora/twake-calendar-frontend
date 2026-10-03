@@ -115,6 +115,36 @@ describe('DateTimeFields', () => {
     )
   })
 
+  it('does not propagate Escape closing the time list', async () => {
+    const onParentKeyDown = jest.fn()
+    await act(async () =>
+      render(
+        <div onKeyDown={onParentKeyDown}>
+          <DateTimeFields {...defaultProps} />
+        </div>
+      )
+    )
+
+    const endTimeInput = screen.getByTestId('end-time-input')
+    await userEvent.click(endTimeInput)
+    await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument())
+
+    await userEvent.keyboard('{Escape}')
+
+    await waitFor(() =>
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    )
+    expect(onParentKeyDown).not.toHaveBeenCalled()
+
+    // The picker hands focus back to the input without reopening the list:
+    // Escape now reaches the parent
+    await waitFor(() => expect(endTimeInput).toHaveFocus())
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    expect(onParentKeyDown).toHaveBeenCalledTimes(1)
+  })
+
   it('does NOT move START backward when END moves before START (normal mode)', async () => {
     await renderField({
       startDate: '2025-01-01',
