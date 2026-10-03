@@ -217,9 +217,10 @@ with `;` or `,`. The container refuses to start if the value contains a double
 quote, a backslash, a `$` or a newline. Only the private image reads this
 variable: the public image ignores it and never lets `/intents` be framed.
 
-Without it, `/intents` cannot be framed at all. The Cozy side needs the
-calendar app's `service_url_flag` set to this application's origin, and the
-token exchange configured for `registry://calendar`.
+Without it, `/intents` cannot be framed at all. On the Cozy side, the calendar
+app's `service_url_flag` names a feature flag (`calendar.service-url`) whose
+value must be this application's origin, and the token exchange must be
+configured for `registry://calendar`.
 
 ---
 
