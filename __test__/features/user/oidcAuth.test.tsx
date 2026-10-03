@@ -104,6 +104,46 @@ describe('OpenID Client Auth Module', () => {
       expect(result.state).toBe('state123')
       expect(result.redirectTo).toBe('https://auth.url')
     })
+
+    it('asks the SSO not to show any UI when prompt is none', async () => {
+      ;(client.randomPKCECodeVerifier as jest.Mock).mockReturnValue(
+        'verifier123'
+      )
+      ;(client.calculatePKCECodeChallenge as jest.Mock).mockResolvedValue(
+        'challenge123'
+      )
+      const discoveredClient = {}
+      ;(client.discovery as jest.Mock).mockResolvedValue(discoveredClient)
+      ;(client.buildAuthorizationUrl as jest.Mock).mockReturnValue(
+        'https://auth.url'
+      )
+
+      await Auth({ prompt: 'none' })
+
+      expect(client.buildAuthorizationUrl).toHaveBeenCalledWith(
+        discoveredClient,
+        expect.objectContaining({ prompt: 'none' })
+      )
+    })
+
+    it('does not send any prompt by default', async () => {
+      ;(client.randomPKCECodeVerifier as jest.Mock).mockReturnValue(
+        'verifier123'
+      )
+      ;(client.calculatePKCECodeChallenge as jest.Mock).mockResolvedValue(
+        'challenge123'
+      )
+      ;(client.discovery as jest.Mock).mockResolvedValue({})
+      ;(client.buildAuthorizationUrl as jest.Mock).mockReturnValue(
+        'https://auth.url'
+      )
+
+      await Auth()
+
+      const parameters = jest.mocked(client.buildAuthorizationUrl).mock
+        .calls[0][1]
+      expect(parameters).not.toHaveProperty('prompt')
+    })
   })
 
   describe('Logout', () => {
