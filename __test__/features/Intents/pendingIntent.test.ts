@@ -25,6 +25,15 @@ describe('pendingIntent', () => {
     expect(getIntentIdFromSearch('?intent=')).toBe(null)
   })
 
+  it('reads only intent ids that are safe in a stack URL', () => {
+    expect(getIntentIdFromSearch('?intent=..%2F..%2Fx')).toBe(null)
+    expect(getIntentIdFromSearch('?intent=a/b')).toBe(null)
+    expect(getIntentIdFromSearch('?intent=a%3Fb')).toBe(null)
+    expect(
+      getIntentIdFromSearch('?intent=0f3c2e9a-41b7_4d2a8c5e6f7a8b9c')
+    ).toBe('0f3c2e9a-41b7_4d2a8c5e6f7a8b9c')
+  })
+
   it('hands the pending intent back once', () => {
     rememberPendingIntent('abc')
     expect(takePendingIntent()).toBe('abc')
@@ -62,6 +71,9 @@ describe('pendingIntent', () => {
     expect(prepareIntentLogin()).toEqual({})
 
     window.history.pushState({}, '', '/intents/sub?intent=abc')
+    expect(prepareIntentLogin()).toEqual({})
+
+    window.history.pushState({}, '', '/intents?intent=..%2F..%2Fx')
     expect(prepareIntentLogin()).toEqual({})
 
     expect(sessionStorage.getItem('pendingIntentId')).toBe(null)

@@ -46,6 +46,20 @@ describe('IntentEntry', () => {
     expect(screen.queryByTestId('intent-message')).toBe(null)
   })
 
+  it('never hands an unsafe intent id to the service', () => {
+    mockUseIntentService.mockReturnValue({
+      status: 'error',
+      reason: 'missingIntent'
+    })
+
+    renderAt('/intents?intent=..%2F..%2Fx')
+
+    expect(mockUseIntentService).toHaveBeenCalledWith(null)
+    expect(screen.queryByTestId('intent-message')).toHaveTextContent(
+      'intents.error.missingIntent'
+    )
+  })
+
   it('explains why the intent cannot be served', () => {
     mockUseIntentService.mockReturnValue({
       status: 'error',

@@ -4,11 +4,17 @@ export const INTENT_ROUTE = '/intents'
 
 const PENDING_INTENT_ID_KEY = 'pendingIntentId'
 
-export const getIntentIdFromSearch = (search: string): string | null =>
-  new URLSearchParams(search).get('intent') || null
+// The id ends up in a stack URL (/intents/<id>): anything else than the
+// characters of a Cozy intent id could reach another route of the stack.
+const INTENT_ID_PATTERN = /^[A-Za-z0-9_-]+$/
 
 // Same matching as the server and the router: any case, optional trailing slash
 const INTENT_ROUTE_PATTERN = /^\/intents\/?$/i
+
+export const getIntentIdFromSearch = (search: string): string | null => {
+  const intentId = new URLSearchParams(search).get('intent')
+  return intentId && INTENT_ID_PATTERN.test(intentId) ? intentId : null
+}
 
 const isIntentRoute = (pathname: string): boolean =>
   INTENT_ROUTE_PATTERN.test(pathname)

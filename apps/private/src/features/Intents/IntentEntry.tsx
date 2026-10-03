@@ -1,6 +1,7 @@
 import { Loading } from '@common/components/Loading/Loading'
 import { useIntentService } from '@common/features/Intents/hooks/useIntentService'
 import { failIntent } from '@common/features/Intents/intentLifecycle'
+import { getIntentIdFromSearch } from '@common/features/Intents/pendingIntent'
 import type { IntentService } from 'cozy-interapp'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router'
@@ -37,7 +38,9 @@ export default function IntentEntry(): JSX.Element {
   const location = useLocation()
   const params = new URLSearchParams(location.search)
   const authError = params.get('authError')
-  const state = useIntentService(authError ? null : params.get('intent'))
+  const state = useIntentService(
+    authError ? null : getIntentIdFromSearch(location.search)
+  )
 
   if (authError) return <IntentMessage reason="sessionExpired" />
   if (state.status === 'loading') return <Loading />
