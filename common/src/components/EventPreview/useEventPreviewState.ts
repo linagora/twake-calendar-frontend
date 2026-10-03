@@ -41,6 +41,7 @@ interface UseEventPreviewStateReturn {
   isNotPrivate: boolean
   canEdit: boolean
   canModify: boolean
+  canMove: boolean
   organizerWritableCalendar: Calendar | undefined
   openUpdateModal: boolean
   openSettingsUpdateModal: boolean
@@ -214,6 +215,13 @@ export function useEventPreviewState(
         isEventOrganiser(event, effectiveEmail, cal))
   )
 
+  // Moving re-creates the event in the target and deletes it from the source:
+  // only offer it from a calendar the user could pick as a destination. This
+  // keeps bookings organized by someone else in a resource calendar (or any
+  // delegated calendar) where they are.
+  const canMove =
+    canModify && userPersonalCalendars.some(cal => cal.id === calId)
+
   // Action handlers
   const handleEditClick = (): void => {
     setUpdateModalCalId(calId)
@@ -294,7 +302,7 @@ export function useEventPreviewState(
   }
 
   const handleCalendarMove = (targetCalId: string): void => {
-    if (!event || targetCalId === calId) return
+    if (!event || !canMove || targetCalId === calId) return
     const targetCalendar = calendars.list[targetCalId]
     const isTargetTeamCalendar = Boolean(targetCalendar?.owner?.teamCalendar)
     const movePayload = isTargetTeamCalendar
@@ -335,6 +343,7 @@ export function useEventPreviewState(
     isNotPrivate,
     canEdit,
     canModify,
+    canMove,
     organizerWritableCalendar,
 
     // Modal state

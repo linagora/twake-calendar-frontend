@@ -1777,6 +1777,82 @@ describe('Event Preview Display', () => {
         ).not.toBeInTheDocument()
       })
     })
+
+    describe('calendar move', () => {
+      const clickCalendarRow = (): void => {
+        const calendarNames = screen.getAllByText('Delegated Calendar')
+        fireEvent.click(calendarNames[calendarNames.length - 1])
+      }
+
+      it('offers to move the event when the owner is organizer', () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState()
+        )
+        clickCalendarRow()
+        expect(screen.getByLabelText('event.form.calendar')).toBeInTheDocument()
+      })
+
+      it('does not offer to move the event when the owner is not organizer', () => {
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          makeDelegatedState({
+            organizer: { cal_address: 'someone-else@example.com' }
+          })
+        )
+        clickCalendarRow()
+        expect(
+          screen.queryByLabelText('event.form.calendar')
+        ).not.toBeInTheDocument()
+      })
+
+      it('does not offer to move a booking out of an administered resource calendar', () => {
+        const state = makeDelegatedState({
+          organizer: { cal_address: 'someone-else@example.com' }
+        })
+        const resourceCalendar = state.calendars.list['user2/cal1']
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user2/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          {
+            ...state,
+            calendars: {
+              ...state.calendars,
+              list: {
+                'user2/cal1': {
+                  ...resourceCalendar,
+                  owner: {
+                    ...resourceCalendar.owner,
+                    resource: true,
+                    administrators: [
+                      { _id: 'user1', id: 'user1', objectType: 'user' }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        )
+        clickCalendarRow()
+        expect(
+          screen.queryByLabelText('event.form.calendar')
+        ).not.toBeInTheDocument()
+      })
+    })
   })
 
   describe('BUGFIX', () => {

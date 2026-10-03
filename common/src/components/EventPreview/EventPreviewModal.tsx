@@ -38,6 +38,7 @@ const EventPreviewModal: React.FC<{
     isNotPrivate,
     canEdit,
     canModify,
+    canMove,
     organizerWritableCalendar,
     openUpdateModal,
     openSettingsUpdateModal,
@@ -169,11 +170,9 @@ const EventPreviewModal: React.FC<{
         <CalendarSelectField
           calendarid={calendarid}
           setCalendarid={handleCalendarMove}
-          userPersonalCalendars={
-            !canModify ? [calendar] : userPersonalCalendars
-          }
+          userPersonalCalendars={canMove ? userPersonalCalendars : [calendar]}
           showMore={false}
-          disabled={!canModify}
+          disabled={!canMove}
         />
       </ResponsiveDialog>
 
