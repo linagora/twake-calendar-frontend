@@ -21,7 +21,7 @@ export function IntentDayView({
   data
 }: IntentHandlerProps): JSX.Element {
   const { t } = useI18n()
-  const date = useMemo(() => parseIntentDate(data), [data])
+  const day = useMemo(() => parseIntentDate(data), [data])
   const calendarRef = useRef<CalendarApi | null>(null)
   const [currentView, setCurrentView] = useState<string>(
     CALENDAR_VIEWS.timeGridDay
@@ -36,7 +36,7 @@ export function IntentDayView({
   } = useManageCalendarSelection()
 
   useEffect(() => {
-    if (!date) {
+    if (!day) {
       failIntent(
         service,
         new Error('Invalid intent data: expected { date: "YYYY-MM-DD" }')
@@ -44,15 +44,15 @@ export function IntentDayView({
       return
     }
     // The grid is mounted synchronously and sets the ref before this effect
-    calendarRef.current?.gotoDate(date)
+    calendarRef.current?.gotoDate(day)
     notifyIntentReady(service)
-  }, [date, service])
+  }, [day, service])
 
   const handleClose = (): void => {
     terminateIntent(service, null)
   }
 
-  if (!date) {
+  if (!day) {
     return <IntentMessage reason="invalidData" />
   }
 
@@ -66,7 +66,8 @@ export function IntentDayView({
       <div className="intent-day-view__calendar">
         <CalendarController
           calendarRef={calendarRef}
-          currentDate={date}
+          // Unused by CalendarController, which navigates through calendarRef
+          currentDate={new Date(`${day}T00:00`)}
           currentView={currentView}
           setCurrentView={setCurrentView}
           selectedCalendars={selectedCalendars}

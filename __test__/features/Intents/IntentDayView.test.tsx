@@ -9,7 +9,7 @@ const mockControllerProps = jest.fn()
 
 jest.mock('@private/components/Calendar/CalendarController', () => ({
   __esModule: true,
-  default: (props: { calendarRef: { current: unknown } }) => {
+  default: (props: { calendarRef: { current: unknown } }): JSX.Element => {
     props.calendarRef.current = { gotoDate: mockGotoDate }
     mockControllerProps(props)
     return <div data-testid="calendar-controller" />
@@ -48,8 +48,12 @@ describe('IntentDayView', () => {
     expect(mockControllerProps).toHaveBeenCalledWith(
       expect.objectContaining({ currentView: CALENDAR_VIEWS.timeGridDay })
     )
-    expect(mockGotoDate).toHaveBeenCalledWith(new Date(2026, 9, 3))
+    // A date-only string is resolved in the calendar's own timezone setting
+    expect(mockGotoDate).toHaveBeenCalledWith('2026-10-03')
     expect(service.notifyReadyToUse).toHaveBeenCalledTimes(1)
+    expect(mockGotoDate.mock.invocationCallOrder[0]).toBeLessThan(
+      jest.mocked(service.notifyReadyToUse).mock.invocationCallOrder[0]
+    )
   })
 
   it('fails the intent on an impossible date', () => {
@@ -58,6 +62,7 @@ describe('IntentDayView', () => {
     render(<IntentDayView service={service} data={{ date: '2026-02-31' }} />)
 
     expect(service.throw).toHaveBeenCalledWith(expect.any(Error))
+    expect(service.notifyReadyToUse).not.toHaveBeenCalled()
     expect(screen.queryByTestId('calendar-controller')).toBe(null)
     expect(screen.queryByTestId('intent-message')).toHaveTextContent(
       'intents.error.invalidData'
