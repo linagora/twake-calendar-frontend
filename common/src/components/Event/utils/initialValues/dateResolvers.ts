@@ -22,7 +22,7 @@ export function formatEventDates(
 
   if (isAllDay) {
     const endDate = new Date(event.end)
-    endDate.setDate(endDate.getDate() - 1)
+    endDate.setUTCDate(endDate.getUTCDate() - 1)
     return { start, end: endDate.toISOString().split('T')[0] }
   }
 
@@ -91,7 +91,7 @@ function adjustAllDayEnd(startValue: string, endValue: string): string {
   }
 
   const adjusted = new Date(endDateOnly)
-  adjusted.setDate(adjusted.getDate() - 1)
+  adjusted.setUTCDate(adjusted.getUTCDate() - 1)
   return adjusted.toISOString().split('T')[0]
 }
 
