@@ -5,6 +5,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 import SearchResultsPage from '@common/features/Search/SearchResultsPage'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { setDisplayedDateAndRange } from '@common/utils/CalendarRangeManager'
+import { DisplayedPeriod } from '@common/components/Menubar/periodLabel'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import type {
   DatesSetArg,
@@ -65,6 +66,7 @@ export interface CalendarControllerProps {
   selectedMiniDate: Date | null
   setSelectedMiniDate: (date: Date) => void
   onDateChange?: (date: Date) => void
+  onPeriodChange?: (period: DisplayedPeriod) => void
   onViewChange: (view: string) => void
   controllerRef?: MutableRefObject<CalendarControllerRef | null>
 }
@@ -81,6 +83,7 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   tempUsers,
   setSelectedMiniDate,
   onDateChange,
+  onPeriodChange,
   onViewChange,
   controllerRef
 }: CalendarControllerProps) => {
@@ -332,6 +335,11 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     if (onDateChange) {
       onDateChange(calendarCurrentDate)
     }
+    onPeriodChange?.({
+      start: arg.view.currentStart,
+      end: arg.view.currentEnd,
+      timeZone: arg.view.calendar.getOption('timeZone')
+    })
 
     setCurrentView(arg.view.type)
 

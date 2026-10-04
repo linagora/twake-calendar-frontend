@@ -4,6 +4,7 @@ import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { refreshCalendars } from '@common/components/Event/utils/eventUtils'
 import { Menubar, MenubarProps } from '@common/components/Menubar/Menubar'
+import { DisplayedPeriod } from '@common/components/Menubar/periodLabel'
 import { useIsInIframe } from '@common/contexts/EmbeddingContext'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import SettingsPage from '@common/features/Settings/SettingsPage'
@@ -31,6 +32,7 @@ export default function CalendarLayout(): JSX.Element {
   const [openSidebar, setOpenSideBar] = useState(false)
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [displayedPeriod, setDisplayedPeriod] = useState<DisplayedPeriod>()
   const [currentView, setCurrentView] = useState<string>(
     isTablet || isMobile
       ? CALENDAR_VIEWS.timeGridDay
@@ -116,6 +118,7 @@ export default function CalendarLayout(): JSX.Element {
     calendarRef,
     onRefresh: () => void handleRefresh(),
     currentDate,
+    displayedPeriod,
     onDateChange: handleDateChange,
     currentView,
     onViewChange: handleViewChange,
@@ -164,6 +167,7 @@ export default function CalendarLayout(): JSX.Element {
               selectedMiniDate={selectedMiniDate}
               setSelectedMiniDate={setSelectedMiniDate}
               onDateChange={handleDateChange}
+              onPeriodChange={setDisplayedPeriod}
               onViewChange={handleViewChange}
             />
           </div>

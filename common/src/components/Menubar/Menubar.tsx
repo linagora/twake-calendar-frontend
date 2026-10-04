@@ -11,6 +11,7 @@ import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
 import { MobileMenubar } from './MobileMenuBar'
 import { useUtilMenus } from '@common/components/Calendar/hooks/useUtilMenus'
+import { DisplayedPeriod, formatPeriodLabel } from './periodLabel'
 
 export type AppIconProps = {
   name: string
@@ -22,6 +23,7 @@ export type MenubarProps = {
   calendarRef: React.RefObject<CalendarApi | null>
   onRefresh: () => void
   currentDate: Date
+  displayedPeriod?: DisplayedPeriod
   onDateChange?: (date: Date) => void
   currentView: string
   onViewChange?: (view: string) => void
@@ -49,6 +51,7 @@ export const Menubar: React.FC<MenubarProps> = ({
   calendarRef,
   onRefresh,
   currentDate,
+  displayedPeriod,
   onDateChange,
   currentView,
   onViewChange,
@@ -114,10 +117,7 @@ export const Menubar: React.FC<MenubarProps> = ({
   }
 
   // Use i18n for month names instead of date-fns
-  const monthIndex = currentDate.getMonth()
-  const year = currentDate.getFullYear()
-  const monthName = t(`months.standalone.${monthIndex}`)
-  const dateLabel = `${monthName} ${year}`
+  const dateLabel = formatPeriodLabel(displayedPeriod, currentDate, t)
 
   const sharedProps: SharedMenubarProps = {
     calendarRef,
@@ -147,6 +147,7 @@ export const Menubar: React.FC<MenubarProps> = ({
       <MobileMenubar
         calendarRef={calendarRef}
         currentDate={currentDate}
+        dateLabel={dateLabel}
         onDateChange={onDateChange}
         handleNavigation={handleNavigation}
         onOpenSidebar={onToggleSidebar}
