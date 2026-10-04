@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import ReplayIcon from '@mui/icons-material/Replay'
+import { translateErrorMessage } from '@common/utils/translateErrorMessage'
 import { useI18n } from 'twake-i18n'
 
 interface ErrorProps {
@@ -32,10 +33,12 @@ export const Error: React.FC<ErrorProps> = ({
     }
   }, [isCrashFallback])
 
-  const errorMessage =
-    userError ||
-    calendarError ||
-    (isCrashFallback ? errorBoundaryMessage?.message : t('error.unknown'))
+  const storeError = userError || calendarError
+  const errorMessage = storeError
+    ? translateErrorMessage(storeError, t)
+    : isCrashFallback
+      ? errorBoundaryMessage?.message
+      : t('error.unknown')
 
   return (
     <Fade in timeout={500}>

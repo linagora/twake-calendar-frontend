@@ -1,10 +1,36 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { Auth } from '@common/features/User/oidcAuth'
-import { getOpenPaasUserData } from '@common/features/User/UserSlice'
+import {
+  getOpenPaasUserData,
+  setUserError
+} from '@common/features/User/UserSlice'
 import { getAccessToken, redirectTo } from '@common/utils/apiUtils'
+import { getRetryDelay } from '@common/utils/getRetryDelay'
 import { useEffect, useRef } from 'react'
+import { push } from 'redux-first-history'
 import { getCalendarsList } from '../Calendars/CalendarSlice'
+
+const SSO_ATTEMPTS = 3
+const SSO_RETRY_BACKOFF = { initialDelay: 1000, maxDelay: 5000 }
+
+export const SSO_UNREACHABLE_ERROR = 'TRANSLATION:error.ssoUnreachable'
+
+// Reaching the SSO takes a discovery request: a network blip, or a request the
+// browser dropped, is no reason to leave the user on a blank page.
+const authWithRetry = async (): ReturnType<typeof Auth> => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await Auth()
+    } catch (error) {
+      if (attempt + 1 >= SSO_ATTEMPTS) throw error
+      console.warn('Reaching the SSO failed, trying again:', error)
+      await new Promise(resolve =>
+        setTimeout(resolve, getRetryDelay(attempt, SSO_RETRY_BACKOFF))
+      )
+    }
+  }
+}
 
 export const useInitializeApp = (): void => {
   const userData = useAppSelector(state => state.user)
@@ -45,7 +71,15 @@ export const useInitializeApp = (): void => {
         return
       }
 
-      const loginurl = await Auth()
+      let loginurl: Awaited<ReturnType<typeof Auth>>
+      try {
+        loginurl = await authWithRetry()
+      } catch (error) {
+        console.error('The SSO cannot be reached:', error)
+        dispatch(setUserError(SSO_UNREACHABLE_ERROR))
+        dispatch(push('/error'))
+        return
+      }
       sessionStorage.setItem(
         'redirectState',
         JSON.stringify({

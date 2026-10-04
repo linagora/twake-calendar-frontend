@@ -2,6 +2,7 @@ import { useAppDispatch } from '@common/app/hooks'
 import { clearError as calendarClearError } from '@common/features/Calendars/CalendarSlice'
 import { clearError as userClearError } from '@common/features/User/UserSlice'
 import { Alert, Button, Snackbar } from '@linagora/twake-mui'
+import { translateErrorMessage } from '@common/utils/translateErrorMessage'
 import { useI18n } from 'twake-i18n'
 
 export function ErrorSnackbar({
@@ -20,32 +21,7 @@ export function ErrorSnackbar({
 
   const getErrorMessage = () => {
     if (!error) return t('error.unknown')
-
-    // Check if error message is a translation key with params
-    // Format: TRANSLATION:key|param1=value1|param2=value2
-    if (error.startsWith('TRANSLATION:')) {
-      const parts = error.substring(12).split('|')
-      const translationKey = parts[0]
-      const params: Record<string, string> = {}
-
-      for (let i = 1; i < parts.length; i++) {
-        const equalIndex = parts[i].indexOf('=')
-        if (equalIndex === -1) continue
-        const key = parts[i].substring(0, equalIndex)
-        const value = parts[i].substring(equalIndex + 1)
-        if (key && value) {
-          try {
-            params[key] = decodeURIComponent(value)
-          } catch {
-            params[key] = value
-          }
-        }
-      }
-
-      return t(translationKey, params)
-    }
-
-    return error
+    return translateErrorMessage(error, t)
   }
 
   return (

@@ -268,6 +268,7 @@
     "title": "Une erreur s'est produite",
     "unknown": "Une erreur inconnue s'est produite",
     "retry": "Réessayer",
+    "ssoUnreachable": "Le service de connexion est injoignable. Vérifiez votre connexion et réessayez.",
     "multipleEvents": "%{smart_count} événement comporte des erreurs |||| %{smart_count} événements comportent des erreurs",
     "cannotLoadEvent": "Impossible de charger l'événement",
     "missingToken": "Votre lien est invalide",

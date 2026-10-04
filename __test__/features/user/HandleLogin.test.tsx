@@ -3,8 +3,13 @@ import { AppDispatch, setupStore } from '@common/app/store'
 import HandleLogin from '@private/features/User/HandleLogin'
 import * as oidcAuth from '@common/features/User/oidcAuth'
 import { clientConfig } from '@common/features/User/oidcAuth'
-import { useInitializeApp } from '@common/features/User/useInitializeApp'
+import {
+  SSO_UNREACHABLE_ERROR,
+  useInitializeApp
+} from '@common/features/User/useInitializeApp'
 import * as apiUtils from '@common/utils/apiUtils'
+import * as retryDelay from '@common/utils/getRetryDelay'
+import { setUserError } from '@common/features/User/UserSlice'
 import { renderHook, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { push } from 'redux-first-history'
@@ -87,6 +92,70 @@ describe('HandleLogin', () => {
       },
       { timeout: 3000 }
     )
+  })
+
+  describe('when the SSO cannot be reached', () => {
+    const loginUrlMock = {
+      code_verifier: 'verifier123',
+      state: 'state123',
+      redirectTo: new URL('http://login.url')
+    }
+
+    const renderWithoutSession = () =>
+      renderHook(() => useInitializeApp(), {
+        wrapper: ({ children }) => (
+          <Provider
+            store={setupStore({
+              user: {
+                userData: null,
+                tokens: null,
+                loading: false,
+                error: null,
+                coreConfig: { language: 'en' }
+              },
+              calendars: { list: {}, pending: false, error: null }
+            })}
+          >
+            {children}
+          </Provider>
+        )
+      })
+
+    beforeEach(() => {
+      jest.spyOn(retryDelay, 'getRetryDelay').mockReturnValue(0)
+      jest.spyOn(console, 'warn').mockImplementation(() => {})
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    test('tries again and redirects once it answers', async () => {
+      jest
+        .spyOn(oidcAuth, 'Auth')
+        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+        .mockResolvedValue(loginUrlMock)
+
+      renderWithoutSession()
+
+      await waitFor(() =>
+        expect(apiUtils.redirectTo).toHaveBeenCalledWith(
+          loginUrlMock.redirectTo
+        )
+      )
+      expect(oidcAuth.Auth).toHaveBeenCalledTimes(2)
+    })
+
+    test('shows the error page when it never answers', async () => {
+      jest
+        .spyOn(oidcAuth, 'Auth')
+        .mockRejectedValue(new TypeError('Failed to fetch'))
+      const dispatch = appHooks.useAppDispatch()
+
+      renderWithoutSession()
+
+      await waitFor(() => expect(dispatch).toHaveBeenCalledWith(push('/error')))
+      expect(dispatch).toHaveBeenCalledWith(setUserError(SSO_UNREACHABLE_ERROR))
+      expect(oidcAuth.Auth).toHaveBeenCalledTimes(3)
+      expect(apiUtils.redirectTo).not.toHaveBeenCalled()
+    })
   })
 
   test('does not reload the user when the user data changes while calendars are pending', () => {
