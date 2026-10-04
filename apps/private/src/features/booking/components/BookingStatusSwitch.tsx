@@ -17,8 +17,8 @@ export const BookingStatusSwitch: React.FC<BookingStatusSwitchProps> = ({
   const { t } = useI18n()
 
   const tooltipTitle = active
-    ? t('booking.inactiveSchedule')
-    : t('booking.activeSchedule')
+    ? t('booking.activeSchedule')
+    : t('booking.inactiveSchedule')
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
@@ -29,7 +29,7 @@ export const BookingStatusSwitch: React.FC<BookingStatusSwitchProps> = ({
           disabled={disabled}
           color="primary"
           slotProps={{
-            input: { 'aria-label': tooltipTitle }
+            input: { 'aria-label': t('booking.activeSchedule') }
           }}
         />
       </Tooltip>
