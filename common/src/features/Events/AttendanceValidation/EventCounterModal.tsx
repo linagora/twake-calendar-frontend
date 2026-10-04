@@ -3,6 +3,10 @@ import { ResponsiveDialog } from '@common/components/Dialog'
 import { DateTimeFields } from '@common/components/Event/components/DateTimeFields/DateTimeFields'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { splitDateTime } from '@common/components/Event/utils/dateTimeHelpers'
+import {
+  validateEventForm,
+  ValidationResult
+} from '@common/components/Event/utils/formValidation'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
 import moment from 'moment-timezone'
@@ -12,6 +16,12 @@ import { postCounterProposal } from '@common/features/Events/EventDao'
 import { EventTimeSubtitle } from '@common/components/EventPreview/EventTimeSubtitle'
 import { ContextualizedEvent } from '@common/types/EventsTypes'
 import { makeCounterProposalPayload } from '@common/features/Events/transformers/makeCounterProposalPayload'
+
+const NO_VALIDATION_ERROR: ValidationResult = {
+  isValid: true,
+  errors: { date: { start: '', end: '' }, time: { start: '', end: '' } },
+  warnings: { date: { start: '' } }
+}
 
 export function EventCounterModal({
   open,
@@ -51,11 +61,14 @@ export function EventCounterModal({
   const [showMore, setShowMore] = useState(false)
   const [hasEndDateChanged, setHasEndDateChanged] = useState(false)
   const [message, setMessage] = useState('')
-  const [validation, setValidation] = useState<{
-    errors: { dateTime: string }
-  }>({
-    errors: { dateTime: '' }
-  })
+  const [validation, setValidation] =
+    useState<ValidationResult>(NO_VALIDATION_ERROR)
+  const [submitError, setSubmitError] = useState('')
+
+  const clearErrors = (): void => {
+    setValidation(NO_VALIDATION_ERROR)
+    setSubmitError('')
+  }
 
   const handleStartDateChange = (value: string): void => {
     setStartDate(value)
@@ -63,49 +76,38 @@ export function EventCounterModal({
       setEndDate(value)
       setHasEndDateChanged(true)
     }
-    setValidation({ errors: { dateTime: '' } })
+    clearErrors()
   }
 
   const handleStartTimeChange = (value: string): void => {
     setStartTime(value)
-    setValidation({ errors: { dateTime: '' } })
+    clearErrors()
   }
 
   const handleEndDateChange = (value: string): void => {
     setEndDate(value)
     setHasEndDateChanged(true)
-    setValidation({ errors: { dateTime: '' } })
+    clearErrors()
   }
 
   const handleEndTimeChange = (value: string): void => {
     setEndTime(value)
-    setValidation({ errors: { dateTime: '' } })
+    clearErrors()
   }
 
   const validate = (): boolean => {
-    if (!startDate || !endDate) {
-      setValidation({
-        errors: { dateTime: t('event.validation.startRequired') }
-      })
-      return false
-    }
-    if (!allday && (!startTime || !endTime)) {
-      setValidation({
-        errors: { dateTime: t('event.validation.startRequired') }
-      })
-      return false
-    }
-    if (
-      endDate < startDate ||
-      (!allday && endDate === startDate && endTime <= startTime)
-    ) {
-      setValidation({
-        errors: { dateTime: t('event.validation.endAfterStart') }
-      })
-      return false
-    }
-    setValidation({ errors: { dateTime: '' } })
-    return true
+    const result = validateEventForm({
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      allday,
+      hasEndDateChanged,
+      showMore
+    })
+    setValidation(result)
+    setSubmitError('')
+    return result.isValid
   }
 
   const handleSubmit = async (): Promise<void> => {
@@ -114,7 +116,7 @@ export function EventCounterModal({
       !contextualizedEvent.currentUserAttendee?.cal_address ||
       !contextualizedEvent.event.organizer?.cal_address
     ) {
-      setValidation({ errors: { dateTime: t('error.unknown') } })
+      setSubmitError(t('error.unknown'))
       return
     }
     setIsSubmitting(true)
@@ -136,7 +138,7 @@ export function EventCounterModal({
       setOpen(false)
     } catch (error) {
       console.error(error)
-      setValidation({ errors: { dateTime: t('error.unknown') } })
+      setSubmitError(t('error.unknown'))
     } finally {
       setIsSubmitting(false)
     }
@@ -151,7 +153,8 @@ export function EventCounterModal({
     setShowMore(false)
     setHasEndDateChanged(false)
     setMessage('')
-    setValidation({ errors: { dateTime: '' } })
+    setValidation(NO_VALIDATION_ERROR)
+    setSubmitError('')
   }, [open, startSplit.date, startSplit.time, endSplit.date, endSplit.time])
 
   return (
@@ -227,6 +230,15 @@ export function EventCounterModal({
             }
             onToggleEndDate={() => setShowMore(prev => !prev)}
           />
+          {submitError && (
+            <Typography
+              role="alert"
+              variant="caption"
+              sx={{ color: 'error.main' }}
+            >
+              {submitError}
+            </Typography>
+          )}
         </FieldWithLabel>
         {/* Optional message */}
         <Box sx={{ mt: 2 }}>
