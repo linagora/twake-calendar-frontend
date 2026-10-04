@@ -132,10 +132,33 @@ class AuthenticationTest extends TwakeCalendarE2ETest {
         // The SPA leaves for the provider's end session endpoint, carrying the post logout
         // redirect it was configured with. Whether the provider then drops the session is its
         // own business -- Dex, for one, wants an id_token_hint the SPA does not send today.
-        page.waitForURL(java.util.regex.Pattern.compile("https://sso:5554/.*"));
+        java.util.regex.Pattern endSession = java.util.regex.Pattern.compile(
+            "https://sso:5554/.*post_logout_redirect_uri.*");
+        if (!reaches(page, endSession)) {
+            // the logout discovers the SSO, then redirects to it: Chromium drops the requests in
+            // flight whenever a container starts on the CI agent, see LoginPage. Not what this
+            // test is about: sign in and out again. The SSO may still hold the session.
+            System.out.println("[e2e] the logout did not reach the SSO, logging in and out again");
+            page.navigate("/");
+            page.waitForURL(url -> url.contains("/auth") || url.contains("/calendar"));
+            calendar = page.url().contains("/auth")
+                ? new LoginPage(page).submit(user)
+                : new CalendarPage(page).waitUntilLoaded();
+            calendar.logout();
+            page.waitForURL(endSession);
+        }
         org.assertj.core.api.Assertions.assertThat(page.url())
             .contains("client_id=twake-calendar")
             .contains("post_logout_redirect_uri");
+    }
+
+    private static boolean reaches(Page page, java.util.regex.Pattern url) {
+        try {
+            page.waitForURL(url, new Page.WaitForURLOptions().setTimeout(15_000));
+            return true;
+        } catch (com.microsoft.playwright.TimeoutError notThereYet) {
+            return false;
+        }
     }
 
     @Test

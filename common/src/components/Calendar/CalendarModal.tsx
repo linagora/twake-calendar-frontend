@@ -15,6 +15,8 @@ import {
 import { Calendar } from '@common/types/CalendarTypes'
 import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
 import { defaultColors } from '@common/utils/defaultColors'
+import { makeDisplayName } from '@common/utils/makeDisplayName'
+import { renameDefault } from '@common/utils/renameDefault'
 import { Button, Tab, Tabs } from '@linagora/twake-mui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -42,6 +44,16 @@ function CalendarPopover({
   const canManageInvites = calendar
     ? canAdministerCalendar(calendar, userData)
     : true
+  // The default calendar is stored as '#default': show the name used by the
+  // rest of the UI, and keep '#default' on save unless the user renames it.
+  const displayedName = calendar
+    ? renameDefault(
+        calendar.name,
+        makeDisplayName(calendar) ?? '',
+        t,
+        userData.openpaasId === calendar.id.split('/')[0]
+      )
+    : ''
   // Importing writes events: any write right on the calendar is enough, whether
   // it comes from owning it or from a delegation.
   const canImport =
@@ -77,7 +89,7 @@ function CalendarPopover({
     if (!open) return
     const fillCalendarData = () => {
       if (calendar) {
-        setName(calendar.name)
+        setName(displayedName)
         setDescription(calendar.description ?? '')
         setColor(calendar.color ?? defaultColors[0])
         setVisibility(calendar.visibility ?? 'public')
@@ -93,7 +105,7 @@ function CalendarPopover({
       initialUsersRef.current = []
     }
     fillCalendarData()
-  }, [calendar, open])
+  }, [calendar, open, displayedName])
 
   const handleUsersWithAccessChange = useCallback((users: UserWithAccess[]) => {
     setUsersWithAccess(users)
@@ -108,7 +120,9 @@ function CalendarPopover({
   const [saveError, setSaveError] = useState('')
 
   const updateCalendar = async (calId: string, calLink: string) => {
-    const nameChanged = name.trim() !== calendar?.name
+    const newName =
+      name.trim() === displayedName ? (calendar?.name ?? '') : name.trim()
+    const nameChanged = newName !== calendar?.name
     const descChanged = description.trim() !== (calendar?.description ?? '')
     const colorChanged =
       JSON.stringify(color) !==
@@ -119,7 +133,7 @@ function CalendarPopover({
         patchCalendar({
           calId,
           calLink,
-          patch: { name: name.trim(), desc: description.trim(), color }
+          patch: { name: newName, desc: description.trim(), color }
         })
       ).unwrap()
     }

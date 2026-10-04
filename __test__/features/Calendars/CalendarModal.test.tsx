@@ -204,6 +204,84 @@ describe('CalendarPopover (editing mode)', () => {
     await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
   })
 
+  describe('default calendar', () => {
+    const defaultCalendar: Calendar = {
+      ...existingCalendar,
+      name: '#default'
+    }
+
+    const renderDefaultCalendar = () =>
+      renderWithProviders(
+        <CalendarPopover
+          open={true}
+          onClose={mockOnClose}
+          calendar={defaultCalendar}
+        />,
+        { user: baseUser }
+      )
+
+    beforeEach(() => {
+      jest
+        .spyOn(eventThunks, 'patchCalendar')
+        .mockImplementation(mockThunkWithUnwrap())
+    })
+
+    it('shows the display name instead of the internal #default name', () => {
+      renderDefaultCalendar()
+
+      expect(screen.getByLabelText(/Name/i)).toHaveValue(
+        'calendar.defaultPersonalCalendarName'
+      )
+    })
+
+    it('keeps #default when other fields are changed', async () => {
+      renderDefaultCalendar()
+
+      fireEvent.change(screen.getByLabelText(/Description/i), {
+        target: { value: 'Updated description' }
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+
+      await waitFor(() =>
+        expect(eventThunks.patchCalendar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            patch: {
+              color: { light: '#33B679' },
+              desc: 'Updated description',
+              name: '#default'
+            }
+          })
+        )
+      )
+    })
+
+    it('does not patch the calendar when nothing changed', async () => {
+      renderDefaultCalendar()
+
+      fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+
+      await waitFor(() => expect(mockOnClose).toHaveBeenCalled())
+      expect(eventThunks.patchCalendar).not.toHaveBeenCalled()
+    })
+
+    it('saves the new name when the user renames it', async () => {
+      renderDefaultCalendar()
+
+      fireEvent.change(screen.getByLabelText(/Name/i), {
+        target: { value: 'Personal' }
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'actions.save' }))
+
+      await waitFor(() =>
+        expect(eventThunks.patchCalendar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            patch: expect.objectContaining({ name: 'Personal' })
+          })
+        )
+      )
+    })
+  })
+
   it('shows access tab when modifying a team calendar, but hides input to invite user to a member without the administration right', () => {
     const teamCalendar: Calendar = {
       ...existingCalendar,

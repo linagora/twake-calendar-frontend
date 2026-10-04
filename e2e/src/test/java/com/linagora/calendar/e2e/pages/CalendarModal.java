@@ -104,7 +104,12 @@ public class CalendarModal {
 
     /** The address that opens the calendar without credentials, token included. */
     public String secretUrl() {
-        return dialog().getByLabel("Secret URL").inputValue();
+        Locator field = dialog().getByLabel("Secret URL");
+        // the tab fetches the address once open: until it answers, the field stands empty
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(field)
+            .hasValue(java.util.regex.Pattern.compile(".+"),
+                new com.microsoft.playwright.assertions.LocatorAssertions.HasValueOptions().setTimeout(20_000));
+        return field.inputValue();
     }
 
     /** Issues a new secret address, retiring the previous one. */
