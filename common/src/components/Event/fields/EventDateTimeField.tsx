@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { useDateTimeSplit } from '@common/components/Event/hooks/useDateTimeSplit'
 import { DateTimeExpanded } from '@common/components/Event/components/DateTimeFields/DateTimeExpanded'
 import { DateTimeSummarySection } from '@common/components/Event/components/DateTimeFields/DateTimeSubPanels'
+import { InvalidTimeInputProvider } from '@common/components/Event/components/DateTimeFields/InvalidTimeInputContext'
 import type { EventDateTimeFieldProps } from './DateTimeField.types'
 
 export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
@@ -34,14 +35,14 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
   const [hasClickedDateTimeSection, setHasClickedDateTimeSection] =
     useState(false)
   const [hasEndDateChanged, setHasEndDateChanged] = useState(false)
+  const [areSplitFieldsValid, setAreSplitFieldsValid] = useState(false)
+  const [hasInvalidTimeInput, setHasInvalidTimeInput] = useState(false)
 
-  // Validation callback for DateTimeField → notify parent
-  const handleValidationChange = useCallback(
-    (isValid: boolean) => {
-      onValidationChange?.(isValid)
-    },
-    [onValidationChange]
-  )
+  // Typed text the time fields could not parse never reaches the split fields:
+  // the form stays invalid while it is displayed.
+  useEffect(() => {
+    onValidationChange?.(areSplitFieldsValid && !hasInvalidTimeInput)
+  }, [areSplitFieldsValid, hasInvalidTimeInput, onValidationChange])
 
   const {
     startDate,
@@ -62,13 +63,13 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
     onEndChange,
     setEnd,
     onHasEndDateChangedChange,
-    onValidationChange: handleValidationChange
+    onValidationChange: setAreSplitFieldsValid
   })
 
   const isCollapsed = !showMore && !hasClickedDateTimeSection
 
   return (
-    <>
+    <InvalidTimeInputProvider onChange={setHasInvalidTimeInput}>
       <FieldWithLabel
         label={isCollapsed ? '' : t('event.form.dateTime')}
         isExpanded={showMore && !isMobile}
@@ -118,6 +119,6 @@ export const EventDateTimeField: React.FC<EventDateTimeFieldProps> = ({
           />
         )}
       </FieldWithLabel>
-    </>
+    </InvalidTimeInputProvider>
   )
 }

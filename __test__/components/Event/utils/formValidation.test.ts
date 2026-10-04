@@ -196,6 +196,14 @@ describe('validateEventForm — compact layout (same-day, showMore=false)', () =
     expect(result.errors.time.end).toBe('event.validation.invalidTimeFormat')
     expect(result.errors.time.start).toBe('event.validation.invalidTimeFormat')
   })
+
+  it('is invalid for out-of-range times', () => {
+    const result = validateEventForm(
+      compactParams({ startTime: '25:99', endTime: '13:00' })
+    )
+    expect(result.isValid).toBe(false)
+    expect(result.errors.time.start).toBe('event.validation.invalidTimeFormat')
+  })
 })
 
 describe('validateEventForm — expanded layout (showMore=true)', () => {

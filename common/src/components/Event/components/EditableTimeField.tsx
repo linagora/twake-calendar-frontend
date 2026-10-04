@@ -16,7 +16,8 @@ import {
   type PickerValidationScope
 } from '@mui/x-date-pickers/validation'
 import { Dayjs } from 'dayjs'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useInvalidTimeInput } from '@common/components/Event/components/DateTimeFields/InvalidTimeInputContext'
 import { parseTimeInput } from '@common/components/Event/utils/dateTimeHelpers'
 
 type FieldType = 'date' | 'time' | 'date-time'
@@ -31,6 +32,20 @@ type GenericPickerFieldProps = PickerFieldSlotProps<Dayjs, false, false> & {
 }
 
 const TIME_DISPLAY_FORMAT = 'HH:mm'
+
+// Typed text the user is done with: a full "HH:mm" or a 3-4 digit shorthand
+const COMPLETE_TIME_INPUT = /^(\d{1,2}:\d{2}|\d{3,4})$/
+
+/**
+ * Text that cannot be turned into a time (e.g. "25:99"), once the user is done
+ * typing it. It never reaches the picker value, so it has to be reported for
+ * the form not to silently save the previous time.
+ */
+function isUnparsableTimeInput(value: string, isFocused: boolean): boolean {
+  const trimmed = value.trim()
+  if (!trimmed || parseTimeInput(trimmed, null)) return false
+  return !isFocused || COMPLETE_TIME_INPUT.test(trimmed)
+}
 
 /**
  * Editable field for time pickers. Allows free typing with format on blur/enter.
@@ -141,6 +156,19 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
     timezone: timezone,
     props: internalProps
   })
+
+  const fieldId = useId()
+  const { reportInvalidTimeInput } = useInvalidTimeInput()
+  const hasUnparsableInput = isUnparsableTimeInput(inputValue, isFocused)
+
+  useEffect(() => {
+    reportInvalidTimeInput(fieldId, hasUnparsableInput)
+  }, [fieldId, hasUnparsableInput, reportInvalidTimeInput])
+
+  useEffect(
+    () => () => reportInvalidTimeInput(fieldId, false),
+    [fieldId, reportInvalidTimeInput]
+  )
 
   const parseAndUpdateTime = useCallback(
     (value: string) => {
@@ -316,7 +344,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
       placeholder={parsedFormat}
       slotProps={mergedSlotProps}
       inputRef={inputRef}
-      error={hasValidationError || forwardedProps.error}
+      error={hasValidationError || hasUnparsableInput || forwardedProps.error}
       focused={isFocused}
       onClick={handleClick}
       onFocus={handleFocus}

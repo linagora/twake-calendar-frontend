@@ -13,6 +13,7 @@ import {
 } from '@common/components/Event/utils/formValidation'
 import { DateTimeError } from './DateTimeError'
 import { DateTimeLayoutContent } from './DateTimeLayoutContent'
+import { useInvalidTimeInput } from './InvalidTimeInputContext'
 import { useDateTimeHandlers } from './useDateTimeHandlers'
 import { useDateTimeLayout } from './useDateTimeLayout'
 import { useDisplayFlags } from './useDisplayFlags'
@@ -58,6 +59,7 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
 }) => {
   const { t, lang } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const { hasInvalidTimeInput } = useInvalidTimeInput()
 
   const {
     spansMultipleDays,
@@ -149,8 +151,12 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
           onEndTimeChange={handleEndTimeChange}
         />
         <DateTimeError
-          message={displayError(validation)}
-          warning={displayAsWarning(validation)}
+          message={
+            hasInvalidTimeInput
+              ? 'event.validation.invalidTimeFormat'
+              : displayError(validation)
+          }
+          warning={!hasInvalidTimeInput && displayAsWarning(validation)}
         />
       </Box>
     </TwakeLocalizationProvider>

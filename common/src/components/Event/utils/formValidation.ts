@@ -242,7 +242,10 @@ function validateTimeOnlyRange(
   const [sh, sm] = parts(startTime)
   const [eh, em] = parts(endTime)
 
-  if ([sh, sm, eh, em].some(isNaN)) {
+  const isInvalidTime = (h: number, m: number) =>
+    isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59
+
+  if (isInvalidTime(sh, sm) || isInvalidTime(eh, em)) {
     return {
       valid: false,
       timeStartError: 'event.validation.invalidTimeFormat',
