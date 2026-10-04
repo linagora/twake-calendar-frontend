@@ -263,9 +263,9 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
 
   const slotTime = useMemo<SlotTime | null>(() => {
     if (!selectedSlot) return null
-    const startDate = dayjs(selectedSlot.start).locale(lang)
+    const startDate = dayjs(selectedSlot.start)
     return {
-      date: startDate.format('MMMM D, YYYY'),
+      date: startDate.toDate().toLocaleDateString(lang, { dateStyle: 'long' }),
       time: startDate.format('HH:mm')
     }
   }, [selectedSlot, lang])
