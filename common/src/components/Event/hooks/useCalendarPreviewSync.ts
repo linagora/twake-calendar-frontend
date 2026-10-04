@@ -32,6 +32,16 @@ function toInstant(wallClock: string, timezone?: string): Date {
 }
 
 /**
+ * The form holds an inclusive end day while FullCalendar expects an exclusive
+ * one: a one day event ending on its start day would be an empty range.
+ */
+function toExclusiveEndDay(inclusiveEnd: string): string {
+  return moment(inclusiveEnd.split('T')[0], 'YYYY-MM-DD')
+    .add(1, 'day')
+    .format('YYYY-MM-DD')
+}
+
+/**
  * Pure helper to calculate the new date range when toggling all-day mode.
  */
 function calculateAllDayRange(
@@ -42,7 +52,7 @@ function calculateAllDayRange(
   timezone?: string
 ): DateSelectArg {
   const startStr = newAllDay ? newStart.split('T')[0] : newStart
-  const endStr = newAllDay ? newEnd.split('T')[0] : newEnd
+  const endStr = newAllDay ? toExclusiveEndDay(newEnd) : newEnd
 
   return {
     ...prev,

@@ -63,3 +63,39 @@ describe('useCalendarPreviewSync (#1398)', () => {
     expect(nextRange().end.toISOString()).toBe('2026-09-23T17:00:00.000Z')
   })
 })
+
+describe('useCalendarPreviewSync all day toggle (#1491)', () => {
+  it('previews a one day all day event as a non empty range ending the next day', () => {
+    const { result, nextRange } = renderWithFormIn(TONGATAPU)
+
+    result.current.handleAllDayChange(
+      true,
+      '2026-10-03T09:00',
+      '2026-10-03T10:00'
+    )
+
+    expect(nextRange().allDay).toBe(true)
+    expect(nextRange().startStr).toBe('2026-10-03')
+    expect(nextRange().endStr).toBe('2026-10-04')
+    expect(nextRange().end.getTime()).toBeGreaterThan(
+      nextRange().start.getTime()
+    )
+  })
+
+  it('keeps the last day of a multi day all day event in the preview', () => {
+    const { result, nextRange } = renderWithFormIn(TONGATAPU)
+
+    result.current.handleAllDayChange(true, '2026-10-03', '2026-10-05')
+
+    expect(nextRange().startStr).toBe('2026-10-03')
+    expect(nextRange().endStr).toBe('2026-10-06')
+  })
+
+  it('crosses month boundaries when computing the exclusive end', () => {
+    const { result, nextRange } = renderWithFormIn(TONGATAPU)
+
+    result.current.handleAllDayChange(true, '2026-10-31', '2026-10-31')
+
+    expect(nextRange().endStr).toBe('2026-11-01')
+  })
+})
