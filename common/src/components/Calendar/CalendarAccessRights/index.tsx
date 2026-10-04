@@ -54,6 +54,7 @@ function UserAccessRow({
   onRemove: (email: string) => void
   onChangeRight: (email: string, right: AccessRight) => void
 }): JSX.Element {
+  const { t } = useI18n()
   return (
     <Box
       key={user.email}
@@ -99,11 +100,16 @@ function UserAccessRow({
           setAccessRight={right => onChangeRight(user.email, right)}
           accessRightOptions={accessRightOptions}
           disabled={!canEdit}
+          ariaLabel={t('a11y.accessFor', {
+            name: user.displayName || user.email
+          })}
         />
         {canEdit && (
           <IconButton
             size="small"
-            aria-label="remove"
+            aria-label={t('a11y.removeItem', {
+              name: user.displayName || user.email
+            })}
             onClick={() => onRemove(user.email)}
             sx={{ color: 'text.secondary' }}
           >
@@ -386,12 +392,14 @@ export function CalendarAccessRights({
                           accessRight={accessRight}
                           setAccessRight={setAccessRight}
                           accessRightOptions={accessRightOptions}
+                          ariaLabel={t('a11y.accessToGrant')}
                         />
                       </InputAdornment>
                     )
                   },
                   htmlInput: {
                     ...params.slotProps.htmlInput,
+                    'aria-label': t('peopleSearch.label'),
                     sx: {
                       fontSize: '14px',
                       '&::placeholder': { fontSize: '14px' }

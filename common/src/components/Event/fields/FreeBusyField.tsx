@@ -32,7 +32,7 @@ export const FreeBusyField: React.FC<FreeBusyFieldProps> = ({
     >
       <FormControl fullWidth margin="dense" size={inputSize}>
         <Select
-          labelId="busy"
+          SelectDisplayProps={{ 'aria-label': t('event.form.showMeAs') }}
           value={busy}
           onChange={(e: SelectChangeEvent) => setBusy(e.target.value)}
         >

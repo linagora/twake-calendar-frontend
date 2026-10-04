@@ -27,6 +27,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- axe-core accessibility checks, see AxeScanTest -->
+            <groupId>com.deque.html.axe-core</groupId>
+            <artifactId>playwright</artifactId>
+            <version>4.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
             <version>${testcontainers.version}</version>

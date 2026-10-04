@@ -16,6 +16,13 @@ interface AvailableDayProps extends PickerDayProps {
   availableDays?: Set<string>
   selectedTimezone?: string
 }
+const isBeforeTodayIn = (day: Dayjs, timezone?: string): boolean => {
+  const todayInTimezone = timezone
+    ? dayjs().tz(timezone).startOf('day')
+    : dayjs().startOf('day')
+  return day.isBefore(todayInTimezone, 'day')
+}
+
 interface BookingCalendarSectionProps {
   selectedDay: Dayjs | null
   availableDays: Set<string>
@@ -37,7 +44,9 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
 
   if (outsideCurrentMonth) {
     return (
+      // An empty cell keeps the grid of the date picker consistent
       <Box
+        role="gridcell"
         sx={{
           boxSizing: 'border-box',
           width: CELL_SIZE,
@@ -51,12 +60,7 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
     )
   }
   const isSlot = availableDays?.has(day.format('YYYY-MM-DD')) ?? false
-
-  const todayInTimezone = selectedTimezone
-    ? dayjs().tz(selectedTimezone).startOf('day')
-    : dayjs().startOf('day')
-
-  const isBeforeToday = day.isBefore(todayInTimezone, 'day')
+  const isBeforeToday = isBeforeTodayIn(day, selectedTimezone)
 
   return (
     <PickerDay
@@ -124,6 +128,12 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
           view={view}
           onViewChange={setView}
           slots={{ day: AvailableDay }}
+          // Also known to the date grid, so that arrow keys skip these days
+          // instead of moving the focus to a disabled button
+          shouldDisableDate={day =>
+            !availableDays.has(day.format('YYYY-MM-DD')) ||
+            isBeforeTodayIn(day, selectedTimezone)
+          }
           showDaysOutsideCurrentMonth
           views={['day', 'month']}
           fixedWeekNumber={6}

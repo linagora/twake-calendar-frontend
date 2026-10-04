@@ -51,6 +51,7 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
       }}
       variant="outlined"
       slotProps={{
+        htmlInput: { 'aria-label': t('a11y.searchEvents') },
         input: {
           ...params.slotProps.input,
           startAdornment: (

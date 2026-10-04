@@ -58,7 +58,14 @@ const ResourceItem: React.FC<{
         <IconButton
           size="small"
           onClick={onRemove}
-          aria-label="Remove calendar"
+          aria-label={t('a11y.removeItem', {
+            name: renameDefault(
+              cal.cal['dav:name'],
+              cal.owner.displayName,
+              t,
+              false
+            )
+          })}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -132,7 +139,14 @@ const OtherCalendarItem: React.FC<{
         <IconButton
           size="small"
           onClick={onRemove}
-          aria-label="Remove calendar"
+          aria-label={t('a11y.removeItem', {
+            name: renameDefault(
+              cal.cal['dav:name'],
+              cal.owner.displayName,
+              t,
+              false
+            )
+          })}
         >
           <CloseIcon fontSize="small" />
         </IconButton>
@@ -188,11 +202,15 @@ export const SelectedCalendarsList: React.FC<{
   return (
     <Box sx={{ mt: 2 }}>
       {keyName === 'email' ? (
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography component="p" variant="subtitle1" gutterBottom>
           {t('common.name')}
         </Typography>
       ) : (
-        <Typography variant="h6" sx={{ margin: 0, marginBottom: 1 }}>
+        <Typography
+          component="p"
+          variant="h6"
+          sx={{ margin: 0, marginBottom: 1 }}
+        >
           {t('common.resource')}
         </Typography>
       )}

@@ -4,14 +4,14 @@ import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import React, { useMemo } from 'react'
+import React, { useId, useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import {
   DateTimeErrors,
   DateTimeWarnings,
   ValidationResult
 } from '@common/components/Event/utils/formValidation'
-import { DateTimeError } from './DateTimeError'
+import { DateTimeError, DateTimeErrorIdContext } from './DateTimeError'
 import { DateTimeLayoutContent } from './DateTimeLayoutContent'
 import { useDateTimeHandlers } from './useDateTimeHandlers'
 import { useDateTimeLayout } from './useDateTimeLayout'
@@ -120,6 +120,8 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
   )
 
   const layoutErrors = useMemo(() => getLayoutErrors(validation), [validation])
+  const errorId = useId()
+  const errorMessage = displayError(validation)
 
   const showFullField = showMore || shouldShowFullFieldsInNormal
   const containerClassName = classNames('date-time-group', {
@@ -132,24 +134,29 @@ export const DateTimeFields: React.FC<DateTimeFieldsProps> = ({
         sx={{ display: 'flex', flexDirection: 'column' }}
         className={containerClassName}
       >
-        <DateTimeLayoutContent
-          layoutMode={layoutMode}
-          startDateValue={startDateValue}
-          startTimeValue={startTimeValue}
-          endDateValue={endDateValue}
-          endTimeValue={endTimeValue}
-          errors={layoutErrors}
-          isMobile={isMobile}
-          allday={allday}
-          startDateLabel={startDateLabel}
-          shouldShowTimeFields={shouldShowTimeFields}
-          onStartDateChange={handleStartDateChange}
-          onStartTimeChange={handleStartTimeChange}
-          onEndDateChange={handleEndDateChange}
-          onEndTimeChange={handleEndTimeChange}
-        />
+        <DateTimeErrorIdContext.Provider
+          value={errorMessage ? errorId : undefined}
+        >
+          <DateTimeLayoutContent
+            layoutMode={layoutMode}
+            startDateValue={startDateValue}
+            startTimeValue={startTimeValue}
+            endDateValue={endDateValue}
+            endTimeValue={endTimeValue}
+            errors={layoutErrors}
+            isMobile={isMobile}
+            allday={allday}
+            startDateLabel={startDateLabel}
+            shouldShowTimeFields={shouldShowTimeFields}
+            onStartDateChange={handleStartDateChange}
+            onStartTimeChange={handleStartTimeChange}
+            onEndDateChange={handleEndDateChange}
+            onEndTimeChange={handleEndTimeChange}
+          />
+        </DateTimeErrorIdContext.Provider>
         <DateTimeError
-          message={displayError(validation)}
+          id={errorId}
+          message={errorMessage}
           warning={displayAsWarning(validation)}
         />
       </Box>

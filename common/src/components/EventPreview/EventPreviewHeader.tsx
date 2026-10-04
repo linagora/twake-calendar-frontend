@@ -21,6 +21,7 @@ interface EventPreviewHeaderProps {
   onClose: () => void
   onEdit: () => void
   onMoreClick: (e: React.MouseEvent<HTMLElement>) => void
+  isMoreMenuOpen?: boolean
   onEditInOrganizerCalendar?: () => void
   editInOrganizerCalendarTooltip?: string
   onDelete: () => void
@@ -36,6 +37,7 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
   onClose,
   onEdit,
   onMoreClick,
+  isMoreMenuOpen = false,
   onEditInOrganizerCalendar,
   editInOrganizerCalendarTooltip,
   onDelete
@@ -110,17 +112,31 @@ export const EventPreviewHeader: React.FC<EventPreviewHeaderProps> = ({
       )}
       {!canEdit && onEditInOrganizerCalendar && (
         <Tooltip title={editInOrganizerCalendarTooltip} placement="top">
-          <IconButton size="small" onClick={onEditInOrganizerCalendar}>
+          <IconButton
+            size="small"
+            aria-label={editInOrganizerCalendarTooltip}
+            onClick={onEditInOrganizerCalendar}
+          >
             <EditIcon />
           </IconButton>
         </Tooltip>
       )}
       {canSeeMore && (
-        <IconButton size="small" onClick={onMoreClick}>
+        <IconButton
+          size="small"
+          aria-label={t('tooltip.moreEventOptions')}
+          aria-haspopup="menu"
+          aria-expanded={isMoreMenuOpen}
+          onClick={onMoreClick}
+        >
           <MoreVertIcon />
         </IconButton>
       )}
-      <IconButton size="small" onClick={onClose}>
+      <IconButton
+        size="small"
+        aria-label={t('actions.close')}
+        onClick={onClose}
+      >
         <CloseIcon />
       </IconButton>
     </Box>

@@ -12,6 +12,7 @@ import { BookingConfirmDialog } from './components/BookingDialog'
 import { BookingSuccessDialog } from './components/BookingSuccessDialog'
 import { BookingTimeSlotSection } from '../../components/Booking/BookingTimeSlotSection'
 import { useI18n } from 'twake-i18n'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
 import { useBookingData } from './hooks/useBookingData'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
@@ -185,6 +186,14 @@ export const BookingPage: React.FC = () => {
 
   const errorStatus = submitError || error
 
+  useDocumentTitle(
+    ...(errorStatus && !bookingInfo
+      ? [t('pageTitle.bookingUnavailable')]
+      : successOpen
+        ? [t('pageTitle.bookingConfirmed'), bookingInfo?.name]
+        : [bookingInfo?.name, t('pageTitle.booking')])
+  )
+
   return (
     <BookingErrorBoundary
       errorStatus={errorStatus}
@@ -212,7 +221,7 @@ export const BookingPage: React.FC = () => {
                   padding: '32px 0'
                 }}
               >
-                <CircularProgress size={28} />
+                <CircularProgress size={28} aria-label={t('a11y.loading')} />
               </Box>
             ) : (
               <>
@@ -241,7 +250,10 @@ export const BookingPage: React.FC = () => {
                         zIndex: 1
                       }}
                     >
-                      <CircularProgress size={24} />
+                      <CircularProgress
+                        size={24}
+                        aria-label={t('a11y.loading')}
+                      />
                     </Box>
                   )}
 

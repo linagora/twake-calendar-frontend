@@ -67,9 +67,10 @@ export const getDateFieldSlotProps = (
   testId: string,
   hasError = false,
   label?: string,
-  isMobile?: boolean
+  isMobile?: boolean,
+  errorId?: string
 ): Partial<DatePickerFieldProps> & BaseFieldProps =>
-  baseFieldProps(testId, hasError, label, isMobile)
+  baseFieldProps(testId, hasError, label, isMobile, errorId)
 
 export const getTimeFieldSlotProps = (
   testId: string,

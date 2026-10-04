@@ -32,7 +32,7 @@ export const NoEventsContent: React.FC<NoEventsContentProps> = ({
             src={logo}
             alt={t('event.noEventsToDisplay')}
           />
-          <Typography variant="h6" sx={{ color: 'text.primary' }}>
+          <Typography component="p" variant="h6" sx={{ color: 'text.primary' }}>
             {t('event.noEventsToDisplay')}
           </Typography>
         </>

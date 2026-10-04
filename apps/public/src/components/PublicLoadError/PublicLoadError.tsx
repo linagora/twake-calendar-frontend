@@ -1,7 +1,6 @@
 import { Box, Typography } from '@linagora/twake-mui'
 import React from 'react'
 import logo from '@common/static/noResult-logo.svg'
-import { useI18n } from 'twake-i18n'
 
 export interface PublicLoadErrorProps {
   title: string
@@ -14,12 +13,10 @@ export const PublicLoadError: React.FC<PublicLoadErrorProps> = ({
   detailMessage,
   action
 }) => {
-  const { t } = useI18n()
-
   return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
-      <img src={logo} alt={t('search.noResults')} />
-      <Typography color="error" variant="h5">
+      <img src={logo} alt="" />
+      <Typography component="h1" color="error" variant="h5">
         {title}
       </Typography>
       {detailMessage && (

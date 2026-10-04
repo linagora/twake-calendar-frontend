@@ -117,7 +117,17 @@
     "selectCustom": "Chọn màu tùy chỉnh",
     "title": "Chọn màu tùy chỉnh",
     "subtitle": "Chọn màu nền cho lịch này",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Xanh lá",
+      "orange": "Cam",
+      "red": "Đỏ",
+      "blue": "Xanh dương",
+      "purple": "Tím"
+    },
+    "customColorHex": "Màu tùy chỉnh %{hex}",
+    "saturation": "Độ bão hòa và độ sáng",
+    "hue": "Sắc độ"
   },
   "event": {
     "createEvent": "Tạo sự kiện",
@@ -659,5 +669,35 @@
   "debug": {
     "enabled": "Đã bật chế độ gỡ lỗi.",
     "disabled": "Đã tắt chế độ gỡ lỗi."
+  },
+  "pageTitle": {
+    "booking": "Đặt lịch hẹn",
+    "bookingConfirmed": "Đã xác nhận lịch hẹn",
+    "bookingUnavailable": "Không thể đặt lịch hẹn"
+  },
+  "a11y": {
+    "removeItem": "Xóa %{name}",
+    "moreActionsFor": "Thêm thao tác cho %{name}",
+    "copyItem": "Sao chép %{name}",
+    "collapseDialog": "Thu gọn",
+    "editItem": "Chỉnh sửa %{name}",
+    "editBookingLink": "Chỉnh sửa liên kết đặt lịch",
+    "time": "Thời gian",
+    "event": "Sự kiện",
+    "sidebar": "Lịch và điều hướng",
+    "calendar": "Lịch",
+    "loading": "Đang tải…",
+    "slotsOn": "Khung giờ trống ngày %{date}",
+    "slotsAvailable": "%{smart_count} khung giờ trống ngày %{date}",
+    "currentAnswer": "(câu trả lời hiện tại)",
+    "repeatUnit": "Đơn vị lặp lại",
+    "repeatEndDate": "Lặp lại đến",
+    "occurrenceCount": "Số lần lặp",
+    "searchEvents": "Tìm kiếm sự kiện",
+    "accessFor": "Quyền truy cập của %{name}",
+    "accessToGrant": "Quyền truy cập cần cấp",
+    "searchResultsCount": "Tìm thấy %{smart_count} sự kiện",
+    "moreEvents": "Các sự kiện khác",
+    "calendarSettings": "Cài đặt lịch"
   }
 }

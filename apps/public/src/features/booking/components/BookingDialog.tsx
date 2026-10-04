@@ -4,7 +4,7 @@ import {
 } from '@common/features/booking/types/BookingTypes'
 import { isValidEmail } from '@common/utils/isValidEmail'
 import { Box, Button, TextField, Typography } from '@linagora/twake-mui'
-import React, { useState } from 'react'
+import React, { RefObject, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { StaticDateTimeSummary } from './StaticDateTimeSummary'
@@ -60,7 +60,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
   return (
     <>
       {bookingInfo?.name && (
-        <Typography variant="h4" sx={{ mb: '24px' }}>
+        <Typography component="h3" variant="h4" sx={{ mb: '24px' }}>
           {bookingInfo.name}
         </Typography>
       )}
@@ -85,6 +85,8 @@ interface BookingFormProps {
   bookingError: string | null
   onNameChange: (value: string) => void
   onEmailChange: (value: string) => void
+  nameRef: RefObject<HTMLInputElement>
+  emailRef: RefObject<HTMLInputElement>
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -94,13 +96,22 @@ const BookingForm: React.FC<BookingFormProps> = ({
   emailError,
   bookingError,
   onNameChange,
-  onEmailChange
+  onEmailChange,
+  nameRef,
+  emailRef
 }) => {
   const { t } = useI18n()
   return (
     <>
       <TextField
+        inputRef={nameRef}
         placeholder={t('booking.form.name')}
+        slotProps={{
+          htmlInput: {
+            'aria-label': t('booking.form.name'),
+            autoComplete: 'name'
+          }
+        }}
         value={name}
         onChange={e => onNameChange(e.target.value)}
         fullWidth
@@ -111,7 +122,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
         helperText={nameError}
       />
       <TextField
+        inputRef={emailRef}
         placeholder={t('booking.form.email')}
+        slotProps={{
+          htmlInput: {
+            'aria-label': t('booking.form.email'),
+            autoComplete: 'email'
+          }
+        }}
         type="email"
         value={email}
         onChange={e => onEmailChange(e.target.value)}
@@ -123,7 +141,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         helperText={emailError}
       />
       {bookingError && (
-        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+        <Typography role="alert" color="error" variant="body2" sx={{ mt: 1 }}>
           {bookingError}
         </Typography>
       )}
@@ -146,6 +164,8 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
   const [emailError, setEmailError] = useState<string | null>(null)
   const [bookingInProgress, setBookingInProgress] = useState<boolean>(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
 
   const handleEmailChange = (value: string): void => {
     setEmail(value)
@@ -161,18 +181,23 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
     setEmailError(null)
     setBookingError(null)
 
+    // Each check sends the focus to the field in error, so that its message
+    // (linked by aria-describedby) is read out
     if (!name.trim()) {
       setNameError(t('booking.error.nameRequired'))
+      nameRef.current?.focus()
       return
     }
 
     if (!email) {
       setEmailError(t('booking.error.emailRequired'))
+      emailRef.current?.focus()
       return
     }
 
     if (!isValidEmail(email)) {
       setEmailError(t('peopleSearch.invalidEmail').replace('%{email}', email))
+      emailRef.current?.focus()
       return
     }
 
@@ -231,6 +256,7 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
       open={open}
       onClose={handleClose}
       title={title}
+      ariaLabel={t('booking.confirm.title')}
       actions={actions}
       normalMaxWidth="570px"
       titleSx={{
@@ -250,6 +276,8 @@ export const BookingConfirmDialog: React.FC<BookingConfirmDialogProps> = ({
         bookingError={bookingError}
         onNameChange={setName}
         onEmailChange={handleEmailChange}
+        nameRef={nameRef}
+        emailRef={emailRef}
       />
     </ResponsiveDialog>
   )

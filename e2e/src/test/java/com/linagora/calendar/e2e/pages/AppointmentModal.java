@@ -118,12 +118,12 @@ public class AppointmentModal {
 
     /** Replicates the hours of a day onto every other one. */
     public AppointmentModal copyToAllDays(String day) {
-        actionOn(day, "copy-slot").click();
+        actionOn(day, "Copy to all").click();
         return this;
     }
 
     public AppointmentModal addSlotOn(String day) {
-        actionOn(day, "add-slot").click();
+        actionOn(day, "Add slot").click();
         return this;
     }
 

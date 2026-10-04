@@ -117,7 +117,17 @@
     "selectCustom": "Sélectionner une couleur personnalisée",
     "title": "Choisir une couleur personnalisée",
     "subtitle": "Choisissez une couleur d'arrière-plan pour ce calendrier",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Vert",
+      "orange": "Orange",
+      "red": "Rouge",
+      "blue": "Bleu",
+      "purple": "Violet"
+    },
+    "customColorHex": "Couleur personnalisée %{hex}",
+    "saturation": "Saturation et luminosité",
+    "hue": "Teinte"
   },
   "event": {
     "createEvent": "Créer",
@@ -658,5 +668,35 @@
   "debug": {
     "enabled": "Mode debug activé.",
     "disabled": "Mode debug désactivé."
+  },
+  "pageTitle": {
+    "booking": "Prendre rendez-vous",
+    "bookingConfirmed": "Rendez-vous confirmé",
+    "bookingUnavailable": "Prise de rendez-vous indisponible"
+  },
+  "a11y": {
+    "removeItem": "Retirer %{name}",
+    "moreActionsFor": "Plus d'actions pour %{name}",
+    "copyItem": "Copier %{name}",
+    "collapseDialog": "Réduire",
+    "editItem": "Modifier %{name}",
+    "editBookingLink": "Modifier le lien de réservation",
+    "time": "Heure",
+    "event": "Événement",
+    "sidebar": "Agendas et navigation",
+    "calendar": "Agenda",
+    "loading": "Chargement…",
+    "slotsOn": "Horaires disponibles le %{date}",
+    "slotsAvailable": "%{smart_count} créneau disponible le %{date} |||| %{smart_count} créneaux disponibles le %{date}",
+    "currentAnswer": "(réponse actuelle)",
+    "repeatUnit": "Unité de répétition",
+    "repeatEndDate": "Répéter jusqu'au",
+    "occurrenceCount": "Nombre d'occurrences",
+    "searchEvents": "Rechercher des événements",
+    "accessFor": "Accès pour %{name}",
+    "accessToGrant": "Accès à accorder",
+    "searchResultsCount": "%{smart_count} événement trouvé |||| %{smart_count} événements trouvés",
+    "moreEvents": "Autres événements",
+    "calendarSettings": "Paramètres de l'agenda"
   }
 }

@@ -10,7 +10,7 @@ import EventPopover from '@common/features/Events/EventModal'
 import EventSettingsUpdateModal from '@common/features/Events/EventSettingsUpdateModal'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
 import { DateSelectArg } from '@fullcalendar/core'
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventPreviewTitleRow } from './EventPreviewTitleRow'
 import { CALENDAR_VIEWS } from '../Calendar/utils/constants'
@@ -25,6 +25,7 @@ const EventPreviewModal: React.FC<{
   currentView?: string
 }> = ({ eventId, calId, tempEvent, open, onClose, anchorEl, currentView }) => {
   const { t } = useI18n()
+  const previewTitleId = useId()
 
   const {
     event,
@@ -110,6 +111,7 @@ const EventPreviewModal: React.FC<{
       onClose={() => onClose({}, 'backdropClick')}
       onEdit={handleEditClick}
       onMoreClick={e => setToggleActionMenu(e.currentTarget)}
+      isMoreMenuOpen={Boolean(toggleActionMenu)}
       onEditInOrganizerCalendar={
         organizerWritableCalendar ? handleEditInOrganizerCalendar : undefined
       }
@@ -143,11 +145,13 @@ const EventPreviewModal: React.FC<{
         contentSx={{ overflowX: 'hidden', overflowY: 'auto' }}
         titleSx={{ backgroundColor: '#FCFCFC' }}
         title=""
+        ariaLabelledBy={previewTitleId}
         headerRightAction={header}
         actions={actions}
       >
         {/* Title & date row */}
         <EventPreviewTitleRow
+          titleId={previewTitleId}
           event={event}
           isOwn={isOwn}
           timezone={timezone}

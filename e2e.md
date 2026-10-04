@@ -194,7 +194,7 @@ day, 23:45) — 48 tests.
 - [x] `SHELL-07` The mini calendar arrows change month without moving the main grid
 - [x] `SHELL-08` Collapsing a sidebar section hides its content
 - [x] `SHELL-09` The Refresh button reloads the events of the displayed range
-- [x] `SHELL-10` The page title is "Twake Calendar"
+- [x] `SHELL-10` The page title names the view, then "Twake Calendar"
 - [x] `SHELL-11` The application version is displayed in the settings
 - [x] `SHELL-12` No console error is emitted on the initial calendar load
 - [x] `SHELL-13` Collapsing a full screen event form gives the menubar its actions back
@@ -717,16 +717,22 @@ day, 23:45) — 48 tests.
 - [x] `I18N-13` `LANG` sets the initial language before any user choice
 - [x] `I18N-14` No raw translation key ever shows up in the interface
 
-## A11Y — Accessibility and keyboard (8)
+## A11Y — Accessibility and keyboard (14)
 
 - [x] `A11Y-01` Every menubar button exposes an accessible name
 - [x] `A11Y-02` The creation modal traps the focus
 - [x] `A11Y-04` Tab walks through the form fields in visual order
-- [x] `A11Y-07` Every form field has an associated label
+- [x] `A11Y-07` Every form field has an associated label (a placeholder does not count)
 - [x] `A11Y-08` Dropdowns are operable with the keyboard
 - [x] `A11Y-09` Calendar checkboxes are operable with the keyboard
 - [x] `A11Y-11` Error messages are announced to screen readers
 - [x] `A11Y-14` The page title changes to reflect the current view
+- [x] `AXE-01` The week view passes axe-core WCAG 2.1 AA (known failures listed in the test)
+- [x] `AXE-02` The expanded event form passes axe-core WCAG 2.1 AA
+- [x] `AXE-03` The event preview passes axe-core WCAG 2.1 AA
+- [x] `AXE-04` The settings page passes axe-core WCAG 2.1 AA (known failures listed in the test)
+- [x] `AXE-05` A public booking page with its slots passes axe-core WCAG 2.1 AA
+- [x] `AXE-06` The page of an unknown booking link passes axe-core WCAG 2.1 AA
 
 ## RESP — Responsive, mobile and tablet (18)
 

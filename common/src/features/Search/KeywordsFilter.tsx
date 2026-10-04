@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { MobileSelector } from '@common/components/MobileSelector'
 import { setFilters } from '@common/features/Search/SearchSlice'
@@ -20,6 +21,7 @@ export const KeywordsFilter: React.FC<Props> = ({
   onEnter
 }) => {
   const { t } = useI18n()
+  const labelId = useId()
   const dispatch = useAppDispatch()
   const filters = useAppSelector(
     state => state.searchResult.searchParams.filters
@@ -31,6 +33,7 @@ export const KeywordsFilter: React.FC<Props> = ({
       error={error}
       helperText={error ? t('search.error.emptySearch') : ''}
       placeholder={t('search.keywordsPlaceholder')}
+      slotProps={{ htmlInput: { 'aria-label': t('search.keywords') } }}
       value={filters.keywords}
       onChange={e => {
         dispatch(setFilters({ keywords: e.target.value }))
@@ -60,6 +63,8 @@ export const KeywordsFilter: React.FC<Props> = ({
 
   return (
     <Box
+      role="group"
+      aria-labelledby={labelId}
       sx={{
         display: 'grid',
         gridTemplateColumns: '140px 1fr',
@@ -67,7 +72,9 @@ export const KeywordsFilter: React.FC<Props> = ({
         alignItems: 'center'
       }}
     >
-      <InputLabel sx={{ m: 0 }}>{t('search.keywords')}</InputLabel>
+      <InputLabel id={labelId} sx={{ m: 0 }}>
+        {t('search.keywords')}
+      </InputLabel>
       {field}
     </Box>
   )

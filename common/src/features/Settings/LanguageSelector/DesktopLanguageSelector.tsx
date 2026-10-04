@@ -18,7 +18,7 @@ export const DesktopSelectLanguage: React.FC<LanguageSelectorInputProps> = ({
         aria-label={t('settings.languageSelector')}
       >
         {AVAILABLE_LANGUAGES.map(({ code, label }) => (
-          <MenuItem key={code} value={code}>
+          <MenuItem key={code} value={code} lang={code}>
             {label}
           </MenuItem>
         ))}

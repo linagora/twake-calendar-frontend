@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useId, useState } from 'react'
 import {
   IconButton,
   Dialog,
@@ -15,6 +15,7 @@ import { useI18n } from 'twake-i18n'
 import { AttendeeOptionsList } from '@common/components/Attendees/AttendeeOptionsList'
 import { SplittedSearchInput } from './SplittedSearchInput'
 import type { SearchCalendarsDialogProps, SearchState } from './index.types'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
 
 export const SearchCalendarsDialog: React.FC<SearchCalendarsDialogProps> = ({
   objectTypes,
@@ -68,17 +69,25 @@ export const SearchCalendarsDialog: React.FC<SearchCalendarsDialogProps> = ({
     onCloseRegister()
   }
 
+  const dialogLabelId = useId()
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
       fullScreen
+      // The title bar holds the back button and the search field: name the
+      // dialog after its purpose instead
+      aria-labelledby={dialogLabelId}
       slotProps={{
         root: {
           sx: { borderRadius: 0 }
         }
       }}
     >
+      <VisuallyHidden id={dialogLabelId}>
+        {t('calendar.browseOtherCalendars')}
+      </VisuallyHidden>
       <DialogTitle
         sx={{
           display: 'flex',

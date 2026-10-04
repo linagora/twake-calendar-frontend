@@ -21,6 +21,7 @@ import {
   getDateFieldSlotProps,
   getDateSlotProps
 } from './dateTimePickerSlotProps'
+import { useDateTimeErrorId } from './DateTimeError'
 
 dayjs.extend(customParseFormat)
 
@@ -73,7 +74,9 @@ const DatePickerDialogContent: React.FC<DatePickerDialogProps> = ({
           gap: 1
         }}
       >
-        <Typography variant="subtitle1">{displayDate}</Typography>
+        <Typography component="p" variant="subtitle1">
+          {displayDate}
+        </Typography>
         <IconButton
           size="small"
           onClick={handleToggleView}
@@ -146,6 +149,7 @@ export const TouchDatePickerField: React.FC<DatePickerFieldProps> = ({
   label = 'Date',
   hasError = false
 }) => {
+  const errorId = useDateTimeErrorId()
   const [open, setOpen] = useState(false)
   const [pendingValue, setPendingValue] = useState<PickerValue>(value)
 
@@ -176,14 +180,19 @@ export const TouchDatePickerField: React.FC<DatePickerFieldProps> = ({
         slotProps={{
           openPickerButton: { sx: { display: 'none' } },
           ...getDateSlotProps(testId, hasError, label, true),
-          field: getDateFieldSlotProps(testId, hasError, label, true),
+          field: getDateFieldSlotProps(testId, hasError, label, true, errorId),
           layout: { sx: dateCalendarLayoutSx }
         }}
       />
       <Dialog
         open={open}
         onClose={handleCancel}
-        slotProps={{ paper: { sx: { borderRadius: 2, overflow: 'hidden' } } }}
+        slotProps={{
+          paper: {
+            'aria-label': label,
+            sx: { borderRadius: 2, overflow: 'hidden' }
+          }
+        }}
       >
         <DatePickerDialogContent
           value={pendingValue}

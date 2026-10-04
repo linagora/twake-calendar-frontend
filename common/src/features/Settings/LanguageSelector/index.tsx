@@ -17,7 +17,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" sx={{ mb: 1 }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 1 }}>
         {t('settings.language')}
       </Typography>
       <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>

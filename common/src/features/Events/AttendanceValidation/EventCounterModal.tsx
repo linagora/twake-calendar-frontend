@@ -238,6 +238,9 @@ export function EventCounterModal({
             maxRows={10}
             fullWidth
             placeholder={t('eventPreview.optionalMessage')}
+            slotProps={{
+              htmlInput: { 'aria-label': t('eventPreview.optionalMessage') }
+            }}
             value={message}
             onChange={e => setMessage(e.target.value)}
             sx={{

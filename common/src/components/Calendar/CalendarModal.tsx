@@ -293,6 +293,9 @@ function CalendarPopover({
     <ResponsiveDialog
       open={open}
       onClose={() => handleClose({}, 'backdropClick')}
+      ariaLabel={
+        calendar ? t('a11y.calendarSettings') : t('calendar.new_calendar')
+      }
       title={
         <Tabs value={tab} onChange={(_e, v) => setTab(v)}>
           <Tab

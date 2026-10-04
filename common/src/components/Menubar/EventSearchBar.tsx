@@ -289,6 +289,10 @@ const SearchBar: React.FC<{
                 }}
                 slotProps={{
                   ...params.slotProps,
+                  htmlInput: {
+                    ...params.slotProps.htmlInput,
+                    'aria-label': t('a11y.searchEvents')
+                  },
                   input: {
                     ...params.slotProps.input,
                     startAdornment: (

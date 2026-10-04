@@ -80,8 +80,15 @@ public class RecurrenceSection {
         return this;
     }
 
+    /** The weekday toggles are named after the full day, as a screen reader announces them. */
+    private static final java.util.Map<String, String> DAY_NAMES = java.util.Map.of(
+        "MO", "Monday", "TU", "Tuesday", "WE", "Wednesday", "TH", "Thursday",
+        "FR", "Friday", "SA", "Saturday", "SU", "Sunday");
+
     public Locator weekday(String icalDay) {
-        return page.getByLabel(icalDay, new Page.GetByLabelOptions().setExact(true));
+        // a button: the date picker column headers carry the same day names
+        return page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions()
+            .setName(DAY_NAMES.getOrDefault(icalDay, icalDay)).setExact(true));
     }
 
     /**

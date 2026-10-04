@@ -24,7 +24,9 @@ export default function DesktopSearchResultsPage(): JSX.Element {
           >
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h5">{t('search.resultsTitle')}</Typography>
+          <Typography component="h1" variant="h5">
+            {t('search.resultsTitle')}
+          </Typography>
         </Box>
       </Box>
 

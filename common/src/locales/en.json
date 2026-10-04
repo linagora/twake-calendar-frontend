@@ -117,7 +117,17 @@
     "selectCustom": "Select custom color",
     "title": "Choose custom color",
     "subtitle": "Choose a background color for this calendar",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Green",
+      "orange": "Orange",
+      "red": "Red",
+      "blue": "Blue",
+      "purple": "Purple"
+    },
+    "customColorHex": "Custom color %{hex}",
+    "saturation": "Saturation and brightness",
+    "hue": "Hue"
   },
   "event": {
     "createEvent": "Create",
@@ -658,5 +668,35 @@
   "debug": {
     "enabled": "Debug mode enabled.",
     "disabled": "Debug mode disabled."
+  },
+  "pageTitle": {
+    "booking": "Book a meeting",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingUnavailable": "Booking unavailable"
+  },
+  "a11y": {
+    "removeItem": "Remove %{name}",
+    "moreActionsFor": "More actions for %{name}",
+    "copyItem": "Copy %{name}",
+    "collapseDialog": "Show less",
+    "editItem": "Edit %{name}",
+    "editBookingLink": "Edit booking link",
+    "time": "Time",
+    "event": "Event",
+    "sidebar": "Calendars and navigation",
+    "calendar": "Calendar",
+    "loading": "Loading…",
+    "slotsOn": "Available times on %{date}",
+    "slotsAvailable": "%{smart_count} time slot available on %{date} |||| %{smart_count} time slots available on %{date}",
+    "currentAnswer": "(current answer)",
+    "repeatUnit": "Repeat unit",
+    "repeatEndDate": "Repeat until",
+    "occurrenceCount": "Number of occurrences",
+    "searchEvents": "Search events",
+    "accessFor": "Access for %{name}",
+    "accessToGrant": "Access to grant",
+    "searchResultsCount": "%{smart_count} event found |||| %{smart_count} events found",
+    "moreEvents": "More events",
+    "calendarSettings": "Calendar settings"
   }
 }

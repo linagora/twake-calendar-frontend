@@ -117,7 +117,17 @@
     "selectCustom": "Выбрать цвет",
     "title": "Выберите цвет",
     "subtitle": "Выберите цвет фона",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Зелёный",
+      "orange": "Оранжевый",
+      "red": "Красный",
+      "blue": "Синий",
+      "purple": "Фиолетовый"
+    },
+    "customColorHex": "Свой цвет %{hex}",
+    "saturation": "Насыщенность и яркость",
+    "hue": "Оттенок"
   },
   "event": {
     "createEvent": "Создать",
@@ -659,5 +669,35 @@
   "debug": {
     "enabled": "Режим отладки включён.",
     "disabled": "Режим отладки отключён."
+  },
+  "pageTitle": {
+    "booking": "Записаться на встречу",
+    "bookingConfirmed": "Встреча подтверждена",
+    "bookingUnavailable": "Запись недоступна"
+  },
+  "a11y": {
+    "removeItem": "Удалить %{name}",
+    "moreActionsFor": "Другие действия для %{name}",
+    "copyItem": "Копировать %{name}",
+    "collapseDialog": "Свернуть",
+    "editItem": "Изменить %{name}",
+    "editBookingLink": "Изменить ссылку для записи",
+    "time": "Время",
+    "event": "Событие",
+    "sidebar": "Календари и навигация",
+    "calendar": "Календарь",
+    "loading": "Загрузка…",
+    "slotsOn": "Свободное время на %{date}",
+    "slotsAvailable": "Свободных слотов на %{date}: %{smart_count}",
+    "currentAnswer": "(текущий ответ)",
+    "repeatUnit": "Единица повторения",
+    "repeatEndDate": "Повторять до",
+    "occurrenceCount": "Количество повторений",
+    "searchEvents": "Поиск событий",
+    "accessFor": "Доступ для %{name}",
+    "accessToGrant": "Предоставляемый доступ",
+    "searchResultsCount": "Найдено %{smart_count} событие |||| Найдено %{smart_count} события |||| Найдено %{smart_count} событий",
+    "moreEvents": "Другие события",
+    "calendarSettings": "Настройки календаря"
   }
 }

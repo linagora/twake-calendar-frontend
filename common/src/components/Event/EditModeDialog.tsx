@@ -33,15 +33,20 @@ export function EditModeDialog({
     setOpen(null)
     setTypeOfAction('solo')
   }
+  const title =
+    type === 'edit'
+      ? t('editModeDialog.updateRecurrentEvent')
+      : type === 'delete'
+        ? t('editModeDialog.deleteRecurrentEvent')
+        : type === 'attendance'
+          ? t('editModeDialog.updateParticipationStatus')
+          : ''
   return (
     <Dialog open={Boolean(type)} onClose={handleClose}>
-      <DialogTitle>
-        {type === 'edit' && t('editModeDialog.updateRecurrentEvent')}
-        {type === 'delete' && t('editModeDialog.deleteRecurrentEvent')}
-        {type === 'attendance' && t('editModeDialog.updateParticipationStatus')}
-      </DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <RadioGroup
+          aria-label={title}
           value={typeOfAction}
           onChange={e =>
             setTypeOfAction(e.target.value as 'solo' | 'all' | undefined)

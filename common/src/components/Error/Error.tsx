@@ -8,6 +8,7 @@ import {
 } from '@linagora/twake-mui'
 import { useEffect, useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import ReplayIcon from '@mui/icons-material/Replay'
 import { useI18n } from 'twake-i18n'
@@ -25,6 +26,7 @@ export const Error: React.FC<ErrorProps> = ({
   const userError = useAppSelector(state => state.user.error)
   const calendarError = useAppSelector(state => state.calendars.error)
   const initialError = useRef(userError || calendarError)
+  useDocumentTitle(t('error.title'))
 
   useEffect(() => {
     if (!initialError.current && !isCrashFallback) {
@@ -40,6 +42,7 @@ export const Error: React.FC<ErrorProps> = ({
   return (
     <Fade in timeout={500}>
       <Box
+        component="main"
         sx={{
           minHeight: '100vh',
           display: 'flex',
@@ -74,7 +77,9 @@ export const Error: React.FC<ErrorProps> = ({
               <ErrorOutlinedIcon sx={{ fontSize: 40 }} />
             </Box>
 
-            <Typography variant="h5">{t('error.title')}</Typography>
+            <Typography component="h1" variant="h5">
+              {t('error.title')}
+            </Typography>
 
             <Typography
               variant="body1"
