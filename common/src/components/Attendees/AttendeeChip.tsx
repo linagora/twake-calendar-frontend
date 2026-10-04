@@ -72,7 +72,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
     : userAttendee.fromUser(option)
 
   return (
-    <AttendeePopover attendee={attendeeForPopover}>
+    <AttendeePopover attendee={attendeeForPopover} openOnHover={false}>
       <Chip
         {...getItemProps({ index })}
         key={label}

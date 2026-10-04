@@ -91,4 +91,45 @@ describe('AttendeePopover (Private)', () => {
 
     jest.useRealTimers()
   })
+
+  it('does not open popover on hover when openOnHover is false but opens on click', () => {
+    jest.useFakeTimers()
+    const attendee = new userAttendee({
+      cal_address: 'john@example.com',
+      cn: 'John Doe'
+    })
+
+    renderWithProviders(
+      <AttendeePopover attendee={attendee} openOnHover={false}>
+        <span>Open Popover</span>
+      </AttendeePopover>,
+      {
+        user: {
+          userData: {
+            email: 'user@example.com',
+            workplaceFqdn: 'example.com'
+          }
+        }
+      }
+    )
+
+    const trigger = screen.getByText('Open Popover')
+
+    fireEvent.mouseEnter(trigger)
+    act(() => {
+      jest.advanceTimersByTime(1000)
+    })
+    expect(screen.queryByText('attendees.sendMail')).not.toBeInTheDocument()
+
+    fireEvent.click(trigger)
+    expect(screen.getByText('attendees.sendMail')).toBeInTheDocument()
+
+    fireEvent.mouseLeave(trigger)
+    act(() => {
+      jest.advanceTimersByTime(1000)
+    })
+    expect(screen.getByText('attendees.sendMail')).toBeInTheDocument()
+
+    jest.useRealTimers()
+  })
 })

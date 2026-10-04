@@ -23,6 +23,7 @@ import { useAppSelector } from '@common/app/hooks'
 interface AttendeePopoverProps {
   attendee: userAttendee
   children: React.ReactElement
+  openOnHover?: boolean
 }
 
 function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
@@ -74,7 +75,8 @@ function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
 
 export function AttendeePopover({
   attendee,
-  children
+  children,
+  openOnHover = true
 }: AttendeePopoverProps): React.ReactElement {
   const theme = useTheme()
   const userEmail = useAppSelector(state => state.user.userData?.email)
@@ -161,8 +163,8 @@ export function AttendeePopover({
       <div>
         <div
           onClick={handleClick}
-          onMouseEnter={handleTriggerMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={openOnHover ? handleTriggerMouseEnter : undefined}
+          onMouseLeave={openOnHover ? handleMouseLeave : undefined}
           onKeyDown={event => {
             if (event.key === 'Enter' || event.key === ' ') {
               handleClick(event as unknown as React.MouseEvent<HTMLElement>)
@@ -194,8 +196,8 @@ export function AttendeePopover({
         >
           <Paper
             elevation={4}
-            onMouseEnter={handlePopoverMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={openOnHover ? handlePopoverMouseEnter : undefined}
+            onMouseLeave={openOnHover ? handleMouseLeave : undefined}
             sx={{
               p: 3,
               display: 'flex',
