@@ -66,7 +66,8 @@ export function useOpenEventFromUrl({
         setEventDisplayedTemp(false)
         setOpenEventDisplay(true)
       } catch {
-        // Silently ignore: an unresolved deep link should not break the page.
+        // An unresolved deep link should not break the page: the thunk already
+        // reports the failure (e.g. a translated "event not found") to the user.
       }
     })()
   }, [

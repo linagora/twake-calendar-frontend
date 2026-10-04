@@ -598,6 +598,36 @@ describe('CalendarSlice', () => {
       expect(state.list).toEqual({})
     })
 
+    it('getEventByUid.rejected with a 404 stores a translated not found error', () => {
+      const state = reducer(
+        initialState,
+        getEventByUid.rejected(
+          null,
+          'req14',
+          { userId: 'u1', uid: 'missing' },
+          {
+            message:
+              'Request failed with status code 404 Not Found: REPORT http://api/dav/calendars/u1.json',
+            status: 404
+          }
+        )
+      )
+      expect(state.error).toBe('TRANSLATION:error.eventNotFound')
+    })
+
+    it('getEventByUid.rejected keeps the error message for other failures', () => {
+      const state = reducer(
+        initialState,
+        getEventByUid.rejected(
+          null,
+          'req15',
+          { userId: 'u1', uid: 'e1' },
+          { message: 'Request failed with status code 500', status: 500 }
+        )
+      )
+      expect(state.error).toBe('Request failed with status code 500')
+    })
+
     it('getEvent.fulfilled doesnt create new events when there are already event with base UID', () => {
       const baseUid = 'recurring-event-base'
       const existingEvent = {

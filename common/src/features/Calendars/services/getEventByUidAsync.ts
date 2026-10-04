@@ -14,6 +14,8 @@ import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
+const EVENT_NOT_FOUND_ERROR = 'TRANSLATION:error.eventNotFound'
+
 export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
   create.asyncThunk<
     { calId: string; events: CalendarEvent[] } | null,
@@ -85,6 +87,12 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
       },
       rejected: (state, action) => {
         state.pending = false
+        // An unknown UID (typically a stale deep link) is answered with a 404:
+        // show a translated message rather than the raw HTTP error.
+        if (action.payload?.status === 404) {
+          state.error = EVENT_NOT_FOUND_ERROR
+          return
+        }
         state.error =
           action.payload?.message ||
           action.error.message ||
