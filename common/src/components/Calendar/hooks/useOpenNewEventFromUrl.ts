@@ -53,9 +53,6 @@ export function useOpenNewEventFromUrl({
     sessionStorage.removeItem(PENDING_NEW_EVENT_ATTENDEES_KEY)
 
     const emails = parsePendingAttendees(raw)
-    if (emails.length === 0) {
-      return
-    }
 
     setTempEvent({
       start: '',

@@ -44,7 +44,18 @@ describe('useOpenNewEventFromUrl', () => {
     expect(sessionStorage.getItem(PENDING_NEW_EVENT_ATTENDEES_KEY)).toBeNull()
   })
 
-  it('does nothing when there is no pending attendee', () => {
+  it('opens the create modal without attendees when none was valid', () => {
+    sessionStorage.setItem(PENDING_NEW_EVENT_ATTENDEES_KEY, JSON.stringify([]))
+
+    const { setTempEvent, setAnchorEl } = renderWith()
+
+    expect(setTempEvent).toHaveBeenCalledTimes(1)
+    const tempEvent = setTempEvent.mock.calls[0][0] as CalendarEvent
+    expect(tempEvent.attendee).toEqual([])
+    expect(setAnchorEl).toHaveBeenCalledWith(document.body)
+  })
+
+  it('does nothing when no new event was requested', () => {
     const { setTempEvent, setAnchorEl } = renderWith()
 
     expect(setTempEvent).not.toHaveBeenCalled()

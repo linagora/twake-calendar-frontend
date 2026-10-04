@@ -24,12 +24,12 @@ export default function NewEventDeepLink(): JSX.Element {
     const attendees = parseNewEventAttendees(
       new URLSearchParams(location.search)
     )
-    if (attendees.length > 0) {
-      sessionStorage.setItem(
-        PENDING_NEW_EVENT_ATTENDEES_KEY,
-        JSON.stringify(attendees)
-      )
-    }
+    // Stored even when empty: the user asked for a new event, so the form
+    // opens whether or not a valid attendee came along.
+    sessionStorage.setItem(
+      PENDING_NEW_EVENT_ATTENDEES_KEY,
+      JSON.stringify(attendees)
+    )
     dispatch(push(tokens && userId ? '/calendar' : '/'))
   }, [location.search, tokens, userId, dispatch])
 

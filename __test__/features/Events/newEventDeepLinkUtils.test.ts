@@ -16,6 +16,13 @@ describe('parseNewEventAttendees', () => {
     expect(parseNewEventAttendees(params)).toEqual(['a@b.com', 'c@d.com'])
   })
 
+  it('drops invalid email addresses', () => {
+    const params = new URLSearchParams(
+      'attendee=not-an-email&attendee=a@b.com,foo@bar'
+    )
+    expect(parseNewEventAttendees(params)).toEqual(['a@b.com'])
+  })
+
   it('returns an empty array when no attendee is present', () => {
     const params = new URLSearchParams('foo=bar')
     expect(parseNewEventAttendees(params)).toEqual([])
