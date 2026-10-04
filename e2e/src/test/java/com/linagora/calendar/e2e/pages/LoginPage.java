@@ -63,9 +63,26 @@ public class LoginPage {
     }
 
     public LoginPage waitUntilDisplayed() {
-        page.waitForURL("**/auth**");
+        if (!reachesTheSso()) {
+            // the SPA discovers the SSO, then redirects to it: when Chromium drops either request
+            // -- see submit -- the page stays blank, or on an error page. Start the SPA over, on
+            // the address it was given.
+            System.out.println("[e2e] the SPA did not reach the SSO, reloading it");
+            page.reload(new Page.ReloadOptions()
+                .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.COMMIT));
+            page.waitForURL("**/auth**");
+        }
         loginField().waitFor();
         return this;
+    }
+
+    private boolean reachesTheSso() {
+        try {
+            page.waitForURL("**/auth**", new Page.WaitForURLOptions().setTimeout(15_000));
+            return true;
+        } catch (com.microsoft.playwright.TimeoutError notThereYet) {
+            return false;
+        }
     }
 
     public Locator loginField() {

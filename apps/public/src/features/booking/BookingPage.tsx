@@ -88,11 +88,11 @@ export const BookingPage: React.FC = () => {
     }
     const today = dayjs().tz(selectedTimezone).format('YYYY-MM-DD')
     if (availableDays.has(today)) {
-      return dayjs()
+      return dayjs(today)
     }
     const earliestDay = Array.from(availableDays).sort().at(0)
     return earliestDay ? dayjs(earliestDay) : null
-  }, [availableDays, selectedDay])
+  }, [availableDays, selectedDay, selectedTimezone])
 
   const slotsForSelectedDay = useMemo<Slot[]>(() => {
     if (!effectiveSelectedDay) {
