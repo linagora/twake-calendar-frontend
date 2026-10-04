@@ -138,6 +138,40 @@ describe('CalendarSlice', () => {
       expect(state.list).toEqual({})
     })
 
+    it('getCalendarsList.fulfilled keeps the sync token of the calendars already loaded', () => {
+      const calId = 'u1/cal1'
+      const stateWithLoadedCal = {
+        ...initialState,
+        list: {
+          [calId]: {
+            id: calId,
+            name: 'Old name',
+            events: { e1: { uid: 'e1' } },
+            syncToken: 'http://sabre.io/ns/sync/12',
+            lastRangesOutdated: 42
+          } as unknown as Calendar
+        }
+      }
+
+      const state = reducer(
+        stateWithLoadedCal,
+        getCalendarsList.fulfilled(
+          {
+            importedCalendars: {
+              [calId]: { id: calId, name: 'New name', events: {} } as any
+            },
+            errors: ''
+          },
+          'request-id'
+        )
+      )
+
+      expect(state.list[calId].name).toBe('New name')
+      expect(state.list[calId].events).toEqual({ e1: { uid: 'e1' } })
+      expect(state.list[calId].syncToken).toBe('http://sabre.io/ns/sync/12')
+      expect(state.list[calId].lastRangesOutdated).toBe(42)
+    })
+
     it('getCalendarsList loads user details in parallel for multiple owners', async () => {
       const mockCalendars = [
         {

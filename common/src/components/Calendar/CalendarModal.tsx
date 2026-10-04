@@ -26,6 +26,7 @@ import { SettingsTab } from './SettingsTab'
 function CalendarPopover({
   open,
   onClose,
+  onCalendarCreated,
   calendar
 }: {
   open: boolean
@@ -33,6 +34,7 @@ function CalendarPopover({
     event: object | null,
     reason: 'backdropClick' | 'escapeKeyDown'
   ) => void
+  onCalendarCreated?: (calId: string) => void
   calendar?: Calendar
 }) {
   const { t } = useI18n()
@@ -194,7 +196,7 @@ function CalendarPopover({
     color: Record<string, string>,
     visibility: string
   ) => {
-    await dispatch(
+    const created = await dispatch(
       createCalendarAsync({
         name: name.trim(),
         desc: desc.trim(),
@@ -203,6 +205,14 @@ function CalendarPopover({
         calId
       })
     )
+      .unwrap()
+      .then(
+        () => true,
+        () => false
+      )
+    if (created) {
+      onCalendarCreated?.(`${userData.openpaasId}/${calId}`)
+    }
     dispatch(
       patchACLCalendar({
         calId: `${userData.openpaasId}/${calId}`,

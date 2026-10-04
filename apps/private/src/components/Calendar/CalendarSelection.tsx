@@ -635,6 +635,11 @@ const CalendarSelection: React.FC<{
           setSelectedCalId('')
           setAnchorElCal(null)
         }}
+        onCalendarCreated={(id: string) =>
+          setSelectedCalendars((prev: string[]) =>
+            prev.includes(id) ? prev : [...prev, id]
+          )
+        }
       />
       <RegisterCalendars
         open={Boolean(anchorElCalOthers)}

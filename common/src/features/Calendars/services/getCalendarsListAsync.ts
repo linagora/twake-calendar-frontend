@@ -120,9 +120,18 @@ export const getCalendarsListThunk = (
 
         Object.entries(action.payload.importedCalendars).forEach(
           ([id, cal]) => {
+            // The server list only describes the calendar: what the store
+            // knows of its content -- the events, the sync token they are as
+            // fresh as, the pending reloads -- stays. Dropping the sync token
+            // would make the refresh following a change a no-op, and the
+            // change would never show up.
+            const known = state.list[id]
             state.list[id] = {
               ...cal,
-              events: state.list[id]?.events || {}
+              events: known?.events || {},
+              syncToken: known?.syncToken,
+              lastCacheCleared: known?.lastCacheCleared,
+              lastRangesOutdated: known?.lastRangesOutdated
             }
           }
         )
