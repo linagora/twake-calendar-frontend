@@ -1,14 +1,13 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
-import * as oidcAuth from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
   setTokens,
   setUserData
 } from '@common/features/User/UserSlice'
 import { CallbackResume } from '@private/features/User/LoginCallback'
-import { getAccessToken } from '@common/utils/apiUtils'
+import { completeLogin } from '@linagora/twake-oidc'
 import { render, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
@@ -31,8 +30,8 @@ jest.mock('@common/app/hooks', () => ({
   }))
 }))
 
-jest.mock('@common/features/User/oidcAuth', () => ({
-  Callback: jest.fn()
+jest.mock('@linagora/twake-oidc', () => ({
+  completeLogin: jest.fn()
 }))
 
 jest.mock('@common/features/User/UserSlice', () => {
@@ -99,26 +98,22 @@ describe('CallbackResume', () => {
     })
   })
 
-  it('should call Callback and dispatch necessary actions', async () => {
+  it('should complete the sign-in and dispatch necessary actions', async () => {
     const mockTokenSet = { access_token: 'abc' }
     const mockUserInfo = { name: 'Test User' }
 
     const mockData = {
       tokenSet: mockTokenSet,
-      userinfo: mockUserInfo
+      userinfo: mockUserInfo,
+      returnTo: '/calendar'
     }
 
-    ;(oidcAuth.Callback as jest.Mock).mockResolvedValue(mockData)
-
-    sessionStorage.setItem(
-      'redirectState',
-      JSON.stringify({ code_verifier: 'verifier123', state: 'state456' })
-    )
+    ;(completeLogin as jest.Mock).mockResolvedValue(mockData)
 
     const { rerender } = render(<CallbackResume />)
 
     await waitFor(() => {
-      expect(oidcAuth.Callback).toHaveBeenCalledWith('verifier123', 'state456')
+      expect(completeLogin).toHaveBeenCalled()
     })
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(setAppLoading(true))
@@ -164,17 +159,13 @@ describe('CallbackResume', () => {
       },
       { timeout: 3000 }
     )
-    await waitFor(() => {
-      expect(sessionStorage.getItem('redirectState')).toBe(null)
-    })
     // The tokens are handed to the API client, never to web storage
-    expect(getAccessToken()).toBe('abc')
     expect(sessionStorage.getItem('tokenSet')).toBeNull()
     expect(sessionStorage.getItem('userData')).toBeNull()
   })
 
-  it('should handle missing redirectState gracefully', async () => {
-    sessionStorage.removeItem('redirectState')
+  it('should go home when no sign-in is pending', async () => {
+    ;(completeLogin as jest.Mock).mockResolvedValue(null)
     renderWithProviders(<CallbackResume />)
 
     await waitFor(() => {

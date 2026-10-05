@@ -1,14 +1,13 @@
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { Menubar } from '@common/components/Menubar/Menubar'
-import * as oidcAuth from '@common/features/User/oidcAuth'
-import { getAccessToken, setTokenSet } from '@common/utils/apiUtils'
-import { redirectTo } from '@common/utils/navigation'
+import { logOut } from '@linagora/twake-oidc'
 import '@testing-library/jest-dom'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/utils/navigation', () => ({
-  redirectTo: jest.fn()
+jest.mock('@linagora/twake-oidc', () => ({
+  ...jest.requireActual('@linagora/twake-oidc'),
+  logOut: jest.fn()
 }))
 
 describe('Calendar App Component Display Tests', () => {
@@ -769,17 +768,8 @@ describe('Menubar interaction with expanded Dialog', () => {
 })
 
 describe('Menubar logout flow', () => {
-  const redirectToMock = redirectTo as jest.Mock
-
   beforeEach(() => {
-    localStorage.clear()
-    sessionStorage.clear()
     jest.clearAllMocks()
-    redirectToMock.mockReset()
-  })
-
-  afterEach(() => {
-    redirectToMock.mockReset()
   })
 
   function renderMenubar(user = { name: 'John', email: 'test@example.com' }) {
@@ -800,33 +790,7 @@ describe('Menubar logout flow', () => {
     )
   }
 
-  it('clears the tokens and storage before redirecting', async () => {
-    setTokenSet({ access_token: 'dummy' })
-    const logoutSpy = jest
-      .spyOn(oidcAuth, 'Logout')
-      .mockResolvedValue(new URL('https://logout.url'))
-
-    await act(async () => {
-      renderMenubar()
-    })
-    await act(async () => {
-      fireEvent.click(screen.getByLabelText('menubar.userProfile'))
-    })
-    await act(async () => {
-      fireEvent.click(screen.getByText('menubar.logout'))
-    })
-    expect(logoutSpy).toHaveBeenCalled()
-    expect(redirectToMock).toHaveBeenCalledWith('https://logout.url/')
-
-    expect(getAccessToken()).toBeUndefined()
-    expect(sessionStorage.length).toBe(0)
-  })
-
-  it('drops the tokens even when the SSO cannot be reached', async () => {
-    setTokenSet({ access_token: 'dummy' })
-    jest.spyOn(oidcAuth, 'Logout').mockRejectedValue(new Error('unreachable'))
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-
+  it('logs out through the SSO', async () => {
     await act(async () => {
       renderMenubar()
     })
@@ -837,8 +801,7 @@ describe('Menubar logout flow', () => {
       fireEvent.click(screen.getByText('menubar.logout'))
     })
 
-    expect(getAccessToken()).toBeUndefined()
-    expect(redirectToMock).toHaveBeenCalledWith('/')
+    expect(logOut).toHaveBeenCalled()
   })
 })
 

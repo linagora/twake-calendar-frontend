@@ -1,4 +1,3 @@
-jest.mock('@common/features/User/oidcAuth', () => ({ Auth: jest.fn() }))
 jest.mock(
   '@common/websocket/connection/lifecycle/assertWebSocketAlive',
   () => ({ assertWebSocketAlive: jest.fn() })
@@ -24,10 +23,22 @@ describe('api client authorization', () => {
     }) as unknown as typeof fetch
   })
 
-  async function load(): Promise<typeof import('@common/utils/apiUtils')> {
-    let module: typeof import('@common/utils/apiUtils') | undefined
+  type Loaded = typeof import('@common/utils/apiUtils') &
+    typeof import('@linagora/twake-oidc')
+
+  async function load(): Promise<Loaded> {
+    let module: Loaded | undefined
     await jest.isolateModulesAsync(async () => {
-      module = await import('@common/utils/apiUtils')
+      const auth = await import('@linagora/twake-oidc')
+      auth.configureAuth({
+        ssoUrl: 'https://sso.example.com',
+        clientId: 'calendar',
+        scope: 'openid',
+        redirectUri: 'https://calendar-app.example.com/callback',
+        postLogoutRedirectUri: 'https://calendar-app.example.com',
+        apiUrl: window.CALENDAR_BASE_URL
+      })
+      module = { ...auth, ...(await import('@common/utils/apiUtils')) }
     })
     return module!
   }

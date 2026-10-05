@@ -1,12 +1,11 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
-import { Auth } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
   setUserError
 } from '@common/features/User/UserSlice'
-import { getAccessToken, redirectTo } from '@common/utils/apiUtils'
 import { getRetryDelay } from '@common/utils/getRetryDelay'
+import { getAccessToken, startLogin } from '@linagora/twake-oidc'
 import { useEffect, useRef } from 'react'
 import { push } from 'redux-first-history'
 import { getCalendarsList } from '../Calendars/CalendarSlice'
@@ -18,10 +17,10 @@ export const SSO_UNREACHABLE_ERROR = 'TRANSLATION:error.ssoUnreachable'
 
 // Reaching the SSO takes a discovery request: a network blip, or a request the
 // browser dropped, is no reason to leave the user on a blank page.
-const authWithRetry = async (): ReturnType<typeof Auth> => {
+const startLoginWithRetry = async (): Promise<void> => {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await Auth()
+      return await startLogin()
     } catch (error) {
       if (attempt + 1 >= SSO_ATTEMPTS) throw error
       console.warn('Reaching the SSO failed, trying again:', error)
@@ -71,23 +70,13 @@ export const useInitializeApp = (): void => {
         return
       }
 
-      let loginurl: Awaited<ReturnType<typeof Auth>>
       try {
-        loginurl = await authWithRetry()
+        await startLoginWithRetry()
       } catch (error) {
         console.error('The SSO cannot be reached:', error)
         dispatch(setUserError(SSO_UNREACHABLE_ERROR))
         dispatch(push('/error'))
-        return
       }
-      sessionStorage.setItem(
-        'redirectState',
-        JSON.stringify({
-          code_verifier: loginurl.code_verifier,
-          state: loginurl.state
-        })
-      )
-      redirectTo(loginurl.redirectTo)
     }
 
     void initiateLogin()

@@ -1,4 +1,3 @@
-import { clientConfig } from '@common/features/User/oidcAuth'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import {
   makeConfigurationBody,
@@ -13,8 +12,6 @@ import {
 
 jest.mock('@common/features/User/UserDao')
 jest.mock('@common/utils/apiUtils')
-
-clientConfig.url = 'https://example.com'
 
 const mockFetchUserByEmail = fetchUserByEmail as jest.MockedFunction<
   typeof fetchUserByEmail

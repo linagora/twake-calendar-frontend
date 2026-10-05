@@ -10,11 +10,9 @@ import {
   updateDelegationCalendar
 } from '@common/features/Calendars/CalendarDAO'
 import { makeAddSharedCalendarBody } from '@common/features/Calendars/transformers'
-import { clientConfig } from '@common/features/User/oidcAuth'
 import { Calendar } from '@common/types/CalendarTypes'
 import { api } from '@common/utils/apiUtils'
 import { waitFor } from '@testing-library/dom'
-clientConfig.url = 'https://example.com'
 
 jest.mock('@common/utils/apiUtils')
 

@@ -1,26 +1,27 @@
 import * as appHooks from '@common/app/hooks'
 import { AppDispatch, setupStore } from '@common/app/store'
 import HandleLogin from '@private/features/User/HandleLogin'
-import * as oidcAuth from '@common/features/User/oidcAuth'
-import { clientConfig } from '@common/features/User/oidcAuth'
 import {
   SSO_UNREACHABLE_ERROR,
   useInitializeApp
 } from '@common/features/User/useInitializeApp'
-import * as apiUtils from '@common/utils/apiUtils'
 import * as retryDelay from '@common/utils/getRetryDelay'
 import { setUserError } from '@common/features/User/UserSlice'
+import { startLogin } from '@linagora/twake-oidc'
 import { renderHook, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { push } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
-clientConfig.url = 'https://example.com'
+jest.mock('@linagora/twake-oidc', () => ({
+  ...jest.requireActual('@linagora/twake-oidc'),
+  startLogin: jest.fn()
+}))
 
 describe('HandleLogin', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(apiUtils, 'redirectTo').mockImplementation(() => {})
+    ;(startLogin as jest.Mock).mockReset()
     const dispatch = jest.fn() as AppDispatch
     jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(dispatch)
     sessionStorage.clear()
@@ -37,16 +38,8 @@ describe('HandleLogin', () => {
     })
   })
 
-  test('redirects and sets sessionStorage when no userData', async () => {
-    const loginUrlMock = {
-      code_verifier: 'verifier123',
-      state: 'state123',
-      redirectTo: new URL('http://login.url')
-    }
-
-    jest.spyOn(oidcAuth, 'Auth').mockResolvedValue(loginUrlMock)
-
-    const { result } = renderHook(() => useInitializeApp(), {
+  test('signs in through the SSO when no userData', async () => {
+    renderHook(() => useInitializeApp(), {
       wrapper: ({ children }) => (
         <Provider
           store={setupStore({
@@ -65,42 +58,12 @@ describe('HandleLogin', () => {
       )
     })
 
-    await waitFor(
-      () => {
-        expect(oidcAuth.Auth).toHaveBeenCalled()
-      },
-      { timeout: 3000 }
-    )
-
-    await waitFor(
-      () => {
-        expect(sessionStorage.getItem('redirectState')).toEqual(
-          JSON.stringify({
-            code_verifier: 'verifier123',
-            state: 'state123'
-          })
-        )
-      },
-      { timeout: 3000 }
-    )
-
-    await waitFor(
-      () => {
-        expect(apiUtils.redirectTo).toHaveBeenCalledWith(
-          loginUrlMock.redirectTo
-        )
-      },
-      { timeout: 3000 }
-    )
+    await waitFor(() => {
+      expect(startLogin).toHaveBeenCalled()
+    })
   })
 
   describe('when the SSO cannot be reached', () => {
-    const loginUrlMock = {
-      code_verifier: 'verifier123',
-      state: 'state123',
-      redirectTo: new URL('http://login.url')
-    }
-
     const renderWithoutSession = () =>
       renderHook(() => useInitializeApp(), {
         wrapper: ({ children }) => (
@@ -128,33 +91,26 @@ describe('HandleLogin', () => {
     })
 
     test('tries again and redirects once it answers', async () => {
-      jest
-        .spyOn(oidcAuth, 'Auth')
+      ;(startLogin as jest.Mock)
         .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockResolvedValue(loginUrlMock)
+        .mockResolvedValue(undefined)
 
       renderWithoutSession()
 
-      await waitFor(() =>
-        expect(apiUtils.redirectTo).toHaveBeenCalledWith(
-          loginUrlMock.redirectTo
-        )
-      )
-      expect(oidcAuth.Auth).toHaveBeenCalledTimes(2)
+      await waitFor(() => expect(startLogin).toHaveBeenCalledTimes(2))
     })
 
     test('shows the error page when it never answers', async () => {
-      jest
-        .spyOn(oidcAuth, 'Auth')
-        .mockRejectedValue(new TypeError('Failed to fetch'))
+      ;(startLogin as jest.Mock).mockRejectedValue(
+        new TypeError('Failed to fetch')
+      )
       const dispatch = appHooks.useAppDispatch()
 
       renderWithoutSession()
 
       await waitFor(() => expect(dispatch).toHaveBeenCalledWith(push('/error')))
       expect(dispatch).toHaveBeenCalledWith(setUserError(SSO_UNREACHABLE_ERROR))
-      expect(oidcAuth.Auth).toHaveBeenCalledTimes(3)
-      expect(apiUtils.redirectTo).not.toHaveBeenCalled()
+      expect(startLogin).toHaveBeenCalledTimes(3)
     })
   })
 
@@ -163,7 +119,6 @@ describe('HandleLogin', () => {
     // fired then races the write and its stale answer undoes the pick
     sessionStorage.setItem('tokenSet', JSON.stringify({ access_token: 'test' }))
     sessionStorage.setItem('userData', JSON.stringify({ sub: 'test' }))
-    jest.spyOn(oidcAuth, 'Auth')
     const dispatch = appHooks.useAppDispatch()
 
     renderHook(() => useInitializeApp(), {
@@ -186,7 +141,7 @@ describe('HandleLogin', () => {
     })
 
     expect(dispatch).not.toHaveBeenCalled()
-    expect(oidcAuth.Auth).not.toHaveBeenCalled()
+    expect(startLogin).not.toHaveBeenCalled()
   })
 
   test('does not render loading element when userData exists and calendars pending is true', () => {
@@ -232,11 +187,6 @@ describe('HandleLogin', () => {
   test('goes to error page when there is error in user data', async () => {
     const mockDispatch = jest.fn()
     jest.spyOn(appHooks, 'useAppDispatch').mockReturnValue(mockDispatch)
-    jest.spyOn(oidcAuth, 'Auth').mockResolvedValue({
-      code_verifier: 'verifier123',
-      state: 'state123',
-      redirectTo: new URL('http://login.url')
-    })
 
     renderWithProviders(<HandleLogin />, {
       user: {

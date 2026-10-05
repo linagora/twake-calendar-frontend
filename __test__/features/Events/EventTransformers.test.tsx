@@ -2,13 +2,10 @@ import { VCalComponent } from '@common/features/Calendars/types/CalendarData'
 import { makeSearchEventParam } from '@common/features/Events/transformers/makeSearchEventParam'
 import { makeSeriesJCal } from '@common/features/Events/transformers/makeSeriesJCal'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { clientConfig } from '@common/features/User/oidcAuth'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { VAlarm } from '@common/types/VAlarm'
 import { Valarms } from '@common/types/Valarms'
 import { userOrganiser } from '@common/features/User/userDataTypes'
-
-clientConfig.url = 'https://example.com'
 
 const day = new Date()
 
