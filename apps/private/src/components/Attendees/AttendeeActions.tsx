@@ -94,6 +94,11 @@ export function AttendeeActions({
         >
           <Box component="span" sx={{ display: 'inline-flex' }}>
             <IconButton
+              aria-label={
+                !isInternalUser
+                  ? t('tooltip.cannotOpenChatExternalUser')
+                  : t('tooltip.openChat', { attendee: attendee.cn })
+              }
               onClick={handleOpenChat}
               sx={{
                 border: '1px solid',

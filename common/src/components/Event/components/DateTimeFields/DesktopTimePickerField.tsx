@@ -6,6 +6,7 @@ import {
   timePickerPopperSx
 } from './dateTimePickerSlotProps'
 import { TimePickerFieldProps } from './TimePickerField'
+import { useDateTimeErrorId } from './DateTimeError'
 
 export const DesktopTimePickerField: React.FC<TimePickerFieldProps> = ({
   value,
@@ -15,23 +16,32 @@ export const DesktopTimePickerField: React.FC<TimePickerFieldProps> = ({
   hasError = false,
   errorId,
   disabled = false
-}) => (
-  <TimePicker
-    ampm={false}
-    value={value}
-    onChange={onChange}
-    disabled={disabled}
-    thresholdToRenderTimeInASingleColumn={48}
-    timeSteps={{ minutes: 30 }}
-    slots={{
-      field: EditableTimeField,
-      actionBar: () => null
-    }}
-    slotProps={{
-      openPickerButton: { sx: { display: 'none' } },
-      popper: { sx: timePickerPopperSx },
-      field: getTimeFieldSlotProps(testId, hasError, label, false, errorId),
-      textField: { disabled }
-    }}
-  />
-)
+}) => {
+  const contextErrorId = useDateTimeErrorId()
+  return (
+    <TimePicker
+      ampm={false}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      thresholdToRenderTimeInASingleColumn={48}
+      timeSteps={{ minutes: 30 }}
+      slots={{
+        field: EditableTimeField,
+        actionBar: () => null
+      }}
+      slotProps={{
+        openPickerButton: { sx: { display: 'none' } },
+        popper: { sx: timePickerPopperSx },
+        field: getTimeFieldSlotProps(
+          testId,
+          hasError,
+          label,
+          false,
+          errorId ?? contextErrorId
+        ),
+        textField: { disabled }
+      }}
+    />
+  )
+}

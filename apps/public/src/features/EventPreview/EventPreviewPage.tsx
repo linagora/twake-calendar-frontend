@@ -3,6 +3,7 @@ import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPrevi
 import { AttendanceValidation } from './components/AttendanceValidation'
 import { Box, useTheme } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
 import { useParseToken } from './hooks/useParseToken'
 import { useFetchEventDetail } from './hooks/useFetchEventDetail'
 import { Loading } from '@common/components/Loading/Loading'
@@ -49,6 +50,14 @@ export const EventPreviewPage: React.FC = () => {
     )
   }, [errorDetail, decodedClaims, t])
 
+  useDocumentTitle(
+    loading
+      ? undefined
+      : isUnableToLoad(error, event, decodedClaims)
+        ? t('error.cannotLoadEvent')
+        : event?.title
+  )
+
   if (loading) {
     return <Loading />
   }
@@ -68,6 +77,7 @@ export const EventPreviewPage: React.FC = () => {
     <PreviewContainer>
       <EventPreviewTitleRow
         event={event as CalendarEvent}
+        titleComponent="h1"
         isOwn={false}
         timezone={event?.timezone as string}
         t={t}

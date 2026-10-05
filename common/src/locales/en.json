@@ -117,7 +117,17 @@
     "selectCustom": "Select custom color",
     "title": "Choose custom color",
     "subtitle": "Choose a background color for this calendar",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Green",
+      "orange": "Orange",
+      "red": "Red",
+      "blue": "Blue",
+      "purple": "Purple"
+    },
+    "customColorHex": "Custom color %{hex}",
+    "saturation": "Saturation and brightness",
+    "hue": "Hue"
   },
   "event": {
     "createEvent": "Create",
@@ -344,7 +354,37 @@
     "back": "Back to calendar",
     "chooseWorkingDays": "Choose your working days",
     "showOnlyWorkingDays": "Show only working days",
-    "workingDaysUpdateError": "Failed to update working days setting"
+    "workingDaysUpdateError": "Failed to update working days setting",
+    "accessibility": {
+      "title": "Accessibility",
+      "display": "Display",
+      "highContrast": "High contrast mode",
+      "highContrastDescription": "Stronger colours, a visible keyboard focus, visible field labels and other accessibility aids. This setting is stored on this device.",
+      "keyboard": {
+        "title": "Keyboard",
+        "keys": "Keys",
+        "action": "Action",
+        "caption": "The main keyboard shortcuts of Twake Calendar.",
+        "key1": "Tab / Shift+Tab",
+        "action1": "Move to the next / previous control",
+        "key2": "Enter or Space",
+        "action2": "Activate the focused button, event or row",
+        "key3": "Escape",
+        "action3": "Close a dialog or a menu",
+        "key4": "Enter, Space or Alt+↓",
+        "action4": "Open the picker of a date or time field",
+        "key5": "Arrow keys, Page Up / Page Down",
+        "action5": "Move between days / months in a date picker",
+        "key6": "Shift+F10 or Menu key",
+        "action6": "Open the actions of the focused calendar",
+        "key7": "Arrow keys",
+        "action7": "Choose a calendar colour",
+        "key8": "← / → then Backspace",
+        "action8": "Remove a guest from the guests field",
+        "key9": "Enter",
+        "action9": "Run the search typed in the search field"
+      }
+    }
   },
   "eventPreview": {
     "extraAttendees": "%{smart_count} extra participant |||| %{smart_count} extra participants",
@@ -659,5 +699,39 @@
   "debug": {
     "enabled": "Debug mode enabled.",
     "disabled": "Debug mode disabled."
+  },
+  "pageTitle": {
+    "booking": "Book a meeting",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingUnavailable": "Booking unavailable"
+  },
+  "a11y": {
+    "removeItem": "Remove %{name}",
+    "moreActionsFor": "More actions for %{name}",
+    "copyItem": "Copy %{name}",
+    "collapseDialog": "Show less",
+    "editItem": "Edit %{name}",
+    "editBookingLink": "Edit booking link",
+    "time": "Time",
+    "event": "Event",
+    "sidebar": "Calendars and navigation",
+    "calendar": "Calendar",
+    "loading": "Loading…",
+    "slotsOn": "Available times on %{date}",
+    "slotsAvailable": "%{smart_count} time slot available on %{date} |||| %{smart_count} time slots available on %{date}",
+    "currentAnswer": "(current answer)",
+    "repeatUnit": "Repeat unit",
+    "repeatEndDate": "Repeat until",
+    "occurrenceCount": "Number of occurrences",
+    "searchEvents": "Search events",
+    "accessFor": "Access for %{name}",
+    "accessToGrant": "Access to grant",
+    "searchResultsCount": "%{smart_count} event found |||| %{smart_count} events found",
+    "moreEvents": "More events",
+    "calendarSettings": "Calendar settings",
+    "moreEventsHint": "Show %{smart_count} more event |||| Show %{smart_count} more events",
+    "skipToContent": "Skip to content",
+    "requiredLegend": "Fields marked with an asterisk (*) are required.",
+    "calendarNameRequired": "A name is required to save the calendar."
   }
 }

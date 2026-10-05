@@ -46,7 +46,15 @@ export function RSVPSection({
             : t('eventPreview.attendingQuestion')}
         </Typography>
       )}
-      <Box sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}>
+      <Box
+        role="group"
+        aria-label={
+          isResource
+            ? t('eventPreview.authorizeQuestion')
+            : t('eventPreview.attendingQuestion')
+        }
+        sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}
+      >
         <RSVPButton rsvpValue="ACCEPTED" {...commonButtonProps} />
         <RSVPButton rsvpValue="DECLINED" {...commonButtonProps} />
         <RSVPButton rsvpValue="TENTATIVE" {...commonButtonProps} />

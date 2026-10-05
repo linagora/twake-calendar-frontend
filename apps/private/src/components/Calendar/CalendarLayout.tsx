@@ -9,19 +9,31 @@ import { useIsInIframe } from '@common/contexts/EmbeddingContext'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import SettingsPage from '@common/features/Settings/SettingsPage'
 import { setView } from '@common/features/Settings/SettingsSlice'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { getViewRange } from '@common/utils/dateUtils'
 import type { CalendarApi } from '@fullcalendar/core'
 import CalendarController, { CalendarControllerRef } from './CalendarController'
 import cx from 'classnames'
 import { useEffect, useRef, useState } from 'react'
+import { useI18n } from 'twake-i18n'
 import { useManageCalendarSelection } from './hooks/useManageCalendarSelection'
 import Sidebar from './Sidebar/SideBar'
+import { MAIN_CONTENT_ID, SkipLink } from '@common/components/SkipLink'
+
+const VIEW_NAME_KEYS: Record<string, string> = {
+  [CALENDAR_VIEWS.dayGridMonth]: 'menubar.views.month',
+  [CALENDAR_VIEWS.timeGridWeek]: 'menubar.views.week',
+  [CALENDAR_VIEWS.timeGridDay]: 'menubar.views.day',
+  [CALENDAR_VIEWS.listWeek]: 'menubar.views.schedule'
+}
 
 export default function CalendarLayout(): JSX.Element {
   const calendarRef = useRef<CalendarApi | null>(null)
   const controllerRef = useRef<CalendarControllerRef | null>(null)
   const dispatch = useAppDispatch()
+  const { t } = useI18n()
 
   const error = useAppSelector(state => state.calendars.error)
   const calendars = useAppSelector(state => state.calendars.list)
@@ -40,6 +52,20 @@ export default function CalendarLayout(): JSX.Element {
   )
 
   const currentViewModeRef = useRef<string>()
+  // The period shown by the grid, as FullCalendar words it in the user locale
+  const [periodTitle, setPeriodTitle] = useState<string>()
+
+  const viewNameKey = VIEW_NAME_KEYS[currentView]
+  const calendarHeading = [periodTitle, viewNameKey && t(viewNameKey)]
+    .filter(Boolean)
+    .join(' – ')
+  useDocumentTitle(
+    ...(view === 'settings'
+      ? [t('settings.title')]
+      : view === 'search'
+        ? [t('search.resultsTitle')]
+        : [calendarHeading])
+  )
 
   useEffect(() => {
     const setViewMode = (): void => {
@@ -128,14 +154,22 @@ export default function CalendarLayout(): JSX.Element {
 
   return (
     <div className={cx('App ', { 'App--mobile': isMobile })}>
+      <SkipLink />
       {!isInIframe && <Menubar {...menubarProps} />}
       {(view === 'calendar' || view === 'search') && (
         <main
+          id={MAIN_CONTENT_ID}
+          tabIndex={-1}
           className={cx('main-layout calendar-layout', {
             isInIframe: isInIframe,
             'calendar-layout--desktop': !isMobile
           })}
         >
+          {view === 'calendar' && (
+            <VisuallyHidden component="h1">
+              {calendarHeading || t('a11y.calendar')}
+            </VisuallyHidden>
+          )}
           <Sidebar
             open={openSidebar}
             onClose={() => setOpenSideBar(false)}
@@ -169,6 +203,7 @@ export default function CalendarLayout(): JSX.Element {
               onDateChange={handleDateChange}
               onPeriodChange={setDisplayedPeriod}
               onViewChange={handleViewChange}
+              onPeriodTitleChange={setPeriodTitle}
             />
           </div>
           {isMobile && (

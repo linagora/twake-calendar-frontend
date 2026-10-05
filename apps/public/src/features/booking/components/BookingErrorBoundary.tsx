@@ -103,7 +103,7 @@ export const BookingErrorBoundary: React.FC<BookingErrorBoundaryProps> = ({
 
   const nonBlockingErrorNode =
     errorStatus && !initialLoading ? (
-      <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+      <Typography role="alert" color="error" variant="body2" sx={{ mb: 2 }}>
         {typeof errorStatus === 'string'
           ? errorStatus
           : t('booking.error.generic')}

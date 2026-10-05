@@ -42,6 +42,13 @@ export const SettingsHeader: React.FC<{
         >
           <Tab value="settings" label={t('settings.title')} />
           <Tab value="notifications" label={t('settings.notifications')} />
+          {/* on desktop, accessibility has its own entry in the side bar */}
+          {isMobile && (
+            <Tab
+              value="accessibility"
+              label={t('settings.accessibility.title')}
+            />
+          )}
         </Tabs>
       )}
     </Box>

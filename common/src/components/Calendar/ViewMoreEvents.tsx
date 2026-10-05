@@ -8,6 +8,7 @@ import {
   ListItemIcon
 } from '@linagora/twake-mui'
 import RepeatIcon from '@mui/icons-material/Repeat'
+import { useI18n } from 'twake-i18n'
 
 interface ViewMoreEventsProps {
   isOpen: boolean
@@ -24,12 +25,14 @@ const ViewMoreEvents: React.FC<ViewMoreEventsProps> = ({
   moreEvents,
   handleEventClick
 }: ViewMoreEventsProps) => {
+  const { t } = useI18n()
   return (
     <SwipeableDrawer
       anchor="bottom"
       open={isOpen}
       onClose={onClose}
       onOpen={onOpen}
+      slotProps={{ paper: { 'aria-label': t('a11y.moreEvents') } }}
     >
       <List sx={{ p: 2, overflowY: 'auto' }}>
         {moreEvents.map((event, index) => (

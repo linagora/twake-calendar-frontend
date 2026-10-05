@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { ContextualizedEvent } from '@common/types/EventsTypes'
 import { handleRSVPClick } from './handleRSVPClick'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 const rsvpColor: Record<PartStat, 'success' | 'error' | 'warning' | 'primary'> =
   {
@@ -67,6 +68,7 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
 }) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
+  const highContrast = useHighContrast()
   const { currentUserAttendee, calendar } = contextualizedEvent
 
   const effectivePartstat =
@@ -121,6 +123,11 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
   const shouldShowActive = showLoading || (isCurrentlyActive && !isLoading)
 
   const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'primary'
+  // high contrast mode: the current answer, disabled, read as a grey on grey
+  // button (1.4:1); it keeps its colour instead
+  const keepColorWhenDisabled =
+    (isLoading && shouldShowActive) ||
+    (highContrast && shouldShowActive && !isReadDelegated)
 
   return (
     <Tooltip title={t(`tooltip.${rsvpValue}`)}>
@@ -132,23 +139,28 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
           sx={{
             borderRadius: '50px',
             // Override MUI's default disabled styles to keep the color
-            '&.Mui-disabled':
-              isLoading && shouldShowActive
-                ? {
-                    backgroundColor: (theme: Theme): string =>
-                      theme.palette[buttonColor].main,
-                    color: (theme: Theme): string =>
-                      theme.palette[buttonColor].contrastText,
-                    borderColor: (theme: Theme): string =>
-                      theme.palette[buttonColor].main
-                  }
-                : {}
+            '&.Mui-disabled': keepColorWhenDisabled
+              ? {
+                  backgroundColor: (theme: Theme): string =>
+                    theme.palette[buttonColor].main,
+                  color: (theme: Theme): string =>
+                    theme.palette[buttonColor].contrastText,
+                  borderColor: (theme: Theme): string =>
+                    theme.palette[buttonColor].main
+                }
+              : {}
           }}
           onClick={() => void handleClick()}
           disabled={isLoading || isReadDelegated || isCurrentlyActive}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {showLoading && <CircularProgress size={20} color="inherit" />}
+            {showLoading && (
+              <CircularProgress
+                size={20}
+                color="inherit"
+                aria-label={t('a11y.loading')}
+              />
+            )}
             {t(`eventPreview.${rsvpValue}`)}
           </Box>
         </Button>

@@ -221,7 +221,7 @@ describe('RepeatEvent Component', () => {
   it('toggles day selection for weekly frequency', () => {
     const { setRepetition } = setupRepeatEvent({ freq: 'weekly' })
 
-    const mondayChip = screen.getByLabelText('event.repeat.days.monday')
+    const mondayChip = screen.getByLabelText('event.repeat.fullDays.monday')
     fireEvent.click(mondayChip)
 
     expect(setRepetition).toHaveBeenCalledWith(
@@ -356,7 +356,9 @@ describe('Repeat Event Integration Tests', () => {
     fireEvent.click(weeklyOption)
 
     // Select Thursday
-    const thursdayCheckbox = screen.getByLabelText('event.repeat.days.thursday')
+    const thursdayCheckbox = screen.getByLabelText(
+      'event.repeat.fullDays.thursday'
+    )
     fireEvent.click(thursdayCheckbox)
 
     await expectRRule({

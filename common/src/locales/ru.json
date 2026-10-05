@@ -117,7 +117,17 @@
     "selectCustom": "Выбрать цвет",
     "title": "Выберите цвет",
     "subtitle": "Выберите цвет фона",
-    "hex": "Hex"
+    "hex": "Hex",
+    "colors": {
+      "green": "Зелёный",
+      "orange": "Оранжевый",
+      "red": "Красный",
+      "blue": "Синий",
+      "purple": "Фиолетовый"
+    },
+    "customColorHex": "Свой цвет %{hex}",
+    "saturation": "Насыщенность и яркость",
+    "hue": "Оттенок"
   },
   "event": {
     "createEvent": "Создать",
@@ -344,7 +354,37 @@
     "back": "Вернуться к календарю",
     "chooseWorkingDays": "Выберите ваши рабочие дни",
     "showOnlyWorkingDays": "Показывать только рабочие дни",
-    "workingDaysUpdateError": "Не удалось обновить настройку рабочих дней"
+    "workingDaysUpdateError": "Не удалось обновить настройку рабочих дней",
+    "accessibility": {
+      "title": "Специальные возможности",
+      "display": "Отображение",
+      "highContrast": "Режим высокой контрастности",
+      "highContrastDescription": "Более контрастные цвета, видимый фокус клавиатуры, видимые подписи полей и другие средства доступности. Настройка сохраняется на этом устройстве.",
+      "keyboard": {
+        "title": "Клавиатура",
+        "keys": "Клавиши",
+        "action": "Действие",
+        "caption": "Основные сочетания клавиш Twake Calendar.",
+        "key1": "Tab / Shift+Tab",
+        "action1": "Перейти к следующему / предыдущему элементу",
+        "key2": "Enter или Пробел",
+        "action2": "Активировать кнопку, событие или строку в фокусе",
+        "key3": "Escape",
+        "action3": "Закрыть окно или меню",
+        "key4": "Enter, Пробел или Alt+↓",
+        "action4": "Открыть выбор даты или времени",
+        "key5": "Стрелки, Page Up / Page Down",
+        "action5": "Переходить по дням / месяцам в выборе даты",
+        "key6": "Shift+F10 или клавиша меню",
+        "action6": "Открыть действия календаря в фокусе",
+        "key7": "Стрелки",
+        "action7": "Выбрать цвет календаря",
+        "key8": "← / → затем Backspace",
+        "action8": "Удалить участника из поля участников",
+        "key9": "Enter",
+        "action9": "Выполнить поиск из поля поиска"
+      }
+    }
   },
   "eventPreview": {
     "extraAttendees": "%{smart_count} дополнительный участник |||| %{smart_count} дополнительных участника |||| %{smart_count} дополнительных участников",
@@ -660,5 +700,39 @@
   "debug": {
     "enabled": "Режим отладки включён.",
     "disabled": "Режим отладки отключён."
+  },
+  "pageTitle": {
+    "booking": "Записаться на встречу",
+    "bookingConfirmed": "Встреча подтверждена",
+    "bookingUnavailable": "Запись недоступна"
+  },
+  "a11y": {
+    "removeItem": "Удалить %{name}",
+    "moreActionsFor": "Другие действия для %{name}",
+    "copyItem": "Копировать %{name}",
+    "collapseDialog": "Свернуть",
+    "editItem": "Изменить %{name}",
+    "editBookingLink": "Изменить ссылку для записи",
+    "time": "Время",
+    "event": "Событие",
+    "sidebar": "Календари и навигация",
+    "calendar": "Календарь",
+    "loading": "Загрузка…",
+    "slotsOn": "Свободное время на %{date}",
+    "slotsAvailable": "Свободных слотов на %{date}: %{smart_count}",
+    "currentAnswer": "(текущий ответ)",
+    "repeatUnit": "Единица повторения",
+    "repeatEndDate": "Повторять до",
+    "occurrenceCount": "Количество повторений",
+    "searchEvents": "Поиск событий",
+    "accessFor": "Доступ для %{name}",
+    "accessToGrant": "Предоставляемый доступ",
+    "searchResultsCount": "Найдено %{smart_count} событие |||| Найдено %{smart_count} события |||| Найдено %{smart_count} событий",
+    "moreEvents": "Другие события",
+    "calendarSettings": "Настройки календаря",
+    "moreEventsHint": "Показать ещё %{smart_count} событие |||| Показать ещё %{smart_count} события |||| Показать ещё %{smart_count} событий",
+    "skipToContent": "Перейти к содержимому",
+    "requiredLegend": "Поля, отмеченные звёздочкой (*), обязательны.",
+    "calendarNameRequired": "Чтобы сохранить календарь, укажите название."
   }
 }

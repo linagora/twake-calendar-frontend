@@ -36,6 +36,21 @@ export function getBestColor(colors: { light: string; dark: string }): string {
   const contrastToLight = getContrastRatio(colors?.light, '#fff')
   return contrastToDark > contrastToLight ? colors?.dark : colors?.light
 }
+/**
+ * R-31, high contrast mode: the text of an event chip, the darkest or the
+ * lightest, whichever reads best on the background of the chip (calendar
+ * colours are chosen by users). Translucent backgrounds read as white.
+ */
+export function getHighContrastTextColor(background?: string): string {
+  const DARK = '#1C1B1F'
+  const LIGHT = '#FFFFFF'
+  const opaque =
+    background && !background.startsWith('rgba') ? background : LIGHT
+  return getContrastRatio(DARK, opaque) >= getContrastRatio(LIGHT, opaque)
+    ? DARK
+    : LIGHT
+}
+
 export function getEventTimes(
   event: EventContentArg['event'],
   timeZone: string

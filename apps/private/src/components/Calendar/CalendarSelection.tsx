@@ -60,6 +60,11 @@ import { handleCopyLink } from '@calendar/common/src/utils/handleCopyLink'
 import { useVisibleBookingLinks } from './hooks/useVisibleBookingLinks'
 import { PrintScheduleModal } from './PrintSchedule/PrintScheduleModal'
 import WebAssetOffOutlinedIcon from '@mui/icons-material/WebAssetOffOutlined'
+import {
+  buttonLikeProps,
+  isContextMenuKey
+} from '@common/utils/keyboardActivation'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 type SectionHeader = {
   title: string
@@ -299,6 +304,7 @@ const BookingLinkChip: React.FC<{
             overflow: 'hidden',
             cursor: 'pointer'
           }}
+          {...buttonLikeProps}
           onClick={() => onEdit(link)}
         >
           <div style={{ display: 'flex', padding: '9px', marginRight: '4px' }}>
@@ -342,7 +348,14 @@ const BookingLinkChip: React.FC<{
               <LinkIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <IconButton className="MoreBtn" size="small" onClick={handleMenuOpen}>
+          <IconButton
+            className="MoreBtn"
+            size="small"
+            aria-label={t('a11y.moreActionsFor', { name: linkName })}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={handleMenuOpen}
+          >
             <MoreHorizIcon fontSize="small" />
           </IconButton>
         </div>
@@ -712,6 +725,7 @@ const CalendarSelector: React.FC<{
   hideOwner
 }) => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
   const dispatch = useAppDispatch()
   const calLink = useAppSelector(state => state.calendars.list[id].link) ?? ''
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -801,6 +815,14 @@ const CalendarSelector: React.FC<{
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        // The keyboard counterpart of the long press, and of the "more"
+        // button that narrow layouts do not render
+        onKeyDown={e => {
+          if (isContextMenuKey(e)) {
+            e.preventDefault()
+            setAnchorEl(e.currentTarget)
+          }
+        }}
         onClickCapture={e => {
           if (isLongPressedRef.current) {
             e.stopPropagation()
@@ -822,7 +844,12 @@ const CalendarSelector: React.FC<{
               size="small"
               checked={selectedCalendars.includes(id)}
               onChange={() => handleCalendarToggle(id)}
-              slotProps={{ input: { 'aria-label': displayName } }}
+              slotProps={{
+                input: {
+                  'aria-label': displayName,
+                  'aria-keyshortcuts': 'Shift+F10'
+                }
+              }}
             />
             <div
               style={{
@@ -849,8 +876,16 @@ const CalendarSelector: React.FC<{
             </div>
           </label>
         </Tooltip>
-        {!isMobile && (
-          <IconButton className="MoreBtn" onClick={handleClick}>
+        {/* R-11: narrow layouts open the menu with a long press; the high
+            contrast mode keeps a button for whoever cannot */}
+        {(!isMobile || highContrast) && (
+          <IconButton
+            className="MoreBtn"
+            aria-label={t('a11y.moreActionsFor', { name: displayName })}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            onClick={handleClick}
+          >
             <MoreHorizIcon />
           </IconButton>
         )}

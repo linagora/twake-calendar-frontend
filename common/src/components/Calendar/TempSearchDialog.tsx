@@ -1,5 +1,5 @@
 import { useAppSelector } from '@common/app/hooks'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useId, useState } from 'react'
 import {
   IconButton,
   Dialog,
@@ -17,6 +17,7 @@ import { useTempSearch } from './hooks/useTempSearch'
 import { AttendeeOptionsList } from '@common/components/Attendees/AttendeeOptionsList'
 import { MobileTempSearchInput } from './MobileTempSearchInput'
 import { SearchState } from './utils/tempSearchUtil'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
 
 interface TempSearchDialogProps {
   tempUsers: User[]
@@ -69,17 +70,25 @@ export default function TempSearchDialog({
     setSearchState(prev => ({ ...prev, query: '' }))
   }
 
+  const dialogLabelId = useId()
+
   return (
     <Dialog
       open={isMobileSearchOpen}
       onClose={onClose}
       fullScreen
+      // The title bar holds the back button and the search field: name the
+      // dialog after its purpose instead
+      aria-labelledby={dialogLabelId}
       slotProps={{
         root: {
           sx: { borderRadius: 0 }
         }
       }}
     >
+      <VisuallyHidden id={dialogLabelId}>
+        {t('peopleSearch.availabilityPlaceholder')}
+      </VisuallyHidden>
       <DialogTitle
         sx={{
           display: 'flex',

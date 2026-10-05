@@ -2,7 +2,10 @@
  * @jest-environment jsdom
  */
 
-import { getEffectiveColor } from '@common/components/Event/EventChip/EventChipUtils'
+import {
+  getEffectiveColor,
+  getHighContrastTextColor
+} from '@common/components/Event/EventChip/EventChipUtils'
 import { createTheme } from '@mui/material/styles'
 import { Calendar } from '@common/types/CalendarTypes'
 import { getAccessiblePair } from '@common/utils/getAccessiblePair'
@@ -63,5 +66,20 @@ describe('getEffectiveColor', () => {
     expect(result.light).toBe('#00ff00')
     expect(result.dark).toBe('#000000')
     expect(getAccessiblePair).not.toHaveBeenCalled()
+  })
+})
+
+describe('getHighContrastTextColor', () => {
+  it('writes dark on the light tint of a calendar', () => {
+    expect(getHighContrastTextColor('#D0ECDA')).toBe('#1C1B1F')
+  })
+
+  it('writes white on a dark calendar colour', () => {
+    expect(getHighContrastTextColor('#1A237E')).toBe('#FFFFFF')
+  })
+
+  it('reads a missing or translucent background as white', () => {
+    expect(getHighContrastTextColor(undefined)).toBe('#1C1B1F')
+    expect(getHighContrastTextColor('rgba(26, 35, 126, 0.1)')).toBe('#1C1B1F')
   })
 })

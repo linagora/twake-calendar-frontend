@@ -20,6 +20,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import { MouseEvent } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Tooltip } from '@common/components/Tooltip'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 export type UserMenuProps = {
   anchorEl: HTMLElement | null
@@ -47,6 +48,8 @@ const UserMenuContent: React.FC<{
 }> = ({ user, displayName, onSettingsClick, onLogoutClick }) => {
   const { t } = useI18n()
   const theme = useTheme()
+  // R-08, high contrast mode: the menu icons were 2.49:1
+  const highContrast = useHighContrast()
 
   return (
     <>
@@ -83,7 +86,7 @@ const UserMenuContent: React.FC<{
           <SettingsOutlinedIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: alpha(theme.palette.grey[900], highContrast ? 0.8 : 0.48),
               fontSize: 20
             }}
           />
@@ -94,7 +97,7 @@ const UserMenuContent: React.FC<{
           <LogoutIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: alpha(theme.palette.grey[900], highContrast ? 0.8 : 0.48),
               fontSize: 20
             }}
           />
@@ -122,8 +125,11 @@ const UserMenuPopup: React.FC<{
   onLogoutClick,
   isMobile
 }) => {
+  const { t } = useI18n()
   const open = Boolean(anchorEl)
-  const slotProps = { paper: { sx: sharedPaperSx } }
+  const slotProps = {
+    paper: { sx: sharedPaperSx, 'aria-label': t('menubar.userProfile') }
+  }
   const content = (
     <UserMenuContent
       user={user}

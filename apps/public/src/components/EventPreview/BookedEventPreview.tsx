@@ -7,6 +7,7 @@ import { Loading } from '@common/components/Loading/Loading'
 import React from 'react'
 import { useParams } from 'react-router'
 import { useI18n } from 'twake-i18n'
+import { useDocumentTitle } from '@common/hooks/useDocumentTitle'
 import {
   EventLoadError,
   PreviewContainer
@@ -50,6 +51,14 @@ export const BookedEventPreviewPage: React.FC = () => {
     }
   }
 
+  useDocumentTitle(
+    ...(loading
+      ? []
+      : error || !event
+        ? [t('error.cannotLoadEvent')]
+        : [t('pageTitle.bookingConfirmed'), event.title])
+  )
+
   if (loading) {
     return <Loading />
   }
@@ -66,6 +75,7 @@ export const BookedEventPreviewPage: React.FC = () => {
     <PreviewContainer>
       <EventPreviewTitleRow
         event={event}
+        titleComponent="h1"
         isOwn={false}
         timezone={event?.timezone}
         t={t}

@@ -1,0 +1,202 @@
+/*
+ * High contrast mode (settings > Accessibility): every rule is scoped to
+ * html[data-high-contrast='true'], so that nothing changes while the mode is
+ * off. See accessibility/A10Y_REMEDIATIONS-2026-10-01.md.
+ */
+
+/* --- R-03: a visible focus indicator on every focusable element --------- */
+
+html[data-high-contrast='true'] {
+  --hc-focus-color: #1c1b1f;
+  --hc-focus-on-dark: #ffffff;
+}
+
+/* MUI resets the outline of its ButtonBase and twake-mui removes the focus
+   shadow of buttons: draw one ring for everything instead, 3px, ≥ 3:1 against
+   the white and light grey backgrounds of the application */
+html[data-high-contrast='true'] :focus-visible,
+html[data-high-contrast='true'] .Mui-focusVisible {
+  outline: 3px solid var(--hc-focus-color) !important;
+  outline-offset: 2px !important;
+}
+
+/* inside menus and lists the ring would be clipped: draw it inside */
+html[data-high-contrast='true'] .MuiMenuItem-root.Mui-focusVisible,
+html[data-high-contrast='true'] .MuiListItemButton-root.Mui-focusVisible,
+html[data-high-contrast='true'] .MuiMenuItem-root:focus-visible,
+html[data-high-contrast='true'] .MuiListItemButton-root:focus-visible,
+html[data-high-contrast='true'] .MuiAutocomplete-option.Mui-focused {
+  outline-offset: -3px !important;
+}
+
+/* text fields show their focus through their border: make it thick and dark */
+html[data-high-contrast='true']
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-width: 2px !important;
+}
+/* a field in error keeps its red border */
+html[data-high-contrast='true']
+  .MuiOutlinedInput-root.Mui-focused:not(.Mui-error)
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--hc-focus-color) !important;
+}
+html[data-high-contrast='true'] .MuiInputBase-input:focus-visible {
+  outline: none !important;
+}
+
+/* actions shown on hover only must show up on keyboard focus too (CAL-03) */
+html[data-high-contrast='true'] .MoreBtn:focus-visible,
+html[data-high-contrast='true'] li:focus-within .MoreBtn {
+  opacity: 1 !important;
+}
+
+/* Windows high contrast themes repaint colours: use the system highlight */
+@media (forced-colors: active) {
+  html[data-high-contrast='true'] :focus-visible,
+  html[data-high-contrast='true'] .Mui-focusVisible {
+    outline-color: Highlight !important;
+  }
+}
+
+/* --- R-07: skip link, off screen until it receives the focus ----------- */
+
+html[data-high-contrast='true'] .skip-link {
+  position: absolute;
+  left: -10000px;
+  top: 8px;
+  z-index: 2000;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1c1b1f;
+  font-weight: 600;
+  text-decoration: underline;
+}
+html[data-high-contrast='true'] .skip-link:focus {
+  left: 8px;
+}
+/* the main region only receives the focus to move the reading position */
+html[data-high-contrast='true'] #main-content:focus,
+html[data-high-contrast='true'] #main-content:focus-visible {
+  outline: none !important;
+}
+
+/* --- R-08: colours outside the MUI theme ------------------------------- */
+
+/* mini calendar: today was white on orange (1.97:1), the selected day a
+   light grey barely distinct from white (1.5:1) */
+html[data-high-contrast='true'] .MuiPickerDay-root.today {
+  background: #b5470f !important;
+  color: #ffffff !important;
+}
+html[data-high-contrast='true'] .MuiPickerDay-root.Mui-selected:not(.today) {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 2px #1c1b1f;
+}
+
+/* settings: the active entry and tab were only marked by a 2.64:1 orange */
+html[data-high-contrast='true'] .settings-nav-item:before,
+html[data-high-contrast='true'] .settings-content-tabs .MuiTabs-indicator,
+html[data-high-contrast='true']
+  .settings-content-tabs--mobile
+  .MuiTabs-indicator {
+  background-color: #b5470f !important;
+}
+html[data-high-contrast='true'] .settings-nav-item.active .MuiListItemIcon-root,
+html[data-high-contrast='true'] .settings-nav-item:hover .MuiListItemIcon-root {
+  color: #b5470f !important;
+}
+html[data-high-contrast='true']
+  .settings-nav-item.active
+  .MuiListItemText-primary {
+  font-weight: 700;
+}
+html[data-high-contrast='true']
+  .settings-content-tabs
+  .MuiTab-root.Mui-selected,
+html[data-high-contrast='true']
+  .settings-content-tabs--mobile
+  .MuiTab-root.Mui-selected {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+/* --- R-11: actions are not hidden until hover --------------------------- */
+
+/* a touch screen never hovers, and a cue that only shows up under the mouse
+   is missed by keyboard and magnifier users alike */
+html[data-high-contrast='true'] .MoreBtn {
+  opacity: 1 !important;
+}
+
+/* --- High contrast audit, 2026-10-05 ------------------------------------ */
+
+/* placeholders: twake-mui paints them in secondary.dark (1.6:1) with a
+   selector more specific than the theme override of the mode */
+html[data-high-contrast='true'] .MuiOutlinedInput-root input::placeholder,
+html[data-high-contrast='true'] .MuiOutlinedInput-root textarea::placeholder {
+  color: #6b6b6e !important;
+  opacity: 1 !important;
+}
+
+/* secondary outlined and text buttons ("Continue editing"): the secondary
+   colour of twake-mui is a near white grey meant for backgrounds (1.14:1) */
+html[data-high-contrast='true']
+  .MuiButton-outlined.MuiButton-colorSecondary:not(.Mui-disabled),
+html[data-high-contrast='true']
+  .MuiButton-text.MuiButton-colorSecondary:not(.Mui-disabled) {
+  color: #1c1b1f !important;
+}
+html[data-high-contrast='true']
+  .MuiButton-outlined.MuiButton-colorSecondary:not(.Mui-disabled) {
+  border-color: #8a8a8d !important;
+}
+
+/* switches: the track of an unchecked switch was a 1.5:1 grey, its white
+   thumb invisible on white */
+html[data-high-contrast='true']
+  .MuiSwitch-switchBase:not(.Mui-checked):not(.Mui-disabled)
+  + .MuiSwitch-track {
+  background-color: #6b6b6e !important;
+  opacity: 1 !important;
+}
+
+/* calendar grid: today (white on light orange, 2.09:1), weekday names
+   (2.8:1), hours (2.3:1), the current time (2.64:1), days of the other
+   months (1.76:1) */
+html[data-high-contrast='true'] span.fc-daygrid-day-number.current-date::after {
+  background-color: #b5470f;
+}
+html[data-high-contrast='true'] .fc-daygrid-day-top small,
+html[data-high-contrast='true'] .fc-timegrid-slot-label-cushion {
+  color: rgba(66, 66, 68, 0.85) !important;
+}
+html[data-high-contrast='true'] .fc .fc-timegrid-now-indicator-line {
+  border-color: #b5470f;
+}
+html[data-high-contrast='true'] .fc .fc-timegrid-now-indicator-line::after {
+  background-color: #b5470f;
+}
+html[data-high-contrast='true'] .fc .fc-timegrid-now-indicator-arrow::before,
+html[data-high-contrast='true'] .now-time-label {
+  color: #b5470f;
+}
+html[data-high-contrast='true'] .fc .fc-day-other .fc-daygrid-day-top {
+  opacity: 1;
+}
+html[data-high-contrast='true'] .fc .fc-day-other .fc-daygrid-day-number {
+  color: #6b6b6e;
+}
+
+/* R-31: event chips, whose text colour EventChip picks for the mode; the
+   start time and the description were dimmed down to 70 % and 80 % */
+html[data-high-contrast='true'] .fc-event .MuiCard-root .MuiTypography-root {
+  opacity: 1 !important;
+}
+
+/* avatars: white initials on the light twake-mui gradients (1.3:1 to 3.6:1);
+   dark initials reach 4.5:1 at the middle of every gradient */
+html[data-high-contrast='true'] .MuiAvatar-root {
+  color: #1c1b1f !important;
+}

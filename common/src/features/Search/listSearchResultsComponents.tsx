@@ -1,6 +1,7 @@
 import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 import { RenderTime } from './searchResultsComponents'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface DayIndicatorProps {
   isFirstRow: boolean
@@ -18,6 +19,8 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
   isMobile
 }) => {
   const theme = useTheme()
+  // R-08, high contrast mode: white on #FB9E3A was 2.09:1, the weekday 2.27:1
+  const highContrast = useHighContrast()
 
   if (!isFirstRow) {
     return <Box sx={{ width: isMobile ? '60px' : '80px', flexShrink: 0 }} />
@@ -47,7 +50,7 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
               width: 32,
               height: 32,
               borderRadius: '50%',
-              bgcolor: '#FB9E3A',
+              bgcolor: highContrast ? '#B5470F' : '#FB9E3A',
               color: '#FFF',
               display: 'flex',
               alignItems: 'center',
@@ -73,7 +76,7 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
         <Typography
           sx={{
             fontSize: '14px',
-            color: theme.palette.grey[500],
+            color: highContrast ? 'text.secondary' : theme.palette.grey[500],
             textTransform: 'uppercase'
           }}
         >

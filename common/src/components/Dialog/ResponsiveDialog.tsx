@@ -22,7 +22,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import React, { ReactNode, useContext, useId, useMemo, useState } from 'react'
+import { useI18n } from 'twake-i18n'
 import useDynamicPosition from './useDynamicPosition'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
 
 /** Open expanded dialogs sharing the fullscreen-view body class. */
 let expandedDialogCount = 0
@@ -60,6 +62,13 @@ interface ResponsiveDialogProps extends Omit<
   onClose: () => void
   /** Dialog title - can be string or custom ReactNode */
   title: string | ReactNode
+  /**
+   * Accessible name of the dialog, when the title is not a plain string (or
+   * is empty): the title bar also holds buttons, which must not end up in it
+   */
+  ariaLabel?: string
+  /** Id of a visible element naming the dialog, preferred to ariaLabel */
+  ariaLabelledBy?: string
   /** Dialog content - form fields, text, etc. */
   children: ReactNode
   /** Optional actions rendered in DialogActions (buttons, etc.) */
@@ -187,6 +196,8 @@ function ResponsiveDialog({
   open,
   onClose,
   title,
+  ariaLabel,
+  ariaLabelledBy,
   children,
   actions,
   isExpanded = false,
@@ -212,12 +223,18 @@ function ResponsiveDialog({
   headerRightAction,
   ...otherDialogProps
 }: ResponsiveDialogProps): JSX.Element {
+  const { t } = useI18n()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isInIframe = useIsInIframe()
 
   const uid = useId()
   const titleId = `responsive-dialog-title-${uid}`
+  const labelId = `${titleId}-label`
+  // Named after its title only, not after the whole title bar and its buttons
+  const hasTextTitle = typeof title === 'string' && title !== ''
+  const dialogLabelledBy =
+    ariaLabelledBy ?? (hasTextTitle || ariaLabel ? labelId : titleId)
 
   const isDraggable = draggable && !isMobile && !isExpanded
 
@@ -395,8 +412,16 @@ function ResponsiveDialog({
         }
         style={isExpanded ? { zIndex: 1200 } : undefined}
         PaperComponent={DraggablePaper}
-        aria-labelledby={titleId}
+        aria-labelledby={dialogLabelledBy}
       >
+        {!ariaLabelledBy &&
+          ((!hasTextTitle && ariaLabel) ||
+            (hasTextTitle && isExpanded && onExpandToggle && !isMobile)) && (
+            // In expanded mode the back button replaces the visible title
+            <VisuallyHidden id={labelId}>
+              {hasTextTitle ? title : ariaLabel}
+            </VisuallyHidden>
+          )}
         <DialogTitle
           {...dialogTitleProps}
           id={titleId}
@@ -421,11 +446,13 @@ function ResponsiveDialog({
               {isExpanded && onExpandToggle && !isMobile ? (
                 <IconButton
                   onClick={onExpandToggle}
-                  aria-label="show less"
+                  aria-label={t('a11y.collapseDialog')}
                   sx={{ marginLeft: '-8px' }}
                 >
                   <ArrowBackIcon sx={{ fontSize: 30 }} />
                 </IconButton>
+              ) : hasTextTitle ? (
+                <span id={labelId}>{title}</span>
               ) : (
                 title
               )}
@@ -439,7 +466,7 @@ function ResponsiveDialog({
                       <Tooltip title={expandText}>
                         <IconButton
                           onClick={onExpandToggle}
-                          aria-label="expand"
+                          aria-label={expandText ?? t('tooltip.expand')}
                           size="small"
                           sx={{ marginRight: 1 }}
                         >
@@ -449,7 +476,7 @@ function ResponsiveDialog({
                     )}
                     <IconButton
                       onClick={onClose}
-                      aria-label="close"
+                      aria-label={t('actions.close')}
                       size="small"
                     >
                       <CloseIcon />

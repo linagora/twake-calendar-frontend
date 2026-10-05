@@ -1,11 +1,14 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { Box, SxProps, Theme } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface WeekDaySelectorProps {
   selectedDays: number[] // FullCalendar format: 0=Sun, 1=Mon...
   onChange: (days: number[]) => void
   disabled?: boolean
+  /** Name of the group of day buttons */
+  ariaLabel?: string
 }
 
 export const FC_DAYS = [
@@ -21,15 +24,19 @@ export const FC_DAYS = [
 const WeekDayStyle = (
   isSelected: boolean,
   isMobile: boolean,
-  disabled?: boolean
+  disabled?: boolean,
+  highContrast?: boolean
 ): SxProps<Theme> => {
+  // R-08, high contrast mode: unselected days were 2.18:1 / 2.80:1
+  const unselectedBorder = highContrast ? '#8A8A8D' : '#AEAEC0'
+  const unselectedText = highContrast ? 'text.secondary' : '#8C9CAF'
   const desktopStyle = {
     width: 40,
     height: 40,
     borderRadius: '4px',
     border: '1px solid',
-    borderColor: isSelected ? 'primary.main' : '#AEAEC0',
-    color: isSelected ? '#fff' : '#8C9CAF',
+    borderColor: isSelected ? 'primary.main' : unselectedBorder,
+    color: isSelected ? '#fff' : unselectedText,
     fontSize: 16,
     fontWeight: 400,
     display: 'flex',
@@ -63,9 +70,11 @@ const WeekDayStyle = (
 export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
   selectedDays,
   onChange,
-  disabled
+  disabled,
+  ariaLabel
 }) => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
 
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
@@ -93,6 +102,8 @@ export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
 
   return (
     <Box
+      role="group"
+      aria-label={ariaLabel}
       sx={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -108,11 +119,12 @@ export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
             component="button"
             type="button"
             key={ics}
-            aria-label={fullLabel}
+            // Always the full day name: "MO" or "M" says little
+            aria-label={getDayLabel(ics, true)}
             aria-pressed={isSelected}
             onClick={() => handleToggle(fc)}
             disabled={disabled}
-            sx={WeekDayStyle(isSelected, isMobile, disabled)}
+            sx={WeekDayStyle(isSelected, isMobile, disabled, highContrast)}
           >
             {isMobile ? fullLabel : fullLabel.charAt(0)}
           </Box>

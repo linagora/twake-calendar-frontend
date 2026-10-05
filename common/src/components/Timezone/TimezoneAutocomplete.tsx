@@ -1,6 +1,8 @@
 import { Autocomplete, TextField } from '@linagora/twake-mui'
 import { PublicOutlined as TimezoneIcon } from '@mui/icons-material'
 import { useMemo } from 'react'
+import { useI18n } from 'twake-i18n'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface TimezoneOption {
   value: string
@@ -24,6 +26,8 @@ interface TimezoneAutocompleteProps {
   disableClearable?: boolean
   hideBorder?: boolean
   openOnFocus?: boolean
+  /** Name of the field, its placeholder by default */
+  ariaLabel?: string
 }
 
 export function TimezoneAutocomplete({
@@ -35,14 +39,21 @@ export function TimezoneAutocomplete({
   inputRef,
   width,
   size = 'small',
-  placeholder = 'Select timezone',
+  placeholder: placeholderProp,
   inputFontSize,
   inputPadding,
   onClose,
   disableClearable = false,
   hideBorder = false,
-  openOnFocus = false
+  openOnFocus = false,
+  ariaLabel
 }: TimezoneAutocompleteProps): React.ReactElement {
+  const { t } = useI18n()
+  const highContrast = useHighContrast()
+  // R-06, high contrast mode: the default placeholder in the user language
+  const placeholder =
+    placeholderProp ??
+    (highContrast ? t('event.form.timezonePlaceholder') : 'Select timezone')
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map(tz => ({
       value: tz,
@@ -119,6 +130,7 @@ export function TimezoneAutocomplete({
             },
             htmlInput: {
               ...params.slotProps.htmlInput,
+              'aria-label': ariaLabel ?? placeholder,
               autoComplete: 'new-password'
             }
           }}

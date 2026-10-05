@@ -98,7 +98,7 @@ const EventUpdateModalInternal: React.FC<
             sx={{ display: 'flex', justifyContent: 'center', py: 4 }}
             data-testid="series-loading"
           >
-            <CircularProgress />
+            <CircularProgress aria-label={t('a11y.loading')} />
           </Box>
         ) : (
           <EventFormFields

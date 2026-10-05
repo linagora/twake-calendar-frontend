@@ -14,6 +14,7 @@ import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import { CalendarSidebarProps } from './SideBar'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 const VIEW_OPTIONS = [
   {
@@ -43,6 +44,11 @@ export const ViewSwitcher: React.FC<
 > = ({ onClose, onViewChange, currentView }) => {
   const { t } = useI18n()
   const theme = useTheme()
+  // high contrast mode: orange on the orange tint of the selection was 4.17:1
+  const highContrast = useHighContrast()
+  const selectedColor = highContrast
+    ? theme.palette.primary.dark
+    : theme.palette.primary.main
 
   const changeViewAndClose = (view: string): void => {
     onViewChange(view)
@@ -62,9 +68,7 @@ export const ViewSwitcher: React.FC<
             >
               <ListItemIcon
                 sx={{
-                  color: isSelected
-                    ? theme.palette.primary.main
-                    : theme.palette.text.primary
+                  color: isSelected ? selectedColor : theme.palette.text.primary
                 }}
               >
                 {option.icon}
@@ -74,9 +78,10 @@ export const ViewSwitcher: React.FC<
                 slotProps={{
                   primary: {
                     variant: 'h6',
+                    component: 'span',
                     sx: {
                       color: isSelected
-                        ? theme.palette.primary.main
+                        ? selectedColor
                         : theme.palette.text.primary
                     }
                   }

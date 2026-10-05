@@ -10,12 +10,14 @@ import {
 } from '@linagora/twake-mui'
 import React, { useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import { ErrorEventChip } from './ErrorEventChip'
 import {
   DisplayedIcons,
   EventChipProps,
   getBestColor,
+  getHighContrastTextColor,
   getEffectiveColor,
   getCardStyle,
   getEventDuration,
@@ -41,6 +43,7 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
   const cardRef = useRef<HTMLDivElement>(null)
   const showCompact = useCompactMode(cardRef)
   const theme = useTheme()
+  const highContrast = useHighContrast()
 
   const calendars = useAppSelector(state => state.calendars.list)
   const tempcalendars = useAppSelector(state => state.calendars.templist)
@@ -149,6 +152,14 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
       effectiveColor,
       isPrivate
     )
+
+    if (highContrast) {
+      const textColor = getHighContrastTextColor(
+        cardStyle.backgroundColor as string | undefined
+      )
+      titleStyle.color = textColor
+      cardStyle.color = textColor
+    }
 
     // Organizer avatar
     const organizer = event._def.extendedProps.organizer as

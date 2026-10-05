@@ -3,6 +3,7 @@ import type { ThemeOptions } from '@mui/material/styles'
 import type {} from '@mui/x-date-pickers/themeAugmentation'
 import { AccordionExpandIcon } from '@linagora/twake-mui'
 import paletteData from './palette.json'
+import { highContrastPaletteData } from './highContrastTheme'
 import { typography } from './typography'
 
 export const radius = {
@@ -13,7 +14,10 @@ export const radius = {
   pill: '100px'
 }
 
-function getDateCalendarRootOverrides(theme: Theme) {
+function getDateCalendarRootOverrides(theme: Theme, highContrast: boolean) {
+  // R-08, high contrast mode: stronger arrows and labels, no 10px text
+  const mutedAlpha = highContrast ? 0.8 : 0.48
+  const smallText = highContrast ? '12px' : '10px'
   return {
     '.MuiDateCalendar-root.MuiDateCalendar-root': {
       width: '230px',
@@ -49,20 +53,20 @@ function getDateCalendarRootOverrides(theme: Theme) {
       padding: '0',
       width: '32px',
       height: '32px',
-      color: alpha(theme.palette.grey[900], 0.48)
+      color: alpha(theme.palette.grey[900], mutedAlpha)
     },
     '.MuiDateCalendar-root .MuiDayCalendar-weekDayLabel': {
-      fontSize: '10px',
+      fontSize: smallText,
       fontStyle: 'normal',
       fontWeight: 500,
       lineHeight: '16px',
       height: '32px',
       width: '32px',
       margin: '0',
-      color: alpha(theme.palette.grey[900], 0.48)
+      color: alpha(theme.palette.grey[900], mutedAlpha)
     },
     '.MuiDateCalendar-root .MuiPickerDay-root': {
-      fontSize: '10px',
+      fontSize: smallText,
       fontStyle: 'normal',
       fontWeight: 500,
       lineHeight: '16px',
@@ -249,9 +253,13 @@ This function allows us to create themes overrides that are specific to Twake Ca
 (eg. palette, specific components like date pickers from mui/x-date-pickers, etc)
 **/
 export function makeCalendarOverrides(
-  includeDateOverrides?: boolean
+  includeDateOverrides?: boolean,
+  highContrast = false
 ): ThemeOptions {
-  const palette = makePalette('light', paletteData)
+  const palette = makePalette(
+    'light',
+    highContrast ? highContrastPaletteData(paletteData) : paletteData
+  )
   const theme = createTheme({
     palette,
     breakpoints: {
@@ -274,7 +282,7 @@ export function makeCalendarOverrides(
       MuiCssBaseline: {
         styleOverrides: includeDateOverrides
           ? {
-              ...getDateCalendarRootOverrides(theme),
+              ...getDateCalendarRootOverrides(theme, highContrast),
               ...getMonthCalendarOverrides(theme),
               ...getYearCalendarOverrides(theme)
             }

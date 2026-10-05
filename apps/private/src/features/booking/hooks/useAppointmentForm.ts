@@ -265,6 +265,24 @@ const computeInitialFormState = ({
     : defaultFormState(firstCalendarId ?? '', workingDays, firstCalendarColor)
 }
 
+/**
+ * R-15, high contrast mode: what prevents saving, named, rather than a bare
+ * "fill all required fields".
+ */
+export const invalidAppointmentMessage = (
+  form: Pick<FormState, 'calendarid' | 'duration' | 'availabilityRules'>,
+  t: (key: string) => string
+): string => {
+  const missing = [
+    form.calendarid === '' && t('event.form.calendar'),
+    !(form.duration > 0) && t('booking.chooseTimeSlot'),
+    hasInvalidSlot(form.availabilityRules) && t('booking.setRegularHours')
+  ].filter(Boolean)
+  return missing.length
+    ? `${t('booking.fillRequiredFields')} ${missing.join(', ')}`
+    : t('booking.fillRequiredFields')
+}
+
 const checkFormValid = (form: FormState): boolean =>
   form.calendarid !== '' &&
   form.duration > 0 &&

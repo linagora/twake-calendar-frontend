@@ -11,11 +11,19 @@ import { getLayoutConstants } from './LayoutConstants'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { PickerValue } from '@mui/x-date-pickers/internals'
 import { TwakeLocalizationProvider } from '@common/components/DateTimePicker'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface AvailableDayProps extends PickerDayProps {
   availableDays?: Set<string>
   selectedTimezone?: string
 }
+const isBeforeTodayIn = (day: Dayjs, timezone?: string): boolean => {
+  const todayInTimezone = timezone
+    ? dayjs().tz(timezone).startOf('day')
+    : dayjs().startOf('day')
+  return day.isBefore(todayInTimezone, 'day')
+}
+
 interface BookingCalendarSectionProps {
   selectedDay: Dayjs | null
   availableDays: Set<string>
@@ -37,7 +45,9 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
 
   if (outsideCurrentMonth) {
     return (
+      // An empty cell keeps the grid of the date picker consistent
       <Box
+        role="gridcell"
         sx={{
           boxSizing: 'border-box',
           width: CELL_SIZE,
@@ -51,12 +61,7 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
     )
   }
   const isSlot = availableDays?.has(day.format('YYYY-MM-DD')) ?? false
-
-  const todayInTimezone = selectedTimezone
-    ? dayjs().tz(selectedTimezone).startOf('day')
-    : dayjs().startOf('day')
-
-  const isBeforeToday = day.isBefore(todayInTimezone, 'day')
+  const isBeforeToday = isBeforeTodayIn(day, selectedTimezone)
 
   return (
     <PickerDay
@@ -99,6 +104,7 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
   selectedTimezone
 }) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const highContrast = useHighContrast()
   const { CELL_SIZE, WEEKDAY_LABEL_HEIGHT, CALENDAR_GRID_HEIGHT, ROW_GAP } =
     getLayoutConstants(isMobile)
 
@@ -109,7 +115,8 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        p: '24px',
+        // R-13, high contrast mode: 7 cells of 40px fit in 320px (WCAG 1.4.10)
+        p: highContrast && isMobile ? '12px' : '24px',
         gap: '16px'
       }}
     >
@@ -124,6 +131,12 @@ export const BookingCalendarSection: React.FC<BookingCalendarSectionProps> = ({
           view={view}
           onViewChange={setView}
           slots={{ day: AvailableDay }}
+          // Also known to the date grid, so that arrow keys skip these days
+          // instead of moving the focus to a disabled button
+          shouldDisableDate={day =>
+            !availableDays.has(day.format('YYYY-MM-DD')) ||
+            isBeforeTodayIn(day, selectedTimezone)
+          }
           showDaysOutsideCurrentMonth
           views={['day', 'month']}
           fixedWeekNumber={6}

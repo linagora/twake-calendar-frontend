@@ -5,14 +5,19 @@ import { SettingErrorSnackbars } from './SettingErrorSnackbars'
 import { DesktopSettingsPage } from './DesktopSettingsPage'
 import { MobileSettingsPage } from './MobileSettingsPage'
 import { Menubar, type MenubarProps } from '@common/components/Menubar/Menubar'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
+import { useI18n } from 'twake-i18n'
+import { MAIN_CONTENT_ID } from '@common/components/SkipLink'
 
-export type SidebarNavItem = 'settings' | 'sync'
-export type SettingsSubTab = 'settings' | 'notifications'
+export type SidebarNavItem = 'settings' | 'sync' | 'accessibility'
+// 'accessibility' is a sub tab on mobile only, a navigation item on desktop
+export type SettingsSubTab = 'settings' | 'notifications' | 'accessibility'
 
 const SettingsPage: React.FC<{
   menubarProps?: MenubarProps
   isInIframe?: boolean
 }> = ({ menubarProps, isInIframe }) => {
+  const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
@@ -54,8 +59,11 @@ const SettingsPage: React.FC<{
       {isInIframe && isMobile && menubarProps && <Menubar {...menubarProps} />}
 
       <main
+        id={MAIN_CONTENT_ID}
+        tabIndex={-1}
         className={`main-layout settings-layout${isInIframe ? ' isInIframe' : ''} ${isMobile ? 'settings-layout--mobile' : ''}`}
       >
+        <VisuallyHidden component="h1">{t('settings.title')}</VisuallyHidden>
         {isMobile ? (
           <MobileSettingsPage
             activeSettingsSubTab={activeSettingsSubTab}

@@ -260,7 +260,11 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         }}
       >
         {t('print.title')}
-        <IconButton onClick={onClose} aria-label="close" size="small">
+        <IconButton
+          onClick={onClose}
+          aria-label={t('actions.close')}
+          size="small"
+        >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -272,6 +276,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 {t('print.scale')}
               </Typography>
               <ToggleButtonGroup
+                aria-label={t('print.scale')}
                 exclusive
                 fullWidth
                 value={scale}
@@ -293,6 +298,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 {t('print.layout')}
               </Typography>
               <ToggleButtonGroup
+                aria-label={t('print.layout')}
                 exclusive
                 fullWidth
                 value={layout}
@@ -358,6 +364,9 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                       fullWidth
                       displayEmpty
                       value={calId}
+                      SelectDisplayProps={{
+                        'aria-label': t('print.selectCalendar')
+                      }}
                       onChange={e => updateCalendarRow(index, e.target.value)}
                     >
                       <MenuItem value="" disabled>
@@ -371,7 +380,11 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                     </Select>
                     <IconButton
                       size="small"
-                      aria-label={t('actions.remove')}
+                      aria-label={
+                        calId
+                          ? t('a11y.removeItem', { name: calendarLabel(calId) })
+                          : t('actions.remove')
+                      }
                       onClick={() => removeCalendarRow(index)}
                     >
                       <CloseIcon fontSize="small" />

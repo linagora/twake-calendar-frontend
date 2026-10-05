@@ -51,7 +51,7 @@ export function AddDescButton({
           minRows={2}
           maxRows={10}
           slotProps={{
-            input: {
+            htmlInput: {
               'aria-label': t('event.form.description')
             }
           }}

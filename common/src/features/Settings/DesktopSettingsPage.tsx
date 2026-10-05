@@ -7,6 +7,8 @@ import {
   Typography
 } from '@linagora/twake-mui'
 import SettingsIcon from '@mui/icons-material/Settings'
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew'
+import { AccessibilitySettings } from './Accessibility/AccessibilitySettings'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { GeneralSettings } from './GeneralSettings'
@@ -14,6 +16,8 @@ import { NotificationsSettings } from './NotificationSettings'
 import './SettingsPage.styl'
 import { SettingsHeader } from './SettingsHeader'
 import type { SidebarNavItem, SettingsSubTab } from './SettingsPage'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
+import { HighContrastSwitch } from './Accessibility/HighContrastSwitch'
 
 export const DesktopSettingsPage: React.FC<{
   activeSettingsSubTab: SettingsSubTab
@@ -40,6 +44,7 @@ export const DesktopSettingsPage: React.FC<{
   setActiveSettingsSubTab
 }) => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
 
   const [activeNavItem, setActiveNavItem] = useState<SidebarNavItem>('settings')
 
@@ -59,6 +64,7 @@ export const DesktopSettingsPage: React.FC<{
         <List>
           <ListItemButton
             className={`settings-nav-item ${activeNavItem === 'settings' ? 'active' : ''}`}
+            aria-current={activeNavItem === 'settings' ? 'page' : undefined}
             onClick={() => handleNavItemClick('settings')}
           >
             <ListItemIcon>
@@ -66,9 +72,26 @@ export const DesktopSettingsPage: React.FC<{
             </ListItemIcon>
             <ListItemText primary={t('settings.title') || 'Settings'} />
           </ListItemButton>
+          <ListItemButton
+            className={`settings-nav-item ${activeNavItem === 'accessibility' ? 'active' : ''}`}
+            aria-current={
+              activeNavItem === 'accessibility' ? 'page' : undefined
+            }
+            onClick={() => handleNavItemClick('accessibility')}
+          >
+            <ListItemIcon>
+              <AccessibilityNewIcon />
+            </ListItemIcon>
+            <ListItemText primary={t('settings.accessibility.title')} />
+          </ListItemButton>
         </List>
         <Box sx={{ mt: 'auto', px: 3, pb: 2 }}>
-          <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+          <HighContrastSwitch sx={{ mb: 1 }} />
+          <Typography
+            variant="caption"
+            // R-08, high contrast mode: real information, not a disabled state
+            sx={{ color: highContrast ? 'text.secondary' : 'text.disabled' }}
+          >
             version {window.APP_VERSION ?? '2.0'}
           </Typography>
         </Box>
@@ -100,9 +123,18 @@ export const DesktopSettingsPage: React.FC<{
                   onAlarmEmailsError={() => setAlarmEmailsErrorOpen(true)}
                 />
               )}
+              {/* left from the mobile layout, before a resize */}
+              {activeSettingsSubTab === 'accessibility' && (
+                <AccessibilitySettings />
+              )}
             </>
           )}
         </Box>
+        {activeNavItem === 'accessibility' && (
+          <Box className="settings-content-body">
+            <AccessibilitySettings />
+          </Box>
+        )}
         {activeNavItem === 'sync' && (
           <Box className="settings-tab-content">
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>

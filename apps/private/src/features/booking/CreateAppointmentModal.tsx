@@ -7,7 +7,10 @@ import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { AppointmentModalForm } from './components/AppointmentModalForm'
 import { HeaderRightAction } from './components/HeaderRightAction'
 import { ModalActions } from './components/ModalActions'
-import { useAppointmentForm } from './hooks/useAppointmentForm'
+import {
+  invalidAppointmentMessage,
+  useAppointmentForm
+} from './hooks/useAppointmentForm'
 import { getVisibleBookingLinks } from '@common/utils/storage/getVisibleBookingLinks'
 import {
   formatResourceIds,
@@ -15,6 +18,7 @@ import {
   formatExtraAttendees,
   buildBookingPayload
 } from './utils'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 interface CreateAppointmentModalProps {
   open: boolean
@@ -26,6 +30,7 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
   onClose
 }) => {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
   const buttonSize = isMobile ? 'small' : 'medium'
   const [isExpanded, setIsExpanded] = useState(false)
@@ -82,7 +87,14 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
 
   const handleSave = async (): Promise<void> => {
     if (!isFormValid) {
-      setError(t('booking.fillRequiredFields'))
+      setError(
+        highContrast
+          ? invalidAppointmentMessage(
+              { calendarid, duration, availabilityRules },
+              t
+            )
+          : t('booking.fillRequiredFields')
+      )
       return
     }
 

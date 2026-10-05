@@ -16,6 +16,7 @@ import { postCounterProposal } from '@common/features/Events/EventDao'
 import { EventTimeSubtitle } from '@common/components/EventPreview/EventTimeSubtitle'
 import { ContextualizedEvent } from '@common/types/EventsTypes'
 import { makeCounterProposalPayload } from '@common/features/Events/transformers/makeCounterProposalPayload'
+import { useHighContrast } from '@common/features/Settings/Accessibility/highContrastMode'
 
 const NO_VALIDATION_ERROR: ValidationResult = {
   isValid: true,
@@ -33,6 +34,7 @@ export function EventCounterModal({
   contextualizedEvent: ContextualizedEvent
 }): JSX.Element {
   const { t } = useI18n()
+  const highContrast = useHighContrast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
 
@@ -249,7 +251,12 @@ export function EventCounterModal({
             minRows={2}
             maxRows={10}
             fullWidth
+            // R-14, high contrast mode: a label that stays once typing starts
+            label={highContrast ? t('eventPreview.optionalMessage') : undefined}
             placeholder={t('eventPreview.optionalMessage')}
+            slotProps={{
+              htmlInput: { 'aria-label': t('eventPreview.optionalMessage') }
+            }}
             value={message}
             onChange={e => setMessage(e.target.value)}
             sx={{

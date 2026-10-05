@@ -16,6 +16,7 @@ import { useUtilMenus } from '@common/components/Calendar/hooks/useUtilMenus'
 import { setIsMobileSearchOpen } from '@common/features/Calendars/CalendarSlice'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import { UtilButtons } from './UtilButtons'
+import { HighContrastSwitch } from '@common/features/Settings/Accessibility/HighContrastSwitch'
 
 export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
   open,
@@ -62,7 +63,9 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
           marginTop: 0
         }
       }}
-      slotProps={{ paper: { className: 'sidebar' } }}
+      slotProps={{
+        paper: { className: 'sidebar', 'aria-label': t('a11y.sidebar') }
+      }}
     >
       {!isIframe && (
         <Box
@@ -124,6 +127,8 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
           />
         </ListItemButton>
       </Box>
+      {/* R-29: the accessible version within one step of every view */}
+      <HighContrastSwitch sx={{ mt: 'auto', pt: 2 }} />
     </Drawer>
   )
 }

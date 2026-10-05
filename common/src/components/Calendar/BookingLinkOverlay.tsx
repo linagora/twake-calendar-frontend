@@ -15,6 +15,7 @@ import {
   type StripPosition
 } from './utils/bookingLinkOverlayUtils'
 import { useFilteredBookingLinks } from './hooks/useBookingLinks'
+import { useI18n } from 'twake-i18n'
 
 interface BookingLinkOverlayProps {
   visibleBookingLinks: string[] | undefined
@@ -222,6 +223,7 @@ const BookingLinkStrip: React.FC<BookingLinkStripProps> = ({
   onEdit,
   stripRef
 }) => {
+  const { t } = useI18n()
   const handleActivate = useCallback((): void => {
     if (position.linkId) onEdit(position.linkId)
   }, [onEdit, position.linkId])
@@ -251,7 +253,9 @@ const BookingLinkStrip: React.FC<BookingLinkStripProps> = ({
       role="button"
       tabIndex={0}
       aria-label={
-        position.linkName ? `Edit ${position.linkName}` : 'Edit booking link'
+        position.linkName
+          ? t('a11y.editItem', { name: position.linkName })
+          : t('a11y.editBookingLink')
       }
       onClick={handleClick}
       onKeyDown={handleKeyDown}
