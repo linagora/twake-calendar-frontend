@@ -4,6 +4,7 @@ import { Box, Chip, Icon, IconButton, useTheme } from '@linagora/twake-mui'
 import CircleIcon from '@mui/icons-material/Circle'
 import CloseIcon from '@mui/icons-material/Close'
 import { ReactElement } from 'react'
+import { useI18n } from 'twake-i18n'
 import { AttendeePopover } from './AttendeePopover'
 import { User } from './types'
 
@@ -27,6 +28,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
   getChipIcon,
   index
 }) => {
+  const { t } = useI18n()
   const theme = useTheme()
 
   const isString = typeof option === 'string'
@@ -54,7 +56,11 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
 
   const renderDeleteIcon = (): ReactElement => {
     return (
+      // The chip is removed with Backspace / Delete: the icon stays out of the
+      // tab order rather than adding a stop per attendee
       <IconButton
+        tabIndex={-1}
+        aria-label={t('a11y.removeItem', { name: label })}
         sx={{
           backgroundColor: theme.palette.grey[500],
           width: '20px',

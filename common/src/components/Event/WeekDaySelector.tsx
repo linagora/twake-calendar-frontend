@@ -6,6 +6,8 @@ interface WeekDaySelectorProps {
   selectedDays: number[] // FullCalendar format: 0=Sun, 1=Mon...
   onChange: (days: number[]) => void
   disabled?: boolean
+  /** Name of the group of day buttons */
+  ariaLabel?: string
 }
 
 export const FC_DAYS = [
@@ -63,7 +65,8 @@ const WeekDayStyle = (
 export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
   selectedDays,
   onChange,
-  disabled
+  disabled,
+  ariaLabel
 }) => {
   const { t } = useI18n()
 
@@ -93,6 +96,8 @@ export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
 
   return (
     <Box
+      role="group"
+      aria-label={ariaLabel}
       sx={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -108,7 +113,8 @@ export const WeekDaySelector: React.FC<WeekDaySelectorProps> = ({
             component="button"
             type="button"
             key={ics}
-            aria-label={fullLabel}
+            // Always the full day name: "MO" or "M" says little
+            aria-label={getDayLabel(ics, true)}
             aria-pressed={isSelected}
             onClick={() => handleToggle(fc)}
             disabled={disabled}

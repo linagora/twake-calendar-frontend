@@ -122,8 +122,11 @@ const UserMenuPopup: React.FC<{
   onLogoutClick,
   isMobile
 }) => {
+  const { t } = useI18n()
   const open = Boolean(anchorEl)
-  const slotProps = { paper: { sx: sharedPaperSx } }
+  const slotProps = {
+    paper: { sx: sharedPaperSx, 'aria-label': t('menubar.userProfile') }
+  }
   const content = (
     <UserMenuContent
       user={user}

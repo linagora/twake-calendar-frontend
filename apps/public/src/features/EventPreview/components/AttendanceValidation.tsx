@@ -10,6 +10,7 @@ import {
   Theme
 } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
 
 const rsvpColor: Record<PartStat, 'success' | 'error' | 'warning' | 'primary'> =
   {
@@ -86,8 +87,18 @@ export const AttendanceValidation: React.FC<AttendanceValidationProps> = ({
         disabled={!!clickedValue || !linkUrl || isCurrentlyActive}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {isThisLoading && <CircularProgress size={20} color="inherit" />}
+          {isThisLoading && (
+            <CircularProgress
+              size={20}
+              color="inherit"
+              aria-label={t('a11y.loading')}
+            />
+          )}
           {t(`eventPreview.${rsvpValue}`)}
+          {/* the current answer is disabled, and only its style tells it */}
+          {isCurrentlyActive && (
+            <VisuallyHidden>{t('a11y.currentAnswer')}</VisuallyHidden>
+          )}
         </Box>
       </Button>
     )
@@ -115,7 +126,11 @@ export const AttendanceValidation: React.FC<AttendanceValidationProps> = ({
             {t('eventPreview.wantToChangeQuestion')}
           </Typography>
         )}
-        <Box sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}>
+        <Box
+          role="group"
+          aria-label={t('eventPreview.wantToChangeQuestion')}
+          sx={{ display: 'flex', gap: 1, mx: 1, alignItems: 'center' }}
+        >
           {renderButton('ACCEPTED', links?.yes)}
           {renderButton('DECLINED', links?.no)}
           {renderButton('TENTATIVE', links?.maybe)}

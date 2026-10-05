@@ -35,6 +35,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       }}
     >
       <Box
+        component="header"
         sx={{
           position: 'absolute',
           top: 16,
@@ -66,6 +67,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       </Box>
 
       <Box
+        component="main"
         sx={{
           flex: 1,
           display: 'flex',

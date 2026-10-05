@@ -34,6 +34,7 @@ export const TitleField: React.FC<TitleFieldProps> = ({
         value={name}
         onChange={e => setName(e.target.value)}
         inputRef={nameInputRef}
+        slotProps={{ htmlInput: { 'aria-label': t('booking.title') } }}
       />
     </FieldWithLabel>
   )

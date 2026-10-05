@@ -13,6 +13,7 @@ import {
 import RepeatIcon from '@mui/icons-material/Repeat'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import React from 'react'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
 
 interface DateProps {
   startDate: Date
@@ -34,6 +35,8 @@ interface TitleProps {
   summary?: string
   isRecurrent: boolean
   t: (key: string) => string
+  /** Lets the keyboard open the event when the row itself is not focusable */
+  focusable?: boolean
 }
 
 interface OrganizerProps {
@@ -118,13 +121,15 @@ export const RenderTime: React.FC<TimeProps> = ({
 export const RenderTitle: React.FC<TitleProps> = ({
   summary,
   isRecurrent,
-  t
+  t,
+  focusable = false
 }) => {
   const theme = useTheme()
 
   return (
     <Tooltip title={summary || t('event.untitled')}>
       <Box
+        {...(focusable ? buttonLikeProps : {})}
         sx={{
           display: 'flex',
           flexDirection: 'row',

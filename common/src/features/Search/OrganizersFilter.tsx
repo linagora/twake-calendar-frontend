@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import UserSearch from '@common/components/Attendees/AttendeeSearch'
 import { useFilterSearch } from '@common/components/Menubar/useMobileSearch'
@@ -14,6 +15,7 @@ interface Props {
 
 export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
   const { t } = useI18n()
+  const labelId = useId()
   const dispatch = useAppDispatch()
   const searchParams = useAppSelector(state => state.searchResult.searchParams)
 
@@ -34,6 +36,8 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
 
   return (
     <Box
+      role="group"
+      aria-labelledby={labelId}
       sx={{
         display: 'grid',
         gridTemplateColumns: '140px 1fr',
@@ -41,7 +45,9 @@ export const OrganizersFilter: React.FC<Props> = ({ mode, onErrorClear }) => {
         alignItems: 'center'
       }}
     >
-      <InputLabel sx={{ m: 0 }}>{t('search.organizers')}</InputLabel>
+      <InputLabel id={labelId} sx={{ m: 0 }}>
+        {t('search.organizers')}
+      </InputLabel>
       <UserSearch
         attendees={searchParams.filters.organizers}
         setAttendees={(users: userAttendee[]) => {

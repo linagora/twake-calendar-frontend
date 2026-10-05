@@ -55,7 +55,7 @@ public class EventFormModal {
 
     /** Reveals every field of the form. */
     public EventFormModal expand() {
-        page.getByLabel("expand").click();
+        expandButton().click();
         page.getByLabel("Start Date").waitFor();
         // The compact and the expanded layout declare the same test ids. While the swap is in
         // flight both are in the page, and a fill started against the one on its way out lands
@@ -69,8 +69,14 @@ public class EventFormModal {
     /** Leaves the full screen layout for the compact modal, keeping the form open. */
     public EventFormModal collapse() {
         page.getByLabel("show less").click();
-        page.getByLabel("expand").waitFor();
+        expandButton().waitFor();
         return this;
+    }
+
+    /** The button switching the dialog to its full screen layout, named after its tooltip. */
+    private Locator expandButton() {
+        return page.getByRole(AriaRole.BUTTON,
+            new Page.GetByRoleOptions().setName("Show more options").setExact(true)).last();
     }
 
     public EventFormModal startTime(String hhmm) {

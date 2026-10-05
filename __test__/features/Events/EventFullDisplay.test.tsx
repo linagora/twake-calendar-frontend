@@ -122,8 +122,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       stateWithFixedDate
     )
@@ -155,8 +155,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -169,8 +169,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -187,7 +187,7 @@ describe('Event Full Display', () => {
     // EventDisplay modal doesn't have Repeat checkbox, only RepeatEvent component
     // which shows repetition settings when repetition data exists
     // Since test event has no repetition data, RepeatEvent component won't show Repeat checkbox
-    fireEvent.click(screen.getByRole('button', { name: /Show Less/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'a11y.collapseDialog' }))
   })
 
   it('can edit title when user is organizer', () => {
@@ -195,8 +195,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -209,8 +209,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -283,8 +283,8 @@ describe('Event Full Display', () => {
         <EventUpdateModal
           open={true}
           onClose={mockOnClose}
-          calId={'667037022b752d0026472254/cal1'}
-          eventId={'event1'}
+          calId="667037022b752d0026472254/cal1"
+          eventId="event1"
         />,
         preloadedTwoCals
       )
@@ -353,8 +353,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       stateWithTimezone
     )
@@ -376,8 +376,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       preloadedState
     )
@@ -415,8 +415,8 @@ describe('Event Full Display', () => {
       <EventUpdateModal
         open={true}
         onClose={mockOnClose}
-        calId={'667037022b752d0026472254/cal1'}
-        eventId={'event1'}
+        calId="667037022b752d0026472254/cal1"
+        eventId="event1"
       />,
       videoState
     )

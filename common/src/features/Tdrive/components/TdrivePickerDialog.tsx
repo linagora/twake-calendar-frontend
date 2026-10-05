@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Dialog, Box, IconButton } from '@linagora/twake-mui'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { TdriveFile } from '../types'
 import { PickerSkeleton } from './PickerSkeleton'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
+import { useI18n } from 'twake-i18n'
 
 interface TdrivePickerDialogProps {
   open: boolean
@@ -64,9 +65,18 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
   containerRef,
   onReadyToUse
 }) => {
+  const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const [isReady, setIsReady] = useState(false)
+
+  // cozy-interapp creates the picker iframe without a title
+  useEffect(() => {
+    if (!isReady) return
+    containerRef.current
+      ?.querySelector('iframe')
+      ?.setAttribute('title', t('event.form.tdrivePickerTitle'))
+  }, [isReady, containerRef, t])
 
   // Reset loader each time the dialog opens
   const handleTransitionEnter = useCallback(() => {
@@ -81,6 +91,9 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
       fullWidth
       fullScreen={isMobile}
       onTransitionEnter={handleTransitionEnter}
+      slotProps={{
+        paper: { 'aria-label': t('event.form.tdrivePickerTitle') }
+      }}
       sx={{
         '& .MuiDialog-paper': {
           maxWidth: '900px',
@@ -96,7 +109,7 @@ export const TdrivePickerDialog: React.FC<TdrivePickerDialogProps> = ({
       <PickerContent containerRef={containerRef} isReady={isReady} />
       {!isReady && (
         <IconButton
-          aria-label="close"
+          aria-label={t('actions.close')}
           onClick={onClose}
           sx={{
             position: 'absolute',

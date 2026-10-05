@@ -2,6 +2,8 @@ import { useAppSelector } from '@common/app/hooks'
 import EventPreviewModal from '@common/components/EventPreview'
 import { Box } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
+import { buttonLikeProps } from '@common/utils/keyboardActivation'
 import { AttendeesFilter } from './AttendeesFilter'
 import { normalizeCalendars } from './calendarColorUtils'
 import { OrganizersFilter } from './OrganizersFilter'
@@ -17,6 +19,7 @@ import { useEventPreview } from './useEventPreview'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 
 const MobileSearchResultsPage: React.FC = () => {
+  const { t } = useI18n()
   const searchResults = useAppSelector(state => state.searchResult)
   const hasSearchParams =
     searchResults.searchParams.search !== '' ||
@@ -39,6 +42,7 @@ const MobileSearchResultsPage: React.FC = () => {
         overflow: 'hidden'
       }}
     >
+      <VisuallyHidden component="h1">{t('search.resultsTitle')}</VisuallyHidden>
       <FiltersButtons />
       {displaySearch && (
         <Box sx={{ m: 2, flex: 1, minHeight: 0, overflow: 'auto' }}>
@@ -115,6 +119,7 @@ const MobileResultItem: React.FC<{ eventData: SearchEventResult }> = ({
           alignItems: 'center',
           textAlign: 'left'
         }}
+        {...buttonLikeProps}
         onClick={() => void handleOpen()}
       >
         <RenderMobileDate startDate={startDate} t={t} timeZone={timeZone} />

@@ -25,8 +25,11 @@ const AppListPopup: React.FC<{
   applist: AppIconProps[]
   isMobile: boolean
 }> = ({ anchorEl, onAppMenuClose, applist, isMobile }) => {
+  const { t } = useI18n()
   const open = Boolean(anchorEl)
-  const slotProps = { paper: { sx: sharedPaperSx } }
+  const slotProps = {
+    paper: { sx: sharedPaperSx, 'aria-label': t('menubar.apps') }
+  }
 
   if (isMobile) {
     return (

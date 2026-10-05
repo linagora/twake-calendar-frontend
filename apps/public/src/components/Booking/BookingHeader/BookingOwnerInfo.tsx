@@ -35,7 +35,7 @@ export const BookingOwnerName: React.FC<{
   owner: BookingSlotsResponse['owner']
 }> = ({ owner }) => {
   return (
-    <Typography variant="subtitle1">
+    <Typography component="p" variant="subtitle1">
       {owner.displayName || owner.email}
     </Typography>
   )
@@ -66,7 +66,9 @@ export const BookingTitle: React.FC<{ bookingInfo: BookingSlotsResponse }> = ({
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', ml: 1 }}>
       {bookingInfo.name && (
-        <Typography variant="h6">{bookingInfo.name}</Typography>
+        <Typography component="h1" variant="h6">
+          {bookingInfo.name}
+        </Typography>
       )}
       <TimerOutlinedIcon sx={{ color: 'text.secondary' }} />
       <Typography

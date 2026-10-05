@@ -80,8 +80,8 @@ describe('CalendarPopover', () => {
       target: { value: 'Test Description' }
     })
 
-    const colorButtons = screen.getAllByRole('button', {
-      name: /select color/i
+    const colorButtons = screen.getAllByRole('radio', {
+      name: /colorPicker.colors/
     })
     fireEvent.click(colorButtons[0])
 

@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import tanstackQuery from '@tanstack/eslint-plugin-query'
 import cozyReact from 'eslint-config-cozy-app/react'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 // Flatten cozyReact config (may be an object or array)
 const cozyReactConfigs = Array.isArray(cozyReact) ? cozyReact : [cozyReact]
@@ -29,6 +30,19 @@ export default [
 
   // Cozy React recommended rules
   ...cozyReactConfigs,
+
+  // Accessibility (RGAA / WCAG): the recommended rules, reported as warnings
+  // until the existing findings are cleared — see
+  // accessibility/A10Y_REMEDIATIONS-2026-10-01.md, R-17
+  {
+    ...jsxA11y.flatConfigs.recommended,
+    rules: Object.fromEntries(
+      Object.keys(jsxA11y.flatConfigs.recommended.rules).map(rule => [
+        rule,
+        'warn'
+      ])
+    )
+  },
 
   {
     files: ['**/*.{js,jsx,ts,tsx}'],

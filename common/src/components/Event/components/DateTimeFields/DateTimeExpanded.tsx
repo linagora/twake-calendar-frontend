@@ -104,7 +104,9 @@ const DateTimeControlsRow: React.FC<DateTimeControlsRowProps> = ({
               <Checkbox checked={allday} onChange={handleAllDayToggle} />
             }
             label={
-              <Typography variant="h6">{t('event.form.allDay')}</Typography>
+              <Typography component="span" variant="h6">
+                {t('event.form.allDay')}
+              </Typography>
             }
           />
           <FormControlLabel
@@ -118,7 +120,9 @@ const DateTimeControlsRow: React.FC<DateTimeControlsRowProps> = ({
               />
             }
             label={
-              <Typography variant="h6">{t('event.form.repeat')}</Typography>
+              <Typography component="span" variant="h6">
+                {t('event.form.repeat')}
+              </Typography>
             }
           />
         </Box>
@@ -132,7 +136,7 @@ const DateTimeControlsRow: React.FC<DateTimeControlsRowProps> = ({
               onClick={() => setTimezoneDrawerOpen(true)}
               sx={{ textTransform: 'none', px: 0, color: 'text.secondary' }}
             >
-              <Typography variant="h6">
+              <Typography component="span" variant="h6">
                 ({offset}) {tzLabel}
               </Typography>
               <ArrowDropDown />

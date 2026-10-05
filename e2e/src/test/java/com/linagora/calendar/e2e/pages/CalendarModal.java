@@ -48,9 +48,18 @@ public class CalendarModal {
         return page.getByRole(AriaRole.TAB).allInnerTexts();
     }
 
+    /** The preset colours, named as the colour radio group announces them. */
+    private static final java.util.Map<String, String> PRESET_COLOR_NAMES = java.util.Map.of(
+        "#D0ECDA", "Green",
+        "#FAE3CE", "Orange",
+        "#F5CFD0", "Red",
+        "#AFCBEF", "Blue",
+        "#E8E4F8", "Purple");
+
     /** Picks one of the preset colours, by its hexadecimal value. */
     public CalendarModal color(String hex) {
-        page.getByLabel("select color " + hex).click();
+        page.getByRole(AriaRole.RADIO, new Page.GetByRoleOptions()
+            .setName(PRESET_COLOR_NAMES.get(hex.toUpperCase())).setExact(true)).click();
         return this;
     }
 
@@ -99,12 +108,12 @@ public class CalendarModal {
 
     /** The CalDAV address of this calendar, as the Access tab shows it. */
     public String caldavUrl() {
-        return dialog().getByLabel("CalDAV access").inputValue();
+        return dialog().getByLabel("CalDAV access", new Locator.GetByLabelOptions().setExact(true)).inputValue();
     }
 
     /** The address that opens the calendar without credentials, token included. */
     public String secretUrl() {
-        Locator field = dialog().getByLabel("Secret URL");
+        Locator field = dialog().getByLabel("Secret URL", new Locator.GetByLabelOptions().setExact(true));
         // the tab fetches the address once open: until it answers, the field stands empty
         com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(field)
             .hasValue(java.util.regex.Pattern.compile(".+"),

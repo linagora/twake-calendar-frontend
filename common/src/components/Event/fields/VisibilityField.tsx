@@ -27,6 +27,7 @@ export const VisibilityField: React.FC<VisibilityFieldProps> = ({
       isExpanded={showMore && !isMobile}
     >
       <ToggleButtonGroup
+        aria-label={t('event.form.visibleTo')}
         value={eventClass}
         exclusive
         onChange={(_e, newValue: string | null) => {

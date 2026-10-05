@@ -145,7 +145,9 @@ describe('SearchResultsPage', () => {
       ...preloadedState,
       searchResult: { loading: false, error: null, hits: null, results: [] }
     })
-    expect(screen.getByText('search.noResults')).toBeInTheDocument()
+    const messages = screen.getAllByText('search.noResults')
+    expect(messages.some(m => !m.closest('[role="status"]'))).toBe(true)
+    expect(screen.getByRole('status')).toHaveTextContent('search.noResults')
   })
 
   it('should render search results', () => {

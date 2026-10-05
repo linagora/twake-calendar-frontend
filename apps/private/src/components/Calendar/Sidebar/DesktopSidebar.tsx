@@ -36,7 +36,13 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
         },
         zIndex: 5
       }}
-      slotProps={{ paper: { className: 'sidebar' } }}
+      slotProps={{
+        paper: {
+          className: 'sidebar',
+          component: 'aside',
+          'aria-label': t('a11y.sidebar')
+        }
+      }}
     >
       <Box
         sx={{

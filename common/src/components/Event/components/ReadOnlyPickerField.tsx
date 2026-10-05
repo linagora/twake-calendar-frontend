@@ -43,9 +43,16 @@ const formatPickerValue = (
   return formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1) : ''
 }
 
+// Keys opening the picker from the read-only field, as on a native select
+const isOpeningKey = (event: React.KeyboardEvent): boolean =>
+  event.key === 'Enter' ||
+  event.key === ' ' ||
+  (event.altKey && event.key === 'ArrowDown')
+
 /**
  * Shared read-only field for date/time pickers. Disables typing, removes icon,
- * and opens the picker when clicking anywhere in the field.
+ * and opens the picker when clicking anywhere in the field, or with Enter,
+ * Space or Alt+ArrowDown from the keyboard.
  */
 const ReadOnlyPickerField = <
   TProps extends ValidateDateProps | ValidateTimeProps,
@@ -118,7 +125,10 @@ const ReadOnlyPickerField = <
         ...inputComponentProps.sx
       }
     },
-    htmlInput: fp.slotProps?.htmlInput
+    htmlInput: {
+      'aria-haspopup': 'dialog',
+      ...fp.slotProps?.htmlInput
+    }
   } as React.ComponentProps<typeof TextField>['slotProps']
 
   return (
@@ -130,6 +140,13 @@ const ReadOnlyPickerField = <
       error={hasValidationError || fp.error}
       focused={open}
       onClick={() => setOpen((prev: boolean) => !prev)}
+      onKeyDown={event => {
+        fp.onKeyDown?.(event)
+        if (!event.defaultPrevented && !open && isOpeningKey(event)) {
+          event.preventDefault()
+          setOpen(true)
+        }
+      }}
       className={rootClassName}
       sx={rootSx}
       ref={rootRef}

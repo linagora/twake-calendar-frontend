@@ -148,7 +148,13 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
           disabled={isLoading || isReadDelegated || isCurrentlyActive}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {showLoading && <CircularProgress size={20} color="inherit" />}
+            {showLoading && (
+              <CircularProgress
+                size={20}
+                color="inherit"
+                aria-label={t('a11y.loading')}
+              />
+            )}
             {t(`eventPreview.${rsvpValue}`)}
           </Box>
         </Button>

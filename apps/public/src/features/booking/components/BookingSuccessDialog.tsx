@@ -22,7 +22,7 @@ import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 import LinkIcon from '@mui/icons-material/Link'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import dayjs from 'dayjs'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { getBookedEvent } from '../BookingDao'
@@ -46,35 +46,50 @@ interface SlotTime {
 interface SuccessHeaderProps {
   onClose: () => void
   title: string
+  titleId: string
 }
 
-const SuccessHeader: React.FC<SuccessHeaderProps> = ({ onClose, title }) => (
-  <Box sx={{ position: 'relative', textAlign: 'center', pt: 3 }}>
-    <IconButton
-      onClick={onClose}
-      size="small"
-      sx={{ position: 'absolute', top: 8, right: 8 }}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-    <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 1 }} />
-    <Typography variant="h3" sx={{ mb: 1 }}>
-      {title}
-    </Typography>
-  </Box>
-)
+const SuccessHeader: React.FC<SuccessHeaderProps> = ({
+  onClose,
+  title,
+  titleId
+}) => {
+  const { t } = useI18n()
+  return (
+    <Box sx={{ position: 'relative', textAlign: 'center', pt: 3 }}>
+      <IconButton
+        aria-label={t('actions.close')}
+        onClick={onClose}
+        size="small"
+        sx={{ position: 'absolute', top: 8, right: 8 }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+      <CheckCircleOutlinedIcon color="success" sx={{ fontSize: 48, mb: 1 }} />
+      <Typography id={titleId} component="h2" variant="h3" sx={{ mb: 1 }}>
+        {title}
+      </Typography>
+    </Box>
+  )
+}
 
 interface SuccessSummaryProps {
   subtitle: string
   subsubtitle: string
+  subtitleId: string
 }
 
 const SuccessSummary: React.FC<SuccessSummaryProps> = ({
   subtitle,
-  subsubtitle
+  subsubtitle,
+  subtitleId
 }) => (
   <>
-    <Typography variant="body1" sx={{ textAlign: 'center', px: 3, mb: 3 }}>
+    <Typography
+      id={subtitleId}
+      variant="body1"
+      sx={{ textAlign: 'center', px: 3, mb: 3 }}
+    >
       {subtitle}
     </Typography>
     <Typography
@@ -222,6 +237,8 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   onCancelMeeting
 }) => {
   const { t, lang } = useI18n()
+  const titleId = useId()
+  const subtitleId = useId()
 
   const owner = bookingInfo?.owner
   const durationMinutes = bookingInfo?.durationMinutes
@@ -275,8 +292,17 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
   const showFooter = Boolean(onCancelMeeting)
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <SuccessHeader onClose={onClose} title={t('booking.success.title')} />
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby={titleId}
+      aria-describedby={slotTime && owner ? subtitleId : undefined}
+    >
+      <SuccessHeader
+        onClose={onClose}
+        title={t('booking.success.title')}
+        titleId={titleId}
+      />
       {slotTime && owner && (
         <SuccessSummary
           subtitle={t('booking.success.subtitle', {
@@ -285,6 +311,7 @@ export const BookingSuccessDialog: React.FC<BookingSuccessDialogProps> = ({
             time: slotTime.time
           })}
           subsubtitle={t('booking.success.subsubtitle')}
+          subtitleId={subtitleId}
         />
       )}
       <DialogContent sx={{ px: 3, pb: 4 }}>

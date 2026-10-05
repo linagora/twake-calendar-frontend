@@ -143,11 +143,11 @@ class ShellTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("SHELL-10 The page title is Twake Calendar")
+    @DisplayName("SHELL-10 The page title names the view, then Twake Calendar")
     void thePageTitleIsTwakeCalendar(Page page, E2EUser user) {
         LoginPage.loginAs(page, user);
 
-        assertThat(page).hasTitle("Twake Calendar");
+        assertThat(page).hasTitle(java.util.regex.Pattern.compile(".+ – Week – Twake Calendar$"));
     }
 
     @Test

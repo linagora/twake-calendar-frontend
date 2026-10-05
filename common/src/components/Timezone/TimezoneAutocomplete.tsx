@@ -24,6 +24,8 @@ interface TimezoneAutocompleteProps {
   disableClearable?: boolean
   hideBorder?: boolean
   openOnFocus?: boolean
+  /** Name of the field, its placeholder by default */
+  ariaLabel?: string
 }
 
 export function TimezoneAutocomplete({
@@ -41,7 +43,8 @@ export function TimezoneAutocomplete({
   onClose,
   disableClearable = false,
   hideBorder = false,
-  openOnFocus = false
+  openOnFocus = false,
+  ariaLabel
 }: TimezoneAutocompleteProps): React.ReactElement {
   const options = useMemo<TimezoneOption[]>(() => {
     return zones.map(tz => ({
@@ -119,6 +122,7 @@ export function TimezoneAutocomplete({
             },
             htmlInput: {
               ...params.slotProps.htmlInput,
+              'aria-label': ariaLabel ?? placeholder,
               autoComplete: 'new-password'
             }
           }}

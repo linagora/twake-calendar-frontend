@@ -5,6 +5,8 @@ import { SettingErrorSnackbars } from './SettingErrorSnackbars'
 import { DesktopSettingsPage } from './DesktopSettingsPage'
 import { MobileSettingsPage } from './MobileSettingsPage'
 import { Menubar, type MenubarProps } from '@common/components/Menubar/Menubar'
+import { VisuallyHidden } from '@common/components/VisuallyHidden'
+import { useI18n } from 'twake-i18n'
 
 export type SidebarNavItem = 'settings' | 'sync'
 export type SettingsSubTab = 'settings' | 'notifications'
@@ -13,6 +15,7 @@ const SettingsPage: React.FC<{
   menubarProps?: MenubarProps
   isInIframe?: boolean
 }> = ({ menubarProps, isInIframe }) => {
+  const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
@@ -56,6 +59,7 @@ const SettingsPage: React.FC<{
       <main
         className={`main-layout settings-layout${isInIframe ? ' isInIframe' : ''} ${isMobile ? 'settings-layout--mobile' : ''}`}
       >
+        <VisuallyHidden component="h1">{t('settings.title')}</VisuallyHidden>
         {isMobile ? (
           <MobileSettingsPage
             activeSettingsSubTab={activeSettingsSubTab}

@@ -62,7 +62,9 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
           marginTop: 0
         }
       }}
-      slotProps={{ paper: { className: 'sidebar' } }}
+      slotProps={{
+        paper: { className: 'sidebar', 'aria-label': t('a11y.sidebar') }
+      }}
     >
       {!isIframe && (
         <Box
