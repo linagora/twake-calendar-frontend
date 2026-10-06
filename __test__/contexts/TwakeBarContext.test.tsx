@@ -5,7 +5,7 @@ import {
   useIsEmbedded
 } from '@common/contexts/TwakeBarContext'
 import { setAppLoading } from '@common/app/loadingSlice'
-import { exchangeToken } from '@common/features/Tdrive/TdriveDao'
+import { setTokens } from '@common/features/User/UserSlice'
 import '@testing-library/jest-dom'
 import { act, screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
@@ -18,12 +18,6 @@ jest.mock('cozy-external-bridge', () => ({
     isInIframe: mockIsInIframe
   }))
 }))
-
-jest.mock('@common/features/Tdrive/TdriveDao', () => ({
-  exchangeToken: jest.fn()
-}))
-
-const mockExchangeToken = exchangeToken as jest.Mock
 
 const BAR_SRC = 'https://bar.example.com/standalone-1.2.3.js'
 
@@ -45,9 +39,11 @@ const BarState = (): JSX.Element => (
   <span data-testid="bar-state">{useIsEmbedded() ? 'embedded' : 'off'}</span>
 )
 
-const renderApp = ({ locale = 'fr', isLoading = false } = {}): ReturnType<
-  typeof renderWithProviders
-> => {
+const renderApp = ({
+  locale = 'fr',
+  isLoading = false,
+  idToken = 'the-id-token'
+} = {}): ReturnType<typeof renderWithProviders> => {
   window.appList = [{ name: 'Mail', link: '/mail', icon: 'mail.svg' }]
   return renderWithProviders(
     <TwakeBarProvider locale={locale}>
@@ -60,7 +56,10 @@ const renderApp = ({ locale = 'fr', isLoading = false } = {}): ReturnType<
         currentView={CALENDAR_VIEWS.timeGridWeek}
       />
     </TwakeBarProvider>,
-    { ...preloadedState, loading: { isLoading } }
+    {
+      user: { ...preloadedState.user, tokens: { id_token: idToken } },
+      loading: { isLoading }
+    }
   )
 }
 
@@ -86,17 +85,26 @@ const expectCalendarTopBar = (): void => {
   expect(screen.queryByLabelText('menubar.apps')).toBeInTheDocument()
 }
 
+const flushPromises = (): Promise<void> =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 0))
+  })
+
 describe('TwakeBarProvider', () => {
   const mount = jest.fn()
+  const unmount = jest.fn()
   const setCredentials = jest.fn()
   const setLocale = jest.fn()
+  const exposeBar = (): void => {
+    window.TwakeBar = { mount, unmount, setCredentials, setLocale }
+  }
 
   beforeEach(() => {
     mockIsInIframe.mockReturnValue(false)
-    mockExchangeToken.mockResolvedValue({
-      access_token: 'access',
-      refresh_token: 'refresh'
-    })
+    mount.mockResolvedValue(undefined)
+    unmount.mockResolvedValue(undefined)
+    setCredentials.mockResolvedValue(undefined)
+    setLocale.mockResolvedValue(undefined)
     window.TWAKE_BAR_URL = BAR_SRC
     jest.spyOn(console, 'error').mockImplementation(() => {})
   })
@@ -115,7 +123,6 @@ describe('TwakeBarProvider', () => {
     renderApp()
 
     expect(getBarScript()).toBe(null)
-    expect(mockExchangeToken).not.toHaveBeenCalled()
     expectCalendarTopBar()
   })
 
@@ -124,36 +131,29 @@ describe('TwakeBarProvider', () => {
     renderApp()
 
     expect(getBarScript()).toBe(null)
-    expect(mockExchangeToken).not.toHaveBeenCalled()
     // The workplace around calendar provides the top bar
     expect(screen.getByTestId('bar-state')).toHaveTextContent('embedded')
   })
 
-  it('mounts the bar with its Cozy credentials', async () => {
+  it("mounts the bar with the user's id token", async () => {
     renderApp()
-    window.TwakeBar = { mount, setCredentials, setLocale }
+    exposeBar()
     await fireScriptEvent('load')
 
     await waitFor(() =>
       expect(screen.getByTestId('bar-state')).toHaveTextContent('embedded')
-    )
-    expect(mockExchangeToken).toHaveBeenCalledWith(
-      'https://alice.twake.app',
-      'the-id-token'
     )
     expect(mount).toHaveBeenCalledWith(
       expect.objectContaining({
         appSlug: 'calendar',
         appName: 'Twake Calendar',
         locale: 'fr',
-        onLogOut: expect.any(Function)
+        onLogOut: expect.any(Function),
+        idToken: 'the-id-token',
+        cozyURL: 'https://alice.twake.app'
       })
     )
-    expect(setCredentials).toHaveBeenCalledWith({
-      accessToken: 'access',
-      refreshToken: 'refresh',
-      cozyURL: 'https://alice.twake.app'
-    })
+    expect(setCredentials).not.toHaveBeenCalled()
     expect(getBarHeight()).toBe('3rem')
     expect(screen.queryByAltText('menubar.logoAlt')).toBe(null)
     expect(screen.queryByLabelText('menubar.apps')).toBe(null)
@@ -171,13 +171,10 @@ describe('TwakeBarProvider', () => {
 
   it("waits for calendar's loader to be gone before showing the bar", async () => {
     const { store } = renderApp({ isLoading: true })
-    window.TwakeBar = { mount, setCredentials, setLocale }
+    exposeBar()
     await fireScriptEvent('load')
-    await act(async () => {
-      await Promise.resolve()
-    })
+    await flushPromises()
 
-    expect(mockExchangeToken).toHaveBeenCalled()
     expect(mount).not.toHaveBeenCalled()
     expectCalendarTopBar()
 
@@ -192,7 +189,7 @@ describe('TwakeBarProvider', () => {
 
   it("gives calendar's new locale to the mounted bar", async () => {
     const { rerender } = renderApp({ locale: 'en' })
-    window.TwakeBar = { mount, setCredentials, setLocale }
+    exposeBar()
     await fireScriptEvent('load')
     await waitFor(() =>
       expect(mount).toHaveBeenCalledWith(
@@ -204,16 +201,34 @@ describe('TwakeBarProvider', () => {
     expect(setLocale).toHaveBeenLastCalledWith('vi')
   })
 
-  it('keeps the calendar top bar when the token exchange fails', async () => {
-    mockExchangeToken.mockRejectedValue(new Error('forbidden'))
-    renderApp()
-    window.TwakeBar = { mount, setCredentials, setLocale }
+  it('gives the renewed id token to the mounted bar', async () => {
+    const { store } = renderApp()
+    exposeBar()
     await fireScriptEvent('load')
-    await act(async () => {
-      await Promise.resolve()
+    await waitFor(() => expect(mount).toHaveBeenCalled())
+    expect(setCredentials).not.toHaveBeenCalled()
+
+    act(() => {
+      store.dispatch(setTokens({ id_token: 'the-renewed-id-token' }))
     })
 
-    expect(mount).not.toHaveBeenCalled()
+    await waitFor(() =>
+      expect(setCredentials).toHaveBeenCalledWith({
+        idToken: 'the-renewed-id-token',
+        cozyURL: 'https://alice.twake.app'
+      })
+    )
+  })
+
+  it('gives calendar its top bar back when the bar fails', async () => {
+    mount.mockRejectedValue(new Error('token exchange failed: 400'))
+    renderApp()
+    exposeBar()
+    await fireScriptEvent('load')
+    await flushPromises()
+
+    expect(mount).toHaveBeenCalledTimes(1)
+    expect(unmount).toHaveBeenCalled()
     expectCalendarTopBar()
   })
 
@@ -228,9 +243,7 @@ describe('TwakeBarProvider', () => {
   it('keeps the calendar top bar when the script does not expose the bar', async () => {
     renderApp()
     await fireScriptEvent('load')
-    await act(async () => {
-      await Promise.resolve()
-    })
+    await flushPromises()
 
     expectCalendarTopBar()
   })
@@ -241,15 +254,14 @@ describe('TwakeBarProvider', () => {
       mount: (): never => {
         throw new Error('broken')
       },
+      unmount,
       setCredentials,
       setLocale
     }
     await fireScriptEvent('load')
-    await act(async () => {
-      await Promise.resolve()
-    })
+    await flushPromises()
 
-    expect(setCredentials).not.toHaveBeenCalled()
+    expect(unmount).toHaveBeenCalled()
     expectCalendarTopBar()
   })
 })

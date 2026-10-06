@@ -3,16 +3,22 @@ import type { RootState } from '@common/app/store'
 import { useAppSelector } from '@common/app/hooks'
 import { logOut } from '@common/components/Calendar/hooks/useUtilMenus'
 import { useIsInIframe } from '@common/contexts/EmbeddingContext'
-import { exchangeToken } from '@common/features/Tdrive/TdriveDao'
 import React, {
   createContext,
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState
 } from 'react'
 
-interface TwakeBarMountConfig {
+interface TwakeBarCredentials {
+  /** OIDC id token of the user, the bar exchanges it on the user's Cozy */
+  idToken: string
+  cozyURL: string
+}
+
+interface TwakeBarMountConfig extends Partial<TwakeBarCredentials> {
   appSlug: string
   appName: string
   appIcon?: string
@@ -22,17 +28,15 @@ interface TwakeBarMountConfig {
   onLogOut?: () => void
 }
 
-interface TwakeBarCredentials {
-  accessToken: string
-  refreshToken: string
-  cozyURL: string
-}
-
-/** API the standalone bar script exposes on window.TwakeBar. */
+/**
+ * API the standalone bar script exposes on window.TwakeBar. Every call returns
+ * a promise, rejected when the bar cannot load or the call fails.
+ */
 export interface TwakeBarApi {
-  mount: (config: TwakeBarMountConfig) => void
-  setCredentials: (credentials: TwakeBarCredentials) => void
-  setLocale: (locale: string) => void
+  mount: (config: TwakeBarMountConfig) => Promise<void>
+  unmount: () => Promise<void>
+  setCredentials: (credentials: TwakeBarCredentials) => Promise<void>
+  setLocale: (locale: string) => Promise<void>
 }
 
 // A second copy of the script would start a second bar, that never gets
@@ -84,91 +88,61 @@ const selectIsAppLoading = (state: RootState): boolean =>
   state.loading.isLoading
 
 /**
- * Loads the bar script and runs the token_exchange on the user's Cozy.
+ * Loads the bar script in the background.
  *
- * @returns the credentials of the bar, or null when anything failed.
+ * @returns whether window.TwakeBar is available.
  */
-const prepareBarCredentials = async (
-  barUrl: string,
-  cozyURL: string,
-  idToken: string
-): Promise<TwakeBarCredentials | null> => {
-  try {
-    const [tokens] = await Promise.all([
-      exchangeToken(cozyURL, idToken),
-      loadBarScript(barUrl, window.TWAKE_BAR_INTEGRITY)
-    ])
-    return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      cozyURL
-    }
-  } catch (error) {
-    console.error('Twake bar could not be prepared:', error)
-    return null
-  }
-}
-
-/**
- * Mounts the bar with its credentials and reserves its space.
- *
- * @returns whether the bar is mounted.
- */
-const tryMountTwakeBar = (
-  locale: string,
-  credentials: TwakeBarCredentials
-): boolean => {
-  try {
-    if (!window.TwakeBar) throw new Error('window.TwakeBar is missing')
-    window.TwakeBar.mount({
-      appSlug: 'calendar',
-      appName: 'Twake Calendar',
-      appIcon: new URL('/calendar.svg', window.location.origin).href,
-      appTextIcon: new URL('/calendar-text.svg', window.location.origin).href,
-      locale,
-      // Calendar has no dark mode
-      theme: 'light',
-      onLogOut: () => void logOut()
-    })
-    window.TwakeBar.setCredentials(credentials)
-    // Height the page reserves at its top for the bar
-    document.documentElement.style.setProperty('--twake-bar-height', '3rem')
-    return true
-  } catch (error) {
-    console.error('Twake bar could not be mounted:', error)
-    return false
-  }
-}
-
-/**
- * Prepares the credentials of the bar once logged in. They stay null when
- * anything fails: the bar stays off.
- */
-const useBarCredentials = (
-  barUrl: string | undefined
-): TwakeBarCredentials | null => {
-  const idToken = useAppSelector(selectIdToken)
-  const cozyURL = useAppSelector(selectCozyURL)
-  const [credentials, setCredentials] = useState<TwakeBarCredentials | null>(
-    null
-  )
+const useBarScript = (barUrl: string | undefined): boolean => {
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    if (!barUrl || !idToken || !cozyURL) return
+    if (!barUrl) return
 
     let cancelled = false
-    const prepare = async (): Promise<void> => {
-      const result = await prepareBarCredentials(barUrl, cozyURL, idToken)
-      if (!cancelled) setCredentials(result)
+    const load = async (): Promise<void> => {
+      try {
+        await loadBarScript(barUrl, window.TWAKE_BAR_INTEGRITY)
+        if (!window.TwakeBar) throw new Error('window.TwakeBar is missing')
+        if (!cancelled) setIsLoaded(true)
+      } catch (error) {
+        console.error('Twake bar could not be loaded:', error)
+      }
     }
-    void prepare()
+    void load()
 
     return (): void => {
       cancelled = true
     }
-  }, [barUrl, idToken, cozyURL])
+  }, [barUrl])
 
-  return credentials
+  return isLoaded
+}
+
+// Async so that anything thrown also rejects
+const mountTwakeBar = async (
+  locale: string,
+  credentials: TwakeBarCredentials
+): Promise<void> => {
+  if (!window.TwakeBar) throw new Error('window.TwakeBar is missing')
+  await window.TwakeBar.mount({
+    appSlug: 'calendar',
+    appName: 'Twake Calendar',
+    appIcon: new URL('/calendar.svg', window.location.origin).href,
+    appTextIcon: new URL('/calendar-text.svg', window.location.origin).href,
+    locale,
+    // Calendar has no dark mode
+    theme: 'light',
+    onLogOut: () => void logOut(),
+    ...credentials
+  })
+}
+
+const setBarHeight = (height: string | null): void => {
+  if (height) {
+    document.documentElement.style.setProperty('--twake-bar-height', height)
+  } else {
+    document.documentElement.style.removeProperty('--twake-bar-height')
+  }
 }
 
 /**
@@ -176,31 +150,59 @@ const useBarCredentials = (
  * and calendar is not embedded (the embedding workplace already provides its
  * own bar).
  *
- * While calendar loads, the bar script and the token_exchange on the user's
- * Cozy run in the background. When the loader is gone, the bar is mounted with
- * its credentials before the next paint, so the loader leaves room for the bar
- * at once. Any failure leaves the bar off: calendar keeps its own top bar.
+ * While calendar loads, the bar script loads in the background. When the
+ * loader is gone, the bar is mounted with the user's id token before the next
+ * paint, so the loader leaves room for the bar at once. The bar exchanges the
+ * id token on the user's Cozy and shows a placeholder avatar meanwhile. If
+ * anything fails, the bar is removed and calendar gets its own top bar back.
  *
  * @returns whether the bar is mounted.
  */
 const useTwakeBar = (locale: string): boolean => {
   const isInIframe = useIsInIframe()
   const isAppLoading = useAppSelector(selectIsAppLoading)
-  const credentials = useBarCredentials(
+  const idToken = useAppSelector(selectIdToken)
+  const cozyURL = useAppSelector(selectCozyURL)
+  const isScriptLoaded = useBarScript(
     isInIframe ? undefined : window.TWAKE_BAR_URL
   )
   const [isBarMounted, setIsBarMounted] = useState(false)
+  const hasFailed = useRef(false)
+  // id token the bar was last given, to give it the renewed ones only
+  const barIdToken = useRef<string>()
 
   // A layout effect mounts the bar before the paint that removes the loader
   useLayoutEffect(() => {
-    if (!credentials || isAppLoading || isBarMounted) return
-    setIsBarMounted(tryMountTwakeBar(locale, credentials))
+    if (!isScriptLoaded || !idToken || !cozyURL || isAppLoading) return
+    if (isBarMounted || hasFailed.current) return
+
+    barIdToken.current = idToken
+    setBarHeight('3rem')
+    setIsBarMounted(true)
+    mountTwakeBar(locale, { idToken, cozyURL }).catch((error: unknown) => {
+      console.error('Twake bar could not be mounted:', error)
+      hasFailed.current = true
+      void window.TwakeBar?.unmount()
+      setBarHeight(null)
+      setIsBarMounted(false)
+    })
     // locale is given at mount only, setLocale follows its changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [credentials, isAppLoading, isBarMounted])
+  }, [isScriptLoaded, idToken, cozyURL, isAppLoading, isBarMounted])
 
   useEffect(() => {
-    if (isBarMounted) window.TwakeBar?.setLocale(locale)
+    if (!isBarMounted || !idToken || !cozyURL) return
+    if (idToken === barIdToken.current) return
+    barIdToken.current = idToken
+    window.TwakeBar?.setCredentials({ idToken, cozyURL }).catch(
+      (error: unknown) => {
+        console.error('Twake bar could not renew its token:', error)
+      }
+    )
+  }, [isBarMounted, idToken, cozyURL])
+
+  useEffect(() => {
+    if (isBarMounted) void window.TwakeBar?.setLocale(locale)
   }, [isBarMounted, locale])
 
   return isBarMounted
