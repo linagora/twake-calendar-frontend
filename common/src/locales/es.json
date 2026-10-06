@@ -664,5 +664,8 @@
   "debug": {
     "enabled": "Modo de depuración activado.",
     "disabled": "Modo de depuración desactivado."
+  },
+  "embed": {
+    "calendarUnavailable": "Este calendario no está disponible. Es posible que no seas miembro."
   }
 }

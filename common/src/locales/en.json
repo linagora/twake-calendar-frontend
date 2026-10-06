@@ -664,5 +664,8 @@
   "debug": {
     "enabled": "Debug mode enabled.",
     "disabled": "Debug mode disabled."
+  },
+  "embed": {
+    "calendarUnavailable": "This calendar is not available. You may not be a member of it."
   }
 }
