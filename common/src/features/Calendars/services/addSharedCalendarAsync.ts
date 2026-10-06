@@ -69,7 +69,7 @@ export const addSharedCalendarThunk = (
       const resultCalId = new CalDavLink(cal.cal._links).parseCalendarId()
       if (!resultCalId) {
         return rejectWithValue({
-          message: 'Invalid calendar ID',
+          message: 'TRANSLATION:error.invalidCalendarId',
           status: 400
         } as RejectedError)
       }
@@ -137,7 +137,7 @@ export const addSharedCalendarThunk = (
         state.error =
           (action.payload as RejectedError)?.message ||
           action.error.message ||
-          'Failed to add shared calendar'
+          'TRANSLATION:error.addSharedCalendarFailed'
       }
     }
   )

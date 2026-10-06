@@ -20,6 +20,7 @@
     "browseOtherCalendars": "Просмотреть другие календари",
     "noPublicCalendarsFor": "Нет общедоступных календарей для %{name}",
     "noMoreCalendarsFor": "Других календарей для %{name} нет",
+    "removeCalendar": "Удалить календарь",
     "userDoesNotHavePublicCalendars": "%{name} не имеет общедоступных календарей",
     "delete": {
       "title": "Удалить %{name}?",
@@ -275,7 +276,11 @@
     "eventNotFound": "Событие не найдено. Возможно, оно было удалено или ссылка недействительна.",
     "invalidOrExpiredToken": "Ваша ссылка-приглашение недействительна или истек срок ее действия.",
     "needHelp": "Нужна помощь",
-    "calendarsNotFound": "Не удалось загрузить список календарей. Возможно, некоторые календари были удалены."
+    "calendarsNotFound": "Не удалось загрузить список календарей. Возможно, некоторые календари были удалены.",
+    "invalidCalendarId": "Недопустимый идентификатор календаря",
+    "addSharedCalendarFailed": "Не удалось добавить общий календарь",
+    "uploadedFileMissingId": "Не удалось загрузить файл: отсутствует идентификатор файла",
+    "importEventFromFileFailed": "Не удалось импортировать событие из файла"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Обновить повторяющееся событие",

@@ -19,7 +19,7 @@ export const importEventFromFileThunk = (
         const id = response?._id
         if (!id) {
           return rejectWithValue({
-            message: 'Failed to upload file: missing file ID',
+            message: 'TRANSLATION:error.uploadedFileMissingId',
             status: undefined
           })
         }
@@ -48,7 +48,7 @@ export const importEventFromFileThunk = (
         state.error =
           action.payload?.message ||
           action.error.message ||
-          'Failed to import event from file'
+          'TRANSLATION:error.importEventFromFileFailed'
       }
     }
   )

@@ -20,6 +20,7 @@
     "browseOtherCalendars": "Parcourir d'autres calendriers",
     "noPublicCalendarsFor": "Aucun calendrier public disponible pour %{name}",
     "noMoreCalendarsFor": "Plus de calendriers disponibles pour %{name}",
+    "removeCalendar": "Retirer le calendrier",
     "userDoesNotHavePublicCalendars": "%{name} n'a pas de calendriers publics",
     "delete": {
       "title": "Supprimer %{name} ?",
@@ -275,7 +276,11 @@
     "eventNotFound": "L'événement est introuvable. Il a peut-être été supprimé ou le lien est invalide.",
     "invalidOrExpiredToken": "Votre lien d'invitation est invalide ou a expiré.",
     "needHelp": "Besoin d'aide",
-    "calendarsNotFound": "Votre liste de calendriers n'a pas pu être chargée. Certains calendriers ont peut-être été supprimés."
+    "calendarsNotFound": "Votre liste de calendriers n'a pas pu être chargée. Certains calendriers ont peut-être été supprimés.",
+    "invalidCalendarId": "L'identifiant du calendrier est invalide",
+    "addSharedCalendarFailed": "Impossible d'ajouter le calendrier partagé",
+    "uploadedFileMissingId": "Échec de l'envoi du fichier : identifiant de fichier manquant",
+    "importEventFromFileFailed": "Impossible d'importer l'événement depuis le fichier"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Mettre à jour l'événement récurrent",

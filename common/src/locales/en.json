@@ -20,6 +20,7 @@
     "browseOtherCalendars": "Browse other calendars",
     "noPublicCalendarsFor": "No publicly available calendars for %{name}",
     "noMoreCalendarsFor": "No more calendars for %{name}",
+    "removeCalendar": "Remove calendar",
     "userDoesNotHavePublicCalendars": "%{name} does not have public calendars",
     "delete": {
       "title": "Delete %{name}?",
@@ -275,7 +276,11 @@
     "eventNotFound": "The event could not be found. It may have been deleted or the link is invalid.",
     "invalidOrExpiredToken": "Your invitation link is invalid or has expired.",
     "needHelp": "Need help",
-    "calendarsNotFound": "Your calendar list could not be loaded. Some calendars may have been deleted."
+    "calendarsNotFound": "Your calendar list could not be loaded. Some calendars may have been deleted.",
+    "invalidCalendarId": "The calendar ID is invalid",
+    "addSharedCalendarFailed": "Failed to add the shared calendar",
+    "uploadedFileMissingId": "Failed to upload the file: missing file ID",
+    "importEventFromFileFailed": "Failed to import the event from the file"
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",
