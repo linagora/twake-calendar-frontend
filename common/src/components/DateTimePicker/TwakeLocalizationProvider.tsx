@@ -17,6 +17,14 @@ import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+/**
+ * Dayjs registers its locales under their base language code ('de', 'fr'),
+ * while the translation files declare a region ('de-de', 'fr-fr').
+ * The date pickers look the locale up as given, so pass the base code.
+ */
+export const toAdapterLocale = (locale?: string): string =>
+  (locale || 'en').toLowerCase().split('-')[0]
+
 export interface TwakeLocalizationProviderProps {
   children: React.ReactNode
 }
@@ -46,7 +54,7 @@ export const TwakeLocalizationProvider = ({
     <ThemeProvider theme={themeWithPickers}>
       <LocalizationProvider
         dateAdapter={AdapterDayjs}
-        adapterLocale={locale ?? 'en'}
+        adapterLocale={toAdapterLocale(locale)}
         localeText={{
           okButtonLabel: t('common.ok'),
           cancelButtonLabel: t('common.cancel'),
