@@ -666,6 +666,7 @@
     "disabled": "Modo de depuración desactivado."
   },
   "embed": {
+    "signInRequired": "Has cerrado sesión. Vuelve a iniciar sesión para ver este calendario.",
     "calendarUnavailable": "Este calendario no está disponible. Es posible que no seas miembro."
   }
 }

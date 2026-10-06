@@ -666,6 +666,7 @@
     "disabled": "Modalità debug disattivata."
   },
   "embed": {
+    "signInRequired": "Sei disconnesso. Accedi di nuovo per vedere questo calendario.",
     "calendarUnavailable": "Questo calendario non è disponibile. Potresti non esserne membro."
   }
 }

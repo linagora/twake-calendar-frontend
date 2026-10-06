@@ -1,3 +1,4 @@
+import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
 import { getLocation } from '@common/utils/apiUtils'
 import * as client from 'openid-client'
 
@@ -26,24 +27,43 @@ export async function getClientConfig() {
   return config
 }
 
+// The SSO refuses to show its portal in a frame: a framed sign in asks it to
+// show nothing, and it answers with a code or with one of these errors.
+const SILENT_LOGIN_ERRORS = [
+  'login_required',
+  'interaction_required',
+  'consent_required',
+  'account_selection_required'
+]
+
+export function isSilentLoginRefused(search: string): boolean {
+  const error = new URLSearchParams(search).get('error')
+  return error !== null && SILENT_LOGIN_ERRORS.includes(error)
+}
+
 export async function Auth() {
   const code_verifier = client.randomPKCECodeVerifier()
   const code_challenge = await client.calculatePKCECodeChallenge(code_verifier)
   const openIdClientConfig = await getClientConfig()
   const state = client.randomState()
+  // An embed route is framed by TwakeSpace: sign in silently, and come back to
+  // it rather than to the calendar page
+  const { pathname } = window.location
+  const returnTo = isEmbedPath(pathname) ? pathname : undefined
   const parameters: Record<string, string> = {
     redirect_uri: clientConfig.redirect_uri,
     scope: clientConfig.scope,
     code_challenge,
     code_challenge_method: clientConfig.code_challenge_method,
-    state
+    state,
+    ...(returnTo && { prompt: 'none' })
   }
   const redirectTo = client.buildAuthorizationUrl(
     openIdClientConfig,
     parameters
   )
 
-  return { redirectTo, code_verifier, state }
+  return { redirectTo, code_verifier, state, returnTo }
 }
 
 export async function Logout() {

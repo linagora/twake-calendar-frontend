@@ -9,7 +9,7 @@ import {
 } from '@common/features/User/UserSlice'
 import { CallbackResume } from '@private/features/User/LoginCallback'
 import { getAccessToken } from '@common/utils/apiUtils'
-import { render, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -32,7 +32,8 @@ jest.mock('@common/app/hooks', () => ({
 }))
 
 jest.mock('@common/features/User/oidcAuth', () => ({
-  Callback: jest.fn()
+  Callback: jest.fn(),
+  isSilentLoginRefused: jest.fn(() => false)
 }))
 
 jest.mock('@common/features/User/UserSlice', () => {
@@ -171,6 +172,54 @@ describe('CallbackResume', () => {
     expect(getAccessToken()).toBe('abc')
     expect(sessionStorage.getItem('tokenSet')).toBeNull()
     expect(sessionStorage.getItem('userData')).toBeNull()
+  })
+
+  it('returns to the embed route the sign in started from', async () => {
+    const mockTokenSet = { access_token: 'abc' }
+    const mockUserInfo = { name: 'Test User' }
+    ;(oidcAuth.Callback as jest.Mock).mockResolvedValue({
+      tokenSet: mockTokenSet,
+      userinfo: mockUserInfo
+    })
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({
+        code_verifier: 'verifier123',
+        state: 'state456',
+        returnTo: '/embed/calendars/team1'
+      })
+    )
+
+    const { rerender } = render(<CallbackResume />)
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(getCalendarsList())
+    })
+
+    mockUserState = { ...mockUserState, userData: mockUserInfo }
+    mockUserState.tokens = mockTokenSet
+    rerender(<CallbackResume />)
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(replace('/embed/calendars/team1'))
+    })
+  })
+
+  it('shows an error when the SSO refuses the silent sign in', async () => {
+    ;(oidcAuth.isSilentLoginRefused as jest.Mock).mockReturnValueOnce(true)
+    sessionStorage.setItem(
+      'redirectState',
+      JSON.stringify({
+        code_verifier: 'verifier123',
+        state: 'state456',
+        returnTo: '/embed/calendars/team1'
+      })
+    )
+
+    renderWithProviders(<CallbackResume />)
+
+    expect(await screen.findByText('embed.signInRequired')).toBeInTheDocument()
+    expect(oidcAuth.Callback).not.toHaveBeenCalled()
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/error'))
   })
 
   it('should handle missing redirectState gracefully', async () => {

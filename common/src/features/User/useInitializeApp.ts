@@ -84,7 +84,8 @@ export const useInitializeApp = (): void => {
         'redirectState',
         JSON.stringify({
           code_verifier: loginurl.code_verifier,
-          state: loginurl.state
+          state: loginurl.state,
+          returnTo: loginurl.returnTo
         })
       )
       redirectTo(loginurl.redirectTo)
