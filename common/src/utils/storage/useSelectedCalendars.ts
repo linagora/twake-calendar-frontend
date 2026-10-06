@@ -1,6 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useEmbeddedCalendarId } from '@common/features/Embed/embeddedCalendar'
 
+/**
+ * The calendars the user shows. An embed route shows its calendar only, and
+ * leaves the selection the user keeps for the full application untouched.
+ */
 export function useSelectedCalendars(): string[] {
+  const embeddedCalendarId = useEmbeddedCalendarId()
+
   const [calendars, setCalendars] = useState<string[]>(() => {
     if (typeof window === 'undefined') return []
     try {
@@ -42,5 +49,8 @@ export function useSelectedCalendars(): string[] {
     }
   }, [])
 
-  return calendars
+  return useMemo(
+    () => (embeddedCalendarId ? [embeddedCalendarId] : calendars),
+    [embeddedCalendarId, calendars]
+  )
 }

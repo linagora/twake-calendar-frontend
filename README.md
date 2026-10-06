@@ -206,6 +206,8 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
+TwakeSpace frames the team calendar of a space on `/embed/calendars/<team calendar id>`.
+
 ---
 
 ## Configuring the Application

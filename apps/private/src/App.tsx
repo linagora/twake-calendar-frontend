@@ -15,6 +15,8 @@ import { Loading } from '@common/components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
 import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
+import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
+import { EMBED_CALENDAR_ROUTE } from '@common/features/Embed/embeddedCalendar'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { default as NewEventDeepLink } from '@common/features/Events/NewEventDeepLink'
@@ -126,6 +128,10 @@ export default function App(): JSX.Element {
                 <Routes>
                   <Route path="/" element={<HandleLogin />} />
                   <Route path="/calendar" element={<CalendarLayout />} />
+                  <Route
+                    path={EMBED_CALENDAR_ROUTE}
+                    element={<EmbeddedCalendar />}
+                  />
                   <Route path="/events/:uid" element={<EventDeepLink />} />
                   <Route path="/newEvent" element={<NewEventDeepLink />} />
                   <Route path="/callback" element={<CallbackResume />} />
