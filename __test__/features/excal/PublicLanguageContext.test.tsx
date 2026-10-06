@@ -24,12 +24,15 @@ describe('PublicLanguageContext Localization helpers', () => {
     it('should return true for supported languages', () => {
       expect(isValidLanguage('en')).toBe(true)
       expect(isValidLanguage('fr')).toBe(true)
+      expect(isValidLanguage('es')).toBe(true)
+      expect(isValidLanguage('de')).toBe(true)
+      expect(isValidLanguage('it')).toBe(true)
       expect(isValidLanguage('ru')).toBe(true)
       expect(isValidLanguage('vi')).toBe(true)
     })
 
     it('should return false for unsupported languages or empty values', () => {
-      expect(isValidLanguage('es')).toBe(false)
+      expect(isValidLanguage('pt')).toBe(false)
       expect(isValidLanguage('')).toBe(false)
       expect(isValidLanguage(null)).toBe(false)
       expect(isValidLanguage(undefined)).toBe(false)
@@ -85,7 +88,7 @@ describe('PublicLanguageContext Localization helpers', () => {
     it('should fallback to window.LANG if localStorage and browser language are missing or invalid', () => {
       localStorage.removeItem('lang')
       ;(window as unknown as { LANG: string | undefined }).LANG = 'ru'
-      languageSpy.mockReturnValue('es-ES') // unsupported
+      languageSpy.mockReturnValue('pt-BR') // unsupported
 
       expect(getDefaultLanguage()).toBe('ru')
     })
@@ -93,7 +96,7 @@ describe('PublicLanguageContext Localization helpers', () => {
     it('should default to en if everything else is missing or invalid', () => {
       localStorage.removeItem('lang')
       ;(window as unknown as { LANG: string | undefined }).LANG = undefined
-      languageSpy.mockReturnValue('es-ES') // unsupported
+      languageSpy.mockReturnValue('pt-BR') // unsupported
 
       expect(getDefaultLanguage()).toBe('en')
     })

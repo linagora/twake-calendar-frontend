@@ -10,6 +10,9 @@ import interactionPlugin, {
 import momentTimezonePlugin from '@fullcalendar/moment-timezone'
 import listPlugin from '@fullcalendar/list'
 import frLocale from '@fullcalendar/core/locales/fr'
+import esLocale from '@fullcalendar/core/locales/es'
+import deLocale from '@fullcalendar/core/locales/de'
+import itLocale from '@fullcalendar/core/locales/it'
 import ruLocale from '@fullcalendar/core/locales/ru'
 import viLocale from '@fullcalendar/core/locales/vi'
 import type {
@@ -44,6 +47,9 @@ import type { BookingLink } from '@common/features/booking/types/BookingTypes'
 
 const localeMap: Record<string, LocaleInput | undefined> = {
   fr: frLocale,
+  es: esLocale,
+  de: deLocale,
+  it: itLocale,
   ru: ruLocale,
   vi: viLocale,
   en: undefined

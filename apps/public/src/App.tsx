@@ -19,6 +19,9 @@ import { BookedEventPreviewPage } from './components/EventPreview/BookedEventPre
 import {
   enGB,
   fr as frLocale,
+  es as esLocale,
+  de as deLocale,
+  it as itLocale,
   ru as ruLocale,
   vi as viLocale
 } from 'date-fns/locale'
@@ -26,6 +29,9 @@ import {
 import I18n from 'twake-i18n'
 import en from '@common/locales/en.json'
 import fr from '@common/locales/fr.json'
+import es from '@common/locales/es.json'
+import de from '@common/locales/de.json'
+import it from '@common/locales/it.json'
 import ru from '@common/locales/ru.json'
 import vi from '@common/locales/vi.json'
 import {
@@ -34,8 +40,16 @@ import {
   SupportedLanguage
 } from './context/PublicLanguageContext'
 
-const locale = { en, fr, ru, vi }
-const dateLocales = { en: enGB, fr: frLocale, ru: ruLocale, vi: viLocale }
+const locale = { en, fr, es, de, it, ru, vi }
+const dateLocales = {
+  en: enGB,
+  fr: frLocale,
+  es: esLocale,
+  de: deLocale,
+  it: itLocale,
+  ru: ruLocale,
+  vi: viLocale
+}
 
 export default function App(): JSX.Element {
   const [lang, setLang] = useState<SupportedLanguage>(getDefaultLanguage)

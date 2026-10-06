@@ -1,6 +1,9 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/en'
 import 'dayjs/locale/fr'
+import 'dayjs/locale/es'
+import 'dayjs/locale/de'
+import 'dayjs/locale/it'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/vi'
 import { getTimezoneOffset } from '@common/utils/timezone'
@@ -91,13 +94,16 @@ export const LONG_DATE_FORMAT = 'dddd, MMMM D, YYYY'
 
 const LOCALIZED_LONG_DATE_FORMATS: Record<string, string> = {
   fr: 'dddd D MMMM YYYY',
+  es: 'dddd, D [de] MMMM [de] YYYY',
+  de: 'dddd, D. MMMM YYYY',
+  it: 'dddd D MMMM YYYY',
   ru: 'dddd, D MMMM YYYY',
   vi: 'dddd, D MMMM YYYY'
 }
 
 /**
  * Long date display format following the day/month ordering of the locale
- * @param locale - Language code (en, fr, ru, vi)
+ * @param locale - Language code (en, fr, es, de, it, ru, vi)
  * @returns dayjs format string
  */
 export function getLongDateFormat(locale?: string): string {
@@ -113,7 +119,10 @@ export function getLongDateFormat(locale?: string): string {
 export function formatLocalizedDate(dateStr: string, lang?: string): string {
   if (!dateStr) return ''
   const date = dayjs(dateStr)
-  const locale = lang && ['en', 'vi', 'fr', 'ru'].includes(lang) ? lang : 'en'
+  const locale =
+    lang && ['en', 'vi', 'fr', 'es', 'de', 'it', 'ru'].includes(lang)
+      ? lang
+      : 'en'
 
   if (locale === 'vi') {
     const dow = date.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -125,7 +134,7 @@ export function formatLocalizedDate(dateStr: string, lang?: string): string {
   }
 
   const formatted = date.locale(locale).format(getLongDateFormat(locale))
-  if (locale === 'fr' || locale === 'ru') {
+  if (['fr', 'es', 'it', 'ru'].includes(locale)) {
     return formatted.charAt(0).toUpperCase() + formatted.slice(1)
   }
   return formatted
