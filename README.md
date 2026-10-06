@@ -196,6 +196,16 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
+To let other pages frame the application, list their origins in `FRAME_ANCESTORS`. It is sent as the `frame-ancestors` of a `Content-Security-Policy` header, and no header is sent when it is unset:
+
+```bash
+docker run -d \
+  -e FRAME_ANCESTORS="https://space.example.com" \
+  -v $PWD/public/.env.js:/usr/share/nginx/html/.env.js \
+  -p 5000:80 \
+  linagora/twake-calendar-private
+```
+
 ---
 
 ## Configuring the Application
