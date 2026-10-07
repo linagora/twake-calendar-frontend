@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
+import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { Callback, isSilentLoginRefused } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
@@ -108,6 +109,7 @@ export const CallbackResume: React.FC = () => {
 
       if (saved.returnTo && isSilentLoginRefused(window.location.search)) {
         sessionStorage.removeItem('redirectState')
+        twakeSpace?.notifyLoginRequired()
         setIsSignInRefused(true)
         return
       }
