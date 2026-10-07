@@ -42,7 +42,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-websocket|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
       ],
 
       moduleNameMapper: {
@@ -61,7 +61,10 @@ const config: Config = {
         '^@linagora/twake-utils$':
           '<rootDir>/node_modules/@linagora/twake-utils',
         '^@linagora/twake-websocket$':
-          '<rootDir>/node_modules/@linagora/twake-websocket/dist/index.js'
+          '<rootDir>/node_modules/@linagora/twake-websocket/dist/index.js',
+        // ESM only, with no `default` export condition for Jest to pick
+        '^@linagora/twake-embed$':
+          '<rootDir>/node_modules/@linagora/twake-embed/dist/index.js'
       },
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts']
     },
@@ -93,7 +96,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-websocket|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
       ],
 
       moduleNameMapper: {
