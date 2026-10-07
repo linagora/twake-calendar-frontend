@@ -1,4 +1,4 @@
-// A copy of the TwakeSpace overlay of @linagora/twake-mui 10.5
+// A copy of the TwakeSpace overlay of @linagora/twake-mui 10.5.1
 // (packages/twake-mui/src/components/SpaceOverlay, twake-ui#137), for a
 // Calendar still on twake-mui 5: to drop, with this folder, once Calendar
 // takes twake-mui 10.4 or later, which exports the same names.

@@ -1,7 +1,12 @@
-// A copy of the TwakeSpace overlay of @linagora/twake-mui 10.5
+// A copy of the TwakeSpace overlay of @linagora/twake-mui 10.5.1
 // (packages/twake-mui/src/components/SpaceOverlay, twake-ui#137), for a
 // Calendar still on twake-mui 5: to drop, with this folder, once Calendar
 // takes twake-mui 10.4 or later, which exports the same names.
+//
+// Known trap: a dialog rendered on the overlay lives in another document, so
+// `document.getElementById` in this one does not find its paper;
+// `components/Dialog/useDynamicPosition.ts` would then request animation
+// frames without end. The embed route shows no view with dynamic positioning.
 //
 // The overlay TwakeSpace puts over its page for an embedded app (ADR 010 of
 // twake-space-architecture), from the side of the app.
