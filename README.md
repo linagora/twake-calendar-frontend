@@ -208,7 +208,7 @@ docker run -d \
 
 TwakeSpace frames the team calendar of a space on `/embed/calendars/<team calendar id>`. The page signs in silently (`prompt=none`), so TwakeSpace, the application and the SSO portal must be served on one registrable domain.
 
-The frame follows the contract of [`@linagora/twake-embed`](https://github.com/linagora/twake-libs/tree/main/packages/twake-embed) with the TwakeSpace origins listed in `TWAKE_SPACE_ORIGIN` of `.env.js` (space separated, usually the same as `FRAME_ANCESTORS`): TwakeSpace owns the browser history and moves the frame from one calendar to another with its `load` and `navigate` messages, the application reports its URL and never adds an entry, and tells TwakeSpace when the silent sign in is refused. Without `TWAKE_SPACE_ORIGIN` the embed route still works, but the frame runs on its own. `/embed/overlay.html` is the empty page TwakeSpace may frame as the overlay of the application; the application draws nothing on it yet.
+The frame follows the contract of [`@linagora/twake-embed`](https://github.com/linagora/twake-libs/tree/main/packages/twake-embed): TwakeSpace greets the frame on each of its loads and the application answers the origin that greeted it, so the application needs no address of TwakeSpace and `FRAME_ANCESTORS` is the one setting that says who may frame it. TwakeSpace owns the browser history and moves the frame from one calendar to another with its `load` and `navigate` messages, the application reports its URL and never adds an entry, and tells TwakeSpace when the silent sign in is refused. `/embed/overlay.html` is the empty page TwakeSpace frames as the overlay of the application: its dialogs and drawers render there, over the whole page of TwakeSpace.
 
 ---
 

@@ -8,14 +8,16 @@ import { EMBED_CALENDAR_PREFIX } from './embeddedCalendar'
 const TEAM_CALENDAR_ID = /^[\w-]+$/
 
 /**
- * The connection to TwakeSpace when it frames the application on an embed
- * route, null when the application runs on its own. `parent` is for tests.
+ * The connection to TwakeSpace when it frames the application, null when the
+ * application runs on its own. The application does not know where
+ * TwakeSpace is: TwakeSpace greets the frame, and the application answers the
+ * origin that greeted it. Only a page `FRAME_ANCESTORS` allows can be that
+ * parent. `parent` is for tests.
  */
 export function connectCalendarToTwakeSpace(
   parent?: Window
 ): TwakeSpaceConnection | null {
   return connectToTwakeSpace({
-    hostOrigins: window.TWAKE_SPACE_ORIGIN?.split(' ').filter(Boolean) ?? [],
     embedPrefix: EMBED_CALENDAR_PREFIX,
     isResourceId: id => TEAM_CALENDAR_ID.test(id),
     parent
