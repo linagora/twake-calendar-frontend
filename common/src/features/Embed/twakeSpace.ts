@@ -4,6 +4,7 @@ import {
   type TwakeSpaceConnection
 } from '@linagora/twake-embed'
 import { EMBED_CALENDAR_PREFIX } from './embeddedCalendar'
+import { connectSpaceOverlay, type SpaceOverlay } from './spaceOverlay'
 
 const TEAM_CALENDAR_ID = /^[\w-]+$/
 
@@ -26,6 +27,18 @@ export function connectCalendarToTwakeSpace(
 
 // Connected at boot, on the callback page of the silent login too
 export const twakeSpace = connectCalendarToTwakeSpace()
+
+/**
+ * The overlay TwakeSpace frames next to the application, on its origin:
+ * dialogs and drawers render there, over the whole page of TwakeSpace, which
+ * shows the region the application draws in. Null on its own.
+ */
+export const spaceOverlay: SpaceOverlay | null =
+  twakeSpace === null
+    ? null
+    : connectSpaceOverlay(region => {
+        twakeSpace.reportOverlayRegion(region)
+      })
 
 /**
  * Leaves the browser history to TwakeSpace: it moves the frame to a team

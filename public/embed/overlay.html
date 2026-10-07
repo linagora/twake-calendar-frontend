@@ -1,9 +1,17 @@
 <!doctype html>
-<!-- The overlay TwakeSpace frames next to the application (@linagora/twake-embed): empty, the application renders into it -->
+<!-- The overlay TwakeSpace frames next to the application (ADR 010 of twake-space-architecture): empty, the application renders its dialogs and drawers into it. Transparent, so that only what the application draws shows over the page of TwakeSpace. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Twake Calendar overlay</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+        color-scheme: normal;
+      }
+    </style>
   </head>
   <body></body>
 </html>
