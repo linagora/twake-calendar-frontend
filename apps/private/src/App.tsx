@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
 import { push } from 'redux-first-history'
@@ -15,6 +15,17 @@ import { Loading } from '@common/components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
 import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
+import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
+import { EMBED_CALENDAR_ROUTE } from '@common/features/Embed/embeddedCalendar'
+import {
+  overlayThemeOptions,
+  SpaceOverlayProvider
+} from '@common/features/Embed/spaceOverlay'
+import {
+  spaceOverlay,
+  syncHistoryWithTwakeSpace,
+  twakeSpace
+} from '@common/features/Embed/twakeSpace'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { default as NewEventDeepLink } from '@common/features/Events/NewEventDeepLink'
@@ -91,13 +102,27 @@ export default function App(): JSX.Element {
   // Logging out from another tab ended the session: start over from the login
   useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
 
+  // Framed by TwakeSpace, the dialogs and drawers go onto its overlay
+  const themeOptions = useMemo(() => {
+    const calendar = makeCalendarOverrides(true)
+    if (spaceOverlay === null) return calendar
+    const overlay = overlayThemeOptions(spaceOverlay)
+    return {
+      ...calendar,
+      components: { ...calendar.components, ...overlay.components }
+    }
+  }, [])
+
+  // Framed by TwakeSpace: it owns the browser history, the router follows it
+  useEffect(
+    () =>
+      twakeSpace ? syncHistoryWithTwakeSpace(twakeSpace, history) : undefined,
+    []
+  )
+
   return (
     <EmbeddingProvider>
-      <TwakeMuiThemeProvider
-        themeOptions={{
-          ...makeCalendarOverrides(true)
-        }}
-      >
+      <TwakeMuiThemeProvider themeOptions={themeOptions}>
         <I18n
           dictRequire={(lang: keyof typeof locale) => locale[lang]}
           lang={lang}
@@ -122,16 +147,22 @@ export default function App(): JSX.Element {
           >
             <Suspense fallback={<Loading />}>
               <WebSocketGate />
-              <Router history={history}>
-                <Routes>
-                  <Route path="/" element={<HandleLogin />} />
-                  <Route path="/calendar" element={<CalendarLayout />} />
-                  <Route path="/events/:uid" element={<EventDeepLink />} />
-                  <Route path="/newEvent" element={<NewEventDeepLink />} />
-                  <Route path="/callback" element={<CallbackResume />} />
-                  <Route path="/error" element={<ErrorPage />} />
-                </Routes>
-              </Router>
+              <SpaceOverlayProvider overlay={spaceOverlay}>
+                <Router history={history}>
+                  <Routes>
+                    <Route path="/" element={<HandleLogin />} />
+                    <Route path="/calendar" element={<CalendarLayout />} />
+                    <Route
+                      path={EMBED_CALENDAR_ROUTE}
+                      element={<EmbeddedCalendar />}
+                    />
+                    <Route path="/events/:uid" element={<EventDeepLink />} />
+                    <Route path="/newEvent" element={<NewEventDeepLink />} />
+                    <Route path="/callback" element={<CallbackResume />} />
+                    <Route path="/error" element={<ErrorPage />} />
+                  </Routes>
+                </Router>
+              </SpaceOverlayProvider>
               <ErrorSnackbar error={error} type="user" />
               <DebugModeToggle />
             </Suspense>

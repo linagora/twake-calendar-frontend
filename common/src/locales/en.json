@@ -669,5 +669,9 @@
   "debug": {
     "enabled": "Debug mode enabled.",
     "disabled": "Debug mode disabled."
+  },
+  "embed": {
+    "signInRequired": "You are signed out. Sign in again to see this calendar.",
+    "calendarUnavailable": "This calendar is not available. You may not be a member of it."
   }
 }

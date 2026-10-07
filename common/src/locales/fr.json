@@ -669,5 +669,9 @@
   "debug": {
     "enabled": "Mode debug activé.",
     "disabled": "Mode debug désactivé."
+  },
+  "embed": {
+    "signInRequired": "Vous êtes déconnecté. Reconnectez-vous pour voir ce calendrier.",
+    "calendarUnavailable": "Ce calendrier n'est pas disponible. Vous n'en êtes peut-être pas membre."
   }
 }

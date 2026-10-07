@@ -196,6 +196,20 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
+To let other pages frame the application, list their origins in `FRAME_ANCESTORS`. It is required for the embed routes: without it no `Content-Security-Policy` header is sent, and any page could frame them. It is sent as the `frame-ancestors` of a `Content-Security-Policy` header, and no header is sent when it is unset:
+
+```bash
+docker run -d \
+  -e FRAME_ANCESTORS="https://space.example.com" \
+  -v $PWD/public/.env.js:/usr/share/nginx/html/.env.js \
+  -p 5000:80 \
+  linagora/twake-calendar-private
+```
+
+TwakeSpace frames the team calendar of a space on `/embed/calendars/<team calendar id>`. The page signs in silently (`prompt=none`), so TwakeSpace, the application and the SSO portal must be served on one registrable domain.
+
+The frame follows the contract of [`@linagora/twake-embed`](https://github.com/linagora/twake-libs/tree/main/packages/twake-embed): TwakeSpace greets the frame on each of its loads and the application answers the origin that greeted it, so the application needs no address of TwakeSpace and `FRAME_ANCESTORS` is the one setting that says who may frame it. TwakeSpace owns the browser history and moves the frame from one calendar to another with its `load` and `navigate` messages, the application reports its URL and never adds an entry, and tells TwakeSpace when the silent sign in is refused. `/embed/overlay.html` is the empty page TwakeSpace frames as the overlay of the application: its dialogs and drawers render there, over the whole page of TwakeSpace.
+
 ---
 
 ## Configuring the Application
