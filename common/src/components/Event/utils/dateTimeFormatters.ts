@@ -99,27 +99,6 @@ export function formatDateTimeInTimezone(
 }
 
 /**
- * Format the calendar day of a date in a specific timezone (YYYY-MM-DD).
- * Assembled from formatToParts: the pattern of a locale (e.g. en-CA) comes
- * from the engine's CLDR data and is not guaranteed (WebKit yields M/D/YYYY).
- * @param date - Date to format
- * @param timeZone - Target timezone
- * @returns Day in target timezone, as YYYY-MM-DD
- */
-export function formatDateInTimezone(date: Date, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).formatToParts(date)
-  const getValue = (type: Intl.DateTimeFormatPartTypes): string =>
-    parts.find(p => p.type === type)?.value ?? ''
-
-  return `${getValue('year')}-${getValue('month')}-${getValue('day')}`
-}
-
-/**
  * Get current time rounded to nearest 30 minutes
  * @returns Rounded Date object
  */
