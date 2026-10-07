@@ -4,7 +4,8 @@ import { useAppSelector } from '@common/app/hooks'
  * TwakeSpace frames the team calendar of a space on this route, keyed by the
  * id the calendar side service published when it provisioned the space.
  */
-export const EMBED_CALENDAR_ROUTE = '/embed/calendars/:teamCalendarId'
+export const EMBED_CALENDAR_PREFIX = '/embed/calendars/'
+export const EMBED_CALENDAR_ROUTE = `${EMBED_CALENDAR_PREFIX}:teamCalendarId`
 
 const EMBED_CALENDAR_PATH = /^\/embed\/calendars\/([\w-]+)\/?$/
 

@@ -1,3 +1,4 @@
+import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
 import { Auth } from '@common/features/User/oidcAuth'
 import { assertWebSocketAlive } from '@common/websocket/connection/lifecycle/assertWebSocketAlive'
 import ky, {
@@ -178,7 +179,10 @@ export const api: KyInstance = ky.extend({
 export const externalApi: KyInstance = ky.create({})
 
 export function redirectTo(url: URL): void {
-  window.location.assign(url)
+  // TwakeSpace owns the browser history of the pages it frames: a frame never
+  // adds an entry, so the silent login leaves no dead Back press behind
+  if (isEmbedPath(window.location.pathname)) window.location.replace(url)
+  else window.location.assign(url)
 }
 
 export function getLocation(): string {

@@ -69,5 +69,7 @@ declare global {
     HIDE_LANGUAGE_SELECTOR: boolean
 
     PUBLIC_PAGE_BASE: string | undefined
+
+    TWAKE_SPACE_ORIGIN: string | undefined
   }
 }
