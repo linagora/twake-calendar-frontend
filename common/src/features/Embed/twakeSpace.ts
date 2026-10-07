@@ -3,21 +3,38 @@ import {
   embedRoute,
   type TwakeSpaceConnection
 } from '@linagora/twake-embed'
-import { EMBED_CALENDAR_PREFIX } from './embeddedCalendar'
+import { getPendingReturnTo } from '@linagora/twake-oidc'
+import { EMBED_CALENDAR_PREFIX, isEmbedPath } from './embeddedCalendar'
 import { connectSpaceOverlay, type SpaceOverlay } from './spaceOverlay'
 
 const TEAM_CALENDAR_ID = /^[\w-]+$/
 
 /**
+ * Whether this document is the one TwakeSpace frames: an embed route, or the
+ * callback of the silent sign in that an embed route started (the route it
+ * returns to is saved with the sign in). The application is framed elsewhere
+ * too, by the Cozy workplace, where nothing of this applies.
+ */
+export function isFramedByTwakeSpace(
+  pathname: string = window.location.pathname
+): boolean {
+  if (isEmbedPath(pathname)) return true
+  if (pathname !== '/callback') return false
+  const returnTo = getPendingReturnTo()
+  return returnTo !== null && isEmbedPath(returnTo)
+}
+
+/**
  * The connection to TwakeSpace when it frames the application, null when the
- * application runs on its own. The application does not know where
- * TwakeSpace is: TwakeSpace greets the frame, and the application answers the
- * origin that greeted it. Only a page `FRAME_ANCESTORS` allows can be that
- * parent. `parent` is for tests.
+ * application runs on its own or is framed by another page. The application
+ * does not know where TwakeSpace is: TwakeSpace greets the frame, and the
+ * application answers the origin that greeted it. Only a page
+ * `FRAME_ANCESTORS` allows can be that parent. `parent` is for tests.
  */
 export function connectCalendarToTwakeSpace(
   parent?: Window
 ): TwakeSpaceConnection | null {
+  if (!isFramedByTwakeSpace()) return null
   return connectToTwakeSpace({
     embedPrefix: EMBED_CALENDAR_PREFIX,
     isResourceId: id => TEAM_CALENDAR_ID.test(id),
