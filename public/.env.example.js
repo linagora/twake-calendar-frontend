@@ -72,6 +72,3 @@ var TDRIVE_INTENT_URL = "https://{localpart}.example.com"
 //   'https://{workplaceFqdn}'
 //   'https://{workplaceFqdn.localpart}.{workplaceFqdn.domain}'
 var ENABLE_REFRESH_BUTTON = false 
-// The origins of TwakeSpace, space separated, when it frames the team
-// calendars on /embed/calendars/<id>. Optional, see FRAME_ANCESTORS in the README.
-// var TWAKE_SPACE_ORIGIN = 'https://space.example.com'
