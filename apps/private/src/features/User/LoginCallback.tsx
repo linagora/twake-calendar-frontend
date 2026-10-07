@@ -1,6 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
 import { getCalendarsList } from '@common/features/Calendars/CalendarSlice'
+import {
+  buildIntentPath,
+  takePendingIntent
+} from '@common/features/Intents/pendingIntent'
 import { Callback } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
@@ -63,8 +67,16 @@ export const CallbackResume: React.FC = () => {
   const dispatch = useAppDispatch()
   const hasRun = useRef(false)
   const hasNavigated = useRef(false)
+  const pendingIntentRef = useRef<string | null>(null)
   const userData = useAppSelector(state => state.user)
   const calendars = useAppSelector(state => state.calendars)
+
+  // The error page would start an interactive sign in inside the intent
+  // frame: the frame explains the failure instead.
+  const getFailurePath = (): string =>
+    pendingIntentRef.current
+      ? buildIntentPath(pendingIntentRef.current, 'callback_failed')
+      : '/error'
 
   // Process callback and load data
   useEffect(() => {
@@ -74,6 +86,15 @@ export const CallbackResume: React.FC = () => {
     hasRun.current = true
 
     const runCallback = async (): Promise<void> => {
+      pendingIntentRef.current = takePendingIntent()
+      const authError = new URLSearchParams(window.location.search).get('error')
+      if (pendingIntentRef.current && authError) {
+        // The SSO answered the intent frame's prompt=none without signing in:
+        // the frame explains it, the error page would be a dead end there.
+        sessionStorage.removeItem('redirectState')
+        dispatch(replace(buildIntentPath(pendingIntentRef.current, authError)))
+        return
+      }
       const saved = getSavedRedirectState()
       const savedToken = hasSavedToken()
 
@@ -108,7 +129,7 @@ export const CallbackResume: React.FC = () => {
         console.error('OIDC callback error:', e)
         dispatch(setAppLoading(false))
         dispatch(setUserError(getErrorMessage(e)))
-        dispatch(replace('/error'))
+        dispatch(replace(getFailurePath()))
       }
     }
 
@@ -123,7 +144,7 @@ export const CallbackResume: React.FC = () => {
     // view: only a broken user session justifies the full error page.
     if (userData.error) {
       dispatch(setAppLoading(false))
-      dispatch(replace('/error'))
+      dispatch(replace(getFailurePath()))
       return
     }
     if (!userData.userData || !userData.tokens) return
@@ -138,7 +159,13 @@ export const CallbackResume: React.FC = () => {
       window.history.replaceState({}, '', window.location.pathname)
     }
 
-    dispatch(replace('/calendar'))
+    dispatch(
+      replace(
+        pendingIntentRef.current
+          ? buildIntentPath(pendingIntentRef.current)
+          : '/calendar'
+      )
+    )
   }, [
     userData.loading,
     userData.userData,

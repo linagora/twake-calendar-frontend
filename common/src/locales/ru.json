@@ -670,5 +670,18 @@
   "debug": {
     "enabled": "Режим отладки включён.",
     "disabled": "Режим отладки отключён."
+  },
+  "intents": {
+    "close": "Закрыть",
+    "error": {
+      "missingIntent": "Ссылка неполная: запрос к Twake Calendar отсутствует.",
+      "tokenExchangeFailed": "Twake Calendar не удалось подключиться к вашему рабочему пространству. Повторите попытку позже.",
+      "forbidden": "Twake Calendar не может ответить на этот запрос. Обратитесь к администратору.",
+      "serviceFailed": "Twake Calendar не удалось загрузить этот запрос. Повторите попытку позже.",
+      "sessionExpired": "Срок действия сеанса истёк. Откройте Twake Calendar, чтобы войти снова, затем повторите попытку.",
+      "unsupported": "Twake Calendar не может обработать этот запрос.",
+      "invalidData": "Запрос к Twake Calendar имеет неверный формат.",
+      "crashed": "В Twake Calendar произошла ошибка."
+    }
   }
 }

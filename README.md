@@ -37,6 +37,7 @@ The repository is organized as a monorepo workspace:
 | `/calendar` | Main calendar view (authenticated) |
 | `/events/:uid` | Deep link that opens the event identified by `uid` once the calendar is loaded (going through the login flow first when needed) |
 | `/newEvent?attendee=alice@example.com` | Deep link that opens the create-event modal with the attendee(s) prefilled. Accepts several attendees, either repeated (`?attendee=a@x.com&attendee=b@x.com`) or comma separated (`?attendee=a@x.com,b@x.com`) |
+| `/intents?intent=<id>` | Service of the Cozy intents Twake Calendar handles (`OPEN io.cozy.calendar.events` with `{ date: 'YYYY-MM-DD' }`). The Cozy stack opens it in an iframe of the app that started the intent; see "Cozy intents" below |
 | `/callback` | OAuth callback |
 | `/error` | Error page |
 
@@ -195,6 +196,31 @@ docker run -d \
   -p 5000:80 \
   linagora/twake-calendar-private
 ```
+
+### Cozy intents
+
+Other apps of the workplace open `/intents` in an iframe (see the route table
+above). Set `INTENTS_FRAME_ANCESTORS` to the origins allowed to do so, usually
+the Cozy domain with a wildcard:
+
+```bash
+docker run -d \
+  -v $PWD/public/.env.js:/usr/share/nginx/html/.env.js \
+  -e INTENTS_FRAME_ANCESTORS='https://*.twake.example.com' \
+  -p 5000:80 \
+  linagora/twake-calendar-private
+```
+
+The value is a space-separated list of CSP sources, for example
+`https://*.twake.example.com https://other.example.com`. Do not separate them
+with `;` or `,`. The container refuses to start if the value contains a double
+quote, a backslash, a `$` or a newline. Only the private image reads this
+variable: the public image ignores it and never lets `/intents` be framed.
+
+Without it, `/intents` cannot be framed at all. On the Cozy side, the calendar
+app's `service_url_flag` names a feature flag (`calendar.service-url`) whose
+value must be this application's origin, and the token exchange must be
+configured for `registry://calendar`.
 
 ---
 

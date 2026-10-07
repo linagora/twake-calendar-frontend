@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setAppLoading } from '@common/app/loadingSlice'
-import { Auth } from '@common/features/User/oidcAuth'
+import { prepareIntentLogin } from '@common/features/Intents/pendingIntent'
+import { Auth, type AuthOptions } from '@common/features/User/oidcAuth'
 import {
   getOpenPaasUserData,
   setUserError
@@ -18,10 +19,10 @@ export const SSO_UNREACHABLE_ERROR = 'TRANSLATION:error.ssoUnreachable'
 
 // Reaching the SSO takes a discovery request: a network blip, or a request the
 // browser dropped, is no reason to leave the user on a blank page.
-const authWithRetry = async (): ReturnType<typeof Auth> => {
+const authWithRetry = async (options: AuthOptions): ReturnType<typeof Auth> => {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await Auth()
+      return await Auth(options)
     } catch (error) {
       if (attempt + 1 >= SSO_ATTEMPTS) throw error
       console.warn('Reaching the SSO failed, trying again:', error)
@@ -73,7 +74,7 @@ export const useInitializeApp = (): void => {
 
       let loginurl: Awaited<ReturnType<typeof Auth>>
       try {
-        loginurl = await authWithRetry()
+        loginurl = await authWithRetry(prepareIntentLogin())
       } catch (error) {
         console.error('The SSO cannot be reached:', error)
         dispatch(setUserError(SSO_UNREACHABLE_ERROR))

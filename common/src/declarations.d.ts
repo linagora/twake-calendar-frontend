@@ -1,5 +1,24 @@
 declare module '*.styl'
 declare module 'cozy-interapp' {
+  export interface IntentDocument {
+    _id: string
+    attributes: {
+      action: string
+      type: string
+      client: string
+      permissions?: string[]
+    }
+  }
+
+  export interface IntentService {
+    getData: () => unknown
+    getIntent: () => IntentDocument
+    terminate: (doc: unknown) => void
+    cancel: () => void
+    throw: (error: Error) => void
+    notifyReadyToUse: () => void
+  }
+
   export default class Intents {
     constructor(options?: Record<string, unknown>)
     create(
@@ -8,6 +27,10 @@ declare module 'cozy-interapp' {
       data?: Record<string, unknown>,
       permissions?: string[]
     ): unknown
+    createService(
+      intentId?: string,
+      serviceWindow?: Window
+    ): Promise<IntentService>
   }
 }
 

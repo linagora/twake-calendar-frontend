@@ -26,7 +26,16 @@ export async function getClientConfig() {
   return config
 }
 
-export async function Auth() {
+export interface AuthOptions {
+  /**
+   * 'none' makes the SSO answer without showing any page: where a login form
+   * cannot be displayed (an intent frame), a dead session comes back as an
+   * error instead.
+   */
+  prompt?: 'none'
+}
+
+export async function Auth(options: AuthOptions = {}) {
   const code_verifier = client.randomPKCECodeVerifier()
   const code_challenge = await client.calculatePKCECodeChallenge(code_verifier)
   const openIdClientConfig = await getClientConfig()
@@ -37,6 +46,9 @@ export async function Auth() {
     code_challenge,
     code_challenge_method: clientConfig.code_challenge_method,
     state
+  }
+  if (options.prompt) {
+    parameters.prompt = options.prompt
   }
   const redirectTo = client.buildAuthorizationUrl(
     openIdClientConfig,

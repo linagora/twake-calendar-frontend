@@ -670,5 +670,18 @@
   "debug": {
     "enabled": "Đã bật chế độ gỡ lỗi.",
     "disabled": "Đã tắt chế độ gỡ lỗi."
+  },
+  "intents": {
+    "close": "Đóng",
+    "error": {
+      "missingIntent": "Liên kết này chưa đầy đủ: thiếu yêu cầu gửi tới Twake Calendar.",
+      "tokenExchangeFailed": "Twake Calendar không thể kết nối với không gian làm việc của bạn. Vui lòng thử lại sau.",
+      "forbidden": "Twake Calendar không được phép trả lời yêu cầu này. Vui lòng liên hệ quản trị viên.",
+      "serviceFailed": "Twake Calendar không thể tải yêu cầu này. Vui lòng thử lại sau.",
+      "sessionExpired": "Phiên của bạn đã hết hạn. Hãy mở Twake Calendar để đăng nhập lại, rồi thử lại.",
+      "unsupported": "Twake Calendar không thể xử lý yêu cầu này.",
+      "invalidData": "Yêu cầu gửi tới Twake Calendar không đúng định dạng.",
+      "crashed": "Đã xảy ra lỗi trong Twake Calendar."
+    }
   }
 }

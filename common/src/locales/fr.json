@@ -669,5 +669,18 @@
   "debug": {
     "enabled": "Mode debug activé.",
     "disabled": "Mode debug désactivé."
+  },
+  "intents": {
+    "close": "Fermer",
+    "error": {
+      "missingIntent": "Ce lien est incomplet : la demande adressée à Twake Calendar est manquante.",
+      "tokenExchangeFailed": "Twake Calendar n’a pas pu se connecter à votre espace de travail. Réessayez plus tard.",
+      "forbidden": "Twake Calendar n’est pas autorisé à répondre à cette demande. Contactez votre administrateur.",
+      "serviceFailed": "Twake Calendar n’a pas pu charger cette demande. Réessayez plus tard.",
+      "sessionExpired": "Votre session a expiré. Ouvrez Twake Calendar pour vous reconnecter, puis réessayez.",
+      "unsupported": "Twake Calendar ne sait pas traiter cette demande.",
+      "invalidData": "Cette demande adressée à Twake Calendar est mal formée.",
+      "crashed": "Une erreur est survenue dans Twake Calendar."
+    }
   }
 }
