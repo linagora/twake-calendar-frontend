@@ -9,7 +9,6 @@ import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { BookingOwnerDisplay } from '@/components/Booking/BookingHeader/BookingOwnerInfo'
 import { StaticDateTimeSummary } from './StaticDateTimeSummary'
-import { formatDateInTimezone } from '@common/components/Event/utils/dateTimeFormatters'
 import { ResponsiveDialog } from '@common/components/Dialog'
 
 interface BookingConfirmDialogProps {
