@@ -5,7 +5,7 @@ import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
 import { push } from 'redux-first-history'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { history } from '@common/app/store'
+import { history, store } from '@common/app/store'
 import { Error as ErrorPage } from '@common/components/Error/Error'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
@@ -22,6 +22,7 @@ import {
   SpaceOverlayProvider
 } from '@common/features/Embed/spaceOverlay'
 import {
+  reportUpcomingEventsToTwakeSpace,
   spaceOverlay,
   syncHistoryWithTwakeSpace,
   twakeSpace
@@ -116,6 +117,14 @@ export default function App(): JSX.Element {
   useEffect(
     () =>
       twakeSpace ? syncHistoryWithTwakeSpace(twakeSpace, history) : undefined,
+    []
+  )
+  // Framed by TwakeSpace: the home of the space shows the upcoming events
+  useEffect(
+    () =>
+      twakeSpace
+        ? reportUpcomingEventsToTwakeSpace(twakeSpace, store)
+        : undefined,
     []
   )
 
