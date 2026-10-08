@@ -19,6 +19,7 @@ import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { SectionPreviewRow } from '@common/components/Event/components/SectionPreviewRow'
 import { useResponsiveInputSize } from '@common/hooks/useResponsiveInputSize'
+import { useEmbeddedCalendarId } from '@common/features/Embed/embeddedCalendar'
 
 export interface CalendarSelectFieldProps {
   calendarid: string
@@ -151,10 +152,13 @@ export const CalendarSelectField: React.FC<CalendarSelectFieldProps> = ({
   showMore,
   defaultExpanded,
   onCalendarChange,
-  disabled
+  disabled: isDisabled
 }) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
+  // A space shows its team calendar only: its events stay there
+  const isInSpace = useEmbeddedCalendarId() !== null
+  const disabled = isDisabled || isInSpace
 
   // Local UI state
   const [hasClickedCalendarSection, setHasClickedCalendarSection] =
