@@ -1,9 +1,13 @@
 import { history, store } from '@common/app/store'
 import {
   connectCalendarToTwakeSpace,
+  countUpcomingEvents,
   openMeetingInTwakeSpace,
+  reportUpcomingEventsToTwakeSpace,
   syncHistoryWithTwakeSpace
 } from '@common/features/Embed/twakeSpace'
+import type { Calendar } from '@common/types/CalendarTypes'
+import type { CalendarEvent } from '@common/types/EventsTypes'
 
 const HOST = 'https://space.test'
 
@@ -165,5 +169,80 @@ describe('the frame of TwakeSpace', () => {
     expect(
       openMeetingInTwakeSpace('https://meet.test/abc-defg-hij', null)
     ).toBe(false)
+  })
+
+  describe('the upcoming events of the team calendars', () => {
+    const NOW = Date.parse('2026-10-08T10:00:00Z')
+    const DAY = 24 * 60 * 60 * 1000
+    const event = (start: number): CalendarEvent =>
+      ({ start: new Date(start).toISOString() }) as CalendarEvent
+    const calendar = (
+      id: string,
+      teamCalendar: boolean,
+      events: CalendarEvent[]
+    ): Calendar =>
+      ({
+        id,
+        owner: { teamCalendar },
+        events: Object.fromEntries(events.map((e, i) => [`e${i}`, e]))
+      }) as unknown as Calendar
+    const calendars = {
+      'team1/team1': calendar('team1/team1', true, [
+        event(NOW - 1),
+        event(NOW),
+        event(NOW + 3 * DAY),
+        event(NOW + 7 * DAY),
+        event(NOW + 7 * DAY + 1)
+      ]),
+      'team2/team2': calendar('team2/team2', true, []),
+      'user1/user1': calendar('user1/user1', false, [event(NOW + DAY)])
+    }
+
+    it('counts the events from now through the next 7 days, by embed route id', () => {
+      expect(countUpcomingEvents(calendars, NOW)).toEqual([
+        { resourceId: 'team1', name: 'events.upcoming', value: 3 },
+        { resourceId: 'team2', name: 'events.upcoming', value: 0 }
+      ])
+    })
+
+    it('reports them to TwakeSpace, and again when they change', () => {
+      const space = connectCalendarToTwakeSpace(parent)
+      if (!space) throw new Error('not connected')
+      let list: Record<string, Calendar> = {}
+      const listeners: (() => void)[] = []
+      const fakeStore = {
+        getState: (): { calendars: { list: Record<string, Calendar> } } => ({
+          calendars: { list }
+        }),
+        subscribe: (listener: () => void): (() => void) => {
+          listeners.push(listener)
+          return (): void => {
+            listeners.splice(listeners.indexOf(listener), 1)
+          }
+        }
+      }
+      const metadata = (): unknown[] =>
+        posted()
+          .map(([data]) => data as { type: string; metadata: unknown })
+          .filter(data => data.type === 'twake-embed:metadata')
+          .map(data => data.metadata)
+
+      stop = reportUpcomingEventsToTwakeSpace(space, fakeStore)
+      greet()
+      expect(metadata()).toEqual([[]])
+
+      list = { 'team2/team2': calendars['team2/team2'] }
+      listeners.forEach(listener => listener())
+      listeners.forEach(listener => listener())
+      expect(metadata()).toEqual([
+        [],
+        [{ resourceId: 'team2', name: 'events.upcoming', value: 0 }]
+      ])
+
+      stop()
+      stop = undefined
+      expect(listeners).toEqual([])
+      space.disconnect()
+    })
   })
 })

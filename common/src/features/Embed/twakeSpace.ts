@@ -1,12 +1,16 @@
 import {
   connectToTwakeSpace,
   embedRoute,
+  type Metadata,
   type TwakeSpaceConnection
 } from '@linagora/twake-embed'
+import type { Calendar } from '@common/types/CalendarTypes'
 import { EMBED_CALENDAR_PREFIX, isEmbedPath } from './embeddedCalendar'
 import { connectSpaceOverlay, type SpaceOverlay } from './spaceOverlay'
 
 const TEAM_CALENDAR_ID = /^[\w-]+$/
+const UPCOMING_DAYS = 7
+const DAY_MS = 24 * 60 * 60 * 1000
 
 /**
  * Whether this document is the one TwakeSpace frames: an embed route, or the
@@ -74,6 +78,52 @@ export function openMeetingInTwakeSpace(
   if (space === null) return false
   space.openPip(url)
   return true
+}
+
+/**
+ * What TwakeSpace shows on the home of each space: the events of its team
+ * calendar from now through the next 7 days, keyed by the id of its embed
+ * route (a team calendar lives at /calendars/<id>/<id>). Counted from the
+ * events loaded so far: the embed route loads the week shown and the next.
+ */
+export function countUpcomingEvents(
+  calendars: Record<string, Calendar>,
+  now: number = Date.now()
+): Metadata[] {
+  const end = now + UPCOMING_DAYS * DAY_MS
+  return Object.values(calendars)
+    .filter(calendar => calendar.owner?.teamCalendar)
+    .map(calendar => ({
+      resourceId: calendar.id.split('/')[0],
+      name: 'events.upcoming',
+      value: Object.values(calendar.events ?? {}).filter(event => {
+        const start = Date.parse(event.start)
+        return start >= now && start <= end
+      }).length
+    }))
+}
+
+/**
+ * Reports the upcoming events of every team calendar to TwakeSpace, and again
+ * whenever the store changes them. Returns the function that stops it.
+ */
+export function reportUpcomingEventsToTwakeSpace(
+  space: TwakeSpaceConnection,
+  store: {
+    getState: () => { calendars: { list: Record<string, Calendar> } }
+    subscribe: (listener: () => void) => () => void
+  }
+): () => void {
+  let last = ''
+  const report = (): void => {
+    const metadata = countUpcomingEvents(store.getState().calendars.list)
+    const key = JSON.stringify(metadata)
+    if (key === last) return
+    last = key
+    space.reportMetadata(metadata)
+  }
+  report()
+  return store.subscribe(report)
 }
 
 /**
