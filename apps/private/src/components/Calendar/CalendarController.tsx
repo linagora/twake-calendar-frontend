@@ -69,6 +69,9 @@ export interface CalendarControllerProps {
   onPeriodChange?: (period: DisplayedPeriod) => void
   onViewChange: (view: string) => void
   controllerRef?: MutableRefObject<CalendarControllerRef | null>
+  // The event the embed route shows, and what closing its preview does
+  eventUid?: string | null
+  onCloseEvent?: () => void
 }
 
 const getCalendarIds = (calendarIdsString: string): string[] => {
@@ -85,7 +88,9 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
   onDateChange,
   onPeriodChange,
   onViewChange,
-  controllerRef
+  controllerRef,
+  eventUid,
+  onCloseEvent
 }: CalendarControllerProps) => {
   const { t } = useI18n()
 
@@ -253,7 +258,8 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     setEventDisplayedId,
     setEventDisplayedCalId,
     setEventDisplayedTemp,
-    setOpenEventDisplay
+    setOpenEventDisplay,
+    uid: eventUid
   })
 
   // Open the create event modal with prefilled attendee(s) when arriving from a
@@ -422,7 +428,10 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
           calId={eventDisplayedCalId}
           tempEvent={eventDisplayedTemp}
           open={openEventDisplay}
-          onClose={eventHandlers.handleCloseEventDisplay}
+          onClose={() => {
+            eventHandlers.handleCloseEventDisplay()
+            onCloseEvent?.()
+          }}
           anchorEl={anchorEl}
           currentView={currentView}
         />

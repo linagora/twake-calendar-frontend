@@ -12,12 +12,15 @@ interface UseOpenEventFromUrlProps {
   setEventDisplayedCalId: (calId: string) => void
   setEventDisplayedTemp: (temp: boolean) => void
   setOpenEventDisplay: (open: boolean) => void
+  // The event of the embed route, in place of the one a deep link saved
+  uid?: string | null
 }
 
 /**
  * When the user reaches the calendar page after following a /events/:uid deep
  * link, resolves the event from its UID and opens the preview modal on top of
- * the default calendar view.
+ * the default calendar view. On the embed route, opens each event its URL
+ * shows.
  */
 export function useOpenEventFromUrl({
   userId,
@@ -26,16 +29,22 @@ export function useOpenEventFromUrl({
   setEventDisplayedId,
   setEventDisplayedCalId,
   setEventDisplayedTemp,
-  setOpenEventDisplay
+  setOpenEventDisplay,
+  uid
 }: UseOpenEventFromUrlProps): void {
-  const processedRef = useRef(false)
+  const processedRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (processedRef.current || !userId) {
+    if (!userId) {
       return
     }
-    const pendingUid = sessionStorage.getItem(PENDING_EVENT_UID_KEY)
+    const pendingUid = uid ?? sessionStorage.getItem(PENDING_EVENT_UID_KEY)
     if (!pendingUid) {
+      // The same event may be opened again once its preview is closed
+      processedRef.current = null
+      return
+    }
+    if (processedRef.current === pendingUid) {
       return
     }
     // Wait for the user's calendars to be loaded so the event can be attached
@@ -44,8 +53,8 @@ export function useOpenEventFromUrl({
       return
     }
 
-    processedRef.current = true
-    sessionStorage.removeItem(PENDING_EVENT_UID_KEY)
+    processedRef.current = pendingUid
+    if (!uid) sessionStorage.removeItem(PENDING_EVENT_UID_KEY)
 
     void (async () => {
       try {
@@ -77,6 +86,7 @@ export function useOpenEventFromUrl({
     setEventDisplayedId,
     setEventDisplayedCalId,
     setEventDisplayedTemp,
-    setOpenEventDisplay
+    setOpenEventDisplay,
+    uid
   ])
 }
