@@ -1,6 +1,7 @@
 import { history, store } from '@common/app/store'
 import {
   connectCalendarToTwakeSpace,
+  openMeetingInTwakeSpace,
   syncHistoryWithTwakeSpace
 } from '@common/features/Embed/twakeSpace'
 
@@ -144,5 +145,25 @@ describe('the frame of TwakeSpace', () => {
     )
     expect(space.hostOrigin()).toBeNull()
     expect(posted()).toEqual([])
+  })
+
+  it('opens a video meeting in the call window of TwakeSpace, once greeted', () => {
+    const space = connectCalendarToTwakeSpace(parent)
+    if (!space) throw new Error('not connected')
+    greet()
+    expect(
+      openMeetingInTwakeSpace('https://meet.test/abc-defg-hij', space)
+    ).toBe(true)
+    expect(posted()).toContainEqual([
+      { type: 'twake-embed:pip', url: 'https://meet.test/abc-defg-hij' },
+      HOST
+    ])
+    space.disconnect()
+  })
+
+  it('leaves a video meeting to the link on its own', () => {
+    expect(
+      openMeetingInTwakeSpace('https://meet.test/abc-defg-hij', null)
+    ).toBe(false)
   })
 })

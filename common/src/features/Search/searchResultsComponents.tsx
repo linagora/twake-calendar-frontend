@@ -1,5 +1,6 @@
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import Tooltip from '@common/components/Tooltip'
+import { openMeetingInTwakeSpace } from '@common/features/Embed/twakeSpace'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 import {
   alpha,
@@ -280,6 +281,7 @@ export const RenderVideoJoin: React.FC<VideoJoinProps> = ({ url, t }) => {
           const parsed = new URL(url)
           if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')
             return
+          if (openMeetingInTwakeSpace(parsed.toString())) return
           window.open(parsed.toString(), '_blank', 'noopener,noreferrer')
         } catch {
           return

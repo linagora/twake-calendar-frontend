@@ -63,6 +63,20 @@ export const spaceOverlay: SpaceOverlay | null =
       })
 
 /**
+ * Opens a video meeting in the call window of TwakeSpace when it frames the
+ * application (`twake-embed:pip`), and says so: the caller then leaves the
+ * link alone. False on its own, where the link opens a new tab as usual.
+ */
+export function openMeetingInTwakeSpace(
+  url: string,
+  space: TwakeSpaceConnection | null = twakeSpace
+): boolean {
+  if (space === null) return false
+  space.openPip(url)
+  return true
+}
+
+/**
  * Leaves the browser history to TwakeSpace: it moves the frame to a team
  * calendar (another space, Back, Forward, a deep link) and the router
  * replaces its URL, never adding an entry. Returns the function that stops it.

@@ -12,6 +12,7 @@ import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import { ContentCopy as CopyIcon } from '@mui/icons-material'
 import Tooltip from '@common/components/Tooltip'
 import { handleCopyLink } from '@common/utils/handleCopyLink'
+import { openMeetingInTwakeSpace } from '@common/features/Embed/twakeSpace'
 
 const sanitizeMeetingLink = (raw: string | null): string | null => {
   if (!raw) return null
@@ -49,6 +50,9 @@ export const VideoLink: React.FC<{
           target="_blank"
           rel="noopener noreferrer"
           sx={{ textDecoration: 'none' }}
+          onClick={event => {
+            if (openMeetingInTwakeSpace(safeMeetingLink)) event.preventDefault()
+          }}
         >
           <Button
             startIcon={icon}
