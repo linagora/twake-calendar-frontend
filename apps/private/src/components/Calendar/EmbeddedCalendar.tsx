@@ -55,7 +55,7 @@ export function EmbeddedCalendar(): JSX.Element | null {
   }
 
   return (
-    <div className="App">
+    <div className="App isEmbedded">
       <main className="main-layout isInIframe">
         <div className="calendar">
           <header className="menubar">

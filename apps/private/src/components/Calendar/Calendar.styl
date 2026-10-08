@@ -12,6 +12,10 @@
   margin-top 8px
   height calc(100vh - 8px)
 
+// TwakeSpace frames the embed on its white page: no grey of the application
+.App.isEmbedded
+  background-color #fff
+
 .main-layout.calendar-layout
   background-color #fff
   flex-direction row
@@ -33,6 +37,14 @@
 .main-layout.isInIframe .fc
   flex 1
   min-height 0
+
+// The wrapper of FullCalendar takes the height left under the menubar
+.App.isEmbedded .calendar > div:has(> .fc)
+  flex 1
+  min-height 0
+  height auto !important
+  display flex
+  flex-direction column
 
 .calendarListHeader
   padding-top 10px
