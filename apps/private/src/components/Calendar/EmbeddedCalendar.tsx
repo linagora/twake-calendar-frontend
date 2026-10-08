@@ -1,4 +1,4 @@
-import { useAppSelector } from '@common/app/hooks'
+import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { User } from '@common/components/Attendees/types'
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import {
@@ -6,11 +6,17 @@ import {
   formatPeriodLabel
 } from '@common/components/Menubar/periodLabel'
 import { NavigationControls } from '@common/components/Menubar/components/NavigationControls'
-import { useEmbeddedCalendarId } from '@common/features/Embed/embeddedCalendar'
+import {
+  EMBED_CALENDAR_PREFIX,
+  useEmbeddedCalendarId,
+  useEmbeddedEventUid
+} from '@common/features/Embed/embeddedCalendar'
+import { embedRoute } from '@linagora/twake-embed'
 import { Button, Stack, Typography } from '@linagora/twake-mui'
 import type { CalendarApi } from '@fullcalendar/core'
 import AddIcon from '@mui/icons-material/Add'
 import { useMemo, useRef, useState } from 'react'
+import { replace } from 'redux-first-history'
 import { useI18n } from 'twake-i18n'
 import CalendarController, { CalendarControllerRef } from './CalendarController'
 
@@ -37,8 +43,22 @@ export function EmbeddedCalendar(): JSX.Element | null {
     Boolean(calendarId && state.calendars.list[calendarId])
   )
 
+  const dispatch = useAppDispatch()
+  const eventUid = useEmbeddedEventUid()
+
   const [currentDate, setCurrentDate] = useState(new Date())
   const [displayedPeriod, setDisplayedPeriod] = useState<DisplayedPeriod>()
+
+  // Back to the calendar once the event's preview closes: the report of the
+  // new URL brings TwakeSpace's address along, and a click on the same card
+  // opens the event again
+  const closeEvent = (): void => {
+    if (eventUid && calendarId) {
+      dispatch(
+        replace(embedRoute(EMBED_CALENDAR_PREFIX, calendarId.split('/')[0]))
+      )
+    }
+  }
 
   if (!isSignedIn) return null
 
@@ -95,6 +115,8 @@ export function EmbeddedCalendar(): JSX.Element | null {
             onDateChange={setCurrentDate}
             onPeriodChange={setDisplayedPeriod}
             onViewChange={noop}
+            eventUid={eventUid}
+            onCloseEvent={closeEvent}
           />
         </div>
       </main>

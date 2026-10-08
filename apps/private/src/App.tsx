@@ -16,7 +16,10 @@ import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
 import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
-import { EMBED_CALENDAR_ROUTE } from '@common/features/Embed/embeddedCalendar'
+import {
+  EMBED_CALENDAR_ROUTE,
+  EMBED_EVENT_ROUTE
+} from '@common/features/Embed/embeddedCalendar'
 import {
   overlayThemeOptions,
   SpaceOverlayProvider
@@ -162,6 +165,10 @@ export default function App(): JSX.Element {
                     <Route path="/calendar" element={<CalendarLayout />} />
                     <Route
                       path={EMBED_CALENDAR_ROUTE}
+                      element={<EmbeddedCalendar />}
+                    />
+                    <Route
+                      path={EMBED_EVENT_ROUTE}
                       element={<EmbeddedCalendar />}
                     />
                     <Route path="/events/:uid" element={<EventDeepLink />} />
