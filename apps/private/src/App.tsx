@@ -102,16 +102,15 @@ export default function App(): JSX.Element {
   // Logging out from another tab ended the session: start over from the login
   useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
 
-  // Framed by TwakeSpace, the dialogs and drawers go onto its overlay
-  const themeOptions = useMemo(() => {
-    const calendar = makeCalendarOverrides(true)
-    if (spaceOverlay === null) return calendar
-    const overlay = overlayThemeOptions(spaceOverlay)
-    return {
-      ...calendar,
-      components: { ...calendar.components, ...overlay.components }
-    }
-  }, [])
+  // Framed by TwakeSpace, the default theme of Twake: the dialogs and drawers
+  // go onto its overlay
+  const themeOptions = useMemo(
+    () =>
+      spaceOverlay === null
+        ? makeCalendarOverrides(true)
+        : overlayThemeOptions(spaceOverlay),
+    []
+  )
 
   // Framed by TwakeSpace: it owns the browser history, the router follows it
   useEffect(
