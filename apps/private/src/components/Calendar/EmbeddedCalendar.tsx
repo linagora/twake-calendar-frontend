@@ -5,6 +5,7 @@ import {
   DisplayedPeriod,
   formatPeriodLabel
 } from '@common/components/Menubar/periodLabel'
+import { NavigationControls } from '@common/components/Menubar/components/NavigationControls'
 import { useEmbeddedCalendarId } from '@common/features/Embed/embeddedCalendar'
 import { Button, Stack, Typography } from '@linagora/twake-mui'
 import type { CalendarApi } from '@fullcalendar/core'
@@ -59,9 +60,18 @@ export function EmbeddedCalendar(): JSX.Element | null {
       <main className="main-layout isInIframe">
         <div className="calendar">
           <header className="menubar">
-            <Typography className="current-date-time">
-              {formatPeriodLabel(displayedPeriod, currentDate, t)}
-            </Typography>
+            <div className="left-menu">
+              <div className="menu-items">
+                <NavigationControls
+                  onNavigate={action => calendarRef.current?.[action]()}
+                />
+              </div>
+              <div className="menu-items">
+                <Typography variant="h5">
+                  {formatPeriodLabel(displayedPeriod, currentDate, t)}
+                </Typography>
+              </div>
+            </div>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
