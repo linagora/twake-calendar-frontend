@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useSelectedCalendars } from '@common/utils/storage/useSelectedCalendars'
 import { Calendar } from '@common/types/CalendarTypes'
 import { canWriteToCalendar } from '@common/features/Calendars/utils/calendarPermissions'
+import { useEmbeddedCalendarId } from '@common/features/Embed/embeddedCalendar'
 
 interface UseDefaultCalendarIdParams {
   calId?: string
@@ -18,9 +19,14 @@ export function useDefaultCalendarId({
   userId
 }: UseDefaultCalendarIdParams): string {
   const selectedCalendarIds = useSelectedCalendars()
+  const embeddedCalendarId = useEmbeddedCalendarId()
 
   return useMemo(() => {
     if (calId) return calId
+    // A space creates its events on its team calendar
+    if (embeddedCalendarId && calList?.[embeddedCalendarId]) {
+      return embeddedCalendarId
+    }
 
     const calendars = Object.values(calList ?? {})
 
@@ -36,5 +42,5 @@ export function useDefaultCalendarId({
     const firstPersonal = calendars.find(cal => canWriteToCalendar(cal, userId))
 
     return firstPersonal?.id ?? ''
-  }, [selectedCalendarIds, calList, userId, calId])
+  }, [selectedCalendarIds, calList, userId, calId, embeddedCalendarId])
 }
