@@ -147,6 +147,7 @@ export const Menubar: React.FC<MenubarProps> = ({
       <MobileMenubar
         calendarRef={calendarRef}
         currentDate={currentDate}
+        currentView={currentView}
         dateLabel={dateLabel}
         onDateChange={onDateChange}
         handleNavigation={handleNavigation}

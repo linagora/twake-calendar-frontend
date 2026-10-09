@@ -84,7 +84,10 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
         )}
 
         <div className="menu-items" style={{ marginLeft: 0 }}>
-          <SmallNavigationControls onNavigate={onNavigate} />
+          <SmallNavigationControls
+            currentView={currentView}
+            onNavigate={onNavigate}
+          />
         </div>
 
         <div className="menu-items">

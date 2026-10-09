@@ -19,6 +19,7 @@ import MobileSearchBar from './MobileEventSearchBar'
 export interface MobileMenubarProps {
   calendarRef: React.RefObject<CalendarApi | null>
   currentDate: Date
+  currentView: string
   dateLabel: string
   onDateChange?: (date: Date) => void
   handleNavigation: (action: 'prev' | 'next' | 'today') => void
@@ -28,6 +29,7 @@ export interface MobileMenubarProps {
 export const MobileMenubar: React.FC<MobileMenubarProps> = ({
   calendarRef,
   currentDate,
+  currentView,
   dateLabel,
   onDateChange,
   handleNavigation,
@@ -108,7 +110,10 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
                 <MenuIcon />
               </IconButton>
               <div className="menu-items">
-                <SmallNavigationControls onNavigate={handleNavigation} />
+                <SmallNavigationControls
+                  currentView={currentView}
+                  onNavigate={handleNavigation}
+                />
               </div>
               <div className="menu-items">
                 <Stack direction="row" className="current-date-time">
