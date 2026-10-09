@@ -170,7 +170,9 @@
         "never": "Nunca",
         "after": "Después de",
         "on": "El",
-        "occurrences": "repeticiones"
+        "occurrences": "repeticiones",
+        "endDateAriaLabel": "Fecha de fin de la repetición",
+        "occurrencesAriaLabel": "Número de repeticiones"
       }
     },
     "freeBusy": {

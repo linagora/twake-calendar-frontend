@@ -114,6 +114,7 @@ export const RepeatEvent: React.FC<{
                 min: 1,
                 max: MAX_REPEAT_INTERVAL,
                 step: 1,
+                'aria-label': t('event.repeat.repeatEvery'),
                 'data-testid': 'repeat-interval',
                 style: {
                   textAlign: 'center',
@@ -311,7 +312,7 @@ export const RepeatEvent: React.FC<{
                           field: getDateFieldSlotProps(
                             'event-repeat-end-date',
                             false,
-                            undefined,
+                            t('event.repeat.end.endDateAriaLabel'),
                             isMobile
                           ),
                           layout: { sx: dateCalendarLayoutSx }
@@ -356,6 +357,9 @@ export const RepeatEvent: React.FC<{
                         ...numericSlotProps.htmlInput,
                         min: 1,
                         step: 1,
+                        'aria-label': t(
+                          'event.repeat.end.occurrencesAriaLabel'
+                        ),
                         'data-testid': 'occurrences-input'
                       }
                     }}

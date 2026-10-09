@@ -158,6 +158,20 @@ describe('RepeatEvent Component', () => {
     expect(frequencySelect).toBeInTheDocument()
   })
 
+  it('gives the interval, end date and occurrences fields an accessible name', () => {
+    setupRepeatEvent({ freq: 'daily' })
+
+    expect(screen.getByTestId('repeat-interval')).toHaveAccessibleName(
+      'event.repeat.repeatEvery'
+    )
+    expect(screen.getByTestId('event-repeat-end-date')).toHaveAccessibleName(
+      'event.repeat.end.endDateAriaLabel'
+    )
+    expect(screen.getByTestId('occurrences-input')).toHaveAccessibleName(
+      'event.repeat.end.occurrencesAriaLabel'
+    )
+  })
+
   it('allows selecting repetition frequency', () => {
     const { setRepetition } = setupRepeatEvent()
 

@@ -170,7 +170,9 @@
         "never": "Nie",
         "after": "Nach",
         "on": "Am",
-        "occurrences": "Wiederholungen"
+        "occurrences": "Wiederholungen",
+        "endDateAriaLabel": "Enddatum der Wiederholung",
+        "occurrencesAriaLabel": "Anzahl der Wiederholungen"
       }
     },
     "freeBusy": {
