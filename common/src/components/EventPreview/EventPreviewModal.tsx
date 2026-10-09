@@ -9,6 +9,8 @@ import { AttendanceValidation } from '@common/features/Events/AttendanceValidati
 import EventPopover from '@common/features/Events/EventModal'
 import EventSettingsUpdateModal from '@common/features/Events/EventSettingsUpdateModal'
 import EventUpdateModal from '@common/features/Events/EventUpdateModal'
+import { makeDisplayName } from '@common/utils/makeDisplayName'
+import { renameDefault } from '@common/utils/renameDefault'
 import { DateSelectArg } from '@fullcalendar/core'
 import { useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
@@ -94,7 +96,12 @@ const EventPreviewModal: React.FC<{
 
   const editInOrganizerCalendarTooltip = organizerWritableCalendar
     ? t('eventPreview.editInOrganizerCalendar', {
-        calendarName: organizerWritableCalendar.name
+        // Show the name used by the sidebar rather than the raw '#default' DAV name.
+        calendarName: renameDefault(
+          organizerWritableCalendar.name,
+          makeDisplayName(organizerWritableCalendar) ?? '',
+          t
+        )
       })
     : undefined
 

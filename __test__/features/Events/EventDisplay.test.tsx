@@ -1721,6 +1721,52 @@ describe('Event Preview Display', () => {
       )
     })
 
+    describe('edit in organizer calendar shortcut', () => {
+      it('names the delegated default calendar as the sidebar does rather than "#default"', () => {
+        const delegatedState = makeDelegatedState()
+        const delegatedCalendar = delegatedState.calendars.list['user2/cal1']
+        const ownCopy = {
+          ...delegatedBaseEvent,
+          calId: 'user1/cal1',
+          attendee: [
+            ...delegatedBaseEvent.attendee,
+            { cal_address: 'alice@example.com', partstat: 'NEEDS-ACTION' }
+          ],
+          URL: '/calendars/user1/cal1/event-1.ics'
+        }
+        renderWithProviders(
+          <EventPreviewModal
+            eventId="event-1"
+            calId="user1/cal1"
+            open={true}
+            onClose={mockOnClose}
+          />,
+          {
+            ...delegatedState,
+            calendars: {
+              ...delegatedState.calendars,
+              list: {
+                'user1/cal1': {
+                  id: 'user1/cal1',
+                  name: '#default',
+                  owner: { emails: ['alice@example.com'] },
+                  color: { light: '#00FF00', dark: '#000' },
+                  events: { 'event-1': ownCopy }
+                },
+                'user2/cal1': { ...delegatedCalendar, name: '#default' }
+              }
+            }
+          }
+        )
+
+        expect(
+          screen.getByLabelText(
+            'eventPreview.editInOrganizerCalendar(calendarName=calendar.defaultCalendarName(name=Bob Owner))'
+          )
+        ).toBeInTheDocument()
+      })
+    })
+
     describe('delete menu item visibility', () => {
       it('does not show delete option on a masked private event of a write-delegated calendar', () => {
         renderWithProviders(
