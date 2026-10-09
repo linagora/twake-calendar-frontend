@@ -55,7 +55,10 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
         )}
 
         <div className="menu-items" style={{ marginLeft: '65px' }}>
-          <NavigationControls onNavigate={onNavigate} />
+          <NavigationControls
+            currentView={currentView}
+            onNavigate={onNavigate}
+          />
         </div>
 
         {!isSearchExpanded && (

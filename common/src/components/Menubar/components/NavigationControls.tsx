@@ -3,11 +3,14 @@ import { Button, ButtonGroup } from '@linagora/twake-mui'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useI18n } from 'twake-i18n'
+import { useNavigationLabels } from './useNavigationLabels'
 
 export const NavigationControls: React.FC<{
+  currentView: string
   onNavigate: (action: 'today' | 'next' | 'prev') => void
-}> = ({ onNavigate }) => {
+}> = ({ currentView, onNavigate }) => {
   const { t } = useI18n()
+  const labels = useNavigationLabels(currentView)
   return (
     <div className="navigation-controls">
       <ButtonGroup
@@ -18,11 +21,11 @@ export const NavigationControls: React.FC<{
           '& button:last-of-type': { borderRadius: '0 12px 12px 0' }
         }}
       >
-        <Tooltip title={t('menubar.prev')}>
+        <Tooltip title={labels.prev}>
           <Button
             sx={{ width: 20 }}
             onClick={() => onNavigate('prev')}
-            aria-label={t('menubar.prev')}
+            aria-label={labels.prev}
           >
             <ChevronLeftIcon sx={{ height: 20 }} />
           </Button>
@@ -32,11 +35,11 @@ export const NavigationControls: React.FC<{
             {t('menubar.today')}
           </Button>
         </Tooltip>
-        <Tooltip title={t('menubar.next')}>
+        <Tooltip title={labels.next}>
           <Button
             sx={{ width: 20 }}
             onClick={() => onNavigate('next')}
-            aria-label={t('menubar.next')}
+            aria-label={labels.next}
           >
             <ChevronRightIcon sx={{ height: 20 }} />
           </Button>

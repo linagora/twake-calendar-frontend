@@ -3,19 +3,22 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import TodayIcon from '@mui/icons-material/Today'
 import { useI18n } from 'twake-i18n'
+import { useNavigationLabels } from './useNavigationLabels'
 
 export const SmallNavigationControls: React.FC<{
+  currentView: string
   onNavigate: (action: 'today' | 'next' | 'prev') => void
-}> = ({ onNavigate }) => {
+}> = ({ currentView, onNavigate }) => {
   const { t } = useI18n()
+  const labels = useNavigationLabels(currentView)
 
   return (
     <div className="navigation-controls">
       <Stack direction="row" spacing={1.25}>
         <IconButton
           onClick={() => onNavigate('prev')}
-          aria-label={t('menubar.prev')}
-          title={t('menubar.prev')}
+          aria-label={labels.prev}
+          title={labels.prev}
         >
           <ChevronLeftIcon sx={{ height: 30 }} />
         </IconButton>
@@ -36,8 +39,8 @@ export const SmallNavigationControls: React.FC<{
         </IconButton>
         <IconButton
           onClick={() => onNavigate('next')}
-          aria-label={t('menubar.next')}
-          title={t('menubar.next')}
+          aria-label={labels.next}
+          title={labels.next}
         >
           <ChevronRightIcon sx={{ height: 30 }} />
         </IconButton>
