@@ -18,7 +18,7 @@ import { UserMenu } from './UserMenu'
 export const TabletMenubar: React.FC<SharedMenubarProps> = ({
   calendarRef,
   currentView,
-  isIframe,
+  isEmbedded,
   dateLabel,
   onUserMenuOpen,
   onSettingsClick,
@@ -72,7 +72,7 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           </IconButton>
         </Tooltip>
 
-        {!isIframe && (
+        {!isEmbedded && (
           <div className="menu-items">
             <MainTitle
               calendarRef={calendarRef}
@@ -126,7 +126,7 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
             onSettingsClick={onSettingsClick}
             onLogoutClick={onLogoutClick}
             onUserMenuOpen={onUserMenuOpen}
-            isIframe={isIframe}
+            isEmbedded={isEmbedded}
             user={user}
           />
         </div>
