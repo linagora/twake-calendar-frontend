@@ -106,4 +106,33 @@ describe('reading a calendar shared with the user', () => {
     const calendar = store.getState().calendars.list[OWNER_CAL_ID]
     expect(calendar.events.event1.title).toBe('Owner meeting')
   })
+
+  it("resolves an event found by UID in the owner's home, read through the instance", async () => {
+    ;(CalendarDAO.fetchEventByUid as jest.Mock).mockResolvedValue({
+      _embedded: {
+        'dav:item': [
+          {
+            ...item,
+            _links: { self: { href: `/calendars/${OWNER_CAL_ID}/event1.ics` } }
+          }
+        ]
+      }
+    })
+    const store = storeFactory()
+
+    const result = await store.dispatch(
+      getEventByUid({ userId: 'owner1', uid: 'event1' })
+    )
+
+    expect(CalendarDAO.fetchEventByUid).toHaveBeenCalledWith(
+      'owner1',
+      'event1',
+      undefined
+    )
+    expect(result.payload).toEqual(
+      expect.objectContaining({ calId: OWNER_CAL_ID })
+    )
+    const calendar = store.getState().calendars.list[OWNER_CAL_ID]
+    expect(calendar.events.event1.URL).toBe(`${INSTANCE}/event1.ics`)
+  })
 })

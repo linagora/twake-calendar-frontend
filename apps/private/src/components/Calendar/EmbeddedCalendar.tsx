@@ -45,6 +45,8 @@ export function EmbeddedCalendar(): JSX.Element | null {
 
   const dispatch = useAppDispatch()
   const eventUid = useEmbeddedEventUid()
+  // A team calendar lives at /calendars/<id>/<id>: its events are in its home
+  const teamCalendarId = calendarId?.split('/')[0] ?? null
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [displayedPeriod, setDisplayedPeriod] = useState<DisplayedPeriod>()
@@ -53,10 +55,8 @@ export function EmbeddedCalendar(): JSX.Element | null {
   // new URL brings TwakeSpace's address along, and a click on the same card
   // opens the event again
   const closeEvent = (): void => {
-    if (eventUid && calendarId) {
-      dispatch(
-        replace(embedRoute(EMBED_CALENDAR_PREFIX, calendarId.split('/')[0]))
-      )
+    if (eventUid && teamCalendarId) {
+      dispatch(replace(embedRoute(EMBED_CALENDAR_PREFIX, teamCalendarId)))
     }
   }
 
@@ -116,6 +116,7 @@ export function EmbeddedCalendar(): JSX.Element | null {
             onPeriodChange={setDisplayedPeriod}
             onViewChange={noop}
             eventUid={eventUid}
+            eventHome={teamCalendarId}
             onCloseEvent={closeEvent}
           />
         </div>

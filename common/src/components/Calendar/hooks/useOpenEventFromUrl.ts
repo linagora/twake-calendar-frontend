@@ -12,8 +12,10 @@ interface UseOpenEventFromUrlProps {
   setEventDisplayedCalId: (calId: string) => void
   setEventDisplayedTemp: (temp: boolean) => void
   setOpenEventDisplay: (open: boolean) => void
-  // The event of the embed route, in place of the one a deep link saved
+  // The event of the embed route, in place of the one a deep link saved, and
+  // the calendar home it is in: the team calendar's, not the user's
   uid?: string | null
+  home?: string | null
 }
 
 /**
@@ -30,7 +32,8 @@ export function useOpenEventFromUrl({
   setEventDisplayedCalId,
   setEventDisplayedTemp,
   setOpenEventDisplay,
-  uid
+  uid,
+  home
 }: UseOpenEventFromUrlProps): void {
   const processedRef = useRef<string | null>(null)
 
@@ -59,7 +62,7 @@ export function useOpenEventFromUrl({
     void (async () => {
       try {
         const result = await dispatch(
-          getEventByUid({ userId, uid: pendingUid })
+          getEventByUid({ userId: home ?? userId, uid: pendingUid })
         ).unwrap()
         if (!result || !calendars[result.calId]) {
           return
@@ -87,6 +90,7 @@ export function useOpenEventFromUrl({
     setEventDisplayedCalId,
     setEventDisplayedTemp,
     setOpenEventDisplay,
-    uid
+    uid,
+    home
   ])
 }

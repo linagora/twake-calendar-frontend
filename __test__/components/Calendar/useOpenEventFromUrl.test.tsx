@@ -4,6 +4,10 @@ import type { AppDispatch } from '@common/app/store'
 import type { Calendar } from '@common/types/CalendarTypes'
 import { renderHook, waitFor } from '@testing-library/react'
 
+jest.mock('@common/features/Calendars/CalendarSlice', () => ({
+  getEventByUid: (arg: unknown) => arg
+}))
+
 const calendars = {
   'team1/team1': { id: 'team1/team1' }
 } as unknown as Record<string, Calendar>
@@ -28,7 +32,8 @@ const setup = (uid: string | null) => {
         setEventDisplayedCalId: jest.fn(),
         setEventDisplayedTemp: jest.fn(),
         setOpenEventDisplay,
-        uid
+        uid,
+        home: 'team1'
       }),
     { initialProps: { uid } }
   )
@@ -38,11 +43,12 @@ const setup = (uid: string | null) => {
 describe('useOpenEventFromUrl on the embed route', () => {
   afterEach(() => sessionStorage.clear())
 
-  it('opens the event of the route, not the one a deep link saved', async () => {
+  it("opens the event of the route, found in the team calendar's home", async () => {
     sessionStorage.setItem(PENDING_EVENT_UID_KEY, 'other')
-    const { setOpenEventDisplay, setEventDisplayedId } = setup('e1')
+    const { setOpenEventDisplay, setEventDisplayedId, dispatch } = setup('e1')
 
     await waitFor(() => expect(setOpenEventDisplay).toHaveBeenCalledWith(true))
+    expect(dispatch).toHaveBeenCalledWith({ userId: 'team1', uid: 'e1' })
     expect(setEventDisplayedId).toHaveBeenCalledWith('e1')
     expect(sessionStorage.getItem(PENDING_EVENT_UID_KEY)).toBe('other')
   })

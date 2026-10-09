@@ -41,17 +41,35 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
           return null
         }
         // The href names the calendar the user read it through: for a calendar
-        // shared with them, their own instance of it rather than its id.
+        // shared with them, their own instance of it rather than its id. Found
+        // in the owner's home (a team calendar on the embed route), it names
+        // the owner's node, which the event is then read through the instance
+        // of, as the events of its time range are.
         const calendarPath = `/calendars/${calendarIdFromEventHref(eventURL)}`
         const state = getState() as RootState
         const calendarStored: Calendar | undefined = Object.values(
           state.calendars.list
-        ).find(cal => calendarDavPath(cal) === calendarPath)
+        ).find(
+          cal =>
+            calendarDavPath(cal) === calendarPath ||
+            `/calendars/${cal.id}` === calendarPath
+        )
         if (!calendarStored) {
           return null
         }
         const calId: string = calendarStored.id
-        const events = extractCalendarEvents(item, {
+        const davPath = calendarDavPath(calendarStored)
+        const read =
+          davPath === calendarPath
+            ? item
+            : {
+                ...item,
+                _links: {
+                  ...item._links,
+                  self: { href: davPath + eventURL.slice(calendarPath.length) }
+                }
+              }
+        const events = extractCalendarEvents(read, {
           cal: calendarStored,
           color: calendarStored.color
         })
