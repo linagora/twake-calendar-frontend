@@ -4,7 +4,11 @@ import { SuccessFooter } from '@/features/booking/components/BookingSuccessDialo
 import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
 import { EventPreviewTitleRow } from '@common/components/EventPreview/EventPreviewTitleRow'
 import { Loading } from '@common/components/Loading/Loading'
-import React from 'react'
+import { TimezoneSelector } from '@common/components/Timezone/TimezoneSelector'
+import { browserDefaultTimeZone } from '@common/utils/timezone'
+import { Box } from '@linagora/twake-mui'
+import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
+import React, { useState } from 'react'
 import { useParams } from 'react-router'
 import { useI18n } from 'twake-i18n'
 import {
@@ -22,6 +26,10 @@ export const BookedEventPreviewPage: React.FC = () => {
 
   const { event, loading, error, errorDetail } = useFetchBookedEventDetail(
     bookingConfirmationToken
+  )
+  // The booking backend stores the event in UTC: show it in the visitor's zone
+  const [selectedTimezone, setSelectedTimezone] = useState<string>(
+    browserDefaultTimeZone
   )
 
   const { organizer } = useFilterEventAttendees({
@@ -64,10 +72,25 @@ export const BookedEventPreviewPage: React.FC = () => {
 
   return (
     <PreviewContainer>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '8px'
+        }}
+      >
+        <LanguageOutlinedIcon sx={{ color: 'text.secondary' }} />
+        <TimezoneSelector
+          value={selectedTimezone}
+          onChange={setSelectedTimezone}
+          referenceDate={new Date(event.start)}
+        />
+      </Box>
       <EventPreviewTitleRow
         event={event}
         isOwn={false}
-        timezone={event?.timezone}
+        timezone={selectedTimezone}
         t={t}
       />
       <EventStatus partStat={organizerPartstat} isOrganizer />
