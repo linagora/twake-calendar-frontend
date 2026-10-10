@@ -12,7 +12,7 @@ import {
   useEmbeddedEventUid
 } from '@common/features/Embed/embeddedCalendar'
 import { embedRoute } from '@linagora/twake-embed'
-import { Button, Stack, Typography } from '@linagora/twake-mui'
+import { Button, GlobalStyles, Stack, Typography } from '@linagora/twake-mui'
 import type { CalendarApi } from '@fullcalendar/core'
 import AddIcon from '@mui/icons-material/Add'
 import { useMemo, useRef, useState } from 'react'
@@ -28,7 +28,20 @@ const noop = (): void => {}
  * of the space: the events of that calendar as a list, without the bar and
  * the sidebar of the application.
  */
-export function EmbeddedCalendar(): JSX.Element | null {
+export function EmbeddedCalendar(): JSX.Element {
+  return (
+    <>
+      <GlobalStyles
+        styles={theme => ({
+          body: { backgroundColor: theme.palette.background.paper }
+        })}
+      />
+      <EmbeddedCalendarContent />
+    </>
+  )
+}
+
+function EmbeddedCalendarContent(): JSX.Element | null {
   const { t } = useI18n()
   const calendarRef = useRef<CalendarApi | null>(null)
   const controllerRef = useRef<CalendarControllerRef | null>(null)

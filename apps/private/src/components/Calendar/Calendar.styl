@@ -12,9 +12,21 @@
   margin-top 8px
   height calc(100vh - 8px)
 
-// TwakeSpace frames the embed on its white page: no grey of the application
+// TwakeSpace frames the embed edge to edge: the embed keeps 16px to its edges
+// and shows the body, painted with the paper of the theme
 .App.isEmbedded
-  background-color #fff
+  background-color transparent
+
+.App.isEmbedded .main-layout
+  margin 16px
+  height calc(100vh - 32px)
+
+.App.isEmbedded .menubar
+  padding 0 0 16px
+  height auto
+  min-height 0
+  flex-shrink 0
+  background-color transparent
 
 .main-layout.calendar-layout
   background-color #fff
