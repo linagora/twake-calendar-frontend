@@ -130,8 +130,9 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
     void theMiniCalendarGivesUpItsSpaceOnAPhone(Page page, E2EUser user, E2ESessions sessions) {
         CalendarPage phone = sessions.openFor(user, PHONE_WIDTH, PHONE_HEIGHT);
 
-        assertThat(phone.page().getByLabel("Next month").count()
-                + phone.page().getByLabel("Previous month").count())
+        // the menubar is left out: its buttons name the step of the view, "Next month" included
+        assertThat(phone.page().locator("[aria-label='Next month']:not(.menubar *)").count()
+                + phone.page().locator("[aria-label='Previous month']:not(.menubar *)").count())
             .as("a second calendar next to the first is a luxury a phone cannot afford")
             .isZero();
     }

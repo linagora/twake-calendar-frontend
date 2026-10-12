@@ -34,7 +34,8 @@ class ShellTest extends TwakeCalendarE2ETest {
     void theMenubarExposesItsActions(Page page, E2EUser user) {
         LoginPage.loginAs(page, user);
 
-        List.of("Today", "Previous", "Next", "Search for events or calendars", "Refresh",
+        // the week view names the step of its Previous / Next buttons
+        List.of("Today", "Previous week", "Next week", "Search for events or calendars", "Refresh",
                 "User profile")
             .forEach(action -> assertThat(
                 page.getByLabel(action, new Page.GetByLabelOptions().setExact(true))).isVisible());
@@ -211,7 +212,7 @@ class ShellTest extends TwakeCalendarE2ETest {
     }
 
     private static void assertTheMenubarNavigationIsVisible(Page page) {
-        List.of("Today", "Previous", "Next", "Search for events or calendars", "Refresh")
+        List.of("Today", "Previous week", "Next week", "Search for events or calendars", "Refresh")
             .forEach(action -> assertThat(
                 page.getByLabel(action, new Page.GetByLabelOptions().setExact(true))).isVisible());
     }

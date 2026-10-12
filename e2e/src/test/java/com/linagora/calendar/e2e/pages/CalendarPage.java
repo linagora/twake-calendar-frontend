@@ -2,6 +2,7 @@ package com.linagora.calendar.e2e.pages;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.linagora.calendar.e2e.docker.BearerTokens;
 import com.microsoft.playwright.Locator;
@@ -146,14 +147,23 @@ public class CalendarPage {
     // -------------------------------------------------------------- navigation
 
     public CalendarPage next() {
-        // exact: the mini calendar has its own "Next month" button
-        page.getByLabel("Next", new Page.GetByLabelOptions().setExact(true)).click();
+        menubarStep("Next").click();
         return this;
     }
 
     public CalendarPage previous() {
-        page.getByLabel("Previous", new Page.GetByLabelOptions().setExact(true)).click();
+        menubarStep("Previous").click();
         return this;
+    }
+
+    /**
+     * The Previous / Next button of the menubar. It names the step of the view on screen
+     * ("Next week", "Next day"...), and the mini calendar has a "Next month" of its own:
+     * look for it in the menubar only.
+     */
+    private Locator menubarStep(String direction) {
+        return menubar().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions()
+            .setName(Pattern.compile("^" + direction + "( (day|week|month))?$")));
     }
 
     public CalendarPage today() {
@@ -273,7 +283,8 @@ public class CalendarPage {
     }
 
     public CalendarPage miniCalendarNextMonth() {
-        page.getByLabel("Next month").click();
+        // not the one of the menubar, which the month view names "Next month" too
+        page.locator("[aria-label='Next month']:not(.menubar *)").click();
         return this;
     }
 
