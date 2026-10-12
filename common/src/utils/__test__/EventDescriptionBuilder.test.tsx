@@ -16,7 +16,7 @@ jest.mock('dompurify', () => {
 describe('EventDescriptionBuilder', () => {
   beforeEach(() => {
     // Enable attachments for testing
-    ;(window as any).ENABLE_EVENT_ATTACHMENTS = true
+    window.ENABLE_EVENT_ATTACHMENTS = true
   })
 
   it('should initialize with text and no attachments by default', () => {
@@ -146,7 +146,7 @@ describe('EventDescriptionBuilder', () => {
   })
 
   it('should return empty attachments if ENABLE_EVENT_ATTACHMENTS is false', () => {
-    ;(window as any).ENABLE_EVENT_ATTACHMENTS = false
+    window.ENABLE_EVENT_ATTACHMENTS = false
     const attach1 = { hasDisplayableFilename: () => true } as Attachment
 
     const builder = new EventDescriptionBuilder('', [

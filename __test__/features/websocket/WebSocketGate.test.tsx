@@ -90,7 +90,7 @@ describe('WebSocketGate', () => {
     store = createMockStore()
     mockSocket = createMockSocket()
     localStorage.clear()
-    ;(window as any).WEBSOCKET_URL = 'ws://localhost/ws'
+    window.WEBSOCKET_URL = 'ws://localhost/ws'
   })
 
   afterEach(() => {
