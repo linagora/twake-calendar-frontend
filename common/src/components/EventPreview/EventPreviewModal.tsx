@@ -15,7 +15,7 @@ import { DateSelectArg } from '@fullcalendar/core'
 import { useEffect } from 'react'
 import { useI18n } from 'twake-i18n'
 import { EventPreviewTitleRow } from './EventPreviewTitleRow'
-import { CALENDAR_VIEWS } from '../Calendar/utils/constants'
+import { isListView } from '../Calendar/utils/constants'
 
 const EventPreviewModal: React.FC<{
   eventId: string
@@ -143,7 +143,7 @@ const EventPreviewModal: React.FC<{
         onClose={() => onClose({}, 'backdropClick')}
         showHeaderActions={false}
         draggable
-        dynamicPositioning={currentView !== CALENDAR_VIEWS.listWeek}
+        dynamicPositioning={!isListView(currentView)}
         anchorEl={anchorEl}
         actionsBorderTop={hasActionsBorderTop}
         actionsJustifyContent="center"

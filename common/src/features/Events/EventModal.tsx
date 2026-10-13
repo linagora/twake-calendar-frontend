@@ -15,7 +15,7 @@ import { EventActions } from './EventActions'
 import { useBuildInitialValues } from '@common/components/Event/hooks/useBuildInitialValues'
 import { useSubmitCreateEvent } from '@common/features/Events/hooks/useSubmitCreateEvent'
 import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import { isListView } from '@common/components/Calendar/utils/constants'
 
 const EventPopover: React.FC<{
   open: boolean
@@ -131,7 +131,7 @@ const EventPopover: React.FC<{
         open={open}
         anchorEl={anchorEl}
         dynamicPositioning={
-          currentView !== CALENDAR_VIEWS.listWeek && anchorEl !== document.body
+          !isListView(currentView) && anchorEl !== document.body
         }
         onClose={handleClose}
         title={modalTitle}

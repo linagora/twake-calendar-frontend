@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import { isListView } from '@common/components/Calendar/utils/constants'
 
 export const usePreserveScrollPositionInScheduleView = (
   openEventDisplay: boolean,
@@ -10,7 +10,7 @@ export const usePreserveScrollPositionInScheduleView = (
 
   // 1. TRACKING
   useEffect(() => {
-    if (currentView !== CALENDAR_VIEWS.listWeek) {
+    if (!isListView(currentView)) {
       savedScrollTop.current = 0
       return
     }
@@ -35,8 +35,7 @@ export const usePreserveScrollPositionInScheduleView = (
   // 2. RESTORING
   useEffect(() => {
     // Early exit: No need to lock or animate if scroll is 0
-    if (currentView !== CALENDAR_VIEWS.listWeek || savedScrollTop.current === 0)
-      return
+    if (!isListView(currentView) || savedScrollTop.current === 0) return
 
     isTransitioning.current = true
     let frameId: number

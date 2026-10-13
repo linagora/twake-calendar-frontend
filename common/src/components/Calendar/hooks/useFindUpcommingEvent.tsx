@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import { isListView } from '@common/components/Calendar/utils/constants'
 import { EventApi, EventInput } from '@fullcalendar/core'
 import { sortEventsByDateTime } from '@common/components/Calendar/utils/calendarUtils'
 
@@ -14,7 +14,7 @@ export const useFindUpcommingEvent = (
   }, [events])
 
   return useMemo(() => {
-    if (currentView !== CALENDAR_VIEWS.listWeek) return undefined
+    if (!isListView(currentView)) return undefined
 
     const now = new Date().getTime()
     let upcommingEventId: string | undefined = undefined

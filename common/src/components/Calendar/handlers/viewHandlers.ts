@@ -16,7 +16,10 @@ import {
 import { endOfDay } from 'date-fns'
 import moment from 'moment-timezone'
 import React from 'react'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import {
+  CALENDAR_VIEWS,
+  isListView
+} from '@common/components/Calendar/utils/constants'
 import { createMouseHandlers } from './mouseHandlers'
 import { EventChipSchedule } from '@common/components/Event/EventChip/EventChipSchedule'
 
@@ -221,7 +224,7 @@ export const createViewHandlers = (props: ViewHandlersProps): ViewHandlers => {
   }
 
   const handleEventContent = (arg: EventContentArg): React.ReactElement => {
-    if (arg.view.type === CALENDAR_VIEWS.listWeek) {
+    if (isListView(arg.view.type)) {
       return React.createElement(EventChipSchedule, {
         arg,
         calendars,

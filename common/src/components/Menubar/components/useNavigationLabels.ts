@@ -5,7 +5,8 @@ const STEP_KEYS: Record<string, [string, string]> = {
   [CALENDAR_VIEWS.timeGridDay]: ['menubar.prevDay', 'menubar.nextDay'],
   [CALENDAR_VIEWS.timeGridWeek]: ['menubar.prevWeek', 'menubar.nextWeek'],
   [CALENDAR_VIEWS.listWeek]: ['menubar.prevWeek', 'menubar.nextWeek'],
-  [CALENDAR_VIEWS.dayGridMonth]: ['menubar.prevMonth', 'menubar.nextMonth']
+  [CALENDAR_VIEWS.dayGridMonth]: ['menubar.prevMonth', 'menubar.nextMonth'],
+  [CALENDAR_VIEWS.listMonth]: ['menubar.prevMonth', 'menubar.nextMonth']
 }
 
 export function useNavigationLabels(currentView: string): {

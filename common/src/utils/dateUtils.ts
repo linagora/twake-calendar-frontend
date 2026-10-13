@@ -62,7 +62,10 @@ export function getViewRange(
   date = new Date(),
   view: string
 ): { start: Date; end: Date } {
-  if (view === CALENDAR_VIEWS.dayGridMonth) {
+  if (
+    view === CALENDAR_VIEWS.dayGridMonth ||
+    view === CALENDAR_VIEWS.listMonth
+  ) {
     return getCalendarRange(date)
   }
   return computeWeekRange(date)

@@ -96,6 +96,7 @@ function EmbeddedCalendarContent(): JSX.Element | null {
             <div className="left-menu">
               <div className="menu-items">
                 <NavigationControls
+                  currentView={CALENDAR_VIEWS.listMonth}
                   onNavigate={action => calendarRef.current?.[action]()}
                 />
               </div>
@@ -117,7 +118,7 @@ function EmbeddedCalendarContent(): JSX.Element | null {
             calendarRef={calendarRef}
             controllerRef={controllerRef}
             currentDate={currentDate}
-            currentView={CALENDAR_VIEWS.listWeek}
+            currentView={CALENDAR_VIEWS.listMonth}
             setCurrentView={noop}
             selectedCalendars={selectedCalendars}
             setSelectedCalendars={noop}

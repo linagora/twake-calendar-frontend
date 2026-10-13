@@ -12,7 +12,7 @@ import { EventActions } from './EventActions'
 import { useEventUpdateModal } from './useEventUpdateModal'
 import { useEditableInitialValues } from './hooks/useEditableInitialValues'
 import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard'
-import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
+import { isListView } from '@common/components/Calendar/utils/constants'
 
 export interface EventUpdateModalProps {
   eventId: string
@@ -79,7 +79,7 @@ const EventUpdateModalInternal: React.FC<
         onExpandToggle={handleExpandToggle}
         draggable={!showMore}
         anchorEl={props.anchorEl}
-        dynamicPositioning={currentView !== CALENDAR_VIEWS.listWeek}
+        dynamicPositioning={!isListView(currentView)}
         actions={actions}
         sx={dialogPaddingStyles(isMobile)}
         expandText={t('tooltip.moreEventOptions')}

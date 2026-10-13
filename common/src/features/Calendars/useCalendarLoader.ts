@@ -105,7 +105,8 @@ export function useCalendarDataLoader({
   const { visibleStart, visibleEnd, prefetchEnd } = useMemo(() => {
     const { start, end } = getViewRange(selectedDate, currentView)
     const prefetchEnd =
-      currentView === CALENDAR_VIEWS.dayGridMonth
+      currentView === CALENDAR_VIEWS.dayGridMonth ||
+      currentView === CALENDAR_VIEWS.listMonth
         ? end.getTime()
         : getAdjacentWeekRange(selectedDate).end.getTime()
     return {

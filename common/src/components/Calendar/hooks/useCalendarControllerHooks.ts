@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import moment from 'moment-timezone'
-import { CALENDAR_VIEWS } from '../utils/constants'
+import { CALENDAR_VIEWS, isListView } from '../utils/constants'
 import { EventInput } from '@fullcalendar/core'
 
 export const useHiddenDays = (
@@ -26,7 +26,7 @@ export const useFilteredCalendarEvents = (
       return [...fullCalendarEvents, ...bookingListEvents]
     }
 
-    if (currentView !== CALENDAR_VIEWS.listWeek) {
+    if (!isListView(currentView)) {
       return fullCalendarEvents
     }
 

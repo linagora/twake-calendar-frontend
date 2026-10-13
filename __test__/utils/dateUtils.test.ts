@@ -1,4 +1,4 @@
-import { getCalendarRange } from '@common/utils/dateUtils'
+import { getCalendarRange, getViewRange } from '@common/utils/dateUtils'
 
 describe('getCalendarRange', () => {
   it('Nov 2025: 2025-10-27 to 2025-12-07', () => {
@@ -46,5 +46,12 @@ describe('getCalendarRange', () => {
     expect(start.getSeconds()).toBe(0)
     expect(end.getHours()).toBe(23)
     expect(end.getMinutes()).toBe(59)
+  })
+})
+
+describe('getViewRange', () => {
+  it('loads the whole month for the month list, as for the month grid', () => {
+    const date = new Date(2026, 9, 13)
+    expect(getViewRange(date, 'listMonth')).toEqual(getCalendarRange(date))
   })
 })
