@@ -8,6 +8,7 @@ import { store } from '@common/app/store'
 import { initSentry } from '@common/app/sentry'
 import { configureAuth } from '@linagora/twake-oidc'
 import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
+import { twakeSpace } from '@common/features/Embed/twakeSpace'
 
 initSentry()
 configureAuth({
@@ -19,7 +20,12 @@ configureAuth({
   apiUrl: window.CALENDAR_BASE_URL,
   // TwakeSpace frames the embed routes: their sign in shows no SSO page and
   // leaves no history entry
-  framed: () => isEmbedPath(window.location.pathname)
+  framed: () => isEmbedPath(window.location.pathname),
+  // Framed, an ended session never navigates the frame: TwakeSpace signs
+  // the user in again at the top level and reloads its frames
+  onLoginRequired: () => {
+    twakeSpace?.notifyLoginRequired()
+  }
 })
 
 const container = document.getElementById('root')

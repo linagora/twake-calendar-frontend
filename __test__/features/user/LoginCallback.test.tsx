@@ -6,6 +6,7 @@ import {
   setTokens,
   setUserData
 } from '@common/features/User/UserSlice'
+import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { CallbackResume } from '@private/features/User/LoginCallback'
 import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -37,6 +38,10 @@ jest.mock('@linagora/twake-oidc', () => ({
       super('The SSO needs the user to sign in')
     }
   }
+}))
+
+jest.mock('@common/features/Embed/twakeSpace', () => ({
+  twakeSpace: { notifyLoginRequired: jest.fn() }
 }))
 
 jest.mock('@common/features/User/UserSlice', () => {
@@ -209,6 +214,7 @@ describe('CallbackResume', () => {
     renderWithProviders(<CallbackResume />)
 
     expect(await screen.findByText('embed.signInRequired')).toBeInTheDocument()
+    expect(twakeSpace?.notifyLoginRequired).toHaveBeenCalled()
     expect(dispatch).not.toHaveBeenCalledWith(replace('/error'))
   })
 })

@@ -8,6 +8,7 @@ import {
   setUserError
 } from '@common/features/User/UserSlice'
 import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
+import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
 import { Stack, Typography } from '@linagora/twake-mui'
 import { useEffect, useRef, useState } from 'react'
@@ -72,6 +73,7 @@ export const CallbackResume: React.FC = () => {
         if (e instanceof LoginRequiredError) {
           dispatch(setAppLoading(false))
           setIsSignInRefused(true)
+          twakeSpace?.notifyLoginRequired()
           return
         }
         console.error('OIDC callback error:', e)
