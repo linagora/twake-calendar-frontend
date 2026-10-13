@@ -58,4 +58,13 @@ describe('useOpenEventFromUrl on the embed route', () => {
     rerender({ uid: 'e1' })
     await waitFor(() => expect(dispatch).toHaveBeenCalledTimes(2))
   })
+
+  it('leaves the deep link of the full page alone on the bare route', async () => {
+    sessionStorage.setItem(PENDING_EVENT_UID_KEY, 'other')
+    const { dispatch } = setup(null)
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(sessionStorage.getItem(PENDING_EVENT_UID_KEY)).toBe('other')
+  })
 })

@@ -12,7 +12,8 @@ interface UseOpenEventFromUrlProps {
   setEventDisplayedCalId: (calId: string) => void
   setEventDisplayedTemp: (temp: boolean) => void
   setOpenEventDisplay: (open: boolean) => void
-  // The event of the embed route, in place of the one a deep link saved
+  // The event of the embed route (null: the route shows none), in place of the
+  // one a deep link of the full page saved, which the embed leaves alone
   uid?: string | null
 }
 
@@ -38,7 +39,10 @@ export function useOpenEventFromUrl({
     if (!userId) {
       return
     }
-    const pendingUid = uid ?? sessionStorage.getItem(PENDING_EVENT_UID_KEY)
+    const isEmbedRoute = uid !== undefined
+    const pendingUid = isEmbedRoute
+      ? uid
+      : sessionStorage.getItem(PENDING_EVENT_UID_KEY)
     if (!pendingUid) {
       // The same event may be opened again once its preview is closed
       processedRef.current = null
@@ -54,7 +58,7 @@ export function useOpenEventFromUrl({
     }
 
     processedRef.current = pendingUid
-    if (!uid) sessionStorage.removeItem(PENDING_EVENT_UID_KEY)
+    if (!isEmbedRoute) sessionStorage.removeItem(PENDING_EVENT_UID_KEY)
 
     void (async () => {
       try {
