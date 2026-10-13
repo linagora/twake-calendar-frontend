@@ -17,6 +17,10 @@ import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
 import { default as CalendarLayout } from '@/components/Calendar/CalendarLayout'
 import { EmbeddedCalendar } from '@/components/Calendar/EmbeddedCalendar'
 import { EMBED_CALENDAR_ROUTE } from '@common/features/Embed/embeddedCalendar'
+import {
+  syncHistoryWithTwakeSpace,
+  twakeSpace
+} from '@common/features/Embed/twakeSpace'
 import { default as HandleLogin } from '@/features/User/HandleLogin'
 import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { default as NewEventDeepLink } from '@common/features/Events/NewEventDeepLink'
@@ -92,6 +96,13 @@ export default function App(): JSX.Element {
 
   // Logging out from another tab ended the session: start over from the login
   useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
+
+  // Framed by TwakeSpace: it owns the browser history, the router follows it
+  useEffect(
+    () =>
+      twakeSpace ? syncHistoryWithTwakeSpace(twakeSpace, history) : undefined,
+    []
+  )
 
   return (
     <EmbeddingProvider>
