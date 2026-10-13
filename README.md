@@ -206,7 +206,7 @@ docker run -d \
   linagora/twake-calendar-private
 ```
 
-TwakeSpace frames the team calendar of a space on `/embed/calendars/<team calendar id>`.
+TwakeSpace frames the team calendar of a space on `/embed/calendars/<team calendar id>`. The page signs in silently (`prompt=none`), so TwakeSpace, the application and the SSO portal must be served on one registrable domain.
 
 ---
 

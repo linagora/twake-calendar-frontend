@@ -7,7 +7,7 @@
     "@fullcalendar/core": "^6.1.17",
     "@linagora/twake-icons": "^2.7.0",
     "@linagora/twake-mui": "^5.1.1",
-    "@linagora/twake-oidc": "^1.0.1",
+    "@linagora/twake-oidc": "^1.1.0",
     "@mui/icons-material": "^9.0.1",
     "@mui/x-date-pickers": "^9",
     "@sentry/react": "^8.55.1",

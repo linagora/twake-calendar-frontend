@@ -7,6 +7,7 @@ import App from './App'
 import { store } from '@common/app/store'
 import { initSentry } from '@common/app/sentry'
 import { configureAuth } from '@linagora/twake-oidc'
+import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
 
 initSentry()
 configureAuth({
@@ -15,7 +16,10 @@ configureAuth({
   scope: window.SSO_SCOPE ?? '',
   redirectUri: window.SSO_REDIRECT_URI ?? '',
   postLogoutRedirectUri: window.SSO_POST_LOGOUT_REDIRECT ?? '',
-  apiUrl: window.CALENDAR_BASE_URL
+  apiUrl: window.CALENDAR_BASE_URL,
+  // TwakeSpace frames the embed routes: their sign in shows no SSO page and
+  // leaves no history entry
+  framed: () => isEmbedPath(window.location.pathname)
 })
 
 const container = document.getElementById('root')

@@ -7,18 +7,35 @@ import {
   setUserData,
   setUserError
 } from '@common/features/User/UserSlice'
-import { completeLogin } from '@linagora/twake-oidc'
-import { useEffect, useRef } from 'react'
+import { isEmbedPath } from '@common/features/Embed/embeddedCalendar'
+import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
+import { Stack, Typography } from '@linagora/twake-mui'
+import { useEffect, useRef, useState } from 'react'
 import { replace } from 'redux-first-history'
+import { useI18n } from 'twake-i18n'
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : 'OAuth callback failed'
+}
+
+// A framed page cannot show the SSO portal: the user signs in again outside
+const SignInRefused: React.FC = () => {
+  const { t } = useI18n()
+  return (
+    <Stack
+      sx={{ alignItems: 'center', justifyContent: 'center', height: '100vh' }}
+    >
+      <Typography>{t('embed.signInRequired')}</Typography>
+    </Stack>
+  )
 }
 
 export const CallbackResume: React.FC = () => {
   const dispatch = useAppDispatch()
   const hasRun = useRef(false)
   const hasNavigated = useRef(false)
+  const returnTo = useRef('/calendar')
+  const [isSignInRefused, setIsSignInRefused] = useState(false)
   const userData = useAppSelector(state => state.user)
   const calendars = useAppSelector(state => state.calendars)
 
@@ -43,12 +60,20 @@ export const CallbackResume: React.FC = () => {
           return
         }
 
+        // An embed route signs in on its own: back to it, not to the calendar
+        if (isEmbedPath(data.returnTo)) returnTo.current = data.returnTo
+
         dispatch(setUserData(data.userinfo))
         dispatch(setTokens(data.tokenSet))
 
         await dispatch(getOpenPaasUserData())
         await dispatch(getCalendarsList())
       } catch (e) {
+        if (e instanceof LoginRequiredError) {
+          dispatch(setAppLoading(false))
+          setIsSignInRefused(true)
+          return
+        }
         console.error('OIDC callback error:', e)
         dispatch(setAppLoading(false))
         dispatch(setUserError(getErrorMessage(e)))
@@ -82,7 +107,7 @@ export const CallbackResume: React.FC = () => {
       window.history.replaceState({}, '', window.location.pathname)
     }
 
-    dispatch(replace('/calendar'))
+    dispatch(replace(returnTo.current))
   }, [
     userData.loading,
     userData.userData,
@@ -92,5 +117,5 @@ export const CallbackResume: React.FC = () => {
     dispatch
   ])
 
-  return null
+  return isSignInRefused ? <SignInRefused /> : null
 }

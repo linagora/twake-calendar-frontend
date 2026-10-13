@@ -7,8 +7,8 @@ import {
   setUserData
 } from '@common/features/User/UserSlice'
 import { CallbackResume } from '@private/features/User/LoginCallback'
-import { completeLogin } from '@linagora/twake-oidc'
-import { render, waitFor } from '@testing-library/react'
+import { completeLogin, LoginRequiredError } from '@linagora/twake-oidc'
+import { render, screen, waitFor } from '@testing-library/react'
 import { replace } from 'redux-first-history'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
@@ -31,7 +31,12 @@ jest.mock('@common/app/hooks', () => ({
 }))
 
 jest.mock('@linagora/twake-oidc', () => ({
-  completeLogin: jest.fn()
+  completeLogin: jest.fn(),
+  LoginRequiredError: class extends Error {
+    constructor(readonly returnTo: string) {
+      super('The SSO needs the user to sign in')
+    }
+  }
 }))
 
 jest.mock('@common/features/User/UserSlice', () => {
@@ -171,5 +176,39 @@ describe('CallbackResume', () => {
     await waitFor(() => {
       expect(dispatch).toHaveBeenCalledWith(replace('/'))
     })
+  })
+
+  it('returns to the embed route the sign in started from', async () => {
+    const mockTokenSet = { access_token: 'abc' }
+    const mockUserInfo = { name: 'Test User' }
+    ;(completeLogin as jest.Mock).mockResolvedValue({
+      tokenSet: mockTokenSet,
+      userinfo: mockUserInfo,
+      returnTo: '/embed/calendars/team1'
+    })
+
+    const { rerender } = render(<CallbackResume />)
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(getCalendarsList())
+    })
+
+    mockUserState = { ...mockUserState, userData: mockUserInfo }
+    mockUserState.tokens = mockTokenSet
+    rerender(<CallbackResume />)
+
+    await waitFor(() => {
+      expect(dispatch).toHaveBeenCalledWith(replace('/embed/calendars/team1'))
+    })
+  })
+
+  it('shows an error when the SSO refuses the silent sign in', async () => {
+    ;(completeLogin as jest.Mock).mockRejectedValue(
+      new LoginRequiredError('/embed/calendars/team1')
+    )
+
+    renderWithProviders(<CallbackResume />)
+
+    expect(await screen.findByText('embed.signInRequired')).toBeInTheDocument()
+    expect(dispatch).not.toHaveBeenCalledWith(replace('/error'))
   })
 })
