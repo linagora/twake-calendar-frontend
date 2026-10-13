@@ -1,7 +1,21 @@
 body
   margin 0
+  // Height of the Twake bar, set on :root when the bar is mounted. No default
+  // on :root: minified, 0px becomes 0, which is invalid in calc()
+  padding-top var(--twake-bar-height, 0px)
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
 
 code
   font-family source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace
+
+// The Twake bar is pinned on top of the page, in the space the body reserves.
+// It stays above the application (menubar: 1100) and below the MUI overlays
+// (drawers: 1200, modals: 1300), which cover it like they cover the menubar.
+#cozy-bar
+  position fixed
+  top 0
+  left 0
+  width 100%
+  height var(--twake-bar-height, 0px)
+  z-index 1150

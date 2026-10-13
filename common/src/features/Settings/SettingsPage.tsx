@@ -11,8 +11,8 @@ export type SettingsSubTab = 'settings' | 'notifications'
 
 const SettingsPage: React.FC<{
   menubarProps?: MenubarProps
-  isInIframe?: boolean
-}> = ({ menubarProps, isInIframe }) => {
+  isEmbedded?: boolean
+}> = ({ menubarProps, isEmbedded }) => {
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
   const [activeSettingsSubTab, setActiveSettingsSubTab] =
@@ -51,10 +51,10 @@ const SettingsPage: React.FC<{
 
   return (
     <>
-      {isInIframe && isMobile && menubarProps && <Menubar {...menubarProps} />}
+      {isEmbedded && isMobile && menubarProps && <Menubar {...menubarProps} />}
 
       <main
-        className={`main-layout settings-layout${isInIframe ? ' isInIframe' : ''} ${isMobile ? 'settings-layout--mobile' : ''}`}
+        className={`main-layout settings-layout${isEmbedded ? ' isEmbedded' : ''} ${isMobile ? 'settings-layout--mobile' : ''}`}
       >
         {isMobile ? (
           <MobileSettingsPage

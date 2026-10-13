@@ -6,11 +6,11 @@
 
 .main-layout
   display flex
-  height calc(100dvh - 70px)
+  height calc(100dvh - 70px - var(--twake-bar-height, 0px))
 
-.main-layout.isInIframe
+.main-layout.isEmbedded
   margin-top 8px
-  height calc(100vh - 8px)
+  height calc(100vh - 8px - var(--twake-bar-height, 0px))
 
 .main-layout.calendar-layout
   background-color #fff
@@ -24,13 +24,13 @@
   height 100%
   overflow hidden
 
-.main-layout.isInIframe .calendar
+.main-layout.isEmbedded .calendar
   display flex
   flex-direction column
   height 100%
   overflow hidden
 
-.main-layout.isInIframe .fc
+.main-layout.isEmbedded .fc
   flex 1
   min-height 0
 

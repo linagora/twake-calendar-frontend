@@ -72,3 +72,14 @@ var TDRIVE_INTENT_URL = "https://{localpart}.example.com"
 //   'https://{workplaceFqdn}'
 //   'https://{workplaceFqdn.localpart}.{workplaceFqdn.domain}'
 var ENABLE_REFRESH_BUTTON = false 
+// URL of the Twake standalone bar script (cozy-bar's dist/standalone.js). When
+// set, the bar replaces the application's own top bar once the application has
+// loaded. Ignored when the application is embedded in an iframe. Pin a version
+// in the URL and, in production, serve it from a host you control.
+// It needs the user's Cozy: SSO_SCOPE must include workplaceFqdn (or set
+// WORKPLACE_FQDN_FALLBACK), and the Cozy must accept the application's SSO
+// client for token exchange. Otherwise the application keeps its own top bar.
+// var TWAKE_BAR_URL = 'https://cdn.jsdelivr.net/npm/cozy-bar@x.y.z/dist/standalone.js'; // optional
+// Subresource Integrity hash of that script, e.g. 'sha384-…': the browser then
+// refuses any other content. Recommended in production.
+// var TWAKE_BAR_INTEGRITY = 'sha384-…'; // optional

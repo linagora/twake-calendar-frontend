@@ -13,7 +13,7 @@ export default [
       '**/build/',
       '**/node_modules/',
       '**/coverage/',
-      'public/',
+      '**/public/',
       '**/*.config.js',
       '**/*.config.ts',
       '**/fileTransformer.ts'

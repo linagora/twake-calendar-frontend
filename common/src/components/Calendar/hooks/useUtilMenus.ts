@@ -4,6 +4,23 @@ import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { logOut } from '@linagora/twake-oidc'
 import { useEffect, useState } from 'react'
 
+/**
+ * Ends the session here and on the SSO, then leaves the application.
+ */
+export const logOut = async (): Promise<void> => {
+  // The tokens are dropped, here and in the other tabs, before anything else:
+  // even if the SSO cannot be reached, this browser no longer holds a
+  // session.
+  endLocalSession()
+  try {
+    const logoutUrl = await Logout()
+    redirectTo(logoutUrl.href)
+  } catch (error) {
+    console.error('Logout failed:', error)
+    redirectTo('/')
+  }
+}
+
 export const useUtilMenus = (): {
   anchorEl: null | HTMLElement
   userMenuAnchorEl: null | HTMLElement

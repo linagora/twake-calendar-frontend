@@ -28,7 +28,7 @@ export type UserMenuProps = {
   onLogoutClick: () => void
   onUserMenuOpen: (event: MouseEvent<HTMLElement>) => void
   user: userData | null
-  isIframe?: boolean
+  isEmbedded?: boolean
   size?: 's' | 'm' | 'l'
 }
 
@@ -162,7 +162,7 @@ export function UserMenu({
   onLogoutClick,
   onUserMenuOpen,
   user,
-  isIframe = false,
+  isEmbedded = false,
   size = 'm'
 }: UserMenuProps): JSX.Element {
   const { t } = useI18n()
@@ -172,15 +172,15 @@ export function UserMenu({
   return (
     <>
       <Tooltip
-        title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
+        title={isEmbedded ? t('menubar.settings') : t('menubar.userProfile')}
       >
         <IconButton
-          onClick={!isIframe ? onUserMenuOpen : onSettingsClick}
+          onClick={!isEmbedded ? onUserMenuOpen : onSettingsClick}
           aria-label={
-            isIframe ? t('menubar.settings') : t('menubar.userProfile')
+            isEmbedded ? t('menubar.settings') : t('menubar.userProfile')
           }
         >
-          {!isIframe ? (
+          {!isEmbedded ? (
             <Avatar color={stringToGradient(displayName)} size={size}>
               {getInitials(displayName)}
             </Avatar>

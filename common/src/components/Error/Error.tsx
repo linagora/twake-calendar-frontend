@@ -44,7 +44,7 @@ export const Error: React.FC<ErrorProps> = ({
     <Fade in timeout={500}>
       <Box
         sx={{
-          minHeight: '100vh',
+          minHeight: 'calc(100vh - var(--twake-bar-height, 0px))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
