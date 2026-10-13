@@ -43,18 +43,37 @@ export function EmbeddedCalendar(): JSX.Element {
 
 function EmbeddedCalendarContent(): JSX.Element | null {
   const { t } = useI18n()
-  const calendarRef = useRef<CalendarApi | null>(null)
-  const controllerRef = useRef<CalendarControllerRef | null>(null)
   const calendarId = useEmbeddedCalendarId()
-  const selectedCalendars = useMemo(
-    () => (calendarId ? [calendarId] : []),
-    [calendarId]
-  )
   const isSignedIn = useAppSelector(state => Boolean(state.user.tokens))
   const pending = useAppSelector(state => state.calendars.pending)
   const isMember = useAppSelector(state =>
     Boolean(calendarId && state.calendars.list[calendarId])
   )
+
+  if (!isSignedIn) return null
+
+  if (!isMember || !calendarId) {
+    // Loading the calendars. Once the calendar is known, pending only means
+    // that events are loading: the view stays, or it would load them again.
+    if (pending) return null
+    return (
+      <Stack
+        sx={{ alignItems: 'center', justifyContent: 'center', height: '100vh' }}
+      >
+        <Typography>{t('embed.calendarUnavailable')}</Typography>
+      </Stack>
+    )
+  }
+
+  return <TeamCalendar calendarId={calendarId} />
+}
+
+// The month of the team calendar, for a member of it
+function TeamCalendar({ calendarId }: { calendarId: string }): JSX.Element {
+  const { t } = useI18n()
+  const calendarRef = useRef<CalendarApi | null>(null)
+  const controllerRef = useRef<CalendarControllerRef | null>(null)
+  const selectedCalendars = useMemo(() => [calendarId], [calendarId])
 
   const dispatch = useAppDispatch()
   const eventUid = useEmbeddedEventUid()
@@ -66,26 +85,11 @@ function EmbeddedCalendarContent(): JSX.Element | null {
   // new URL brings TwakeSpace's address along, and a click on the same card
   // opens the event again
   const closeEvent = (): void => {
-    if (eventUid && calendarId) {
+    if (eventUid) {
       dispatch(
         replace(embedRoute(EMBED_CALENDAR_PREFIX, calendarId.split('/')[0]))
       )
     }
-  }
-
-  if (!isSignedIn) return null
-
-  if (!isMember) {
-    // Loading the calendars. Once the calendar is known, pending only means
-    // that events are loading: the view stays, or it would load them again.
-    if (pending) return null
-    return (
-      <Stack
-        sx={{ alignItems: 'center', justifyContent: 'center', height: '100vh' }}
-      >
-        <Typography>{t('embed.calendarUnavailable')}</Typography>
-      </Stack>
-    )
   }
 
   return (

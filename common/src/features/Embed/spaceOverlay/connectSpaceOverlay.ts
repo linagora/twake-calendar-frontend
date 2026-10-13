@@ -140,19 +140,17 @@ function findOverlay(name: string): Document | null {
   )
   for (const frame of frames) {
     try {
-      if (
-        frame?.name === name &&
-        frame.location.href !== 'about:blank' &&
-        frame.document.readyState === 'complete'
-      ) {
-        return frame.document
-      }
+      if (frame?.name === name && isLoaded(frame)) return frame.document
     } catch {
       // Another origin
     }
   }
   return null
 }
+
+const isLoaded = (frame: Window): boolean =>
+  frame.location.href !== 'about:blank' &&
+  frame.document.readyState === 'complete'
 
 /**
  * Copies every CSS rule of the app into the overlay, and again whenever the
@@ -292,10 +290,7 @@ function followRegion(
     const wasBlocking = last === '"full"'
     last = key
     reportRegion(region)
-    if (wasBlocking && region !== 'full' && doc.activeElement === doc.body) {
-      const target = lastAppFocus()
-      if (target !== null) restoreFocus(target)
-    }
+    if (wasBlocking && hasLostFocus(doc, region)) restoreAppFocus(lastAppFocus)
   }
   // Not the overlay's animation frames: the browser does not run them while
   // the overlay shows nothing, which it does until it reports a region
@@ -316,6 +311,15 @@ function followRegion(
   schedule()
 }
 
+// A dialog closed and left the focus nowhere on the overlay
+const hasLostFocus = (doc: Document, region: OverlayRegion): boolean =>
+  region !== 'full' && doc.activeElement === doc.body
+
+function restoreAppFocus(lastAppFocus: () => HTMLElement | null): void {
+  const target = lastAppFocus()
+  if (target !== null) restoreFocus(target)
+}
+
 /**
  * What the overlay shows: everything while a modal (dialog, menu) or a
  * backdrop is open, otherwise the boxes that paint something. A box that
@@ -324,35 +328,45 @@ function followRegion(
 export function computeOverlayRegion(doc: Document): OverlayRegion {
   const view = doc.defaultView
   if (view === null) return []
-  const blocking = Array.from(
+  if (hasOpenModal(doc, view)) return 'full'
+
+  const boxes: OverlayBox[] = []
+  const visit = (element: Element): void => {
+    const style = view.getComputedStyle(element)
+    if (isHidden(style)) return
+    if (style.pointerEvents === 'none' && !paints(style)) {
+      Array.from(element.children).forEach(visit)
+      return
+    }
+    const box = toOverlayBox(element.getBoundingClientRect())
+    if (box !== null) boxes.push(box)
+  }
+  Array.from(doc.body.children).forEach(visit)
+  return boxes
+}
+
+function hasOpenModal(doc: Document, view: Window): boolean {
+  return Array.from(
     doc.body.querySelectorAll('.MuiModal-root, .MuiBackdrop-root')
   ).some(
     element =>
       element.closest('.MuiModal-hidden') === null &&
       view.getComputedStyle(element).visibility !== 'hidden'
   )
-  if (blocking) return 'full'
+}
 
-  const boxes: OverlayBox[] = []
-  const visit = (element: Element): void => {
-    const style = view.getComputedStyle(element)
-    if (style.display === 'none' || style.visibility === 'hidden') return
-    if (style.pointerEvents === 'none' && !paints(style)) {
-      Array.from(element.children).forEach(visit)
-      return
-    }
-    const box = element.getBoundingClientRect()
-    if (box.width > 0 && box.height > 0) {
-      boxes.push({
-        x: Math.floor(box.left - SHADOW_MARGIN),
-        y: Math.floor(box.top - SHADOW_MARGIN),
-        width: Math.ceil(box.width + 2 * SHADOW_MARGIN),
-        height: Math.ceil(box.height + 2 * SHADOW_MARGIN)
-      })
-    }
+const isHidden = (style: CSSStyleDeclaration): boolean =>
+  style.display === 'none' || style.visibility === 'hidden'
+
+// The box of an element, with room for its shadow; null when it is empty
+function toOverlayBox(box: DOMRect): OverlayBox | null {
+  if (box.width <= 0 || box.height <= 0) return null
+  return {
+    x: Math.floor(box.left - SHADOW_MARGIN),
+    y: Math.floor(box.top - SHADOW_MARGIN),
+    width: Math.ceil(box.width + 2 * SHADOW_MARGIN),
+    height: Math.ceil(box.height + 2 * SHADOW_MARGIN)
   }
-  Array.from(doc.body.children).forEach(visit)
-  return boxes
 }
 
 function paints(style: CSSStyleDeclaration): boolean {
