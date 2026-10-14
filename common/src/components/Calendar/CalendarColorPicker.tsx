@@ -3,7 +3,6 @@ import CheckIcon from '@mui/icons-material/Check'
 import {
   Box,
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -12,6 +11,7 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { useEffect, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useI18n } from 'twake-i18n'

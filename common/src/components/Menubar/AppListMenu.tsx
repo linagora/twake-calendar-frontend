@@ -1,5 +1,6 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { Dialog, IconButton, Popover } from '@linagora/twake-mui'
+import { IconButton, Popover } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined'
 import { useI18n } from 'twake-i18n'
 import { AppIcon, AppIconProps } from './AppIcon'

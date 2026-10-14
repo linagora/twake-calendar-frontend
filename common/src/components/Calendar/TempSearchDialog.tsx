@@ -2,7 +2,6 @@ import { useAppSelector } from '@common/app/hooks'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   IconButton,
-  Dialog,
   DialogTitle,
   DialogContent,
   useTheme,
@@ -10,6 +9,7 @@ import {
   DialogActions,
   Button
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { User } from '@common/components/Attendees/types'
 import { useI18n } from 'twake-i18n'

@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Dialog,
   DialogActions,
   Divider,
   IconButton,
@@ -9,6 +8,7 @@ import {
   Theme,
   useTheme
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import AccessTime from '@mui/icons-material/AccessTime'
 import KeyboardAltOutlined from '@mui/icons-material/KeyboardAltOutlined'
 import {

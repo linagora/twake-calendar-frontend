@@ -1,6 +1,5 @@
 import {
   Box,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogContentProps,
@@ -16,6 +15,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import Tooltip from '@common/components/Tooltip'
 import { useIsInIframe } from '@common/contexts/EmbeddingContext'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'

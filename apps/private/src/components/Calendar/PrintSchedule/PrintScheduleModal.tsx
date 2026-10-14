@@ -24,7 +24,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -36,6 +35,7 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { DatePickerField } from '@common/components/Event/components/DateTimeFields/DatePickerField'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'

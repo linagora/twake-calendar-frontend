@@ -6,12 +6,12 @@ import {
 } from '@common/features/User/UserSlice'
 import {
   Button,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Typography
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { getTimezoneOffset } from '@common/utils/timezone'

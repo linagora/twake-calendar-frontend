@@ -1,12 +1,7 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import EditIcon from '@mui/icons-material/Edit'
-import {
-  Box,
-  Button,
-  Dialog,
-  IconButton,
-  Typography
-} from '@linagora/twake-mui'
+import { Box, Button, IconButton, Typography } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { DateField, DatePicker } from '@mui/x-date-pickers'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
 import { PickerValue } from '@mui/x-date-pickers/internals'

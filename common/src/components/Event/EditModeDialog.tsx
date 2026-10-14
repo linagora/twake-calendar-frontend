@@ -1,7 +1,6 @@
 import {
   Button,
   ButtonGroup,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -9,6 +8,7 @@ import {
   Radio,
   RadioGroup
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 

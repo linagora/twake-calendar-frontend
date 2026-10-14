@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
-import { Dialog, Box, IconButton } from '@linagora/twake-mui'
+import { Box, IconButton } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { TdriveFile } from '../types'
 import { PickerSkeleton } from './PickerSkeleton'

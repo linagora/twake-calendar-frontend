@@ -5,7 +5,6 @@ import { getUserDisplayName } from '@common/utils/userUtils'
 import {
   alpha,
   Box,
-  Dialog,
   Divider,
   IconButton,
   Menu,
@@ -14,6 +13,7 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { Dialog } from '@common/ds/Dialog/Dialog'
 import { Avatar } from '@common/ds/Avatar/Avatar'
 import LogoutIcon from '@mui/icons-material/Logout'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
