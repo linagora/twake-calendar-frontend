@@ -9,9 +9,9 @@ import {
   Box,
   FormControl,
   FormControlLabel,
-  Switch,
   Typography
 } from '@linagora/twake-mui'
+import { Switch } from '@common/ds/Switch/Switch'
 import { useI18n } from 'twake-i18n'
 import {
   setTimezone as setUserTimeZone,

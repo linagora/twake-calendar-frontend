@@ -3,9 +3,9 @@ import {
   Box,
   FormControl,
   FormControlLabel,
-  Switch,
   Typography
 } from '@linagora/twake-mui'
+import { Switch } from '@common/ds/Switch/Switch'
 import { useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { updateUserConfigurations } from '@common/features/User/UserSlice'

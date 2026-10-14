@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
-import { FormControlLabel, Switch, Typography, Box } from '@linagora/twake-mui'
+import { FormControlLabel, Typography, Box } from '@linagora/twake-mui'
+import { Switch } from '@common/ds/Switch/Switch'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import {

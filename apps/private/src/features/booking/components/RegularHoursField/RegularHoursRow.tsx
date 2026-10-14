@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, Typography, Switch, IconButton, Stack } from '@linagora/twake-mui'
+import { Box, Typography, IconButton, Stack } from '@linagora/twake-mui'
+import { Switch } from '@common/ds/Switch/Switch'
 import { Add, ContentCopy } from '@mui/icons-material'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import { DayOfWeek, TimeSlot, isInvalidSlot } from './RegularHoursTypes'

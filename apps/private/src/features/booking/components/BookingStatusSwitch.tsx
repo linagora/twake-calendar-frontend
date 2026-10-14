@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, Switch } from '@linagora/twake-mui'
+import { Box } from '@linagora/twake-mui'
+import { Switch } from '@common/ds/Switch/Switch'
 import { Tooltip } from '@common/components/Tooltip'
 import { useI18n } from 'twake-i18n'
 
