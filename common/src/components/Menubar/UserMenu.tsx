@@ -7,6 +7,7 @@ import {
   Box,
   Divider,
   IconButton,
+  type IconButtonProps,
   Menu,
   MenuItem,
   MenuList,
@@ -30,6 +31,7 @@ export type UserMenuProps = {
   user: userData | null
   isIframe?: boolean
   size?: 's' | 'm' | 'l'
+  buttonSize?: IconButtonProps['size']
 }
 
 const sharedPaperSx = {
@@ -163,7 +165,8 @@ export function UserMenu({
   onUserMenuOpen,
   user,
   isIframe = false,
-  size = 'm'
+  size = 'm',
+  buttonSize
 }: UserMenuProps): JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -175,6 +178,7 @@ export function UserMenu({
         title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
       >
         <IconButton
+          size={buttonSize}
           onClick={!isIframe ? onUserMenuOpen : onSettingsClick}
           aria-label={
             isIframe ? t('menubar.settings') : t('menubar.userProfile')

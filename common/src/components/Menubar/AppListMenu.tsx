@@ -1,5 +1,5 @@
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-import { IconButton, Popover } from '@linagora/twake-mui'
+import { IconButton, Popover, type IconButtonProps } from '@linagora/twake-mui'
 import { Dialog } from '@common/ds/Dialog/Dialog'
 import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined'
 import { useI18n } from 'twake-i18n'
@@ -56,7 +56,14 @@ export const AppListMenu: React.FC<{
   onAppMenuOpen: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void
   onAppMenuClose: () => void
   iconSize?: 'inherit' | 'small' | 'medium' | 'large'
-}> = ({ anchorEl, onAppMenuOpen, onAppMenuClose, iconSize = 'inherit' }) => {
+  buttonSize?: IconButtonProps['size']
+}> = ({
+  anchorEl,
+  onAppMenuOpen,
+  onAppMenuClose,
+  iconSize = 'inherit',
+  buttonSize
+}) => {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
 
@@ -69,6 +76,7 @@ export const AppListMenu: React.FC<{
     <>
       <Tooltip title={t('menubar.apps')}>
         <IconButton
+          size={buttonSize}
           onClick={onAppMenuOpen}
           style={{ marginRight: 8 }}
           aria-label={t('menubar.apps')}

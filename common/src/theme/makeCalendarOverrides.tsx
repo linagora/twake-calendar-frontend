@@ -231,6 +231,12 @@ const basicThemeOverrides = {
       })
     }
   },
+  // twake-mui draws a border between the summary and the details
+  MuiAccordionDetails: {
+    styleOverrides: {
+      root: { padding: 0 }
+    }
+  },
   MuiListItem: {
     styleOverrides: {
       root: ({ theme }: { theme: Theme }) => ({

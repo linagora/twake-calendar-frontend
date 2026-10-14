@@ -70,19 +70,19 @@ export const TempCalendarsInput: React.FC<{
                   )
                 }
               }}
-              sx={
-                tempUsers.length > 0
-                  ? {
-                      '& .MuiOutlinedInput-root': {
-                        flexDirection: 'column',
-                        alignItems: 'start',
-                        '& .MuiInputBase-input': {
-                          width: '100%'
-                        }
-                      }
+              sx={{
+                // The body1 text of twake-mui cuts the placeholder in the sidebar
+                '& .MuiInputBase-root': { typography: 'body2' },
+                ...(tempUsers.length > 0 && {
+                  '& .MuiOutlinedInput-root': {
+                    flexDirection: 'column',
+                    alignItems: 'start',
+                    '& .MuiInputBase-input': {
+                      width: '100%'
                     }
-                  : undefined
-              }
+                  }
+                })
+              }}
             />
           )}
         />

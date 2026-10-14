@@ -27,6 +27,7 @@ export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
       {supportLink && (
         <Tooltip title={t('menubar.help')}>
           <IconButton
+            size="xsmall"
             component="a"
             href={supportLink}
             target="_blank"
@@ -44,6 +45,7 @@ export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
         onAppMenuOpen={handleAppMenuOpen}
         onAppMenuClose={handleAppMenuClose}
         iconSize="small"
+        buttonSize="xsmall"
       />
 
       <UserMenu
@@ -55,6 +57,7 @@ export const UtilButtons: React.FC<{ isIframe?: boolean }> = ({ isIframe }) => {
         isIframe={isIframe}
         user={user}
         size="s"
+        buttonSize="xsmall"
       />
     </Box>
   )

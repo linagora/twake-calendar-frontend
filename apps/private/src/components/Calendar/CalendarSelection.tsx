@@ -152,6 +152,7 @@ const CollapsibleSection: React.FC<{
           <Tooltip title={addBtnTooltip}>
             <IconButton
               component="span"
+              size="xsmall"
               onClick={e => {
                 if (expanded) {
                   e.stopPropagation()
@@ -879,6 +880,7 @@ const CalendarSelector: React.FC<{
         {!isMobile && (
           <IconButton
             className="MoreBtn"
+            size="xsmall"
             aria-label={t('common.moreOptions')}
             onClick={handleClick}
           >
