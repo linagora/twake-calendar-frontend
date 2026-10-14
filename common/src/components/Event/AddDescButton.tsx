@@ -58,8 +58,7 @@ export function AddDescButton({
           sx={{
             '& .MuiInputBase-root': {
               maxHeight: '33%',
-              overflowY: 'auto',
-              padding: 0
+              overflowY: 'auto'
             },
             '& textarea': {
               resize: 'vertical'
