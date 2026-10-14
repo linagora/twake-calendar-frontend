@@ -231,6 +231,16 @@ const basicThemeOverrides = {
       })
     }
   },
+  // twake-mui draws the "+N" avatar like the page, outlined by a ring on the
+  // last child, which is the wrapper of an attendee here: keep MUI's grey disc
+  MuiAvatarGroup: {
+    defaultProps: {
+      slotProps: {
+        surplus: { sx: { bgcolor: 'grey.400', color: 'background.default' } }
+      }
+    },
+    styleOverrides: { root: {} }
+  },
   // twake-mui draws a border between the summary and the details
   MuiAccordionDetails: {
     styleOverrides: {
