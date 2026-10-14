@@ -22,10 +22,8 @@ it generic.
   whether it should go upstream to twake-ui, and why.
 - Named exports and explicit types.
 
-## The twake-mui 5.1.1 look
+## Kept from twake-mui 5.1.1
 
-`ThemeProvider` and `Avatar`, `Dialog`, `ListItemText` and `Switch` keep the
-calendar as it was with twake-mui 5.1.1 while it runs twake-mui 13. To adopt
-the twake-mui 13 look of a component, delete its entry in
-`ThemeProvider/legacyOverrides.tsx` (or its folder here) and check the
-screens that use it.
+`Avatar`, `Dialog`, `ListItemText` and `Switch` keep the behaviour they had
+with twake-mui 5.1.1, which twake-mui 13 changed. To adopt the twake-mui 13
+version of one, delete its folder here and check the screens that use it.

@@ -1,6 +1,6 @@
 import type { AppStore, RootState } from '@common/app/store'
 import { setupStore } from '@common/app/store'
-import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import type { RenderOptions } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import React, { PropsWithChildren } from 'react'
@@ -22,7 +22,7 @@ export function renderWithProviders(
 
   const Wrapper = ({ children }: PropsWithChildren) => {
     return (
-      <ThemeProvider>
+      <TwakeMuiThemeProvider>
         <I18nContext.Provider
           value={{
             t: (key: string, vars?: Record<string, string>) => {
@@ -45,7 +45,7 @@ export function renderWithProviders(
             <Provider store={store}>{children}</Provider>
           </MemoryRouter>
         </I18nContext.Provider>
-      </ThemeProvider>
+      </TwakeMuiThemeProvider>
     )
   }
 
