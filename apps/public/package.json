@@ -18,7 +18,7 @@
     "react-router": "^7.18.4",
     "redux-first-history": "^5.2.0",
     "twake-i18n": "^0.7.1",
-    "@linagora/twake-icons": "^2.7.0"
+    "@linagora/twake-icons": "^2.14.0"
   },
   "scripts": {
     "start": "PORT=5001 rsbuild dev",
