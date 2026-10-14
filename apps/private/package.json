@@ -22,7 +22,7 @@
     "react-redux": "^9.2.0",
     "react-router": "^7.18.4",
     "redux-first-history": "^5.2.0",
-    "twake-i18n": "^0.5.0"
+    "twake-i18n": "^0.7.1"
   },
   "scripts": {
     "start": "PORT=5000 rsbuild dev",
