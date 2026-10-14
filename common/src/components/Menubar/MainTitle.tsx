@@ -50,6 +50,7 @@ export const MainTitle: React.FC<MainTitleProps> = ({
   return (
     <div className="menubar-item tc-home">
       <Button
+        variant="text"
         onClick={handleLogoClick}
         aria-label={t('menubar.logoAlt')}
         style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer' }}

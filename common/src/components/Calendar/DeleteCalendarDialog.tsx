@@ -51,7 +51,7 @@ export function DeleteCalendarDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={() => setDeletePopupOpen(false)}>
+        <Button variant="text" onClick={() => setDeletePopupOpen(false)}>
           {t('common.cancel')}
         </Button>
         <Button onClick={handleDeleteConfirm} variant="contained">

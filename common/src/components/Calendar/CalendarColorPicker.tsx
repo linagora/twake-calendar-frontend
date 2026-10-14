@@ -187,7 +187,9 @@ function ColorPickerActions({
   const { t } = useI18n()
   return (
     <>
-      <Button onClick={onCancel}>{t('common.cancel')}</Button>
+      <Button variant="text" onClick={onCancel}>
+        {t('common.cancel')}
+      </Button>
       <Button
         variant="contained"
         onClick={onSave}

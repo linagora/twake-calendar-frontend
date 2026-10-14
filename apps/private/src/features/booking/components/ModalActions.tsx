@@ -36,6 +36,7 @@ export const ModalActions: React.FC<{
     >
       {!isExpanded && (
         <Button
+          variant="text"
           size={buttonSize}
           startIcon={<AddIcon />}
           onClick={onExpandToggle}
