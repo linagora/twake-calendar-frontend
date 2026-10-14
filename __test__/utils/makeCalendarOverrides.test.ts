@@ -1,4 +1,6 @@
+import { makePalette } from '@linagora/twake-mui'
 import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
+import paletteData from '@common/theme/palette.json'
 
 const DAY_SELECTOR = '.MuiDateCalendar-root .MuiPickerDay-root'
 const DISABLED_DAY_SELECTOR = `${DAY_SELECTOR}.Mui-disabled:not(.Mui-selected)`
@@ -13,9 +15,7 @@ function dateOverrides(): Record<string, { color?: string }> {
 describe('makeCalendarOverrides', () => {
   it('greys out disabled days instead of drawing them like selectable ones', () => {
     const overrides = dateOverrides()
-    const theme = makeCalendarOverrides(true)
-    const disabledColor = (theme.palette as { text: { disabled: string } }).text
-      .disabled
+    const disabledColor = makePalette('light', paletteData).text.disabled
 
     expect(overrides[DISABLED_DAY_SELECTOR]?.color).toBe(disabledColor)
     expect(overrides[DISABLED_DAY_SELECTOR]?.color).not.toBe(

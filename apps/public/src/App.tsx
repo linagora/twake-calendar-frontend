@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { Suspense, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
@@ -8,6 +8,7 @@ import { Error as ErrorPage } from '@common/components/Error/Error'
 import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
 import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
+import paletteData from '@common/theme/palette.json'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
 import { useDocumentLanguage } from '@common/hooks/useDocumentLanguage'
@@ -62,7 +63,8 @@ export default function App(): JSX.Element {
 
   return (
     <EmbeddingProvider>
-      <ThemeProvider
+      <TwakeMuiThemeProvider
+        palette={paletteData}
         themeOptions={{
           ...makeCalendarOverrides()
         }}
@@ -129,7 +131,7 @@ export default function App(): JSX.Element {
             </ErrorBoundary>
           </PublicLanguageContext.Provider>
         </I18n>
-      </ThemeProvider>
+      </TwakeMuiThemeProvider>
     </EmbeddingProvider>
   )
 }

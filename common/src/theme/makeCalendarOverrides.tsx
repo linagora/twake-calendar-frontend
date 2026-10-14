@@ -252,7 +252,7 @@ const basicThemeOverrides = {
 
 /**
 This function allows us to create themes overrides that are specific to Twake Calendar.
-(eg. palette, specific components like date pickers from mui/x-date-pickers, etc)
+(eg. specific components like date pickers from mui/x-date-pickers, etc)
 **/
 export function makeCalendarOverrides(
   includeDateOverrides?: boolean
@@ -273,7 +273,6 @@ export function makeCalendarOverrides(
   })
 
   return {
-    palette,
     typography,
     components: {
       ...basicThemeOverrides,
