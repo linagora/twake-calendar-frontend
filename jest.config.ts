@@ -46,6 +46,8 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '^(react-markdown|remark-gfm)$':
+          '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -100,6 +102,8 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '^(react-markdown|remark-gfm)$':
+          '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
         '^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -144,6 +148,8 @@ const config: Config = {
       ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
+        '^(react-markdown|remark-gfm)$':
+          '<rootDir>/__test__/utils/markdownStub.ts',
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',
         '^@private/(.*)$': '<rootDir>/apps/private/src/$1',
