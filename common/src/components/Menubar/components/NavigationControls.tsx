@@ -15,8 +15,14 @@ export const NavigationControls: React.FC<{
     <div className="navigation-controls">
       <ButtonGroup
         variant="outlined"
+        color="inherit"
         size="medium"
         sx={{
+          // twake-mui outlines in the text colour, darker than before
+          '& .MuiButton-root': { borderColor: 'border.main' },
+          '& .MuiButton-root:not(:last-of-type)': {
+            borderRightColor: 'transparent'
+          },
           '& button:first-of-type': { borderRadius: '12px 0 0 12px' },
           '& button:last-of-type': { borderRadius: '0 12px 12px 0' }
         }}

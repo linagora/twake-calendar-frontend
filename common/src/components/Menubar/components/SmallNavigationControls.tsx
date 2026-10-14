@@ -23,11 +23,12 @@ export const SmallNavigationControls: React.FC<{
           <ChevronLeftIcon sx={{ height: 30 }} />
         </IconButton>
         <IconButton
-          color="primary"
           aria-label={t('menubar.today')}
           title={t('menubar.today')}
           sx={{
+            // Neutral like the outline of the desktop navigation buttons
             border: '1px solid',
+            borderColor: 'border.main',
             borderRadius: '12px',
             width: '38px',
             height: '38px'
