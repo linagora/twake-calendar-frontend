@@ -1,5 +1,11 @@
 import React from 'react'
-import { ListItemIcon, MenuItem, MenuList, useTheme } from '@linagora/twake-mui'
+import {
+  ListItemIcon,
+  MenuItem,
+  MenuList,
+  radius,
+  useTheme
+} from '@linagora/twake-mui'
 import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import CalendarViewDayOutlinedIcon from '@mui/icons-material/CalendarViewDayOutlined'
 import CalendarViewMonthOutlinedIcon from '@mui/icons-material/CalendarViewMonthOutlined'
@@ -54,6 +60,8 @@ export const ViewSwitcher: React.FC<
               key={option.value}
               selected={isSelected}
               onClick={() => changeViewAndClose(option.value)}
+              // twake-mui menu items are square, these stand alone in the drawer
+              sx={{ borderRadius: radius.md }}
             >
               <ListItemIcon
                 sx={{
