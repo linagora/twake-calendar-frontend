@@ -17,11 +17,11 @@ import {
   InputLabel,
   List,
   ListItemButton,
-  ListItemText,
   MenuItem,
   Select,
   Typography
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { useRef } from 'react'
 import { useI18n } from 'twake-i18n'
 import { Calendar } from '@common/types/CalendarTypes'

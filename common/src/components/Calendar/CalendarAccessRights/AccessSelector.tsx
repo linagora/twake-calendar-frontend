@@ -4,13 +4,13 @@ import {
   Box,
   List,
   ListItemButton,
-  ListItemText,
   MenuItem,
   Select,
   styled,
   SwipeableDrawer,
   Typography
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { MobileSelector } from '@common/components/MobileSelector'
 
 const StyledSwipeableDrawer = styled(SwipeableDrawer)(({ theme }) => ({

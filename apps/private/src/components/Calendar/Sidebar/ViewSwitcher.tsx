@@ -1,11 +1,6 @@
 import React from 'react'
-import {
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  MenuList,
-  useTheme
-} from '@linagora/twake-mui'
+import { ListItemIcon, MenuItem, MenuList, useTheme } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import CalendarViewDayOutlinedIcon from '@mui/icons-material/CalendarViewDayOutlined'
 import CalendarViewMonthOutlinedIcon from '@mui/icons-material/CalendarViewMonthOutlined'
 import CalendarViewWeekOutlinedIcon from '@mui/icons-material/CalendarViewWeekOutlined'

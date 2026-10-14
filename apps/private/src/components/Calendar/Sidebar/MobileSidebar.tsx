@@ -3,9 +3,9 @@ import {
   Box,
   useTheme,
   ListItemIcon,
-  ListItemText,
   ListItemButton
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { CalendarSidebarProps } from './SideBar'
 import { SidebarCommonContent } from './SidebarCommonContent'
 import { ViewSwitcher } from './ViewSwitcher'

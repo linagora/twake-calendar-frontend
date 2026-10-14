@@ -3,9 +3,9 @@ import {
   styled,
   SwipeableDrawer,
   List,
-  ListItemButton,
-  ListItemText
+  ListItemButton
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { useI18n } from 'twake-i18n'
 
 const StyledSwipeableDrawer = styled(SwipeableDrawer)(({ theme }) => ({

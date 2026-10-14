@@ -8,7 +8,6 @@ import {
   CircularProgress,
   ListItem,
   ListItemAvatar,
-  ListItemText,
   PaperProps,
   PopperProps,
   TextField,
@@ -16,6 +15,7 @@ import {
   Typography,
   type AutocompleteRenderInputParams
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import SearchIcon from '@mui/icons-material/Search'
 import {
   HTMLAttributes,

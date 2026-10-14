@@ -3,10 +3,10 @@ import {
   Box,
   ListItem,
   ListItemButton,
-  ListItemText,
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { Check as CheckIcon } from '@mui/icons-material'
 import React from 'react'
 

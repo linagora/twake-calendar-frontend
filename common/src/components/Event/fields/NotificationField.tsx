@@ -1,12 +1,12 @@
 import {
   Checkbox,
   FormControl,
-  ListItemText,
   MenuItem,
   OutlinedInput,
   Select,
   SelectChangeEvent
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { useI18n } from 'twake-i18n'
 import { FieldWithLabel } from '@common/components/Event/components/FieldWithLabel'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'

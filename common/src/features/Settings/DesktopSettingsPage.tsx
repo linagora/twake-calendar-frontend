@@ -3,9 +3,9 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
   Typography
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'

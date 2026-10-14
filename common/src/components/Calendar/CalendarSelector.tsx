@@ -5,11 +5,11 @@ import {
   InputLabel,
   List,
   ListItemButton,
-  ListItemText,
   MenuItem,
   Select,
   Typography
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { useI18n } from 'twake-i18n'
 import { CalendarItemList } from './CalendarItemList'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'

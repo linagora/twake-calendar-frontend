@@ -4,9 +4,9 @@ import {
   ListItem,
   SwipeableDrawer,
   ListItemButton,
-  ListItemText,
   ListItemIcon
 } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import RepeatIcon from '@mui/icons-material/Repeat'
 
 interface ViewMoreEventsProps {

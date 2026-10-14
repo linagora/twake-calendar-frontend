@@ -1,10 +1,6 @@
 import React, { useMemo, useRef } from 'react'
-import {
-  ListItemText,
-  ListItemButton,
-  ListItem,
-  List
-} from '@linagora/twake-mui'
+import { ListItemButton, ListItem, List } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import { TIME_SLOT_OPTIONS, TimeSlotSelectFieldProps } from './index.type'
 import {
   MobileSelector,

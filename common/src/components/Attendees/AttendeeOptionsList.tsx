@@ -1,4 +1,5 @@
-import { ListItem, ListItemAvatar, ListItemText } from '@linagora/twake-mui'
+import { ListItem, ListItemAvatar } from '@linagora/twake-mui'
+import { ListItemText } from '@common/ds/ListItemText/ListItemText'
 import React, { HTMLAttributes } from 'react'
 import { Typography, Box } from '@linagora/twake-mui'
 import { AttendeeAvatar } from './AttendeeAvatar'
