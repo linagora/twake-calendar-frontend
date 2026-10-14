@@ -47,6 +47,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         <PublicLanguageSelector />
 
         <Button
+          variant="text"
           onClick={handleHelpClick}
           sx={{
             textTransform: 'none',

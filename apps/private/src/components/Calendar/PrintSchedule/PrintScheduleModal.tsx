@@ -336,10 +336,18 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                 </Box>
               </Stack>
               <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-                <Button size="small" onClick={() => applyQuickRange('week')}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => applyQuickRange('week')}
+                >
                   {t('print.thisWeek')}
                 </Button>
-                <Button size="small" onClick={() => applyQuickRange('month')}>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => applyQuickRange('month')}
+                >
                   {t('print.thisMonth')}
                 </Button>
               </Stack>
@@ -383,6 +391,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                   </Stack>
                 ))}
                 <Button
+                  variant="text"
                   size="small"
                   startIcon={<AddIcon />}
                   onClick={addCalendarRow}
@@ -402,7 +411,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
         </TwakeLocalizationProvider>
       </DialogContent>
       <DialogActions sx={{ px: paddingX }}>
-        <Button onClick={onClose} disabled={loading}>
+        <Button variant="text" onClick={onClose} disabled={loading}>
           {t('common.cancel')}
         </Button>
         <Button

@@ -31,7 +31,12 @@ export const EventActions: React.FC<EventActionsProps> = ({
       }}
     >
       {showExpandedBtn && (
-        <Button size="medium" startIcon={<AddIcon />} onClick={onExpanded}>
+        <Button
+          size="medium"
+          variant="text"
+          startIcon={<AddIcon />}
+          onClick={onExpanded}
+        >
           {t('common.moreOptions')}
         </Button>
       )}

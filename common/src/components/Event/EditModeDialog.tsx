@@ -61,8 +61,12 @@ export function EditModeDialog({
       </DialogContent>
       <DialogActions>
         <ButtonGroup>
-          <Button onClick={handleClose}>{t('common.cancel')}</Button>
-          <Button onClick={handleEvent}>{t('common.ok')}</Button>
+          <Button variant="text" onClick={handleClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="text" onClick={handleEvent}>
+            {t('common.ok')}
+          </Button>
         </ButtonGroup>
       </DialogActions>
     </Dialog>
