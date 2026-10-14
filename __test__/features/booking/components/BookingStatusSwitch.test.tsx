@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
+import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
 import { BookingStatusSwitch } from '@private/features/booking/components/BookingStatusSwitch'
 
 jest.mock('twake-i18n', () => ({
@@ -12,7 +12,7 @@ jest.mock('twake-i18n', () => ({
 
 describe('BookingStatusSwitch', () => {
   const renderWithTheme = (ui: React.ReactElement) =>
-    render(<TwakeMuiThemeProvider>{ui}</TwakeMuiThemeProvider>)
+    render(<ThemeProvider>{ui}</ThemeProvider>)
 
   it('renders switch with active state and handles change', async () => {
     const handleChange = jest.fn()

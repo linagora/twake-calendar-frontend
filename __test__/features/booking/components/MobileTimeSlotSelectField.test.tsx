@@ -6,7 +6,7 @@ import {
   waitFor,
   within
 } from '@testing-library/react'
-import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
+import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
 import { MobileTimeSlotSelectField } from '@private/features/booking/components/TimeSlotSelectField/MobileTimeSlotSelectField'
 
 jest.mock('twake-i18n', () => ({
@@ -18,9 +18,9 @@ jest.mock('twake-i18n', () => ({
 describe('MobileTimeSlotSelectField', () => {
   const renderField = (setDuration = jest.fn()) =>
     render(
-      <TwakeMuiThemeProvider>
+      <ThemeProvider>
         <MobileTimeSlotSelectField duration={30} setDuration={setDuration} />
-      </TwakeMuiThemeProvider>
+      </ThemeProvider>
     )
 
   it('closes the bottom sheet once a duration is picked', async () => {

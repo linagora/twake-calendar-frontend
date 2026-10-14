@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
+import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
@@ -133,7 +133,7 @@ export default function App(): JSX.Element {
 
   return (
     <EmbeddingProvider>
-      <TwakeMuiThemeProvider themeOptions={themeOptions}>
+      <ThemeProvider themeOptions={themeOptions}>
         <I18n
           dictRequire={(lang: keyof typeof locale) => locale[lang]}
           lang={lang}
@@ -184,7 +184,7 @@ export default function App(): JSX.Element {
             {appLoading && <Loading />}
           </ErrorBoundary>
         </I18n>
-      </TwakeMuiThemeProvider>
+      </ThemeProvider>
     </EmbeddingProvider>
   )
 }
