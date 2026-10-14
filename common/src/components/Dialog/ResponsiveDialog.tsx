@@ -329,6 +329,9 @@ function ResponsiveDialog({
 
   const baseContentSx: SxProps<Theme> = {
     width: '100%',
+    // twake-mui keeps the top padding after a title, too loose under the
+    // header buttons
+    '.MuiDialogTitle-root + &': { pt: 0 },
     px: isMobile ? 2 : undefined
   }
 
@@ -405,6 +408,8 @@ function ResponsiveDialog({
           className="draggable-dialog-title"
           sx={
             [
+              // twake-mui pads titles with 24px, too loose for the header buttons
+              { py: 1.5 },
               titleSx,
               isDraggable ? { cursor: 'move', userSelect: 'none' } : {},
               isMobile ? { px: 2 } : {}
@@ -424,6 +429,7 @@ function ResponsiveDialog({
                 <IconButton
                   onClick={onExpandToggle}
                   aria-label={t('eventPreview.showLess')}
+                  size="xsmall"
                   sx={{ marginLeft: '-8px' }}
                 >
                   <ArrowBackIcon sx={{ fontSize: 30 }} />
@@ -442,7 +448,7 @@ function ResponsiveDialog({
                         <IconButton
                           onClick={onExpandToggle}
                           aria-label={t('tooltip.expand')}
-                          size="small"
+                          size="xsmall"
                           sx={{ marginRight: 1 }}
                         >
                           <OpenInFullIcon sx={{ padding: '2px' }} />
@@ -452,7 +458,7 @@ function ResponsiveDialog({
                     <IconButton
                       onClick={onClose}
                       aria-label={t('actions.close')}
-                      size="small"
+                      size="xsmall"
                     >
                       <CloseIcon />
                     </IconButton>
