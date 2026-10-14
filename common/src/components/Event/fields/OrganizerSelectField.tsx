@@ -11,7 +11,6 @@ import {
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { normalizeEmail } from '@common/utils/normalizeEmail'
 import {
-  Avatar,
   Box,
   FormControl,
   MenuItem,
@@ -19,6 +18,7 @@ import {
   SelectChangeEvent,
   Typography
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import React, { useEffect, useState } from 'react'
 import { useI18n } from 'twake-i18n'

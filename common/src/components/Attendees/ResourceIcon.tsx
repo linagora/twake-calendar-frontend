@@ -1,4 +1,5 @@
-import { alpha, Avatar, Box, useTheme } from '@linagora/twake-mui'
+import { alpha, Box, useTheme } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
 
 interface ResourceIconProps {

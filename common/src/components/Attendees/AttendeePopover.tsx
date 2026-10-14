@@ -1,6 +1,5 @@
 import { userAttendee } from '@common/features/User/models/attendee'
 import {
-  Avatar,
   Box,
   IconButton,
   Typography,
@@ -9,6 +8,7 @@ import {
   useTheme,
   alpha
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import { ClickAwayListener } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'

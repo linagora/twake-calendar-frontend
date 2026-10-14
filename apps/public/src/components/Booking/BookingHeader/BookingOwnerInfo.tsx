@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
-import { Box, Typography, Avatar } from '@linagora/twake-mui'
+import { Box, Typography } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import { useI18n } from 'twake-i18n'
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
 import {

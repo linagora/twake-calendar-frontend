@@ -4,7 +4,6 @@ import { getInitials, stringToGradient } from '@common/utils/avatarUtils'
 import { getUserDisplayName } from '@common/utils/userUtils'
 import {
   alpha,
-  Avatar,
   Box,
   Dialog,
   Divider,
@@ -15,6 +14,7 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import LogoutIcon from '@mui/icons-material/Logout'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import { MouseEvent } from 'react'

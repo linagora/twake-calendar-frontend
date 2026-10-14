@@ -1,4 +1,5 @@
-import { Avatar, Box, Typography } from '@linagora/twake-mui'
+import { Box, Typography } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import { useI18n } from 'twake-i18n'
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import { UserWithAccess } from './CalendarAccessRights'

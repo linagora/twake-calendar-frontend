@@ -1,4 +1,4 @@
-import { Avatar } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import GroupsIcon from '@mui/icons-material/Groups'
 import React from 'react'
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'

@@ -1,13 +1,8 @@
 import { CalDavLink } from '@common/features/Calendars/types/CalendarApiTypes'
 import { Calendar } from '@common/types/CalendarTypes'
 import { renameDefault } from '@common/utils/renameDefault'
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Typography,
-  useTheme
-} from '@linagora/twake-mui'
+import { Box, IconButton, Typography, useTheme } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import CloseIcon from '@mui/icons-material/Close'
 import { useI18n } from 'twake-i18n'
 import { User } from '@common/components/Attendees/types'

@@ -11,7 +11,6 @@ import { makeDisplayName } from '@common/utils/makeDisplayName'
 import { normalizeEmail } from '@common/utils/normalizeEmail'
 import {
   AutocompleteRenderInputParams,
-  Avatar,
   Box,
   CircularProgress,
   IconButton,
@@ -19,6 +18,7 @@ import {
   TextField,
   Typography
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import { useCallback, useEffect, useRef, useState } from 'react'

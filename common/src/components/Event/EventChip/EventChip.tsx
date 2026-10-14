@@ -1,6 +1,5 @@
 import { CALENDAR_VIEWS } from '@common/components/Calendar/utils/constants'
 import {
-  Avatar,
   Box,
   Card,
   CardContent,
@@ -8,6 +7,7 @@ import {
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import React, { useRef } from 'react'
 import { useAppSelector } from '@common/app/hooks'
 import { stringAvatar } from '@common/components/Event/utils/eventUtils'

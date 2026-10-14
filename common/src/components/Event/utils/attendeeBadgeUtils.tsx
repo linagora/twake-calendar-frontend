@@ -1,6 +1,7 @@
 import { ResourceIcon } from '@common/components/Attendees/ResourceIcon'
 import { userAttendee } from '@common/features/User/models/attendee'
-import { Avatar, Badge, Box, Typography } from '@linagora/twake-mui'
+import { Badge, Box, Typography } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { AttendeePopover } from '@common/components/Attendees/AttendeePopover'

@@ -5,13 +5,13 @@ import { openMeetingInTwakeSpace } from '@common/features/Embed/twakeSpace'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
 import {
   alpha,
-  Avatar,
   Box,
   Button,
   radius,
   Typography,
   useTheme
 } from '@linagora/twake-mui'
+import { Avatar } from '@common/ds/Avatar/Avatar'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import React from 'react'
