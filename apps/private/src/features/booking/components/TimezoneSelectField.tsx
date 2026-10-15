@@ -35,7 +35,7 @@ export const TimezoneSelectField: React.FC<TimezoneSelectFieldProps> = ({
               width: 24,
               height: 24,
               mr: 1.5,
-              color: theme => theme.palette.grey[900],
+              color: theme => `rgb(${theme.vars.palette.text.primaryChannel})`,
               opacity: 0.9
             }}
           >

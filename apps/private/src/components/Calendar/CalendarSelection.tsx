@@ -31,7 +31,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  alpha,
   Checkbox,
   IconButton,
   ListItem,
@@ -264,7 +263,7 @@ const BookingLinkLabel: React.FC<{ name: string }> = ({ name }) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             fontSize: '0.875rem',
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }}
         >
           {name}
@@ -315,7 +314,7 @@ const BookingLinkChip: React.FC<{
   const calendarColor = calendars?.[calendarId]?.color?.light
   const iconColor = isVisible
     ? (link.color ?? calendarColor ?? defaultColors[4].dark)
-    : theme.palette.grey[400]
+    : theme.vars.palette.text.disabled
 
   const linkName =
     link.name || t('booking.durationMinutes', { count: link.durationMinutes })

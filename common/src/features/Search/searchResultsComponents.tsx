@@ -3,14 +3,7 @@ import { stringAvatar } from '@common/components/Event/utils/eventUtils'
 import Tooltip from '@common/components/Tooltip'
 import { openMeetingInTwakeSpace } from '@common/features/Embed/twakeSpace'
 import { EventDescriptionBuilder } from '@common/utils/EventDescriptionBuilder'
-import {
-  alpha,
-  Box,
-  Button,
-  radius,
-  Typography,
-  useTheme
-} from '@linagora/twake-mui'
+import { Box, Button, radius, Typography, useTheme } from '@linagora/twake-mui'
 import { Avatar } from '@common/ds/Avatar/Avatar'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import VideocamIcon from '@mui/icons-material/Videocam'
@@ -160,7 +153,7 @@ export const RenderTitle: React.FC<TitleProps> = ({
         </Typography>
         {isRecurrent && (
           <RepeatIcon
-            sx={{ flexShrink: 0, color: alpha(theme.palette.grey[900], 0.9) }}
+            sx={{ flexShrink: 0, color: theme.vars.palette.text.primary }}
           />
         )}
       </Box>
@@ -262,27 +255,27 @@ export const RenderVideoJoin: React.FC<VideoJoinProps> = ({ url, t }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: theme.palette.success.main,
+            backgroundColor: theme.vars.palette.success.main,
             borderRadius: '50%',
             width: 20,
             height: 20
           }}
         >
           <VideocamIcon
-            sx={{ color: theme.palette.info.contrastText, fontSize: 14 }}
+            sx={{ color: theme.vars.palette.info.contrastText, fontSize: 14 }}
           />
         </Box>
       }
       sx={{
         flexShrink: 0,
         ml: 'auto',
-        backgroundColor: theme.palette.grey[200],
-        color: theme.palette.text.primary,
+        backgroundColor: theme.vars.palette.action.selected,
+        color: theme.vars.palette.text.primary,
         textTransform: 'none',
         fontWeight: 500,
         borderRadius: radius.md,
         '&:hover': {
-          backgroundColor: theme.palette.grey[300]
+          backgroundColor: theme.vars.palette.action.focus
         }
       }}
       onClick={e => {
@@ -346,7 +339,7 @@ export const DayBadge: React.FC<DayBadgeProps> = ({
         <Typography
           sx={{
             fontSize: '22px',
-            color: theme.palette.grey[900],
+            color: `rgb(${theme.vars.palette.text.primaryChannel})`,
             minWidth: '32px',
             textAlign: 'center'
           }}
@@ -357,7 +350,7 @@ export const DayBadge: React.FC<DayBadgeProps> = ({
       <Typography
         sx={{
           fontSize: '14px',
-          color: theme.palette.grey[500],
+          color: theme.alpha(theme.vars.palette.text.primary, 0.48),
           textTransform: 'uppercase'
         }}
       >

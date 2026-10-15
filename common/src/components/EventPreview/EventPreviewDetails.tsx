@@ -1,7 +1,7 @@
 import { useFilterEventAttendees } from '@common/components/Event/hooks/useFilterEventAttendees'
 import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { alpha, Box, SxProps, Theme } from '@linagora/twake-mui'
+import { Box, SxProps, Theme } from '@linagora/twake-mui'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
 import {
@@ -29,7 +29,7 @@ export interface EventPreviewDetailsProps {
 export const infoIconSx = (theme: Theme): SxProps<Theme> => ({
   minWidth: '25px',
   marginRight: 2,
-  color: alpha(theme.palette.grey[900], 0.9),
+  color: theme.vars.palette.text.primary,
   display: 'flex',
   alignItems: 'center',
   alignSelf: 'center'

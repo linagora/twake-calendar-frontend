@@ -45,7 +45,7 @@ const scrollableListSx = (
   maxHeight: `${slotListMaxHeight}px`,
   overflowY: 'auto',
   '&:hover': {
-    scrollbarColor: `${theme.palette.grey[400]} transparent`
+    scrollbarColor: `${theme.vars.palette.text.disabled} transparent`
   },
   '&:hover::-webkit-scrollbar-thumb': {
     backgroundColor: 'divider'

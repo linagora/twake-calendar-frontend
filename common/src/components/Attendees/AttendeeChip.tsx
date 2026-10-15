@@ -31,6 +31,8 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
 
   const isString = typeof option === 'string'
   const label = isString ? option : option.displayName || option.email
+  // A colour value, not a CSS variable: getAccessiblePair computes the text
+  // colour from it
   const chipColor = isString
     ? theme.palette.grey[200]
     : (option.color?.light ?? theme.palette.grey[200])
@@ -56,7 +58,7 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
     return (
       <IconButton
         sx={{
-          backgroundColor: theme.palette.grey[500],
+          backgroundColor: theme.alpha(theme.vars.palette.text.primary, 0.48),
           width: '20px',
           height: '20px'
         }}

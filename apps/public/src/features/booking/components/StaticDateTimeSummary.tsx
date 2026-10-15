@@ -2,7 +2,7 @@ import {
   formatLocalizedDate,
   formatTimezoneWithOffset
 } from '@common/components/Event/utils/dateTimeFormatters'
-import { Box, Typography, alpha, useTheme } from '@linagora/twake-mui'
+import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -44,7 +44,7 @@ export const StaticDateTimeSummary: React.FC<StaticDateTimeSummaryProps> = ({
   const primaryStyle = {
     fontSize: '14px',
     fontWeight: 500,
-    color: alpha(theme.palette.grey[900], 0.9)
+    color: theme.vars.palette.text.primary
   }
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react'
 import { EventContentArg } from '@fullcalendar/core'
-import { alpha, Box, useTheme } from '@linagora/twake-mui'
+import { Box, useTheme } from '@linagora/twake-mui'
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -75,7 +75,7 @@ export const DesktopEventChipSchedule: React.FC<
         p: 3,
         backgroundColor:
           upcommingEventId === ext.uid
-            ? alpha(theme.palette.grey[200], 0.5)
+            ? theme.vars.palette.action.hover
             : 'transparent'
       }}
     >

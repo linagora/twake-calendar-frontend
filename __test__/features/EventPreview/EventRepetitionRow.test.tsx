@@ -2,6 +2,7 @@ import { EventRepetitionRow } from '@common/components/EventPreview/EventDetails
 import en from '@common/locales/en.json'
 import fr from '@common/locales/fr.json'
 import { RepetitionObject } from '@common/types/Repetition'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { render, RenderResult, screen } from '@testing-library/react'
 import I18n from 'twake-i18n'
 
@@ -18,7 +19,9 @@ const renderRow = (
       lang={lang}
       dictRequire={(l: Lang): (typeof LOCALES)[Lang] => LOCALES[l]}
     >
-      <EventRepetitionRow repetition={repetition} />
+      <TwakeMuiThemeProvider>
+        <EventRepetitionRow repetition={repetition} />
+      </TwakeMuiThemeProvider>
     </I18n>
   )
 

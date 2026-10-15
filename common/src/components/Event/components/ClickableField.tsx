@@ -1,4 +1,4 @@
-import { alpha, Box, Typography, useTheme } from '@linagora/twake-mui'
+import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 
 interface ClickableFieldProps {
@@ -42,7 +42,7 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
           backgroundColor: 'action.hover'
         },
         '&:focus-visible': {
-          outline: `2px solid ${theme.palette.primary.main}`,
+          outline: `2px solid ${theme.vars.palette.primary.main}`,
           outlineOffset: '2px'
         }
       }}
@@ -55,7 +55,7 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
           maxWidth: '24px',
           maxHeight: '24px',
           marginRight: '12px',
-          color: iconColor || alpha(theme.palette.grey[900], 0.9),
+          color: iconColor || theme.vars.palette.text.primary,
           '& svg': {
             width: '24px',
             height: '24px'
@@ -74,7 +74,7 @@ export const ClickableField: React.FC<ClickableFieldProps> = ({
         <Typography
           sx={{
             fontSize: '14px',
-            color: alpha(theme.palette.grey[900], 0.9),
+            color: theme.vars.palette.text.primary,
             fontWeight: 500
           }}
         >

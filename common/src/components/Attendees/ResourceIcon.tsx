@@ -1,4 +1,4 @@
-import { alpha, Box, useTheme } from '@linagora/twake-mui'
+import { Box, useTheme } from '@linagora/twake-mui'
 import { Avatar } from '@common/ds/Avatar/Avatar'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
 
@@ -39,7 +39,7 @@ export const ResourceIcon: React.FC<ResourceIconProps> = ({
     <Avatar
       sx={{
         backgroundColor: 'transparent',
-        color: alpha(theme.palette.grey[900], 0.9),
+        color: theme.vars.palette.text.primary,
         width: '24px',
         height: '24px'
       }}

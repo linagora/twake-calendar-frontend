@@ -26,12 +26,12 @@ export const PublicLanguageSelector = (): JSX.Element => {
           sx={{
             mr: 1,
             fontSize: 20,
-            color: theme.palette.text.secondary
+            color: theme.vars.palette.text.secondary
           }}
         />
       }
       sx={{
-        color: theme.palette.text.secondary,
+        color: theme.vars.palette.text.secondary,
         fontSize: '0.875rem',
         fontWeight: 500,
         cursor: 'pointer',
