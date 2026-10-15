@@ -39,7 +39,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
         py: 1,
         scrollbarWidth: 'none',
         '&::-webkit-scrollbar': { display: 'none' },
-        backgroundColor: '#FFF',
+        backgroundColor: 'background.paper',
         minHeight: '48px'
       }}
     >

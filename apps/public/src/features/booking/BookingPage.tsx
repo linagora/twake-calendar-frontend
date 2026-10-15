@@ -191,7 +191,7 @@ export const BookingPage: React.FC = () => {
         <>
           <Box
             sx={{
-              backgroundColor: 'white',
+              backgroundColor: 'background.paper',
               borderRadius: '12px',
               width: '100%',
               maxWidth: '900px',
@@ -233,7 +233,8 @@ export const BookingPage: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                        backgroundColor: theme =>
+                          theme.alpha(theme.vars.palette.background.paper, 0.6),
                         zIndex: 1
                       }}
                     >

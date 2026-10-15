@@ -344,7 +344,7 @@ const BookingLinkChip: React.FC<{
           alignItems: 'center',
           justifyContent: 'space-between',
           ...rowActionsSx,
-          '&:hover': { backgroundColor: '#F3F3F6' }
+          '&:hover': { backgroundColor: 'action.hover' }
         }}
       >
         <div
@@ -823,7 +823,7 @@ const CalendarSelector: React.FC<{
           justifyContent: 'space-between',
           transition: 'background-color 0.2s ease',
           ...rowActionsSx,
-          '&:hover': { backgroundColor: '#F3F3F6' }
+          '&:hover': { backgroundColor: 'action.hover' }
         }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

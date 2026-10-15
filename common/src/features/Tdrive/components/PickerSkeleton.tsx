@@ -13,7 +13,7 @@ export const PickerSkeleton: React.FC = () => (
       flexDirection: 'column',
       height: '100%',
       width: '100%',
-      backgroundColor: 'white'
+      backgroundColor: 'background.paper'
     }}
   >
     <Box

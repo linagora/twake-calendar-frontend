@@ -28,8 +28,8 @@ const WeekDayStyle = (
     height: 40,
     borderRadius: '4px',
     border: '1px solid',
-    borderColor: isSelected ? 'primary.main' : '#AEAEC0',
-    color: isSelected ? '#fff' : '#8C9CAF',
+    borderColor: isSelected ? 'primary.main' : 'border.ghost',
+    color: isSelected ? 'primary.contrastText' : 'text.secondary',
     fontSize: 16,
     fontWeight: 400,
     display: 'flex',
@@ -42,7 +42,7 @@ const WeekDayStyle = (
         ? {
             borderColor: 'primary.main',
             bgcolor: 'primary.main',
-            color: '#fff'
+            color: 'primary.contrastText'
           }
         : undefined
     }

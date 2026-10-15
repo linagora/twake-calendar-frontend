@@ -14,7 +14,7 @@ export const Loading: React.FC = () => {
     <Box
       data-testid="loading"
       sx={{
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

@@ -254,13 +254,16 @@ function ColorPickerBox({
         role="button"
         aria-label={t('colorPicker.selectCustom')}
         onClick={handleClick}
+        sx={{
+          border: '1px solid',
+          borderColor: 'text.disabled',
+          bgcolor: 'background.paper'
+        }}
         style={{
           width: '46px',
           height: '32px',
           padding: 0,
           borderRadius: '4px',
-          border: '1px solid #CBD2E0',
-          backgroundColor: '#FFF',
           cursor: 'pointer',
           transition: 'all 0.2s',
           display: 'flex',
@@ -273,10 +276,10 @@ function ColorPickerBox({
             height: '7px',
             width: '100%',
             borderRadius: '4px 4px 0px 0px',
-            backgroundColor: '#CBD2E0'
+            backgroundColor: theme.vars.palette.text.disabled
           }}
         ></Box>
-        <AddIcon style={{ color: '#CBD2E0' }} />
+        <AddIcon sx={{ color: 'text.disabled' }} />
       </Box>
 
       {isMobile ? (

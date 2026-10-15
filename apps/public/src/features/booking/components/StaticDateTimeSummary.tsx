@@ -72,7 +72,7 @@ export const StaticDateTimeSummary: React.FC<StaticDateTimeSummaryProps> = ({
             </Box>
           )}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#444746' }}>
+        <Typography variant="caption" sx={{ color: 'text.primary' }}>
           {timezoneText}
         </Typography>
       </Box>
