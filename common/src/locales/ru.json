@@ -348,6 +348,15 @@
     "languageDescription": "Это будет язык, используемый в вашем Twake Calendar",
     "languageSelector": "Выбор языка",
     "languageUpdateError": "Не удалось обновить язык",
+    "theme": "Тема",
+    "themeDescription": "Цвета вашего Twake Calendar",
+    "themeSelector": "Выбор темы",
+    "themeUpdateError": "Не удалось обновить тему",
+    "themes": {
+      "light": "Светлая",
+      "dark": "Тёмная",
+      "auto": "Системная"
+    },
     "timeZone": "Часовой пояс",
     "timeZoneBrowserDefault": "Определять часовой пояс автоматически",
     "timeZoneUpdateError": "Не удалось обновить часовой пояс",

@@ -348,6 +348,15 @@
     "languageDescription": "Đây sẽ là ngôn ngữ được sử dụng trong Twake Calendar của bạn",
     "languageSelector": "Chọn ngôn ngữ",
     "languageUpdateError": "Không cập nhật được ngôn ngữ",
+    "theme": "Giao diện",
+    "themeDescription": "Màu sắc của Twake Calendar của bạn",
+    "themeSelector": "Bộ chọn giao diện",
+    "themeUpdateError": "Không thể cập nhật giao diện",
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "auto": "Hệ thống"
+    },
     "timeZone": "Múi giờ",
     "timeZoneBrowserDefault": "Tự động phát hiện múi giờ",
     "timeZoneUpdateError": "Không cập nhật được múi giờ",

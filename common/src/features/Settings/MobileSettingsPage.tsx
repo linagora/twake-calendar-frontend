@@ -8,6 +8,7 @@ import { SettingsSubTab } from './SettingsPage'
 export const MobileSettingsPage: React.FC<{
   activeSettingsSubTab: SettingsSubTab
   setLanguageErrorOpen: (open: boolean) => void
+  setThemeErrorOpen: (open: boolean) => void
   setTimeZoneErrorOpen: (open: boolean) => void
   setAlarmEmailsErrorOpen: (open: boolean) => void
   setHideDeclinedEventsErrorOpen: (open: boolean) => void
@@ -21,6 +22,7 @@ export const MobileSettingsPage: React.FC<{
 }> = ({
   activeSettingsSubTab,
   setLanguageErrorOpen,
+  setThemeErrorOpen,
   setTimeZoneErrorOpen,
   setAlarmEmailsErrorOpen,
   setHideDeclinedEventsErrorOpen,
@@ -39,6 +41,7 @@ export const MobileSettingsPage: React.FC<{
         {activeSettingsSubTab === 'settings' && (
           <GeneralSettings
             onLanguageError={() => setLanguageErrorOpen(true)}
+            onThemeError={() => setThemeErrorOpen(true)}
             onTimeZoneError={() => setTimeZoneErrorOpen(true)}
             onHideDeclinedEventsError={() =>
               setHideDeclinedEventsErrorOpen(true)

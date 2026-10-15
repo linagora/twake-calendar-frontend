@@ -348,6 +348,15 @@
     "languageDescription": "Questa sarà la lingua usata nel tuo Twake Calendar",
     "languageSelector": "Selettore della lingua",
     "languageUpdateError": "Impossibile aggiornare la lingua",
+    "theme": "Tema",
+    "themeDescription": "I colori del tuo Twake Calendar",
+    "themeSelector": "Selettore del tema",
+    "themeUpdateError": "Impossibile aggiornare il tema",
+    "themes": {
+      "light": "Chiaro",
+      "dark": "Scuro",
+      "auto": "Sistema"
+    },
     "timeZone": "Fuso orario",
     "timeZoneBrowserDefault": "Rileva automaticamente il fuso orario",
     "timeZoneUpdateError": "Impossibile aggiornare il fuso orario",

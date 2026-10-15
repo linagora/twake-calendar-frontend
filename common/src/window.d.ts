@@ -68,6 +68,9 @@ declare global {
 
     HIDE_LANGUAGE_SELECTOR: boolean
 
+    // Hidden where Twake Workplace common settings own the theme
+    HIDE_THEME_SELECTOR: boolean
+
     PUBLIC_PAGE_BASE: string | undefined
   }
 }

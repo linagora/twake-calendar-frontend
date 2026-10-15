@@ -348,6 +348,15 @@
     "languageDescription": "This will be the language used in your Twake Calendar",
     "languageSelector": "Language selector",
     "languageUpdateError": "Failed to update language",
+    "theme": "Theme",
+    "themeDescription": "The colours of your Twake Calendar",
+    "themeSelector": "Theme selector",
+    "themeUpdateError": "Failed to update theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "System"
+    },
     "timeZone": "Timezone",
     "timeZoneBrowserDefault": "Detect time zone automatically",
     "timeZoneUpdateError": "Failed to update time zone",

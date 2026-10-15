@@ -455,7 +455,9 @@ describe('Timezone Logic - Backend to Frontend Flow', () => {
       fireEvent.click(browserDefaultSwitch)
 
       // Now timezone combobox is visible
-      const autocomplete = screen.getAllByRole('combobox')[1]
+      const autocomplete = screen.getByLabelText(
+        'event.form.timezonePlaceholder'
+      )
       fireEvent.mouseDown(autocomplete)
 
       // Type to filter options

@@ -348,6 +348,15 @@
     "languageDescription": "Este será el idioma utilizado en su Twake Calendar",
     "languageSelector": "Selector de idioma",
     "languageUpdateError": "No se ha podido actualizar el idioma",
+    "theme": "Tema",
+    "themeDescription": "Los colores de tu Twake Calendar",
+    "themeSelector": "Selector de tema",
+    "themeUpdateError": "Error al actualizar el tema",
+    "themes": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "auto": "Sistema"
+    },
     "timeZone": "Zona horaria",
     "timeZoneBrowserDefault": "Detectar la zona horaria automáticamente",
     "timeZoneUpdateError": "No se ha podido actualizar la zona horaria",
