@@ -1,5 +1,6 @@
 import { BusinessHour } from '@common/features/Settings/SettingsSlice'
 import { businessHoursToIso } from '@common/features/Settings/businessHoursDays'
+import type { ThemeSetting } from '@common/features/Settings/constants'
 import { ConfigurationItem, ModuleConfiguration } from '../userDataTypes'
 
 export interface DatetimeConfiguration {
@@ -9,6 +10,7 @@ export interface DatetimeConfiguration {
 
 export interface ConfigurationUpdatesInput {
   language?: string
+  theme?: ThemeSetting
   notifications?: Record<string, unknown>
   timezone?: string | null
   autoDetectTimezone?: boolean
@@ -58,6 +60,7 @@ function buildCoreConfigs(
 ): ConfigurationItem[] {
   const configs: ConfigurationItem[] = []
   pushIfDefined(configs, 'language', updates.language)
+  pushIfDefined(configs, 'theme', updates.theme)
   pushIfDefined(configs, 'notifications', updates.notifications)
   pushIfDefined(
     configs,

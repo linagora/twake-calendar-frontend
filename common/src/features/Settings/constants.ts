@@ -7,3 +7,8 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'ru', label: 'Русский' },
   { code: 'vi', label: 'Tiếng Việt' }
 ] as const
+
+// Values of the core.theme user setting: `auto` follows the system
+export const THEME_SETTINGS = ['light', 'dark', 'auto'] as const
+
+export type ThemeSetting = (typeof THEME_SETTINGS)[number]
