@@ -497,7 +497,10 @@ function ResponsiveDialog({
                     `1px solid ${theme.vars.palette.divider}`
                 : undefined,
               justifyContent: actionsJustifyContent,
-              px: isMobile ? 2 : undefined
+              px: isMobile ? 2 : undefined,
+              // twake-mui spaces the actions with a margin, which leaves the
+              // border flush with the buttons: space them inside it instead
+              ...(actionsBorderTop && { m: 0, py: 2, px: isMobile ? 2 : 4 })
             }}
           >
             {actions}
