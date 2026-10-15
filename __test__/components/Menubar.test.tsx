@@ -42,7 +42,7 @@ describe('Calendar App Component Display Tests', () => {
       />,
       preloadedState
     )
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     expect(logoElement).toBeInTheDocument()
   })
   it('renders the main title', () => {
@@ -61,7 +61,9 @@ describe('Calendar App Component Display Tests', () => {
       />,
       preloadedState
     )
-    expect(screen.getByAltText('menubar.logoAlt')).toBeInTheDocument()
+    expect(
+      screen.getByRole('img', { name: 'menubar.logoAlt' })
+    ).toBeInTheDocument()
   })
 
   it('shows avatar with user initials', () => {
@@ -555,7 +557,7 @@ describe('Menubar interaction with expanded Dialog', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     expect(logoElement).toBeInTheDocument()
     expect(logoElement).toBeVisible()
   })
@@ -855,7 +857,7 @@ describe('Logo click navigation to current week', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     await act(async () => {
       fireEvent.click(logoElement)
     })
@@ -898,7 +900,7 @@ describe('Logo click navigation to current week', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     await act(async () => {
       fireEvent.click(logoElement)
     })
@@ -941,7 +943,7 @@ describe('Logo click navigation to current week', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     await act(async () => {
       fireEvent.click(logoElement)
     })
@@ -975,7 +977,7 @@ describe('Logo click navigation to current week', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     await act(async () => {
       fireEvent.click(logoElement)
     })
@@ -1012,7 +1014,7 @@ describe('Logo click navigation to current week', () => {
       preloadedState
     )
 
-    const logoElement = screen.getByAltText('menubar.logoAlt')
+    const logoElement = screen.getByRole('img', { name: 'menubar.logoAlt' })
     await act(async () => {
       fireEvent.click(logoElement)
     })
