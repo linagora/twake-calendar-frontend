@@ -363,7 +363,7 @@ export const PrintScheduleModal: React.FC<PrintScheduleModalProps> = ({
                     key={index}
                     direction="row"
                     spacing={1}
-                    alignItems="center"
+                    sx={{ alignItems: 'center' }}
                   >
                     <Select
                       size="small"
