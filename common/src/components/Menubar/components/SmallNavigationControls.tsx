@@ -14,7 +14,7 @@ export const SmallNavigationControls: React.FC<{
 
   return (
     <div className="navigation-controls">
-      <Stack direction="row" spacing={1.25}>
+      <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
         <IconButton
           size="xsmall"
           onClick={() => onNavigate('prev')}
