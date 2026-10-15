@@ -18,3 +18,10 @@ export FORCE_FRONTEND_BUILD="${FORCE_FRONTEND_BUILD:-true}"
 
 cd "$REPO_DIR/e2e"
 ./pre-build.sh "$@"
+
+# compose up only pulls the images that are missing: refresh the floating tags of the stack and
+# the curl start.sh runs. A local copy is as good when the registry does not answer.
+echo "==> Pulling the floating images"
+for image in redis:latest curlimages/curl; do
+  docker pull -q "$image" >/dev/null || docker image inspect "$image" >/dev/null
+done
