@@ -4,6 +4,7 @@ import {
   getOpenPaasUserDataThunk,
   updateUserConfigurationsThunk
 } from './services'
+import type { ThemeSetting } from '@common/features/Settings/constants'
 import { userData, userOrganiser } from './userDataTypes'
 
 // Type for core config datetime
@@ -18,6 +19,8 @@ interface DatetimeConfig {
 // Type for core config
 interface CoreConfig {
   language: string | null
+  // Missing until loaded, and on backends that predate the setting
+  theme?: ThemeSetting | null
   datetime: DatetimeConfig
   [key: string]: unknown
 }

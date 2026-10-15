@@ -27,6 +27,13 @@ const stateUpdaters: Array<{
     }
   },
   {
+    key: 'theme',
+    updater: (state, payload): void => {
+      if (payload.theme === undefined) return
+      state.coreConfig.theme = payload.theme
+    }
+  },
+  {
     key: 'timezone',
     updater: (state, payload): void => {
       if (payload.timezone === undefined) return

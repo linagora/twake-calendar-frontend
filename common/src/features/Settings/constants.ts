@@ -7,3 +7,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'ru', label: 'Русский' },
   { code: 'vi', label: 'Tiếng Việt' }
 ] as const
+
+export const THEME_SETTINGS = ['light', 'dark', 'auto'] as const
+
+export type ThemeSetting = (typeof THEME_SETTINGS)[number]
