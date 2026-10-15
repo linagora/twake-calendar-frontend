@@ -368,13 +368,19 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
             color="primary"
             aria-label={t('event.createEvent')}
             onClick={handleCreateEvent}
-            sx={{
+            sx={theme => ({
               position: 'fixed',
               bottom: 24,
               right: 24,
               zIndex: 20,
-              borderRadius: '16px'
-            }}
+              borderRadius: '16px',
+              // twake-mui draws it in the light and dark primary shades, too
+              // close in the dark scheme: use the colours of the Create button
+              ...theme.applyStyles('dark', {
+                backgroundColor: theme.vars.palette.primary.main,
+                color: theme.vars.palette.primary.contrastText
+              })
+            })}
           >
             <AddIcon />
           </Fab>
