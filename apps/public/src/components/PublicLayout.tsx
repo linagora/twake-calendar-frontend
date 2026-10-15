@@ -1,4 +1,4 @@
-import logo from '@common/static/header-logo.svg'
+import { HeaderLogo } from '@common/components/HeaderLogo'
 import { Box, Button, Link, Typography, useTheme } from '@linagora/twake-mui'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined'
 import React from 'react'
@@ -88,10 +88,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img
-            src={logo}
-            alt={t('publicLayout.logoAlt')}
-            style={{ height: '32px', marginBottom: '8px' }}
+          <HeaderLogo
+            role="img"
+            aria-label={t('publicLayout.logoAlt')}
+            style={{ width: 'auto', height: '32px', marginBottom: '8px' }}
           />
         </Link>
         <Typography variant="body2">{t('publicLayout.title')}</Typography>
