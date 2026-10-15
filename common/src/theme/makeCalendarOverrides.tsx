@@ -240,6 +240,11 @@ const basicThemeOverrides = {
     },
     styleOverrides: { root: {} }
   },
+  // twake-mui sets the caret 14px from the edge, which only outlined selects
+  // make room for: put it back against the edge of borderless ones
+  MuiSelect: {
+    styleOverrides: { standard: { '& ~ .MuiSelect-icon': { right: 0 } } }
+  },
   // twake-mui draws a border between the summary and the details
   MuiAccordionDetails: {
     styleOverrides: {
