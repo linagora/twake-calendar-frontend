@@ -64,6 +64,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
     return (
       <header className="menubar menubar--mobile">
         <IconButton
+          size="xsmall"
           onClick={e => {
             setOpenEventSearch(false)
             handleBackClick(e)
@@ -88,6 +89,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
         {view === 'settings' ? (
           <>
             <IconButton
+              size="xsmall"
               onClick={handleBackClick}
               aria-label={t('settings.back')}
               className="back-button"
@@ -103,6 +105,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
           <>
             <div className="left-menu">
               <IconButton
+                size="xsmall"
                 onClick={onOpenSidebar}
                 aria-label={t('menubar.toggleSidebar')}
                 sx={{ mr: 1 }}
@@ -155,6 +158,7 @@ export const MobileMenubar: React.FC<MobileMenubarProps> = ({
             <div className="right-menu">
               <div className="search-container">
                 <IconButton
+                  size="xsmall"
                   sx={{ mr: 1 }}
                   onClick={() => {
                     setOpenDatePicker(false)
