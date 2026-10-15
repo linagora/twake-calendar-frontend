@@ -1,5 +1,5 @@
 .App
-  background-color #f3f6f9
+  background-color var(--twake-palette-background-default)
   display flex
   flex-direction column
   justify-content space-between
@@ -29,7 +29,7 @@
   background-color transparent
 
 .main-layout.calendar-layout
-  background-color #fff
+  background-color var(--twake-palette-background-paper)
   flex-direction row
   
   &--desktop
@@ -80,17 +80,17 @@
   background: transparent
 
 .sidebar::-webkit-scrollbar-thumb
-  background-color: rgba(0, 0, 0, 0.3)
+  background-color: unquote('rgba(var(--twake-palette-text-primaryChannel) / 0.3)')
   border-radius: 4px
   opacity: 0
   transition: opacity 0.3s ease
 
 .sidebar:hover::-webkit-scrollbar-thumb
-  background-color: rgba(0, 0, 0, 0.5)
+  background-color: unquote('rgba(var(--twake-palette-text-primaryChannel) / 0.5)')
   opacity: 1
 
 .sidebar:hover
-  scrollbar-color: rgba(0, 0, 0, 0.5) transparent
+  scrollbar-color: unquote('rgba(var(--twake-palette-text-primaryChannel) / 0.5)') transparent
 
 // .declined-event
 //   opacity 0.7
@@ -100,7 +100,7 @@
 //   border dashed 1px #ffffff
 
 [data-theme="dark"] .fc-timegrid-slot::after
-  border-top 1px dotted rgba(255, 255, 255, 0.2)
+  border-top 1px dotted var(--twake-palette-border-main)
 
 #calendar
   flex 1
@@ -119,7 +119,7 @@
 /* sidebar*/
 .sidebar-calendar
   width 280px
-  background-color #fff
+  background-color var(--twake-palette-background-paper)
   border-radius 12px
   box-shadow 0 4px 12px rgba(0, 0, 0, 0.1)
   padding 20px
@@ -131,7 +131,7 @@
 .sidebar-calendar h2
   font-size 1.3rem
   font-weight 700
-  color #333
+  color var(--twake-palette-text-primary)
   margin 0 0 10px 0
 
 /* Calendar list */
@@ -148,7 +148,7 @@
   align-items center
   gap 10px
   font-weight 600
-  color #444
+  color var(--twake-palette-text-primary)
   padding 10px 15px
   border-radius 10px
   transition background-color 0.2s ease
@@ -160,4 +160,4 @@
   align-items center
 
 .fc .fc-list-empty
-  background-color #fff
+  background-color var(--twake-palette-background-paper)
