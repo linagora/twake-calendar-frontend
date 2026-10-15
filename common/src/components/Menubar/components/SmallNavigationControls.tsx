@@ -16,6 +16,7 @@ export const SmallNavigationControls: React.FC<{
     <div className="navigation-controls">
       <Stack direction="row" spacing={1.25}>
         <IconButton
+          size="xsmall"
           onClick={() => onNavigate('prev')}
           aria-label={labels.prev}
           title={labels.prev}
@@ -39,6 +40,7 @@ export const SmallNavigationControls: React.FC<{
           <TodayIcon fontSize="inherit" />
         </IconButton>
         <IconButton
+          size="xsmall"
           onClick={() => onNavigate('next')}
           aria-label={labels.next}
           title={labels.next}
