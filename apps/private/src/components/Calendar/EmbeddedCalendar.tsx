@@ -33,7 +33,7 @@ export function EmbeddedCalendar(): JSX.Element {
     <>
       <GlobalStyles
         styles={theme => ({
-          body: { backgroundColor: theme.palette.background.paper }
+          body: { backgroundColor: theme.vars.palette.background.paper }
         })}
       />
       <EmbeddedCalendarContent />

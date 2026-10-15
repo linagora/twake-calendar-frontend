@@ -1,7 +1,7 @@
 import { useAppSelector } from '@common/app/hooks'
 import EventPreviewModal from '@common/components/EventPreview'
 import { defaultColors } from '@common/utils/defaultColors'
-import { alpha, Box, useTheme } from '@linagora/twake-mui'
+import { Box, useTheme } from '@linagora/twake-mui'
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded'
 import { useI18n } from 'twake-i18n'
 import { SearchEventResult } from './types/SearchEventResult'
@@ -51,7 +51,7 @@ export default function DesktopResultItem({
           borderTop: '1px solid',
           borderColor: 'divider',
           cursor: 'pointer',
-          '&:hover': { backgroundColor: alpha(theme.palette.grey[200], 0.5) },
+          '&:hover': { backgroundColor: theme.vars.palette.action.hover },
           alignItems: 'center',
           textAlign: 'left'
         }}

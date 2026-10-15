@@ -8,8 +8,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  useTheme,
-  alpha
+  useTheme
 } from '@linagora/twake-mui'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined'
@@ -61,7 +60,7 @@ export function SettingsTab({
   // carries it over: shown, but not theirs to change.
   const showsVisibility = canManageVisibility || Boolean(calendar?.delegated)
   const theme = useTheme()
-  const infoIconColor = alpha(theme.palette.grey[900], 0.9)
+  const infoIconColor = theme.vars.palette.text.primary
   const infoIconSx = { minWidth: '25px', marginRight: 2, color: infoIconColor }
 
   const isResource = useMemo(

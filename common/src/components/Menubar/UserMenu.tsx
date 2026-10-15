@@ -3,7 +3,6 @@ import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { getInitials, stringToGradient } from '@common/utils/avatarUtils'
 import { getUserDisplayName } from '@common/utils/userUtils'
 import {
-  alpha,
   Box,
   Divider,
   IconButton,
@@ -69,7 +68,7 @@ const UserMenuContent: React.FC<{
         </Avatar>
         <Typography
           sx={{
-            color: theme.palette.grey[900],
+            color: `rgb(${theme.vars.palette.text.primaryChannel})`,
             fontSize: 22,
             fontWeight: 600
           }}
@@ -85,7 +84,7 @@ const UserMenuContent: React.FC<{
           <SettingsOutlinedIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: theme.alpha(theme.vars.palette.text.primary, 0.48),
               fontSize: 20
             }}
           />
@@ -96,7 +95,7 @@ const UserMenuContent: React.FC<{
           <LogoutIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: theme.alpha(theme.vars.palette.text.primary, 0.48),
               fontSize: 20
             }}
           />

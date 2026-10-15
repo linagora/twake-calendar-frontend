@@ -5,8 +5,7 @@ import {
   Typography,
   Popper,
   Paper,
-  useTheme,
-  alpha
+  useTheme
 } from '@linagora/twake-mui'
 import { Avatar } from '@common/ds/Avatar/Avatar'
 import { ClickAwayListener } from '@mui/material'
@@ -58,7 +57,7 @@ function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
                   void navigator.clipboard.writeText(attendee.cal_address)
                   setSnackbarOpen(true)
                 }}
-                sx={{ p: 0.5, color: alpha(theme.palette.grey[900], 0.9) }}
+                sx={{ p: 0.5, color: theme.vars.palette.text.primary }}
               >
                 <ContentCopyOutlinedIcon fontSize="small" />
               </IconButton>
@@ -228,7 +227,7 @@ export function AttendeePopover({
                 position: 'absolute',
                 top: 8,
                 right: 8,
-                color: alpha(theme.palette.grey[900], 0.9)
+                color: theme.vars.palette.text.primary
               }}
             >
               <CloseIcon fontSize="small" />

@@ -1,3 +1,4 @@
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { BookingSuccessDialog } from '@public/features/booking/components/BookingSuccessDialog'
@@ -31,13 +32,15 @@ const bookingInfo = {
 
 const renderDialog = (slot: Slot, selectedTimezone: string): void => {
   render(
-    <BookingSuccessDialog
-      open
-      onClose={jest.fn()}
-      selectedSlot={slot}
-      bookingInfo={bookingInfo}
-      selectedTimezone={selectedTimezone}
-    />
+    <TwakeMuiThemeProvider>
+      <BookingSuccessDialog
+        open
+        onClose={jest.fn()}
+        selectedSlot={slot}
+        bookingInfo={bookingInfo}
+        selectedTimezone={selectedTimezone}
+      />
+    </TwakeMuiThemeProvider>
   )
 }
 

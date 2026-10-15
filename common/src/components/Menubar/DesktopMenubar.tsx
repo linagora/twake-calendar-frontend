@@ -40,7 +40,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
   return (
     <header
       className="menubar"
-      style={{ borderBottom: `1px solid ${theme.palette.divider}` }}
+      style={{ borderBottom: `1px solid ${theme.vars.palette.divider}` }}
     >
       <div className="left-menu">
         {!isIframe && (

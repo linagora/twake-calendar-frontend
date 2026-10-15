@@ -66,8 +66,8 @@ export const ViewSwitcher: React.FC<
               <ListItemIcon
                 sx={{
                   color: isSelected
-                    ? theme.palette.primary.main
-                    : theme.palette.text.primary
+                    ? theme.vars.palette.primary.main
+                    : theme.vars.palette.text.primary
                 }}
               >
                 {option.icon}
@@ -79,8 +79,8 @@ export const ViewSwitcher: React.FC<
                     variant: 'h6',
                     sx: {
                       color: isSelected
-                        ? theme.palette.primary.main
-                        : theme.palette.text.primary
+                        ? theme.vars.palette.primary.main
+                        : theme.vars.palette.text.primary
                     }
                   }
                 }}

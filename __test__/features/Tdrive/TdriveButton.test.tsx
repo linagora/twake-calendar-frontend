@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
 import { Provider } from 'react-redux'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { setupStore } from '@common/app/store'
 
 jest.mock('twake-i18n', () => ({
@@ -46,7 +47,11 @@ const mockUseTdrivePicker = useTdrivePicker as jest.MockedFunction<
 describe('TdriveButton', () => {
   const mockOnFilesSelected = jest.fn()
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(Provider, { store: setupStore() }, children)
+    React.createElement(
+      Provider,
+      { store: setupStore() },
+      React.createElement(TwakeMuiThemeProvider, null, children)
+    )
 
   beforeEach(() => {
     jest.clearAllMocks()

@@ -306,6 +306,8 @@ export function ResourceSearch({
           value.map((option: string | Resource, index) => {
             const isString = typeof option === 'string'
             const label = isString ? option : option.displayName
+            // A colour value, not a CSS variable: getAccessiblePair computes
+            // the text colour from it
             const chipColor = isString
               ? theme.palette.grey[300]
               : (option.color?.light ?? theme.palette.grey[300])

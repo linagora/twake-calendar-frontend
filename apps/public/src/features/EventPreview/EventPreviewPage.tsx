@@ -81,7 +81,7 @@ export const EventPreviewPage: React.FC = () => {
 
       <Box
         sx={{
-          borderTop: `1px solid ${theme.palette.divider}`,
+          borderTop: `1px solid ${theme.vars.palette.divider}`,
           pt: '24px',
           display: 'flex',
           justifyContent: 'center'

@@ -24,15 +24,15 @@ const SelectorButton = styled(ButtonBase)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: theme.spacing(1.5, 2),
-  border: `1px solid ${theme.palette.divider}`,
+  border: `1px solid ${theme.vars.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.secondary,
+  backgroundColor: theme.vars.palette.background.paper,
+  color: theme.vars.palette.text.secondary,
   textAlign: 'left',
   cursor: 'pointer',
   transition: 'border-color 0.2s',
   '&:hover': {
-    borderColor: theme.palette.text.primary
+    borderColor: theme.vars.palette.text.primary
   }
 }))
 

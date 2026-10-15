@@ -493,7 +493,8 @@ function ResponsiveDialog({
           <DialogActions
             sx={{
               borderTop: actionsBorderTop
-                ? (theme: Theme): string => `1px solid ${theme.palette.divider}`
+                ? (theme: Theme): string =>
+                    `1px solid ${theme.vars.palette.divider}`
                 : undefined,
               justifyContent: actionsJustifyContent,
               px: isMobile ? 2 : undefined

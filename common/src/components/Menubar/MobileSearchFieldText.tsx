@@ -57,7 +57,7 @@ export const SearchTextField: React.FC<SearchTextFieldProps> = ({
           startAdornment: (
             <>
               <InputAdornment position="start">
-                <Box sx={{ color: theme.palette.grey[700] }}>
+                <Box sx={{ color: theme.vars.palette.text.icon }}>
                   <SearchIcon fontSize="inherit" color="inherit" />
                 </Box>
               </InputAdornment>

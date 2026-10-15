@@ -1,8 +1,7 @@
-import { alpha, createTheme, Theme, makePalette } from '@linagora/twake-mui'
+import { Theme } from '@linagora/twake-mui'
 import type { ThemeOptions } from '@mui/material/styles'
 import type {} from '@mui/x-date-pickers/themeAugmentation'
 import { AccordionExpandIcon } from '@linagora/twake-mui'
-import paletteData from './palette.json'
 import { typography } from './typography'
 
 export const radius = {
@@ -34,13 +33,13 @@ function getDateCalendarRootOverrides(theme: Theme) {
       fontStyle: 'normal',
       fontWeight: 600,
       lineHeight: '20px',
-      color: alpha(theme.palette.grey[900], 0.9)
+      color: theme.vars.palette.text.primary
     },
     '.MuiDateCalendar-root .MuiPickersCalendarHeader-switchViewButton': {
       padding: '0',
       width: '32px',
       height: '32px',
-      color: theme.palette.grey[900]
+      color: `rgb(${theme.vars.palette.text.primaryChannel})`
     },
     '.MuiDateCalendar-root .MuiPickersCalendarHeader-switchViewIcon': {
       fontSize: '15px'
@@ -49,7 +48,7 @@ function getDateCalendarRootOverrides(theme: Theme) {
       padding: '0',
       width: '32px',
       height: '32px',
-      color: alpha(theme.palette.grey[900], 0.48)
+      color: theme.alpha(theme.vars.palette.text.primary, 0.48)
     },
     '.MuiDateCalendar-root .MuiDayCalendar-weekDayLabel': {
       fontSize: '10px',
@@ -59,7 +58,7 @@ function getDateCalendarRootOverrides(theme: Theme) {
       height: '32px',
       width: '32px',
       margin: '0',
-      color: alpha(theme.palette.grey[900], 0.48)
+      color: theme.alpha(theme.vars.palette.text.primary, 0.48)
     },
     '.MuiDateCalendar-root .MuiPickerDay-root': {
       fontSize: '10px',
@@ -69,31 +68,31 @@ function getDateCalendarRootOverrides(theme: Theme) {
       height: '32px',
       width: '32px',
       margin: '0',
-      color: alpha(theme.palette.grey[900], 0.9)
+      color: theme.vars.palette.text.primary
     },
     // The colour above outranks MUI's own disabled colour: restore it so
     // days outside minDate/maxDate do not look selectable.
     '.MuiDateCalendar-root .MuiPickerDay-root.Mui-disabled:not(.Mui-selected)':
       {
-        color: theme.palette.text.disabled
+        color: theme.vars.palette.text.disabled
       },
     '.MuiDateCalendar-root .MuiPickerDay-root.MuiPickerDay-today': {
       border: 'none',
       outline: 'none'
     },
     '.MuiDateCalendar-root .MuiPickerDay-root.Mui-selected': {
-      color: 'white',
-      backgroundColor: theme.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText,
+      backgroundColor: theme.vars.palette.primary.main,
       '&:hover': {
-        backgroundColor: theme.palette.primary.dark
+        backgroundColor: theme.vars.palette.primary.dark
       }
     },
     '.MuiDateCalendar-root .MuiButtonBase-root.MuiPickerDay-root.Mui-selected':
       {
-        color: 'white',
-        backgroundColor: `${theme.palette.primary.main}`,
+        color: theme.vars.palette.primary.contrastText,
+        backgroundColor: `${theme.vars.palette.primary.main}`,
         '&:hover': {
-          backgroundColor: `${theme.palette.primary.dark}`
+          backgroundColor: `${theme.vars.palette.primary.dark}`
         }
       }
   }
@@ -114,24 +113,24 @@ function getMonthCalendarOverrides(theme: Theme) {
       background: 'transparent'
     },
     '.MuiDateCalendar-root .MuiMonthCalendar-button.Mui-selected': {
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText,
+      background: theme.vars.palette.primary.main,
       '&:hover': {
-        background: theme.palette.primary.dark
+        background: theme.vars.palette.primary.dark
       },
       '&:focus': {
-        background: theme.palette.primary.dark
+        background: theme.vars.palette.primary.dark
       }
     },
     '.MuiDateCalendar-root .MuiMonthCalendar-button.Mui-selected[tabindex="0"]':
       {
-        color: theme.palette.primary.contrastText,
-        background: theme.palette.primary.main,
+        color: theme.vars.palette.primary.contrastText,
+        background: theme.vars.palette.primary.main,
         '&:hover': {
-          background: theme.palette.primary.dark
+          background: theme.vars.palette.primary.dark
         },
         '&:focus': {
-          background: theme.palette.primary.dark
+          background: theme.vars.palette.primary.dark
         }
       }
   }
@@ -153,31 +152,31 @@ function getYearCalendarOverrides(theme: Theme) {
       background: 'transparent'
     },
     '.MuiDateCalendar-root .MuiYearCalendar-button.Mui-selected': {
-      color: theme.palette.primary.contrastText,
-      background: theme.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText,
+      background: theme.vars.palette.primary.main,
       '&:hover': {
-        background: theme.palette.primary.dark
+        background: theme.vars.palette.primary.dark
       },
       '&:focus': {
-        background: theme.palette.primary.dark
+        background: theme.vars.palette.primary.dark
       }
     },
     '.MuiDateCalendar-root .MuiYearCalendar-button.Mui-selected[tabindex="0"]':
       {
-        color: theme.palette.primary.contrastText,
-        background: theme.palette.primary.main,
+        color: theme.vars.palette.primary.contrastText,
+        background: theme.vars.palette.primary.main,
         '&:hover': {
-          background: theme.palette.primary.dark
+          background: theme.vars.palette.primary.dark
         },
         '&:focus': {
-          background: theme.palette.primary.dark
+          background: theme.vars.palette.primary.dark
         }
       },
     '.MuiButtonBase-root.MuiMenuItem-root.MuiDigitalClock-item.Mui-selected': {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
+      backgroundColor: theme.vars.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText,
       '&:hover': {
-        backgroundColor: theme.palette.primary.dark
+        backgroundColor: theme.vars.palette.primary.dark
       }
     }
   }
@@ -198,7 +197,7 @@ const basicThemeOverrides = {
     styleOverrides: {
       root: ({ theme }: { theme: Theme }) => ({
         ...theme.typography.caption,
-        color: theme.palette.text.secondary,
+        color: theme.vars.palette.text.secondary,
         minHeight: theme.typography.pxToRem(18),
         padding: 0,
         '&.Mui-expanded': {
@@ -254,11 +253,11 @@ const basicThemeOverrides = {
           padding: '0',
           borderRadius: theme.typography.pxToRem(4),
           '&:hover': {
-            backgroundColor: alpha(theme.palette.grey[900], 0.04)
+            backgroundColor: theme.vars.palette.action.hover
           },
           '& label': {
             ...theme.typography.body2,
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }
         }
       })
@@ -273,32 +272,18 @@ This function allows us to create themes overrides that are specific to Twake Ca
 export function makeCalendarOverrides(
   includeDateOverrides?: boolean
 ): ThemeOptions {
-  const palette = makePalette('light', paletteData)
-  const theme = createTheme({
-    palette,
-    breakpoints: {
-      keys: ['xs', 'sm', 'md', 'lg', 'xl'],
-      values: {
-        xs: 0,
-        sm: 600,
-        md: 900,
-        lg: 1200,
-        xl: 1536
-      }
-    }
-  })
-
   return {
     typography,
     components: {
       ...basicThemeOverrides,
       MuiCssBaseline: {
+        // A function of the theme, so the colours follow its colour scheme
         styleOverrides: includeDateOverrides
-          ? {
+          ? (theme: Theme) => ({
               ...getDateCalendarRootOverrides(theme),
               ...getMonthCalendarOverrides(theme),
               ...getYearCalendarOverrides(theme)
-            }
+            })
           : {}
       }
     }

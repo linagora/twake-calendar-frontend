@@ -1,12 +1,5 @@
 import { renderAttendeeBadge } from '@common/components/Event/utils/eventUtils'
-import {
-  alpha,
-  Box,
-  Tab,
-  Tabs,
-  Typography,
-  useTheme
-} from '@linagora/twake-mui'
+import { Box, Tab, Tabs, Typography, useTheme } from '@linagora/twake-mui'
 import React, { useState, useMemo } from 'react'
 import { useI18n } from 'twake-i18n'
 import { userAttendee } from '@common/features/User/models/attendee'
@@ -161,7 +154,7 @@ export function EventPreviewAttendees({
               display: 'flex',
               alignItems: 'center',
               pt: '2px',
-              color: alpha(theme.palette.grey[900], 0.9)
+              color: theme.vars.palette.text.primary
             }}
           >
             <PeopleAltOutlinedIcon />
@@ -191,7 +184,7 @@ export function EventPreviewAttendees({
             textColor="primary"
             indicatorColor="primary"
             sx={{
-              borderBottom: '1px solid ' + theme.palette.divider,
+              borderBottom: '1px solid ' + theme.vars.palette.divider,
               '& .MuiTab-root': {
                 textTransform: 'none',
                 minWidth: '100px'

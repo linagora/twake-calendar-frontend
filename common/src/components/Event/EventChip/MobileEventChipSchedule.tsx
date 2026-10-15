@@ -1,6 +1,6 @@
 import React from 'react'
 import { EventContentArg } from '@fullcalendar/core'
-import { alpha, Box, useTheme } from '@linagora/twake-mui'
+import { Box, useTheme } from '@linagora/twake-mui'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { type EventChipScheduleProps } from './EventChipSchedule'
@@ -102,7 +102,7 @@ export const MobileEventChipSchedule: React.FC<
         px: 1,
         backgroundColor:
           upcommingEventId === ext.uid
-            ? alpha(theme.palette.grey[200], 0.5)
+            ? theme.vars.palette.action.hover
             : 'transparent'
       }}
     >

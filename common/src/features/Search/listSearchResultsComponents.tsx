@@ -62,7 +62,7 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
           <Typography
             sx={{
               fontSize: '22px',
-              color: theme.palette.grey[900],
+              color: `rgb(${theme.vars.palette.text.primaryChannel})`,
               minWidth: '32px',
               textAlign: 'center'
             }}
@@ -73,7 +73,7 @@ export const RenderDayIndicator: React.FC<DayIndicatorProps> = ({
         <Typography
           sx={{
             fontSize: '14px',
-            color: theme.palette.grey[500],
+            color: theme.alpha(theme.vars.palette.text.primary, 0.48),
             textTransform: 'uppercase'
           }}
         >

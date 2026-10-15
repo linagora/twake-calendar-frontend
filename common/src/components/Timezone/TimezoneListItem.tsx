@@ -46,7 +46,7 @@ export const TimezoneListItem: React.FC<TimezoneListItemProps> = ({
         />
         {isSelected && (
           <CheckIcon
-            sx={{ color: theme.palette.primary.main, fontSize: '20px' }}
+            sx={{ color: theme.vars.palette.primary.main, fontSize: '20px' }}
           />
         )}
       </ListItemButton>

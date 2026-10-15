@@ -105,7 +105,7 @@ export const MobileSidebar: React.FC<CalendarSidebarProps> = ({
             <SettingsOutlinedIcon
               sx={{
                 marginRight: 1,
-                color: theme.palette.grey.A700,
+                color: theme.vars.palette.text.primary,
                 fontSize: 20
               }}
             />
