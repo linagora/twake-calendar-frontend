@@ -82,7 +82,7 @@ export const BookingErrorBoundary: React.FC<BookingErrorBoundaryProps> = ({
     return (
       <Box
         sx={{
-          backgroundColor: 'white',
+          backgroundColor: 'background.paper',
           borderRadius: '12px',
           width: '100%',
           maxWidth: '600px',
@@ -126,7 +126,7 @@ const BookingFallback: React.FC<FallbackProps> = ({ error }) => {
   return (
     <Box
       sx={{
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         borderRadius: '12px',
         width: '100%',
         maxWidth: '600px',

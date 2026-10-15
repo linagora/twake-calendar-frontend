@@ -126,10 +126,10 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
           )}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 0.5 }}>
-          <Typography variant="caption" sx={{ color: '#444746' }}>
+          <Typography variant="caption" sx={{ color: 'text.primary' }}>
             {timezoneText}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#444746' }}>
+          <Typography variant="caption" sx={{ color: 'text.primary' }}>
             {repeatText}
           </Typography>
         </Box>

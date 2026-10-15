@@ -126,7 +126,7 @@ export const EventResourceRow: React.FC<{
               overflowY: 'auto',
               width: '100%',
               fontSize: '13px',
-              color: '#717D96'
+              color: 'text.secondary'
             }}
           >
             {t(`eventPreview.attendingStatus.${resource.partstat}`)}

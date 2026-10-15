@@ -149,7 +149,7 @@ const EventPreviewModal: React.FC<{
         actionsJustifyContent="center"
         style={{ overflow: 'auto' }}
         contentSx={{ overflowX: 'hidden', overflowY: 'auto' }}
-        titleSx={{ backgroundColor: '#FCFCFC' }}
+        titleSx={{ backgroundColor: 'background.contrast' }}
         title=""
         headerRightAction={header}
         actions={actions}

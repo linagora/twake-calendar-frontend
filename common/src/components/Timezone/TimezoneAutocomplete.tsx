@@ -106,7 +106,7 @@ export function TimezoneAutocomplete({
                   <TimezoneIcon
                     sx={{
                       marginRight: 8,
-                      color: 'rgba(0, 0, 0, 0.54)'
+                      color: 'action.active'
                     }}
                   />
                   {params.slotProps.input?.startAdornment}

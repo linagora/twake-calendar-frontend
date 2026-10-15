@@ -43,7 +43,7 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
           position: 'sticky',
           top: 0,
           zIndex: 10,
-          backgroundColor: '#fff',
+          backgroundColor: 'background.paper',
           paddingTop: isIframe ? '10px' : 3
         }}
       >
