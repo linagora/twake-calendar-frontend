@@ -18,6 +18,7 @@ import type { SidebarNavItem, SettingsSubTab } from './SettingsPage'
 export const DesktopSettingsPage: React.FC<{
   activeSettingsSubTab: SettingsSubTab
   setLanguageErrorOpen: (open: boolean) => void
+  setThemeErrorOpen: (open: boolean) => void
   setTimeZoneErrorOpen: (open: boolean) => void
   setAlarmEmailsErrorOpen: (open: boolean) => void
   setHideDeclinedEventsErrorOpen: (open: boolean) => void
@@ -31,6 +32,7 @@ export const DesktopSettingsPage: React.FC<{
 }> = ({
   activeSettingsSubTab,
   setLanguageErrorOpen,
+  setThemeErrorOpen,
   setTimeZoneErrorOpen,
   setAlarmEmailsErrorOpen,
   setHideDeclinedEventsErrorOpen,
@@ -85,6 +87,7 @@ export const DesktopSettingsPage: React.FC<{
               {activeSettingsSubTab === 'settings' && (
                 <GeneralSettings
                   onLanguageError={() => setLanguageErrorOpen(true)}
+                  onThemeError={() => setThemeErrorOpen(true)}
                   onTimeZoneError={() => setTimeZoneErrorOpen(true)}
                   onHideDeclinedEventsError={() =>
                     setHideDeclinedEventsErrorOpen(true)

@@ -47,6 +47,9 @@ var DISABLE_PUBLIC_VISIBILITY = false
 var ASK_FOR_TZ_UPDATE = true
 var TOOLTIP_DELAY_MS = 2000
 var HIDE_LANGUAGE_SELECTOR = false
+// Hides the theme selector of the settings, for deployments where Twake
+// Workplace common settings own the theme. Defaults to false.
+var HIDE_THEME_SELECTOR = false
 // Exposes the booking link section in the left bar. Defaults to false.
 var BOOKING_LINK_ENABLED = false
 // Displays the attachments section in the event display modal. Defaults to false.

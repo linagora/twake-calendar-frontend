@@ -4,12 +4,14 @@ import './SettingsPage.styl'
 
 export const SettingErrorSnackbars: React.FC<{
   languageErrorOpen: boolean
+  themeErrorOpen: boolean
   timeZoneErrorOpen: boolean
   alarmEmailsErrorOpen: boolean
   hideDeclinedEventsErrorOpen: boolean
   displayWeekNumbersErrorOpen: boolean
   workingDaysErrorOpen: boolean
   handleLanguageErrorClose: () => void
+  handleThemeErrorClose: () => void
   handleTimeZoneErrorClose: () => void
   handleAlarmEmailsErrorClose: () => void
   handleHideDeclinedEventsErrorClose: () => void
@@ -17,12 +19,14 @@ export const SettingErrorSnackbars: React.FC<{
   setWorkingDaysErrorOpen: (open: boolean) => void
 }> = ({
   languageErrorOpen,
+  themeErrorOpen,
   timeZoneErrorOpen,
   alarmEmailsErrorOpen,
   hideDeclinedEventsErrorOpen,
   displayWeekNumbersErrorOpen,
   workingDaysErrorOpen,
   handleLanguageErrorClose,
+  handleThemeErrorClose,
   handleTimeZoneErrorClose,
   handleAlarmEmailsErrorClose,
   handleHideDeclinedEventsErrorClose,
@@ -40,6 +44,12 @@ export const SettingErrorSnackbars: React.FC<{
         message={
           t('settings.languageUpdateError') || 'Failed to update language'
         }
+      />
+      <Snackbar
+        open={themeErrorOpen}
+        autoHideDuration={4000}
+        onClose={handleThemeErrorClose}
+        message={t('settings.themeUpdateError')}
       />
       <Snackbar
         open={timeZoneErrorOpen}
