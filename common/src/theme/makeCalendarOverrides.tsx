@@ -245,6 +245,18 @@ const basicThemeOverrides = {
   MuiSelect: {
     styleOverrides: { standard: { '& ~ .MuiSelect-icon': { right: 0 } } }
   },
+  // twake-mui fills unchecked radios with the border colour, too pale to
+  // see: use the colour of unchecked checkboxes. Its root override is a
+  // function, which a root of ours would replace, hence the colour slot.
+  MuiRadio: {
+    styleOverrides: {
+      colorPrimary: ({ theme }: { theme: Theme }) => ({
+        '&:not(.Mui-checked):not(.Mui-disabled) svg': {
+          fill: theme.vars.palette.text.secondary
+        }
+      })
+    }
+  },
   // twake-mui draws a border between the summary and the details
   MuiAccordionDetails: {
     styleOverrides: {
