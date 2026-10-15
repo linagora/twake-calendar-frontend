@@ -42,6 +42,7 @@ import {
   calendarColorSchemes,
   makeCalendarOverrides
 } from '@common/theme/makeCalendarOverrides'
+import { ColorSchemeSync } from '@common/features/Settings/ColorSchemeSync'
 import paletteData from '@common/theme/palette.json'
 
 import {
@@ -144,6 +145,7 @@ export default function App(): JSX.Element {
         palette={spaceOverlay === null ? paletteData : undefined}
         themeOptions={themeOptions}
       >
+        <ColorSchemeSync />
         <I18n
           dictRequire={(lang: keyof typeof locale) => locale[lang]}
           lang={lang}
