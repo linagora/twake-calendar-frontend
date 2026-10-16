@@ -143,7 +143,7 @@ const EventPreviewModal: React.FC<{
         onClose={() => onClose({}, 'backdropClick')}
         showHeaderActions={false}
         draggable
-        dynamicPositioning={!isListView(currentView)}
+        dynamicPositioning={!isListView(currentView) && Boolean(anchorEl)}
         anchorEl={anchorEl}
         actionsBorderTop={hasActionsBorderTop}
         actionsJustifyContent="center"
