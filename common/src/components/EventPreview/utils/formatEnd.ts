@@ -22,9 +22,11 @@ export function formatEnd({
   if (allday) {
     const inclusiveEndDate = new Date(endDate)
     inclusiveEndDate.setUTCDate(inclusiveEndDate.getUTCDate() - 1)
-    const sameDay =
-      formatDatePart(startDate) === formatDatePart(inclusiveEndDate)
-    return sameDay
+    // YYYY-MM-DD strings compare chronologically. An end on or before the
+    // start (DTEND <= DTSTART, accepted by the server) shows the start only.
+    const noLaterDay =
+      formatDatePart(inclusiveEndDate) <= formatDatePart(startDate)
+    return noLaterDay
       ? null
       : inclusiveEndDate.toLocaleDateString(t('locale'), {
           year: 'numeric',
@@ -33,6 +35,9 @@ export function formatEnd({
           timeZone
         })
   } else {
+    if (endDate < startDate) {
+      return null
+    }
     const sameDay = formatDatePart(startDate) === formatDatePart(endDate)
     if (sameDay) {
       return endDate.toLocaleTimeString(t('locale'), {
