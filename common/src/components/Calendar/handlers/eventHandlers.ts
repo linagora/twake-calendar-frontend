@@ -10,6 +10,7 @@ import { fetchEvent } from '@common/features/Events/EventDao'
 import { handleUpdateRecurringSeries } from '@common/features/Events/hooks/submitUpdateHelpers/updateActions'
 import { getSeriesInstances } from '@common/features/Events/hooks/submitUpdateHelpers/utils'
 import { parseFetchedEvent } from '@common/features/Events/transformers'
+import { shiftByday } from '@common/features/Events/utils/shiftByday'
 import { updateAttendeesAfterTimeChange } from '@common/features/Events/updateEventHelpers/updateAttendeesAfterTimeChange'
 import {
   userAttendee,
@@ -17,6 +18,7 @@ import {
 } from '@common/features/User/models/attendee'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
+import { RepetitionObject } from '@common/types/Repetition'
 import { getDeltaInMilliseconds } from '@common/utils/dateUtils'
 import {
   CalendarApi,
@@ -286,11 +288,12 @@ export const createEventHandlers = (
     const seriesDeltaMs =
       moment(computedNewStart).valueOf() - instanceDefaultStart.valueOf()
 
-    const masterStart = momentInEventZone(
+    const originalMasterStart = momentInEventZone(
       master.start,
       masterTz,
       master.allday
-    ).add(seriesDeltaMs, 'ms')
+    )
+    const masterStart = originalMasterStart.clone().add(seriesDeltaMs, 'ms')
     const masterEnd = master.end
       ? momentInEventZone(master.end, masterTz, master.allday).add(
           seriesDeltaMs,
@@ -300,11 +303,25 @@ export const createEventHandlers = (
           .add(seriesDeltaMs, 'ms')
           .add(moment(computedNewEnd).diff(moment(computedNewStart)))
 
+    // The weekdays of the rule are read in the zone of DTSTART: they move
+    // by as many days as DTSTART does there.
+    const seriesDayShift = masterStart
+      .clone()
+      .startOf('day')
+      .diff(originalMasterStart.clone().startOf('day'), 'days')
+    const shiftedRepetition =
+      master.repetition &&
+      new RepetitionObject({
+        ...master.repetition,
+        byday: shiftByday(master.repetition.byday, seriesDayShift)
+      })
+
     const shiftedMasterEvent = updateAttendeesAfterTimeChange(
       {
         ...master,
         start: masterStart.toISOString(),
-        end: masterEnd.toISOString()
+        end: masterEnd.toISOString(),
+        repetition: shiftedRepetition
       },
       true
     )
@@ -320,7 +337,7 @@ export const createEventHandlers = (
         end: masterEnd.toISOString(),
         allday: master.allday ?? false,
         timezone: masterTz,
-        repetition: master.repetition ?? DEFAULT_FORM_VALUES.repetition
+        repetition: shiftedRepetition ?? DEFAULT_FORM_VALUES.repetition
       },
       tempContext: {},
       event: master,
