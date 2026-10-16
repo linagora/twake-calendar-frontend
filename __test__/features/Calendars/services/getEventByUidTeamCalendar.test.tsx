@@ -23,6 +23,13 @@ const calendar = (id: string): Calendar => ({
   events: {}
 })
 
+// As loaded for a member: delegated, read through the member's own instance.
+const teamCalendar = (id: string): Calendar => ({
+  ...calendar(id),
+  link: '/calendars/alice/instance1.json',
+  delegated: true
+})
+
 const found = (calId: string) => ({
   _embedded: {
     'dav:item': [
@@ -61,7 +68,7 @@ const storeFactory = () =>
       calendars: {
         list: {
           [PERSONAL_CAL_ID]: calendar(PERSONAL_CAL_ID),
-          [TEAM_CAL_ID]: calendar(TEAM_CAL_ID)
+          [TEAM_CAL_ID]: teamCalendar(TEAM_CAL_ID)
         },
         templist: {},
         pending: false,
@@ -99,6 +106,19 @@ describe('getEventByUid on a team calendar', () => {
     expect(
       store.getState().calendars.list[TEAM_CAL_ID].events.event1.title
     ).toBe('Deep embed')
+  })
+
+  it("resolves an event found through the user's own instance", async () => {
+    fetchEventByUid.mockResolvedValue(found('alice/instance1'))
+    const store = storeFactory()
+
+    const result = await store.dispatch(
+      getEventByUid({ userId: 'alice', uid: 'event1' })
+    )
+
+    expect(result.payload).toEqual(
+      expect.objectContaining({ calId: TEAM_CAL_ID })
+    )
   })
 
   it('reports an event found in no home as not found', async () => {

@@ -82,14 +82,25 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
 // The homes a UID lookup is sent to. The user's home does not search the team
 // calendars the user reads, only the team's home does: the full app tries the
 // user's home first, then the home of each other calendar it lists. The embed
-// route only asks the home of its calendar.
+// route only asks the homes of its calendar.
+// A calendar delegated to the user (a team calendar they are a member of) is
+// read through their own instance, whose home is the user's: the owner's home,
+// taken from the calendar id, is asked too.
 function searchedHomes(
   userId: string,
   calendars: Calendar[],
   onlyTheseCalendars: boolean
 ): string[] {
-  const homes = calendars.map(cal => homeOf(calendarDavPath(cal)))
+  const homes = calendars.flatMap(cal => [
+    homeOf(ownerDavPath(cal)),
+    homeOf(calendarDavPath(cal))
+  ])
   return [...new Set(onlyTheseCalendars ? homes : [userId, ...homes])]
+}
+
+// The owner's node of a calendar, "/calendars/{owner}/{calendar}"
+function ownerDavPath(cal: Calendar): string {
+  return `/calendars/${cal.id}`
 }
 
 // "/calendars/{home}/{calendar}" → "{home}"
@@ -143,11 +154,14 @@ function resolveEvent(
   if (!eventURL) {
     return null
   }
-  // The href names the calendar the user read it through: for a calendar
-  // shared with them, their own instance of it rather than its id.
+  // The href names the calendar of the home that was searched: the user's own
+  // instance of a calendar shared with them when found in the user's home, the
+  // calendar itself when found in its owner's home (a team calendar).
   const calendarPath = `/calendars/${calendarIdFromEventHref(eventURL)}`
   const calendarStored = calendars.find(
-    cal => calendarDavPath(cal) === calendarPath
+    cal =>
+      calendarDavPath(cal) === calendarPath ||
+      ownerDavPath(cal) === calendarPath
   )
   if (!calendarStored) {
     return null
