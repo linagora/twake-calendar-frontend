@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Typography,
-  alpha,
   useTheme
 } from '@linagora/twake-mui'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
@@ -48,7 +47,7 @@ export function EventPreviewAttendees({
   const { t } = useI18n()
   const theme = useTheme()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
-  const infoIconColor = alpha(theme.palette.grey[900], 0.9)
+  const infoIconColor = theme.vars.palette.text.primary
   const infoIconSx = { minWidth: '25px', marginRight: 2, color: infoIconColor }
   // Icon takes 25px width + 16px (mr: 2) = 41px, use negative margin to align avatars
   const mobileAvatarOffset = '-42px'

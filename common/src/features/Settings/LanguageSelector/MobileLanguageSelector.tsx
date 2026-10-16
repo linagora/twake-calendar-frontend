@@ -54,7 +54,10 @@ export const MobileLanguageSelector: React.FC<LanguageSelectorInputProps> = ({
               />
               {currentLanguage === code && (
                 <CheckIcon
-                  sx={{ color: theme.palette.primary.main, fontSize: '20px' }}
+                  sx={{
+                    color: theme.vars.palette.primary.main,
+                    fontSize: '20px'
+                  }}
                 />
               )}
             </ListItemButton>

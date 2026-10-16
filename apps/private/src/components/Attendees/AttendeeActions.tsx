@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, useTheme, alpha } from '@linagora/twake-mui'
+import { Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
 import { Icon, CalendarToday, EmailOpen, Discuss } from '@linagora/twake-icons'
 import { useI18n } from 'twake-i18n'
 import { useNavigate } from 'react-router'
@@ -78,7 +78,7 @@ export function AttendeeActions({
             borderRadius: 6,
             textTransform: 'none',
             borderColor: 'divider',
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }}
         >
           {t('attendees.sendMail')}
@@ -100,8 +100,8 @@ export function AttendeeActions({
                 borderColor: 'divider',
                 borderRadius: '50%',
                 padding: 1,
-                color: alpha(theme.palette.grey[900], 0.9),
-                '&.Mui-disabled': { color: alpha(theme.palette.grey[900], 0.9) }
+                color: theme.vars.palette.text.primary,
+                '&.Mui-disabled': { color: theme.vars.palette.text.primary }
               }}
               size="small"
               disabled={!isInternalUser || loading}
@@ -125,7 +125,7 @@ export function AttendeeActions({
             borderColor: 'divider',
             borderRadius: '50%',
             padding: 1,
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }}
           size="small"
         >

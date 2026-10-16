@@ -148,11 +148,14 @@ export const MiniCalendar: React.FC<{
                 '&.Mui-selected': {
                   color: 'inherit !important',
                   fontWeight: 'inherit !important',
-                  backgroundColor: 'lightgray !important'
+                  backgroundColor: theme =>
+                    `${theme.alpha(theme.vars.palette.text.primary, 0.24)} !important`
                 },
                 '&.today': {
-                  background: 'orange !important',
-                  color: 'white !important',
+                  background: theme =>
+                    `${theme.vars.palette.primary.main} !important`,
+                  color: theme =>
+                    `${theme.vars.palette.primary.contrastText} !important`,
                   outline: 'none'
                 }
               },

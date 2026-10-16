@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react'
-import { ThemeProvider } from '@common/ds/ThemeProvider/ThemeProvider'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
@@ -39,6 +39,7 @@ import { redirectTo } from '@common/utils/navigation'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
 import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
+import paletteData from '@common/theme/palette.json'
 
 import {
   enGB,
@@ -133,7 +134,10 @@ export default function App(): JSX.Element {
 
   return (
     <EmbeddingProvider>
-      <ThemeProvider themeOptions={themeOptions}>
+      <TwakeMuiThemeProvider
+        palette={spaceOverlay === null ? paletteData : undefined}
+        themeOptions={themeOptions}
+      >
         <I18n
           dictRequire={(lang: keyof typeof locale) => locale[lang]}
           lang={lang}
@@ -184,7 +188,7 @@ export default function App(): JSX.Element {
             {appLoading && <Loading />}
           </ErrorBoundary>
         </I18n>
-      </ThemeProvider>
+      </TwakeMuiThemeProvider>
     </EmbeddingProvider>
   )
 }

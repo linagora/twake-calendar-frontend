@@ -1,7 +1,7 @@
 import { CalendarApi } from '@fullcalendar/core'
 import {
   act,
-  render,
+  render as rtlRender,
   screen,
   fireEvent,
   waitFor,
@@ -9,6 +9,11 @@ import {
 } from '@testing-library/react'
 import React from 'react'
 import { DatePickerMobile } from '@common/components/Menubar/components/DatePickerMobile'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
+
+// The components read the CSS variables of the twake-mui theme
+const render = (ui: React.ReactElement): ReturnType<typeof rtlRender> =>
+  rtlRender(ui, { wrapper: TwakeMuiThemeProvider })
 
 jest.mock('twake-i18n', () => ({
   useI18n: (): { t: (key: string) => string; lang: string } => ({
@@ -16,18 +21,6 @@ jest.mock('twake-i18n', () => ({
     lang: 'en'
   })
 }))
-
-jest.mock('@linagora/twake-mui', () => {
-  const actual = jest.requireActual<typeof import('@linagora/twake-mui')>(
-    '@linagora/twake-mui'
-  )
-  return {
-    ...actual,
-    useTheme: (): { palette: { grey: { 500: string } } } => ({
-      palette: { grey: { 500: '#9e9e9e' } }
-    })
-  }
-})
 
 const scrollIntoViewMock = jest.fn()
 // eslint-disable-next-line @typescript-eslint/unbound-method

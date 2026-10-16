@@ -35,7 +35,7 @@ export const PreviewContainer: React.FC<PreviewContainerProps> = ({
 }) => (
   <Box
     sx={{
-      backgroundColor: 'white',
+      backgroundColor: 'background.paper',
       borderRadius: '12px',
       width: '100%',
       maxWidth: '600px',

@@ -1,12 +1,5 @@
-import logo from '@common/static/header-logo.svg'
-import {
-  alpha,
-  Box,
-  Button,
-  Link,
-  Typography,
-  useTheme
-} from '@linagora/twake-mui'
+import { HeaderLogo } from '@common/components/HeaderLogo'
+import { Box, Button, Link, Typography, useTheme } from '@linagora/twake-mui'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -30,7 +23,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: theme.palette.grey[100],
+        backgroundColor: theme.vars.palette.background.default,
         position: 'relative'
       }}
     >
@@ -47,16 +40,17 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         <PublicLanguageSelector />
 
         <Button
+          variant="text"
           onClick={handleHelpClick}
           sx={{
             textTransform: 'none',
-            color: theme.palette.text.secondary,
+            color: theme.vars.palette.text.secondary,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             '&:hover': {
-              backgroundColor: alpha(theme.palette.grey[900], 0.04),
-              color: theme.palette.text.secondary
+              backgroundColor: theme.vars.palette.action.hover,
+              color: theme.vars.palette.text.secondary
             }
           }}
         >
@@ -94,10 +88,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img
-            src={logo}
-            alt={t('publicLayout.logoAlt')}
-            style={{ height: '32px', marginBottom: '8px' }}
+          <HeaderLogo
+            role="img"
+            aria-label={t('publicLayout.logoAlt')}
+            style={{ width: 'auto', height: '32px', marginBottom: '8px' }}
           />
         </Link>
         <Typography variant="body2">{t('publicLayout.title')}</Typography>

@@ -1,6 +1,6 @@
 import iconCamera from '@common/static/images/icon-camera.svg'
 import { useVideoConference } from '../hooks/useVideoConference'
-import { alpha, Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
+import { Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
 import { Close as DeleteIcon } from '@mui/icons-material'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -41,7 +41,7 @@ const VideoConferenceHasLink: React.FC<{
         <IconButton
           onClick={handleDeleteVideoConference}
           size="small"
-          sx={{ color: alpha(theme.palette.grey[900], 0.9) }}
+          sx={{ color: theme.vars.palette.text.primary }}
           aria-label={t('event.form.removeVideoConference')}
           title={t('event.form.removeVideoConference')}
         >

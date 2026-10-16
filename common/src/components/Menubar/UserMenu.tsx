@@ -3,10 +3,10 @@ import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { getInitials, stringToGradient } from '@common/utils/avatarUtils'
 import { getUserDisplayName } from '@common/utils/userUtils'
 import {
-  alpha,
   Box,
   Divider,
   IconButton,
+  type IconButtonProps,
   Menu,
   MenuItem,
   MenuList,
@@ -30,6 +30,7 @@ export type UserMenuProps = {
   user: userData | null
   isIframe?: boolean
   size?: 's' | 'm' | 'l'
+  buttonSize?: IconButtonProps['size']
 }
 
 const sharedPaperSx = {
@@ -67,7 +68,7 @@ const UserMenuContent: React.FC<{
         </Avatar>
         <Typography
           sx={{
-            color: theme.palette.grey[900],
+            color: `rgb(${theme.vars.palette.text.primaryChannel})`,
             fontSize: 22,
             fontWeight: 600
           }}
@@ -83,7 +84,7 @@ const UserMenuContent: React.FC<{
           <SettingsOutlinedIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: theme.alpha(theme.vars.palette.text.primary, 0.48),
               fontSize: 20
             }}
           />
@@ -94,7 +95,7 @@ const UserMenuContent: React.FC<{
           <LogoutIcon
             sx={{
               mr: 2,
-              color: alpha(theme.palette.grey[900], 0.48),
+              color: theme.alpha(theme.vars.palette.text.primary, 0.48),
               fontSize: 20
             }}
           />
@@ -163,7 +164,8 @@ export function UserMenu({
   onUserMenuOpen,
   user,
   isIframe = false,
-  size = 'm'
+  size = 'm',
+  buttonSize
 }: UserMenuProps): JSX.Element {
   const { t } = useI18n()
   const { isTooSmall: isMobile } = useScreenSizeDetection()
@@ -175,6 +177,7 @@ export function UserMenu({
         title={isIframe ? t('menubar.settings') : t('menubar.userProfile')}
       >
         <IconButton
+          size={buttonSize}
           onClick={!isIframe ? onUserMenuOpen : onSettingsClick}
           aria-label={
             isIframe ? t('menubar.settings') : t('menubar.userProfile')

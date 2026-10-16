@@ -49,7 +49,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
     '& .MuiPickersSectionList-root': { justifyContent: 'end' },
     '& .MuiPickersInputBase-root': {
       ...TIME_DISPLAY_SX,
-      color: theme.palette.text.secondary,
+      color: theme.vars.palette.text.secondary,
       backgroundColor: 'transparent !important',
       '&:before': { borderBottomColor: 'transparent !important' },
       '&:after': { borderBottomColor: 'transparent !important' }
@@ -59,7 +59,7 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
     },
     '& .MuiPickersInputBase-root.Mui-focused .MuiPickersInputBase-input': {
       backgroundColor: 'transparent !important',
-      color: theme.palette.primary.main
+      color: theme.vars.palette.primary.main
     }
   }
 
@@ -72,23 +72,23 @@ export const TouchTimePickerField: React.FC<TimePickerFieldProps> = ({
       gap: '16px'
     },
     '& .MuiTimePickerToolbar-hourMinuteLabel .MuiPickersToolbarText-root[data-selected]':
-      { color: theme.palette.primary.main },
+      { color: theme.vars.palette.primary.main },
     '& .MuiPickersToolbar-root .MuiTypography-root': TIME_DISPLAY_SX,
     '& .MuiPickersToolbar-title': { display: 'none' },
     '& .MuiPickersArrowSwitcher-root': { display: 'none' },
     '& .MuiClockPointer-root': {
-      backgroundColor: theme.palette.primary.main
+      backgroundColor: theme.vars.palette.primary.main
     },
     '& .MuiClockPointer-thumb': {
-      backgroundColor: theme.palette.primary.main,
-      borderColor: theme.palette.primary.main
+      backgroundColor: theme.vars.palette.primary.main,
+      borderColor: theme.vars.palette.primary.main
     },
     '& .MuiClock-pin': {
-      backgroundColor: theme.palette.primary.main
+      backgroundColor: theme.vars.palette.primary.main
     },
     '& .MuiClockNumber-root[aria-selected="true"]': {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText
+      backgroundColor: theme.vars.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText
     }
   }
 

@@ -14,8 +14,9 @@ export const SmallNavigationControls: React.FC<{
 
   return (
     <div className="navigation-controls">
-      <Stack direction="row" spacing={1.25}>
+      <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
         <IconButton
+          size="xsmall"
           onClick={() => onNavigate('prev')}
           aria-label={labels.prev}
           title={labels.prev}
@@ -23,11 +24,12 @@ export const SmallNavigationControls: React.FC<{
           <ChevronLeftIcon sx={{ height: 30 }} />
         </IconButton>
         <IconButton
-          color="primary"
           aria-label={t('menubar.today')}
           title={t('menubar.today')}
           sx={{
+            // Neutral like the outline of the desktop navigation buttons
             border: '1px solid',
+            borderColor: 'border.main',
             borderRadius: '12px',
             width: '38px',
             height: '38px'
@@ -38,6 +40,7 @@ export const SmallNavigationControls: React.FC<{
           <TodayIcon fontSize="inherit" />
         </IconButton>
         <IconButton
+          size="xsmall"
           onClick={() => onNavigate('next')}
           aria-label={labels.next}
           title={labels.next}

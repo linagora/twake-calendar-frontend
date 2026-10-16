@@ -140,10 +140,10 @@ function renderTeamOrganizerFullBadge({
         badgeContent={
           icon && (
             <Box
+              sx={{ bgcolor: 'background.paper' }}
               style={{
                 fontSize: 14,
                 lineHeight: 0,
-                backgroundColor: 'white',
                 borderRadius: '50%',
                 padding: '1px'
               }}
@@ -244,10 +244,10 @@ function renderFullAttendeeBadge({
           badgeContent={
             icon && (
               <Box
+                sx={{ bgcolor: 'background.paper' }}
                 style={{
                   fontSize: 14,
                   lineHeight: 0,
-                  backgroundColor: 'white',
                   borderRadius: '50%',
                   padding: '1px'
                 }}

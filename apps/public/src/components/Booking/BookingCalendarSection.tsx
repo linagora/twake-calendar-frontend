@@ -80,10 +80,10 @@ const AvailableDay = (props: AvailableDayProps): React.ReactElement => {
         ...(isSlot &&
           !isBeforeToday && {
             '&:not(.Mui-selected)': {
-              backgroundColor: theme.palette.grey[200]
+              backgroundColor: theme.vars.palette.action.selected
             },
             '&:not(.Mui-selected):hover': {
-              backgroundColor: theme.palette.grey[300]
+              backgroundColor: theme.vars.palette.action.focus
             },
             '&.Mui-selected': { backgroundColor: 'text.secondary' }
           })

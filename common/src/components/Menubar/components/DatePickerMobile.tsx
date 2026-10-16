@@ -149,7 +149,7 @@ export const DatePickerMobile: React.FC<DatePickerMobileProps> = ({
           day: {
             sx: {
               '&.MuiPickerDay-dayOutsideMonth': {
-                color: theme.palette.grey[500]
+                color: theme.alpha(theme.vars.palette.text.primary, 0.48)
               }
             }
           }

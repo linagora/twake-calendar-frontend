@@ -35,7 +35,12 @@ export function ErrorSnackbar({
         onClose={handleCloseSnackbar}
         sx={{ width: '100%' }}
         action={
-          <Button color="inherit" size="small" onClick={handleCloseSnackbar}>
+          <Button
+            variant="text"
+            color="inherit"
+            size="small"
+            onClick={handleCloseSnackbar}
+          >
             {t('common.ok')}
           </Button>
         }
@@ -73,7 +78,7 @@ export function EventErrorSnackbar({
         onClose={onClose}
         sx={{ width: '100%' }}
         action={
-          <Button color="inherit" size="small" onClick={onClose}>
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>
             {t('common.ok')}
           </Button>
         }

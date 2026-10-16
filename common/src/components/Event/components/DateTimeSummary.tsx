@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, alpha } from '@linagora/twake-mui'
+import { Box, Typography, useTheme } from '@linagora/twake-mui'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import React from 'react'
 import { useI18n } from 'twake-i18n'
@@ -102,7 +102,7 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
   const primaryStyle = {
     fontSize: '14px',
     fontWeight: 500,
-    color: alpha(theme.palette.grey[900], 0.9)
+    color: theme.vars.palette.text.primary
   }
 
   return (
@@ -126,10 +126,10 @@ export const DateTimeSummary: React.FC<DateTimeSummaryProps> = ({
           )}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 0.5 }}>
-          <Typography variant="caption" sx={{ color: '#444746' }}>
+          <Typography variant="caption" sx={{ color: 'text.primary' }}>
             {timezoneText}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#444746' }}>
+          <Typography variant="caption" sx={{ color: 'text.primary' }}>
             {repeatText}
           </Typography>
         </Box>

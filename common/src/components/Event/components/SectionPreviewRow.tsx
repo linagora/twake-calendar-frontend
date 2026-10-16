@@ -1,4 +1,4 @@
-import { Box, radius, Typography, useTheme, alpha } from '@linagora/twake-mui'
+import { Box, radius, Typography, useTheme } from '@linagora/twake-mui'
 import React from 'react'
 
 export interface SectionPreviewRowProps {
@@ -23,7 +23,7 @@ export const SectionPreviewRow: React.FC<SectionPreviewRowProps> = ({
   ariaLabel
 }) => {
   const theme = useTheme()
-  const color = iconColor ?? alpha(theme.palette.grey[900], 0.9)
+  const color = iconColor ?? theme.vars.palette.text.primary
 
   const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' || e.key === ' ') {

@@ -8,7 +8,7 @@ export const PrivateEventPreview: React.FC = () => {
   return (
     <Box
       sx={{
-        backgroundColor: '#F3F4F6',
+        backgroundColor: 'background.default',
         height: 48,
         borderRadius: '8px',
         gap: '16px',

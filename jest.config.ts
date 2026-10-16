@@ -46,6 +46,7 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
@@ -102,6 +103,7 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
@@ -148,6 +150,7 @@ const config: Config = {
       ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
+        '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^@/common/(.*)$': '<rootDir>/common/src/$1',

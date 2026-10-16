@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   useTheme,
-  alpha,
   DialogActions,
   Button
 } from '@linagora/twake-mui'
@@ -89,7 +88,7 @@ export const SearchCalendarsDialog: React.FC<SearchCalendarsDialogProps> = ({
           paddingRight: 1,
           paddingTop: 0.5,
           paddingBottom: 0.5,
-          boxShadow: `0 8px 0px ${alpha(theme.palette.grey[600], theme.palette.action.focusOpacity)}`
+          boxShadow: `0 8px 0px ${theme.alpha(theme.vars.palette.text.primary, theme.vars.palette.action.focusOpacity)}`
         }}
       >
         <IconButton

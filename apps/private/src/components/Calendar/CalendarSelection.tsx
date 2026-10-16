@@ -31,7 +31,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  alpha,
   Checkbox,
   IconButton,
   ListItem,
@@ -152,6 +151,7 @@ const CollapsibleSection: React.FC<{
           <Tooltip title={addBtnTooltip}>
             <IconButton
               component="span"
+              size="xsmall"
               onClick={e => {
                 if (expanded) {
                   e.stopPropagation()
@@ -263,7 +263,7 @@ const BookingLinkLabel: React.FC<{ name: string }> = ({ name }) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             fontSize: '0.875rem',
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }}
         >
           {name}
@@ -314,7 +314,7 @@ const BookingLinkChip: React.FC<{
   const calendarColor = calendars?.[calendarId]?.color?.light
   const iconColor = isVisible
     ? (link.color ?? calendarColor ?? defaultColors[4].dark)
-    : theme.palette.grey[400]
+    : theme.vars.palette.text.disabled
 
   const linkName =
     link.name || t('booking.durationMinutes', { count: link.durationMinutes })
@@ -344,7 +344,7 @@ const BookingLinkChip: React.FC<{
           alignItems: 'center',
           justifyContent: 'space-between',
           ...rowActionsSx,
-          '&:hover': { backgroundColor: '#F3F3F6' }
+          '&:hover': { backgroundColor: 'action.hover' }
         }}
       >
         <div
@@ -823,7 +823,7 @@ const CalendarSelector: React.FC<{
           justifyContent: 'space-between',
           transition: 'background-color 0.2s ease',
           ...rowActionsSx,
-          '&:hover': { backgroundColor: '#F3F3F6' }
+          '&:hover': { backgroundColor: 'action.hover' }
         }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -879,6 +879,7 @@ const CalendarSelector: React.FC<{
         {!isMobile && (
           <IconButton
             className="MoreBtn"
+            size="xsmall"
             aria-label={t('common.moreOptions')}
             onClick={handleClick}
           >

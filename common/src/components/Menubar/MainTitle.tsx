@@ -1,6 +1,6 @@
 import { useAppDispatch } from '@common/app/hooks'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import logo from '@common/static/header-logo.svg'
+import { HeaderLogo } from '@common/components/HeaderLogo'
 import { CalendarApi } from '@fullcalendar/core'
 import { Button } from '@linagora/twake-mui'
 import React from 'react'
@@ -50,14 +50,15 @@ export const MainTitle: React.FC<MainTitleProps> = ({
   return (
     <div className="menubar-item tc-home">
       <Button
+        variant="text"
         onClick={handleLogoClick}
         aria-label={t('menubar.logoAlt')}
         style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer' }}
       >
-        <img
+        <HeaderLogo
           className={`logo ${isMobile ? 'logo--mobile' : ''}`}
-          src={logo}
-          alt={t('menubar.logoAlt')}
+          role="img"
+          aria-label={t('menubar.logoAlt')}
           onClick={handleLogoClick}
         />
       </Button>

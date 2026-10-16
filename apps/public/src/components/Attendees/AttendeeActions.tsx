@@ -1,4 +1,4 @@
-import { Box, Button, useTheme, alpha } from '@linagora/twake-mui'
+import { Box, Button, useTheme } from '@linagora/twake-mui'
 import { Icon, EmailOpen } from '@linagora/twake-icons'
 import { useI18n } from 'twake-i18n'
 import { useAppSelector } from '@common/app/hooks'
@@ -53,7 +53,7 @@ export function AttendeeActions({
             borderRadius: 6,
             textTransform: 'none',
             borderColor: 'divider',
-            color: alpha(theme.palette.grey[900], 0.9)
+            color: theme.vars.palette.text.primary
           }}
         >
           {t('attendees.sendMail')}

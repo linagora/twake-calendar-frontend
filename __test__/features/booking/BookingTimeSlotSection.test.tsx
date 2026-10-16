@@ -1,6 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react'
 import { BookingTimeSlotSection } from '@public/components/Booking/BookingTimeSlotSection'
 import dayjs from 'dayjs'
+import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
+
+// The components read the CSS variables of the twake-mui theme
+const render = (ui: React.ReactElement): ReturnType<typeof rtlRender> =>
+  rtlRender(ui, { wrapper: TwakeMuiThemeProvider })
 
 jest.mock('twake-i18n', () => ({
   useI18n: () => ({
