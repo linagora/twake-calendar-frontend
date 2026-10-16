@@ -25,7 +25,6 @@ export async function getFreeBusyForAddedAttendee(
 }
 
 interface BusySlot {
-  uid: string
   start: string
   end: string
 }
@@ -49,16 +48,20 @@ export async function getFreeBusyForEventAttendees(
   end: string,
   eventUid: string
 ): Promise<Record<string, boolean>> {
-  const query: FreeBusyPostQuery = { userIds, start, end, eventUid }
+  // Busy periods carry no uid: the server excludes the edited event itself,
+  // matching on the uid of the master event, not the one of an occurrence.
+  const query: FreeBusyPostQuery = {
+    userIds,
+    start,
+    end,
+    eventUid: extractEventBaseUuid(eventUid)
+  }
   const payload = (await fetchFreeBusyPost(query)) as FreeBusyPayload
   const users = Array.isArray(payload.users) ? payload.users : []
-  const eventUidBase = extractEventBaseUuid(eventUid)
   return Object.fromEntries(
     users.map(u => {
-      const isBusy = (u.calendars ?? []).some(cal =>
-        (cal.busy ?? []).some(
-          slot => extractEventBaseUuid(slot.uid) !== eventUidBase
-        )
+      const isBusy = (u.calendars ?? []).some(
+        cal => (cal.busy ?? []).length > 0
       )
       return [u.id, isBusy]
     })

@@ -125,7 +125,6 @@ const busyPostResponse = {
           id: 'user-carol',
           busy: [
             {
-              uid: 'fa507111-07d5-44b4-a611-c27845a66ccf',
               start: START,
               end: END
             }
@@ -498,6 +497,26 @@ describe('useAttendeesFreeBusy — Flow A (existing attendees)', () => {
       start: '20260314T130000',
       userIds: ['user-carol']
     })
+  })
+
+  it('passes the uid of the master event when editing an occurrence', async () => {
+    mockPOST.mockResolvedValue(freePostResponse)
+
+    renderHook(() =>
+      useAttendeesFreeBusy({
+        existingAttendees: [existingAttendee],
+        newAttendees: [],
+        start: START,
+        end: END,
+        timezone: TZ,
+        eventUid: 'event-abc/20260314T130000Z'
+      })
+    )
+
+    await waitFor(() => expect(mockPOST).toHaveBeenCalled())
+    expect(mockPOST).toHaveBeenCalledWith(
+      expect.objectContaining({ eventUid: 'event-abc' })
+    )
   })
 })
 

@@ -55,9 +55,11 @@ const busyIcal = [
   }
 ]
 
-const postResponse = (busy: { uid: string }[]): unknown => ({
+const postResponse = (busy: { start: string; end: string }[]): unknown => ({
   users: [{ id: ROOM_ID, calendars: [{ id: ROOM_ID, busy }] }]
 })
+
+const busyPeriod = { start: '20260314T130000Z', end: '20260314T140000Z' }
 
 describe('useResourcesFreeBusy', () => {
   beforeEach(() => {
@@ -92,7 +94,8 @@ describe('useResourcesFreeBusy', () => {
   })
 
   it('ignores the edited event itself when looking at a resource', async () => {
-    mockPOST.mockResolvedValue(postResponse([{ uid: 'event-123' }]))
+    // The server leaves out the busy periods of the uids it is given
+    mockPOST.mockResolvedValue(postResponse([]))
 
     const { result } = renderHook(() =>
       useResourcesFreeBusy({
@@ -111,7 +114,7 @@ describe('useResourcesFreeBusy', () => {
   })
 
   it('shows a resource taken by another event as busy while editing', async () => {
-    mockPOST.mockResolvedValue(postResponse([{ uid: 'another-event' }]))
+    mockPOST.mockResolvedValue(postResponse([busyPeriod]))
 
     const { result } = renderHook(() =>
       useResourcesFreeBusy({
