@@ -255,7 +255,9 @@ describe('SettingsPage', () => {
     it('displays timezone selector in Settings tab', () => {
       renderWithProviders(<SettingsPage />, preloadedState)
 
-      expect(screen.getAllByRole('combobox')).toHaveLength(2)
+      expect(
+        screen.getByLabelText('event.form.timezonePlaceholder')
+      ).toBeInTheDocument()
     })
 
     it('displays timezone from user state', () => {
@@ -294,7 +296,9 @@ describe('SettingsPage', () => {
     it('updates timezone immediately (optimistic update) and calls API', async () => {
       const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
-      const timezoneInput = screen.getAllByRole('combobox')[1]
+      const timezoneInput = screen.getByLabelText(
+        'event.form.timezonePlaceholder'
+      )
 
       // Open the autocomplete dropdown
       fireEvent.mouseDown(timezoneInput)
@@ -341,7 +345,9 @@ describe('SettingsPage', () => {
     it('handles timezone change with different timezone values', async () => {
       const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
-      const timezoneInput = screen.getAllByRole('combobox')[1]
+      const timezoneInput = screen.getByLabelText(
+        'event.form.timezonePlaceholder'
+      )
 
       // Test with Asia/Tokyo
       fireEvent.mouseDown(timezoneInput)
@@ -493,7 +499,9 @@ describe('SettingsPage', () => {
 
       expect(browserDefaultSwitch).toBeChecked()
 
-      expect(screen.getAllByRole('combobox')).toHaveLength(1)
+      expect(screen.queryByLabelText('event.form.timezonePlaceholder')).toBe(
+        null
+      )
 
       fireEvent.click(browserDefaultSwitch)
 
@@ -502,7 +510,9 @@ describe('SettingsPage', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getAllByRole('combobox')).toHaveLength(2)
+        expect(
+          screen.getByLabelText('event.form.timezonePlaceholder')
+        ).toBeInTheDocument()
       })
 
       // the zone on display is written down, so that it no longer reads as the
@@ -532,7 +542,9 @@ describe('SettingsPage', () => {
 
       const { store } = renderWithProviders(<SettingsPage />, preloadedState)
 
-      const timezoneInput = screen.getAllByRole('combobox')[1]
+      const timezoneInput = screen.getByLabelText(
+        'event.form.timezonePlaceholder'
+      )
 
       fireEvent.mouseDown(timezoneInput)
       const option = await screen.findByText(/Europe\/Paris/i)
@@ -639,7 +651,9 @@ describe('SettingsPage', () => {
 
       renderWithProviders(<SettingsPage />, stateWithDatetimeConfig)
 
-      const timezoneInput = screen.getAllByRole('combobox')[1]
+      const timezoneInput = screen.getByLabelText(
+        'event.form.timezonePlaceholder'
+      )
 
       fireEvent.mouseDown(timezoneInput)
       const option = await screen.findByRole('option', {

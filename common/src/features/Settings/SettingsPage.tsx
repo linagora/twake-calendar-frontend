@@ -19,6 +19,7 @@ const SettingsPage: React.FC<{
     useState<SettingsSubTab>('settings')
 
   const [languageErrorOpen, setLanguageErrorOpen] = useState(false)
+  const [themeErrorOpen, setThemeErrorOpen] = useState(false)
   const [timeZoneErrorOpen, setTimeZoneErrorOpen] = useState(false)
   const [alarmEmailsErrorOpen, setAlarmEmailsErrorOpen] = useState(false)
   const [hideDeclinedEventsErrorOpen, setHideDeclinedEventsErrorOpen] =
@@ -35,6 +36,9 @@ const SettingsPage: React.FC<{
   }
   const handleLanguageErrorClose = (): void => {
     setLanguageErrorOpen(false)
+  }
+  const handleThemeErrorClose = (): void => {
+    setThemeErrorOpen(false)
   }
   const handleTimeZoneErrorClose = (): void => {
     setTimeZoneErrorOpen(false)
@@ -60,6 +64,7 @@ const SettingsPage: React.FC<{
           <MobileSettingsPage
             activeSettingsSubTab={activeSettingsSubTab}
             setLanguageErrorOpen={setLanguageErrorOpen}
+            setThemeErrorOpen={setThemeErrorOpen}
             setTimeZoneErrorOpen={setTimeZoneErrorOpen}
             setAlarmEmailsErrorOpen={setAlarmEmailsErrorOpen}
             setHideDeclinedEventsErrorOpen={setHideDeclinedEventsErrorOpen}
@@ -72,6 +77,7 @@ const SettingsPage: React.FC<{
           <DesktopSettingsPage
             activeSettingsSubTab={activeSettingsSubTab}
             setLanguageErrorOpen={setLanguageErrorOpen}
+            setThemeErrorOpen={setThemeErrorOpen}
             setTimeZoneErrorOpen={setTimeZoneErrorOpen}
             setAlarmEmailsErrorOpen={setAlarmEmailsErrorOpen}
             setHideDeclinedEventsErrorOpen={setHideDeclinedEventsErrorOpen}
@@ -83,12 +89,14 @@ const SettingsPage: React.FC<{
         )}
         <SettingErrorSnackbars
           languageErrorOpen={languageErrorOpen}
+          themeErrorOpen={themeErrorOpen}
           timeZoneErrorOpen={timeZoneErrorOpen}
           alarmEmailsErrorOpen={alarmEmailsErrorOpen}
           hideDeclinedEventsErrorOpen={hideDeclinedEventsErrorOpen}
           displayWeekNumbersErrorOpen={displayWeekNumbersErrorOpen}
           workingDaysErrorOpen={workingDaysErrorOpen}
           handleLanguageErrorClose={handleLanguageErrorClose}
+          handleThemeErrorClose={handleThemeErrorClose}
           handleTimeZoneErrorClose={handleTimeZoneErrorClose}
           handleAlarmEmailsErrorClose={handleAlarmEmailsErrorClose}
           handleHideDeclinedEventsErrorClose={
