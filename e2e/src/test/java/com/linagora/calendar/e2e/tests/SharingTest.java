@@ -518,7 +518,7 @@ class SharingTest extends TwakeCalendarE2ETest {
         CalendarModal reopened = calendar.modifyCalendar(OWN_CALENDAR).tab("Access");
         assertThat(grantees)
             .as("every right granted has to be findable again, however many there are")
-            .allSatisfy(grantee -> assertThat(reopened.hasAccessRow(grantee.email()))
+            .allSatisfy(grantee -> assertThat(reopened.awaitAccessRow(grantee.email()))
                 .as("the row of %s", grantee.email())
                 .isTrue());
         reopened.close();

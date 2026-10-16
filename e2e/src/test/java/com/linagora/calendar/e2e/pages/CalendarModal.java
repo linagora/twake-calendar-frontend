@@ -188,6 +188,19 @@ public class CalendarModal {
         return accessRow(email).count() > 0;
     }
 
+    /**
+     * Whether the row of that grantee shows up. On a reopened dialog the rows are only drawn
+     * once every grantee has been looked up in the directory, so they are waited for.
+     */
+    public boolean awaitAccessRow(String email) {
+        try {
+            accessRow(email).waitFor(new Locator.WaitForOptions().setTimeout(20_000));
+            return true;
+        } catch (com.microsoft.playwright.TimeoutError missing) {
+            return false;
+        }
+    }
+
     /** The rights the picker offers, which say what the product can actually grant. */
     public java.util.List<String> accessRightOptions(String email) {
         Locator selector = accessRow(email).locator("[role=combobox]").first();

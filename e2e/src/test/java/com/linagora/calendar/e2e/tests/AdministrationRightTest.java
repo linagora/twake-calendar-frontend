@@ -273,7 +273,7 @@ class AdministrationRightTest extends TwakeCalendarE2ETest {
 
         new SharedCalendar(matePage, user).awaitInSidebar();
         CalendarModal reopened = owner.reload().modifyCalendar("My calendar").tab("Access");
-        assertThat(reopened.hasAccessRow(mate.email()))
+        assertThat(reopened.awaitAccessRow(mate.email()))
             .as("the owner sees who their administrator let in")
             .isTrue();
         assertThat(reopened.rightOf(mate.email())).isEqualTo("View all events");
