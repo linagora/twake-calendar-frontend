@@ -47,15 +47,33 @@ const PICKERS_LOCALES: Record<string, typeof enUS> = {
   vi: viVN
 }
 
+type PickersLocaleText =
+  typeof enUS.components.MuiLocalizationProvider.defaultProps.localeText
+
+/**
+ * Corrections of texts MUI X ships wrong for a locale.
+ */
+const PICKERS_LOCALE_FIXES: Record<string, Partial<PickersLocaleText>> = {
+  it: {
+    calendarViewSwitchingButtonAriaLabel: view =>
+      view === 'year'
+        ? "la vista dell'anno è aperta, passare alla vista del calendario"
+        : "la vista del calendario è aperta, passare alla vista dell'anno"
+  }
+}
+
 /**
  * The accessible names of the date pickers (month navigation, view switch...)
  * shipped by MUI X for the given locale, English when none matches.
  */
-export const pickersLocaleText = (
-  locale?: string
-): typeof enUS.components.MuiLocalizationProvider.defaultProps.localeText =>
-  (PICKERS_LOCALES[toAdapterLocale(locale)] ?? enUS).components
-    .MuiLocalizationProvider.defaultProps.localeText
+export const pickersLocaleText = (locale?: string): PickersLocaleText => {
+  const language = toAdapterLocale(locale)
+  return {
+    ...(PICKERS_LOCALES[language] ?? enUS).components.MuiLocalizationProvider
+      .defaultProps.localeText,
+    ...PICKERS_LOCALE_FIXES[language]
+  }
+}
 
 export interface TwakeLocalizationProviderProps {
   children: React.ReactNode

@@ -40,7 +40,6 @@ describe('pickersLocaleText', () => {
     ['fr-fr', frFR],
     ['de-de', deDE],
     ['es-es', esES],
-    ['it-it', itIT],
     ['ru-ru', ruRU],
     ['vi', viVN]
   ])('uses the MUI X texts of %s', (locale, expected) => {
@@ -48,6 +47,24 @@ describe('pickersLocaleText', () => {
       expected.components.MuiLocalizationProvider.defaultProps.localeText
     )
     expect(pickersLocaleText(locale).nextMonth).not.toBe('Next month')
+  })
+
+  it('uses the MUI X texts of it-it', () => {
+    expect(pickersLocaleText('it-it')).toEqual({
+      ...itIT.components.MuiLocalizationProvider.defaultProps.localeText,
+      calendarViewSwitchingButtonAriaLabel: expect.any(Function)
+    })
+  })
+
+  it('names the Italian view switch grammatically', () => {
+    const label =
+      pickersLocaleText('it-it').calendarViewSwitchingButtonAriaLabel
+    expect(label?.('day')).toBe(
+      "la vista del calendario è aperta, passare alla vista dell'anno"
+    )
+    expect(label?.('year')).toBe(
+      "la vista dell'anno è aperta, passare alla vista del calendario"
+    )
   })
 
   it('falls back to English', () => {
