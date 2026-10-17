@@ -729,4 +729,168 @@ describe('refreshCalendarWithSyncToken', () => {
     // Max concurrent should not exceed 5
     expect(maxConcurrent).toBeLessThanOrEqual(5)
   })
+
+  describe('occurrences of a series read in full before (#1700)', () => {
+    const seriesURL = '/calendars/user1/cal1/series.ics'
+    const occurrenceUid = 'series/2024-01-15T10:00:00Z'
+
+    const syncResponse = {
+      'sync-token': 'new-sync-token-series',
+      _embedded: {
+        'dav:item': [{ status: 200, _links: { self: { href: seriesURL } } }]
+      }
+    }
+
+    const expandedOccurrence = {
+      data: [
+        'vcalendar',
+        [],
+        [
+          [
+            'vevent',
+            [
+              ['uid', {}, 'text', 'series'],
+              ['summary', {}, 'text', 'Weekly'],
+              ['recurrence-id', {}, 'date-time', '2024-01-15T10:00:00Z'],
+              ['dtstart', {}, 'date-time', '2024-01-15T10:00:00Z'],
+              ['dtend', {}, 'date-time', '2024-01-15T11:00:00Z']
+            ],
+            []
+          ]
+        ]
+      ],
+      _links: { self: { href: seriesURL } }
+    }
+
+    const storedSeries = (freq: string) => [
+      'vcalendar',
+      [],
+      [
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'series'],
+            ['summary', {}, 'text', 'Weekly'],
+            ['dtstart', {}, 'date-time', '2024-01-08T10:00:00Z'],
+            ['dtend', {}, 'date-time', '2024-01-08T11:00:00Z'],
+            ['rrule', {}, 'recur', { freq }]
+          ],
+          []
+        ],
+        [
+          'vevent',
+          [
+            ['uid', {}, 'text', 'series'],
+            ['summary', {}, 'text', 'Weekly'],
+            ['recurrence-id', {}, 'date-time', '2024-01-15T10:00:00Z'],
+            ['dtstart', {}, 'date-time', '2024-01-15T10:00:00Z'],
+            ['dtend', {}, 'date-time', '2024-01-15T11:00:00Z']
+          ],
+          []
+        ]
+      ]
+    ]
+
+    const storeWithOccurrence = (repetition?: { freq: string }) =>
+      configureStore({
+        reducer: { calendars: reducer },
+        preloadedState: {
+          calendars: {
+            list: {
+              [mockCalendar.id]: {
+                ...mockCalendar,
+                events: {
+                  [occurrenceUid]: {
+                    uid: occurrenceUid,
+                    recurrenceId: '2024-01-15T10:00:00Z',
+                    title: 'Weekly',
+                    start: '2024-01-15T10:00:00Z',
+                    end: '2024-01-15T11:00:00Z',
+                    calId: mockCalendar.id,
+                    URL: seriesURL,
+                    repetition
+                  } as CalendarEvent
+                }
+              }
+            },
+            templist: {},
+            pending: false,
+            error: null
+          }
+        }
+      })
+
+    beforeEach(() => {
+      ;(CalendarDAO.fetchSyncTokenChanges as jest.Mock).mockResolvedValue(
+        syncResponse
+      )
+      ;(EventDao.reportEvent as jest.Mock).mockResolvedValue(expandedOccurrence)
+    })
+
+    it('keeps the recurrence rule of the series', async () => {
+      ;(EventDao.fetchEvent as jest.Mock).mockResolvedValue(
+        storedSeries('WEEKLY')
+      )
+      const store = storeWithOccurrence({ freq: 'weekly' })
+
+      await store.dispatch(
+        refreshCalendarWithSyncToken({ calendar: mockCalendar, calendarRange })
+      )
+
+      expect(
+        store.getState().calendars.list[mockCalendar.id].events[occurrenceUid]
+          .repetition?.freq
+      ).toBe('weekly')
+    })
+
+    it('reads the rule again rather than keeping the stored one', async () => {
+      ;(EventDao.fetchEvent as jest.Mock).mockResolvedValue(
+        storedSeries('DAILY')
+      )
+      const store = storeWithOccurrence({ freq: 'weekly' })
+
+      await store.dispatch(
+        refreshCalendarWithSyncToken({ calendar: mockCalendar, calendarRange })
+      )
+
+      expect(EventDao.fetchEvent).toHaveBeenCalledTimes(1)
+      expect(
+        store.getState().calendars.list[mockCalendar.id].events[occurrenceUid]
+          .repetition?.freq
+      ).toBe('daily')
+    })
+
+    it('does not read a series never read in full', async () => {
+      const store = storeWithOccurrence()
+
+      await store.dispatch(
+        refreshCalendarWithSyncToken({ calendar: mockCalendar, calendarRange })
+      )
+
+      expect(EventDao.fetchEvent).not.toHaveBeenCalled()
+      expect(
+        store.getState().calendars.list[mockCalendar.id].events[occurrenceUid]
+          .repetition
+      ).toBeUndefined()
+    })
+
+    it('still applies the refresh when the series cannot be read', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      ;(EventDao.fetchEvent as jest.Mock).mockRejectedValue(
+        new Error('network')
+      )
+      const store = storeWithOccurrence({ freq: 'weekly' })
+
+      const result = await store.dispatch(
+        refreshCalendarWithSyncToken({ calendar: mockCalendar, calendarRange })
+      )
+
+      expect(result.type).toBe(
+        'calendars/refreshCalendarWithSyncToken/fulfilled'
+      )
+      expect(
+        store.getState().calendars.list[mockCalendar.id].events[occurrenceUid]
+      ).toBeDefined()
+    })
+  })
 })

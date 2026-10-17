@@ -512,6 +512,39 @@ class PastRecurrenceTest extends TwakeCalendarE2ETest {
     }
 
     @Test
+    @DisplayName("PAST-53 (#1700) Answering a single occurrence keeps the rule in its preview")
+    void answeringOneOccurrenceKeepsTheRuleInThePreview(Page page, E2EUser organizer,
+                                                        E2EUserFactory users, E2ESessions sessions,
+                                                        CalendarProbe probe) {
+        E2EUser guest = users.newUser();
+        CalendarPage guestCalendar = sessions.openFor(guest);
+        CalendarPage calendar = LoginPage.loginAs(page, organizer);
+
+        String title = title("Weekly answered once");
+        var form = calendar.createEvent().title(title).addGuest(guest.email())
+            .expand().startTime("09:00").endTime("10:00");
+        form.repeat().frequency(RecurrenceSection.WEEKLY);
+        form.save();
+        awaitAttached(calendar.eventCard(title));
+
+        guestCalendar.reload();
+        awaitAttached(guestCalendar.eventCard(title));
+        var preview = guestCalendar.openEvent(title);
+        Awaitility.await().atMost(Duration.ofSeconds(30)).until(() ->
+            preview.text().contains("Recurrent Event"));
+
+        preview.answer("Yes", THIS_EVENT);
+        Awaitility.await().atMost(Duration.ofSeconds(60)).untilAsserted(() ->
+            assertThat(Ics.overrides(probe.singleEvent(guest)))
+                .as("the answer is recorded on that occurrence only")
+                .anySatisfy(override -> assertThat(override.replaceAll("\\s+", ""))
+                    .contains("PARTSTAT=ACCEPTED")));
+
+        Awaitility.await().atMost(Duration.ofSeconds(15)).during(Duration.ofSeconds(5))
+            .until(() -> preview.text().contains("Recurrent Event"));
+    }
+
+    @Test
     @DisplayName("PAST-18 (#961) The recurrence interval never accepts a float")
     void theRecurrenceIntervalRefusesAFloat(Page page, E2EUser user) {
         CalendarPage calendar = LoginPage.loginAs(page, user);

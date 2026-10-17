@@ -46,7 +46,7 @@ from the other direction.
 Pure display defects are deliberately absent: alignment, margins, z-index, colours, blinking
 and double scrollbars belong to pixel level tooling, not to this suite.
 
-## PAST — Recurrence and occurrences (18)
+## PAST — Recurrence and occurrences (19)
 
 - [x] `PAST-01` Toggling repeat on a new event produces a valid RRULE, never `count: 0` ([#1277](https://github.com/linagora/twake-calendar-frontend/issues/1277))
 - [x] `PAST-02` Editing one instance of a weekly series opens that instance, at its own date and in its own timezone ([#489](https://github.com/linagora/twake-calendar-frontend/issues/489))
@@ -66,6 +66,7 @@ and double scrollbars belong to pixel level tooling, not to this suite.
 - [x] `PAST-16` Editing a single occurrence does not offer to move it to another calendar ([#916](https://github.com/linagora/twake-calendar-frontend/issues/916))
 - [x] `PAST-17` The preview of a recurring event states its rule, including interval and count ([#442](https://github.com/linagora/twake-calendar-frontend/issues/442))
 - [x] `PAST-18` The recurrence interval never accepts a float ([#961](https://github.com/linagora/twake-calendar-frontend/issues/961))
+- [x] `PAST-53` Answering a single occurrence keeps the recurrence rule in its preview ([#1700](https://github.com/linagora/twake-calendar-frontend/issues/1700))
 
 ## PAST — Timezones (5)
 

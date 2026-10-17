@@ -1,7 +1,9 @@
+import type { RootState } from '@common/app/store'
 import { fetchSyncTokenChanges } from '@common/features/Calendars/CalendarDAO'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { expandEventFunction } from '@common/features/Calendars/utils/expandEventFunction'
 import { processSyncUpdates } from '@common/features/Calendars/utils/processSyncTokenUpdates'
+import { restoreSeriesRepetition } from '@common/features/Calendars/utils/restoreSeriesRepetition'
 import { buildDelegatedEventURL } from '@common/features/Events/utils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -19,6 +21,16 @@ export interface SyncTokenUpdates {
   syncStatus?: string
 }
 
+function storedEvents(
+  state: RootState,
+  calId: string,
+  calType?: 'temp'
+): CalendarEvent[] {
+  const calendars =
+    calType === 'temp' ? state.calendars.templist : state.calendars.list
+  return Object.values(calendars[calId]?.events ?? {})
+}
+
 export const refreshCalendarWithSyncToken = (
   create: ReducerCreators<CalendarState>
 ) =>
@@ -34,7 +46,7 @@ export const refreshCalendarWithSyncToken = (
   >(
     async (
       { calendar, maxConcurrency = 8, calendarRange, calType },
-      { rejectWithValue }
+      { rejectWithValue, getState }
     ) => {
       try {
         if (!calendar?.syncToken) {
@@ -53,10 +65,15 @@ export const refreshCalendarWithSyncToken = (
 
         const { toDelete, toExpand } = processSyncUpdates(updates)
 
-        const createdOrUpdatedEvents = await pMap(
+        const expandedEvents = await pMap(
           toExpand,
           expandEventFunction(calendarRange, calendar),
           { concurrency: maxConcurrency }
+        )
+        const createdOrUpdatedEvents = await restoreSeriesRepetition(
+          expandedEvents.flat().filter(Boolean) as CalendarEvent[],
+          storedEvents(getState() as RootState, calendar.id, calType),
+          maxConcurrency
         )
 
         return {
@@ -66,9 +83,7 @@ export const refreshCalendarWithSyncToken = (
               ? buildDelegatedEventURL(calendar, eventURL)
               : eventURL
           ),
-          createdOrUpdatedEvents: createdOrUpdatedEvents
-            .flat()
-            .filter(Boolean) as CalendarEvent[],
+          createdOrUpdatedEvents,
           calType,
           syncToken: newSyncToken,
           syncStatus: newSyncToken ? 'SUCCESS' : 'NO_NEW_SYNC_TOKEN'
