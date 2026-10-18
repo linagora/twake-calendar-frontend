@@ -13,6 +13,7 @@ import {
   saveEventFormDataToTemp
 } from '@common/utils/eventFormTempStorage'
 import { isEventFormDirty } from '@common/utils/isEventFormDirty'
+import { followStartWeekday } from '@common/components/Event/utils/followStartWeekday'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { userOrganiser } from '@common/features/User/userDataTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
@@ -140,10 +141,14 @@ function useEventFormSetters(
   const setLocation = useCallback((v: string) => set('location', v), [set])
   const setStart = useCallback(
     (v: string) => {
-      set('start', v)
+      setFormValues(prev => ({
+        ...prev,
+        start: v,
+        repetition: followStartWeekday(prev.repetition, prev.start, v)
+      }))
       onStartChange?.(v)
     },
-    [set, onStartChange]
+    [setFormValues, onStartChange]
   )
   const setEnd = useCallback(
     (v: string) => {
