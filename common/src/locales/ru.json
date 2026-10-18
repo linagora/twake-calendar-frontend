@@ -420,7 +420,7 @@
     "guests": "%{smart_count} участник |||| %{smart_count} участника |||| %{smart_count} участников",
     "yesCount": "%{count} да",
     "maybeCount": "%{count} может быть",
-    "needActionCount": "%{count} в ожидании",
+    "needActionCount": "%{smart_count} в ожидании",
     "noCount": "%{count} нет",
     "recurrentEvent": "Повторяющееся событие",
     "freq": {

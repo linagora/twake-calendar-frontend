@@ -87,7 +87,9 @@ export function EventPreviewAttendees({
       parts.push(t('eventPreview.maybeCount', { count: tentativeCount }))
     }
     if (waitingCount > 0) {
-      parts.push(t('eventPreview.needActionCount', { count: waitingCount }))
+      parts.push(
+        t('eventPreview.needActionCount', { smart_count: waitingCount })
+      )
     }
     return parts.join(', ')
   }, [acceptedCount, declinedCount, tentativeCount, waitingCount, t])

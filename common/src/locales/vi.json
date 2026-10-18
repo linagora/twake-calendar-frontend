@@ -420,7 +420,7 @@
     "guests": "%{smart_count} người tham gia",
     "yesCount": "%{count} đồng ý",
     "maybeCount": "%{count} có thể",
-    "needActionCount": "%{count} đang chờ",
+    "needActionCount": "%{smart_count} đang chờ",
     "noCount": "%{count} từ chối",
     "recurrentEvent": "Sự kiện lặp lại",
     "freq": {

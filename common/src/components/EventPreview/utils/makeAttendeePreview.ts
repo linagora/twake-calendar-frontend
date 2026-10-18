@@ -30,7 +30,7 @@ export function makeAttendeePreview(
   }
   if (needActionCount) {
     attendeePreview.push(
-      t('eventPreview.needActionCount', { count: needActionCount })
+      t('eventPreview.needActionCount', { smart_count: needActionCount })
     )
   }
   if (noCount) {

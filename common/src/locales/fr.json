@@ -420,7 +420,7 @@
     "guests": "%{smart_count} participant |||| %{smart_count} participants",
     "yesCount": "%{count} oui",
     "maybeCount": "%{count} peut-être",
-    "needActionCount": "%{count} en attente",
+    "needActionCount": "%{smart_count} en attente",
     "noCount": "%{count} non",
     "recurrentEvent": "Événement récurrent",
     "freq": {

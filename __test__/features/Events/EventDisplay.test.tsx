@@ -1294,7 +1294,7 @@ describe('Event Preview Display', () => {
         )
 
         expect(
-          screen.getByText('eventPreview.needActionCount(count=2)')
+          screen.getByText('eventPreview.needActionCount(smart_count=2)')
         ).toBeInTheDocument()
         expect(
           screen.queryByText(/eventPreview.yesCount/i)
@@ -1394,7 +1394,7 @@ describe('Event Preview Display', () => {
           screen.getByText(/eventPreview.maybeCount\(count\=1\)/i)
         ).toBeInTheDocument()
         expect(
-          screen.getByText(/eventPreview.needActionCount\(count\=1\)/i)
+          screen.getByText(/eventPreview.needActionCount\(smart_count\=1\)/i)
         ).toBeInTheDocument()
         expect(
           screen.getByText(/eventPreview.noCount\(count\=1\)/i)
@@ -1518,7 +1518,7 @@ describe('Event Preview Display', () => {
         )
 
         expect(
-          screen.getByText(/eventPreview.needActionCount\(count\=3\)/i)
+          screen.getByText(/eventPreview.needActionCount\(smart_count\=3\)/i)
         ).toBeInTheDocument()
         expect(
           screen.getByText(/eventPreview.noCount\(count\=1\)/i)
@@ -1611,7 +1611,7 @@ describe('Event Preview Display', () => {
           screen.getByText(/eventPreview.maybeCount\(count\=3\)/i)
         ).toBeInTheDocument()
         expect(
-          screen.getByText(/eventPreview.needActionCount\(count\=2\)/i)
+          screen.getByText(/eventPreview.needActionCount\(smart_count\=2\)/i)
         ).toBeInTheDocument()
         expect(
           screen.getByText(/eventPreview.noCount\(count\=2\)/i)
