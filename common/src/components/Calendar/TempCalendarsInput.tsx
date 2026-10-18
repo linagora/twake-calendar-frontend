@@ -47,6 +47,7 @@ export const TempCalendarsInput: React.FC<{
           onChange={handleUserChange}
           onToggleEventPreview={handleToggleEventPreview}
           placeholder={t('peopleSearch.availabilityPlaceholder')}
+          label={t('peopleSearch.availabilityPlaceholder')}
           inputSlot={params => (
             <TextField
               {...params}

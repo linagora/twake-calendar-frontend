@@ -32,6 +32,7 @@ export const MobileTempSearchInput: React.FC<MobileTempSearchInputProps> = ({
           onChange={handleChange}
           onToggleEventPreview={handleToggleEventPreview}
           placeholder={t('peopleSearch.availabilityPlaceholder')}
+          label={t('peopleSearch.availabilityPlaceholder')}
           hideOptions
           onSearchStateChange={handleSearchChange}
           inputValue={searchState.query}

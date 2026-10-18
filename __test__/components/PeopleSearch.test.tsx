@@ -3,6 +3,7 @@ import { User } from '@common/components/Attendees/types'
 import { dedupeByEmail } from '@common/components/Attendees/usePeopleSearchState'
 import { SearchResponseItem } from '@common/types/SearchResponseItem'
 import { searchPeople } from '@common/features/User/UserDao'
+import { TextField } from '@linagora/twake-mui'
 import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
@@ -258,6 +259,35 @@ describe('PeopleSearch', () => {
     await act(async () => {
       resolveSearch!([baseUser])
       await searchPromise
+    })
+  })
+
+  describe('accessible name', () => {
+    it('names the input after the people search label by default', () => {
+      setup()
+
+      expect(
+        screen.getByRole('combobox', { name: 'peopleSearch.label' })
+      ).toBeInTheDocument()
+    })
+
+    it('names the input after the given label', () => {
+      setup([], { label: 'Check availability' })
+
+      expect(
+        screen.getByRole('combobox', { name: 'Check availability' })
+      ).toBeInTheDocument()
+    })
+
+    it('names a custom input slot after the given label', () => {
+      setup([], {
+        label: 'Check availability',
+        inputSlot: params => <TextField {...params} />
+      })
+
+      expect(
+        screen.getByRole('combobox', { name: 'Check availability' })
+      ).toBeInTheDocument()
     })
   })
 

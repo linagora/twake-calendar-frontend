@@ -292,9 +292,9 @@ describe('calendar Availability search', () => {
       renderWithProviders(<CalendarTestWrapper />, preloadedState)
     )
 
-    const input = screen.getByPlaceholderText(
-      'peopleSearch.availabilityPlaceholder'
-    )
+    const input = screen.getByRole('combobox', {
+      name: 'peopleSearch.availabilityPlaceholder'
+    })
     await act(async () => {
       fireEvent.change(input, { target: { value: 'New' } })
     })

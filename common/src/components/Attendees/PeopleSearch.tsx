@@ -41,6 +41,7 @@ export interface PeopleSearchProps {
   freeSolo?: boolean
   onToggleEventPreview?: () => void
   placeholder?: string
+  label?: string
   inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => ReactNode
   customRenderInput?: (
     params: AutocompleteRenderInputParams,
@@ -149,6 +150,7 @@ interface RenderInputParams {
   searchState: ReturnType<typeof usePeopleSearchState>
   onToggleEventPreview: PeopleSearchProps['onToggleEventPreview']
   searchPlaceholder: string
+  searchLabel: string
   inputSlot: PeopleSearchProps['inputSlot']
   enableEmailAutocompleteAndCommit?: boolean
   onEnterKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
@@ -160,6 +162,7 @@ const renderPeopleSearchInput = ({
   searchState,
   onToggleEventPreview,
   searchPlaceholder,
+  searchLabel,
   inputSlot,
   enableEmailAutocompleteAndCommit,
   onEnterKeyDown
@@ -176,6 +179,7 @@ const renderPeopleSearchInput = ({
       isOpen={searchState.isOpen}
       inputError={searchState.inputError}
       searchPlaceholder={searchPlaceholder}
+      searchLabel={searchLabel}
       inputSlot={inputSlot}
       onKeyDown={
         enableEmailAutocompleteAndCommit ? searchState.handleKeyDown : undefined
@@ -193,6 +197,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
   freeSolo,
   onToggleEventPreview,
   placeholder,
+  label,
   inputSlot,
   customRenderInput,
   customSlotProps,
@@ -208,6 +213,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
 }) => {
   const { t } = useI18n()
   const searchPlaceholder = placeholder ?? t('peopleSearch.placeholder')
+  const searchLabel = label ?? t('peopleSearch.label')
 
   const searchState = usePeopleSearchState({
     objectTypes,
@@ -297,6 +303,7 @@ export const PeopleSearch: React.FC<PeopleSearchProps> = ({
             searchState,
             onToggleEventPreview,
             searchPlaceholder,
+            searchLabel,
             inputSlot,
             enableEmailAutocompleteAndCommit,
             onEnterKeyDown: handleEnterKeyDown

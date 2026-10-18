@@ -6,7 +6,6 @@ import {
 } from '@linagora/twake-mui'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
 import React, { type ReactNode } from 'react'
-import { useI18n } from 'twake-i18n'
 
 export interface ExtendedAutocompleteRenderInputParams extends AutocompleteRenderInputParams {
   error?: boolean
@@ -24,6 +23,7 @@ export interface PeopleSearchInputProps {
   isOpen: boolean
   inputError: string | null
   searchPlaceholder: string
+  searchLabel: string
   inputSlot?: (params: ExtendedAutocompleteRenderInputParams) => ReactNode
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
   onEnterKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
@@ -37,12 +37,11 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
   isOpen,
   inputError,
   searchPlaceholder,
+  searchLabel,
   inputSlot,
   onKeyDown,
   onEnterKeyDown
 }) => {
-  const { t } = useI18n()
-
   const inputSize = useResponsiveInputSize()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -115,7 +114,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
     return (
       <>
         <label htmlFor={params.id} className="visually-hidden">
-          {t('peopleSearch.label')}
+          {searchLabel}
         </label>
         {inputSlot({
           ...enhancedParams,
@@ -131,7 +130,7 @@ export const PeopleSearchInput: React.FC<PeopleSearchInputProps> = ({
   return (
     <>
       <label htmlFor={params.id} className="visually-hidden">
-        {t('peopleSearch.label')}
+        {searchLabel}
       </label>
       <TextField
         {...enhancedParams}
