@@ -22,4 +22,13 @@ describe('translateErrorMessage', () => {
       )
     ).toBe('calendar.userDoesNotHaveValidId{"name":"José R"}')
   })
+
+  it('replaces the raw message of a failed request', () => {
+    expect(
+      translateErrorMessage(
+        'Request failed with status code 500 Internal Server Error: PUT http://api/dav/calendars/u1/c1/e1.ics',
+        t
+      )
+    ).toBe('error.requestFailed')
+  })
 })

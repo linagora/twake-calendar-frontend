@@ -3,7 +3,10 @@ import { fetchEvent } from '@common/features/Events/EventDao'
 import { parseFetchedEvent } from '@common/features/Events/transformers/parseFetchedEvent'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { formatReduxError } from '@common/utils/errorUtils'
+import {
+  formatReduxError,
+  rejectedErrorMessage
+} from '@common/utils/errorUtils'
 import { extractEventBaseUuid } from '@common/utils/extractEventBaseUuid'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
@@ -70,10 +73,10 @@ export const getEventThunk = (create: ReducerCreators<CalendarState>) =>
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to load event'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.cannotLoadEvent'
+        )
       }
     }
   )

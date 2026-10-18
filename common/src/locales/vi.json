@@ -289,7 +289,11 @@
     "invalidCalendarId": "ID lịch không hợp lệ",
     "addSharedCalendarFailed": "Không thể thêm lịch được chia sẻ",
     "uploadedFileMissingId": "Không thể tải tệp lên: thiếu ID tệp",
-    "importEventFromFileFailed": "Không thể nhập sự kiện từ tệp"
+    "importEventFromFileFailed": "Không thể nhập sự kiện từ tệp",
+    "saveEventFailed": "Không thể lưu sự kiện. Vui lòng thử lại.",
+    "deleteEventFailed": "Không thể xóa sự kiện. Vui lòng thử lại.",
+    "loadEventsFailed": "Không thể tải các sự kiện. Vui lòng thử lại.",
+    "requestFailed": "Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại."
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Cập nhật sự kiện lặp lại",

@@ -1,6 +1,6 @@
 import { moveEvent } from '@common/features/Events/EventDao'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { ReducerCreators } from '@reduxjs/toolkit'
@@ -33,10 +33,10 @@ export const moveEventThunk = (create: ReducerCreators<CalendarState>) =>
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to move event'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.saveEventFailed'
+        )
       }
     }
   )

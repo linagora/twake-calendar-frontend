@@ -8,7 +8,7 @@ import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { extractCalendarEvents } from '@common/features/Calendars/utils/extractCalendarEvents'
 import { oldestSyncToken } from '@common/features/Calendars/utils/oldestSyncToken'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
@@ -107,10 +107,10 @@ export const getCalendarDetailThunk = (
         ) {
           return
         }
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to load calendar details'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.loadEventsFailed'
+        )
       }
     }
   )

@@ -289,7 +289,11 @@
     "invalidCalendarId": "Die Kalender-ID ist ungültig",
     "addSharedCalendarFailed": "Der geteilte Kalender konnte nicht hinzugefügt werden",
     "uploadedFileMissingId": "Die Datei konnte nicht hochgeladen werden: Datei-ID fehlt",
-    "importEventFromFileFailed": "Der Termin konnte nicht aus der Datei importiert werden"
+    "importEventFromFileFailed": "Der Termin konnte nicht aus der Datei importiert werden",
+    "saveEventFailed": "Der Termin konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "deleteEventFailed": "Der Termin konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+    "loadEventsFailed": "Die Termine konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    "requestFailed": "Der Server konnte die Anfrage nicht bearbeiten. Bitte versuchen Sie es erneut."
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Wiederkehrenden Termin aktualisieren",

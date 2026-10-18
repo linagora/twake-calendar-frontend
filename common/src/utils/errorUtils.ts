@@ -28,17 +28,15 @@ export function toRejectedError(err: unknown): RejectedError {
 }
 
 /**
- * Message to store for a rejected thunk. A rejection without an HTTP status
- * (e.g. the browser's "Failed to fetch") carries untranslated text, so the
- * translated fallback is used instead, unless the message is itself a
- * translation key.
+ * Message to store for a rejected thunk. The message of a failed request is
+ * untranslated and may carry internal URLs and ids (e.g. "Request failed with
+ * status code 500 Internal Server Error: PUT http://…"), so the translated
+ * fallback is used instead, unless the message is itself a translation key.
  */
 export function rejectedErrorMessage(
   rejection: RejectedError | undefined,
   fallback: string
 ): string {
   const message = rejection?.message
-  if (!message) return fallback
-  if (message.startsWith('TRANSLATION:')) return message
-  return rejection?.status === undefined ? fallback : message
+  return message?.startsWith('TRANSLATION:') ? message : fallback
 }

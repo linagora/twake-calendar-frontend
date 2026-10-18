@@ -1,6 +1,6 @@
 import { RejectedError } from '@common/features/Calendars/types/RejectedError'
 import { deleteEvent } from '@common/features/Events/EventDao'
-import { toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
@@ -28,10 +28,10 @@ export const deleteEventThunk = (create: ReducerCreators<CalendarState>) =>
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to delete event'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.deleteEventFailed'
+        )
       }
     }
   )

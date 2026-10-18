@@ -133,7 +133,7 @@ describe('getEventByUid on a team calendar', () => {
     )
   })
 
-  it('stops at the first error other than a missing event', async () => {
+  it('stops at the first error other than a missing event, with a translated message', async () => {
     fetchEventByUid.mockRejectedValue(
       Object.assign(new Error('Server Error'), { response: { status: 500 } })
     )
@@ -142,7 +142,9 @@ describe('getEventByUid on a team calendar', () => {
     await store.dispatch(getEventByUid({ userId: 'alice', uid: 'event1' }))
 
     expect(fetchEventByUid).toHaveBeenCalledTimes(1)
-    expect(store.getState().calendars.error).toBe('Server Error')
+    expect(store.getState().calendars.error).toBe(
+      'TRANSLATION:error.cannotLoadEvent'
+    )
   })
 
   it('only asks the home of the embedded calendar', async () => {

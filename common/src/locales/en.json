@@ -289,7 +289,11 @@
     "invalidCalendarId": "The calendar ID is invalid",
     "addSharedCalendarFailed": "Failed to add the shared calendar",
     "uploadedFileMissingId": "Failed to upload the file: missing file ID",
-    "importEventFromFileFailed": "Failed to import the event from the file"
+    "importEventFromFileFailed": "Failed to import the event from the file",
+    "saveEventFailed": "The event could not be saved. Please try again.",
+    "deleteEventFailed": "The event could not be deleted. Please try again.",
+    "loadEventsFailed": "The events could not be loaded. Please try again.",
+    "requestFailed": "The server could not complete the request. Please try again."
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Update the recurrent event",

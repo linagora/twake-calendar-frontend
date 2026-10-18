@@ -289,7 +289,11 @@
     "invalidCalendarId": "El identificador del calendario no es válido",
     "addSharedCalendarFailed": "No se ha podido añadir el calendario compartido",
     "uploadedFileMissingId": "No se ha podido subir el archivo: falta el identificador del archivo",
-    "importEventFromFileFailed": "No se ha podido importar el evento desde el archivo"
+    "importEventFromFileFailed": "No se ha podido importar el evento desde el archivo",
+    "saveEventFailed": "No se ha podido guardar el evento. Inténtelo de nuevo.",
+    "deleteEventFailed": "No se ha podido eliminar el evento. Inténtelo de nuevo.",
+    "loadEventsFailed": "No se han podido cargar los eventos. Inténtelo de nuevo.",
+    "requestFailed": "El servidor no ha podido completar la solicitud. Inténtelo de nuevo."
   },
   "editModeDialog": {
     "updateRecurrentEvent": "Actualizar el evento periódico",

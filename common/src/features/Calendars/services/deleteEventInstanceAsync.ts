@@ -6,7 +6,10 @@ import {
 import { makeDeleteEventInstanceJCal } from '@common/features/Events/transformers/makeDeleteEventInstanceJCal'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { formatReduxError } from '@common/utils/errorUtils'
+import {
+  formatReduxError,
+  rejectedErrorMessage
+} from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
@@ -44,10 +47,10 @@ export const deleteEventInstanceThunk = (
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to delete event instance'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.deleteEventFailed'
+        )
       }
     }
   )

@@ -6,7 +6,7 @@ import {
 import { makeEventWithOverrides } from '@common/features/Events/transformers/makeEventWithOverrides'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
 
@@ -46,10 +46,10 @@ export const updateEventInstanceThunk = (
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to update event instance'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.saveEventFailed'
+        )
       }
     }
   )

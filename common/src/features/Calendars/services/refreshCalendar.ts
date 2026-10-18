@@ -7,7 +7,7 @@ import { restoreSeriesRepetition } from '@common/features/Calendars/utils/restor
 import { buildDelegatedEventURL } from '@common/features/Events/utils'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { toRejectedError } from '@common/utils/errorUtils'
+import { toRejectedError, rejectedErrorMessage } from '@common/utils/errorUtils'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import pMap from 'p-map'
 import { CalendarState } from '../CalendarSlice'
@@ -141,10 +141,10 @@ export const refreshCalendarWithSyncToken = (
       },
       rejected: (state, action) => {
         state.pending = false
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to refresh calendar'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.loadEventsFailed'
+        )
       }
     }
   )

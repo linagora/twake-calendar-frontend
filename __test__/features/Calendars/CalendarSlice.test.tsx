@@ -11,6 +11,7 @@ import reducer, {
   getTempCalendarsList,
   importEventFromFile,
   patchACLCalendar,
+  putEvent,
   removeEvent,
   removeTempCal,
   updateEventLocal
@@ -650,7 +651,7 @@ describe('CalendarSlice', () => {
       expect(state.error).toBe('TRANSLATION:error.eventNotFound')
     })
 
-    it('getEventByUid.rejected keeps the error message for other failures', () => {
+    it('getEventByUid.rejected stores a translated message for other failures', () => {
       const state = reducer(
         initialState,
         getEventByUid.rejected(
@@ -660,7 +661,7 @@ describe('CalendarSlice', () => {
           { message: 'Request failed with status code 500', status: 500 }
         )
       )
-      expect(state.error).toBe('Request failed with status code 500')
+      expect(state.error).toBe('TRANSLATION:error.cannotLoadEvent')
     })
 
     it('importEventFromFile.rejected by a network error stores the translated fallback', () => {
@@ -702,7 +703,7 @@ describe('CalendarSlice', () => {
       expect(state.error).toBe('TRANSLATION:error.addSharedCalendarFailed')
     })
 
-    it('addSharedCalendar.rejected keeps the message of an HTTP error', () => {
+    it('addSharedCalendar.rejected stores the translated fallback for an HTTP error', () => {
       const state = reducer(
         initialState,
         addSharedCalendar.rejected(
@@ -712,7 +713,41 @@ describe('CalendarSlice', () => {
           { message: 'Request failed with status code 500', status: 500 }
         )
       )
-      expect(state.error).toBe('Request failed with status code 500')
+      expect(state.error).toBe('TRANSLATION:error.addSharedCalendarFailed')
+    })
+
+    it('putEvent.rejected by a server error does not store the request URL', () => {
+      const state = reducer(
+        initialState,
+        putEvent.rejected(
+          null,
+          'req20',
+          { cal: {} as Calendar, newEvent: {} as CalendarEvent },
+          {
+            message:
+              'Request failed with status code 500 Internal Server Error: PUT http://api/dav/calendars/u1/c1/e1.ics',
+            status: 500
+          }
+        )
+      )
+      expect(state.error).toBe('TRANSLATION:error.saveEventFailed')
+    })
+
+    it('getCalendarDetail.rejected by a server error stores a translated message', () => {
+      const state = reducer(
+        initialState,
+        getCalendarDetail.rejected(
+          null,
+          'req21',
+          { calId: 'c1', match: { start: '', end: '' } },
+          {
+            message:
+              'Request failed with status code 500 Internal Server Error: REPORT http://api/dav/calendars/u1/c1.json',
+            status: 500
+          }
+        )
+      )
+      expect(state.error).toBe('TRANSLATION:error.loadEventsFailed')
     })
 
     it('getEvent.fulfilled doesnt create new events when there are already event with base UID', () => {

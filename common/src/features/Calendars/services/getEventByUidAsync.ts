@@ -9,7 +9,11 @@ import { calendarDavPath } from '@common/features/Calendars/utils/calendarDavPat
 import { extractCalendarEvents } from '@common/features/Calendars/utils/extractCalendarEvents'
 import { Calendar } from '@common/types/CalendarTypes'
 import { CalendarEvent } from '@common/types/EventsTypes'
-import { httpStatusOf, toRejectedError } from '@common/utils/errorUtils'
+import {
+  httpStatusOf,
+  toRejectedError,
+  rejectedErrorMessage
+} from '@common/utils/errorUtils'
 import { browserDefaultTimeZone } from '@common/utils/timezone'
 import { ReducerCreators } from '@reduxjs/toolkit'
 import { CalendarState } from '../CalendarSlice'
@@ -71,10 +75,10 @@ export const getEventByUidThunk = (create: ReducerCreators<CalendarState>) =>
           state.error = EVENT_NOT_FOUND_ERROR
           return
         }
-        state.error =
-          action.payload?.message ||
-          action.error.message ||
-          'Failed to load event'
+        state.error = rejectedErrorMessage(
+          action.payload,
+          'TRANSLATION:error.cannotLoadEvent'
+        )
       }
     }
   )
