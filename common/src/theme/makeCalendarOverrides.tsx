@@ -257,6 +257,24 @@ const basicThemeOverrides = {
       })
     }
   },
+  // Lighter than MUI's black backdrop, as with the twake-mui 5 theme
+  MuiBackdrop: {
+    styleOverrides: {
+      root: {
+        variants: [
+          {
+            props: { invisible: false },
+            style: ({ theme }: { theme: Theme }) => ({
+              backgroundColor: theme.alpha(
+                theme.vars.palette.text.primary,
+                theme.vars.palette.action.focusOpacity
+              )
+            })
+          }
+        ]
+      }
+    }
+  },
   // twake-mui draws a border between the summary and the details
   MuiAccordionDetails: {
     styleOverrides: {
