@@ -94,6 +94,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
               <div className="menu-items">
                 <Tooltip title={t('menubar.help')}>
                   <IconButton
+                    size="xsmall"
                     component="a"
                     href={supportLink}
                     target="_blank"
@@ -112,6 +113,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
                 anchorEl={anchorEl}
                 onAppMenuOpen={onAppMenuOpen}
                 onAppMenuClose={onAppMenuClose}
+                buttonSize="xsmall"
               />
             </div>
           </>
@@ -126,6 +128,7 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
             onUserMenuOpen={onUserMenuOpen}
             isIframe={isIframe}
             user={user}
+            buttonSize="xsmall"
           />
         </div>
       </div>
@@ -141,6 +144,7 @@ const ResfreshButton: React.FC<{
   return (
     <Tooltip title={t('tooltip.refreshCalendar')}>
       <IconButton
+        size="xsmall"
         className="refresh-button"
         onClick={onRefresh}
         aria-label={t('menubar.refresh')}

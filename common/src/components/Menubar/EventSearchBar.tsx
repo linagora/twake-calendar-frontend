@@ -192,7 +192,7 @@ const SearchBar: React.FC<{
       >
         {!extended && (
           <Tooltip title={t('tooltip.searchEventsOrCalendars')}>
-            <IconButton sx={{ mr: 1 }} onClick={handleOpenSearch}>
+            <IconButton size="xsmall" sx={{ mr: 1 }} onClick={handleOpenSearch}>
               <SearchIcon />
             </IconButton>
           </Tooltip>
