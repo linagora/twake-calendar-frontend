@@ -1,8 +1,30 @@
 import { Theme } from '@linagora/twake-mui'
-import type { ThemeOptions } from '@mui/material/styles'
+import type {
+  PaletteColor,
+  PaletteColorOptions,
+  ThemeOptions
+} from '@mui/material/styles'
 import type {} from '@mui/x-date-pickers/themeAugmentation'
 import { AccordionExpandIcon } from '@linagora/twake-mui'
 import { typography } from './typography'
+
+declare module '@mui/material/styles' {
+  interface Palette {
+    today: PaletteColor
+  }
+  interface PaletteOptions {
+    today?: PaletteColorOptions
+  }
+}
+
+// The circle of today, lighter than the primary colour, in both schemes
+const today = { main: '#FB9E3A', contrastText: '#fff' }
+
+// Palette additions of the calendar, also given to the TwakeSpace embed
+export const calendarColorSchemes: ThemeOptions['colorSchemes'] = {
+  light: { palette: { today } },
+  dark: { palette: { today } }
+}
 
 export const radius = {
   none: '0',
@@ -309,6 +331,7 @@ export function makeCalendarOverrides(
 ): ThemeOptions {
   return {
     typography,
+    colorSchemes: calendarColorSchemes,
     components: {
       ...basicThemeOverrides,
       MuiCssBaseline: {

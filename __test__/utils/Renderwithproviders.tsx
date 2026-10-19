@@ -1,5 +1,6 @@
 import type { AppStore, RootState } from '@common/app/store'
 import { setupStore } from '@common/app/store'
+import { calendarColorSchemes } from '@common/theme/makeCalendarOverrides'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
 import type { RenderOptions } from '@testing-library/react'
 import { render } from '@testing-library/react'
@@ -20,9 +21,12 @@ export function renderWithProviders(
   const { store = setupStore(preloadedState), ...renderOptions } =
     extendedRenderOptions
 
+  // The palette additions of the calendar, as in the app
+  const themeOptions = { colorSchemes: calendarColorSchemes }
+
   const Wrapper = ({ children }: PropsWithChildren) => {
     return (
-      <TwakeMuiThemeProvider>
+      <TwakeMuiThemeProvider themeOptions={themeOptions}>
         <I18nContext.Provider
           value={{
             t: (key: string, vars?: Record<string, string>) => {

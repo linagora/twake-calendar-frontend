@@ -153,9 +153,9 @@ export const MiniCalendar: React.FC<{
                 },
                 '&.today': {
                   background: theme =>
-                    `${theme.vars.palette.primary.main} !important`,
+                    `${theme.vars.palette.today.main} !important`,
                   color: theme =>
-                    `${theme.vars.palette.primary.contrastText} !important`,
+                    `${theme.vars.palette.today.contrastText} !important`,
                   outline: 'none'
                 }
               },

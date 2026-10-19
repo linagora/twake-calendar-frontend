@@ -38,7 +38,10 @@ import { useInitializeApp } from '@common/features/User/useInitializeApp'
 import { redirectTo } from '@common/utils/navigation'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
-import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
+import {
+  calendarColorSchemes,
+  makeCalendarOverrides
+} from '@common/theme/makeCalendarOverrides'
 import paletteData from '@common/theme/palette.json'
 
 import {
@@ -108,12 +111,15 @@ export default function App(): JSX.Element {
   useEffect(() => onSessionEndedElsewhere(() => redirectTo('/')), [])
 
   // Framed by TwakeSpace, the default theme of Twake: the dialogs and drawers
-  // go onto its overlay
+  // go onto its overlay, with the palette additions of the calendar
   const themeOptions = useMemo(
     () =>
       spaceOverlay === null
         ? makeCalendarOverrides(true)
-        : overlayThemeOptions(spaceOverlay),
+        : {
+            ...overlayThemeOptions(spaceOverlay),
+            colorSchemes: calendarColorSchemes
+          },
     []
   )
 
