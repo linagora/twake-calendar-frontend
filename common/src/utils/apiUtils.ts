@@ -53,12 +53,6 @@ export const api: KyInstance = ky.extend({
   }
 })
 
-/**
- * HTTP client for the services other than the Calendar backend: it never
- * adds the Calendar access token, nor redirects to the SSO on a 401.
- */
-export const externalApi: KyInstance = ky.create({})
-
 export function isValidUrl(string?: string): URL | boolean {
   let url
 

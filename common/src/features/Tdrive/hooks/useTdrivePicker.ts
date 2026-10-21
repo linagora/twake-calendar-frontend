@@ -1,10 +1,26 @@
 import { useAppSelector } from '@common/app/hooks'
+import { createSdk, type Sdk } from '@linagora/twake-sdk'
 import Intents from 'cozy-interapp'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
-import { exchangeToken, fetchIntentJSON } from '../TdriveDao'
 import { useTdriveUserContext } from './useTdriveUserContext'
+
+const INTENT_REQUEST_TIMEOUT_MS = 30000
+
+/**
+ * The fetch cozy-interapp sends its intent requests with: the SDK client signs
+ * them with its token, and refreshes the token once on a 401.
+ */
+export const makeIntentFetch =
+  (sdk: Sdk) =>
+  (method: string, path: string, body?: unknown): Promise<unknown> =>
+    sdk.fetchJSON(path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(INTENT_REQUEST_TIMEOUT_MS)
+    })
 
 interface UseTdrivePickerReturn {
   isOpen: boolean
@@ -73,7 +89,7 @@ function createPickerCancellation(): PickerCancellation {
 }
 
 interface StartTdrivePickerOptions {
-  tdriveBaseUrl: string
+  sdk: Sdk
   idToken: string
   containerRef: React.RefObject<HTMLDivElement | null>
   readyCallbackRef: React.MutableRefObject<(() => void) | null>
@@ -95,7 +111,7 @@ type CozyIntent = Promise<unknown> & {
 }
 
 async function startTdrivePicker({
-  tdriveBaseUrl,
+  sdk,
   idToken,
   containerRef,
   readyCallbackRef,
@@ -103,18 +119,14 @@ async function startTdrivePicker({
   intentRef,
   t
 }: StartTdrivePickerOptions): Promise<TdriveFile[]> {
-  const tokenResponse = await exchangeToken(tdriveBaseUrl, idToken)
+  // The id token is exchanged once: the client then keeps its token fresh
+  if (sdk.status !== 'ready') await sdk.login(idToken)
 
   if (cancellationRef.cancelled) {
     return []
   }
 
-  const intents = new Intents({
-    fetch: fetchIntentJSON({
-      tdriveBaseUrl,
-      accessToken: tokenResponse.access_token
-    })
-  })
+  const intents = new Intents({ fetch: makeIntentFetch(sdk) })
 
   const intent = intents.create(
     'PICK',
@@ -175,6 +187,10 @@ export function useTdrivePicker({
 
   const { tdriveBaseUrl } = useTdriveUserContext()
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
+  const sdk = useMemo(
+    () => (tdriveBaseUrl ? createSdk({ platformURL: tdriveBaseUrl }) : null),
+    [tdriveBaseUrl]
+  )
 
   const containerRef = useRef<HTMLDivElement>(null)
   const intentRef = useRef<StartedCozyIntent | null>(null)
@@ -190,7 +206,7 @@ export function useTdrivePicker({
 
     const validationError =
       (isOpen && 'alreadyOpen') ||
-      (!tdriveBaseUrl && 'tdriveUrlNotConfigured') ||
+      (!sdk && 'tdriveUrlNotConfigured') ||
       (!idToken && 'tdriveTokenUnavailable') ||
       null
 
@@ -208,7 +224,7 @@ export function useTdrivePicker({
 
     try {
       const files = await startTdrivePicker({
-        tdriveBaseUrl: tdriveBaseUrl as string,
+        sdk: sdk as Sdk,
         idToken: idToken as string,
         containerRef,
         readyCallbackRef,
@@ -233,7 +249,7 @@ export function useTdrivePicker({
         setIsOpen(false)
       }
     }
-  }, [isOpen, tdriveBaseUrl, idToken, onFilesSelected, t])
+  }, [isOpen, sdk, idToken, onFilesSelected, t])
 
   const closePicker = useCallback(() => {
     activeCancellationRef.current?.cancel()

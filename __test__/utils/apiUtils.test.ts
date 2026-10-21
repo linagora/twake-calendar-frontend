@@ -64,16 +64,4 @@ describe('api client authorization', () => {
     expect(sent[0].url).toBe('https://drive.example.com/auth/token_exchange')
     expect(sent[0].headers.get('Authorization')).toBeNull()
   })
-
-  it('never sends the access token through the external client', async () => {
-    const { externalApi, setTokenSet } = await load()
-    setTokenSet({ access_token: 'calendar-token' })
-
-    await externalApi.post('auth/token_exchange', {
-      prefixUrl: 'https://calendar.example.com',
-      json: {}
-    })
-
-    expect(sent[0].headers.get('Authorization')).toBeNull()
-  })
 })

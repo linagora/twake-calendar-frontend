@@ -1,6 +1,9 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { useTdrivePicker } from '@common/features/Tdrive/hooks/useTdrivePicker'
-import * as TdriveDao from '@common/features/Tdrive/TdriveDao'
+import {
+  makeIntentFetch,
+  useTdrivePicker
+} from '@common/features/Tdrive/hooks/useTdrivePicker'
+import type { Sdk } from '@linagora/twake-sdk'
 import { Provider } from 'react-redux'
 import { setupStore } from '@common/app/store'
 import React, { PropsWithChildren } from 'react'
@@ -29,29 +32,22 @@ jest.mock('twake-i18n', () => ({
   })
 }))
 
-jest.mock('@common/features/Tdrive/TdriveDao')
+const mockLogin = jest.fn()
+const mockCreateSdk = jest.fn()
+
+jest.mock('@linagora/twake-sdk', () => ({
+  createSdk: (options: unknown): unknown => mockCreateSdk(options)
+}))
 jest.mock('@linagora/twake-utils', () => ({
   resolveUriTemplate: jest.fn((template: string) => template)
 }))
 
 describe('useTdrivePicker', () => {
-  const mockExchangeToken = jest.spyOn(TdriveDao, 'exchangeToken')
-
   const createWrapper = (preloadedState = {}) => {
     const store = setupStore(preloadedState)
     return function Wrapper({ children }: PropsWithChildren) {
       return React.createElement(Provider, { store }, children)
     }
-  }
-
-  const defaultTokenResponse = {
-    token_type: 'bearer',
-    scope: 'io.cozy.files',
-    access_token: 'test-access-token',
-    refresh_token: 'refresh-token',
-    client_id: 'client-123',
-    client_secret: 'secret',
-    registration_access_token: 'reg-token'
   }
 
   const defaultUserState = {
@@ -75,6 +71,12 @@ describe('useTdrivePicker', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     window.TDRIVE_INTENT_URL = 'https://drive.example.com'
+    // Like the SDK client, a successful login makes the client ready
+    const sdk = { status: 'waiting', login: mockLogin }
+    mockCreateSdk.mockReturnValue(sdk)
+    mockLogin.mockImplementation(async () => {
+      sdk.status = 'ready'
+    })
     mockCreate.mockImplementation(() => withStart(Promise.resolve({})))
     // Default: start() calls onReadyToUse then resolves with a file
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
@@ -97,8 +99,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('opens picker using cozy-interapp', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     // Don't resolve start() yet so we can assert isOpen while it's open
     let resolveStart!: (value: unknown) => void
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
@@ -121,10 +121,10 @@ describe('useTdrivePicker', () => {
 
     await waitFor(() => expect(result.current.isOpen).toBe(true))
 
-    expect(mockExchangeToken).toHaveBeenCalledWith(
-      'https://drive.example.com',
-      'user-id-token'
-    )
+    expect(mockCreateSdk).toHaveBeenCalledWith({
+      platformURL: 'https://drive.example.com'
+    })
+    expect(mockLogin).toHaveBeenCalledWith('user-id-token')
 
     expect(mockCreate).toHaveBeenCalledWith(
       'PICK',
@@ -170,7 +170,7 @@ describe('useTdrivePicker', () => {
     })
 
     expect(result.current.isOpen).toBe(false)
-    expect(mockExchangeToken).not.toHaveBeenCalled()
+    expect(mockCreateSdk).not.toHaveBeenCalled()
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
@@ -193,11 +193,12 @@ describe('useTdrivePicker', () => {
     })
 
     expect(result.current.isOpen).toBe(false)
-    expect(mockExchangeToken).not.toHaveBeenCalled()
+    expect(mockLogin).not.toHaveBeenCalled()
   })
 
   it('handles API errors gracefully', async () => {
-    mockExchangeToken.mockRejectedValue(new Error('API Error'))
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    mockLogin.mockRejectedValue(new Error('API Error'))
 
     const { result } = renderHook(
       () => useTdrivePicker({ onFilesSelected: jest.fn() }),
@@ -222,8 +223,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('calls onFilesSelected with file from intent result', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     const onFilesSelected = jest.fn()
 
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
@@ -265,8 +264,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('closes picker and resets state', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     // start() calls onReadyToUse but never resolves — simulates picker staying open
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
       onReadyToUse?.()
@@ -292,8 +289,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('stops the started intent on unmount', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
       onReadyToUse?.()
       return new Promise(() => {})
@@ -316,8 +311,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('settles openPicker when the picker is closed', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
       onReadyToUse?.()
       return new Promise(() => {})
@@ -346,8 +339,6 @@ describe('useTdrivePicker', () => {
   })
 
   it('stops the intent once created when closed during its creation', async () => {
-    mockExchangeToken.mockResolvedValue(defaultTokenResponse)
-
     let completeCreation!: (intent: unknown) => void
     mockCreate.mockImplementation(() =>
       withStart(
@@ -379,5 +370,57 @@ describe('useTdrivePicker', () => {
     })
 
     expect(mockStop).toHaveBeenCalledTimes(1)
+  })
+
+  it('exchanges the id token only once across picker opens', async () => {
+    const { result } = renderHook(
+      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
+      { wrapper: createWrapper(defaultUserState) }
+    )
+
+    mountContainer(result)
+    await act(async () => {
+      await result.current.openPicker()
+    })
+    await act(async () => {
+      await result.current.openPicker()
+    })
+
+    expect(mockCreate).toHaveBeenCalledTimes(2)
+    expect(mockCreateSdk).toHaveBeenCalledTimes(1)
+    expect(mockLogin).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('makeIntentFetch', () => {
+  it('sends the intent requests through the SDK client', async () => {
+    const fetchJSON = jest.fn().mockResolvedValue({ data: { id: 'intent-1' } })
+    const intentFetch = makeIntentFetch({ fetchJSON } as unknown as Sdk)
+
+    const response = await intentFetch('POST', '/intents', {
+      data: { type: 'io.cozy.intents' }
+    })
+
+    expect(response).toEqual({ data: { id: 'intent-1' } })
+    expect(fetchJSON).toHaveBeenCalledWith(
+      '/intents',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { type: 'io.cozy.intents' } })
+      })
+    )
+  })
+
+  it('sends no body without one', async () => {
+    const fetchJSON = jest.fn().mockResolvedValue({})
+    const intentFetch = makeIntentFetch({ fetchJSON } as unknown as Sdk)
+
+    await intentFetch('GET', '/intents/intent-1')
+
+    expect(fetchJSON).toHaveBeenCalledWith(
+      '/intents/intent-1',
+      expect.objectContaining({ method: 'GET', body: undefined })
+    )
   })
 })
