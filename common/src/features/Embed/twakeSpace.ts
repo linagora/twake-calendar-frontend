@@ -16,8 +16,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 /**
  * Whether this document is the one TwakeSpace frames: an embed route, or the
  * callback of the silent sign in that an embed route started (the route it
- * returns to is saved with the sign in). The application is framed elsewhere
- * too, by the Cozy workplace, where nothing of this applies.
+ * returns to is saved with the sign in).
  */
 export function isFramedByTwakeSpace(
   pathname: string = window.location.pathname

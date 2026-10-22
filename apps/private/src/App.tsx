@@ -9,7 +9,6 @@ import { history, store } from '@common/app/store'
 import { Error as ErrorPage } from '@common/components/Error/Error'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
-import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
 import { TwakeBarHeader } from '@common/components/TwakeBarHeader/TwakeBarHeader'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
@@ -143,64 +142,59 @@ export default function App(): JSX.Element {
   )
 
   return (
-    <EmbeddingProvider>
-      <TwakeMuiThemeProvider
-        palette={spaceOverlay === null ? paletteData : undefined}
-        themeOptions={themeOptions}
+    <TwakeMuiThemeProvider
+      palette={spaceOverlay === null ? paletteData : undefined}
+      themeOptions={themeOptions}
+    >
+      <ColorSchemeSync />
+      <I18n
+        dictRequire={(lang: keyof typeof locale) => locale[lang]}
+        lang={lang}
+        locales={dateLocales}
       >
-        <ColorSchemeSync />
-        <I18n
-          dictRequire={(lang: keyof typeof locale) => locale[lang]}
-          lang={lang}
-          locales={dateLocales}
-        >
-          <TwakeBarHeader />
-          <ErrorBoundary
-            FallbackComponent={({ error }) => (
-              <ErrorPage
-                isCrashFallback
-                errorBoundaryMessage={error as Error}
-              />
-            )}
-            onError={(error, errorInfo) => {
-              Sentry.captureException(error, {
-                contexts: {
-                  react: {
-                    componentStack: errorInfo.componentStack
-                  }
+        <TwakeBarHeader />
+        <ErrorBoundary
+          FallbackComponent={({ error }) => (
+            <ErrorPage isCrashFallback errorBoundaryMessage={error as Error} />
+          )}
+          onError={(error, errorInfo) => {
+            Sentry.captureException(error, {
+              contexts: {
+                react: {
+                  componentStack: errorInfo.componentStack
                 }
-              })
-            }}
-          >
-            <Suspense fallback={<Loading />}>
-              <WebSocketGate />
-              <SpaceOverlayProvider overlay={spaceOverlay}>
-                <Router history={history}>
-                  <Routes>
-                    <Route path="/" element={<HandleLogin />} />
-                    <Route path="/calendar" element={<CalendarLayout />} />
-                    <Route
-                      path={EMBED_CALENDAR_ROUTE}
-                      element={<EmbeddedCalendar />}
-                    />
-                    <Route
-                      path={EMBED_EVENT_ROUTE}
-                      element={<EmbeddedCalendar />}
-                    />
-                    <Route path="/events/:uid" element={<EventDeepLink />} />
-                    <Route path="/newEvent" element={<NewEventDeepLink />} />
-                    <Route path="/callback" element={<CallbackResume />} />
-                    <Route path="/error" element={<ErrorPage />} />
-                  </Routes>
-                </Router>
-              </SpaceOverlayProvider>
-              <ErrorSnackbar error={error} type="user" />
-              <DebugModeToggle />
-            </Suspense>
-            {appLoading && <Loading />}
-          </ErrorBoundary>
-        </I18n>
-      </TwakeMuiThemeProvider>
-    </EmbeddingProvider>
+              }
+            })
+          }}
+        >
+          <Suspense fallback={<Loading />}>
+            <WebSocketGate />
+            <SpaceOverlayProvider overlay={spaceOverlay}>
+              <Router history={history}>
+                <Routes>
+                  <Route path="/" element={<HandleLogin />} />
+                  <Route path="/calendar" element={<CalendarLayout />} />
+                  <Route
+                    path={EMBED_CALENDAR_ROUTE}
+                    element={<EmbeddedCalendar />}
+                  />
+                  <Route
+                    path={EMBED_EVENT_ROUTE}
+                    element={<EmbeddedCalendar />}
+                  />
+                  <Route path="/events/:uid" element={<EventDeepLink />} />
+                  <Route path="/newEvent" element={<NewEventDeepLink />} />
+                  <Route path="/callback" element={<CallbackResume />} />
+                  <Route path="/error" element={<ErrorPage />} />
+                </Routes>
+              </Router>
+            </SpaceOverlayProvider>
+            <ErrorSnackbar error={error} type="user" />
+            <DebugModeToggle />
+          </Suspense>
+          {appLoading && <Loading />}
+        </ErrorBoundary>
+      </I18n>
+    </TwakeMuiThemeProvider>
   )
 }
