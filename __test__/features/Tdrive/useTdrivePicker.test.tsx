@@ -32,11 +32,11 @@ jest.mock('twake-i18n', () => ({
   })
 }))
 
-const mockLogin = jest.fn()
-const mockCreateSdk = jest.fn()
+const mockEnsureSdkSignedIn = jest.fn()
 
-jest.mock('@linagora/twake-sdk', () => ({
-  createSdk: (options: unknown): unknown => mockCreateSdk(options)
+jest.mock('@common/utils/sdkSession', () => ({
+  ensureSdkSignedIn: (...args: unknown[]): unknown =>
+    mockEnsureSdkSignedIn(...args)
 }))
 
 describe('useTdrivePicker', () => {
@@ -70,12 +70,7 @@ describe('useTdrivePicker', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Like the SDK client, a successful login makes the client ready
-    const sdk = { status: 'waiting', login: mockLogin }
-    mockCreateSdk.mockReturnValue(sdk)
-    mockLogin.mockImplementation(async () => {
-      sdk.status = 'ready'
-    })
+    mockEnsureSdkSignedIn.mockResolvedValue({ status: 'ready' })
     mockCreate.mockImplementation(() => withStart(Promise.resolve({})))
     // Default: start() calls onReadyToUse then resolves with a file
     mockStart.mockImplementation((_container, { onReadyToUse } = {}) => {
@@ -120,10 +115,10 @@ describe('useTdrivePicker', () => {
 
     await waitFor(() => expect(result.current.isOpen).toBe(true))
 
-    expect(mockCreateSdk).toHaveBeenCalledWith({
-      platformURL: 'https://drive.example.com'
-    })
-    expect(mockLogin).toHaveBeenCalledWith('user-id-token')
+    expect(mockEnsureSdkSignedIn).toHaveBeenCalledWith(
+      'https://drive.example.com',
+      'user-id-token'
+    )
 
     expect(mockCreate).toHaveBeenCalledWith(
       'PICK',
@@ -167,7 +162,7 @@ describe('useTdrivePicker', () => {
     })
 
     expect(result.current.isOpen).toBe(false)
-    expect(mockCreateSdk).not.toHaveBeenCalled()
+    expect(mockEnsureSdkSignedIn).not.toHaveBeenCalled()
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
@@ -193,12 +188,12 @@ describe('useTdrivePicker', () => {
     })
 
     expect(result.current.isOpen).toBe(false)
-    expect(mockLogin).not.toHaveBeenCalled()
+    expect(mockEnsureSdkSignedIn).not.toHaveBeenCalled()
   })
 
   it('handles API errors gracefully', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
-    mockLogin.mockRejectedValue(new Error('API Error'))
+    mockEnsureSdkSignedIn.mockRejectedValue(new Error('API Error'))
 
     const { result } = renderHook(
       () => useTdrivePicker({ onFilesSelected: jest.fn() }),
@@ -376,25 +371,6 @@ describe('useTdrivePicker', () => {
     })
 
     expect(mockStop).toHaveBeenCalledTimes(1)
-  })
-
-  it('exchanges the id token only once across picker opens', async () => {
-    const { result } = renderHook(
-      () => useTdrivePicker({ onFilesSelected: jest.fn() }),
-      { wrapper: createWrapper(defaultUserState) }
-    )
-
-    mountContainer(result)
-    await act(async () => {
-      await result.current.openPicker()
-    })
-    await act(async () => {
-      await result.current.openPicker()
-    })
-
-    expect(mockCreate).toHaveBeenCalledTimes(2)
-    expect(mockCreateSdk).toHaveBeenCalledTimes(1)
-    expect(mockLogin).toHaveBeenCalledTimes(1)
   })
 })
 

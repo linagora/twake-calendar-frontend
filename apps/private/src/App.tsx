@@ -35,6 +35,7 @@ import { default as EventDeepLink } from '@common/features/Events/EventDeepLink'
 import { default as NewEventDeepLink } from '@common/features/Events/NewEventDeepLink'
 import { CallbackResume } from '@/features/User/LoginCallback'
 import { useInitializeApp } from '@common/features/User/useInitializeApp'
+import { usePlatformSignIn } from '@common/hooks/usePlatformSignIn'
 import { redirectTo } from '@common/utils/navigation'
 import { onSessionEndedElsewhere } from '@linagora/twake-oidc'
 import { WebSocketGate } from '@common/websocket/WebSocketGate'
@@ -98,6 +99,7 @@ export default function App(): JSX.Element {
     ) || 'en'
 
   useDocumentLanguage(lang)
+  usePlatformSignIn()
 
   const dispatch = useAppDispatch()
   useEffect(() => {

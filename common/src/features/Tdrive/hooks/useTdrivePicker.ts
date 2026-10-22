@@ -1,8 +1,9 @@
 import { useAppSelector } from '@common/app/hooks'
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
-import { createSdk, type Sdk } from '@linagora/twake-sdk'
+import { ensureSdkSignedIn } from '@common/utils/sdkSession'
+import type { Sdk } from '@linagora/twake-sdk'
 import Intents from 'cozy-interapp'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
 
@@ -89,7 +90,7 @@ function createPickerCancellation(): PickerCancellation {
 }
 
 interface StartTdrivePickerOptions {
-  sdk: Sdk
+  platformURL: string
   idToken: string
   containerRef: React.RefObject<HTMLDivElement | null>
   readyCallbackRef: React.MutableRefObject<(() => void) | null>
@@ -111,7 +112,7 @@ type CozyIntent = Promise<unknown> & {
 }
 
 async function startTdrivePicker({
-  sdk,
+  platformURL,
   idToken,
   containerRef,
   readyCallbackRef,
@@ -119,8 +120,7 @@ async function startTdrivePicker({
   intentRef,
   t
 }: StartTdrivePickerOptions): Promise<TdriveFile[]> {
-  // The id token is exchanged once: the client then keeps its token fresh
-  if (sdk.status !== 'ready') await sdk.login(idToken)
+  const sdk = await ensureSdkSignedIn(platformURL, idToken)
 
   if (cancellationRef.cancelled) {
     return []
@@ -187,10 +187,6 @@ export function useTdrivePicker({
 
   const platformURL = useAppSelector(selectPlatformURL)
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
-  const sdk = useMemo(
-    () => (platformURL ? createSdk({ platformURL }) : null),
-    [platformURL]
-  )
 
   const containerRef = useRef<HTMLDivElement>(null)
   const intentRef = useRef<StartedCozyIntent | null>(null)
@@ -206,7 +202,7 @@ export function useTdrivePicker({
 
     const validationError =
       (isOpen && 'alreadyOpen') ||
-      (!sdk && 'tdriveUrlNotConfigured') ||
+      (!platformURL && 'tdriveUrlNotConfigured') ||
       (!idToken && 'tdriveTokenUnavailable') ||
       null
 
@@ -224,7 +220,7 @@ export function useTdrivePicker({
 
     try {
       const files = await startTdrivePicker({
-        sdk: sdk as Sdk,
+        platformURL: platformURL as string,
         idToken: idToken as string,
         containerRef,
         readyCallbackRef,
@@ -249,7 +245,7 @@ export function useTdrivePicker({
         setIsOpen(false)
       }
     }
-  }, [isOpen, sdk, idToken, onFilesSelected, t])
+  }, [isOpen, platformURL, idToken, onFilesSelected, t])
 
   const closePicker = useCallback(() => {
     activeCancellationRef.current?.cancel()
