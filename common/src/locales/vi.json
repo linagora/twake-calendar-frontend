@@ -330,12 +330,8 @@
       "day": "Ngày",
       "schedule": "Lịch trình"
     },
-    "apps": "Ứng dụng",
-    "userProfile": "Hồ sơ người dùng",
-    "logoAlt": "Lịch",
     "settings": "Cài đặt",
     "help": "Giúp đỡ",
-    "logout": "Đăng xuất",
     "toggleSidebar": "Ẩn/hiện thanh bên",
     "hideDatePicker": "Ẩn chọn ngày",
     "showDatePicker": "Hiện chọn ngày"

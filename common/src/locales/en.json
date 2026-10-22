@@ -331,12 +331,8 @@
       "day": "Day",
       "schedule": "Schedule"
     },
-    "apps": "Apps",
-    "userProfile": "User profile",
-    "logoAlt": "Calendar",
     "settings": "Settings",
     "help": "Help",
-    "logout": "Logout",
     "hideDatePicker": "Hide date picker",
     "showDatePicker": "Show date picker"
   },

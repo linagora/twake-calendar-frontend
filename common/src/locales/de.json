@@ -331,12 +331,8 @@
       "day": "Tag",
       "schedule": "Terminübersicht"
     },
-    "apps": "Anwendungen",
-    "userProfile": "Benutzerprofil",
-    "logoAlt": "Kalender",
     "settings": "Einstellungen",
     "help": "Hilfe",
-    "logout": "Abmelden",
     "hideDatePicker": "Datumsauswahl ausblenden",
     "showDatePicker": "Datumsauswahl einblenden"
   },

@@ -221,8 +221,7 @@ class InternationalisationTest extends TwakeCalendarE2ETest {
         config.set("HIDE_LANGUAGE_SELECTOR", "true");
         CalendarPage calendar = LoginPage.loginAs(page, user);
 
-        calendar.page().getByLabel("User profile").click();
-        calendar.page().getByText("Settings").last().click();
+        calendar.openSettings();
         page.waitForTimeout(2500);
 
         PlaywrightAssertions.assertThat(page.getByLabel("Language selector")).hasCount(0);

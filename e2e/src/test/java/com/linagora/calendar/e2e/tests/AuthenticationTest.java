@@ -47,11 +47,11 @@ class AuthenticationTest extends TwakeCalendarE2ETest {
     }
 
     @Test
-    @DisplayName("AUTH-05 The menubar avatar carries the initials of the signed in account")
+    @DisplayName("AUTH-05 The Twake bar avatar carries the initials of the signed in account")
     void theAvatarCarriesTheInitials(Page page, E2EUser user) {
         LoginPage.loginAs(page, user);
 
-        String initials = page.getByLabel("User profile").innerText().trim();
+        String initials = page.getByTestId("twake-bar-user-button").innerText().trim();
         org.assertj.core.api.Assertions.assertThat(initials)
             .as("the avatar of %s reads %s", user.displayName(), initials)
             .isNotEmpty()

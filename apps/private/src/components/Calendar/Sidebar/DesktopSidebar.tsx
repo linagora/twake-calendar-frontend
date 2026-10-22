@@ -8,7 +8,6 @@ import Tooltip from '@common/components/Tooltip'
 
 export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
   calendarRef,
-  isIframe,
   onCreateEvent,
   selectedMiniDate,
   setSelectedMiniDate,
@@ -31,8 +30,8 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
           paddingLeft: 3,
           paddingRight: 2,
           width: '270px',
-          marginTop: isIframe ? 1 : '68px',
-          height: isIframe ? 'calc(100% - 8px)' : 'calc(100% - 68px)'
+          marginTop: 'calc(8px + var(--twake-bar-height, 0px))',
+          height: 'calc(100% - 8px - var(--twake-bar-height, 0px))'
         },
         zIndex: 5
       }}
@@ -44,7 +43,7 @@ export const DesktopSidebar: React.FC<CalendarSidebarProps> = ({
           top: 0,
           zIndex: 10,
           backgroundColor: 'background.paper',
-          paddingTop: isIframe ? '10px' : 3
+          paddingTop: '10px'
         }}
       >
         <Tooltip title={t('tooltip.createEvent')}>

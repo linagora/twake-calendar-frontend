@@ -10,27 +10,16 @@ import SearchIcon from '@mui/icons-material/Search'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { SmallNavigationControls } from './components/SmallNavigationControls'
-import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
 import MobileSearchBar from './MobileEventSearchBar'
-import { UserMenu } from './UserMenu'
+import { SettingsButton } from './SettingsButton'
 
 export const TabletMenubar: React.FC<SharedMenubarProps> = ({
-  calendarRef,
   currentView,
-  isIframe,
   dateLabel,
-  onUserMenuOpen,
-  onSettingsClick,
-  onLogoutClick,
   onNavigate,
   onRefresh,
-  onToggleSidebar,
-  user,
-  userMenuAnchorEl,
-  onUserMenuClose,
-  onViewChange,
-  onDateChange
+  onToggleSidebar
 }: SharedMenubarProps) => {
   const { t } = useI18n()
   const dispatch = useAppDispatch()
@@ -72,17 +61,6 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
           </IconButton>
         </Tooltip>
 
-        {!isIframe && (
-          <div className="menu-items">
-            <MainTitle
-              calendarRef={calendarRef}
-              currentView={currentView}
-              onViewChange={onViewChange}
-              onDateChange={onDateChange}
-            />
-          </div>
-        )}
-
         <div className="menu-items" style={{ marginLeft: 0 }}>
           <SmallNavigationControls
             currentView={currentView}
@@ -123,15 +101,7 @@ export const TabletMenubar: React.FC<SharedMenubarProps> = ({
         </div>
 
         <div className="menu-items">
-          <UserMenu
-            anchorEl={userMenuAnchorEl}
-            onClose={onUserMenuClose}
-            onSettingsClick={onSettingsClick}
-            onLogoutClick={onLogoutClick}
-            onUserMenuOpen={onUserMenuOpen}
-            isIframe={isIframe}
-            user={user}
-          />
+          <SettingsButton />
         </div>
       </div>
     </header>

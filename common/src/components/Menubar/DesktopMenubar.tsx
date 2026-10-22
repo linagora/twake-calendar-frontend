@@ -1,36 +1,20 @@
 import Tooltip from '@common/components/Tooltip'
 import { IconButton, useTheme } from '@linagora/twake-mui'
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { AppListMenu } from './AppListMenu'
 import { NavigationControls } from './components/NavigationControls'
 import SearchBar from './EventSearchBar'
-import { MainTitle } from './MainTitle'
 import { SharedMenubarProps } from './Menubar'
 import { SelectView } from './SelectView'
-import { UserMenu } from './UserMenu'
+import { SettingsButton } from './SettingsButton'
 
 export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
-  calendarRef,
   currentView,
-  isIframe,
   dateLabel,
-  supportLink,
-  anchorEl,
-  onAppMenuOpen,
-  onAppMenuClose,
-  onUserMenuOpen,
-  onSettingsClick,
-  onLogoutClick,
   onNavigate,
   onRefresh,
-  onViewChange,
-  onDateChange,
-  user,
-  userMenuAnchorEl,
-  onUserMenuClose
+  onViewChange
 }) => {
   const { t } = useI18n()
   const theme = useTheme()
@@ -43,17 +27,6 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
       style={{ borderBottom: `1px solid ${theme.vars.palette.divider}` }}
     >
       <div className="left-menu">
-        {!isIframe && (
-          <div className="menu-items">
-            <MainTitle
-              calendarRef={calendarRef}
-              currentView={currentView}
-              onViewChange={onViewChange}
-              onDateChange={onDateChange}
-            />
-          </div>
-        )}
-
         <div className="menu-items" style={{ marginLeft: '65px' }}>
           <NavigationControls
             currentView={currentView}
@@ -88,48 +61,8 @@ export const DesktopMenubar: React.FC<SharedMenubarProps> = ({
           <SelectView currentView={currentView} onViewChange={onViewChange} />
         </div>
 
-        {!isIframe && (
-          <>
-            {supportLink && (
-              <div className="menu-items">
-                <Tooltip title={t('menubar.help')}>
-                  <IconButton
-                    size="xsmall"
-                    component="a"
-                    href={supportLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginRight: 8 }}
-                    aria-label={t('menubar.help')}
-                  >
-                    <HelpOutlineOutlinedIcon />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            )}
-
-            <div className="menu-items">
-              <AppListMenu
-                anchorEl={anchorEl}
-                onAppMenuOpen={onAppMenuOpen}
-                onAppMenuClose={onAppMenuClose}
-                buttonSize="xsmall"
-              />
-            </div>
-          </>
-        )}
-
         <div className="menu-items">
-          <UserMenu
-            anchorEl={userMenuAnchorEl}
-            onClose={onUserMenuClose}
-            onSettingsClick={onSettingsClick}
-            onLogoutClick={onLogoutClick}
-            onUserMenuOpen={onUserMenuOpen}
-            isIframe={isIframe}
-            user={user}
-            buttonSize="xsmall"
-          />
+          <SettingsButton size="xsmall" />
         </div>
       </div>
     </header>

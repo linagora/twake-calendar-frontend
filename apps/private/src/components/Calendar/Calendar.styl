@@ -6,11 +6,6 @@
 
 .main-layout
   display flex
-  height calc(100dvh - 70px)
-
-.main-layout.isInIframe
-  margin-top 8px
-  height calc(100vh - 8px)
 
 // TwakeSpace frames the embed edge to edge: the embed keeps 16px to its edges
 // and shows the body, painted with the paper of the theme
@@ -31,22 +26,19 @@
 .main-layout.calendar-layout
   background-color var(--twake-palette-background-paper)
   flex-direction row
-  
-  &--desktop
-    margin-top 8px
+  margin-top 8px
+  height calc(100dvh - 8px - var(--twake-bar-height, 0px))
 
 .calendar
   flex-grow 1
   height 100%
   overflow hidden
 
-.main-layout.isInIframe .calendar
+.main-layout.calendar-layout .calendar
   display flex
   flex-direction column
-  height 100%
-  overflow hidden
 
-.main-layout.isInIframe .fc
+.main-layout.calendar-layout .fc
   flex 1
   min-height 0
 
