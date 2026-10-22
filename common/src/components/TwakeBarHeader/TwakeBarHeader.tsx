@@ -9,7 +9,7 @@ import React, { useLayoutEffect, useMemo } from 'react'
 import type { RootState } from '@common/app/store'
 import { useAppSelector } from '@common/app/hooks'
 import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
-import { useIsInIframe } from '@common/contexts/EmbeddingContext'
+import { twakeSpace } from '@common/features/Embed/twakeSpace'
 import { getPlatformSdk } from '@common/utils/sdkSession'
 import { getUserDisplayName } from '@common/utils/userUtils'
 
@@ -39,19 +39,18 @@ const handleLogOut = (): void => void logOut()
 /**
  * The Twake bar, pinned on top of the page in the space the body reserves,
  * once calendar's loader is gone. Rendered under the theme and i18n providers,
- * which the bar follows. Not shown when calendar is embedded in an iframe: the
- * embedding workplace provides its own bar.
+ * which the bar follows. Not shown when TwakeSpace frames calendar: the bar of
+ * TwakeSpace is above it.
  *
  * The bar shows the platform session, which calendar signs in at load.
  * Without a platform, or when the token exchange fails, it shows calendar's
  * apps and user instead.
  */
 export const TwakeBarHeader = (): JSX.Element | null => {
-  const isInIframe = useIsInIframe()
   const isAppLoading = useAppSelector(selectIsAppLoading)
   const platformURL = useAppSelector(selectPlatformURL)
   const user = useAppSelector(selectUser)
-  const isShown = !isInIframe && !isAppLoading
+  const isShown = twakeSpace === null && !isAppLoading
 
   const fallback = useMemo<TwakeBarFallback>(
     () => ({

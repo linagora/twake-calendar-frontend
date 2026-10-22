@@ -4,13 +4,12 @@ import '@testing-library/jest-dom'
 import { act, screen } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-const mockIsInIframe = jest.fn()
+let mockTwakeSpace: object | null = null
 
-jest.mock('cozy-external-bridge', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    isInIframe: mockIsInIframe
-  }))
+jest.mock('@common/features/Embed/twakeSpace', () => ({
+  get twakeSpace(): object | null {
+    return mockTwakeSpace
+  }
 }))
 
 const mockGetPlatformSdk = jest.fn()
@@ -61,7 +60,7 @@ const getBarHeight = (): string =>
 
 describe('TwakeBarHeader', () => {
   beforeEach(() => {
-    mockIsInIframe.mockReturnValue(false)
+    mockTwakeSpace = null
     mockGetPlatformSdk.mockReturnValue({})
     window.appList = [{ name: 'Mail', link: '/mail', icon: 'mail.svg' }]
     window.SUPPORT_URL = 'https://support.example.com'
@@ -72,8 +71,8 @@ describe('TwakeBarHeader', () => {
     jest.clearAllMocks()
   })
 
-  it('does nothing when embedded in an iframe', () => {
-    mockIsInIframe.mockReturnValue(true)
+  it('does nothing when TwakeSpace frames calendar', () => {
+    mockTwakeSpace = {}
     renderBar()
 
     expect(mockGetPlatformSdk).not.toHaveBeenCalled()
