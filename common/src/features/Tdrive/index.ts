@@ -1,5 +1,5 @@
 export { TdriveButton } from './components/TdriveButton'
 export { TdrivePickerDialog } from './components/TdrivePickerDialog'
 export { useTdrivePicker } from './hooks/useTdrivePicker'
-export { useIsTdrivePickerAvailable } from './hooks/useIsTdrivePickerAvailable'
+export { isTdrivePickerAvailable } from './helpers/isTdrivePickerAvailable'
 export type { TdriveFile } from './types'
