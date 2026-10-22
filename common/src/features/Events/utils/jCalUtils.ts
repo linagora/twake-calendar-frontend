@@ -21,8 +21,7 @@ export function parseMoment(
   fallbackTimezone: string
 ): moment.Moment | null {
   if (!prop || typeof prop[3] !== 'string') return null
-  const tzid =
-    getTzidParam(prop[1] as Record<string, unknown>) || fallbackTimezone
+  const tzid = getTzidParam(prop[1]) || fallbackTimezone
   const val = prop[3]
   const m = val.endsWith('Z') ? moment.utc(val) : moment.tz(val, tzid)
   return m.isValid() ? m : null

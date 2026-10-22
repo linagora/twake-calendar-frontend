@@ -47,8 +47,8 @@ export interface CalendarState {
 const CalendarSlice = createAppSlice({
   name: 'calendars',
   initialState: {
-    list: {} as Record<string, Calendar>,
-    templist: {} as Record<string, Calendar>,
+    list: {},
+    templist: {},
     pending: true,
     error: null as string | null,
     isMobileSearchOpen: false

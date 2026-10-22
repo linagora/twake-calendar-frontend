@@ -219,7 +219,7 @@ export function createStripPosition(
   if (!columnPos) return null
 
   const timeInfo = getStripTimes(
-    rule as AvailabilityRule & { dayOfWeek: string; timeZone?: string },
+    rule,
     dayIndex,
     ctx.startOfWeek,
     ctx.calendarTimezone
@@ -274,12 +274,7 @@ export function computeStripPositions(
   return bookingLinks.flatMap(link =>
     (link.availabilityRules ?? []).flatMap((rule, ruleIndex) => {
       if (rule.type !== 'weekly') return []
-      const strip = createStripPosition(
-        link,
-        rule as AvailabilityRule & { dayOfWeek: string },
-        ruleIndex,
-        ctx
-      )
+      const strip = createStripPosition(link, rule, ruleIndex, ctx)
       return strip ? [strip] : []
     })
   )

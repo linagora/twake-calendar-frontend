@@ -57,14 +57,14 @@ export function updateEventPartstatJCal(
       }
 
       if (recurrenceId !== undefined) {
-        const veventProps = component[1] as VObjectProperty[]
+        const veventProps = component[1]
         const ridProp = veventProps.find(
           ([k]) => k.toLowerCase() === 'recurrence-id'
         )
         if (!ridProp) {
           return component
         }
-        const storedTzid = getTzidParam(ridProp[1] as Record<string, unknown>)
+        const storedTzid = getTzidParam(ridProp[1])
         if (
           !sameRecurrence(
             { value: ridProp[3], tzid: storedTzid },
@@ -76,7 +76,7 @@ export function updateEventPartstatJCal(
         }
       }
 
-      const properties = component[1] as VObjectProperty[]
+      const properties = component[1]
       const updatedProperties = properties.map(
         (prop: VObjectProperty): VObjectProperty => {
           if (prop[0] !== 'attendee') {

@@ -304,7 +304,7 @@ const isSourceOverride = (
   sourceTimezone?: string
 ): boolean => {
   if (!sourceRecurrenceId) return false
-  const rid = findFieldValue(vevent[1] as VObjectProperty[], 'recurrence-id')
+  const rid = findFieldValue(vevent[1], 'recurrence-id')
   if (!rid) return false
 
   const ridMs = parseInstant(rid, 'UTC')
@@ -341,20 +341,13 @@ const updateOverrideWithMetadata = (
     shift,
     tz
   } = params
-  const isVeventMaster = !findFieldValue(
-    vevent[1] as VObjectProperty[],
-    'recurrence-id'
-  )
+  const isVeventMaster = !findFieldValue(vevent[1], 'recurrence-id')
   if (isVeventMaster) return updatedMaster
 
   const [veventType, props, components = []] = vevent
 
   // Apply metadata changes to remaining overrides
-  let newProps = applyMetadataChanges(
-    props as VObjectProperty[],
-    oldMaster[1],
-    changedFields
-  )
+  let newProps = applyMetadataChanges(props, oldMaster[1], changedFields)
   newProps = reanchorOverride(newProps, shift, tz)
 
   // Increment sequence number if any changes were made

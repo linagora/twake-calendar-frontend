@@ -19,10 +19,7 @@ export function makeDeleteEventInstanceJCal(
 ): VCalComponent {
   // Find the master VEVENT
   const masterIndex = vevents.findIndex(
-    ([, props]) =>
-      !(props as VObjectProperty[]).find(
-        ([k]) => k.toLowerCase() === 'recurrence-id'
-      )
+    ([, props]) => !props.find(([k]) => k.toLowerCase() === 'recurrence-id')
   )
 
   if (masterIndex === -1) {
@@ -31,13 +28,13 @@ export function makeDeleteEventInstanceJCal(
 
   const exdateValue = event.recurrenceId ?? event.start
   const seriesEvent = parseCalendarEvent({
-    data: vevents[masterIndex][1] as VObjectProperty[],
+    data: vevents[masterIndex][1],
     color: {},
     calendar: { id: event.calId } as Calendar,
     eventURL: '',
     valarms: filterComponents(vevents[masterIndex], 'valarm')
   })
-  const masterProps = vevents[masterIndex][1] as VObjectProperty[]
+  const masterProps = vevents[masterIndex][1]
 
   // EXDATE must use the same date-time form as the master DTSTART, otherwise the
   // CalDAV server rejects the update ("EXDATE date-time form (UTC) must match
@@ -57,7 +54,7 @@ export function makeDeleteEventInstanceJCal(
   let exdateProperty = exdateValue as VObjectValue
   if (useTzidForm) {
     const zoned = moment.tz(exdateValue, dtstartTzid)
-    exdateProperty = zoned.format('YYYY-MM-DDTHH:mm:ss') as VObjectValue
+    exdateProperty = zoned.format('YYYY-MM-DDTHH:mm:ss')
   }
 
   const isDuplicate = masterProps.some((prop: VObjectProperty) => {
@@ -85,7 +82,7 @@ export function makeDeleteEventInstanceJCal(
   // deleted). Match by instant so an override stored in TZID/UTC form is still
   // recognised against the deleted occurrence expressed in another form.
   const filteredVevents = vevents.filter(([, props]) => {
-    const recurrenceIdProp = (props as VObjectProperty[]).find(
+    const recurrenceIdProp = props.find(
       ([k]) => k.toLowerCase() === 'recurrence-id'
     )
     if (!recurrenceIdProp) return true // Keep master

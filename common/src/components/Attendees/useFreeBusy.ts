@@ -73,7 +73,7 @@ async function fetchFreeBusyMap(
   const unresolved: FreeBusyMap = Object.fromEntries(
     attendees
       .filter(a => !resolved.find(r => r.email === a.email))
-      .map(a => [a.email, 'unknown' as FreeBusyStatus])
+      .map(a => [a.email, 'unknown'])
   )
 
   if (resolved.length === 0) return unresolved
@@ -83,15 +83,11 @@ async function fetchFreeBusyMap(
 }
 
 function toLoadingMap(attendees: Attendee[]): FreeBusyMap {
-  return Object.fromEntries(
-    attendees.map(a => [a.email, 'loading' as FreeBusyStatus])
-  )
+  return Object.fromEntries(attendees.map(a => [a.email, 'loading']))
 }
 
 function toUnknownMap(attendees: Attendee[]): FreeBusyMap {
-  return Object.fromEntries(
-    attendees.map(a => [a.email, 'unknown' as FreeBusyStatus])
-  )
+  return Object.fromEntries(attendees.map(a => [a.email, 'unknown']))
 }
 
 function toFreeBusyMap(
@@ -104,9 +100,7 @@ function toFreeBusyMap(
     Object.fromEntries(
       Object.entries(busyByUserId).flatMap(([uid, busy]) => {
         const email = userIdToEmail[uid]
-        return email
-          ? [[email, (busy ? 'busy' : 'free') as FreeBusyStatus]]
-          : []
+        return email ? [[email, busy ? 'busy' : 'free']] : []
       })
     )
 }
@@ -218,9 +212,9 @@ export function useAttendeesFreeBusy({
               moment.tz(start, timezone).utc().format('YYYYMMDDTHHmmss'),
               moment.tz(end, timezone).utc().format('YYYYMMDDTHHmmss')
             )
-            return [email, (busy ? 'busy' : 'free') as FreeBusyStatus] as const
+            return [email, busy ? 'busy' : 'free'] as const
           } catch {
-            return [email, 'unknown' as FreeBusyStatus] as const
+            return [email, 'unknown'] as const
           }
         })
       ).then(Object.fromEntries)

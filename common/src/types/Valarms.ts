@@ -38,7 +38,7 @@ export class Valarms {
 
   private static extractAlarmsFromObject(json: object): VAlarm[] {
     if (!('_alarms' in json)) return []
-    const alarms = (json as { _alarms: unknown })._alarms
+    const alarms = json._alarms
     return Array.isArray(alarms) ? alarms.map(a => VAlarm.fromJSON(a)) : []
   }
 

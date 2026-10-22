@@ -376,7 +376,7 @@ export const createEventHandlers = (
         start: computedNewStart.toISOString(),
         end: computedNewEnd.toISOString(),
         sequence: (event.sequence ?? 1) + 1
-      } as CalendarEvent,
+      },
       true
     )
 

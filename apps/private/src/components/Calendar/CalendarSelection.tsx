@@ -5,7 +5,6 @@ import { CalendarSelectorMenu } from '@common/components/Calendar/CalendarSelect
 import { DeleteCalendarDialog } from '@common/components/Calendar/DeleteCalendarDialog'
 import { OwnerCaption } from '@common/components/Calendar/OwnerCaption'
 import RegisterCalendars from '@common/components/Calendar/RegisterCalendars'
-import type { ResourceCal } from '@common/components/Calendar/RegisterCalendars/index.types'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 import {
   deleteBookingLink,
@@ -724,7 +723,7 @@ const CalendarSelection: React.FC<{
           addCalendarResource({
             userId,
             calId,
-            cal: cal as ResourceCal
+            cal
           })
         }
         onClose={(newResourceIds?: string[] | Record<string, never>) => {

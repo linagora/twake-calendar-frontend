@@ -54,7 +54,7 @@ export function getVeventEndInstant(
   vevent: VCalComponent,
   fallbackTimezone: string = 'UTC'
 ): number {
-  const properties = vevent[1] as VObjectProperty[]
+  const properties = vevent[1]
 
   const endMs = parseInstant(
     findFieldValue(properties, 'dtend'),
@@ -88,11 +88,11 @@ export function updateSeriesPartstatJCal(
   const fallbackTimezone = event.timezone || 'UTC'
 
   const masterIndex = vevents.findIndex(
-    ([, props]) => !findFieldValue(props as VObjectProperty[], 'recurrence-id')
+    ([, props]) => !findFieldValue(props, 'recurrence-id')
   )
 
   const updateVeventAttendee = (vevent: VCalComponent): VCalComponent => {
-    const properties = vevent[1] as VObjectProperty[]
+    const properties = vevent[1]
     const updatedProperties = properties.map(
       (prop: VObjectProperty): VObjectProperty => {
         const calAddress = (prop[3] as string | undefined) ?? ''

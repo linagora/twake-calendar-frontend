@@ -433,7 +433,7 @@ const useDisplayOptions = ({
     if (shouldAddEmailOption) {
       const email = EmailAddress.parse(query.trim())
       if (email) {
-        baseOptions = [{ email: email.value, displayName: email.value } as User]
+        baseOptions = [{ email: email.value, displayName: email.value }]
       }
     }
 

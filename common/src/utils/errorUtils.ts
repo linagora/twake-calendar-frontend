@@ -6,10 +6,7 @@ export function formatReduxError(error: unknown): string {
   if (typeof error === 'string') return error
 
   if (typeof error === 'object' && error !== null) {
-    if (
-      'message' in error &&
-      typeof (error as { message: unknown }).message === 'string'
-    ) {
+    if ('message' in error && typeof error.message === 'string') {
       return (error as { message: string }).message
     }
   }

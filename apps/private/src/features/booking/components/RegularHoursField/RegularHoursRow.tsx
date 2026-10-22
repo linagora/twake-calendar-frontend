@@ -48,7 +48,7 @@ const TimeSlotItem: React.FC<TimeSlotItemProps> = ({
   const handleTimeChangeCallback =
     (field: keyof TimeSlot) =>
     (val: PickerValue): void => {
-      const d = val as Dayjs | null
+      const d = val
       if (d && d.isValid()) {
         handleTimeChange(day, index, field, d.format('HH:mm'))
       }

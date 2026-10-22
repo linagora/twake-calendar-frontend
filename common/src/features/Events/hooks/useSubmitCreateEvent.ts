@@ -34,7 +34,7 @@ export function useSubmitCreateEvent({
       const targetCalendar: Calendar | undefined =
         calList[values.calendarid] ||
         userPersonalCalendars[0] ||
-        (Object.values(calList)[0] as Calendar | undefined)
+        Object.values(calList)[0]
 
       if (!targetCalendar?.id) {
         console.error('No target calendar available to save event')

@@ -51,7 +51,7 @@ const UserSlice = createAppSlice({
       datetime: {
         timeZone: null
       }
-    } as CoreConfig,
+    },
     alarmEmailsEnabled: null,
     loading: true,
     error: null

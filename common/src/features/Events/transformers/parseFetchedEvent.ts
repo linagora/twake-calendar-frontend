@@ -28,10 +28,7 @@ function selectTargetVevent(
     return vevents[0]
   }
   const master = vevents.find(
-    ([, props]) =>
-      !(props as VObjectProperty[]).find(
-        ([k]) => k.toLowerCase() === 'recurrence-id'
-      )
+    ([, props]) => !props.find(([k]) => k.toLowerCase() === 'recurrence-id')
   )
   return master ?? vevents[0]
 }
@@ -42,9 +39,7 @@ function resolveTimezoneFromVTimezone(
   if (vtimezones.length === 0) {
     return undefined
   }
-  const tzidProp = (vtimezones[0][1] as VObjectProperty[]).find(
-    ([k]) => k.toLowerCase() === 'tzid'
-  )
+  const tzidProp = vtimezones[0][1].find(([k]) => k.toLowerCase() === 'tzid')
   if (!tzidProp?.[3]) {
     return undefined
   }
@@ -52,9 +47,7 @@ function resolveTimezoneFromVTimezone(
 }
 
 function findDtstart(targetVevent: VCalComponent): VObjectProperty | undefined {
-  return (targetVevent[1] as VObjectProperty[]).find(
-    ([k]) => k.toLowerCase() === 'dtstart'
-  )
+  return targetVevent[1].find(([k]) => k.toLowerCase() === 'dtstart')
 }
 
 function resolveTimezoneFromDtstartTzid(
@@ -128,7 +121,7 @@ export function parseFetchedEvent(
   const timezoneFromUtcValue = isUtcDtstart(targetVevent) ? 'UTC' : undefined
 
   const eventjson = parseCalendarEvent({
-    data: targetVevent[1] as VObjectProperty[],
+    data: targetVevent[1],
     color: event.color ?? {},
     calendar: { id: event?.calId } as Calendar,
     eventURL: event.URL,

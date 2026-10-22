@@ -110,7 +110,7 @@ export async function searchEvent(reqParam: {
 
 function normalizeVeventRrule(vevents: VCalComponent[]): VCalComponent[] {
   return vevents.map(vevent => {
-    const props = (vevent[1] as VObjectProperty[]).map(prop => {
+    const props = vevent[1].map(prop => {
       if (prop[0] === 'rrule' && prop[2] === 'recur') {
         const rule = prop[3] as Record<string, unknown>
         if (typeof rule.wkst === 'number') {

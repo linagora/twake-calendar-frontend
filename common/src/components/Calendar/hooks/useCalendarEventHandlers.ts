@@ -58,15 +58,9 @@ export const useCalendarEventHandlers = (
       }
     }
 
-    window.addEventListener(
-      'eventModalError',
-      handleEventModalError as EventListener
-    )
+    window.addEventListener('eventModalError', handleEventModalError)
     return (): void => {
-      window.removeEventListener(
-        'eventModalError',
-        handleEventModalError as EventListener
-      )
+      window.removeEventListener('eventModalError', handleEventModalError)
     }
   }, [
     props.openEventDisplay,

@@ -67,7 +67,7 @@ const CHECKS: Check[] = [
   (c, i): boolean =>
     safeStringify(c.repetition ?? {}) !== safeStringify(i.repetition ?? {}),
   (c, i): boolean => !attendeesEqual(c.attendees ?? [], i.attendees ?? []),
-  (c, i): boolean => alarmsKey(c.alarms) !== alarmsKey(i.alarms as Valarms),
+  (c, i): boolean => alarmsKey(c.alarms) !== alarmsKey(i.alarms),
   (c, i): boolean => c.organizer?.cal_address !== i.organizer?.cal_address,
   (c, i): boolean =>
     !attachmentsEqual(c.attachments ?? [], i.attachments ?? []),

@@ -71,7 +71,7 @@ export const addSharedCalendarThunk = (
         return rejectWithValue({
           message: 'TRANSLATION:error.invalidCalendarId',
           status: 400
-        } as RejectedError)
+        })
       }
 
       try {

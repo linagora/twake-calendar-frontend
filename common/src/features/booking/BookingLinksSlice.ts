@@ -16,7 +16,7 @@ const BookingLinksSlice = createAppSlice({
     list: [] as BookingLink[],
     pending: false,
     error: null as string | null
-  } as BookingLinksState,
+  },
   reducers: create => ({
     listBookingLinks: listBookingLinksThunk(create),
     deleteBookingLink: deleteBookingLinkThunk(create),

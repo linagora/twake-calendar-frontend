@@ -57,7 +57,7 @@ function buildEventsForRule(
         bookingLink: link
       },
       priority: 0
-    } as EventInput
+    }
   })
 }
 

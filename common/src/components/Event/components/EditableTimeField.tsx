@@ -192,7 +192,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
         return
       }
 
-      const newValue = parseTimeInput(trimmed, pickerValue as Dayjs | null)
+      const newValue = parseTimeInput(trimmed, pickerValue)
 
       if (newValue) {
         // Update picker internal state and trigger onChange in one call
@@ -304,7 +304,7 @@ function EditableTimePickerField(props: GenericPickerFieldProps) {
     // Keep partial and shorthand input editable, but immediately propagate a
     // complete time so form validation is refreshed while the user is typing.
     if (/^\d{2}:\d{2}$/.test(value.trim())) {
-      const newValue = parseTimeInput(value, pickerValue as Dayjs | null)
+      const newValue = parseTimeInput(value, pickerValue)
       if (newValue) {
         pickerActions.setValue(newValue, { changeImportance: 'accept' })
       }
