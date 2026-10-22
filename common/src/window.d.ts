@@ -22,7 +22,6 @@ declare global {
     VIDEO_CONFERENCE_BASE_URL: string
     MEET_BACKEND_INTEGRATION: boolean | undefined
     TDRIVE_ENABLED: boolean | undefined
-    TDRIVE_INTENT_URL: string | undefined
     WORKPLACE_FQDN_FALLBACK: string | undefined
     SUPPORT_URL: string
     PRIVACY_URL: string

@@ -38,9 +38,6 @@ const mockCreateSdk = jest.fn()
 jest.mock('@linagora/twake-sdk', () => ({
   createSdk: (options: unknown): unknown => mockCreateSdk(options)
 }))
-jest.mock('@linagora/twake-utils', () => ({
-  resolveUriTemplate: jest.fn((template: string) => template)
-}))
 
 describe('useTdrivePicker', () => {
   const createWrapper = (preloadedState = {}) => {
@@ -52,7 +49,10 @@ describe('useTdrivePicker', () => {
 
   const defaultUserState = {
     user: {
-      userData: { email: 'alice@example.com', workplaceFqdn: 'example.com' },
+      userData: {
+        email: 'alice@example.com',
+        workplaceFqdn: 'drive.example.com'
+      },
       organiserData: {},
       tokens: { id_token: 'user-id-token' }
     }
@@ -70,7 +70,6 @@ describe('useTdrivePicker', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    window.TDRIVE_INTENT_URL = 'https://drive.example.com'
     // Like the SDK client, a successful login makes the client ready
     const sdk = { status: 'waiting', login: mockLogin }
     mockCreateSdk.mockReturnValue(sdk)
@@ -157,9 +156,7 @@ describe('useTdrivePicker', () => {
     await waitFor(() => expect(result.current.isOpen).toBe(false))
   })
 
-  it('does not open when TDRIVE_URL is not configured', async () => {
-    window.TDRIVE_INTENT_URL = undefined
-
+  it("does not open without the user's platform", async () => {
     const { result } = renderHook(
       () => useTdrivePicker({ onFilesSelected: jest.fn() }),
       { wrapper: createWrapper() }
@@ -180,7 +177,10 @@ describe('useTdrivePicker', () => {
       {
         wrapper: createWrapper({
           user: {
-            userData: { email: 'alice@example.com' },
+            userData: {
+              email: 'alice@example.com',
+              workplaceFqdn: 'drive.example.com'
+            },
             organiserData: {},
             tokens: {}
           }
@@ -205,7 +205,10 @@ describe('useTdrivePicker', () => {
       {
         wrapper: createWrapper({
           user: {
-            userData: { email: 'alice@example.com' },
+            userData: {
+              email: 'alice@example.com',
+              workplaceFqdn: 'drive.example.com'
+            },
             organiserData: {},
             tokens: { id_token: 'token' }
           }
@@ -238,7 +241,10 @@ describe('useTdrivePicker', () => {
     const { result } = renderHook(() => useTdrivePicker({ onFilesSelected }), {
       wrapper: createWrapper({
         user: {
-          userData: { email: 'alice@example.com' },
+          userData: {
+            email: 'alice@example.com',
+            workplaceFqdn: 'drive.example.com'
+          },
           organiserData: {},
           tokens: { id_token: 'token' }
         }

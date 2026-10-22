@@ -66,12 +66,8 @@ var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain
 // Examples:
 //   '{localpart}.twake.linagora.com'
 // var WORKPLACE_FQDN_FALLBACK = '{localpart}.twake.linagora.com'; // optional
+// Offers to attach files from Tdrive to events. Tdrive runs on the user's
+// platform, so it needs the workplace FQDN from the SSO (workplaceFqdn in
+// SSO_SCOPE) or WORKPLACE_FQDN_FALLBACK.
 var TDRIVE_ENABLED = false
-var TDRIVE_INTENT_URL = "https://{localpart}.example.com"
-// TDRIVE_INTENT_URL is a URI template (RFC 6570 style).
-// Supported expressions: {localpart}, {workplaceFqdn},
-// {workplaceFqdn.localpart}, {workplaceFqdn.domain}
-// Examples:
-//   'https://{workplaceFqdn}'
-//   'https://{workplaceFqdn.localpart}.{workplaceFqdn.domain}'
 var ENABLE_REFRESH_BUTTON = false 

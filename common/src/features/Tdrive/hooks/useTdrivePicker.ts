@@ -1,10 +1,10 @@
 import { useAppSelector } from '@common/app/hooks'
+import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
 import { createSdk, type Sdk } from '@linagora/twake-sdk'
 import Intents from 'cozy-interapp'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveFile } from '../types'
-import { useTdriveUserContext } from './useTdriveUserContext'
 
 const INTENT_REQUEST_TIMEOUT_MS = 30000
 
@@ -185,11 +185,11 @@ export function useTdrivePicker({
   const [isOpen, setIsOpen] = useState(false)
   const [openPickerError, setOpenPickerError] = useState<string | null>(null)
 
-  const { tdriveBaseUrl } = useTdriveUserContext()
+  const platformURL = useAppSelector(selectPlatformURL)
   const idToken = useAppSelector(state => state.user.tokens?.id_token)
   const sdk = useMemo(
-    () => (tdriveBaseUrl ? createSdk({ platformURL: tdriveBaseUrl }) : null),
-    [tdriveBaseUrl]
+    () => (platformURL ? createSdk({ platformURL }) : null),
+    [platformURL]
   )
 
   const containerRef = useRef<HTMLDivElement>(null)
