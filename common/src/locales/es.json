@@ -331,12 +331,8 @@
       "day": "Día",
       "schedule": "Agenda"
     },
-    "apps": "Aplicaciones",
-    "userProfile": "Perfil de usuario",
-    "logoAlt": "Calendario",
     "settings": "Ajustes",
     "help": "Ayuda",
-    "logout": "Cerrar sesión",
     "hideDatePicker": "Ocultar el selector de fecha",
     "showDatePicker": "Mostrar el selector de fecha"
   },

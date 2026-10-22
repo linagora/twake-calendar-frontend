@@ -330,12 +330,8 @@
       "day": "Jour",
       "schedule": "Programme"
     },
-    "apps": "Applications",
-    "userProfile": "Profil utilisateur",
-    "logoAlt": "Calendrier",
     "settings": "Paramètres",
     "help": "Aide",
-    "logout": "Déconnexion",
     "toggleSidebar": "Afficher/masquer la barre latérale",
     "hideDatePicker": "Masquer le sélecteur de date",
     "showDatePicker": "Afficher le sélecteur de date"

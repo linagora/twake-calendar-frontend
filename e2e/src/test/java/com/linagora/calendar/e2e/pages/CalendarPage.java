@@ -863,19 +863,19 @@ public class CalendarPage {
     }
 
     public SettingsPage openSettings() {
-        page.getByLabel("User profile").click();
-        page.getByText("Settings").last().click();
+        page.getByLabel("Settings", new Page.GetByLabelOptions().setExact(true)).click();
         return new SettingsPage(page).waitUntilOpen();
     }
 
+    /** Logs out from the user menu of the Twake bar. */
     public void logout() {
-        page.getByLabel("User profile").click();
-        page.getByText("Logout").last().click();
+        page.getByTestId("twake-bar-user-button").click();
+        page.getByTestId("twake-bar-logout").click();
     }
 
     public String loggedInUser() {
-        page.getByLabel("User profile").click();
-        String menu = page.locator(".MuiPopover-root").innerText();
+        page.getByTestId("twake-bar-user-button").click();
+        String menu = page.getByTestId("twake-bar-user-menu").innerText();
         page.keyboard().press("Escape");
         return menu;
     }

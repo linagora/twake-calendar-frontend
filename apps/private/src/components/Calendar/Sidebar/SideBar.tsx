@@ -10,7 +10,6 @@ export interface CalendarSidebarProps {
   open: boolean
   onClose: () => void
   calendarRef: MutableRefObject<CalendarApi | null>
-  isIframe?: boolean
   onCreateEvent: () => void
   onViewChange: (view: string) => void
   selectedMiniDate: Date | null

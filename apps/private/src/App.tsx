@@ -10,6 +10,7 @@ import { Error as ErrorPage } from '@common/components/Error/Error'
 import { ErrorSnackbar } from '@common/components/Error/ErrorSnackbar'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
 import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
+import { TwakeBarHeader } from '@common/components/TwakeBarHeader/TwakeBarHeader'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Loading } from '@common/components/Loading/Loading'
 import { AVAILABLE_LANGUAGES } from '@common/features/Settings/constants'
@@ -153,6 +154,7 @@ export default function App(): JSX.Element {
           lang={lang}
           locales={dateLocales}
         >
+          <TwakeBarHeader />
           <ErrorBoundary
             FallbackComponent={({ error }) => (
               <ErrorPage

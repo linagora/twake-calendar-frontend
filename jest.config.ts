@@ -38,7 +38,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
       ],
 
       moduleNameMapper: {
@@ -93,7 +93,7 @@ const config: Config = {
           '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        '/node_modules/(?!(preact|@fullcalendar|react-calendar|get-user-locale|memoize|mimic-function|@wojtekmaj|ky|cozy-ui|p-map|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|@linagora/twake-embed|mime|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
       ],
 
       moduleNameMapper: {
@@ -142,7 +142,7 @@ const config: Config = {
         '^.+\\.(js|jsx|mjs)$': 'babel-jest'
       },
       transformIgnorePatterns: [
-        '/node_modules/(?!(ky|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-websocket|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
+        '/node_modules/(?!(ky|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-bar|@linagora/twake-websocket|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'
       ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {

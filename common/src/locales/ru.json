@@ -330,12 +330,8 @@
       "day": "День",
       "schedule": "Расписание"
     },
-    "apps": "Приложения",
-    "userProfile": "Профиль",
-    "logoAlt": "Календарь",
     "settings": "Настройки",
     "help": "Помощь",
-    "logout": "Выйти",
     "toggleSidebar": "Показать/скрыть боковую панель",
     "hideDatePicker": "Скрыть выбор даты",
     "showDatePicker": "Показать выбор даты"
