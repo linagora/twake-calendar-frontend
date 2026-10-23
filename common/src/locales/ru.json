@@ -569,7 +569,6 @@
     "previousMonth": "Предыдущий месяц",
     "copyBookingLink": "Копировать ссылку для бронирования",
     "createAppointment": "Создать расписание встреч",
-    "copyEmail": "Копировать адрес электронной почты",
     "emailCopied": "Email скопирован",
     "cannotOpenChatExternalUser": "Невозможно открыть чат с внешним пользователем",
     "openChat": "Открыть чат с %{attendee}",
@@ -695,7 +694,6 @@
     "dot": "."
   },
   "attendees": {
-    "sendMail": "Отправить письмо",
     "chat": "Чат",
     "createEvent": "Создать событие"
   },

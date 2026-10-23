@@ -1,5 +1,4 @@
-import { Box, Button, IconButton, useTheme } from '@linagora/twake-mui'
-import { Icon, CalendarToday, EmailOpen, Discuss } from '@linagora/twake-icons'
+import { ContactPopover } from '@linagora/twake-mui'
 import { useI18n } from 'twake-i18n'
 import { useNavigate } from 'react-router'
 import { useAppSelector } from '@common/app/hooks'
@@ -8,7 +7,6 @@ import {
   resolveMailSpaUrl,
   resolveChatSpaUrl
 } from '@linagora/twake-utils'
-import { Tooltip } from '@common/components/Tooltip'
 import { useCheckInternalUser } from './useCheckInternalUser'
 import { userAttendee } from '@common/features/User/models/attendee'
 
@@ -22,7 +20,6 @@ export function AttendeeActions({
   attendee: userAttendee
 }): JSX.Element {
   const { t } = useI18n()
-  const theme = useTheme()
   const navigate = useNavigate()
 
   const workplaceFqdn = useAppSelector(
@@ -35,6 +32,8 @@ export function AttendeeActions({
     workplaceFqdn,
     workplaceFqdnFallback: window.WORKPLACE_FQDN_FALLBACK
   })
+  const composeUrl =
+    mailSpaUrl && buildMailComposerUrl(mailSpaUrl, [attendee.cal_address])
 
   const chatSpaUrl = resolveChatSpaUrl(window.CHAT_SPA_URL, {
     localpart: getUserNameFromEmail(userEmail),
@@ -48,91 +47,28 @@ export function AttendeeActions({
     chatSpaUrl
   )
 
-  const chatLabel = !isInternalUser
-    ? t('tooltip.cannotOpenChatExternalUser')
-    : t('tooltip.openChat', { attendee: attendee.cn })
-
-  const handleSendMail = (): void => {
-    if (!mailSpaUrl) return
-    const composeUrl = buildMailComposerUrl(mailSpaUrl, [attendee.cal_address])
-    if (!composeUrl) return
-    window.open(composeUrl, '_blank', 'noopener,noreferrer')
-  }
-
-  const handleOpenChat = (): void => {
-    if (!chatSpaUrl) return
-    window.open(chatSpaUrl, '_blank', 'noopener,noreferrer')
-  }
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: 1,
-        mt: 1,
-        alignItems: 'center'
-      }}
-    >
-      {mailSpaUrl && (
-        <Button
-          variant="outlined"
-          startIcon={<Icon icon={EmailOpen} size={18} />}
-          onClick={handleSendMail}
-          sx={{
-            borderRadius: 6,
-            textTransform: 'none',
-            borderColor: 'divider',
-            color: theme.vars.palette.text.primary
-          }}
-        >
-          {t('attendees.sendMail')}
-        </Button>
-      )}
-      {/* the span lets the tooltip show on a disabled button, and takes its
-      aria-label: the button is named too */}
+    <>
+      {composeUrl && <ContactPopover.EmailAction url={composeUrl} />}
       {chatSpaUrl && (
-        <Tooltip title={chatLabel}>
-          <Box component="span" sx={{ display: 'inline-flex' }}>
-            <IconButton
-              onClick={handleOpenChat}
-              aria-label={chatLabel}
-              sx={{
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: '50%',
-                padding: 1,
-                color: theme.vars.palette.text.primary,
-                '&.Mui-disabled': { color: theme.vars.palette.text.primary }
-              }}
-              size="small"
-              disabled={!isInternalUser || loading}
-            >
-              <Icon icon={Discuss} size={20} />
-            </IconButton>
-          </Box>
-        </Tooltip>
+        <ContactPopover.ChatAction
+          url={chatSpaUrl}
+          label={
+            !isInternalUser
+              ? t('tooltip.cannotOpenChatExternalUser')
+              : t('tooltip.openChat', { attendee: attendee.cn })
+          }
+          disabled={!isInternalUser || loading}
+        />
       )}
-      <Tooltip
-        title={t('tooltip.createEventWithAttendee', { attendee: attendee.cn })}
-      >
-        <IconButton
-          onClick={() => {
-            navigate(
-              `/newEvent?attendee=${encodeURIComponent(attendee.cal_address)}`
-            )
-          }}
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: '50%',
-            padding: 1,
-            color: theme.vars.palette.text.primary
-          }}
-          size="small"
-        >
-          <Icon icon={CalendarToday} size={20} />
-        </IconButton>
-      </Tooltip>
-    </Box>
+      <ContactPopover.CalendarAction
+        label={t('tooltip.createEventWithAttendee', { attendee: attendee.cn })}
+        onClick={() => {
+          navigate(
+            `/newEvent?attendee=${encodeURIComponent(attendee.cal_address)}`
+          )
+        }}
+      />
+    </>
   )
 }

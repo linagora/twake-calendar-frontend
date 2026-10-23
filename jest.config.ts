@@ -143,7 +143,9 @@ const config: Config = {
       testTimeout: 15000,
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
-        '^.+\\.(js|jsx|mjs)$': 'babel-jest'
+        '^.+\\.(js|jsx|mjs)$': 'babel-jest',
+        '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+          '<rootDir>/fileTransformer.ts'
       },
       transformIgnorePatterns: [
         '/node_modules/(?!(ky|@linagora/twake-mui|@linagora/twake-oidc|@linagora/twake-icons|@linagora/twake-utils|@linagora/twake-sdk|@linagora/twake-websocket|html-react-parser|domhandler|htmlparser2|domutils|entities|domelementtype|dom-serializer)/)'

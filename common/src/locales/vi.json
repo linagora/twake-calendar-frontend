@@ -569,7 +569,6 @@
     "previousMonth": "Tháng trước",
     "copyBookingLink": "Sao chép liên kết đặt lịch",
     "createAppointment": "Tạo lịch hẹn",
-    "copyEmail": "Sao chép địa chỉ email",
     "emailCopied": "Email đã được sao chép",
     "cannotOpenChatExternalUser": "Không thể mở trò chuyện với người dùng bên ngoài",
     "openChat": "Mở trò chuyện với %{attendee}",
@@ -695,7 +694,6 @@
     "dot": "."
   },
   "attendees": {
-    "sendMail": "Gửi thư",
     "chat": "Trò chuyện",
     "createEvent": "Tạo sự kiện"
   },

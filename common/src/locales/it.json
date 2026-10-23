@@ -570,7 +570,6 @@
     "copyBookingLink": "Copia il link di prenotazione",
     "createAppointment": "Crea una pianificazione appuntamenti",
     "chat": "Chatta",
-    "copyEmail": "Copia l'indirizzo email",
     "emailCopied": "Indirizzo email copiato",
     "cannotOpenChatExternalUser": "Impossibile aprire una chat con un utente esterno",
     "openChat": "Apri una chat con %{attendee}",
@@ -695,9 +694,7 @@
     "termsOfService": "Termini di servizio",
     "dot": "."
   },
-  "attendees": {
-    "sendMail": "Invia un'email"
-  },
+  "attendees": {},
   "debug": {
     "enabled": "Modalità debug attivata.",
     "disabled": "Modalità debug disattivata."

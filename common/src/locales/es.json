@@ -570,7 +570,6 @@
     "copyBookingLink": "Copiar el enlace de reserva",
     "createAppointment": "Crear una agenda de citas",
     "chat": "Chatear",
-    "copyEmail": "Copiar dirección de correo",
     "emailCopied": "Correo copiado",
     "cannotOpenChatExternalUser": "No se puede abrir un chat con un usuario externo",
     "openChat": "Abrir un chat con %{attendee}",
@@ -695,9 +694,7 @@
     "termsOfService": "Términos de servicio",
     "dot": "."
   },
-  "attendees": {
-    "sendMail": "Enviar correo"
-  },
+  "attendees": {},
   "debug": {
     "enabled": "Modo de depuración activado.",
     "disabled": "Modo de depuración desactivado."

@@ -33,12 +33,12 @@ describe('AttendeePopover (Public)', () => {
     fireEvent.click(trigger)
 
     // Should render mail action button
-    expect(screen.getByText('attendees.sendMail')).toBeInTheDocument()
+    expect(screen.getByText('ContactPopover.emailButton')).toBeInTheDocument()
 
     // Should NOT render chat or create event buttons present only in private AttendeeActions
-    expect(screen.queryByText(/tooltip\.openChat/)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/tooltip\.openChat/)).not.toBeInTheDocument()
     expect(
-      screen.queryByText(/tooltip\.createEventWithAttendee/)
+      screen.queryByLabelText(/tooltip\.createEventWithAttendee/)
     ).not.toBeInTheDocument()
   })
 })

@@ -6,7 +6,7 @@
     "@calendar/common": "*",
     "@fullcalendar/core": "^6.1.17",
     "@linagora/twake-icons": "^2.14.0",
-    "@linagora/twake-mui": "^13.2.1",
+    "@linagora/twake-mui": "^18.3.0",
     "@linagora/twake-oidc": "^1.1.0",
     "@mui/icons-material": "^9.0.1",
     "@mui/x-date-pickers": "^9",

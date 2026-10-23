@@ -570,7 +570,6 @@
     "copyBookingLink": "Buchungslink kopieren",
     "createAppointment": "Terminplan erstellen",
     "chat": "Chatten",
-    "copyEmail": "E-Mail-Adresse kopieren",
     "emailCopied": "E-Mail-Adresse kopiert",
     "cannotOpenChatExternalUser": "Mit externen Benutzern kann kein Chat geöffnet werden",
     "openChat": "Chat mit %{attendee} öffnen",
@@ -695,9 +694,7 @@
     "termsOfService": "Nutzungsbedingungen",
     "dot": "."
   },
-  "attendees": {
-    "sendMail": "E-Mail senden"
-  },
+  "attendees": {},
   "debug": {
     "enabled": "Debug-Modus aktiviert.",
     "disabled": "Debug-Modus deaktiviert."

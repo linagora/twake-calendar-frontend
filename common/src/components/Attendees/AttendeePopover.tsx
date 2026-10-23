@@ -1,26 +1,10 @@
 import { userAttendee } from '@common/features/User/models/attendee'
-import {
-  Box,
-  IconButton,
-  Typography,
-  Popper,
-  Paper,
-  useTheme
-} from '@linagora/twake-mui'
-import { Avatar } from '@common/ds/Avatar/Avatar'
-import { ClickAwayListener } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
-import React, { useState, useRef, useEffect } from 'react'
+import { ContactPopover } from '@linagora/twake-mui'
+import React, { useState } from 'react'
 import { useI18n } from 'twake-i18n'
-import { Tooltip } from '../Tooltip'
-import { stringAvatar } from '../Event/utils/eventUtils'
 import { SnackbarAlert } from '../Loading/SnackBarAlert'
 import { AttendeeActions } from '@injected/components/Attendees/AttendeeActions'
 import { useAppSelector } from '@common/app/hooks'
-import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
-
-const VIEWPORT_MARGIN = 8
 
 interface AttendeePopoverProps {
   attendee: userAttendee
@@ -28,52 +12,8 @@ interface AttendeePopoverProps {
   openOnHover?: boolean
 }
 
-function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
-  const { t } = useI18n()
-  const theme = useTheme()
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
-
-  return (
-    <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar
-          {...stringAvatar(attendee.cn || attendee.cal_address)}
-          sx={{ width: 48, height: 48, fontSize: '1.25rem' }}
-        />
-        <Box sx={{ minWidth: 0 }}>
-          {attendee.cn ? (
-            <Typography variant="body1" sx={{ fontWeight: 500 }} noWrap>
-              {attendee.cn}
-            </Typography>
-          ) : null}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {attendee.cal_address}
-            </Typography>
-            <Tooltip title={t('tooltip.copyEmail')}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  void navigator.clipboard.writeText(attendee.cal_address)
-                  setSnackbarOpen(true)
-                }}
-                sx={{ p: 0.5, color: theme.vars.palette.text.primary }}
-              >
-                <ContentCopyOutlinedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Box>
-      <SnackbarAlert
-        open={snackbarOpen}
-        setOpen={setSnackbarOpen}
-        message={t('tooltip.emailCopied')}
-        sx={{ whiteSpace: 'nowrap' }}
-      />
-    </>
-  )
-}
+const normalizeEmail = (email: string): string =>
+  email.replace(/^mailto:/i, '').toLowerCase()
 
 export function AttendeePopover({
   attendee,
@@ -81,165 +21,33 @@ export function AttendeePopover({
   openOnHover = true
 }: AttendeePopoverProps): React.ReactElement {
   const { t } = useI18n()
-  const theme = useTheme()
   const userEmail = useAppSelector(state => state.user.userData?.email)
-  const { isTooSmall: isMobile } = useScreenSizeDetection()
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const openTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const clearOpenTimeout = (): void => {
-    if (openTimeoutRef.current) {
-      clearTimeout(openTimeoutRef.current)
-      openTimeoutRef.current = null
-    }
-  }
-
-  const clearCloseTimeout = (): void => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current)
-      closeTimeoutRef.current = null
-    }
-  }
-
-  const handleTriggerMouseEnter = (
-    event: React.MouseEvent<HTMLElement>
-  ): void => {
-    clearCloseTimeout()
-    clearOpenTimeout()
-    const target = event.currentTarget
-    if (anchorEl) {
-      setAnchorEl(target)
-      return
-    }
-    openTimeoutRef.current = setTimeout(() => {
-      setAnchorEl(target)
-    }, 500)
-  }
-
-  const handlePopoverMouseEnter = (): void => {
-    clearCloseTimeout()
-    clearOpenTimeout()
-  }
-
-  const handleMouseLeave = (): void => {
-    clearOpenTimeout()
-    clearCloseTimeout()
-    closeTimeoutRef.current = setTimeout(() => {
-      setAnchorEl(null)
-    }, 200)
-  }
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
-    clearOpenTimeout()
-    clearCloseTimeout()
-    setAnchorEl(anchorEl ? null : event.currentTarget)
-  }
-
-  const handleClose = (): void => {
-    clearOpenTimeout()
-    clearCloseTimeout()
-    setAnchorEl(null)
-  }
-
-  useEffect(() => {
-    return (): void => {
-      clearOpenTimeout()
-      clearCloseTimeout()
-    }
-  }, [])
-
-  const open = Boolean(anchorEl)
-
-  const normalizeEmail = (email: string): string =>
-    email.replace(/^mailto:/i, '').toLowerCase()
   const isSelf =
     !!userEmail &&
     normalizeEmail(attendee.cal_address) === normalizeEmail(userEmail)
 
-  if (isSelf || attendee.cutype === 'RESOURCE') {
-    return <>{children}</>
-  }
-
   return (
-    <ClickAwayListener onClickAway={handleClose}>
-      <div>
-        <div
-          onClick={handleClick}
-          onMouseEnter={openOnHover ? handleTriggerMouseEnter : undefined}
-          onMouseLeave={openOnHover ? handleMouseLeave : undefined}
-          onKeyDown={event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              handleClick(event as unknown as React.MouseEvent<HTMLElement>)
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          style={{
-            display: 'inline-block',
-            width: 'fit-content',
-            cursor: 'pointer'
-          }}
-        >
-          {children}
-        </div>
-        <Popper
-          open={open}
-          anchorEl={anchorEl}
-          placement={isMobile ? 'bottom-start' : 'right'}
-          style={{ zIndex: 1300 }}
-          modifiers={[
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 8]
-              }
-            },
-            {
-              name: 'preventOverflow',
-              options: {
-                altAxis: true,
-                padding: VIEWPORT_MARGIN
-              }
-            }
-          ]}
-        >
-          <Paper
-            elevation={4}
-            onMouseEnter={openOnHover ? handlePopoverMouseEnter : undefined}
-            onMouseLeave={openOnHover ? handleMouseLeave : undefined}
-            sx={{
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              position: 'relative',
-              minWidth: `min(320px, calc(100vw - ${2 * VIEWPORT_MARGIN}px))`,
-              maxWidth: `calc(100vw - ${2 * VIEWPORT_MARGIN}px)`,
-              boxSizing: 'border-box',
-              borderRadius: 2
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={handleClose}
-              aria-label={t('actions.close')}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                color: theme.vars.palette.text.primary
-              }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-
-            <AttendeeInfo attendee={attendee} />
-            <AttendeeActions attendee={attendee} />
-          </Paper>
-        </Popper>
-      </div>
-    </ClickAwayListener>
+    <>
+      <ContactPopover
+        name={attendee.cn ?? ''}
+        email={attendee.cal_address}
+        openOnHover={openOnHover}
+        disabled={isSelf || attendee.cutype === 'RESOURCE'}
+        onEmailCopy={() => setSnackbarOpen(true)}
+      >
+        {children}
+        <ContactPopover.Actions>
+          <AttendeeActions attendee={attendee} />
+        </ContactPopover.Actions>
+      </ContactPopover>
+      <SnackbarAlert
+        open={snackbarOpen}
+        setOpen={setSnackbarOpen}
+        message={t('tooltip.emailCopied')}
+        sx={{ whiteSpace: 'nowrap' }}
+      />
+    </>
   )
 }
