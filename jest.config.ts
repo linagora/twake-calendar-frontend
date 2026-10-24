@@ -34,10 +34,6 @@ const config: Config = {
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
         '^.+\\.(js|jsx|mjs)$': 'babel-jest',
-        '^.+\\.(css|scss|sass|less|styl|stylus)$':
-          'jest-preview/transforms/css',
-        '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)':
-          'jest-preview/transforms/file',
         '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
           '<rootDir>/fileTransformer.ts'
       },
@@ -46,6 +42,8 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '\\.(css|scss|sass|less|styl|stylus)$':
+          '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
@@ -91,10 +89,6 @@ const config: Config = {
       transform: {
         '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.base.json' }],
         '^.+\\.(js|jsx|mjs)$': 'babel-jest',
-        '^.+\\.(css|scss|sass|less|styl|stylus)$':
-          'jest-preview/transforms/css',
-        '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)':
-          'jest-preview/transforms/file',
         '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
           '<rootDir>/fileTransformer.ts'
       },
@@ -103,6 +97,8 @@ const config: Config = {
       ],
 
       moduleNameMapper: {
+        '\\.(css|scss|sass|less|styl|stylus)$':
+          '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
@@ -150,6 +146,8 @@ const config: Config = {
       ],
       setupFilesAfterEnv: ['<rootDir>/common/src/setupTests.ts'],
       moduleNameMapper: {
+        '\\.(css|scss|sass|less|styl|stylus)$':
+          '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
         '^(react-markdown|remark-gfm)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
