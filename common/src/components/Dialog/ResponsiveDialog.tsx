@@ -17,7 +17,6 @@ import {
 } from '@linagora/twake-mui'
 import { Dialog } from '@common/ds/Dialog/Dialog'
 import Tooltip from '@common/components/Tooltip'
-import { useIsInIframe } from '@common/contexts/EmbeddingContext'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
@@ -228,7 +227,6 @@ function ResponsiveDialog({
   const { t } = useI18n()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const isInIframe = useIsInIframe()
 
   const uid = useId()
   const titleId = `responsive-dialog-title-${uid}`
@@ -305,11 +303,11 @@ function ResponsiveDialog({
           maxWidth: isExpanded ? '100%' : normalMaxWidth,
           width: '100%',
           height: isExpanded
-            ? `calc(100vh - ${isInIframe ? '0px' : headerHeight})`
+            ? 'calc(100vh - var(--twake-bar-height, 0px))'
             : undefined,
-          maxHeight: isExpanded && isInIframe ? '100%' : undefined,
+          maxHeight: isExpanded ? '100%' : undefined,
           margin: isExpanded
-            ? `${isInIframe ? 0 : headerHeight} 0 0 0`
+            ? 'var(--twake-bar-height, 0px) 0 0 0'
             : lockedPosition
               ? '0 !important'
               : '32px',

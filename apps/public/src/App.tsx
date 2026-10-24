@@ -5,7 +5,6 @@ import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
 import { history } from '@common/app/store'
 import { Error as ErrorPage } from '@common/components/Error/Error'
-import { EmbeddingProvider } from '@common/contexts/EmbeddingContext'
 import { DebugModeToggle } from '@common/components/Debug/DebugModeToggle'
 import { makeCalendarOverrides } from '@common/theme/makeCalendarOverrides'
 import paletteData from '@common/theme/palette.json'
@@ -62,76 +61,74 @@ export default function App(): JSX.Element {
   }
 
   return (
-    <EmbeddingProvider>
-      <TwakeMuiThemeProvider
-        palette={paletteData}
-        themeOptions={{
-          ...makeCalendarOverrides()
-        }}
+    <TwakeMuiThemeProvider
+      palette={paletteData}
+      themeOptions={{
+        ...makeCalendarOverrides()
+      }}
+    >
+      <I18n
+        dictRequire={(lang: keyof typeof locale) => locale[lang]}
+        lang={lang}
+        locales={dateLocales}
       >
-        <I18n
-          dictRequire={(lang: keyof typeof locale) => locale[lang]}
-          lang={lang}
-          locales={dateLocales}
+        <PublicLanguageContext.Provider
+          value={{
+            currentLanguage: lang,
+            setCurrentLanguage: handleLanguageChange
+          }}
         >
-          <PublicLanguageContext.Provider
-            value={{
-              currentLanguage: lang,
-              setCurrentLanguage: handleLanguageChange
+          <ErrorBoundary
+            FallbackComponent={({ error }) => (
+              <ErrorPage
+                isCrashFallback
+                errorBoundaryMessage={error as Error}
+              />
+            )}
+            onError={(error, errorInfo) => {
+              Sentry.captureException(error, {
+                contexts: {
+                  react: {
+                    componentStack: errorInfo.componentStack
+                  }
+                }
+              })
             }}
           >
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorPage
-                  isCrashFallback
-                  errorBoundaryMessage={error as Error}
-                />
-              )}
-              onError={(error, errorInfo) => {
-                Sentry.captureException(error, {
-                  contexts: {
-                    react: {
-                      componentStack: errorInfo.componentStack
+            <Suspense fallback={<Loading />}>
+              <Router history={history}>
+                <Routes>
+                  <Route
+                    path="/excal"
+                    element={
+                      <PublicLayout>
+                        <EventPreviewPage />
+                      </PublicLayout>
                     }
-                  }
-                })
-              }}
-            >
-              <Suspense fallback={<Loading />}>
-                <Router history={history}>
-                  <Routes>
-                    <Route
-                      path="/excal"
-                      element={
-                        <PublicLayout>
-                          <EventPreviewPage />
-                        </PublicLayout>
-                      }
-                    />
-                    <Route
-                      path="/booking/confirmed/:bookingConfirmationToken"
-                      element={
-                        <PublicLayout>
-                          <BookedEventPreviewPage />
-                        </PublicLayout>
-                      }
-                    />
-                    <Route
-                      path="/booking/:bookingLinkPublicId"
-                      element={
-                        <PublicLayout>
-                          <BookingPage />
-                        </PublicLayout>
-                      }
-                    />
-                  </Routes>
-                </Router>
-                <DebugModeToggle />
-              </Suspense>
-            </ErrorBoundary>
-          </PublicLanguageContext.Provider>
-        </I18n>
-      </TwakeMuiThemeProvider>
-    </EmbeddingProvider>
+                  />
+                  <Route
+                    path="/booking/confirmed/:bookingConfirmationToken"
+                    element={
+                      <PublicLayout>
+                        <BookedEventPreviewPage />
+                      </PublicLayout>
+                    }
+                  />
+                  <Route
+                    path="/booking/:bookingLinkPublicId"
+                    element={
+                      <PublicLayout>
+                        <BookingPage />
+                      </PublicLayout>
+                    }
+                  />
+                </Routes>
+              </Router>
+              <DebugModeToggle />
+            </Suspense>
+          </ErrorBoundary>
+        </PublicLanguageContext.Provider>
+      </I18n>
+    </TwakeMuiThemeProvider>
   )
 }

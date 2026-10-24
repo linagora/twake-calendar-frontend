@@ -144,10 +144,10 @@ class ResponsiveTest extends TwakeCalendarE2ETest {
         Page tabletPage = tablet.page();
 
         // a tablet keeps the sidebar toggle of the phone and regains what a phone has no room
-        // for: the refresh and the profile
+        // for: the refresh and the settings
         assertThat(tabletPage.getByLabel("Toggle sidebar").count()).isPositive();
         assertThat(tabletPage.getByLabel("Refresh").count()).isPositive();
-        assertThat(tabletPage.getByLabel("User profile").count()).isPositive();
+        assertThat(tabletPage.getByLabel("Settings").count()).isPositive();
         assertThat(overflowsSideways(tabletPage)).isFalse();
     }
 

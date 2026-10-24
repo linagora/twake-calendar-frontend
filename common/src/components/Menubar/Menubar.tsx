@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import { setView } from '@common/features/Settings/SettingsSlice'
-import { userData } from '@common/features/User/userDataTypes'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { CalendarApi } from '@fullcalendar/core'
 import React, { useEffect } from 'react'
@@ -10,7 +9,6 @@ import { DesktopMenubar } from './DesktopMenubar'
 import './Menubar.styl'
 import { TabletMenubar } from './TabletMenubar'
 import { MobileMenubar } from './MobileMenuBar'
-import { useUtilMenus } from '@common/components/Calendar/hooks/useUtilMenus'
 import { DisplayedPeriod, formatPeriodLabel } from './periodLabel'
 
 export type AppIconProps = {
@@ -27,24 +25,13 @@ export type MenubarProps = {
   onDateChange?: (date: Date) => void
   currentView: string
   onViewChange?: (view: string) => void
-  isIframe?: boolean
   onToggleSidebar: () => void
 }
 
 export type SharedMenubarProps = MenubarProps & {
   dateLabel: string
-  supportLink: string | undefined
-  anchorEl: HTMLElement | null
-  onAppMenuOpen: (event: React.MouseEvent<HTMLElement>) => void
-  onAppMenuClose: () => void
-  userMenuAnchorEl: HTMLElement | null
-  onUserMenuOpen: (event: React.MouseEvent<HTMLElement>) => void
-  onUserMenuClose: () => void
-  onSettingsClick: () => void
-  onLogoutClick: () => void
   onNavigate: (action: 'prev' | 'next' | 'today') => void
   onViewChange: (view: string) => void
-  user: userData | null
 }
 
 export const Menubar: React.FC<MenubarProps> = ({
@@ -55,24 +42,11 @@ export const Menubar: React.FC<MenubarProps> = ({
   onDateChange,
   currentView,
   onViewChange,
-  isIframe,
   onToggleSidebar
 }) => {
   const { t } = useI18n() // deliberately NOT using f()
 
   const user = useAppSelector(state => state.user.userData)
-
-  const {
-    anchorEl,
-    userMenuAnchorEl,
-    supportLink,
-    handleAppMenuOpen,
-    handleAppMenuClose,
-    handleUserMenuOpen,
-    handleUserMenuClose,
-    handleSettingsClick,
-    handleLogoutClick
-  } = useUtilMenus()
 
   const dispatch = useAppDispatch()
   const { isTablet, isTooSmall: isMobile } = useScreenSizeDetection()
@@ -126,20 +100,9 @@ export const Menubar: React.FC<MenubarProps> = ({
     onDateChange,
     currentView,
     onViewChange: handleViewChange,
-    isIframe,
     onToggleSidebar,
     dateLabel,
-    supportLink,
-    anchorEl,
-    onAppMenuOpen: handleAppMenuOpen,
-    onAppMenuClose: handleAppMenuClose,
-    userMenuAnchorEl,
-    onUserMenuOpen: handleUserMenuOpen,
-    onUserMenuClose: handleUserMenuClose,
-    onSettingsClick: handleSettingsClick,
-    onLogoutClick: () => void handleLogoutClick(),
-    onNavigate: handleNavigation,
-    user
+    onNavigate: handleNavigation
   }
 
   if (isMobile) {

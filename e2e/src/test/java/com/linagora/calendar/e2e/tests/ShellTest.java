@@ -30,13 +30,13 @@ class ShellTest extends TwakeCalendarE2ETest {
         DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
 
     @Test
-    @DisplayName("SHELL-01 The menubar exposes Today, Previous, Next, Search, Refresh and the profile")
+    @DisplayName("SHELL-01 The menubar exposes Today, Previous, Next, Search, Refresh and the settings")
     void theMenubarExposesItsActions(Page page, E2EUser user) {
         LoginPage.loginAs(page, user);
 
         // the week view names the step of its Previous / Next buttons
         List.of("Today", "Previous week", "Next week", "Search for events or calendars", "Refresh",
-                "User profile")
+                "Settings")
             .forEach(action -> assertThat(
                 page.getByLabel(action, new Page.GetByLabelOptions().setExact(true))).isVisible());
     }

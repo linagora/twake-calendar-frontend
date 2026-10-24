@@ -71,3 +71,7 @@ var CHAT_SPA_URL = 'https://{workplaceFqdn.localpart}-chat.{workplaceFqdn.domain
 // SSO_SCOPE) or WORKPLACE_FQDN_FALLBACK.
 var TDRIVE_ENABLED = false
 var ENABLE_REFRESH_BUTTON = false 
+// The Twake bar, the platform top bar, shows the apps and the account of the
+// user's Cozy when SSO_SCOPE includes workplaceFqdn (or WORKPLACE_FQDN_FALLBACK
+// is set) and the Cozy accepts the application's SSO client for token
+// exchange. Otherwise it shows the apps of appList.js and the SSO user.

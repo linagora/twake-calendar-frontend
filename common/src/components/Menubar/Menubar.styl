@@ -67,6 +67,10 @@
     .right-menu
       flex 0 0 auto
 
+// When the page scrolls, stick below the Twake bar
+.App > .menubar--mobile
+  top var(--twake-bar-height, 0px)
+
 .menubar-item
   display flex
   align-items center

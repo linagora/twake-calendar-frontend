@@ -1,4 +1,4 @@
-import type { ensureSdkSignedIn as EnsureSdkSignedIn } from '@common/utils/sdkSession'
+import type * as SdkSession from '@common/utils/sdkSession'
 
 const mockCreateSdk = jest.fn()
 
@@ -21,16 +21,30 @@ const makeSdk = (
 }
 
 describe('ensureSdkSignedIn', () => {
-  let ensureSdkSignedIn: typeof EnsureSdkSignedIn
+  let ensureSdkSignedIn: typeof SdkSession.ensureSdkSignedIn
+  let getPlatformSdk: typeof SdkSession.getPlatformSdk
 
   // The session lives in the module: each test starts from a fresh one
   beforeEach(() => {
     mockCreateSdk.mockReset()
     jest.isolateModules(() => {
-      ;({ ensureSdkSignedIn } = jest.requireActual<{
-        ensureSdkSignedIn: typeof EnsureSdkSignedIn
-      }>('@common/utils/sdkSession'))
+      ;({ ensureSdkSignedIn, getPlatformSdk } = jest.requireActual<
+        typeof SdkSession
+      >('@common/utils/sdkSession'))
     })
+  })
+
+  it('gives the client of the session before it is signed in', async () => {
+    const sdk = makeSdk()
+    mockCreateSdk.mockReturnValue(sdk)
+
+    expect(getPlatformSdk('https://alice.example.com')).toBe(sdk)
+    expect(sdk.login).not.toHaveBeenCalled()
+
+    await ensureSdkSignedIn('https://alice.example.com', 'token')
+
+    expect(mockCreateSdk).toHaveBeenCalledTimes(1)
+    expect(getPlatformSdk('https://alice.example.com')).toBe(sdk)
   })
 
   it("signs the client of the user's platform in with the id token", async () => {
