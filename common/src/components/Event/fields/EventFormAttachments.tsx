@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react'
 import { useI18n } from 'twake-i18n'
 import { TdriveButton } from '@common/features/Tdrive/components/TdriveButton'
+import { useAppSelector } from '@common/app/hooks'
+import { selectPlatformURL } from '@common/app/selectors/selectPlatformURL'
 import { isTdrivePickerAvailable } from '@common/features/Tdrive/helpers/isTdrivePickerAvailable'
 import { TdriveFile } from '@common/features/Tdrive/types'
 import { Attachment } from '@common/types/Attachment'
@@ -19,6 +21,7 @@ export const EventFormAttachments: React.FC<{
   isExpanded: boolean
 }> = ({ v, setAttachments, showMore, isExpanded }) => {
   const { t } = useI18n()
+  const platformURL = useAppSelector(selectPlatformURL)
   const hasVisibleAttachments = v.attachments.some(a => isSafeHttpUrl(a.uri))
 
   const handleTdriveFilesSelected = useCallback(
@@ -31,7 +34,7 @@ export const EventFormAttachments: React.FC<{
     [v.attachments, setAttachments]
   )
 
-  if (isTdrivePickerAvailable()) {
+  if (isTdrivePickerAvailable(platformURL)) {
     return (
       <TdriveButton
         onFilesSelected={handleTdriveFilesSelected}
