@@ -18,6 +18,7 @@ import { stringAvatar } from '../Event/utils/eventUtils'
 import { SnackbarAlert } from '../Loading/SnackBarAlert'
 import { AttendeeActions } from '@injected/components/Attendees/AttendeeActions'
 import { useAppSelector } from '@common/app/hooks'
+import { clipboardOf } from '@common/utils/handleCopyLink'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 
 const VIEWPORT_MARGIN = 8
@@ -53,8 +54,10 @@ function AttendeeInfo({ attendee }: { attendee: userAttendee }): JSX.Element {
             <Tooltip title={t('tooltip.copyEmail')}>
               <IconButton
                 size="small"
-                onClick={() => {
-                  void navigator.clipboard.writeText(attendee.cal_address)
+                onClick={event => {
+                  void clipboardOf(event.currentTarget).writeText(
+                    attendee.cal_address
+                  )
                   setSnackbarOpen(true)
                 }}
                 sx={{ p: 0.5, color: theme.vars.palette.text.primary }}

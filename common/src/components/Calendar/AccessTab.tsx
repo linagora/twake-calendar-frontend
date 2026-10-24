@@ -133,10 +133,11 @@ export function AccessTab({
                     <InputAdornment position="end">
                       <Tooltip title={t('calendar.copyCaldavAccess')}>
                         <IconButton
-                          onClick={() =>
+                          onClick={event =>
                             handleCopyLink(
                               new URL(calDAVLink, window.location.origin),
-                              setOpen
+                              setOpen,
+                              event.currentTarget
                             )
                           }
                           edge="end"
@@ -169,10 +170,11 @@ export function AccessTab({
                   <InputAdornment position="end">
                     <Tooltip title={t('calendar.copySecretUrl')}>
                       <IconButton
-                        onClick={() =>
+                        onClick={event =>
                           handleCopyLink(
                             new URL(secretLink, window.location.origin),
-                            setOpen
+                            setOpen,
+                            event.currentTarget
                           )
                         }
                         edge="end"

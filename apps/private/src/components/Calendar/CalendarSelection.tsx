@@ -298,14 +298,18 @@ const BookingLinkLabel: React.FC<{ name: string }> = ({ name }) => {
 }
 
 const BookingLinkRowActions: React.FC<{
-  onCopy: () => void
+  onCopy: (clicked: Element) => void
   onMenuOpen: (event: React.MouseEvent<HTMLButtonElement>) => void
 }> = ({ onCopy, onMenuOpen }) => {
   const { t } = useI18n()
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <Tooltip title={t('tooltip.copyBookingLink')}>
-        <IconButton className="MoreBtn" onClick={onCopy} size="small">
+        <IconButton
+          className="MoreBtn"
+          onClick={event => onCopy(event.currentTarget)}
+          size="small"
+        >
           <LinkIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -388,10 +392,11 @@ const BookingLinkChip: React.FC<{
           <BookingLinkLabel name={linkName} />
         </div>
         <BookingLinkRowActions
-          onCopy={() =>
+          onCopy={clicked =>
             handleCopyLink(
               getBookingLinkUrl(link.publicId),
-              setCopySnackbarOpen
+              setCopySnackbarOpen,
+              clicked
             )
           }
           onMenuOpen={handleMenuOpen}

@@ -58,8 +58,12 @@ export const VideoLink: React.FC<{
         </Link>
         <Tooltip title={t('event.form.copyMeetingLink')}>
           <IconButton
-            onClick={() =>
-              void handleCopyLink(new URL(safeMeetingLink), setOpenToast)
+            onClick={event =>
+              handleCopyLink(
+                new URL(safeMeetingLink),
+                setOpenToast,
+                event.currentTarget
+              )
             }
             size="small"
             sx={{ color: theme.vars.palette.text.primary }}
