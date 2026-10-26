@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react'
 import { TwakeMuiThemeProvider } from '@linagora/twake-mui'
-import { Suspense, useEffect, useMemo } from 'react'
+import { type ErrorInfo, Suspense, useEffect, useMemo } from 'react'
 import { Route, Routes } from 'react-router'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
 import { push } from 'redux-first-history'
@@ -85,6 +85,16 @@ const isValidLanguage = (
   return !!lang && SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage)
 }
 
+const reportCrash = (error: unknown, errorInfo: ErrorInfo): void => {
+  Sentry.captureException(error, {
+    contexts: {
+      react: {
+        componentStack: errorInfo.componentStack
+      }
+    }
+  })
+}
+
 export default function App(): JSX.Element {
   const error = useAppSelector(state => state.user.error)
   const appLoading = useAppSelector(state => state.loading.isLoading)
@@ -152,20 +162,15 @@ export default function App(): JSX.Element {
         lang={lang}
         locales={dateLocales}
       >
-        <TwakeBarHeader />
+        {/* A crash of the bar leaves calendar without it, not without calendar */}
+        <ErrorBoundary fallback={null} onError={reportCrash}>
+          <TwakeBarHeader />
+        </ErrorBoundary>
         <ErrorBoundary
           FallbackComponent={({ error }) => (
             <ErrorPage isCrashFallback errorBoundaryMessage={error as Error} />
           )}
-          onError={(error, errorInfo) => {
-            Sentry.captureException(error, {
-              contexts: {
-                react: {
-                  componentStack: errorInfo.componentStack
-                }
-              }
-            })
-          }}
+          onError={reportCrash}
         >
           <Suspense fallback={<Loading />}>
             <WebSocketGate />
