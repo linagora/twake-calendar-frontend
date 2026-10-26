@@ -172,8 +172,7 @@ const SettingsSlice = createAppSlice({
         (config: ConfigurationItem) => config.name === 'datetime'
       )
       const datetimeValue = datetimeConfig?.value as
-        | DatetimeConfiguration
-        | undefined
+        DatetimeConfiguration | undefined
 
       // a zone the user picked while this fetch was in flight must not be
       // clobbered by the (now stale) server value

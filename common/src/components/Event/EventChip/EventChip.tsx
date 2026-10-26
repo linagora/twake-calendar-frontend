@@ -93,8 +93,7 @@ export const EventChip: React.FC<EventChipProps> = ({ arg, errorHandler }) => {
     // Event properties
     const isPrivate = PRIVATE_CLASSIFICATIONS.includes(classification as string)
     const organizer = props.organizer as
-      | { cn?: string; cal_address?: string }
-      | undefined
+      { cn?: string; cal_address?: string } | undefined
 
     // Determine owner attendee
     const ownerAttendee = getCalendarOwnerAttendee(

@@ -15,8 +15,7 @@ function isValidToken(token: LinkifyToken): boolean {
   if (token.type !== 'url') return false
 
   const validateOption = linkifyOptions.validate as
-    | Record<string, (value: string) => boolean>
-    | undefined
+    Record<string, (value: string) => boolean> | undefined
   const validateUrl = validateOption?.url
 
   if (validateUrl && !validateUrl(token.value)) return false

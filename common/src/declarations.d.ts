@@ -13,13 +13,7 @@ declare module 'cozy-interapp' {
 
 declare module 'classnames' {
   type ClassValue =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ClassArray
-    | ClassDictionary
+    string | number | boolean | null | undefined | ClassArray | ClassDictionary
   interface ClassDictionary {
     [id: string]: boolean | undefined | null
   }

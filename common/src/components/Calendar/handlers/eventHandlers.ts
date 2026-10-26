@@ -181,8 +181,7 @@ export const createEventHandlers = (
     info.jsEvent.preventDefault()
 
     const bookingLink = info.event.extendedProps.bookingLink as
-      | BookingLink
-      | undefined
+      BookingLink | undefined
     if (
       info.event.extendedProps.isBookingLink &&
       bookingLink &&

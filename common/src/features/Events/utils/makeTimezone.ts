@@ -4,8 +4,7 @@ import { CalendarEvent } from '@common/types/EventsTypes'
 
 export function makeTimezone(
   timezoneData:
-    | { ics: string; latitude: string; longitude: string }
-    | undefined,
+    { ics: string; latitude: string; longitude: string } | undefined,
   event: CalendarEvent
 ): ICAL.Timezone {
   if (!timezoneData) {

@@ -43,8 +43,7 @@ function buildDatetimeValue(
   updates: ConfigurationUpdatesInput
 ): DatetimeConfiguration {
   const previousDatetime = updates.previousConfig?.datetime as
-    | DatetimeConfiguration
-    | undefined
+    DatetimeConfiguration | undefined
 
   return {
     ...previousDatetime,
