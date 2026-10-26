@@ -96,7 +96,7 @@ function TeamCalendar({ calendarId }: { calendarId: string }): JSX.Element {
 
   return (
     <div className="App isEmbedded">
-      <main className="main-layout isInIframe">
+      <main className="main-layout">
         <div className="calendar">
           <header className="menubar">
             <div className="left-menu">
