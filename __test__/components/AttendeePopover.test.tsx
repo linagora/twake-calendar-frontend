@@ -94,6 +94,41 @@ describe('AttendeePopover (Private)', () => {
     }
   })
 
+  it('caps the card width so it fits narrow screens', () => {
+    const attendee = new userAttendee({
+      cal_address: 'john@example.com',
+      cn: 'John Doe'
+    })
+
+    renderWithProviders(
+      <AttendeePopover attendee={attendee}>
+        <span>Open Popover</span>
+      </AttendeePopover>,
+      {
+        user: {
+          userData: {
+            email: 'user@example.com',
+            workplaceFqdn: 'example.com'
+          }
+        }
+      }
+    )
+    fireEvent.click(screen.getByText('Open Popover'))
+
+    const card = screen
+      .getByText('ContactPopover.emailButton')
+      .closest('.MuiPopover-paper > .MuiBox-root')
+    expect(card).not.toBeNull()
+    // jsdom cannot compute min(): read the rules applying to the card instead
+    const cardMinWidths = Array.from(document.styleSheets)
+      .flatMap(sheet => Array.from(sheet.cssRules))
+      .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
+      .filter(rule => rule.style.getPropertyValue('min-width'))
+      .filter(rule => card?.matches(rule.selectorText))
+      .map(rule => rule.style.getPropertyValue('min-width'))
+    expect(cardMinWidths).toContain('min(320px, calc(100vw - 32px))')
+  })
+
   it('opens popover after pending hover delay on mouse enter and closes on mouse leave', () => {
     jest.useFakeTimers()
     const attendee = new userAttendee({
