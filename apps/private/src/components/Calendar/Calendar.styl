@@ -44,8 +44,9 @@
   flex 1
   min-height 0
 
-// The wrapper of FullCalendar takes the height left under the menubar
-.App.isEmbedded .calendar > div:has(> .fc)
+// The wrapper of FullCalendar takes the height left under the menubar, instead
+// of the whole column with the bottom of the grid cut off
+.main-layout .calendar > div:has(> .fc)
   flex 1
   min-height 0
   height auto !important
