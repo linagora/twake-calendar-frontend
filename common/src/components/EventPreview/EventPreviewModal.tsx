@@ -149,8 +149,13 @@ const EventPreviewModal: React.FC<{
         actionsBorderTop={hasActionsBorderTop}
         actionsJustifyContent="center"
         style={{ overflow: 'auto' }}
-        contentSx={{ overflowX: 'hidden', overflowY: 'auto' }}
-        titleSx={{ backgroundColor: 'background.contrast' }}
+        contentSx={{
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          pb: '20px',
+          '.MuiDialogTitle-root + &': { pt: '30px' }
+        }}
+        titleSx={{ backgroundColor: 'background.contrast', py: 1.25, pr: 2 }}
         title=""
         ariaLabel={formatEventChipTitle(event, t)}
         headerRightAction={header}
