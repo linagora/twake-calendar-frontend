@@ -50,7 +50,7 @@ const config: Config = {
         '\\.(css|scss|sass|less|styl|stylus)$':
           '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
-        '^(react-markdown|remark-gfm)$':
+        '^(react-markdown|remark-gfm|remark-parse|unified)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
@@ -105,7 +105,7 @@ const config: Config = {
         '\\.(css|scss|sass|less|styl|stylus)$':
           '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
-        '^(react-markdown|remark-gfm)$':
+        '^(react-markdown|remark-gfm|remark-parse|unified)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^preact(/(.*)|$)': 'preact$1',
         '^react$': '<rootDir>/node_modules/react',
@@ -156,7 +156,7 @@ const config: Config = {
         '\\.(css|scss|sass|less|styl|stylus)$':
           '<rootDir>/__test__/utils/styleStub.ts',
         '^(.+\\.svg)\\?react$': '<rootDir>/__test__/utils/svgComponentStub.tsx',
-        '^(react-markdown|remark-gfm)$':
+        '^(react-markdown|remark-gfm|remark-parse|unified)$':
           '<rootDir>/__test__/utils/markdownStub.ts',
         '^@/common/(.*)$': '<rootDir>/common/src/$1',
         '^@common/(.*)$': '<rootDir>/common/src/$1',

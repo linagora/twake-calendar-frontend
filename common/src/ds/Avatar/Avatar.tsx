@@ -18,7 +18,8 @@ export function Avatar({
   ...props
 }: AvatarProps): ReactElement {
   const isTwakeColor =
-    color === 'none' || (supportedColors as readonly string[]).includes(color ?? '')
+    color === 'none' ||
+    (supportedColors as readonly string[]).includes(color ?? '')
   return (
     <TwakeAvatar
       color={isTwakeColor ? color : undefined}
