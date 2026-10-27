@@ -52,8 +52,8 @@ interface UseEventPreviewStateReturn {
   setOpenDuplicateModal: React.Dispatch<React.SetStateAction<boolean>>
   hidePreview: boolean
   setHidePreview: React.Dispatch<React.SetStateAction<boolean>>
-  toggleActionMenu: Element | null
-  setToggleActionMenu: React.Dispatch<React.SetStateAction<Element | null>>
+  toggleActionMenu: HTMLElement | null
+  setToggleActionMenu: React.Dispatch<React.SetStateAction<HTMLElement | null>>
   updateModalCalId: string
   openEditModePopup: string | null
   setOpenEditModePopup: React.Dispatch<React.SetStateAction<string | null>>
@@ -116,7 +116,9 @@ export function useEventPreviewState(
     useState<boolean>(false)
   const [openDuplicateModal, setOpenDuplicateModal] = useState<boolean>(false)
   const [hidePreview, setHidePreview] = useState<boolean>(false)
-  const [toggleActionMenu, setToggleActionMenu] = useState<Element | null>(null)
+  const [toggleActionMenu, setToggleActionMenu] = useState<HTMLElement | null>(
+    null
+  )
   const [updateModalCalId, setUpdateModalCalId] = useState<string>(calId)
 
   // Recurring event handling
