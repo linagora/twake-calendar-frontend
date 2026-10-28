@@ -346,7 +346,11 @@ function CalendarPopover({
       }
       actions={
         <>
-          <Button variant="outlined" onClick={() => handleClose({}, 'cancel')}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleClose({}, 'cancel')}
+          >
             {t('common.cancel')}
           </Button>
           <Button

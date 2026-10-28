@@ -278,6 +278,34 @@ const basicThemeOverrides = {
     },
     styleOverrides: { root: {} }
   },
+  // Tint neutral outlined buttons with the primary colour on hover, as with the
+  // twake-mui 5 theme, rather than with the grey of secondary
+  MuiButton: {
+    styleOverrides: {
+      outlined: {
+        variants: [
+          {
+            props: { color: 'secondary' },
+            style: ({ theme }: { theme: Theme }) => ({
+              '@media (hover: hover)': {
+                '&:hover': {
+                  backgroundColor: theme.alpha(
+                    theme.vars.palette.primary.main,
+                    0.04
+                  ),
+                  color: theme.vars.palette.primary.main,
+                  borderColor: theme.alpha(
+                    theme.vars.palette.primary.main,
+                    0.32
+                  )
+                }
+              }
+            })
+          }
+        ]
+      }
+    }
+  },
   // twake-mui sets the caret 14px from the edge, which only outlined selects
   // make room for: put it back against the edge of borderless ones
   MuiSelect: {

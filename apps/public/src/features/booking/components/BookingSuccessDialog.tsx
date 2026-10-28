@@ -157,6 +157,7 @@ const CopyLinkSection: React.FC<CopyLinkSectionProps> = ({
       <Button
         onClick={() => void handleCopyLink()}
         variant="outlined"
+        color="secondary"
         fullWidth
         startIcon={<LinkIcon fontSize="small" />}
         sx={{ mb: 3 }}

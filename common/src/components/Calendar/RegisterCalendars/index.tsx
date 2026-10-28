@@ -177,6 +177,7 @@ const RegisterCalendars: React.FC<{
         <>
           <Button
             variant="outlined"
+            color="secondary"
             onClick={() => handleClose({}, 'backdropClick')}
           >
             {t('common.cancel')}

@@ -42,7 +42,12 @@ export const EventActions: React.FC<EventActionsProps> = ({
       )}
       <Box sx={{ display: 'flex', gap: 1, ml: !showExpandedBtn ? 'auto' : 0 }}>
         {(!showExpandedBtn || isEdit) && (
-          <Button size="medium" variant="outlined" onClick={onClose}>
+          <Button
+            size="medium"
+            variant="outlined"
+            color="secondary"
+            onClick={onClose}
+          >
             {t('common.cancel')}
           </Button>
         )}

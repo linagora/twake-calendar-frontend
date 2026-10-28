@@ -120,7 +120,7 @@ export const RSVPButton: React.FC<RSVPButtonProps> = ({
   // 2. This is the active status AND nothing is loading
   const shouldShowActive = showLoading || (isCurrentlyActive && !isLoading)
 
-  const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'primary'
+  const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'secondary'
 
   return (
     <Tooltip title={t(`tooltip.${rsvpValue}`)}>

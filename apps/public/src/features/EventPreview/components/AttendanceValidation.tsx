@@ -62,7 +62,7 @@ export const AttendanceValidation: React.FC<AttendanceValidationProps> = ({
     const isThisLoading = clickedValue === rsvpValue
     const shouldShowActive =
       isThisLoading || (isCurrentlyActive && !clickedValue)
-    const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'primary'
+    const buttonColor = shouldShowActive ? rsvpColor[rsvpValue] : 'secondary'
 
     return (
       <Button

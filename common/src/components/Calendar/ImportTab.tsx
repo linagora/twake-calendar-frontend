@@ -51,6 +51,7 @@ export const ImportTab: React.FC<{
         <Box sx={{ mt: 0 }}>
           <Button
             variant="outlined"
+            color="secondary"
             component="label"
             size="medium"
             sx={{ borderRadius: '12px' }}

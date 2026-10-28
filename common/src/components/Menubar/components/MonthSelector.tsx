@@ -50,6 +50,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
             key={i}
             size="medium"
             variant={isSelected ? 'contained' : 'outlined'}
+            color={isSelected ? 'primary' : 'secondary'}
             aria-pressed={isSelected}
             sx={{
               borderRadius: radius.md

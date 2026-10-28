@@ -46,7 +46,12 @@ export const ModalActions: React.FC<{
       )}
       <Box sx={{ display: 'flex', gap: 1, ml: isExpanded ? 'auto' : 0 }}>
         {(isExpanded || isEdit) && (
-          <Button size={buttonSize} variant="outlined" onClick={onClose}>
+          <Button
+            size={buttonSize}
+            variant="outlined"
+            color="secondary"
+            onClick={onClose}
+          >
             {t('common.cancel')}
           </Button>
         )}
