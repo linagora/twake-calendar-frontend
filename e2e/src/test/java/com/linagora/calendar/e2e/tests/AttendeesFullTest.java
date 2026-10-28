@@ -3,6 +3,10 @@ package com.linagora.calendar.e2e.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +19,7 @@ import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.backend.E2EUserFactory;
 import com.linagora.calendar.e2e.backend.Ics;
+import com.linagora.calendar.e2e.docker.E2EClock;
 import com.linagora.calendar.e2e.docker.E2ESessions;
 import com.linagora.calendar.e2e.pages.CalendarPage;
 import com.linagora.calendar.e2e.pages.LoginPage;
@@ -26,6 +31,7 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 
 /** Inviting people, and what they can answer. */
 class AttendeesFullTest extends TwakeCalendarE2ETest {
+    private static final DateTimeFormatter HH_MM = DateTimeFormatter.ofPattern("HH:mm");
 
     private static String title(String prefix) {
         return prefix + " " + UUID.randomUUID().toString().substring(0, 8);
@@ -449,18 +455,24 @@ class AttendeesFullTest extends TwakeCalendarE2ETest {
         tokyo.reload();
         awaitAttached(tokyo.eventCard(title));
 
+        // 10:00 in Paris is 17:00 in Tokyo in summer time and 18:00 in winter: Tokyo has no DST
+        ZonedDateTime start = E2EClock.today().atTime(LocalTime.of(10, 0)).atZone(E2EClock.BROWSER_ZONE)
+            .withZoneSameInstant(ZoneId.of("Asia/Tokyo"));
+        String startInTokyo = start.format(HH_MM);
+        String endInTokyo = start.plusHours(1).format(HH_MM);
+
         var personal = tokyo.openEvent(title).personalSettings();
         assertThat(personal.text())
-            .as("10:00 in Paris is 17:00 in Tokyo, as in the preview and the grid")
-            .contains("17:00 – 18:00 UTC+9");
+            .as("10:00 in Paris is " + startInTokyo + " in Tokyo, as in the preview and the grid")
+            .contains(startInTokyo + " – " + endInTokyo + " UTC+9");
         personal.cancel();
 
         var proposal = tokyo.openEvent(title).proposeNewTime();
-        assertThat(proposal.text()).contains("17:00 – 18:00 UTC+9");
+        assertThat(proposal.text()).contains(startInTokyo + " – " + endInTokyo + " UTC+9");
         assertThat(proposal.startTime())
             .as("the proposal starts from the time the guest reads, in their own zone")
-            .isEqualTo("17:00");
-        assertThat(proposal.endTime()).isEqualTo("18:00");
+            .isEqualTo(startInTokyo);
+        assertThat(proposal.endTime()).isEqualTo(endInTokyo);
     }
 
     private static String startLine(String ical) {
