@@ -13,6 +13,7 @@ import com.linagora.calendar.e2e.TwakeCalendarE2ETest;
 import com.linagora.calendar.e2e.backend.CalendarProbe;
 import com.linagora.calendar.e2e.backend.E2EUser;
 import com.linagora.calendar.e2e.pages.CalendarPage;
+import com.linagora.calendar.e2e.pages.DeletionSnackbar;
 import com.linagora.calendar.e2e.pages.LoginPage;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -390,5 +391,40 @@ class EventEditionTest extends TwakeCalendarE2ETest {
             .contains("BEGIN:VCALENDAR")
             .contains("UID:" + uid)
             .contains("SUMMARY:" + title);
+    }
+
+    @Test
+    @DisplayName("EDIT-32 Undoing a deletion brings the event back and sends nothing")
+    void undoingADeletionBringsTheEventBack(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = uniqueTitle("Spared");
+        calendar.createEvent(title);
+
+        DeletionSnackbar snackbar = calendar.openEvent(title).startDeletion();
+
+        assertThat(snackbar.message()).contains("Event", title, "deleted");
+        PlaywrightAssertions.assertThat(calendar.eventCard(title)).hasCount(0);
+
+        snackbar.undo();
+
+        PlaywrightAssertions.assertThat(calendar.eventCard(title)).hasCount(1);
+        // well past the time the deletion would have gone out
+        page.waitForTimeout(DeletionSnackbar.UNDO_WINDOW_MS + 2_000);
+        assertThat(probe.eventSummaries(user)).containsExactly(title);
+    }
+
+    @Test
+    @DisplayName("EDIT-34 A deletion a reload cut short is sent at the next start")
+    void aDeletionCutShortByAReloadIsSentAfterwards(Page page, E2EUser user, CalendarProbe probe) {
+        CalendarPage calendar = LoginPage.loginAs(page, user);
+        String title = uniqueTitle("Reloaded away");
+        calendar.createEvent(title);
+
+        calendar.openEvent(title).startDeletion();
+        page.reload();
+
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() ->
+            assertThat(probe.eventSummaries(user)).isEmpty());
+        PlaywrightAssertions.assertThat(calendar.eventCard(title)).hasCount(0);
     }
 }

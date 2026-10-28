@@ -14,6 +14,7 @@ import { CalendarApi, EventInput } from '@fullcalendar/core'
 import { CalendarEvent } from '@common/types/EventsTypes'
 import { EventErrorHandler } from '@common/components/Error/EventErrorHandler'
 import type { RootState } from '@common/app/store'
+import { PendingDeletion } from '@common/features/Calendars/types/PendingDeletion'
 
 const getTempCalendarIds = (
   tempcalendars: RootState['calendars']['templist']
@@ -24,14 +25,18 @@ const getTempCalendarIds = (
   return tempCalendarIdsString ? tempCalendarIdsString.split(',') : []
 }
 
+const NO_PENDING_DELETIONS: PendingDeletion[] = []
+
 const getFilteredEvents = (
   selectedCalendars: string[],
   calendars: RootState['calendars']['list'],
   email: string | undefined,
-  hideDeclinedEvents: boolean | undefined
+  hideDeclinedEvents: boolean | undefined,
+  pendingDeletions: PendingDeletion[]
 ): CalendarEvent[] => {
   return extractEvents(selectedCalendars, calendars || {}, {
-    hideDeclinedEvents
+    hideDeclinedEvents,
+    pendingDeletions
   })
 }
 
@@ -106,15 +111,20 @@ const useFullCalendarEvents = ({
   )
 
   const email = userData?.email
+  // deleted events stay hidden while their deletion may still be undone
+  const pendingDeletions = useAppSelector(
+    state => state.calendars.pendingDeletions ?? NO_PENDING_DELETIONS
+  )
   const filteredEvents = useMemo(
     () =>
       getFilteredEvents(
         selectedCalendars,
         calendars,
         email,
-        hideDeclinedEvents
+        hideDeclinedEvents,
+        pendingDeletions
       ),
-    [selectedCalendars, calendars, email, hideDeclinedEvents]
+    [selectedCalendars, calendars, email, hideDeclinedEvents, pendingDeletions]
   )
 
   const filteredTempEvents = useMemo(
@@ -123,9 +133,16 @@ const useFullCalendarEvents = ({
         tempCalendarIds,
         tempcalendars,
         email,
-        hideDeclinedEvents
+        hideDeclinedEvents,
+        pendingDeletions
       ),
-    [tempCalendarIds, tempcalendars, email, hideDeclinedEvents]
+    [
+      tempCalendarIds,
+      tempcalendars,
+      email,
+      hideDeclinedEvents,
+      pendingDeletions
+    ]
   )
 
   return useMemo(() => {

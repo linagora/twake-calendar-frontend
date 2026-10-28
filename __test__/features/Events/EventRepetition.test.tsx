@@ -4,10 +4,8 @@ import {
   EventHandlersProps
 } from '@common/components/Calendar/handlers/eventHandlers'
 import { EditModeDialog } from '@common/components/Event/EditModeDialog'
-import {
-  handleDelete,
-  handleRSVP
-} from '@common/components/Event/eventHandlers/eventHandlers'
+import { handleRSVP } from '@common/components/Event/eventHandlers/eventHandlers'
+import { UNDO_DURATION } from '@common/components/UndoableActions/UndoableActionsProvider'
 import EventPreviewModal from '@common/components/EventPreview'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { VcalendarProperties } from '@common/features/Calendars/types/VcalendarProperties'
@@ -379,6 +377,11 @@ describe('EventPreviewModal - Recurring Event Interactions', () => {
 
     fireEvent.click(screen.getByLabelText('eventPreview.deleteEvent'))
 
+    // the deletion is only sent once its undo snackbar is gone
+    act(() => {
+      vi.advanceTimersByTime(UNDO_DURATION)
+    })
+
     await waitFor(() => {
       expect(spy).toHaveBeenCalled()
       expect(mockOnClose).toHaveBeenCalled()
@@ -429,6 +432,11 @@ describe('Delete Recurring Event Instance', () => {
 
     fireEvent.click(screen.getByLabelText('editModeDialog.thisEvent'))
     fireEvent.click(screen.getByRole('button', { name: /Ok/i }))
+
+    // the deletion is only sent once its undo snackbar is gone
+    act(() => {
+      vi.advanceTimersByTime(UNDO_DURATION)
+    })
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled()
@@ -483,6 +491,11 @@ describe('Delete Recurring Event Instance', () => {
 
     fireEvent.click(screen.getByLabelText('editModeDialog.allEvents'))
     fireEvent.click(screen.getByRole('button', { name: /Ok/i }))
+
+    // the deletion is only sent once its undo snackbar is gone
+    act(() => {
+      vi.advanceTimersByTime(UNDO_DURATION)
+    })
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled()
@@ -1076,97 +1089,6 @@ describe('handleRSVP function', () => {
       rsvp: 'ACCEPTED'
     })
 
-    expect(mockDispatch).toHaveBeenCalled()
-  })
-})
-
-describe('handleDelete function', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'))
-  })
-
-  afterAll(() => {
-    vi.useRealTimers()
-  })
-  it('calls deleteEvent for non-recurring events', () => {
-    const mockDispatch = vi.fn()
-    const mockOnClose = vi.fn()
-
-    vi.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
-      return () => Promise.resolve(payload) as any
-    })
-
-    const nonRecurringEvent = {
-      uid: 'single-event',
-      title: 'Single Event',
-      calId: '667037022b752d0026472254/cal1',
-      URL: '/calendars/667037022b752d0026472254/cal1/single-event.ics'
-    }
-
-    handleDelete(
-      false, // isRecurring
-      undefined,
-      mockOnClose,
-      mockDispatch,
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'],
-      nonRecurringEvent,
-      '667037022b752d0026472254/cal1',
-      'single-event'
-    )
-
-    expect(mockOnClose).toHaveBeenCalledWith({}, 'backdropClick')
-    expect(mockDispatch).toHaveBeenCalled()
-  })
-
-  it('calls deleteEventInstance when deleting solo recurring event', () => {
-    const mockDispatch = vi.fn()
-    const mockOnClose = vi.fn()
-
-    vi.spyOn(eventThunks, 'deleteEventInstance').mockImplementation(payload => {
-      return () => Promise.resolve(payload) as any
-    })
-
-    handleDelete(
-      true, // isRecurring
-      'solo',
-      mockOnClose,
-      mockDispatch,
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'],
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'].events[
-        'recurring-base/20250315T100000'
-      ],
-      '667037022b752d0026472254/cal1',
-      'recurring-base/20250315T100000'
-    )
-
-    expect(mockOnClose).toHaveBeenCalledWith({}, 'backdropClick')
-    expect(mockDispatch).toHaveBeenCalled()
-  })
-
-  it('calls deleteEvent when deleting all recurring events', () => {
-    const mockDispatch = vi.fn()
-    const mockOnClose = vi.fn()
-
-    vi.spyOn(eventThunks, 'deleteEvent').mockImplementation(payload => {
-      return () => Promise.resolve(payload) as any
-    })
-
-    handleDelete(
-      true, // isRecurring
-      'all',
-      mockOnClose,
-      mockDispatch,
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'],
-      basePreloadedState.calendars.list['667037022b752d0026472254/cal1'].events[
-        'recurring-base/20250315T100000'
-      ],
-      '667037022b752d0026472254/cal1',
-      'recurring-base/20250315T100000'
-    )
-
-    expect(mockOnClose).toHaveBeenCalledWith({}, 'backdropClick')
     expect(mockDispatch).toHaveBeenCalled()
   })
 })
