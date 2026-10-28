@@ -110,7 +110,7 @@ const VideoConferenceFieldInExpandedMode: React.FC<{
         disabled={isCreatingRoom}
         size="medium"
         variant="contained"
-        color="secondary"
+        color="inherit"
         sx={{
           borderRadius: '4px',
           display: hasVideoConference ? 'none' : 'flex'

@@ -79,12 +79,13 @@ export const AttendeeChip: React.FC<AttendeeChipProps> = ({
         {...getItemProps({ index })}
         key={label}
         variant="filled"
-        color="secondary"
         icon={renderIcon()}
         deleteIcon={renderDeleteIcon()}
-        style={{
+        sx={{
           color: textColor,
-          maxWidth: '200px'
+          maxWidth: '200px',
+          // The dark shade is unreadable on the dark chip: use the light one
+          ...theme.applyStyles('dark', { color: chipColor })
         }}
         label={label}
       />

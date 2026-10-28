@@ -66,7 +66,6 @@ export const AttachementChip: React.FC<{
       <Box>
         <Chip
           square
-          color="secondary"
           icon={
             <Icon
               icon={

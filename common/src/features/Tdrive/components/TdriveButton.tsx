@@ -51,7 +51,7 @@ const TdriveButtonInExpandedMode: React.FC<{
         onClick={onClick}
         size="medium"
         variant="contained"
-        color="secondary"
+        color="inherit"
         sx={{ borderRadius: '4px' }}
       >
         {t('event.form.addTdriveFile')}

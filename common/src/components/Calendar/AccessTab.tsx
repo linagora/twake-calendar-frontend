@@ -190,7 +190,7 @@ export function AccessTab({
           />
           <Button
             variant="contained"
-            color="secondary"
+            color="inherit"
             onClick={handleResetSecretLink}
             sx={{ borderRadius: '4px' }}
           >
@@ -214,7 +214,7 @@ export function AccessTab({
         </Typography>
         <Button
           variant="contained"
-          color="secondary"
+          color="inherit"
           onClick={handleExport}
           startIcon={!exportLoading && <FileDownloadOutlinedIcon />}
           disabled={exportLoading}

@@ -22,8 +22,24 @@ const today = { main: '#FB9E3A', contrastText: '#fff' }
 
 // Palette additions of the calendar, also given to the TwakeSpace embed
 export const calendarColorSchemes: ThemeOptions['colorSchemes'] = {
-  light: { palette: { today } },
-  dark: { palette: { today } }
+  light: {
+    palette: {
+      today,
+      // MUI lightens neutral filled buttons on hover, to the near-white
+      // grey A100 of twake-css: darken them instead, like the other buttons
+      Button: { inheritContainedHoverBg: 'var(--twake-palette-grey-400)' }
+    }
+  },
+  dark: {
+    palette: {
+      today,
+      // MUI fills neutral buttons with grey 800, the colour of dark dialogs
+      Button: {
+        inheritContainedBg: 'var(--twake-palette-grey-700)',
+        inheritContainedHoverBg: 'var(--twake-palette-grey-600)'
+      }
+    }
+  }
 }
 
 export const radius = {
