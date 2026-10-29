@@ -16,6 +16,7 @@ interface CalendarSelectorMobileMenuProps {
   open: boolean
   onClose: () => void
   onModify: () => void
+  onShare?: () => void
   onDelete: () => void
   onToggleVisibility?: () => void
   onPrint?: () => void
@@ -31,6 +32,7 @@ export const CalendarSelectorMobileMenu: React.FC<
   open,
   onClose,
   onModify,
+  onShare,
   onDelete,
   onToggleVisibility,
   onPrint,
@@ -69,6 +71,16 @@ export const CalendarSelectorMobileMenu: React.FC<
         >
           <ListItemText primary={t('actions.modify')} />
         </ListItemButton>
+        {onShare !== undefined && (
+          <ListItemButton
+            onClick={() => {
+              onShare()
+              onClose()
+            }}
+          >
+            <ListItemText primary={t('calendar.share')} />
+          </ListItemButton>
+        )}
         {onPrint !== undefined && (
           <ListItemButton
             onClick={() => {

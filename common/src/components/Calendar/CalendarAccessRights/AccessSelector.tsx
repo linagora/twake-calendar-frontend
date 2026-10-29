@@ -17,10 +17,17 @@ const StyledSwipeableDrawer = styled(SwipeableDrawer)(({ theme }) => ({
   zIndex: theme.zIndex.modal + 100
 }))
 
+export interface AccessRightOption {
+  value: AccessRight
+  label: string
+  /** What the right allows, shown under its label in the list */
+  description: string
+}
+
 export const AccessSelector: React.FC<{
   accessRight: AccessRight
   setAccessRight: (r: AccessRight) => void
-  accessRightOptions: { value: AccessRight; label: string }[]
+  accessRightOptions: AccessRightOption[]
   disabled?: boolean
   /** Names the selector, e.g. "Access right of Bob" */
   label?: string
@@ -59,13 +66,17 @@ const DesktopAccessSelector: React.FC<{
   accessRight: number
   setAccessRight: (r: AccessRight) => void
   disabled: boolean | undefined
-  accessRightOptions: { value: AccessRight; label: string }[]
+  accessRightOptions: AccessRightOption[]
   label?: string
 }> = ({ accessRight, setAccessRight, disabled, accessRightOptions, label }) => {
   return (
     <Select
       value={accessRight}
       inputProps={{ 'aria-label': label }}
+      // the list shows each right with its description, the field its name only
+      renderValue={value =>
+        accessRightOptions.find(opt => opt.value === value)?.label
+      }
       onChange={e => setAccessRight(e.target.value as AccessRight)}
       variant="standard"
       disableUnderline
@@ -73,9 +84,13 @@ const DesktopAccessSelector: React.FC<{
       sx={{
         fontSize: '0.875rem',
         color: 'text.secondary',
+        minWidth: 'max-content',
         '& .MuiSelect-select': {
           paddingRight: '24px !important',
-          paddingY: 0
+          paddingY: 0,
+          // inside the people field, the Autocomplete caps its inputs at 80%:
+          // the selected right would be cut
+          maxWidth: 'none'
         },
         '& .MuiSelect-icon': { fontSize: '1rem' },
         '&:before, &:after': { display: 'none' }
@@ -85,9 +100,13 @@ const DesktopAccessSelector: React.FC<{
         <MenuItem
           key={opt.value}
           value={opt.value}
-          sx={{ color: 'text.secondary' }}
+          sx={{ color: 'text.secondary', maxWidth: 360 }}
         >
-          {opt.label}
+          <ListItemText
+            primary={opt.label}
+            secondary={opt.description}
+            slotProps={{ secondary: { sx: { whiteSpace: 'normal' } } }}
+          />
         </MenuItem>
       ))}
     </Select>
@@ -96,7 +115,7 @@ const DesktopAccessSelector: React.FC<{
 const MobileAccessSelector: React.FC<{
   displayText: string | undefined
   disabled: boolean | undefined
-  accessRightOptions: { value: AccessRight; label: string }[]
+  accessRightOptions: AccessRightOption[]
   accessRight: number
   setAccessRight: (r: AccessRight) => void
   label?: string
@@ -117,8 +136,6 @@ const MobileAccessSelector: React.FC<{
         '& .MuiTypography-root': {
           fontSize: '0.875rem',
           color: 'text.secondary',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
           whiteSpace: 'nowrap'
         }
       }}
@@ -148,6 +165,7 @@ const MobileAccessSelector: React.FC<{
                             <Typography>{opt.label}</Typography>
                           </Box>
                         }
+                        secondary={opt.description}
                       />
                     </ListItemButton>
                   ))}

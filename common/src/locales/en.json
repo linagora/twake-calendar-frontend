@@ -9,6 +9,18 @@
     "caldav_access": "CalDAV access",
     "secretUrl": "Secret URL",
     "secretUrlDesc": "The secret address can be used to view all calendar events even without access permissions. You can reset your current secret address and get a new one.",
+    "share": "Share",
+    "rights": {
+      "readDesc": "Sees the events, cannot change them",
+      "editorDesc": "Can also create, change and delete events",
+      "adminDesc": "Can also share the calendar and change its settings"
+    },
+    "accessSaved": "Sharing updated",
+    "resetSecretUrl": {
+      "title": "Reset the secret URL?",
+      "body": "Apps and people using the current secret URL will no longer see this calendar. You will have to give them the new one.",
+      "done": "New secret URL created"
+    },
     "copyCaldavAccess": "Copy CalDAV address",
     "copySecretUrl": "Copy secret URL",
     "exportCalendar": "Export calendar",

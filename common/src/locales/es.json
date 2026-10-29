@@ -9,6 +9,18 @@
     "caldav_access": "Acceso CalDAV",
     "secretUrl": "URL secreta",
     "secretUrlDesc": "La dirección secreta permite ver todos los eventos del calendario incluso sin permisos de acceso. Puede restablecer su dirección secreta actual y obtener una nueva.",
+    "share": "Compartir",
+    "rights": {
+      "readDesc": "Ve los eventos, sin poder modificarlos",
+      "editorDesc": "También puede crear, modificar y eliminar eventos",
+      "adminDesc": "También puede compartir el calendario y cambiar su configuración"
+    },
+    "accessSaved": "Uso compartido actualizado",
+    "resetSecretUrl": {
+      "title": "¿Restablecer la URL secreta?",
+      "body": "Las aplicaciones y personas que usan la URL secreta actual dejarán de ver este calendario. Tendrá que darles la nueva.",
+      "done": "Nueva URL secreta creada"
+    },
     "copyCaldavAccess": "Copiar la dirección CalDAV",
     "copySecretUrl": "Copiar la URL secreta",
     "exportCalendar": "Exportar calendario",

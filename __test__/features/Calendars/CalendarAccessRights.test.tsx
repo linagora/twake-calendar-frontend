@@ -9,7 +9,7 @@ import * as delegationThunks from '@common/features/Calendars/CalendarSlice'
 import * as eventThunks from '@common/features/Calendars/CalendarSlice'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { accessRightToDavProp } from '@common/utils/accessRightToDavProp'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/Renderwithproviders'
 
 jest.mock('@common/utils/apiUtils', () => ({
@@ -86,6 +86,47 @@ describe('CalendarAccessRights', () => {
     expect(
       screen.getByText('calendarPopover.access.grantAccessRights')
     ).toBeInTheDocument()
+  })
+
+  it('describes each right in the list and shows only its name once chosen', async () => {
+    renderWithProviders(
+      <CalendarAccessRights
+        calendar={baseCalendar}
+        value={[]}
+        onChange={mockOnChange}
+        onInvitesLoaded={mockOnInvitesLoaded}
+      />,
+      { ...userState }
+    )
+
+    const selector = screen.getByRole('combobox', {
+      name: 'calendarPopover.access.newUserAccessRight'
+    })
+    expect(selector).toHaveTextContent(
+      /^calendarPopover\.access\.viewAllEvents$/
+    )
+
+    fireEvent.mouseDown(selector)
+    const listbox = await screen.findByRole('listbox')
+    for (const [name, desc] of [
+      ['viewAllEvents', 'readDesc'],
+      ['editor', 'editorDesc'],
+      ['administrator', 'adminDesc']
+    ]) {
+      const option = within(listbox).getByRole('option', {
+        name: new RegExp(`calendarPopover\\.access\\.${name}`)
+      })
+      expect(option).toHaveTextContent(`calendar.rights.${desc}`)
+    }
+
+    fireEvent.click(
+      within(listbox).getByRole('option', {
+        name: /calendarPopover\.access\.editor/
+      })
+    )
+    await waitFor(() =>
+      expect(selector).toHaveTextContent(/^calendarPopover\.access\.editor$/)
+    )
   })
 
   it('shows a list of users already passed in via value prop', () => {
@@ -601,6 +642,8 @@ describe('CalendarModal – updateDelegationCalendar integration', () => {
       expect(delegationThunks.updateDelegationCalendar).toHaveBeenCalled()
     )
     await waitFor(() => expect(eventThunks.getCalendarsList).toHaveBeenCalled())
+    // the dialog has closed: the confirmation is shown outside of it
+    expect(await screen.findByText('calendar.accessSaved')).toBeInTheDocument()
   })
 
   it('does NOT call updateDelegationCalendar when no users are added or removed', async () => {
@@ -619,6 +662,7 @@ describe('CalendarModal – updateDelegationCalendar integration', () => {
 
     expect(delegationThunks.updateDelegationCalendar).not.toHaveBeenCalled()
     expect(eventThunks.getCalendarsList).not.toHaveBeenCalled()
+    expect(screen.queryByText('calendar.accessSaved')).not.toBeInTheDocument()
   })
 })
 
