@@ -53,10 +53,14 @@ The repository is organized as a monorepo workspace:
 
 ### Formatting
 
-We use [Prettier](https://prettier.io/) to keep code style consistent.
-A `.prettierrc` file is already included in the repo, so formatting rules are predefined.
+We use `rs fmt` of [Rstack](https://rstack.rs), which runs [Prettier](https://prettier.io/), to keep code style consistent.
+The formatting rules are set in `rstack.config.mjs`.
 
-Before committing, make sure you format your files either using your IDE Prettier extension or Prettier CLI.
+Before committing, format your files:
+
+```bash
+npm run fmt
+```
 
 ---
 
@@ -155,10 +159,11 @@ to cover.
 
 ### Linting
 
-To run the ESLint checks:
+To run the [Rslint](https://rslint.rs) checks and the format check:
 
 ```bash
 npm run lint
+npm run lint:fmt
 ```
 
 To automatically fix formatting and lint errors:

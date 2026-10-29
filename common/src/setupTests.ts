@@ -68,6 +68,8 @@ jest.mock('@common/useScreenSizeDetection', () => ({
 }))
 // Suppress jsdom CSS selector parsing errors for Emotion/MUI
 if (typeof window !== 'undefined' && window.getComputedStyle) {
+  // Called with .call(this) below
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const originalGetComputedStyle = window.getComputedStyle
   window.getComputedStyle = function (
     element: Element,

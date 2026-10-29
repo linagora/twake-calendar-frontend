@@ -32,7 +32,7 @@ pipeline {
       }
       stage('Check Formatting') {
         steps {
-          sh 'npx prettier --check .'
+          sh 'npm run lint:fmt'
         }
       }
       stage('End to end tests') {
