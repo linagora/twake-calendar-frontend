@@ -1,3 +1,4 @@
+import { EventSaveFeedback } from '@common/components/Calendar/EventSaveFeedback'
 import { useAppDispatch, useAppSelector } from '@common/app/hooks'
 import EventPopover from '@common/features/Events/EventModal'
 import EventPreviewModal from '@common/components/EventPreview'
@@ -142,6 +143,9 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
 
   const timezone =
     useAppSelector(state => state.settings.timeZone) ?? browserDefaultTimeZone
+
+  const [displayedPeriod, setDisplayedPeriod] =
+    useState<DisplayedPeriod | null>(null)
 
   const [eventErrors, setEventErrors] = useState<string[]>([])
   const errorHandler = useMemo(() => new EventErrorHandler(), [])
@@ -293,17 +297,20 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     timezone
   )
 
-  // In day view, the new event lands on the displayed day rather than today
+  // Seed Create from the period currently displayed by FullCalendar
   const { handleDateSelect } = eventHandlers
   const handleCreateEvent = useCallback((): void => {
     handleDateSelect(
       buildCreateEventRange(
         currentView,
         calendarRef.current?.view.currentStart,
-        timezone
+        timezone,
+        new Date(),
+        workingDays,
+        calendarRef.current?.view.currentEnd
       )
     )
-  }, [handleDateSelect, currentView, calendarRef, timezone])
+  }, [handleDateSelect, currentView, calendarRef, timezone, workingDays])
 
   // Expose handleCreateEvent through controllerRef
   useEffect(() => {
@@ -345,11 +352,13 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     if (onDateChange) {
       onDateChange(calendarCurrentDate)
     }
-    onPeriodChange?.({
+    const period = {
       start: arg.view.currentStart,
       end: arg.view.currentEnd,
       timeZone: arg.view.calendar.getOption('timeZone')
-    })
+    }
+    setDisplayedPeriod(period)
+    onPeriodChange?.(period)
 
     setCurrentView(arg.view.type)
 
@@ -362,6 +371,10 @@ const CalendarController: React.FC<CalendarControllerProps> = ({
     <>
       <TimezoneChangeAlert />
       <ImportAlert />
+      <EventSaveFeedback
+        timezone={timezone}
+        displayedPeriod={displayedPeriod}
+      />
       {(isTablet || isMobile) && (
         <Tooltip title={t('tooltip.createEvent')}>
           <Fab

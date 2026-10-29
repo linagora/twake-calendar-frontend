@@ -2,40 +2,54 @@ import { DateSelectArg } from '@fullcalendar/core'
 import moment from 'moment-timezone'
 import { CALENDAR_VIEWS } from './constants'
 
-/**
- * The create button of the day view shall seed the event on the day being
- * looked at rather than on today, keeping the usual "next full hour, one hour
- * long" slot. Other views, and the day view showing today, keep the default
- * (null) so that the form falls back on its own "next hour of today".
- */
 export function buildCreateEventRange(
   currentView: string,
   displayedDate: Date | undefined,
   timezone: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  workingDays?: number[],
+  displayedEnd?: Date
 ): DateSelectArg | null {
-  if (currentView !== CALENDAR_VIEWS.timeGridDay || !displayedDate) {
+  if (!displayedDate || !Object.values(CALENDAR_VIEWS).includes(currentView)) {
     return null
   }
 
-  const displayedDay = moment.tz(displayedDate, timezone).format('YYYY-MM-DD')
+  const firstDay = moment.tz(displayedDate, timezone).startOf('day')
+  const isMonth =
+    currentView === CALENDAR_VIEWS.dayGridMonth ||
+    currentView === CALENDAR_VIEWS.listMonth
+  const periodEnd = firstDay
+    .clone()
+    .add(
+      isMonth || currentView === CALENDAR_VIEWS.timeGridDay ? 1 : 7,
+      isMonth ? 'month' : 'day'
+    )
+  const end = displayedEnd ? moment.tz(displayedEnd, timezone) : periodEnd
   const nowInZone = moment.tz(now, timezone)
-  if (displayedDay === nowInZone.format('YYYY-MM-DD')) {
+  if (nowInZone.isSameOrAfter(firstDay) && nowInZone.isBefore(end)) {
     return null
   }
 
+  const day = firstDay.clone()
+  if (currentView !== CALENDAR_VIEWS.timeGridDay && workingDays?.length) {
+    while (day.isBefore(end) && !workingDays.includes(day.day())) {
+      day.add(1, 'day')
+    }
+    if (!day.isBefore(end)) day.set(firstDay.toObject())
+  }
+  const displayedDay = day.format('YYYY-MM-DD')
   const nextHour = nowInZone.clone().add(1, 'hour').startOf('hour')
   const start = moment.tz(
     `${displayedDay}T${nextHour.format('HH:mm')}`,
     timezone
   )
-  const end = start.clone().add(1, 'hour')
+  const eventEnd = start.clone().add(1, 'hour')
 
   return {
     start: start.toDate(),
-    end: end.toDate(),
+    end: eventEnd.toDate(),
     startStr: start.format(),
-    endStr: end.format(),
+    endStr: eventEnd.format(),
     allDay: false
   } as DateSelectArg
 }

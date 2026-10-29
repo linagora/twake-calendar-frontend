@@ -20,7 +20,10 @@ export function SnackbarAlert({
     <Snackbar
       open={open}
       autoHideDuration={autoHideDuration}
-      onClose={() => setOpen(false)}
+      onClose={(_event, reason) => {
+        if (reason === 'clickaway') return
+        setOpen(false)
+      }}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert

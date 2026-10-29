@@ -132,6 +132,8 @@
     "invalidHex": "Saisissez une couleur comme #1A73E8"
   },
   "event": {
+    "saved": "Événement enregistré",
+    "savedFor": "Événement enregistré pour le %{date}",
     "createEvent": "Créer",
     "createInAgenda": "Créer dans l'agenda de %{owner}",
     "updateEvent": "Mettre à jour un événement",

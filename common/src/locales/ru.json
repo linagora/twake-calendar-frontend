@@ -132,6 +132,8 @@
     "invalidHex": "Введите цвет, например #1A73E8"
   },
   "event": {
+    "saved": "Событие сохранено",
+    "savedFor": "Событие сохранено на %{date}",
     "createEvent": "Создать",
     "createInAgenda": "Создать в календаре %{owner}",
     "updateEvent": "Обновить событие",
