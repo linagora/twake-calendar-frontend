@@ -18,7 +18,7 @@
     "@linagora/twake-icons": "^2.14.0",
     "@linagora/twake-mui": "^18.3.0",
     "@linagora/twake-oidc": "^1.1.0",
-    "@linagora/twake-sdk": "^1.1.0",
+    "@linagora/twake-sdk": "^1.2.0",
     "@linagora/twake-utils": "^1.2.0",
     "@lottiefiles/dotlottie-react": "^0.17.13",
     "@mui/icons-material": "^9.0.1",
