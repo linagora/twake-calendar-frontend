@@ -40,22 +40,24 @@ export interface UserState {
   error: string | null
 }
 
+const initialState: UserState = {
+  userData: {} as userData,
+  organiserData: new userOrganiser(),
+  tokens: null,
+  coreConfig: {
+    language: null,
+    datetime: {
+      timeZone: null
+    }
+  },
+  alarmEmailsEnabled: null,
+  loading: true,
+  error: null
+}
+
 const UserSlice = createAppSlice({
   name: 'user',
-  initialState: {
-    userData: {} as userData,
-    organiserData: new userOrganiser(),
-    tokens: null,
-    coreConfig: {
-      language: null,
-      datetime: {
-        timeZone: null
-      }
-    },
-    alarmEmailsEnabled: null,
-    loading: true,
-    error: null
-  } as UserState,
+  initialState,
   reducers: create => ({
     // Regular reducers
     setUserData: create.reducer((state, action: PayloadAction<userData>) => {

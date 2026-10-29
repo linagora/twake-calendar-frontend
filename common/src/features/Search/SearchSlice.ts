@@ -34,15 +34,17 @@ export const defaultSearchParams: SearchParams = {
   }
 }
 
+const initialState: SearchResultsState = {
+  searchParams: defaultSearchParams,
+  hits: 0,
+  results: [],
+  error: null,
+  loading: false
+}
+
 const SearchSlice = createAppSlice({
   name: 'searchResult',
-  initialState: {
-    searchParams: defaultSearchParams,
-    hits: 0,
-    results: [],
-    error: null,
-    loading: false
-  } as SearchResultsState,
+  initialState,
   reducers: create => ({
     // Regular reducers
     setResults: create.reducer(

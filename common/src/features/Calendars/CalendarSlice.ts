@@ -44,15 +44,17 @@ export interface CalendarState {
   isMobileSearchOpen: boolean
 }
 
+const initialState: CalendarState = {
+  list: {},
+  templist: {},
+  pending: true,
+  error: null as string | null,
+  isMobileSearchOpen: false
+}
+
 const CalendarSlice = createAppSlice({
   name: 'calendars',
-  initialState: {
-    list: {},
-    templist: {},
-    pending: true,
-    error: null as string | null,
-    isMobileSearchOpen: false
-  } as CalendarState,
+  initialState,
   reducers: create => ({
     // Regular reducers
     createCalendar: createCalendarReducer(create),

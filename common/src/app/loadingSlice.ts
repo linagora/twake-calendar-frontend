@@ -6,12 +6,14 @@ export interface LoadingState {
   message?: string
 }
 
+const initialState: LoadingState = {
+  isLoading: false,
+  message: undefined
+}
+
 const LoadingSlice = createAppSlice({
   name: 'loading',
-  initialState: {
-    isLoading: false,
-    message: undefined
-  } as LoadingState,
+  initialState,
   reducers: create => ({
     setAppLoading: create.reducer((state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload

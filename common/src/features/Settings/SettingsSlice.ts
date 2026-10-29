@@ -102,19 +102,21 @@ const applyServerTimeZone = (
   localStorage.setItem('timeZone', state.timeZone)
 }
 
+const initialState: SettingsState = {
+  language: defaultLang,
+  timeZone: autoDetectTimeZone ? browserDefaultTimeZone : defaultTimeZone,
+  isBrowserDefaultTimeZone: autoDetectTimeZone,
+  timeZonePickedDuringUserDataFetch: false,
+  hideDeclinedEvents: null,
+  displayWeekNumbers: true,
+  view: 'calendar',
+  businessHours: null,
+  workingDays: null
+}
+
 const SettingsSlice = createAppSlice({
   name: 'settings',
-  initialState: {
-    language: defaultLang,
-    timeZone: autoDetectTimeZone ? browserDefaultTimeZone : defaultTimeZone,
-    isBrowserDefaultTimeZone: autoDetectTimeZone,
-    timeZonePickedDuringUserDataFetch: false,
-    hideDeclinedEvents: null,
-    displayWeekNumbers: true,
-    view: 'calendar',
-    businessHours: null,
-    workingDays: null
-  } as SettingsState,
+  initialState,
   reducers: create => ({
     setLanguage: create.reducer((state, action: PayloadAction<string>) => {
       state.language = action.payload
