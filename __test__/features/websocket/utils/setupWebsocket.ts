@@ -1,14 +1,14 @@
 export function setupWebsocket() {
   const originalWebSocket = global.WebSocket
   const webSocketInstances: any[] = []
-  const mockWebSocket = jest.fn().mockImplementation((url: string) => {
+  const mockWebSocket = vi.fn().mockImplementation(function (url: string) {
     const ws = {
       url,
       readyState: WebSocket.CONNECTING,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      send: jest.fn(),
-      close: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      send: vi.fn(),
+      close: vi.fn(),
       _listeners: {} as Record<string, Function[]>
     }
 
