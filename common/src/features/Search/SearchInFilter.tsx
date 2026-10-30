@@ -170,6 +170,7 @@ const CalendarMobileSelector: React.FC<{
     <MobileSelector
       ref={selectorRef}
       displayText={getDisplayLabel(filters, allCalendar, t)}
+      label={t('search.searchIn')}
     >
       <List>
         <ListItemButton

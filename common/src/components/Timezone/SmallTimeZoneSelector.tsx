@@ -126,6 +126,7 @@ export const SmallTimezoneSelector: React.FC<
       disableAutoFocus
       slotProps={{
         paper: {
+          'aria-label': t('settings.timeZone'),
           ref: paperRef,
           sx: { height: '90%', maxHeight: '90dvh' }
         }

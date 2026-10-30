@@ -49,6 +49,7 @@ export const CalendarSelector: React.FC<{
         </Typography>
         <MobileSelector
           ref={selectorRef}
+          label={t('calendar.import_to')}
           displayText={
             importTarget === 'new' ? (
               t('calendar.new_calendar')

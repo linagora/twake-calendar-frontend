@@ -125,12 +125,13 @@ const MobileAccessSelector: React.FC<{
       bottomSheetChildren={
         disabled
           ? undefined
-          : ({ open, onClose }) => (
+          : ({ open, onClose, label }) => (
               <StyledSwipeableDrawer
                 anchor="bottom"
                 open={open}
                 onClose={onClose}
                 onOpen={(): void => {}}
+                slotProps={{ paper: { 'aria-label': label } }}
               >
                 <List sx={{ overflow: 'auto', flex: 1, pt: 0 }}>
                   {accessRightOptions.map(opt => (
