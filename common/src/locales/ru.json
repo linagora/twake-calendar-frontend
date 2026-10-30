@@ -378,8 +378,9 @@
       "detected": "Ваш браузер указывает, что вы находитесь в часовом поясе %{browserTZ}. Хотите обновить свой часовой пояс? Вы можете изменить его позже в Настройках."
     },
     "notifications.empty": "Настройки уведомлений скоро появятся",
-    "notifications.email": "Email",
-    "notifications.deliveryMethod": "Способ доставки",
+    "notifications.email": "Отправлять мне напоминания по электронной почте",
+    "notifications.deliveryMethod": "Напоминания",
+    "notifications.emailDesc": "Для событий, в поле «Уведомление» которых задано напоминание.",
     "alarmEmailsUpdateError": "Не удалось обновить настройки уведомлений по email",
     "displayWeekNumbers": "Показать номер недели",
     "displayWeekNumbersUpdateError": "Не удалось обновить отображение номера недели",

@@ -378,8 +378,9 @@
       "detected": "Your browser indicates that you’re in the %{browserTZ} time zone. Would you like to update your time zone? You can change it later in Settings."
     },
     "notifications.empty": "Notifications settings coming soon",
-    "notifications.email": "Email",
-    "notifications.deliveryMethod": "Delivery method",
+    "notifications.email": "Send me reminders by email",
+    "notifications.deliveryMethod": "Reminders",
+    "notifications.emailDesc": "For events with a reminder set in their \"Notification\" field.",
     "alarmEmailsUpdateError": "Failed to update email notifications setting",
     "displayWeekNumbers": "Show week number",
     "displayWeekNumbersUpdateError": "Failed to update show week number",

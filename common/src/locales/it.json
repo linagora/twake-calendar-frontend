@@ -378,8 +378,9 @@
       "detected": "Il tuo browser indica che ti trovi nel fuso orario %{browserTZ}. Vuoi aggiornare il tuo fuso orario? Potrai modificarlo in seguito nelle Impostazioni."
     },
     "notifications.empty": "Le impostazioni delle notifiche saranno presto disponibili",
-    "notifications.email": "Email",
-    "notifications.deliveryMethod": "Metodo di invio",
+    "notifications.email": "Inviami i promemoria via email",
+    "notifications.deliveryMethod": "Promemoria",
+    "notifications.emailDesc": "Per gli eventi con un promemoria impostato nel campo «Notifica».",
     "alarmEmailsUpdateError": "Impossibile aggiornare l'impostazione delle notifiche via email",
     "displayWeekNumbers": "Mostra il numero della settimana",
     "displayWeekNumbersUpdateError": "Impossibile aggiornare la visualizzazione del numero della settimana",

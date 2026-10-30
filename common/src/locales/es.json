@@ -378,8 +378,9 @@
       "detected": "Su navegador indica que se encuentra en la zona horaria %{browserTZ}. ¿Desea actualizar su zona horaria? Podrá cambiarla más adelante en Ajustes."
     },
     "notifications.empty": "Los ajustes de notificaciones estarán disponibles próximamente",
-    "notifications.email": "Correo",
-    "notifications.deliveryMethod": "Método de envío",
+    "notifications.email": "Enviarme los recordatorios por correo electrónico",
+    "notifications.deliveryMethod": "Recordatorios",
+    "notifications.emailDesc": "Para los eventos con un recordatorio en su campo «Notificación».",
     "alarmEmailsUpdateError": "No se ha podido actualizar el ajuste de notificaciones por correo electrónico",
     "displayWeekNumbers": "Mostrar el número de semana",
     "displayWeekNumbersUpdateError": "No se ha podido actualizar la visualización del número de semana",

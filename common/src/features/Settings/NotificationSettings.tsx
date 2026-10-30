@@ -59,6 +59,9 @@ export const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({
           marginLeft: 0
         }}
       />
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        {t('settings.notifications.emailDesc')}
+      </Typography>
     </Box>
   )
 }
