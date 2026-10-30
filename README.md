@@ -135,7 +135,7 @@ You can serve the built production assets locally using:
 
 ### Running Tests
 
-Launches the Jest test runner:
+Launches the Vitest test runner:
 
 ```bash
 npm test
