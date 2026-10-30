@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest'
 import type { CalendarApi } from '@fullcalendar/core'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
@@ -10,7 +11,7 @@ import {
   type SavedEvent
 } from '@common/features/Events/eventSaveFeedbackSlice'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string, options?: { date: string }) =>
       ({
@@ -35,10 +36,10 @@ const renderFeedback = (timezone?: string) =>
     </Provider>
   )
 
-const gotoDate = jest.fn()
-const showEventPreview = jest.fn()
+const gotoDate = vi.fn()
+const showEventPreview = vi.fn()
 const calendarRef = { current: { gotoDate } as unknown as CalendarApi }
-let dispatchSpy: jest.SpyInstance
+let dispatchSpy: MockInstance
 const saved: SavedEvent = {
   uid: 'event',
   calId: 'calendar',
@@ -62,12 +63,12 @@ describe('event save feedback', () => {
     store = configureStore({
       reducer: { eventSaveFeedback: eventSaveFeedbackReducer }
     })
-    dispatchSpy = jest.spyOn(store, 'dispatch')
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2026-10-23T05:30:00Z'))
+    dispatchSpy = vi.spyOn(store, 'dispatch')
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-23T05:30:00Z'))
   })
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('stores only serializable event identity and date fields', () => {
@@ -99,7 +100,7 @@ describe('event save feedback', () => {
       screen.queryByRole('button', { name: 'Show' })
     ).not.toBeInTheDocument()
     act(() => {
-      jest.advanceTimersByTime(4000)
+      vi.advanceTimersByTime(4000)
     })
     expect(screen.queryByText('Event saved')).not.toBeInTheDocument()
   })
@@ -113,7 +114,7 @@ describe('event save feedback', () => {
     expect(gotoDate).not.toHaveBeenCalled()
     expect(showEventPreview).not.toHaveBeenCalled()
     act(() => {
-      jest.advanceTimersByTime(4000)
+      vi.advanceTimersByTime(4000)
     })
     fireEvent.click(screen.getByRole('button', { name: 'Show' }))
     expect(gotoDate).toHaveBeenCalledWith(new Date(saved.start))
@@ -158,15 +159,15 @@ describe('event save feedback', () => {
     const event = { ...saved, start: '2026-10-23T10:00:00Z' }
     act(() => notifySaved(event))
     act(() => {
-      jest.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(3000)
     })
     act(() => notifySaved(event))
     act(() => {
-      jest.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(3000)
     })
     expect(screen.getByText('Event saved')).toBeInTheDocument()
     act(() => {
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
     })
     expect(screen.queryByText('Event saved')).not.toBeInTheDocument()
   })
@@ -175,7 +176,7 @@ describe('event save feedback', () => {
     renderFeedback()
     act(() => notifySaved(saved))
     act(() => {
-      jest.advanceTimersByTime(6000)
+      vi.advanceTimersByTime(6000)
     })
     expect(
       screen.queryByRole('button', { name: 'Show' })

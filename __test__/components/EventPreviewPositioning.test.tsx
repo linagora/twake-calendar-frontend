@@ -3,8 +3,8 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 
 // The dialog keeps its paper hidden until a dynamic position is found: record
 // what the preview asks of it rather than rendering it.
-const dialogProps = jest.fn()
-jest.mock('@common/components/Dialog/ResponsiveDialog', () => ({
+const dialogProps = vi.fn()
+vi.mock('@common/components/Dialog/ResponsiveDialog', () => ({
   __esModule: true,
   default: (props: { open: boolean; dynamicPositioning?: boolean }) => {
     dialogProps(props)
@@ -49,7 +49,7 @@ const renderPreview = (anchorEl: HTMLElement | null): void => {
   renderWithProviders(
     <EventPreviewModal
       open={true}
-      onClose={jest.fn()}
+      onClose={vi.fn()}
       calId={CAL_ID}
       eventId="event1"
       currentView="timeGridWeek"

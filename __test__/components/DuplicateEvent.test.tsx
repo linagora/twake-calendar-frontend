@@ -67,9 +67,9 @@ describe('EventPopover', () => {
       <EventPopover
         anchorEl={null}
         open={true}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         selectedRange={null}
-        setSelectedRange={jest.fn()}
+        setSelectedRange={vi.fn()}
         calendarRef={{ current: null }}
         event={
           preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
@@ -83,7 +83,7 @@ describe('EventPopover', () => {
   })
 
   it('saves duplicated event when Save is clicked', () => {
-    const onClose = jest.fn()
+    const onClose = vi.fn()
 
     renderWithProviders(
       <EventPopover
@@ -91,7 +91,7 @@ describe('EventPopover', () => {
         open={true}
         onClose={onClose}
         selectedRange={null}
-        setSelectedRange={jest.fn()}
+        setSelectedRange={vi.fn()}
         calendarRef={{ current: null }}
         event={
           preloadedState.calendars.list['667037022b752d0026472254/cal1'].events
@@ -117,7 +117,7 @@ describe('EventDisplayModal', () => {
         eventId="event1"
         calId="667037022b752d0026472254/cal1"
         open={true}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />,
       preloadedState
     )

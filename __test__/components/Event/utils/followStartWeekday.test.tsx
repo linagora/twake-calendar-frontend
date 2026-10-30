@@ -60,7 +60,7 @@ describe('followStartWeekday', () => {
         followStartWeekday(weekly(['MO']), '2026-11-16', '2026-11-18').byday
       ).toEqual(['WE'])
     } finally {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
     }
   })
 

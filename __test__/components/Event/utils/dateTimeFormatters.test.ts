@@ -9,7 +9,7 @@ describe('dateTimeFormatters', () => {
   const date = new Date('2026-10-06T23:00:00Z')
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('formatLocalDateTime', () => {
@@ -24,9 +24,9 @@ describe('dateTimeFormatters', () => {
     })
 
     it('does not depend on the engine en-CA layout (WebKit renders MM/DD/YYYY)', () => {
-      jest
-        .spyOn(Intl.DateTimeFormat.prototype, 'format', 'get')
-        .mockReturnValue(() => '10/07/2026, 01:00')
+      vi.spyOn(Intl.DateTimeFormat.prototype, 'format', 'get').mockReturnValue(
+        () => '10/07/2026, 01:00'
+      )
 
       expect(formatLocalDateTime(date, 'Europe/Paris')).toBe('2026-10-07T01:00')
     })
@@ -43,9 +43,9 @@ describe('dateTimeFormatters', () => {
     })
 
     it('does not depend on the engine en-CA layout (WebKit renders MM/DD/YYYY)', () => {
-      jest
-        .spyOn(Intl.DateTimeFormat.prototype, 'format', 'get')
-        .mockReturnValue(() => '10/07/2026')
+      vi.spyOn(Intl.DateTimeFormat.prototype, 'format', 'get').mockReturnValue(
+        () => '10/07/2026'
+      )
 
       expect(formatDateInTimezone(date, 'Europe/Paris')).toBe('2026-10-07')
     })

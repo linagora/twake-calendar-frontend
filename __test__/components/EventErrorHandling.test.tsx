@@ -5,7 +5,7 @@ import { renderWithProviders } from '../utils/Renderwithproviders'
 describe('Event Error Handling', () => {
   beforeEach(() => {
     localStorage.clear()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   const today = new Date()
@@ -63,7 +63,7 @@ describe('Event Error Handling', () => {
   }
 
   it('BUGFIX: does not re-report errors after clearing error snackbar', async () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation()
     // other warnings (API retries...) come and go with the timing of the run
     const reportCount = (): number =>
       consoleWarnSpy.mock.calls.filter(

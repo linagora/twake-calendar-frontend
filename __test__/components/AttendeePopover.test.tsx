@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import React from 'react'
 import { fireEvent, screen, act } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
@@ -5,11 +6,11 @@ import { AttendeePopover } from '@common/components/Attendees/AttendeePopover'
 import { userAttendee } from '@common/features/User/models/attendee'
 import { searchPeople } from '@common/features/User/UserDao'
 
-jest.mock('@common/features/User/UserDao')
-const mockedSearchPeople = searchPeople
+vi.mock('@common/features/User/UserDao')
+const mockedSearchPeople = searchPeople as MockedFunction<typeof searchPeople>
 
-jest.mock('@common/useScreenSizeDetection', () => ({
-  useScreenSizeDetection: jest.fn(() => ({
+vi.mock('@common/useScreenSizeDetection', () => ({
+  useScreenSizeDetection: vi.fn(() => ({
     isTooSmall: false,
     isTablet: false
   }))
@@ -92,7 +93,7 @@ describe('AttendeePopover (Private)', () => {
   })
 
   it('opens popover after pending hover delay on mouse enter and closes on mouse leave', () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     const attendee = new userAttendee({
       cal_address: 'john@example.com',
       cn: 'John Doe'
@@ -126,14 +127,14 @@ describe('AttendeePopover (Private)', () => {
 
     // Fast-forward open timer
     act(() => {
-      jest.advanceTimersByTime(500)
+      vi.advanceTimersByTime(500)
     })
     expect(screen.getByText('ContactPopover.emailButton')).toBeInTheDocument()
 
     // Leaving the trigger keeps the open card, leaving the card closes it
     fireEvent.mouseLeave(trigger)
     act(() => {
-      jest.advanceTimersByTime(200)
+      vi.advanceTimersByTime(200)
     })
     expect(screen.getByText('ContactPopover.emailButton')).toBeInTheDocument()
 
@@ -145,21 +146,21 @@ describe('AttendeePopover (Private)', () => {
 
     // Fast-forward close timer
     act(() => {
-      jest.advanceTimersByTime(200)
+      vi.advanceTimersByTime(200)
     })
     // Let the popover's exit transition finish
     act(() => {
-      jest.runOnlyPendingTimers()
+      vi.runOnlyPendingTimers()
     })
     expect(
       screen.queryByText('ContactPopover.emailButton')
     ).not.toBeInTheDocument()
 
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('does not open popover on hover when openOnHover is false but opens on click', () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     const attendee = new userAttendee({
       cal_address: 'john@example.com',
       cn: 'John Doe'
@@ -183,7 +184,7 @@ describe('AttendeePopover (Private)', () => {
 
     fireEvent.mouseEnter(trigger)
     act(() => {
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
     })
     expect(
       screen.queryByText('ContactPopover.emailButton')
@@ -194,10 +195,10 @@ describe('AttendeePopover (Private)', () => {
 
     fireEvent.mouseLeave(trigger)
     act(() => {
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
     })
     expect(screen.getByText('ContactPopover.emailButton')).toBeInTheDocument()
 
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 })

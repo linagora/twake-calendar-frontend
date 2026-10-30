@@ -1,11 +1,12 @@
+import type { Mock } from 'vitest'
 import { EmbeddedCalendar } from '@private/components/Calendar/EmbeddedCalendar'
 import { useScreenSizeDetection } from '@common/useScreenSizeDetection'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
-jest.mock('@common/useScreenSizeDetection', () => ({
-  useScreenSizeDetection: jest.fn(() => ({
+vi.mock('@common/features/User/UserDao')
+vi.mock('@common/useScreenSizeDetection', () => ({
+  useScreenSizeDetection: vi.fn(() => ({
     isTooSmall: false,
     isTablet: false
   }))
@@ -58,7 +59,7 @@ describe('EmbeddedCalendar', () => {
   }
 
   beforeEach(() => {
-    ;(useScreenSizeDetection as jest.Mock).mockReturnValue({
+    ;(useScreenSizeDetection as Mock).mockReturnValue({
       isTooSmall: false,
       isTablet: false
     })
@@ -81,7 +82,7 @@ describe('EmbeddedCalendar', () => {
   })
 
   it('leaves the Create button of its toolbar to the floating one on a phone', async () => {
-    ;(useScreenSizeDetection as jest.Mock).mockReturnValue({
+    ;(useScreenSizeDetection as Mock).mockReturnValue({
       isTooSmall: true,
       isTablet: false
     })

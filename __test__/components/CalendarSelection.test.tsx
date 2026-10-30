@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import CalendarSelection from '../../apps/private/src/components/Calendar/CalendarSelection'
 import { listBookingLinks } from '@common/features/booking/BookingDao'
 import * as calendarThunks from '@common/features/Calendars/CalendarSlice'
@@ -14,25 +15,25 @@ import {
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock(
+vi.mock(
   '../../apps/private/src/features/booking/CreateAppointmentModal',
   () => ({
     CreateAppointmentModal: () => null
   })
 )
 
-jest.mock('@common/features/Calendars/CalendarDAO', () => ({
-  ...jest.requireActual('@common/features/Calendars/CalendarDAO'),
-  fetchSecretLink: jest.fn().mockResolvedValue({ secretLink: '' })
+vi.mock('@common/features/Calendars/CalendarDAO', async () => ({
+  ...(await vi.importActual('@common/features/Calendars/CalendarDAO')),
+  fetchSecretLink: vi.fn().mockResolvedValue({ secretLink: '' })
 }))
 
-jest.mock('@common/features/booking/BookingDao', () => ({
-  listBookingLinks: jest.fn().mockResolvedValue([])
+vi.mock('@common/features/booking/BookingDao', () => ({
+  listBookingLinks: vi.fn().mockResolvedValue([])
 }))
 
 describe('CalendarSelection', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     window.HIDE_RESOURCES = undefined
     window.BOOKING_LINK_ENABLED = true
     localStorage.clear()
@@ -81,14 +82,14 @@ describe('CalendarSelection', () => {
     }
   }
   beforeAll(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     cleanup()
   })
   it('renders personal, delegated and calendar.other', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={['user1/cal1']}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -116,7 +117,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={['user1/cal1']}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -131,7 +132,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -147,7 +148,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: { ...baseUser, tokens: null },
@@ -162,7 +163,7 @@ describe('CalendarSelection', () => {
     const { store } = renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: { ...baseUser, tokens: null },
@@ -185,7 +186,7 @@ describe('CalendarSelection', () => {
       renderWithProviders(
         <CalendarSelection
           selectedCalendars={[]}
-          setSelectedCalendars={jest.fn()}
+          setSelectedCalendars={vi.fn()}
         />,
         {
           user: baseUser,
@@ -201,7 +202,7 @@ describe('CalendarSelection', () => {
   )
 
   it('toggles a calendar selection on click', () => {
-    const setSelectedCalendars = jest.fn()
+    const setSelectedCalendars = vi.fn()
 
     renderWithProviders(
       <CalendarSelection
@@ -224,7 +225,7 @@ describe('CalendarSelection', () => {
   })
 
   it('removes calendar from selection if already selected', () => {
-    const setSelectedCalendars = jest.fn()
+    const setSelectedCalendars = vi.fn()
 
     renderWithProviders(
       <CalendarSelection
@@ -248,7 +249,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -293,7 +294,7 @@ describe('CalendarSelection', () => {
       renderWithProviders(
         <CalendarSelection
           selectedCalendars={[]}
-          setSelectedCalendars={jest.fn()}
+          setSelectedCalendars={vi.fn()}
         />,
         {
           user: baseUser,
@@ -327,7 +328,7 @@ describe('CalendarSelection', () => {
       renderWithProviders(
         <CalendarSelection
           selectedCalendars={[]}
-          setSelectedCalendars={jest.fn()}
+          setSelectedCalendars={vi.fn()}
         />,
         {
           user: baseUser,
@@ -347,7 +348,7 @@ describe('CalendarSelection', () => {
   })
 
   it('Navigates to deletion dialog and deletes personal cal', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(calendarThunks, 'removeCalendar')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -355,7 +356,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -379,7 +380,7 @@ describe('CalendarSelection', () => {
   })
 
   it('Navigates to deletion dialog and deletes other cal', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(calendarThunks, 'removeCalendar')
       .mockImplementation(payload => {
         return () => Promise.resolve(payload) as any
@@ -387,7 +388,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -414,7 +415,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -454,7 +455,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -475,7 +476,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -496,7 +497,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -518,7 +519,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -533,7 +534,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       {
         user: baseUser,
@@ -555,7 +556,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       { user: baseUser, calendars: { list: calendarsMock, pending: false } }
     )
@@ -569,7 +570,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={[]}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       { user: baseUser, calendars: { list: calendarsMock, pending: false } }
     )
@@ -595,7 +596,7 @@ describe('CalendarSelection', () => {
     renderWithProviders(
       <CalendarSelection
         selectedCalendars={['team1/cal1']}
-        setSelectedCalendars={jest.fn()}
+        setSelectedCalendars={vi.fn()}
       />,
       { user: baseUser, calendars: { list: teamCalendarsMock, pending: false } }
     )
@@ -616,11 +617,11 @@ describe('CalendarSelection', () => {
     }
 
     const renderWithBookingLink = async (): Promise<void> => {
-      ;(listBookingLinks as jest.Mock).mockResolvedValueOnce([bookingLink])
+      ;(listBookingLinks as Mock).mockResolvedValueOnce([bookingLink])
       renderWithProviders(
         <CalendarSelection
           selectedCalendars={[]}
-          setSelectedCalendars={jest.fn()}
+          setSelectedCalendars={vi.fn()}
         />,
         { user: baseUser, calendars: { list: calendarsMock, pending: false } }
       )

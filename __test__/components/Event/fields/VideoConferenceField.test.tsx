@@ -1,15 +1,16 @@
+import type { Mock } from 'vitest'
 import { VideoConferenceField } from '@common/components/Event/fields/VideoConferenceField'
 import { createVideoConferenceRoom } from '@common/features/Events/VideoConferenceDao'
 import '@testing-library/jest-dom'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../utils/Renderwithproviders'
 
-jest.mock('@common/features/Events/VideoConferenceDao')
+vi.mock('@common/features/Events/VideoConferenceDao')
 
 describe('VideoConferenceField room creation failure (#1821)', () => {
   const originalIntegration = window.MEET_BACKEND_INTEGRATION
-  const setHasVideoConference = jest.fn()
-  const setMeetingLink = jest.fn()
+  const setHasVideoConference = vi.fn()
+  const setMeetingLink = vi.fn()
 
   const renderField = (showMore: boolean): void => {
     renderWithProviders(
@@ -19,21 +20,21 @@ describe('VideoConferenceField room creation failure (#1821)', () => {
         meetingLink={null}
         setMeetingLink={setMeetingLink}
         description=""
-        setDescription={jest.fn()}
+        setDescription={vi.fn()}
         showMore={showMore}
       />
     )
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     window.MEET_BACKEND_INTEGRATION = true
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
     window.MEET_BACKEND_INTEGRATION = originalIntegration
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it.each([
@@ -42,7 +43,7 @@ describe('VideoConferenceField room creation failure (#1821)', () => {
   ])(
     'tells the user the room could not be created in %s mode',
     async (_mode, showMore) => {
-      ;(createVideoConferenceRoom as jest.Mock).mockRejectedValue(
+      ;(createVideoConferenceRoom as Mock).mockRejectedValue(
         new Error('createVideoConferenceRoom failed with status 500')
       )
       renderField(showMore)
@@ -60,7 +61,7 @@ describe('VideoConferenceField room creation failure (#1821)', () => {
   )
 
   it('hides the failure once the user dismisses it', async () => {
-    ;(createVideoConferenceRoom as jest.Mock).mockRejectedValue(
+    ;(createVideoConferenceRoom as Mock).mockRejectedValue(
       new Error('createVideoConferenceRoom failed with status 500')
     )
     renderField(true)
@@ -75,7 +76,7 @@ describe('VideoConferenceField room creation failure (#1821)', () => {
   })
 
   it('creates the room when the user retries after a failure', async () => {
-    ;(createVideoConferenceRoom as jest.Mock)
+    ;(createVideoConferenceRoom as Mock)
       .mockRejectedValueOnce(
         new Error('createVideoConferenceRoom failed with status 500')
       )
@@ -99,7 +100,7 @@ describe('VideoConferenceField room creation failure (#1821)', () => {
   })
 
   it('shows no error when the room is created', async () => {
-    ;(createVideoConferenceRoom as jest.Mock).mockResolvedValue(
+    ;(createVideoConferenceRoom as Mock).mockResolvedValue(
       'https://meet.example.com/vep-txbc-trh'
     )
     renderField(true)

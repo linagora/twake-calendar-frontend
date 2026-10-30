@@ -10,7 +10,7 @@ import '@testing-library/jest-dom'
 import { fireEvent, screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
+vi.mock('@common/features/User/UserDao')
 
 const calendar = {
   id: 'alice/alice',
@@ -24,11 +24,7 @@ describe('visible field labels name their controls (#1786)', () => {
   it('names the participants input after its label and its hint', () => {
     renderWithProviders(
       <FieldWithLabel label="event.form.participants" isExpanded>
-        <PeopleSearch
-          selectedUsers={[]}
-          onChange={jest.fn()}
-          objectTypes={[]}
-        />
+        <PeopleSearch selectedUsers={[]} onChange={vi.fn()} objectTypes={[]} />
       </FieldWithLabel>
     )
 
@@ -41,7 +37,7 @@ describe('visible field labels name their controls (#1786)', () => {
 
   it('keeps the search name of a participants input without a label', () => {
     renderWithProviders(
-      <PeopleSearch selectedUsers={[]} onChange={jest.fn()} objectTypes={[]} />
+      <PeopleSearch selectedUsers={[]} onChange={vi.fn()} objectTypes={[]} />
     )
 
     expect(
@@ -55,7 +51,7 @@ describe('visible field labels name their controls (#1786)', () => {
         <ResourceSearch
           objectTypes={['resource']}
           selectedResources={[]}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           hideLabel
         />
       </FieldWithLabel>
@@ -73,12 +69,12 @@ describe('visible field labels name their controls (#1786)', () => {
       <>
         <NotificationField
           alarms={new Valarms()}
-          setAlarms={jest.fn()}
+          setAlarms={vi.fn()}
           showMore
         />
         <CalendarSelectField
           calendarid={calendar.id}
-          setCalendarid={jest.fn()}
+          setCalendarid={vi.fn()}
           userPersonalCalendars={[calendar]}
           showMore
         />
@@ -95,7 +91,7 @@ describe('visible field labels name their controls (#1786)', () => {
 
   it('names the visibility buttons group after its label', () => {
     renderWithProviders(
-      <VisibilityField eventClass="PUBLIC" setEventClass={jest.fn()} showMore />
+      <VisibilityField eventClass="PUBLIC" setEventClass={vi.fn()} showMore />
     )
 
     expect(
@@ -106,11 +102,7 @@ describe('visible field labels name their controls (#1786)', () => {
   it('moves to the field when its label is clicked', () => {
     renderWithProviders(
       <FieldWithLabel label="event.form.participants" isExpanded>
-        <PeopleSearch
-          selectedUsers={[]}
-          onChange={jest.fn()}
-          objectTypes={[]}
-        />
+        <PeopleSearch selectedUsers={[]} onChange={vi.fn()} objectTypes={[]} />
       </FieldWithLabel>
     )
 

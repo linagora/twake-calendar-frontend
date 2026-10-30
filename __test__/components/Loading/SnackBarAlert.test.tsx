@@ -2,15 +2,15 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { SnackbarAlert } from '@common/components/Loading/SnackBarAlert'
 
 describe('SnackbarAlert during calendar interactions', () => {
-  beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
 
   it('does not dismiss when a calendar interaction clicks away', () => {
-    const setOpen = jest.fn()
+    const setOpen = vi.fn()
     render(<SnackbarAlert open setOpen={setOpen} message="Event saved" />)
     // ClickAwayListener arms on the next tick after mounting.
     act(() => {
-      jest.advanceTimersByTime(1)
+      vi.advanceTimersByTime(1)
     })
     fireEvent.click(document.body)
     expect(setOpen).not.toHaveBeenCalled()
@@ -18,7 +18,7 @@ describe('SnackbarAlert during calendar interactions', () => {
   })
 
   it('still dismisses when the configured duration elapses', () => {
-    const setOpen = jest.fn()
+    const setOpen = vi.fn()
     render(
       <SnackbarAlert
         open
@@ -28,13 +28,13 @@ describe('SnackbarAlert during calendar interactions', () => {
       />
     )
     act(() => {
-      jest.advanceTimersByTime(4000)
+      vi.advanceTimersByTime(4000)
     })
     expect(setOpen).toHaveBeenCalledWith(false)
   })
 
   it('still dismisses with the close button', () => {
-    const setOpen = jest.fn()
+    const setOpen = vi.fn()
     render(<SnackbarAlert open setOpen={setOpen} message="Event saved" />)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(setOpen).toHaveBeenCalledWith(false)

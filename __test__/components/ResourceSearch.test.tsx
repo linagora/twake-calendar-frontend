@@ -1,3 +1,4 @@
+import type { MockedFunction } from 'vitest'
 import {
   Resource,
   ResourceSearch
@@ -8,10 +9,8 @@ import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../utils/Renderwithproviders'
 
-jest.mock('@common/features/User/UserDao')
-const mockedSearchUsers = searchPeople as jest.MockedFunction<
-  typeof searchPeople
->
+vi.mock('@common/features/User/UserDao')
+const mockedSearchUsers = searchPeople as MockedFunction<typeof searchPeople>
 
 describe('ResourceSearch', () => {
   const baseResource: SearchResponseItem = new SearchResponseItem({
@@ -23,7 +22,7 @@ describe('ResourceSearch', () => {
     selectedResources: Resource[] = [],
     props?: Partial<React.ComponentProps<typeof ResourceSearch>>
   ) {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     renderWithProviders(
       <ResourceSearch
         objectTypes={['resource']}
@@ -36,12 +35,12 @@ describe('ResourceSearch', () => {
   }
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     mockedSearchUsers.mockReset()
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('names its popup button through the translations', () => {
@@ -61,7 +60,7 @@ describe('ResourceSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -78,7 +77,7 @@ describe('ResourceSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     const option = await screen.findByText('Projector Room')
@@ -97,7 +96,7 @@ describe('ResourceSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Projector')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -123,7 +122,7 @@ describe('ResourceSearch', () => {
 
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -145,7 +144,7 @@ describe('ResourceSearch', () => {
     await userEvent.type(input, 'Room')
 
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
       await Promise.resolve()
     })
@@ -167,7 +166,7 @@ describe('ResourceSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -179,7 +178,7 @@ describe('ResourceSearch', () => {
     await userEvent.clear(input)
     await userEvent.type(input, 'Error')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -194,7 +193,7 @@ describe('ResourceSearch', () => {
     await userEvent.clear(input)
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
       await Promise.resolve()
     })
 
@@ -216,7 +215,7 @@ describe('ResourceSearch', () => {
     const input = screen.getByRole('combobox')
     await userEvent.type(input, 'Room')
     await act(async () => {
-      jest.advanceTimersByTime(300)
+      vi.advanceTimersByTime(300)
     })
 
     const loadingText = await screen.findByText(

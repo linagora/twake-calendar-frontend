@@ -6,7 +6,7 @@ import { InvalidTimeInputProvider } from '@common/components/Event/components/Da
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
     lang: 'en'
@@ -15,11 +15,11 @@ jest.mock('twake-i18n', () => ({
 
 describe('DateTimeFields', () => {
   const mockHandlers = {
-    onStartDateChange: jest.fn(),
-    onStartTimeChange: jest.fn(),
-    onEndDateChange: jest.fn(),
-    onEndTimeChange: jest.fn(),
-    onToggleEndDate: jest.fn()
+    onStartDateChange: vi.fn(),
+    onStartTimeChange: vi.fn(),
+    onEndDateChange: vi.fn(),
+    onEndTimeChange: vi.fn(),
+    onToggleEndDate: vi.fn()
   }
 
   const defaultProps: DateTimeFieldsProps = {
@@ -51,7 +51,7 @@ describe('DateTimeFields', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('moves END forward when START moves after END (normal mode)', async () => {
@@ -117,7 +117,7 @@ describe('DateTimeFields', () => {
   })
 
   it('puts the last valid time back when Tab leaves an invalid time with the list open', async () => {
-    const onInvalidTimeInputChange = jest.fn()
+    const onInvalidTimeInputChange = vi.fn()
     await act(async () =>
       render(
         <InvalidTimeInputProvider onChange={onInvalidTimeInputChange}>
@@ -141,7 +141,7 @@ describe('DateTimeFields', () => {
   })
 
   it('does not propagate Escape closing the time list', async () => {
-    const onParentKeyDown = jest.fn()
+    const onParentKeyDown = vi.fn()
     await act(async () =>
       render(
         <div onKeyDown={onParentKeyDown}>

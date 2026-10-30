@@ -13,14 +13,14 @@ const setup = (
   uid: string | null,
   { calId, foundIn = 'team1/team1' }: { calId?: string; foundIn?: string } = {}
 ) => {
-  const dispatch = jest.fn((thunk: unknown) => {
+  const dispatch = vi.fn((thunk: unknown) => {
     void thunk
     return {
       unwrap: () => Promise.resolve({ calId: foundIn, events: [{ uid: 'e1' }] })
     }
   }) as unknown as AppDispatch
-  const setOpenEventDisplay = jest.fn()
-  const setEventDisplayedId = jest.fn()
+  const setOpenEventDisplay = vi.fn()
+  const setEventDisplayedId = vi.fn()
   const hook = renderHook(
     ({ uid }: { uid: string | null }) =>
       useOpenEventFromUrl({
@@ -28,8 +28,8 @@ const setup = (
         calendars,
         dispatch,
         setEventDisplayedId,
-        setEventDisplayedCalId: jest.fn(),
-        setEventDisplayedTemp: jest.fn(),
+        setEventDisplayedCalId: vi.fn(),
+        setEventDisplayedTemp: vi.fn(),
         setOpenEventDisplay,
         uid,
         calId

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { OrganizerSelectField } from '@common/components/Event/fields/OrganizerSelectField'
 import { fetchUserById } from '@common/features/User/UserDao'
 import { userOrganiser } from '@common/features/User/userDataTypes'
@@ -5,11 +6,11 @@ import { Calendar } from '@common/types/CalendarTypes'
 import '@testing-library/jest-dom'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
-jest.mock('@common/features/User/UserDao', () => ({
-  fetchUserById: jest.fn()
+vi.mock('@common/features/User/UserDao', () => ({
+  fetchUserById: vi.fn()
 }))
 
-jest.mock('twake-i18n', () => ({
+vi.mock('twake-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => (key === 'event.organizer' ? 'Organizer' : key)
   })
@@ -55,8 +56,8 @@ describe('OrganizerSelectField', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(fetchUserById as jest.Mock).mockImplementation((id: string) => {
+    vi.clearAllMocks()
+    ;(fetchUserById as Mock).mockImplementation((id: string) => {
       if (id === 'user-alice') {
         return Promise.resolve({
           firstname: 'Alice',
@@ -78,7 +79,7 @@ describe('OrganizerSelectField', () => {
   })
 
   it('renders current user as default value and loads write access users', async () => {
-    const handleChange = jest.fn()
+    const handleChange = vi.fn()
 
     render(
       <OrganizerSelectField
@@ -110,7 +111,7 @@ describe('OrganizerSelectField', () => {
   })
 
   it('invokes onChange when a different organizer is selected', async () => {
-    const handleChange = jest.fn()
+    const handleChange = vi.fn()
 
     render(
       <OrganizerSelectField
