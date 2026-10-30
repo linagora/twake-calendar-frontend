@@ -130,10 +130,10 @@ describe('EventCounterModal', () => {
     )
 
     expect(
-      screen.getAllByDisplayValue('Thursday, January 15, 2099')
+      screen.getAllByDisplayValue('Thursday, 15 January 2099')
     ).toHaveLength(2)
     expect(
-      screen.queryByDisplayValue('Friday, January 16, 2099')
+      screen.queryByDisplayValue('Friday, 16 January 2099')
     ).not.toBeInTheDocument()
   })
 
@@ -150,7 +150,7 @@ describe('EventCounterModal', () => {
     )
 
     expect(
-      screen.getByDisplayValue('Friday, January 16, 2099')
+      screen.getByDisplayValue('Friday, 16 January 2099')
     ).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('eventPreview.sendProposal'))

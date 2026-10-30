@@ -46,11 +46,11 @@ describe('getLongDateFormat', () => {
     )
   })
 
-  it('keeps the English ordering for English', () => {
+  it('orders the day before the month in English', () => {
     const date = dayjs('2026-09-25').locale('en')
 
     expect(date.format(getLongDateFormat('en'))).toBe(
-      'Friday, September 25, 2026'
+      'Friday, 25 September 2026'
     )
   })
 
@@ -69,7 +69,8 @@ describe('getDateFormat', () => {
     ['es', '7 de octubre de 2026'],
     ['it', '7 ottobre 2026'],
     ['ru', '7 октября 2026'],
-    ['en', 'October 7, 2026']
+    ['en', '7 October 2026'],
+    ['vi', '7 tháng 10, 2026']
   ])('writes the %s date in the language pattern', (locale, expected) => {
     expect(date.locale(locale).format(getDateFormat(locale))).toBe(expected)
   })
@@ -81,6 +82,21 @@ describe('getDateFormat', () => {
 })
 
 describe('formatLocalizedDate', () => {
+  it('matches the British English date used in the event preview', () => {
+    const date = new Date('2026-10-26T10:00:00')
+    const previewDate = date.toLocaleDateString('en-gb', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+
+    expect(formatLocalizedDate('2026-10-26T10:00:00', 'en')).toBe(
+      'Monday, 26 October 2026'
+    )
+    expect(formatLocalizedDate('2026-10-26T10:00:00', 'en')).toBe(previewDate)
+  })
+
   it('capitalises the French weekday for standalone labels', () => {
     expect(formatLocalizedDate('2026-10-06T15:00:00', 'fr')).toBe(
       'Mardi 6 octobre 2026'
